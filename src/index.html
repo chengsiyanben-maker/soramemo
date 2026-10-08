@@ -580,6 +580,12 @@ details.dev summary{cursor:pointer;color:var(--sumi);font-size:14px;padding:6px 
 
   <!-- FLIGHTS（フライト：路線の地図、フライトの一覧と追加） -->
   <section class="view" id="v-log" aria-label="フライト">
+    <h2>全体の記録</h2>
+    <div class="yrgrid" id="overallBox"></div>
+    <h2>年ごとの記録</h2>
+    <div class="yrtabs" id="yrTabs"></div>
+    <div id="yrBody"></div>
+    <div id="yrPlus"></div>
     <h2>飛んだ路線</h2>
     <div class="mapbox"><svg id="map" viewBox="0 0 400 420" role="img" aria-label="訪れた空港と路線の地図"></svg></div>
     <button class="btn2" id="shareMap" style="width:100%;margin-top:10px">記録を画像で共有</button>
@@ -618,14 +624,10 @@ details.dev summary{cursor:pointer;color:var(--sumi);font-size:14px;padding:6px 
 
   <!-- STATS（成績：ステータスの目安、年ごとの記録、航空会社別） -->
   <section class="view" id="v-stats" aria-label="成績">
-    <h2>ステータスの目安</h2>
-    <div class="sgrid" id="statusBox"></div>
-    <h2>年ごとの記録</h2>
-    <div class="yrtabs" id="yrTabs"></div>
-    <div id="yrBody"></div>
-    <div id="yrPlus"></div>
     <h2>航空会社別</h2>
     <div id="airlineStats"></div>
+    <h2>ステータスの目安</h2>
+    <div class="sgrid" id="statusBox"></div>
   </section>
 </main>
 
@@ -1326,10 +1328,16 @@ function renderLog(){
   const mlAll = [...S.manual].sort((x,y)=>y.d.localeCompare(x.d)), ml = mlAll.slice(0, ML_SHOW);
   const mkm = mlAll.reduce((s,m)=>s+km(BY[m.from],BY[m.to]),0);
   $("manualList").innerHTML = ml.length ? `<h3>記録帳のみのフライト　${mlAll.length}件 ${fmtKm(mkm)}km</h3>` + ml.map(m => `<div class="flight"><div class="route">${BY[m.from].name} → ${BY[m.to].name}<span class="badge">手入力</span>${m.airline && ALBY[m.airline] ? `<span class="badge">${ALBY[m.airline].short}</span>` : ""}</div><div class="meta">${m.d.replaceAll("-","/")}</div><div class="km">${fmtKm(km(BY[m.from],BY[m.to]))} km</div></div>`).join("") + (mlAll.length > ml.length ? `<button class="btn2" id="mlMore" style="width:100%;margin-top:10px">もっと見る（残り${mlAll.length - ml.length}件）</button>` : "") : "";
+  renderOverall(); renderYears(); renderYearPlus();
   renderMap();
 }
-// 成績：ステータスの目安、年ごとの記録、航空会社別（成績の画面を開いたときだけ描く）
-function renderStats(){ renderStatus(); renderYears(); renderYearPlus(); renderAirlines(); }
+// 成績：航空会社別とステータスの目安、年ごとの記録、航空会社別（成績の画面を開いたときだけ描く）
+function renderStats(){ renderYears(); renderAirlines(); renderStatus(); }
+function renderOverall(){
+  const fl = S.flights, km = fl.reduce((x, f) => x + f.km, 0), rt = new Set(fl.map(f => [f.from, f.to].sort((p, q) => p - q).join("-")));
+  const cell = (n, u) => `<div><div class="n">${n}</div><div class="u">${u}</div></div>`;
+  $("overallBox").innerHTML = `${cell(visited().size, "空港")}${cell(rt.size, "路線")}${cell(fl.length, "フライト")}${cell(fmtKm(km), "km")}${cell(S.checkins.length, "チェックイン")}`;
+}
 let YEAR = null;
 function renderYears(){
   const ys = [...new Set([...S.checkins.map(c => new Date(c.t).getFullYear()), ...S.flights.map(f => new Date(f.arr).getFullYear())])].sort((a,b) => b - a);

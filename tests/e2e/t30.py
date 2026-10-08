@@ -12,7 +12,7 @@ async def main():
         await pg.goto('file://'+os.path.join(WEB,'index.html')); await pg.wait_for_load_state('load'); await pg.wait_for_function('document.readyState === "complete" && typeof render === "function"'); await pg.wait_for_timeout(400)
         await pg.evaluate("""() => { const id=i=>A.find(a=>a.iata===i).id, t0=Date.parse('2026-02-01T08:00:00+09:00');
           localStorage.setItem('soramemo.v1', JSON.stringify({checkins:[{a:id('HND'),t:t0,acc:20,term:null},{a:id('CTS'),t:t0+7.2e6,acc:20,term:null}], flights:[{id:'a1',from:id('HND'),to:id('CTS'),dep:t0,arr:t0+7.2e6,km:820,airline:'JL',no:null}], manual:[]})); }""")
-        await pg.wait_for_timeout(400); await pg.reload(); await pg.wait_for_load_state('load'); await pg.wait_for_timeout(400); await pg.click('nav.tabs button[data-v=stats]')
+        await pg.wait_for_timeout(400); await pg.reload(); await pg.wait_for_load_state('load'); await pg.wait_for_timeout(400); await pg.click('nav.tabs button[data-v=log]')
         print('local locked:', await pg.locator('#yrPlus .locked').count() == 1)
         await pg.click('nav.tabs button[data-v=log]')
         await pg.click('#importBox summary'); await pg.click('#impCheck'); print('local import:', await pg.inner_text('#impPreview'))
@@ -22,7 +22,7 @@ async def main():
         cts = await pg.evaluate("'a:'+A.find(a=>a.iata=='CTS').id")
         for v in ['t:HND-T1', cts]:
             await pg.select_option('#demoAirport', v); await pg.click('#checkin'); await pg.wait_for_timeout(600); await pg.click('#dStamp .row2 .btn2')
-        await pg.click('nav.tabs button[data-v=stats]'); await pg.wait_for_timeout(200)
+        await pg.click('nav.tabs button[data-v=log]'); await pg.wait_for_timeout(200)
         print('demo year plus:', (await pg.inner_text('#yrPlus')).replace('\n',' ')[:200])
         await pg.locator('#yrPlus').scroll_into_view_if_needed(); await pg.screenshot(path=os.path.join(WORK,'plus_year.png'))
         await pg.click('#yrShare'); await pg.wait_for_timeout(900)
@@ -40,8 +40,8 @@ async def main():
         await pg.goto('file://'+os.path.join(WORK,'index_server_test.html')); await pg.wait_for_load_state('load'); await pg.wait_for_function('document.readyState === "complete" && typeof render === "function"'); await pg.wait_for_timeout(500)
         await pg.evaluate('__fake.login()'); await pg.wait_for_timeout(600)
         await pg.click('#openSettings'); print('server not plus:', await pg.inner_text('#plusInfo'), '|', await pg.inner_text('#plusBtn')); await pg.click('#closeSettings')
-        await pg.click('nav.tabs button[data-v=stats]'); print('server locked:', await pg.locator('#yrPlus .locked').count() == 1)
-        await pg.evaluate('window.__plus = true'); await pg.evaluate('reload()'); await pg.wait_for_timeout(500); await pg.click('nav.tabs button[data-v=stats]')
+        await pg.click('nav.tabs button[data-v=log]'); print('server locked:', await pg.locator('#yrPlus .locked').count() == 1)
+        await pg.evaluate('window.__plus = true'); await pg.evaluate('reload()'); await pg.wait_for_timeout(500); await pg.click('nav.tabs button[data-v=log]')
         print('server plus unlocked:', await pg.locator('#yrPlus .locked').count() == 0)
         await pg.click('#openSettings'); print('server plus:', await pg.inner_text('#plusInfo'), '|', await pg.inner_text('#plusBtn')); await pg.click('#closeSettings')
         await pg.click('nav.tabs button[data-v=log]')
