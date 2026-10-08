@@ -16,10 +16,10 @@ async def main():
         await pg.click('nav.tabs button[data-v=book]'); await pg.wait_for_timeout(200); await pg.screenshot(path=os.path.join(WORK,'w_book.png'))
         for i in range(4):
             await pg.click(f'#book .cell.got >> nth={i}'); await pg.wait_for_timeout(250)
-            print(i, (await pg.inner_text('#dStampBody')).replace('\n',' ')[:120])
+            print(i, (await pg.inner_text('#dAirportBody')).replace('\n',' ')[:120])
             await pg.screenshot(path=os.path.join(WORK,f'w_detail{i}.png')); 
             if i==0:
-                await pg.click('#dStamp [data-share-a]'); await pg.wait_for_timeout(900)
+                await pg.click('#dAirport [data-share-a]'); await pg.wait_for_timeout(900)
                 src=await pg.get_attribute('#shareImg','src'); open(os.path.join(WORK,'w_card.png'),'wb').write(base64.b64decode(src.split(',')[1])); await pg.click('#shareClose')
             else: await pg.keyboard.press('Escape')
         # 50回目のチェックイン（新千歳）で機長に昇格

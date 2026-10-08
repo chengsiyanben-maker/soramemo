@@ -30,7 +30,7 @@ async def main():
         await pg.click('nav.tabs button[data-v=home]'); print('title:', await pg.inner_text('#titlePill'))
         await pg.screenshot(path=os.path.join(WORK,'y_home.png'))
         await pg.click('nav.tabs button[data-v=book]'); await pg.click('#v-book [data-seg=main]'); await pg.wait_for_timeout(200); await pg.screenshot(path=os.path.join(WORK,'y_book.png'))
-        await pg.click('#book .cell.got >> nth=0'); await pg.wait_for_timeout(200); print('detail:', (await pg.inner_text('#dStampBody')).replace('\n',' ')); await pg.screenshot(path=os.path.join(WORK,'y_detail.png')); await pg.keyboard.press('Escape')
+        await pg.click('#book .cell.got >> nth=0'); await pg.wait_for_timeout(200); print('detail:', (await pg.inner_text('#dAirportBody')).replace('\n',' ')); await pg.screenshot(path=os.path.join(WORK,'y_detail.png')); await pg.keyboard.press('Escape')
         await pg.click('nav.tabs button[data-v=stats]'); await pg.wait_for_timeout(200)
         print('year:', (await pg.inner_text('#yrBody')).replace('\n',' '))
         await pg.click('[data-year="2025"]'); print('2025:', (await pg.inner_text('#yrBody')).replace('\n',' '))

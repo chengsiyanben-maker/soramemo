@@ -22,6 +22,6 @@ async def main():
         print('prog:', await pg.inner_text('#achProg')); await pg.screenshot(path=os.path.join(WORK,'a_tab.png'))
         await pg.click('nav.tabs button[data-v=book]'); await pg.click('#v-book [data-seg=main]'); await pg.wait_for_timeout(200)
         print('vcounts:', await pg.locator('#book .vcount').all_inner_texts())
-        await pg.click('#book .cell.got >> nth=0'); print('detail:', (await pg.inner_text('#dStampBody')).replace('\n',' '))
+        await pg.click('#book .cell.got >> nth=0'); print('detail:', (await pg.inner_text('#dAirportBody')).replace('\n',' '))
         print(errs); await b.close()
 asyncio.run(main())

@@ -28,6 +28,10 @@ async def main():
                 allv[(scheme,name)] = r['violations']
             for v in ['home','book','log','stats']: await pg.evaluate(f"goTab('{v}')"); await pg.wait_for_timeout(200); await scan(v)
             for s in ['extra','ach']: await pg.evaluate(f"goTab('book','{s}')"); await pg.wait_for_timeout(200); await scan('book-'+s)
+            await pg.evaluate("goTab('book')"); await pg.wait_for_timeout(200)
+            await pg.evaluate("document.querySelector('#book .cell.got').click()"); await pg.wait_for_timeout(300)
+            await pg.add_script_tag(content=AXE); r = await pg.evaluate("axe.run(document.querySelector('dialog[open]'), {runOnly:['wcag2a','wcag2aa']})"); allv[(scheme,'airport-dialog')] = r['violations']
+            await pg.click('#dAirport [data-close]')
             await pg.click('[data-mode=game]')
             for v in ['co','fleet','gods']: await pg.evaluate(f"goTab('{v}')"); await pg.wait_for_timeout(200); await scan(v)
             await pg.click('[data-mode=rally]'); await pg.click('#openSettings'); await pg.wait_for_timeout(200)

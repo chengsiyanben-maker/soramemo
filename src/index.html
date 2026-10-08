@@ -398,6 +398,15 @@ ol.steps{padding-left:1.4em;line-height:1.9}
 .meet .hint{color:var(--ink)}
 .opsbtn{width:100%;margin:6px 0 4px}
 .dlg-wide{max-width:640px}
+#dAirport{max-width:min(460px,94vw)}
+#dAirport .dlg{max-height:85vh;overflow:auto}
+.dlg h3.sub{font-size:16px;margin:16px 0 6px}
+.aplist{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.apitem{display:flex;gap:8px;align-items:center;font-size:13px;line-height:1.4;border-radius:10px;padding:6px 8px;background:var(--shu-wash)}
+.apitem:not(.got){background:none;border:1px dashed var(--line);color:var(--sumi)}
+.apitem svg{width:44px;height:44px;flex:none}
+.apitem small{display:block;color:var(--sumi);font-size:11px}
+.hist{margin:0;padding-left:1.2em;font-size:14px;line-height:1.8;max-height:200px;overflow:auto}
 .opsmodes{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
 .chip{border:1.5px solid var(--line);background:var(--paper);color:var(--ink);border-radius:999px;padding:6px 12px;font-size:13px;font-weight:600}
 .chip[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
@@ -633,6 +642,7 @@ details.dev summary{cursor:pointer;color:var(--sumi);font-size:14px;padding:6px 
 </div></nav>
 
 <dialog id="dStamp"><div class="dlg" id="dStampBody"></div></dialog>
+<dialog id="dAirport" aria-label="空港"><div class="dlg" id="dAirportBody"></div></dialog>
 <dialog id="dGuide" aria-label="使い方"><div class="dlg">
   <div class="ob-step on">
     <svg viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="50" fill="none" stroke="var(--shu)" stroke-width="4"/><circle cx="60" cy="60" r="43" fill="none" stroke="var(--shu)" stroke-width="1.2"/><text x="60" y="72" text-anchor="middle" font-family="var(--mincho)" font-weight="800" font-size="32" fill="var(--shu)">HND</text></svg>
@@ -1449,16 +1459,40 @@ document.addEventListener("click", e => { const b = e.target.closest("[data-clos
 document.querySelectorAll("#modeSw [data-mode]").forEach(b => b.onclick = () => { setMode(b.dataset.mode); track("mode", b.dataset.mode); });
 document.addEventListener("click", e => {
   const c = e.target.closest(".cell.got"); if(!c) return;
-  const a = BY[+c.dataset.a], t = c.dataset.t ? TBY[c.dataset.t] : null;
-  const first = t ? visitedTerms().get(t.id) : visited().get(a.id);
-  const times = S.checkins.filter(x => t ? x.term===t.id : x.a===a.id).length;
-  const ss = achState().seasons.get(a.id) || new Set();
-  const dt = t ? 0 : tierOf(times);
-  $("dStampBody").innerHTML = `<div class="stampbig${dt ? " wide" : ""}">${insigniaSVG(a, first, {big:true, term:t}, dt)}</div><h3>${placeName(a, t)}</h3><p>${a.pref}${a.rare?"・離島の空港":""}</p>
-  ${t ? "" : `<p class="marks">${SEASONS.map((x,i) => `<span class="mark${ss.has(i) ? " on" : " off"}">${x}</span>`).join("")}</p>`}<p>はじめての訪問 ${fmtD(first)}　訪問 ${times}回${!t && visitTier(times) ? `　<span class="rankbadge">${visitTier(times)}</span>` : ""}</p>
-  ${t ? "" : `<p class="hint">${dt < TOP ? `次の${RANKS[dt+1]}まであと${RANK_AT[dt+1] - times}回` : "最高の階級です"}</p>`}<div class="row2"><button class="btn2" data-close>閉じる</button><button class="btn1" data-share-a="${a.id}" data-share-t="${t?t.id:""}" data-share-at="${first}">画像で共有</button></div>`;
+  // 空港のマスは「空港ページ」へ、ターミナルのマスは従来どおり印の画面へ
+  if(!c.dataset.t){ openAirport(+c.dataset.a); return; }
+  const a = BY[+c.dataset.a], t = TBY[c.dataset.t];
+  const first = visitedTerms().get(t.id), times = S.checkins.filter(x => x.term === t.id).length;
+  $("dStampBody").innerHTML = `<div class="stampbig">${insigniaSVG(a, first, {big:true, term:t}, 0)}</div><h3>${placeName(a, t)}</h3><p>${a.pref}${a.rare?"・離島の空港":""}</p>
+  <p>はじめての訪問 ${fmtD(first)}　訪問 ${times}回</p><div class="row2"><button class="btn2" data-close>閉じる</button><button class="btn1" data-share-a="${a.id}" data-share-t="${t.id}" data-share-at="${first}">画像で共有</button></div>`;
   $("dStamp").showModal();
 });
+// 空港ページ：印・記章・階級・四季・ターミナル・訪問の記録・守り神・羽田の運用・写真・共有
+function openAirport(id){
+  const a = BY[id], b = $("dAirportBody");
+  const visits = S.checkins.filter(c => c.a === a.id), times = visits.length, first = visited().get(a.id);
+  const ss = achState().seasons.get(a.id) || new Set(), dt = tierOf(times), vt = visitedTerms();
+  const ts = TERMS.filter(t => t.a === a.id), got = ts.filter(t => vt.has(t.id)).length;
+  const termList = ts.map(t => vt.has(t.id)
+    ? `<div class="apitem got">${stampSVG(a, vt.get(t.id), {term:t})}<span>${t.short} ${t.name}<small>${fmtD(vt.get(t.id))}</small></span></div>`
+    : `<div class="apitem">${emptySVG(a, t)}<span>${t.short} ${t.name}<small>未訪問</small></span></div>`).join("");
+  const hist = visits.slice().sort((x, y) => y.t - x.t).slice(0, 12)
+    .map(c => `<li>${fmtD(c.t)}　${c.term && TBY[c.term] ? TBY[c.term].name : "空港"}</li>`).join("");
+  b.innerHTML = `<div class="stampbig${dt ? " wide" : ""}">${insigniaSVG(a, first, {big:true, term:null}, dt)}</div>
+  <h3>${a.name}</h3><p>${a.pref}${a.rare?"・離島の空港":""}${a.kind ? "・番外編" : ""}</p>
+  <p class="marks">${SEASONS.map((x,i) => `<span class="mark${ss.has(i) ? " on" : " off"}">${x}</span>`).join("")}${ss.size === 4 ? `<span class="mark gold">四季がそろった</span>` : ""}</p>
+  <p>はじめての訪問 ${fmtD(first)}　訪問 ${times}回${visitTier(times) ? `　<span class="rankbadge">${visitTier(times)}</span>` : ""}</p>
+  <p class="hint">${dt < TOP ? `次の${RANKS[dt+1]}まであと${RANK_AT[dt+1] - times}回` : "最高の階級です"}</p>
+  ${first && gameAvail() && !a.kind ? `<div class="meet">${godSVG(a)}<div><span class="gametag">エアライン経営</span><b>${godName(a)}と出会った</b><span class="hint">エアライン経営の「守り神」で会えます（仮の姿）</span></div></div>` : ""}
+  ${ts.length ? `<h3 class="sub">ターミナル　${got} / ${ts.length}</h3><div class="aplist">${termList}</div>` : ""}
+  ${a.iata === "HND" ? `<button class="btn2 opsbtn" style="width:100%;margin-top:12px" data-ap-ops>羽田の今の運用（滑走路・進入）</button>` : ""}
+  <h3 class="sub">訪問の記録</h3>${hist ? `<ul class="hist">${hist}</ul>` : "<p class=\"hint\">まだ訪問の記録がありません</p>"}
+  <div class="row2"><button class="btn2" data-close>閉じる</button><button class="btn1" data-share-a="${a.id}" data-share-at="${first}">画像で共有</button></div>
+  <button class="btn2" style="width:100%;margin-top:8px" data-photo-a="${a.id}" data-photo-at="${first}">写真に押す</button>`;
+  $("dAirport").showModal();
+}
+document.addEventListener("click", e => { const b = e.target.closest("[data-ap-ops]"); if(!b) return;
+  $("dAirport").close(); $("opsOpen").click(); });
 $("checkin").onclick = checkin;
 $("probe").onclick = async () => {
   const o = $("probeOut"); o.textContent = "新しい位置を取得しています…（最大12秒）";
@@ -2806,6 +2840,7 @@ async function openShare(cv, fname, mime = "image/png"){
   $("shareGo").hidden = !can; $("shareGo").dataset.fname = fname;
   $("shareHint").textContent = can ? "「共有する」でSNSや写真に送れます。画像を長押しして保存もできます。" : "画像を長押しすると保存できます。";
   if($("dStamp").open) $("dStamp").close();
+  if($("dAirport").open) $("dAirport").close();
   $("dShare").showModal();
 }
 $("shareGo").onclick = async () => { try{ await navigator.share({ files:[new File([shareBlob], $("shareGo").dataset.fname, {type:shareBlob.type || "image/png"})], text:"#そらメモ" }); }catch(e){} };
