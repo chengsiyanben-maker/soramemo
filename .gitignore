@@ -1,0 +1,6 @@
+node_modules/
+tools/fonts/*.ttf
+__pycache__/
+.DS_Store
+supabase/.temp/
+supabase/.branches/

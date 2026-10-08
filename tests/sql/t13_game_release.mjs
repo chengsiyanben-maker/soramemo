@@ -1,0 +1,22 @@
+// エアライン経営の公開スイッチ：公開前は運営者以外が会社の関数を使えないこと、公開後は使えること
+import { PGlite } from '@electric-sql/pglite';
+import fs from 'fs';
+const db = new PGlite(); const dir = new URL('../../supabase/migrations/', import.meta.url).pathname;
+await db.exec(`create role anon nologin; create role authenticated nologin; create role service_role nologin; create schema auth;
+create table auth.users (id uuid primary key, email text, created_at timestamptz default now());
+create function auth.uid() returns uuid language sql stable as $$ select nullif(current_setting('request.jwt.claim.sub', true), '')::uuid $$;
+create function auth.jwt() returns jsonb language sql stable as $$ select jsonb_build_object('sub', current_setting('request.jwt.claim.sub', true), 'aal', 'aal2') $$;
+grant usage on schema public, auth to anon, authenticated, service_role; grant execute on function auth.uid(), auth.jwt() to anon, authenticated, service_role;`);
+for (const f of fs.readdirSync(dir).sort()) await db.exec(fs.readFileSync(dir + f, 'utf8'));
+console.log('applied', fs.readdirSync(dir).length);
+const ADM = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', U = '11111111-1111-1111-1111-111111111111';
+await db.exec(`insert into auth.users (id) values ('${ADM}'),('${U}'); insert into ops.admins values ('${ADM}');`);
+const as = async (role, uid, sql) => { try { await db.exec(`set role ${role}; select set_config('request.jwt.claim.sub','${uid}',false);`); const r = await db.query(sql); return r.rows.length ? Object.values(r.rows[0])[0] : 'ok'; } catch (e) { return 'ERROR: ' + e.message.split('\n')[0]; } finally { await db.exec('reset role'); } };
+console.log('app_status:', JSON.stringify(await as('anon', '', 'select public.app_status()')));
+console.log('公開前 利用者 co_state:', await as('authenticated', U, 'select public.co_state()'));
+console.log('公開前 利用者 co_buy:', await as('authenticated', U, `select public.co_buy('prop')`));
+console.log('公開前 運営者 co_state:', typeof (await as('authenticated', ADM, 'select public.co_state()')) === 'object' ? '使える' : 'NG');
+console.log('利用者が公開しようとする:', await as('authenticated', U, `select public.admin_set_flag('game_released','true'::jsonb)`));
+console.log('運営者が公開:', await as('authenticated', ADM, `select public.admin_set_flag('game_released','true'::jsonb)`));
+console.log('公開後 利用者 co_state:', typeof (await as('authenticated', U, 'select public.co_state()')) === 'object' ? '使える' : 'NG');
+console.log('app_status:', JSON.stringify(await as('anon', '', 'select public.app_status()')));

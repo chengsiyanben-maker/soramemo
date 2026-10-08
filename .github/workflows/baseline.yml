@@ -1,0 +1,36 @@
+# 初回だけ使う：自動の仕組みを使う前に、Supabase の SQL Editor で手で流したSQLを「流し済み」として記録する。
+# これをしないと、自動の仕組みが最初のSQLから流し直そうとして「すでにある」で止まる。
+# Actions の画面で「初回だけ：手で流したSQLを記録」を選び、「Run workflow」を押す。
+name: 初回だけ：手で流したSQLを記録
+on:
+  workflow_dispatch:
+    inputs:
+      last:
+        description: "最後に手で流したSQLの番号（ファイル名の先頭14桁）"
+        required: true
+        default: "20261004000014"
+jobs:
+  mark:
+    runs-on: ubuntu-latest
+    env:
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+      PROJECT_REF: ${{ vars.SUPABASE_PROJECT_REF }}
+      LAST: ${{ github.event.inputs.last }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+      - run: supabase link --project-ref "$PROJECT_REF" --password "$SUPABASE_DB_PASSWORD"
+      - name: 流し済みとして記録する
+        run: |
+          versions=""
+          for f in supabase/migrations/*.sql; do
+            v=$(basename "$f" | cut -d_ -f1)
+            if [ "$v" -le "$LAST" ]; then versions="$versions $v"; fi
+          done
+          echo "流し済みとして記録する：$versions"
+          supabase migration repair --status applied $versions --linked --password "$SUPABASE_DB_PASSWORD"
+      - name: 確かめる（この後に流すSQL）
+        run: supabase db push --linked --password "$SUPABASE_DB_PASSWORD" --dry-run

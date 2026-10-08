@@ -1,0 +1,21 @@
+import { PGlite } from '@electric-sql/pglite';
+import fs from 'fs';
+const db = new PGlite(); const dir=new URL('../../supabase/migrations/', import.meta.url).pathname;
+await db.exec(`create role anon nologin; create role authenticated nologin; create role service_role nologin; create schema auth; create table auth.users (id uuid primary key, email text, created_at timestamptz default now());
+create function auth.uid() returns uuid language sql stable as $$ select nullif(current_setting('request.jwt.claim.sub', true), '')::uuid $$;
+create function auth.jwt() returns jsonb language sql stable as $$ select jsonb_build_object('sub', current_setting('request.jwt.claim.sub', true), 'aal', 'aal2') $$;
+grant usage on schema public, auth to anon, authenticated; grant execute on function auth.uid() to anon, authenticated;
+alter default privileges in schema public grant all on tables to anon, authenticated; alter default privileges in schema public grant all on sequences to anon, authenticated;`);
+for (const f of fs.readdirSync(dir).sort()) { await db.exec(fs.readFileSync(dir+f,'utf8')); console.log('applied', f); }
+const A='11111111-1111-1111-1111-111111111111', B='22222222-2222-2222-2222-222222222222';
+await db.exec(`insert into auth.users (id) values ('${A}'),('${B}');
+insert into public.flights (user_id, from_airport, to_airport, dep_at, arr_at, distance_km) values ('${A}',5,6,now()-interval '2 hours',now(),820),('${B}',5,6,now()-interval '2 hours',now(),820);`);
+const as = async (uid, sql) => { try { await db.exec(`set role authenticated; select set_config('request.jwt.claim.sub','${uid}',false);`); const r = await db.query(sql); return r.rows ?? 'ok'; } catch(e){ return 'ERROR: '+e.message.split('\n')[0]; } finally { await db.exec('reset role'); } };
+console.log('A sets own:', await as(A, `select public.set_flight_airline(1,'JL','JL501')`));
+console.log('A sets B:', await as(A, `select public.set_flight_airline(2,'NH','NH61')`));
+console.log('bad code:', await as(A, `select public.set_flight_airline(1,'jal','1')`));
+console.log('bad no:', await as(A, `select public.set_flight_airline(1,'NH','NH 61')`));
+console.log('A updates directly:', await as(A, `update public.flights set airline='NH' where id=1`));
+console.log('A reads:', await as(A, `select id, airline, flight_no, status from public.flights`));
+console.log('A clears:', await as(A, `select public.set_flight_airline(1,null,null)`), await as(A, `select airline, flight_no, status from public.flights`));
+console.log('manual w/ airline:', await as(A, `insert into public.manual_flights (from_airport,to_airport,flown_on,airline) values (5,6,'2025-01-01','NH') returning airline`));

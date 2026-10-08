@@ -1,0 +1,41 @@
+import os, sys
+HERE=os.path.dirname(os.path.abspath(__file__)); WEB=os.path.abspath(os.path.join(HERE,'..','..','web')); WORK=os.environ.get('SORAMEMO_TEST_WORK','/tmp/soramemo-e2e'); os.makedirs(WORK, exist_ok=True)
+import asyncio
+from playwright.async_api import async_playwright
+async def main():
+    async with async_playwright() as p:
+        b=await p.chromium.launch(); c=await b.new_context(viewport={'width':400,'height':860}, device_scale_factor=2)
+        await c.add_init_script("localStorage.setItem('soramemo.onboarded','1'); Object.defineProperty(window, 'SORAMEMO_CONFIG', { configurable:true, get(){ return this.__cfg; }, set(v){ this.__cfg = Object.assign({}, v, { gameReleased: true }); } });")
+        pg=await c.new_page(); errs=[]; pg.on('pageerror', lambda e: errs.append(str(e)))
+        await pg.goto('file://'+os.path.join(WEB,'index.html')); await pg.wait_for_load_state('load'); await pg.wait_for_function('document.readyState === "complete" && typeof render === "function"'); await pg.wait_for_timeout(500)
+        await pg.click('#openSettings'); await pg.click('#toggleDemo')
+        ids = {k: await pg.evaluate(f"'a:'+A.find(a=>a.iata=='{k}').id") for k in ['CTS','OKA','ISG']}
+        for v in ['t:HND-T1', ids['CTS'], 't:HND-T2', ids['OKA'], ids['ISG'], ids['OKA'], 't:HND-T3']:
+            await pg.select_option('#demoAirport', v); await pg.click('#checkin'); await pg.wait_for_timeout(600); await pg.click('#dStamp .row2 .btn2')
+        await pg.evaluate('goTab("co")')
+        await pg.evaluate("CO.cash = 200000; coSave(); renderCompany();")
+        await pg.evaluate('goTab("fleet")')
+        print('km:', await pg.inner_text('#coKm'))
+        print('catalog:', [ (await x.inner_text()).replace('\n',' ') for x in await pg.locator('#coCatalog [data-buy]').all()])
+        await pg.evaluate('goTab("fleet")')
+        await pg.click('[data-buy=prop]'); await pg.click('[data-buy=nb]'); await pg.wait_for_timeout(100)
+        await pg.evaluate('goTab("co")')
+        print('cash after buys:', await pg.inner_text('#coCash'), '| fleet:', await pg.evaluate('JSON.stringify(CO.fleet.map(f=>f.type))'))
+        d0 = await pg.evaluate('coDaily()')
+        fl = await pg.evaluate('CO.fleet.map(f=>f.id)')
+        await pg.evaluate('goTab("fleet")')
+        opts_nb = await pg.locator(f'[data-assign="{fl[1]}"] option').all_inner_texts(); print('nb route options:', opts_nb)
+        await pg.evaluate('goTab("fleet")')
+        opts_prop = await pg.locator(f'[data-assign="{fl[0]}"] option').all_inner_texts(); print('prop route options:', opts_prop)
+        hc = await pg.evaluate("coRoutes().find(r=>r.a.iata==='HND'&&r.b.iata==='CTS'||r.a.iata==='CTS'&&r.b.iata==='HND').k")
+        oi = await pg.evaluate("coRoutes().find(r=>[r.a.iata,r.b.iata].includes('ISG')).k")
+        await pg.evaluate('goTab("fleet")')
+        await pg.select_option(f'[data-assign="{fl[1]}"]', hc); await pg.select_option(f'[data-assign="{fl[0]}"]', oi); await pg.wait_for_timeout(100)
+        print('daily before/after:', d0, await pg.evaluate('coDaily()'))
+        await pg.evaluate('goTab("fleet")')
+        await pg.select_option(f'[data-assign="{fl[0]}"]', hc); await pg.wait_for_timeout(100)
+        print('swap ->', await pg.evaluate('JSON.stringify(CO.fleet.map(f=>[f.type,f.route]))'))
+        h = await pg.locator('h2:has-text("自社路線")').bounding_box(); await pg.evaluate(f"window.scrollTo(0,{h['y']-70})"); await pg.screenshot(path=os.path.join(WORK,'ac_routes.png'))
+        h = await pg.locator('h2:has-text("機材")').bounding_box(); await pg.evaluate(f"window.scrollTo(0,{h['y']-70})"); await pg.screenshot(path=os.path.join(WORK,'ac_tab.png'))
+        print(errs); await b.close()
+asyncio.run(main())

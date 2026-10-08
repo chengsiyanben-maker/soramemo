@@ -1,0 +1,33 @@
+import { PGlite } from '@electric-sql/pglite';
+import fs from 'fs';
+const db = new PGlite(); const dir=new URL('../../supabase/migrations/', import.meta.url).pathname;
+await db.exec(`create role anon nologin; create role authenticated nologin; create role service_role nologin; create schema auth; create table auth.users (id uuid primary key, email text, created_at timestamptz default now());
+create function auth.uid() returns uuid language sql stable as $$ select nullif(current_setting('request.jwt.claim.sub', true), '')::uuid $$;
+create function auth.jwt() returns jsonb language sql stable as $$ select jsonb_build_object('sub', current_setting('request.jwt.claim.sub', true), 'aal', 'aal2') $$;
+grant usage on schema public, auth to anon, authenticated; grant execute on function auth.uid() to anon, authenticated;
+alter default privileges in schema public grant all on tables to anon, authenticated; alter default privileges in schema public grant all on sequences to anon, authenticated;`);
+for (const f of fs.readdirSync(dir).sort()) { await db.exec(fs.readFileSync(dir+f,'utf8')); console.log('applied', f); }
+await db.exec(`update ops.flags set value = 'true' where key = 'game_released'`);   // 会社のテストは、エアライン経営の公開後の状態で行う
+const A='11111111-1111-1111-1111-111111111111';
+const ids = Object.fromEntries((await db.query(`select iata, id from airports where iata in ('HND','CTS','OKA','ISG')`)).rows.map(r=>[r.iata,r.id]));
+await db.exec(`insert into auth.users (id) values ('${A}');`);
+const ins = (a,b,km) => db.exec(`insert into flights (user_id, from_airport, to_airport, dep_at, arr_at, distance_km) values ('${A}',${a},${b},now()-interval '3 hours',now()-interval '1 hour',${km})`);
+await ins(ids.HND, ids.CTS, 819.6); await ins(ids.OKA, ids.ISG, 395.4);
+const as = async (sql) => { try { await db.exec(`set role authenticated; select set_config('request.jwt.claim.sub','${A}',false);`); const r = await db.query(sql); return Object.values(r.rows[0])[0]; } catch(e){ return 'ERROR: '+e.message.split('\n')[0]; } finally { await db.exec('reset role'); } };
+const brief = j => typeof j === 'string' ? j : JSON.stringify({cash:j.cash, daily:j.daily, total_km:j.total_km, routes:j.routes.map(r=>`${r.k}:${r.base}x${r.mult}(${r.ac||'-'},min${r.min_size})`), fleet:j.fleet});
+await db.exec(`insert into companies (user_id, cash) values ('${A}', 20000)`);
+console.log('state:', brief(await as('select public.co_state()')));
+console.log('buy nb (locked, 1215km):', await as(`select public.co_buy('nb')`));
+console.log('buy prop:', brief(await as(`select public.co_buy('prop')`)));
+console.log('buy rj (locked <2000):', await as(`select public.co_buy('rj')`));
+const hc = `${Math.min(ids.HND,ids.CTS)}-${Math.max(ids.HND,ids.CTS)}`, oi = `${Math.min(ids.OKA,ids.ISG)}-${Math.max(ids.OKA,ids.ISG)}`;
+console.log('assign prop -> HND-CTS:', brief(await as(`select public.co_assign(1, '${hc}')`)));
+await ins(ids.CTS, ids.HND, 819.6); await ins(ids.HND, ids.OKA, 1555); await ins(ids.OKA, ids.HND, 1555); await ins(ids.HND, ids.CTS, 820);
+console.log('buy nb (now 5,985km):', brief(await as(`select public.co_buy('nb')`)));
+console.log('assign nb -> OKA-ISG (island, too small):', await as(`select public.co_assign(2, '${oi}')`));
+console.log('assign nb -> HND-CTS (replaces prop):', brief(await as(`select public.co_assign(2, '${hc}')`)));
+console.log('assign prop -> OKA-ISG:', brief(await as(`select public.co_assign(1, '${oi}')`)));
+console.log('unassign:', brief(await as(`select public.co_assign(1, null)`)));
+console.log('bad type:', await as(`select public.co_buy('concorde')`));
+console.log('other aircraft:', await as(`select public.co_assign(999, null)`));
+console.log('direct insert:', await as(`insert into aircraft (user_id, type) values ('${A}','lg') returning id`));

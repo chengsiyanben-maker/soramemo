@@ -1,0 +1,91 @@
+# そらメモを反映する：テスト → データベース（まだ流していないSQLだけ） → サーバーの関数 → アプリ
+# main に変更を入れると自動で動く。途中で失敗したら、そこで止まる（SQLより先にアプリが公開されることはない）。
+# 必要な設定（リポジトリの Settings）：
+#   Variables：SUPABASE_PROJECT_REF（例：bygwdoypfrccgfjjrorc）
+#   Secrets  ：SUPABASE_ACCESS_TOKEN（Supabase のアクセストークン）、SUPABASE_DB_PASSWORD（データベースのパスワード）
+#   Pages    ：Source を「GitHub Actions」にする
+name: 反映
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  test:
+    name: テスト
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - name: チェックインの判定・便の照合のテスト
+        run: deno test --allow-read supabase/tests/
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: データベースのテスト（すべてのSQLを模擬のデータベースに流す）
+        working-directory: tests/sql
+        run: |
+          npm install --no-audit --no-fund
+          npm test
+
+  database:
+    name: データベースと関数
+    needs: test
+    if: ${{ vars.SUPABASE_PROJECT_REF != '' }}
+    runs-on: ubuntu-latest
+    env:
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+      PROJECT_REF: ${{ vars.SUPABASE_PROJECT_REF }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+      - name: プロジェクトにつなぐ
+        run: supabase link --project-ref "$PROJECT_REF" --password "$SUPABASE_DB_PASSWORD"
+      - name: これから流すSQL
+        run: supabase db push --linked --password "$SUPABASE_DB_PASSWORD" --dry-run
+      - name: まだ流していないSQLを番号順に流す
+        run: supabase db push --linked --password "$SUPABASE_DB_PASSWORD" --yes
+      - name: サーバーの関数を公開する
+        run: supabase functions deploy --use-api --project-ref "$PROJECT_REF"
+
+  web:
+    name: アプリ
+    needs: [test, database]
+    if: ${{ always() && needs.test.result == 'success' && (needs.database.result == 'success' || needs.database.result == 'skipped') }}
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: 道具を用意する
+        run: |
+          pip install fonttools brotli
+          cd tools && npm install --no-audit --no-fund
+      - name: 配る用を作る（縮める・フォントを作る・版の番号を付ける）
+        run: node tools/build.mjs
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: web
+      - name: 公開する
+        id: deploy
+        uses: actions/deploy-pages@v4

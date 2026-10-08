@@ -1,0 +1,3 @@
+{ "name": "soramemo-sql-tests", "private": true, "type": "module",
+  "scripts": { "test": "for f in t*.mjs; do echo \"== $f\"; node $f || exit 1; done" },
+  "dependencies": { "@electric-sql/pglite": "0.5.8" } }
