@@ -13,17 +13,17 @@
 <meta name="apple-mobile-web-app-title" content="そらメモ">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="description" content="国内の空港でチェックインして、印と路線を集める位置情報ゲーム">
-<script>try{var p=localStorage.getItem("soramemo.palette");if(p==="kurenai"||p==="ai"||p==="sora"||p==="akashiro")document.documentElement.setAttribute("data-palette",p);}catch(e){}</script>
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><circle cx='32' cy='32' r='28' fill='none' stroke='%23C23A2B' stroke-width='5'/><path d='M16 36l32-12-8 20-6-8z' fill='%23C23A2B'/></svg>">
+<script>try{var p=localStorage.getItem("soramemo.palette");if(p==="sora"||p==="akashiro")document.documentElement.setAttribute("data-palette",p);}catch(e){}</script>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><circle cx='32' cy='32' r='28' fill='none' stroke='%23111111' stroke-width='5'/><path d='M16 36l32-12-8 20-6-8z' fill='%23111111'/></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@700;800&display=swap" rel="stylesheet">
 <style>
 :root{
-  --sky:#EAF0F5; --paper:#FFFFFF; --ink:#1C2B4A; --sumi:#606A7F; --line:#CCD6E1;
-  --shu:#C23A2B; --shu-wash:#F6E3DF; --gold:#A9822E; --dot:#B5C2D1;
+  --sky:#F4F4F4; --paper:#FFFFFF; --ink:#111111; --sumi:#5C5C5C; --line:#D6D6D6;
+  --shu:#111111; --shu-wash:#EDEDED; --gold:#A9822E; --dot:#BDBDBD;
   /* 文字に使う色（背景との明るさの差を4.5倍以上にする：WCAG AA） */
-  --shu-text:#B63627; --gold-text:#856620; --on-shu:#FFFFFF; --gold-badge:#856620; --on-gold:#FFFFFF;
+  --shu-text:#111111; --gold-text:#856620; --on-shu:#FFFFFF; --gold-badge:#856620; --on-gold:#FFFFFF;
   --mil:#2B4A73; --glider:#1F7FB6; --field:#3D7A4E;
   --mincho:"Shippori Mincho","Hiragino Mincho ProN","Yu Mincho",serif;
   /* 本文は端末に入っている書体を使う（Webフォントは見出し・印の明朝体だけにして、通信量と描画を軽くする） */
@@ -33,25 +33,8 @@
   padding-top:env(safe-area-inset-top,0px);
   padding-bottom:env(safe-area-inset-bottom,0px);
 }
-@media (prefers-color-scheme:dark){
-  :root:not([data-theme="light"]){
-    --sky:#111A2B; --paper:#1A2539; --ink:#E6ECF4; --sumi:#9AA6BA; --line:#2C3A53;
-    --shu:#E2604F; --shu-wash:#3A2226; --gold:#D3AE5A; --dot:#3B4A64; color-scheme:dark;
-    --shu-text:#E57162; --gold-text:#D3AE5A; --on-shu:#14090A; --gold-badge:#D3AE5A; --on-gold:#1A1300; --mil:#8FB3E0; --glider:#6CC3EE; --field:#8CCB9C;
-  }
-}
-:root[data-theme="dark"]{
-  --sky:#111A2B; --paper:#1A2539; --ink:#E6ECF4; --sumi:#9AA6BA; --line:#2C3A53;
-  --shu:#E2604F; --shu-wash:#3A2226; --gold:#D3AE5A; --dot:#3B4A64; color-scheme:dark;
-  --shu-text:#E57162; --gold-text:#D3AE5A; --on-shu:#14090A; --gold-badge:#D3AE5A; --on-gold:#1A1300; --mil:#8FB3E0; --glider:#6CC3EE; --field:#8CCB9C;
-}
 
-/* ---------- 配色テーマ：紅（くれない）・藍（あい）。朱（標準）は上の :root ---------- */
-:root[data-palette="kurenai"]{
-  --sky:#F6F2F1; --paper:#FFFFFF; --ink:#241E1F; --sumi:#6F6667; --line:#E4DADA;
-  --shu:#C8102E; --shu-wash:#FBE2E5; --gold:#A9822E; --dot:#CFBFC0;
-  --shu-text:#C8102E; --gold-text:#856620; --on-shu:#FFFFFF; --gold-badge:#856620; --on-gold:#FFFFFF;
-}
+/* ---------- 配色テーマ：空・赤白。標準は白黒（上の :root） ---------- */
 :root[data-palette="akashiro"]{
   --sky:#FBEDED; --paper:#FFFFFF; --ink:#2A1212; --sumi:#6B5656; --line:#E8C4C4;
   --shu:#D63131; --shu-wash:#F7CFCF; --gold:#A9822E; --dot:#E88A8A;
@@ -62,25 +45,6 @@
   --shu:#233F9A; --shu-wash:#CDEFFA; --gold:#A9822E; --dot:#00B5F0;
   --shu-text:#233F9A; --gold-text:#856620; --on-shu:#FFFFFF; --gold-badge:#856620; --on-gold:#FFFFFF;
  color-scheme:light;}
-:root[data-palette="ai"]{
-  --sky:#EDF2F9; --paper:#FFFFFF; --ink:#0F1F3C; --sumi:#5E6D86; --line:#CBD7E8;
-  --shu:#0F4C9E; --shu-wash:#E0EAF7; --gold:#A9822E; --dot:#AFC0D8;
-  --shu-text:#0F4C9E; --gold-text:#856620; --on-shu:#FFFFFF; --gold-badge:#856620; --on-gold:#FFFFFF;
-}
-@media (prefers-color-scheme:dark){
-  :root[data-palette="kurenai"]:not([data-theme="light"]){
-    --sky:#1A1314; --paper:#251B1C; --ink:#F2EAEA; --sumi:#AB9D9E; --line:#3B2E2F; --shu:#E8394B; --shu-wash:#3D2024; --gold:#D3AE5A; --dot:#4C3B3D; --shu-text:#E86774; --gold-text:#D3AE5A; --on-shu:#14090A; --gold-badge:#D3AE5A; --on-gold:#1A1300;
-  }
-  :root[data-palette="ai"]:not([data-theme="light"]){
-    --sky:#0B1424; --paper:#132038; --ink:#E6EDF8; --sumi:#94A4BE; --line:#243656; --shu:#3D7EDC; --shu-wash:#1B2C4D; --gold:#D3AE5A; --dot:#32476B; --shu-text:#6497E2; --gold-text:#D3AE5A; --on-shu:#14090A; --gold-badge:#D3AE5A; --on-gold:#1A1300;
-  }
-}
-:root[data-theme="dark"][data-palette="kurenai"]{
-  --sky:#1A1314; --paper:#251B1C; --ink:#F2EAEA; --sumi:#AB9D9E; --line:#3B2E2F; --shu:#E8394B; --shu-wash:#3D2024; --gold:#D3AE5A; --dot:#4C3B3D; --shu-text:#E86774; --gold-text:#D3AE5A; --on-shu:#14090A; --gold-badge:#D3AE5A; --on-gold:#1A1300;
-}
-:root[data-theme="dark"][data-palette="ai"]{
-  --sky:#0B1424; --paper:#132038; --ink:#E6EDF8; --sumi:#94A4BE; --line:#243656; --shu:#3D7EDC; --shu-wash:#1B2C4D; --gold:#D3AE5A; --dot:#32476B; --shu-text:#6497E2; --gold-text:#D3AE5A; --on-shu:#14090A; --gold-badge:#D3AE5A; --on-gold:#1A1300;
-}
 .swatches{display:flex;gap:10px}
 .swatch{display:flex;flex-direction:column;align-items:center;gap:4px;background:none;border:none;padding:2px;font-size:12px;color:var(--sumi)}
 .swatch i{width:34px;height:34px;border-radius:50%;border:3px solid var(--paper);box-shadow:0 0 0 1.5px var(--line)}
@@ -763,9 +727,7 @@ details.dev summary{cursor:pointer;color:var(--sumi);font-size:14px;padding:6px 
     <div class="set-row" id="baseRow"><div>拠点の空港<small>搭乗券の出発地に使います。初期値は最初に押した空港です。</small></div><select id="baseSel" aria-label="拠点の空港"></select></div>
     <div class="set-row"><div>色<small>アプリと共有画像の色を選べます。</small></div>
       <div class="swatches" role="group" aria-label="色">
-        <button class="swatch" data-pal="shu" aria-pressed="true"><i style="background:#C23A2B"></i>朱</button>
-        <button class="swatch" data-pal="kurenai" aria-pressed="false"><i style="background:#C8102E"></i>紅</button>
-        <button class="swatch" data-pal="ai" aria-pressed="false"><i style="background:#0F4C9E"></i>藍</button>
+        <button class="swatch" data-pal="mono" aria-pressed="true"><i style="background:#111111"></i>白黒</button>
         <button class="swatch" data-pal="sora" aria-pressed="false"><i style="background:#233F9A"></i>空</button>
         <button class="swatch" data-pal="akashiro" aria-pressed="false"><i style="background:#D63131"></i>赤白</button>
       </div></div>
@@ -2658,7 +2620,7 @@ function drawOpsMap(rw, op, plus){
   }
   if(OPS_LAYER) OPS_LAYER.remove();
   OPS_LAYER = L.layerGroup().addTo(OPS_MAP);
-  const shu = getComputedStyle(document.documentElement).getPropertyValue("--shu").trim() || "#C23A2B";
+  const shu = getComputedStyle(document.documentElement).getPropertyValue("--shu").trim() || "#111111";
   for(const [a, , , , b, , , , name] of HND_RWY){
     const r1 = rw[a], r2 = rw[b];
     L.polyline([r1.end, r2.end], { color:"#1C2B4A", weight:5, opacity:.85 }).bindTooltip(`${name}（${a}/${b}）`).addTo(OPS_LAYER);
@@ -2749,16 +2711,14 @@ function maybeGuide(){ let seen = false; try{ seen = !!localStorage.getItem("sor
 /* ---------- share images ---------- */
 const XCOL = { mil:"#2B4A73", glider:"#1F7FB6", field:"#3D7A4E" };   // 共有画像の印の色（自衛隊・米軍は濃紺、滑空場は空色、飛行場は緑）
 const PALETTES = {
-  shu:     {sky:"#EAF0F5", ink:"#1C2B4A", sumi:"#677288", line:"#CCD6E1", shu:"#C23A2B", gold:"#A9822E", dot:"#B5C2D1", paper:"#FFFFFF"},
-  kurenai: {sky:"#F6F2F1", ink:"#241E1F", sumi:"#6F6667", line:"#E4DADA", shu:"#C8102E", gold:"#A9822E", dot:"#CFBFC0", paper:"#FFFFFF"},
+  mono:    {sky:"#F4F4F4", ink:"#111111", sumi:"#5C5C5C", line:"#D6D6D6", shu:"#111111", gold:"#A9822E", dot:"#BDBDBD", paper:"#FFFFFF"},
   akashiro:{sky:"#FBEDED", ink:"#2A1212", sumi:"#6B5656", line:"#E8C4C4", shu:"#D63131", gold:"#A9822E", dot:"#E88A8A", paper:"#FFFFFF"},
   sora:    {sky:"#E6F7FD", ink:"#142049", sumi:"#5A6684", line:"#B9D9EA", shu:"#233F9A", gold:"#A9822E", dot:"#00B5F0", paper:"#FFFFFF"},
-  ai:      {sky:"#EDF2F9", ink:"#0F1F3C", sumi:"#5E6D86", line:"#CBD7E8", shu:"#0F4C9E", gold:"#A9822E", dot:"#AFC0D8", paper:"#FFFFFF"},
 };
-let PAL = PALETTES[document.documentElement.getAttribute("data-palette") || "shu"];
+let PAL = PALETTES[document.documentElement.getAttribute("data-palette") || "mono"];
 function setPalette(p){
-  if(!PALETTES[p]) p = "shu";
-  if(p === "shu") document.documentElement.removeAttribute("data-palette"); else document.documentElement.setAttribute("data-palette", p);
+  if(!PALETTES[p]) p = "mono";
+  if(p === "mono") document.documentElement.removeAttribute("data-palette"); else document.documentElement.setAttribute("data-palette", p);
   try{ localStorage.setItem("soramemo.palette", p); }catch(e){}
   PAL = PALETTES[p];
   document.querySelectorAll(".swatch").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.pal === p)));
@@ -2776,7 +2736,7 @@ function setFocus(f){
 document.querySelectorAll("[data-focus]").forEach(b => b.onclick = () => { setFocus(b.dataset.focus); track("focus", b.dataset.focus); });
 document.addEventListener("click", e => { if(e.target.id === "focusOff") setFocus("ALL"); const t = e.target.closest("[data-title]"); if(t) setTitle(t.dataset.title); });
 document.querySelectorAll("[data-focus]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.focus === FOCUS)));
-setPalette(document.documentElement.getAttribute("data-palette") || "shu");
+setPalette(document.documentElement.getAttribute("data-palette") || "mono");
 const MINCHO = '"Shippori Mincho","Hiragino Mincho ProN","Yu Mincho",serif', GOTHIC = '"Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic UI","Yu Gothic","Meiryo","Noto Sans JP",sans-serif';
 function circle(ctx, x, y, r){ ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI*2); ctx.stroke(); }
 function drawStamp(ctx, cx, cy, R, a, t, term){
