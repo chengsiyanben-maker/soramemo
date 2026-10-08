@@ -508,7 +508,7 @@ details.dev summary{cursor:pointer;color:var(--sumi);font-size:14px;padding:6px 
       <div><div class="n" id="tKm">0</div><div class="u">飛行距離 km</div></div>
     </div>
     <p class="streak" id="streak"></p>
-    <button class="btn2 opsbtn" id="opsOpen">羽田の今の運用（滑走路・進入）</button>
+    <button class="btn2 opsbtn" id="opsOpen" hidden>羽田の今の運用（滑走路・進入）</button>
     <h2>最近の印</h2>
     <div class="grid" id="recent"></div>
     <details class="dev" hidden><summary>検証用ツール</summary>
@@ -1530,7 +1530,7 @@ function openAirport(id){
   <p class="hint">${dt < TOP ? `次の${RANKS[dt+1]}まであと${RANK_AT[dt+1] - times}回` : "最高の階級です"}</p>
   ${first && gameAvail() && !a.kind ? `<div class="meet">${godSVG(a)}<div><span class="gametag">エアライン経営</span><b>${godName(a)}と出会った</b><span class="hint">エアライン経営の「守り神」で会えます（仮の姿）</span></div></div>` : ""}
   ${ts.length ? `<h3 class="sub">ターミナル　${got} / ${ts.length}</h3><div class="aplist">${termList}</div>` : ""}
-  ${a.iata === "HND" ? `<button class="btn2 opsbtn" style="width:100%;margin-top:12px" data-ap-ops>羽田の今の運用（滑走路・進入）</button>` : ""}
+  ${false && a.iata === "HND" ? `<button class="btn2 opsbtn" style="width:100%;margin-top:12px" data-ap-ops>羽田の今の運用（滑走路・進入）</button>` : ""}
   <h3 class="sub">訪問の記録</h3>${hist ? `<ul class="hist">${hist}</ul>` : "<p class=\"hint\">まだ訪問の記録がありません</p>"}
   <div class="row2"><button class="btn2" data-close>閉じる</button><button class="btn1" data-share-a="${a.id}" data-share-at="${first}">画像で共有</button></div>
   <button class="btn2" style="width:100%;margin-top:8px" data-photo-a="${a.id}" data-photo-at="${first}">写真に押す</button>`;
