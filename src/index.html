@@ -952,7 +952,7 @@ function updateAuthUI(){
 }
 function loadScript(src){ return new Promise((res, rej) => { const el = document.createElement("script"); el.src = src; el.onload = res; el.onerror = rej; document.head.appendChild(el); }); }
 async function initServer(){
-  try{ await loadScript(SUPABASE_JS); }catch(e){ say("サーバーにつながりませんでした。電波のよい場所で開き直してください。", true); return; }
+  try{ await loadScript(SUPABASE_JS); if(!window.supabase || !window.supabase.createClient) throw new Error("supabase-js missing"); }catch(e){ say("サーバーにつながりませんでした。電波のよい場所で開き直してください。", true); return; }
   sb = window.supabase.createClient(SORAMEMO_CONFIG.supabaseUrl, SORAMEMO_CONFIG.supabaseAnonKey);
   loadAppStatus();
   const { data } = await sb.auth.getSession(); user = data.session ? data.session.user : null;
