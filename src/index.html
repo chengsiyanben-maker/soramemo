@@ -511,7 +511,7 @@ details.dev summary{cursor:pointer;color:var(--sumi);font-size:14px;padding:6px 
     <button class="btn2 opsbtn" id="opsOpen">羽田の今の運用（滑走路・進入）</button>
     <h2>最近の印</h2>
     <div class="grid" id="recent"></div>
-    <details class="dev"><summary>検証用ツール</summary>
+    <details class="dev" hidden><summary>検証用ツール</summary>
       <p class="hint">判定を確かめるための機能です。記録には残りません。</p>
       <button class="btn2" id="probe" style="width:100%">位置だけ測る（検証用・記録しない）</button>
       <div id="probeOut" class="hint" style="margin-top:8px"></div>
@@ -615,7 +615,7 @@ details.dev summary{cursor:pointer;color:var(--sumi);font-size:14px;padding:6px 
       <div id="impPreview"></div>
     </details>
     <div id="manualList"></div>
-    <details class="dev"><summary>検証ログ</summary>
+    <details class="dev" hidden><summary>検証ログ</summary>
       <p class="hint">「位置だけ測る」とチェックインのたびに、座標・誤差・判定結果を残します。下の欄を長押しで全選択してコピーできます。</p>
       <textarea id="vlog" readonly rows="6" style="width:100%;font:12px/1.5 ui-monospace,monospace;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--paper);color:var(--ink)"></textarea>
       <button class="btn2" id="vlogClear" style="margin-top:8px">検証ログを消す</button>
@@ -2745,6 +2745,7 @@ document.querySelectorAll("[data-focus]").forEach(b => b.onclick = () => { setFo
 document.addEventListener("click", e => { if(e.target.id === "focusOff") setFocus("ALL"); const t = e.target.closest("[data-title]"); if(t) setTitle(t.dataset.title); });
 document.querySelectorAll("[data-focus]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.focus === FOCUS)));
 setPalette(document.documentElement.getAttribute("data-palette") || "mono");
+try{ if(localStorage.getItem("soramemo.dev") === "1") document.querySelectorAll("details.dev").forEach(d => d.hidden = false); }catch(e){}
 const MINCHO = '"Shippori Mincho","Hiragino Mincho ProN","Yu Mincho",serif', GOTHIC = '"Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic UI","Yu Gothic","Meiryo","Noto Sans JP",sans-serif';
 function circle(ctx, x, y, r){ ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI*2); ctx.stroke(); }
 function drawStamp(ctx, cx, cy, R, a, t, term){
@@ -2902,8 +2903,15 @@ if(SERVER){ S = blank(); render(); updateAuthUI(); initServer(); } else { load()
 setGameOn(GAME_ON); setAnalytics(ANALYTICS_ON); $("anaRow").hidden = !SERVER; renderInstall();
 track("open", MODE);
 maybeGuide();
+/* ログインの回数制限（この端末の中）。連打やコードの総当たりを減らす。サーバー側の上限は Supabase の Auth 設定で別に決める */
+const LOGIN_GUARD = {
+  get(k){ try{ return JSON.parse(localStorage.getItem("soramemo." + k) || "null"); }catch(e){ return null; } },
+  set(k, v){ try{ localStorage.setItem("soramemo." + k, JSON.stringify(v)); }catch(e){} }
+};
 $("sendLink").onclick = async () => {
   const email = $("email").value.trim(), m = $("loginMsg");
+  const last = LOGIN_GUARD.get("sentAt") || 0;
+  if(Date.now() - last < 60000){ m.textContent = `コードは1分に1回まで送れます。あと${Math.ceil((60000 - (Date.now() - last)) / 1000)}秒待ってください。`; m.className = "msg err"; return; }
   if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){ m.textContent = "メールアドレスを確かめてください。"; m.className = "msg err"; return; }
   if(!sb){ m.textContent = "サーバーにつながっていません。開き直してください。"; m.className = "msg err"; return; }
   if(captchaOn() && !CAPTCHA.token){ m.textContent = "確認の表示が出ていれば、それを済ませてからもう一度押してください。"; m.className = "msg err"; initCaptcha(); return; }
@@ -2912,16 +2920,23 @@ $("sendLink").onclick = async () => {
   $("sendLink").disabled = false;
   resetCaptcha();          // 確認の合図は1回ごとに使い捨て
   if(error){ m.textContent = "送れませんでした。少し待ってからもう一度試してください。"; m.className = "msg err"; return; }
+  LOGIN_GUARD.set("sentAt", Date.now());
   $("codeBox").hidden = false; $("loginCode").focus();
   m.textContent = "メールに届いたコードを入れてください。メールのリンクを押してもログインできます（ホーム画面に追加したアプリでは、コードを使ってください）。"; m.className = "msg";
 };
 $("verifyCode").onclick = async () => {
   const email = $("email").value.trim(), token = $("loginCode").value.trim(), m = $("loginMsg");
   if(!/^\d{6,10}$/.test(token)){ m.textContent = "メールに届いた数字のコードを入れてください。"; m.className = "msg err"; return; }
+  const fail = LOGIN_GUARD.get("codeFail") || { n:0, until:0 };
+  if(fail.until > Date.now()){ m.textContent = `コードの入力が続けて違ったため、少し休みます（あと${Math.ceil((fail.until - Date.now()) / 60000)}分）。`; m.className = "msg err"; return; }
   $("verifyCode").disabled = true;
   const { error } = await sb.auth.verifyOtp({ email, token, type:"email", ...(captchaOn() && CAPTCHA.token ? { options:{ captchaToken: CAPTCHA.token } } : {}) });
   $("verifyCode").disabled = false; resetCaptcha();
-  if(error){ m.textContent = "コードが違うか、期限が切れています。もう一度コードを送ってください。"; m.className = "msg err"; return; }
+  if(error){
+    const n = fail.until > 0 && fail.until <= Date.now() ? 1 : fail.n + 1;   // 休みが終わったら数え直す
+    LOGIN_GUARD.set("codeFail", n >= 5 ? { n:0, until: Date.now() + 10 * 60000 } : { n, until:0 });
+    m.textContent = "コードが違うか、期限が切れています。もう一度コードを送ってください。"; m.className = "msg err"; return; }
+  LOGIN_GUARD.set("codeFail", { n:0, until:0 });
   $("codeBox").hidden = true; $("loginCode").value = ""; m.textContent = ""; track("login", "code");
 };
 $("logout").onclick = async () => { if(sb) await sb.auth.signOut(); user = null; CO = null; PLUS = false; $("dSettings").close(); await reload(); };
