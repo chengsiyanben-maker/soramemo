@@ -398,6 +398,11 @@ ol.steps{padding-left:1.4em;line-height:1.9}
 .meet .hint{color:var(--ink)}
 .opsbtn{width:100%;margin:6px 0 4px}
 .dlg-wide{max-width:640px}
+.notice-slot{margin:0}
+.mp-sec{margin:16px 0 4px}
+.mp-sec h4{font-size:13px;color:var(--sumi);margin:0 0 4px;letter-spacing:.04em}
+.plus-list{margin:6px 0 0;padding-left:1.2em;font-size:14px;line-height:1.8}
+.nwait{display:none !important}
 #dAirport{max-width:min(460px,94vw)}
 #dAirport .dlg{max-height:85vh;overflow:auto}
 .dlg h3.sub{font-size:16px;margin:16px 0 6px}
@@ -460,7 +465,7 @@ details.dev summary{cursor:pointer;color:var(--sumi);font-size:14px;padding:6px 
       <svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="27" fill="none" stroke="var(--shu)" stroke-width="5"/><path d="M15 37l34-13-9 21-6-9z" fill="var(--shu)"/></svg>
       そらメモ
     </h1>
-    <button class="iconbtn" id="openSettings">設定</button>
+    <button class="iconbtn" id="openSettings">マイページ</button>
   </header>
   <div class="modesw" id="modeSw" role="tablist" aria-label="スタンプラリーとエアライン経営の切り替え">
     <button role="tab" data-mode="rally" aria-selected="true">スタンプラリー</button>
@@ -498,11 +503,13 @@ details.dev summary{cursor:pointer;color:var(--sumi);font-size:14px;padding:6px 
     <button class="cta" id="checkin">チェックイン</button>
     <p class="hint">空港の判定範囲（1〜2km）の中で押すと、その空港の印が押されます。</p>
     <p class="msg" id="msg" role="status" aria-live="polite"></p>
+    <div class="notice-slot" id="noticeSlot" hidden>
     <div class="queuebar" id="queueBar" hidden></div>
     <div class="queuebar" id="migrateBar" hidden></div>
     <div class="queuebar" id="updateBar" hidden role="status"><b>新しい版が届きました</b>再読み込みすると、新しい版になります。記録はそのまま残ります。<br><button class="btn2" id="updateGo">再読み込み</button></div>
     <div class="queuebar" id="installBar" hidden><b>ホーム画面に追加しませんか</b>アプリのように、ホーム画面からすぐに開けます。インストールは不要です。<br>
       <button class="btn2" data-install="go">追加する</button> <button class="btn2" data-install="later">閉じる</button></div>
+    </div>
     <div id="inflight"></div>
     <div class="tally" aria-label="これまでの記録">
       <div><div class="n" id="tAirports">0</div><div class="u">空港 / <span id="tTotal">86</span></div></div>
@@ -704,29 +711,48 @@ details.dev summary{cursor:pointer;color:var(--sumi);font-size:14px;padding:6px 
 <dialog id="dBP" aria-label="読み取った搭乗券"><div class="dlg" id="dBPBody"></div></dialog>
 <dialog id="dGod" aria-label="守り神"><div class="dlg" id="dGodBody"></div></dialog>
 <dialog id="dSettings"><div class="dlg">
-  <h3>設定</h3>
-  <div class="set-row"><div>デモモード<small>空港を選んでチェックインを試せます。記録は本番とは別です。</small></div><button class="btn2" id="toggleDemo">開始</button></div>
-  <div class="set-row"><div>判定のしくみ<small>出発と到着の空港で24時間以内にチェックインし、移動速度が時速1,000km以下ならフライトとして記録します。</small></div></div>
-  <div class="set-row" id="installRow"><div>ホーム画面に追加<small>アプリのように、ホーム画面から開けるようにします。iPhone・Android・パソコンで使えます。</small></div><button class="btn2" data-install="go">追加する</button></div>
-  <div class="set-row" id="anaRow"><div>使われ方とエラーを送る<small>アプリの改善のため、開いた画面や使った機能、エラーを送ります。利用者のIDや位置は含みません。</small></div><button class="btn2" id="anaToggle" aria-pressed="true">送る（オン）</button></div>
-  <div class="set-row" id="gameRow"><div>エアライン経営<small>オフにすると、スタンプラリーだけのアプリとして使えます。記録はそのまま残り、オンに戻せば続きから遊べます。</small></div><button class="btn2" id="gameToggle" aria-pressed="true">使う（オン）</button></div>
-  <div class="set-row"><div>表示<small>JAL・ANAそれぞれのフライトだけで数えた表示に切り替えます。記録は消えません。</small></div></div>
-  <div class="seg" role="group" aria-label="表示">
-    <button data-focus="ALL" aria-pressed="true">ノーマル</button><button data-focus="JAL" aria-pressed="false">JAL</button><button data-focus="ANA" aria-pressed="false">ANA</button>
-  </div>
-  <div class="set-row"><div>色<small>アプリと共有画像の色を選べます。</small></div>
-    <div class="swatches" role="group" aria-label="色">
-      <button class="swatch" data-pal="shu" aria-pressed="true"><i style="background:#C23A2B"></i>朱</button>
-      <button class="swatch" data-pal="kurenai" aria-pressed="false"><i style="background:#C8102E"></i>紅</button>
-      <button class="swatch" data-pal="ai" aria-pressed="false"><i style="background:#0F4C9E"></i>藍</button>
-    </div></div>
-  <div class="set-row"><div>そらメモ＋<small id="plusInfo"></small></div><div class="plusbtns"><button class="btn2" id="plusBtn" hidden></button><button class="btn1" id="plusBtnYear" hidden data-act="checkout" data-plan="year">年額4,800円</button></div></div>
-  <div class="set-row"><div>使い方<small>はじめに出る案内をもう一度見ます。</small></div><button class="btn2" id="openGuide">見る</button></div>
-  <div class="set-row"><div>記録を書き出す<small>チェックイン・フライト・記録帳を書き出します（無料）。CSVは「まとめて取り込む」と同じ形です。</small></div>
-    <div class="exp"><button class="btn2" data-export="json">JSON</button><button class="btn2" data-export="csv">CSV</button></div></div>
-  <div class="set-row" id="acctRow" hidden><div>アカウント<small id="acctEmail"></small></div><button class="btn2" id="logout">ログアウト</button></div>
-  <div class="set-row" id="delRow" hidden><div>アカウントを削除<small>アカウントとすべての記録を消します。そらメモ＋に加入中なら解約されます。元に戻せません。</small></div><button class="btn2 danger" id="delAcct">削除</button></div>
-  <div class="set-row" id="wipeRow"><div>記録を消す<small>この端末に保存した本番の記録をすべて消します。</small></div><button class="btn2 danger" id="wipe">消す</button></div>
+  <h3>マイページ</h3>
+  <section class="mp-sec" aria-labelledby="mpAcct"><h4 id="mpAcct">アカウント</h4>
+    <div class="set-row" id="loginRow"><div>ログイン<small>記録をサーバーに保存します。メールアドレスに届くコードでログインできます。</small></div><button class="btn2" id="mpLogin">ログインする</button></div>
+    <div class="set-row" id="acctRow" hidden><div>ログイン中<small id="acctEmail"></small></div><button class="btn2" id="logout">ログアウト</button></div>
+    <div class="set-row" id="delRow" hidden><div>アカウントを削除<small>アカウントとすべての記録を消します。そらメモ＋に加入中なら解約されます。元に戻せません。</small></div><button class="btn2 danger" id="delAcct">削除</button></div>
+  </section>
+  <section class="mp-sec" aria-labelledby="mpPlus"><h4 id="mpPlus">そらメモ＋</h4>
+    <div class="set-row"><div>プラン<small id="plusInfo"></small></div><div class="plusbtns"><button class="btn2" id="plusBtn" hidden></button><button class="btn1" id="plusBtnYear" hidden data-act="checkout" data-plan="year">年額4,800円</button></div></div>
+    <p class="hint">そらメモ＋でできること</p>
+    <ul class="plus-list">
+      <li>年間まとめ（その年の空港・路線・距離を一枚に）</li>
+      <li>過去フライトの一括取り込み</li>
+      <li>ステータスの先読み（到達の予測・あと何回）</li>
+      <li>羽田の運用の詳しい表示（地図の進入・離陸の線、気象通報の詳しい値）</li>
+    </ul>
+    <p class="hint">月額500円、または年額4,800円（2か月分お得）。</p>
+  </section>
+  <section class="mp-sec" aria-labelledby="mpShow"><h4 id="mpShow">表示</h4>
+    <div class="set-row"><div>表示<small>JAL・ANAそれぞれのフライトだけで数えた表示に切り替えます。記録は消えません。</small></div></div>
+    <div class="seg" role="group" aria-label="表示">
+      <button data-focus="ALL" aria-pressed="true">ノーマル</button><button data-focus="JAL" aria-pressed="false">JAL</button><button data-focus="ANA" aria-pressed="false">ANA</button>
+    </div>
+    <div class="set-row"><div>色<small>アプリと共有画像の色を選べます。</small></div>
+      <div class="swatches" role="group" aria-label="色">
+        <button class="swatch" data-pal="shu" aria-pressed="true"><i style="background:#C23A2B"></i>朱</button>
+        <button class="swatch" data-pal="kurenai" aria-pressed="false"><i style="background:#C8102E"></i>紅</button>
+        <button class="swatch" data-pal="ai" aria-pressed="false"><i style="background:#0F4C9E"></i>藍</button>
+      </div></div>
+    <div class="set-row" id="gameRow"><div>エアライン経営<small>オフにすると、スタンプラリーだけのアプリとして使えます。記録はそのまま残り、オンに戻せば続きから遊べます。</small></div><button class="btn2" id="gameToggle" aria-pressed="true">使う（オン）</button></div>
+  </section>
+  <section class="mp-sec" aria-labelledby="mpData"><h4 id="mpData">データ</h4>
+    <div class="set-row"><div>記録を書き出す<small>チェックイン・フライト・記録帳を書き出します（無料）。CSVは「まとめて取り込む」と同じ形です。</small></div>
+      <div class="exp"><button class="btn2" data-export="json">JSON</button><button class="btn2" data-export="csv">CSV</button></div></div>
+    <div class="set-row" id="wipeRow"><div>記録を消す<small>この端末に保存した本番の記録をすべて消します。</small></div><button class="btn2 danger" id="wipe">消す</button></div>
+  </section>
+  <section class="mp-sec" aria-labelledby="mpAdv"><h4 id="mpAdv">詳しい設定</h4>
+    <div class="set-row"><div>デモモード<small>空港を選んでチェックインを試せます。記録は本番とは別です。</small></div><button class="btn2" id="toggleDemo">開始</button></div>
+    <div class="set-row"><div>判定のしくみ<small>出発と到着の空港で24時間以内にチェックインし、移動速度が時速1,000km以下ならフライトとして記録します。</small></div></div>
+    <div class="set-row" id="installRow"><div>ホーム画面に追加<small>アプリのように、ホーム画面から開けるようにします。iPhone・Android・パソコンで使えます。</small></div><button class="btn2" data-install="go">追加する</button></div>
+    <div class="set-row" id="anaRow"><div>使われ方とエラーを送る<small>アプリの改善のため、開いた画面や使った機能、エラーを送ります。利用者のIDや位置は含みません。</small></div><button class="btn2" id="anaToggle" aria-pressed="true">送る（オン）</button></div>
+    <div class="set-row"><div>使い方<small>はじめに出る案内をもう一度見ます。</small></div><button class="btn2" id="openGuide">見る</button></div>
+  </section>
   <p class="legal"><a href="terms.html" target="_blank" rel="noopener">利用規約</a>・<a href="privacy.html" target="_blank" rel="noopener">プライバシーポリシー</a>・<a href="tokushoho.html" target="_blank" rel="noopener">特定商取引法にもとづく表記</a></p>
   <p class="hint appver" id="appVer"></p>
   <button class="btn2 close" id="closeSettings">閉じる</button>
@@ -925,6 +951,7 @@ function updateAuthUI(){
   $("checkin").disabled = needLogin || paused;
   $("checkin").textContent = needLogin ? "ログインしてください" : paused ? "一時停止中" : "チェックイン";
   $("acctRow").hidden = !(SERVER && user);
+  $("loginRow").hidden = !(SERVER && !user && !demo);
   $("acctEmail").textContent = user ? user.email || "" : "";
   $("wipeRow").hidden = SERVER;
   $("delRow").hidden = !(SERVER && user);
@@ -2892,6 +2919,16 @@ if("serviceWorker" in navigator && window.isSecureContext && location.protocol !
   navigator.serviceWorker.addEventListener("controllerchange", () => { if(hadController){ $("updateBar").hidden = false; track("update", "ready"); } });
   $("updateGo").onclick = () => location.reload();
 }
+/* ホームのお知らせ欄：いちばん大事なものを1つだけ見せる（新しい版 > 引っ越し > 送信待ち > ホーム画面に追加） */
+const NOTICES = ["updateBar", "migrateBar", "queueBar", "installBar"];
+function syncNotices(){
+  let shown = false;
+  for(const id of NOTICES){ const el = $(id); if(!el) continue; const on = !el.hidden; el.classList.toggle("nwait", on && shown); if(on) shown = true; }
+  $("noticeSlot").hidden = !shown;
+}
+const noticeObs = new MutationObserver(syncNotices); NOTICES.forEach(id => noticeObs.observe($(id), { attributes:true, attributeFilter:["hidden"] }));
+syncNotices();
+$("mpLogin").onclick = () => { $("dSettings").close(); goTab("home"); $("loginBox").hidden = false; $("loginBox").scrollIntoView({ block:"center" }); $("email").focus(); };
 </script>
 </body>
 </html>
