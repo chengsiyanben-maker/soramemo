@@ -608,7 +608,7 @@ details.dev summary{cursor:pointer;color:var(--sumi);font-size:14px;padding:6px 
       <button class="btn2" id="mAdd">記録帳に追加</button>
       <p class="msg" id="mMsg" role="status" aria-live="polite"></p>
     </div>
-    <details class="plusbox" id="importBox"><summary>まとめて取り込む <span class="plustag">そらメモ＋</span></summary>
+    <details class="plusbox" id="importBox" hidden><summary>まとめて取り込む <span class="plustag">そらメモ＋</span></summary>
       <p class="hint">1行に「日付,出発空港,到着空港,航空会社（任意）」を書いて貼り付けます。空港は「HND」でも「羽田」でも構いません。区切りはカンマかタブです。1回500件まで。</p>
       <textarea id="impText" rows="6" placeholder="2025-08-01,HND,CTS,JAL&#10;2025/08/03,新千歳,羽田"></textarea>
       <div class="row2"><button class="btn2" id="impCheck">確認する</button><button class="btn1" id="impGo" disabled>取り込む</button></div>
@@ -710,7 +710,7 @@ details.dev summary{cursor:pointer;color:var(--sumi);font-size:14px;padding:6px 
     <div class="set-row" id="acctRow" hidden><div>ログイン中<small id="acctEmail"></small></div><button class="btn2" id="logout">ログアウト</button></div>
     <div class="set-row" id="delRow" hidden><div>アカウントを削除<small>アカウントとすべての記録を消します。そらメモ＋に加入中なら解約されます。元に戻せません。</small></div><button class="btn2 danger" id="delAcct">削除</button></div>
   </section>
-  <section class="mp-sec" aria-labelledby="mpPlus"><h4 id="mpPlus">そらメモ＋</h4>
+  <section class="mp-sec" aria-labelledby="mpPlus" hidden><h4 id="mpPlus">そらメモ＋</h4>
     <div class="set-row"><div>プラン<small id="plusInfo"></small></div><div class="plusbtns"><button class="btn2" id="plusBtn" hidden></button><button class="btn1" id="plusBtnYear" hidden data-act="checkout" data-plan="year">年額4,800円</button></div></div>
     <p class="hint">そらメモ＋でできること</p>
     <ul class="plus-list">
@@ -2138,8 +2138,7 @@ function renderYearPlus(){
     <div class="chips">${st.regions.map(([r, n]) => `<span>${r} <b>${n}</b></span>`).join("") || "<span>—</span>"}</div>
     ${st.longest ? `<p class="hint">いちばん長いフライト：${godShort(BY[st.longest.from])} → ${godShort(BY[st.longest.to])}（${fmtKm(st.longest.km)}km）</p>` : ""}
     <button class="btn2" id="yrShare" style="width:100%">${YEAR}年のまとめを画像で共有</button>`;
-  el.innerHTML = plusOn() ? `<div class="yp">${body}</div>`
-    : `<div class="yp locked"><div class="blur">${body}</div><div class="cover"><b>年間まとめは そらメモ＋ の機能です</b><span class="hint">月別のグラフ、季節・時間帯・航空会社・地方ごとの内訳と、共有画像。</span><button class="btn1" id="yrJoin">くわしく見る</button></div></div>`;
+  el.innerHTML = plusOn() ? `<div class="yp">${body}</div>` : "";
 }
 document.addEventListener("click", async e => {
   if(e.target.id === "yrJoin"){ track("plus_view", "year"); $("dSettings").showModal(); return; }
@@ -2596,7 +2595,7 @@ async function loadMetar(){
     if(!r.ok) return null; const d = await r.json(); return d && !d.error ? d : null; }catch(e){ return null; }
 }
 function wxText(m){
-  if(m && !plusOn()){ const t = new Date(m.time); return `気象通報（${t.getHours()}時${String(t.getMinutes()).padStart(2,"0")}分）にもとづく推定です。風・視程の詳しい値は そらメモ＋ で見られます。`; }
+  if(m && !plusOn()){ const t = new Date(m.time); return `気象通報（${t.getHours()}時${String(t.getMinutes()).padStart(2,"0")}分）にもとづく推定です。`; }
   if(!m) return SERVER ? "気象通報を読み込めませんでした。下のボタンで運用を選べます。" : "この版では気象通報を読み込めません。下のボタンで運用を選べます。";
   const t = new Date(m.time), wind = m.wdir == null ? (m.wspd ? `風向き不定 ${m.wspd}ノット` : "ほぼ無風") : `${m.wdir}°の方向から ${m.wspd}ノット${m.wgst ? `（最大${m.wgst}）` : ""}`;
   const vis = m.vis_m == null ? "不明" : m.vis_m >= 10000 ? "10km以上" : `${(m.vis_m / 1000).toFixed(1)}km`;
@@ -2611,9 +2610,9 @@ function renderOps(){
     <br>着陸：${op.arr.map(r => `<span class="rw arr">${r}</span>`).join("")}（${approach}）
     <br>離陸：${op.dep.map(r => `<span class="rw dep">${r}</span>${op.depNote && op.depNote[r] ? `<small>${op.depNote[r]}</small>` : ""}`).join(" ")}
     <br><span class="hint">${op.note}${mode === "north" && est.northNew && OPS_MODE === "auto" ? "　この時間帯は、C滑走路（34R）から北へ離陸して荒川沿いを上昇する新しいルートが使われることがあります。" : ""}</span>`
-    + (plus ? "" : `<div class="opsplus"><b>そらメモ＋ で見られるもの</b>地図の進入・離陸の線、気象通報の詳しい値（風向・風速・視程）、曲がった進入経路（LDA・RNP など、準備中）。<br><button class="btn2" id="opsJoin">くわしく見る</button></div>`);
+    ;
   $("opsLegend").textContent = plus ? "赤の点線は使っている着陸の滑走路の最終進入（延長線上の約18km）、青の点線は離陸の向きです。LDA・RNP・海ほたる経由などの曲がった進入経路は、航空路誌（AIP）のチャートの座標を確かめてから表示します。"
-    : "地図には滑走路の位置を表示しています。進入・離陸の線は そらメモ＋ の機能です。";
+    : "地図には滑走路の位置を表示しています。";
   drawOpsMap(rw, op, plus);
 }
 function drawOpsMap(rw, op, plus){
@@ -2694,7 +2693,7 @@ function planHTML(y, st){
     <select id="planFare" aria-label="運賃">${fareOptions(car === "JAL" ? "JL" : "NH", t, PLAN.fare)}</select>
     <p>1区間 <b>${fmtKm(per)} ${unit}</b>（片道）</p>${need || ls ? `<ul class="fc">${need}${ls}</ul>` : `<p class="hint">すべての段階に届いています。</p>`}
     <p class="hint">今年の実績と、選んだ区間・運賃だけで計算した目安です。キャンペーンのボーナスは含みません。${car === "JAL" ? (y >= 2027 ? "JALには回数による条件もあります（例：JMBプレミアは80回以上かつ25,000 FOP以上）。" : "JGCプレミアはJGC会員だけが対象です（2027年の搭乗分からは、名前がJMBプレミアに変わり、搭乗実績だけで達成できます）。JALには回数による条件もあります（例：80回以上かつ25,000 FOP以上）。") : ""}</p></div>`;
-  return plusOn() ? body : `<div class="yp locked"><div class="blur">${body}</div><div class="cover"><b>ステータスの先読みは そらメモ＋ の機能です</b><span class="hint">今のペースで何月何日ごろ届くか、選んだ路線をあと何回乗れば届くか。</span><button class="btn1" id="planJoin">くわしく見る</button></div></div>`;
+  return plusOn() ? body : "";
 }
 document.addEventListener("click", e => {
   const c = e.target.closest("[data-plan-car]"); if(c){ PLAN.car = c.dataset.planCar; PLAN.from = null; renderStatus(); track("plan", PLAN.car); return; }
