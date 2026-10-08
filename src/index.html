@@ -403,6 +403,19 @@ ol.steps{padding-left:1.4em;line-height:1.9}
 .mp-sec h4{font-size:13px;color:var(--sumi);margin:0 0 4px;letter-spacing:.04em}
 .plus-list{margin:6px 0 0;padding-left:1.2em;font-size:14px;line-height:1.8}
 .nwait{display:none !important}
+#dStampBody{position:relative}
+.tk-pass{position:absolute;left:50%;top:0;width:230px;margin-left:-115px;height:106px;pointer-events:none;z-index:2;animation:tkDrop .35s ease-out both}
+.tk-half{position:absolute;left:0;right:0;background:var(--paper);border:1px solid var(--line);padding:8px 12px;font-size:11px;color:var(--sumi)}
+.tk-top{top:0;height:66px;border-radius:12px 12px 0 0;border-bottom:1.5px dashed var(--line);animation:tkTop .8s cubic-bezier(.3,.7,.3,1) 1.1s forwards}
+.tk-bot{top:65px;height:41px;border-radius:0 0 12px 12px;border-top:0;display:flex;align-items:center;animation:tkBot .8s ease-in 1.1s forwards}
+.tk-bot span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.tk-top .pl{display:block;font-size:10px;letter-spacing:.06em}
+.tk-top .route{display:flex;align-items:center;gap:8px;font:800 18px/1 var(--sans);color:var(--ink);margin-top:6px}
+.tk-top .route i{font-style:normal;color:var(--shu);font-size:13px}
+@keyframes tkDrop{from{opacity:0;transform:translateY(-24px)}to{opacity:1;transform:none}}
+@keyframes tkTop{to{transform:translate(-10px,-26px) rotate(-5deg);opacity:0}}
+@keyframes tkBot{to{transform:translate(16px,64px) rotate(11deg);opacity:0}}
+@media (prefers-reduced-motion: reduce){ .tk-pass{display:none} }
 #dAirport{max-width:min(460px,94vw)}
 #dAirport .dlg{max-height:85vh;overflow:auto}
 .dlg h3.sub{font-size:16px;margin:16px 0 6px}
@@ -733,6 +746,7 @@ details.dev summary{cursor:pointer;color:var(--sumi);font-size:14px;padding:6px 
     <div class="seg" role="group" aria-label="表示">
       <button data-focus="ALL" aria-pressed="true">ノーマル</button><button data-focus="JAL" aria-pressed="false">JAL</button><button data-focus="ANA" aria-pressed="false">ANA</button>
     </div>
+    <div class="set-row" id="baseRow"><div>拠点の空港<small>搭乗券の出発地に使います。初期値は最初に押した空港です。</small></div><select id="baseSel" aria-label="拠点の空港"></select></div>
     <div class="set-row"><div>色<small>アプリと共有画像の色を選べます。</small></div>
       <div class="swatches" role="group" aria-label="色">
         <button class="swatch" data-pal="shu" aria-pressed="true"><i style="background:#C23A2B"></i>朱</button>
@@ -1008,6 +1022,24 @@ const fmtKm = n => Math.round(n).toLocaleString("ja-JP");
 const fmtDT = t => new Date(t).toLocaleString("ja-JP",{month:"numeric",day:"numeric",hour:"2-digit",minute:"2-digit"});
 const fmtD = t => new Date(t).toLocaleDateString("ja-JP",{year:"numeric",month:"numeric",day:"numeric"});
 function say(t, err){ const m=$("msg"); m.textContent=t; m.classList.toggle("err", !!err); }
+function homeBase(){
+  try{ const v = +localStorage.getItem("soramemo.base"); if(v && BY[v] && !IS_EXTRA(v)) return v; }catch(e){}
+  const first = [...S.checkins].sort((x, y) => x.t - y.t)[0]; return first ? first.a : null;
+}
+function renderBaseSel(){
+  const sel = $("baseSel"), now = homeBase(); sel.innerHTML = "";
+  for(const [id] of visited()){ const o = document.createElement("option"); o.value = id; o.textContent = BY[id].name; if(id === now) o.selected = true; sel.appendChild(o); }
+  $("baseRow").hidden = sel.options.length === 0;
+}
+$("baseSel").onchange = () => { try{ localStorage.setItem("soramemo.base", $("baseSel").value); }catch(e){} };
+function ticketHTML(a, t){
+  const prev = S.checkins.filter(c => c.t < t).sort((x, y) => y.t - x.t)[0];
+  const base = homeBase();
+  const from = prev && prev.a !== a.id ? prev.a : (base && base !== a.id ? base : null);
+  const label = !from ? "はじめての印" : prev && prev.a !== a.id ? "前回の場所から" : "拠点から";
+  const route = from ? `<b>${code(BY[from])}</b><i>→</i><b>${code(a)}</b>` : `<b>${code(a)}</b>`;
+  return `<div class="tk-pass" aria-hidden="true"><div class="tk-half tk-top"><span class="pl">搭乗券・${label}</span><div class="route">${route}</div></div><div class="tk-half tk-bot"><span>${from ? `${BY[from].name} → ${a.name}` : a.name}</span></div></div>`;
+}
 function visited(){ const s=new Map(); for(const c of S.checkins){ if(!s.has(c.a) && !IS_EXTRA(c.a)) s.set(c.a, c.t); } return s; }   // 民間の空港だけ
 function visitedExtra(){ const s=new Map(); for(const c of S.checkins){ if(!s.has(c.a) && IS_EXTRA(c.a)) s.set(c.a, c.t); } return s; }
 function visitedTerms(){ const s=new Map(); for(const c of S.checkins){ if(c.term && !s.has(c.term)) s.set(c.term, c.t); } return s; }
@@ -1181,7 +1213,7 @@ function showStamp(a, t, first, flight, term, firstTerm){
     : (first ? "" : "この空港の印はもう持っています。訪問日として記録しました。");
   const isFirst = term ? firstTerm : first;
   const shownTier = term ? 0 : tierNow;
-  b.innerHTML = `<div class="stampwrap${shownTier ? " wide t" + shownTier : ""}"><div class="stampbig">${insigniaSVG(a, t, {big:true, term}, shownTier)}</div><div class="inkring" style="${a.rare?"border-color:var(--gold)":""}"></div></div>
+  b.innerHTML = `${ticketHTML(a, t)}<div class="stampwrap${shownTier ? " wide t" + shownTier : ""}"><div class="stampbig">${insigniaSVG(a, t, {big:true, term}, shownTier)}</div><div class="inkring" style="${a.rare?"border-color:var(--gold)":""}"></div></div>
   <div class="reveal">
   ${isFirst ? `<span class="firstbadge${a.rare?" gold":""}">はじめての印</span>` : ""}
   <h3>${placeName(a, term)}</h3>
@@ -1533,7 +1565,7 @@ $("probe").onclick = async () => {
 };
 $("vlogClear").onclick = () => { if(confirm("検証ログを消します。")){ try{ localStorage.removeItem("soramemo.vlog"); }catch(e){} showVlog(); } };
 $("demoAirport").onchange = () => { showNearest(nearest(demoPlace())); say(""); };
-$("openSettings").onclick = () => $("dSettings").showModal();
+$("openSettings").onclick = () => { renderBaseSel(); $("dSettings").showModal(); };
 $("closeSettings").onclick = () => $("dSettings").close();
 $("toggleDemo").onclick = async () => {
   if(demo){ try{ localStorage.removeItem("soramemo.demo.v1"); }catch(e){} }
