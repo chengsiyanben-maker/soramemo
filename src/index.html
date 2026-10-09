@@ -195,11 +195,15 @@ dialog::backdrop{background:rgba(15,22,38,.55)}
 .seg{display:grid;grid-template-columns:repeat(3,1fr);border:1.5px solid var(--ink);border-radius:10px;overflow:hidden;margin:2px 0 6px}
 .seg button{background:none;border:none;padding:10px 0;font-weight:700;color:var(--ink)}
 .seg button+button{border-left:1.5px solid var(--ink)}
+#v-book .seg{grid-template-columns:repeat(4,1fr)}
+#v-book .seg button{font-size:13px;white-space:nowrap;padding:10px 2px}
 .seg button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
 .cell.dim{opacity:.32}
 .pend{display:block;font-size:11px;color:var(--shu-text);font-weight:700}
 .achgrp{margin:22px 0 0}
 .achgrp h3{margin:0 0 8px}
+.airach{background:var(--sky);border-radius:14px;padding:12px 14px 4px;margin:0 0 18px}
+.airhead{margin:0 0 4px;font-size:16px}
 .achs{display:grid;gap:10px}
 .achc{display:grid;grid-template-columns:44px 1fr auto;gap:2px 12px;align-items:center;background:var(--paper);border-radius:12px;padding:12px 14px}
 .achc .ic{grid-row:1/4;width:44px;height:44px}
@@ -523,6 +527,7 @@ details.dev summary{cursor:pointer;color:var(--sumi);font-size:14px;padding:6px 
   <section class="view" id="v-book" aria-label="図鑑">
     <div class="seg" role="group" aria-label="図鑑の切り替え">
       <button data-seg="main" aria-pressed="true">86空港</button>
+      <button data-seg="air" aria-pressed="false">飛行場・滑空場</button>
       <button data-seg="extra" aria-pressed="false">番外編</button>
       <button data-seg="ach" aria-pressed="false">実績</button>
     </div>
@@ -530,6 +535,9 @@ details.dev summary{cursor:pointer;color:var(--sumi);font-size:14px;padding:6px 
       <div class="book-head"><h2>空港図鑑</h2><span class="p" id="bookProg"></span></div>
       <p class="hint" id="bookNote" hidden></p>
       <div id="book"></div>
+    </div>
+    <div id="bookAir" hidden>
+      <div class="book-head"><h2>飛行場・滑空場</h2></div>
     </div>
     <div id="bookExtra" hidden>
       <div class="book-head"><h2>番外編</h2></div>
@@ -965,6 +973,13 @@ function km(a, b){ const R=6371, r=Math.PI/180; const dl=(b.lat-a.lat)*r, dn=(b.
   const h=Math.sin(dl/2)**2+Math.cos(a.lat*r)*Math.cos(b.lat*r)*Math.sin(dn/2)**2; return 2*R*Math.asin(Math.sqrt(h)); }
 // 民間空港の範囲内なら民間空港。そうでなければ範囲内の番外編の飛行場。どちらでもなければ、いちばん近い民間空港（範囲外の案内用）
 function nearest(p){
+  const r = nearestBase(p);
+  // 判定の範囲の外でも、5km以内に飛行場・滑空場があれば、ホームにそれを案内する（基地は除く）
+  if(r.within) return r;
+  let nb = null, nd = Infinity; for(const a of XA){ if(a.kind === "mil") continue; const k = km(p, a); if(k < nd){ nd = k; nb = a; } }
+  return nb && nd <= 5 ? {...r, near:{a:nb, km:nd}} : r;
+}
+function nearestBase(p){
   const c = nearestCivil(p); if(c.within) return c;
   let eb = null, ed = Infinity; for(const a of XA){ const k = km(p, a); if(k < ed){ ed = k; eb = a; } }
   if(eb && ed * 1000 <= eb.radius) return {a:eb, km:ed, term:null, within:true};
@@ -1182,7 +1197,8 @@ function showNearest(n){
   $("nearName").textContent = placeName(n.a, n.within ? n.term : null); $("nearName").classList.remove("idle");
   const ok = n.within, el = $("nearDist");
   el.classList.toggle("ok", ok);
-  el.innerHTML = ok ? `判定範囲の中にいます（<b>${n.km < 1 ? Math.round(n.km*1000)+"m" : n.km.toFixed(1)+"km"}</b>）` : `ここから <b>${n.km.toFixed(1)}km</b>（判定範囲 ${n.a.radius/1000}km）`;
+  el.innerHTML = ok ? `判定範囲の中にいます（<b>${n.km < 1 ? Math.round(n.km*1000)+"m" : n.km.toFixed(1)+"km"}</b>）` : `ここから <b>${n.km.toFixed(1)}km</b>（判定範囲 ${n.a.radius/1000}km）`
+    + (!ok && n.near ? `<br>近くに<b>${n.near.a.name}</b>（${XKIND[n.near.a.kind].short}・${n.near.km.toFixed(1)}km）があります。` : "");
 }
 function showStamp(a, t, first, flight, term, firstTerm){
   const b = $("dStampBody");
@@ -1226,6 +1242,10 @@ function renderMap(){
   }
   for(const a of A){ const [x,y]=proj(a), on=v.has(a.id);
     parts.push(`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${on?4:2.6}" fill="${on?(a.rare?"var(--gold)":"var(--shu)"):"var(--dot)"}"><title>${a.name}</title></circle>`); }
+  // 飛行場・滑空場は四角で描く（民間空港の丸と区別する）。訪れた印は色を塗る
+  const xv = visitedExtra();
+  for(const a of XA){ if(a.kind === "mil") continue; const [x,y]=proj(a), on=xv.has(a.id), col=XCOL[a.kind]||"var(--shu)", s=on?4.4:3.2;
+    parts.push(`<rect x="${(x-s/2).toFixed(1)}" y="${(y-s/2).toFixed(1)}" width="${s}" height="${s}" fill="${on?col:"var(--dot)"}" stroke="${col}" stroke-width=".8"><title>${a.name}（${XKIND[a.kind].short}）</title></rect>`); }
   $("map").innerHTML = parts.join("");
 }
 function dedupFlights(){ const seen=new Set(), out=[]; for(const f of focusFlights()){ const k=[f.from,f.to].sort((x,y)=>x-y).join("-"); if(!seen.has(k)){seen.add(k); out.push(f);} } return out; }
@@ -1240,7 +1260,7 @@ let BOOK_SEG = "main";
 function setBookSeg(s){
   BOOK_SEG = s;
   document.querySelectorAll("#v-book [data-seg]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.seg === s)));
-  $("bookMain").hidden = s !== "main"; $("bookExtra").hidden = s !== "extra"; $("bookAch").hidden = s !== "ach";
+  $("bookMain").hidden = s !== "main"; $("bookAir").hidden = s !== "air"; $("bookExtra").hidden = s !== "extra"; $("bookAch").hidden = s !== "ach";
 }
 document.querySelectorAll("#v-book [data-seg]").forEach(b => b.onclick = () => { setBookSeg(b.dataset.seg); renderVisible(); });
 function renderVisible(){
@@ -1297,13 +1317,14 @@ function renderBook(){
       ? `<button class="cell got${FOCUS !== "ALL" && !fa.has(a.id) && !ua.has(a.id) ? " dim" : ""}" data-a="${a.id}"><div class="slot">${stampSVG(a, v.get(a.id))}${(vc.get(a.id)||0) > 1 ? `<span class="vcount">×${vc.get(a.id)}</span>` : ""}</div><div class="nm">${stripesMini(tierOf(vc.get(a.id)||0))}${a.name}${FOCUS !== "ALL" && !fa.has(a.id) && ua.has(a.id) ? `<span class="pend">便が未記録</span>` : ""}</div></button>`
       : `<div class="cell"><div class="slot">${emptySVG(a)}</div><div class="nm">${a.name}${a.rare?"（離島）":""}</div></div>`).join("")}</div>${termGrid(prefs)}`;
   }).join("");
-  $("bookExtra").innerHTML = `<div class="book-head"><h2>番外編</h2></div>` + extraBook();
+  $("bookAir").innerHTML = `<div class="book-head"><h2>飛行場・滑空場</h2></div>` + extraBook(["field", "glider"], "定期便のない空港や小型機の飛行場、グライダーの滑空場です。86空港の全国制覇には数えず、別の実績があります。");
+  $("bookExtra").innerHTML = `<div class="book-head"><h2>番外編</h2></div>` + extraBook(["mil"], "自衛隊・米軍の飛行場です。86空港の全国制覇には数えず、別の実績があります。基地の中には入れないので、フェンスの外から押せる距離にしてあります。");
 }
-// 番外編の図鑑（自衛隊・米軍の飛行場、滑空場）。全国制覇などには数えない
-function extraBook(){
+// 番外編の図鑑（自衛隊・米軍の飛行場、滑空場、飛行場）。全国制覇などには数えない
+function extraBook(kinds, note){
   const xv = visitedExtra(), vc = new Map(); for(const c of S.checkins) if(IS_EXTRA(c.a)) vc.set(c.a, (vc.get(c.a) || 0) + 1);
-  return `<p class="hint">自衛隊・米軍の飛行場、グライダーの滑空場、定期便のない空港や小型機の飛行場です。86空港の全国制覇には数えず、別の実績があります。基地の中には入れないので、フェンスの外から押せる距離にしてあります。</p>`
-    + Object.entries(XKIND).map(([k, info]) => { const list = XA.filter(a => a.kind === k), got = list.filter(a => xv.has(a.id)).length;
+  return `<p class="hint">${note}</p>`
+    + Object.entries(XKIND).filter(([k]) => kinds.includes(k)).map(([k, info]) => { const list = XA.filter(a => a.kind === k), got = list.filter(a => xv.has(a.id)).length;
       const open = got > 0 || XB_OPEN.has(k);
       return `<details class="xgrp" data-xk="${k}"${open ? " open" : ""}><summary><h3>${info.label}　${got} / ${list.length}</h3></summary>${open ? extraGrid(k, xv, vc) : ""}</details>`; }).join("");
 }
@@ -1752,17 +1773,21 @@ function achIcon(x, ok){
   return `<svg class="ic" viewBox="0 0 44 44" aria-hidden="true"><circle cx="22" cy="22" r="19" fill="none" stroke="${col}" stroke-width="3"/><circle cx="22" cy="22" r="15" fill="none" stroke="${col}" stroke-width="1"/>${ok ? `<path d="M14 22.5l5.5 5.5L30 17" fill="none" stroke="var(--shu)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>` : `<text x="22" y="27" text-anchor="middle" font-size="13" font-weight="700" fill="var(--sumi)">?</text>`}</svg>`;
 }
 function renderAch(){
-  const st = achState(), cats = [...new Set(ACH.map(x => x.cat))];
+  const st = achState(), allCats = [...new Set(ACH.map(x => x.cat))];
+  const AIR_CATS = ["番外編：滑空場", "番外編：飛行場"], airCats = allCats.filter(c => AIR_CATS.includes(c)), restCats = allCats.filter(c => !AIR_CATS.includes(c));
+  const airDone = ACH.filter(x => AIR_CATS.includes(x.cat) && st.done.has(x.id)).length, airAll = ACH.filter(x => AIR_CATS.includes(x.cat)).length;
   $("achProg").textContent = `達成 ${st.done.size} / ${ACH.length}`;
-  $("ach").innerHTML = cats.map(cat => cat === "同じ空港" ? visitAchHTML(st) : `<div class="achgrp"><h3>${cat}</h3><div class="achs">${ACH.filter(x => x.cat === cat).map(x => {
+  const catHTML = cat => `<div class="achgrp"><h3>${cat}</h3><div class="achs">${ACH.filter(x => x.cat === cat).map(x => {
     const ok = st.done.has(x.id), v = st.value(x), pct = Math.round(v / x.target * 100);
     const shown = x.kind === "km" || x.kind === "yearKm" ? `${fmtKm(v)} / ${fmtKm(x.target)}km`
       : x.kind === "streak" ? `最長 ${v} / ${x.target}か月`
       : x.kind.startsWith("lap:") ? `${v} / ${x.target}空港が${x.kind.split(":")[2]}回以上` : `${v} / ${x.target}`;
     return `<div class="achc ${ok ? "done" : "lock"}${TITLE === x.id ? " cur" : ""}" ${ok ? `role="button" tabindex="0" data-title="${x.id}"` : ""}>${achIcon(x, ok)}<div class="t">${x.name}${TITLE === x.id ? `<span class="badge">称号</span>` : ""}</div><div class="v">${ok ? fmtD(st.done.get(x.id)) + " 達成" : shown}</div><div class="d">${x.desc}</div>${ok ? "" : `<div class="bar" aria-hidden="true"><i style="width:${pct}%"></i></div>`}</div>`;
-  }).join("")}</div></div>`).join("");
+  }).join("")}</div></div>`;
+  $("ach").innerHTML = (airCats.length ? `<section class="airach" aria-label="飛行場・滑空場の実績"><h3 class="airhead">飛行場・滑空場の実績　${airDone} / ${airAll}</h3>${airCats.map(catHTML).join("")}</section>` : "")
+    + restCats.map(cat => cat === "同じ空港" ? visitAchHTML(st) : catHTML(cat)).join("");
 }
-let TITLE = (() => { try{ return localStorage.getItem("soramemo.title") || ""; }catch(e){ return ""; } })();
+let TITLE =(() => { try{ return localStorage.getItem("soramemo.title") || ""; }catch(e){ return ""; } })();
 function titleName(){ const x = ACH.find(a => a.id === TITLE); return x && achState().done.has(x.id) ? x.name : ""; }
 function setTitle(id){ TITLE = TITLE === id ? "" : id; try{ localStorage.setItem("soramemo.title", TITLE); }catch(e){} render(); }
 function visitAchHTML(st){
