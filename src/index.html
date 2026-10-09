@@ -2769,7 +2769,6 @@ document.querySelectorAll("[data-focus]").forEach(b => b.onclick = () => { setFo
 document.addEventListener("click", e => { if(e.target.id === "focusOff") setFocus("ALL"); const t = e.target.closest("[data-title]"); if(t) setTitle(t.dataset.title); });
 document.querySelectorAll("[data-focus]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.focus === FOCUS)));
 setPalette(document.documentElement.getAttribute("data-palette") || "mono");
-try{ if(localStorage.getItem("soramemo.dev") === "1") document.querySelectorAll("details.dev").forEach(d => d.hidden = false); }catch(e){}
 const MINCHO = '"Shippori Mincho","Hiragino Mincho ProN","Yu Mincho",serif', GOTHIC = '"Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic UI","Yu Gothic","Meiryo","Noto Sans JP",sans-serif';
 function circle(ctx, x, y, r){ ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI*2); ctx.stroke(); }
 function drawStamp(ctx, cx, cy, R, a, t, term){
