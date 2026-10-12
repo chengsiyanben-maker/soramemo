@@ -105,3 +105,9 @@ Deno.test("雲底：BKN・OVC のいちばん低い高さ。FEW・SCT は数え�
   assertEquals(ceilingOf([{ cover: "SCT", base: 1000 }]), null);
   assertEquals(ceilingOf([], 2), 200);
 });
+
+import { wxCode } from "../functions/_shared/airport_now.ts";
+Deno.test("チェックインに残す天気の記号", () => {
+  assertEquals([wxCode("晴れ"), wxCode("くもり"), wxCode("雨"), wxCode("雪"), wxCode("霧"), wxCode("雷"), wxCode(null), wxCode("？")],
+    ["clear", "cloudy", "rain", "snow", "fog", "thunder", null, null]);
+});

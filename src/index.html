@@ -522,6 +522,7 @@ ol.steps{padding-left:1.4em;line-height:1.9}
 .opsoon b{display:block;font-size:15px}
 .opsoon span{font-size:12px;color:var(--sumi)}
 .opsoon em{font-style:normal;font-size:11px;font-weight:700;border:1px solid var(--sumi);color:var(--sumi);border-radius:999px;padding:2px 10px;white-space:nowrap}
+.wxtag{font-size:12px;color:var(--sumi);border:1px solid var(--line);border-radius:4px;padding:0 6px}
 .hist{margin:0;padding-left:1.2em;font-size:14px;line-height:1.8;max-height:200px;overflow:auto}
 .opsmodes{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
 .chip{border:1.5px solid var(--line);background:var(--paper);color:var(--ink);border-radius:999px;padding:6px 12px;font-size:13px;font-weight:600}
@@ -1193,7 +1194,7 @@ async function applyPlan(){
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 async function loadServer(){
   const [c, f, m] = await Promise.all([
-    fetchAll("checkins", "id,airport_id,terminal_id,created_at,accuracy_m", "created_at"),
+    fetchAll("checkins", "id,airport_id,terminal_id,created_at,accuracy_m,weather,wind_kt", "created_at"),
     fetchAll("flights", "id,from_airport,to_airport,dep_at,arr_at,distance_km,status,airline,flight_no,fare,seat,track", "arr_at"),
     fetchAll("manual_flights", "id,from_airport,to_airport,flown_on,airline,fare,seat", null),
   ]);
@@ -1202,7 +1203,7 @@ async function loadServer(){
   const err = c.error || f.error || m.error;
   if(err){ say("記録を読み込めませんでした。電波のよい場所で開き直してください。", true); return; }
   S = { demoClock:null,
-    checkins: c.data.map(r => ({a:r.airport_id, term:r.terminal_id, t:Date.parse(r.created_at), acc:r.accuracy_m})),
+    checkins: c.data.map(r => ({a:r.airport_id, term:r.terminal_id, t:Date.parse(r.created_at), acc:r.accuracy_m, wx:r.weather || null, wind:r.wind_kt ?? null})),
     flights: f.data.map(r => ({id:r.id, from:r.from_airport, to:r.to_airport, dep:Date.parse(r.dep_at), arr:Date.parse(r.arr_at), km:r.distance_km, status:r.status, airline:r.airline, no:r.flight_no, fare:r.fare || null, seat:r.seat || null, track:Array.isArray(r.track) ? r.track : null})),
     manual: m.data.map(r => ({id:r.id, from:r.from_airport, to:r.to_airport, d:r.flown_on, airline:r.airline, fare:r.fare || null, seat:r.seat || null})) };
 }
@@ -1469,7 +1470,7 @@ function showNearest(n){
 function showStamp(a, t, first, flight, term, firstTerm){
   const b = $("dStampBody");
   const visitsNow = S.checkins.filter(c => c.a === a.id).length, tierNow = tierOf(visitsNow), tierUp = tierNow > tierOf(visitsNow - 1);
-  const marks = [...timeMarks(t), `${SEASONS[seasonOf(t)]}の訪問`];
+  const marks = [...timeMarks(t), `${SEASONS[seasonOf(t)]}の訪問`, ...wxMarks(S.checkins.find(c => c.a === a.id && c.t === t))];
   const seasonSet = achState().seasons.get(a.id) || new Set();
   const note = term ? (firstTerm ? `${term.name}の印です。` : `${term.name}の印はもう持っています。訪問日として記録しました。`) + (first ? "この空港ははじめてです。" : "")
     : (first ? "" : "この空港の印はもう持っています。訪問日として記録しました。");
@@ -1817,7 +1818,7 @@ function openAirport(id){
     ? `<div class="apitem got">${stampSVG(a, vt.get(t.id), {term:t})}<span>${t.short} ${t.name}<small>${fmtD(vt.get(t.id))}</small></span></div>`
     : `<div class="apitem">${emptySVG(a, t)}<span>${t.short} ${t.name}<small>未訪問</small></span></div>`).join("");
   const hist = visits.slice().sort((x, y) => y.t - x.t).slice(0, 12)
-    .map(c => `<li>${fmtD(c.t)}　${c.term && TBY[c.term] ? TBY[c.term].name : "空港"}</li>`).join("");
+    .map(c => `<li>${fmtD(c.t)}　${c.term && TBY[c.term] ? TBY[c.term].name : "空港"}${c.wx ? `　<span class="wxtag">${WX_LABEL[c.wx]}${c.wind != null && c.wind >= STRONG_WIND ? "・強風" : ""}</span>` : ""}</li>`).join("");
   b.innerHTML = `<div class="stampbig${dt ? " wide" : ""}">${insigniaSVG(a, first, {big:true, term:null}, dt)}</div>
   <h3>${a.name}</h3><p>${a.pref}${a.rare?"・離島の空港":""}${a.kind ? "・番外編" : ""}</p>
   <p class="marks">${SEASONS.map((x,i) => `<span class="mark${ss.has(i) ? " on" : " off"}">${x}</span>`).join("")}${ss.size === 4 ? `<span class="mark gold">四季がそろった</span>` : ""}</p>
@@ -1880,6 +1881,10 @@ const dayKey = t => { const d = new Date(t); return d.getFullYear()*10000 + (d.g
 const monthKey = t => { const d = new Date(t); return d.getFullYear()*12 + d.getMonth(); };
 const RARE_TOTAL = A.filter(a => a.rare).length;
 const VISIT_STEPS = [[5, "行きつけ"], [20, "ホーム空港"], [50, "主"], [100, "機長"], [365, "レジェンド"]];
+// チェックインしたときの空港の天気（サーバーが気象通報から記録する）
+const WX_LABEL = { clear:"晴れ", cloudy:"くもり", rain:"雨", snow:"雪", fog:"霧", thunder:"雷" };
+const WX_KINDS = Object.keys(WX_LABEL), STRONG_WIND = 25;   // 強風：25ノット（約13m/s）以上
+const wxMarks = c => !c ? [] : [...(c.wx && c.wx !== "clear" && c.wx !== "cloudy" ? [`${WX_LABEL[c.wx]}の日の印`] : []), ...(c.wind != null && c.wind >= STRONG_WIND ? ["強風の日の印"] : [])];
 const ACH = [
   // [カテゴリ, id, 名前, 説明, 目標, 値の種類]
   ["空港の数","ap1","はじめの一歩","はじめて空港の印を押す",1,"airports"],
@@ -1905,6 +1910,13 @@ const ACH = [
   ["番外編：基地","mil10","航空祭の常連","自衛隊・米軍の飛行場10か所の印を集める",10,"mil"],
   ["番外編：基地","mil20","基地の達人","自衛隊・米軍の飛行場20か所の印を集める",20,"mil"],
   ["番外編：基地","milall","全基地制覇",`自衛隊・米軍の飛行場${XA.filter(a => a.kind === "mil").length}か所すべての印を集める`,XA.filter(a => a.kind === "mil").length,"mil"],
+  ["空模様","wx_rain1","雨の日の旅人","雨の日にチェックインする",1,"wx:rain"],
+  ["空模様","wx_rain10","雨男・雨女","雨の日に10回チェックインする",10,"wx:rain"],
+  ["空模様","wx_snow1","雪の空港","雪の日にチェックインする",1,"wx:snow"],
+  ["空模様","wx_fog1","霧の中で","霧の日にチェックインする",1,"wx:fog"],
+  ["空模様","wx_thunder1","雷鳴の空港","雷の日にチェックインする",1,"wx:thunder"],
+  ["空模様","wx_wind1","強風の空港",`風速${STRONG_WIND}ノット以上の日にチェックインする`,1,"wx:wind"],
+  ["空模様","wx_all","空模様コンプリート","晴れ・くもり・雨・雪・霧・雷の6つの空模様すべての日にチェックインする",6,"wxKinds"],
   ["番外編：滑空場","gl1","風に乗る","滑空場の印をはじめて押す",1,"glider"],
   ["番外編：滑空場","gl5","河川敷の滑空場","滑空場5か所の印を集める",5,"glider"],
   ["番外編：滑空場","gl10","上昇気流","滑空場10か所の印を集める",10,"glider"],
@@ -1967,6 +1979,11 @@ function achState(){
   const seasons = new Map(), days = new Map(), years = new Map(), dir = new Set(), round = new Set(), ends = new Set();
   const endIds = new Set(EXTREMES.map(([, a]) => a.id));
   const regionCnt = {}, lapCnt = {}, termCnt = {}, xset = { mil:new Set(), glider:new Set(), field:new Set() };
+  const wxCnt = { rain:0, snow:0, fog:0, thunder:0, wind:0 }, wxSeen = new Set();
+  const countWx = (c, t) => {
+    if(c.wx){ if(!wxSeen.has(c.wx)){ wxSeen.add(c.wx); hit("wxKinds", wxSeen.size, t); } if(c.wx in wxCnt) hit("wx:" + c.wx, ++wxCnt[c.wx], t); }
+    if(c.wind != null && c.wind >= STRONG_WIND) hit("wx:wind", ++wxCnt.wind, t);
+  };
   let ci = 0, km = 0, maxV = 0, morning = 0, night = 0, newyear = 0, four = 0, lastMonth = null, streak = 0, bestStreak = 0, maxDay = 0, ns = 0, yearAp = 0, yearKm = 0;
   // 種類ごとに、まだ達成していない実績を目標の小さい順に並べておく
   const pending = new Map();
@@ -1979,7 +1996,7 @@ function achState(){
     if(e.c && IS_EXTRA(e.c.a)){
       // 番外編（基地・滑空場）：チェックインの回数・時間の印・連続には数え、空港の数や地方制覇には数えない
       const id = e.c.a, xk = BY[id].kind;
-      ci++; hit("checkins", ci, t);
+      ci++; hit("checkins", ci, t); countWx(e.c, t);
       if(!xset[xk].has(id)){ xset[xk].add(id); hit(xk, xset[xk].size, t); }
       visits.set(id, (visits.get(id) || 0) + 1);
       const tm = timeMarks(t);
@@ -1989,7 +2006,7 @@ function achState(){
       const mk = monthKey(t); if(mk !== lastMonth){ streak = lastMonth !== null && mk === lastMonth + 1 ? streak + 1 : 1; lastMonth = mk; bestStreak = Math.max(bestStreak, streak); hit("streak", bestStreak, t); }
     } else if(e.c){
       const id = e.c.a, rg = AIRPORT_REGION[id];
-      ci++; hit("checkins", ci, t);
+      ci++; hit("checkins", ci, t); countWx(e.c, t);
       if(!ap.has(id)){
         ap.add(id); hit("airports", ap.size, t);
         regionCnt[rg] = (regionCnt[rg] || 0) + 1; hit("region:" + rg, regionCnt[rg], t);
@@ -2031,7 +2048,8 @@ function achState(){
     : k === "roundTrips" ? round.size : k === "ends" ? ends.size : k === "northSouth" ? ns
     : k === "airports" ? ap.size : k === "checkins" ? ci : k === "maxVisit" ? maxV : k === "rare" ? rare.size
     : k === "routes" ? rt.size : k === "km" ? km : k === "bothGroups" ? (groups.has("JAL") ? 1 : 0) + (groups.has("ANA") ? 1 : 0)
-    : k === "termAll" ? terms.size
+    : k === "termAll" ? terms.size : k === "wxKinds" ? wxSeen.size
+    : k.startsWith("wx:") ? (wxCnt[k.slice(3)] || 0)
     : k.startsWith("visit:") ? (visits.get(+k.slice(6)) || 0)
     : k.startsWith("region:") ? (regionCnt[k.slice(7)] || 0)
     : k.startsWith("term:") ? (termCnt[k.slice(5)] || 0)

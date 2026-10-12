@@ -176,3 +176,7 @@ export function amedasWeather(v: Record<string, [number | null, number | null]>,
     sky: rain10 && rain10 > 0 ? "雨" : null,
   };
 }
+
+// 空模様（日本語）→ チェックインに残す天気の記号
+const WX_CODE: Record<string, string> = { "晴れ": "clear", "くもり": "cloudy", "雨": "rain", "雪": "snow", "霧": "fog", "雷": "thunder" };
+export function wxCode(sky: string | null | undefined): string | null { return sky ? WX_CODE[sky] ?? null : null; }

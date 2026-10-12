@@ -2,6 +2,7 @@
 // 端末は「位置・誤差・取得時刻」だけを送る。判定・記録・フライト成立はすべてここで行う。
 import { createClient } from "npm:@supabase/supabase-js@2.117.2";
 import { type Airport, decide, type Terminal } from "../_shared/judge.ts";
+import { weather, wxCode } from "../_shared/airport_now.ts";
 
 const URL = Deno.env.get("SUPABASE_URL")!;
 const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -27,6 +28,25 @@ async function checkinAllowed(): Promise<boolean> {
 // 記録は本処理を待たせない（失敗してもチェックインには影響させない）
 // deno-lint-ignore no-explicit-any
 const background = (p: PromiseLike<unknown>) => { const q = Promise.resolve(p).catch(() => {}); const rt = (globalThis as any).EdgeRuntime; if (rt?.waitUntil) rt.waitUntil(q); };
+
+// チェックインしたときの空港の天気（気象通報）。同じ空港は10分使い回し、2.5秒で取れなければあきらめる（チェックインは待たせない）
+const wxCache = new Map<string, { at: number; v: { weather: string | null; wind_kt: number | null } }>();
+async function wxAt(icao: string | null | undefined): Promise<{ weather: string | null; wind_kt: number | null }> {
+  const none = { weather: null, wind_kt: null };
+  if (!icao || !/^[A-Z]{4}$/.test(icao)) return none;
+  const hit = wxCache.get(icao);
+  if (hit && Date.now() - hit.at < 10 * 60_000) return hit.v;
+  try {
+    const r = await fetch(`https://aviationweather.gov/api/data/metar?ids=${icao}&format=json`, { headers: { "User-Agent": "soramemo (checkin)" }, signal: AbortSignal.timeout(2500) });
+    if (!r.ok) return none;
+    const m = (await r.json())[0];
+    if (!m) return none;
+    const w = weather(m);
+    const v = { weather: wxCode(w.sky), wind_kt: w.wspd == null ? null : Math.min(200, Math.max(0, Math.round(w.wspd))) };
+    wxCache.set(icao, { at: Date.now(), v });
+    return v;
+  } catch { return none; }
+}
 
 // 空港とターミナルはほぼ変わらないので、関数のインスタンスごとに一度だけ読む
 let master: { airports: Airport[]; terminals: Terminal[] } | null = null;
@@ -91,17 +111,20 @@ Deno.serve(async (req) => {
     }
 
     // 初訪問かどうか（印の演出用）
-    const [fa, ft] = await Promise.all([
+    const [fa, ft, wx] = await Promise.all([
       admin.from("checkins").select("id", { count: "exact", head: true }).eq("user_id", userId).eq("airport_id", d.place.airport.id),
       d.place.terminal
         ? admin.from("checkins").select("id", { count: "exact", head: true }).eq("user_id", userId).eq("terminal_id", d.place.terminal.id)
         : Promise.resolve({ count: 1 }),
+      // deno-lint-ignore no-explicit-any
+      wxAt((d.place.airport as any).icao),
     ]);
 
     const { data: ci, error: ie } = await admin.from("checkins").insert({
       user_id: userId, airport_id: d.place.airport.id, terminal_id: d.place.terminal?.id ?? null,
       lat: body.lat, lon: body.lon, accuracy_m: body.acc, position_at: new Date(Number(body.ts)).toISOString(),
       created_at: new Date(d.at).toISOString(), flags: d.flags,
+      weather: wx.weather, wind_kt: wx.wind_kt,
     }).select("id,created_at").single();
     if (ie) throw ie;
 
@@ -120,7 +143,7 @@ Deno.serve(async (req) => {
       ok: true, at: ci.created_at,
       airport_id: d.place.airport.id, terminal_id: d.place.terminal?.id ?? null,
       first_airport: (fa.count ?? 0) === 0, first_terminal: (ft.count ?? 0) === 0,
-      flight, flags: d.flags,
+      flight, flags: d.flags, weather: wx.weather, wind_kt: wx.wind_kt,
     });
   } catch (e) {
     console.error(e);
