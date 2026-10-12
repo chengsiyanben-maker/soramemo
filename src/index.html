@@ -549,6 +549,9 @@ ul.fc{margin:4px 0;padding-left:1.2em;line-height:1.9}
 .opsplus b{display:block;color:var(--gold-text)}
 .opsmap{height:340px;border-radius:12px;overflow:hidden;margin:10px 0;background:var(--sky)}
 .opsmap .leaflet-container{font:inherit}
+.tplane{background:none;border:none}
+.tplane svg{display:block;filter:drop-shadow(0 1px 1px rgba(0,0,0,.35))}
+.tlabel{position:absolute;left:22px;top:2px;white-space:nowrap;font-size:11px;font-weight:700;line-height:1.4;background:#fff;color:#12263A;border:1.5px solid;border-radius:4px;padding:0 4px}
 .rwylabel{background:none;border:none;box-shadow:none;font-weight:800;font-size:12px;color:#1C2B4A;text-shadow:0 0 3px #fff,0 0 3px #fff}
 .opsmap .leaflet-marker-icon.rwylabel{display:none}
 .opsmap.lbl .leaflet-marker-icon.rwylabel{display:block}
@@ -826,6 +829,7 @@ details.dev summary{cursor:pointer;color:var(--sumi);font-size:14px;padding:6px 
   <div class="opsbox" id="opsInfo"></div>
   <div class="opsmap" id="opsMap" role="img" aria-label="羽田空港の滑走路と最終進入の地図"></div>
   <p class="hint" id="opsLegend"></p>
+  <p class="hint" id="trafficNote"></p>
   <p class="hint">公表されている運用のルールと気象通報（METAR）をもとにした推定です。実際の運用は管制の指示で変わり、深夜早朝（23時〜6時）や悪天候のときは異なることがあります。航法には使えません。地図：国土地理院</p>
   <button class="btn2 close" data-close>閉じる</button>
 </div></dialog>
@@ -2960,13 +2964,49 @@ function drawOpsMap(rw, op, plus){
     L.polyline([far, r.thr], { color:shu, weight:3, dashArray:"8 7" }).bindTooltip(`RWY ${id} 最終進入（約10海里）`).addTo(OPS_LAYER); }
   if(plus) for(const id of op.dep){ const r = rw[id], start = r.thr, end = dest(r.opp, r.hdg, 5);
     L.polyline([start, end], { color:"#2B6CB0", weight:3, dashArray:"2 6" }).bindTooltip(`RWY ${id} 離陸（滑走路の向きに上昇）`).addTo(OPS_LAYER); }
-  setTimeout(() => { OPS_MAP.invalidateSize(); const bd = L.featureGroup(OPS_LAYER.getLayers().filter(l => l instanceof L.Polyline)).getBounds(); if(bd.isValid()) OPS_MAP.fitBounds(bd, { padding:[18, 18] }); }, 60);
+  setTimeout(() => { OPS_MAP.invalidateSize(); if(TRAFFIC_FIT) return; const bd = L.featureGroup(OPS_LAYER.getLayers().filter(l => l instanceof L.Polyline)).getBounds(); if(bd.isValid()) OPS_MAP.fitBounds(bd, { padding:[18, 18] }); }, 60);
 }
+/* 今飛んでいる機体と、通ってきた線（OpenSky。10〜20秒遅れ）。地図を開いているあいだ、30秒ごとに読み直す */
+let TRAFFIC_LAYER = null, TRAFFIC_TIMER = null, TRAFFIC_FIT = false;
+const TRAFFIC_COL = { arr:"#A3166B", dep:"#2B6CB0", other:"#5C6B7A" };
+function planeIcon(p){
+  const c = TRAFFIC_COL[p.phase] || TRAFFIC_COL.other, rot = p.hdg == null ? 0 : p.hdg;
+  const label = p.phase === "other" ? "" : `<span class="tlabel" style="border-color:${c}">${esc(p.callsign || "")}${p.alt_ft != null ? " " + p.alt_ft.toLocaleString("ja-JP") + "ft" : ""}</span>`;
+  return L.divIcon({ className:"tplane", iconSize:[22, 22], iconAnchor:[11, 11],
+    html:`<svg viewBox="0 0 24 24" width="22" height="22" style="transform:rotate(${rot}deg)" aria-hidden="true"><path d="M12 2l1.6 7.2 7.4 4.3v2l-7.4-2.1-.4 5.1 2.4 1.8v1.6L12 21l-3.6.9v-1.6l2.4-1.8-.4-5.1L3 15.5v-2l7.4-4.3z" fill="${c}" stroke="#fff" stroke-width=".8"/></svg>${label}` });
+}
+async function loadTraffic(){
+  if(!$("dOps").open || !window.L || !OPS_MAP || !SERVER) return;
+  let d = null;
+  try{ const r = await fetch(SORAMEMO_CONFIG.supabaseUrl.replace(/\/$/, "") + "/functions/v1/airport-traffic?iata=HND", { headers:{ apikey:SORAMEMO_CONFIG.supabaseAnonKey, Authorization:"Bearer " + SORAMEMO_CONFIG.supabaseAnonKey } });
+    if(r.ok) d = await r.json(); }catch(e){}
+  if(!$("dOps").open) return;
+  if(TRAFFIC_LAYER) TRAFFIC_LAYER.remove();
+  TRAFFIC_LAYER = L.layerGroup().addTo(OPS_MAP);
+  if(!d || !Array.isArray(d.planes)){ $("trafficNote").textContent = "今飛んでいる機体を読み込めませんでした。少し待つと、もう一度読み込みます。"; return; }
+  const arr = d.planes.filter(p => p.phase === "arr"), dep = d.planes.filter(p => p.phase === "dep");
+  for(const p of d.planes){
+    const c = TRAFFIC_COL[p.phase] || TRAFFIC_COL.other;
+    if(Array.isArray(p.trail) && p.trail.length > 1 && p.phase !== "other")
+      L.polyline([...p.trail, [p.lat, p.lon]], { color:c, weight:p.phase === "arr" ? 3 : 2.5, opacity:.85 }).addTo(TRAFFIC_LAYER);
+    L.marker([p.lat, p.lon], { icon:planeIcon(p), zIndexOffset:p.phase === "arr" ? 1000 : 0 })
+      .bindTooltip(`${esc(p.callsign || "（便名不明）")}<br>${p.alt_ft != null ? p.alt_ft.toLocaleString("ja-JP") + "ft・" : ""}${p.kt != null ? p.kt + "ノット" : ""}${p.fpm != null && Math.abs(p.fpm) >= 300 ? `・${p.fpm > 0 ? "上昇" : "降下"}中` : ""}`).addTo(TRAFFIC_LAYER);
+  }
+  // はじめて読み込んだときだけ、着陸に向かう機体の線が入るように地図を合わせる
+  if(!TRAFFIC_FIT && arr.length){ TRAFFIC_FIT = true;
+    const pts = arr.flatMap(p => [...(p.trail || []), [p.lat, p.lon]]).concat([[35.5533, 139.7811]]);
+    setTimeout(() => { OPS_MAP.invalidateSize(); OPS_MAP.stop(); OPS_MAP.fitBounds(L.latLngBounds(pts), { padding:[20, 20], maxZoom:11, animate:false }); }, 400); }
+  $("trafficNote").innerHTML = `<b style="color:${TRAFFIC_COL.arr}">━</b> 着陸に向かう機体 ${arr.length}機　<b style="color:${TRAFFIC_COL.dep}">━</b> 離陸して上昇中 ${dep.length}機　${jstHM(d.at)} 時点<br>機体の位置は OpenSky Network（ADS-B）。実際より10〜20秒ほど遅れ、受信できない機体は出ません。`;
+}
+function startTraffic(){ stopTraffic(); TRAFFIC_FIT = false; loadTraffic(); TRAFFIC_TIMER = setInterval(loadTraffic, 30_000); }
+function stopTraffic(){ if(TRAFFIC_TIMER) clearInterval(TRAFFIC_TIMER); TRAFFIC_TIMER = null; }
+$("dOps").addEventListener("close", stopTraffic);
 $("opsOpen").onclick = async () => {
   $("dOps").showModal(); track("ops", "open"); OPS_MODE = "auto";
   $("opsWx").textContent = "気象通報を読み込んでいます…"; renderOps();
   const [m] = await Promise.all([loadMetar(), loadLeaflet().catch(() => {})]);
   OPS_WX = m; $("opsWx").textContent = wxText(m); renderOps();
+  setTimeout(startTraffic, 120);   // 地図ができてから
 };
 document.addEventListener("click", e => { if(e.target.id === "opsJoin"){ track("plus_view", "ops"); $("dOps").close(); $("dSettings").showModal(); } });
 document.addEventListener("click", e => { const b = e.target.closest("[data-ops]"); if(!b) return; OPS_MODE = b.dataset.ops; track("ops", OPS_MODE); renderOps(); });
