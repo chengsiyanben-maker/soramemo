@@ -2908,6 +2908,13 @@ const OPS = {
            depNote:{ "16R":"北日本方面", "22":"西日本・南西方面" },
            app:{ good:{"16L":"RNP", "16R":"RNP"}, bad:{"16L":"ILS", "16R":"ILS"} } },
 };
+// 進入の経路（AIP JAPAN 2026年10月1日版の進入チャートの座標から作成）。n：フィックスの名前（p の先頭から順に対応）、p：[緯度, 経度]（最後は滑走路の進入端）
+// LDA W は、MAPt から先が目で見て曲がる部分（Visual Prescribed Track）。チャートの絵をもとにした、なめらかな線で近似している
+const HND_APP = {"ILS X 34L":{"n":["KAIHO","AVION","ALLIE","AZURE"],"p":[[35.31606,139.77844],[35.41033,139.85153],[35.44375,139.85147],[35.47263,139.83102],[35.5366,139.78567]]},"ILS Z 34L":{"n":["CREAM","ARLON","APOLO"],"p":[[35.29539,140.10344],[35.25703,139.98328],[35.32203,139.93744],[35.5366,139.78567]]},"ILS Z 34R":{"n":["CREAM","CLOAK","CAMEL","CACAO"],"p":[[35.29539,140.10344],[35.26333,140.03561],[35.28839,139.98272],[35.37022,139.92504],[35.54251,139.80315]]},"HIGHWAY 34R":{"n":["CACAO","D9.1","D6.0"],"p":[[35.37022,139.92504],[35.41347,139.8945],[35.45827,139.86282],[35.54251,139.80315]]},"LDA W 22":{"n":["BACON","BIBLO","BEAST","BONDO"],"p":[[35.53194,140.20419],[35.58578,140.18558],[35.60564,140.14292],[35.60536,140.07847],[35.60404,139.84142],[35.60382,139.83526],[35.60324,139.82932],[35.60229,139.82359],[35.60097,139.81809],[35.59929,139.8128],[35.59723,139.80774],[35.59481,139.80289],[35.59202,139.79826],[35.56747,139.77711]]},"ILS 22":{"n":["STEAM","NINJA","NEXUS","NITRO"],"p":[[35.93147,139.95233],[35.86339,139.98219],[35.79692,139.97483],[35.76964,139.95124],[35.56747,139.77711]]},"LDA W 23":{"n":["DATUM","DARIO","DISCO","DANON","DAMBO"],"p":[[35.71656,140.14008],[35.65603,140.21125],[35.59531,140.23761],[35.57169,140.18803],[35.57125,140.07871],[35.57014,139.88255],[35.57,139.87758],[35.56963,139.87277],[35.56904,139.8681],[35.56822,139.86359],[35.56718,139.85922],[35.5659,139.85501],[35.5644,139.85095],[35.56268,139.84704],[35.5406,139.82211]]},"ILS Z 23":{"n":["STEAM","SWEET","SNAKE","SMILE","SAROB"],"p":[[35.93147,139.95233],[35.89589,140.03436],[35.87639,140.11003],[35.74344,140.06692],[35.6814,139.99165],[35.5406,139.82211]]},"RNP 16L":{"n":["SANDY","LYCEE","LAUDA","T6L61","T6L64"],"p":[[35.82154,139.73412],[35.74837,139.68261],[35.69578,139.69418],[35.6495,139.72714],[35.61484,139.75178],[35.56285,139.78871]]},"ILS 16L":{"n":["SANDY","LABAN","LINEN","LORRY","LYCOS"],"p":[[35.82153,139.73411],[35.82142,139.68494],[35.82128,139.635],[35.77847,139.63519],[35.73517,139.66609],[35.56285,139.78871]]},"RNP 16R":{"n":["NATTY","RACER","REMUS","ROWAN","RIPOD","T6R73","T6R74"],"p":[[35.89746,139.7587],[35.86484,139.67622],[35.80209,139.63209],[35.75191,139.63232],[35.70354,139.66686],[35.65441,139.70189],[35.60389,139.73786],[35.55624,139.77172]]},"ILS 16R":{"n":["NATTY","RANGY","RESIN","RUGBY","RONIE"],"p":[[35.89747,139.75869],[35.87544,139.70303],[35.84097,139.616],[35.77428,139.61633],[35.68582,139.67951],[35.55624,139.77172]]}};
+// 運用と天気から、使う進入の経路を選ぶ
+const HND_APP_KEY = { north:{ good:{"34L":"ILS X 34L", "34R":"HIGHWAY 34R"}, bad:{"34L":"ILS Z 34L", "34R":"ILS Z 34R"} },
+  south:{ good:{"22":"LDA W 22", "23":"LDA W 23"}, bad:{"22":"ILS 22", "23":"ILS Z 23"} },
+  city:{ good:{"16L":"RNP 16L", "16R":"RNP 16R"}, bad:{"16L":"ILS 16L", "16R":"ILS 16R"} } };
 const appName = (mode, good, rw) => ((OPS[mode].app || {})[good ? "good" : "bad"] || {})[rw] || "";
 let OPS_MODE = "auto", OPS_WX = null, OPS_MAP = null, OPS_LAYER = null;
 async function loadLeaflet(){
@@ -2937,11 +2944,10 @@ function renderOps(){
     <br>離陸：${op.dep.map(r => `<span class="rw dep">${r}</span>${op.depNote && op.depNote[r] ? `<small>${op.depNote[r]}</small>` : ""}`).join(" ")}
     <br><span class="hint">${op.note}${mode === "north" && est.northNew && OPS_MODE === "auto" ? "　この時間帯は、C滑走路（34R）から北へ離陸して荒川沿いを上昇する新しいルートが使われることがあります。" : ""}</span>`
     ;
-  $("opsLegend").textContent = plus ? "赤の点線は使っている着陸の滑走路の最終進入（延長線上の約18km）、青の点線は離陸の向きです。LDA・RNP・海ほたる経由などの曲がった進入経路は、航空路誌（AIP）のチャートの座標を確かめてから表示します。"
-    : "地図には滑走路の位置を表示しています。";
-  drawOpsMap(rw, op, plus);
+  $("opsLegend").textContent = "太い点線は、いまの運用と天気で使うと推定した進入の経路、白い点はその上のフィックスです。経路は、AIP JAPAN（2026年10月1日版）の進入チャートの座標をもとに そらメモ が作ったもので、国が作ったものではなく、最新でない場合があります。実際は管制の指示で途中を短くすることが多く、LDA の最後の曲がる部分は目で見て飛ぶため、線はおおよそです。航空機の運航には使えません。青の点線は離陸の向きです。";
+  drawOpsMap(rw, op, plus, mode, est.good);
 }
-function drawOpsMap(rw, op, plus){
+function drawOpsMap(rw, op, plus, mode, good){
   if(!window.L || !$("dOps").open) return;
   if(!OPS_MAP){
     OPS_MAP = L.map("opsMap", { zoomControl:true, attributionControl:true }).setView([35.60, 139.80], 10);
@@ -2959,10 +2965,17 @@ function drawOpsMap(rw, op, plus){
     L.polyline([r1.end, r2.end], { color:"#1C2B4A", weight:5, opacity:.85 }).bindTooltip(`${name}（${a}/${b}）`).addTo(OPS_LAYER);
     for(const r of [r1, r2]) L.marker(dest(r.end, (r.hdg + 180) % 360, 0.35), { icon: L.divIcon({ className:"rwylabel", html:r.id, iconSize:[30, 14] }) }).addTo(OPS_LAYER);
   }
-  // 進入・離陸の線は そらメモ＋（無料は滑走路の位置まで）
-  if(plus) for(const id of op.arr){ const r = rw[id], far = dest(r.thr, (r.hdg + 180) % 360, 18.52);
-    L.polyline([far, r.thr], { color:shu, weight:3, dashArray:"8 7" }).bindTooltip(`RWY ${id} 最終進入（約10海里）`).addTo(OPS_LAYER); }
-  if(plus) for(const id of op.dep){ const r = rw[id], start = r.thr, end = dest(r.opp, r.hdg, 5);
+  // 進入・離陸の線（いまは全員に見せる。10月13日に そらメモ＋ の制限を外した）
+  for(const id of op.arr){
+    const key = ((HND_APP_KEY[mode] || {})[good ? "good" : "bad"] || {})[id], a = key && HND_APP[key];
+    if(!a){ const r = rw[id], far = dest(r.thr, (r.hdg + 180) % 360, 18.52);
+      L.polyline([far, r.thr], { color:shu, weight:3, dashArray:"8 7" }).bindTooltip(`RWY ${id} 最終進入（約10海里）`).addTo(OPS_LAYER); continue; }
+    const name = `RWY ${id} ${appName(mode, good, id)}`;
+    L.polyline(a.p, { color:shu, weight:3, dashArray:"8 7", opacity:.9 }).bindTooltip(`${name}（AIP の進入経路）`).addTo(OPS_LAYER);
+    a.n.forEach((n, i) => { if(/^D\d/.test(n)) return;
+      L.circleMarker(a.p[i], { radius:3, color:shu, weight:1.5, fillColor:"#fff", fillOpacity:1 }).bindTooltip(`${n}（${name}）`).addTo(OPS_LAYER); });
+  }
+  for(const id of op.dep){ const r = rw[id], start = r.thr, end = dest(r.opp, r.hdg, 5);
     L.polyline([start, end], { color:"#2B6CB0", weight:3, dashArray:"2 6" }).bindTooltip(`RWY ${id} 離陸（滑走路の向きに上昇）`).addTo(OPS_LAYER); }
   setTimeout(() => { OPS_MAP.invalidateSize(); if(TRAFFIC_FIT) return; const bd = L.featureGroup(OPS_LAYER.getLayers().filter(l => l instanceof L.Polyline)).getBounds(); if(bd.isValid()) OPS_MAP.fitBounds(bd, { padding:[18, 18] }); }, 60);
 }
