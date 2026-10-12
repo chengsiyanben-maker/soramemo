@@ -3009,7 +3009,7 @@ async function loadTraffic(){
   if(!TRAFFIC_FIT && arr.length){ TRAFFIC_FIT = true;
     const pts = arr.flatMap(p => [...(p.trail || []), [p.lat, p.lon]]).concat([[35.5533, 139.7811]]);
     setTimeout(() => { OPS_MAP.invalidateSize(); OPS_MAP.stop(); OPS_MAP.fitBounds(L.latLngBounds(pts), { padding:[20, 20], maxZoom:11, animate:false }); }, 400); }
-  $("trafficNote").innerHTML = `<b style="color:${TRAFFIC_COL.arr}">━</b> 着陸に向かう機体 ${arr.length}機　<b style="color:${TRAFFIC_COL.dep}">━</b> 離陸して上昇中 ${dep.length}機　${jstHM(d.at)} 時点<br>機体の位置は <a href="https://adsb.lol" target="_blank" rel="noopener">adsb.lol</a>（有志の受信機による ADS-B のオープンデータ、ODbL）。少し遅れることがあり、受信できない機体は出ません。通ってきた線は、地図を開いている人がいるあいだに少しずつ伸びます。`;
+  $("trafficNote").innerHTML = `<b style="color:${TRAFFIC_COL.arr}">━</b> 着陸に向かう機体 ${arr.length}機　<b style="color:${TRAFFIC_COL.dep}">━</b> 離陸して上昇中 ${dep.length}機　${jstHM(d.at)} 時点<br>機体の位置は <a href="https://adsb.lol" target="_blank" rel="noopener">adsb.lol</a>（有志の受信機による ADS-B のオープンデータ、ODbL）。少し遅れることがあり、受信できない機体は出ません。通ってきた線は、30秒ごとの記録から、最大20分ぶんを描いています。`;
 }
 function startTraffic(){ stopTraffic(); TRAFFIC_FIT = false; loadTraffic(); TRAFFIC_TIMER = setInterval(loadTraffic, 30_000); }
 function stopTraffic(){ if(TRAFFIC_TIMER) clearInterval(TRAFFIC_TIMER); TRAFFIC_TIMER = null; }
