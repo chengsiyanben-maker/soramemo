@@ -1,0 +1,31 @@
+# 毎晩の照合（運航確認）と、実際に飛んだ航路の取り込み。
+# OpenSky は Supabase のサーバーから届かないため、GitHub の実行環境で動かす（日本時間 3:30）。
+# 必要な設定（リポジトリの Settings → Secrets and variables → Actions）：
+#   Secrets  ：SUPABASE_SERVICE_ROLE_KEY、OPENSKY_CLIENT_ID、OPENSKY_CLIENT_SECRET
+#   Variables：SUPABASE_PROJECT_REF（反映の仕組みと同じもの）
+name: 毎晩の照合
+on:
+  schedule:
+    - cron: "30 18 * * *"
+  workflow_dispatch:
+concurrency:
+  group: verify-flights
+  cancel-in-progress: false
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      SUPABASE_URL: https://${{ vars.SUPABASE_PROJECT_REF }}.supabase.co
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      OPENSKY_CLIENT_ID: ${{ secrets.OPENSKY_CLIENT_ID }}
+      OPENSKY_CLIENT_SECRET: ${{ secrets.OPENSKY_CLIENT_SECRET }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - name: 照合する
+        run: deno run --node-modules-dir=none --allow-net --allow-env --allow-read tools/verify_flights.ts
