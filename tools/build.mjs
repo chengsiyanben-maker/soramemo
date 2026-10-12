@@ -11,7 +11,7 @@ import { join } from "node:path";
 import { minify } from "terser";
 import { minify as cssMinify } from "csso";
 
-let FONT_FILE = null;
+let FONT_FILES = [];
 const files = ["index.html"];   // 運営コンソール（ops-console/）は公開しないので、ここでは作らない
 for (const f of files) {
   const raw = readFileSync(new URL(`../src/${f}`, import.meta.url), "utf8");
@@ -38,12 +38,15 @@ for (const f of files) {
     const dir = mkdtempSync(join(tmpdir(), "font-")), list = join(dir, "chars.txt");
     writeFileSync(list, [...chars].join(""));
     const fontDir = new URL("../web/fonts/", import.meta.url).pathname;
-    const name = execFileSync("python3", [new URL("./build_font.py", import.meta.url).pathname, list, fontDir], { encoding: "utf8" }).trim();
-    const face = `@font-face{font-family:"Shippori Mincho";src:url(fonts/${name}) format("woff2");font-weight:500 900;font-display:swap}`;
-    out = out.replace(/<link href="https:\/\/fonts\.googleapis\.com\/css2[^>]*>/, `<link rel="preload" href="fonts/${name}" as="font" type="font/woff2" crossorigin><style>${face}</style>`);
+    // 明朝体（見出し・印）と、ドット文字（案内板の数字・空港コード）の2つを作る
+    const make = (kind) => execFileSync("python3", [new URL("./build_font.py", import.meta.url).pathname, list, fontDir, kind], { encoding: "utf8" }).trim();
+    const name = make("mincho"), dot = make("dot");
+    const face = `@font-face{font-family:"Shippori Mincho";src:url(fonts/${name}) format("woff2");font-weight:500 900;font-display:swap}`
+      + `@font-face{font-family:"DotGothic16";src:url(fonts/${dot}) format("woff2");font-weight:400;font-display:swap}`;
+    out = out.replace(/<link href="https:\/\/fonts\.googleapis\.com\/css2[^>]*>/, `<link rel="preload" href="fonts/${name}" as="font" type="font/woff2" crossorigin><link rel="preload" href="fonts/${dot}" as="font" type="font/woff2" crossorigin><style>${face}</style>`);
     out = out.replace(/<link rel="preconnect" href="https:\/\/fonts\.(googleapis|gstatic)\.com"[^>]*>/g, "");
-    FONT_FILE = name;
-    console.log(`fonts/${name}: ${chars.size}文字 ${(readFileSync(join(fontDir, name)).length / 1024).toFixed(0)}KB`);
+    FONT_FILES = [name, dot];
+    for (const n of FONT_FILES) console.log(`fonts/${n}: ${chars.size}文字 ${(readFileSync(join(fontDir, n)).length / 1024).toFixed(0)}KB`);
   }
   // ページの防御設定（CSP）：このファイルに書いたスクリプト（ハッシュで指定）と、決まった配信元のものだけを動かす。
   // 外から差し込まれたスクリプトや、HTMLに直接書いた onclick などは動かない。
@@ -68,7 +71,7 @@ for (const f of files) {
 {
   const page = readFileSync(new URL("../web/index.html", import.meta.url));
   const ver = createHash("sha256").update(page).update(readFileSync(new URL("../web/config.js", import.meta.url))).digest("hex").slice(0, 10);
-  const sw = readFileSync(new URL("../src/sw.js", import.meta.url), "utf8").replace("__BUILD__", ver).replace('"./tokushoho.html"]', `"./tokushoho.html"${FONT_FILE ? `, "./fonts/${FONT_FILE}"` : ""}]`);
+  const sw = readFileSync(new URL("../src/sw.js", import.meta.url), "utf8").replace("__BUILD__", ver).replace('"./tokushoho.html"]', `"./tokushoho.html"${FONT_FILES.map((n) => `, "./fonts/${n}"`).join("")}]`);
   writeFileSync(new URL("../web/sw.js", import.meta.url), sw);
   console.log(`sw.js: 版 ${ver}`);
 }

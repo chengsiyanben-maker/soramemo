@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#EAF0F5">
+<meta name="theme-color" content="#0B0D10">
 <title>そらメモ</title>
 <link rel="manifest" href="manifest.webmanifest">
 <script src="config.js"></script>
@@ -13,11 +13,11 @@
 <meta name="apple-mobile-web-app-title" content="そらメモ">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="description" content="国内の空港でチェックインして、印と路線を集める位置情報ゲーム">
-<script>try{var p=localStorage.getItem("soramemo.palette");if(p==="sora"||p==="akashiro")document.documentElement.setAttribute("data-palette",p);}catch(e){}</script>
+<script>var p="board";try{p=localStorage.getItem("soramemo.palette")||"board";}catch(e){}if(p==="sora"||p==="akashiro"||p==="board")document.documentElement.setAttribute("data-palette",p);</script>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><circle cx='32' cy='32' r='28' fill='none' stroke='%23111111' stroke-width='5'/><path d='M16 36l32-12-8 20-6-8z' fill='%23111111'/></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@700;800&family=DotGothic16&display=swap" rel="stylesheet">
 <style>
 :root{
   --sky:#F4F4F4; --paper:#FFFFFF; --ink:#111111; --sumi:#5C5C5C; --line:#D6D6D6;
@@ -45,6 +45,48 @@
   --shu:#233F9A; --shu-wash:#CDEFFA; --gold:#A9822E; --dot:#00B5F0;
   --shu-text:#233F9A; --gold-text:#856620; --on-shu:#FFFFFF; --gold-badge:#856620; --on-gold:#FFFFFF;
  color-scheme:light;}
+/* 案内板（標準）：夜の空港の出発案内板。黒地に琥珀色、数字と空港コードはドット文字 */
+:root{--dotfont:"DotGothic16","Osaka-Mono",ui-monospace,monospace}
+:root[data-palette="board"]{
+  --sky:#0B0D10; --paper:#121418; --ink:#E8ECF1; --sumi:#A7B0BC; --line:#262B33;
+  --shu:#FFB547; --shu-wash:#1C2027; --gold:#E0B85C; --dot:#3A414C;
+  --shu-text:#FFB547; --gold-text:#E0B85C; --on-shu:#0B0D10; --gold-badge:#E0B85C; --on-gold:#0B0D10;
+  --mil:#7FA6D9; --glider:#5CC1F0; --field:#7BC48E; --go:#7EE2A8; --stop:#E5484D;
+  color-scheme:dark;}
+[data-palette="board"] .brand{font-family:var(--dotfont);font-weight:400;color:var(--shu);letter-spacing:.12em}
+[data-palette="board"] h2,[data-palette="board"] .dlg h3,[data-palette="board"] .apnow .nowhead h3{font-family:var(--gothic);font-weight:800;letter-spacing:.08em}
+[data-palette="board"] .nearest .name{font-family:var(--dotfont);font-weight:400;color:#fff;letter-spacing:.04em}
+[data-palette="board"] .nearest .name.idle{color:var(--sumi)}
+[data-palette="board"] .cta{font-weight:900;letter-spacing:.16em;box-shadow:none}
+[data-palette="board"] .tally{background:var(--paper);border:1px solid var(--line);border-radius:12px}
+[data-palette="board"] .tally .n{font-family:var(--dotfont);font-weight:400;color:var(--shu);letter-spacing:.04em}
+[data-palette="board"] .flight .route,[data-palette="board"] .flight .km{font-family:var(--dotfont);font-weight:400}
+[data-palette="board"] .flight .route{color:#fff}
+[data-palette="board"] .login input{background:var(--shu-wash)}
+[data-palette="board"] :is(.seg button,.yrtabs button,.nowtabs button,.nowterms button,.chip)[aria-pressed="true"],[data-palette="board"] .modesw button[aria-selected="true"]{background:var(--shu);color:var(--on-shu);border-color:var(--shu)}
+[data-palette="board"] .yrgrid{background:var(--paper)}
+[data-palette="board"] .yrgrid>*{box-shadow:0 0 0 .5px var(--line)}
+[data-palette="board"] nav.tabs button[aria-current="page"]{color:var(--shu)}
+[data-palette="board"] .stampbig,[data-palette="board"] .cell .slot{filter:drop-shadow(0 0 6px rgba(255,181,71,.18))}
+/* いちばん近い空港のコード：パタパタの板。案内板のときだけ出す */
+.flap{display:none}
+[data-palette="board"] .flap:not(:empty){display:flex;gap:6px;margin:6px 0 8px}
+.flap i{font-style:normal;width:54px;height:70px;border-radius:6px;background:#1C2027;color:var(--shu);font-family:var(--dotfont);font-size:46px;line-height:70px;text-align:center;position:relative;box-shadow:inset 0 -2px 0 #0B0D10}
+.flap i::after{content:"";position:absolute;left:0;right:0;top:34px;height:2px;background:#0B0D10}
+/* 空港の今の便：案内板では、発着の表示らしく */
+[data-palette="board"] .flist li{background:var(--paper);border:1px solid var(--line)}
+[data-palette="board"] .flist .tm b,[data-palette="board"] .flist .pl b{font-family:var(--dotfont);font-weight:400}
+[data-palette="board"] .flist .pl b{color:#fff}
+[data-palette="board"] .fst{font-family:var(--dotfont);font-weight:400;border-radius:4px}
+[data-palette="board"] .fst.ok{color:var(--go);border-color:#2F5E45}
+[data-palette="board"] .fst.board{background:var(--go);color:#0B0D10;border-color:transparent}
+[data-palette="board"] .fst.cancel{background:var(--stop);color:#fff}
+[data-palette="board"] .wxgrid b{font-family:var(--dotfont);font-weight:400;color:#fff}
+[data-palette="board"] .apnow{background:var(--paper);border:1px solid var(--line)}
+[data-palette="board"] .wxgrid div,[data-palette="board"] .nowempty{background:var(--shu-wash)}
+/* 地図は、どの配色でも紙の航空図（方眼・赤紫の路線・青の空港） */
+.mapbox{--chart-bg:#F7F9F4;--chart-land:#E9EFE4;--chart-coast:#9FB3A4;--chart-route:#A3166B;--chart-apt:#1F4E79;--chart-off:#B8C5BC;
+  background-color:var(--chart-bg);background-image:repeating-linear-gradient(0deg,transparent 0 31px,#DCE5DA 31px 32px),repeating-linear-gradient(90deg,transparent 0 31px,#DCE5DA 31px 32px);color:#12263A;border:1px solid var(--line)}
 .swatches{display:flex;gap:10px}
 .swatch{display:flex;flex-direction:column;align-items:center;gap:4px;background:none;border:none;padding:2px;font-size:12px;color:var(--sumi)}
 .swatch i{width:34px;height:34px;border-radius:50%;border:3px solid var(--paper);box-shadow:0 0 0 1.5px var(--line)}
@@ -119,7 +161,7 @@ h3{font-size:14px;color:var(--sumi);font-weight:500;margin:22px 0 10px}
 .empty-slot text{fill:var(--dot);opacity:.75;font-family:var(--mincho);font-weight:700}
 
 /* records */
-.mapbox{background:var(--paper);border-radius:14px;padding:10px;margin-top:12px}
+.mapbox{border-radius:14px;padding:10px;margin-top:12px}
 .mapbox svg{width:100%;height:auto;display:block}
 .flight{display:grid;grid-template-columns:1fr auto;gap:2px 12px;padding:14px 0;border-bottom:1px solid var(--line)}
 .flight .route{font-family:var(--mincho);font-weight:700;font-size:17px}
@@ -523,6 +565,7 @@ details.dev summary{cursor:pointer;color:var(--sumi);font-size:14px;padding:6px 
     <div class="titlepill" id="titlePill" hidden></div>
     <div class="nearest">
       <div class="label" id="nearLabel">いちばん近い空港</div>
+      <div class="flap" id="nearCode" aria-hidden="true"></div>
       <div class="name idle" id="nearName">空港に着いたら、印を押そう</div>
       <div class="dist" id="nearDist">チェックインを押すと、現在地からいちばん近い空港を調べます。</div>
     </div>
@@ -783,7 +826,8 @@ details.dev summary{cursor:pointer;color:var(--sumi);font-size:14px;padding:6px 
     <div class="set-row" id="baseRow"><div>拠点の空港<small>搭乗券の出発地に使います。初期値は最初に押した空港です。</small></div><select id="baseSel" aria-label="拠点の空港"></select></div>
     <div class="set-row"><div>色<small>アプリと共有画像の色を選べます。</small></div>
       <div class="swatches" role="group" aria-label="色">
-        <button class="swatch" data-pal="mono" aria-pressed="true"><i style="background:#111111"></i>白黒</button>
+        <button class="swatch" data-pal="board" aria-pressed="true"><i style="background:#0B0D10;box-shadow:0 0 0 1.5px var(--line),inset 0 0 0 9px #0B0D10,inset 0 0 0 30px #FFB547"></i>案内板</button>
+        <button class="swatch" data-pal="mono" aria-pressed="false"><i style="background:#111111"></i>白黒</button>
         <button class="swatch" data-pal="sora" aria-pressed="false"><i style="background:#233F9A"></i>空</button>
         <button class="swatch" data-pal="akashiro" aria-pressed="false"><i style="background:#D63131"></i>赤白</button>
       </div></div>
@@ -1340,6 +1384,7 @@ function demoNow(a){
 function showNearest(n){
   $("nearLabel").textContent = "いちばん近い空港";
   $("nearName").textContent = placeName(n.a, n.within ? n.term : null); $("nearName").classList.remove("idle");
+  const cd = code(n.a); $("nearCode").innerHTML = /^[A-Z0-9]{3,4}$/.test(cd) ? [...cd].map(ch => `<i>${ch}</i>`).join("") : "";
   const ok = n.within, el = $("nearDist");
   el.classList.toggle("ok", ok);
   el.innerHTML = ok ? `判定範囲の中にいます（<b>${n.km < 1 ? Math.round(n.km*1000)+"m" : n.km.toFixed(1)+"km"}</b>）` : `ここから <b>${n.km.toFixed(1)}km</b>（判定範囲 ${n.a.radius/1000}km）`
@@ -1379,18 +1424,18 @@ function showStamp(a, t, first, flight, term, firstTerm){
 function proj(a){ const x=(a.lon-122.5)*16.4*0.82+20, y=(46.2-a.lat)*17.6+14; return [x,y]; }
 const JP_OUTLINE = "M117.9 267.4L118.2 268.4L116.8 270.6L116.2 269.9ZM143.2 255.5L138.9 275.0L137.2 273.5L135.3 273.6L134.5 275.1L136.1 276.6L133.5 279.4L129.7 281.5L131.6 275.5L130.2 271.9L128.8 271.2L130.1 270.6L131.1 271.6L131.3 269.0L129.5 268.9L128.0 272.5L128.4 275.6L129.7 276.7L128.7 278.8L126.9 277.1L123.8 277.2L122.5 274.3L123.9 274.8L125.4 271.6L123.2 267.6L124.0 267.1L123.3 262.3L125.2 261.8L127.8 258.0L128.5 254.3L129.8 252.5L126.9 253.0L129.3 251.5L129.1 250.1L126.8 247.7L126.5 244.8L124.1 243.0L122.6 244.2L123.8 246.8L122.3 248.5L125.4 248.8L125.7 251.8L123.1 253.5L122.6 251.9L123.7 250.7L122.1 249.9L120.3 250.5L117.4 253.9L119.0 251.2L116.0 247.6L116.6 244.7L117.6 245.5L117.4 246.5L118.5 246.7L118.1 248.5L120.9 249.0L120.1 246.0L117.5 245.2L117.0 243.5L116.4 244.5L116.2 243.0L114.8 242.3L115.2 239.8L116.5 239.3L118.9 241.4L119.1 239.3L118.0 238.3L119.1 238.5L118.9 236.6L121.1 238.5L123.1 236.9L122.1 236.2L123.7 234.6L124.8 236.2L126.1 235.7L126.2 234.5L125.6 235.0L124.8 234.3L126.8 233.7L127.4 231.3L131.0 229.7L133.1 230.6L134.4 229.3L133.8 232.0L135.7 235.3L139.3 236.2L141.3 234.4L143.3 234.6L144.2 237.8L142.3 240.2L141.1 239.9L141.2 241.5L146.4 241.6L145.2 244.1L146.6 244.1L146.1 245.0L147.7 244.7L146.5 246.6L148.8 247.3L143.8 253.7L144.2 255.3ZM183.3 231.3L184.8 231.6L178.9 236.2L177.0 242.2L173.6 237.6L171.1 236.9L165.1 239.9L164.2 243.5L161.2 246.5L160.6 248.9L161.2 251.4L160.1 250.2L156.2 250.7L157.3 247.9L155.3 247.4L154.5 248.2L154.1 245.6L152.9 246.0L154.3 244.0L153.1 242.7L154.3 243.3L155.1 242.3L154.3 241.5L154.8 240.8L152.8 240.7L153.4 238.5L151.9 238.1L147.9 240.2L156.9 233.7L157.3 230.4L160.1 227.5L159.8 226.6L160.4 226.2L162.9 229.9L165.5 228.9L168.1 229.3L169.8 227.3L169.8 225.5L168.7 224.2L170.6 224.6L173.8 222.1L175.7 222.6L176.6 221.8L176.9 223.0L177.6 222.5L180.6 225.1L183.4 224.5L182.6 228.2L184.0 229.6ZM166.9 220.9L165.0 223.1L165.4 222.3L164.5 221.2L163.7 223.8L162.2 224.2L162.2 223.1L163.5 222.5L162.5 221.9L162.0 222.9L159.0 223.2L156.6 225.2L155.2 225.3L154.7 222.5L152.4 222.6L150.7 224.5L149.9 231.5L148.5 232.6L149.1 231.0L145.8 228.7L144.8 229.3L145.4 228.3L144.3 227.7L142.3 228.1L142.1 229.0L140.8 228.2L140.2 229.1L139.6 228.0L137.8 230.0L134.8 227.9L133.2 230.2L132.7 229.8L132.9 222.7L134.8 222.0L133.4 221.8L133.8 221.2L136.6 222.2L136.6 221.2L137.7 221.0L138.1 221.5L137.4 221.4L137.1 222.2L139.9 221.3L142.3 217.1L145.9 216.1L153.2 208.0L156.3 205.9L156.3 203.4L160.8 202.0L162.4 200.5L165.4 201.0L164.8 202.4L166.6 203.1L169.0 201.7L177.8 201.5L181.9 199.3L187.1 199.8L191.2 197.5L192.2 199.3L190.6 201.5L191.4 200.7L192.4 203.3L193.5 202.6L192.6 201.7L194.3 200.5L195.2 202.4L196.8 201.6L196.5 202.6L197.8 202.5L198.0 201.1L198.8 201.8L199.3 201.7L199.0 199.8L201.3 200.0L201.0 198.3L201.8 197.6L202.5 199.5L202.9 197.5L201.1 193.5L203.2 189.1L206.7 186.6L210.8 180.7L211.9 176.3L210.6 173.3L212.1 169.3L218.4 166.7L219.7 167.0L219.7 168.1L218.4 168.4L218.1 170.8L216.5 170.9L215.2 172.7L214.3 171.8L213.1 174.6L214.7 175.1L215.6 174.2L215.1 178.8L219.0 180.2L221.0 177.1L231.7 172.7L235.8 169.3L240.0 161.4L247.6 155.7L248.5 150.3L252.3 143.9L254.2 136.1L255.3 135.0L255.7 126.2L254.3 124.9L252.1 125.6L251.3 123.3L253.6 123.4L255.5 119.0L255.7 116.9L253.5 112.4L256.0 109.6L257.0 110.0L259.0 108.8L259.7 105.0L260.3 105.8L260.8 105.1L258.7 103.3L259.6 102.9L259.9 100.8L261.6 102.3L262.7 101.5L263.8 102.1L264.8 108.1L266.8 107.6L267.3 105.3L270.5 107.8L272.5 102.8L271.6 100.9L269.6 102.3L265.6 103.0L267.5 96.0L272.5 99.3L275.0 97.9L274.0 105.0L274.7 111.3L280.0 118.7L280.1 121.9L281.6 123.2L282.3 127.1L281.7 130.0L282.7 129.5L283.2 131.0L281.6 132.6L283.0 132.5L281.0 134.9L282.0 134.5L280.9 135.9L281.1 137.7L280.1 138.0L281.1 139.0L279.8 139.1L280.2 140.3L278.6 140.1L278.6 141.6L277.4 141.0L277.8 143.3L276.7 142.8L275.8 144.8L276.4 145.9L275.0 146.7L276.0 147.2L275.1 148.3L276.2 149.2L275.1 150.8L276.2 151.5L275.9 153.6L274.5 151.6L272.9 151.1L271.1 152.6L269.9 152.0L268.3 155.3L267.7 158.9L269.1 163.1L268.9 173.6L268.3 176.5L266.2 177.9L265.3 180.0L262.9 188.5L264.0 193.3L267.2 198.4L264.2 199.0L261.8 201.2L260.5 204.4L260.4 208.0L257.2 209.0L254.4 212.8L252.1 211.9L253.6 211.1L252.9 208.3L253.5 206.8L252.4 205.5L256.7 201.1L255.1 199.4L252.5 200.5L252.2 199.6L252.5 202.1L250.5 203.1L250.6 205.9L251.9 206.7L251.1 208.6L250.2 208.8L249.2 205.7L244.4 206.5L242.9 209.8L243.8 213.4L241.9 215.8L241.8 217.3L239.7 218.2L238.5 216.6L238.7 211.5L239.0 210.7L240.6 210.6L239.2 209.0L235.9 209.4L235.4 211.5L233.4 212.6L231.3 216.2L231.6 218.3L228.0 217.0L222.4 216.8L215.2 218.5L216.0 217.0L216.5 217.7L219.6 215.9L218.8 214.5L215.2 214.9L214.4 214.1L214.7 212.5L213.9 215.1L214.6 216.5L213.1 215.7L212.6 211.9L213.5 209.6L213.0 210.4L212.7 209.7L212.8 210.5L210.4 211.4L208.5 216.7L209.0 218.1L213.9 221.1L213.6 224.0L212.8 224.4L212.2 224.3L212.9 223.3L211.0 223.5L211.1 222.8L206.1 225.5L205.7 227.1L204.5 227.4L205.2 229.2L204.7 228.8L204.6 229.8L203.0 230.6L201.0 235.9L198.3 238.7L198.4 237.8L194.1 236.6L192.5 234.5L193.4 233.8L189.7 230.6L188.9 230.8L189.1 229.1L190.3 228.3L189.4 227.5L189.8 226.3L190.7 226.1L188.9 224.0L193.1 220.2L193.7 216.5L191.5 216.4L191.4 217.3L188.7 217.7L184.7 215.2L181.3 214.9L179.4 216.3L177.5 215.9L178.4 216.4L176.6 218.2L174.6 218.0L173.8 218.4L175.3 218.5L173.8 220.8L171.9 220.9L170.9 219.4ZM330.4 64.4L333.7 63.7L331.0 64.9L329.7 67.3L324.4 68.1L324.8 68.9L322.6 69.5L322.8 70.5L321.2 70.7L319.9 69.5L319.1 71.7L315.4 71.4L313.5 70.3L307.6 73.1L303.4 77.3L300.4 82.3L298.9 89.2L295.1 86.1L288.4 83.1L279.8 77.4L274.5 78.0L268.5 82.6L265.2 78.0L262.1 77.7L259.7 80.3L259.3 83.4L262.7 86.1L264.9 85.6L271.5 91.4L268.9 93.0L266.4 92.0L264.9 92.4L265.1 91.2L264.2 91.0L263.5 92.6L261.4 93.5L261.2 96.2L259.0 97.0L258.2 98.5L255.9 97.7L255.1 95.3L257.0 91.2L257.3 88.2L252.5 83.6L253.2 76.9L256.1 75.7L257.8 73.7L259.1 74.6L262.3 70.4L259.9 66.6L260.2 64.6L261.9 63.8L266.0 66.9L268.9 66.3L269.1 67.2L271.1 67.8L274.5 64.7L273.3 57.8L277.4 53.8L277.6 47.8L279.4 42.2L278.9 37.1L276.5 31.5L277.7 27.2L278.1 28.0L279.9 27.7L281.5 26.0L295.4 42.4L301.1 47.1L306.1 49.4L304.8 49.5L305.5 50.7L310.7 50.4L311.2 52.4L312.4 50.6L314.2 53.5L319.1 54.2L327.2 46.6L327.6 48.3L323.5 56.7L327.9 64.9L326.1 64.6L329.5 66.3ZM37.1 397.4L39.3 398.3L38.5 400.2L35.7 399.5L36.7 399.1ZM44.6 394.4L43.4 398.3L42.1 398.7L41.2 397.1L43.0 396.9ZM57.1 389.1L59.6 391.7L57.1 391.8ZM98.5 355.5L95.8 359.8L92.0 361.8L92.9 364.1L91.7 364.0L91.2 367.1L89.3 368.0L90.2 362.0L93.4 359.6L92.3 357.3L94.7 358.2L97.4 353.9ZM103.4 343.9L102.2 345.5L101.1 345.5L101.1 344.6ZM106.7 335.8L107.8 338.3L106.7 339.9L106.1 336.2ZM109.8 331.0L112.1 332.8L110.4 332.6ZM116.9 326.2L113.4 329.2L113.7 330.5L112.1 331.5L112.5 332.2L111.0 330.3L109.4 329.9L111.1 329.8L111.0 328.5L113.8 326.9L114.4 327.4L115.8 325.8L116.1 326.6L116.5 325.3ZM129.9 292.5L129.0 294.7L127.4 295.1L125.9 292.2L127.6 290.9ZM135.0 284.3L135.1 288.4L133.8 292.6L132.6 293.1L132.3 290.8ZM123.8 255.9L127.2 254.9L125.7 257.3L125.6 256.5L124.1 257.0ZM123.0 254.3L123.6 258.0L120.8 260.6L120.3 259.5L121.7 258.5L120.6 258.1L120.9 254.5ZM104.8 249.8L106.1 252.6L104.4 252.5L104.4 253.9L102.0 253.1L102.9 250.1L103.4 250.8ZM108.7 246.5L109.9 246.6L108.3 249.5L107.1 247.2L108.5 245.9L108.9 243.4ZM114.9 239.1L114.0 242.0L113.0 243.2L112.0 243.2L112.9 242.9L113.4 240.2ZM117.7 231.5L117.1 234.0L116.2 233.3L116.7 231.0ZM150.9 231.0L150.8 229.6L152.1 230.5L154.1 229.8L152.8 231.5ZM155.2 227.5L153.9 227.2L154.9 225.6L155.5 226.6ZM111.6 223.8L111.1 226.4L109.7 226.8L110.2 222.9ZM188.1 218.0L186.7 222.2L187.5 224.0L184.5 225.4L183.8 222.9ZM113.7 216.4L112.3 221.6L112.9 222.5L112.0 223.4L111.6 222.0L110.5 222.5L111.6 220.6L111.3 218.7L111.8 217.3ZM246.7 214.7L248.0 215.7L247.8 216.8L246.6 216.0ZM166.1 188.7L165.6 190.7L163.8 189.9L165.1 187.5ZM234.6 157.1L236.2 157.0L235.2 160.0L231.4 161.8L233.1 158.9L231.8 158.7L231.7 157.1L235.4 152.6ZM249.3 83.6L248.7 86.1L248.0 87.0L247.5 84.9ZM273.2 32.1L272.2 33.4L270.6 31.4L271.5 30.7ZM268.3 27.0L269.8 27.6L269.3 30.5ZM179.6 219.0L179.3 221.1L176.9 220.5L177.0 219.6Z";
 function renderMap(){
-  const v = shownAirports(), parts = [`<path d="${JP_OUTLINE}" fill="var(--sky)" stroke="var(--line)" stroke-width=".8" stroke-linejoin="round"/>`];
+  const v = shownAirports(), parts = [`<path d="${JP_OUTLINE}" fill="var(--chart-land)" stroke="var(--chart-coast)" stroke-width=".8" stroke-linejoin="round"/>`];
   for(const f of dedupFlights()){
     const [x1,y1]=proj(BY[f.from]), [x2,y2]=proj(BY[f.to]);
     const mx=(x1+x2)/2, my=(y1+y2)/2, dx=x2-x1, dy=y2-y1, L=Math.hypot(dx,dy)||1, k=Math.min(40, L*0.18);
-    parts.push(`<path d="M${x1.toFixed(1)} ${y1.toFixed(1)}Q${(mx-dy/L*k).toFixed(1)} ${(my+dx/L*k).toFixed(1)} ${x2.toFixed(1)} ${y2.toFixed(1)}" fill="none" stroke="var(--shu)" stroke-width="1.6" stroke-linecap="round" opacity=".85"/>`);
+    parts.push(`<path d="M${x1.toFixed(1)} ${y1.toFixed(1)}Q${(mx-dy/L*k).toFixed(1)} ${(my+dx/L*k).toFixed(1)} ${x2.toFixed(1)} ${y2.toFixed(1)}" fill="none" stroke="var(--chart-route)" stroke-width="1.6" stroke-linecap="round" opacity=".9"/>`);
   }
   for(const a of A){ const [x,y]=proj(a), on=v.has(a.id);
-    parts.push(`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${on?4:2.6}" fill="${on?(a.rare?"var(--gold)":"var(--shu)"):"var(--dot)"}"><title>${a.name}</title></circle>`); }
+    parts.push(`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${on?4:2.4}" fill="${on?"var(--chart-bg)":"var(--chart-off)"}"${on ? ` stroke="${a.rare ? "#A9822E" : "var(--chart-apt)"}" stroke-width="1.8"` : ""}><title>${a.name}</title></circle>`); }
   // 飛行場・滑空場は四角で描く（民間空港の丸と区別する）。訪れた印は色を塗る
   const xv = visitedExtra();
-  for(const a of XA){ if(a.kind === "mil") continue; const [x,y]=proj(a), on=xv.has(a.id), col=XCOL[a.kind]||"var(--shu)", s=on?4.4:3.2;
-    parts.push(`<rect x="${(x-s/2).toFixed(1)}" y="${(y-s/2).toFixed(1)}" width="${s}" height="${s}" fill="${on?col:"var(--dot)"}" stroke="${col}" stroke-width=".8"><title>${a.name}（${XKIND[a.kind].short}）</title></rect>`); }
+  for(const a of XA){ if(a.kind === "mil") continue; const [x,y]=proj(a), on=xv.has(a.id), col=a.kind === "glider" ? "#1F7FB6" : "#3D7A4E", s=on?4.4:3.2;
+    parts.push(`<rect x="${(x-s/2).toFixed(1)}" y="${(y-s/2).toFixed(1)}" width="${s}" height="${s}" fill="${on?col:"var(--chart-off)"}" stroke="${col}" stroke-width=".8"><title>${a.name}（${XKIND[a.kind].short}）</title></rect>`); }
   $("map").innerHTML = parts.join("");
 }
 function dedupFlights(){ const seen=new Set(), out=[]; for(const f of focusFlights()){ const k=[f.from,f.to].sort((x,y)=>x-y).join("-"); if(!seen.has(k)){seen.add(k); out.push(f);} } return out; }
@@ -2892,6 +2937,7 @@ function maybeGuide(){ let seen = false; try{ seen = !!localStorage.getItem("sor
 /* ---------- share images ---------- */
 const XCOL = { mil:"#2B4A73", glider:"#1F7FB6", field:"#3D7A4E" };   // 共有画像の印の色（自衛隊・米軍は濃紺、滑空場は空色、飛行場は緑）
 const PALETTES = {
+  board:   {sky:"#0B0D10", ink:"#E8ECF1", sumi:"#A7B0BC", line:"#262B33", shu:"#FFB547", gold:"#E0B85C", dot:"#3A414C", paper:"#121418"},
   mono:    {sky:"#F4F4F4", ink:"#111111", sumi:"#5C5C5C", line:"#D6D6D6", shu:"#111111", gold:"#A9822E", dot:"#BDBDBD", paper:"#FFFFFF"},
   akashiro:{sky:"#FBEDED", ink:"#2A1212", sumi:"#6B5656", line:"#E8C4C4", shu:"#D63131", gold:"#A9822E", dot:"#E88A8A", paper:"#FFFFFF"},
   sora:    {sky:"#E6F7FD", ink:"#142049", sumi:"#5A6684", line:"#B9D9EA", shu:"#233F9A", gold:"#A9822E", dot:"#00B5F0", paper:"#FFFFFF"},
