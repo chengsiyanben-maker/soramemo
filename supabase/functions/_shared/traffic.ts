@@ -51,3 +51,18 @@ export function updateTrails(trails: Trails, planes: Plane[], now: number, keepM
     trails.set(p.id, tr);
   }
 }
+
+// adsb.lol（/v2/lat/…/lon/…/dist/…）の ac を、同じ形にする。
+//   ac の1件：hex・flight（便名）・t（機種）・lat・lon・alt_baro（ft か "ground"）・gs（ノット）・track・baro_rate（ft/分）
+export function planesFromAdsb(ac: unknown, apt: [number, number], maxFt = 14000): (Plane & { type: string | null })[] {
+  if (!Array.isArray(ac)) return [];
+  const states = ac.filter((a) => a && typeof a === "object" && (a as Record<string, unknown>).alt_baro !== "ground").map((a) => {
+    const x = a as Record<string, unknown>;
+    const ft = num(x.alt_baro) ?? num(x.alt_geom), fpm = num(x.baro_rate) ?? num(x.geom_rate);
+    // planesFrom と同じ並び（高度はm、速度はm/s、昇降率はm/s）に直して、同じ見分け方を使う
+    return [x.hex, x.flight ?? null, null, null, null, num(x.lon), num(x.lat), ft == null ? null : ft / 3.281, false,
+      num(x.gs) == null ? null : num(x.gs)! / 1.944, num(x.track), fpm == null ? null : fpm / 196.85, null, null];
+  });
+  const types = new Map(ac.map((a) => [String((a as Record<string, unknown>)?.hex), typeof (a as Record<string, unknown>)?.t === "string" ? (a as Record<string, unknown>).t as string : null]));
+  return planesFrom(states, apt, maxFt).map((p) => ({ ...p, type: types.get(p.id) ?? null }));
+}

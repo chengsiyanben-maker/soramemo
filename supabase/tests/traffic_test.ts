@@ -32,3 +32,15 @@ Deno.test("通ってきた線：点を足し、同じ位置は重ねず、いな
   updateTrails(tr, [P("a", 35.2, 139.9)], 30 * 60_000);
   assertEquals(tr.get("a")!.map((x) => x.p), [[35.2, 139.9]]);
 });
+
+import { planesFromAdsb } from "../functions/_shared/traffic.ts";
+Deno.test("adsb.lol の形からも同じように見分け、機種を添える。地上は除く", () => {
+  const p = planesFromAdsb([
+    { hex: "86a1", flight: "SFJ54   ", t: "A20N", lat: 35.30, lon: 139.85, alt_baro: 2950, gs: 150, track: 337, baro_rate: -800 },
+    { hex: "86a2", flight: "ANA243 ", t: "B788", lat: 35.62, lon: 139.90, alt_baro: 2600, gs: 200, track: 60, baro_rate: 2400 },
+    { hex: "86a3", flight: "SIA635", t: "B78X", lat: 35.55, lon: 139.78, alt_baro: "ground" },
+    { hex: "86a4", flight: "JAL1", t: "B738", lat: 35.0, lon: 139.5, alt_baro: 33000, baro_rate: 0 },
+  ], [35.5533, 139.7811]);
+  assertEquals(p.map((x) => [x.callsign, x.phase, x.type, x.alt_ft]), [["ANA243", "dep", "B788", 2600], ["SFJ54", "arr", "A20N", 2950]]);
+  assertEquals(p[1].fpm, -800);
+});

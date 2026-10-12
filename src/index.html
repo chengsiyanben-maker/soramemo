@@ -2990,13 +2990,13 @@ async function loadTraffic(){
     if(Array.isArray(p.trail) && p.trail.length > 1 && p.phase !== "other")
       L.polyline([...p.trail, [p.lat, p.lon]], { color:c, weight:p.phase === "arr" ? 3 : 2.5, opacity:.85 }).addTo(TRAFFIC_LAYER);
     L.marker([p.lat, p.lon], { icon:planeIcon(p), zIndexOffset:p.phase === "arr" ? 1000 : 0 })
-      .bindTooltip(`${esc(p.callsign || "（便名不明）")}<br>${p.alt_ft != null ? p.alt_ft.toLocaleString("ja-JP") + "ft・" : ""}${p.kt != null ? p.kt + "ノット" : ""}${p.fpm != null && Math.abs(p.fpm) >= 300 ? `・${p.fpm > 0 ? "上昇" : "降下"}中` : ""}`).addTo(TRAFFIC_LAYER);
+      .bindTooltip(`${esc(p.callsign || "（便名不明）")}${p.type ? "（" + esc(p.type) + "）" : ""}<br>${p.alt_ft != null ? p.alt_ft.toLocaleString("ja-JP") + "ft・" : ""}${p.kt != null ? p.kt + "ノット" : ""}${p.fpm != null && Math.abs(p.fpm) >= 300 ? `・${p.fpm > 0 ? "上昇" : "降下"}中` : ""}`).addTo(TRAFFIC_LAYER);
   }
   // はじめて読み込んだときだけ、着陸に向かう機体の線が入るように地図を合わせる
   if(!TRAFFIC_FIT && arr.length){ TRAFFIC_FIT = true;
     const pts = arr.flatMap(p => [...(p.trail || []), [p.lat, p.lon]]).concat([[35.5533, 139.7811]]);
     setTimeout(() => { OPS_MAP.invalidateSize(); OPS_MAP.stop(); OPS_MAP.fitBounds(L.latLngBounds(pts), { padding:[20, 20], maxZoom:11, animate:false }); }, 400); }
-  $("trafficNote").innerHTML = `<b style="color:${TRAFFIC_COL.arr}">━</b> 着陸に向かう機体 ${arr.length}機　<b style="color:${TRAFFIC_COL.dep}">━</b> 離陸して上昇中 ${dep.length}機　${jstHM(d.at)} 時点<br>機体の位置は OpenSky Network（ADS-B）。実際より10〜20秒ほど遅れ、受信できない機体は出ません。`;
+  $("trafficNote").innerHTML = `<b style="color:${TRAFFIC_COL.arr}">━</b> 着陸に向かう機体 ${arr.length}機　<b style="color:${TRAFFIC_COL.dep}">━</b> 離陸して上昇中 ${dep.length}機　${jstHM(d.at)} 時点<br>機体の位置は <a href="https://adsb.lol" target="_blank" rel="noopener">adsb.lol</a>（有志の受信機による ADS-B のオープンデータ、ODbL）。少し遅れることがあり、受信できない機体は出ません。通ってきた線は、地図を開いている人がいるあいだに少しずつ伸びます。`;
 }
 function startTraffic(){ stopTraffic(); TRAFFIC_FIT = false; loadTraffic(); TRAFFIC_TIMER = setInterval(loadTraffic, 30_000); }
 function stopTraffic(){ if(TRAFFIC_TIMER) clearInterval(TRAFFIC_TIMER); TRAFFIC_TIMER = null; }
