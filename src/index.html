@@ -1470,7 +1470,7 @@ function showNearest(n){
 function showStamp(a, t, first, flight, term, firstTerm){
   const b = $("dStampBody");
   const visitsNow = S.checkins.filter(c => c.a === a.id).length, tierNow = tierOf(visitsNow), tierUp = tierNow > tierOf(visitsNow - 1);
-  const marks = [...timeMarks(t), `${SEASONS[seasonOf(t)]}の訪問`, ...wxMarks(S.checkins.find(c => c.a === a.id && c.t === t))];
+  const marks = [...timeMarks(t), `${SEASONS[seasonOf(t)]}の訪問`];
   const seasonSet = achState().seasons.get(a.id) || new Set();
   const note = term ? (firstTerm ? `${term.name}の印です。` : `${term.name}の印はもう持っています。訪問日として記録しました。`) + (first ? "この空港ははじめてです。" : "")
     : (first ? "" : "この空港の印はもう持っています。訪問日として記録しました。");
@@ -1884,7 +1884,6 @@ const VISIT_STEPS = [[5, "行きつけ"], [20, "ホーム空港"], [50, "主"], 
 // チェックインしたときの空港の天気（サーバーが気象通報から記録する）
 const WX_LABEL = { clear:"晴れ", cloudy:"くもり", rain:"雨", snow:"雪", fog:"霧", thunder:"雷" };
 const STRONG_WIND = 25;   // 強風：25ノット（約13m/s）以上
-const wxMarks = c => !c ? [] : [...(c.wx && c.wx !== "clear" && c.wx !== "cloudy" ? [`${WX_LABEL[c.wx]}の日の印`] : []), ...(c.wind != null && c.wind >= STRONG_WIND ? ["強風の日の印"] : [])];
 const ACH = [
   // [カテゴリ, id, 名前, 説明, 目標, 値の種類]
   ["空港の数","ap1","はじめの一歩","はじめて空港の印を押す",1,"airports"],
