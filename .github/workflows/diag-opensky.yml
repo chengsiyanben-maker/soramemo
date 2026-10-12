@@ -1,0 +1,14 @@
+# 一時的な確認用：GitHub の実行環境から OpenSky と adsb.lol に届くか（結果を見たら消す）
+name: 確認：OpenSky に届くか
+on:
+  push:
+    branches: [diag/opensky]
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 届くか
+        run: |
+          curl -sS -m 20 -o /dev/null -w "OpenSky 認証: HTTP %{http_code} %{time_total}s\n" -X POST -d "grant_type=client_credentials&client_id=x&client_secret=y" https://auth.opensky-network.org/auth/realms/opensky-network/protocol/openid-connect/token || echo "OpenSky 認証: 届かない"
+          curl -sS -m 20 -o /dev/null -w "OpenSky API: HTTP %{http_code} %{time_total}s\n" "https://opensky-network.org/api/states/all?lamin=35.4&lomin=139.6&lamax=35.7&lomax=139.9" || echo "OpenSky API: 届かない"
+          curl -sS -m 20 -o /dev/null -w "adsb.lol: HTTP %{http_code} %{time_total}s\n" "https://api.adsb.lol/v2/lat/35.55/lon/139.78/dist/10" || echo "adsb.lol: 届かない"
