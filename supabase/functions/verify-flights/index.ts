@@ -34,6 +34,14 @@ async function fetchArrivals(icao: string, begin: number, end: number): Promise<
   return await res.json();
 }
 
+// 実際に飛んだ航路（飛行中のどこかの時刻を渡すと、その飛行の全体が返る）。見つからなければ null
+async function fetchTrack(icao24: string, time: number): Promise<unknown> {
+  const res = await fetch(`${API}/tracks/all?icao24=${encodeURIComponent(icao24)}&time=${time}`, { headers: { Authorization: `Bearer ${await bearer()}` } });
+  if (res.status === 404) return null;
+  if (!res.ok) throw new Error(`track ${res.status}`);
+  return (await res.json())?.path ?? null;
+}
+
 async function loadFlights(): Promise<Row[]> {
   const today = new Date(); today.setUTCHours(0, 0, 0, 0);       // 到着記録は夜間にまとめて更新されるため、前日以前の分だけ
   const { data, error } = await admin.from("flights")
@@ -47,8 +55,9 @@ async function loadFlights(): Promise<Row[]> {
     dep: Date.parse(r.dep_at), arr: Date.parse(r.arr_at), flightNo: r.flight_no, attempts: r.verify_attempts }));
 }
 
-async function save(id: number, status: "verified" | "no_data" | null, note: string, attempts: number) {
+async function save(id: number, status: "verified" | "no_data" | null, note: string, attempts: number, track?: [number, number][] | null) {
   const patch: Record<string, unknown> = { verify_attempts: attempts, verify_note: note };
+  if (track) patch.track = track;
   if (status) patch.status = status;
   if (status === "verified") patch.verified_at = new Date().toISOString();
   const { error } = await admin.from("flights").update(patch).eq("id", id);
@@ -58,7 +67,7 @@ async function save(id: number, status: "verified" | "no_data" | null, note: str
 Deno.serve(async (req) => {
   if (!CRON_SECRET || !sameSecret(req.headers.get("x-cron-secret") ?? "", CRON_SECRET)) return new Response("forbidden", { status: 403 });
   try {
-    const sum = await runVerification({ loadFlights, fetchArrivals, save });
+    const sum = await runVerification({ loadFlights, fetchArrivals, save, fetchTrack });
     console.log("verify-flights", sum);
     return new Response(JSON.stringify(sum), { headers: { "Content-Type": "application/json" } });
   } catch (e) {

@@ -1,11 +1,14 @@
 // 照合の実行（データの読み書きと OpenSky への問い合わせは外から渡す）
 import { match, type OpenSkyFlight, type RecordedFlight, windowFor } from "./verify.ts";
+import { compactTrack } from "./track.ts";
 
 export type Row = { id: number; fromIcao: string | null; toIcao: string | null; dep: number; arr: number; flightNo: string | null; attempts: number };
 export type Deps = {
   loadFlights: () => Promise<Row[]>;
   fetchArrivals: (icao: string, begin: number, end: number) => Promise<OpenSkyFlight[]>;
-  save: (id: number, status: "verified" | "no_data" | null, note: string, attempts: number) => Promise<void>;
+  save: (id: number, status: "verified" | "no_data" | null, note: string, attempts: number, track?: [number, number][] | null) => Promise<void>;
+  // 確認できた便の、実際に飛んだ航路（OpenSky の path）。取れなくても照合の結果は変えない
+  fetchTrack?: (icao24: string, time: number) => Promise<unknown>;
 };
 export const JOB = { maxPerRun: 200, maxAttempts: 3 };
 
@@ -27,7 +30,14 @@ export async function runVerification(d: Deps) {
       sum.errors++; console.error("OpenSky", e); continue;     // 回数は数えず、次の晩にもう一度
     }
     const v = match(f, arrivals);
-    if (v.status === "verified") { await d.save(r.id, "verified", `${(v.matched.callsign ?? "").trim()} ${v.byCallsign ? "便名一致" : "空港と時間帯で一致"}`, r.attempts + 1); sum.verified++; }
+    if (v.status === "verified") {
+      let track: [number, number][] | null = null;
+      if (d.fetchTrack) {
+        try { track = compactTrack(await d.fetchTrack(v.matched.icao24, Math.floor((v.matched.firstSeen + v.matched.lastSeen) / 2))); }
+        catch (e) { console.error("track", e); }
+      }
+      await d.save(r.id, "verified", `${(v.matched.callsign ?? "").trim()} ${v.byCallsign ? "便名一致" : "空港と時間帯で一致"}`, r.attempts + 1, track); sum.verified++;
+    }
     else if (v.status === "no_data") { await d.save(r.id, "no_data", "到着記録なし", r.attempts + 1); sum.no_data++; }
     else { await d.save(r.id, null, "当てはまる便なし", r.attempts + 1); sum.unmatched++; }
   }
