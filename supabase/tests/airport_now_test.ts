@@ -61,7 +61,7 @@ Deno.test("空模様：雨・霧・雪・雷・晴れ・くもり", () => {
 
 Deno.test("天気の整形：視程9999は10km以上", () => {
   const w = weather({ rawOb: "RJTT 121230Z 34012G22KT 9999 FEW030 17/10 Q1015", reportTime: "2026-10-12T12:30:00Z", wdir: 340, wspd: 12, wgst: 22, visib: "6+", clouds: [{ cover: "FEW" }] });
-  assertEquals(w, { time: "2026-10-12T12:30:00Z", wdir: 340, wspd: 12, wgst: 22, vis_m: 10000, vis_plus: true, sky: "晴れ" });
+  assertEquals(w, { time: "2026-10-12T12:30:00Z", wdir: 340, wspd: 12, wgst: 22, vis_m: 10000, vis_plus: true, sky: "晴れ", ceil_ft: null });
 });
 
 import { amedasNearest, amedasWeather, tafPeriods } from "../functions/_shared/airport_now.ts";
@@ -97,4 +97,11 @@ Deno.test("アメダス：風向の番号を角度に、風速 m/s をノット�
   assertEquals([w.wdir, w.wspd, w.temp, w.sky, w.rain1h, w.calm], [360, 10, 18.4, "雨", 1.5, false]);
   const c = amedasWeather({ windDirection: [0, 0], wind: [0, 0], temp: [10, 0] }, "x", "t");
   assertEquals([c.wdir, c.calm, c.sky], [null, true, null]);
+});
+
+import { ceilingOf } from "../functions/_shared/airport_now.ts";
+Deno.test("雲底：BKN・OVC のいちばん低い高さ。FEW・SCT は数えない。鉛直視程も雲底とみなす", () => {
+  assertEquals(ceilingOf([{ cover: "FEW", base: 800 }, { cover: "BKN", base: 2500 }, { cover: "OVC", base: 1800 }]), 1800);
+  assertEquals(ceilingOf([{ cover: "SCT", base: 1000 }]), null);
+  assertEquals(ceilingOf([], 2), 200);
 });

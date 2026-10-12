@@ -74,7 +74,14 @@ export function recent(rows: FlightRow[], nowMin: number, before = 60, after = 1
 }
 
 // ---------- 天気（METAR） ----------
-export type Weather = { time: string | null; wdir: number | null; wspd: number | null; wgst: number | null; vis_m: number | null; vis_plus: boolean; sky: string | null };
+export type Weather = { time: string | null; wdir: number | null; wspd: number | null; wgst: number | null; vis_m: number | null; vis_plus: boolean; sky: string | null; ceil_ft: number | null };
+
+// 雲底：曇り（BKN）・本曇り（OVC）・空が見えない（OVX・鉛直視程）のうち、いちばん低い高さ（フィート）。なければ null
+export function ceilingOf(clouds: { cover?: string; base?: number | null }[] = [], vertVis?: unknown): number | null {
+  const bases = clouds.filter((c) => /^(BKN|OVC|OVX)$/i.test(String(c.cover ?? "")) && typeof c.base === "number").map((c) => c.base as number);
+  if (typeof vertVis === "number") bases.push(vertVis * (vertVis < 100 ? 100 : 1));   // 鉛直視程は百フィート単位のこともある
+  return bases.length ? Math.min(...bases) : null;
+}
 
 // 空模様：降っているもの（雷・雪・雨・霧）を先に見て、なければ雲の量で決める
 export function skyOf(raw: string, clouds: { cover?: string }[] = []): string | null {
@@ -103,6 +110,7 @@ export function weather(m: Record<string, unknown>): Weather {
     vis_m: visM,
     vis_plus: mv ? mv[1] === "9999" || mv[1] === "CAVOK" : visRaw.endsWith("+"),
     sky: skyOf(" " + raw + " ", Array.isArray(m.clouds) ? m.clouds as { cover?: string }[] : []),
+    ceil_ft: ceilingOf(Array.isArray(m.clouds) ? m.clouds as { cover?: string; base?: number }[] : [], m.vertVis),
   };
 }
 
@@ -113,7 +121,7 @@ export type TafPeriod = {
   kind: "base" | "BECMG" | "TEMPO" | "FM" | "PROB";
   prob: number | null;                 // PROB30 など
   wdir: number | null; wspd: number | null; wgst: number | null;
-  vis_m: number | null; sky: string | null;
+  vis_m: number | null; sky: string | null; ceil_ft: number | null;
 };
 export function tafPeriods(fcsts: Record<string, unknown>[], nowSec: number, hours = 24, max = 5): TafPeriod[] {
   const out: TafPeriod[] = [];
@@ -129,6 +137,7 @@ export function tafPeriods(fcsts: Record<string, unknown>[], nowSec: number, hou
       wdir: typeof f.wdir === "number" ? f.wdir : null, wspd: typeof f.wspd === "number" ? f.wspd : null, wgst: typeof f.wgst === "number" ? f.wgst : null,
       vis_m: visRaw.endsWith("+") ? 10000 : Number.isFinite(mi) ? Math.round(mi * 1609) : null,
       sky: skyOf(" X " + String(f.wxString ?? "") + " ", Array.isArray(f.clouds) ? f.clouds as { cover?: string }[] : []),
+      ceil_ft: ceilingOf(Array.isArray(f.clouds) ? f.clouds as { cover?: string; base?: number }[] : [], f.vertVis),
     });
     if (out.length >= max) break;
   }

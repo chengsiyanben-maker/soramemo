@@ -481,6 +481,9 @@ ol.steps{padding-left:1.4em;line-height:1.9}
 .hndops .opsnote{font-size:12px;color:var(--sumi);line-height:1.6}
 .hndops .opsnext{font-size:13px;font-weight:700;color:var(--gold-text)}
 .hndops .linkbtn2{white-space:nowrap}
+.opsapp{list-style:none;margin:6px 0 0;padding:0;display:flex;flex-wrap:wrap;gap:6px 14px;font-size:14px}
+.opsapp li{display:flex;align-items:center;gap:6px}
+[data-palette="board"] .opsapp b{font-family:var(--dotfont);font-weight:400;color:#fff}
 [data-palette="board"] .hndops{background:var(--shu-wash)}
 [data-palette="board"] .hndops .opsmode{font-family:var(--dotfont);font-weight:400;color:#fff}
 [data-palette="board"] .hndops .rw{font-family:var(--dotfont);font-weight:400}
@@ -1094,22 +1097,27 @@ function hndOpsHTML(w, taf){
   const est = estimateHaneda(w), op = OPS[est.mode];
   // 予報の区切りごとに運用を推し量り、いまと違う運用になる最初の区切りを「見込み」として出す
   let next = "";
+  const key = e => e.mode + (e.good ? "+" : "-");
   if(taf && Array.isArray(taf.periods)){
     const today = new Date(Date.now() + 9*36e5).toISOString().slice(0, 10);
     for(const p of taf.periods){
       if(p.wspd == null || p.kind === "TEMPO" || p.kind === "PROB") continue;   // 一時的な変化や確率つきは、運用の切り替えとしては数えない
-      const m = estimateHaneda({ wdir:p.wdir, wspd:p.wspd, vis_m:p.vis_m }, new Date(p.from * 1000)).mode;
-      if(m !== est.mode){ const d = new Date(p.from * 1000 + 9*36e5);
-        next = `${d.toISOString().slice(0, 10) === today ? "" : "明日"}${d.getUTCHours()}時${p.kind === "BECMG" ? "ごろ" : ""}から、${OPS[m].label}に変わる見込み`; break; }
+      const e2 = estimateHaneda({ wdir:p.wdir, wspd:p.wspd, vis_m:p.vis_m, ceil_ft:p.ceil_ft }, new Date(p.from * 1000));
+      if(key(e2) !== key(est)){ const d = new Date(p.from * 1000 + 9*36e5), when = `${d.toISOString().slice(0, 10) === today ? "" : "明日"}${d.getUTCHours()}時${p.kind === "BECMG" ? "ごろ" : ""}から、`;
+        next = e2.mode !== est.mode ? `${when}${OPS[e2.mode].label}に変わる見込み`
+          : e2.good ? `${when}天気が回復し、${OPS[e2.mode].arr.map(r => appName(e2.mode, true, r)).filter((x, i, a) => a.indexOf(x) === i).join("・")}の進入に戻る見込み`
+          : `${when}視程や雲が悪くなり、計器（ILS）の進入に変わる見込み`;
+        break; }
     }
   }
-  const approach = est.mode === "south" ? (est.good ? "視程が良いので、曲がった進入（LDA）が中心。" : "視程が悪いので、計器による直線の進入（ILS）。") : "";
+  const cond = est.good ? "好天時の進入" : "好天時以外（視程や雲が悪い）の進入";
   return `<div class="hndops"><div class="opshead"><b>滑走路と進入の今</b><span>推定</span></div>
     <p class="opsmode">${op.label}</p>
-    <p class="opsrw">着陸 ${op.arr.map(r => `<span class="rw arr">${r}</span>`).join("")}　離陸 ${op.dep.map(r => `<span class="rw dep">${r}</span>`).join("")}</p>
-    <p class="opsnote">${esc(op.note)}${esc(approach)}${est.night ? "深夜早朝は、騒音を減らすための別の運用になることがあります。" : ""}</p>
+    <ul class="opsapp">${op.arr.map(r => `<li><span class="rw arr">${r}</span><b>${esc(appName(est.mode, est.good, r))}</b></li>`).join("")}</ul>
+    <p class="opsrw">離陸 ${op.dep.map(r => `<span class="rw dep">${r}</span>`).join("")}</p>
+    <p class="opsnote">${esc(cond)}。${esc(op.note)}${est.night ? (est.mode === "north" ? "" : "深夜（23〜6時）の南・西の風では、D滑走路（RWY23）が中心で、閉鎖中は VOR-A（RWY16L）になることがあります。") : ""}${est.night ? "深夜早朝は、海上を使う別の運用になることがあります。" : ""}</p>
     ${next ? `<p class="opsnext">${esc(next)}</p>` : ""}
-    <div class="nowfoot"><p class="src" style="margin:0;line-height:1.5">風から推し量ったもので、実際の運用と違うことがあります。</p><button class="linkbtn2" data-hnd-map>地図で見る</button></div></div>`;
+    <div class="nowfoot"><p class="src" style="margin:0;line-height:1.5">風と天気から推し量ったもので、実際の運用と違うことがあります（好天の目安：視程5km以上・雲底2,500ft以上）。進入方式は国土交通省の運用区分による。</p><button class="linkbtn2" data-hnd-map>地図で見る</button></div></div>`;
 }
 document.addEventListener("click", e => { if(!e.target.closest("[data-hnd-map]")) return; $("dAirport").close(); $("opsOpen").click(); });
 // この先の予報（TAF）：区切りごとに1行。「21時〜 北の風12ノット くもり」「明日3時ごろから 東の風8ノット」「一時 雨」
@@ -2865,17 +2873,25 @@ function estimateHaneda(m, now = new Date()){
     why = south ? `南寄りの風（34滑走路に${Math.round(tail34)}ノットの追い風）なので、南風の運用と推定` : `34滑走路への追い風が7ノット以下なので、北風の運用と推定`;
     whyPlain = south ? "南寄りの風なので、南風の運用と推定" : "北寄りの風か、風が弱いので、北風の運用と推定";
   } else if(m && m.wdir == null && m.wspd != null && m.wspd > 7) why = "風向きが定まらないため、北風の運用（ふだんの向き）と推定";
-  const vis = m && m.vis_m != null ? m.vis_m : null, good = vis == null || vis >= 5000;
-  const city = south && h >= 15 && h < 19 && good;
-  return { mode: south ? (city ? "city" : "south") : "north", why, whyPlain: whyPlain || why, good, vis, night: h >= 23 || h < 6,
+  // 好天時かどうか（公式の数字は公開されていないので、そらメモの目安：視程5km以上、かつ雲底2,500ft以上か雲底なし）
+  const vis = m && m.vis_m != null ? m.vis_m : null, ceil = m && m.ceil_ft != null ? m.ceil_ft : null;
+  const good = (vis == null || vis >= HND_GOOD.vis) && (ceil == null || ceil >= HND_GOOD.ceil);
+  const city = south && h >= 15 && h < 19;   // 都心ルートは15〜19時のうち3時間程度。天候が悪いときは ILS で
+  return { mode: south ? (city ? "city" : "south") : "north", why, whyPlain: whyPlain || why, good, vis, ceil, night: h >= 23 || h < 6,
     northNew: !south && ((h >= 7 && h < 11.5) || (h >= 15 && h < 19)) };
 }
+const HND_GOOD = { vis:5000, ceil:2500 };
+// 運用ごとの進入方式（国土交通省「羽田空港の運用状況の区分」による。good＝好天時、bad＝好天時以外）
 const OPS = {
-  north: { label:"北風運用", arr:["34L","34R"], dep:["05","34R"], note:"着陸は東京湾の上から北向きに、A・C滑走路へ。離陸はD滑走路（05）と、C滑走路（34R）から。" },
-  south: { label:"南風運用", arr:["22","23"], dep:["16L","16R"], note:"着陸は千葉方面から南西向きに、B・D滑走路へ。離陸はA・C滑走路から南向き。" },
-  city:  { label:"南風運用（都心ルート）", arr:["16L","16R"], dep:["16L","16R","22"], note:"15時〜19時の南風・好天時。着陸は埼玉・都心の上空から南向きに、A・C滑走路へ。",
-           depNote:{ "16L":"長距離の国際線", "16R":"北日本方面", "22":"西日本・南西方面" } },
+  north: { label:"北風運用", arr:["34L","34R"], dep:["05","34R"], note:"着陸は東京湾の上から北向きに、A・C滑走路へ。離陸はD滑走路（05）と、C滑走路（34R）から。",
+           app:{ good:{"34L":"ILS X", "34R":"ハイウェイビジュアル"}, bad:{"34L":"ILS Z", "34R":"ILS Z"} } },
+  south: { label:"南風運用", arr:["22","23"], dep:["16L","16R"], note:"着陸は千葉方面から南西向きに、B・D滑走路へ。離陸はA・C滑走路から南向き。",
+           app:{ good:{"22":"LDA W", "23":"LDA W"}, bad:{"22":"ILS", "23":"ILS Z"} } },
+  city:  { label:"南風運用（都心ルート）", arr:["16L","16R"], dep:["22","16R"], note:"15時〜19時のうち3時間程度。着陸は埼玉・都心の上空から南向きに、A・C滑走路へ。",
+           depNote:{ "16R":"北日本方面", "22":"西日本・南西方面" },
+           app:{ good:{"16L":"RNP", "16R":"RNP"}, bad:{"16L":"ILS", "16R":"ILS"} } },
 };
+const appName = (mode, good, rw) => ((OPS[mode].app || {})[good ? "good" : "bad"] || {})[rw] || "";
 let OPS_MODE = "auto", OPS_WX = null, OPS_MAP = null, OPS_LAYER = null;
 async function loadLeaflet(){
   if(window.L) return;
@@ -2897,7 +2913,7 @@ function wxText(m){
 function renderOps(){
   const est = estimateHaneda(OPS_WX), mode = OPS_MODE === "auto" ? est.mode : OPS_MODE, op = OPS[mode], rw = hndRunways();
   document.querySelectorAll("[data-ops]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.ops === OPS_MODE)));
-  const approach = mode === "south" ? (est.good ? "視程が良いので、曲がった進入（LDA）が中心" : "視程が悪いので、計器による直線の進入（ILS）") : mode === "city" ? "都心の上空を通る進入（RNP・ILS）" : "東京湾の上からの進入（ILS・LOC など）";
+  const approach = op.arr.map(r => `${r} ${appName(mode, est.good, r)}`).join("・");
   const plus = plusOn();
   $("opsInfo").innerHTML = `<b class="mode">${op.label}</b>${OPS_MODE === "auto" ? `<br><span class="hint">${plus ? est.why : est.whyPlain}${est.night ? "。深夜早朝は、騒音を減らすための別の運用になることがあります" : ""}</span>` : `<br><span class="hint">手で選んだ運用を表示しています</span>`}
     <br>着陸：${op.arr.map(r => `<span class="rw arr">${r}</span>`).join("")}（${approach}）
