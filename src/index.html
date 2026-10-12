@@ -2944,7 +2944,7 @@ function renderOps(){
     <br>離陸：${op.dep.map(r => `<span class="rw dep">${r}</span>${op.depNote && op.depNote[r] ? `<small>${op.depNote[r]}</small>` : ""}`).join(" ")}
     <br><span class="hint">${op.note}${mode === "north" && est.northNew && OPS_MODE === "auto" ? "　この時間帯は、C滑走路（34R）から北へ離陸して荒川沿いを上昇する新しいルートが使われることがあります。" : ""}</span>`
     ;
-  $("opsLegend").textContent = "太い点線は、いまの運用と天気で使うと推定した進入の経路（AIP JAPAN の進入チャートの座標から作成）、白い点はその上のフィックスです。実際は管制の指示で途中を短くすることが多く、LDA の最後の曲がる部分は目で見て飛ぶため、線はおおよそです。航法には使えません。青の点線は離陸の向きです。";
+  $("opsLegend").textContent = "太い点線は、いまの運用と天気で使うと推定した進入の経路、白い点はその上のフィックスです。経路は、AIP JAPAN（2026年10月1日版）の進入チャートの座標をもとに そらメモ が作ったもので、国が作ったものではなく、最新でない場合があります。実際は管制の指示で途中を短くすることが多く、LDA の最後の曲がる部分は目で見て飛ぶため、線はおおよそです。航空機の運航には使えません。青の点線は離陸の向きです。";
   drawOpsMap(rw, op, plus, mode, est.good);
 }
 function drawOpsMap(rw, op, plus, mode, good){
