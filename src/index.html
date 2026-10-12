@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#0B0D10">
+<meta name="theme-color" content="#F4F4F4">
 <title>そらメモ</title>
 <link rel="manifest" href="manifest.webmanifest">
 <script src="config.js"></script>
@@ -13,7 +13,7 @@
 <meta name="apple-mobile-web-app-title" content="そらメモ">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="description" content="国内の空港でチェックインして、印と路線を集める位置情報ゲーム">
-<script>var p="board";try{p=localStorage.getItem("soramemo.palette.chosen")||"board";}catch(e){}if(p==="sora"||p==="akashiro"||p==="board")document.documentElement.setAttribute("data-palette",p);</script>
+<script>var p="mono";try{p=localStorage.getItem("soramemo.palette.chosen")||"mono";}catch(e){}if(p==="sora"||p==="akashiro")document.documentElement.setAttribute("data-palette",p);</script>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><circle cx='32' cy='32' r='28' fill='none' stroke='%23111111' stroke-width='5'/><path d='M16 36l32-12-8 20-6-8z' fill='%23111111'/></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -70,8 +70,15 @@
 [data-palette="board"] .stampbig,[data-palette="board"] .cell .slot{filter:drop-shadow(0 0 6px rgba(255,181,71,.18))}
 /* いちばん近い空港のコード：パタパタの板。案内板のときだけ出す */
 .flap{display:none}
-[data-palette="board"] .flap:not(:empty){display:flex;gap:6px;margin:6px 0 8px}
-.flap i{font-style:normal;width:54px;height:70px;border-radius:6px;background:#1C2027;color:var(--shu);font-family:var(--dotfont);font-size:46px;line-height:70px;text-align:center;position:relative;box-shadow:inset 0 -2px 0 #0B0D10}
+/* 最近の印は、どの配色でも案内板の見た目（黒地・琥珀色の印・ドット文字の見出し） */
+.boardzone{--sky:#0B0D10;--paper:#121418;--ink:#E8ECF1;--sumi:#A7B0BC;--line:#262B33;--shu:#FFB547;--shu-wash:#1C2027;--gold:#E0B85C;--dot:#3A414C;--shu-text:#FFB547;--on-shu:#0B0D10;
+  background:#0B0D10;color:#E8ECF1;border-radius:14px;padding:6px 14px 16px;margin:30px 0 0}
+.boardzone h2{font-family:var(--dotfont);font-weight:400;color:#FFB547;letter-spacing:.12em;margin:10px 0 12px}
+.boardzone .cell .nm,.boardzone .none{color:#A7B0BC}
+.boardzone .cell.got .nm{color:#E8ECF1}
+.boardzone .cell .slot{filter:drop-shadow(0 0 6px rgba(255,181,71,.18))}
+.flap:not(:empty){display:flex;gap:6px;margin:6px 0 8px}
+.flap i{font-style:normal;width:54px;height:70px;border-radius:6px;background:#1C2027;color:#FFB547;font-family:var(--dotfont);font-size:46px;line-height:70px;text-align:center;position:relative;box-shadow:inset 0 -2px 0 #0B0D10}
 .flap i::after{content:"";position:absolute;left:0;right:0;top:34px;height:2px;background:#0B0D10}
 /* 空港の今の便：案内板では、発着の表示らしく */
 [data-palette="board"] .flist li{background:var(--paper);border:1px solid var(--line)}
@@ -631,8 +638,10 @@ details.dev summary{cursor:pointer;color:var(--sumi);font-size:14px;padding:6px 
     </div>
     <p class="streak" id="streak"></p>
     <button class="btn2 opsbtn" id="opsOpen" hidden>羽田の今の運用（滑走路・進入）</button>
+    <section class="boardzone" aria-label="最近の印">
     <h2>最近の印</h2>
     <div class="grid" id="recent"></div>
+    </section>
     <details class="dev" hidden><summary>検証用ツール</summary>
       <p class="hint">判定を確かめるための機能です。記録には残りません。</p>
       <button class="btn2" id="probe" style="width:100%">位置だけ測る（検証用・記録しない）</button>
@@ -855,8 +864,7 @@ details.dev summary{cursor:pointer;color:var(--sumi);font-size:14px;padding:6px 
     <div class="set-row" id="baseRow"><div>拠点の空港<small>搭乗券の出発地に使います。初期値は最初に押した空港です。</small></div><select id="baseSel" aria-label="拠点の空港"></select></div>
     <div class="set-row"><div>色<small>アプリと共有画像の色を選べます。</small></div>
       <div class="swatches" role="group" aria-label="色">
-        <button class="swatch" data-pal="board" aria-pressed="true"><i style="background:#0B0D10;box-shadow:0 0 0 1.5px var(--line),inset 0 0 0 9px #0B0D10,inset 0 0 0 30px #FFB547"></i>案内板</button>
-        <button class="swatch" data-pal="mono" aria-pressed="false"><i style="background:#111111"></i>白黒</button>
+        <button class="swatch" data-pal="mono" aria-pressed="true"><i style="background:#111111"></i>白黒</button>
         <button class="swatch" data-pal="sora" aria-pressed="false"><i style="background:#233F9A"></i>空</button>
         <button class="swatch" data-pal="akashiro" aria-pressed="false"><i style="background:#D63131"></i>赤白</button>
       </div></div>
@@ -3040,7 +3048,7 @@ const PALETTES = {
 let PAL = PALETTES[document.documentElement.getAttribute("data-palette") || "mono"];
 // 配色。保存するのは、マイページで自分で選んだときだけ（以前の版は開くたびに白黒を保存していたので、保存先を新しくした）
 function setPalette(p, chosen){
-  if(!PALETTES[p]) p = "board";
+  if(!PALETTES[p] || p === "board") p = "mono";
   if(p === "mono") document.documentElement.removeAttribute("data-palette"); else document.documentElement.setAttribute("data-palette", p);
   if(chosen) try{ localStorage.setItem("soramemo.palette.chosen", p); localStorage.removeItem("soramemo.palette"); }catch(e){}
   PAL = PALETTES[p];
