@@ -433,3 +433,5 @@ verify_jwt = false
 verify_jwt = false
 [functions.emergency-stop]
 verify_jwt = false
+[functions.airport-now]
+verify_jwt = false

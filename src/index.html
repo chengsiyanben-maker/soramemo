@@ -406,6 +406,52 @@ ol.steps{padding-left:1.4em;line-height:1.9}
 .apitem:not(.got){background:none;border:1px dashed var(--line);color:var(--sumi)}
 .apitem svg{width:44px;height:44px;flex:none}
 .apitem small{display:block;color:var(--sumi);font-size:11px}
+/* 空港の今・お知らせ */
+.apnow{margin:18px 0 0;background:var(--sky);border-radius:14px;padding:14px 14px 12px}
+.apnow .nowhead{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.apnow .nowhead h3{margin:0;font-family:var(--mincho);font-size:18px}
+.apnow .nowhead span,.apnow .src{font-size:11px;color:var(--sumi)}
+.wxgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:10px 0 4px}
+.wxgrid div{background:var(--paper);border-radius:10px;padding:8px 10px;display:flex;flex-direction:column;gap:2px;min-width:0}
+.wxgrid small{font-size:11px;color:var(--sumi)}
+.wxgrid b{font-size:15px;display:flex;align-items:center;gap:4px;white-space:nowrap}
+.wxgrid span{font-size:12px}
+.wxgrid svg{width:14px;height:14px;flex:none}
+.nowtabs{display:grid;grid-template-columns:1fr 1fr;border:1.5px solid var(--ink);border-radius:10px;overflow:hidden;margin:12px 0 0}
+.nowtabs button{min-height:44px;border:none;background:var(--paper);color:var(--ink);font-weight:700;font-size:15px}
+.nowtabs button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+.nowterms{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 0}
+.nowterms button{font-size:13px;font-weight:700;padding:6px 12px;min-height:36px;border-radius:999px;border:1.5px solid var(--line);background:var(--paper);color:var(--ink)}
+.nowterms button[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.flist{list-style:none;margin:10px 0 0;padding:0;display:flex;flex-direction:column;gap:6px}
+.flist li{background:var(--paper);border-radius:10px;padding:9px 10px;display:grid;grid-template-columns:52px minmax(0,1fr) auto;gap:2px 10px;align-items:center}
+.flist .tm{display:flex;flex-direction:column;line-height:1.25}
+.flist .tm b{font-size:16px;font-variant-numeric:tabular-nums}
+.flist .tm b.old{text-decoration:line-through;color:var(--sumi)}
+.flist .tm i{font-style:normal;font-size:12px;font-weight:700;color:var(--gold-text)}
+.flist .pl{display:flex;flex-direction:column;min-width:0;line-height:1.35}
+.flist .pl b{font-size:15px}
+.flist .pl span{font-size:12px;color:var(--sumi)}
+.flist .st{display:flex;flex-direction:column;align-items:flex-end;gap:4px}
+.fst{font-size:12px;font-weight:700;border-radius:999px;padding:2px 9px;white-space:nowrap;border:1px solid var(--line)}
+.fst.done{border-color:transparent;color:var(--sumi)}
+.fst.board{border:1.5px solid var(--ink)}
+.fst.late{background:var(--gold-badge);color:var(--on-gold);border-color:transparent}
+.fst.cancel{background:var(--ink);color:var(--paper);border-color:transparent}
+.ride{font-size:12px;font-weight:700;padding:4px 10px;min-height:32px;border:1.5px solid var(--ink);border-radius:8px;background:none;color:var(--ink)}
+.nowempty{margin:10px 0 0;background:var(--paper);border-radius:10px;padding:12px;font-size:13px;color:var(--sumi)}
+.nowfoot{display:flex;justify-content:space-between;align-items:center;gap:8px;margin:6px 0 0}
+.linkbtn2{font-size:13px;font-weight:700;min-height:44px;padding:0 4px;border:none;background:none;color:var(--ink);text-decoration:underline}
+.notices{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.notice{padding:10px 12px;background:var(--sky);border-radius:10px;font-size:14px}
+.notice b{display:block}
+.notice p{margin:2px 0 0}
+.notice .src{font-size:12px;color:var(--sumi);margin-top:4px}
+.notice .src a{color:inherit}
+.opsoon{margin:18px 0 0;border:1px dashed var(--line);border-radius:12px;padding:12px 14px;display:flex;justify-content:space-between;align-items:center;gap:10px}
+.opsoon b{display:block;font-size:15px}
+.opsoon span{font-size:12px;color:var(--sumi)}
+.opsoon em{font-style:normal;font-size:11px;font-weight:700;border:1px solid var(--sumi);color:var(--sumi);border-radius:999px;padding:2px 10px;white-space:nowrap}
 .hist{margin:0;padding-left:1.2em;font-size:14px;line-height:1.8;max-height:200px;overflow:auto}
 .opsmodes{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
 .chip{border:1.5px solid var(--line);background:var(--paper);color:var(--ink);border-radius:999px;padding:6px 12px;font-size:13px;font-weight:600}
@@ -925,6 +971,105 @@ async function loadAppStatus(){
     : !APP_STATUS.checkin_enabled ? `<b>チェックインを一時停止しています</b><br>${esc(APP_STATUS.message || "記録や図鑑は見られます。")}` : "";
   updateAuthUI();
 }
+// 空港ごとのお知らせ（公式の発表を、出典つきで運営者が手入力したもの）。airport_id ごとに新しい順
+let AP_NOTICES = new Map();
+async function loadNotices(){
+  try{ const { data, error } = await sb.rpc("airport_notices"); if(error || !Array.isArray(data)) return;
+    const m = new Map(); for(const n of data){ if(!BY[n.airport_id] || !/^https:\/\//.test(n.source_url || "")) continue; if(!m.has(n.airport_id)) m.set(n.airport_id, []); m.get(n.airport_id).push(n); }
+    AP_NOTICES = m;
+  }catch(e){}
+}
+const fmtYMD = s => { const [y, mo, d] = String(s || "").split("-").map(Number); return y ? `${y}年${mo}月${d}日` : ""; };
+function noticesHTML(a){
+  const l = AP_NOTICES.get(a.id) || []; if(!l.length) return "";
+  const item = n => `<li class="notice"><b>${esc(n.title)}</b>${n.body ? `<p>${esc(n.body)}</p>` : ""}<div class="src">${fmtYMD(n.published_on)}発表・出典：<a href="${esc(n.source_url)}" target="_blank" rel="noopener noreferrer">${esc(n.source_name)}</a>${n.expires_on ? `（${fmtYMD(n.expires_on)}まで）` : ""}</div></li>`;
+  return `<h3 class="sub">お知らせ</h3><ul class="notices">${l.slice(0, 2).map(item).join("")}</ul>`
+    + (l.length > 2 ? `<details><summary class="linkbtn2" style="display:inline-block;padding-top:10px">ほかに${l.length - 2}件</summary><ul class="notices" style="margin-top:8px">${l.slice(2).map(item).join("")}</ul></details>` : "")
+    + `<p class="hint" style="margin-top:6px">空港・航空会社・行政の発表を、出典つきで紹介しています。</p>`;
+}
+
+/* 空港の今：天気（気象通報）と、直近の到着・出発便（JAL・ANA の公式のリアルタイム情報）。サーバーの airport-now から取る */
+let NOW = null;   // { a, data, dir, term, more, msg }
+const DIR16 = ["北","北北東","北東","東北東","東","東南東","南東","南南東","南","南南西","南西","西南西","西","西北西","北西","北北西"];
+const placeShort = c => { const a = IATA[c]; if(!a) return c; const m = a.name.match(/（(.+)）/); return m ? m[1] : a.name.replace(/国際空港$|空港$/, ""); };
+const jstHM = iso => { const t = Date.parse(iso); if(!t) return ""; const d = new Date(t + 9*36e5); return `${String(d.getUTCHours()).padStart(2,"0")}:${String(d.getUTCMinutes()).padStart(2,"0")}`; };
+const FKIND = { ok:"定刻", late:"遅れ", board:"搭乗中", cancel:"欠航" };
+const canNow = a => SERVER && !a.kind;
+async function loadNow(a){
+  NOW = { a, data:null, dir:"arr", term:"all", more:false, msg:"" };
+  try{
+    const r = await fetch(SORAMEMO_CONFIG.supabaseUrl.replace(/\/$/, "") + "/functions/v1/airport-now?iata=" + encodeURIComponent(a.iata), { headers:{ apikey:SORAMEMO_CONFIG.supabaseAnonKey, Authorization:"Bearer " + SORAMEMO_CONFIG.supabaseAnonKey } });
+    if(!r.ok) throw new Error("now " + r.status);
+    const j = await r.json();
+    if(!NOW || NOW.a !== a) return;
+    NOW.data = j;
+  }catch(e){ if(NOW && NOW.a === a) NOW.data = { weather:null, flights:null }; }
+  renderNow();
+}
+function wxHTML(w){
+  if(!w) return "";
+  const calm = w.wspd === 0, dir = w.wdir == null ? null : DIR16[Math.round(w.wdir / 22.5) % 16];
+  const arrow = dir ? `<svg viewBox="0 0 16 16" aria-hidden="true" style="transform:rotate(${(w.wdir + 180) % 360}deg)"><path d="M8 1 L12 13 L8 10 L4 13 Z" fill="currentColor"/></svg>` : "";
+  const wind = calm ? "<b>静か</b><span>風はほぼなし</span>"
+    : `<b>${arrow}${dir || "変わりやすい"}</b><span>${w.wspd != null ? w.wspd + "ノット" : "—"}${w.wgst ? `（最大${w.wgst}）` : ""}</span>`;
+  const vis = w.vis_m == null ? "—" : w.vis_plus || w.vis_m >= 10000 ? "10km以上" : w.vis_m >= 1000 ? `${Math.round(w.vis_m / 100) / 10}km` : `${w.vis_m}m`;
+  return `<div class="wxgrid"><div><small>風</small>${wind}</div><div><small>見通し</small><b>${vis}</b><span>視程</span></div><div><small>空</small><b>${esc(w.sky || "—")}</b><span>${w.time ? jstHM(w.time) + " 観測" : ""}</span></div></div>
+    <p class="src" style="margin:0">気象通報（METAR）より</p>`;
+}
+function flightsHTML(a, fl){
+  if(!fl) return "";
+  const terms = TERMS.filter(t => t.a === a.id && /^T\d$/.test(t.tag));
+  const all = (NOW.dir === "arr" ? fl.arr : fl.dep) || [];
+  const list = all.filter(x => NOW.term === "all" || x.term === NOW.term), shown = NOW.more ? list : list.slice(0, 5);
+  const row = x => { const k = x.kind === "done" ? (NOW.dir === "arr" ? "到着済み" : "出発済み") : FKIND[x.kind] || "定刻";
+    const ride = NOW.dir === "dep" && ["ok","late","board"].includes(x.kind) && ALBY[x.airline] && IATA[x.place];
+    return `<li><div class="tm"><b class="${x.newTime || x.kind === "cancel" ? "old" : ""}">${esc(x.time)}</b>${x.newTime ? `<i>→${esc(x.newTime)}</i>` : ""}</div>
+      <div class="pl"><b>${esc(placeShort(x.place))}${NOW.dir === "arr" ? "から" : "へ"}</b><span>${esc(x.no.slice(0,2) + " " + x.no.slice(2))}${x.term ? "・" + esc(x.term) : ""}</span></div>
+      <div class="st"><span class="fst ${esc(x.kind)}">${k}</span>${ride ? `<button class="ride" data-ride="${esc(x.no)}">この便に乗る</button>` : ""}</div></li>`; };
+  const empty = NOW.term !== "all" && !list.length ? "このターミナルの便は、いまは出していません（国際線は対象外です）。" : !list.length ? "この時間の便はありません。" : "";
+  return `<div class="nowtabs" role="group" aria-label="到着と出発"><button data-now-dir="arr" aria-pressed="${NOW.dir === "arr"}">到着</button><button data-now-dir="dep" aria-pressed="${NOW.dir === "dep"}">出発</button></div>`
+    + (terms.length > 1 ? `<div class="nowterms">${[["all","すべて"], ...terms.map(t => [t.tag, t.tag])].map(([k, l]) => `<button data-now-term="${k}" aria-pressed="${NOW.term === k}">${l}</button>`).join("")}</div>` : "")
+    + (empty ? `<p class="nowempty">${empty}</p>` : `<ul class="flist">${shown.map(row).join("")}</ul>`)
+    + (NOW.msg ? `<p class="msg" role="status" style="margin:8px 0 0">${NOW.msg}</p>` : "")
+    + `<div class="nowfoot"><p class="src" style="margin:0;line-height:1.5">JAL・ANAグループの便のみ<br>出典：公共交通オープンデータセンター</p>${list.length > 5 ? `<button class="linkbtn2" data-now-more>${NOW.more ? "少なく表示" : "もっと見る"}</button>` : ""}</div>`;
+}
+function renderNow(){
+  const box = $("apNow"); if(!box || !NOW) return;
+  const d = NOW.data;
+  if(!d){ box.hidden = false; box.innerHTML = `<div class="nowhead"><h3>空港の今</h3><span>読み込み中…</span></div>`; return; }
+  if(!d.weather && !d.flights){ box.hidden = true; return; }
+  box.hidden = false;
+  box.innerHTML = `<div class="nowhead"><h3>空港の今</h3><span>${d.at ? jstHM(d.at) + " 更新" : ""}</span></div>${wxHTML(d.weather)}${flightsHTML(NOW.a, d.flights)}`;
+}
+document.addEventListener("click", e => {
+  if(!NOW || !NOW.data || !e.target.closest("#apNow")) return;
+  const dir = e.target.closest("[data-now-dir]"), term = e.target.closest("[data-now-term]"), more = e.target.closest("[data-now-more]"), ride = e.target.closest("[data-ride]");
+  if(dir){ NOW.dir = dir.dataset.nowDir; NOW.more = false; NOW.msg = ""; }
+  else if(term){ NOW.term = term.dataset.nowTerm; NOW.more = false; }
+  else if(more){ NOW.more = !NOW.more; }
+  else if(ride){ const x = ((NOW.data.flights || {}).dep || []).find(f => f.no === ride.dataset.ride); if(!x) return;
+    const to = IATA[x.place], d = new Date(Date.now() + 9*36e5).toISOString().slice(0, 10);
+    savePlan({ from: NOW.a.id, to: to.id, airline: x.airline, no: x.no, day: d });
+    NOW.msg = `${esc(x.no)}（${esc(placeShort(x.place))}行き）を覚えました。${esc(to.name)}でチェックインすると、このフライトに便名が付きます。`; }
+  else return;
+  renderNow();
+});
+/* 「この便に乗る」で選んだ便。次にできたフライト（同じ出発・到着、同じ日）に便名を付ける */
+const PLAN_KEY = "soramemo.plan";
+function savePlan(p){ try{ localStorage.setItem(PLAN_KEY, JSON.stringify(p)); }catch(e){} }
+async function applyPlan(){
+  let p = null; try{ p = JSON.parse(localStorage.getItem(PLAN_KEY) || "null"); }catch(e){}
+  if(!p || !SERVER || demo || !user) return;
+  const jst = t => new Date(t + 9*36e5).toISOString().slice(0, 10);
+  if(Date.parse(p.day) < Date.now() - 2 * 864e5){ try{ localStorage.removeItem(PLAN_KEY); }catch(e){} return; }   // 2日たったら忘れる
+  const f = S.flights.find(x => x.from === p.from && x.to === p.to && !x.airline && jst(x.dep) === p.day);
+  if(!f) return;
+  const { error } = await sb.rpc("set_flight_airline", { p_flight_id: f.id, p_airline: p.airline, p_flight_no: p.no });
+  if(error) return;
+  f.airline = p.airline; f.no = p.no;
+  try{ localStorage.removeItem(PLAN_KEY); }catch(e){}
+  render();
+}
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 async function loadServer(){
   const [c, f, m] = await Promise.all([
@@ -943,7 +1088,7 @@ async function loadServer(){
 }
 async function reload(){
   if(SERVER && !demo){ if(user) await loadServer(); else S = blank(); } else load();
-  render(); updateAuthUI();
+  render(); updateAuthUI(); applyPlan();
 }
 function updateAuthUI(){
   const needLogin = SERVER && !user && !demo;
@@ -962,7 +1107,7 @@ function loadScript(src){ return new Promise((res, rej) => { const el = document
 async function initServer(){
   try{ await loadScript(SUPABASE_JS); if(!window.supabase || !window.supabase.createClient) throw new Error("supabase-js missing"); }catch(e){ say("サーバーにつながりませんでした。電波のよい場所で開き直してください。", true); return; }
   sb = window.supabase.createClient(SORAMEMO_CONFIG.supabaseUrl, SORAMEMO_CONFIG.supabaseAnonKey);
-  loadAppStatus();
+  loadAppStatus(); loadNotices();
   const { data } = await sb.auth.getSession(); user = data.session ? data.session.user : null;
   sb.auth.onAuthStateChange((_ev, session) => { const u = session ? session.user : null; if((u&&u.id) !== (user&&user.id)){ user = u; CO = null; reload().then(() => flushQueue(true)); } });
   await reload(); flushQueue(true); afterCheckout();
@@ -1549,13 +1694,17 @@ function openAirport(id){
   <p class="marks">${SEASONS.map((x,i) => `<span class="mark${ss.has(i) ? " on" : " off"}">${x}</span>`).join("")}${ss.size === 4 ? `<span class="mark gold">四季がそろった</span>` : ""}</p>
   <p>はじめての訪問 ${fmtD(first)}　訪問 ${times}回${visitTier(times) ? `　<span class="rankbadge">${visitTier(times)}</span>` : ""}</p>
   <p class="hint">${dt < TOP ? `次の${RANKS[dt+1]}まであと${RANK_AT[dt+1] - times}回` : "最高の階級です"}</p>
+  ${canNow(a) ? `<section class="apnow" id="apNow" aria-label="空港の今" hidden></section>` : ""}
+  ${noticesHTML(a)}
   ${first && gameAvail() && !a.kind ? `<div class="meet">${godSVG(a)}<div><span class="gametag">エアライン経営</span><b>${godName(a)}と出会った</b><span class="hint">エアライン経営の「守り神」で会えます（仮の姿）</span></div></div>` : ""}
   ${ts.length ? `<h3 class="sub">ターミナル　${got} / ${ts.length}</h3><div class="aplist">${termList}</div>` : ""}
   ${false && a.iata === "HND" ? `<button class="btn2 opsbtn" style="width:100%;margin-top:12px" data-ap-ops>羽田の今の運用（滑走路・進入）</button>` : ""}
   <h3 class="sub">訪問の記録</h3>${hist ? `<ul class="hist">${hist}</ul>` : "<p class=\"hint\">まだ訪問の記録がありません</p>"}
+  ${a.iata === "HND" && !a.kind ? `<div class="opsoon"><div><b>滑走路と進入の今</b><span>どの向きから降りてくるかを地図で</span></div><em>準備中</em></div>` : ""}
   <div class="row2"><button class="btn2" data-close>閉じる</button><button class="btn1" data-share-a="${a.id}" data-share-at="${first}">画像で共有</button></div>
   <button class="btn2" style="width:100%;margin-top:8px" data-photo-a="${a.id}" data-photo-at="${first}">写真に押す</button>`;
   $("dAirport").showModal();
+  NOW = null; if(canNow(a)){ loadNow(a); renderNow(); }
 }
 document.addEventListener("click", e => { const b = e.target.closest("[data-ap-ops]"); if(!b) return;
   $("dAirport").close(); $("opsOpen").click(); });
