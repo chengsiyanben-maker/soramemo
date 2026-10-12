@@ -105,3 +105,65 @@ export function weather(m: Record<string, unknown>): Weather {
     sky: skyOf(" " + raw + " ", Array.isArray(m.clouds) ? m.clouds as { cover?: string }[] : []),
   };
 }
+
+// ---------- 予報（TAF） ----------
+// 米国の航空気象センターの TAF の JSON（fcsts）を、これから先の区切りだけの短い形にする
+export type TafPeriod = {
+  from: number; to: number;            // UNIX秒
+  kind: "base" | "BECMG" | "TEMPO" | "FM" | "PROB";
+  prob: number | null;                 // PROB30 など
+  wdir: number | null; wspd: number | null; wgst: number | null;
+  vis_m: number | null; sky: string | null;
+};
+export function tafPeriods(fcsts: Record<string, unknown>[], nowSec: number, hours = 24, max = 5): TafPeriod[] {
+  const out: TafPeriod[] = [];
+  for (const f of fcsts) {
+    const from = Number(f.timeBec ?? f.timeFrom), to = Number(f.timeTo);
+    if (!Number.isFinite(from) || !Number.isFinite(to) || to <= nowSec || from > nowSec + hours * 3600) continue;
+    const ch = String(f.fcstChange ?? "").toUpperCase();
+    const kind = ch === "BECMG" || ch === "TEMPO" || ch === "FM" ? ch : ch.startsWith("PROB") || f.probability ? "PROB" : "base";
+    const visRaw = String(f.visib ?? ""), mi = parseFloat(visRaw);
+    out.push({
+      from: Math.max(from, kind === "base" ? nowSec : from), to, kind: kind as TafPeriod["kind"],
+      prob: typeof f.probability === "number" ? f.probability : null,
+      wdir: typeof f.wdir === "number" ? f.wdir : null, wspd: typeof f.wspd === "number" ? f.wspd : null, wgst: typeof f.wgst === "number" ? f.wgst : null,
+      vis_m: visRaw.endsWith("+") ? 10000 : Number.isFinite(mi) ? Math.round(mi * 1609) : null,
+      sky: skyOf(" X " + String(f.wxString ?? "") + " ", Array.isArray(f.clouds) ? f.clouds as { cover?: string }[] : []),
+    });
+    if (out.length >= max) break;
+  }
+  return out;
+}
+
+// ---------- 気象庁アメダス（METAR のない空港の代わり） ----------
+export type AmedasStation = { lat: number[]; lon: number[]; elems: string; kjName: string };
+const deg = (v: number[]) => v[0] + (v[1] ?? 0) / 60;
+function km(a: [number, number], b: [number, number]) {
+  const r = Math.PI / 180, dl = (b[0] - a[0]) * r, dn = (b[1] - a[1]) * r;
+  const h = Math.sin(dl / 2) ** 2 + Math.cos(a[0] * r) * Math.cos(b[0] * r) * Math.sin(dn / 2) ** 2;
+  return 2 * 6371 * Math.asin(Math.sqrt(h));
+}
+// 風を測っている観測所のうち、いちばん近いもの（maxKm より遠ければ使わない）
+export function amedasNearest(table: Record<string, AmedasStation>, lat: number, lon: number, maxKm = 25): { id: string; name: string; km: number } | null {
+  let best: { id: string; name: string; km: number } | null = null;
+  for (const [id, s] of Object.entries(table)) {
+    if (!s || s.elems?.[2] !== "1") continue;
+    const d = km([lat, lon], [deg(s.lat), deg(s.lon)]);
+    if (d <= maxKm && (!best || d < best.km)) best = { id, name: s.kjName, km: Math.round(d * 10) / 10 };
+  }
+  return best;
+}
+// アメダスの1観測所の値（[値, 品質]）を、天気の形にする。風向は16方位の番号（0＝静穏、16＝北）
+export function amedasWeather(v: Record<string, [number | null, number | null]>, station: string, time: string) {
+  const val = (k: string) => { const x = v?.[k]?.[0]; return typeof x === "number" && Number.isFinite(x) ? x : null; };
+  const wd = val("windDirection"), ws = val("wind");
+  const rain10 = val("precipitation10m"), rain1h = val("precipitation1h");
+  return {
+    source: "amedas" as const, station, time,
+    wdir: wd && wd > 0 ? wd * 22.5 : null,
+    wspd: ws == null ? null : Math.round(ws * 1.944), wgst: null,
+    calm: wd === 0 || ws === 0,
+    temp: val("temp"), rain1h,
+    sky: rain10 && rain10 > 0 ? "雨" : null,
+  };
+}

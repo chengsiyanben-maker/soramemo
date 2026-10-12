@@ -462,6 +462,12 @@ ol.steps{padding-left:1.4em;line-height:1.9}
 .wxgrid b{font-size:15px;display:flex;align-items:center;gap:4px;white-space:nowrap}
 .wxgrid span{font-size:12px}
 .wxgrid svg{width:14px;height:14px;flex:none}
+.tafh{margin:12px 0 4px;font-size:13px;font-weight:700}
+.taf{list-style:none;margin:0 0 4px;padding:0;display:flex;flex-direction:column;gap:4px}
+.taf li{display:grid;grid-template-columns:auto minmax(0,1fr);gap:0 10px;background:var(--paper);border-radius:8px;padding:7px 10px;font-size:13px;line-height:1.5}
+.taf li b{white-space:nowrap}
+[data-palette="board"] .taf li{background:var(--shu-wash)}
+[data-palette="board"] .taf li b{font-family:var(--dotfont);font-weight:400;color:var(--shu)}
 .nowtabs{display:grid;grid-template-columns:1fr 1fr;border:1.5px solid var(--ink);border-radius:10px;overflow:hidden;margin:12px 0 0}
 .nowtabs button{min-height:44px;border:none;background:var(--paper);color:var(--ink);font-weight:700;font-size:15px}
 .nowtabs button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
@@ -1055,13 +1061,31 @@ async function loadNow(a){
 }
 function wxHTML(w){
   if(!w) return "";
-  const calm = w.wspd === 0, dir = w.wdir == null ? null : DIR16[Math.round(w.wdir / 22.5) % 16];
+  const calm = w.calm || w.wspd === 0, dir = w.wdir == null ? null : DIR16[Math.round(w.wdir / 22.5) % 16];
   const arrow = dir ? `<svg viewBox="0 0 16 16" aria-hidden="true" style="transform:rotate(${(w.wdir + 180) % 360}deg)"><path d="M8 1 L12 13 L8 10 L4 13 Z" fill="currentColor"/></svg>` : "";
   const wind = calm ? "<b>静か</b><span>風はほぼなし</span>"
     : `<b>${arrow}${dir || "変わりやすい"}</b><span>${w.wspd != null ? w.wspd + "ノット" : "—"}${w.wgst ? `（最大${w.wgst}）` : ""}</span>`;
   const vis = w.vis_m == null ? "—" : w.vis_plus || w.vis_m >= 10000 ? "10km以上" : w.vis_m >= 1000 ? `${Math.round(w.vis_m / 100) / 10}km` : `${w.vis_m}m`;
+  if(w.source === "amedas")   // 気象通報のない空港：近くのアメダス（見通しと空模様は測っていない）
+    return `<div class="wxgrid"><div><small>風</small>${wind}</div><div><small>気温</small><b>${w.temp == null ? "—" : w.temp.toFixed(1) + "℃"}</b><span>${w.time ? jstHM(w.time) + " 観測" : ""}</span></div><div><small>雨</small><b>${w.rain1h == null ? "—" : w.rain1h > 0 ? w.rain1h + "mm" : "なし"}</b><span>1時間</span></div></div>
+    <p class="src" style="margin:0">気象庁アメダス（${esc(w.station)}）より</p>`;
   return `<div class="wxgrid"><div><small>風</small>${wind}</div><div><small>見通し</small><b>${vis}</b><span>視程</span></div><div><small>空</small><b>${esc(w.sky || "—")}</b><span>${w.time ? jstHM(w.time) + " 観測" : ""}</span></div></div>
     <p class="src" style="margin:0">気象通報（METAR）より</p>`;
+}
+// この先の予報（TAF）：区切りごとに1行。「21時〜 北の風12ノット くもり」「明日3時ごろから 東の風8ノット」「一時 雨」
+function tafHTML(t){
+  if(!t || !Array.isArray(t.periods) || !t.periods.length) return "";
+  const today = new Date(Date.now() + 9*36e5).toISOString().slice(0, 10);
+  const at = sec => { const d = new Date(sec * 1000 + 9*36e5); return (d.toISOString().slice(0, 10) === today ? "" : "明日") + d.getUTCHours() + "時"; };
+  const line = p => {
+    const when = p.kind === "BECMG" ? `${at(p.from)}ごろから` : p.kind === "FM" ? `${at(p.from)}から` : p.kind === "TEMPO" ? `${at(p.from)}〜${at(p.to)} 一時` : p.kind === "PROB" ? `${at(p.from)}〜 ${p.prob || ""}%の確率で` : `${at(p.from)}〜`;
+    const wind = p.wspd === 0 ? "風は弱い" : p.wspd != null ? `${p.wdir == null ? "風向が変わりやすい" : DIR16[Math.round(p.wdir / 22.5) % 16] + "の風"}${p.wspd}ノット${p.wgst ? `（最大${p.wgst}）` : ""}` : "";
+    const vis = p.vis_m != null && p.vis_m < 5000 ? `見通し${p.vis_m >= 1000 ? Math.round(p.vis_m / 100) / 10 + "km" : p.vis_m + "m"}` : "";
+    const what = [wind, p.sky || "", vis].filter(Boolean).join("　");
+    return what ? `<li><b>${esc(when)}</b><span>${esc(what)}</span></li>` : "";
+  };
+  const items = t.periods.map(line).join("");
+  return items ? `<h4 class="tafh">この先の予報</h4><ul class="taf">${items}</ul><p class="src" style="margin:0">航空気象の予報（TAF）より。予報のため、外れることがあります。</p>` : "";
 }
 function flightsHTML(a, fl){
   if(!fl) return "";
@@ -1084,9 +1108,9 @@ function renderNow(){
   const box = $("apNow"); if(!box || !NOW) return;
   const d = NOW.data;
   if(!d){ box.hidden = false; box.innerHTML = `<div class="nowhead"><h3>空港の今</h3><span>読み込み中…</span></div>`; return; }
-  if(!d.weather && !d.flights){ box.hidden = true; return; }
+  if(!d.weather && !d.flights && !d.taf){ box.hidden = true; return; }
   box.hidden = false;
-  box.innerHTML = `<div class="nowhead"><h3>空港の今</h3><span>${d.at ? jstHM(d.at) + " 更新" : ""}</span></div>${wxHTML(d.weather)}${flightsHTML(NOW.a, d.flights)}`;
+  box.innerHTML = `<div class="nowhead"><h3>空港の今</h3><span>${d.at ? jstHM(d.at) + " 更新" : ""}</span></div>${wxHTML(d.weather)}${tafHTML(d.taf)}${flightsHTML(NOW.a, d.flights)}`;
 }
 document.addEventListener("click", e => {
   if(!NOW || !NOW.data || !e.target.closest("#apNow")) return;

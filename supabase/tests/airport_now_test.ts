@@ -63,3 +63,38 @@ Deno.test("天気の整形：視程9999は10km以上", () => {
   const w = weather({ rawOb: "RJTT 121230Z 34012G22KT 9999 FEW030 17/10 Q1015", reportTime: "2026-10-12T12:30:00Z", wdir: 340, wspd: 12, wgst: 22, visib: "6+", clouds: [{ cover: "FEW" }] });
   assertEquals(w, { time: "2026-10-12T12:30:00Z", wdir: 340, wspd: 12, wgst: 22, vis_m: 10000, vis_plus: true, sky: "晴れ" });
 });
+
+import { amedasNearest, amedasWeather, tafPeriods } from "../functions/_shared/airport_now.ts";
+
+Deno.test("TAF：これから先の区切りだけ、変化の種類つきで", () => {
+  const now = 1791806400 + 3600;   // 最初の区切りの途中
+  const f = [
+    { timeFrom: 1791806400, timeTo: 1791860400, fcstChange: null, wdir: 360, wspd: 12, visib: "6+", clouds: [{ cover: "BKN" }] },
+    { timeFrom: 1791860400, timeTo: 1791903600, timeBec: 1791871200, fcstChange: "BECMG", wdir: 80, wspd: 8, visib: "6+", clouds: [{ cover: "FEW" }] },
+    { timeFrom: 1791870000, timeTo: 1791880000, fcstChange: "TEMPO", wdir: null, wspd: null, visib: "3", wxString: "-SHRA", clouds: [{ cover: "BKN" }] },
+    { timeFrom: 1791700000, timeTo: 1791800000, fcstChange: null, wdir: 10, wspd: 5 },          // もう終わった区切りは捨てる
+  ];
+  const p = tafPeriods(f, now);
+  assertEquals(p.map((x) => x.kind), ["base", "BECMG", "TEMPO"]);
+  assertEquals(p[0].from, now);                       // 今の区切りは「今から」
+  assertEquals(p[1].from, 1791871200);                // BECMG は変わり始めの時刻
+  assertEquals([p[0].sky, p[1].sky, p[2].sky], ["くもり", "晴れ", "雨"]);
+  assertEquals(p[2].vis_m, 4827);
+});
+
+Deno.test("アメダス：風を測っている近くの観測所。遠すぎれば使わない", () => {
+  const table = {
+    "1": { lat: [33, 7.0], lon: [139, 47.0], elems: "11112010", kjName: "八丈島" },
+    "2": { lat: [33, 6.5], lon: [139, 47.5], elems: "11012010", kjName: "風なし" },      // 風を測っていない
+    "3": { lat: [35, 0], lon: [139, 0], elems: "11112010", kjName: "遠い" },
+  };
+  assertEquals(amedasNearest(table, 33.115, 139.786)?.name, "八丈島");
+  assertEquals(amedasNearest(table, 30, 130), null);
+});
+
+Deno.test("アメダス：風向の番号を角度に、風速 m/s をノットに。静穏と雨", () => {
+  const w = amedasWeather({ windDirection: [16, 0], wind: [5.0, 0], temp: [18.4, 0], precipitation10m: [0.5, 0], precipitation1h: [1.5, 0] }, "八丈島", "2026-10-12T21:00:00+09:00");
+  assertEquals([w.wdir, w.wspd, w.temp, w.sky, w.rain1h, w.calm], [360, 10, 18.4, "雨", 1.5, false]);
+  const c = amedasWeather({ windDirection: [0, 0], wind: [0, 0], temp: [10, 0] }, "x", "t");
+  assertEquals([c.wdir, c.calm, c.sky], [null, true, null]);
+});
