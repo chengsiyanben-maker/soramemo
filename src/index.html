@@ -1101,7 +1101,8 @@ function hndOpsHTML(w, taf){
   if(taf && Array.isArray(taf.periods)){
     const today = new Date(Date.now() + 9*36e5).toISOString().slice(0, 10);
     for(const p of taf.periods){
-      if(p.wspd == null || p.kind === "TEMPO" || p.kind === "PROB") continue;   // 一時的な変化や確率つきは、運用の切り替えとしては数えない
+      // 今の区切り（base）は気象通報で判断済みなので数えない。一時的な変化や確率つきも、運用の切り替えとしては数えない
+      if(p.wspd == null || p.kind === "base" || p.kind === "TEMPO" || p.kind === "PROB") continue;
       const e2 = estimateHaneda({ wdir:p.wdir, wspd:p.wspd, vis_m:p.vis_m, ceil_ft:p.ceil_ft }, new Date(p.from * 1000));
       if(key(e2) !== key(est)){ const d = new Date(p.from * 1000 + 9*36e5), when = `${d.toISOString().slice(0, 10) === today ? "" : "明日"}${d.getUTCHours()}時${p.kind === "BECMG" ? "ごろ" : ""}から、`;
         next = e2.mode !== est.mode ? `${when}${OPS[e2.mode].label}に変わる見込み`
