@@ -468,6 +468,22 @@ ol.steps{padding-left:1.4em;line-height:1.9}
 .taf li b{white-space:nowrap}
 [data-palette="board"] .taf li{background:var(--shu-wash)}
 [data-palette="board"] .taf li b{font-family:var(--dotfont);font-weight:400;color:var(--shu)}
+.hndops{margin:12px 0 0;background:var(--paper);border-radius:10px;padding:10px 12px}
+.hndops .opshead{display:flex;justify-content:space-between;align-items:baseline}
+.hndops .opshead b{font-size:14px}
+.hndops .opshead span{font-size:11px;font-weight:700;border:1px solid var(--sumi);color:var(--sumi);border-radius:999px;padding:0 8px}
+.hndops p{margin:4px 0 0}
+.hndops .opsmode{font-size:18px;font-weight:800}
+.hndops .opsrw{font-size:13px}
+.hndops .rw{display:inline-block;border-radius:6px;padding:0 6px;margin:0 2px;font-weight:700;font-size:13px}
+.hndops .rw.arr{background:var(--shu);color:var(--on-shu)}
+.hndops .rw.dep{background:#2B6CB0;color:#fff}
+.hndops .opsnote{font-size:12px;color:var(--sumi);line-height:1.6}
+.hndops .opsnext{font-size:13px;font-weight:700;color:var(--gold-text)}
+.hndops .linkbtn2{white-space:nowrap}
+[data-palette="board"] .hndops{background:var(--shu-wash)}
+[data-palette="board"] .hndops .opsmode{font-family:var(--dotfont);font-weight:400;color:#fff}
+[data-palette="board"] .hndops .rw{font-family:var(--dotfont);font-weight:400}
 .nowtabs{display:grid;grid-template-columns:1fr 1fr;border:1.5px solid var(--ink);border-radius:10px;overflow:hidden;margin:12px 0 0}
 .nowtabs button{min-height:44px;border:none;background:var(--paper);color:var(--ink);font-weight:700;font-size:15px}
 .nowtabs button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
@@ -1072,6 +1088,30 @@ function wxHTML(w){
   return `<div class="wxgrid"><div><small>風</small>${wind}</div><div><small>見通し</small><b>${vis}</b><span>視程</span></div><div><small>空</small><b>${esc(w.sky || "—")}</b><span>${w.time ? jstHM(w.time) + " 観測" : ""}</span></div></div>
     <p class="src" style="margin:0">気象通報（METAR）より</p>`;
 }
+// 羽田の滑走路と進入の今（推定）。いまの気象通報から運用を推し量り、予報（TAF）から切り替わりの見込みも出す
+function hndOpsHTML(w, taf){
+  if(!w || w.source === "amedas") return "";
+  const est = estimateHaneda(w), op = OPS[est.mode];
+  // 予報の区切りごとに運用を推し量り、いまと違う運用になる最初の区切りを「見込み」として出す
+  let next = "";
+  if(taf && Array.isArray(taf.periods)){
+    const today = new Date(Date.now() + 9*36e5).toISOString().slice(0, 10);
+    for(const p of taf.periods){
+      if(p.wspd == null || p.kind === "TEMPO" || p.kind === "PROB") continue;   // 一時的な変化や確率つきは、運用の切り替えとしては数えない
+      const m = estimateHaneda({ wdir:p.wdir, wspd:p.wspd, vis_m:p.vis_m }, new Date(p.from * 1000)).mode;
+      if(m !== est.mode){ const d = new Date(p.from * 1000 + 9*36e5);
+        next = `${d.toISOString().slice(0, 10) === today ? "" : "明日"}${d.getUTCHours()}時${p.kind === "BECMG" ? "ごろ" : ""}から、${OPS[m].label}に変わる見込み`; break; }
+    }
+  }
+  const approach = est.mode === "south" ? (est.good ? "視程が良いので、曲がった進入（LDA）が中心。" : "視程が悪いので、計器による直線の進入（ILS）。") : "";
+  return `<div class="hndops"><div class="opshead"><b>滑走路と進入の今</b><span>推定</span></div>
+    <p class="opsmode">${op.label}</p>
+    <p class="opsrw">着陸 ${op.arr.map(r => `<span class="rw arr">${r}</span>`).join("")}　離陸 ${op.dep.map(r => `<span class="rw dep">${r}</span>`).join("")}</p>
+    <p class="opsnote">${esc(op.note)}${esc(approach)}${est.night ? "深夜早朝は、騒音を減らすための別の運用になることがあります。" : ""}</p>
+    ${next ? `<p class="opsnext">${esc(next)}</p>` : ""}
+    <div class="nowfoot"><p class="src" style="margin:0;line-height:1.5">風から推し量ったもので、実際の運用と違うことがあります。</p><button class="linkbtn2" data-hnd-map>地図で見る</button></div></div>`;
+}
+document.addEventListener("click", e => { if(!e.target.closest("[data-hnd-map]")) return; $("dAirport").close(); $("opsOpen").click(); });
 // この先の予報（TAF）：区切りごとに1行。「21時〜 北の風12ノット くもり」「明日3時ごろから 東の風8ノット」「一時 雨」
 function tafHTML(t){
   if(!t || !Array.isArray(t.periods) || !t.periods.length) return "";
@@ -1110,7 +1150,7 @@ function renderNow(){
   if(!d){ box.hidden = false; box.innerHTML = `<div class="nowhead"><h3>空港の今</h3><span>読み込み中…</span></div>`; return; }
   if(!d.weather && !d.flights && !d.taf){ box.hidden = true; return; }
   box.hidden = false;
-  box.innerHTML = `<div class="nowhead"><h3>空港の今</h3><span>${d.at ? jstHM(d.at) + " 更新" : ""}</span></div>${wxHTML(d.weather)}${tafHTML(d.taf)}${flightsHTML(NOW.a, d.flights)}`;
+  box.innerHTML = `<div class="nowhead"><h3>空港の今</h3><span>${d.at ? jstHM(d.at) + " 更新" : ""}</span></div>${wxHTML(d.weather)}${tafHTML(d.taf)}${NOW.a.iata === "HND" ? hndOpsHTML(d.weather, d.taf) : ""}${flightsHTML(NOW.a, d.flights)}`;
 }
 document.addEventListener("click", e => {
   if(!NOW || !NOW.data || !e.target.closest("#apNow")) return;
@@ -1780,7 +1820,6 @@ function openAirport(id){
   ${ts.length ? `<h3 class="sub">ターミナル　${got} / ${ts.length}</h3><div class="aplist">${termList}</div>` : ""}
   ${false && a.iata === "HND" ? `<button class="btn2 opsbtn" style="width:100%;margin-top:12px" data-ap-ops>羽田の今の運用（滑走路・進入）</button>` : ""}
   <h3 class="sub">訪問の記録</h3>${hist ? `<ul class="hist">${hist}</ul>` : "<p class=\"hint\">まだ訪問の記録がありません</p>"}
-  ${a.iata === "HND" && !a.kind ? `<div class="opsoon"><div><b>滑走路と進入の今</b><span>どの向きから降りてくるかを地図で</span></div><em>準備中</em></div>` : ""}
   <div class="row2"><button class="btn2" data-close>閉じる</button><button class="btn1" data-share-a="${a.id}" data-share-at="${first}">画像で共有</button></div>
   <button class="btn2" style="width:100%;margin-top:8px" data-photo-a="${a.id}" data-photo-at="${first}">写真に押す</button>`;
   $("dAirport").showModal();
