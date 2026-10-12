@@ -13,7 +13,7 @@
 <meta name="apple-mobile-web-app-title" content="そらメモ">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="description" content="国内の空港でチェックインして、印と路線を集める位置情報ゲーム">
-<script>var p="board";try{p=localStorage.getItem("soramemo.palette")||"board";}catch(e){}if(p==="sora"||p==="akashiro"||p==="board")document.documentElement.setAttribute("data-palette",p);</script>
+<script>var p="board";try{p=localStorage.getItem("soramemo.palette.chosen")||"board";}catch(e){}if(p==="sora"||p==="akashiro"||p==="board")document.documentElement.setAttribute("data-palette",p);</script>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><circle cx='32' cy='32' r='28' fill='none' stroke='%23111111' stroke-width='5'/><path d='M16 36l32-12-8 20-6-8z' fill='%23111111'/></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -3038,15 +3038,16 @@ const PALETTES = {
   sora:    {sky:"#E6F7FD", ink:"#142049", sumi:"#5A6684", line:"#B9D9EA", shu:"#233F9A", gold:"#A9822E", dot:"#00B5F0", paper:"#FFFFFF"},
 };
 let PAL = PALETTES[document.documentElement.getAttribute("data-palette") || "mono"];
-function setPalette(p){
-  if(!PALETTES[p]) p = "mono";
+// 配色。保存するのは、マイページで自分で選んだときだけ（以前の版は開くたびに白黒を保存していたので、保存先を新しくした）
+function setPalette(p, chosen){
+  if(!PALETTES[p]) p = "board";
   if(p === "mono") document.documentElement.removeAttribute("data-palette"); else document.documentElement.setAttribute("data-palette", p);
-  try{ localStorage.setItem("soramemo.palette", p); }catch(e){}
+  if(chosen) try{ localStorage.setItem("soramemo.palette.chosen", p); localStorage.removeItem("soramemo.palette"); }catch(e){}
   PAL = PALETTES[p];
   document.querySelectorAll(".swatch").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.pal === p)));
   const m = document.querySelector('meta[name="theme-color"]'); if(m) m.content = getComputedStyle(document.documentElement).getPropertyValue("--sky").trim() || PAL.sky;
 }
-document.querySelectorAll(".swatch").forEach(b => b.onclick = () => { setPalette(b.dataset.pal); track("palette", b.dataset.pal); });
+document.querySelectorAll(".swatch").forEach(b => b.onclick = () => { setPalette(b.dataset.pal, true); track("palette", b.dataset.pal); });
 $("gameToggle").onclick = () => { setGameOn(!GAME_ON); track("game", GAME_ON ? "on" : "off"); };
 $("anaToggle").onclick = () => { if(ANALYTICS_ON){ track("analytics", "off"); flushEvents(); } setAnalytics(!ANALYTICS_ON); };
 function setFocus(f){
