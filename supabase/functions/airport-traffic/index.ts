@@ -19,7 +19,7 @@ const AIRPORTS: Record<string, { at: [number, number]; box: [number, number, num
 let token: { value: string; until: number } | null = null;
 async function bearer(): Promise<string> {
   if (token && Date.now() < token.until) return token.value;
-  const res = await fetch(TOKEN_URL, { method: "POST", signal: AbortSignal.timeout(8000), headers: { "Content-Type": "application/x-www-form-urlencoded" },
+  const res = await fetch(TOKEN_URL, { method: "POST", signal: AbortSignal.timeout(5000), headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: new URLSearchParams({ grant_type: "client_credentials", client_id: Deno.env.get("OPENSKY_CLIENT_ID") ?? "", client_secret: Deno.env.get("OPENSKY_CLIENT_SECRET") ?? "" }) });
   if (!res.ok) throw new Error(`token ${res.status}`);
   const j = await res.json();
@@ -36,7 +36,7 @@ async function seedTrack(iata: string, id: string, tr: Trails) {
   if (last && Date.now() - last < 10 * 60_000) return;
   seeded.set(id, Date.now());
   try {
-    const r = await fetch(`${API}/tracks/all?icao24=${encodeURIComponent(id)}&time=0`, { headers: { Authorization: `Bearer ${await bearer()}` }, signal: AbortSignal.timeout(6000) });
+    const r = await osFetch(`${API}/tracks/all?icao24=${encodeURIComponent(id)}&time=0`, 6000);
     if (!r.ok) return;
     const path = compactTrack((await r.json())?.path);
     if (!path) return;
@@ -47,12 +47,21 @@ async function seedTrack(iata: string, id: string, tr: Trails) {
   } catch { /* 航跡が取れなくても、位置だけは出す */ }
 }
 
+// 認証つきで取れなければ、認証なしで取る（認証サーバーに届かないことがあるため）
+let STEP = "";
+async function osFetch(url: string, ms: number): Promise<Response> {
+  let auth: Record<string, string> = {};
+  try { STEP = "token"; auth = { Authorization: `Bearer ${await bearer()}` }; } catch { auth = {}; }
+  STEP = auth.Authorization ? "api(auth)" : "api(anon)";
+  return await fetch(url, { headers: auth, signal: AbortSignal.timeout(ms) });
+}
+
 async function snapshot(iata: string): Promise<string> {
   const hit = cache.get(iata);
   if (hit && Date.now() - hit.at < TTL) return hit.body;
   const a = AIRPORTS[iata], [la1, lo1, la2, lo2] = a.box;
-  const r = await fetch(`${API}/states/all?lamin=${la1}&lomin=${lo1}&lamax=${la2}&lomax=${lo2}`, { headers: { Authorization: `Bearer ${await bearer()}` }, signal: AbortSignal.timeout(12000) });
-  if (!r.ok) throw new Error("states " + r.status);
+  const r = await osFetch(`${API}/states/all?lamin=${la1}&lomin=${lo1}&lamax=${la2}&lomax=${lo2}`, 12000);
+  if (!r.ok) throw new Error(`states ${r.status} ${STEP}`);
   const j = await r.json();
   const planes = planesFrom(j?.states, a.at);
   if (!trails.has(iata)) trails.set(iata, new Map());
@@ -81,7 +90,7 @@ Deno.serve(async (req) => {
     const hit = cache.get(iata);
     if (hit) return new Response(hit.body, { headers: { ...JSON_HEADERS, "X-Stale": "1" } });
     // 理由（どの問い合わせで止まったか）だけを返す。合言葉などは含めない
-    const why = e instanceof Error ? (e.name === "TimeoutError" ? "timeout" : e.message.slice(0, 40)) : "error";
+    const why = e instanceof Error ? (e.name === "TimeoutError" ? "timeout " + STEP : e.message.slice(0, 60)) : "error";
     return new Response(JSON.stringify({ error: "unavailable", why }), { status: 503, headers: JSON_HEADERS });
   }
 });
