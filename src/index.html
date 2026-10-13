@@ -2933,6 +2933,45 @@ const HND_STAR_TO = { "ILS X 34L":["KAIHO"], "ILS Z 34L":["ARLON","CREAM"], "HIG
   "LDA W 22":["BACON"], "ILS 22":["NYLON","STEAM"], "LDA W 23":["DATUM"], "ILS Z 23":["NYLON","STEAM"],
   "RNP 16L":["SANDY"], "ILS 16L":["SANDY"], "RNP 16R":["NATTY"], "ILS 16R":["NATTY"] };
 const STAR_FROM = { XAC:"大島" };
+// 実際の機体から判定した運用（地図を開いているあいだ、機体を読み込むたびに更新）。mode・apps：{滑走路: 進入のキー}・n：{滑走路: 機数}
+let OPS_OBS = null;
+const keyName = k => { const n = k.replace(/ \d\d[LR]?$/, ""); return n === "HIGHWAY" ? "ハイウェイビジュアル" : n; };
+function appKey(mode, good, id){
+  if(OPS_MODE === "auto" && OPS_OBS && OPS_OBS.mode === mode && OPS_OBS.apps[id]) return OPS_OBS.apps[id];
+  return ((HND_APP_KEY[mode] || {})[good ? "good" : "bad"] || {})[id];
+}
+// 点と折れ線の距離（海里。羽田の近くなので平面で近似）
+function nmToLine(pt, line){
+  const c = Math.cos(35.55 * D2R), xy = q => [q[1] * 60 * c, q[0] * 60], P = xy(pt); let best = Infinity;
+  for(let i = 0; i + 1 < line.length; i++){ const A = xy(line[i]), B = xy(line[i + 1]), dx = B[0] - A[0], dy = B[1] - A[1], L2 = dx * dx + dy * dy;
+    const t = L2 ? Math.max(0, Math.min(1, ((P[0] - A[0]) * dx + (P[1] - A[1]) * dy) / L2)) : 0;
+    best = Math.min(best, Math.hypot(P[0] - A[0] - t * dx, P[1] - A[1] - t * dy)); }
+  return best;
+}
+// 着陸に向かう機体の通ってきた線を、AIP の進入経路と比べて、どの滑走路・進入かを判定する
+const RW_MODE = { "34L":"north", "34R":"north", "22":"south", "23":"south", "16L":"city", "16R":"city" };
+function observeOps(planes){
+  const H = [35.5533, 139.7811], hit = [];
+  for(const p of planes){
+    if(p.phase !== "arr" || p.alt_ft == null || p.alt_ft > 7000) continue;
+    const pts = [...(p.trail || []), [p.lat, p.lon]].filter(q => { const d = nmToLine(q, [H, H]); return d >= 3 && d <= 22; }).slice(-10);
+    if(pts.length < 5) continue;   // 少なくとも2分ぶんの線があるものだけ
+    const c = Object.entries(HND_APP).map(([k, a]) => ({ k, rw: k.split(" ").pop(), d: pts.reduce((s, q) => s + nmToLine(q, a.p), 0) / pts.length })).sort((x, y) => x.d - y.d);
+    if(c[0].d >= 0.8) continue;
+    // 同じ滑走路の別の進入と見分けがつかない（最終進入が同じ）ときは、進入の種類は決めない
+    const twin = c.find((x, i) => i > 0 && x.rw === c[0].rw);
+    hit.push({ rw: c[0].rw, k: twin && twin.d - c[0].d < 0.3 ? null : c[0].k });
+  }
+  if(hit.length < 2) return null;
+  const n = {}, byMode = {}; for(const h of hit){ n[h.rw] = (n[h.rw] || 0) + 1; byMode[RW_MODE[h.rw]] = (byMode[RW_MODE[h.rw]] || 0) + 1; }
+  const [mode, cnt] = Object.entries(byMode).sort((x, y) => y[1] - x[1])[0];
+  if(cnt / hit.length < 0.8) return { mixed:true, n };
+  for(const rw of Object.keys(n)) if(RW_MODE[rw] !== mode) delete n[rw];   // ほかの運用の滑走路に見えた少数の機体は数えない
+  const apps = {};
+  for(const rw of Object.keys(n)){ const c = {}; hit.filter(h => h.rw === rw && h.k).forEach(h => c[h.k] = (c[h.k] || 0) + 1);
+    const top = Object.entries(c).sort((x, y) => y[1] - x[1])[0]; if(top) apps[rw] = top[0]; }
+  return { mode, apps, n };
+}
 const appName = (mode, good, rw) => ((OPS[mode].app || {})[good ? "good" : "bad"] || {})[rw] || "";
 let OPS_MODE = "auto", OPS_WX = null, OPS_MAP = null, OPS_LAYER = null;
 async function loadLeaflet(){
@@ -2953,11 +2992,12 @@ function wxText(m){
   return `気象通報（${t.getHours()}時${String(t.getMinutes()).padStart(2,"0")}分）：風 ${wind}、視程 ${vis}`;
 }
 function renderOps(){
-  const est = estimateHaneda(OPS_WX), mode = OPS_MODE === "auto" ? est.mode : OPS_MODE, op = OPS[mode], rw = hndRunways();
+  const est = estimateHaneda(OPS_WX), obs = OPS_MODE === "auto" && OPS_OBS && OPS_OBS.mode ? OPS_OBS : null;
+  const mode = OPS_MODE === "auto" ? (obs ? obs.mode : est.mode) : OPS_MODE, op = OPS[mode], rw = hndRunways();
   document.querySelectorAll("[data-ops]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.ops === OPS_MODE)));
-  const approach = op.arr.map(r => `${r} ${appName(mode, est.good, r)}`).join("・");
+  const approach = op.arr.map(r => { const k = appKey(mode, est.good, r); return `${r} ${k ? keyName(k) : appName(mode, est.good, r)}`; }).join("・");
   const plus = plusOn();
-  $("opsInfo").innerHTML = `<b class="mode">${op.label}</b>${OPS_MODE === "auto" ? `<br><span class="hint">${plus ? est.why : est.whyPlain}${est.night ? "。深夜早朝は、騒音を減らすための別の運用になることがあります" : ""}</span>` : `<br><span class="hint">手で選んだ運用を表示しています</span>`}
+  $("opsInfo").innerHTML = `<b class="mode">${op.label}</b>${obs ? `<br><span class="hint">実際に着陸に向かっている機体から判定（${Object.entries(obs.n).map(([r, c]) => `${r} に${c}機`).join("、")}）${obs.mode !== est.mode ? `。風からの推定（${OPS[est.mode].label}）とは違います` : ""}</span>` : ""}${OPS_MODE === "auto" && !obs ? `<br><span class="hint">${OPS_OBS && OPS_OBS.mixed ? "着陸に向かう機体の滑走路が分かれている（運用の切り替え中かもしれません）ため、風から推定しています。" : ""}${plus ? est.why : est.whyPlain}${est.night ? "。深夜早朝は、騒音を減らすための別の運用になることがあります" : ""}</span>` : OPS_MODE !== "auto" ? `<br><span class="hint">手で選んだ運用を表示しています</span>` : ""}
     <br>着陸：${op.arr.map(r => `<span class="rw arr">${r}</span>`).join("")}（${approach}）
     <br>離陸：${op.dep.map(r => `<span class="rw dep">${r}</span>${op.depNote && op.depNote[r] ? `<small>${op.depNote[r]}</small>` : ""}`).join(" ")}
     <br><span class="hint">${op.note}${mode === "north" && est.northNew && OPS_MODE === "auto" ? "　この時間帯は、C滑走路（34R）から北へ離陸して荒川沿いを上昇する新しいルートが使われることがあります。" : ""}</span>`
@@ -2985,16 +3025,16 @@ function drawOpsMap(rw, op, plus, mode, good){
   }
   // 進入・離陸の線（いまは全員に見せる。10月13日に そらメモ＋ の制限を外した）
   for(const id of op.arr){
-    const key = ((HND_APP_KEY[mode] || {})[good ? "good" : "bad"] || {})[id], a = key && HND_APP[key];
+    const key = appKey(mode, good, id), a = key && HND_APP[key];
     if(!a){ const r = rw[id], far = dest(r.thr, (r.hdg + 180) % 360, 18.52);
       L.polyline([far, r.thr], { color:shu, weight:3, dashArray:"8 7" }).bindTooltip(`RWY ${id} 最終進入（約10海里）`).addTo(OPS_LAYER); continue; }
-    const name = `RWY ${id} ${appName(mode, good, id)}`;
+    const name = `RWY ${id} ${keyName(key)}`;
     L.polyline(a.p, { color:shu, weight:3, dashArray:"8 7", opacity:.9 }).bindTooltip(`${name}（AIP の進入経路）`).addTo(OPS_LAYER);
     a.n.forEach((n, i) => { if(/^D\d/.test(n)) return;
       L.circleMarker(a.p[i], { radius:3, color:shu, weight:1.5, fillColor:"#fff", fillOpacity:1 }).bindTooltip(`${n}（${name}）`).addTo(OPS_LAYER); });
   }
   // 到着経路（STAR）：使う進入につながるものを、細い線で
-  const ends = new Set(op.arr.flatMap(id => HND_STAR_TO[((HND_APP_KEY[mode] || {})[good ? "good" : "bad"] || {})[id]] || [])), starFrom = new Set();
+  const ends = new Set(op.arr.flatMap(id => HND_STAR_TO[appKey(mode, good, id)] || [])), starFrom = new Set();
   for(const st of HND_STAR){ if(!ends.has(st.to)) continue;
     L.polyline(st.p.map(q => [q[0], q[1]]), { color:shu, weight:1.8, opacity:.7, dashArray:"1 5", noFit:true })
       .bindTooltip(`到着経路：${STAR_FROM[st.from] || st.from} から ${st.to} へ`).addTo(OPS_LAYER);
@@ -3030,6 +3070,7 @@ async function loadTraffic(){
   TRAFFIC_LAYER = L.layerGroup().addTo(OPS_MAP);
   if(!d || !Array.isArray(d.planes)){ $("trafficNote").textContent = "今飛んでいる機体を読み込めませんでした。少し待つと、もう一度読み込みます。"; return; }
   const arr = d.planes.filter(p => p.phase === "arr"), dep = d.planes.filter(p => p.phase === "dep");
+  { const ob = observeOps(d.planes); if(JSON.stringify(ob) !== JSON.stringify(OPS_OBS)){ OPS_OBS = ob; if(OPS_MODE === "auto") renderOps(); } }
   for(const p of d.planes){
     const c = TRAFFIC_COL[p.phase] || TRAFFIC_COL.other;
     if(Array.isArray(p.trail) && p.trail.length > 1 && p.phase !== "other")
@@ -3047,7 +3088,7 @@ function startTraffic(){ stopTraffic(); TRAFFIC_FIT = false; loadTraffic(); TRAF
 function stopTraffic(){ if(TRAFFIC_TIMER) clearInterval(TRAFFIC_TIMER); TRAFFIC_TIMER = null; }
 $("dOps").addEventListener("close", stopTraffic);
 $("opsOpen").onclick = async () => {
-  $("dOps").showModal(); track("ops", "open"); OPS_MODE = "auto";
+  $("dOps").showModal(); track("ops", "open"); OPS_MODE = "auto"; OPS_OBS = null;
   $("opsWx").textContent = "気象通報を読み込んでいます…"; renderOps();
   const [m] = await Promise.all([loadMetar(), loadLeaflet().catch(() => {})]);
   OPS_WX = m; $("opsWx").textContent = wxText(m); renderOps();
