@@ -1,6 +1,6 @@
 # 成田の進入経路と標準到着経路（RNAV STAR）のデータを作る。AIP JAPAN の RJAA AD2 の PDF（SWIM の AIP ファイルダウンロードサービス）から読む。
 #   python3 tools/nrt_routes.py <RJAA__YYYYMMDD.pdf>
-# 出力（標準出力の JSON：{"app":…, "star":…}）を src/index.html の NRT_APP・NRT_STAR に入れる。
+# 出力（標準出力の JSON：{"app":…, "star":…, "sid":…}）を src/index.html の NRT_APP・NRT_STAR・NRT_SID に入れる。
 # 進入は、進入チャート（RJAA AD2.24-IAC）のフィックスの並びを書き写したもの（AIP が改訂されたら、チャートと見比べて直す）。
 # 実行すると、IF・FAF が滑走路の延長線上の正しい距離にあるかを表示する（チャートの NM to THR と比べる）。
 import json, math, re, subprocess, sys
@@ -12,10 +12,10 @@ def deg(s):
     h = s[-1]; s = s[:-1]; k = 3 if h == "E" else 2
     return round(int(s[:k]) + int(s[k:k + 2]) / 60 + float(s[k + 2:]) / 3600, 5)
 
-# STAR のフィックスの座標（STAR のチャートの表から）
+# STAR・SID のフィックスの座標（チャートの表から）
 C = {}
 for p in raw:
-    if "STANDARD ARRIVAL CHART" not in p: continue
+    if "STANDARD ARRIVAL CHART" not in p and "STANDARD DEPARTURE CHART" not in p: continue
     for m in re.finditer(r"\b([A-Z][A-Z0-9]{4})\b[^\n0-9]{0,40}?(\d{6}(?:\.\d+)?N)\s*/?\s*(\d{7}(?:\.\d+)?E)", p):
         C.setdefault(m.group(1), [deg(m.group(2)), deg(m.group(3))])
 
@@ -67,4 +67,16 @@ for p in raw:
         S.append({"from": fx[0], "to": fx[-1], "p": [[*C[f], f] for f in fx]})
 if miss: print("座標が見つからない：", sorted(miss), file=sys.stderr)
 print(f"STAR {len(S)}本：" + ", ".join(f"{s['from']}→{s['to']}" for s in S), file=sys.stderr)
-json.dump({"app": app, "star": S}, sys.stdout, ensure_ascii=False, separators=(",", ":"))
+# SID（RNAV）：「RWY16R : Climb on HDG157˚ …, direct to ASPEN, to …, to TETRA.」を読む。名前は最後のフィックス
+DIR = {"TETRA": "北西へ", "REDEK": "西へ", "PIGOK": "南西へ", "GULBO": "東へ", "BORLO": "南東へ", "PEDLA": "南へ"}
+SID = {}
+for p in raw:
+    if "STANDARD DEPARTURE CHART" not in p: continue
+    flat = re.sub(r"\s+", " ", p)
+    for m in re.finditer(r"RWY ?(\d\d[LR]) : Climb on HDG ?\d+˚[^,]*, (direct to [A-Z][A-Z0-9]{4}.*?)\.(?= |$)", flat):
+        fx = re.findall(r"\bto ?([A-Z][A-Z0-9]{4})\b", m.group(2))
+        if not fx or fx[-1] not in DIR: continue
+        if any(f not in C for f in fx): print("SID の座標が見つからない：", [f for f in fx if f not in C], file=sys.stderr); continue
+        SID.setdefault(m.group(1), {})[fx[-1]] = {"dir": DIR[fx[-1]], "v": {"A": [[*C[f], f] for f in fx]}}
+print("SID：" + ", ".join(f"{r} {sorted(v)}" for r, v in sorted(SID.items())), file=sys.stderr)
+json.dump({"app": app, "star": S, "sid": SID}, sys.stdout, ensure_ascii=False, separators=(",", ":"))
