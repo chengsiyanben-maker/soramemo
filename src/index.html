@@ -548,6 +548,13 @@ ul.fc{margin:4px 0;padding-left:1.2em;line-height:1.9}
 .opsplus{margin-top:8px;padding:8px 10px;border-radius:10px;background:var(--paper);font-size:13px}
 .opsplus b{display:block;color:var(--gold-text)}
 .opsmap{height:340px;border-radius:12px;overflow:hidden;margin:10px 0;background:var(--sky)}
+@media (min-width:640px){.opsmap{height:440px}}
+.opslayers{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.opslayers .chip[aria-pressed="false"]{opacity:.55;text-decoration:line-through}
+.opslegend{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:12px;color:var(--ink2,#555);margin:-2px 0 6px}
+.opslegend span{display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
+.opslegend svg{width:30px;height:8px;flex:none}
+.opsabout{margin:4px 0 8px}.opsabout summary{cursor:pointer;font-size:13px}
 .opsmap .leaflet-container{font:inherit}
 .tplane{background:none;border:none}
 .tplane svg{display:block;filter:drop-shadow(0 1px 1px rgba(0,0,0,.35))}
@@ -826,13 +833,17 @@ details.dev summary{cursor:pointer;color:var(--sumi);font-size:14px;padding:6px 
   <h3>羽田の今の運用</h3>
   <p class="hint" id="opsWx">気象通報を読み込んでいます…</p>
   <div class="opsmodes" role="group" aria-label="運用の切り替え">
-    <button class="chip" data-ops="auto" aria-pressed="true">今の推定</button><button class="chip" data-ops="north" aria-pressed="false">北風</button><button class="chip" data-ops="south" aria-pressed="false">南風</button><button class="chip" data-ops="city" aria-pressed="false">南風（都心）</button>
+    <button class="chip" data-ops="auto" aria-pressed="true">今の運用</button><button class="chip" data-ops="north" aria-pressed="false">北風</button><button class="chip" data-ops="south" aria-pressed="false">南風</button><button class="chip" data-ops="city" aria-pressed="false">南風（都心）</button>
   </div>
   <div class="opsbox" id="opsInfo"></div>
-  <div class="opsmap" id="opsMap" role="img" aria-label="羽田空港の滑走路と最終進入の地図"></div>
-  <p class="hint" id="opsLegend"></p>
+  <div class="opslayers" role="group" aria-label="地図に出すもの">
+    <button class="chip" data-layer="traffic" aria-pressed="true">機体</button><button class="chip" data-layer="star" aria-pressed="true">到着経路</button><button class="chip" data-layer="app" aria-pressed="true">進入経路</button><button class="chip" data-layer="sid" aria-pressed="true">出発経路</button><button class="chip" id="opsFitAll">全体を見る</button>
+  </div>
+  <div class="opsmap" id="opsMap" role="img" aria-label="羽田空港の滑走路と、進入・出発・到着の経路、今飛んでいる機体の地図"></div>
+  <div class="opslegend" id="opsLegendKey"></div>
+  <details class="opsabout"><summary>この地図について</summary><p class="hint" id="opsLegend"></p></details>
   <p class="hint" id="trafficNote"></p>
-  <p class="hint">公表されている運用のルールと気象通報（METAR）をもとにした推定です。実際の運用は管制の指示で変わり、深夜早朝（23時〜6時）や悪天候のときは異なることがあります。航法には使えません。地図：国土地理院</p>
+  <p class="hint">公表されている運用のルール、気象通報（METAR）、今飛んでいる機体の位置をもとにした推定です。実際の運用は管制の指示で変わり、深夜早朝（23時〜6時）や悪天候のときは異なることがあります。航法には使えません。地図：国土地理院</p>
   <button class="btn2 close" data-close>閉じる</button>
 </div></dialog>
 <dialog id="dScan" aria-label="搭乗券を読み取る"><div class="dlg">
@@ -2935,6 +2946,9 @@ const HND_STAR_TO = { "ILS X 34L":["KAIHO"], "ILS Z 34L":["ARLON","CREAM"], "HIG
 const STAR_FROM = { XAC:"大島" };
 // 実際の機体から判定した運用（地図を開いているあいだ、機体を読み込むたびに更新）。mode・apps：{滑走路: 進入のキー}・n：{滑走路: 機数}
 let OPS_OBS = null;
+// 地図に出すもの（この端末にだけ覚える）
+const OPS_SHOW = { traffic:true, star:true, app:true, sid:true };
+try{ Object.assign(OPS_SHOW, JSON.parse(localStorage.getItem("soramemo.opsLayers") || "{}")); }catch(e){}
 const keyName = k => { const n = k.replace(/ \d\d[LR]?$/, ""); return n === "HIGHWAY" ? "ハイウェイビジュアル" : n; };
 function appKey(mode, good, id){
   if(OPS_MODE === "auto" && OPS_OBS && OPS_OBS.mode === mode && OPS_OBS.apps[id]) return OPS_OBS.apps[id];
@@ -3003,7 +3017,7 @@ function renderOps(){
     <br><span class="hint">${op.note}${mode === "north" && est.northNew && OPS_MODE === "auto" ? "　この時間帯は、C滑走路（34R）から北へ離陸して荒川沿いを上昇する新しいルートが使われることがあります。" : ""}</span>`
     ;
   $("opsLegend").textContent = "太い点線は、いまの運用と天気で使うと推定した進入の経路、白い点はその上のフィックスです。経路は、AIP JAPAN（2026年10月1日版）の進入チャートの座標をもとに そらメモ が作ったもので、国が作ったものではなく、最新でない場合があります。実際は管制の指示で途中を短くすることが多く、LDA の最後の曲がる部分は目で見て飛ぶため、線はおおよそです。航空機の運航には使えません。青の点線は、その運用で使う主な標準出発経路（RNAV SID。AIP の同じ版から作成）で、行き先の方向ごとに分かれます。時間帯によって経路が変わるもの（ROVER・BEKLA）は、いまの時刻のものを出しています。細かい点線は、その進入につながる標準到着経路（RNAV STAR）で、入口の名前を付けています（深夜早朝の経路は出していません）。";
-  drawOpsMap(rw, op, plus, mode, est.good);
+  drawOpsMap(rw, op, plus, mode, est.good); opsLegendKey();
 }
 function drawOpsMap(rw, op, plus, mode, good){
   if(!window.L || !$("dOps").open) return;
@@ -3024,7 +3038,7 @@ function drawOpsMap(rw, op, plus, mode, good){
     for(const r of [r1, r2]) L.marker(dest(r.end, (r.hdg + 180) % 360, 0.35), { icon: L.divIcon({ className:"rwylabel", html:r.id, iconSize:[30, 14] }) }).addTo(OPS_LAYER);
   }
   // 進入・離陸の線（いまは全員に見せる。10月13日に そらメモ＋ の制限を外した）
-  for(const id of op.arr){
+  if(OPS_SHOW.app) for(const id of op.arr){
     const key = appKey(mode, good, id), a = key && HND_APP[key];
     if(!a){ const r = rw[id], far = dest(r.thr, (r.hdg + 180) % 360, 18.52);
       L.polyline([far, r.thr], { color:shu, weight:3, dashArray:"8 7" }).bindTooltip(`RWY ${id} 最終進入（約10海里）`).addTo(OPS_LAYER); continue; }
@@ -3035,7 +3049,7 @@ function drawOpsMap(rw, op, plus, mode, good){
   }
   // 到着経路（STAR）：使う進入につながるものを、細い線で
   const ends = new Set(op.arr.flatMap(id => HND_STAR_TO[appKey(mode, good, id)] || [])), starFrom = new Set();
-  for(const st of HND_STAR){ if(!ends.has(st.to)) continue;
+  if(OPS_SHOW.star) for(const st of HND_STAR){ if(!ends.has(st.to)) continue;
     L.polyline(st.p.map(q => [q[0], q[1]]), { color:shu, weight:1.8, opacity:.7, dashArray:"1 5", noFit:true })
       .bindTooltip(`到着経路：${STAR_FROM[st.from] || st.from} から ${st.to} へ`).addTo(OPS_LAYER);
     if(!starFrom.has(st.from)){ starFrom.add(st.from); const q = st.p[0];
@@ -3043,7 +3057,7 @@ function drawOpsMap(rw, op, plus, mode, good){
   }
   const vr = sidVariant();
   for(const id of op.dep){ const r = rw[id], sids = ((HND_SID_USE[mode] || {})[id] || []).map(n => [n, (HND_SID[id] || {})[n]]).filter(x => x[1]);
-    if(!sids.length){ L.polyline([r.thr, dest(r.opp, r.hdg, 5)], { color:"#2B6CB0", weight:3, dashArray:"2 6" }).bindTooltip(`RWY ${id} 離陸（滑走路の向きに上昇）`).addTo(OPS_LAYER); continue; }
+    if(!sids.length || !OPS_SHOW.sid){ if(!OPS_SHOW.sid){ L.polyline([r.thr, r.opp], { color:"#2B6CB0", weight:3, opacity:.9 }).addTo(OPS_LAYER); continue; } L.polyline([r.thr, dest(r.opp, r.hdg, 5)], { color:"#2B6CB0", weight:3, dashArray:"2 6" }).bindTooltip(`RWY ${id} 離陸（滑走路の向きに上昇）`).addTo(OPS_LAYER); continue; }
     L.polyline([r.thr, r.opp], { color:"#2B6CB0", weight:3, opacity:.9 }).addTo(OPS_LAYER);
     for(const [n, sd] of sids){ const pts = sd.v[vr] || sd.v.A, line = [r.opp, dest(r.opp, r.hdg, 1.5), ...pts.map(q => [q[0], q[1]])];
       L.polyline(line, { color:"#2B6CB0", weight:2, dashArray:"2 6", opacity:.85, noFit:true }).bindTooltip(`RWY ${id} から ${n}（${sd.dir}）の出発経路`).addTo(OPS_LAYER);
@@ -3051,6 +3065,26 @@ function drawOpsMap(rw, op, plus, mode, good){
   }
   setTimeout(() => { OPS_MAP.invalidateSize(); if(TRAFFIC_FIT) return; const bd = L.featureGroup(OPS_LAYER.getLayers().filter(l => l instanceof L.Polyline && !l.options.noFit)).getBounds(); if(bd.isValid()) OPS_MAP.fitBounds(bd, { padding:[18, 18] }); }, 60);
 }
+// 地図の凡例（いま出しているものだけ）
+function opsLegendKey(){
+  const shu = getComputedStyle(document.documentElement).getPropertyValue("--shu").trim() || "#111111";
+  const ln = (c, w, dash, op = 1) => `<svg viewBox="0 0 30 8" aria-hidden="true"><line x1="1" y1="4" x2="29" y2="4" stroke="${c}" stroke-width="${w}" stroke-dasharray="${dash}" stroke-opacity="${op}" stroke-linecap="round"/></svg>`;
+  const it = [];
+  if(OPS_SHOW.traffic) it.push(`<span>${ln(TRAFFIC_COL.arr, 3, "")}着陸に向かう機体</span>`, `<span>${ln(TRAFFIC_COL.dep, 2.5, "")}離陸した機体</span>`);
+  if(OPS_SHOW.star) it.push(`<span>${ln(shu, 1.8, "1 4", .7)}到着経路</span>`);
+  if(OPS_SHOW.app) it.push(`<span>${ln(shu, 3, "6 5")}進入経路</span>`);
+  if(OPS_SHOW.sid) it.push(`<span>${ln("#2B6CB0", 2, "2 5")}出発経路</span>`);
+  $("opsLegendKey").innerHTML = it.join("");
+}
+document.querySelectorAll("[data-layer]").forEach(b => {
+  b.setAttribute("aria-pressed", String(OPS_SHOW[b.dataset.layer]));
+  b.onclick = () => { const k = b.dataset.layer; OPS_SHOW[k] = !OPS_SHOW[k]; b.setAttribute("aria-pressed", String(OPS_SHOW[k]));
+    try{ localStorage.setItem("soramemo.opsLayers", JSON.stringify(OPS_SHOW)); }catch(e){}
+    if(k === "traffic"){ if(TRAFFIC_LAYER && OPS_MAP){ OPS_SHOW.traffic ? TRAFFIC_LAYER.addTo(OPS_MAP) : TRAFFIC_LAYER.remove(); } opsLegendKey(); }
+    else renderOps(); };
+});
+$("opsFitAll").onclick = () => { if(!OPS_MAP) return; const ls = [...(OPS_LAYER ? OPS_LAYER.getLayers() : []), ...(TRAFFIC_LAYER && OPS_SHOW.traffic ? TRAFFIC_LAYER.getLayers() : [])].filter(l => l instanceof L.Polyline);
+  const bd = L.featureGroup(ls).getBounds(); if(bd.isValid()) OPS_MAP.fitBounds(bd, { padding:[16, 16] }); };
 /* 今飛んでいる機体と、通ってきた線（OpenSky。10〜20秒遅れ）。地図を開いているあいだ、30秒ごとに読み直す */
 let TRAFFIC_LAYER = null, TRAFFIC_TIMER = null, TRAFFIC_FIT = false;
 const TRAFFIC_COL = { arr:"#A3166B", dep:"#2B6CB0", other:"#5C6B7A" };
@@ -3067,7 +3101,7 @@ async function loadTraffic(){
     if(r.ok) d = await r.json(); }catch(e){}
   if(!$("dOps").open) return;
   if(TRAFFIC_LAYER) TRAFFIC_LAYER.remove();
-  TRAFFIC_LAYER = L.layerGroup().addTo(OPS_MAP);
+  TRAFFIC_LAYER = L.layerGroup(); if(OPS_SHOW.traffic) TRAFFIC_LAYER.addTo(OPS_MAP);
   if(!d || !Array.isArray(d.planes)){ $("trafficNote").textContent = "今飛んでいる機体を読み込めませんでした。少し待つと、もう一度読み込みます。"; return; }
   const arr = d.planes.filter(p => p.phase === "arr"), dep = d.planes.filter(p => p.phase === "dep");
   { const ob = observeOps(d.planes); if(JSON.stringify(ob) !== JSON.stringify(OPS_OBS)){ OPS_OBS = ob; if(OPS_MODE === "auto") renderOps(); } }
