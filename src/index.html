@@ -785,12 +785,29 @@ details.dev summary{cursor:pointer;color:var(--sumi);font-size:14px;padding:6px 
     <h2>ステータスの目安</h2>
     <div class="sgrid" id="statusBox"></div>
   </section>
+  <section class="view" id="v-ops" aria-label="運用">
+  <h2>羽田の今の運用</h2>
+  <p class="hint" id="opsWx">気象通報を読み込んでいます…</p>
+  <div class="opsmodes" role="group" aria-label="運用の切り替え">
+    <button class="chip" data-ops="auto" aria-pressed="true">今の運用</button><button class="chip" data-ops="north" aria-pressed="false">北風</button><button class="chip" data-ops="south" aria-pressed="false">南風</button><button class="chip" data-ops="city" aria-pressed="false">南風（都心）</button>
+  </div>
+  <div class="opsbox" id="opsInfo"></div>
+  <div class="opslayers" role="group" aria-label="地図に出すもの">
+    <button class="chip" data-layer="traffic" aria-pressed="true">機体</button><button class="chip" data-layer="star" aria-pressed="true">到着経路</button><button class="chip" data-layer="app" aria-pressed="true">進入経路</button><button class="chip" data-layer="sid" aria-pressed="true">出発経路</button><button class="chip" id="opsFitAll">全体を見る</button>
+  </div>
+  <div class="opsmap" id="opsMap" role="img" aria-label="羽田空港の滑走路と、進入・出発・到着の経路、今飛んでいる機体の地図"></div>
+  <div class="opslegend" id="opsLegendKey"></div>
+  <details class="opsabout"><summary>この地図について</summary><p class="hint" id="opsLegend"></p></details>
+  <p class="hint" id="trafficNote"></p>
+  <p class="hint">公表されている運用のルール、気象通報（METAR）、今飛んでいる機体の位置をもとにした推定です。実際の運用は管制の指示で変わり、深夜早朝（23時〜6時）や悪天候のときは異なることがあります。航法には使えません。地図：国土地理院</p>
+  </section>
 </main>
 
 <nav class="tabs" aria-label="画面の切り替え"><div class="in">
   <button data-v="home" data-mode="rally" aria-current="page">ホーム</button>
   <button data-v="book" data-mode="rally">図鑑</button>
   <button data-v="log" data-mode="rally">フライト</button>
+  <button data-v="ops" data-mode="rally">運用</button>
   <button data-v="stats" data-mode="rally">成績</button>
   <button data-v="co" data-mode="game" hidden>会社</button>
   <button data-v="fleet" data-mode="game" hidden>路線・機材</button>
@@ -837,23 +854,6 @@ details.dev summary{cursor:pointer;color:var(--sumi);font-size:14px;padding:6px 
   <button class="btn2" id="fPhoto" style="width:100%;margin-bottom:8px">写真に押す</button>
   <p class="msg" id="fMsg" role="status" aria-live="polite"></p>
   <div class="row2"><button class="btn2" id="fCancel">閉じる</button><button class="btn1" id="fSave">記録する</button></div>
-</div></dialog>
-<dialog id="dOps" aria-label="羽田の今の運用"><div class="dlg dlg-wide">
-  <h3>羽田の今の運用</h3>
-  <p class="hint" id="opsWx">気象通報を読み込んでいます…</p>
-  <div class="opsmodes" role="group" aria-label="運用の切り替え">
-    <button class="chip" data-ops="auto" aria-pressed="true">今の運用</button><button class="chip" data-ops="north" aria-pressed="false">北風</button><button class="chip" data-ops="south" aria-pressed="false">南風</button><button class="chip" data-ops="city" aria-pressed="false">南風（都心）</button>
-  </div>
-  <div class="opsbox" id="opsInfo"></div>
-  <div class="opslayers" role="group" aria-label="地図に出すもの">
-    <button class="chip" data-layer="traffic" aria-pressed="true">機体</button><button class="chip" data-layer="star" aria-pressed="true">到着経路</button><button class="chip" data-layer="app" aria-pressed="true">進入経路</button><button class="chip" data-layer="sid" aria-pressed="true">出発経路</button><button class="chip" id="opsFitAll">全体を見る</button>
-  </div>
-  <div class="opsmap" id="opsMap" role="img" aria-label="羽田空港の滑走路と、進入・出発・到着の経路、今飛んでいる機体の地図"></div>
-  <div class="opslegend" id="opsLegendKey"></div>
-  <details class="opsabout"><summary>この地図について</summary><p class="hint" id="opsLegend"></p></details>
-  <p class="hint" id="trafficNote"></p>
-  <p class="hint">公表されている運用のルール、気象通報（METAR）、今飛んでいる機体の位置をもとにした推定です。実際の運用は管制の指示で変わり、深夜早朝（23時〜6時）や悪天候のときは異なることがあります。航法には使えません。地図：国土地理院</p>
-  <button class="btn2 close" data-close>閉じる</button>
 </div></dialog>
 <dialog id="dScan" aria-label="搭乗券を読み取る"><div class="dlg">
   <h3>搭乗券を読み取る</h3>
@@ -1156,7 +1156,7 @@ function hndOpsHTML(w, taf){
     ${next ? `<p class="opsnext">${esc(next)}</p>` : ""}
     <div class="nowfoot"><p class="src" style="margin:0;line-height:1.5">風と天気から推し量ったもので、実際の運用と違うことがあります（好天の目安：視程5km以上・雲底2,500ft以上）。進入方式は国土交通省の運用区分による。</p><button class="linkbtn2" data-hnd-map>地図で見る</button></div></div>`;
 }
-document.addEventListener("click", e => { if(!e.target.closest("[data-hnd-map]")) return; $("dAirport").close(); $("opsOpen").click(); });
+document.addEventListener("click", e => { if(!e.target.closest("[data-hnd-map]")) return; $("dAirport").close(); goTab("ops"); });
 // この先の予報（TAF）：区切りごとに1行。「21時〜 北の風12ノット くもり」「明日3時ごろから 東の風8ノット」「一時 雨」
 function tafHTML(t){
   if(!t || !Array.isArray(t.periods) || !t.periods.length) return "";
@@ -1807,7 +1807,9 @@ function goTab(v, seg){
   if(b.dataset.mode !== MODE) setMode(b.dataset.mode, false);
   document.querySelectorAll("nav.tabs button").forEach(x => x.removeAttribute("aria-current"));
   b.setAttribute("aria-current","page"); LAST_TAB[MODE] = v;
+  const wasOps = $("v-ops").classList.contains("on");
   document.querySelectorAll("section.view").forEach(s => s.classList.toggle("on", s.id === "v-" + v));
+  if(v === "ops" && !wasOps) openOps(); else if(v !== "ops" && wasOps) stopTraffic();
   if(seg) setBookSeg(seg);
   renderVisible();
   window.scrollTo(0,0);
@@ -1871,7 +1873,7 @@ function openAirport(id){
   NOW = null; if(canNow(a)){ loadNow(a); renderNow(); }
 }
 document.addEventListener("click", e => { const b = e.target.closest("[data-ap-ops]"); if(!b) return;
-  $("dAirport").close(); $("opsOpen").click(); });
+  $("dAirport").close(); goTab("ops"); });
 $("checkin").onclick = checkin;
 $("probe").onclick = async () => {
   const o = $("probeOut"); o.textContent = "新しい位置を取得しています…（最大12秒）";
@@ -3067,7 +3069,7 @@ function renderOps(){
   drawOpsMap(rw, op, plus, mode, est.good); opsLegendKey();
 }
 function drawOpsMap(rw, op, plus, mode, good){
-  if(!window.L || !$("dOps").open) return;
+  if(!window.L || !opsOn()) return;
   if(!OPS_MAP){
     OPS_MAP = L.map("opsMap", { zoomControl:true, attributionControl:true }).setView([35.60, 139.80], 10);
     OPS_MAP.attributionControl.setPrefix('<a href="https://leafletjs.com" target="_blank" rel="noopener">Leaflet</a>');
@@ -3142,11 +3144,11 @@ function planeIcon(p){
     html:`<svg viewBox="0 0 24 24" width="22" height="22" style="transform:rotate(${rot}deg)" aria-hidden="true"><path d="M12 2l1.6 7.2 7.4 4.3v2l-7.4-2.1-.4 5.1 2.4 1.8v1.6L12 21l-3.6.9v-1.6l2.4-1.8-.4-5.1L3 15.5v-2l7.4-4.3z" fill="${c}" stroke="#fff" stroke-width=".8"/></svg>${label}` });
 }
 async function loadTraffic(){
-  if(!$("dOps").open || !window.L || !OPS_MAP || !SERVER) return;
+  if(!opsOn() || !window.L || !OPS_MAP || !SERVER) return;
   let d = null;
   try{ const r = await fetch(SORAMEMO_CONFIG.supabaseUrl.replace(/\/$/, "") + "/functions/v1/airport-traffic?iata=HND", { headers:{ apikey:SORAMEMO_CONFIG.supabaseAnonKey, Authorization:"Bearer " + SORAMEMO_CONFIG.supabaseAnonKey } });
     if(r.ok) d = await r.json(); }catch(e){}
-  if(!$("dOps").open) return;
+  if(!opsOn()) return;
   if(TRAFFIC_LAYER) TRAFFIC_LAYER.remove();
   TRAFFIC_LAYER = L.layerGroup(); if(OPS_SHOW.traffic) TRAFFIC_LAYER.addTo(OPS_MAP);
   if(!d || !Array.isArray(d.planes)){ $("trafficNote").textContent = "今飛んでいる機体を読み込めませんでした。少し待つと、もう一度読み込みます。"; return; }
@@ -3167,15 +3169,17 @@ async function loadTraffic(){
 }
 function startTraffic(){ stopTraffic(); TRAFFIC_FIT = false; loadTraffic(); TRAFFIC_TIMER = setInterval(loadTraffic, 30_000); }
 function stopTraffic(){ if(TRAFFIC_TIMER) clearInterval(TRAFFIC_TIMER); TRAFFIC_TIMER = null; }
-$("dOps").addEventListener("close", stopTraffic);
-$("opsOpen").onclick = async () => {
-  $("dOps").showModal(); track("ops", "open"); OPS_MODE = "auto"; OPS_OBS = null;
+const opsOn = () => $("v-ops").classList.contains("on");
+// 運用のタブを開いたとき（ほかのタブへ移ったら、機体の読み込みを止める）
+async function openOps(){
+  track("ops", "open"); OPS_MODE = "auto"; OPS_OBS = null;
   $("opsWx").textContent = "気象通報を読み込んでいます…"; renderOps();
   const [m] = await Promise.all([loadMetar(), loadLeaflet().catch(() => {})]);
   OPS_WX = m; $("opsWx").textContent = wxText(m); renderOps();
   setTimeout(startTraffic, 120);   // 地図ができてから
-};
-document.addEventListener("click", e => { if(e.target.id === "opsJoin"){ track("plus_view", "ops"); $("dOps").close(); $("dSettings").showModal(); } });
+}
+$("opsOpen").onclick = () => goTab("ops");
+document.addEventListener("click", e => { if(e.target.id === "opsJoin"){ track("plus_view", "ops"); $("dSettings").showModal(); } });
 document.addEventListener("click", e => { const b = e.target.closest("[data-ops]"); if(!b) return; OPS_MODE = b.dataset.ops; track("ops", OPS_MODE); renderOps(); });
 
 
