@@ -543,6 +543,7 @@ ol.steps{padding-left:1.4em;line-height:1.9}
 .opsrows small{font-size:12px;margin:0 6px 0 1px}
 .opswhy summary{cursor:pointer;font-size:13px;color:#5C6B7A}.opswhy p{margin:4px 0 0;font-size:13px;line-height:1.7;color:#3A4656}
 .opsdiag{display:block;width:100%;max-width:340px;max-height:300px;margin:6px auto 2px;background:#F4F7FB;border-radius:10px}
+.hndops .opsdiag{max-width:240px;max-height:220px;margin:6px 0 4px}
 .opswind{font-size:12px;color:#3A4656}.opswind .arw{display:inline-block;font-weight:800;margin-right:3px}
 .opsbox .rw{display:inline-block;border-radius:6px;padding:0 6px;margin:0 2px;font-weight:700;font-size:13px}
 .opsbox .rw.arr{background:var(--shu);color:var(--on-shu)}
@@ -1148,6 +1149,7 @@ function hndOpsHTML(w, taf){
   const cond = est.good ? "好天時の進入" : "好天時以外（視程や雲が悪い）の進入";
   return `<div class="hndops"><div class="opshead"><b>滑走路と進入の今</b><span>推定</span></div>
     <p class="opsmode">${op.label}</p>
+    ${hndDiagram(op, hndRunways(), est.mode, est.good)}
     <ul class="opsapp">${op.arr.map(r => `<li><span class="rw arr">${r}</span><b>${esc(appName(est.mode, est.good, r))}</b></li>`).join("")}</ul>
     <p class="opsrw">離陸 ${op.dep.map(r => `<span class="rw dep">${r}</span>`).join("")}</p>
     <p class="opsnote">${esc(cond)}。${esc(op.note)}${est.night ? (est.mode === "north" ? "" : "深夜（23〜6時）の南・西の風では、D滑走路（RWY23）が中心で、閉鎖中は VOR-A（RWY16L）になることがあります。") : ""}${est.night ? "深夜早朝は、海上を使う別の運用になることがあります。" : ""}</p>
