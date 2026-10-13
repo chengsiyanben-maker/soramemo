@@ -595,6 +595,16 @@ details.dev summary{cursor:pointer;color:var(--sumi);font-size:14px;padding:6px 
 .login{margin:18px 0 0;padding:16px;background:var(--paper);border-radius:12px}
 .login input{width:100%;padding:12px;border:1px solid var(--line);border-radius:10px;background:var(--sky)}
 [hidden]{display:none !important}
+
+details.rgrp{border-bottom:1px solid var(--line,#E2E8EF);padding:2px 0 6px}
+details.rgrp>summary{list-style:none;cursor:pointer;display:grid;grid-template-columns:1fr;gap:4px;padding:8px 0 4px}
+details.rgrp>summary::-webkit-details-marker{display:none}
+details.rgrp>summary h3{margin:0;display:flex;justify-content:space-between;align-items:baseline}
+details.rgrp>summary h3::after{content:"＋";font-size:13px;color:var(--sumi);margin-left:8px}
+details.rgrp[open]>summary h3::after{content:"−"}
+details.rgrp .rgn{margin-left:auto;font-size:13px;font-weight:600;color:var(--sumi)}
+details.rgrp .rgbar{display:block;height:4px;border-radius:2px;background:var(--line,#E2E8EF);overflow:hidden}
+details.rgrp .rgbar i{display:block;height:100%;background:var(--shu)}
 </style>
 </head>
 <body>
@@ -878,7 +888,7 @@ details.dev summary{cursor:pointer;color:var(--sumi);font-size:14px;padding:6px 
       <li>年間まとめ（その年の空港・路線・距離を一枚に）</li>
       <li>過去フライトの一括取り込み</li>
       <li>ステータスの先読み（到達の予測・あと何回）</li>
-      <li>羽田の運用の詳しい表示（地図の進入・離陸の線、気象通報の詳しい値）</li>
+      <li>羽田の運用の推定の詳しい理由（気象通報の詳しい値）</li>
     </ul>
     <p class="hint">月額500円、または年額4,800円（2か月分お得）。</p>
   </section>
@@ -1623,13 +1633,17 @@ function renderBook(){
     + (pend ? `「便が未記録」の空港は、フライトの画面でそのフライトに航空会社を記録すると${FOCUS}の数に入ります。` : "");
   $("book").innerHTML = REGION.map(([rg, prefs]) => {
     const list = A.filter(a => prefs.includes(a.pref)); const got = list.filter(a => v.has(a.id)).length;
-    return `<h3>${rg}　${got} / ${list.length}</h3><div class="grid">${list.map(a => v.has(a.id)
+    const open = got > 0 || RB_OPEN.has(rg);
+    return `<details class="rgrp" data-rg="${rg}"${open ? " open" : ""}><summary><h3>${rg}<span class="rgn">${got} / ${list.length}</span></h3><span class="rgbar"><i style="width:${Math.round(got / list.length * 100)}%"></i></span></summary><div class="grid">${list.map(a => v.has(a.id)
       ? `<button class="cell got${FOCUS !== "ALL" && !fa.has(a.id) && !ua.has(a.id) ? " dim" : ""}" data-a="${a.id}"><div class="slot">${stampSVG(a, v.get(a.id))}${(vc.get(a.id)||0) > 1 ? `<span class="vcount">×${vc.get(a.id)}</span>` : ""}</div><div class="nm">${stripesMini(tierOf(vc.get(a.id)||0))}${a.name}${FOCUS !== "ALL" && !fa.has(a.id) && ua.has(a.id) ? `<span class="pend">便が未記録</span>` : ""}</div></button>`
-      : `<div class="cell"><div class="slot">${emptySVG(a)}</div><div class="nm">${a.name}${a.rare?"（離島）":""}</div></div>`).join("")}</div>${termGrid(prefs)}`;
+      : `<div class="cell"><div class="slot">${emptySVG(a)}</div><div class="nm">${a.name}${a.rare?"（離島）":""}</div></div>`).join("")}</div>${termGrid(prefs)}</details>`;
   }).join("");
   $("bookAir").innerHTML = `<div class="book-head"><h2>飛行場・滑空場</h2></div>` + extraBook(["field", "glider"], "定期便のない空港や小型機の飛行場、グライダーの滑空場です。86空港の全国制覇には数えず、別の実績があります。");
   $("bookExtra").innerHTML = `<div class="book-head"><h2>番外編</h2></div>` + extraBook(["mil"], "自衛隊・米軍の飛行場です。86空港の全国制覇には数えず、別の実績があります。基地の中には入れないので、フェンスの外から押せる距離にしてあります。");
 }
+// 図鑑の地方：印のある地方と、自分で開いた地方だけ開いておく（未訪問の丸が長く続かないように）
+const RB_OPEN = new Set();
+document.addEventListener("toggle", e => { const d = e.target; if(!d.matches || !d.matches("details.rgrp")) return; d.open ? RB_OPEN.add(d.dataset.rg) : RB_OPEN.delete(d.dataset.rg); }, true);
 // 番外編の図鑑（自衛隊・米軍の飛行場、滑空場、飛行場）。全国制覇などには数えない
 function extraBook(kinds, note){
   const xv = visitedExtra(), vc = new Map(); for(const c of S.checkins) if(IS_EXTRA(c.a)) vc.set(c.a, (vc.get(c.a) || 0) + 1);
@@ -1889,12 +1903,28 @@ $("vlogClear").onclick = () => { if(confirm("検証ログを消します。")){ 
 $("demoAirport").onchange = () => { showNearest(nearest(demoPlace())); say(""); };
 $("openSettings").onclick = () => { renderBaseSel(); $("dSettings").showModal(); };
 $("closeSettings").onclick = () => $("dSettings").close();
+// お試しモードの見本：始めたときに、1年ぶんの旅（16空港・30フライト）をたまった状態で見せる。お試しの記録は本番とは別に保存される
+function demoSeed(){
+  if(!demo || S.checkins.length) return;
+  const legs = [["HND","CTS","JL"],["CTS","HND","JL"],["HND","FUK","NH"],["FUK","HND","NH"],["HND","OKA","JL"],["OKA","ISG","NU"],["ISG","OKA","NU"],["OKA","HND","JL"],
+    ["HND","ITM","NH"],["ITM","HND","NH"],["HND","KMQ","JL"],["KMQ","HND","JL"],["HND","HKD","NH"],["HKD","HND","NH"],["HND","KOJ","JL"],["KOJ","HND","JL"],
+    ["HND","AKJ","NH"],["AKJ","HND","NH"],["HND","KCZ","JL"],["KCZ","HND","JL"],["HND","NGS","NH"],["NGS","HND","NH"],["HND","SDJ","JL"],["SDJ","HND","JL"],
+    ["HND","MMY","JL"],["MMY","HND","JL"],["HND","HIJ","NH"],["HIJ","HND","NH"],["HND","OIT","NH"],["OIT","HND","NH"]];
+  let t = Date.now() - 330 * 864e5;
+  for(let i = 0; i < legs.length; i++){ const [f, to, al] = legs[i], A1 = IATA[f], A2 = IATA[to]; if(!A1 || !A2) continue;
+    const d = km(A1, A2), dur = Math.round((d / 700 + 0.5) * 36e5);
+    if(i % 2 === 0 || S.checkins.length === 0 || S.checkins[S.checkins.length - 1].a !== A1.id) S.checkins.push({a:A1.id, t, acc:12, term:null});
+    const arr = t + dur; S.checkins.push({a:A2.id, t:arr, acc:12, term:null});
+    S.flights.push({id:"a" + arr, from:A1.id, to:A2.id, dep:t, arr, km:d, airline:al, no:null, fare:null, seat:null});
+    t = arr + (i % 2 === 0 ? 2 : 9) * 864e5 + 3 * 36e5; }
+  S.demoClock = t; save();
+}
 $("toggleDemo").onclick = async () => {
   if(demo){ try{ localStorage.removeItem("soramemo.demo.v1"); }catch(e){} }
   demo = !demo; document.body.classList.toggle("demo", demo); CO = null; setMode(MODE);
   $("toggleDemo").textContent = demo ? "終了" : "開始";
   await reload(); say("");
-  if(demo){ showNearest(nearest(demoPlace())); }
+  if(demo){ demoSeed(); render(); showNearest(nearest(demoPlace())); say("見本の記録（1年ぶん・16空港・30フライト）を入れてあります。チェックインすると、ここに足されます。"); }
   else { $("nearName").textContent="空港に着いたら、印を押そう"; $("nearName").classList.add("idle"); $("nearDist").textContent="チェックインを押すと、現在地からいちばん近い空港を調べます。"; $("nearDist").classList.remove("ok"); }
   $("dSettings").close();
 };
@@ -2413,7 +2443,7 @@ document.addEventListener("visibilitychange", () => { if(document.visibilityStat
 document.addEventListener("click", e => { if(e.target.closest("[data-flush]")) flushQueue(); });
 
 
-/* ---------- そらメモ＋（年間まとめ・一括取り込み・羽田の運用の詳しい表示） ---------- */
+/* ---------- そらメモ＋（年間まとめ・一括取り込み・羽田の運用の詳しい理由） ---------- */
 let PLUS = false, PLUS_UNTIL = null;
 const plusOn = () => demo || (SERVER && PLUS);
 async function loadPlus(){ if(!sb || !user){ PLUS = false; return; }
@@ -2421,11 +2451,11 @@ async function loadPlus(){ if(!sb || !user){ PLUS = false; return; }
 function renderPlusSettings(){
   const info = $("plusInfo"), btn = $("plusBtn");
   btn.hidden = true; $("plusBtnYear").hidden = true;
-  if(demo){ info.textContent = "デモモードでは、年間まとめ・一括取り込み・ステータスの先読み・羽田の運用の詳しい表示をお試しできます。"; return; }
-  if(!SERVER){ info.textContent = "年間まとめ・過去フライトの一括取り込み・ステータスの先読み・羽田の運用の詳しい表示（月額500円・年額4,800円）。サーバー版でログインすると申し込めます。"; return; }
+  if(demo){ info.textContent = "デモモードでは、年間まとめ・一括取り込み・ステータスの先読み・羽田の運用の詳しい理由をお試しできます。"; return; }
+  if(!SERVER){ info.textContent = "年間まとめ・過去フライトの一括取り込み・ステータスの先読み・羽田の運用の詳しい理由（月額500円・年額4,800円）。サーバー版でログインすると申し込めます。"; return; }
   if(!user){ info.textContent = "ログインすると申し込めます（月額500円・年額4,800円）。"; return; }
-  if(PLUS){ info.textContent = `加入中${PLUS_UNTIL ? `（次の更新 ${fmtD(PLUS_UNTIL)}）` : ""}。年間まとめ・一括取り込み・ステータスの先読み・羽田の運用の詳しい表示が使えます。`; btn.hidden = false; btn.textContent = "管理・解約"; btn.dataset.act = "portal"; return; }
-  info.textContent = "年間まとめ、過去フライトの一括取り込み、ステータスの先読み（到達の予測・あと何回）、羽田の運用の詳しい表示（地図の進入・離陸の線、気象通報の詳しい値）が使えます。月額500円、または年額4,800円（2か月分お得）。";
+  if(PLUS){ info.textContent = `加入中${PLUS_UNTIL ? `（次の更新 ${fmtD(PLUS_UNTIL)}）` : ""}。年間まとめ・一括取り込み・ステータスの先読み・羽田の運用の詳しい理由が使えます。`; btn.hidden = false; btn.textContent = "管理・解約"; btn.dataset.act = "portal"; return; }
+  info.textContent = "年間まとめ、過去フライトの一括取り込み、ステータスの先読み（到達の予測・あと何回）、羽田の運用の推定の詳しい理由（気象通報の詳しい値）が使えます。月額500円、または年額4,800円（2か月分お得）。";
   btn.hidden = false; btn.textContent = "月額500円"; btn.dataset.act = "checkout"; btn.dataset.plan = "month"; $("plusBtnYear").hidden = false;
 }
 async function plusGo(b){
