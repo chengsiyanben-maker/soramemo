@@ -3246,7 +3246,7 @@ function drawOpsMap(rw, op, plus, mode, good){
     // 滑走路の番号は、拡大したときだけ出す（引いた縮尺では重なって読めないため）
     const syncLabels = () => $("opsMap").classList.toggle("lbl", OPS_MAP.getZoom() >= 13);
     OPS_MAP.on("zoomend", syncLabels); syncLabels();
-    L.tileLayer("https://cyberjapandata.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png", { maxZoom:18, attribution:'<a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank" rel="noopener">国土地理院</a>' }).addTo(OPS_MAP);
+    opsBaseMap();
   }
   if(OPS_LAYER) OPS_LAYER.remove();
   // 空港を切り替えたときは、線を描く前に地図をその空港へ動かす（前の空港のまま描くと、Leaflet の描画が壊れて止まることがある）
@@ -3288,6 +3288,29 @@ function drawOpsMap(rw, op, plus, mode, good){
       const e = pts[pts.length - 1]; L.marker([e[0], e[1]], { icon:L.divIcon({ className:"sidlabel", html:`${n}<small>${sd.dir}</small>`, iconSize:[54, 26], iconAnchor:[27, 13] }) }).addTo(OPS_LAYER); }
   }
   setTimeout(() => { OPS_MAP.invalidateSize(); if(TRAFFIC_FIT) return; const bd = L.featureGroup(OPS_LAYER.getLayers().filter(l => l instanceof L.Polyline && !l.options.noFit)).getBounds(); if(bd.isValid()) OPS_MAP.fitBounds(bd, { padding:[18, 18], animate:false }); }, 60);
+}
+// 運用の地図の下地：道路だけ（国土地理院のベクトルタイルから道路の層だけを描く。地名・建物・記号は出さない）
+// ベクトルタイルを描けない端末（WebGL が使えないなど）では、これまでの淡色地図にする
+const MAPLIBRE = { js:"https://cdn.jsdelivr.net/npm/maplibre-gl@4.7.1/dist/maplibre-gl.js", css:"https://cdn.jsdelivr.net/npm/maplibre-gl@4.7.1/dist/maplibre-gl.css",
+  bridge:"https://cdn.jsdelivr.net/npm/@maplibre/maplibre-gl-leaflet@0.0.22/leaflet-maplibre-gl.js" };
+const GSI_ATTR = '<a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank" rel="noopener">国土地理院</a>';
+async function opsBaseMap(){
+  const map = OPS_MAP, pale = () => L.tileLayer("https://cyberjapandata.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png", { maxZoom:18, attribution:GSI_ATTR }).addTo(map);
+  try{
+    const c = document.createElement("canvas"); if(!(c.getContext("webgl2") || c.getContext("webgl"))) throw new Error("no webgl");
+    if(!document.querySelector(`link[href="${MAPLIBRE.css}"]`)){ const l = document.createElement("link"); l.rel = "stylesheet"; l.href = MAPLIBRE.css; document.head.appendChild(l); }
+    await loadScript(MAPLIBRE.js); await loadScript(MAPLIBRE.bridge);
+    if(map !== OPS_MAP || !L.maplibreGL) throw new Error("no bridge");
+    const w = (a, b, c) => ["interpolate", ["linear"], ["zoom"], 8, a, 12, b, 16, c];
+    L.maplibreGL({ attribution:GSI_ATTR, style:{ version:8,
+      sources:{ gsi:{ type:"vector", tiles:["https://cyberjapandata.gsi.go.jp/xyz/experimental_bvmap/{z}/{x}/{y}.pbf"], minzoom:4, maxzoom:16 } },
+      layers:[
+        { id:"bg", type:"background", paint:{ "background-color":"#FAFAF8" } },
+        { id:"road", type:"line", source:"gsi", "source-layer":"road", filter:["!=", ["get", "motorway"], 1],
+          layout:{ "line-cap":"round", "line-join":"round" }, paint:{ "line-color":"#D3D6DA", "line-width":w(.4, .9, 2.4) } },
+        { id:"motorway", type:"line", source:"gsi", "source-layer":"road", filter:["==", ["get", "motorway"], 1],
+          layout:{ "line-cap":"round", "line-join":"round" }, paint:{ "line-color":"#A9B0B8", "line-width":w(.9, 1.6, 3.5) } } ] } }).addTo(map);
+  }catch(e){ if(map === OPS_MAP) pale(); }
 }
 // 地図の凡例（いま出しているものだけ）
 function opsLegendKey(){
