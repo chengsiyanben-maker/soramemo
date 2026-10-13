@@ -561,10 +561,17 @@ ul.fc{margin:4px 0;padding-left:1.2em;line-height:1.9}
 .opsaps{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 10px}
 .opslayers{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
 .opslayers .chip[aria-pressed="false"]{opacity:.55;text-decoration:line-through}
-.opslegend{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:12px;color:var(--ink2,#555);margin:-2px 0 6px}
-.opslegend span{display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
-.opslegend svg{width:30px;height:8px;flex:none}
-.opsabout{margin:4px 0 8px}.opsabout summary{cursor:pointer;font-size:13px}
+.opslayers .chip{display:inline-flex;align-items:center;gap:6px}
+.opslayers .chip svg{width:24px;height:12px;flex:none;background:#fff;border-radius:3px;padding:2px 1px;box-sizing:border-box}
+.opsstat{display:flex;flex-wrap:wrap;align-items:center;gap:2px 6px;font-size:13px;margin:8px 0 4px;color:var(--ink)}
+.opsstat:empty{display:none}
+.opsstat i{display:inline-block;width:14px;height:3px;border-radius:2px;margin-left:4px}
+.opsstat i:first-child{margin-left:0}
+.opsstat span{margin-left:auto;font-size:12px;color:var(--sumi)}
+.opsabout{margin:6px 0 8px;border-top:1px solid var(--line);padding-top:8px}
+.opsabout summary{cursor:pointer;font-size:13px;display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px}
+.opsabout summary small{font-size:11.5px;color:var(--sumi)}
+.opsabout p{margin:8px 0 0}
 .opsmap .leaflet-container{font:inherit}
 .tplane{background:none;border:none}
 .tplane svg{display:block;filter:drop-shadow(0 1px 1px rgba(0,0,0,.35))}
@@ -806,10 +813,12 @@ details.rgrp .rgbar i{display:block;height:100%;background:var(--shu)}
     <button class="chip" data-layer="traffic" aria-pressed="true">機体</button><button class="chip" data-layer="star" aria-pressed="true">到着経路</button><button class="chip" data-layer="app" aria-pressed="true">進入経路</button><button class="chip" data-layer="sid" aria-pressed="true">出発経路</button><button class="chip" id="opsFitAll">全体を見る</button>
   </div>
   <div class="opsmap" id="opsMap" role="img" aria-label="羽田空港の滑走路と、進入・出発・到着の経路、今飛んでいる機体の地図"></div>
-  <div class="opslegend" id="opsLegendKey"></div>
-  <details class="opsabout"><summary>この地図について</summary><p class="hint" id="opsLegend"></p></details>
-  <p class="hint" id="trafficNote"></p>
-  <p class="hint">公表されている運用のルール、気象通報（METAR）、今飛んでいる機体の位置をもとにした推定です。実際の運用は管制の指示で変わり、深夜早朝（23時〜6時）や悪天候のときは異なることがあります。航法には使えません。地図：国土地理院</p>
+  <p class="opsstat" id="trafficNote"></p>
+  <details class="opsabout"><summary>この地図について・出典<small>推定です。航法には使えません</small></summary>
+    <p class="hint" id="opsLegend"></p>
+    <p class="hint">機体の位置は <a href="https://adsb.lol" target="_blank" rel="noopener">adsb.lol</a>（有志の受信機による ADS-B のオープンデータ、ODbL）。少し遅れることがあり、受信できない機体は出ません。通ってきた線は最大20分ぶん（羽田は30秒ごとの記録から）。</p>
+    <p class="hint">公表されている運用のルール、気象通報（METAR）、今飛んでいる機体の位置をもとにした推定です。実際の運用は管制の指示で変わり、深夜早朝（23時〜6時）や悪天候のときは異なることがあります。航法には使えません。地図：国土地理院</p>
+  </details>
   </section>
 </main>
 
@@ -3233,6 +3242,7 @@ function drawOpsMap(rw, op, plus, mode, good){
   if(!OPS_MAP){
     OPS_MAP = L.map("opsMap", { zoomControl:true, attributionControl:true }).setView([35.60, 139.80], 10);
     OPS_MAP.attributionControl.setPrefix('<a href="https://leafletjs.com" target="_blank" rel="noopener">Leaflet</a>');
+    OPS_MAP.attributionControl.addAttribution('機体：<a href="https://adsb.lol" target="_blank" rel="noopener">adsb.lol</a>（ODbL）');
     // 滑走路の番号は、拡大したときだけ出す（引いた縮尺では重なって読めないため）
     const syncLabels = () => $("opsMap").classList.toggle("lbl", OPS_MAP.getZoom() >= 13);
     OPS_MAP.on("zoomend", syncLabels); syncLabels();
@@ -3281,14 +3291,13 @@ function drawOpsMap(rw, op, plus, mode, good){
 }
 // 地図の凡例（いま出しているものだけ）
 function opsLegendKey(){
+  // 凡例は、地図の上の切り替えボタンに線の見本として出す（地図の下に別の凡例を置かない）
   const shu = getComputedStyle(document.documentElement).getPropertyValue("--shu").trim() || "#111111";
-  const ln = (c, w, dash, op = 1) => `<svg viewBox="0 0 30 8" aria-hidden="true"><line x1="1" y1="4" x2="29" y2="4" stroke="${c}" stroke-width="${w}" stroke-dasharray="${dash}" stroke-opacity="${op}" stroke-linecap="round"/></svg>`;
-  const it = [];
-  if(OPS_SHOW.traffic) it.push(`<span>${ln(TRAFFIC_COL.arr, 3, "")}着陸に向かう機体</span>`, `<span>${ln(TRAFFIC_COL.dep, 2.5, "")}離陸した機体</span>`);
-  if(OPS_SHOW.star) it.push(`<span>${ln(shu, 1.8, "1 4", .7)}到着経路</span>`);
-  if(OPS_SHOW.app) it.push(`<span>${ln(shu, 3, "6 5")}進入経路</span>`);
-  if(OPS_SHOW.sid) it.push(`<span>${ln("#2B6CB0", 2, "2 5")}出発経路</span>`);
-  $("opsLegendKey").innerHTML = it.join("");
+  const ln = (c, w, dash, op = 1) => `<svg viewBox="0 0 22 8" aria-hidden="true"><line x1="1" y1="4" x2="21" y2="4" stroke="${c}" stroke-width="${w}" stroke-dasharray="${dash}" stroke-opacity="${op}" stroke-linecap="round"/></svg>`;
+  const sw = { traffic:`<svg viewBox="0 0 22 8" aria-hidden="true"><line x1="1" y1="2.5" x2="21" y2="2.5" stroke="${TRAFFIC_COL.arr}" stroke-width="2.5" stroke-linecap="round"/><line x1="1" y1="6" x2="21" y2="6" stroke="${TRAFFIC_COL.dep}" stroke-width="2" stroke-linecap="round"/></svg>`,
+    star:ln(shu, 1.8, "1 4", .8), app:ln(shu, 3, "5 4"), sid:ln("#2B6CB0", 2, "2 4") };
+  const name = { traffic:"機体", star:"到着経路", app:"進入経路", sid:"出発経路" };
+  document.querySelectorAll("[data-layer]").forEach(b => { b.innerHTML = sw[b.dataset.layer] + name[b.dataset.layer]; });
 }
 document.querySelectorAll("[data-layer]").forEach(b => {
   b.setAttribute("aria-pressed", String(OPS_SHOW[b.dataset.layer]));
@@ -3330,7 +3339,7 @@ async function loadTraffic(){
   if(!TRAFFIC_FIT && arr.length){ TRAFFIC_FIT = true;
     const pts = arr.flatMap(p => [...(p.trail || []), [p.lat, p.lon]]).concat([opsDef().center]);
     setTimeout(() => { OPS_MAP.invalidateSize(); OPS_MAP.stop(); OPS_MAP.fitBounds(L.latLngBounds(pts), { padding:[20, 20], maxZoom:11, animate:false }); }, 400); }
-  $("trafficNote").innerHTML = `<b style="color:${TRAFFIC_COL.arr}">━</b> 着陸に向かう機体 ${arr.length}機　<b style="color:${TRAFFIC_COL.dep}">━</b> 離陸して上昇中 ${dep.length}機　${jstHM(d.at)} 時点<br>機体の位置は <a href="https://adsb.lol" target="_blank" rel="noopener">adsb.lol</a>（有志の受信機による ADS-B のオープンデータ、ODbL）。少し遅れることがあり、受信できない機体は出ません。通ってきた線は、30秒ごとの記録から、最大20分ぶんを描いています。`;
+  $("trafficNote").innerHTML = `<i style="background:${TRAFFIC_COL.arr}"></i>着陸に向かう ${arr.length}機　<i style="background:${TRAFFIC_COL.dep}"></i>離陸して上昇中 ${dep.length}機<span>${jstHM(d.at)} 時点</span>`;
 }
 function startTraffic(){ stopTraffic(); TRAFFIC_FIT = false; loadTraffic(); TRAFFIC_TIMER = setInterval(loadTraffic, 30_000); }
 function stopTraffic(){ if(TRAFFIC_TIMER) clearInterval(TRAFFIC_TIMER); TRAFFIC_TIMER = null; }
