@@ -25,6 +25,10 @@ const AIRPORTS: Record<string, { at: [number, number]; nm: number }> = {
   OKA: { at: [26.1933, 127.6394], nm: 40 },
 };
 
+// 着陸・離陸の見分けで「ほかの空港のほうが近い機体」を除くための、近くの空港（神戸・札幌丘珠・横田も含む）
+const NEARBY: [number, number][] = [...Object.values(AIRPORTS).map((a) => a.at),
+  [34.6328, 135.2239], [43.1161, 141.3800], [35.7485, 139.3485]];
+
 // データベースの線を読み、今回の位置を足して書き戻す。いなくなった機体と古い位置は消える
 async function syncTrails(iata: string, planes: { id: string; lat: number; lon: number }[]): Promise<Trails> {
   const tr: Trails = new Map();
@@ -54,7 +58,7 @@ async function snapshot(iata: string): Promise<string> {
     { headers: { "User-Agent": "soramemo (airport-traffic)" }, signal: AbortSignal.timeout(10000) });
   if (!r.ok) throw new Error("adsb.lol " + r.status);
   const j = await r.json();
-  const planes = planesFromAdsb(j?.ac, a.at);
+  const planes = planesFromAdsb(j?.ac, a.at, 14000, NEARBY.filter((o) => o !== a.at));
   const tr = await syncTrails(iata, planes);
   const body = JSON.stringify({
     iata, at: new Date(typeof j?.now === "number" ? j.now : Date.now()).toISOString(), source: "adsb.lol",

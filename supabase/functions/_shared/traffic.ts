@@ -15,8 +15,16 @@ function km(a: [number, number], b: [number, number]) {
   return 2 * 6371 * Math.asin(Math.sqrt(h));
 }
 
+function bearing(a: [number, number], b: [number, number]) {
+  const r = Math.PI / 180, y = Math.sin((b[1] - a[1]) * r) * Math.cos(b[0] * r);
+  const x = Math.cos(a[0] * r) * Math.sin(b[0] * r) - Math.sin(a[0] * r) * Math.cos(b[0] * r) * Math.cos((b[1] - a[1]) * r);
+  return (Math.atan2(y, x) / r + 360) % 360;
+}
+
 // 空中にいて、高度 maxFt 以下の機体だけ。着陸・離陸の見分けは、昇降率と高度と空港からの距離で
-export function planesFrom(states: unknown, apt: [number, number], maxFt = 14000): Plane[] {
+// others：近くのほかの空港。そちらへ向かう（そちらから離れていく）機体は、この空港の着陸・離陸に数えない
+// （成田から見た羽田の機体、伊丹から見た関西の機体など。関西の24の進入は伊丹の近くを回るため、距離だけでなく向きで見分ける）
+export function planesFrom(states: unknown, apt: [number, number], maxFt = 14000, others: [number, number][] = []): Plane[] {
   if (!Array.isArray(states)) return [];
   const out: Plane[] = [];
   for (const s of states) {
@@ -26,8 +34,19 @@ export function planesFrom(states: unknown, apt: [number, number], maxFt = 14000
     if (alt != null && alt > maxFt) continue;
     const vr = num(s[11]), fpm = vr == null ? null : Math.round(vr * 196.85);
     const d = km(apt, [lat, lon]);
-    const phase = fpm != null && fpm <= -300 ? "arr" : fpm != null && fpm >= 300 ? "dep"
+    let phase: Plane["phase"] = fpm != null && fpm <= -300 ? "arr" : fpm != null && fpm >= 300 ? "dep"
       : alt != null && alt < 3000 && d < 25 ? "arr" : "other";   // 低くて空港に近く、ほぼ水平なら最終進入とみなす
+    if (phase !== "other") {
+      // 向かっている（離陸なら離れていく）空港ほど点が小さくなるようにして、40km以内のほかの空港のほうが小さければ、そちらの機体とみなす
+      const hdg = num(s[10]);
+      const score = (o: [number, number]) => {
+        const dd = km(o, [lat, lon]); if (hdg == null) return dd;
+        const c = Math.cos((hdg - bearing([lat, lon], o)) * Math.PI / 180);
+        return dd * (phase === "arr" ? 2 - c : 2 + c);
+      };
+      const mine = score(apt);
+      if (others.some((o) => km(o, [lat, lon]) < 40 && score(o) < mine)) phase = "other";
+    }
     out.push({
       id: String(s[0]), callsign: typeof s[1] === "string" && s[1].trim() ? s[1].trim() : null,
       lat: Math.round(lat * 1e4) / 1e4, lon: Math.round(lon * 1e4) / 1e4, alt_ft: alt,
@@ -54,7 +73,7 @@ export function updateTrails(trails: Trails, planes: Plane[], now: number, keepM
 
 // adsb.lol（/v2/lat/…/lon/…/dist/…）の ac を、同じ形にする。
 //   ac の1件：hex・flight（便名）・t（機種）・lat・lon・alt_baro（ft か "ground"）・gs（ノット）・track・baro_rate（ft/分）
-export function planesFromAdsb(ac: unknown, apt: [number, number], maxFt = 14000): (Plane & { type: string | null })[] {
+export function planesFromAdsb(ac: unknown, apt: [number, number], maxFt = 14000, others: [number, number][] = []): (Plane & { type: string | null })[] {
   if (!Array.isArray(ac)) return [];
   const states = ac.filter((a) => a && typeof a === "object" && (a as Record<string, unknown>).alt_baro !== "ground").map((a) => {
     const x = a as Record<string, unknown>;
@@ -64,5 +83,5 @@ export function planesFromAdsb(ac: unknown, apt: [number, number], maxFt = 14000
       num(x.gs) == null ? null : num(x.gs)! / 1.944, num(x.track), fpm == null ? null : fpm / 196.85, null, null];
   });
   const types = new Map(ac.map((a) => [String((a as Record<string, unknown>)?.hex), typeof (a as Record<string, unknown>)?.t === "string" ? (a as Record<string, unknown>).t as string : null]));
-  return planesFrom(states, apt, maxFt).map((p) => ({ ...p, type: types.get(p.id) ?? null }));
+  return planesFrom(states, apt, maxFt, others).map((p) => ({ ...p, type: types.get(p.id) ?? null }));
 }

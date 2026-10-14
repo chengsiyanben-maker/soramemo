@@ -44,3 +44,23 @@ Deno.test("adsb.lol の形からも同じように見分け、機種を添える
   assertEquals(p.map((x) => [x.callsign, x.phase, x.type, x.alt_ft]), [["ANA243", "dep", "B788", 2600], ["SFJ54", "arr", "A20N", 2950]]);
   assertEquals(p[1].fpm, -800);
 });
+
+Deno.test("ほかの空港のほうが近い機体は、この空港の着陸・離陸に数えない", () => {
+  const NRT: [number, number] = [35.7772, 140.3823], HND: [number, number] = [35.5533, 139.7811];
+  const p = planesFromAdsb([
+    { hex: "a1", flight: "JAL562", lat: 35.45, lon: 139.85, alt_baro: 3000, gs: 160, track: 340, baro_rate: -700 },   // 羽田へ降りていく
+    { hex: "a3", flight: "ANA605", lat: 35.50, lon: 139.83, alt_baro: 500, gs: 160, track: 150, baro_rate: 2000 },     // 羽田から離陸した
+    { hex: "a2", flight: "NCA001", lat: 35.70, lon: 140.45, alt_baro: 2500, gs: 150, track: 337, baro_rate: -700 },   // 成田へ降りていく
+  ], NRT, 14000, [HND]);
+  const by = Object.fromEntries(p.map((x) => [x.id, x.phase]));
+  assertEquals(by["a1"], "other");
+  assertEquals(by["a2"], "arr");
+  assertEquals(by["a3"], "other");
+});
+Deno.test("関西の24の進入で伊丹の近くを回る機体は、関西の着陸のまま", () => {
+  const KIX: [number, number] = [34.4336, 135.2336], ITM: [number, number] = [34.7856, 135.4380];
+  const p = planesFromAdsb([{ hex: "b1", flight: "KAL723", lat: 34.62, lon: 135.36, alt_baro: 2400, gs: 170, track: 202, baro_rate: -600 }], KIX, 14000, [ITM]);
+  assertEquals(p[0].phase, "arr");
+  const q = planesFromAdsb([{ hex: "b1", flight: "KAL723", lat: 34.62, lon: 135.36, alt_baro: 2400, gs: 170, track: 202, baro_rate: -600 }], ITM, 14000, [KIX]);
+  assertEquals(q[0].phase, "other");
+});
