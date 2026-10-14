@@ -1,0 +1,23 @@
+name: ODPT のデータの形を確かめる（一度きり）
+on:
+  push:
+    branches: [probe-odpt]
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 時刻表の見本を取る（鍵は出力しない）
+        env:
+          K: ${{ secrets.ODPT_CONSUMER_KEY }}
+        run: |
+          mkdir out
+          for op in JAL ANA; do
+            curl -s "https://api.odpt.org/api/v4/odpt:FlightSchedule?odpt:operator=odpt.Operator:$op&acl:consumerKey=$K" -o raw.json -w "$op FlightSchedule %{http_code} %{size_download}\n"
+            jq '{count: length, sample: .[0:3] | map(. + {"odpt:flightScheduleObject": (.["odpt:flightScheduleObject"] // [])[0:3]}), calendars: ([.[]["odpt:calendar"]] | unique), origins: ([.[]["odpt:originAirport"]] | unique | length)}' raw.json > out/schedule_$op.json || head -c 500 raw.json
+            curl -s "https://api.odpt.org/api/v4/odpt:FlightInformationDeparture?odpt:operator=odpt.Operator:$op&acl:consumerKey=$K" -o dep.json -w "$op Departure %{http_code}\n"
+            jq '.[0:2]' dep.json > out/dep_$op.json || true
+          done
+          curl -s "https://api.odpt.org/api/v4/odpt:Calendar?acl:consumerKey=$K" -o cal.json -w "Calendar %{http_code}\n"; jq '[.[] | {"owl:sameAs", "dc:title", "odpt:day": (.["odpt:day"] // [])[0:3], "odpt:duration"}] | .[0:40]' cal.json > out/calendar.json || true
+          grep -c "$K" out/* || true
+      - uses: actions/upload-artifact@v4
+        with: { name: odpt-sample, path: out }
