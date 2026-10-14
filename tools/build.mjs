@@ -12,14 +12,16 @@ import { minify } from "terser";
 import { minify as cssMinify } from "csso";
 
 let FONT_FILES = [];
-const files = ["index.html"];   // 運営コンソール（ops-console/）は公開しないので、ここでは作らない
+import { opsCoreParts } from "./ops_core_parts.mjs";
+const files = ["index.html", "now.html"];   // 運営コンソール（ops-console/）は公開しないので、ここでは作らない。now.html は公開ページ「空港のいま」
 for (const f of files) {
   const raw = readFileSync(new URL(`../src/${f}`, import.meta.url), "utf8");
   // 版の番号：原本の中身から自動で付ける（設定の画面と、運営に届くエラーに出る）
   const APP_VER = createHash("sha256").update(raw).digest("hex").slice(0, 8);
   const src = raw.replace(/const APP_VERSION = "([^"+]+)";/, (m, v) => `const APP_VERSION = "${v}+${APP_VER}";`);
   if (f === "index.html") console.log(`版の番号: ${src.match(/const APP_VERSION = "([^"]+)"/)[1]}`);
-  let out = src;
+  // 「空港のいま」には、アプリ本体と同じ運用の判定の中心を差し込む（判定の仕方がずれないように）
+  let out = f === "now.html" ? src.replace("/*@OPS_CORE@*/", () => opsCoreParts().join("\n")) : src;
   // CSS
   out = out.replace(/<style>([\s\S]*?)<\/style>/g, (_, css) => `<style>${cssMinify(css).css}</style>`);
   // JS（<script src> 以外の、中身のある script）

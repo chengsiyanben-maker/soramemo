@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#F4F4F4">
+<title>空港のいま｜そらメモ（非公式）</title>
+<meta name="description" content="羽田・成田・伊丹・関西など14空港の、いまの滑走路の使い方（運用）を、風と実際に飛んでいる機体から推定して出す、そらメモの公開ページです（非公式）。">
+<meta property="og:title" content="空港のいま｜そらメモ（非公式）">
+<meta property="og:description" content="いまの滑走路の使い方（運用）を、風と実際に飛んでいる機体から推定します。ログインは不要です。">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://soramemo.jp/now.html">
+<meta property="og:image" content="https://soramemo.jp/icon-512.png">
+<meta name="twitter:card" content="summary">
+<link rel="icon" href="icon.svg">
+<script src="config.js"></script>
+<style>
+/* 「空港のいま」：ログインなしで見られる1枚のページ。アプリ本体と同じ白黒の見た目 */
+:root{--sky:#F4F4F4;--paper:#FFFFFF;--ink:#111111;--sumi:#5C5C5C;--line:#D6D6D6;--live:#1E6B3A;--dep:#2B6CB0;
+  --gothic:"Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic UI","Yu Gothic","Meiryo","Noto Sans JP",system-ui,sans-serif;
+  --mincho:"Hiragino Mincho ProN","Yu Mincho",serif}
+@media (prefers-color-scheme: dark){:root{--sky:#0E1013;--paper:#16191E;--ink:#E8ECF1;--sumi:#A7B0BC;--line:#2A2F37;--live:#6FCF97;--dep:#7FB3E8;color-scheme:dark}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--sky);color:var(--ink);font:15px/1.7 var(--gothic);-webkit-text-size-adjust:100%}
+main{max-width:640px;margin:0 auto;padding:20px max(16px,env(safe-area-inset-left)) 40px max(16px,env(safe-area-inset-right))}
+header{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+header a{color:var(--ink);font-weight:700;text-decoration:none}
+h1{font:800 24px/1.35 var(--mincho);margin:14px 0 2px}
+.sub{color:var(--sumi);font-size:13px;margin:0}
+.aps{display:flex;flex-wrap:wrap;gap:6px;margin:14px 0 0;padding:0;list-style:none}
+.aps a{display:inline-block;padding:5px 11px;border:1.5px solid var(--line);border-radius:999px;color:var(--ink);text-decoration:none;font-size:13px;font-weight:700;background:var(--paper)}
+.aps a[aria-current="page"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.card{background:var(--paper);border-radius:12px;padding:16px;margin:14px 0 0}
+.mode{font:800 26px/1.3 var(--mincho);margin:0}
+.src{display:inline-block;font-size:12px;font-weight:700;border:1.5px solid var(--line);border-radius:999px;padding:1px 9px;margin:6px 0 0;color:var(--sumi)}
+.src.live{color:var(--live);border-color:var(--live)}
+.why{margin:8px 0 0}
+.note{color:var(--sumi);font-size:13px;margin:6px 0 0}
+.rw{display:flex;gap:18px;flex-wrap:wrap;margin:10px 0 0;font-size:14px}
+.rw b{display:inline-block;min-width:2.4em;text-align:center;border-radius:4px;padding:0 6px;margin-left:4px;background:var(--ink);color:var(--paper)}
+.rw .d b{background:var(--dep)}
+h2{font-size:15px;margin:0 0 6px}
+ul.list{list-style:none;margin:0;padding:0}
+ul.list li{padding:6px 0;border-top:1px solid var(--line)}
+ul.list li:first-child{border-top:0}
+small{color:var(--sumi)}
+.go{display:block;text-align:center;margin:18px 0 0;padding:12px;border-radius:10px;background:var(--ink);color:var(--paper);font-weight:700;text-decoration:none}
+.go:focus-visible,.aps a:focus-visible,button:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+button.share{font:inherit;font-weight:700;background:none;border:1.5px solid var(--line);border-radius:8px;padding:4px 12px;color:var(--ink);cursor:pointer}
+footer{color:var(--sumi);font-size:12px;margin:22px 0 0}
+footer a{color:var(--sumi)}
+</style>
+</head>
+<body>
+<main>
+  <header><a href="./">そらメモ</a><button class="share" id="share" type="button">共有</button></header>
+  <h1 id="title">空港のいま</h1>
+  <p class="sub" id="upd">読み込んでいます…</p>
+  <ul class="aps" id="aps" aria-label="空港"></ul>
+  <section class="card" aria-labelledby="modeLbl">
+    <p class="mode" id="modeLbl">—</p>
+    <span class="src" id="src"></span>
+    <p class="why" id="why"></p>
+    <div class="rw" id="rw"></div>
+    <p class="note" id="opnote"></p>
+  </section>
+  <section class="card" id="trafficBox" hidden><h2>近くを飛んでいる機体</h2><p id="counts" style="margin:0"></p><ul class="list" id="arrList"></ul></section>
+  <section class="card" id="spBox" hidden><h2>近くの特別塗装機</h2><ul class="list" id="spList"></ul></section>
+  <a class="go" id="go" href="./#ops">地図と経路をそらメモで見る</a>
+  <footer>
+    <p>そらメモは非公式のアプリです。空港・航空会社・国とは関係ありません。運用は、公表されている運用のルール、気象通報（METAR）、今飛んでいる機体の位置（<a href="https://adsb.lol" rel="noopener">adsb.lol</a>、ODbL）をもとにした推定で、実際の運用と違うことがあります。航法には使えません。滑走路の位置・優先滑走路の決まりは AIP JAPAN（2026年10月1日版）をもとに そらメモ が作ったもので、最新でない場合があります。</p>
+    <p><a href="privacy.html">プライバシーポリシー</a>・<a href="terms.html">利用規約</a></p>
+  </footer>
+</main>
+<script>
+// 運用の判定の中心（src/index.html の <ops-core> の部分。配る用を作るときに tools/build.mjs が差し込む）
+/*@OPS_CORE@*/
+const CFG = window.SORAMEMO_CONFIG || {}, BASE = (CFG.supabaseUrl || "").replace(/\/$/, ""), H = { apikey:CFG.supabaseAnonKey || "", Authorization:"Bearer " + (CFG.supabaseAnonKey || "") };
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]));
+const ORDER = ["CTS","SDJ","HND","NRT","NGO","ITM","KIX","HIJ","MYJ","FUK","NGS","KMJ","KOJ","OKA"];
+const pick = () => { const q = (new URLSearchParams(location.search).get("ap") || "HND").toUpperCase(); return OPS_AIRPORTS[q] ? q : "HND"; };
+let AP = pick();
+const fullName = d => d.iata === "KIX" ? "関西空港" : d.iata === "NGO" ? "中部空港（セントレア）" : `${d.name}空港`;
+const hm = t => { const d = new Date(t); return `${d.getHours()}時${String(d.getMinutes()).padStart(2, "0")}分`; };
+const ft = v => (Math.round(v / 100) * 100).toLocaleString("ja-JP") + "ft";
+
+function renderAps(){
+  $("aps").innerHTML = ORDER.filter(k => OPS_AIRPORTS[k]).map(k => `<li><a href="?ap=${k}"${k === AP ? ' aria-current="page"' : ""}>${esc(OPS_AIRPORTS[k].name)}</a></li>`).join("");
+}
+async function getJSON(path, opt){ try{ const r = await fetch(BASE + path, { ...opt, headers:{ ...H, ...(opt && opt.headers) } }); return r.ok ? await r.json() : null; }catch(e){ return null; } }
+
+async function load(){
+  const def = OPS_AIRPORTS[AP], name = fullName(def);
+  document.title = `${name}のいま｜そらメモ（非公式）`; $("title").textContent = `${name}のいま`;
+  $("go").href = `./#ops-${AP}`; renderAps();
+  if(!BASE){ $("upd").textContent = "この版ではサーバーにつながりません。"; return; }
+  const [m, t, sp] = await Promise.all([getJSON(`/functions/v1/metar?ids=${def.icao}`), getJSON(`/functions/v1/airport-traffic?iata=${AP}`),
+    getJSON("/rest/v1/rpc/special_now", { method:"POST", headers:{ "Content-Type":"application/json" }, body:"{}" })]);
+  if(def !== OPS_AIRPORTS[AP]) return;
+  const wx = m && !m.error ? m : null, planes = t && Array.isArray(t.planes) ? t.planes : [];
+  const est = def.estimate(wx), obs = observeOps(planes, def), live = obs && !obs.mixed && def.modes[obs.mode];
+  const mode = live ? obs.mode : est.mode, op = def.modes[mode];
+  $("modeLbl").textContent = !live && est.unsure ? "判定できず" : op.label;
+  $("src").textContent = live ? "実際の機体から判定" : est.unsure ? "判定できず" : "風から推定";
+  $("src").className = "src" + (live ? " live" : "");
+  const fromWind = live && !est.unsure ? (est.mode === obs.mode ? "（風からの推定とも一致）" : `（風からの推定は${def.modes[est.mode].label}）`) : "";
+  $("why").textContent = live ? `${obsText(obs)}${fromWind}` : (obs && obs.mixed ? "着陸に向かう機体の滑走路が分かれている（切り替え中かもしれません）ため、風から推定しています。" : "") + (est.whyPlain || est.why || "");
+  $("rw").innerHTML = !live && est.unsure ? "" : `<span>着陸${op.arr.map(r => `<b>${esc(r)}</b>`).join("")}</span><span class="d">離陸${op.dep.map(r => `<b>${esc(r)}</b>`).join("")}</span>`;
+  $("opnote").textContent = !live && est.unsure ? "風が弱いときや気象通報がないときは、向きを決めていません。" : (op.note || "");
+  // 近くの機体：着陸に向かう機体を近い順に
+  const arr = planes.filter(p => p.phase === "arr").sort((a, b) => a.dist_km - b.dist_km), dep = planes.filter(p => p.phase === "dep");
+  $("trafficBox").hidden = !t || !!t.error;
+  $("counts").textContent = `着陸に向かう機体 ${arr.length}機・離陸して上昇中 ${dep.length}機`;
+  $("arrList").innerHTML = arr.slice(0, 6).map(p => `<li><b>${esc(p.callsign || "（便名なし）")}</b> <small>${p.type ? esc(p.type) + "・" : ""}${Math.round(p.dist_km)}km・${p.alt_ft != null ? ft(p.alt_ft) : "高度不明"}</small></li>`).join("");
+  // 近くの特別塗装機：この空港の着陸・離陸中か、空港から150km以内
+  const near = (Array.isArray(sp) ? sp : []).filter(x => x.iata === AP || nmToLine([x.lat, x.lon], [def.center, def.center]) * 1.852 < 150);
+  $("spBox").hidden = !near.length;
+  $("spList").innerHTML = near.map(x => `<li><b>★${esc(x.name)}</b> <small>${esc(x.airline)}${x.callsign ? "・" + esc(x.callsign) : ""}</small><br><small>${x.iata === AP && x.phase ? (x.phase === "arr" ? "着陸に向かっています" : "離陸しました") : `近くを飛行中${x.alt_ft ? "・" + ft(x.alt_ft) : ""}`}</small></li>`).join("");
+  $("upd").textContent = `${hm(Date.now())}の時点${wx ? `・気象通報（${hm(wx.time)}）：風 ${wx.wdir == null ? (wx.wspd ? "向き不定" : "ほぼ無風") : wx.wdir + "°"} ${wx.wspd ?? "—"}ノット` : "・気象通報を読み込めませんでした"}`;
+}
+document.addEventListener("click", e => {
+  const a = e.target.closest(".aps a"); if(!a) return;
+  e.preventDefault(); AP = new URL(a.href).searchParams.get("ap"); history.replaceState(null, "", `?ap=${AP}`); load();
+});
+$("share").addEventListener("click", async () => {
+  const url = `https://soramemo.jp/now.html?ap=${AP}`, title = document.title;
+  try{ if(navigator.share){ await navigator.share({ title, url }); return; } await navigator.clipboard.writeText(url); $("share").textContent = "リンクを写しました"; setTimeout(() => $("share").textContent = "共有", 2500); }catch(e){}
+});
+load(); setInterval(() => { if(!document.hidden) load(); }, 60_000);
+</script>
+</body>
+</html>

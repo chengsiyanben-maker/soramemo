@@ -7,6 +7,9 @@
 // 通ってきた線は、位置をデータベース（traffic_trails）に足していって作る（関数の呼び出しをまたいで残すため）。
 import { createClient } from "npm:@supabase/supabase-js@2.117.2";
 import { planesFromAdsb, type Trails, updateTrails } from "../_shared/traffic.ts";
+import { fetchMetars } from "../_shared/metar.ts";
+import { OPS_AIRPORTS, observeOps } from "../_shared/ops_core.js";
+import { liveryMap } from "../_shared/liveries.ts";
 
 const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, { auth: { persistSession: false } });
 
@@ -95,6 +98,54 @@ async function snapshot(iata: string): Promise<string> {
   return body;
 }
 
+// 特別塗装機を livery_sightings に残す（今回取った円の機体から。運用タブの空港の着陸・離陸中なら、その空港も）
+async function recordLiveries(bodies: Map<string, string>) {
+  const L = liveryMap(), seen = new Map<string, Record<string, unknown>>();
+  // 空港ごとの機体（着陸・離陸の見分けが付いたもの）
+  const near = new Map<string, { iata: string; phase: string }>();
+  for (const [iata, body] of bodies) for (const p of (JSON.parse(body).planes ?? []) as { reg?: string; phase?: string }[]) {
+    if (p.reg && (p.phase === "arr" || p.phase === "dep") && L.has(p.reg)) near.set(p.reg, { iata, phase: p.phase });
+  }
+  const keys = new Set([...bodies.keys()].map((k) => REGION_OF[k] ?? k));
+  for (const k of keys) {
+    const c = regionCache.get(k); if (!c || Date.now() - c.at > TTL) continue;
+    for (const a of (c.j.ac ?? []) as Record<string, unknown>[]) {
+      const reg = typeof a.r === "string" ? a.r : null, l = reg ? L.get(reg) : undefined;
+      if (!l || typeof a.lat !== "number" || typeof a.lon !== "number") continue;
+      const n = near.get(l.reg);
+      seen.set(l.reg, { reg: l.reg, name: l.name, airline: l.airline, src: l.src, lat: a.lat, lon: a.lon,
+        alt_ft: typeof a.alt_baro === "number" ? Math.round(a.alt_baro) : a.alt_baro === "ground" ? 0 : null,
+        callsign: typeof a.flight === "string" ? a.flight.trim().slice(0, 10) || null : null,
+        iata: n?.iata ?? null, phase: n?.phase ?? null, seen_at: new Date().toISOString() });
+    }
+  }
+  if (seen.size) { const { error } = await admin.from("livery_sightings").upsert([...seen.values()]); if (error) throw error; }
+  return seen.size;
+}
+
+// 運用の判定を ops_log に残す（気象通報は14空港を1回でまとめて取る）
+// deno-lint-ignore no-explicit-any
+async function logOps(bodies: Map<string, string>) {
+  const defs = Object.values(OPS_AIRPORTS) as any[];
+  const wx = await fetchMetars(defs.map((d) => d.icao));
+  const rows = [];
+  for (const d of defs) {
+    const body = bodies.get(d.iata); if (!body) continue;
+    const planes = (JSON.parse(body).planes ?? []) as any[];
+    const m = wx.get(d.icao) ?? null, est = d.estimate(m), obs = observeOps(planes, d) as any;
+    rows.push({
+      iata: d.iata, wdir: m?.wdir ?? null, wspd: m?.wspd ?? null, metar_at: m?.time ?? null,
+      est_mode: est.mode, est_unsure: !!est.unsure,
+      obs_mode: obs && !obs.mixed ? obs.mode : null, obs_mixed: !!(obs && obs.mixed),
+      obs_arr: obs && !obs.mixed ? Object.values(obs.n ?? {}).reduce((a: number, b) => a + (b as number), 0) : 0,
+      obs_dep: obs && !obs.mixed ? obs.dep ?? 0 : 0,
+      planes: planes.filter((p) => p.phase === "arr" || p.phase === "dep").length,
+    });
+  }
+  if (rows.length) { const { error } = await admin.from("ops_log").insert(rows); if (error) throw error; }
+  return rows.length;
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: CORS });
   if (req.method !== "GET") return new Response(JSON.stringify({ error: "GET only" }), { status: 405, headers: JSON_HEADERS });
@@ -104,14 +155,22 @@ Deno.serve(async (req) => {
     const first = new Date().getUTCSeconds() < 30;
     // 問い合わせは1回に3つまで：東の円・西の円と、新千歳か那覇
     const list = [...Object.keys(REGION_OF), first ? "CTS" : "OKA"];
-    const done: Record<string, string> = {};
+    const done: Record<string, string> = {}, bodies = new Map<string, string>();
     // adsb.lol は同時にたくさん問い合わせると断る（429・420）ので、3秒ずつあけて1つずつ
     for (const [i, k] of list.entries()) {
       const key = REGION_OF[k] ?? k, cached = regionCache.get(key);
       if (i && !(cached && Date.now() - cached.at < TTL)) await new Promise((r) => setTimeout(r, 3000));
-      try { await snapshot(k); done[k] = "ok"; } catch (e) { done[k] = e instanceof Error ? e.message.slice(0, 40) : "error"; }
+      try { bodies.set(k, await snapshot(k)); done[k] = "ok"; } catch (e) { done[k] = e instanceof Error ? e.message.slice(0, 40) : "error"; }
     }
-    return new Response(JSON.stringify({ recorded: done }), { headers: JSON_HEADERS });
+    // 特別塗装機：今回取った円の中に、一覧の登録記号の機体がいれば残す
+    let liveries = 0;
+    try { liveries = await recordLiveries(bodies); } catch (e) { console.error("livery", e); }
+    // 5分ごと（毎時0・5・10…分の前半）に、運用の判定を記録する（画面と同じ判定の仕方。_shared/ops_core.js）
+    let logged = 0;
+    if (first && new Date().getUTCMinutes() % 5 === 0) {
+      try { logged = await logOps(bodies); } catch (e) { console.error("ops_log", e); }
+    }
+    return new Response(JSON.stringify({ recorded: done, logged, liveries }), { headers: JSON_HEADERS });
   }
   if (!AIRPORTS[iata]) return new Response(JSON.stringify({ error: "unsupported airport" }), { status: 404, headers: JSON_HEADERS });
   try {

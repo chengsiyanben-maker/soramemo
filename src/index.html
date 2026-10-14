@@ -591,6 +591,13 @@ ul.fc{margin:4px 0;padding-left:1.2em;line-height:1.9}
 .opsmap .leaflet-container{font:inherit}
 .tplane{background:none;border:none}
 .tplane svg{display:block;filter:drop-shadow(0 1px 1px rgba(0,0,0,.35))}
+.tlabel.sp{background:#FFF6D6}
+.splist ul{list-style:none;margin:6px 0 0;padding:0}
+.splist li{padding:6px 0;border-top:1px solid var(--line,#e3e3e3)}
+.splist li:first-child{border-top:0}
+.splist li button{all:unset;cursor:pointer;display:block;width:100%}
+.splist li button:focus-visible{outline:2px solid currentColor;outline-offset:2px}
+.splist small{color:#5A6876}
 .tlabel{position:absolute;left:22px;top:2px;white-space:nowrap;font-size:11px;font-weight:700;line-height:1.4;background:#fff;color:#12263A;border:1.5px solid;border-radius:4px;padding:0 4px}
 .rwylabel{background:none;border:none;box-shadow:none;font-weight:800;font-size:12px;color:#1C2B4A;text-shadow:0 0 3px #fff,0 0 3px #fff}
 .starlabel{font:600 10px/1.15 system-ui,sans-serif;color:#444;text-align:center;background:rgba(255,255,255,.85);border:1px dashed #666;border-radius:3px;padding:1px 2px;white-space:nowrap;width:auto!important;height:auto!important}.starlabel small{display:block;font-weight:400;font-size:9px}
@@ -832,9 +839,10 @@ details.rgrp .rgbar i{display:block;height:100%;background:var(--shu)}
   </div>
   <div class="opsmap" id="opsMap" role="img" aria-label="羽田空港の滑走路と、進入・出発・到着の経路、今飛んでいる機体の地図"></div>
   <p class="opsstat" id="trafficNote"></p>
+  <div class="fwbox" id="opsSpecial" hidden></div>
   <details class="opsabout"><summary>この地図について・出典<small>推定です。航法には使えません</small></summary>
     <p class="hint" id="opsLegend"></p>
-    <p class="hint">機体の位置は <a href="https://adsb.lol" target="_blank" rel="noopener">adsb.lol</a>（有志の受信機による ADS-B のオープンデータ、ODbL）。少し遅れることがあり、受信できない機体は出ません。通ってきた線は最大20分ぶん（サーバーで羽田は30秒ごと、ほかの空港は1分ごとに記録）。</p>
+    <p class="hint">機体の位置は <a href="https://adsb.lol" target="_blank" rel="noopener">adsb.lol</a>（有志の受信機による ADS-B のオープンデータ、ODbL）。少し遅れることがあり、受信できない機体は出ません。通ってきた線は最大20分ぶん（サーバーで30秒ごとに記録。新千歳・那覇は1分ごと）。</p>
     <p class="hint">公表されている運用のルール、気象通報（METAR）、今飛んでいる機体の位置をもとにした推定です。実際の運用は管制の指示で変わり、深夜早朝（23時〜6時）や悪天候のときは異なることがあります。航法には使えません。地図：国土地理院</p>
   </details>
   </section>
@@ -2974,6 +2982,7 @@ document.addEventListener("click", e => { const b = e.target.closest("[data-inst
    滑走路の端と、着陸が始まる位置（ずらした接地点）は OurAirports の滑走路データ。最終進入は滑走路の延長線上に計算で引く。
    運用は、公表されている運用のルールと気象通報（METAR）からの推定。曲がった進入経路（LDA・RNP など）は、AIP のチャートの座標を確かめてから足す */
 const LEAFLET = { js:"https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js", css:"https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css" };
+// <ops-core> ここから運用の判定の中心（サーバーの _shared/ops_core.js にも同じものを tools/sync_ops_core.mjs で写す。画面の部品は使わない）
 const HND_RWY = [   // [端A, 緯度, 経度, ずらした接地点ft, 端B, 緯度, 経度, ずらした接地点ft, 名前]
   ["16R", 35.560452, 139.768734, 1770, "34L", 35.536591, 139.785672, 0, "A滑走路"],
   ["04", 35.549015, 139.761274, 0, "22", 35.567459, 139.777114, 0, "B滑走路"],
@@ -3188,6 +3197,7 @@ function windEstimate(def, m){
   const why = `${m.wdir}°から${m.wspd}ノットの風なので、向かい風になる${def.modes[mode].label}と推定`;
   return { ...base, mode, why, whyPlain:why };
 }
+// </ops-core>
 let OPS_AP = (() => { try{ const v = localStorage.getItem("soramemo.opsAirport"); return v && OPS_AIRPORTS[v] ? v : "HND"; }catch(e){ return "HND"; } })();
 const opsDef = () => OPS_AIRPORTS[OPS_AP];
 // 実際の機体から判定した運用（地図を開いているあいだ、機体を読み込むたびに更新）。mode・apps：{滑走路: 進入のキー}・n：{滑走路: 機数}
@@ -3201,6 +3211,7 @@ function appKey(mode, good, id, def){
   if(def === opsDef() && OPS_MODE === "auto" && OPS_OBS && OPS_OBS.mode === mode && OPS_OBS.apps[id]) return OPS_OBS.apps[id];
   return (((def.appKey || {})[mode] || {})[good ? "good" : "bad"] || {})[id];
 }
+// <ops-core>
 // 点と折れ線の距離（海里。羽田の近くなので平面で近似）
 function nmToLine(pt, line){
   const c = Math.cos(pt[0] * D2R), xy = q => [q[1] * 60 * c, q[0] * 60], P = xy(pt); let best = Infinity;
@@ -3299,6 +3310,7 @@ function observeOps(planes, def = opsDef()){
     const top = Object.entries(c).sort((x, y) => y[1] - x[1])[0]; if(top) apps[rw] = top[0]; }
   return { mode, apps, n };
 }
+// </ops-core>
 const appName = (mode, good, rw, def) => ((((def || opsDef()).modes[mode] || {}).app || {})[good ? "good" : "bad"] || {})[rw] || "";
 let OPS_MODE = "auto", OPS_WX = null, OPS_MAP = null, OPS_LAYER = null;
 async function loadLeaflet(){
@@ -3488,7 +3500,8 @@ let TRAFFIC_LAYER = null, TRAFFIC_TIMER = null, TRAFFIC_FIT = false;
 const TRAFFIC_COL = { arr:"#A3166B", dep:"#2B6CB0", other:"#5C6B7A" };
 function planeIcon(p){
   const c = TRAFFIC_COL[p.phase] || TRAFFIC_COL.other, rot = p.hdg == null ? 0 : p.hdg;
-  const label = p.phase === "other" ? "" : `<span class="tlabel" style="border-color:${c}">${esc(p.callsign || "")}${p.alt_ft != null ? " " + (Math.round(p.alt_ft / 100) * 100).toLocaleString("ja-JP") + "ft" : ""}</span>`;
+  const sp = p.reg && SPECIAL.get(p.reg);
+  const label = p.phase === "other" ? "" : `<span class="tlabel${sp ? " sp" : ""}" style="border-color:${c}">${sp ? `★${esc(sp.name)} ` : ""}${esc(p.callsign || "")}${p.alt_ft != null ? " " + (Math.round(p.alt_ft / 100) * 100).toLocaleString("ja-JP") + "ft" : ""}</span>`;
   return L.divIcon({ className:"tplane", iconSize:[22, 22], iconAnchor:[11, 11],
     html:`<svg viewBox="0 0 24 24" width="22" height="22" style="transform:rotate(${rot}deg)" aria-hidden="true"><path d="M12 2l1.6 7.2 7.4 4.3v2l-7.4-2.1-.4 5.1 2.4 1.8v1.6L12 21l-3.6.9v-1.6l2.4-1.8-.4-5.1L3 15.5v-2l7.4-4.3z" fill="${c}" stroke="#fff" stroke-width=".8"/></svg>${label}` });
 }
@@ -3523,6 +3536,7 @@ async function loadTraffic(){
 }
 // 機体の名札（便名と高度）が重なるときは、優先度の低いほうを隠す（隠れた機体も、押すと詳しく出る）
 // 優先：着陸に向かう機体 → 離陸した機体、同じなら空港に近い順。引いた縮尺（9より小さい）では名札を出さない
+const SPECIAL = new Map();   // いま飛んでいる特別塗装機（登録記号 → 見えた特別塗装機。下の「いま飛んでいる特別塗装機」で読み込む）
 let TRAFFIC_MK = [];
 function declutterLabels(){
   if(!OPS_MAP || !TRAFFIC_MK.length) return;
@@ -3556,8 +3570,39 @@ function fwHTML(list, iata, withPush){
     `<li class="fw-${esc(a.kind)}"><span class="fwk">${esc(FW_KIND[a.kind] || "お知らせ")}</span><b>${esc(a.flight)}</b> <small>${jstHM(a.at)}</small><p>${esc(a.message)}</p></li>`).join("")}</ul>
     <p class="fwnote">予定の便と、今飛んでいる機体の位置を照らし合わせた推定です。航空会社の発表ではありません。運航状況は各航空会社でご確認ください。</p>${push}</div>`;
 }
+/* ---------- いま飛んでいる特別塗装機 ----------
+   サーバーが機体を記録するたびに、特別塗装機の一覧（航空会社の発表などから作ったもの）の登録記号の機体を見つけて残している。直近15分ぶん */
+async function loadSpecial(){
+  if(!SERVER) return;
+  try{ const r = await fetch(SORAMEMO_CONFIG.supabaseUrl.replace(/\/$/, "") + "/rest/v1/rpc/special_now", { method:"POST",
+      headers:{ "Content-Type":"application/json", apikey:SORAMEMO_CONFIG.supabaseAnonKey, Authorization:"Bearer " + SORAMEMO_CONFIG.supabaseAnonKey }, body:"{}" });
+    if(r.ok){ const d = await r.json(); SPECIAL.clear(); for(const x of Array.isArray(d) ? d : []) SPECIAL.set(x.reg, x); } }catch(e){}
+}
+// どこにいるか：運用タブの空港の着陸・離陸中ならその空港、そうでなければいちばん近い空港（150km以内）
+function specialWhere(x){
+  const ap = x.iata && OPS_AIRPORTS[x.iata];
+  if(ap && x.phase) return `${ap.name}${x.phase === "arr" ? "に着陸へ" : "から離陸"}`;
+  let best = null, bd = 150;
+  for(const d of Object.values(OPS_AIRPORTS)){ const km = nmToLine([x.lat, x.lon], [d.center, d.center]) * 1.852; if(km < bd){ bd = km; best = d; } }
+  const alt = x.alt_ft ? `高度 ${(Math.round(x.alt_ft / 100) * 100).toLocaleString("ja-JP")}ft` : "";
+  return [best ? `${best.name}の近く` : "飛行中", alt].filter(Boolean).join("・");
+}
+function specialHTML(){
+  const list = [...SPECIAL.values()].sort((a, b) => (b.iata === OPS_AP) - (a.iata === OPS_AP) || (!!b.iata) - (!!a.iata));
+  if(!list.length) return "";
+  return `<div class="fwlist splist"><div class="opshead"><b>いま飛んでいる特別塗装機</b><span>${list.length}機</span></div><ul>${list.map(x => {
+    const go = x.iata && OPS_AIRPORTS[x.iata] && x.iata !== OPS_AP;
+    const body = `<b>★${esc(x.name)}</b> <small>${esc(x.airline)}${x.callsign ? "・" + esc(x.callsign) : ""}（${esc(x.reg)}）</small><br><small>${esc(specialWhere(x))}</small>`;
+    return `<li>${go ? `<button data-ops-ap="${esc(x.iata)}" aria-label="${esc(x.name)}：${esc(OPS_AIRPORTS[x.iata].name)}の運用を見る">${body}</button>` : body}</li>`; }).join("")}</ul>
+    <p class="fwnote">直近15分に位置が届いたもの（adsb.lol）。特別塗装機の一覧は航空会社の発表などをもとに そらメモ がまとめたもので、塗装の期間や機体の入れ替えで違うことがあります。</p></div>`;
+}
+async function renderSpecial(){
+  await loadSpecial(); const box = $("opsSpecial"), html = specialHTML();
+  box.hidden = !html; box.innerHTML = html;
+}
 async function renderOpsAlerts(){
   if(!SERVER) return;
+  renderSpecial();
   const iata = OPS_AP; await loadFlightAlerts(iata); if(OPS_AP !== iata) return;
   const box = $("opsAlerts"), html = fwHTML(FW.get(iata), iata, true);
   box.hidden = !html; box.innerHTML = html;
