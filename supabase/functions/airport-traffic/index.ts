@@ -188,10 +188,12 @@ Deno.serve(async (req) => {
     // 特別塗装機：今回取った円の中に、一覧の登録記号の機体がいれば残す
     let liveries = 0;
     try { liveries = await recordLiveries(bodies); } catch (e) { console.error("livery", e); }
-    // 5分ごと（毎時0・5・10…分の前半）に、運用の判定を記録する（画面と同じ判定の仕方。_shared/ops_core.js）
+    // 5分ごと（毎時0・5・10…分）に、運用の判定を記録する（画面と同じ判定の仕方。_shared/ops_core.js）
     let logged = 0;
-    if (first && new Date().getUTCMinutes() % 5 === 0) {
-      try { logged = await logOps(bodies); } catch (e) { console.error("ops_log", e); }
+    // 前半は那覇以外の13空港、後半は那覇（那覇は後半にしか機体を取らないため）
+    if (new Date().getUTCMinutes() % 5 === 0) {
+      const only = first ? null : ["OKA"];
+      try { logged = await logOps(only ? new Map([...bodies].filter(([k]) => only.includes(k))) : bodies); } catch (e) { console.error("ops_log", e); }
     }
     return new Response(JSON.stringify({ recorded: done, logged, liveries }), { headers: JSON_HEADERS });
   }
