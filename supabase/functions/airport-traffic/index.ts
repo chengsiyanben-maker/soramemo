@@ -73,10 +73,11 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: CORS });
   if (req.method !== "GET") return new Response(JSON.stringify({ error: "GET only" }), { status: 405, headers: JSON_HEADERS });
   const iata = (new URL(req.url).searchParams.get("iata") || "").toUpperCase();
-  // 記録用（pg_cron が30秒ごとに呼ぶ）：羽田は毎回、ほかの空港は1分に1回（毎分0〜24秒の呼び出しのときだけ）、線を足す
+  // 記録用（pg_cron が30秒ごとに呼ぶ）：羽田は毎回。ほかの6空港は2組に分け、毎分の前半の呼び出しで成田・伊丹・関西、
+  // 後半で新千歳・福岡・那覇の線を足す（どの空港も1分に1回。adsb.lol への問い合わせは1回の呼び出しで4つまで）
   if (iata === "RECORD") {
-    const others = new Date().getUTCSeconds() < 25;
-    const list = Object.keys(AIRPORTS).filter((k) => k === "HND" || others);
+    const first = new Date().getUTCSeconds() < 30;
+    const list = ["HND", ...(first ? ["NRT", "ITM", "KIX"] : ["CTS", "FUK", "OKA"])];
     const done: Record<string, string> = {};
     // adsb.lol は同時にたくさん問い合わせると断る（429・420）ので、1.5秒ずつあけて1つずつ
     for (const [i, k] of list.entries()) {
