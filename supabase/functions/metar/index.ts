@@ -4,7 +4,7 @@
 const CORS = { "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Headers": "authorization, apikey, content-type", "Access-Control-Allow-Methods": "GET, OPTIONS" };
 const cache = new Map<string, { at: number; body: string }>();
 const TTL = 5 * 60_000;
-const ALLOWED = new Set(["RJTT", "RJAA", "RJBB", "RJOO", "RJGG", "RJCC", "RJFF", "ROAH"]);   // 運用の表示に使う空港だけ
+const ALLOWED = new Set(["RJTT", "RJAA", "RJBB", "RJOO", "RJGG", "RJCC", "RJFF", "ROAH", "RJSS", "RJOA", "RJOM", "RJFT", "RJFU", "RJFK"]);   // 運用の表示に使う空港だけ
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: CORS });
