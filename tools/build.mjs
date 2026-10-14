@@ -58,8 +58,9 @@ for (const f of files) {
     "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net",
     "font-src 'self'",
     "img-src 'self' data: blob: https://cyberjapandata.gsi.go.jp",
-    "connect-src 'self' https://*.supabase.co https://challenges.cloudflare.com",
-    "manifest-src 'self'", "worker-src 'self'", "base-uri 'none'", "form-action 'none'", "object-src 'none'",
+    // 運用タブの地図の下地（国土地理院のベクトルタイル）を読み、描画の部品（MapLibre）が裏で動かす処理（blob の worker）を許す
+    "connect-src 'self' https://*.supabase.co https://challenges.cloudflare.com https://cyberjapandata.gsi.go.jp",
+    "manifest-src 'self'", "worker-src 'self' blob:", "base-uri 'none'", "form-action 'none'", "object-src 'none'",
   ].join("; ");
   out = out.replace(/<meta charset="utf-8">/, `<meta charset="utf-8"><meta http-equiv="Content-Security-Policy" content="${csp}">`);
   writeFileSync(new URL(`../web/${f}`, import.meta.url), out);

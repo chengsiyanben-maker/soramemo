@@ -3301,15 +3301,15 @@ async function opsBaseMap(){
     if(!document.querySelector(`link[href="${MAPLIBRE.css}"]`)){ const l = document.createElement("link"); l.rel = "stylesheet"; l.href = MAPLIBRE.css; document.head.appendChild(l); }
     await loadScript(MAPLIBRE.js); await loadScript(MAPLIBRE.bridge);
     if(map !== OPS_MAP || !L.maplibreGL) throw new Error("no bridge");
-    const w = (a, b, c) => ["interpolate", ["linear"], ["zoom"], 8, a, 12, b, 16, c];
+    const w = (a, b, c) => ["interpolate", ["linear"], ["zoom"], 7, a, 11, b, 16, c];
     L.maplibreGL({ attribution:GSI_ATTR, style:{ version:8,
       sources:{ gsi:{ type:"vector", tiles:["https://cyberjapandata.gsi.go.jp/xyz/experimental_bvmap/{z}/{x}/{y}.pbf"], minzoom:4, maxzoom:16 } },
       layers:[
         { id:"bg", type:"background", paint:{ "background-color":"#FAFAF8" } },
         { id:"road", type:"line", source:"gsi", "source-layer":"road", filter:["!=", ["get", "motorway"], 1],
-          layout:{ "line-cap":"round", "line-join":"round" }, paint:{ "line-color":"#D3D6DA", "line-width":w(.4, .9, 2.4) } },
+          layout:{ "line-cap":"round", "line-join":"round" }, paint:{ "line-color":"#BFC5CC", "line-width":w(.6, 1, 2.6) } },
         { id:"motorway", type:"line", source:"gsi", "source-layer":"road", filter:["==", ["get", "motorway"], 1],
-          layout:{ "line-cap":"round", "line-join":"round" }, paint:{ "line-color":"#A9B0B8", "line-width":w(.9, 1.6, 3.5) } } ] } }).addTo(map);
+          layout:{ "line-cap":"round", "line-join":"round" }, paint:{ "line-color":"#8D96A0", "line-width":w(1.1, 1.8, 3.8) } } ] } }).addTo(map);
   }catch(e){ if(map === OPS_MAP) pale(); }
 }
 // 地図の凡例（いま出しているものだけ）
@@ -3353,6 +3353,7 @@ async function loadTraffic(){
   { const ob = observeOps(d.planes); if(JSON.stringify(ob) !== JSON.stringify(OPS_OBS)){ OPS_OBS = ob; if(OPS_MODE === "auto") renderOps(); } }
   TRAFFIC_MK = [];
   for(const p of d.planes){
+    if(p.phase !== "arr" && p.phase !== "dep") continue;   // 着陸・離陸に関係ない機体（上空を通過する機体など）は出さない
     const c = TRAFFIC_COL[p.phase] || TRAFFIC_COL.other;
     if(Array.isArray(p.trail) && p.trail.length > 1 && p.phase !== "other")
       L.polyline([...p.trail, [p.lat, p.lon]], { color:c, weight:p.phase === "arr" ? 3 : 2.5, opacity:.85 }).addTo(TRAFFIC_LAYER);
