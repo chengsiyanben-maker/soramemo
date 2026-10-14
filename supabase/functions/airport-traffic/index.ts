@@ -51,15 +51,32 @@ async function syncTrails(iata: string, planes: { id: string; lat: number; lon: 
 
 const cache = new Map<string, { at: number; body: string }>();
 
+// 近い空港は、1つの広い円でまとめて問い合わせる（adsb.lol への問い合わせを減らす。1回の記録で3つまでしか答えてもらえない）
+//   関東：羽田・成田（中心から羽田・成田ともに約16海里、半径76海里で羽田の60海里まで入る）、関西：伊丹・関西（約13海里、半径53海里）
+const REGIONS: Record<string, { at: [number, number]; nm: number }> = {
+  KANTO: { at: [35.665, 140.082], nm: 76 }, KANSAI: { at: [34.61, 135.336], nm: 53 },
+};
+const REGION_OF: Record<string, string> = { HND: "KANTO", NRT: "KANTO", ITM: "KANSAI", KIX: "KANSAI" };
+const regionCache = new Map<string, { at: number; j: { now?: number; ac?: unknown[] } }>();
+async function fetchArea(iata: string) {
+  const key = REGION_OF[iata] ?? iata, area = REGIONS[key] ?? AIRPORTS[iata];
+  const hit = regionCache.get(key);
+  if (hit && Date.now() - hit.at < TTL) return hit.j;
+  const r = await fetch(`https://api.adsb.lol/v2/lat/${area.at[0]}/lon/${area.at[1]}/dist/${area.nm}`,
+    { headers: { "User-Agent": "soramemo (airport-traffic)" }, signal: AbortSignal.timeout(10000) });
+  if (!r.ok) throw new Error("adsb.lol " + r.status);
+  const j = await r.json();
+  regionCache.set(key, { at: Date.now(), j });
+  return j;
+}
+
 async function snapshot(iata: string): Promise<string> {
   const hit = cache.get(iata);
   if (hit && Date.now() - hit.at < TTL) return hit.body;
   const a = AIRPORTS[iata];
-  const r = await fetch(`https://api.adsb.lol/v2/lat/${a.at[0]}/lon/${a.at[1]}/dist/${a.nm}`,
-    { headers: { "User-Agent": "soramemo (airport-traffic)" }, signal: AbortSignal.timeout(10000) });
-  if (!r.ok) throw new Error("adsb.lol " + r.status);
-  const j = await r.json();
-  const planes = planesFromAdsb(j?.ac, a.at, 14000, NEARBY.filter((o) => o !== a.at));
+  const j = await fetchArea(iata);
+  // まとめて取った円から、この空港の半径の中だけを使う
+  const planes = planesFromAdsb(j?.ac, a.at, 14000, NEARBY.filter((o) => o !== a.at)).filter((p) => p.dist_km <= a.nm * 1.852);
   const tr = await syncTrails(iata, planes);
   const body = JSON.stringify({
     iata, at: new Date(typeof j?.now === "number" ? j.now : Date.now()).toISOString(), source: "adsb.lol",
@@ -73,15 +90,16 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: CORS });
   if (req.method !== "GET") return new Response(JSON.stringify({ error: "GET only" }), { status: 405, headers: JSON_HEADERS });
   const iata = (new URL(req.url).searchParams.get("iata") || "").toUpperCase();
-  // 記録用（pg_cron が30秒ごとに呼ぶ）：羽田は毎回。ほかの6空港は2組に分け、毎分の前半の呼び出しで成田・伊丹・関西、
-  // 後半で新千歳・福岡・那覇の線を足す（どの空港も1分に1回。adsb.lol への問い合わせは1回の呼び出しで4つまで）
+  // 記録用（pg_cron が30秒ごとに呼ぶ）：羽田・成田は毎回、伊丹・関西・新千歳は毎分の前半、福岡・那覇は後半に線を足す
   if (iata === "RECORD") {
     const first = new Date().getUTCSeconds() < 30;
-    const list = ["HND", ...(first ? ["NRT", "ITM", "KIX"] : ["CTS", "FUK", "OKA"])];
+    // 問い合わせは1回に3つまで：前半は 関東（羽田・成田）・関西（伊丹・関西）・新千歳、後半は 関東・福岡・那覇
+    const list = first ? ["HND", "NRT", "ITM", "KIX", "CTS"] : ["HND", "NRT", "FUK", "OKA"];
     const done: Record<string, string> = {};
     // adsb.lol は同時にたくさん問い合わせると断る（429・420）ので、3秒ずつあけて1つずつ
     for (const [i, k] of list.entries()) {
-      if (i) await new Promise((r) => setTimeout(r, 3000));
+      const key = REGION_OF[k] ?? k, cached = regionCache.get(key);
+      if (i && !(cached && Date.now() - cached.at < TTL)) await new Promise((r) => setTimeout(r, 3000));
       try { await snapshot(k); done[k] = "ok"; } catch (e) { done[k] = e instanceof Error ? e.message.slice(0, 40) : "error"; }
     }
     return new Response(JSON.stringify({ recorded: done }), { headers: JSON_HEADERS });
