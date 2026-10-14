@@ -3162,19 +3162,29 @@ function obsPaths(def){
   return def.app ? [...Object.entries(def.app).map(([k, a]) => [k, a.p]), ...fin(37)] : fin(18.52);
 }
 function rwModeOf(def){ const m = {}; for(const [k, op] of Object.entries(def.modes)) for(const r of op.arr) if(!m[r]) m[r] = k; return m; }
-// 離陸機から向きを判定する（着陸機では見分けられない伊丹と、着陸機がそろわないときのほかの空港のため）。離陸した機体を最初に見た位置が、空港から見てどちら側か（8km以内。まだ低いか、まっすぐ遠ざかっている機体）を、
-// 各運用の離陸の向きと比べる（北西へ離陸すれば、まず空港の北西に現れる。1分ごとの記録でも1点あれば判定できる）
+// 離陸機から向きを判定する（着陸機では見分けられない伊丹と、着陸機がそろわないときのほかの空港のため）。
+// 1) 空港の近く（8km以内）で最初に見えた機体が、次の点までどちらへ動いたか（1km以上動いていれば）を、離陸の向き（±40°）と比べる。
+// 2) 1点しかないときは、その点がどちらの向きの離陸の「滑走路の先」にあるか（離陸を終える端から0.3〜8km、離陸の向きの±50°以内）で決める。
+//    空港の中心ではなく滑走路の端から測る（関西など長い滑走路では、滑走を始めた直後の位置が離陸と反対側に出るため）。
+// 地上の機体（300ft未満）と、上がってから旋回して戻ってきた機体（4,000ft超で、まっすぐ遠ざかっていない）は数えない
 function observeDeps(planes, def){
-  const rw = runwaysOf(def), H = def.center, votes = {};
+  const rw = runwaysOf(def), H = def.center, votes = {}, km = (a, b) => nmToLine(a, [b, b]) * 1.852, off = (x, y) => Math.abs(((x - y) + 540) % 360 - 180);
   for(const p of planes){
-    if(p.phase !== "dep" || p.alt_ft == null) continue;
-    const pts = [...(p.trail || []), [p.lat, p.lon]], first = pts[0], d = nmToLine(first, [H, H]) * 1.852;
-    if(d < 1.5 || d > 8) continue;
-    const b = bearing(H, first);
-    // まだ低い（4,000ft以下）か、最初に見た位置からまっすぐ遠ざかっている機体だけ（旋回して戻ってきた機体を数えないように）
-    const away = pts.some(q => nmToLine(q, [H, H]) * 1.852 >= d + 2 && Math.abs(((bearing(H, q) - b) + 540) % 360 - 180) <= 25);
-    if(p.alt_ft > 4000 && !away) continue;
-    for(const [m, op] of Object.entries(def.modes)) if(op.dep.some(id => Math.abs(((b - rw[id].hdg) + 540) % 360 - 180) <= 50)){ votes[m] = (votes[m] || 0) + 1; break; }
+    if(p.phase !== "dep" || p.alt_ft == null || p.alt_ft < 300) continue;
+    const pts = [...(p.trail || []), [p.lat, p.lon]], first = pts[0];
+    if(km(first, H) > 8) continue;
+    const next = pts.slice(1, 4).find(q => km(q, first) >= 1);
+    let pick = null;
+    if(next){
+      const b = bearing(first, next);
+      if(p.alt_ft > 4000 && !pts.some(q => km(q, first) >= 3 && off(bearing(first, q), b) <= 25)) continue;
+      pick = m => def.modes[m].dep.some(id => off(b, rw[id].hdg) <= 40);
+    } else {
+      if(p.alt_ft > 4000) continue;
+      pick = m => def.modes[m].dep.some(id => { const e = rw[id].opp, d = km(first, e); return d >= 0.3 && d <= 8 && off(bearing(e, first), rw[id].hdg) <= 50; });
+    }
+    const m = Object.keys(def.modes).find(pick);
+    if(m) votes[m] = (votes[m] || 0) + 1;
   }
   const all = Object.values(votes).reduce((a, b) => a + b, 0); if(all < 2) return null;
   const [mode, cnt] = Object.entries(votes).sort((x, y) => y[1] - x[1])[0];
