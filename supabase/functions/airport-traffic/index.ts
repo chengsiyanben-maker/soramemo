@@ -10,6 +10,7 @@ import { planesFromAdsb, type Trails, updateTrails } from "../_shared/traffic.ts
 import { fetchMetars } from "../_shared/metar.ts";
 import { OPS_AIRPORTS, observeOps } from "../_shared/ops_core.js";
 import { liveryMap } from "../_shared/liveries.ts";
+import { normCallsign } from "../_shared/flight_watch.ts";
 import webpush from "npm:web-push@3.6.7";
 
 const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, { auth: { persistSession: false } });
@@ -64,12 +65,15 @@ const cache = new Map<string, { at: number; body: string }>();
 
 // 空港は、広い円（adsb.lol の上限の250海里）でまとめて問い合わせる（adsb.lol への問い合わせを減らす。1回の記録で3つまでしか答えてもらえない）
 //   東：羽田・成田・中部・伊丹・関西・仙台（中心からいちばん遠い仙台が約205海里、仙台の40海里まで入る）
-//   西：福岡・熊本・長崎・鹿児島・広島・松山（いちばん遠い広島が約120海里）。新千歳・那覇はそれぞれの円
+//   西：福岡・熊本・長崎・鹿児島・広島・松山（いちばん遠い広島が約120海里）。
+//   北：新千歳を中心に250海里（北海道と東北の北）。南：那覇を中心に250海里（奄美・宮古・石垣まで）。
+//   日本中の機体の位置は live_positions にも残し、便の見張り（flight-watch）が使う
 const REGIONS: Record<string, { at: [number, number]; nm: number }> = {
   EAST: { at: [35.6, 138.0], nm: 250 }, WEST: { at: [33.2, 131.0], nm: 250 },
+  NORTH: { at: [42.7752, 141.6923], nm: 250 }, SOUTH: { at: [26.1933, 127.6394], nm: 250 },
 };
 const REGION_OF: Record<string, string> = { HND: "EAST", NRT: "EAST", NGO: "EAST", ITM: "EAST", KIX: "EAST", SDJ: "EAST",
-  FUK: "WEST", KMJ: "WEST", NGS: "WEST", KOJ: "WEST", HIJ: "WEST", MYJ: "WEST" };
+  FUK: "WEST", KMJ: "WEST", NGS: "WEST", KOJ: "WEST", HIJ: "WEST", MYJ: "WEST", CTS: "NORTH", OKA: "SOUTH" };
 const regionCache = new Map<string, { at: number; j: { now?: number; ac?: unknown[] } }>();
 async function fetchArea(iata: string) {
   const key = REGION_OF[iata] ?? iata, area = REGIONS[key] ?? AIRPORTS[iata];
@@ -97,6 +101,26 @@ async function snapshot(iata: string): Promise<string> {
   });
   cache.set(iata, { at: Date.now(), body });
   return body;
+}
+
+// 今回取った円の機体（便名のあるもの）の位置を live_positions に残す
+async function recordPositions(bodies: Map<string, string>) {
+  const keys = new Set([...bodies.keys()].map((k) => REGION_OF[k] ?? k)), rows = new Map<string, Record<string, unknown>>();
+  for (const k of keys) {
+    const c = regionCache.get(k); if (!c || Date.now() - c.at > TTL) continue;
+    const t = typeof c.j.now === "number" ? c.j.now : Date.now();
+    for (const a of (c.j.ac ?? []) as Record<string, unknown>[]) {
+      if (typeof a.flight !== "string" || !a.flight.trim() || typeof a.lat !== "number" || typeof a.lon !== "number") continue;
+      const cs = normCallsign(a.flight).slice(0, 10), at = t - (typeof a.seen_pos === "number" ? a.seen_pos * 1000 : 0);
+      rows.set(cs, { callsign: cs, hex: typeof a.hex === "string" ? a.hex : null, lat: a.lat, lon: a.lon,
+        alt_ft: typeof a.alt_baro === "number" ? Math.round(a.alt_baro) : null, ground: a.alt_baro === "ground",
+        fpm: typeof a.baro_rate === "number" ? Math.round(a.baro_rate) : typeof a.geom_rate === "number" ? Math.round(a.geom_rate) : null,
+        seen_at: new Date(at).toISOString() });
+    }
+  }
+  const all = [...rows.values()];
+  for (let i = 0; i < all.length; i += 500) { const { error } = await admin.from("live_positions").upsert(all.slice(i, i + 500)); if (error) throw error; }
+  return all.length;
 }
 
 // 特別塗装機を livery_sightings に残す（今回取った円の機体から。運用タブの空港の着陸・離陸中なら、その空港も）
@@ -177,7 +201,7 @@ Deno.serve(async (req) => {
   if (iata === "RECORD") {
     const first = new Date().getUTCSeconds() < 30;
     // 問い合わせは1回に3つまで：東の円・西の円と、新千歳か那覇
-    const list = [...Object.keys(REGION_OF), first ? "CTS" : "OKA"];
+    const list = [...Object.keys(REGION_OF).filter((k) => k !== "CTS" && k !== "OKA"), first ? "CTS" : "OKA"];
     const done: Record<string, string> = {}, bodies = new Map<string, string>();
     // adsb.lol は同時にたくさん問い合わせると断る（429・420）ので、3秒ずつあけて1つずつ
     for (const [i, k] of list.entries()) {
@@ -185,6 +209,8 @@ Deno.serve(async (req) => {
       if (i && !(cached && Date.now() - cached.at < TTL)) await new Promise((r) => setTimeout(r, 3000));
       try { bodies.set(k, await snapshot(k)); done[k] = "ok"; } catch (e) { done[k] = e instanceof Error ? e.message.slice(0, 40) : "error"; }
     }
+    // 日本中の機体の最新の位置を残す（便の見張り用）
+    try { await recordPositions(bodies); } catch (e) { console.error("positions", e); }
     // 特別塗装機：今回取った円の中に、一覧の登録記号の機体がいれば残す
     let liveries = 0;
     try { liveries = await recordLiveries(bodies); } catch (e) { console.error("livery", e); }

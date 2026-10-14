@@ -13,7 +13,7 @@ let bad = 0; const check = (label, ok, v) => { console.log((ok ? 'OK ' : 'NG ') 
 await db.exec(`insert into public.ops_log (iata, est_mode, obs_mode) values ('FUK','b','a'),('FUK','a','a'),('HND','north',null);
 insert into public.livery_sightings (reg, name, airline, lat, lon, src, iata, phase) values ('JA819A','ポケモンジェット 赤','ANA',35.5,139.8,'https://example','HND','arr');
 insert into public.livery_sightings (reg, name, airline, lat, lon, src, seen_at) values ('JA05RK','ジンベエジェット','JTA',26.2,127.6,'https://example', now() - interval '20 minutes');`);
-for (const t of ['ops_log', 'livery_sightings']) {
+for (const t of ['ops_log', 'livery_sightings', 'live_positions', 'schedule_sync_runs']) {
   const r = await as('anon', `select count(*) from public.${t}`);
   check(`${t} は利用者から直接読めない`, String(r).startsWith('ERROR'), r);
 }

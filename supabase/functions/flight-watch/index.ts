@@ -1,22 +1,14 @@
-// 予定の便（flight_schedule）と、今飛んでいる機体（adsb.lol）を照らし合わせ、遅れ・ダイバートを見つけて知らせる。
+// 予定の便（flight_schedule）と、今飛んでいる機体（adsb.lol。機体の記録が live_positions に残したもの）を照らし合わせ、遅れ・ダイバートを見つけて知らせる。
 //   GET /functions/v1/flight-watch   （pg_cron が1分ごとに呼ぶ。何度呼ばれても、機体を取りに行くのは1分に1回）
 // ダイヤが空（または見張る便がない）なら、機体は取りに行かず、何もしない。
 // 見つけたお知らせは flight_alerts に残し、その空港を選んでいる人のスマホへ通知する（VAPID の鍵があるときだけ）。
 import { createClient } from "npm:@supabase/supabase-js@2.117.2";
 import webpush from "npm:web-push@3.6.7";
-import { type Airport, blankWatch, callsignsFor, normCallsign, type Sched, type Seen, step, type Watch } from "../_shared/flight_watch.ts";
+import { type Airport, blankWatch, callsignsFor, type Sched, type Seen, step, type Watch } from "../_shared/flight_watch.ts";
 
 const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, { auth: { persistSession: false } });
 const JSON_HEADERS = { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" };
 const MIN = 60_000;
-
-// 日本の上空をおおう円（中心と半径250海里。adsb.lol の上限）。見張る便の近くの円だけ取りに行く
-const CIRCLES: [number, number][] = [[35.6, 139.8], [34.6, 135.4], [33.4, 130.6], [43.0, 142.0], [38.6, 140.6], [26.3, 127.8], [29.5, 129.8], [24.4, 124.2]];
-function km(a: [number, number], b: [number, number]) {
-  const r = Math.PI / 180, dl = (b[0] - a[0]) * r, dn = (b[1] - a[1]) * r;
-  const h = Math.sin(dl / 2) ** 2 + Math.cos(a[0] * r) * Math.cos(b[0] * r) * Math.sin(dn / 2) ** 2;
-  return 2 * 6371 * Math.asin(Math.sqrt(h));
-}
 
 let AIRPORTS: Map<string, Airport> | null = null;
 async function airports() {
@@ -24,13 +16,6 @@ async function airports() {
   const { data } = await admin.from("airports").select("iata, name, lat, lon").not("iata", "is", null);
   AIRPORTS = new Map((data ?? []).filter((a) => /^[A-Z]{3}$/.test(a.iata)).map((a) => [a.iata, { iata: a.iata, lat: a.lat, lon: a.lon, name: String(a.name).replace(/国際空港$|空港$/, "").replace(/^.*（(.+)）$/, "$1") }]));
   return AIRPORTS;
-}
-
-async function fetchCircle([lat, lon]: [number, number]) {
-  const r = await fetch(`https://api.adsb.lol/v2/lat/${lat}/lon/${lon}/dist/250`, { headers: { "User-Agent": "soramemo (flight-watch)" }, signal: AbortSignal.timeout(15000) });
-  if (!r.ok) throw new Error("adsb.lol " + r.status);
-  const j = await r.json();
-  return { now: typeof j?.now === "number" ? j.now : Date.now(), ac: Array.isArray(j?.ac) ? j.ac : [] };
 }
 
 async function sendPush(alerts: { iata: string[]; message: string; flight: string; fkey: string }[]) {
@@ -76,24 +61,13 @@ Deno.serve(async () => {
     if (!list.length) return new Response(JSON.stringify({ watching: 0 }), { headers: JSON_HEADERS });
 
     const aps = await airports();
-    // 見張る便の出発・到着・最後の位置の近くの円だけ取りに行く
-    const pts: [number, number][] = list.flatMap(({ s, w }) => [aps.get(s.dep), aps.get(s.arr)].filter(Boolean).map((a) => [a!.lat, a!.lon] as [number, number])
-      .concat(w.last ? [[w.last.lat, w.last.lon]] : []));
-    const need = CIRCLES.filter((c) => pts.some((p) => km(c, p) < 500));
+    // 機体の位置：機体の記録（airport-traffic）が30秒ごとに日本中の機体を取って live_positions に残している（adsb.lol に別に問い合わせない）
+    const { data: pos } = await admin.from("live_positions").select("callsign, lat, lon, alt_ft, ground, fpm, seen_at")
+      .gt("seen_at", new Date(now - 3 * MIN).toISOString()).limit(5000);
+    // 位置がほとんど届いていない（記録が止まっている）ときは、離陸を確認できないと誤って知らせないよう、何もしない
+    if ((pos?.length ?? 0) < 20) return new Response(JSON.stringify({ watching: list.length, skipped: "few positions", positions: pos?.length ?? 0 }), { headers: JSON_HEADERS });
     const seen = new Map<string, Seen>();
-    for (const [ci, c] of need.entries()) {
-      if (ci) await new Promise((r) => setTimeout(r, 1500));   // adsb.lol に続けて問い合わせすぎない
-      try {
-        const { now: t, ac } = await fetchCircle(c);
-        for (const a of ac) {
-          if (typeof a?.flight !== "string" || typeof a.lat !== "number") continue;
-          const cs = normCallsign(a.flight);
-          seen.set(cs, { callsign: cs, lat: a.lat, lon: a.lon, alt_ft: typeof a.alt_baro === "number" ? a.alt_baro : null, ground: a.alt_baro === "ground",
-            fpm: typeof a.baro_rate === "number" ? a.baro_rate : typeof a.geom_rate === "number" ? a.geom_rate : null, at: t - (typeof a.seen_pos === "number" ? a.seen_pos * 1000 : 0) });
-        }
-      } catch (e) { console.error(e); }
-    }
-
+    for (const p of pos ?? []) seen.set(p.callsign, { callsign: p.callsign, lat: p.lat, lon: p.lon, alt_ft: p.alt_ft, ground: p.ground, fpm: p.fpm, at: Date.parse(p.seen_at) });
     const upd: { schedule_id: number; state: Watch; updated_at: string }[] = [];
     const out: { schedule_id: number; kind: string; flight: string; dep: string; arr: string; iata: string[]; message: string }[] = [];
     const fkeys = new Map<number, string>();
@@ -107,7 +81,7 @@ Deno.serve(async () => {
     if (upd.length) await admin.from("flight_watch").upsert(upd);
     if (out.length) await admin.from("flight_alerts").insert(out);
     const pushed = await sendPush(out.map((a) => ({ ...a, fkey: fkeys.get(a.schedule_id)! })));
-    return new Response(JSON.stringify({ watching: list.length, circles: need.length, seen: seen.size, updated: upd.length, alerts: out.length, pushed }), { headers: JSON_HEADERS });
+    return new Response(JSON.stringify({ watching: list.length, seen: seen.size, updated: upd.length, alerts: out.length, pushed }), { headers: JSON_HEADERS });
   } catch (e) {
     console.error(e);
     return new Response(JSON.stringify({ error: "failed" }), { status: 500, headers: JSON_HEADERS });
