@@ -3197,9 +3197,11 @@ function observeOps(planes, def = opsDef()){
   for(const p of planes){
     if(p.phase !== "arr" || p.alt_ft == null || p.alt_ft > 7000) continue;
     // 羽田（30秒ごとの記録）：空港から3〜22海里の直近10点（約5分）で比べる。
-    // ほかの空港（1分ごとの記録）：最終進入の部分だけで比べるよう、3〜15海里の直近4点（約3分）にする（10点だと、回り込んでくる部分まで入って外れる）
-    const far = def.detail ? 22 : 15, need = def.detail ? 5 : 4;
-    const pts = [...(p.trail || []), [p.lat, p.lon]].filter(q => { const d = nmToLine(q, [H, H]); return d >= 3 && d <= far; }).slice(-(def.detail ? 10 : 4));
+    // ほかの空港（1分ごとの記録）：最終進入の部分だけで比べるよう、3〜12海里の直近3点（約2分）にする
+    // （多いと、新千歳の目視での進入のように最終進入の手前で回り込んでくる部分まで入って外れる）。同じ位置が続く点は1つにまとめる
+    const far = def.detail ? 22 : 12, need = def.detail ? 5 : 3;
+    const pts = [...(p.trail || []), [p.lat, p.lon]].filter((q, i, a) => !i || q[0] !== a[i - 1][0] || q[1] !== a[i - 1][1])
+      .filter(q => { const d = nmToLine(q, [H, H]); return d >= 3 && d <= far; }).slice(-(def.detail ? 10 : 3));
     if(pts.length < need) continue;
     const c = paths.map(([k, line]) => ({ k, rw: k.split(" ").pop(), d: pts.reduce((s, q) => s + nmToLine(q, line), 0) / pts.length })).sort((x, y) => x.d - y.d);
     if(c[0].d >= 0.8) continue;
