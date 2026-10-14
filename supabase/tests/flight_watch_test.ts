@@ -38,6 +38,7 @@ Deno.test("定刻どおり：離陸と着陸を記録し、お知らせは出さ
 
 Deno.test("出発が1時間以上遅れ・到着も1時間以上遅れ", () => {
   const { all } = run([
+    [null, T0 - 10 * MIN],
     [null, T0 + 60 * MIN],
     [at(35.56, 139.80, 2000, T0 + 80 * MIN, 2500), T0 + 80 * MIN],
     [at(42.72, 141.68, 1200, T0 + 160 * MIN, -700), T0 + 160 * MIN],
@@ -47,7 +48,7 @@ Deno.test("出発が1時間以上遅れ・到着も1時間以上遅れ", () => {
 });
 
 Deno.test("定刻から1時間15分たっても離陸を確認できない", () => {
-  const { all } = run([[null, T0 + 70 * MIN], [null, T0 + 76 * MIN], [null, T0 + 90 * MIN]]);
+  const { all } = run([[null, T0 - 10 * MIN], [null, T0 + 70 * MIN], [null, T0 + 76 * MIN], [null, T0 + 90 * MIN]]);
   assertEquals(all, ["no_takeoff"]);
 });
 
@@ -69,4 +70,9 @@ Deno.test("引き返し：離陸から20分より後に、羽田へ降りてく�
     [at(35.60, 139.85, 3000, T0 + 60 * MIN, -900), T0 + 60 * MIN],
   ]);
   assertEquals(all, ["return"]);
+});
+
+Deno.test("定刻を過ぎてから見張り始めた便（ダイヤを後から入れた）は、「離陸を確認できず」を出さない", () => {
+  const { all } = run([[null, T0 + 80 * MIN], [null, T0 + 90 * MIN], [null, T0 + 120 * MIN]]);
+  assertEquals(all, []);
 });

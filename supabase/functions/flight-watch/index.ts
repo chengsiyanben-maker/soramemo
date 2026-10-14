@@ -58,9 +58,11 @@ Deno.serve(async () => {
       s: { id: r.id, flight: r.flight, dep: r.dep, arr: r.arr, std: Date.parse(r.std), sta: Date.parse(r.sta) } as Sched,
       w: ((Array.isArray(r.flight_watch) ? r.flight_watch[0]?.state : (r.flight_watch as { state?: Watch } | null)?.state) ?? blankWatch()) as Watch,
     })).filter((x) => x.w.phase !== "landed" && now - x.s.sta < 6 * 60 * MIN);
+    const aps = await airports();
+    // 国内の便だけ見張る（国際線は日本から離れると位置が届かず、着陸や遅れを見分けられない）
+    for (let i = list.length - 1; i >= 0; i--) if (!aps.has(list[i].s.dep) || !aps.has(list[i].s.arr)) list.splice(i, 1);
     if (!list.length) return new Response(JSON.stringify({ watching: 0 }), { headers: JSON_HEADERS });
 
-    const aps = await airports();
     // 機体の位置：機体の記録（airport-traffic）が30秒ごとに日本中の機体を取って live_positions に残している（adsb.lol に別に問い合わせない）
     const { data: pos } = await admin.from("live_positions").select("callsign, lat, lon, alt_ft, ground, fpm, seen_at")
       .gt("seen_at", new Date(now - 3 * MIN).toISOString()).limit(5000);

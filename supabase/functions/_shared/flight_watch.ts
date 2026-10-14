@@ -23,6 +23,7 @@ export type Watch = {
   low_iata: string | null; low_at: number | null;   // 最後に「空港の近くで低い」と見た空港と時刻
   last: { lat: number; lon: number; alt_ft: number | null; at: number } | null;
   sent: string[];                                   // 送ったお知らせの種類（同じお知らせを二度出さない）
+  start?: number;                                   // 見張りを始めた時刻（ダイヤを入れたのが定刻より後なら、離陸を見逃しているので「離陸を確認できず」は出さない）
 };
 export type Alert = { kind: "delay_dep" | "no_takeoff" | "delay_arr" | "divert" | "return" | "divert_landed"; iata: string[]; message: string };
 
@@ -59,6 +60,8 @@ const hm = (ms: number) => { const d = new Date(ms + 9 * 3600_000); return `${d.
 // 1便ぶんを1回進める。seen は今回見つかった機体（見つからなければ null）
 export function step(s: Sched, w0: Watch, seen: Seen | null, now: number, aps: Map<string, Airport>): { watch: Watch; alerts: Alert[] } {
   const w: Watch = { ...w0, sent: [...w0.sent] }, out: Alert[] = [];
+  if (w.start == null) w.start = now;
+  const lateStart = w.start > s.std + 15 * MIN;   // 定刻を15分以上すぎてから見張り始めた便
   const name = (i: string) => aps.get(i)?.name ?? i, route = `${s.flight}（${name(s.dep)}→${name(s.arr)}）`;
   const emit = (a: Alert) => { if (w.sent.includes(a.kind)) return; w.sent.push(a.kind); out.push(a); };
   const dep = aps.get(s.dep);
@@ -90,11 +93,11 @@ export function step(s: Sched, w0: Watch, seen: Seen | null, now: number, aps: M
     if (w.landed_iata !== s.arr && w.landed_iata !== s.dep) emit({ kind: "divert_landed", iata: [s.arr, w.landed_iata, s.dep], message: `${route}は、${name(w.landed_iata)}に着陸したようです（ダイバート・推定）` });
   }
   // 遅れ
-  if (w.takeoff_at != null && !w.takeoff_est && w.takeoff_at - s.std >= 75 * MIN) {
+  if (w.takeoff_at != null && !w.takeoff_est && !lateStart && w.takeoff_at - s.std >= 75 * MIN) {
     const late = Math.round((w.takeoff_at - 15 * MIN - s.std) / MIN);
     emit({ kind: "delay_dep", iata: [s.dep, s.arr], message: `${route}は、出発が約${late}分遅れました（${hm(w.takeoff_at)}ごろ離陸・推定）` });
   }
-  if (w.phase === "sched" && now - s.std >= 75 * MIN && now - s.std < 6 * 60 * MIN)
+  if (w.phase === "sched" && !lateStart && now - s.std >= 75 * MIN && now - s.std < 6 * 60 * MIN)
     emit({ kind: "no_takeoff", iata: [s.dep, s.arr], message: `${route}は、出発の定刻（${hm(s.std)}）から1時間以上たっても離陸を確認できていません` });
   if (w.phase === "landed" && w.landed_at != null && w.landed_iata === s.arr && w.landed_at - s.sta >= 60 * MIN)
     emit({ kind: "delay_arr", iata: [s.arr, s.dep], message: `${route}は、到着が約${Math.round((w.landed_at - s.sta) / MIN)}分遅れました（${hm(w.landed_at)}ごろ着陸・推定）` });
