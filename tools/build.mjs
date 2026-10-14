@@ -41,14 +41,18 @@ for (const f of files) {
     writeFileSync(list, [...chars].join(""));
     const fontDir = new URL("../web/fonts/", import.meta.url).pathname;
     // 明朝体（見出し・印）と、ドット文字（案内板の数字・空港コード）の2つを作る
-    const make = (kind) => execFileSync("python3", [new URL("./build_font.py", import.meta.url).pathname, list, fontDir, kind], { encoding: "utf8" }).trim();
-    const name = make("mincho"), dot = make("dot");
-    const face = `@font-face{font-family:"Shippori Mincho";src:url(fonts/${name}) format("woff2");font-weight:500 900;font-display:swap}`
-      + `@font-face{font-family:"DotGothic16";src:url(fonts/${dot}) format("woff2");font-weight:400;font-display:swap}`;
-    out = out.replace(/<link href="https:\/\/fonts\.googleapis\.com\/css2[^>]*>/, `<link rel="preload" href="fonts/${name}" as="font" type="font/woff2" crossorigin><link rel="preload" href="fonts/${dot}" as="font" type="font/woff2" crossorigin><style>${face}</style>`);
+    // 文字の多い漢字は小分けにし（unicode-range）、画面に出た文字を含むファイルだけが読まれるようにする
+    const make = (kind) => execFileSync("python3", [new URL("./build_font.py", import.meta.url).pathname, list, fontDir, kind], { encoding: "utf8" })
+      .trim().split("\n").map((l) => l.split("\t"));
+    const mincho = make("mincho"), dot = make("dot");
+    const face = mincho.map(([n, r]) => `@font-face{font-family:"Shippori Mincho";src:url(fonts/${n}) format("woff2");font-weight:500 900;font-display:swap;unicode-range:${r}}`).join("")
+      + dot.map(([n, r]) => `@font-face{font-family:"DotGothic16";src:url(fonts/${n}) format("woff2");font-weight:400;font-display:swap;unicode-range:${r}}`).join("");
+    // 先読みは、見出しにすぐ出る明朝体の「英数字・かな」のファイルだけ
+    out = out.replace(/<link href="https:\/\/fonts\.googleapis\.com\/css2[^>]*>/, `<link rel="preload" href="fonts/${mincho[0][0]}" as="font" type="font/woff2" crossorigin><style>${face}</style>`);
     out = out.replace(/<link rel="preconnect" href="https:\/\/fonts\.(googleapis|gstatic)\.com"[^>]*>/g, "");
-    FONT_FILES = [name, dot];
-    for (const n of FONT_FILES) console.log(`fonts/${n}: ${chars.size}文字 ${(readFileSync(join(fontDir, n)).length / 1024).toFixed(0)}KB`);
+    FONT_FILES = [mincho[0][0], dot[0][0]];   // オフライン用に最初から保存するのは「英数字・かな」だけ。漢字のファイルは使ったときに保存される
+    const total = (fs) => fs.reduce((a, [n]) => a + readFileSync(join(fontDir, n)).length, 0) / 1024;
+    console.log(`フォント：${chars.size}文字　明朝体 ${mincho.length}ファイル 計${total(mincho).toFixed(0)}KB（英数字・かな ${total(mincho.slice(0, 1)).toFixed(0)}KB）　ドット ${dot.length}ファイル 計${total(dot).toFixed(0)}KB（英数字・かな ${total(dot.slice(0, 1)).toFixed(0)}KB）`);
   }
   // ページの防御設定（CSP）：このファイルに書いたスクリプト（ハッシュで指定）と、決まった配信元のものだけを動かす。
   // 外から差し込まれたスクリプトや、HTMLに直接書いた onclick などは動かない。
