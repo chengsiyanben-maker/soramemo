@@ -477,6 +477,8 @@ ol.steps{padding-left:1.4em;line-height:1.9}
 [data-palette="board"] .taf li b{font-family:var(--dotfont);font-weight:400;color:var(--shu)}
 .hndops{margin:12px 0 0;background:var(--paper);border-radius:10px;padding:10px 12px}
 .fwbox{margin:10px 0 0}
+.opstitle{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+.opstitle h2{margin-right:auto}
 .fwlist{margin:12px 0 0;background:var(--paper);border-radius:10px;padding:10px 12px}
 .fwlist .opshead{display:flex;justify-content:space-between;align-items:baseline}
 .fwlist .opshead b{font-size:14px}
@@ -818,7 +820,8 @@ details.rgrp .rgbar i{display:block;height:100%;background:var(--shu)}
     <div class="sgrid" id="statusBox"></div>
   </section>
   <section class="view" id="v-ops" aria-label="運用">
-  <h2 id="opsTitle">羽田の今の運用</h2>
+  <div class="opstitle"><h2 id="opsTitle">羽田の今の運用</h2><button class="linkbtn2" id="opsShare" type="button">共有</button></div>
+  <p class="msg" id="opsMsg" role="status" aria-live="polite"></p>
   <div class="opsaps" id="opsAps" role="group" aria-label="空港の切り替え"></div>
   <p class="hint" id="opsWx">気象通報を読み込んでいます…</p>
   <div class="opsmodes" id="opsModes" role="group" aria-label="運用の切り替え"></div>
@@ -3446,6 +3449,12 @@ async function loadPushKey(){
     PUSH_KEY = r.ok ? ((await r.json()).key || null) : null; }catch(e){ PUSH_KEY = null; }
 }
 const b64u = s => { const p = "=".repeat((4 - s.length % 4) % 4), b = atob((s + p).replace(/-/g, "+").replace(/_/g, "/")); return Uint8Array.from(b, c => c.charCodeAt(0)); };
+// いま見ている画面に短い知らせを出す（運用のタブ・空港のページ・ホーム）
+function uiSay(t){
+  if(opsOn()){ $("opsMsg").textContent = t; return; }
+  if(NOW && $("dAirport").open){ NOW.msg = esc(t); renderNow(); return; }
+  say(t);
+}
 // 「この便に乗る」で選んだ便（便名@運航日）。運航日を2日すぎたものは消す
 const pushFlights = () => { try{ const t = new Date(Date.now() + 9*36e5 - 2*864e5).toISOString().slice(0, 10);
   return JSON.parse(localStorage.getItem("soramemo.pushFlights") || "[]").filter(k => k.split("@")[1] >= t); }catch(e){ return []; } };
@@ -3459,7 +3468,7 @@ async function syncPush(airports, flights){
     if(!airports.length && !flights.length){
       if(sub){ await fetch(url, { method:"POST", headers:H, body:JSON.stringify({ endpoint:sub.endpoint, remove:true }) }); await sub.unsubscribe(); }
     }else{
-      if(Notification.permission !== "granted" && (await Notification.requestPermission()) !== "granted"){ say("通知が許可されていないため、申し込めませんでした。端末の設定で、そらメモの通知を許可してください。"); return false; }
+      if(Notification.permission !== "granted" && (await Notification.requestPermission()) !== "granted"){ uiSay("通知が許可されていないため、申し込めませんでした。端末の設定で、そらメモの通知を許可してください。"); return false; }
       if(!sub) sub = await reg.pushManager.subscribe({ userVisibleOnly:true, applicationServerKey:b64u(PUSH_KEY) });
       const j = sub.toJSON(), r = await fetch(url, { method:"POST", headers:H, body:JSON.stringify({ endpoint:j.endpoint, keys:j.keys, airports, flights }) });
       if(!r.ok) throw new Error("subscribe " + r.status);
@@ -3467,11 +3476,11 @@ async function syncPush(airports, flights){
     localStorage.setItem("soramemo.pushAirports", JSON.stringify(airports));
     localStorage.setItem("soramemo.pushFlights", JSON.stringify(flights));
     return true;
-  }catch(e){ say("通知の申し込みに失敗しました。少し待って、もう一度お試しください。"); return false; }
+  }catch(e){ uiSay("通知の申し込みに失敗しました。少し待って、もう一度お試しください。"); return false; }
 }
 async function togglePush(iata){
   const cur = pushAps(), on = cur.includes(iata), next = on ? cur.filter(x => x !== iata) : [...cur, iata].slice(0, 12);
-  if(await syncPush(next, pushFlights())){ say(on ? "通知をやめました。" : "遅れ・ダイバートの推定を、この端末に通知します。"); track("push", on ? "off" : "on"); }
+  if(await syncPush(next, pushFlights())){ uiSay(on ? "通知をやめました。" : "遅れ・ダイバートの推定を、この端末に通知します。"); track("push", on ? "off" : "on"); }
   renderOpsAlerts();
 }
 // 「この便に乗る」の便を通知の宛先に足す
@@ -3815,7 +3824,17 @@ if("serviceWorker" in navigator && window.isSecureContext && location.protocol !
   // 通知を押して開いたときは、運用のタブへ
   navigator.serviceWorker.addEventListener("message", e => { if(e.data && e.data.type === "open-ops") goTab("ops"); });
 }
-if(location.hash === "#ops") setTimeout(() => goTab("ops"), 0);
+// 運用のタブへのリンク（#ops、空港つきは #ops-NRT など）。通知や共有のリンクから開いたとき
+{ const m = /^#ops(?:-([A-Z]{3}))?$/.exec(location.hash);
+  if(m) setTimeout(() => { if(m[1] && OPS_AIRPORTS[m[1]]){ OPS_AP = m[1]; try{ localStorage.setItem("soramemo.opsAirport", m[1]); }catch(e){} } goTab("ops"); }, 0); }
+// 運用の共有：いまの空港のリンクと、ひとことの文（推定であることも書く）
+$("opsShare").onclick = async () => {
+  const def = opsDef(), url = `https://soramemo.jp/#ops-${def.iata}`, mode = $("opsInfo").querySelector(".mode");
+  const text = `${def.name}の今の運用（推定）：${mode ? mode.textContent : ""}\n#そらメモ #${def.name}空港`;
+  track("ops_share", def.iata);
+  try{ if(navigator.share){ await navigator.share({ title:`${def.name}の今の運用`, text, url }); return; } }catch(e){ if(e && e.name === "AbortError") return; }
+  try{ await navigator.clipboard.writeText(`${text}\n${url}`); uiSay("リンクを写しました。"); }catch(e){ uiSay(url); }
+};
 /* ホームのお知らせ欄：いちばん大事なものを1つだけ見せる（新しい版 > 引っ越し > 送信待ち > ホーム画面に追加） */
 const NOTICES = ["updateBar", "migrateBar", "queueBar", "installBar"];
 function syncNotices(){
