@@ -3162,16 +3162,18 @@ function obsPaths(def){
   return def.app ? [...Object.entries(def.app).map(([k, a]) => [k, a.p]), ...fin(37)] : fin(18.52);
 }
 function rwModeOf(def){ const m = {}; for(const [k, op] of Object.entries(def.modes)) for(const r of op.arr) if(!m[r]) m[r] = k; return m; }
-// 離陸機から向きを判定する（着陸機では見分けられない伊丹のため）。離陸した機体を最初に見た位置が、空港から見てどちら側か（8km以内・まだ4,000ft以下の機体）を、
+// 離陸機から向きを判定する（着陸機では見分けられない伊丹と、着陸機がそろわないときのほかの空港のため）。離陸した機体を最初に見た位置が、空港から見てどちら側か（8km以内。まだ低いか、まっすぐ遠ざかっている機体）を、
 // 各運用の離陸の向きと比べる（北西へ離陸すれば、まず空港の北西に現れる。1分ごとの記録でも1点あれば判定できる）
 function observeDeps(planes, def){
   const rw = runwaysOf(def), H = def.center, votes = {};
   for(const p of planes){
-    // まだ低い（4,000ft以下）機体だけ。上がってから旋回して戻ってきた機体を数えないように（福岡などは離陸後すぐ逆向きへ旋回する）
-    if(p.phase !== "dep" || p.alt_ft == null || p.alt_ft > 4000) continue;
-    const first = [...(p.trail || []), [p.lat, p.lon]][0], d = nmToLine(first, [H, H]) * 1.852;
+    if(p.phase !== "dep" || p.alt_ft == null) continue;
+    const pts = [...(p.trail || []), [p.lat, p.lon]], first = pts[0], d = nmToLine(first, [H, H]) * 1.852;
     if(d < 1.5 || d > 8) continue;
     const b = bearing(H, first);
+    // まだ低い（4,000ft以下）か、最初に見た位置からまっすぐ遠ざかっている機体だけ（旋回して戻ってきた機体を数えないように）
+    const away = pts.some(q => nmToLine(q, [H, H]) * 1.852 >= d + 2 && Math.abs(((bearing(H, q) - b) + 540) % 360 - 180) <= 25);
+    if(p.alt_ft > 4000 && !away) continue;
     for(const [m, op] of Object.entries(def.modes)) if(op.dep.some(id => Math.abs(((b - rw[id].hdg) + 540) % 360 - 180) <= 50)){ votes[m] = (votes[m] || 0) + 1; break; }
   }
   const all = Object.values(votes).reduce((a, b) => a + b, 0); if(all < 2) return null;
@@ -3196,7 +3198,8 @@ function observeOps(planes, def = opsDef()){
     if(!RW_MODE[c[0].rw]) continue;
     hit.push({ rw: c[0].rw, k: !def.app || /^FINAL /.test(c[0].k) || (twin && twin.d - c[0].d < 0.3) ? null : c[0].k });
   }
-  if(hit.length < 2) return null;
+  // 着陸機がそろわないときは、離陸機（空港のどちら側に現れたか）で判定する（羽田は着陸機の経路が細かく分かれるため使わない）
+  if(hit.length < 2) return def.detail ? null : observeDeps(planes, def);
   const n = {}, byMode = {}; for(const h of hit){ n[h.rw] = (n[h.rw] || 0) + 1; byMode[RW_MODE[h.rw]] = (byMode[RW_MODE[h.rw]] || 0) + 1; }
   const [mode, cnt] = Object.entries(byMode).sort((x, y) => y[1] - x[1])[0];
   if(cnt / hit.length < 0.8) return { mixed:true, n };
