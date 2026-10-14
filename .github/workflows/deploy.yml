@@ -59,6 +59,14 @@ jobs:
         run: supabase db push --linked --password "$SUPABASE_DB_PASSWORD" --yes
       - name: サーバーの関数を公開する
         run: supabase functions deploy --use-api --project-ref "$PROJECT_REF"
+      # スマホへの通知（遅れ・ダイバート）の鍵。リポジトリの Secrets に VAPID_PUBLIC_KEY・VAPID_PRIVATE_KEY があるときだけ、サーバーに入れる
+      - name: 通知の鍵をサーバーに入れる
+        env:
+          VAPID_PUBLIC_KEY: ${{ secrets.VAPID_PUBLIC_KEY }}
+          VAPID_PRIVATE_KEY: ${{ secrets.VAPID_PRIVATE_KEY }}
+        run: |
+          if [ -z "$VAPID_PRIVATE_KEY" ] || [ -z "$VAPID_PUBLIC_KEY" ]; then echo "通知の鍵がまだないので、とばす"; exit 0; fi
+          supabase secrets set --project-ref "$PROJECT_REF" VAPID_PUBLIC_KEY="$VAPID_PUBLIC_KEY" VAPID_PRIVATE_KEY="$VAPID_PRIVATE_KEY" VAPID_SUBJECT="https://soramemo.jp"
 
   web:
     name: アプリ

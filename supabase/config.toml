@@ -437,3 +437,7 @@ verify_jwt = false
 verify_jwt = false
 [functions.airport-traffic]
 verify_jwt = false
+[functions.flight-watch]
+verify_jwt = false
+[functions.push-subscribe]
+verify_jwt = false

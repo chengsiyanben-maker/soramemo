@@ -476,6 +476,20 @@ ol.steps{padding-left:1.4em;line-height:1.9}
 [data-palette="board"] .taf li{background:var(--shu-wash)}
 [data-palette="board"] .taf li b{font-family:var(--dotfont);font-weight:400;color:var(--shu)}
 .hndops{margin:12px 0 0;background:var(--paper);border-radius:10px;padding:10px 12px}
+.fwbox{margin:10px 0 0}
+.fwlist{margin:12px 0 0;background:var(--paper);border-radius:10px;padding:10px 12px}
+.fwlist .opshead{display:flex;justify-content:space-between;align-items:baseline}
+.fwlist .opshead b{font-size:14px}
+.fwlist .opshead span{font-size:11px;font-weight:700;border:1px solid var(--sumi);color:var(--sumi);border-radius:999px;padding:0 8px}
+.fwlist ul{list-style:none;margin:6px 0 0;padding:0}
+.fwlist li{padding:7px 0;border-top:1px solid var(--line)}
+.fwlist li:first-child{border-top:0}
+.fwlist li p{margin:2px 0 0;font-size:13px}
+.fwlist li small{color:var(--sumi)}
+.fwlist .fwk{display:inline-block;font-size:11px;font-weight:700;border-radius:4px;padding:0 6px;margin-right:6px;background:var(--line)}
+.fwlist .fw-divert .fwk,.fwlist .fw-divert_landed .fwk,.fwlist .fw-return .fwk{background:var(--shu);color:var(--on-shu)}
+.fwlist .fwpush{margin-top:8px}
+.fwlist .fwnote{margin:6px 0 0;font-size:11.5px;line-height:1.5;color:var(--sumi)}
 .hndops .opshead{display:flex;justify-content:space-between;align-items:baseline}
 .hndops .opshead b{font-size:14px}
 .hndops .opshead span{font-size:11px;font-weight:700;border:1px solid var(--sumi);color:var(--sumi);border-radius:999px;padding:0 8px}
@@ -809,6 +823,7 @@ details.rgrp .rgbar i{display:block;height:100%;background:var(--shu)}
   <p class="hint" id="opsWx">気象通報を読み込んでいます…</p>
   <div class="opsmodes" id="opsModes" role="group" aria-label="運用の切り替え"></div>
   <div class="opsbox" id="opsInfo"></div>
+  <div class="fwbox" id="opsAlerts" hidden></div>
   <div class="opslayers" role="group" aria-label="地図に出すもの">
     <button class="chip" data-layer="traffic" aria-pressed="true">機体</button><button class="chip" data-layer="star" aria-pressed="true">到着経路</button><button class="chip" data-layer="app" aria-pressed="true">進入経路</button><button class="chip" data-layer="sid" aria-pressed="true">出発経路</button><button class="chip" id="opsFitAll">全体を見る</button>
   </div>
@@ -1123,6 +1138,7 @@ const FKIND = { ok:"定刻", late:"遅れ", board:"搭乗中", cancel:"欠航" }
 const canNow = a => SERVER && !a.kind;
 async function loadNow(a){
   NOW = { a, data:null, dir:"arr", term:"all", more:false, msg:"" };
+  loadFlightAlerts(a.iata).then(() => { if(NOW && NOW.a === a) renderNow(); });
   try{
     const r = await fetch(SORAMEMO_CONFIG.supabaseUrl.replace(/\/$/, "") + "/functions/v1/airport-now?iata=" + encodeURIComponent(a.iata), { headers:{ apikey:SORAMEMO_CONFIG.supabaseAnonKey, Authorization:"Bearer " + SORAMEMO_CONFIG.supabaseAnonKey } });
     if(!r.ok) throw new Error("now " + r.status);
@@ -1225,7 +1241,7 @@ function renderNow(){
   if(!d){ box.hidden = false; box.innerHTML = `<div class="nowhead"><h3>空港の今</h3><span>読み込み中…</span></div>`; return; }
   if(!d.weather && !d.flights && !d.taf){ box.hidden = true; return; }
   box.hidden = false;
-  box.innerHTML = `<div class="nowhead"><h3>空港の今</h3><span>${d.at ? jstHM(d.at) + " 更新" : ""}</span></div>${wxHTML(d.weather)}${tafHTML(d.taf)}${OPS_AIRPORTS[NOW.a.iata] ? hndOpsHTML(d.weather, d.taf, NOW.a.iata) : ""}${flightsHTML(NOW.a, d.flights)}`;
+  box.innerHTML = `<div class="nowhead"><h3>空港の今</h3><span>${d.at ? jstHM(d.at) + " 更新" : ""}</span></div>${wxHTML(d.weather)}${tafHTML(d.taf)}${OPS_AIRPORTS[NOW.a.iata] ? hndOpsHTML(d.weather, d.taf, NOW.a.iata) : ""}${fwHTML(FW.get(NOW.a.iata), NOW.a.iata, false)}${flightsHTML(NOW.a, d.flights)}`;
 }
 document.addEventListener("click", e => {
   if(!NOW || !NOW.data || !e.target.closest("#apNow")) return;
@@ -3386,12 +3402,77 @@ function declutterLabels(){
 function startTraffic(){ stopTraffic(); TRAFFIC_FIT = false; loadTraffic(); TRAFFIC_TIMER = setInterval(loadTraffic, 30_000); }
 function stopTraffic(){ if(TRAFFIC_TIMER) clearInterval(TRAFFIC_TIMER); TRAFFIC_TIMER = null; }
 const opsOn = () => $("v-ops").classList.contains("on");
+/* ---------- 遅れ・ダイバートのお知らせ（推定） ----------
+   サーバーの flight-watch が、予定の便（ダイヤ）と今飛んでいる機体を照らし合わせて見つけたもの。直近12時間ぶん。
+   ダイヤが入っていないあいだは何も出ない。お知らせは推定で、航空会社の発表ではない */
+const FW = new Map();   // IATA → お知らせの配列
+const FW_KIND = { delay_dep:"出発の遅れ", no_takeoff:"離陸を確認できず", delay_arr:"到着の遅れ", divert:"ダイバートの可能性", return:"引き返し", divert_landed:"ダイバート" };
+async function loadFlightAlerts(iata){
+  if(!SERVER) return;
+  try{ const r = await fetch(SORAMEMO_CONFIG.supabaseUrl.replace(/\/$/, "") + "/rest/v1/rpc/flight_alerts", { method:"POST",
+      headers:{ "Content-Type":"application/json", apikey:SORAMEMO_CONFIG.supabaseAnonKey, Authorization:"Bearer " + SORAMEMO_CONFIG.supabaseAnonKey }, body:JSON.stringify({ p_iata:iata }) });
+    if(r.ok){ const d = await r.json(); FW.set(iata, Array.isArray(d) ? d : []); } }catch(e){}
+}
+function fwHTML(list, iata, withPush){
+  const push = withPush ? pushButtonHTML(iata) : "";
+  if(!list || !list.length) return push ? `<div class="fwlist"><div class="opshead"><b>遅れ・ダイバート</b><span>推定</span></div><p class="hint" style="margin:4px 0 0">いまは、お知らせはありません。</p>${push}</div>` : "";
+  return `<div class="fwlist"><div class="opshead"><b>遅れ・ダイバート</b><span>推定</span></div><ul>${list.slice(0, 8).map(a =>
+    `<li class="fw-${esc(a.kind)}"><span class="fwk">${esc(FW_KIND[a.kind] || "お知らせ")}</span><b>${esc(a.flight)}</b> <small>${jstHM(a.at)}</small><p>${esc(a.message)}</p></li>`).join("")}</ul>
+    <p class="fwnote">予定の便と、今飛んでいる機体の位置を照らし合わせた推定です。航空会社の発表ではありません。運航状況は各航空会社でご確認ください。</p>${push}</div>`;
+}
+async function renderOpsAlerts(){
+  if(!SERVER) return;
+  const iata = OPS_AP; await loadFlightAlerts(iata); if(OPS_AP !== iata) return;
+  const box = $("opsAlerts"), html = fwHTML(FW.get(iata), iata, true);
+  box.hidden = !html; box.innerHTML = html;
+}
+setInterval(() => { if(opsOn()) renderOpsAlerts(); }, 60_000);
+
+/* スマホへの通知（Web Push）。空港ごとに申し込む。ブラウザの購読だけを送り、ログインはいらない */
+let PUSH_KEY;   // VAPID の公開鍵（サーバーにまだなければ null。そのときは通知のボタンを出さない）
+const pushAps = () => { try{ return JSON.parse(localStorage.getItem("soramemo.pushAirports") || "[]"); }catch(e){ return []; } };
+const pushOK = () => "serviceWorker" in navigator && "PushManager" in window && "Notification" in window;
+function pushButtonHTML(iata){
+  if(!SERVER || PUSH_KEY === null) return "";
+  if(PUSH_KEY === undefined){ loadPushKey().then(() => { if(PUSH_KEY && opsOn()) renderOpsAlerts(); }); return ""; }
+  if(!pushOK()) return `<p class="hint" style="margin:8px 0 0">スマホへの通知は、この端末のブラウザでは使えません（iPhone はホーム画面に追加したそらメモから使えます）。</p>`;
+  const on = pushAps().includes(iata), name = (OPS_AIRPORTS[iata] || {}).name || iata;
+  return `<button class="linkbtn2 fwpush" data-fw-push="${esc(iata)}" aria-pressed="${on}">${on ? `${esc(name)}の通知をやめる` : `${esc(name)}の遅れ・ダイバートを通知する`}</button>`;
+}
+async function loadPushKey(){
+  if(PUSH_KEY !== undefined) return;
+  try{ const r = await fetch(SORAMEMO_CONFIG.supabaseUrl.replace(/\/$/, "") + "/functions/v1/push-subscribe", { headers:{ apikey:SORAMEMO_CONFIG.supabaseAnonKey } });
+    PUSH_KEY = r.ok ? ((await r.json()).key || null) : null; }catch(e){ PUSH_KEY = null; }
+}
+const b64u = s => { const p = "=".repeat((4 - s.length % 4) % 4), b = atob((s + p).replace(/-/g, "+").replace(/_/g, "/")); return Uint8Array.from(b, c => c.charCodeAt(0)); };
+async function togglePush(iata){
+  const cur = pushAps(), on = cur.includes(iata), next = on ? cur.filter(x => x !== iata) : [...cur, iata].slice(0, 12);
+  try{
+    const reg = await navigator.serviceWorker.ready;
+    let sub = await reg.pushManager.getSubscription();
+    const url = SORAMEMO_CONFIG.supabaseUrl.replace(/\/$/, "") + "/functions/v1/push-subscribe", H = { "Content-Type":"application/json", apikey:SORAMEMO_CONFIG.supabaseAnonKey };
+    if(!next.length){
+      if(sub){ await fetch(url, { method:"POST", headers:H, body:JSON.stringify({ endpoint:sub.endpoint, remove:true }) }); await sub.unsubscribe(); }
+    }else{
+      if(Notification.permission !== "granted" && (await Notification.requestPermission()) !== "granted"){ say("通知が許可されていないため、申し込めませんでした。端末の設定で、そらメモの通知を許可してください。"); return; }
+      if(!sub) sub = await reg.pushManager.subscribe({ userVisibleOnly:true, applicationServerKey:b64u(PUSH_KEY) });
+      const j = sub.toJSON(), r = await fetch(url, { method:"POST", headers:H, body:JSON.stringify({ endpoint:j.endpoint, keys:j.keys, airports:next }) });
+      if(!r.ok) throw new Error("subscribe " + r.status);
+    }
+    localStorage.setItem("soramemo.pushAirports", JSON.stringify(next));
+    say(on ? "通知をやめました。" : "遅れ・ダイバートの推定を、この端末に通知します。");
+    track("push", on ? "off" : "on");
+  }catch(e){ say("通知の申し込みに失敗しました。少し待って、もう一度お試しください。"); }
+  renderOpsAlerts();
+}
+document.addEventListener("click", e => { const b = e.target.closest("[data-fw-push]"); if(b) togglePush(b.dataset.fwPush); });
+
 // 運用のタブを開いたとき（ほかのタブへ移ったら、機体の読み込みを止める）
 async function openOps(){
   track("ops", "open"); OPS_MODE = "auto"; OPS_OBS = null;
   $("opsWx").textContent = "気象通報を読み込んでいます…"; renderOps();
   const [m] = await Promise.all([loadMetar(), loadLeaflet().catch(() => {})]);
-  OPS_WX = m; $("opsWx").textContent = wxText(m); renderOps();
+  OPS_WX = m; $("opsWx").textContent = wxText(m); renderOps(); renderOpsAlerts();
   setTimeout(startTraffic, 120);   // 地図ができてから
 }
 $("opsOpen").onclick = () => goTab("ops");
@@ -3406,7 +3487,7 @@ async function setOpsAirport(iata){
   if(OPS_MAP){ OPS_MAP._opsAp = iata; OPS_MAP.setView(opsDef().center, 10, { animate:false }); }
   $("trafficNote").textContent = ""; $("opsWx").textContent = "気象通報を読み込んでいます…"; renderOps();
   const m = await loadMetar(); if(OPS_AP !== iata) return;
-  OPS_WX = m; $("opsWx").textContent = wxText(m); renderOps(); startTraffic();
+  OPS_WX = m; $("opsWx").textContent = wxText(m); renderOps(); startTraffic(); renderOpsAlerts();
 }
 document.addEventListener("click", e => { const b = e.target.closest("[data-ops-ap]"); if(!b) return; track("ops_ap", b.dataset.opsAp); setOpsAirport(b.dataset.opsAp); });
 
@@ -3712,7 +3793,10 @@ if("serviceWorker" in navigator && window.isSecureContext && location.protocol !
   // 新しい版の仕組みに切り替わったら、お知らせを出す（はじめて開いたときは出さない）
   navigator.serviceWorker.addEventListener("controllerchange", () => { if(hadController){ $("updateBar").hidden = false; track("update", "ready"); } });
   $("updateGo").onclick = () => location.reload();
+  // 通知を押して開いたときは、運用のタブへ
+  navigator.serviceWorker.addEventListener("message", e => { if(e.data && e.data.type === "open-ops") goTab("ops"); });
 }
+if(location.hash === "#ops") setTimeout(() => goTab("ops"), 0);
 /* ホームのお知らせ欄：いちばん大事なものを1つだけ見せる（新しい版 > 引っ越し > 送信待ち > ホーム画面に追加） */
 const NOTICES = ["updateBar", "migrateBar", "queueBar", "installBar"];
 function syncNotices(){
