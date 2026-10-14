@@ -3154,8 +3154,11 @@ function observeOps(planes){
   if(def.noObs) return null;
   for(const p of planes){
     if(p.phase !== "arr" || p.alt_ft == null || p.alt_ft > 7000) continue;
-    const pts = [...(p.trail || []), [p.lat, p.lon]].filter(q => { const d = nmToLine(q, [H, H]); return d >= 3 && d <= 22; }).slice(-10);
-    if(pts.length < 5) continue;   // 少なくとも2分ぶんの線があるものだけ
+    // 羽田（30秒ごとの記録）：空港から3〜22海里の直近10点（約5分）で比べる。
+    // ほかの空港（1分ごとの記録）：最終進入の部分だけで比べるよう、3〜15海里の直近4点（約3分）にする（10点だと、回り込んでくる部分まで入って外れる）
+    const far = def.detail ? 22 : 15, need = def.detail ? 5 : 4;
+    const pts = [...(p.trail || []), [p.lat, p.lon]].filter(q => { const d = nmToLine(q, [H, H]); return d >= 3 && d <= far; }).slice(-(def.detail ? 10 : 4));
+    if(pts.length < need) continue;
     const c = paths.map(([k, line]) => ({ k, rw: k.split(" ").pop(), d: pts.reduce((s, q) => s + nmToLine(q, line), 0) / pts.length })).sort((x, y) => x.d - y.d);
     if(c[0].d >= 0.8) continue;
     // 同じ滑走路の別の進入と見分けがつかない（最終進入が同じ）ときは、進入の種類は決めない
