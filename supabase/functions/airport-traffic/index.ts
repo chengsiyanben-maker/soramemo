@@ -1,5 +1,6 @@
 // 空港の周りを今飛んでいる機体と、通ってきた線（羽田・成田・伊丹・関西・新千歳・福岡・那覇）。
 //   GET /functions/v1/airport-traffic?iata=HND
+//   GET /functions/v1/airport-traffic?iata=RECORD   （記録用。7空港の線を足すだけ）
 // 位置は adsb.lol（有志の受信機による ADS-B のオープンデータ）。実際より数秒〜十数秒遅れる。ログインは不要。
 // OpenSky は Supabase のサーバーから届かないため使わない。
 // 配信元に負担をかけないよう、20秒ためて全員で使い回す。
@@ -72,6 +73,14 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: CORS });
   if (req.method !== "GET") return new Response(JSON.stringify({ error: "GET only" }), { status: 405, headers: JSON_HEADERS });
   const iata = (new URL(req.url).searchParams.get("iata") || "").toUpperCase();
+  // 記録用（pg_cron が30秒ごとに呼ぶ）：羽田は毎回、ほかの空港は1分に1回（毎分0〜24秒の呼び出しのときだけ）、線を足す
+  if (iata === "RECORD") {
+    const others = new Date().getUTCSeconds() < 25;
+    const list = Object.keys(AIRPORTS).filter((k) => k === "HND" || others);
+    const done: Record<string, string> = {};
+    await Promise.all(list.map(async (k) => { try { await snapshot(k); done[k] = "ok"; } catch (e) { done[k] = e instanceof Error ? e.message.slice(0, 40) : "error"; } }));
+    return new Response(JSON.stringify({ recorded: done }), { headers: JSON_HEADERS });
+  }
   if (!AIRPORTS[iata]) return new Response(JSON.stringify({ error: "unsupported airport" }), { status: 404, headers: JSON_HEADERS });
   try {
     return new Response(await snapshot(iata), { headers: { ...JSON_HEADERS, "Cache-Control": "max-age=10" } });
