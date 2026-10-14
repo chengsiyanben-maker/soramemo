@@ -72,7 +72,7 @@ async function fetchArea(iata: string) {
   const hit = regionCache.get(key);
   if (hit && Date.now() - hit.at < TTL) return hit.j;
   const r = await fetch(`https://api.adsb.lol/v2/lat/${area.at[0]}/lon/${area.at[1]}/dist/${area.nm}`,
-    { headers: { "User-Agent": "soramemo (airport-traffic)" }, signal: AbortSignal.timeout(10000) });
+    { headers: { "User-Agent": "soramemo (airport-traffic)" }, signal: AbortSignal.timeout(area.nm > 100 ? 20000 : 10000) });   // 広い円は返事が大きいので長めに待つ
   if (!r.ok) throw new Error("adsb.lol " + r.status);
   const j = await r.json();
   regionCache.set(key, { at: Date.now(), j });
