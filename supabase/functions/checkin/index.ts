@@ -3,6 +3,7 @@
 import { createClient } from "npm:@supabase/supabase-js@2.117.2";
 import { type Airport, decide, type Terminal } from "../_shared/judge.ts";
 import { weather, wxCode } from "../_shared/airport_now.ts";
+import { OPS_AIRPORTS } from "../_shared/ops_core.js";
 
 const URL = Deno.env.get("SUPABASE_URL")!;
 const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -46,6 +47,21 @@ async function wxAt(icao: string | null | undefined): Promise<{ weather: string 
     wxCache.set(icao, { at: Date.now(), v });
     return v;
   } catch { return none; }
+}
+
+// チェックインしたときの空港の運用（運用タブの14空港だけ）：運用の判定の記録（ops_log）の直近10分から。
+// 実際の機体での判定を優先し、なければ風からの推定（決められたときだけ）。名前は画面と同じ（_shared/ops_core.js）
+async function opsAt(iata: string | null | undefined): Promise<string | null> {
+  // deno-lint-ignore no-explicit-any
+  const def = iata ? (OPS_AIRPORTS as any)[iata] : null;
+  if (!def) return null;
+  try {
+    const { data } = await admin.from("ops_log").select("est_mode, est_unsure, obs_mode").eq("iata", iata)
+      .gt("at", new Date(Date.now() - 10 * 60_000).toISOString()).order("at", { ascending: false }).limit(1);
+    const r = data?.[0]; if (!r) return null;
+    const mode = r.obs_mode ?? (r.est_unsure ? null : r.est_mode);
+    return mode && def.modes[mode] ? String(def.modes[mode].label).slice(0, 40) : null;
+  } catch { return null; }
 }
 
 // 空港とターミナルはほぼ変わらないので、関数のインスタンスごとに一度だけ読む
@@ -111,20 +127,22 @@ Deno.serve(async (req) => {
     }
 
     // 初訪問かどうか（印の演出用）
-    const [fa, ft, wx] = await Promise.all([
+    const [fa, ft, wx, ops] = await Promise.all([
       admin.from("checkins").select("id", { count: "exact", head: true }).eq("user_id", userId).eq("airport_id", d.place.airport.id),
       d.place.terminal
         ? admin.from("checkins").select("id", { count: "exact", head: true }).eq("user_id", userId).eq("terminal_id", d.place.terminal.id)
         : Promise.resolve({ count: 1 }),
       // deno-lint-ignore no-explicit-any
       wxAt((d.place.airport as any).icao),
+      // deno-lint-ignore no-explicit-any
+      opsAt((d.place.airport as any).iata),
     ]);
 
     const { data: ci, error: ie } = await admin.from("checkins").insert({
       user_id: userId, airport_id: d.place.airport.id, terminal_id: d.place.terminal?.id ?? null,
       lat: body.lat, lon: body.lon, accuracy_m: body.acc, position_at: new Date(Number(body.ts)).toISOString(),
       created_at: new Date(d.at).toISOString(), flags: d.flags,
-      weather: wx.weather, wind_kt: wx.wind_kt,
+      weather: wx.weather, wind_kt: wx.wind_kt, ops,
     }).select("id,created_at").single();
     if (ie) throw ie;
 
@@ -143,7 +161,7 @@ Deno.serve(async (req) => {
       ok: true, at: ci.created_at,
       airport_id: d.place.airport.id, terminal_id: d.place.terminal?.id ?? null,
       first_airport: (fa.count ?? 0) === 0, first_terminal: (ft.count ?? 0) === 0,
-      flight, flags: d.flags, weather: wx.weather, wind_kt: wx.wind_kt,
+      flight, flags: d.flags, weather: wx.weather, wind_kt: wx.wind_kt, ops,
     });
   } catch (e) {
     console.error(e);

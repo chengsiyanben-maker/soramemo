@@ -1304,7 +1304,7 @@ async function applyPlan(){
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 async function loadServer(){
   const [c, f, m] = await Promise.all([
-    fetchAll("checkins", "id,airport_id,terminal_id,created_at,accuracy_m,weather,wind_kt", "created_at"),
+    fetchAll("checkins", "id,airport_id,terminal_id,created_at,accuracy_m,weather,wind_kt,ops", "created_at"),
     fetchAll("flights", "id,from_airport,to_airport,dep_at,arr_at,distance_km,status,airline,flight_no,fare,seat,track", "arr_at"),
     fetchAll("manual_flights", "id,from_airport,to_airport,flown_on,airline,fare,seat", null),
   ]);
@@ -1313,7 +1313,7 @@ async function loadServer(){
   const err = c.error || f.error || m.error;
   if(err){ say("記録を読み込めませんでした。電波のよい場所で開き直してください。", true); return; }
   S = { demoClock:null,
-    checkins: c.data.map(r => ({a:r.airport_id, term:r.terminal_id, t:Date.parse(r.created_at), acc:r.accuracy_m, wx:r.weather || null, wind:r.wind_kt ?? null})),
+    checkins: c.data.map(r => ({a:r.airport_id, term:r.terminal_id, t:Date.parse(r.created_at), acc:r.accuracy_m, wx:r.weather || null, wind:r.wind_kt ?? null, ops:r.ops || null})),
     flights: f.data.map(r => ({id:r.id, from:r.from_airport, to:r.to_airport, dep:Date.parse(r.dep_at), arr:Date.parse(r.arr_at), km:r.distance_km, status:r.status, airline:r.airline, no:r.flight_no, fare:r.fare || null, seat:r.seat || null, track:Array.isArray(r.track) ? r.track : null})),
     manual: m.data.map(r => ({id:r.id, from:r.from_airport, to:r.to_airport, d:r.flown_on, airline:r.airline, fare:r.fare || null, seat:r.seat || null})) };
 }
@@ -1941,7 +1941,7 @@ function openAirport(id){
     ? `<div class="apitem got">${stampSVG(a, vt.get(t.id), {term:t})}<span>${t.short} ${t.name}<small>${fmtD(vt.get(t.id))}</small></span></div>`
     : `<div class="apitem">${emptySVG(a, t)}<span>${t.short} ${t.name}<small>未訪問</small></span></div>`).join("");
   const hist = visits.slice().sort((x, y) => y.t - x.t).slice(0, 12)
-    .map(c => `<li>${fmtD(c.t)}　${c.term && TBY[c.term] ? TBY[c.term].name : "空港"}${c.wx ? `　<span class="wxtag">${WX_LABEL[c.wx]}${c.wind != null && c.wind >= STRONG_WIND ? "・強風" : ""}</span>` : ""}</li>`).join("");
+    .map(c => `<li>${fmtD(c.t)}　${c.term && TBY[c.term] ? TBY[c.term].name : "空港"}${c.wx ? `　<span class="wxtag">${WX_LABEL[c.wx]}${c.wind != null && c.wind >= STRONG_WIND ? "・強風" : ""}</span>` : ""}${c.ops ? `　<span class="wxtag" title="チェックインしたときの運用（推定）">${esc(c.ops)}</span>` : ""}</li>`).join("");
   b.innerHTML = `<div class="stampbig${dt ? " wide" : ""}">${insigniaSVG(a, first, {big:true, term:null}, dt)}</div>
   <h3>${a.name}</h3><p>${a.pref}${a.rare?"・離島の空港":""}${a.kind ? "・番外編" : ""}</p>
   <p class="marks">${SEASONS.map((x,i) => `<span class="mark${ss.has(i) ? " on" : " off"}">${x}</span>`).join("")}${ss.size === 4 ? `<span class="mark gold">四季がそろった</span>` : ""}</p>
