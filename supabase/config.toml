@@ -441,3 +441,5 @@ verify_jwt = false
 verify_jwt = false
 [functions.push-subscribe]
 verify_jwt = false
+[functions.schedule-sync]
+verify_jwt = false
