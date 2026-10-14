@@ -1,6 +1,6 @@
-// 空港の周りを今飛んでいる機体と、通ってきた線（羽田・成田・伊丹・関西・新千歳・福岡・那覇）。
+// 空港の周りを今飛んでいる機体と、通ってきた線（羽田・成田・伊丹・関西・新千歳・福岡・那覇・中部・仙台・広島・松山・熊本・長崎・鹿児島）。
 //   GET /functions/v1/airport-traffic?iata=HND
-//   GET /functions/v1/airport-traffic?iata=RECORD   （記録用。7空港の線を足すだけ）
+//   GET /functions/v1/airport-traffic?iata=RECORD   （記録用。14空港の線を足すだけ）
 // 位置は adsb.lol（有志の受信機による ADS-B のオープンデータ）。実際より数秒〜十数秒遅れる。ログインは不要。
 // OpenSky は Supabase のサーバーから届かないため使わない。
 // 配信元に負担をかけないよう、20秒ためて全員で使い回す。
@@ -24,11 +24,18 @@ const AIRPORTS: Record<string, { at: [number, number]; nm: number }> = {
   CTS: { at: [42.7752, 141.6923], nm: 40 },
   FUK: { at: [33.5861, 130.4493], nm: 40 },
   OKA: { at: [26.1933, 127.6394], nm: 40 },
+  NGO: { at: [34.8584, 136.8054], nm: 40 },
+  SDJ: { at: [38.1405, 140.9157], nm: 40 },
+  HIJ: { at: [34.4360, 132.9194], nm: 40 },
+  MYJ: { at: [33.8273, 132.6996], nm: 40 },
+  KMJ: { at: [32.8373, 130.8551], nm: 40 },
+  NGS: { at: [32.9170, 129.9134], nm: 40 },
+  KOJ: { at: [31.8034, 130.7194], nm: 40 },
 };
 
-// 着陸・離陸の見分けで「ほかの空港のほうが近い機体」を除くための、近くの空港（神戸・札幌丘珠・横田も含む）
+// 着陸・離陸の見分けで「ほかの空港のほうが近い機体」を除くための、近くの空港（神戸・札幌丘珠・横田・名古屋（小牧）・佐賀・北九州・岩国も含む）
 const NEARBY: [number, number][] = [...Object.values(AIRPORTS).map((a) => a.at),
-  [34.6328, 135.2239], [43.1161, 141.3800], [35.7485, 139.3485]];
+  [34.6328, 135.2239], [43.1161, 141.3800], [35.7485, 139.3485], [35.2550, 136.9244], [33.1497, 130.3022], [33.8459, 131.0349], [34.1440, 132.2356]];
 
 // データベースの線を読み、今回の位置を足して書き戻す。いなくなった機体と古い位置は消える
 async function syncTrails(iata: string, planes: { id: string; lat: number; lon: number }[]): Promise<Trails> {
@@ -51,12 +58,14 @@ async function syncTrails(iata: string, planes: { id: string; lat: number; lon: 
 
 const cache = new Map<string, { at: number; body: string }>();
 
-// 近い空港は、1つの広い円でまとめて問い合わせる（adsb.lol への問い合わせを減らす。1回の記録で3つまでしか答えてもらえない）
-//   関東：羽田・成田（中心から羽田・成田ともに約16海里、半径76海里で羽田の60海里まで入る）、関西：伊丹・関西（約13海里、半径53海里）
+// 空港は、広い円（adsb.lol の上限の250海里）でまとめて問い合わせる（adsb.lol への問い合わせを減らす。1回の記録で3つまでしか答えてもらえない）
+//   東：羽田・成田・中部・伊丹・関西・仙台（中心からいちばん遠い仙台が約205海里、仙台の40海里まで入る）
+//   西：福岡・熊本・長崎・鹿児島・広島・松山（いちばん遠い広島が約120海里）。新千歳・那覇はそれぞれの円
 const REGIONS: Record<string, { at: [number, number]; nm: number }> = {
-  KANTO: { at: [35.665, 140.082], nm: 76 }, KANSAI: { at: [34.61, 135.336], nm: 53 },
+  EAST: { at: [35.6, 138.0], nm: 250 }, WEST: { at: [33.2, 131.0], nm: 250 },
 };
-const REGION_OF: Record<string, string> = { HND: "KANTO", NRT: "KANTO", ITM: "KANSAI", KIX: "KANSAI" };
+const REGION_OF: Record<string, string> = { HND: "EAST", NRT: "EAST", NGO: "EAST", ITM: "EAST", KIX: "EAST", SDJ: "EAST",
+  FUK: "WEST", KMJ: "WEST", NGS: "WEST", KOJ: "WEST", HIJ: "WEST", MYJ: "WEST" };
 const regionCache = new Map<string, { at: number; j: { now?: number; ac?: unknown[] } }>();
 async function fetchArea(iata: string) {
   const key = REGION_OF[iata] ?? iata, area = REGIONS[key] ?? AIRPORTS[iata];
@@ -90,11 +99,11 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: CORS });
   if (req.method !== "GET") return new Response(JSON.stringify({ error: "GET only" }), { status: 405, headers: JSON_HEADERS });
   const iata = (new URL(req.url).searchParams.get("iata") || "").toUpperCase();
-  // 記録用（pg_cron が30秒ごとに呼ぶ）：羽田・成田は毎回、伊丹・関西・新千歳は毎分の前半、福岡・那覇は後半に線を足す
+  // 記録用（pg_cron が30秒ごとに呼ぶ）：東・西の円の12空港は毎回、新千歳は毎分の前半、那覇は後半に線を足す
   if (iata === "RECORD") {
     const first = new Date().getUTCSeconds() < 30;
-    // 問い合わせは1回に3つまで：前半は 関東（羽田・成田）・関西（伊丹・関西）・新千歳、後半は 関東・福岡・那覇
-    const list = first ? ["HND", "NRT", "ITM", "KIX", "CTS"] : ["HND", "NRT", "FUK", "OKA"];
+    // 問い合わせは1回に3つまで：東の円・西の円と、新千歳か那覇
+    const list = [...Object.keys(REGION_OF), first ? "CTS" : "OKA"];
     const done: Record<string, string> = {};
     // adsb.lol は同時にたくさん問い合わせると断る（429・420）ので、3秒ずつあけて1つずつ
     for (const [i, k] of list.entries()) {
