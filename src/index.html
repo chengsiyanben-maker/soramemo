@@ -1142,6 +1142,7 @@ const canNow = a => SERVER && !a.kind;
 async function loadNow(a){
   NOW = { a, data:null, dir:"arr", term:"all", more:false, msg:"" };
   loadFlightAlerts(a.iata).then(() => { if(NOW && NOW.a === a) renderNow(); });
+  if(SERVER && OPS_AIRPORTS[a.iata] && !OPS_AIRPORTS[a.iata].noObs) loadCardObs(a);
   try{
     const r = await fetch(SORAMEMO_CONFIG.supabaseUrl.replace(/\/$/, "") + "/functions/v1/airport-now?iata=" + encodeURIComponent(a.iata), { headers:{ apikey:SORAMEMO_CONFIG.supabaseAnonKey, Authorization:"Bearer " + SORAMEMO_CONFIG.supabaseAnonKey } });
     if(!r.ok) throw new Error("now " + r.status);
@@ -1150,6 +1151,12 @@ async function loadNow(a){
     NOW.data = j;
   }catch(e){ if(NOW && NOW.a === a) NOW.data = { weather:null, flights:null }; }
   renderNow();
+}
+// 空港ページの「滑走路の今」：サーバーが記録している機体の線から、実際の向きを判定する
+async function loadCardObs(a){
+  try{ const r = await fetch(SORAMEMO_CONFIG.supabaseUrl.replace(/\/$/, "") + "/functions/v1/airport-traffic?iata=" + a.iata, { headers:{ apikey:SORAMEMO_CONFIG.supabaseAnonKey, Authorization:"Bearer " + SORAMEMO_CONFIG.supabaseAnonKey } });
+    if(!r.ok) return; const d = await r.json(); if(!NOW || NOW.a !== a || !Array.isArray(d.planes)) return;
+    NOW.obs = observeOps(d.planes, OPS_AIRPORTS[a.iata]); if(NOW.obs && NOW.data) renderNow(); }catch(e){}
 }
 function wxHTML(w){
   if(!w) return "";
@@ -1165,10 +1172,16 @@ function wxHTML(w){
     <p class="src" style="margin:0">気象通報（METAR）より</p>`;
 }
 // 羽田の滑走路と進入の今（推定）。いまの気象通報から運用を推し量り、予報（TAF）から切り替わりの見込みも出す
-function hndOpsHTML(w, taf, iata = "HND"){
+function hndOpsHTML(w, taf, iata = "HND", obs = null){
   const def = OPS_AIRPORTS[iata];
   if(!def || !w || w.source === "amedas") return "";
-  const est = def.estimate(w), op = def.modes[est.mode];
+  const est = def.estimate(w);
+  // 着陸に向かう実際の機体から向きが分かったときは、風からの推定よりそちらを出す
+  const live = obs && obs.mode && !obs.mixed && def.modes[obs.mode];
+  if(live){ const n = Object.entries(obs.n).map(([r, c]) => `${r} に${c}機`).join("、");
+    const fromWind = est.unsure ? "" : est.mode !== obs.mode ? `（風からの推定は${def.modes[est.mode].label}）` : "（風からの推定とも一致）";
+    Object.assign(est, { mode:obs.mode, unsure:false, whyPlain:`着陸に向かう実際の機体から判定：${n}${fromWind}` }); }
+  const op = def.modes[est.mode];
   // 予報の区切りごとに運用を推し量り、いまと違う運用になる最初の区切りを「見込み」として出す
   let next = "";
   const key = e => e.mode + (e.good ? "+" : "-");
@@ -1188,14 +1201,14 @@ function hndOpsHTML(w, taf, iata = "HND"){
   }
   const cond = est.good ? "好天時の進入" : "好天時以外（視程や雲が悪い）の進入";
   const map = `<button class="linkbtn2" data-hnd-map="${def.iata}">地図で見る</button>`;
-  if(!def.detail) return `<div class="hndops"><div class="opshead"><b>滑走路の今</b><span>推定</span></div>
+  if(!def.detail) return `<div class="hndops"><div class="opshead"><b>滑走路の今</b><span>${live ? "実際の機体から" : "推定"}</span></div>
     <p class="opsmode">${est.unsure ? "向きは判定できず" : op.label}</p>
     ${est.unsure ? "" : hndDiagram(op, runwaysOf(def), est.mode, est.good, def)}
     ${!est.unsure && def.app ? `<ul class="opsapp">${op.arr.map(r => { const k = appKey(est.mode, est.good, r, def); return k ? `<li><span class="rw arr">${r}</span><b>${esc(keyName(k))}</b></li>` : ""; }).join("")}</ul>` : ""}
     <p class="opsnote">${esc(est.whyPlain)}。${est.unsure ? "" : esc(op.note)}</p>
     ${next ? `<p class="opsnext">${esc(next)}</p>` : ""}
-    <div class="nowfoot"><p class="src" style="margin:0;line-height:1.5">風から推し量った滑走路の向きで、実際と違うことがあります。${def.noObs ? "" : "地図では、着陸に向かう実際の機体からも判定します。"}</p>${map}</div></div>`;
-  return `<div class="hndops"><div class="opshead"><b>滑走路と進入の今</b><span>推定</span></div>
+    <div class="nowfoot"><p class="src" style="margin:0;line-height:1.5">${live ? "着陸に向かう機体の位置（adsb.lol）から判定した向きで、実際と違うことがあります。" : `風から推し量った滑走路の向きで、実際と違うことがあります。${def.noObs ? "" : "着陸に向かう機体がそろうと、実際の機体から判定します。"}`}</p>${map}</div></div>`;
+  return `<div class="hndops"><div class="opshead"><b>滑走路と進入の今</b><span>${live ? "実際の機体から" : "推定"}</span></div>
     <p class="opsmode">${op.label}</p>
     ${hndDiagram(op, runwaysOf(def), est.mode, est.good, def)}
     <ul class="opsapp">${op.arr.map(r => `<li><span class="rw arr">${r}</span><b>${esc(appName(est.mode, est.good, r, def))}</b></li>`).join("")}</ul>
@@ -1244,7 +1257,7 @@ function renderNow(){
   if(!d){ box.hidden = false; box.innerHTML = `<div class="nowhead"><h3>空港の今</h3><span>読み込み中…</span></div>`; return; }
   if(!d.weather && !d.flights && !d.taf){ box.hidden = true; return; }
   box.hidden = false;
-  box.innerHTML = `<div class="nowhead"><h3>空港の今</h3><span>${d.at ? jstHM(d.at) + " 更新" : ""}</span></div>${wxHTML(d.weather)}${tafHTML(d.taf)}${OPS_AIRPORTS[NOW.a.iata] ? hndOpsHTML(d.weather, d.taf, NOW.a.iata) : ""}${fwHTML(FW.get(NOW.a.iata), NOW.a.iata, false)}${flightsHTML(NOW.a, d.flights)}`;
+  box.innerHTML = `<div class="nowhead"><h3>空港の今</h3><span>${d.at ? jstHM(d.at) + " 更新" : ""}</span></div>${wxHTML(d.weather)}${tafHTML(d.taf)}${OPS_AIRPORTS[NOW.a.iata] ? hndOpsHTML(d.weather, d.taf, NOW.a.iata, NOW.obs) : ""}${fwHTML(FW.get(NOW.a.iata), NOW.a.iata, false)}${flightsHTML(NOW.a, d.flights)}`;
 }
 document.addEventListener("click", e => {
   if(!NOW || !NOW.data || !e.target.closest("#apNow")) return;
@@ -3149,8 +3162,8 @@ function obsPaths(def){
   return def.app ? [...Object.entries(def.app).map(([k, a]) => [k, a.p]), ...fin(37)] : fin(18.52);
 }
 function rwModeOf(def){ const m = {}; for(const [k, op] of Object.entries(def.modes)) for(const r of op.arr) if(!m[r]) m[r] = k; return m; }
-function observeOps(planes){
-  const def = opsDef(), H = def.center, hit = [], RW_MODE = rwModeOf(def), paths = obsPaths(def);
+function observeOps(planes, def = opsDef()){
+  const H = def.center, hit = [], RW_MODE = rwModeOf(def), paths = obsPaths(def);
   if(def.noObs) return null;
   for(const p of planes){
     if(p.phase !== "arr" || p.alt_ft == null || p.alt_ft > 7000) continue;
