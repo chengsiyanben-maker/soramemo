@@ -10,6 +10,7 @@ import { planesFromAdsb, type Trails, updateTrails } from "../_shared/traffic.ts
 import { fetchMetars } from "../_shared/metar.ts";
 import { OPS_AIRPORTS, observeOps } from "../_shared/ops_core.js";
 import { liveryMap } from "../_shared/liveries.ts";
+import webpush from "npm:web-push@3.6.7";
 
 const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, { auth: { persistSession: false } });
 
@@ -120,7 +121,29 @@ async function recordLiveries(bodies: Map<string, string>) {
     }
   }
   if (seen.size) { const { error } = await admin.from("livery_sightings").upsert([...seen.values()]); if (error) throw error; }
+  // 着陸に向かってきた特別塗装機は、その空港を選んでいる人に知らせる（同じ機体・空港は6時間に1回）
+  for (const v of seen.values()) if (v.iata && v.phase === "arr") { try { await notifyLivery(v); } catch (e) { console.error("livery push", e); } }
   return seen.size;
+}
+
+// deno-lint-ignore no-explicit-any
+async function notifyLivery(v: any) {
+  const pub = Deno.env.get("VAPID_PUBLIC_KEY"), priv = Deno.env.get("VAPID_PRIVATE_KEY");
+  if (!pub || !priv) return;
+  const since = new Date(Date.now() - 6 * 3600_000).toISOString();
+  const { data: done } = await admin.from("livery_notified").select("reg").eq("reg", v.reg).eq("iata", v.iata).gt("notified_at", since);
+  if (done?.length) return;
+  await admin.from("livery_notified").upsert({ reg: v.reg, iata: v.iata, notified_at: new Date().toISOString() });
+  const { data: subs } = await admin.from("push_subs").select("id, endpoint, p256dh, auth").contains("sp_airports", [v.iata]);
+  if (!subs?.length) return;
+  webpush.setVapidDetails(Deno.env.get("VAPID_SUBJECT") || "https://soramemo.jp", pub, priv);
+  // deno-lint-ignore no-explicit-any
+  const name = (OPS_AIRPORTS as any)[v.iata]?.name ?? v.iata;
+  const body = JSON.stringify({ title: `そらメモ：★${v.name}`, body: `${v.name}（${v.airline}${v.callsign ? "・" + v.callsign : ""}）が${name}に着陸に向かっています（推定）。`, tag: `sp-${v.reg}`, url: `./#ops-${v.iata}` });
+  for (const s of subs) {
+    try { await webpush.sendNotification({ endpoint: s.endpoint, keys: { p256dh: s.p256dh, auth: s.auth } }, body, { TTL: 900 }); }
+    catch (e) { const code = (e as { statusCode?: number }).statusCode; if (code === 404 || code === 410) await admin.from("push_subs").delete().eq("id", s.id); }
+  }
 }
 
 // 運用の判定を ops_log に残す（気象通報は14空港を1回でまとめて取る）

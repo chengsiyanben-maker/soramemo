@@ -3587,14 +3587,19 @@ function specialWhere(x){
   const alt = x.alt_ft ? `高度 ${(Math.round(x.alt_ft / 100) * 100).toLocaleString("ja-JP")}ft` : "";
   return [best ? `${best.name}の近く` : "飛行中", alt].filter(Boolean).join("・");
 }
+function spPushHTML(){
+  if(!SERVER || !PUSH_KEY || !pushOK()) return "";
+  const on = pushSp().includes(OPS_AP), name = opsDef().name;
+  return `<button class="linkbtn2 fwpush" data-sp-push="${esc(OPS_AP)}" aria-pressed="${on}">${on ? `${esc(name)}の特別塗装機の通知をやめる` : `${esc(name)}に特別塗装機が来たら通知する`}</button>`;
+}
 function specialHTML(){
-  const list = [...SPECIAL.values()].sort((a, b) => (b.iata === OPS_AP) - (a.iata === OPS_AP) || (!!b.iata) - (!!a.iata));
-  if(!list.length) return "";
+  const list = [...SPECIAL.values()].sort((a, b) => (b.iata === OPS_AP) - (a.iata === OPS_AP) || (!!b.iata) - (!!a.iata)), push = spPushHTML();
+  if(!list.length) return push ? `<div class="fwlist splist"><div class="opshead"><b>いま飛んでいる特別塗装機</b></div><p class="hint" style="margin:4px 0 0">いまは見つかっていません。</p>${push}</div>` : "";
   return `<div class="fwlist splist"><div class="opshead"><b>いま飛んでいる特別塗装機</b><span>${list.length}機</span></div><ul>${list.map(x => {
     const go = x.iata && OPS_AIRPORTS[x.iata] && x.iata !== OPS_AP;
     const body = `<b>★${esc(x.name)}</b> <small>${esc(x.airline)}${x.callsign ? "・" + esc(x.callsign) : ""}（${esc(x.reg)}）</small><br><small>${esc(specialWhere(x))}</small>`;
     return `<li>${go ? `<button data-ops-ap="${esc(x.iata)}" aria-label="${esc(x.name)}：${esc(OPS_AIRPORTS[x.iata].name)}の運用を見る">${body}</button>` : body}</li>`; }).join("")}</ul>
-    <p class="fwnote">直近15分に位置が届いたもの（adsb.lol）。特別塗装機の一覧は航空会社の発表などをもとに そらメモ がまとめたもので、塗装の期間や機体の入れ替えで違うことがあります。</p></div>`;
+    <p class="fwnote">直近15分に位置が届いたもの（adsb.lol）。特別塗装機の一覧は航空会社の発表などをもとに そらメモ がまとめたもので、塗装の期間や機体の入れ替えで違うことがあります。</p>${push}</div>`;
 }
 async function renderSpecial(){
   await loadSpecial(); const box = $("opsSpecial"), html = specialHTML();
@@ -3612,6 +3617,7 @@ setInterval(() => { if(opsOn()) renderOpsAlerts(); }, 60_000);
 /* スマホへの通知（Web Push）。空港ごとに申し込む。ブラウザの購読だけを送り、ログインはいらない */
 let PUSH_KEY;   // VAPID の公開鍵（サーバーにまだなければ null。そのときは通知のボタンを出さない）
 const pushAps = () => { try{ return JSON.parse(localStorage.getItem("soramemo.pushAirports") || "[]"); }catch(e){ return []; } };
+const pushSp = () => { try{ return JSON.parse(localStorage.getItem("soramemo.pushSpecial") || "[]"); }catch(e){ return []; } };   // 特別塗装機の通知を申し込んだ空港
 const pushOK = () => "serviceWorker" in navigator && "PushManager" in window && "Notification" in window;
 function pushButtonHTML(iata){
   if(!SERVER || PUSH_KEY === null) return "";
@@ -3636,22 +3642,23 @@ function uiSay(t){
 const pushFlights = () => { try{ const t = new Date(Date.now() + 9*36e5 - 2*864e5).toISOString().slice(0, 10);
   return JSON.parse(localStorage.getItem("soramemo.pushFlights") || "[]").filter(k => k.split("@")[1] >= t); }catch(e){ return []; } };
 // 通知の申し込みを、選んでいる空港と便に合わせる（どちらも空なら取り消し）。成功したら true
-async function syncPush(airports, flights){
+async function syncPush(airports, flights, sp = pushSp()){
   try{
     await loadPushKey(); if(!PUSH_KEY || !pushOK()) throw new Error("push unavailable");
     const reg = await navigator.serviceWorker.ready;
     let sub = await reg.pushManager.getSubscription();
     const url = SORAMEMO_CONFIG.supabaseUrl.replace(/\/$/, "") + "/functions/v1/push-subscribe", H = { "Content-Type":"application/json", apikey:SORAMEMO_CONFIG.supabaseAnonKey };
-    if(!airports.length && !flights.length){
+    if(!airports.length && !flights.length && !sp.length){
       if(sub){ await fetch(url, { method:"POST", headers:H, body:JSON.stringify({ endpoint:sub.endpoint, remove:true }) }); await sub.unsubscribe(); }
     }else{
       if(Notification.permission !== "granted" && (await Notification.requestPermission()) !== "granted"){ uiSay("通知が許可されていないため、申し込めませんでした。端末の設定で、そらメモの通知を許可してください。"); return false; }
       if(!sub) sub = await reg.pushManager.subscribe({ userVisibleOnly:true, applicationServerKey:b64u(PUSH_KEY) });
-      const j = sub.toJSON(), r = await fetch(url, { method:"POST", headers:H, body:JSON.stringify({ endpoint:j.endpoint, keys:j.keys, airports, flights }) });
+      const j = sub.toJSON(), r = await fetch(url, { method:"POST", headers:H, body:JSON.stringify({ endpoint:j.endpoint, keys:j.keys, airports, flights, sp_airports:sp }) });
       if(!r.ok) throw new Error("subscribe " + r.status);
     }
     localStorage.setItem("soramemo.pushAirports", JSON.stringify(airports));
     localStorage.setItem("soramemo.pushFlights", JSON.stringify(flights));
+    localStorage.setItem("soramemo.pushSpecial", JSON.stringify(sp));
     return true;
   }catch(e){ uiSay("通知の申し込みに失敗しました。少し待って、もう一度お試しください。"); return false; }
 }
@@ -3660,6 +3667,13 @@ async function togglePush(iata){
   if(await syncPush(next, pushFlights())){ uiSay(on ? "通知をやめました。" : "遅れ・ダイバートの推定を、この端末に通知します。"); track("push", on ? "off" : "on"); }
   renderOpsAlerts();
 }
+// 特別塗装機がこの空港に着陸に向かってきたら通知する（空港ごと）
+async function toggleSpPush(iata){
+  const cur = pushSp(), on = cur.includes(iata), next = on ? cur.filter(x => x !== iata) : [...cur, iata].slice(0, 14);
+  if(await syncPush(pushAps(), pushFlights(), next)){ uiSay(on ? "特別塗装機の通知をやめました。" : "特別塗装機がこの空港に着陸に向かってきたら、この端末に通知します（同じ機体は6時間に1回まで）。"); track("push", on ? "sp_off" : "sp_on"); }
+  renderSpecial();
+}
+document.addEventListener("click", e => { const b = e.target.closest("[data-sp-push]"); if(b) toggleSpPush(b.dataset.spPush); });
 // 「この便に乗る」の便を通知の宛先に足す
 async function pushRide(key){
   const fl = pushFlights(); if(fl.includes(key)) return;
@@ -3999,7 +4013,8 @@ if("serviceWorker" in navigator && window.isSecureContext && location.protocol !
   navigator.serviceWorker.addEventListener("controllerchange", () => { if(hadController){ $("updateBar").hidden = false; track("update", "ready"); } });
   $("updateGo").onclick = () => location.reload();
   // 通知を押して開いたときは、運用のタブへ
-  navigator.serviceWorker.addEventListener("message", e => { if(e.data && e.data.type === "open-ops") goTab("ops"); });
+  navigator.serviceWorker.addEventListener("message", e => { if(e.data && e.data.type === "open-ops"){ goTab("ops");
+    const m = /#ops-([A-Z]{3})$/.exec(e.data.url || ""); if(m && OPS_AIRPORTS[m[1]] && m[1] !== OPS_AP) setOpsAirport(m[1]); } });
 }
 // 運用のタブへのリンク（#ops、空港つきは #ops-NRT など）。通知や共有のリンクから開いたとき
 { const m = /^#ops(?:-([A-Z]{3}))?$/.exec(location.hash);
