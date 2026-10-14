@@ -78,7 +78,11 @@ Deno.serve(async (req) => {
     const others = new Date().getUTCSeconds() < 25;
     const list = Object.keys(AIRPORTS).filter((k) => k === "HND" || others);
     const done: Record<string, string> = {};
-    await Promise.all(list.map(async (k) => { try { await snapshot(k); done[k] = "ok"; } catch (e) { done[k] = e instanceof Error ? e.message.slice(0, 40) : "error"; } }));
+    // adsb.lol は同時にたくさん問い合わせると断る（429・420）ので、1.5秒ずつあけて1つずつ
+    for (const [i, k] of list.entries()) {
+      if (i) await new Promise((r) => setTimeout(r, 1500));
+      try { await snapshot(k); done[k] = "ok"; } catch (e) { done[k] = e instanceof Error ? e.message.slice(0, 40) : "error"; }
+    }
     return new Response(JSON.stringify({ recorded: done }), { headers: JSON_HEADERS });
   }
   if (!AIRPORTS[iata]) return new Response(JSON.stringify({ error: "unsupported airport" }), { status: 404, headers: JSON_HEADERS });

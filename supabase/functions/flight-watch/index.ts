@@ -81,7 +81,8 @@ Deno.serve(async () => {
       .concat(w.last ? [[w.last.lat, w.last.lon]] : []));
     const need = CIRCLES.filter((c) => pts.some((p) => km(c, p) < 500));
     const seen = new Map<string, Seen>();
-    for (const c of need) {
+    for (const [ci, c] of need.entries()) {
+      if (ci) await new Promise((r) => setTimeout(r, 1500));   // adsb.lol に続けて問い合わせすぎない
       try {
         const { now: t, ac } = await fetchCircle(c);
         for (const a of ac) {
