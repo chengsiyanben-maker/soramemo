@@ -1142,7 +1142,7 @@ const canNow = a => SERVER && !a.kind;
 async function loadNow(a){
   NOW = { a, data:null, dir:"arr", term:"all", more:false, msg:"" };
   loadFlightAlerts(a.iata).then(() => { if(NOW && NOW.a === a) renderNow(); });
-  if(SERVER && OPS_AIRPORTS[a.iata] && !OPS_AIRPORTS[a.iata].noObs) loadCardObs(a);
+  if(SERVER && OPS_AIRPORTS[a.iata]) loadCardObs(a);
   try{
     const r = await fetch(SORAMEMO_CONFIG.supabaseUrl.replace(/\/$/, "") + "/functions/v1/airport-now?iata=" + encodeURIComponent(a.iata), { headers:{ apikey:SORAMEMO_CONFIG.supabaseAnonKey, Authorization:"Bearer " + SORAMEMO_CONFIG.supabaseAnonKey } });
     if(!r.ok) throw new Error("now " + r.status);
@@ -1178,9 +1178,9 @@ function hndOpsHTML(w, taf, iata = "HND", obs = null){
   const est = def.estimate(w);
   // 着陸に向かう実際の機体から向きが分かったときは、風からの推定よりそちらを出す
   const live = obs && obs.mode && !obs.mixed && def.modes[obs.mode];
-  if(live){ const n = Object.entries(obs.n).map(([r, c]) => `${r} に${c}機`).join("、");
+  if(live){ const n = obs.dep ? `離陸した${obs.dep}機の向き` : Object.entries(obs.n).map(([r, c]) => `${r} に${c}機`).join("、");
     const fromWind = est.unsure ? "" : est.mode !== obs.mode ? `（風からの推定は${def.modes[est.mode].label}）` : "（風からの推定とも一致）";
-    Object.assign(est, { mode:obs.mode, unsure:false, whyPlain:`着陸に向かう実際の機体から判定：${n}${fromWind}` }); }
+    Object.assign(est, { mode:obs.mode, unsure:false, whyPlain:`${obs.dep ? "離陸した" : "着陸に向かう"}実際の機体から判定：${n}${fromWind}` }); }
   const op = def.modes[est.mode];
   // 予報の区切りごとに運用を推し量り、いまと違う運用になる最初の区切りを「見込み」として出す
   let next = "";
@@ -1207,7 +1207,7 @@ function hndOpsHTML(w, taf, iata = "HND", obs = null){
     ${!est.unsure && def.app ? `<ul class="opsapp">${op.arr.map(r => { const k = appKey(est.mode, est.good, r, def); return k ? `<li><span class="rw arr">${r}</span><b>${esc(keyName(k))}</b></li>` : ""; }).join("")}</ul>` : ""}
     <p class="opsnote">${esc(est.whyPlain)}。${est.unsure ? "" : esc(op.note)}</p>
     ${next ? `<p class="opsnext">${esc(next)}</p>` : ""}
-    <div class="nowfoot"><p class="src" style="margin:0;line-height:1.5">${live ? "着陸に向かう機体の位置（adsb.lol）から判定した向きで、実際と違うことがあります。" : `風から推し量った滑走路の向きで、実際と違うことがあります。${def.noObs ? "" : "着陸に向かう機体がそろうと、実際の機体から判定します。"}`}</p>${map}</div></div>`;
+    <div class="nowfoot"><p class="src" style="margin:0;line-height:1.5">${live ? "飛んでいる機体の位置（adsb.lol）から判定した向きで、実際と違うことがあります。" : `風から推し量った滑走路の向きで、実際と違うことがあります。${def.noObs ? "離陸する機体がそろうと、実際の機体から判定します。" : "着陸に向かう機体がそろうと、実際の機体から判定します。"}`}</p>${map}</div></div>`;
   return `<div class="hndops"><div class="opshead"><b>滑走路と進入の今</b><span>${live ? "実際の機体から" : "推定"}</span></div>
     <p class="opsmode">${op.label}</p>
     ${hndDiagram(op, runwaysOf(def), est.mode, est.good, def)}
@@ -3162,9 +3162,25 @@ function obsPaths(def){
   return def.app ? [...Object.entries(def.app).map(([k, a]) => [k, a.p]), ...fin(37)] : fin(18.52);
 }
 function rwModeOf(def){ const m = {}; for(const [k, op] of Object.entries(def.modes)) for(const r of op.arr) if(!m[r]) m[r] = k; return m; }
+// 離陸機から向きを判定する（着陸機では見分けられない伊丹のため）。離陸した機体を最初に見た位置が、空港から見てどちら側か（12km以内）を、
+// 各運用の離陸の向きと比べる（北西へ離陸すれば、まず空港の北西に現れる。1分ごとの記録でも1点あれば判定できる）
+function observeDeps(planes, def){
+  const rw = runwaysOf(def), H = def.center, votes = {};
+  for(const p of planes){
+    if(p.phase !== "dep") continue;
+    const first = [...(p.trail || []), [p.lat, p.lon]][0], d = nmToLine(first, [H, H]) * 1.852;
+    if(d < 1.5 || d > 12) continue;
+    const b = bearing(H, first);
+    for(const [m, op] of Object.entries(def.modes)) if(op.dep.some(id => Math.abs(((b - rw[id].hdg) + 540) % 360 - 180) <= 50)){ votes[m] = (votes[m] || 0) + 1; break; }
+  }
+  const all = Object.values(votes).reduce((a, b) => a + b, 0); if(all < 2) return null;
+  const [mode, cnt] = Object.entries(votes).sort((x, y) => y[1] - x[1])[0];
+  if(cnt / all < 0.8) return { mixed:true, n:{} };
+  return { mode, apps:{}, n:{}, dep:cnt };
+}
 function observeOps(planes, def = opsDef()){
   const H = def.center, hit = [], RW_MODE = rwModeOf(def), paths = obsPaths(def);
-  if(def.noObs) return null;
+  if(def.noObs) return observeDeps(planes, def);
   for(const p of planes){
     if(p.phase !== "arr" || p.alt_ft == null || p.alt_ft > 7000) continue;
     // 羽田（30秒ごとの記録）：空港から3〜22海里の直近10点（約5分）で比べる。
@@ -3261,7 +3277,7 @@ function renderOps(){
   const approach = op.arr.map(r => { const k = appKey(mode, est.good, r); return `${r} ${k ? keyName(k) : appName(mode, est.good, r)}`; }).join("・");
   const plus = plusOn();
   const src = OPS_MODE !== "auto" ? "手で選んだ運用" : obs ? "実際の機体から判定" : est.unsure ? "判定できず（仮の表示）" : "風から推定";
-  const why = obs ? `着陸に向かっている機体：${Object.entries(obs.n).map(([r, c]) => `${r} に${c}機`).join("、")}${obs.mode !== est.mode && !est.unsure ? `（風からの推定は${def.modes[est.mode].label}）` : ""}`
+  const why = obs ? `${obs.dep ? `離陸した機体の向き：${obs.dep}機` : `着陸に向かっている機体：${Object.entries(obs.n).map(([r, c]) => `${r} に${c}機`).join("、")}`}${obs.mode !== est.mode && !est.unsure ? `（風からの推定は${def.modes[est.mode].label}）` : ""}`
     : OPS_MODE === "auto" ? `${OPS_OBS && OPS_OBS.mixed ? "着陸に向かう機体の滑走路が分かれている（切り替え中かもしれません）ため、風から推定しています。" : ""}${plus ? est.why : est.whyPlain}${est.night ? "。深夜早朝は、騒音を減らすための別の運用になることがあります" : ""}` : "";
   $("opsInfo").innerHTML = `<div class="opshead"><b class="mode">${op.label}</b><span class="opssrc${obs ? " live" : ""}">${src}</span>${windChip(OPS_WX)}</div>
     ${hndDiagram(op, rw, mode, est.good, def)}
@@ -3270,7 +3286,7 @@ function renderOps(){
       <div><span class="lbl">離陸</span>${op.dep.map(r => `<span class="rw dep">${r}</span>${op.depNote && op.depNote[r] ? `<small>${op.depNote[r]}</small>` : ""}`).join(" ")}</div>
     </div>
     <details class="opswhy"><summary>くわしく</summary><p>${why ? why + "<br>" : ""}${op.note}${mode === "north" && est.northNew && OPS_MODE === "auto" ? "　この時間帯は、C滑走路（34R）から北へ離陸して荒川沿いを上昇する新しいルートが使われることがあります。" : ""}</p></details>`;
-  $("opsLegend").textContent = !def.detail && def.app ? `${def.name}は、滑走路の位置（AIP JAPAN 2026年10月1日版の AD 2.12）と、風・実際の機体から「どちら向きに使っているか」を出しています。太い点線は、その向きで使う ILS の進入経路、白い点はその上のフィックスです。細かい点線は、その進入につながる標準到着経路（RNAV STAR）で、入口のフィックスの名前を付けています。経路は、AIP JAPAN（2026年10月1日版）の進入・到着チャートの座標をもとに そらメモ が作ったもので、国が作ったものではなく、最新でない場合があります。実際は管制の指示で途中を短くすることが多く、線はおおよそです。${def.sid ? `青の点線は、標準出発経路（RNAV SID。行き先の方向ごと）です。${def.name}は、どちらの滑走路から離陸するかを管制がその都度決めるため、両方の滑走路からの経路を出しています（主な方向のものだけ）。` : "出発経路はまだ入れていません（滑走路の向きに短い線だけ）。"}${def.noObs ? "伊丹の14運用は、32Lの進入で近づいて空港の西側を回り14Rに降りる「周回進入」で、回る部分の線は そらメモ が滑走路の位置から作ったおおよその線です。14運用でも着陸機は32Lの進入の線を通るため、伊丹は実際の機体からは判定せず、風から推定しています。" : ""}航空機の運航には使えません。` : !def.detail ? `${def.name}は、滑走路の位置（AIP JAPAN 2026年10月1日版の AD 2.12）と、風・実際の機体から「どちら向きに使っているか」を出しています。太い点線は、今の向きの最終進入（滑走路の延長線、約10海里）で、実際の経路ではありません。平行な滑走路は、どちらも着陸・離陸に使う前提の表示です。進入・出発・到着の経路は、空港ごとに AIP から足していきます。航空機の運航には使えません。` : "太い点線は、いまの運用と天気で使うと推定した進入の経路、白い点はその上のフィックスです。経路は、AIP JAPAN（2026年10月1日版）の進入チャートの座標をもとに そらメモ が作ったもので、国が作ったものではなく、最新でない場合があります。実際は管制の指示で途中を短くすることが多く、LDA の最後の曲がる部分は目で見て飛ぶため、線はおおよそです。航空機の運航には使えません。青の点線は、その運用で使う主な標準出発経路（RNAV SID。AIP の同じ版から作成）で、行き先の方向ごとに分かれます。時間帯によって経路が変わるもの（ROVER・BEKLA）は、いまの時刻のものを出しています。細かい点線は、その進入につながる標準到着経路（RNAV STAR）で、入口の名前を付けています（深夜早朝の経路は出していません）。";
+  $("opsLegend").textContent = !def.detail && def.app ? `${def.name}は、滑走路の位置（AIP JAPAN 2026年10月1日版の AD 2.12）と、風・実際の機体から「どちら向きに使っているか」を出しています。太い点線は、その向きで使う ILS の進入経路、白い点はその上のフィックスです。細かい点線は、その進入につながる標準到着経路（RNAV STAR）で、入口のフィックスの名前を付けています。経路は、AIP JAPAN（2026年10月1日版）の進入・到着チャートの座標をもとに そらメモ が作ったもので、国が作ったものではなく、最新でない場合があります。実際は管制の指示で途中を短くすることが多く、線はおおよそです。${def.sid ? `青の点線は、標準出発経路（RNAV SID。行き先の方向ごと）です。${def.name}は、どちらの滑走路から離陸するかを管制がその都度決めるため、両方の滑走路からの経路を出しています（主な方向のものだけ）。` : "出発経路はまだ入れていません（滑走路の向きに短い線だけ）。"}${def.noObs ? "伊丹の14運用は、32Lの進入で近づいて空港の西側を回り14Rに降りる「周回進入」で、回る部分の線は そらメモ が滑走路の位置から作ったおおよその線です。14運用でも着陸機は32Lの進入の線を通るため、伊丹は、着陸機の線では向きを見分けられないため、離陸した機体を最初に見た位置が空港のどちら側か（12km以内）で判定し、そろわないときは風から推定しています。" : ""}航空機の運航には使えません。` : !def.detail ? `${def.name}は、滑走路の位置（AIP JAPAN 2026年10月1日版の AD 2.12）と、風・実際の機体から「どちら向きに使っているか」を出しています。太い点線は、今の向きの最終進入（滑走路の延長線、約10海里）で、実際の経路ではありません。平行な滑走路は、どちらも着陸・離陸に使う前提の表示です。進入・出発・到着の経路は、空港ごとに AIP から足していきます。航空機の運航には使えません。` : "太い点線は、いまの運用と天気で使うと推定した進入の経路、白い点はその上のフィックスです。経路は、AIP JAPAN（2026年10月1日版）の進入チャートの座標をもとに そらメモ が作ったもので、国が作ったものではなく、最新でない場合があります。実際は管制の指示で途中を短くすることが多く、LDA の最後の曲がる部分は目で見て飛ぶため、線はおおよそです。航空機の運航には使えません。青の点線は、その運用で使う主な標準出発経路（RNAV SID。AIP の同じ版から作成）で、行き先の方向ごとに分かれます。時間帯によって経路が変わるもの（ROVER・BEKLA）は、いまの時刻のものを出しています。細かい点線は、その進入につながる標準到着経路（RNAV STAR）で、入口の名前を付けています（深夜早朝の経路は出していません）。";
   drawOpsMap(rw, op, plus, mode, est.good); opsLegendKey();
 }
 function drawOpsMap(rw, op, plus, mode, good){
