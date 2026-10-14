@@ -70,6 +70,30 @@ for (const f of files) {
   console.log(`${f}: ${kb(Buffer.byteLength(src))} → ${kb(Buffer.byteLength(out))}（圧縮配信 ${kb(gzipSync(src).length)} → ${kb(gzipSync(out).length)}）`);
 }
 
+// 「空港のいま」の空港ごとのページ（now-hnd.html など）：共有したときに空港名と空港ごとの画像（web/og/）が出るよう、題名と OGP だけ変えて写す
+{
+  const base = readFileSync(new URL("../web/now.html", import.meta.url), "utf8");
+  const aps = JSON.parse(execFileSync("node", ["--input-type=module", "-e",
+    `import { OPS_AIRPORTS } from ${JSON.stringify(new URL("../supabase/functions/_shared/ops_core.js", import.meta.url).href)}; console.log(JSON.stringify(Object.values(OPS_AIRPORTS).map(d => [d.iata, d.name])));`], { encoding: "utf8" }));
+  const full = (k, n) => k === "KIX" ? "関西空港" : k === "NGO" ? "中部空港（セントレア）" : `${n}空港`;
+  for (const [k, n] of aps) {
+    const page = `now-${k.toLowerCase()}.html`, t = `${full(k, n)}のいま｜そらメモ（非公式）`;
+    const desc = `${full(k, n)}のいまの滑走路の使い方（運用）を、風と実際に飛んでいる機体から推定します。ログインは不要です（非公式）。`;
+    const out = base.replace('data-ap="HND"', `data-ap="${k}"`)
+      .replace(/<title>[^<]*<\/title>/, `<title>${t}</title>`)
+      .replace(/(<meta name="description" content=")[^"]*/, `$1${desc}`)
+      .replace(/(<meta property="og:title" content=")[^"]*/, `$1${t}`)
+      .replace(/(<meta property="og:description" content=")[^"]*/, `$1${desc}`)
+      .replace(/(<meta property="og:url" content=")[^"]*/, `$1https://soramemo.jp/${page}`)
+      .replace(/(<meta property="og:image" content=")[^"]*/, `$1https://soramemo.jp/og/${k}.png`);
+    writeFileSync(new URL(`../web/${page}`, import.meta.url), out);
+  }
+  console.log(`空港のいま：${aps.length}空港のページ`);
+  // 検索エンジン向けの案内（ページの一覧）
+  const urls = ["", "now.html", ...aps.map(([k]) => `now-${k.toLowerCase()}.html`), "privacy.html", "terms.html", "tokushoho.html"];
+  writeFileSync(new URL("../web/sitemap.xml", import.meta.url), `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.map((u) => `  <url><loc>https://soramemo.jp/${u}</loc></url>`).join("\n")}\n</urlset>\n`);
+}
+
 // サービスワーカー：配る用の中身から版の番号を作って埋め込む（中身が変わると、利用者の端末の保存も入れ替わる）
 {
   const page = readFileSync(new URL("../web/index.html", import.meta.url));

@@ -36,6 +36,12 @@ jobs:
         run: |
           npm install --no-audit --no-fund
           npm test
+      - name: 運用タブと「空港のいま」の画面のテスト（14空港を作り物の機体で開く）
+        working-directory: tests/ops
+        run: |
+          npm install --no-audit --no-fund
+          npx playwright install --with-deps chromium
+          npm test
 
   database:
     name: データベースと関数
@@ -67,6 +73,13 @@ jobs:
         run: |
           if [ -z "$VAPID_PRIVATE_KEY" ] || [ -z "$VAPID_PUBLIC_KEY" ]; then echo "通知の鍵がまだないので、とばす"; exit 0; fi
           supabase secrets set --project-ref "$PROJECT_REF" VAPID_PUBLIC_KEY="$VAPID_PUBLIC_KEY" VAPID_PRIVATE_KEY="$VAPID_PRIVATE_KEY" VAPID_SUBJECT="https://soramemo.jp"
+      # 便の情報（ODPT）のアクセストークン。リポジトリの Secrets に ODPT_CONSUMER_KEY があるときだけ、サーバーに入れる
+      - name: 便の情報（ODPT）の鍵をサーバーに入れる
+        env:
+          ODPT_CONSUMER_KEY: ${{ secrets.ODPT_CONSUMER_KEY }}
+        run: |
+          if [ -z "$ODPT_CONSUMER_KEY" ]; then echo "ODPT の鍵がまだないので、とばす"; exit 0; fi
+          supabase secrets set --project-ref "$PROJECT_REF" ODPT_CONSUMER_KEY="$ODPT_CONSUMER_KEY"
 
   web:
     name: アプリ
