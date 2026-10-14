@@ -1252,7 +1252,8 @@ document.addEventListener("click", e => {
   else if(ride){ const x = ((NOW.data.flights || {}).dep || []).find(f => f.no === ride.dataset.ride); if(!x) return;
     const to = IATA[x.place], d = new Date(Date.now() + 9*36e5).toISOString().slice(0, 10);
     savePlan({ from: NOW.a.id, to: to.id, airline: x.airline, no: x.no, day: d });
-    NOW.msg = `${esc(x.no)}（${esc(placeShort(x.place))}行き）を覚えました。${esc(to.name)}でチェックインすると、このフライトに便名が付きます。`; }
+    NOW.msg = `${esc(x.no)}（${esc(placeShort(x.place))}行き）を覚えました。${esc(to.name)}でチェックインすると、このフライトに便名が付きます。`
+      + (SERVER && pushOK() && PUSH_KEY !== null && !pushFlights().includes(`${x.no}@${d}`) ? `<br><button class="linkbtn2" data-ride-push="${esc(x.no)}@${d}">この便の遅れ・ダイバートを通知する</button>` : ""); }
   else return;
   renderNow();
 });
@@ -3445,26 +3446,44 @@ async function loadPushKey(){
     PUSH_KEY = r.ok ? ((await r.json()).key || null) : null; }catch(e){ PUSH_KEY = null; }
 }
 const b64u = s => { const p = "=".repeat((4 - s.length % 4) % 4), b = atob((s + p).replace(/-/g, "+").replace(/_/g, "/")); return Uint8Array.from(b, c => c.charCodeAt(0)); };
-async function togglePush(iata){
-  const cur = pushAps(), on = cur.includes(iata), next = on ? cur.filter(x => x !== iata) : [...cur, iata].slice(0, 12);
+// 「この便に乗る」で選んだ便（便名@運航日）。運航日を2日すぎたものは消す
+const pushFlights = () => { try{ const t = new Date(Date.now() + 9*36e5 - 2*864e5).toISOString().slice(0, 10);
+  return JSON.parse(localStorage.getItem("soramemo.pushFlights") || "[]").filter(k => k.split("@")[1] >= t); }catch(e){ return []; } };
+// 通知の申し込みを、選んでいる空港と便に合わせる（どちらも空なら取り消し）。成功したら true
+async function syncPush(airports, flights){
   try{
+    await loadPushKey(); if(!PUSH_KEY || !pushOK()) throw new Error("push unavailable");
     const reg = await navigator.serviceWorker.ready;
     let sub = await reg.pushManager.getSubscription();
     const url = SORAMEMO_CONFIG.supabaseUrl.replace(/\/$/, "") + "/functions/v1/push-subscribe", H = { "Content-Type":"application/json", apikey:SORAMEMO_CONFIG.supabaseAnonKey };
-    if(!next.length){
+    if(!airports.length && !flights.length){
       if(sub){ await fetch(url, { method:"POST", headers:H, body:JSON.stringify({ endpoint:sub.endpoint, remove:true }) }); await sub.unsubscribe(); }
     }else{
-      if(Notification.permission !== "granted" && (await Notification.requestPermission()) !== "granted"){ say("通知が許可されていないため、申し込めませんでした。端末の設定で、そらメモの通知を許可してください。"); return; }
+      if(Notification.permission !== "granted" && (await Notification.requestPermission()) !== "granted"){ say("通知が許可されていないため、申し込めませんでした。端末の設定で、そらメモの通知を許可してください。"); return false; }
       if(!sub) sub = await reg.pushManager.subscribe({ userVisibleOnly:true, applicationServerKey:b64u(PUSH_KEY) });
-      const j = sub.toJSON(), r = await fetch(url, { method:"POST", headers:H, body:JSON.stringify({ endpoint:j.endpoint, keys:j.keys, airports:next }) });
+      const j = sub.toJSON(), r = await fetch(url, { method:"POST", headers:H, body:JSON.stringify({ endpoint:j.endpoint, keys:j.keys, airports, flights }) });
       if(!r.ok) throw new Error("subscribe " + r.status);
     }
-    localStorage.setItem("soramemo.pushAirports", JSON.stringify(next));
-    say(on ? "通知をやめました。" : "遅れ・ダイバートの推定を、この端末に通知します。");
-    track("push", on ? "off" : "on");
-  }catch(e){ say("通知の申し込みに失敗しました。少し待って、もう一度お試しください。"); }
+    localStorage.setItem("soramemo.pushAirports", JSON.stringify(airports));
+    localStorage.setItem("soramemo.pushFlights", JSON.stringify(flights));
+    return true;
+  }catch(e){ say("通知の申し込みに失敗しました。少し待って、もう一度お試しください。"); return false; }
+}
+async function togglePush(iata){
+  const cur = pushAps(), on = cur.includes(iata), next = on ? cur.filter(x => x !== iata) : [...cur, iata].slice(0, 12);
+  if(await syncPush(next, pushFlights())){ say(on ? "通知をやめました。" : "遅れ・ダイバートの推定を、この端末に通知します。"); track("push", on ? "off" : "on"); }
   renderOpsAlerts();
 }
+// 「この便に乗る」の便を通知の宛先に足す
+async function pushRide(key){
+  const fl = pushFlights(); if(fl.includes(key)) return;
+  const next = [...fl, key].slice(-5);
+  if(await syncPush(pushAps(), next)){
+    if(NOW){ NOW.msg = `${esc(key.split("@")[0])} が遅れたり、ほかの空港へ向かったりしたら、この端末に通知します（推定）。`; renderNow(); }
+    track("push", "ride");
+  }
+}
+document.addEventListener("click", e => { const b = e.target.closest("[data-ride-push]"); if(b) pushRide(b.dataset.ridePush); });
 document.addEventListener("click", e => { const b = e.target.closest("[data-fw-push]"); if(b) togglePush(b.dataset.fwPush); });
 
 // 運用のタブを開いたとき（ほかのタブへ移ったら、機体の読み込みを止める）

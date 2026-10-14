@@ -25,4 +25,9 @@ r = await as('anon', `insert into public.push_subs (endpoint, p256dh, auth, airp
 check('通知の宛先は利用者から書けない', String(r).startsWith('ERROR'), r);
 r = await as('anon', `insert into public.flight_schedule (svc_date, flight, dep, arr, std, sta, source) values ('2026-10-26','JL1','HND','ITM',now(),now(),'x')`);
 check('ダイヤは利用者から書けない', String(r).startsWith('ERROR'), r);
+await db.exec(`insert into public.push_subs (endpoint, p256dh, auth, airports, flights) values ('https://fcm.googleapis.com/a','k','a','{}','{JL509@2026-10-26}')`);
+r = (await db.query(`select count(*)::int n from public.push_subs where flights && array['JL509@2026-10-26']`)).rows[0].n;
+check('便（便名@運航日）でも宛先を選べる', r === 1, r);
+r = await db.exec(`insert into public.push_subs (endpoint, p256dh, auth, flights) values ('https://fcm.googleapis.com/b','k','a','{a,b,c,d,e,f}')`).then(() => 'ok').catch((e) => 'ERROR');
+check('便は5つまで', r === 'ERROR', r);
 if (bad) process.exit(1);

@@ -33,15 +33,18 @@ async function fetchCircle([lat, lon]: [number, number]) {
   return { now: typeof j?.now === "number" ? j.now : Date.now(), ac: Array.isArray(j?.ac) ? j.ac : [] };
 }
 
-async function sendPush(alerts: { iata: string[]; message: string; flight: string }[]) {
+async function sendPush(alerts: { iata: string[]; message: string; flight: string; fkey: string }[]) {
   const pub = Deno.env.get("VAPID_PUBLIC_KEY"), priv = Deno.env.get("VAPID_PRIVATE_KEY");
   if (!pub || !priv || !alerts.length) return 0;
   webpush.setVapidDetails(Deno.env.get("VAPID_SUBJECT") || "https://soramemo.jp", pub, priv);
-  const all = [...new Set(alerts.flatMap((a) => a.iata))];
-  const { data: subs } = await admin.from("push_subs").select("id, endpoint, p256dh, auth, airports").overlaps("airports", all);
+  // 宛先：関係する空港を選んでいる人と、「この便に乗る」でその便（便名@運航日）を選んでいる人
+  const all = [...new Set(alerts.flatMap((a) => a.iata))], keys = [...new Set(alerts.map((a) => a.fkey))];
+  const cols = "id, endpoint, p256dh, auth, airports, flights";
+  const [byAp, byFl] = await Promise.all([admin.from("push_subs").select(cols).overlaps("airports", all), admin.from("push_subs").select(cols).overlaps("flights", keys)]);
+  const subs = [...new Map([...(byAp.data ?? []), ...(byFl.data ?? [])].map((s) => [s.id, s])).values()];
   let sent = 0;
-  for (const s of subs ?? []) {
-    for (const a of alerts.filter((x) => x.iata.some((i) => s.airports.includes(i)))) {
+  for (const s of subs) {
+    for (const a of alerts.filter((x) => x.iata.some((i) => s.airports.includes(i)) || (s.flights ?? []).includes(x.fkey))) {
       try {
         await webpush.sendNotification({ endpoint: s.endpoint, keys: { p256dh: s.p256dh, auth: s.auth } },
           JSON.stringify({ title: `そらメモ：${a.flight}`, body: a.message, tag: `fw-${a.flight}` }), { TTL: 3600 });
@@ -63,9 +66,10 @@ Deno.serve(async () => {
     if (!run?.length) return new Response(JSON.stringify({ skipped: "recent" }), { headers: JSON_HEADERS });
 
     const now = Date.now();
-    const { data: rows } = await admin.from("flight_schedule").select("id, flight, dep, arr, std, sta, flight_watch(state)")
+    const { data: rows } = await admin.from("flight_schedule").select("id, svc_date, flight, dep, arr, std, sta, flight_watch(state)")
       .gte("std", new Date(now - 8 * 60 * MIN).toISOString()).lte("std", new Date(now + 30 * MIN).toISOString()).limit(3000);
     const list = (rows ?? []).map((r) => ({
+      fkey: `${r.flight}@${r.svc_date}`,
       s: { id: r.id, flight: r.flight, dep: r.dep, arr: r.arr, std: Date.parse(r.std), sta: Date.parse(r.sta) } as Sched,
       w: ((Array.isArray(r.flight_watch) ? r.flight_watch[0]?.state : (r.flight_watch as { state?: Watch } | null)?.state) ?? blankWatch()) as Watch,
     })).filter((x) => x.w.phase !== "landed" && now - x.s.sta < 6 * 60 * MIN);
@@ -91,7 +95,9 @@ Deno.serve(async () => {
 
     const upd: { schedule_id: number; state: Watch; updated_at: string }[] = [];
     const out: { schedule_id: number; kind: string; flight: string; dep: string; arr: string; iata: string[]; message: string }[] = [];
-    for (const { s, w } of list) {
+    const fkeys = new Map<number, string>();
+    for (const { s, w, fkey } of list) {
+      fkeys.set(s.id, fkey);
       const hit = callsignsFor(s.flight).map((c) => seen.get(c)).find(Boolean) ?? null;
       const r = step(s, w, hit, now, aps);
       if (JSON.stringify(r.watch) !== JSON.stringify(w)) upd.push({ schedule_id: s.id, state: r.watch, updated_at: new Date().toISOString() });
@@ -99,7 +105,7 @@ Deno.serve(async () => {
     }
     if (upd.length) await admin.from("flight_watch").upsert(upd);
     if (out.length) await admin.from("flight_alerts").insert(out);
-    const pushed = await sendPush(out);
+    const pushed = await sendPush(out.map((a) => ({ ...a, fkey: fkeys.get(a.schedule_id)! })));
     return new Response(JSON.stringify({ watching: list.length, circles: need.length, seen: seen.size, updated: upd.length, alerts: out.length, pushed }), { headers: JSON_HEADERS });
   } catch (e) {
     console.error(e);
