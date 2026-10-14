@@ -591,6 +591,9 @@ ul.fc{margin:4px 0;padding-left:1.2em;line-height:1.9}
 .opsmap .leaflet-container{font:inherit}
 .tplane{background:none;border:none}
 .tplane svg{display:block;filter:drop-shadow(0 1px 1px rgba(0,0,0,.35))}
+.opssiddir{align-items:center}
+.opssiddir .chip[aria-pressed="false"]{opacity:1;text-decoration:none}
+.opssiddir .lbl{font-size:12px;color:var(--sumi);margin-right:2px}
 .tlabel.sp{background:#FFF6D6}
 .splist ul{list-style:none;margin:6px 0 0;padding:0}
 .splist li{padding:6px 0;border-top:1px solid var(--line,#e3e3e3)}
@@ -837,6 +840,7 @@ details.rgrp .rgbar i{display:block;height:100%;background:var(--shu)}
   <div class="opslayers" role="group" aria-label="地図に出すもの">
     <button class="chip" data-layer="traffic" aria-pressed="true">機体</button><button class="chip" data-layer="star" aria-pressed="true">到着経路</button><button class="chip" data-layer="app" aria-pressed="true">進入経路</button><button class="chip" data-layer="sid" aria-pressed="true">出発経路</button><button class="chip" id="opsFitAll">全体を見る</button>
   </div>
+  <div class="opslayers opssiddir" id="opsSidDir" role="group" aria-label="出発経路の行き先の方向" hidden></div>
   <div class="opsmap" id="opsMap" role="img" aria-label="羽田空港の滑走路と、進入・出発・到着の経路、今飛んでいる機体の地図"></div>
   <p class="opsstat" id="trafficNote"></p>
   <div class="fwbox" id="opsSpecial" hidden></div>
@@ -3444,7 +3448,13 @@ function drawOpsMap(rw, op, plus, mode, good){
       L.marker([q[0], q[1]], { icon:L.divIcon({ className:"starlabel", html:STAR_FROM[st.from] ? `${STAR_FROM[st.from]}<small>${st.from}</small>` : st.from, iconSize:[44, 22], iconAnchor:[22, 11] }) }).addTo(OPS_LAYER); }
   }
   const vr = sidVariant();
-  for(const id of op.dep){ const r = rw[id], sids = (((def.sidUse || {})[mode] || {})[id] || []).map(n => [n, ((def.sid || {})[id] || {})[n]]).filter(x => x[1]);
+  // 出発経路の行き先の方向で絞る（方向が3つ以上あるときだけ、切り替えを出す）
+  const allSids = op.dep.flatMap(id => (((def.sidUse || {})[mode] || {})[id] || []).map(n => ((def.sid || {})[id] || {})[n]).filter(Boolean));
+  const dirs = [...new Set(allSids.map(sd => sd.dir))].sort((a, b) => DIR8.indexOf(a) - DIR8.indexOf(b));
+  if(!dirs.includes(OPS_SID_DIR)) OPS_SID_DIR = "all";
+  const box = $("opsSidDir"); box.hidden = !OPS_SHOW.sid || dirs.length < 3;
+  if(!box.hidden) box.innerHTML = `<span class="lbl">出発経路の方向</span>` + ["all", ...dirs].map(d => `<button class="chip" data-sid-dir="${esc(d)}" aria-pressed="${d === OPS_SID_DIR}">${d === "all" ? "すべて" : esc(d)}</button>`).join("");
+  for(const id of op.dep){ const r = rw[id], sids = (((def.sidUse || {})[mode] || {})[id] || []).map(n => [n, ((def.sid || {})[id] || {})[n]]).filter(x => x[1] && (OPS_SID_DIR === "all" || x[1].dir === OPS_SID_DIR));
     if(!sids.length || !OPS_SHOW.sid){ if(!OPS_SHOW.sid){ L.polyline([r.thr, r.opp], { color:"#2B6CB0", weight:3, opacity:.9 }).addTo(OPS_LAYER); continue; } L.polyline([r.thr, dest(r.opp, r.hdg, 5)], { color:"#2B6CB0", weight:3, dashArray:"2 6" }).bindTooltip(`RWY ${id} 離陸（滑走路の向きに上昇）`).addTo(OPS_LAYER); continue; }
     L.polyline([r.thr, r.opp], { color:"#2B6CB0", weight:3, opacity:.9 }).addTo(OPS_LAYER);
     for(const [n, sd] of sids){ const pts = sd.v[vr] || sd.v.A, line = [r.opp, dest(r.opp, r.hdg, 1.5), ...pts.map(q => [q[0], q[1]])];
@@ -3453,6 +3463,9 @@ function drawOpsMap(rw, op, plus, mode, good){
   }
   setTimeout(() => { OPS_MAP.invalidateSize(); if(TRAFFIC_FIT) return; const bd = L.featureGroup(OPS_LAYER.getLayers().filter(l => l instanceof L.Polyline && !l.options.noFit)).getBounds(); if(bd.isValid()) OPS_MAP.fitBounds(bd, { padding:[18, 18], animate:false }); }, 60);
 }
+let OPS_SID_DIR = "all";   // 出発経路の行き先の方向（"all" か「北へ」など）。空港を切り替えると「すべて」に戻る
+const DIR8 = ["北へ", "北東へ", "東へ", "南東へ", "南へ", "南西へ", "西へ", "北西へ"];
+document.addEventListener("click", e => { const b = e.target.closest("[data-sid-dir]"); if(!b) return; OPS_SID_DIR = b.dataset.sidDir; track("ops", "sid_dir"); renderOps(); });
 // 運用の地図の下地：道路だけ（国土地理院のベクトルタイルから道路の層だけを描く。地名・建物・記号は出さない）
 // ベクトルタイルを描けない端末（WebGL が使えないなど）では、これまでの淡色地図にする
 const MAPLIBRE = { js:"https://cdn.jsdelivr.net/npm/maplibre-gl@4.7.1/dist/maplibre-gl.js", css:"https://cdn.jsdelivr.net/npm/maplibre-gl@4.7.1/dist/maplibre-gl.css",
@@ -3701,7 +3714,7 @@ document.addEventListener("click", e => { const b = e.target.closest("[data-ops]
 async function setOpsAirport(iata){
   if(!OPS_AIRPORTS[iata]) return;
   OPS_AP = iata; try{ localStorage.setItem("soramemo.opsAirport", iata); }catch(e){}
-  OPS_MODE = "auto"; OPS_OBS = null; OPS_WX = null; TRAFFIC_FIT = false;
+  OPS_MODE = "auto"; OPS_OBS = null; OPS_WX = null; TRAFFIC_FIT = false; OPS_SID_DIR = "all";
   if(TRAFFIC_LAYER){ TRAFFIC_LAYER.remove(); TRAFFIC_LAYER = null; }
   if(OPS_MAP){ OPS_MAP._opsAp = iata; OPS_MAP.setView(opsDef().center, 10, { animate:false }); }
   $("trafficNote").textContent = ""; $("opsWx").textContent = "気象通報を読み込んでいます…"; renderOps();
