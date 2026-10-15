@@ -5,6 +5,7 @@
 //  ・便名と機体の呼び出し符号（コールサイン）を、航空会社の記号と数字で結ぶ（JL509 ↔ JAL509、NH1 ↔ ANA1 など。先頭の0は無視）
 //  ・離陸：出発空港の40km以内で、高度8,000ft以下の機体を初めて見た時刻。もっと遠くで初めて見たときは、見た時刻を「離陸（推定）」にする
 //  ・着陸：空港の8km以内で、高度1,500ft以下で最後に見た時刻（見えなくなってから5分たったら着陸とみなす）
+//          受信機に低いところが映らない空港もあるので、到着空港の40km以内・10,000ft以下で見えなくなって10分たったときも着陸とみなす（その時刻は最後に見た時刻）
 //  ・遅れ：離陸が定刻（出発の時刻＝ゲートを離れる時刻）から 1時間＋地上走行15分 以上あと、または着陸が到着の定刻より1時間以上あと
 //          定刻から1時間15分たっても離陸を確認できないときも知らせる（運休・データの抜けのこともある）
 //  ・ダイバート：到着空港ではない空港の15km以内で、高度4,000ft以下に降りてきたとき（出発空港なら「引き返し」）
@@ -14,7 +15,11 @@ export type Sched = {
   id: number; flight: string;            // 便名（JL509）
   dep: string; arr: string;              // IATA
   std: number; sta: number;              // 定刻（ミリ秒、UTC）
+  aircraft?: string | null;              // 機種（ODPT の IATA の機種の記号：738・E70・Q4A など）
 };
+// プロペラ機（ATR・ボンバルディア Q400 など）とエンブラエル機：低く飛ぶ・小さな空港を使うため受信機に映らないことが多く、
+// 「離陸を確認できず」が誤りになりやすいので出さない
+export const hardToSee = (t?: string | null) => !!t && /^(AT|AR|Q\d|Q4|D[H8]|DHC|SF|SAB|YS|BN|DO|E\d|EM|ER)/i.test(t.trim());
 export type Seen = { callsign: string; lat: number; lon: number; alt_ft: number | null; ground: boolean; fpm: number | null; at: number };
 export type Watch = {
   phase: "sched" | "air" | "landed";
@@ -92,16 +97,21 @@ export function step(s: Sched, w0: Watch, seen: Seen | null, now: number, aps: M
     w.phase = "landed"; w.landed_at = w.low_at; w.landed_iata = w.low_iata;
     if (w.landed_iata !== s.arr && w.landed_iata !== s.dep) emit({ kind: "divert_landed", iata: [s.arr, w.landed_iata, s.dep], message: `${route}は、${name(w.landed_iata)}に着陸したようです（ダイバート・推定）` });
   }
+  if (w.phase === "air" && !seen && w.last && now - w.last.at >= 10 * MIN) {
+    const arr = aps.get(s.arr);
+    if (arr && km(w.last, arr) <= 40 && (w.last.alt_ft ?? 99999) <= 10000) { w.phase = "landed"; w.landed_at = w.last.at; w.landed_iata = s.arr; }
+  }
   // 遅れ
   if (w.takeoff_at != null && !w.takeoff_est && !lateStart && w.takeoff_at - s.std >= 75 * MIN) {
     const late = Math.round((w.takeoff_at - 15 * MIN - s.std) / MIN);
     emit({ kind: "delay_dep", iata: [s.dep, s.arr], message: `${route}は、出発が約${late}分遅れました（${hm(w.takeoff_at)}ごろ離陸・推定）` });
   }
-  if (w.phase === "sched" && !lateStart && now - s.std >= 75 * MIN && now - s.std < 6 * 60 * MIN)
+  if (w.phase === "sched" && !lateStart && !hardToSee(s.aircraft) && now - s.std >= 75 * MIN && now - s.std < 6 * 60 * MIN)
     emit({ kind: "no_takeoff", iata: [s.dep, s.arr], message: `${route}は、出発の定刻（${hm(s.std)}）から1時間以上たっても離陸を確認できていません` });
   if (w.phase === "landed" && w.landed_at != null && w.landed_iata === s.arr && w.landed_at - s.sta >= 60 * MIN)
     emit({ kind: "delay_arr", iata: [s.arr, s.dep], message: `${route}は、到着が約${Math.round((w.landed_at - s.sta) / MIN)}分遅れました（${hm(w.landed_at)}ごろ着陸・推定）` });
-  else if (w.phase === "air" && now - s.sta >= 60 * MIN)
+  // 「まだ飛行中」は、今も実際に飛んでいるのが見えているときだけ（途中で見えなくなった便は、着陸したのか分からないので出さない）
+  else if (w.phase === "air" && now - s.sta >= 60 * MIN && w.last && now - w.last.at <= 5 * MIN)
     emit({ kind: "delay_arr", iata: [s.arr, s.dep], message: `${route}は、到着の定刻（${hm(s.sta)}）から1時間以上たっても、まだ飛行中です（推定）` });
   return { watch: w, alerts: out };
 }

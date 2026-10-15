@@ -1,6 +1,6 @@
 // ダイヤと機体の位置の照らし合わせ：離陸・着陸・遅れ・ダイバート・引き返し
 import { assertEquals } from "jsr:@std/assert@1";
-import { type Airport, blankWatch, callsignsFor, normCallsign, type Sched, type Seen, step, type Watch } from "../functions/_shared/flight_watch.ts";
+import { type Airport, blankWatch, callsignsFor, hardToSee, normCallsign, type Sched, type Seen, step, type Watch } from "../functions/_shared/flight_watch.ts";
 
 const APS = new Map<string, Airport>([
   ["HND", { iata: "HND", lat: 35.5497, lon: 139.787, name: "羽田" }],
@@ -75,4 +75,29 @@ Deno.test("引き返し：離陸から20分より後に、羽田へ降りてく�
 Deno.test("定刻を過ぎてから見張り始めた便（ダイヤを後から入れた）は、「離陸を確認できず」を出さない", () => {
   const { all } = run([[null, T0 + 80 * MIN], [null, T0 + 90 * MIN], [null, T0 + 120 * MIN]]);
   assertEquals(all, []);
+});
+
+Deno.test("プロペラ機・エンブラエル機は「離陸を確認できず」を出さない（ジェット機は出す）", () => {
+  for (const t of ["Q4A", "Q84", "AT7", "ATR", "DH4", "E70", "E90", "E75"]) assertEquals(hardToSee(t), true, t);
+  for (const t of ["738", "73H", "763", "32P", "359", "788", null, undefined]) assertEquals(hardToSee(t), false, String(t));
+  const prop: Sched = { ...S, aircraft: "Q4A" }; let w: Watch = blankWatch(); const all: string[] = [];
+  for (const now of [T0 - 10 * MIN, T0 + 76 * MIN, T0 + 90 * MIN]) { const r = step(prop, w, null, now, APS); w = r.watch; all.push(...r.alerts.map((a) => a.kind)); }
+  assertEquals(all, []);
+});
+
+Deno.test("到着空港の手前で受信が切れた：降下中に見えなくなって10分たてば着陸とみなし、「まだ飛行中」は出さない", () => {
+  const { w, all } = run([
+    [at(35.56, 139.80, 2000, T0 + 18 * MIN, 2500), T0 + 18 * MIN],
+    [at(42.55, 141.62, 6000, T0 + 85 * MIN, -900), T0 + 85 * MIN],   // 新千歳の約25km手前・6,000ft で最後
+    [null, T0 + 90 * MIN], [null, T0 + 96 * MIN], [null, T0 + 160 * MIN],
+  ]);
+  assertEquals(w.phase, "landed"); assertEquals(w.landed_iata, "CTS");
+  assertEquals(all, []);
+});
+
+Deno.test("途中で見えなくなった便には「まだ飛行中」を出さない。今も見えていれば出す", () => {
+  const lost = run([[at(35.56, 139.80, 2000, T0 + 18 * MIN, 2500), T0 + 18 * MIN], [at(39.5, 141.0, 37000, T0 + 50 * MIN), T0 + 50 * MIN], [null, T0 + 160 * MIN]]);
+  assertEquals(lost.all, []);
+  const still = run([[at(35.56, 139.80, 2000, T0 + 18 * MIN, 2500), T0 + 18 * MIN], [at(41.0, 141.3, 20000, T0 + 156 * MIN), T0 + 156 * MIN]]);
+  assertEquals(still.all, ["delay_arr"]);
 });

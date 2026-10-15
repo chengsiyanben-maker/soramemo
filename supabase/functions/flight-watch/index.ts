@@ -51,11 +51,11 @@ Deno.serve(async () => {
     if (!run?.length) return new Response(JSON.stringify({ skipped: "recent" }), { headers: JSON_HEADERS });
 
     const now = Date.now();
-    const { data: rows } = await admin.from("flight_schedule").select("id, svc_date, flight, dep, arr, std, sta, flight_watch(state)")
+    const { data: rows } = await admin.from("flight_schedule").select("id, svc_date, flight, dep, arr, std, sta, aircraft, flight_watch(state)")
       .gte("std", new Date(now - 8 * 60 * MIN).toISOString()).lte("std", new Date(now + 30 * MIN).toISOString()).limit(3000);
     const list = (rows ?? []).map((r) => ({
       fkey: `${r.flight}@${r.svc_date}`,
-      s: { id: r.id, flight: r.flight, dep: r.dep, arr: r.arr, std: Date.parse(r.std), sta: Date.parse(r.sta) } as Sched,
+      s: { id: r.id, flight: r.flight, dep: r.dep, arr: r.arr, std: Date.parse(r.std), sta: Date.parse(r.sta), aircraft: r.aircraft } as Sched,
       w: ((Array.isArray(r.flight_watch) ? r.flight_watch[0]?.state : (r.flight_watch as { state?: Watch } | null)?.state) ?? blankWatch()) as Watch,
     })).filter((x) => x.w.phase !== "landed" && now - x.s.sta < 6 * 60 * MIN);
     const aps = await airports();
