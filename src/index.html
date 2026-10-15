@@ -3238,10 +3238,12 @@ function rwModeOf(def){ const m = {}; for(const [k, op] of Object.entries(def.mo
 // 2) 1点しかないときは、その点がどちらの向きの離陸の「滑走路の先」にあるか（離陸を終える端から0.3〜8km、離陸の向きの±50°以内）で決める。
 //    空港の中心ではなく滑走路の端から測る（関西など長い滑走路では、滑走を始めた直後の位置が離陸と反対側に出るため）。
 // 地上の機体（300ft未満）と、上がってから旋回して戻ってきた機体（4,000ft超で、まっすぐ遠ざかっていない）は数えない
-function observeDeps(planes, def){
+// 便名の代わりに登録記号（JA86MV など）を出している機体は、小型機の訓練や遊覧が多く、滑走路の運用と関係なく飛ぶので数えない
+const isGA = p => /^JA[0-9A-Z]{3,5}$/.test(p.callsign || "");
+function observeDeps(planes, def, min = 2){
   const rw = runwaysOf(def), H = def.center, votes = {}, km = (a, b) => nmToLine(a, [b, b]) * 1.852, off = (x, y) => Math.abs(((x - y) + 540) % 360 - 180);
   for(const p of planes){
-    if(p.phase !== "dep" || p.alt_ft == null || p.alt_ft < 300) continue;
+    if(p.phase !== "dep" || p.alt_ft == null || p.alt_ft < 300 || isGA(p)) continue;
     const pts = [...(p.trail || []), [p.lat, p.lon]], first = pts[0];
     if(km(first, H) > 8) continue;
     const next = pts.slice(1, 4).find(q => km(q, first) >= 1);
@@ -3257,7 +3259,7 @@ function observeDeps(planes, def){
     const m = Object.keys(def.modes).find(pick);
     if(m) votes[m] = (votes[m] || 0) + 1;
   }
-  const all = Object.values(votes).reduce((a, b) => a + b, 0); if(all < 2) return null;
+  const all = Object.values(votes).reduce((a, b) => a + b, 0); if(all < min) return null;
   const [mode, cnt] = Object.entries(votes).sort((x, y) => y[1] - x[1])[0];
   if(cnt / all < 0.8) return { mixed:true, n:{} };
   return { mode, apps:{}, n:{}, dep:cnt };
@@ -3287,7 +3289,7 @@ function observeOps(planes, def = opsDef()){
   const H = def.center, hit = [], RW_MODE = rwModeOf(def), paths = obsPaths(def);
   if(def.noObs) return observeDeps(planes, def);
   for(const p of planes){
-    if(p.phase !== "arr" || p.alt_ft == null || p.alt_ft > 7000) continue;
+    if(p.phase !== "arr" || p.alt_ft == null || p.alt_ft > 7000 || isGA(p)) continue;
     // 羽田（30秒ごとの記録）：空港から3〜22海里の直近10点（約5分）で比べる。
     // ほかの空港（1分ごとの記録）：最終進入の部分だけで比べるよう、3〜12海里の直近3点（約2分）にする
     // （多いと、新千歳の目視での進入のように最終進入の手前で回り込んでくる部分まで入って外れる）。同じ位置が続く点は1つにまとめる
@@ -3304,7 +3306,14 @@ function observeOps(planes, def = opsDef()){
   }
   if(def.split) return observeSplit(hit, planes, def);
   // 着陸機がそろわないときは、離陸機（空港のどちら側に現れたか）で判定する（羽田は着陸機の経路が細かく分かれるため使わない）
-  if(hit.length < 2) return def.detail ? null : observeDeps(planes, def);
+  // 便の少ない空港では、着陸機1機と離陸機が同じ運用を指していれば、合わせて2機以上として判定する（食い違えば判定しない）
+  if(hit.length < 2){
+    if(def.detail) return null;
+    const d = observeDeps(planes, def);
+    if(d || hit.length < 1) return d;
+    const one = observeDeps(planes, def, 1), mode = RW_MODE[hit[0].rw];
+    return one && !one.mixed && one.mode === mode ? { mode, apps:{}, n:{ [hit[0].rw]: 1 }, dep:one.dep } : null;
+  }
   const n = {}, byMode = {}; for(const h of hit){ n[h.rw] = (n[h.rw] || 0) + 1; byMode[RW_MODE[h.rw]] = (byMode[RW_MODE[h.rw]] || 0) + 1; }
   const [mode, cnt] = Object.entries(byMode).sort((x, y) => y[1] - x[1])[0];
   if(cnt / hit.length < 0.8) return { mixed:true, n };
