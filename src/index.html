@@ -1023,6 +1023,8 @@ const AIRLINES = [
   {id:"JH", name:"フジドリームエアラインズ",    short:"FDA", group:"OTHER"},
   {id:"OT", name:"その他の航空会社",            short:"その他", group:"OTHER"},
 ];
+// ODPT（公共交通オープンデータセンター）のデータを出すところに必ず添える短い出典（全文は利用規約の「11. 外部のデータ」）
+const ODPT_CREDIT = `出典：公共交通オープンデータセンター（正確・完全とは限りません。表示について航空会社へ直接問い合わせないでください。<a href="terms.html#data" target="_blank" rel="noopener">くわしく</a>）`;
 const ALBY = Object.fromEntries(AIRLINES.map(x => [x.id, x]));
 const GROUPS = [["JAL","JALグループ"],["ANA","ANAグループ"],["OTHER","その他の航空会社"]];
 const KM_GOALS = [[1000,"1,000km"],[5000,"5,000km"],[10000,"1万km"],[20000,"2万km"],[40075,"地球一周"],[80150,"地球二周"]];
@@ -1263,7 +1265,7 @@ function flightsHTML(a, fl){
     + (terms.length > 1 ? `<div class="nowterms">${[["all","すべて"], ...terms.map(t => [t.tag, t.tag])].map(([k, l]) => `<button data-now-term="${k}" aria-pressed="${NOW.term === k}">${l}</button>`).join("")}</div>` : "")
     + (empty ? `<p class="nowempty">${empty}</p>` : `<ul class="flist">${shown.map(row).join("")}</ul>`)
     + (NOW.msg ? `<p class="msg" role="status" style="margin:8px 0 0">${NOW.msg}</p>` : "")
-    + `<div class="nowfoot"><p class="src" style="margin:0;line-height:1.5">JAL・ANAグループの便のみ<br>出典：公共交通オープンデータセンター</p>${list.length > 5 ? `<button class="linkbtn2" data-now-more>${NOW.more ? "少なく表示" : "もっと見る"}</button>` : ""}</div>`;
+    + `<div class="nowfoot"><p class="src" style="margin:0;line-height:1.5">JAL・ANAグループの便のみ<br>${ODPT_CREDIT}</p>${list.length > 5 ? `<button class="linkbtn2" data-now-more>${NOW.more ? "少なく表示" : "もっと見る"}</button>` : ""}</div>`;
 }
 function renderNow(){
   const box = $("apNow"); if(!box || !NOW) return;
@@ -1850,7 +1852,7 @@ async function loadFlightCands(f){
   const hm = t => new Date(t).toLocaleTimeString("ja-JP", { hour:"2-digit", minute:"2-digit" });
   const cur = f.no || "";
   box.innerHTML = `<b>この時刻に近い便</b><div class="row">${list.map((c, i) => `<button class="chip" type="button" data-cand="${esc(c.flight)}" aria-pressed="${c.flight === cur}">${esc(c.flight)}<small>${hm(c.std)}→${hm(c.sta)}${c.aircraft ? "・" + esc(c.aircraft) : ""}</small>${i === 0 ? "<em>いちばん近い</em>" : ""}</button>`).join("")}</div>
-    <p class="hint">押すと航空会社と便名に入ります。時刻は定刻（公共交通オープンデータセンター（ODPT）のフライト時刻表。JAL・ANA グループの便だけ。正確さは保証されません）。</p>`;
+    <p class="hint">押すと航空会社と便名に入ります。時刻は定刻（JAL・ANA グループの便だけ）。${ODPT_CREDIT}</p>`;
   box.hidden = false; track("fcand", list.length);
 }
 document.addEventListener("click", e => { const b = e.target.closest("[data-cand]"); if(!b) return;
@@ -3606,7 +3608,7 @@ const opsOn = () => $("v-ops").classList.contains("on");
    サーバーの flight-watch が、予定の便（ダイヤ）と今飛んでいる機体を照らし合わせて見つけたもの。直近12時間ぶん。
    ダイヤが入っていないあいだは何も出ない。お知らせは推定で、航空会社の発表ではない */
 const FW = new Map();   // IATA → お知らせの配列
-const FW_KIND = { delay_dep:"出発の遅れ", no_takeoff:"離陸を確認できず", delay_arr:"到着の遅れ", divert:"ダイバートの可能性", return:"引き返し", divert_landed:"ダイバート" };
+const FW_KIND = { cancel:"欠航", delay_dep:"出発の遅れ", no_takeoff:"離陸を確認できず", delay_arr:"到着の遅れ", divert:"ダイバートの可能性", return:"引き返し", divert_landed:"ダイバート" };
 async function loadFlightAlerts(iata){
   if(!SERVER) return;
   try{ const r = await fetch(SORAMEMO_CONFIG.supabaseUrl.replace(/\/$/, "") + "/rest/v1/rpc/flight_alerts", { method:"POST",
@@ -3615,10 +3617,10 @@ async function loadFlightAlerts(iata){
 }
 function fwHTML(list, iata, withPush){
   const push = withPush ? pushButtonHTML(iata) : "";
-  if(!list || !list.length) return push ? `<div class="fwlist"><div class="opshead"><b>遅れ・ダイバート</b><span>推定</span></div><p class="hint" style="margin:4px 0 0">いまは、お知らせはありません。</p>${push}</div>` : "";
-  return `<div class="fwlist"><div class="opshead"><b>遅れ・ダイバート</b><span>推定</span></div><ul>${list.slice(0, 8).map(a =>
+  if(!list || !list.length) return push ? `<div class="fwlist"><div class="opshead"><b>遅れ・欠航・ダイバート</b></div><p class="hint" style="margin:4px 0 0">いまは、お知らせはありません。</p>${push}</div>` : "";
+  return `<div class="fwlist"><div class="opshead"><b>遅れ・欠航・ダイバート</b></div><ul>${list.slice(0, 8).map(a =>
     `<li class="fw-${esc(a.kind)}"><span class="fwk">${esc(FW_KIND[a.kind] || "お知らせ")}</span><b>${esc(a.flight)}</b> <small>${jstHM(a.at)}</small><p>${esc(a.message)}</p></li>`).join("")}</ul>
-    <p class="fwnote">予定の便と、今飛んでいる機体の位置を照らし合わせた推定です。航空会社の発表ではありません。運航状況は各航空会社でご確認ください。</p>${push}</div>`;
+    <p class="fwnote">「航空会社の運航情報」とあるものは、JAL・ANA グループの運航情報です（${ODPT_CREDIT}）。それ以外は、予定の便と今飛んでいる機体の位置を照らし合わせた推定で、航空会社の発表ではありません。運航状況は各航空会社の公式の案内でご確認ください。</p>${push}</div>`;
 }
 /* ---------- いま飛んでいる特別塗装機 ----------
    サーバーが機体を記録するたびに、特別塗装機の一覧（航空会社の発表などから作ったもの）の登録記号の機体を見つけて残している。直近15分ぶん */
@@ -3760,12 +3762,13 @@ async function autoOpsAirport(){
 
 // ---- 運用によってよく見える場所（展望デッキ・公園など） ----
 // 位置は OpenStreetMap（© OpenStreetMap contributors）から取った目安。ターミナルの展望デッキはターミナルの位置。
+// 千里川土手は、OpenStreetMap の千里川の線と、伊丹の32Lの延長線（AIP の滑走路の端から求めたもの）が交わる点（進入端から約190m）。
 // 「よく見えるか」は、いまの運用の着陸機の最終進入・離陸機の上昇の線（滑走路の向きから引いた直線）までの距離だけで決める目安で、
 // 建物や木で見えないこと、開いている時間・立ち入りは考えていない
 const OPS_SPOTS = {
   HND:[["第1ターミナル 展望デッキ",35.5492,139.7846],["第2ターミナル 展望デッキ",35.5508,139.7883],["第3ターミナル 展望デッキ",35.5445,139.7679],["城南島海浜公園",35.5814,139.7848],["京浜島つばさ公園",35.5705,139.7702],["浮島町公園",35.5216,139.7880],["東扇島西公園",35.4864,139.7447]],
   NRT:[["第1ターミナル 展望デッキ",35.7631,140.3864],["第2ターミナル 展望デッキ",35.7730,140.3886],["さくらの山",35.7762,140.3637],["ひこうきの丘",35.7384,140.3915],["航空科学博物館",35.7400,140.3976]],
-  ITM:[["ターミナル 展望デッキ",34.7897,135.4419],["伊丹スカイパーク",34.7788,135.4409],["スカイランドHARADA",34.7739,135.4441],["エアフロントオアシス下河原",34.7976,135.4279]],
+  ITM:[["ターミナル 展望デッキ",34.7897,135.4419],["千里川土手",34.7710,135.4533],["伊丹スカイパーク",34.7788,135.4409],["スカイランドHARADA",34.7739,135.4441],["エアフロントオアシス下河原",34.7976,135.4279]],
   KIX:[["関空展望ホール Sky View",34.4409,135.2575],["りんくう公園",34.4033,135.2899]],
   CTS:[["国内線ターミナル 展望デッキ",42.7878,141.6809]],
   FUK:[["国内線ターミナル 展望デッキ",33.5973,130.4482],["東平尾公園",33.5829,130.4616]],

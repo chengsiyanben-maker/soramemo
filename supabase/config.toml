@@ -443,3 +443,5 @@ verify_jwt = false
 verify_jwt = false
 [functions.schedule-sync]
 verify_jwt = false
+[functions.odpt-status]
+verify_jwt = false

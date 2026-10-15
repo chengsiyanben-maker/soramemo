@@ -3,7 +3,7 @@
 // ダイヤが空（または見張る便がない）なら、機体は取りに行かず、何もしない。
 // 見つけたお知らせは flight_alerts に残し、その空港を選んでいる人のスマホへ通知する（VAPID の鍵があるときだけ）。
 import { createClient } from "npm:@supabase/supabase-js@2.117.2";
-import webpush from "npm:web-push@3.6.7";
+import { sendAlertPush } from "../_shared/alert_push.ts";
 import { type Airport, blankWatch, callsignsFor, onRoute, type Sched, type Seen, step, type Watch } from "../_shared/flight_watch.ts";
 
 const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, { auth: { persistSession: false } });
@@ -16,31 +16,6 @@ async function airports() {
   const { data } = await admin.from("airports").select("iata, name, lat, lon").not("iata", "is", null);
   AIRPORTS = new Map((data ?? []).filter((a) => /^[A-Z]{3}$/.test(a.iata)).map((a) => [a.iata, { iata: a.iata, lat: a.lat, lon: a.lon, name: String(a.name).replace(/国際空港$|空港$/, "").replace(/^.*（(.+)）$/, "$1") }]));
   return AIRPORTS;
-}
-
-async function sendPush(alerts: { iata: string[]; message: string; flight: string; fkey: string }[]) {
-  const pub = Deno.env.get("VAPID_PUBLIC_KEY"), priv = Deno.env.get("VAPID_PRIVATE_KEY");
-  if (!pub || !priv || !alerts.length) return 0;
-  webpush.setVapidDetails(Deno.env.get("VAPID_SUBJECT") || "https://soramemo.jp", pub, priv);
-  // 宛先：関係する空港を選んでいる人と、「この便に乗る」でその便（便名@運航日）を選んでいる人
-  const all = [...new Set(alerts.flatMap((a) => a.iata))], keys = [...new Set(alerts.map((a) => a.fkey))];
-  const cols = "id, endpoint, p256dh, auth, airports, flights";
-  const [byAp, byFl] = await Promise.all([admin.from("push_subs").select(cols).overlaps("airports", all), admin.from("push_subs").select(cols).overlaps("flights", keys)]);
-  const subs = [...new Map([...(byAp.data ?? []), ...(byFl.data ?? [])].map((s) => [s.id, s])).values()];
-  let sent = 0;
-  for (const s of subs) {
-    for (const a of alerts.filter((x) => x.iata.some((i) => s.airports.includes(i)) || (s.flights ?? []).includes(x.fkey))) {
-      try {
-        await webpush.sendNotification({ endpoint: s.endpoint, keys: { p256dh: s.p256dh, auth: s.auth } },
-          JSON.stringify({ title: `そらメモ：${a.flight}`, body: a.message, tag: `fw-${a.flight}` }), { TTL: 3600 });
-        sent++; await admin.from("push_subs").update({ last_ok: new Date().toISOString() }).eq("id", s.id);
-      } catch (e) {
-        const code = (e as { statusCode?: number }).statusCode;
-        if (code === 404 || code === 410) { await admin.from("push_subs").delete().eq("id", s.id); break; }   // 購読が切れている
-      }
-    }
-  }
-  return sent;
 }
 
 Deno.serve(async () => {
@@ -81,8 +56,19 @@ Deno.serve(async () => {
       for (const a of r.alerts) out.push({ schedule_id: s.id, kind: a.kind, flight: s.flight, dep: s.dep, arr: s.arr, iata: [...new Set(a.iata)], message: a.message });
     }
     if (upd.length) await admin.from("flight_watch").upsert(upd);
-    if (out.length) await admin.from("flight_alerts").insert(out);
-    const pushed = await sendPush(out.map((a) => ({ ...a, fkey: fkeys.get(a.schedule_id)! })));
+    // 同じ便・同じ種類のお知らせは1回だけ（航空会社の運航情報（odpt-status）が先に出していることがある）
+    let fresh = out;
+    // 安全装置：推定のお知らせが直近1時間に30件以上出ていたら、誤りが続いているおそれがあるので、新しく出さない（運営の見張りが気づく）
+    if (out.length) {
+      const { count } = await admin.from("flight_alerts").select("id", { count: "exact", head: true }).neq("kind", "cancel").gt("created_at", new Date(now - 60 * MIN).toISOString());
+      if ((count ?? 0) >= 30) { out.length = 0; fresh = []; }
+    }
+    if (out.length) {
+      const { data: ins } = await admin.from("flight_alerts").upsert(out, { onConflict: "schedule_id,kind", ignoreDuplicates: true }).select("schedule_id, kind");
+      const ok = new Set((ins ?? []).map((r) => `${r.schedule_id}|${r.kind}`));
+      fresh = out.filter((a) => ok.has(`${a.schedule_id}|${a.kind}`));
+    }
+    const pushed = await sendAlertPush(admin, fresh.map((a) => ({ ...a, fkey: fkeys.get(a.schedule_id)! })));
     return new Response(JSON.stringify({ watching: list.length, seen: seen.size, updated: upd.length, alerts: out.length, pushed }), { headers: JSON_HEADERS });
   } catch (e) {
     console.error(e);
