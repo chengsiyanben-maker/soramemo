@@ -11,6 +11,8 @@ export type FlightRow = {
   no: string;            // 便名（"JL116"）
   term: string | null;   // ターミナル（"T1" など）
   kind: FlightKind;
+  gate?: string | null;  // 搭乗口・到着口（"10" など。航空会社が出しているときだけ）
+  ac?: string | null;    // 機種（IATA の機種の記号："763" など）
 };
 
 const last = (v: unknown): string => { const s = Array.isArray(v) ? String(v[0] ?? "") : String(v ?? ""); const i = s.lastIndexOf(":"); return i >= 0 ? s.slice(i + 1) : s; };
@@ -27,6 +29,12 @@ export function flightNo(v: unknown): { airline: string; no: string } | null {
 export function terminal(v: unknown): string | null {
   const m = String(v ?? "").match(/Terminal\s*(\d)/i);
   return m ? "T" + m[1] : null;
+}
+
+// 搭乗口："10"・"4A" など（短い英数字だけ。配列のときは最初のもの）
+export function gateOf(v: unknown): string | null {
+  const s = (Array.isArray(v) ? String(v[0] ?? "") : String(v ?? "")).trim();
+  return /^[0-9A-Z]{1,4}$/i.test(s) ? s.toUpperCase() : null;
 }
 
 // 状況：ODPT の "odpt.FlightStatus:Arrived" などを5つにまとめる。知らない値は「定刻」扱いにせず、時刻のずれで決める
@@ -55,6 +63,8 @@ export function normalize(raw: Record<string, unknown>, dir: "arr" | "dep"): Fli
     time, newTime, place, airline: fn.airline, no: fn.no,
     term: terminal(raw[dir === "arr" ? "odpt:arrivalAirportTerminal" : "odpt:departureAirportTerminal"]),
     kind: kindOf(raw["odpt:flightStatus"], time, newTime),
+    gate: gateOf(raw[dir === "arr" ? "odpt:arrivalGate" : "odpt:departureGate"]),
+    ac: typeof raw["odpt:aircraftType"] === "string" && /^[A-Z0-9]{2,4}$/.test(raw["odpt:aircraftType"] as string) ? raw["odpt:aircraftType"] as string : null,
   };
 }
 

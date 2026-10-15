@@ -38,14 +38,15 @@ export function makeDeps(admin: SupabaseClient, opensky: { clientId: string; cli
   async function loadFlights(): Promise<Row[]> {
     const today = new Date(); today.setUTCHours(0, 0, 0, 0);       // 到着記録は夜間にまとめて更新されるため、前日以前の分だけ
     const { data, error } = await admin.from("flights")
-      .select("id, dep_at, arr_at, flight_no, verify_attempts, from:airports!flights_from_airport_fkey(icao), to:airports!flights_to_airport_fkey(icao)")
+      .select("id, dep_at, arr_at, flight_no, verify_attempts, from:airports!flights_from_airport_fkey(icao, iata), to:airports!flights_to_airport_fkey(icao, iata)")
       .in("status", ["provisional", "with_flight_no"]).lt("verify_attempts", JOB.maxAttempts)
       .lt("arr_at", today.toISOString()).gte("arr_at", new Date(today.getTime() - 7 * 864e5).toISOString())
       .order("arr_at").limit(JOB.maxPerRun);
     if (error) throw error;
     // deno-lint-ignore no-explicit-any
     return (data ?? []).map((r: any) => ({ id: r.id, fromIcao: r.from?.icao || null, toIcao: r.to?.icao || null,
-      dep: Date.parse(r.dep_at), arr: Date.parse(r.arr_at), flightNo: r.flight_no, attempts: r.verify_attempts }));
+      dep: Date.parse(r.dep_at), arr: Date.parse(r.arr_at), flightNo: r.flight_no, attempts: r.verify_attempts,
+      fromIata: r.from?.iata || null, toIata: r.to?.iata || null }));
   }
 
   async function save(id: number, status: "verified" | "no_data" | null, note: string, attempts: number, track?: [number, number][] | null) {
@@ -57,5 +58,18 @@ export function makeDeps(admin: SupabaseClient, opensky: { clientId: string; cli
     if (error) throw error;
   }
 
-  return { loadFlights, fetchArrivals, save, fetchTrack };
+  // 航空会社の運航情報：同じ区間・同じ便名（先頭の0は無視）で、記録の時間帯に実際に出発か到着した便があれば確認とする
+  async function officialCheck(r: Row): Promise<string | null> {
+    if (!r.flightNo || !r.fromIata || !r.toIata || !/^[A-Z]{3}$/.test(r.fromIata) || !/^[A-Z]{3}$/.test(r.toIata)) return null;
+    const { data, error } = await admin.from("flight_schedule").select("flight, std, atd, ata")
+      .eq("dep", r.fromIata).eq("arr", r.toIata).gte("std", new Date(r.dep - 3 * 3600_000).toISOString()).lte("std", new Date(r.arr).toISOString());
+    if (error) throw error;
+    const n = (f: string) => f.replace(/^([A-Z0-9]{2})0+(\d)/, "$1$2").toUpperCase();
+    const hit = (data ?? []).find((x) => n(x.flight) === n(r.flightNo!) && (x.atd || x.ata));
+    if (!hit) return null;
+    const hm = (t: string | null) => t ? new Date(Date.parse(t) + 9 * 3600_000).toISOString().slice(11, 16) : "—";
+    return `航空会社の運航情報で確認（${n(hit.flight)} ${hm(hit.atd)}発・${hm(hit.ata)}着）`;
+  }
+
+  return { loadFlights, fetchArrivals, save, fetchTrack, officialCheck };
 }
