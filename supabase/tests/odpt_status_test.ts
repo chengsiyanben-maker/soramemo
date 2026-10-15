@@ -53,3 +53,9 @@ Deno.test("航空会社のお知らせの文（理由）を、お知らせの終
   const d = statusAlerts([item("NH55", "HND", "08:00", { "odpt:estimatedDepartureTime": "09:10", "odpt:flightInformationSummary": "天候調査" })], S, names);
   assertEquals(d[0].message, "NH55（羽田→新千歳）は、出発が約70分遅れる見込みです（定刻 8:00 → 変更後 9:10・航空会社の運航情報。天候調査）");
 });
+
+Deno.test("要約（出発遅延）と本文の両方があれば、本文（理由）を使う", () => {
+  const d = statusAlerts([item("NH55", "HND", "08:00", { "odpt:estimatedDepartureTime": "09:10",
+    "odpt:flightInformationSummary": { en: "Delayed", ja: "出発遅延" }, "odpt:flightInformationText": { en: "due to aircraft maintenance.", ja: "飛行機の整備のため出発に遅延が生じています。" } })], S, names);
+  assertEquals(d[0].message.endsWith("・航空会社の運航情報。飛行機の整備のため出発に遅延が生じています。）"), true);
+});

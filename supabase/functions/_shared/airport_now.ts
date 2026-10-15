@@ -32,7 +32,8 @@ export function terminal(v: unknown): string | null {
   return m ? "T" + m[1] : null;
 }
 
-// 航空会社のお知らせの文：文字列か、言語ごとの形（{ ja: "…", en: "…" }）。日本語を優先し、短くする（60文字まで）
+// 航空会社のお知らせの文：文字列か、言語ごとの形（{ ja: "…", en: "…" }）。日本語を優先し、短くする（60文字まで）。
+// 本文（flightInformationText：「飛行機の整備のため出発に遅延が生じています。」など）を先に、なければ要約（Summary：「出発遅延」など）
 export function infoText(...vs: unknown[]): string | null {
   for (const v of vs) {
     let s = "";
@@ -77,7 +78,7 @@ export function normalize(raw: Record<string, unknown>, dir: "arr" | "dep"): Fli
     term: terminal(raw[dir === "arr" ? "odpt:arrivalAirportTerminal" : "odpt:departureAirportTerminal"]),
     kind: kindOf(raw["odpt:flightStatus"], time, newTime),
     gate: gateOf(raw[dir === "arr" ? "odpt:arrivalGate" : "odpt:departureGate"]),
-    note: infoText(raw["odpt:flightInformationSummary"], raw["odpt:flightInformationText"]),
+    note: infoText(raw["odpt:flightInformationText"], raw["odpt:flightInformationSummary"]),
     ac: typeof raw["odpt:aircraftType"] === "string" && /^[A-Z0-9]{2,4}$/.test(raw["odpt:aircraftType"] as string) ? raw["odpt:aircraftType"] as string : null,
   };
 }

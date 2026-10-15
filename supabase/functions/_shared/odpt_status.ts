@@ -48,7 +48,7 @@ export function odptStatus(depItems: any[], arrItems: any[], scheds: StatusSched
     if (!fn || !std || !/^[A-Z]{3}$/.test(dep)) continue;
     const s = (byKey.get(`${fn.no}|${dep}`) ?? []).find((x) => jstHM(x.std) === std);
     if (!s) continue;
-    note = infoText(it["odpt:flightInformationSummary"], it["odpt:flightInformationText"]);
+    note = infoText(it["odpt:flightInformationText"], it["odpt:flightInformationSummary"]);
     const status = st(it["odpt:flightStatus"]), actual = hhmm(it["odpt:actualDepartureTime"]), est = hhmm(it["odpt:estimatedDepartureTime"]);
     upd(s, { dep_status: status, atd: iso(s.std, actual), etd: iso(s.std, est), dep_gate: gateOf(it["odpt:departureGate"]) });
     const sl = (status ?? "").toLowerCase();
@@ -66,7 +66,7 @@ export function odptStatus(depItems: any[], arrItems: any[], scheds: StatusSched
     if (!fn || !sta || !/^[A-Z]{3}$/.test(dep)) continue;
     const s = (byKey.get(`${fn.no}|${dep}`) ?? []).find((x) => x.sta != null && jstHM(x.sta) === sta);
     if (!s || s.sta == null) continue;
-    note = infoText(it["odpt:flightInformationSummary"], it["odpt:flightInformationText"]);
+    note = infoText(it["odpt:flightInformationText"], it["odpt:flightInformationSummary"]);
     const status = st(it["odpt:flightStatus"]), actual = hhmm(it["odpt:actualArrivalTime"]), est = hhmm(it["odpt:estimatedArrivalTime"]);
     upd(s, { arr_status: status, ata: iso(s.sta, actual), eta: iso(s.sta, est), arr_gate: gateOf(it["odpt:arrivalGate"]) });
     const sl = (status ?? "").toLowerCase();
