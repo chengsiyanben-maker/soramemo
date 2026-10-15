@@ -70,6 +70,9 @@ Deno.serve(async (req) => {
     const depItems = await fetchAll("Departure", [...new Set(scheds.map((x) => x.dep))], errors);
     const arrItems = await fetchAll("Arrival", [...new Set(scheds.map((x) => x.arr))], errors);
     const { alerts, updates } = odptStatus(depItems, arrItems, scheds, (i) => names.get(i) ?? i);
+    // 欠航の便に出ていた推定の遅れ・飛行中のお知らせは消す（別の機体と取り違えたもの）
+    const cancelled = alerts.filter((a) => a.kind === "cancel").map((a) => a.schedule_id);
+    if (cancelled.length) await admin.from("flight_alerts").delete().in("schedule_id", cancelled).in("kind", ["delay_dep", "delay_arr", "no_takeoff"]);
     // 便ごとの実際の時刻・状態・搭乗口を残す（一度入った実際の時刻は消さない）
     if (updates.length) { const { error } = await admin.rpc("apply_flight_status", { p: updates }); if (error) errors.push("apply " + error.message); }
     // 同じ便・同じ種類のお知らせは1回だけ（機体の位置からの推定が先に出していることもある）

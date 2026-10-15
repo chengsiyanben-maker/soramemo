@@ -26,10 +26,12 @@ Deno.serve(async () => {
     if (!run?.length) return new Response(JSON.stringify({ skipped: "recent" }), { headers: JSON_HEADERS });
 
     const now = Date.now();
-    const { data: rows } = await admin.from("flight_schedule").select("id, svc_date, flight, dep, arr, std, sta, aircraft, flight_watch(state)")
+    const { data: rows } = await admin.from("flight_schedule").select("id, svc_date, flight, dep, arr, std, sta, aircraft, dep_status, arr_status, flight_watch(state)")
       .gte("std", new Date(now - 8 * 60 * MIN).toISOString()).lte("std", new Date(now + 30 * MIN).toISOString()).limit(3000);
     const list = (rows ?? []).map((r) => ({
       fkey: `${r.flight}@${r.svc_date}`,
+      // 航空会社の運航情報（ODPT）が届いている便：遅れはそちら（odpt-status）に任せ、推定の遅れは出さない（欠航の便を別の機体と取り違えることがある）
+      official: !!(r.dep_status || r.arr_status),
       s: { id: r.id, flight: r.flight, dep: r.dep, arr: r.arr, std: Date.parse(r.std), sta: Date.parse(r.sta), aircraft: r.aircraft } as Sched,
       w: ((Array.isArray(r.flight_watch) ? r.flight_watch[0]?.state : (r.flight_watch as { state?: Watch } | null)?.state) ?? blankWatch()) as Watch,
     })).filter((x) => x.w.phase !== "landed" && now - x.s.sta < 6 * 60 * MIN);
@@ -48,12 +50,12 @@ Deno.serve(async () => {
     const upd: { schedule_id: number; state: Watch; updated_at: string }[] = [];
     const out: { schedule_id: number; kind: string; flight: string; dep: string; arr: string; iata: string[]; message: string }[] = [];
     const fkeys = new Map<number, string>();
-    for (const { s, w, fkey } of list) {
+    for (const { s, w, fkey, official } of list) {
       fkeys.set(s.id, fkey);
       const hit = callsignsFor(s.flight).map((c) => seen.get(c)).find((x) => x && onRoute(s, x, aps)) ?? null;
       const r = step(s, w, hit, now, aps);
       if (JSON.stringify(r.watch) !== JSON.stringify(w)) upd.push({ schedule_id: s.id, state: r.watch, updated_at: new Date().toISOString() });
-      for (const a of r.alerts) out.push({ schedule_id: s.id, kind: a.kind, flight: s.flight, dep: s.dep, arr: s.arr, iata: [...new Set(a.iata)], message: a.message });
+      for (const a of r.alerts) if (!(official && (a.kind === "delay_dep" || a.kind === "delay_arr"))) out.push({ schedule_id: s.id, kind: a.kind, flight: s.flight, dep: s.dep, arr: s.arr, iata: [...new Set(a.iata)], message: a.message });
     }
     if (upd.length) await admin.from("flight_watch").upsert(upd);
     // 同じ便・同じ種類のお知らせは1回だけ（航空会社の運航情報（odpt-status）が先に出していることがある）
