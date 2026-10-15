@@ -31,6 +31,13 @@ export const LIVERIES: Livery[] = [
   { reg: "B-LRJ", name: "80周年記念塗装（A350）", airline: "キャセイパシフィック航空", src: "https://en.traicy.com/posts/2026021032635/" },
   { reg: "B-LJE", name: "80周年記念塗装（747貨物機）", airline: "キャセイパシフィック航空", src: "https://en.traicy.com/posts/2026021032635/" },
   { reg: "D-AIFA", name: "100周年記念塗装（A350-1000）", airline: "ルフトハンザ", src: "https://newsroom.lufthansagroup.com/en/lufthansas-first-airbus-a350-1000-arrives-with-a-special-livery/" },
+  // 日本便に使われる機種（A380・777・787・A350）の特別塗装機。日本の上空で見えたときだけ表示に出る
+  { reg: "A6-EVG", name: "UAE国旗塗装（A380）", airline: "エミレーツ航空", src: "https://en.traicy.com/posts/2026050835328/" },
+  { reg: "N91007", name: "Stars and Stripes（787-10）", airline: "ユナイテッド航空", src: "https://www.flightradar24.com/blog/flight-tracking-news/special-aircraft-tracking/united-adds-two-stars-and-stripes-special-livery-aircraft/" },
+  { reg: "N735AT", name: "Flagship 100周年塗装（777-300ER）", airline: "アメリカン航空", src: "https://news.aa.com/centennial/our-stories/flagship-livery/" },
+  { reg: "N527DN", name: "100周年記念塗装（A350）", airline: "デルタ航空", src: "https://airlinegeeks.com/2025/03/17/delta-officially-debuts-100-year-livery/" },
+  { reg: "A7-BEH", name: "FIFAワールドカップ2026塗装（777-300ER）", airline: "カタール航空", src: "https://en.traicy.com/posts/2026052635894/" },
+  { reg: "VH-ZND", name: "Emily Kame Kngwarreye（787-9）", airline: "カンタス航空", src: "https://www.qantas.com/au/en/about-us/our-company/fleet/flying-art.html" },
 ];
 
 // 期間が過ぎたものを除いた、登録記号 → 特別塗装機
