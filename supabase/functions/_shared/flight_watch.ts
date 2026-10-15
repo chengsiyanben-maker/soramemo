@@ -8,7 +8,9 @@
 //          受信機に低いところが映らない空港もあるので、到着空港の40km以内・10,000ft以下で見えなくなって10分たったときも着陸とみなす（その時刻は最後に見た時刻）
 //  ・遅れ：離陸が定刻（出発の時刻＝ゲートを離れる時刻）から 1時間＋地上走行15分 以上あと、または着陸が到着の定刻より1時間以上あと
 //          定刻から1時間15分たっても離陸を確認できないときも知らせる（運休・データの抜けのこともある）
-//  ・ダイバート：到着空港ではない空港の15km以内で、高度4,000ft以下に降りてきたとき（出発空港なら「引き返し」）
+//  ・ダイバート：到着空港ではない空港の8km以内で、高度2,000ft以下に降りてきたとき（その空港への最終進入。出発空港なら「引き返し」）。
+//          到着空港のほうが近いときや、到着空港の20km以内のときは数えない（北九州と山口宇部、出雲と美保のように近い空港への進入で誤らないよう）
+//  ・同じ番号の別の会社の便（JL552 と JTA552 など）を取り違えないよう、出発空港と到着空港を結ぶ帯の外にいる機体は、その便とみなさない
 
 export type Airport = { iata: string; lat: number; lon: number; name: string };
 export type Sched = {
@@ -62,6 +64,12 @@ function km(a: { lat: number; lon: number }, b: { lat: number; lon: number }) {
 const MIN = 60_000;
 const hm = (ms: number) => { const d = new Date(ms + 9 * 3600_000); return `${d.getUTCHours()}:${String(d.getUTCMinutes()).padStart(2, "0")}`; };
 
+// その便の機体として見てよい位置か：出発空港→機体→到着空港の道のりが、まっすぐの距離の1.3倍＋150km以内
+export function onRoute(s: Sched, p: { lat: number; lon: number }, aps: Map<string, Airport>): boolean {
+  const a = aps.get(s.dep), b = aps.get(s.arr);
+  if (!a || !b) return true;
+  return km(a, p) + km(p, b) <= km(a, b) * 1.3 + 150;
+}
 // 1便ぶんを1回進める。seen は今回見つかった機体（見つからなければ null）
 export function step(s: Sched, w0: Watch, seen: Seen | null, now: number, aps: Map<string, Airport>): { watch: Watch; alerts: Alert[] } {
   const w: Watch = { ...w0, sent: [...w0.sent] }, out: Alert[] = [];
@@ -83,9 +91,13 @@ export function step(s: Sched, w0: Watch, seen: Seen | null, now: number, aps: M
     for (const a of aps.values()) if (km(seen, a) <= 8 && (seen.alt_ft ?? 99999) <= 1500) { low = a; break; }
     if (low) { w.low_iata = low.iata; w.low_at = seen.at; }
     // ほかの空港へ降りていく（離陸の直後は出発空港の近くにいるので、離陸から20分は「引き返し」を見ない）
+    const arrAp = aps.get(s.arr), dArr = arrAp ? km(seen, arrAp) : Infinity;
     if ((seen.alt_ft ?? 99999) <= 4000 && (seen.fpm == null || seen.fpm < 300)) {
       for (const a of aps.values()) {
-        if (a.iata === s.arr || km(seen, a) > 15) continue;
+        const dA = km(seen, a);
+        if (a.iata === s.arr || dArr < 20 || dArr <= dA) continue;
+        // 出発空港（引き返し）は15km・4,000ft以下、ほかの空港（ダイバート）は最終進入の8km・2,000ft以下
+        if (a.iata === s.dep ? dA > 15 : (dA > 8 || (seen.alt_ft ?? 99999) > 2000)) continue;
         if (a.iata === s.dep) { if (w.takeoff_at != null && seen.at - w.takeoff_at > 20 * MIN) emit({ kind: "return", iata: [s.dep, s.arr], message: `${route}は、${name(s.dep)}へ引き返しているようです（推定）` }); }
         else emit({ kind: "divert", iata: [s.arr, a.iata, s.dep], message: `${route}は、${name(a.iata)}へ向かっているようです（ダイバートの可能性・推定）` });
         break;

@@ -4,7 +4,7 @@
 // 見つけたお知らせは flight_alerts に残し、その空港を選んでいる人のスマホへ通知する（VAPID の鍵があるときだけ）。
 import { createClient } from "npm:@supabase/supabase-js@2.117.2";
 import webpush from "npm:web-push@3.6.7";
-import { type Airport, blankWatch, callsignsFor, type Sched, type Seen, step, type Watch } from "../_shared/flight_watch.ts";
+import { type Airport, blankWatch, callsignsFor, onRoute, type Sched, type Seen, step, type Watch } from "../_shared/flight_watch.ts";
 
 const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, { auth: { persistSession: false } });
 const JSON_HEADERS = { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" };
@@ -75,7 +75,7 @@ Deno.serve(async () => {
     const fkeys = new Map<number, string>();
     for (const { s, w, fkey } of list) {
       fkeys.set(s.id, fkey);
-      const hit = callsignsFor(s.flight).map((c) => seen.get(c)).find(Boolean) ?? null;
+      const hit = callsignsFor(s.flight).map((c) => seen.get(c)).find((x) => x && onRoute(s, x, aps)) ?? null;
       const r = step(s, w, hit, now, aps);
       if (JSON.stringify(r.watch) !== JSON.stringify(w)) upd.push({ schedule_id: s.id, state: r.watch, updated_at: new Date().toISOString() });
       for (const a of r.alerts) out.push({ schedule_id: s.id, kind: a.kind, flight: s.flight, dep: s.dep, arr: s.arr, iata: [...new Set(a.iata)], message: a.message });

@@ -1,6 +1,6 @@
 // ダイヤと機体の位置の照らし合わせ：離陸・着陸・遅れ・ダイバート・引き返し
 import { assertEquals } from "jsr:@std/assert@1";
-import { type Airport, blankWatch, callsignsFor, hardToSee, normCallsign, type Sched, type Seen, step, type Watch } from "../functions/_shared/flight_watch.ts";
+import { type Airport, blankWatch, callsignsFor, hardToSee, normCallsign, onRoute, type Sched, type Seen, step, type Watch } from "../functions/_shared/flight_watch.ts";
 
 const APS = new Map<string, Airport>([
   ["HND", { iata: "HND", lat: 35.5497, lon: 139.787, name: "羽田" }],
@@ -100,4 +100,21 @@ Deno.test("途中で見えなくなった便には「まだ飛行中」を出さ
   assertEquals(lost.all, []);
   const still = run([[at(35.56, 139.80, 2000, T0 + 18 * MIN, 2500), T0 + 18 * MIN], [at(41.0, 141.3, 20000, T0 + 156 * MIN), T0 + 156 * MIN]]);
   assertEquals(still.all, ["delay_arr"]);
+});
+
+Deno.test("近い空港への進入はダイバートとしない（北九州へ降りる途中で山口宇部の近くを通る）", () => {
+  const aps = new Map<string, Airport>([...APS, ["KKJ", { iata: "KKJ", lat: 33.8459, lon: 131.0349, name: "北九州" }], ["UBJ", { iata: "UBJ", lat: 33.93, lon: 131.2786, name: "山口宇部" }]]);
+  const s: Sched = { id: 2, flight: "7G77", dep: "HND", arr: "KKJ", std: T0, sta: T0 + 110 * MIN };
+  let w: Watch = blankWatch(); const all: string[] = [];
+  for (const [p, now] of [[at(35.56, 139.80, 2000, T0 + 18 * MIN, 2500), T0 + 18 * MIN], [at(33.92, 131.25, 3000, T0 + 100 * MIN, -800), T0 + 100 * MIN], [at(33.88, 131.10, 1500, T0 + 104 * MIN, -700), T0 + 104 * MIN]] as [Seen, number][]) {
+    const r = step(s, w, p, now, aps); w = r.watch; all.push(...r.alerts.map((a) => a.kind));
+  }
+  assertEquals(all, []);
+});
+
+Deno.test("同じ番号の別の会社の便（JL552 と JTA552）：出発・到着を結ぶ帯の外の機体はその便とみなさない", () => {
+  const aps = new Map<string, Airport>([...APS, ["AKJ", { iata: "AKJ", lat: 43.6708, lon: 142.4475, name: "旭川" }]]);
+  const s: Sched = { id: 3, flight: "JL552", dep: "AKJ", arr: "HND", std: T0, sta: T0 + 100 * MIN };
+  assertEquals(onRoute(s, { lat: 26.2, lon: 127.65 }, aps), false);   // 那覇の近く
+  assertEquals(onRoute(s, { lat: 39.5, lon: 141.0 }, aps), true);     // 途中の東北
 });
