@@ -68,6 +68,7 @@ footer a{color:var(--sumi)}
   </section>
   <section class="card" id="trafficBox" hidden><h2>近くを飛んでいる機体</h2><p id="counts" style="margin:0"></p><ul class="list" id="arrList"></ul></section>
   <section class="card" id="spBox" hidden><h2>近くの特別塗装機</h2><ul class="list" id="spList"></ul></section>
+  <section class="card" id="planBox" hidden><h2>特別塗装機で飛ぶ予定の便</h2><ul class="list" id="planList"></ul><p class="note">航空会社の運航情報（出典：公共交通オープンデータセンター。正確・完全とは限りません）の文に、特別塗装機で運航すると書かれた便です。機体の変更で変わることがあります。</p></section>
   <a class="go" id="go" href="./#ops">地図と経路をそらメモで見る</a>
   <footer>
     <p>そらメモは非公式のアプリです。空港・航空会社・国とは関係ありません。運用は、公表されている運用のルール、気象通報（METAR）、今飛んでいる機体の位置（<a href="https://adsb.lol" rel="noopener">adsb.lol</a>、ODbL）をもとにした推定で、実際の運用と違うことがあります。航法には使えません。滑走路の位置・優先滑走路の決まりは AIP JAPAN（2026年10月1日版）をもとに そらメモ が作ったもので、最新でない場合があります。</p>
@@ -99,8 +100,13 @@ async function load(){
   document.title = `${name}のいま｜そらメモ（非公式）`; $("title").textContent = `${name}のいま`;
   $("go").href = `./#ops-${AP}`; renderAps();
   if(!BASE){ $("upd").textContent = "この版ではサーバーにつながりません。"; return; }
-  const [m, t, sp] = await Promise.all([getJSON(`/functions/v1/metar?ids=${def.icao}`), getJSON(`/functions/v1/airport-traffic?iata=${AP}`),
-    getJSON("/rest/v1/rpc/special_now", { method:"POST", headers:{ "Content-Type":"application/json" }, body:"{}" })]);
+  const [m, t, sp, plans] = await Promise.all([getJSON(`/functions/v1/metar?ids=${def.icao}`), getJSON(`/functions/v1/airport-traffic?iata=${AP}`),
+    getJSON("/rest/v1/rpc/special_now", { method:"POST", headers:{ "Content-Type":"application/json" }, body:"{}" }),
+    getJSON("/rest/v1/rpc/livery_plans_upcoming", { method:"POST", headers:{ "Content-Type":"application/json" }, body:JSON.stringify({ p_iata:AP }) })]);
+  // 特別塗装機で飛ぶ予定の便（この空港を出発・到着するものだけ）
+  const mine = (Array.isArray(plans) ? plans : []).filter(p => p.dep === AP || p.arr === AP);
+  $("planBox").hidden = !mine.length;
+  $("planList").innerHTML = mine.map(p => `<li><b>★${esc(p.livery)}</b> <small>${esc(p.flight)}・${hm(Date.parse(p.std))}発 ${esc(p.dep)}→${esc(p.arr)}${p.cancelled ? "・欠航" : p.atd ? "・出発済み" : ""}</small></li>`).join("");
   if(def !== OPS_AIRPORTS[AP]) return;
   const wx = m && !m.error ? m : null, planes = t && Array.isArray(t.planes) ? t.planes : [];
   const est = def.estimate(wx), obs = observeOps(planes, def), live = obs && !obs.mixed && def.modes[obs.mode];

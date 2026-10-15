@@ -85,3 +85,35 @@ export function odptStatus(depItems: any[], arrItems: any[], scheds: StatusSched
 export function statusAlerts(items: any[], scheds: StatusSched[], names: (iata: string) => string): StatusAlert[] {
   return odptStatus(items, [], scheds, names).alerts;
 }
+
+// ---- 特別塗装機で飛ぶ予定の便 ----
+// 航空会社のお知らせの文に「JAL Jubilee Expressで運航いたします。」のように書かれた便を、飛ぶ前に見つける。
+// 特別塗装機の一覧（liveries.ts）の名前が文に入っていればその名前、入っていなくても「〇〇ジェット」「〇〇塗装」などで運航すると書いてあれば、その〇〇を使う
+export type LiveryPlan = { schedule_id: number; flight: string; dep: string; arr: string; std: string; livery: string; note: string };
+const PLAN_WORD = /(ジェット|塗装|Express|ジンベエ|HONU|ポケモン|ピカチュウ|イーブイ|ロコン|ナッシー|Jubilee|JET)/i;
+export function liveryOf(text: string, names: string[]): string | null {
+  const t = text.replace(/\s+/g, " ");
+  // 一覧の名前（長いものから。「ポケモンジェット 緑」より先に「ポケモンジェット」に当たらないように）
+  for (const n of [...names].sort((a, b) => b.length - a.length)) if (n.length >= 4 && t.includes(n)) return n;
+  const m = t.match(/[「『]?([^「」『』。、]{2,40}?)[」』]?\s*(?:で|にて)運航(?:いた)?(?:します|致します|いたします|予定)/);
+  return m && PLAN_WORD.test(m[1]) ? m[1].trim() : null;
+}
+// deno-lint-ignore no-explicit-any
+export function liveryPlans(depItems: any[], scheds: StatusSched[], names: string[]): LiveryPlan[] {
+  const byKey = new Map<string, StatusSched[]>();
+  for (const s of scheds) { const k = `${norm(s.flight)}|${s.dep}`; byKey.set(k, [...(byKey.get(k) ?? []), s]); }
+  const out = new Map<number, LiveryPlan>();
+  for (const it of Array.isArray(depItems) ? depItems : []) {
+    const text = infoText(it?.["odpt:flightInformationText"]) ?? "";
+    if (!text) continue;
+    const livery = liveryOf(text, names);
+    if (!livery) continue;
+    const fn = flightNo(it?.["odpt:flightNumber"]), dep = ap(it?.["odpt:departureAirport"]), std = hhmm(it?.["odpt:scheduledDepartureTime"]);
+    if (!fn || !std) continue;
+    const s = (byKey.get(`${fn.no}|${dep}`) ?? []).find((x) => jstHM(x.std) === std);
+    if (!s) continue;
+    if (/cancel/i.test(last(it["odpt:flightStatus"]))) continue;
+    out.set(s.id, { schedule_id: s.id, flight: s.flight, dep: s.dep, arr: s.arr, std: new Date(s.std).toISOString(), livery: livery.slice(0, 60), note: text.slice(0, 120) });
+  }
+  return [...out.values()];
+}
