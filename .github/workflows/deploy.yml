@@ -63,6 +63,12 @@ jobs:
         run: supabase db push --linked --password "$SUPABASE_DB_PASSWORD" --dry-run
       - name: まだ流していないSQLを番号順に流す
         run: supabase db push --linked --password "$SUPABASE_DB_PASSWORD" --yes
+      # 容量の見張り：テーブルごとの大きさをログに出すだけ（失敗しても公開は止めない）
+      - name: データベースの容量を見る
+        continue-on-error: true
+        run: |
+          supabase inspect db db-stats --linked || true
+          supabase inspect db table-stats --linked || true
       - name: サーバーの関数を公開する
         run: supabase functions deploy --use-api --project-ref "$PROJECT_REF"
       # スマホへの通知（遅れ・ダイバート）の鍵。リポジトリの Secrets に VAPID_PUBLIC_KEY・VAPID_PRIVATE_KEY があるときだけ、サーバーに入れる
