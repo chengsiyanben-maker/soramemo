@@ -118,9 +118,10 @@ async function load(){
   $("counts").textContent = `着陸に向かう機体 ${arr.length}機・離陸して上昇中 ${dep.length}機`;
   $("arrList").innerHTML = arr.slice(0, 6).map(p => `<li><b>${esc(p.callsign || "（便名なし）")}</b> <small>${p.type ? esc(p.type) + "・" : ""}${Math.round(p.dist_km)}km・${p.alt_ft != null ? ft(p.alt_ft) : "高度不明"}</small></li>`).join("");
   // 近くの特別塗装機：この空港の着陸・離陸中か、空港から150km以内
-  const near = (Array.isArray(sp) ? sp : []).filter(x => x.iata === AP || nmToLine([x.lat, x.lon], [def.center, def.center]) * 1.852 < 150);
+  const near = (Array.isArray(sp) ? sp : []).filter(x => x.iata === AP || nmToLine([x.lat, x.lon], [def.center, def.center]) * 1.852 < 150)
+    .sort((a, b) => (a.kind === "alliance") - (b.kind === "alliance"));   // キャラクター・記念塗装を先に、アライアンス塗装（◇）はあとに
   $("spBox").hidden = !near.length;
-  $("spList").innerHTML = near.map(x => `<li><b>★${esc(x.name)}</b> <small>${esc(x.airline)}${x.callsign ? "・" + esc(x.callsign) : ""}</small><br><small>${x.iata === AP && x.phase ? (x.phase === "arr" ? "着陸に向かっています" : "離陸しました") : `近くを飛行中${x.alt_ft ? "・" + ft(x.alt_ft) : ""}`}</small></li>`).join("");
+  $("spList").innerHTML = near.map(x => `<li><b>${x.kind === "alliance" ? "◇" : "★"}${esc(x.name)}</b> <small>${esc(x.airline)}${x.callsign ? "・" + esc(x.callsign) : ""}</small><br><small>${x.iata === AP && x.phase ? (x.phase === "arr" ? "着陸に向かっています" : "離陸しました") : `近くを飛行中${x.alt_ft ? "・" + ft(x.alt_ft) : ""}`}</small></li>`).join("");
   $("upd").textContent = `${hm(Date.now())}の時点${wx ? `・気象通報（${hm(wx.time)}）：風 ${wx.wdir == null ? (wx.wspd ? "向き不定" : "ほぼ無風") : wx.wdir + "°"} ${wx.wspd ?? "—"}ノット` : "・気象通報を読み込めませんでした"}`;
 }
 document.addEventListener("click", e => {

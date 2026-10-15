@@ -3,7 +3,7 @@
 //   ・便ごとの実際の時刻（出発・到着）・変更後の時刻・状態・搭乗口（予定の便 flight_schedule に残し、フライトの記録の照合などに使う）
 // を作る。機体の位置からの推定（flight_watch.ts）と違い、航空会社が出している情報なので「推定」ではない。取得とは分けて、テストしやすくしている。
 // 便は、予定の便の、同じ便名（先頭の0は無視）・同じ出発空港・同じ定刻の便に結ぶ（日付は予定の便から決まる）。結べない便は使わない。
-import { flightNo, gateOf } from "./airport_now.ts";
+import { flightNo, gateOf, infoText } from "./airport_now.ts";
 
 export type StatusSched = { id: number; flight: string; dep: string; arr: string; std: number; sta?: number };   // ミリ秒（UTC）
 export type StatusAlert = { schedule_id: number; kind: "cancel" | "delay_dep" | "delay_arr" | "divert" | "return"; flight: string; dep: string; arr: string; iata: string[]; message: string };
@@ -35,8 +35,10 @@ export function odptStatus(depItems: any[], arrItems: any[], scheds: StatusSched
   for (const s of scheds) { const k = `${norm(s.flight)}|${s.dep}`; byKey.set(k, [...(byKey.get(k) ?? []), s]); }
   const alerts = new Map<string, StatusAlert>(), updates = new Map<number, StatusUpdate>();
   const route = (s: StatusSched) => `${s.flight}（${names(s.dep)}→${names(s.arr)}）`;
+  let note: string | null = null;   // いま見ている便の、航空会社のお知らせの文（理由）
   const add = (s: StatusSched, kind: StatusAlert["kind"], message: string, iata = [s.dep, s.arr]) =>
-    alerts.set(`${s.id}|${kind}`, { schedule_id: s.id, kind, flight: s.flight, dep: s.dep, arr: s.arr, iata, message });
+    alerts.set(`${s.id}|${kind}`, { schedule_id: s.id, kind, flight: s.flight, dep: s.dep, arr: s.arr, iata,
+      message: (note ? message.replace(/（航空会社の運航情報）$|・航空会社の運航情報）$/, (m) => m.slice(0, -1) + `。${note}）`) : message).slice(0, 300) });
   const upd = (s: StatusSched, u: Omit<StatusUpdate, "id">) => updates.set(s.id, { ...(updates.get(s.id) ?? { id: s.id }), ...u });
   const iso = (base: number, hm: string | null) => hm ? new Date(atNear(base, hm)).toISOString() : null;
 
@@ -46,6 +48,7 @@ export function odptStatus(depItems: any[], arrItems: any[], scheds: StatusSched
     if (!fn || !std || !/^[A-Z]{3}$/.test(dep)) continue;
     const s = (byKey.get(`${fn.no}|${dep}`) ?? []).find((x) => jstHM(x.std) === std);
     if (!s) continue;
+    note = infoText(it["odpt:flightInformationSummary"], it["odpt:flightInformationText"]);
     const status = st(it["odpt:flightStatus"]), actual = hhmm(it["odpt:actualDepartureTime"]), est = hhmm(it["odpt:estimatedDepartureTime"]);
     upd(s, { dep_status: status, atd: iso(s.std, actual), etd: iso(s.std, est), dep_gate: gateOf(it["odpt:departureGate"]) });
     const sl = (status ?? "").toLowerCase();
@@ -63,6 +66,7 @@ export function odptStatus(depItems: any[], arrItems: any[], scheds: StatusSched
     if (!fn || !sta || !/^[A-Z]{3}$/.test(dep)) continue;
     const s = (byKey.get(`${fn.no}|${dep}`) ?? []).find((x) => x.sta != null && jstHM(x.sta) === sta);
     if (!s || s.sta == null) continue;
+    note = infoText(it["odpt:flightInformationSummary"], it["odpt:flightInformationText"]);
     const status = st(it["odpt:flightStatus"]), actual = hhmm(it["odpt:actualArrivalTime"]), est = hhmm(it["odpt:estimatedArrivalTime"]);
     upd(s, { arr_status: status, ata: iso(s.sta, actual), eta: iso(s.sta, est), arr_gate: gateOf(it["odpt:arrivalGate"]) });
     const sl = (status ?? "").toLowerCase();

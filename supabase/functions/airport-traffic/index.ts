@@ -138,15 +138,15 @@ async function recordLiveries(bodies: Map<string, string>) {
       const reg = typeof a.r === "string" ? a.r : null, l = reg ? L.get(reg) : undefined;
       if (!l || typeof a.lat !== "number" || typeof a.lon !== "number") continue;
       const n = near.get(l.reg);
-      seen.set(l.reg, { reg: l.reg, name: l.name, airline: l.airline, src: l.src, lat: a.lat, lon: a.lon,
+      seen.set(l.reg, { reg: l.reg, name: l.name, airline: l.airline, src: l.src, kind: l.kind ?? "special", lat: a.lat, lon: a.lon,
         alt_ft: typeof a.alt_baro === "number" ? Math.round(a.alt_baro) : a.alt_baro === "ground" ? 0 : null,
         callsign: typeof a.flight === "string" ? a.flight.trim().slice(0, 10) || null : null,
         iata: n?.iata ?? null, phase: n?.phase ?? null, seen_at: new Date().toISOString() });
     }
   }
   if (seen.size) { const { error } = await admin.from("livery_sightings").upsert([...seen.values()]); if (error) throw error; }
-  // 着陸に向かってきた特別塗装機は、その空港を選んでいる人に知らせる（同じ機体・空港は6時間に1回）
-  for (const v of seen.values()) if (v.iata && v.phase === "arr") { try { await notifyLivery(v); } catch (e) { console.error("livery push", e); } }
+  // 着陸に向かってきた特別塗装機は、その空港を選んでいる人に知らせる（同じ機体・空港は6時間に1回）。アライアンス塗装は毎日飛んでいるので知らせない
+  for (const v of seen.values()) if (v.iata && v.phase === "arr" && v.kind !== "alliance") { try { await notifyLivery(v); } catch (e) { console.error("livery push", e); } }
   return seen.size;
 }
 
