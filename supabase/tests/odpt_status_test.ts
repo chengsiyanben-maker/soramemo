@@ -1,6 +1,6 @@
 // 航空会社の運航情報（ODPT の出発情報）から、欠航と出発の大きな遅れのお知らせを作る
 import { assertEquals } from "jsr:@std/assert@1";
-import { atNear, statusAlerts, type StatusSched } from "../functions/_shared/odpt_status.ts";
+import { atNear, odptStatus, statusAlerts, type StatusSched } from "../functions/_shared/odpt_status.ts";
 
 const T = (s: string) => Date.parse(s);
 const S: StatusSched[] = [
@@ -31,4 +31,18 @@ Deno.test("日付をまたぐ遅れ（23:30 → 0:45）も75分の遅れとし�
   const a = statusAlerts([item("NH1852", "AOJ", "23:30", { "odpt:actualDepartureTime": "00:45" })], S, names);
   assertEquals(a.length, 1);
   assertEquals(a[0].message, "NH1852（青森→伊丹）は、出発が約75分遅れました（定刻 23:30 → 出発 0:45・航空会社の運航情報）");
+});
+
+Deno.test("到着：遅れ・ダイバートを知らせ、実際の時刻・搭乗口を便に残す（予定の便名の先頭の0も無視して結ぶ）", () => {
+  const sc: StatusSched[] = [{ id: 7, flight: "NH053", dep: "HND", arr: "CTS", std: T("2026-10-15T08:00:00+09:00"), sta: T("2026-10-15T09:35:00+09:00") },
+    { id: 8, flight: "JL509", dep: "HND", arr: "CTS", std: T("2026-10-15T11:00:00+09:00"), sta: T("2026-10-15T12:35:00+09:00") }];
+  const r = odptStatus(
+    [item("NH53", "HND", "08:00", { "odpt:actualDepartureTime": "08:12", "odpt:departureGate": "59", "odpt:flightStatus": "odpt.FlightStatus:Departed" })],
+    [{ "odpt:flightNumber": ["NH0053"], "odpt:departureAirport": "odpt.Airport:HND", "odpt:scheduledArrivalTime": "09:35", "odpt:actualArrivalTime": "10:50", "odpt:arrivalGate": "8" },
+     { "odpt:flightNumber": ["JL509"], "odpt:departureAirport": "odpt.Airport:HND", "odpt:scheduledArrivalTime": "12:35", "odpt:flightStatus": "odpt.FlightStatus:Diverted" }],
+    sc, names);
+  assertEquals(r.alerts.map((a) => [a.schedule_id, a.kind]), [[7, "delay_arr"], [8, "divert"]]);
+  assertEquals(r.alerts[0].message, "NH053（羽田→新千歳）は、到着が約75分遅れました（定刻 9:35 → 到着 10:50・航空会社の運航情報）");
+  const u = r.updates.find((x) => x.id === 7)!;
+  assertEquals([u.dep_status, u.atd, u.dep_gate, u.ata, u.arr_gate], ["Departed", "2026-10-14T23:12:00.000Z", "59", "2026-10-15T01:50:00.000Z", "8"]);
 });

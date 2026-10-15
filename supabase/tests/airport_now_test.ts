@@ -27,9 +27,9 @@ Deno.test("到着便の整形：出発地・変更後の時刻・ターミナル
   const r = normalize({
     "odpt:flightNumber": ["NH0040"], "odpt:scheduledArrivalTime": "21:25", "odpt:estimatedArrivalTime": "21:48",
     "odpt:departureAirport": "odpt.Airport:ITM", "odpt:arrivalAirportTerminal": "odpt.AirportTerminal:HND.Terminal2",
-    "odpt:flightStatus": "odpt.FlightStatus:Delayed",
+    "odpt:flightStatus": "odpt.FlightStatus:Delayed", "odpt:arrivalGate": "62", "odpt:aircraftType": "789",
   }, "arr");
-  assertEquals(r, { time: "21:25", newTime: "21:48", place: "ITM", airline: "NH", no: "NH40", term: "T2", kind: "late" });
+  assertEquals(r, { time: "21:25", newTime: "21:48", place: "ITM", airline: "NH", no: "NH40", term: "T2", kind: "late", gate: "62", ac: "789" });
 });
 
 Deno.test("出発便の整形：行き先。予定と同じ見込み時刻は変更なし", () => {

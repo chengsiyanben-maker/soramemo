@@ -1258,7 +1258,7 @@ function flightsHTML(a, fl){
   const row = x => { const k = x.kind === "done" ? (NOW.dir === "arr" ? "到着済み" : "出発済み") : FKIND[x.kind] || "定刻";
     const ride = NOW.dir === "dep" && ["ok","late","board"].includes(x.kind) && ALBY[x.airline] && IATA[x.place];
     return `<li><div class="tm"><b class="${x.newTime || x.kind === "cancel" ? "old" : ""}">${esc(x.time)}</b>${x.newTime ? `<i>→${esc(x.newTime)}</i>` : ""}</div>
-      <div class="pl"><b>${esc(placeShort(x.place))}${NOW.dir === "arr" ? "から" : "へ"}</b><span>${esc(x.no.slice(0,2) + " " + x.no.slice(2))}${x.term ? "・" + esc(x.term) : ""}</span></div>
+      <div class="pl"><b>${esc(placeShort(x.place))}${NOW.dir === "arr" ? "から" : "へ"}</b><span>${esc(x.no.slice(0,2) + " " + x.no.slice(2))}${x.term ? "・" + esc(x.term) : ""}${x.gate ? `・${NOW.dir === "arr" ? "到着口" : "搭乗口"} ${esc(x.gate)}` : ""}${x.ac ? "・" + esc(x.ac) : ""}</span></div>
       <div class="st"><span class="fst ${esc(x.kind)}">${k}</span>${ride ? `<button class="ride" data-ride="${esc(x.no)}">この便に乗る</button>` : ""}</div></li>`; };
   const empty = NOW.term !== "all" && !list.length ? "このターミナルの便は、いまは出していません（国際線は対象外です）。" : !list.length ? "この時間の便はありません。" : "";
   return `<div class="nowtabs" role="group" aria-label="到着と出発"><button data-now-dir="arr" aria-pressed="${NOW.dir === "arr"}">到着</button><button data-now-dir="dep" aria-pressed="${NOW.dir === "dep"}">出発</button></div>`
@@ -1850,9 +1850,10 @@ async function loadFlightCands(f){
     if(!error && Array.isArray(data)) list = data; }catch(e){}
   if(editing !== f || !list.length) return;
   const hm = t => new Date(t).toLocaleTimeString("ja-JP", { hour:"2-digit", minute:"2-digit" });
+  const nz = no => no.replace(/^([A-Z0-9]{2})0+(\d)/, "$1$2");   // NH053 → NH53
   const cur = f.no || "";
-  box.innerHTML = `<b>この時刻に近い便</b><div class="row">${list.map((c, i) => `<button class="chip" type="button" data-cand="${esc(c.flight)}" aria-pressed="${c.flight === cur}">${esc(c.flight)}<small>${hm(c.std)}→${hm(c.sta)}${c.aircraft ? "・" + esc(c.aircraft) : ""}</small>${i === 0 ? "<em>いちばん近い</em>" : ""}</button>`).join("")}</div>
-    <p class="hint">押すと航空会社と便名に入ります。時刻は定刻（JAL・ANA グループの便だけ）。${ODPT_CREDIT}</p>`;
+  box.innerHTML = `<b>この時刻に近い便</b><div class="row">${list.map((c, i) => `<button class="chip" type="button" data-cand="${esc(nz(c.flight))}" aria-pressed="${nz(c.flight) === cur}">${esc(nz(c.flight))}<small>${c.cancelled ? "欠航" : c.atd || c.ata ? `実際 ${c.atd ? hm(c.atd) : "—"}→${c.ata ? hm(c.ata) : "—"}` : `${hm(c.std)}→${hm(c.sta)}`}${c.aircraft ? "・" + esc(c.aircraft) : ""}</small>${i === 0 ? "<em>いちばん近い</em>" : ""}</button>`).join("")}</div>
+    <p class="hint">押すと航空会社と便名に入ります。時刻は定刻、「実際」は航空会社の運航情報の出発・到着の時刻です（JAL・ANA グループの便だけ）。${ODPT_CREDIT}</p>`;
   box.hidden = false; track("fcand", list.length);
 }
 document.addEventListener("click", e => { const b = e.target.closest("[data-cand]"); if(!b) return;

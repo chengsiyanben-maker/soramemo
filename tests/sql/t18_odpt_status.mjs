@@ -24,4 +24,9 @@ check('1時間に20件以上で、運営のエラーの一覧に載せる', r ==
 r = (await db.query(`select ops.alert_watchdog() n`)).rows[0].n;
 check('3時間のうちは二度載せない', r === 0, r);
 try { await db.exec(`set role anon`); await db.query(`select ops.alert_watchdog()`); check('見張りは利用者から呼べない', false); } catch { check('見張りは利用者から呼べない', true); } finally { await db.exec('reset role'); }
+await db.query(`select public.apply_flight_status($1::jsonb)`, [JSON.stringify([{ id: sid, dep_status: 'Departed', atd: '2026-10-15T00:12:00Z', dep_gate: '10' }])]);
+await db.query(`select public.apply_flight_status($1::jsonb)`, [JSON.stringify([{ id: sid, arr_status: 'Arrived', ata: '2026-10-15T01:40:00Z', atd: null }])]);
+r = (await db.query(`select dep_status, atd, dep_gate, arr_status, ata from public.flight_schedule where id = ${sid}`)).rows[0];
+check('実際の時刻・状態・搭乗口を残し、あとから届いた空の時刻で消さない', r.dep_status === 'Departed' && r.dep_gate === '10' && r.arr_status === 'Arrived' && new Date(r.atd).toISOString() === '2026-10-15T00:12:00.000Z' && new Date(r.ata).toISOString() === '2026-10-15T01:40:00.000Z', r);
+try { await db.exec(`set role anon`); await db.query(`select public.apply_flight_status('[]'::jsonb)`); check('運航情報の書き込みは利用者から呼べない', false); } catch { check('運航情報の書き込みは利用者から呼べない', true); } finally { await db.exec('reset role'); }
 if (bad) process.exit(1);

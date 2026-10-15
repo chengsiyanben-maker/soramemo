@@ -23,11 +23,24 @@ Deno.test("照合の実行：確認・便名違い・記録なし・ICAOなし�
     fetchArrivals: async (icao) => { calls++; if (icao === "RJFF") throw new Error("503"); return arrivals[icao] ?? []; },
     save: async (id, status, note, attempts) => { saved[id] = [status, note, attempts]; },
   });
-  assertEquals(sum, { checked: 5, verified: 1, no_data: 2, unmatched: 1, errors: 1 });
+  assertEquals(sum, { checked: 5, verified: 1, no_data: 2, unmatched: 1, errors: 1, official: 0 });
   assertEquals(saved[1][0], "verified"); assertEquals(saved[1][2], 1);
   assertEquals(saved[2], [null, "当てはまる便なし", 1]);
   assertEquals(saved[3], ["no_data", "到着記録なし", 2]);
   assertEquals(saved[4][0], "no_data");
   assertEquals(saved[5], undefined);          // 通信エラーは保存せず、次の晩にもう一度
   assertEquals(calls, 3);                     // 同じ空港・同じ時間帯（1と2）は1回の問い合わせで済む
+});
+
+Deno.test("OpenSky で確かめられなかった便は、航空会社の運航情報で確かめる（通信エラーのときも）", async () => {
+  const saved: Record<number, [string | null, string, number]> = {};
+  const sum = await runVerification({
+    loadFlights: async () => rows,
+    fetchArrivals: async (icao) => { if (icao === "RJFF") throw new Error("503"); return arrivals[icao] ?? []; },
+    save: async (id, status, note, attempts) => { saved[id] = [status, note, attempts]; },
+    officialCheck: async (r) => r.id === 2 || r.id === 5 ? "航空会社の運航情報で確認（JL501 9:12発・10:40着）" : null,
+  });
+  assertEquals(sum.official, 2); assertEquals(sum.verified, 3); assertEquals(sum.errors, 0);
+  assertEquals(saved[2][0], "verified"); assertEquals(saved[5][0], "verified");
+  assertEquals(saved[3], ["no_data", "到着記録なし", 2]);
 });
