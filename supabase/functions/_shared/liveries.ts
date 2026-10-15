@@ -40,6 +40,36 @@ export const LIVERIES: Livery[] = [
   { reg: "VH-ZND", name: "Emily Kame Kngwarreye（787-9）", airline: "カンタス航空", src: "https://www.qantas.com/au/en/about-us/our-company/fleet/flying-art.html" },
 ];
 
+// アライアンスの塗装機（スターアライアンス・ワンワールド）。日本に乗り入れている会社の機体だけ。
+// 出典：日本の会社は Aviation Wire。海外の会社は Flightradar24 のアライアンス塗装機の一覧（2020年11月更新）から、
+// 退役した機種（747・A340 など）と日本に来ない小さな機体を除いたもの。塗り替え・退役で古くなっているものもあるが、見えなければ表示に出ないだけ
+const AW_ANA = "https://www.aviationwire.jp/archives/156984", AW_JAL = "https://www.aviationwire.jp/archives/247025";
+const FR24_ALLIANCE = "https://www.flightradar24.com/blog/flight-tracking-news/special-aircraft-tracking/tracking-special-alliance-liveries/";
+const ALLIANCE: [string, string, string, string][] = [   // 登録記号・航空会社・機種・出典
+  ["JA899A", "ANA", "787-9", AW_ANA], ["JA731A", "ANA", "777-300ER", AW_ANA], ["JA711A", "ANA", "777-200", AW_ANA], ["JA712A", "ANA", "777-200", AW_ANA],
+  ["JA614A", "ANA", "767-300ER", AW_ANA], ["JA51AN", "ANA", "737-800", AW_ANA],
+  ["B-16206", "エバー航空", "A321", FR24_ALLIANCE], ["B-16701", "エバー航空", "777-300ER", FR24_ALLIANCE],
+  ["B-6091", "中国国際航空", "A330-200", FR24_ALLIANCE], ["B-6093", "中国国際航空", "A330-200", FR24_ALLIANCE], ["B-2032", "中国国際航空", "777-300ER", FR24_ALLIANCE],
+  ["VT-ALJ", "エア・インディア", "777-300ER", FR24_ALLIANCE], ["VT-ANU", "エア・インディア", "787-8", FR24_ALLIANCE],
+  ["C-GHLM", "エア・カナダ", "A330-300", FR24_ALLIANCE], ["HL7730", "アシアナ航空", "A321", FR24_ALLIANCE],
+  ["B-6296", "深圳航空", "A320", FR24_ALLIANCE], ["B-6297", "深圳航空", "A320", FR24_ALLIANCE],
+  ["9V-SWI", "シンガポール航空", "777-300ER", FR24_ALLIANCE], ["9V-SWJ", "シンガポール航空", "777-300ER", FR24_ALLIANCE], ["9V-SRI", "シンガポール航空", "777-200", FR24_ALLIANCE],
+  ["HS-TEL", "タイ国際航空", "A330-300", FR24_ALLIANCE],
+  ["N76021", "ユナイテッド航空", "777-200", FR24_ALLIANCE], ["N77022", "ユナイテッド航空", "777-200", FR24_ALLIANCE], ["N78017", "ユナイテッド航空", "777-200", FR24_ALLIANCE],
+  ["N218UA", "ユナイテッド航空", "777-200", FR24_ALLIANCE], ["N794UA", "ユナイテッド航空", "777-200", FR24_ALLIANCE],
+  ["JA861J", "JAL", "787-9", AW_JAL], ["JA15XJ", "JAL", "A350-900", AW_JAL], ["JA13HC", "北海道エアシステム", "ATR42-600", AW_JAL], ["JA604J", "JAL", "767-300", FR24_ALLIANCE],
+  ["N791AN", "アメリカン航空", "777-200", FR24_ALLIANCE], ["N796AN", "アメリカン航空", "777-200", FR24_ALLIANCE],
+  ["B-KPL", "キャセイパシフィック航空", "777-300ER", FR24_ALLIANCE], ["B-HLU", "キャセイパシフィック航空", "A330-300", FR24_ALLIANCE],
+  ["VH-EBL", "カンタス航空", "A330-200", FR24_ALLIANCE], ["VH-EBV", "カンタス航空", "A330-200", FR24_ALLIANCE],
+  ["A7-BAA", "カタール航空", "777-300ER", FR24_ALLIANCE], ["A7-BAB", "カタール航空", "777-300ER", FR24_ALLIANCE], ["A7-BAF", "カタール航空", "777-300ER", FR24_ALLIANCE], ["A7-BAG", "カタール航空", "777-300ER", FR24_ALLIANCE],
+  ["9M-MTE", "マレーシア航空", "A330-300", FR24_ALLIANCE], ["9M-MTO", "マレーシア航空", "A330-300", FR24_ALLIANCE], ["4R-ALH", "スリランカ航空", "A330-200", FR24_ALLIANCE],
+];
+const ONEWORLD = new Set(["JAL", "北海道エアシステム", "アメリカン航空", "キャセイパシフィック航空", "カンタス航空", "カタール航空", "マレーシア航空", "スリランカ航空"]);
+for (const [reg, airline, type, src] of ALLIANCE) {
+  if (LIVERIES.some((l) => l.reg === reg)) continue;
+  LIVERIES.push({ reg, airline, src, name: `${ONEWORLD.has(airline) ? "ワンワールド" : "スターアライアンス"}塗装（${type}）` });
+}
+
 // 期間が過ぎたものを除いた、登録記号 → 特別塗装機
 export function liveryMap(now = new Date()): Map<string, Livery> {
   const day = now.toISOString().slice(0, 10);
