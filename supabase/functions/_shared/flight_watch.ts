@@ -70,6 +70,7 @@ export function onRoute(s: Sched, p: { lat: number; lon: number }, aps: Map<stri
   if (!a || !b) return true;
   return km(a, p) + km(p, b) <= km(a, b) * 1.3 + 150;
 }
+export const NO_TAKEOFF_ALERT = false;
 // 1便ぶんを1回進める。seen は今回見つかった機体（見つからなければ null）
 export function step(s: Sched, w0: Watch, seen: Seen | null, now: number, aps: Map<string, Airport>): { watch: Watch; alerts: Alert[] } {
   const w: Watch = { ...w0, sent: [...w0.sent] }, out: Alert[] = [];
@@ -118,7 +119,9 @@ export function step(s: Sched, w0: Watch, seen: Seen | null, now: number, aps: M
     const late = Math.round((w.takeoff_at - 15 * MIN - s.std) / MIN);
     emit({ kind: "delay_dep", iata: [s.dep, s.arr], message: `${route}は、出発が約${late}分遅れました（${hm(w.takeoff_at)}ごろ離陸・推定）` });
   }
-  if (w.phase === "sched" && !lateStart && !hardToSee(s.aircraft) && now - s.std >= 75 * MIN && now - s.std < 6 * 60 * MIN)
+  // 「離陸を確認できず」は、いまは出さない（NO_TAKEOFF_ALERT）。共同運航便（JL4344＝フジドリームエアラインズの運航など）は
+  // 便名と機体の呼び出し符号が一致せず、ジェット機でも離陸を見分けられないため、誤ったお知らせばかりになった（2026-10-15）
+  if (NO_TAKEOFF_ALERT && w.phase === "sched" && !lateStart && !hardToSee(s.aircraft) && now - s.std >= 75 * MIN && now - s.std < 6 * 60 * MIN)
     emit({ kind: "no_takeoff", iata: [s.dep, s.arr], message: `${route}は、出発の定刻（${hm(s.std)}）から1時間以上たっても離陸を確認できていません` });
   if (w.phase === "landed" && w.landed_at != null && w.landed_iata === s.arr && w.landed_at - s.sta >= 60 * MIN)
     emit({ kind: "delay_arr", iata: [s.arr, s.dep], message: `${route}は、到着が約${Math.round((w.landed_at - s.sta) / MIN)}分遅れました（${hm(w.landed_at)}ごろ着陸・推定）` });
