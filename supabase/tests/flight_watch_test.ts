@@ -47,9 +47,9 @@ Deno.test("出発が1時間以上遅れ・到着も1時間以上遅れ", () => {
   assertEquals(all, ["delay_dep", "delay_arr"]);
 });
 
-Deno.test("定刻から1時間15分たっても離陸を確認できない", () => {
+Deno.test("定刻から1時間15分たっても離陸を確認できない：いまは知らせない（共同運航便で誤るため）", () => {
   const { all } = run([[null, T0 - 10 * MIN], [null, T0 + 70 * MIN], [null, T0 + 76 * MIN], [null, T0 + 90 * MIN]]);
-  assertEquals(all, ["no_takeoff"]);
+  assertEquals(all, []);
 });
 
 Deno.test("ダイバート：函館へ降りていき、そのまま着陸", () => {
