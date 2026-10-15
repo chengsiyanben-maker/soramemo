@@ -28,4 +28,8 @@ check('特別塗装機の通知の記録は利用者から読めない', String(
 await db.exec(`insert into public.push_subs (endpoint, p256dh, auth, sp_airports) values ('https://fcm.googleapis.com/sp','k','a','{HND,FUK}')`);
 r = (await db.query(`select count(*)::int n from public.push_subs where sp_airports @> array['HND']`)).rows[0].n;
 check('特別塗装機の通知を空港で選べる', r === 1, r);
+r = await (async () => { try { await db.exec(`insert into public.livery_sightings (reg, name, airline, lat, lon, src) values ('9V-OJJ','ピカチュウジェットTR','スクート',35.7,140.4,'https://example'),('B-LRJ','80周年記念塗装','キャセイパシフィック航空',35.7,140.4,'https://example')`); return 'ok'; } catch (e) { return e.message; } })();
+check('海外の登録記号（9V-OJJ・B-LRJ）も記録できる', r === 'ok', r);
+r = await (async () => { try { await db.exec(`insert into public.livery_sightings (reg, name, airline, lat, lon, src) values ('<script>','x','x',0,0,'https://example')`); return 'ok'; } catch (e) { return 'refused'; } })();
+check('登録記号でない文字は断る', r === 'refused', r);
 if (bad) process.exit(1);
