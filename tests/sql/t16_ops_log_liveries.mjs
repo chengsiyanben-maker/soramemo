@@ -32,4 +32,8 @@ r = await (async () => { try { await db.exec(`insert into public.livery_sighting
 check('海外の登録記号（9V-OJJ・B-LRJ）も記録できる', r === 'ok', r);
 r = await (async () => { try { await db.exec(`insert into public.livery_sightings (reg, name, airline, lat, lon, src) values ('<script>','x','x',0,0,'https://example')`); return 'ok'; } catch (e) { return 'refused'; } })();
 check('登録記号でない文字は断る', r === 'refused', r);
+await db.exec(`update public.livery_sightings set kind = 'alliance', seen_at = now() where reg = 'B-LRJ'`);
+await db.exec(`update public.livery_sightings set seen_at = now() where reg = '9V-OJJ'`);
+r = await as('anon', `select public.special_now()`);
+check('アライアンス塗装は種類付きで、キャラクター・記念塗装のあとに並ぶ', Array.isArray(r) && r[r.length - 1].reg === 'B-LRJ' && r[r.length - 1].kind === 'alliance' && r.find((x) => x.reg === '9V-OJJ')?.kind === 'special', r);
 if (bad) process.exit(1);

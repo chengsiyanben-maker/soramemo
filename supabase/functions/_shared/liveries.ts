@@ -2,7 +2,7 @@
 // 出典：航空会社の公式ページを優先し、公式に登録記号が書かれていないものは、登録記号を明記した航空専門の報道（Aviation Wire・TRAICY など）。
 // 海外の航空会社の機体も、日本に乗り入れている便に使われるものは入れる（2026-10-15）。
 // 特別塗装は期間限定のものが多い。終わったものは消し、新しいものは出典を付けて足す（運航期間の終わりが分かっているものは until に書く）。
-export type Livery = { reg: string; name: string; airline: string; src: string; until?: string };
+export type Livery = { reg: string; name: string; airline: string; src: string; until?: string; kind?: "special" | "alliance" };   // kind：alliance はアライアンス塗装（通知はしない）
 
 export const LIVERIES: Livery[] = [
   { reg: "JA819A", name: "ポケモンジェット 赤", airline: "ANA", src: "https://www.ana.co.jp/ja/jp/promotion/pokemonjet/" },
@@ -67,7 +67,7 @@ const ALLIANCE: [string, string, string, string][] = [   // 登録記号・航�
 const ONEWORLD = new Set(["JAL", "北海道エアシステム", "アメリカン航空", "キャセイパシフィック航空", "カンタス航空", "カタール航空", "マレーシア航空", "スリランカ航空"]);
 for (const [reg, airline, type, src] of ALLIANCE) {
   if (LIVERIES.some((l) => l.reg === reg)) continue;
-  LIVERIES.push({ reg, airline, src, name: `${ONEWORLD.has(airline) ? "ワンワールド" : "スターアライアンス"}塗装（${type}）` });
+  LIVERIES.push({ reg, airline, src, kind: "alliance", name: `${ONEWORLD.has(airline) ? "ワンワールド" : "スターアライアンス"}塗装（${type}）` });
 }
 
 // 期間が過ぎたものを除いた、登録記号 → 特別塗装機

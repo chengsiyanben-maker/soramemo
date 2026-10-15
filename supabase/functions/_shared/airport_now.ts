@@ -12,6 +12,7 @@ export type FlightRow = {
   term: string | null;   // ターミナル（"T1" など）
   kind: FlightKind;
   gate?: string | null;  // 搭乗口・到着口（"10" など。航空会社が出しているときだけ）
+  note?: string | null;  // 航空会社のお知らせの文（遅れ・欠航の理由など。odpt:flightInformationSummary / Text）
   ac?: string | null;    // 機種（IATA の機種の記号："763" など）
 };
 
@@ -29,6 +30,18 @@ export function flightNo(v: unknown): { airline: string; no: string } | null {
 export function terminal(v: unknown): string | null {
   const m = String(v ?? "").match(/Terminal\s*(\d)/i);
   return m ? "T" + m[1] : null;
+}
+
+// 航空会社のお知らせの文：文字列か、言語ごとの形（{ ja: "…", en: "…" }）。日本語を優先し、短くする（60文字まで）
+export function infoText(...vs: unknown[]): string | null {
+  for (const v of vs) {
+    let s = "";
+    if (typeof v === "string") s = v;
+    else if (v && typeof v === "object") { const o = v as Record<string, unknown>; s = String(o.ja ?? o["ja-JP"] ?? o.en ?? Object.values(o)[0] ?? ""); }
+    s = s.replace(/\s+/g, " ").trim();
+    if (s) return s.length > 60 ? s.slice(0, 59) + "…" : s;
+  }
+  return null;
 }
 
 // 搭乗口："10"・"4A" など（短い英数字だけ。配列のときは最初のもの）
@@ -64,6 +77,7 @@ export function normalize(raw: Record<string, unknown>, dir: "arr" | "dep"): Fli
     term: terminal(raw[dir === "arr" ? "odpt:arrivalAirportTerminal" : "odpt:departureAirportTerminal"]),
     kind: kindOf(raw["odpt:flightStatus"], time, newTime),
     gate: gateOf(raw[dir === "arr" ? "odpt:arrivalGate" : "odpt:departureGate"]),
+    note: infoText(raw["odpt:flightInformationSummary"], raw["odpt:flightInformationText"]),
     ac: typeof raw["odpt:aircraftType"] === "string" && /^[A-Z0-9]{2,4}$/.test(raw["odpt:aircraftType"] as string) ? raw["odpt:aircraftType"] as string : null,
   };
 }

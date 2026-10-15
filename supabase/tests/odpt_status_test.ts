@@ -10,7 +10,7 @@ const S: StatusSched[] = [
   { id: 4, flight: "JL503", dep: "HND", arr: "CTS", std: T("2026-10-15T10:00:00+09:00") },
 ];
 const names = (i: string) => ({ HND: "羽田", CTS: "新千歳", AOJ: "青森", ITM: "伊丹" } as Record<string, string>)[i] ?? i;
-const item = (no: string, dep: string, std: string, extra: Record<string, string> = {}) =>
+const item = (no: string, dep: string, std: string, extra: Record<string, unknown> = {}) =>
   ({ "odpt:flightNumber": [no], "odpt:departureAirport": `odpt.Airport:${dep}`, "odpt:scheduledDepartureTime": std, ...extra });
 
 Deno.test("欠航・60分以上の遅れ（見込み・実際）を出し、短い遅れや結べない便は出さない", () => {
@@ -45,4 +45,11 @@ Deno.test("到着：遅れ・ダイバートを知らせ、実際の時刻・搭
   assertEquals(r.alerts[0].message, "NH053（羽田→新千歳）は、到着が約75分遅れました（定刻 9:35 → 到着 10:50・航空会社の運航情報）");
   const u = r.updates.find((x) => x.id === 7)!;
   assertEquals([u.dep_status, u.atd, u.dep_gate, u.ata, u.arr_gate], ["Departed", "2026-10-14T23:12:00.000Z", "59", "2026-10-15T01:50:00.000Z", "8"]);
+});
+
+Deno.test("航空会社のお知らせの文（理由）を、お知らせの終わりに添える（言語ごとの形なら日本語）", () => {
+  const r = statusAlerts([item("JL501", "HND", "09:00", { "odpt:flightStatus": "odpt.FlightStatus:Cancelled", "odpt:flightInformationText": { ja: "機材整備のため欠航", en: "Cancelled due to maintenance" } })], S, names);
+  assertEquals(r[0].message, "JL501（羽田→新千歳）は、欠航です（航空会社の運航情報。機材整備のため欠航）");
+  const d = statusAlerts([item("NH55", "HND", "08:00", { "odpt:estimatedDepartureTime": "09:10", "odpt:flightInformationSummary": "天候調査" })], S, names);
+  assertEquals(d[0].message, "NH55（羽田→新千歳）は、出発が約70分遅れる見込みです（定刻 8:00 → 変更後 9:10・航空会社の運航情報。天候調査）");
 });

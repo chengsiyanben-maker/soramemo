@@ -43,14 +43,15 @@ Deno.serve(async (req) => {
     if (!ODPT_KEY) return new Response(JSON.stringify({ skipped: "no key" }), { headers: JSON_HEADERS });
     if (new URL(req.url).searchParams.get("diag") === "1") {
       // 運営の確認用：項目の名前と、状態の値（何種類あるか）だけ。羽田の分だけ見る
-      const errors: string[] = [], keys = new Map<string, number>(), status = new Map<string, number>();
+      const errors: string[] = [], keys = new Map<string, number>(), status = new Map<string, number>(), notes = new Set<string>();
       for (const type of ["Departure", "Arrival"] as const) for (const op of OPERATORS) {
         try { for (const x of await odpt(type, op, "HND") as Record<string, unknown>[]) {
           for (const k of Object.keys(x)) keys.set(`${type}:${k}`, (keys.get(`${type}:${k}`) ?? 0) + 1);
           const v = String(x["odpt:flightStatus"] ?? "（なし）"); status.set(`${type}:${v}`, (status.get(`${type}:${v}`) ?? 0) + 1);
+          for (const k of ["odpt:flightInformationSummary", "odpt:flightInformationText"]) if (x[k] != null && notes.size < 12) notes.add(`${type}:${k}:${JSON.stringify(x[k]).slice(0, 160)}`);
         } } catch (e) { errors.push(String(e)); }
       }
-      return new Response(JSON.stringify({ keys: Object.fromEntries(keys), status: Object.fromEntries(status), errors }), { headers: JSON_HEADERS });
+      return new Response(JSON.stringify({ keys: Object.fromEntries(keys), status: Object.fromEntries(status), notes: [...notes], errors }), { headers: JSON_HEADERS });
     }
     // 4分に1回だけ
     const { data: run } = await admin.from("odpt_status_runs").update({ ran_at: new Date().toISOString() })

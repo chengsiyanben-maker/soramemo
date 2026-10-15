@@ -525,6 +525,7 @@ ol.steps{padding-left:1.4em;line-height:1.9}
 .flist .pl{display:flex;flex-direction:column;min-width:0;line-height:1.35}
 .flist .pl b{font-size:15px}
 .flist .pl span{font-size:12px;color:var(--sumi)}
+.flist .pl span.fnote{color:var(--ink);font-weight:600}
 .flist .st{display:flex;flex-direction:column;align-items:flex-end;gap:4px}
 .fst{font-size:12px;font-weight:700;border-radius:999px;padding:2px 9px;white-space:nowrap;border:1px solid var(--line)}
 .fst.done{border-color:transparent;color:var(--sumi)}
@@ -598,6 +599,7 @@ ul.fc{margin:4px 0;padding-left:1.2em;line-height:1.9}
 .splist ul{list-style:none;margin:6px 0 0;padding:0}
 .splist li{padding:6px 0;border-top:1px solid var(--line,#e3e3e3)}
 .splist li:first-child{border-top:0}
+.spally{margin:8px 0 0}.spally summary{cursor:pointer;font-size:13px;font-weight:700;color:var(--sumi)}
 .splist li button{all:unset;cursor:pointer;display:block;width:100%}
 .splist li button:focus-visible{outline:2px solid currentColor;outline-offset:2px}
 .splist small{color:#5A6876}
@@ -1258,7 +1260,7 @@ function flightsHTML(a, fl){
   const row = x => { const k = x.kind === "done" ? (NOW.dir === "arr" ? "到着済み" : "出発済み") : FKIND[x.kind] || "定刻";
     const ride = NOW.dir === "dep" && ["ok","late","board"].includes(x.kind) && ALBY[x.airline] && IATA[x.place];
     return `<li><div class="tm"><b class="${x.newTime || x.kind === "cancel" ? "old" : ""}">${esc(x.time)}</b>${x.newTime ? `<i>→${esc(x.newTime)}</i>` : ""}</div>
-      <div class="pl"><b>${esc(placeShort(x.place))}${NOW.dir === "arr" ? "から" : "へ"}</b><span>${esc(x.no.slice(0,2) + " " + x.no.slice(2))}${x.term ? "・" + esc(x.term) : ""}${x.gate ? `・${NOW.dir === "arr" ? "到着口" : "搭乗口"} ${esc(x.gate)}` : ""}${x.ac ? "・" + esc(x.ac) : ""}</span></div>
+      <div class="pl"><b>${esc(placeShort(x.place))}${NOW.dir === "arr" ? "から" : "へ"}</b><span>${esc(x.no.slice(0,2) + " " + x.no.slice(2))}${x.term ? "・" + esc(x.term) : ""}${x.gate ? `・${NOW.dir === "arr" ? "到着口" : "搭乗口"} ${esc(x.gate)}` : ""}${x.ac ? "・" + esc(x.ac) : ""}</span>${x.note ? `<span class="fnote">${esc(x.note)}</span>` : ""}</div>
       <div class="st"><span class="fst ${esc(x.kind)}">${k}</span>${ride ? `<button class="ride" data-ride="${esc(x.no)}">この便に乗る</button>` : ""}</div></li>`; };
   const empty = NOW.term !== "all" && !list.length ? "このターミナルの便は、いまは出していません（国際線は対象外です）。" : !list.length ? "この時間の便はありません。" : "";
   return `<div class="nowtabs" role="group" aria-label="到着と出発"><button data-now-dir="arr" aria-pressed="${NOW.dir === "arr"}">到着</button><button data-now-dir="dep" aria-pressed="${NOW.dir === "dep"}">出発</button></div>`
@@ -3554,7 +3556,7 @@ const TRAFFIC_COL = { arr:"#A3166B", dep:"#2B6CB0", other:"#5C6B7A" };
 function planeIcon(p){
   const c = TRAFFIC_COL[p.phase] || TRAFFIC_COL.other, rot = p.hdg == null ? 0 : p.hdg;
   const sp = p.reg && SPECIAL.get(p.reg);
-  const label = p.phase === "other" ? "" : `<span class="tlabel${sp ? " sp" : ""}" style="border-color:${c}">${sp ? `★${esc(sp.name)} ` : ""}${esc(p.callsign || "")}${p.alt_ft != null ? " " + (Math.round(p.alt_ft / 100) * 100).toLocaleString("ja-JP") + "ft" : ""}</span>`;
+  const label = p.phase === "other" ? "" : `<span class="tlabel${sp ? " sp" : ""}" style="border-color:${c}">${sp ? `${sp.kind === "alliance" ? "◇" : "★"}${esc(sp.name)} ` : ""}${esc(p.callsign || "")}${p.alt_ft != null ? " " + (Math.round(p.alt_ft / 100) * 100).toLocaleString("ja-JP") + "ft" : ""}</span>`;
   return L.divIcon({ className:"tplane", iconSize:[22, 22], iconAnchor:[11, 11],
     html:`<svg viewBox="0 0 24 24" width="22" height="22" style="transform:rotate(${rot}deg)" aria-hidden="true"><path d="M12 2l1.6 7.2 7.4 4.3v2l-7.4-2.1-.4 5.1 2.4 1.8v1.6L12 21l-3.6.9v-1.6l2.4-1.8-.4-5.1L3 15.5v-2l7.4-4.3z" fill="${c}" stroke="#fff" stroke-width=".8"/></svg>${label}` });
 }
@@ -3646,13 +3648,16 @@ function spPushHTML(){
   return `<button class="linkbtn2 fwpush" data-sp-push="${esc(OPS_AP)}" aria-pressed="${on}">${on ? `${esc(name)}の特別塗装機の通知をやめる` : `${esc(name)}に特別塗装機が来たら通知する`}</button>`;
 }
 function specialHTML(){
-  const list = [...SPECIAL.values()].sort((a, b) => (b.iata === OPS_AP) - (a.iata === OPS_AP) || (!!b.iata) - (!!a.iata)), push = spPushHTML();
-  if(!list.length) return push ? `<div class="fwlist splist"><div class="opshead"><b>いま飛んでいる特別塗装機</b></div><p class="hint" style="margin:4px 0 0">いまは見つかっていません。</p>${push}</div>` : "";
-  return `<div class="fwlist splist"><div class="opshead"><b>いま飛んでいる特別塗装機</b><span>${list.length}機</span></div><ul>${list.map(x => {
-    const go = x.iata && OPS_AIRPORTS[x.iata] && x.iata !== OPS_AP;
-    const body = `<b>★${esc(x.name)}</b> <small>${esc(x.airline)}${x.callsign ? "・" + esc(x.callsign) : ""}（${esc(x.reg)}）</small><br><small>${esc(specialWhere(x))}</small>`;
-    return `<li>${go ? `<button data-ops-ap="${esc(x.iata)}" aria-label="${esc(x.name)}：${esc(OPS_AIRPORTS[x.iata].name)}の運用を見る">${body}</button>` : body}</li>`; }).join("")}</ul>
-    <p class="fwnote">直近15分に位置が届いたもの（adsb.lol）。特別塗装機の一覧は航空会社の発表などをもとに そらメモ がまとめたもので、塗装の期間や機体の入れ替えで違うことがあります。</p>${push}</div>`;
+  const all = [...SPECIAL.values()].sort((a, b) => (b.iata === OPS_AP) - (a.iata === OPS_AP) || (!!b.iata) - (!!a.iata)), push = spPushHTML();
+  // アライアンス塗装（スターアライアンス・ワンワールド）は数が多いので、たたんだ欄に分ける
+  const list = all.filter(x => x.kind !== "alliance"), ally = all.filter(x => x.kind === "alliance");
+  const item = (x, mark) => { const go = x.iata && OPS_AIRPORTS[x.iata] && x.iata !== OPS_AP;
+    const body = `<b>${mark}${esc(x.name)}</b> <small>${esc(x.airline)}${x.callsign ? "・" + esc(x.callsign) : ""}（${esc(x.reg)}）</small><br><small>${esc(specialWhere(x))}</small>`;
+    return `<li>${go ? `<button data-ops-ap="${esc(x.iata)}" aria-label="${esc(x.name)}：${esc(OPS_AIRPORTS[x.iata].name)}の運用を見る">${body}</button>` : body}</li>`; };
+  const allyHTML = ally.length ? `<details class="spally"><summary>アライアンス塗装 ${ally.length}機</summary><ul>${ally.map(x => item(x, "◇")).join("")}</ul></details>` : "";
+  if(!list.length && !ally.length) return push ? `<div class="fwlist splist"><div class="opshead"><b>いま飛んでいる特別塗装機</b></div><p class="hint" style="margin:4px 0 0">いまは見つかっていません。</p>${push}</div>` : "";
+  return `<div class="fwlist splist"><div class="opshead"><b>いま飛んでいる特別塗装機</b><span>${list.length}機</span></div>${list.length ? `<ul>${list.map(x => item(x, "★")).join("")}</ul>` : `<p class="hint" style="margin:4px 0 0">キャラクター・記念塗装の機体は、いまは見つかっていません。</p>`}${allyHTML}
+    <p class="fwnote">直近15分に位置が届いたもの（adsb.lol）。特別塗装機の一覧は航空会社の発表などをもとに そらメモ がまとめたもので、塗装の期間や機体の入れ替えで違うことがあります。通知はキャラクター・記念塗装の機体だけで、アライアンス塗装（◇）は知らせません。</p>${push}</div>`;
 }
 async function renderSpecial(){
   await loadSpecial(); const box = $("opsSpecial"), html = specialHTML();
