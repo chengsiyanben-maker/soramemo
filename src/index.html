@@ -3627,8 +3627,12 @@ function fwHTML(list, iata, withPush){
 }
 /* ---------- いま飛んでいる特別塗装機 ----------
    サーバーが機体を記録するたびに、特別塗装機の一覧（航空会社の発表などから作ったもの）の登録記号の機体を見つけて残している。直近15分ぶん */
+let SP_PLANS = [];   // 特別塗装機で飛ぶ予定の便（航空会社の運航情報の文から）
 async function loadSpecial(){
   if(!SERVER) return;
+  try{ const r = await fetch(SORAMEMO_CONFIG.supabaseUrl.replace(/\/$/, "") + "/rest/v1/rpc/livery_plans_upcoming", { method:"POST",
+      headers:{ "Content-Type":"application/json", apikey:SORAMEMO_CONFIG.supabaseAnonKey, Authorization:"Bearer " + SORAMEMO_CONFIG.supabaseAnonKey }, body:JSON.stringify({ p_iata:OPS_AP }) });
+    if(r.ok){ const d = await r.json(); SP_PLANS = Array.isArray(d) ? d : []; } }catch(e){}
   try{ const r = await fetch(SORAMEMO_CONFIG.supabaseUrl.replace(/\/$/, "") + "/rest/v1/rpc/special_now", { method:"POST",
       headers:{ "Content-Type":"application/json", apikey:SORAMEMO_CONFIG.supabaseAnonKey, Authorization:"Bearer " + SORAMEMO_CONFIG.supabaseAnonKey }, body:"{}" });
     if(r.ok){ const d = await r.json(); SPECIAL.clear(); for(const x of Array.isArray(d) ? d : []) SPECIAL.set(x.reg, x); } }catch(e){}
@@ -3655,9 +3659,16 @@ function specialHTML(){
     const body = `<b>${mark}${esc(x.name)}</b> <small>${esc(x.airline)}${x.callsign ? "・" + esc(x.callsign) : ""}（${esc(x.reg)}）</small><br><small>${esc(specialWhere(x))}</small>`;
     return `<li>${go ? `<button data-ops-ap="${esc(x.iata)}" aria-label="${esc(x.name)}：${esc(OPS_AIRPORTS[x.iata].name)}の運用を見る">${body}</button>` : body}</li>`; };
   const allyHTML = ally.length ? `<details class="spally"><summary>アライアンス塗装 ${ally.length}機</summary><ul>${ally.map(x => item(x, "◇")).join("")}</ul></details>` : "";
-  if(!list.length && !ally.length) return push ? `<div class="fwlist splist"><div class="opshead"><b>いま飛んでいる特別塗装機</b></div><p class="hint" style="margin:4px 0 0">いまは見つかっていません。</p>${push}</div>` : "";
-  return `<div class="fwlist splist"><div class="opshead"><b>いま飛んでいる特別塗装機</b><span>${list.length}機</span></div>${list.length ? `<ul>${list.map(x => item(x, "★")).join("")}</ul>` : `<p class="hint" style="margin:4px 0 0">キャラクター・記念塗装の機体は、いまは見つかっていません。</p>`}${allyHTML}
-    <p class="fwnote">直近15分に位置が届いたもの（adsb.lol）。特別塗装機の一覧は航空会社の発表などをもとに そらメモ がまとめたもので、塗装の期間や機体の入れ替えで違うことがあります。通知はキャラクター・記念塗装の機体だけで、アライアンス塗装（◇）は知らせません。</p>${push}</div>`;
+  // これから飛ぶ予定（航空会社の運航情報の文に「〇〇で運航いたします」とある便）。この空港の便を先に、ほかの空港の便はたたむ
+  const hm2 = t => new Date(t).toLocaleTimeString("ja-JP", { hour:"2-digit", minute:"2-digit" });
+  const planLi = p => `<li><b>★${esc(p.livery)}</b> <small>${esc(p.flight)}・${hm2(p.std)} ${esc(placeShort(p.dep))}発→${esc(placeShort(p.arr))}${p.cancelled ? "・欠航" : p.atd ? "・出発済み" : ""}</small></li>`;
+  const here = SP_PLANS.filter(p => p.dep === OPS_AP || p.arr === OPS_AP), other = SP_PLANS.filter(p => p.dep !== OPS_AP && p.arr !== OPS_AP);
+  const planHTML = SP_PLANS.length ? `<div class="opshead" style="margin-top:10px"><b>これから飛ぶ予定</b><span>航空会社の運航情報</span></div>`
+    + (here.length ? `<ul>${here.map(planLi).join("")}</ul>` : `<p class="hint" style="margin:4px 0 0">${esc(opsDef().name)}を出発・到着する予定の便は、いまはありません。</p>`)
+    + (other.length ? `<details class="spally"><summary>ほかの空港 ${other.length}便</summary><ul>${other.map(planLi).join("")}</ul></details>` : "") : "";
+  if(!list.length && !ally.length) return push || planHTML ? `<div class="fwlist splist"><div class="opshead"><b>いま飛んでいる特別塗装機</b></div><p class="hint" style="margin:4px 0 0">いまは見つかっていません。</p>${planHTML}${push}</div>` : "";
+  return `<div class="fwlist splist"><div class="opshead"><b>いま飛んでいる特別塗装機</b><span>${list.length}機</span></div>${list.length ? `<ul>${list.map(x => item(x, "★")).join("")}</ul>` : `<p class="hint" style="margin:4px 0 0">キャラクター・記念塗装の機体は、いまは見つかっていません。</p>`}${allyHTML}${planHTML}
+    <p class="fwnote">直近15分に位置が届いたもの（adsb.lol）。特別塗装機の一覧は航空会社の発表などをもとに そらメモ がまとめたもので、塗装の期間や機体の入れ替えで違うことがあります。通知はキャラクター・記念塗装の機体だけで、アライアンス塗装（◇）は知らせません。「これから飛ぶ予定」は航空会社の運航情報（${ODPT_CREDIT}）の文に特別塗装機で運航すると書かれた便で、通知を申し込んでいると飛ぶ前にもお知らせします。機体の変更で変わることがあります。</p>${push}</div>`;
 }
 async function renderSpecial(){
   await loadSpecial(); const box = $("opsSpecial"), html = specialHTML();

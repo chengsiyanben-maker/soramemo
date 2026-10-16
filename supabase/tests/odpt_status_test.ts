@@ -1,6 +1,6 @@
 // 航空会社の運航情報（ODPT の出発情報）から、欠航と出発の大きな遅れのお知らせを作る
 import { assertEquals } from "jsr:@std/assert@1";
-import { atNear, odptStatus, statusAlerts, type StatusSched } from "../functions/_shared/odpt_status.ts";
+import { atNear, liveryOf, liveryPlans, odptStatus, statusAlerts, type StatusSched } from "../functions/_shared/odpt_status.ts";
 
 const T = (s: string) => Date.parse(s);
 const S: StatusSched[] = [
@@ -58,4 +58,19 @@ Deno.test("要約（出発遅延）と本文の両方があれば、本文（理
   const d = statusAlerts([item("NH55", "HND", "08:00", { "odpt:estimatedDepartureTime": "09:10",
     "odpt:flightInformationSummary": { en: "Delayed", ja: "出発遅延" }, "odpt:flightInformationText": { en: "due to aircraft maintenance.", ja: "飛行機の整備のため出発に遅延が生じています。" } })], S, names);
   assertEquals(d[0].message.endsWith("・航空会社の運航情報。飛行機の整備のため出発に遅延が生じています。）"), true);
+});
+
+Deno.test("特別塗装機で飛ぶ予定の便：お知らせの文から見つける（一覧の名前、なければ「〇〇ジェットで運航」）", () => {
+  const names = ["JAL Jubilee Express", "ポケモンジェット 緑", "ピカチュウジェットNH"];
+  assertEquals(liveryOf("JAL Jubilee Expressで運航いたします。", names), "JAL Jubilee Express");
+  assertEquals(liveryOf("本日は「ピカチュウジェットNH」で運航します。", names), "ピカチュウジェットNH");
+  assertEquals(liveryOf("ドラえもんジェットで運航いたします。", names), "ドラえもんジェット");
+  assertEquals(liveryOf("飛行機の整備のため出発に遅延が生じています。", names), null);
+  assertEquals(liveryOf("小型機で運航いたします。", names), null);   // 特別塗装ではない「〇〇で運航」は使わない
+  const p = liveryPlans([
+    item("JL0501", "HND", "09:00", { "odpt:flightInformationText": { ja: "JAL Jubilee Expressで運航いたします。", en: "JAL Jubilee Express Flight." } }),
+    item("NH55", "HND", "08:00", { "odpt:flightInformationText": { ja: "ポケモンジェット 緑で運航します。" }, "odpt:flightStatus": "odpt.FlightStatus:Cancelled" }),
+    item("JL503", "HND", "10:00", { "odpt:flightInformationText": { ja: "使用する飛行機の到着遅れのため出発に遅延が生じています。" } }),
+  ], S, names);
+  assertEquals(p.map((x) => [x.schedule_id, x.livery]), [[1, "JAL Jubilee Express"]]);   // 欠航の便・特別塗装でない便は入れない
 });

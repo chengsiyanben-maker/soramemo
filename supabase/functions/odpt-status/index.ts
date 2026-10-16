@@ -2,10 +2,13 @@
 // 便ごとの実際の時刻・状態・搭乗口を予定の便（flight_schedule）に残す（フライトの記録の照合・便の候補に使う）。
 //   GET /functions/v1/odpt-status         （pg_cron が5分ごとに呼ぶ。何度呼ばれても、ODPT に問い合わせるのは4分に1回）
 //   GET /functions/v1/odpt-status?diag=1  （運営の確認用：ODPT が返してくる項目の名前と状態の値の一覧だけを返す。便のデータは返さない）
+//   GET /functions/v1/odpt-status?diag=2  （運営の確認用：お知らせの文のうち「運航」を含むもの（特別塗装機で飛ぶ便など）の言い回しの一覧）
+// 特別塗装機で飛ぶ予定の便（お知らせの文に「〇〇で運航いたします」）は livery_plans に残し、その空港の特別塗装機の通知を申し込んでいる人へ、飛ぶ前に1回知らせる
 // 機体の位置からの推定ではないので、お知らせに「推定」は付けず「航空会社の運航情報」と書く。
 import { createClient } from "npm:@supabase/supabase-js@2.117.2";
-import { odptStatus } from "../_shared/odpt_status.ts";
-import { sendAlertPush } from "../_shared/alert_push.ts";
+import { liveryPlans, odptStatus } from "../_shared/odpt_status.ts";
+import { sendAlertPush, sendSpPush } from "../_shared/alert_push.ts";
+import { LIVERIES } from "../_shared/liveries.ts";
 
 const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, { auth: { persistSession: false } });
 const ODPT_KEY = Deno.env.get("ODPT_CONSUMER_KEY") ?? "";
@@ -53,15 +56,24 @@ Deno.serve(async (req) => {
       }
       return new Response(JSON.stringify({ keys: Object.fromEntries(keys), status: Object.fromEntries(status), notes: [...notes], errors }), { headers: JSON_HEADERS });
     }
+    if (new URL(req.url).searchParams.get("diag") === "2") {
+      const errors: string[] = [], texts = new Map<string, number>();
+      for (const x of await fetchAll("Departure", [], errors) as Record<string, unknown>[]) {
+        const t = x["odpt:flightInformationText"] as Record<string, string> | string | undefined;
+        const ja = typeof t === "string" ? t : t?.ja ?? "";
+        if (/運航/.test(ja)) texts.set(ja.slice(0, 80), (texts.get(ja.slice(0, 80)) ?? 0) + 1);
+      }
+      return new Response(JSON.stringify({ texts: Object.fromEntries([...texts].slice(0, 40)), errors }), { headers: JSON_HEADERS });
+    }
     // 4分に1回だけ
     const { data: run } = await admin.from("odpt_status_runs").update({ ran_at: new Date().toISOString() })
       .eq("id", 1).lt("ran_at", new Date(Date.now() - 4 * MIN).toISOString()).select("id");
     if (!run?.length) return new Response(JSON.stringify({ skipped: "recent" }), { headers: JSON_HEADERS });
 
-    // 見る便：定刻が6時間前から3時間後まで
+    // 見る便：定刻が6時間前から30時間後まで（遅れ・欠航は近い便、特別塗装機の予定は翌日の便まで）
     const now = Date.now();
     const { data: rows } = await admin.from("flight_schedule").select("id, svc_date, flight, dep, arr, std, sta")
-      .gte("std", new Date(now - 6 * 60 * MIN).toISOString()).lte("std", new Date(now + 3 * 60 * MIN).toISOString()).limit(5000);
+      .gte("std", new Date(now - 6 * 60 * MIN).toISOString()).lte("std", new Date(now + 30 * 60 * MIN).toISOString()).limit(8000);
     const scheds = (rows ?? []).map((r) => ({ id: r.id, flight: r.flight, dep: r.dep, arr: r.arr, std: Date.parse(r.std), sta: Date.parse(r.sta), svc: r.svc_date }));
     if (!scheds.length) return new Response(JSON.stringify({ watching: 0 }), { headers: JSON_HEADERS });
     const { data: aps } = await admin.from("airports").select("iata, name").not("iata", "is", null);
@@ -86,7 +98,26 @@ Deno.serve(async (req) => {
     }
     const svc = new Map(scheds.map((s) => [s.id, s.svc]));
     const pushed = await sendAlertPush(admin, fresh.map((a) => ({ ...a, fkey: `${a.flight}@${svc.get(a.schedule_id)}` })));
-    return new Response(JSON.stringify({ watching: scheds.length, dep: depItems.length, arr: arrItems.length, updated: updates.length, alerts: alerts.length, new: fresh.length, pushed, errors: errors.slice(0, 3) }), { headers: JSON_HEADERS });
+
+    // 特別塗装機で飛ぶ予定の便：新しく見つかった便だけ、飛ぶ前に知らせる
+    const plans = liveryPlans(depItems, scheds, LIVERIES.filter((l) => l.kind !== "alliance").map((l) => l.name));
+    let planNew = 0;
+    if (plans.length) {
+      const { data: ins, error } = await admin.from("livery_plans").upsert(plans, { onConflict: "schedule_id", ignoreDuplicates: true }).select("schedule_id");
+      if (error) errors.push("plans " + error.message);
+      const added = new Set((ins ?? []).map((r) => r.schedule_id));
+      const hm = (t: string) => { const d = new Date(Date.parse(t) + 9 * 3600_000); return `${d.getUTCHours()}:${String(d.getUTCMinutes()).padStart(2, "0")}`; };
+      for (const p of plans) {
+        if (!added.has(p.schedule_id) || Date.parse(p.std) < now) continue;
+        planNew++;
+        const dn = names.get(p.dep) ?? p.dep, an = names.get(p.arr) ?? p.arr;
+        try {
+          await sendSpPush(admin, [p.dep, p.arr], { title: `そらメモ：★${p.livery}（予定）`, tag: `plan-${p.schedule_id}`, url: `./#ops-${p.dep}`,
+            body: `${p.livery}が、${hm(p.std)} ${dn}発の${p.flight}（${an}行き）で飛ぶ予定です（航空会社の運航情報）。` });
+        } catch (e) { errors.push("plan push " + String(e)); }
+      }
+    }
+    return new Response(JSON.stringify({ watching: scheds.length, dep: depItems.length, arr: arrItems.length, updated: updates.length, alerts: alerts.length, new: fresh.length, pushed, plans: plans.length, plan_new: planNew, errors: errors.slice(0, 3) }), { headers: JSON_HEADERS });
   } catch (e) {
     console.error(e);
     return new Response(JSON.stringify({ error: "failed" }), { status: 500, headers: JSON_HEADERS });

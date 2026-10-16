@@ -26,3 +26,18 @@ export async function sendAlertPush(admin: SupabaseClient, alerts: { iata: strin
   }
   return sent;
 }
+
+// 特別塗装機の通知（空港ごとに申し込んだ人：push_subs.sp_airports）。iata のどれかを選んでいる人に送る
+export async function sendSpPush(admin: SupabaseClient, iata: string[], payload: { title: string; body: string; tag: string; url: string }) {
+  const pub = Deno.env.get("VAPID_PUBLIC_KEY"), priv = Deno.env.get("VAPID_PRIVATE_KEY");
+  if (!pub || !priv || !iata.length) return 0;
+  const { data: subs } = await admin.from("push_subs").select("id, endpoint, p256dh, auth").overlaps("sp_airports", iata);
+  if (!subs?.length) return 0;
+  webpush.setVapidDetails(Deno.env.get("VAPID_SUBJECT") || "https://soramemo.jp", pub, priv);
+  let sent = 0;
+  for (const s of subs) {
+    try { await webpush.sendNotification({ endpoint: s.endpoint, keys: { p256dh: s.p256dh, auth: s.auth } }, JSON.stringify(payload), { TTL: 3600 }); sent++; }
+    catch (e) { const code = (e as { statusCode?: number }).statusCode; if (code === 404 || code === 410) await admin.from("push_subs").delete().eq("id", s.id); }
+  }
+  return sent;
+}
