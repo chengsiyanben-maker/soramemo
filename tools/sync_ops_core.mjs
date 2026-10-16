@@ -11,7 +11,7 @@ const out = `// 自動で作るファイル：src/index.html の <ops-core> の�
 // @ts-nocheck
 const opsDef = () => { throw new Error("サーバーでは空港の定義を引数で渡す"); };
 ${parts.join("\n")}
-export { OPS_AIRPORTS, windEstimate, observeOps, obsText, runwaysOf, nightRule };
+export { OPS_AIRPORTS, windEstimate, observeOps, obsText, runwaysOf, nightRule, opsHours };
 `;
 const path = new URL("../supabase/functions/_shared/ops_core.js", import.meta.url);
 if (process.argv.includes("--check")) {

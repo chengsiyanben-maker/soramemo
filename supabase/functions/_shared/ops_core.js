@@ -326,6 +326,14 @@ function nightRule(def, now = new Date()){
   const h = jstHour(now), hit = (OPS_NIGHT[def.iata] || []).filter(r => r.from < r.to ? h >= r.from && h < r.to : h >= r.from || h < r.to);
   return hit.find(r => r.closed) || hit[0] || null;
 }
+// 空港の運用時間（AIP JAPAN の AD 2.3。日本時間）。離着陸できない時間（OPS_NIGHT の closed）がなければ24時間
+const hText = h => `${Math.floor(h)}時${h % 1 ? Math.round(h % 1 * 60) + "分" : ""}`;
+function opsHours(def){
+  const c = (OPS_NIGHT[def.iata] || []).find(r => r.closed);
+  return c ? `${hText(c.to)}〜${hText(c.from || 24)}` : "24時間";
+}
+// いま運用時間の中か（閉まっている時間帯でなければ true）
+const opsOpen = (def, now = new Date()) => !(nightRule(def, now) || {}).closed;
 function observeOpsDay(planes, def = opsDef()){
   const H = def.center, hit = [], RW_MODE = rwModeOf(def), paths = obsPaths(def);
   if(def.noObs) return observeDeps(planes, def);
@@ -365,4 +373,4 @@ function observeOpsDay(planes, def = opsDef()){
   return { mode, apps, n };
 }
 
-export { OPS_AIRPORTS, windEstimate, observeOps, obsText, runwaysOf, nightRule };
+export { OPS_AIRPORTS, windEstimate, observeOps, obsText, runwaysOf, nightRule, opsHours };

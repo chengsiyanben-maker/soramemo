@@ -1,6 +1,6 @@
 // 運用の判定の中心（_shared/ops_core.js）が、画面（src/index.html の <ops-core> の部分）と同じであること、と判定の決まりのテスト
 import { assertEquals } from "jsr:@std/assert@1";
-import { OPS_AIRPORTS, observeOps, nightRule } from "../functions/_shared/ops_core.js";
+import { OPS_AIRPORTS, observeOps, nightRule, opsHours } from "../functions/_shared/ops_core.js";
 
 Deno.test("ops_core.js は src/index.html の <ops-core> の部分を写した最新のもの（違えば node tools/sync_ops_core.mjs）", async () => {
   const src = await Deno.readTextFile(new URL("../../src/index.html", import.meta.url));
@@ -68,4 +68,13 @@ Deno.test("夜の決まり：福岡23時は運用時間外、成田1時は閉鎖
   assertEquals(nightRule(A.FUK, new Date("2026-10-16T04:00:00Z")), null);
   assertEquals(nightRule(A.ITM, new Date("2026-10-16T12:30:00Z"))?.closed, true);   // 21:30
   assertEquals(nightRule(A.KMJ, new Date("2026-10-16T12:15:00Z")), null);           // 21:15
+});
+
+Deno.test("運用時間：羽田は24時間、成田6時〜24時、伊丹7時〜21時、広島7時30分〜22時30分", () => {
+  // deno-lint-ignore no-explicit-any
+  const A = OPS_AIRPORTS as any;
+  assertEquals(opsHours(A.HND), "24時間");
+  assertEquals(opsHours(A.NRT), "6時〜24時");
+  assertEquals(opsHours(A.ITM), "7時〜21時");
+  assertEquals(opsHours(A.HIJ), "7時30分〜22時30分");
 });

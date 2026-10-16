@@ -575,7 +575,7 @@ ul.fc{margin:4px 0;padding-left:1.2em;line-height:1.9}
 .opsplus b{display:block;color:var(--gold-text)}
 .opsmap{height:340px;border-radius:12px;overflow:hidden;margin:10px 0;background:var(--sky)}
 @media (min-width:640px){.opsmap{height:440px}}
-.opsaps{display:flex;overflow-x:auto;gap:2px;margin:4px -16px 10px;padding:0 12px;border-bottom:1.5px solid var(--line);scrollbar-width:none;-webkit-overflow-scrolling:touch}.opsaps::-webkit-scrollbar{display:none}.opstab{flex:0 0 auto;background:none;border:0;border-bottom:3px solid transparent;margin-bottom:-1.5px;padding:9px 10px 7px;font-size:14px;font-weight:600;color:var(--sumi);white-space:nowrap;cursor:pointer}.opstab[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--shu)}.opstab small{font-size:10px;font-weight:600;color:var(--shu);margin-left:3px}.fcands{margin:4px 0 10px}.fcands b{font-size:13px}.fcands .row{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 4px}.fcands .chip small{font-weight:500;color:var(--sumi);margin-left:4px}.fcands .chip[aria-pressed="true"] small,.fcands .chip[aria-pressed="true"] em{color:inherit;opacity:.85}.fcands .chip em{font-style:normal;font-size:10px;color:var(--shu);margin-left:4px}.opsnight{margin:6px 0 4px;padding:6px 10px;border-radius:8px;background:#1C2027;color:#E8ECF1;font-size:13px;line-height:1.5}.opsspots ol{list-style:none;margin:6px 0 0;padding:0}.opsspots li{padding:7px 0;border-top:1px solid var(--line)}.opsspots li:first-child{border-top:0}.opsspots button.spot{all:unset;cursor:pointer;display:block;width:100%}.opsspots .mk{display:inline-block;width:1.6em;font-weight:700;color:var(--shu)}.spotpin span{display:flex;align-items:center;justify-content:center;width:18px;height:18px;box-sizing:border-box;border-radius:4px;background:#fff;border:2px solid #2F855A;color:#2F855A;font-size:10px;font-weight:700;line-height:1}.opsspots small{display:block;color:var(--sumi);margin-left:1.6em}
+.opsaps{display:flex;overflow-x:auto;gap:2px;margin:4px -16px 10px;padding:0 12px;border-bottom:1.5px solid var(--line);scrollbar-width:none;-webkit-overflow-scrolling:touch}.opsaps::-webkit-scrollbar{display:none}.opstab{flex:0 0 auto;background:none;border:0;border-bottom:3px solid transparent;margin-bottom:-1.5px;padding:9px 10px 7px;font-size:14px;font-weight:600;color:var(--sumi);white-space:nowrap;cursor:pointer}.opstab[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--shu)}.opstab small{font-size:10px;font-weight:600;color:var(--shu);margin-left:3px}.fcands{margin:4px 0 10px}.fcands b{font-size:13px}.fcands .row{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 4px}.fcands .chip small{font-weight:500;color:var(--sumi);margin-left:4px}.fcands .chip[aria-pressed="true"] small,.fcands .chip[aria-pressed="true"] em{color:inherit;opacity:.85}.fcands .chip em{font-style:normal;font-size:10px;color:var(--shu);margin-left:4px}.opshours{margin:4px 0 2px;font-size:13px;color:var(--sumi)}.opshours b{color:var(--ink)}.opshours small{margin-left:6px;font-size:10px}.opsnight{margin:6px 0 4px;padding:6px 10px;border-radius:8px;background:#1C2027;color:#E8ECF1;font-size:13px;line-height:1.5}.opsspots ol{list-style:none;margin:6px 0 0;padding:0}.opsspots li{padding:7px 0;border-top:1px solid var(--line)}.opsspots li:first-child{border-top:0}.opsspots button.spot{all:unset;cursor:pointer;display:block;width:100%}.opsspots .mk{display:inline-block;width:1.6em;font-weight:700;color:var(--shu)}.spotpin span{display:flex;align-items:center;justify-content:center;width:18px;height:18px;box-sizing:border-box;border-radius:4px;background:#fff;border:2px solid #2F855A;color:#2F855A;font-size:10px;font-weight:700;line-height:1}.opsspots small{display:block;color:var(--sumi);margin-left:1.6em}
 .opslayers{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
 .opslayers .chip[aria-pressed="false"]{opacity:.55;text-decoration:line-through}
 .opslayers .chip{display:inline-flex;align-items:center;gap:6px}
@@ -3354,6 +3354,14 @@ function nightRule(def, now = new Date()){
   const h = jstHour(now), hit = (OPS_NIGHT[def.iata] || []).filter(r => r.from < r.to ? h >= r.from && h < r.to : h >= r.from || h < r.to);
   return hit.find(r => r.closed) || hit[0] || null;
 }
+// 空港の運用時間（AIP JAPAN の AD 2.3。日本時間）。離着陸できない時間（OPS_NIGHT の closed）がなければ24時間
+const hText = h => `${Math.floor(h)}時${h % 1 ? Math.round(h % 1 * 60) + "分" : ""}`;
+function opsHours(def){
+  const c = (OPS_NIGHT[def.iata] || []).find(r => r.closed);
+  return c ? `${hText(c.to)}〜${hText(c.from || 24)}` : "24時間";
+}
+// いま運用時間の中か（閉まっている時間帯でなければ true）
+const opsOpen = (def, now = new Date()) => !(nightRule(def, now) || {}).closed;
 function observeOpsDay(planes, def = opsDef()){
   const H = def.center, hit = [], RW_MODE = rwModeOf(def), paths = obsPaths(def);
   if(def.noObs) return observeDeps(planes, def);
@@ -3478,6 +3486,7 @@ function renderOps(){
     : OPS_MODE === "auto" ? `${OPS_OBS && OPS_OBS.mixed ? "着陸に向かう機体の滑走路が分かれている（切り替え中かもしれません）ため、風から推定しています。" : ""}${plus ? est.why : est.whyPlain}` : "";
   const nr = OPS_MODE === "auto" ? nightRule(def) : null, shut = nr && nr.closed && !obs;
   $("opsInfo").innerHTML = `<div class="opshead"><b class="mode">${shut ? "運用時間外" : op.label}</b><span class="opssrc${obs ? " live" : ""}">${shut ? "夜間" : src}</span>${windChip(OPS_WX)}</div>
+    <p class="opshours">運用時間：<b>${opsHours(def)}</b>${opsHours(def) === "24時間" ? "" : opsOpen(def) ? "（いまは運用中）" : "（いまは時間外）"}<small>AIP JAPAN</small></p>
     ${nr ? `<p class="opsnight">夜間：${esc(nr.text)}${nr.closed ? "。下は、朝の最初の便が使いそうな向き（風から推定）です" : ""}（AIP JAPAN）</p>` : ""}
     ${hndDiagram(op, rw, mode, est.good, def)}
     <div class="opsrows">
