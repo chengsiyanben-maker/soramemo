@@ -428,6 +428,39 @@ body.game nav.tabs button[aria-current="page"]{color:#fff}
 .scanframe{position:absolute;inset:18% 8%;border:3px solid rgba(255,255,255,.85);border-radius:10px}
 .bpcard{background:var(--sky);border-radius:12px;padding:12px 14px;margin:8px 0;font-size:15px}
 .bpcard b{font-family:var(--mincho);font-size:20px}
+/* ---------- 成績の画面（航空会社別・ステータスの目安）：ゴシック体・数字を大きく・余白とうすい影のカード ---------- */
+#v-stats{--st-ink:#374151;--st-sub:#9CA3AF;--st-mute:#6B7280;--st-card:#FFFFFF;--st-track:#F1F2F4;--st-wash:#F7F8FA;
+  --st-shadow:0 1px 2px rgba(17,24,39,.04),0 6px 20px rgba(17,24,39,.06);--jal:#C8102E;--ana:#1C4FA0;--other:#6B7280;color:var(--st-ink)}
+[data-palette="board"] #v-stats{--st-ink:#E5E7EB;--st-sub:#8B95A3;--st-mute:#A7B0BC;--st-card:#171A20;--st-track:#262B33;--st-wash:#1C2027;
+  --st-shadow:0 1px 2px rgba(0,0,0,.3),0 6px 20px rgba(0,0,0,.25);--jal:#FF5A6E;--ana:#6EA0FF;--other:#A7B0BC}
+#v-stats h2{font-family:var(--gothic);font-size:13px;font-weight:700;letter-spacing:.08em;color:var(--st-mute);margin:36px 4px 14px}
+#v-stats h2:first-child{margin-top:20px}
+#v-stats .alhead{display:inline-flex;align-items:center;gap:8px;font-family:var(--gothic);font-size:14px;font-weight:700;color:var(--st-ink);
+  background:var(--st-card);box-shadow:var(--st-shadow);border-radius:999px;padding:8px 16px 8px 12px;margin:0 0 18px}
+#v-stats .alhead::before{content:"";width:10px;height:10px;border-radius:50%;background:var(--lead,var(--other))}
+#v-stats .alhead[data-lead="JAL"]{--lead:var(--jal)}#v-stats .alhead[data-lead="ANA"]{--lead:var(--ana)}
+#v-stats .alhead b{color:var(--lead,var(--st-ink))}
+#v-stats .alstats{gap:14px}
+#v-stats .alcard,#v-stats .scard{background:var(--st-card);border-radius:18px;padding:20px;box-shadow:var(--st-shadow);border:0}
+#v-stats .alcard{--brand:var(--other)}#v-stats .alcard[data-g="JAL"],#v-stats .scard[data-brand="JAL"]{--brand:var(--jal)}#v-stats .alcard[data-g="ANA"],#v-stats .scard[data-brand="ANA"]{--brand:var(--ana)}
+#v-stats .alcard .g,#v-stats .scard .sh b{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:var(--st-mute)}
+#v-stats .alcard .g::before,#v-stats .scard .sh b::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--brand,var(--other));flex:none}
+#v-stats .alcard .big,#v-stats .scard .sv{font-family:var(--gothic);font-weight:800;font-size:34px;line-height:1.1;letter-spacing:-.01em;
+  font-variant-numeric:tabular-nums;color:var(--st-ink);margin:14px 0 4px}
+#v-stats .alcard .big .sub,#v-stats .scard .sv small{font-family:var(--gothic);font-size:13px;font-weight:600;color:var(--st-sub);margin-left:4px;letter-spacing:0}
+#v-stats .alcard .sub{font-size:12px;color:var(--st-sub)}
+#v-stats .alcard .sub b{font-weight:700;color:var(--st-mute);font-variant-numeric:tabular-nums}
+#v-stats .alcard .bar,#v-stats .sbar{height:8px;border-radius:999px;background:var(--st-track);margin:16px 0 8px;overflow:hidden}
+#v-stats .alcard .bar i,#v-stats .sbar i{border-radius:999px;background:var(--brand,var(--other))}
+#v-stats .alcard .goal{font-size:12px;color:var(--st-mute);line-height:1.7;margin:0}#v-stats .alcard .goal .done{color:var(--st-sub)}
+#v-stats .alcard .goal b,#v-stats .scard .hint b{color:var(--st-ink);font-weight:700;font-variant-numeric:tabular-nums}
+#v-stats .sgrid{gap:14px}
+#v-stats .scard .sh{align-items:center}
+#v-stats .scard .sh span{font-size:11px;font-weight:700;color:var(--st-mute);background:var(--st-wash);border-radius:999px;padding:3px 10px}
+#v-stats .scard .hint{font-size:12px;line-height:1.7;color:var(--st-sub);margin:0 0 4px}
+#v-stats .scard .hint.goalline{color:var(--st-mute)}
+#v-stats .alnote,#v-stats .stnote{font-size:12px;line-height:1.7;color:var(--st-sub);margin:16px 4px 0}
+#v-stats .none{color:var(--st-sub);background:var(--st-card);border-radius:18px;box-shadow:var(--st-shadow);padding:20px;font-size:14px}
 ol.steps{padding-left:1.4em;line-height:1.9}
 .meet .hint{color:var(--ink)}
 .opsbtn{width:100%;margin:6px 0 4px}
@@ -1790,10 +1823,10 @@ function renderAirlines(){
   const card = ([g, label]) => { const x = st[g]; const next = KM_GOALS.find(([v]) => v > x.km) || KM_GOALS[KM_GOALS.length-1];
     const prev = [...KM_GOALS].reverse().find(([v]) => v <= x.km); const base = prev ? prev[0] : 0;
     const pct = Math.min(100, Math.round((x.km - base) / (next[0] - base) * 100));
-    return `<div class="alcard"><div class="g">${label}</div><div class="big">${fmtKm(x.km)}<span class="sub"> km</span></div>
-      <div class="sub">${x.n}便・${x.r.size}路線</div>
+    return `<div class="alcard" data-g="${g}"><div class="g">${label}</div><div class="big">${fmtKm(x.km)}<span class="sub">km</span></div>
+      <div class="sub"><b>${x.n}</b> 便・<b>${x.r.size}</b> 路線</div>
       <div class="bar" aria-hidden="true"><i style="width:${x.km >= next[0] ? 100 : pct}%"></i></div>
-      <div class="goal">${x.km >= next[0] ? `${next[1]}を達成` : `${prev ? `${prev[1]}達成・` : ""}次は${next[1]}（あと${fmtKm(next[0] - x.km)}km）`}</div></div>`; };
+      <div class="goal">${x.km >= next[0] ? `${next[1]}を達成` : `${next[1]}まで<br>あと <b>${fmtKm(next[0] - x.km)}</b> km${prev ? `<br><span class="done">${prev[1]}達成</span>` : ""}`}</div></div>`; };
   const total = S.flights.length;
   if(FOCUS !== "ALL"){
     const x = st[FOCUS], label = GROUPS.find(([g]) => g === FOCUS)[1];
@@ -1804,8 +1837,9 @@ function renderAirlines(){
   }
   if(!total){ $("airlineStats").innerHTML = `<p class="none">フライトを記録すると、航空会社ごとの記録がここに出ます。</p>`; return; }
   const j = st.JAL.km, a = st.ANA.km;
-  const head = (j || a) ? (j === a ? "JAL派とANA派のちょうど真ん中" : j > a ? "あなたは JAL派" : "あなたは ANA派") : "";
-  $("airlineStats").innerHTML = (head ? `<p class="alhead">${head}</p>` : "") + `<div class="alstats">${GROUPS.slice(0,2).map(card).join("")}</div>`
+  const lead = j === a ? "" : j > a ? "JAL" : "ANA";
+  const head = (j || a) ? (lead ? `あなたは <b>${lead}派</b>` : "JAL派とANA派のちょうど真ん中") : "";
+  $("airlineStats").innerHTML = (head ? `<p class="alhead" data-lead="${lead}">${head}</p>` : "") + `<div class="alstats">${GROUPS.slice(0,2).map(card).join("")}</div>`
     + (st.OTHER.n ? `<div class="alstats" style="margin-top:12px;grid-template-columns:1fr">${card(GROUPS[2])}</div>` : "")
     + (unset ? `<p class="alnote">航空会社が未記録のフライトが${unset}便あります。下の一覧から記録できます。</p>` : "");
 }
@@ -2843,18 +2877,18 @@ function renderStatus(){
   const y = YEAR || new Date().getFullYear(), st = statusSummary(y);
   const bar = (v, max) => `<div class="sbar"><i style="width:${Math.min(100, Math.round(v / max * 100))}%"></i></div>`;
   const next = ANA_TIERS.find(([v]) => v > st.ana.pp);
-  el.innerHTML = `<div class="scard"><div class="sh"><b>ANA プレミアムポイント</b><span>${y}年</span></div>
+  el.innerHTML = `<div class="scard" data-brand="ANA"><div class="sh"><b>ANA プレミアムポイント</b><span>${y}年</span></div>
       <div class="sv">${fmtKm(st.ana.pp)}<small> PP</small></div>
-      ${next ? `${bar(st.ana.pp, next[0])}<p class="hint">${next[1]}（${fmtKm(next[0])}）まで あと${fmtKm(next[0] - st.ana.pp)}</p>` : `<p class="hint">ダイヤモンド（100,000）に届いています</p>`}
+      ${next ? `${bar(st.ana.pp, next[0])}<p class="hint goalline">${next[1]}（${fmtKm(next[0])}）まで　あと <b>${fmtKm(next[0] - st.ana.pp)}</b></p>` : `<p class="hint">ダイヤモンド（100,000）に届いています</p>`}
       <p class="hint">ANAグループのフライト ${st.ana.n}便${st.ana.assumed ? `（うち${st.ana.assumed}便は運賃が未選択のため「スタンダード」で計算）` : ""}</p></div>
-    <div class="scard"><div class="sh"><b>JAL FLY ON ポイント</b><span>${y}年</span></div>
+    <div class="scard" data-brand="JAL"><div class="sh"><b>JAL FLY ON ポイント</b><span>${y}年</span></div>
       <div class="sv">${fmtKm(st.jal.fop)}<small> FOP</small></div>
-      ${(() => { const nj = jalTiers(y).find(([v]) => v > st.jal.fop); return nj ? `${bar(st.jal.fop, nj[0])}<p class="hint">${nj[1]}（${fmtKm(nj[0])}）まで あと${fmtKm(nj[0] - st.jal.fop)}</p>` : `<p class="hint">ダイヤモンド（100,000）に届いています</p>`; })()}
+      ${(() => { const nj = jalTiers(y).find(([v]) => v > st.jal.fop); return nj ? `${bar(st.jal.fop, nj[0])}<p class="hint goalline">${nj[1]}（${fmtKm(nj[0])}）まで　あと <b>${fmtKm(nj[0] - st.jal.fop)}</b></p>` : `<p class="hint">ダイヤモンド（100,000）に届いています</p>`; })()}
       <p class="hint">JALグループのフライト ${st.jal.n}便${st.jal.assumed ? `（うち${st.jal.assumed}便は運賃が未選択のため「セイバー」で計算）` : ""}</p></div>
-    <div class="scard"><div class="sh"><b>JAL Life Status ポイント</b><span>これまでの合計</span></div>
+    <div class="scard" data-brand="JAL"><div class="sh"><b>JAL Life Status ポイント</b><span>これまでの合計</span></div>
       <div class="sv">${fmtKm(st.ls)}<small> ポイント</small></div>${bar(st.ls, JGC_LS)}
-      <p class="hint">JGC入会の基準（${fmtKm(JGC_LS)}）まで あと${fmtKm(Math.max(0, JGC_LS - st.ls))}。このアプリに記録した国内線の搭乗分（1搭乗5ポイント）だけを数えています。</p></div>
-    <p class="hint">各社の公開情報（2026年10月時点）をもとにした目安です。区間マイルは、JALが公開している国内線区間マイル表にある区間はその値を、ない区間は地図上の距離から計算しています。キャンペーンのボーナスは含みません。正式な数字は各社のサイトで確かめてください。運賃は、フライトを押すと選べます。</p>` + planHTML(y, st);
+      <p class="hint goalline">JGC入会の基準（${fmtKm(JGC_LS)}）まで　あと <b>${fmtKm(Math.max(0, JGC_LS - st.ls))}</b></p><p class="hint">このアプリに記録した国内線の搭乗分（1搭乗5ポイント）だけを数えています。</p></div>
+    <p class="stnote">各社の公開情報（2026年10月時点）をもとにした目安です。区間マイルは、JALが公開している国内線区間マイル表にある区間はその値を、ない区間は地図上の距離から計算しています。キャンペーンのボーナスは含みません。正式な数字は各社のサイトで確かめてください。運賃は、フライトを押すと選べます。</p>` + planHTML(y, st);
 }
 function fareOptions(airline, t, current){
   const tb = fareTable(airline, t); if(!tb) return "";
