@@ -1,6 +1,6 @@
 // 運用の判定の中心（_shared/ops_core.js）が、画面（src/index.html の <ops-core> の部分）と同じであること、と判定の決まりのテスト
 import { assertEquals } from "jsr:@std/assert@1";
-import { OPS_AIRPORTS, observeOps } from "../functions/_shared/ops_core.js";
+import { OPS_AIRPORTS, observeOps, nightRule } from "../functions/_shared/ops_core.js";
 
 Deno.test("ops_core.js は src/index.html の <ops-core> の部分を写した最新のもの（違えば node tools/sync_ops_core.mjs）", async () => {
   const src = await Deno.readTextFile(new URL("../../src/index.html", import.meta.url));
@@ -45,4 +45,27 @@ Deno.test("便の少ない空港：着陸1機と離陸1機が同じ運用なら�
   assertEquals(observeOps(KOJ_1015.filter((p) => p.callsign === "JL3740"), A.KOJ), null);
   // 小型機（登録記号）だけでは判定しない
   assertEquals(observeOps(KOJ_1015.filter((p) => p.callsign === "JA04KM"), A.KOJ), null);
+});
+
+Deno.test("深夜：羽田は23時〜6時に深夜の運用（北風なら34R着陸・05離陸、南風なら23着陸・16L離陸）", () => {
+  // deno-lint-ignore no-explicit-any
+  const H = (OPS_AIRPORTS as any).HND;
+  const at = (iso: string, wdir: number) => H.estimate({ wdir, wspd: 12, vis_m: 9999, time: iso }, new Date(iso));
+  assertEquals(at("2026-10-16T14:30:00Z", 360).mode, "nightN");   // 23:30
+  assertEquals(at("2026-10-16T14:30:00Z", 200).mode, "nightS");
+  assertEquals(at("2026-10-16T20:59:00Z", 360).mode, "nightN");   // 5:59
+  assertEquals(at("2026-10-16T21:00:00Z", 360).mode, "north");    // 6:00
+  assertEquals(H.modes.nightN.arr, ["34R"]); assertEquals(H.modes.nightN.dep, ["05"]);
+  assertEquals(H.modes.nightS.arr, ["23"]); assertEquals(H.modes.nightS.dep, ["16L"]);
+});
+
+Deno.test("夜の決まり：福岡23時は運用時間外、成田1時は閉鎖・23時半はA滑走路だけ、昼はなし", () => {
+  // deno-lint-ignore no-explicit-any
+  const A = OPS_AIRPORTS as any;
+  assertEquals(nightRule(A.FUK, new Date("2026-10-16T14:00:00Z"))?.closed, true);
+  assertEquals(nightRule(A.NRT, new Date("2026-10-16T16:00:00Z"))?.closed, true);
+  assertEquals(nightRule(A.NRT, new Date("2026-10-16T14:30:00Z"))?.closed, undefined);
+  assertEquals(nightRule(A.FUK, new Date("2026-10-16T04:00:00Z")), null);
+  assertEquals(nightRule(A.ITM, new Date("2026-10-16T12:30:00Z"))?.closed, true);   // 21:30
+  assertEquals(nightRule(A.KMJ, new Date("2026-10-16T12:15:00Z")), null);           // 21:15
 });
