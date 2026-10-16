@@ -119,7 +119,26 @@ for (const url of ["index.html#ops-FUK", "now.html?ap=FUK"]) {
   await p.goto(`${BASE}/${url}`); await p.waitForTimeout(2500);
   const txt = await p.locator("body").innerText().catch(() => "");
   ok(txt.includes("運用時間外") && txt.includes("22時〜7時は離着陸できません"), `福岡 23:00（${url}）：運用時間外`, txt.slice(0, 200));
+  ok(txt.includes("運用時間：7時〜22時") && txt.includes("いまは時間外"), `福岡 23:00（${url}）：運用時間の表示`, txt.slice(0, 200));
   ok(errs.length === 0, `福岡 23:00（${url}）：画面のエラーなし`, errs.join(" / "));
+  await ctx.close();
+}
+
+// 4) 門限チャレンジ：伊丹20時30分。到着済み・間に合いそう（いま見えている機体）・過ぎる見込み・欠航
+{
+  const at = new Date("2026-10-16T11:30:00Z"), close = "2026-10-16T12:00:00Z", T = (m) => new Date(Date.parse(close) + m * 60000).toISOString();
+  const { ctx, p, errs } = await page("ITM", "b", at);
+  await p.route(FAKE + "/rest/v1/rpc/curfew_flights", (r) => r.fulfill({ json: { iata: "ITM", close_at: close, flights: [
+    { dir: "arr", flight: "JL2087", other: "HND", sched: T(-40), est: null, actual: T(-35), status: "Arrived", cancelled: false },
+    { dir: "arr", flight: "TST1", other: "HND", sched: T(-25), est: T(-20), actual: null, status: "EstimatedArrival", cancelled: false, dep_actual: T(-90) },
+    { dir: "arr", flight: "NH039", other: "HND", sched: T(-5), est: T(12), actual: null, status: "EstimatedArrival", cancelled: false },
+    { dir: "dep", flight: "JL2205", other: "FUK", sched: T(-10), est: null, actual: null, status: "Cancelled", cancelled: true },
+  ] } }));
+  await p.goto(`${BASE}/index.html#ops-ITM`); await p.waitForTimeout(3500);
+  const txt = await p.locator("#opsCurfew").innerText().catch(() => "");
+  ok(txt.includes("門限チャレンジ") && txt.includes("21:00") && txt.includes("あと 30分"), "伊丹 20:30：門限チャレンジと残り時間", txt.slice(0, 120));
+  ok(txt.includes("到着") && txt.includes("間に合いそう") && txt.includes("過ぎる見込み") && txt.includes("欠航"), "伊丹 20:30：便ごとの判定", txt);
+  ok(errs.length === 0, "伊丹 20:30：画面のエラーなし", errs.join(" / "));
   await ctx.close();
 }
 

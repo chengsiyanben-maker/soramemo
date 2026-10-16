@@ -38,6 +38,7 @@ h1{font:800 24px/1.35 var(--mincho);margin:14px 0 2px}
 .src.live{color:var(--live);border-color:var(--live)}
 .why{margin:8px 0 0}
 .note{color:var(--sumi);font-size:13px;margin:6px 0 0}
+.hours{color:var(--sumi);font-size:13px;margin:6px 0 0}.hours b{color:var(--ink)}
 .night{margin:8px 0 0;padding:6px 10px;border-radius:8px;background:#1C2027;color:#E8ECF1;font-size:13px;line-height:1.5}
 .rw{display:flex;gap:18px;flex-wrap:wrap;margin:10px 0 0;font-size:14px}
 .rw b{display:inline-block;min-width:2.4em;text-align:center;border-radius:4px;padding:0 6px;margin-left:4px;background:var(--ink);color:var(--paper)}
@@ -66,6 +67,7 @@ footer a{color:var(--sumi)}
     <p class="why" id="why"></p>
     <div class="rw" id="rw"></div>
     <p class="note" id="opnote"></p>
+    <p class="hours" id="hours"></p>
     <p class="night" id="night" hidden></p>
   </section>
   <section class="card" id="trafficBox" hidden><h2>近くを飛んでいる機体</h2><p id="counts" style="margin:0"></p><ul class="list" id="arrList"></ul></section>
@@ -116,6 +118,8 @@ async function load(){
   const nr = nightRule(def), shut = nr && nr.closed && !live;   // 夜の決まり（運用時間外・深夜の優先滑走路など。AIP JAPAN）
   $("modeLbl").textContent = shut ? "運用時間外" : !live && est.unsure ? "判定できず" : op.label;
   $("src").textContent = shut ? "夜間" : live ? "実際の機体から判定" : est.unsure ? "判定できず" : "風から推定";
+  const hrs = opsHours(def);
+  $("hours").innerHTML = `運用時間：<b>${hrs}</b>${hrs === "24時間" ? "" : opsOpen(def) ? "（いまは運用中）" : "（いまは時間外）"}（AIP JAPAN）`;
   $("night").hidden = !nr;
   $("night").textContent = nr ? `夜間：${nr.text}${shut ? "。下は、朝の最初の便が使いそうな向き（風から推定）です" : ""}（AIP JAPAN）` : "";
   $("src").className = "src" + (live ? " live" : "");
