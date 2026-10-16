@@ -428,6 +428,60 @@ body.game nav.tabs button[aria-current="page"]{color:#fff}
 .scanframe{position:absolute;inset:18% 8%;border:3px solid rgba(255,255,255,.85);border-radius:10px}
 .bpcard{background:var(--sky);border-radius:12px;padding:12px 14px;margin:8px 0;font-size:15px}
 .bpcard b{font-family:var(--mincho);font-size:20px}
+/* ---------- 下のメニュー：浮いたピル型・すりガラス・線のアイコン ---------- */
+:root{--nav-acc:#2563EB;--nav-glass:rgba(255,255,255,.72);--nav-edge:rgba(255,255,255,.6);--nav-ink:#6B7280;--nav-on:#1F2937;
+  --nav-shadow:0 10px 30px -8px rgba(17,24,39,.22),0 2px 6px rgba(17,24,39,.06)}
+:root[data-palette="akashiro"]{--nav-acc:#D63131}
+:root[data-palette="sora"]{--nav-acc:#1F6FD1}
+:root[data-palette="board"]{--nav-acc:#FFB547;--nav-glass:rgba(22,25,31,.72);--nav-edge:rgba(255,255,255,.08);--nav-ink:#8B95A3;--nav-on:#F3F4F6;
+  --nav-shadow:0 10px 30px -6px rgba(0,0,0,.6)}
+:root[data-focus="JAL"]{--nav-acc:#C8102E}:root[data-focus="ANA"]{--nav-acc:#1C4FA0}
+:root[data-palette="board"][data-focus="JAL"]{--nav-acc:#FF5A6E}:root[data-palette="board"][data-focus="ANA"]{--nav-acc:#6EA0FF}
+nav.tabs{left:0;right:0;bottom:0;background:none;border:0;padding:0 14px calc(12px + env(safe-area-inset-bottom,0px));pointer-events:none}
+nav.tabs .in{pointer-events:auto;max-width:520px;padding:6px;border-radius:999px;background:var(--nav-glass);
+  -webkit-backdrop-filter:blur(20px) saturate(1.6);backdrop-filter:blur(20px) saturate(1.6);
+  box-shadow:var(--nav-shadow),inset 0 0 0 1px var(--nav-edge)}
+nav.tabs button{display:flex;flex-direction:column;align-items:center;gap:2px;padding:7px 0 13px;border-radius:999px;font-size:10.5px;font-weight:600;
+  letter-spacing:.04em;color:var(--nav-ink);transition:color .2s ease,background .2s ease;-webkit-tap-highlight-color:transparent}
+nav.tabs button svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;transition:transform .2s ease}
+nav.tabs button[aria-current="page"]{color:var(--nav-on);font-weight:800}
+nav.tabs button[aria-current="page"] svg{color:var(--nav-acc);stroke-width:1.9;transform:translateY(-1px)}
+nav.tabs button[aria-current="page"]::before{content:"";position:absolute;top:auto;bottom:3px;left:50%;right:auto;width:5px;height:5px;margin-left:-2.5px;
+  border-radius:50%;background:var(--nav-acc);box-shadow:0 0 8px var(--nav-acc)}
+nav.tabs button:active svg{transform:scale(.92)}
+body.game nav.tabs{background:none;border:0}
+body.game nav.tabs .in{background:rgba(19,33,61,.78);box-shadow:var(--nav-shadow),inset 0 0 0 1px rgba(255,255,255,.08)}
+body.game nav.tabs button[aria-current="page"] svg{color:#7FB3FF}
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){nav.tabs .in{background:var(--paper)}}
+
+/* ---------- ホームの空：時間帯で色が変わる空と、航空図の透かし。下へ行くほど背景に溶ける ---------- */
+.hero{position:absolute;left:0;right:0;top:0;height:560px;z-index:0;pointer-events:none;overflow:hidden;
+  -webkit-mask-image:linear-gradient(180deg,#000 0%,#000 55%,transparent 100%);mask-image:linear-gradient(180deg,#000 0%,#000 55%,transparent 100%)}
+:root:not([data-view="home"]) .hero{display:none}
+.hero-sky,.hero-art{position:absolute;inset:0;will-change:transform,opacity}
+.hero-sky{background:var(--sky-grad)}
+.hero-art{opacity:var(--art-op,.5);background-repeat:no-repeat;background-position:center top;background-size:760px auto;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 760 560'%3E%3Cg fill='none' stroke='%23ffffff' stroke-opacity='.55'%3E%3Cpath d='M-20 420c120-60 220-40 330-90s180-150 300-160 170 30 170 30' stroke-width='1'/%3E%3Cpath d='M-20 460c140-50 240-30 350-80s190-140 310-150 140 20 140 20' stroke-width='.8'/%3E%3Cpath d='M-20 500c150-40 260-20 370-70s200-130 320-140 110 10 110 10' stroke-width='.6'/%3E%3Cpath d='M60 560c40-120 140-170 260-200s260-10 340-80' stroke-width='.6'/%3E%3C/g%3E%3Cg fill='none' stroke='%23ffffff' stroke-opacity='.75' stroke-dasharray='2 7' stroke-linecap='round' stroke-width='1.4'%3E%3Cpath d='M40 300C220 140 460 120 720 60'/%3E%3Cpath d='M120 520C260 360 420 300 700 250'/%3E%3C/g%3E%3Cg fill='%23ffffff' fill-opacity='.85'%3E%3Ccircle cx='40' cy='300' r='3'/%3E%3Ccircle cx='720' cy='60' r='3'/%3E%3Ccircle cx='700' cy='250' r='3'/%3E%3C/g%3E%3C/svg%3E")}
+:root{--sky-grad:linear-gradient(180deg,#8EC5EE 0%,#BFDDF4 38%,#E3EFF8 70%,var(--sky) 100%)}
+:root[data-sky="dawn"]{--sky-grad:linear-gradient(180deg,#9DB4E0 0%,#F3C2B4 40%,#FBE3CF 72%,var(--sky) 100%)}
+:root[data-sky="dusk"]{--sky-grad:linear-gradient(180deg,#2F3A6B 0%,#8A5D86 38%,#E89A82 70%,var(--sky) 100%)}
+:root[data-sky="night"]{--sky-grad:linear-gradient(180deg,#0B1530 0%,#1A2A55 45%,#33467A 75%,var(--sky) 100%);--art-op:.35}
+:root[data-palette="board"]{--sky-grad:linear-gradient(180deg,#05070B 0%,#101A2C 45%,#1A2236 75%,var(--sky) 100%);--art-op:.22}
+.wrap{position:relative;z-index:1}
+/* 濃い空の上では、ヘッダーと切り替えを白い文字に */
+:root:is([data-sky="dusk"],[data-sky="night"]):not([data-palette="board"])[data-view="home"] .topzone{--ink:#F9FAFB;--sumi:rgba(255,255,255,.78);--shu:#FFFFFF;--line:rgba(255,255,255,.35);
+  --paper:#1F2937;--hm-pill:rgba(255,255,255,.16);--hm-mute:rgba(255,255,255,.9);color:var(--ink)}
+:root[data-view="home"] header.top .brand{text-shadow:0 1px 12px rgba(0,0,0,.12)}
+/* 空の上のカード：すりガラス */
+:root[data-view="home"] #v-home .ckcard{background:linear-gradient(180deg,rgba(255,255,255,.80),rgba(255,255,255,.66));
+  -webkit-backdrop-filter:blur(22px) saturate(1.5);backdrop-filter:blur(22px) saturate(1.5);
+  box-shadow:0 1px 0 rgba(255,255,255,.7) inset,0 24px 48px -20px rgba(15,23,42,.35),0 4px 12px rgba(15,23,42,.06)}
+:root[data-palette="board"][data-view="home"] #v-home .ckcard{background:linear-gradient(180deg,rgba(22,25,31,.82),rgba(18,20,26,.72));
+  box-shadow:0 1px 0 rgba(255,255,255,.05) inset,0 24px 48px -20px rgba(0,0,0,.7)}
+#v-home .inflight,#v-home .tally{box-shadow:0 16px 36px -18px rgba(15,23,42,.28),0 2px 6px rgba(15,23,42,.05)}
+:root[data-palette="board"] #v-home .inflight,:root[data-palette="board"] #v-home .tally{box-shadow:0 16px 36px -18px rgba(0,0,0,.7)}
+@media (prefers-reduced-motion:reduce){.hero-sky,.hero-art{transform:none!important}}
+
 /* ---------- ホーム（上半分）：ヘッダー・チェックインのカード・直近の記録・3つの数字 ---------- */
 :root{--hm-ink:#374151;--hm-sub:#9CA3AF;--hm-mute:#6B7280;--hm-card:#FFFFFF;--hm-tint:#F8FAFC;--hm-pill:rgba(17,24,39,.05);
   --hm-shadow:0 1px 2px rgba(17,24,39,.04),0 10px 30px -8px rgba(17,24,39,.10);
@@ -738,6 +792,7 @@ details.rgrp .rgbar i{display:block;height:100%;background:var(--shu)}
 </style>
 </head>
 <body>
+<div class="hero" id="hero" aria-hidden="true"><div class="hero-sky"></div><div class="hero-art"></div></div>
 <main class="wrap">
   <div class="topzone">
   <header class="top">
@@ -953,14 +1008,14 @@ details.rgrp .rgbar i{display:block;height:100%;background:var(--shu)}
 </main>
 
 <nav class="tabs" aria-label="画面の切り替え"><div class="in">
-  <button data-v="home" data-mode="rally" aria-current="page">ホーム</button>
-  <button data-v="book" data-mode="rally">図鑑</button>
-  <button data-v="log" data-mode="rally">フライト</button>
-  <button data-v="ops" data-mode="rally">運用</button>
-  <button data-v="stats" data-mode="rally">成績</button>
-  <button data-v="co" data-mode="game" hidden>会社</button>
-  <button data-v="fleet" data-mode="game" hidden>路線・機材</button>
-  <button data-v="gods" data-mode="game" hidden>守り神</button>
+  <button data-v="home" data-mode="rally" aria-current="page"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 10.5 12 4l8.5 6.5"/><path d="M5.5 9v10h4.5v-5.5h4V19h4.5V9"/></svg><span>ホーム</span></button>
+  <button data-v="book" data-mode="rally"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5C4 4.7 4.7 4 5.5 4H11v15H5.5c-.8 0-1.5.5-1.5 1.2V5.5Z"/><path d="M20 5.5c0-.8-.7-1.5-1.5-1.5H13v15h5.5c.8 0 1.5.5 1.5 1.2V5.5Z"/></svg><span>図鑑</span></button>
+  <button data-v="log" data-mode="rally"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10.5 13.5 4 11l1.4-1.4 7 1.1 3.9-3.9c.8-.8 2.1-.8 2.9 0s.8 2.1 0 2.9l-3.9 3.9 1.1 7L15 22l-2.5-6.5-3 3v2.5L8 22.5l-1.3-3.2L3.5 18 5 16.5h2.5Z"/></svg><span>フライト</span></button>
+  <button data-v="ops" data-mode="rally"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.5"/><path d="M12 12 18 6"/><circle cx="12" cy="12" r="1" fill="currentColor"/></svg><span>運用</span></button>
+  <button data-v="stats" data-mode="rally"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h16"/><path d="M7 16v-4"/><path d="M12 16V8"/><path d="M17 16v-6"/></svg><span>成績</span></button>
+  <button data-v="co" data-mode="game" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V8l6-3v15"/><path d="M10 20V10l10 3v7"/><path d="M3 20h18"/></svg><span>会社</span></button>
+  <button data-v="fleet" data-mode="game" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="17" r="2"/><circle cx="18" cy="7" r="2"/><path d="M8 17h4a3 3 0 0 0 3-3v-4a3 3 0 0 1 3-3"/></svg><span>路線・機材</span></button>
+  <button data-v="gods" data-mode="game" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5 14.4 9l5.6.4-4.3 3.6 1.4 5.5L12 15.6l-5.1 2.9 1.4-5.5L4 9.4 9.6 9Z"/></svg><span>守り神</span></button>
 </div></nav>
 
 <dialog id="dStamp"><div class="dlg" id="dStampBody"></div></dialog>
@@ -1781,7 +1836,7 @@ function render(){
 function renderHome(){
   const v = visited(), r = routes(), totalKm = focusKm();
   $("tAirports").textContent = shownAirports().size; $("tTotal").textContent = A.length;
-  $("focusBar").hidden = FOCUS === "ALL";
+  $("focusBar").hidden = FOCUS === "ALL"; document.documentElement.dataset.focus = FOCUS;
   $("focusBar").innerHTML = FOCUS === "ALL" ? "" : `<b>${FOCUS_LABEL[FOCUS]}</b>を表示中。${FOCUS}グループのフライトだけで数えています。<button class="linkbtn" id="focusOff">ノーマルに戻す</button>`;
   $("tRoutes").textContent = r.size; $("tKm").textContent = fmtKm(totalKm);
 
@@ -2023,6 +2078,7 @@ function goTab(v, seg){
   b.setAttribute("aria-current","page"); LAST_TAB[MODE] = v;
   const wasOps = $("v-ops").classList.contains("on");
   document.querySelectorAll("section.view").forEach(s => s.classList.toggle("on", s.id === "v-" + v));
+  document.documentElement.dataset.view = v;
   if(v === "ops" && !wasOps) openOps(); else if(v !== "ops" && wasOps) stopTraffic();
   if(seg) setBookSeg(seg);
   renderVisible();
@@ -2046,6 +2102,16 @@ function setGameOn(on){
   setMode(on ? MODE : "rally");
 }
 document.querySelectorAll("nav.tabs button").forEach(b => b.onclick = () => { goTab(b.dataset.v); track("tab", b.dataset.v); });
+// ホームの空：時間帯（朝 5〜8時・昼・夕 16〜19時・夜）で色を変え、下へスクロールすると、ゆっくり動きながら薄れる
+function skyNow(d = new Date()){ const h = d.getHours() + d.getMinutes() / 60; return h >= 5 && h < 8 ? "dawn" : h >= 8 && h < 16 ? "day" : h >= 16 && h < 19 ? "dusk" : "night"; }
+document.documentElement.dataset.sky = skyNow(); document.documentElement.dataset.view = document.documentElement.dataset.view || "home";
+setInterval(() => { document.documentElement.dataset.sky = skyNow(); }, 5 * 60e3);
+(() => { const sky = document.querySelector(".hero-sky"), art = document.querySelector(".hero-art"); if(!sky || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  let ticking = false;
+  const draw = () => { ticking = false; const y = Math.min(window.scrollY, 600);
+    sky.style.transform = `translate3d(0,${y * .35}px,0)`; sky.style.opacity = String(Math.max(0, 1 - y / 520));
+    art.style.transform = `translate3d(0,${y * .18}px,0)`; art.style.opacity = String(Math.max(0, 1 - y / 360)); };
+  addEventListener("scroll", () => { if(!ticking){ ticking = true; requestAnimationFrame(draw); } }, { passive:true }); })();
 // ダイアログの「閉じる」（HTMLに直接 onclick を書かない：ページの防御設定 CSP のため）
 document.addEventListener("click", e => { const b = e.target.closest("[data-close]"); if(b) b.closest("dialog").close(); });
 document.querySelectorAll("#modeSw [data-mode]").forEach(b => b.onclick = () => { setMode(b.dataset.mode); track("mode", b.dataset.mode); });
