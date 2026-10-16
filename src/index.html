@@ -428,6 +428,62 @@ body.game nav.tabs button[aria-current="page"]{color:#fff}
 .scanframe{position:absolute;inset:18% 8%;border:3px solid rgba(255,255,255,.85);border-radius:10px}
 .bpcard{background:var(--sky);border-radius:12px;padding:12px 14px;margin:8px 0;font-size:15px}
 .bpcard b{font-family:var(--mincho);font-size:20px}
+/* ---------- ホーム（上半分）：ヘッダー・チェックインのカード・直近の記録・3つの数字 ---------- */
+:root{--hm-ink:#374151;--hm-sub:#9CA3AF;--hm-mute:#6B7280;--hm-card:#FFFFFF;--hm-tint:#F8FAFC;--hm-pill:rgba(17,24,39,.05);
+  --hm-shadow:0 1px 2px rgba(17,24,39,.04),0 10px 30px -8px rgba(17,24,39,.10);
+  --cta-hi:#3B4252;--cta-lo:#0F172A;--cta-text:#FFFFFF;--cta-glow:rgba(56,189,248,.38);--cta-ring:rgba(255,255,255,.9);--cta-ring2:rgba(17,24,39,.06);
+  --jal:#C8102E;--ana:#1C4FA0}
+:root[data-palette="akashiro"]{--hm-tint:#FFF7F7;--cta-hi:#F05252;--cta-lo:#B91C1C;--cta-glow:rgba(239,68,68,.40)}
+:root[data-palette="sora"]{--hm-tint:#F3FBFE;--cta-hi:#3B82F6;--cta-lo:#1E3A8A;--cta-glow:rgba(56,189,248,.45)}
+:root[data-palette="board"]{--hm-ink:#E5E7EB;--hm-sub:#8B95A3;--hm-mute:#A7B0BC;--hm-card:#16191F;--hm-tint:#12151A;--hm-pill:rgba(255,255,255,.07);
+  --hm-shadow:0 1px 2px rgba(0,0,0,.35),0 10px 30px -8px rgba(0,0,0,.5);
+  --cta-hi:#FFCB7A;--cta-lo:#E08A00;--cta-text:#0B0D10;--cta-glow:rgba(255,181,71,.45);--cta-ring:rgba(255,255,255,.05);--cta-ring2:rgba(255,181,71,.18);--jal:#FF5A6E;--ana:#6EA0FF}
+header.top{padding:22px 2px 16px}
+header.top .brand{font-size:20px;gap:9px}
+header.top .brand svg{width:26px;height:26px}
+#openSettings.iconbtn{border:0;background:var(--hm-pill);color:var(--hm-mute);font-size:12.5px;font-weight:600;padding:7px 14px;letter-spacing:.02em}
+#v-home .ckcard{position:relative;isolation:isolate;margin:14px 0 0;padding:26px 22px 20px;border-radius:24px;text-align:center;
+  background:linear-gradient(180deg,var(--hm-card) 0%,var(--hm-tint) 100%);box-shadow:var(--hm-shadow);color:var(--hm-ink)}
+#v-home .nearest{padding:0}
+#v-home .nearest .label{font-size:12px;font-weight:600;letter-spacing:.08em;color:var(--hm-sub)}
+#v-home .nearest .name{font-family:var(--gothic);font-weight:800;font-size:clamp(24px,6.6vw,30px);line-height:1.3;letter-spacing:0;color:var(--hm-ink);margin:6px 0 6px}
+#v-home .nearest .name.idle{font-size:18px;font-weight:700;color:var(--hm-mute)}
+#v-home .nearest .dist{font-size:12.5px;line-height:1.7;color:var(--hm-sub)}
+#v-home .nearest .dist b{color:var(--hm-ink)}
+#v-home .flap:not(:empty){justify-content:center}
+#v-home .demo-pick{text-align:left}
+#v-home .cta{position:relative;display:grid;place-items:center;width:164px;height:164px;margin:30px auto 22px;padding:0;border:0;border-radius:50%;
+  background:radial-gradient(circle at 32% 26%,var(--cta-hi) 0%,var(--cta-lo) 72%);color:var(--cta-text);font-size:16px;font-weight:800;letter-spacing:.14em;
+  box-shadow:0 0 0 10px var(--cta-ring),0 0 0 11px var(--cta-ring2),0 22px 44px -14px var(--cta-glow),inset 0 1px 0 rgba(255,255,255,.28),inset 0 -10px 24px rgba(0,0,0,.18);
+  transition:transform .15s ease,box-shadow .2s ease;-webkit-tap-highlight-color:transparent}
+#v-home .cta::before{content:"";position:absolute;inset:-26px;border-radius:50%;z-index:-1;background:radial-gradient(circle,var(--cta-glow) 0%,transparent 68%);
+  filter:blur(12px);opacity:.7;animation:ctaGlow 3.4s ease-in-out infinite}
+#v-home .cta:hover{transform:translateY(-1px)}
+#v-home .cta:active{transform:scale(.97)}
+#v-home .cta:focus-visible{outline:3px solid var(--cta-glow);outline-offset:14px}
+#v-home .cta:disabled{opacity:.55}
+#v-home .cta:disabled::before{animation:none;opacity:.3}
+@keyframes ctaGlow{0%,100%{transform:scale(.94);opacity:.55}50%{transform:scale(1.04);opacity:.85}}
+@media (prefers-reduced-motion:reduce){#v-home .cta::before{animation:none}}
+#v-home .ckcard .msg{font-size:14px;margin:0 0 4px;min-height:0}
+#v-home .ckhint{font-size:12px;line-height:1.7;color:var(--hm-sub);opacity:.9;margin:6px 8px 0}
+#v-home .inflight{position:relative;margin:18px 0 0;padding:18px 20px 18px 24px;border:0;border-radius:20px;background:var(--hm-card);box-shadow:var(--hm-shadow);color:var(--hm-ink)}
+#v-home .inflight::before{content:"";position:absolute;left:12px;top:18px;bottom:18px;width:2px;border-radius:2px;background:var(--accent,var(--shu));opacity:.85}
+#v-home .inflight[data-g="JAL"]{--accent:var(--jal)}#v-home .inflight[data-g="ANA"]{--accent:var(--ana)}
+#v-home .inflight .t{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:2px 12px;font-weight:400}
+#v-home .inflight .t b{font-size:18px;font-weight:800;line-height:1.4}
+#v-home .inflight .t time{font-size:13px;color:var(--hm-sub);font-variant-numeric:tabular-nums}
+#v-home .inflight p{font-size:12.5px;line-height:1.7;color:var(--hm-sub);margin:4px 0 0}
+#v-home .tally{margin:18px 0 0;padding:20px 8px;border:0;border-radius:20px;background:var(--hm-card);box-shadow:var(--hm-shadow);gap:4px}
+#v-home .tally>div{padding:0 4px;border:0}
+#v-home .tally .n{display:flex;justify-content:center;align-items:baseline;gap:2px;font-family:var(--gothic);font-weight:800;font-size:30px;line-height:1.1;
+  letter-spacing:-.01em;font-variant-numeric:tabular-nums;color:var(--hm-ink)}
+#v-home .tally .n small{font-size:12px;font-weight:600;color:var(--hm-sub);letter-spacing:0}
+#v-home .tally .u{font-size:11px;font-weight:600;letter-spacing:.08em;color:var(--hm-sub);margin-top:6px}
+[data-palette="board"] #v-home .tally .n span{font-family:var(--dotfont);font-weight:400;color:var(--shu)}
+#v-home .streak{margin:16px 4px 0;font-size:13px;color:var(--hm-mute)}
+#v-home .titlepill{margin:12px 0 0;border:0;background:var(--hm-pill);font-size:12px;padding:4px 12px}
+#v-home .boardzone{margin-top:36px}
 /* ---------- 成績の画面（航空会社別・ステータスの目安）：ゴシック体・数字を大きく・余白とうすい影のカード ---------- */
 #v-stats{--st-ink:#374151;--st-sub:#9CA3AF;--st-mute:#6B7280;--st-card:#FFFFFF;--st-track:#F1F2F4;--st-wash:#F7F8FA;
   --st-shadow:0 1px 2px rgba(17,24,39,.04),0 6px 20px rgba(17,24,39,.06);--jal:#C8102E;--ana:#1C4FA0;--other:#6B7280;color:var(--st-ink)}
@@ -699,6 +755,7 @@ details.rgrp .rgbar i{display:block;height:100%;background:var(--shu)}
   <!-- HOME -->
   <section class="view on" id="v-home" aria-label="ホーム">
     <div class="titlepill" id="titlePill" hidden></div>
+    <div class="ckcard">
     <div class="nearest">
       <div class="label" id="nearLabel">いちばん近い空港</div>
       <div class="flap" id="nearCode" aria-hidden="true"></div>
@@ -721,8 +778,9 @@ details.rgrp .rgbar i{display:block;height:100%;background:var(--shu)}
       <p class="msg" id="loginMsg" role="status" aria-live="polite"></p>
     </div>
     <button class="cta" id="checkin">チェックイン</button>
-    <p class="hint">空港の判定範囲（1〜2km）の中で押すと、その空港の印が押されます。</p>
     <p class="msg" id="msg" role="status" aria-live="polite"></p>
+    <p class="hint ckhint">空港の判定範囲（1〜2km）の中で押すと、その空港の印が押されます。</p>
+    </div>
     <div class="notice-slot" id="noticeSlot" hidden>
     <div class="queuebar" id="queueBar" hidden></div>
     <div class="queuebar" id="migrateBar" hidden></div>
@@ -732,9 +790,9 @@ details.rgrp .rgbar i{display:block;height:100%;background:var(--shu)}
     </div>
     <div id="inflight"></div>
     <div class="tally" aria-label="これまでの記録">
-      <div><div class="n" id="tAirports">0</div><div class="u">空港 / <span id="tTotal">86</span></div></div>
-      <div><div class="n" id="tRoutes">0</div><div class="u">路線</div></div>
-      <div><div class="n" id="tKm">0</div><div class="u">飛行距離 km</div></div>
+      <div><div class="n"><span id="tAirports">0</span><small>/<span id="tTotal">86</span></small></div><div class="u">空港</div></div>
+      <div><div class="n"><span id="tRoutes">0</span></div><div class="u">路線</div></div>
+      <div><div class="n"><span id="tKm">0</span><small>km</small></div><div class="u">飛行距離</div></div>
     </div>
     <p class="streak" id="streak"></p>
     <button class="btn2 opsbtn" id="opsOpen" hidden>羽田の今の運用（滑走路・進入）</button>
@@ -1723,7 +1781,8 @@ function renderHome(){
 
   const last = S.checkins[S.checkins.length-1], now = demo && S.demoClock ? S.demoClock : Date.now();
   $("inflight").innerHTML = last && (now - last.t) < RULE.maxGapH*36e5
-    ? `<div class="inflight"><div class="t">${BY[last.a].name}　${fmtDT(last.t)}</div><p>次の空港でチェックインすると、ここからのフライトが記録されます。</p></div>` : "";
+    ? (() => { const lf = [...S.flights].reverse().find(f => f.airline), g = lf ? (ALBY[lf.airline] || {}).group : "";
+        return `<div class="inflight"${g === "JAL" || g === "ANA" ? ` data-g="${g}"` : ""}><div class="t"><b>${BY[last.a].name}</b><time>${fmtDT(last.t)}</time></div><p>次の空港でチェックインすると、ここからのフライトが記録されます。</p></div>`; })() : "";
 
   const rec = [...v.entries()].sort((x,y)=>y[1]-x[1]).slice(0,6);
   $("recent").innerHTML = rec.length ? rec.map(([id,t]) => `<button class="cell got" data-a="${id}"><div class="slot">${stampSVG(BY[id], t)}</div><div class="nm">${stripesMini(tierOf(S.checkins.filter(c => c.a === id).length))}${BY[id].name}</div></button>`).join("")
