@@ -43,18 +43,21 @@ let fails = 0;
 const ok = (cond, label, extra = "") => { console.log((cond ? "OK " : "NG ") + label + (cond ? "" : "  " + extra)); if (!cond) fails++; };
 const browser = await chromium.launch();
 
-async function page(iata, mode) {
+// 時刻は固定する（深夜は別の運用・運用時間外になるため）。ふだんは日本時間の13時
+const NOON = new Date("2026-10-16T04:00:00Z");
+async function page(iata, mode, at = NOON) {
   const ctx = await browser.newContext({ viewport: { width: 390, height: 1400 } });
   await ctx.addInitScript(() => { localStorage.setItem("soramemo.onboarded", "1"); });
   const p = await ctx.newPage(), errs = [];
+  await p.clock.setFixedTime(at);
   p.on("pageerror", (e) => errs.push(String(e)));
   const def = OPS_AIRPORTS[iata];
   await p.route("https://cdn.jsdelivr.net/npm/@supabase/**", (r) => r.fulfill({ contentType: "text/javascript", body: readFileSync(ROOT + "tests/e2e/fake_sb.js", "utf8") }));
   await p.route(FAKE + "/**", (r) => {
     const u = new URL(r.request().url());
-    if (u.pathname.endsWith("/metar")) return r.fulfill({ json: { id: def.icao, time: new Date().toISOString(), raw: "TEST", wdir: null, wspd: 2, wgst: null, vis_m: 10000, vis_plus: true } });
-    if (u.pathname.endsWith("/airport-traffic")) return r.fulfill({ json: { iata, at: new Date().toISOString(), source: "adsb.lol", planes: planesFor(def, mode) } });
-    if (u.pathname.endsWith("/special_now")) return r.fulfill({ json: [{ reg: "JA819A", name: "ポケモンジェット 赤", airline: "ANA", callsign: "TST1", lat: def.center[0], lon: def.center[1], alt_ft: 2000, iata, phase: "arr", src: "x", at: new Date().toISOString() }] });
+    if (u.pathname.endsWith("/metar")) return r.fulfill({ json: { id: def.icao, time: at.toISOString(), raw: "TEST", wdir: null, wspd: 2, wgst: null, vis_m: 10000, vis_plus: true } });
+    if (u.pathname.endsWith("/airport-traffic")) return r.fulfill({ json: { iata, at: at.toISOString(), source: "adsb.lol", planes: planesFor(def, mode) } });
+    if (u.pathname.endsWith("/special_now")) return r.fulfill({ json: [{ reg: "JA819A", name: "ポケモンジェット 赤", airline: "ANA", callsign: "TST1", lat: def.center[0], lon: def.center[1], alt_ft: 2000, iata, phase: "arr", src: "x", at: at.toISOString() }] });
     if (u.pathname.endsWith("/flight_alerts")) return r.fulfill({ json: [] });
     if (u.pathname.endsWith("/push-subscribe")) return r.fulfill({ json: { key: null } });
     return r.fulfill({ json: [] });
@@ -98,6 +101,25 @@ for (const iata of ["HND", "SDJ", "FUK", "OKA"]) {
   const title = await p.locator("#title").innerText(), lbl = await p.locator("#modeLbl").innerText(), src = await p.locator("#src").innerText();
   ok(title.includes(def.name) && lbl === def.modes[expectMode(def, mode)].label && src === "実際の機体から判定", `空港のいま ${iata}：${title}・${lbl}`, `${title} / ${lbl} / ${src}`);
   ok(errs.length === 0, `空港のいま ${iata}：画面のエラーなし`, errs.join(" / "));
+  await ctx.close();
+}
+
+// 3) 深夜：羽田23時30分は「深夜・北風運用」と夜の説明、福岡23時（機体なし）は「運用時間外」
+{
+  const def = OPS_AIRPORTS.HND, { ctx, p, errs } = await page("HND", "north", new Date("2026-10-16T14:30:00Z"));
+  await p.goto(`${BASE}/index.html#ops-HND`); await p.waitForTimeout(2500);
+  const info = await p.locator("#opsInfo").innerText().catch(() => "");
+  ok(info.includes(def.modes.nightN.label) && info.includes("夜間："), "羽田 23:30：深夜・北風運用と夜の説明", info.slice(0, 160));
+  ok(errs.length === 0, "羽田 23:30：画面のエラーなし", errs.join(" / "));
+  await ctx.close();
+}
+for (const url of ["index.html#ops-FUK", "now.html?ap=FUK"]) {
+  const { ctx, p, errs } = await page("FUK", "b", new Date("2026-10-16T14:00:00Z"));
+  await p.route(FAKE + "/functions/v1/airport-traffic*", (r) => r.fulfill({ json: { iata: "FUK", at: new Date("2026-10-16T14:00:00Z").toISOString(), source: "adsb.lol", planes: [] } }));
+  await p.goto(`${BASE}/${url}`); await p.waitForTimeout(2500);
+  const txt = await p.locator("body").innerText().catch(() => "");
+  ok(txt.includes("運用時間外") && txt.includes("22時〜7時は離着陸できません"), `福岡 23:00（${url}）：運用時間外`, txt.slice(0, 200));
+  ok(errs.length === 0, `福岡 23:00（${url}）：画面のエラーなし`, errs.join(" / "));
   await ctx.close();
 }
 

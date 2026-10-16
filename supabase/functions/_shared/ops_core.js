@@ -39,7 +39,8 @@ function estimateHaneda(m, now = new Date()){
   const vis = m && m.vis_m != null ? m.vis_m : null, ceil = m && m.ceil_ft != null ? m.ceil_ft : null;
   const good = (vis == null || vis >= HND_GOOD.vis) && (ceil == null || ceil >= HND_GOOD.ceil);
   const city = south && h >= 15 && h < 19;   // 都心ルートは15〜19時のうち3時間程度。天候が悪いときは ILS で
-  return { mode: south ? (city ? "city" : "south") : "north", why, whyPlain: whyPlain || why, good, vis, ceil, night: h >= 23 || h < 6,
+  const night = h >= 23 || h < 6;   // 深夜は、深夜の優先滑走路を使う運用（深夜・北風／深夜・南風）
+  return { mode: night ? (south ? "nightS" : "nightN") : south ? (city ? "city" : "south") : "north", why, whyPlain: whyPlain || why, good, vis, ceil, night,
     northNew: !south && ((h >= 7 && h < 11.5) || (h >= 15 && h < 19)) };
 }
 const HND_GOOD = { vis:5000, ceil:2500 };
@@ -52,6 +53,11 @@ const OPS = {
   city:  { label:"南風運用（都心ルート）", arr:["16L","16R"], dep:["22","16R"], note:"15時〜19時のうち3時間程度。着陸は埼玉・都心の上空から南向きに、A・C滑走路へ。",
            depNote:{ "16R":"北日本方面", "22":"西日本・南西方面" },
            app:{ good:{"16L":"RNP", "16R":"RNP"}, bad:{"16L":"ILS", "16R":"ILS"} } },
+  // 深夜（23時〜6時）の優先滑走路（AIP RJTT AD 2.21 Noise Preferential Runways の 1400UTC〜2100UTC）。昼の北風・南風とは使う滑走路が違う
+  nightN:{ label:"深夜・北風運用", night:true, arr:["34R"], dep:["05"], note:"深夜（23時〜6時）。着陸はC滑走路（34R）、離陸はD滑走路（05）から海の上へ。34R が使えないときは 34L に着陸。",
+           app:{ good:{"34R":"ILS Z"}, bad:{"34R":"ILS Z"} } },
+  nightS:{ label:"深夜・南風運用", night:true, arr:["23"], dep:["16L"], note:"深夜（23時〜6時）。着陸はD滑走路（23）、離陸はC滑走路（16L）から南へ。23 が使えないときは 16L・22 の順に着陸（VOR-A）。",
+           app:{ good:{"23":"LDA W"}, bad:{"23":"ILS Z"} } },
 };
 // 進入の経路（AIP JAPAN 2026年10月1日版の進入チャートの座標から作成）。n：フィックスの名前（p の先頭から順に対応）、p：[緯度, 経度]（最後は滑走路の進入端）
 // LDA W は、MAPt から先が目で見て曲がる部分（Visual Prescribed Track）。チャートの絵をもとにした、なめらかな線で近似している
@@ -59,13 +65,15 @@ const HND_APP = {"ILS X 34L":{"n":["KAIHO","AVION","ALLIE","AZURE"],"p":[[35.316
 // 運用と天気から、使う進入の経路を選ぶ
 const HND_APP_KEY = { north:{ good:{"34L":"ILS X 34L", "34R":"HIGHWAY 34R"}, bad:{"34L":"ILS Z 34L", "34R":"ILS Z 34R"} },
   south:{ good:{"22":"LDA W 22", "23":"LDA W 23"}, bad:{"22":"ILS 22", "23":"ILS Z 23"} },
-  city:{ good:{"16L":"RNP 16L", "16R":"RNP 16R"}, bad:{"16L":"ILS 16L", "16R":"ILS 16R"} } };
+  city:{ good:{"16L":"RNP 16L", "16R":"RNP 16R"}, bad:{"16L":"ILS 16L", "16R":"ILS 16R"} },
+  nightN:{ good:{"34R":"ILS Z 34R"}, bad:{"34R":"ILS Z 34R"} }, nightS:{ good:{"23":"LDA W 23"}, bad:{"23":"ILS Z 23"} } };
 // 標準出発経路（RNAV SID。AIP JAPAN 2026年10月1日版 RJTT AD2.24-SID から tools/hnd_departures.py で作成）。滑走路 → SID → { dir：方向, v：{ A/B/C：[緯度, 経度, フィックス] } }
 const HND_SID = {"34R":{"ROVER":{"dir":"北へ","v":{"A":[[35.6102,139.8364,"TORAM"],[35.6089,139.9602,"PLUTO"],[35.736,139.9685,"KAIJI"],[35.9079,139.8878,"SPOON"],[35.9884,139.8498,"ROVER"]],"B":[[35.6469,139.845,"ARAKA"],[35.7039,139.8583,"GUGVA"],[35.7565,139.8107,"OHEDO"],[35.9079,139.8878,"SPOON"],[35.9884,139.8498,"ROVER"]],"C":[[35.6469,139.845,"ARAKA"],[35.7039,139.8583,"GUGVA"],[35.7565,139.8107,"OHEDO"],[35.9079,139.8878,"SPOON"],[35.9884,139.8498,"ROVER"]]}},"BEKLA":{"dir":"北西へ","v":{"A":[[35.6102,139.8364,"TORAM"],[35.6089,139.9602,"PLUTO"],[35.736,139.9685,"KAIJI"],[35.7647,139.7278,"INTEL"],[35.8284,139.4726,"RAGOS"],[35.833,139.1693,"BEKLA"]],"B":[[35.6469,139.845,"ARAKA"],[35.7039,139.8583,"GUGVA"],[35.7565,139.8107,"OHEDO"],[35.7647,139.7278,"INTEL"],[35.8284,139.4726,"RAGOS"],[35.833,139.1693,"BEKLA"]],"C":[[35.6469,139.845,"ARAKA"],[35.7039,139.8583,"GUGVA"],[35.7565,139.8107,"OHEDO"],[35.7647,139.7278,"INTEL"],[35.8284,139.4726,"RAGOS"],[35.833,139.1693,"BEKLA"]]}},"GUSRO":{"dir":"西へ","v":{"A":[[35.5401,139.9557,"TT502"],[35.4552,139.9357,"LOCUP"],[35.4744,139.8112,"TT503"],[35.5649,139.6969,"KAMAT"],[35.6571,139.4749,"LAYER"],[35.6624,139.137,"GUSRO"]]}}},"05":{"BEKLA":{"dir":"北西へ","v":{"A":[[35.558,139.8416,"TT501"],[35.5401,139.9557,"TT502"],[35.4552,139.9357,"LOCUP"],[35.4744,139.8112,"TT503"],[35.5649,139.6969,"KAMAT"],[35.6571,139.4749,"LAYER"],[35.833,139.1693,"BEKLA"]],"B":[[35.558,139.8416,"TT501"],[35.5401,139.9557,"TT502"],[35.4552,139.9357,"LOCUP"],[35.4744,139.8112,"TT503"],[35.5649,139.6969,"KAMAT"],[35.6571,139.4749,"LAYER"],[35.833,139.1693,"BEKLA"]],"C":[[35.558,139.8416,"TT501"],[35.5401,139.9557,"TT502"],[35.4552,139.9357,"LOCUP"],[35.4744,139.8112,"TT503"],[35.5649,139.6969,"KAMAT"],[35.6571,139.4749,"LAYER"],[35.833,139.1693,"BEKLA"]]}},"GUSRO":{"dir":"西へ","v":{"A":[[35.558,139.8416,"TT501"],[35.5401,139.9557,"TT502"],[35.4552,139.9357,"LOCUP"],[35.4744,139.8112,"TT503"],[35.5649,139.6969,"KAMAT"],[35.6571,139.4749,"LAYER"],[35.6624,139.137,"GUSRO"]]}},"NINOX":{"dir":"西へ","v":{"A":[[35.558,139.8416,"TT501"],[35.5401,139.9557,"TT502"],[35.4552,139.9357,"LOCUP"],[35.4265,139.7243,"BAYGE"],[35.4846,139.5014,"SEIKO"],[35.4982,139.1647,"NINOX"]]}},"LAXAS":{"dir":"南西へ","v":{"A":[[35.558,139.8416,"TT501"],[35.5401,139.9557,"TT502"],[35.4552,139.9357,"LOCUP"],[35.3128,139.7465,"TAURA"],[35.0739,139.4975,"IMOLA"],[35.0314,139.2424,"LAXAS"]]}}},"16L":{"ROVER":{"dir":"北へ","v":{"A":[[35.441,139.9275,"T6L23"],[35.4948,139.9991,"WELDA"],[35.6089,139.9602,"PLUTO"],[35.736,139.9685,"KAIJI"],[35.9079,139.8878,"SPOON"],[35.9884,139.8498,"ROVER"]],"B":[[35.441,139.9275,"T6L23"],[35.4948,139.9991,"WELDA"],[35.6089,139.9602,"PLUTO"],[35.736,139.9685,"KAIJI"],[35.9079,139.8878,"SPOON"],[35.9884,139.8498,"ROVER"]],"C":[[35.473,139.9467,"T6L31"],[35.5712,140.0787,"DAMBO"],[35.6364,139.9812,"T6L32"],[35.6862,139.9748,"LESMO"],[35.736,139.9685,"KAIJI"],[35.9079,139.8878,"SPOON"],[35.9884,139.8498,"ROVER"]]}},"BEKLA":{"dir":"北西へ","v":{"A":[[35.441,139.9275,"T6L23"],[35.4948,139.9991,"WELDA"],[35.6089,139.9602,"PLUTO"],[35.736,139.9685,"KAIJI"],[35.7647,139.7278,"INTEL"],[35.8284,139.4726,"RAGOS"],[35.833,139.1693,"BEKLA"]],"B":[[35.441,139.9275,"T6L23"],[35.4948,139.9991,"WELDA"],[35.6089,139.9602,"PLUTO"],[35.736,139.9685,"KAIJI"],[35.7647,139.7278,"INTEL"],[35.8284,139.4726,"RAGOS"],[35.833,139.1693,"BEKLA"]],"C":[[35.473,139.9467,"T6L31"],[35.5712,140.0787,"DAMBO"],[35.6364,139.9812,"T6L32"],[35.6862,139.9748,"LESMO"],[35.736,139.9685,"KAIJI"],[35.7647,139.7278,"INTEL"],[35.8284,139.4726,"RAGOS"],[35.833,139.1693,"BEKLA"]]}},"GUSRO":{"dir":"西へ","v":{"A":[[35.4746,139.8513,"T6L43"],[35.4398,139.7211,"HATBA"],[35.5649,139.6969,"KAMAT"],[35.6571,139.4749,"LAYER"],[35.6624,139.137,"GUSRO"]]}}},"16R":{"BEKLA":{"dir":"北西へ","v":{"A":[[35.4669,139.8351,"T6R13"],[35.4398,139.7211,"HATBA"],[35.5649,139.6969,"KAMAT"],[35.6571,139.4749,"LAYER"],[35.833,139.1693,"BEKLA"]],"B":[[35.4669,139.8351,"T6R13"],[35.4398,139.7211,"HATBA"],[35.5649,139.6969,"KAMAT"],[35.6571,139.4749,"LAYER"],[35.833,139.1693,"BEKLA"]],"C":[[35.4312,139.8603,"T6R11"],[35.4948,139.9991,"WELDA"],[35.6089,139.9602,"PLUTO"],[35.736,139.9685,"KAIJI"],[35.7647,139.7278,"INTEL"],[35.8284,139.4726,"RAGOS"],[35.833,139.1693,"BEKLA"]]}},"GUSRO":{"dir":"西へ","v":{"A":[[35.4669,139.8351,"T6R13"],[35.4398,139.7211,"HATBA"],[35.5649,139.6969,"KAMAT"],[35.6571,139.4749,"LAYER"],[35.6624,139.137,"GUSRO"]]}},"NINOX":{"dir":"西へ","v":{"A":[[35.4038,139.8798,"T6R12"],[35.3565,139.7802,"TT631"],[35.4265,139.7243,"BAYGE"],[35.4846,139.5014,"SEIKO"],[35.4982,139.1647,"NINOX"]]}},"LAXAS":{"dir":"南西へ","v":{"A":[[35.4312,139.8603,"T6R11"],[35.3128,139.7465,"TAURA"],[35.0739,139.4975,"IMOLA"],[35.0314,139.2424,"LAXAS"]]}},"ROVER":{"dir":"北へ","v":{"A":[[35.4312,139.8603,"T6R11"],[35.4948,139.9991,"WELDA"],[35.6089,139.9602,"PLUTO"],[35.736,139.9685,"KAIJI"],[35.9079,139.8878,"SPOON"],[35.9884,139.8498,"ROVER"]],"B":[[35.4312,139.8603,"T6R11"],[35.4948,139.9991,"WELDA"],[35.6089,139.9602,"PLUTO"],[35.736,139.9685,"KAIJI"],[35.9079,139.8878,"SPOON"],[35.9884,139.8498,"ROVER"]],"C":[[35.4312,139.8603,"T6R11"],[35.4948,139.9991,"WELDA"],[35.6089,139.9602,"PLUTO"],[35.736,139.9685,"KAIJI"],[35.9079,139.8878,"SPOON"],[35.9884,139.8498,"ROVER"]]}}},"22":{"NINOX":{"dir":"西へ","v":{"A":[[35.4483,139.7615,"HOBBS"],[35.3524,139.7617,"BASSA"],[35.2053,139.8137,"UMUKI"],[35.1662,139.7617,"PIPER"],[35.1037,139.6787,"SATOL"],[35.1553,139.5234,"CURVA"],[35.4982,139.1647,"NINOX"]]}},"LAXAS":{"dir":"南西へ","v":{"A":[[35.4483,139.7615,"HOBBS"],[35.3524,139.7617,"BASSA"],[35.2053,139.8137,"UMUKI"],[35.1662,139.7617,"PIPER"],[35.1037,139.6787,"SATOL"],[35.0739,139.4975,"IMOLA"],[35.0314,139.2424,"LAXAS"]]}}}};
 // 運用ごとに、どの滑走路からどの SID を使うか（RJTT AD 2.20「1.3 Departure」の表）
 const HND_SID_USE = { north:{"34R":["ROVER","BEKLA","GUSRO"], "05":["BEKLA","GUSRO","NINOX","LAXAS"]},
   south:{"16L":["ROVER","BEKLA","GUSRO"], "16R":["BEKLA","GUSRO","NINOX","LAXAS"]},
-  city:{"16R":["ROVER","BEKLA","GUSRO"], "22":["NINOX","LAXAS"]} };
+  city:{"16R":["ROVER","BEKLA","GUSRO"], "22":["NINOX","LAXAS"]},
+  nightN:{"05":["BEKLA","GUSRO","NINOX","LAXAS"]}, nightS:{"16L":["ROVER","BEKLA","GUSRO"]} };
 // ROVER・BEKLA の A・B・C は離陸の時刻で決まる（B：日本時間 7:00〜11:30、C：15〜19時のうち約3時間、それ以外は A）
 function sidVariant(now = new Date()){ const j = new Date(now.getTime() + (now.getTimezoneOffset() + 540) * 60000), h = j.getHours() + j.getMinutes() / 60;
   return h >= 7 && h < 11.5 ? "B" : h >= 15 && h < 19 ? "C" : "A"; }
@@ -82,6 +90,7 @@ const STAR_FROM = { XAC:"大島" };
    ・ほかの空港：滑走路の位置（AIP の AD 2.12）と、風・実際の機体から「どちら向きに使っているか」だけ。経路は空港ごとに AIP から足していく */
 const OPS_AIRPORTS = {};
 OPS_AIRPORTS.HND = { iata:"HND", name:"羽田", icao:"RJTT", center:[35.5533, 139.7811], rwy:HND_RWY, modes:OPS, estimate:estimateHaneda,
+  nightOf:{ north:"nightN", south:"nightS", city:"nightS" },   // 深夜に実際の機体で判定したときは、深夜の運用として出す
   appKey:HND_APP_KEY, app:HND_APP, sid:HND_SID, sidUse:HND_SID_USE, star:HND_STAR, starTo:HND_STAR_TO, detail:true };
 // [IATA, 名前, ICAO, 中心, 滑走路（[端A, 緯度, 経度, ずらした接地点ft, 端B, 緯度, 経度, ずらした接地点ft, 名前]）]。滑走路の端は AIP JAPAN（2026年10月1日版）の AD 2.12
 for(const [iata, name, icao, center, rwy] of [
@@ -286,7 +295,38 @@ function observeSplit(hit, planes, def){
   else mode = dep === sp.dep[0] ? def.split.mode : modeOf(dep);
   return { mode, apps:{}, n: arr ? { [arr]: n[arr] } : {}, dep: dep ? dr.dep : undefined };
 }
-function observeOps(planes, def = opsDef()){
+// 深夜（羽田の23時〜6時）に実際の機体で判定したときは、深夜の運用（nightOf）に置き換える
+function observeOps(planes, def = opsDef(), now = new Date()){
+  const r = observeOpsDay(planes, def);
+  if(r && r.mode && def.nightOf && nightNow(now)) r.mode = def.nightOf[r.mode] || r.mode;
+  return r;
+}
+function jstHour(now = new Date()){ const j = new Date(now.getTime() + (now.getTimezoneOffset() + 540) * 60000); return j.getHours() + j.getMinutes() / 60; }
+function nightNow(now = new Date()){ const h = jstHour(now); return h >= 23 || h < 6; }
+// 空港ごとの夜の決まり（AIP JAPAN 2026年10月1日版。AD 2.3 の運用時間・AD 2.20／2.21 の騒音軽減）。from・to は日本時間（時。30分は .5）
+// closed：離着陸できない時間（運用時間外・夜間の制限）。text：画面に出す説明
+const OPS_NIGHT = {
+  HND:[{ from:23, to:6, text:"深夜（23時〜6時）は、深夜の優先滑走路を使います（着陸は北風なら34R・南風なら23、離陸は05か16L）" }],
+  NRT:[{ from:0, to:6, closed:true, text:"0時〜6時は離着陸できません" }, { from:23, to:24, text:"23時〜24時は A滑走路（16R/34L）だけを使います" }],
+  CTS:[{ from:22, to:7, text:"22時〜7時は離着陸の回数が限られ（0時〜6時は6回まで）、目で見ての進入（視認進入）はできません。決まった出発・到着経路を使います" }],
+  KIX:[{ from:23, to:7, text:"23時〜7時に着く便は、決まった経路で連続して降りてくる方式（CDO）を使います" }],
+  NGO:[{ from:23, to:6, text:"23時〜6時の出発機は、海の上を通る決まった出発経路を使います" }],
+  OKA:[{ from:1.5, to:5.92, text:"1時30分〜5時55分に着く便は、決まった経路で連続して降りてくる方式（CDO）を使います" }],
+  FUK:[{ from:22, to:7, closed:true, text:"22時〜7時は離着陸できません" }],
+  ITM:[{ from:21, to:7, closed:true, text:"空港の運用時間（7時〜21時）の外です" }],
+  SDJ:[{ from:22, to:7.5, closed:true, text:"空港の運用時間（7時30分〜22時）の外です" }],
+  HIJ:[{ from:22.5, to:7.5, closed:true, text:"空港の運用時間（7時30分〜22時30分）の外です" }],
+  MYJ:[{ from:22, to:7, closed:true, text:"空港の運用時間（7時〜22時）の外です" }],
+  KMJ:[{ from:21.5, to:7.5, closed:true, text:"空港の運用時間（7時30分〜21時30分）の外です" }],
+  NGS:[{ from:22, to:7, closed:true, text:"空港の運用時間（7時〜22時）の外です" }],
+  KOJ:[{ from:22, to:7, closed:true, text:"空港の運用時間（7時〜22時）の外です" }],
+};
+// いまの夜の決まり（なければ null）。閉まっている時間帯を先に返す
+function nightRule(def, now = new Date()){
+  const h = jstHour(now), hit = (OPS_NIGHT[def.iata] || []).filter(r => r.from < r.to ? h >= r.from && h < r.to : h >= r.from || h < r.to);
+  return hit.find(r => r.closed) || hit[0] || null;
+}
+function observeOpsDay(planes, def = opsDef()){
   const H = def.center, hit = [], RW_MODE = rwModeOf(def), paths = obsPaths(def);
   if(def.noObs) return observeDeps(planes, def);
   for(const p of planes){
@@ -325,4 +365,4 @@ function observeOps(planes, def = opsDef()){
   return { mode, apps, n };
 }
 
-export { OPS_AIRPORTS, windEstimate, observeOps, obsText, runwaysOf };
+export { OPS_AIRPORTS, windEstimate, observeOps, obsText, runwaysOf, nightRule };
