@@ -74,3 +74,16 @@ Deno.test("特別塗装機で飛ぶ予定の便：お知らせの文から見つ
   ], S, names);
   assertEquals(p.map((x) => [x.schedule_id, x.livery]), [[1, "JAL Jubilee Express"]]);   // 欠航の便・特別塗装でない便は入れない
 });
+
+Deno.test("時刻表と運航情報で定刻が数分ずれていても結ぶ（JL333 の到着：時刻表 21:05・運航情報 21:10 → 実際 21:16）。遅れは運航情報の定刻から数える", () => {
+  const sc: StatusSched[] = [{ id: 9, flight: "JL333", dep: "HND", arr: "FUK", std: T("2026-10-17T19:15:00+09:00"), sta: T("2026-10-17T21:05:00+09:00") },
+    { id: 10, flight: "JL333", dep: "HND", arr: "FUK", std: T("2026-10-16T19:15:00+09:00"), sta: T("2026-10-16T21:05:00+09:00") }];
+  const r = odptStatus([], [{ "odpt:flightNumber": ["JL333"], "odpt:departureAirport": "odpt.Airport:HND", "odpt:scheduledArrivalTime": "21:10", "odpt:actualArrivalTime": "21:16", "odpt:flightStatus": "odpt.FlightStatus:Arrived" }], sc, names);
+  const u = r.updates.find((x) => x.id === 9)!;
+  assertEquals([u.ata, u.arr_status], ["2026-10-17T12:16:00.000Z", "Arrived"]);
+  assertEquals(r.updates.some((x) => x.id === 10), false);   // 前の日の便には結ばない
+  assertEquals(r.alerts.length, 0);   // 6分の遅れはお知らせにしない
+  // 20分を超えてずれた便は、別の便として結ばない
+  const far = odptStatus([], [{ "odpt:flightNumber": ["JL333"], "odpt:departureAirport": "odpt.Airport:HND", "odpt:scheduledArrivalTime": "22:30", "odpt:actualArrivalTime": "22:40" }], sc, names);
+  assertEquals(far.updates.length, 0);
+});

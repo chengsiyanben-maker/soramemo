@@ -16,13 +16,19 @@ export type StatusUpdate = {
 const MIN = 60_000;
 const last = (v: unknown) => { const s = String(Array.isArray(v) ? v[0] ?? "" : v ?? ""); const i = s.lastIndexOf(":"); return i >= 0 ? s.slice(i + 1) : s; };
 const hhmm = (v: unknown): string | null => { const m = String(v ?? "").match(/^(\d{1,2}):(\d{2})/); return m ? `${m[1].padStart(2, "0")}:${m[2]}` : null; };
-const jstHM = (ms: number) => { const d = new Date(ms + 9 * 3600_000); return `${String(d.getUTCHours()).padStart(2, "0")}:${String(d.getUTCMinutes()).padStart(2, "0")}`; };
 const hmText = (hm: string) => `${Number(hm.slice(0, 2))}:${hm.slice(3)}`;
 const norm = (f: string) => flightNo(f)?.no ?? f;
 const ap = (v: unknown) => last(v).slice(0, 3).toUpperCase();
 const st = (v: unknown) => { const s = last(v); return s ? s.slice(0, 40) : null; };
 
 // 定刻 base の日の "HH:MM"（日本時間）を、base にいちばん近い時刻（ミリ秒）にする（日付をまたぐ遅れにも対応）
+// 同じ便名・同じ出発空港の予定の便のうち、定刻が "HH:MM" にいちばん近い便（差が20分以内）。
+// 時刻表（予定の便）と運航情報で定刻が数分ずれることがある（例：JL333 の到着が時刻表では 21:05、運航情報では 21:10）
+export function nearestSched(cands: StatusSched[], hm: string, key: "std" | "sta"): StatusSched | undefined {
+  let best: StatusSched | undefined, bd = 20 * MIN + 1;
+  for (const x of cands) { const t = x[key]; if (t == null) continue; const d = Math.abs(atNear(t, hm) - t); if (d < bd) { bd = d; best = x; } }
+  return best;
+}
 export function atNear(base: number, hm: string): number {
   const d = new Date(base + 9 * 3600_000);
   const t = Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate(), Number(hm.slice(0, 2)), Number(hm.slice(3, 5))) - 9 * 3600_000;
@@ -46,7 +52,7 @@ export function odptStatus(depItems: any[], arrItems: any[], scheds: StatusSched
   for (const it of Array.isArray(depItems) ? depItems : []) {
     const fn = flightNo(it?.["odpt:flightNumber"]), dep = ap(it?.["odpt:departureAirport"]), std = hhmm(it?.["odpt:scheduledDepartureTime"]);
     if (!fn || !std || !/^[A-Z]{3}$/.test(dep)) continue;
-    const s = (byKey.get(`${fn.no}|${dep}`) ?? []).find((x) => jstHM(x.std) === std);
+    const s = nearestSched(byKey.get(`${fn.no}|${dep}`) ?? [], std, "std");
     if (!s) continue;
     note = infoText(it["odpt:flightInformationText"], it["odpt:flightInformationSummary"]);
     const status = st(it["odpt:flightStatus"]), actual = hhmm(it["odpt:actualDepartureTime"]), est = hhmm(it["odpt:estimatedDepartureTime"]);
@@ -56,7 +62,7 @@ export function odptStatus(depItems: any[], arrItems: any[], scheds: StatusSched
     if (/return/.test(sl)) add(s, "return", `${route(s)}は、${names(s.dep)}へ引き返しました（航空会社の運航情報）`);
     const t = actual ?? est;
     if (!t) continue;
-    const late = Math.round((atNear(s.std, t) - s.std) / MIN);
+    const late = Math.round((atNear(s.std, t) - atNear(s.std, std)) / MIN);   // 運航情報の定刻から
     if (late >= 60) add(s, "delay_dep", `${route(s)}は、出発が約${late}分遅れ${actual ? "ました" : "る見込みです"}（定刻 ${hmText(std)} → ${actual ? "出発" : "変更後"} ${hmText(t)}・航空会社の運航情報）`);
   }
   // 到着（相手の空港は「出発空港」の項目）
@@ -64,7 +70,7 @@ export function odptStatus(depItems: any[], arrItems: any[], scheds: StatusSched
     const fn = flightNo(it?.["odpt:flightNumber"]), dep = ap(it?.["odpt:departureAirport"] ?? it?.["odpt:originAirport"]);
     const sta = hhmm(it?.["odpt:scheduledArrivalTime"]);
     if (!fn || !sta || !/^[A-Z]{3}$/.test(dep)) continue;
-    const s = (byKey.get(`${fn.no}|${dep}`) ?? []).find((x) => x.sta != null && jstHM(x.sta) === sta);
+    const s = nearestSched(byKey.get(`${fn.no}|${dep}`) ?? [], sta, "sta");
     if (!s || s.sta == null) continue;
     note = infoText(it["odpt:flightInformationText"], it["odpt:flightInformationSummary"]);
     const status = st(it["odpt:flightStatus"]), actual = hhmm(it["odpt:actualArrivalTime"]), est = hhmm(it["odpt:estimatedArrivalTime"]);
@@ -75,7 +81,7 @@ export function odptStatus(depItems: any[], arrItems: any[], scheds: StatusSched
     if (/return/.test(sl)) add(s, "return", `${route(s)}は、${names(s.dep)}へ引き返しました（航空会社の運航情報）`);
     const t = actual ?? est;
     if (!t) continue;
-    const late = Math.round((atNear(s.sta, t) - s.sta) / MIN);
+    const late = Math.round((atNear(s.sta, t) - atNear(s.sta, sta)) / MIN);
     if (late >= 60) add(s, "delay_arr", `${route(s)}は、到着が約${late}分遅れ${actual ? "ました" : "る見込みです"}（定刻 ${hmText(sta)} → ${actual ? "到着" : "変更後"} ${hmText(t)}・航空会社の運航情報）`, [s.arr, s.dep]);
   }
   return { alerts: [...alerts.values()], updates: [...updates.values()] };
@@ -110,7 +116,7 @@ export function liveryPlans(depItems: any[], scheds: StatusSched[], names: strin
     if (!livery) continue;
     const fn = flightNo(it?.["odpt:flightNumber"]), dep = ap(it?.["odpt:departureAirport"]), std = hhmm(it?.["odpt:scheduledDepartureTime"]);
     if (!fn || !std) continue;
-    const s = (byKey.get(`${fn.no}|${dep}`) ?? []).find((x) => jstHM(x.std) === std);
+    const s = nearestSched(byKey.get(`${fn.no}|${dep}`) ?? [], std, "std");
     if (!s) continue;
     if (/cancel/i.test(last(it["odpt:flightStatus"]))) continue;
     out.set(s.id, { schedule_id: s.id, flight: s.flight, dep: s.dep, arr: s.arr, std: new Date(s.std).toISOString(), livery: livery.slice(0, 60), note: text.slice(0, 120) });
