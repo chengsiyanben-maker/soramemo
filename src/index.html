@@ -601,6 +601,47 @@ dialog.mypage .legal{text-align:center;font-size:11px;color:var(--mp-sub);margin
 dialog.mypage .appver{text-align:center}
 dialog.mypage .dlg .close{display:none}
 
+/* スタンプラリー・エアライン経営の切り替え：枠線なしのピル型 */
+.modesw{border:0;background:var(--hm-pill);padding:3px;gap:0;border-radius:999px}
+.modesw button{border-radius:999px;color:var(--hm-mute);font-size:13px}
+.modesw button[aria-selected="true"]{background:var(--hm-card);color:var(--hm-ink);box-shadow:0 2px 8px -2px rgba(15,23,42,.25)}
+[data-palette="board"] .modesw button[aria-selected="true"]{background:var(--shu);color:var(--on-shu)}
+/* ---------- 運用タブ：ホーム・成績と同じルール（ゴシック体・ピル型・区切り線なし・うすい影のカード） ---------- */
+#v-ops{--op-ink:#374151;--op-sub:#9CA3AF;--op-mute:#6B7280;--op-card:#FFFFFF;--op-pill:#EEF0F3;--op-shadow:0 12px 26px -18px rgba(15,23,42,.3)}
+[data-palette="board"] #v-ops{--op-ink:#E5E7EB;--op-sub:#8B95A3;--op-mute:#A7B0BC;--op-card:#16191F;--op-pill:#232830;--op-shadow:0 12px 26px -16px rgba(0,0,0,.7)}
+#v-ops .opstitle h2,#v-ops h2{font-family:var(--gothic);font-weight:800;font-size:20px;letter-spacing:.02em;color:var(--op-ink)}
+#v-ops .opstitle .linkbtn2{text-decoration:none;background:var(--op-pill);color:var(--op-ink);border-radius:999px;min-height:36px;padding:0 16px;font-size:12.5px}
+#v-ops .opsaps{border:0;gap:6px;margin:6px -16px 12px;padding:2px 16px 6px}
+#v-ops .opstab{border:0;margin:0;background:var(--op-pill);color:var(--op-mute);border-radius:999px;padding:8px 14px;font-size:13px;font-weight:700}
+#v-ops .opstab[aria-selected="true"]{background:var(--op-ink);color:var(--op-card);box-shadow:0 6px 14px -8px rgba(15,23,42,.5)}
+#v-ops .opstab small{color:inherit;opacity:.75;font-weight:700}
+#v-ops .opstab[aria-selected="true"] small{color:#7DD3FC;opacity:1}
+[data-palette="board"] #v-ops .opstab[aria-selected="true"] small{color:var(--shu)}
+#v-ops .chip{border:0;background:var(--op-pill);color:var(--op-mute);font-weight:700;padding:7px 14px}
+#v-ops .chip[aria-pressed="true"]{background:var(--op-ink);color:var(--op-card)}
+#v-ops .opslayers .chip[aria-pressed="true"]{background:var(--op-card);color:var(--op-ink);box-shadow:0 4px 12px -6px rgba(15,23,42,.35)}
+#v-ops .opslayers .chip[aria-pressed="false"]{opacity:.6;text-decoration:none}
+#v-ops .opsbox{background:var(--op-card);border-radius:22px;padding:16px 18px;box-shadow:var(--op-shadow);color:var(--op-ink)}
+#v-ops .opsbox b.mode{font-family:var(--gothic);font-weight:800;font-size:22px;letter-spacing:.01em}
+#v-ops .opssrc{border:0;background:var(--op-pill);color:var(--op-mute);font-weight:700;padding:1px 10px}
+#v-ops .opssrc.live{background:#ECFDF5;color:#047857}
+[data-palette="board"] #v-ops .opssrc.live{background:rgba(16,185,129,.15);color:#6EE7B7}
+#v-ops .opsrows .lbl,#v-ops .opswhy summary{color:var(--op-mute)}
+#v-ops .opswhy p{color:var(--op-mute)}
+#v-ops .opsbox .rw{border-radius:999px;padding:1px 9px}
+#v-ops .opshours{color:var(--op-mute)}
+#v-ops .opsmap{border-radius:22px;box-shadow:var(--op-shadow)}
+#v-ops .fwlist{background:var(--op-card);border-radius:22px;padding:14px 16px;box-shadow:var(--op-shadow);color:var(--op-ink)}
+#v-ops .fwlist li{border-top:0;padding:9px 0}
+#v-ops .fwlist li+li{border-top:1px solid color-mix(in srgb,var(--op-sub) 18%,transparent)}
+#v-ops .fwlist .opshead b{font-size:15px;font-weight:800}
+#v-ops .fwlist .opshead span{border:0;background:var(--op-pill);color:var(--op-mute);padding:1px 10px}
+#v-ops .fwlist .fwk{border-radius:999px;padding:1px 8px}
+#v-ops .fwnote{color:var(--op-sub);font-size:11.5px;line-height:1.7}
+#v-ops .linkbtn2.fwpush{display:block;width:100%;margin-top:10px;text-decoration:none;background:var(--op-pill);color:var(--op-ink);border-radius:999px;min-height:42px}
+#v-ops .linkbtn2.fwpush[aria-pressed="true"]{background:var(--op-ink);color:var(--op-card)}
+#v-ops .hint{color:var(--op-sub)}
+
 /* ---------- 成績の画面（航空会社別・ステータスの目安）：ゴシック体・数字を大きく・余白とうすい影のカード ---------- */
 #v-stats{--st-ink:#374151;--st-sub:#9CA3AF;--st-mute:#6B7280;--st-card:#FFFFFF;--st-track:#F1F2F4;--st-wash:#F7F8FA;
   --st-shadow:0 1px 2px rgba(17,24,39,.04),0 6px 20px rgba(17,24,39,.06);--jal:#C8102E;--ana:#1C4FA0;--other:#6B7280;color:var(--st-ink)}
