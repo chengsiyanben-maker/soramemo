@@ -22,7 +22,7 @@ export type Sched = {
 // プロペラ機（ATR・ボンバルディア Q400 など）とエンブラエル機：低く飛ぶ・小さな空港を使うため受信機に映らないことが多く、
 // 「離陸を確認できず」が誤りになりやすいので出さない
 export const hardToSee = (t?: string | null) => !!t && /^(AT|AR|Q\d|Q4|D[H8]|DHC|SF|SAB|YS|BN|DO|E\d|EM|ER)/i.test(t.trim());
-export type Seen = { callsign: string; lat: number; lon: number; alt_ft: number | null; ground: boolean; fpm: number | null; at: number };
+export type Seen = { callsign: string; lat: number; lon: number; alt_ft: number | null; ground: boolean; fpm: number | null; kt?: number | null; type?: string | null; at: number };
 export type Watch = {
   phase: "sched" | "air" | "landed";
   takeoff_at: number | null; takeoff_est: boolean;
@@ -31,9 +31,35 @@ export type Watch = {
   last: { lat: number; lon: number; alt_ft: number | null; at: number } | null;
   sent: string[];                                   // 送ったお知らせの種類（同じお知らせを二度出さない）
   start?: number;                                   // 見張りを始めた時刻（ダイヤを入れたのが定刻より後なら、離陸を見逃しているので「離陸を確認できず」は出さない）
+  eta?: number | null;                              // 到着予想（推定。機体の位置・速度と機種の巡航速度から。ミリ秒）
 };
 export type Alert = { kind: "delay_dep" | "no_takeoff" | "delay_arr" | "divert" | "return" | "divert_landed"; iata: string[]; message: string };
 
+// 機種ごとの巡航速度（真対気速度の目安・ノット）と、到着空港の手前の進入の平均速度。ICAO の機種記号（B738 など）と ODPT の機種記号（738 など）の両方を受ける
+const CRUISE: [RegExp, number, number][] = [
+  [/^(B77|77|B78|78|A35|35|B74|74|A38|38)/i, 485, 230],   // 大型機（777・787・A350）
+  [/^(B76|76|A30|30|A33|33)/i, 470, 225],                // 767・A300・A330
+  [/^(B73|73|B38|7M|7S|A3[12]|3[12]|A2|32N|31N|21N|A20N|A21N)/i, 450, 220],   // 737・A320 系
+  [/^(E1|E7|E9|E2|ER|EM|CRJ|CR[79]|E70|E75|E90|E95)/i, 430, 210],   // エンブラエル・CRJ
+  [/^(DH8D|Q4|DH4|Q400)/i, 330, 180],                     // Q400
+  [/^(AT[47]|AT[0-9]|ATR|AR[0-9])/i, 275, 165],           // ATR
+  [/^(SF3|SB2|DH8|DHC|DH[0-9]|Q[0-9]|D[0-9])/i, 260, 160],  // そのほかのプロペラ機
+];
+export function cruiseOf(type?: string | null): { cruise: number; approach: number } {
+  const t = (type ?? "").trim();
+  for (const [re, c, a] of CRUISE) if (t && re.test(t)) return { cruise: c, approach: a };
+  return { cruise: 440, approach: 210 };
+}
+// 到着予想（推定）：到着空港まで残りの距離を、巡航中は今の対地速度（上空の風を含む）か機種の巡航速度で、
+// 最後の40海里（約74km）は進入の平均速度で飛ぶとみなし、進入・着陸に4分を足す。上昇中は機種の巡航速度を使う
+export function predictEta(p: { lat: number; lon: number; alt_ft: number | null; kt?: number | null; at: number }, arr: Airport, type?: string | null): number {
+  const { cruise, approach } = cruiseOf(type), nm = km(p, arr) / 1.852, alt = p.alt_ft ?? 0;
+  const inCruise = alt >= 18000 && p.kt != null && p.kt > cruise * 0.6 && p.kt < cruise * 1.5;
+  const v = inCruise ? p.kt! : cruise * 0.95;
+  const far = Math.max(0, nm - 40), near = Math.min(nm, 40);
+  const nearV = alt < 10000 && p.kt != null && p.kt > 100 ? Math.min(approach, p.kt) : approach;
+  return p.at + (far / v + near / nearV) * 3600_000 + 4 * MIN;
+}
 export const blankWatch = (): Watch => ({ phase: "sched", takeoff_at: null, takeoff_est: false, landed_at: null, landed_iata: null, low_iata: null, low_at: null, last: null, sent: [] });
 
 // 便名の航空会社の記号 → 呼び出し符号の記号（グループの別会社が運航すると記号が変わることがあるので、候補を並べる）
@@ -87,6 +113,8 @@ export function step(s: Sched, w0: Watch, seen: Seen | null, now: number, aps: M
       w.takeoff_at = seen.at; w.takeoff_est = !near;
     }
     w.last = { lat: seen.lat, lon: seen.lon, alt_ft: seen.alt_ft, at: seen.at };
+    const arrA = aps.get(s.arr);
+    if (arrA) w.eta = Math.round(predictEta(seen, arrA, seen.type || s.aircraft));
     // 空港の近くで低いか
     let low: Airport | null = null;
     for (const a of aps.values()) if (km(seen, a) <= 8 && (seen.alt_ft ?? 99999) <= 1500) { low = a; break; }

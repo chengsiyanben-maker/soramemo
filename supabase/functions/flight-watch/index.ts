@@ -41,12 +41,12 @@ Deno.serve(async () => {
     if (!list.length) return new Response(JSON.stringify({ watching: 0 }), { headers: JSON_HEADERS });
 
     // 機体の位置：機体の記録（airport-traffic）が30秒ごとに日本中の機体を取って live_positions に残している（adsb.lol に別に問い合わせない）
-    const { data: pos } = await admin.from("live_positions").select("callsign, lat, lon, alt_ft, ground, fpm, seen_at")
+    const { data: pos } = await admin.from("live_positions").select("callsign, lat, lon, alt_ft, ground, fpm, kt, type, seen_at")
       .gt("seen_at", new Date(now - 3 * MIN).toISOString()).limit(5000);
     // 位置がほとんど届いていない（記録が止まっている）ときは、離陸を確認できないと誤って知らせないよう、何もしない
     if ((pos?.length ?? 0) < 20) return new Response(JSON.stringify({ watching: list.length, skipped: "few positions", positions: pos?.length ?? 0 }), { headers: JSON_HEADERS });
     const seen = new Map<string, Seen>();
-    for (const p of pos ?? []) seen.set(p.callsign, { callsign: p.callsign, lat: p.lat, lon: p.lon, alt_ft: p.alt_ft, ground: p.ground, fpm: p.fpm, at: Date.parse(p.seen_at) });
+    for (const p of pos ?? []) seen.set(p.callsign, { callsign: p.callsign, lat: p.lat, lon: p.lon, alt_ft: p.alt_ft, ground: p.ground, fpm: p.fpm, kt: p.kt, type: p.type, at: Date.parse(p.seen_at) });
     const upd: { schedule_id: number; state: Watch; updated_at: string }[] = [];
     const out: { schedule_id: number; kind: string; flight: string; dep: string; arr: string; iata: string[]; message: string }[] = [];
     const fkeys = new Map<number, string>();

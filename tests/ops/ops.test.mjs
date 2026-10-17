@@ -134,11 +134,13 @@ for (const url of ["index.html#ops-FUK", "now.html?ap=FUK"]) {
     { dir: "arr", flight: "NH039", other: "HND", sched: T(-5), est: T(12), actual: null, status: "EstimatedArrival", cancelled: false },
     { dir: "dep", flight: "JL2205", other: "FUK", sched: T(-10), est: null, actual: null, status: "Cancelled", cancelled: true },
     { dir: "arr", flight: "OC070", other: "KMI", sched: T(-75), est: null, actual: null, status: null, cancelled: false },
+    { dir: "arr", flight: "IJ123", other: "HND", sched: T(-60), est: null, actual: null, inferred: T(-52), status: null, cancelled: false },
+    { dir: "arr", flight: "6J21", other: "HND", sched: T(-8), est: null, actual: null, predicted: T(6), status: null, cancelled: false, dep_actual: T(-80) },
   ] } }));
   await p.goto(`${BASE}/index.html#ops-ITM`); await p.waitForTimeout(3500);
   const txt = await p.locator("#opsCurfew").innerText().catch(() => "");
   ok(txt.includes("門限チャレンジ") && txt.includes("21:00") && txt.includes("あと 30分"), "伊丹 20:30：門限チャレンジと残り時間", txt.slice(0, 120));
-  ok(txt.includes("到着") && txt.includes("間に合いそう") && txt.includes("過ぎる見込み") && txt.includes("欠航") && txt.includes("記録なし"), "伊丹 20:30：便ごとの判定（実際の時刻が届かない便は「記録なし」）", txt);
+  ok(txt.includes("到着") && txt.includes("間に合いそう") && txt.includes("過ぎる見込み") && txt.includes("欠航") && txt.includes("記録なし") && txt.includes("到着（推定）") && txt.includes("機体の位置から推定") && txt.includes("到着予想 21:06"), "伊丹 20:30：便ごとの判定（到着予想も・運航情報がない便は推定の着陸時刻、それもなければ「記録なし」）", txt);
   ok(errs.length === 0, "伊丹 20:30：画面のエラーなし", errs.join(" / "));
   await ctx.close();
 }
