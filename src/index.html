@@ -172,7 +172,7 @@ h3{font-size:14px;color:var(--sumi);font-weight:500;margin:22px 0 10px}
 
 /* records */
 .mapbox{border-radius:14px;padding:10px;margin-top:12px}
-.mapbox svg{width:100%;height:auto;display:block}
+.mapbox>svg{width:100%;height:auto;display:block}
 .flight{display:grid;grid-template-columns:1fr auto;gap:2px 12px;padding:14px 0;border-bottom:1px solid var(--line)}
 .flight .route{font-family:var(--mincho);font-weight:700;font-size:17px}
 .flight .meta{font-size:13px;color:var(--sumi)}
@@ -539,6 +539,20 @@ header.top .brand svg{width:26px;height:26px}
 #v-home .streak{margin:16px 4px 0;font-size:13px;color:var(--hm-mute)}
 #v-home .titlepill{margin:12px 0 0;border:0;background:var(--hm-pill);font-size:12px;padding:4px 12px}
 #v-home .boardzone{margin-top:36px}
+/* ---------- フライトの地図：ホームと同じすっきりした地図に、航空会社の色で航路を描く（動かせる） ---------- */
+.fmapbox{background:var(--hm-card,#fff);border:0;padding:0;overflow:hidden;border-radius:22px;box-shadow:0 12px 26px -18px rgba(15,23,42,.3);background-image:none}
+.fmapbox .fmap{height:520px;background:#F2F3F0}
+.fmapbox.vec #map{display:none}
+.fmapbox:not(.vec) .fmap{display:none}
+.fmapbox .maplegend{padding:10px 14px 12px;margin:0;color:var(--hm-mute,#6B7280)}
+.fmapbox .maplegend .lg{display:inline-block;width:18px;height:3px;border-radius:2px}
+.fmapbox .maplegend .lg.dash{background:repeating-linear-gradient(90deg,#9CA3AF 0 4px,transparent 4px 7px)}
+.fmapbox .maplegend .mcred{margin-left:auto;font-size:10px;color:var(--hm-sub,#9CA3AF)}
+[data-palette="board"] .fmapbox .fmap canvas,[data-palette="board"] .fmapbox .fmap .leaflet-tile-pane{filter:invert(.92) hue-rotate(180deg) saturate(.5) brightness(.9)}
+[data-palette="board"] .fmapbox .fmap{background:#0E1218}
+.fmap .leaflet-control-zoom a{border-radius:10px!important}
+.fmap .leaflet-bar{border:0;box-shadow:0 6px 16px -8px rgba(15,23,42,.35);border-radius:12px;overflow:hidden}
+
 /* ---------- マイページ：タイル（いちばん上に黒いアカウントのタイル、項目ごとに白いタイル。区切り線なし） ---------- */
 dialog.mypage{--mp-bg:#F4F5F7;--mp-card:#FFFFFF;--mp-ink:#374151;--mp-sub:#9CA3AF;--mp-mute:#6B7280;--mp-shadow:0 12px 26px -18px rgba(15,23,42,.3);
   max-width:min(460px,100vw);width:100%;max-height:100dvh;height:100dvh;margin:0 auto;border-radius:0;background:var(--mp-bg);color:var(--mp-ink)}
@@ -995,7 +1009,8 @@ details.rgrp .rgbar i{display:block;height:100%;background:var(--shu)}
     <div id="yrBody"></div>
     <div id="yrPlus"></div>
     <h2>飛んだ路線</h2>
-    <div class="mapbox"><svg id="map" viewBox="0 0 400 420" role="img" aria-label="訪れた空港と路線の地図"></svg><p class="maplegend"><span><svg viewBox="0 0 24 6" aria-hidden="true"><path d="M1 3H23" stroke="#A3166B" stroke-width="2"/></svg>実際に飛んだ航路</span><span><svg viewBox="0 0 24 6" aria-hidden="true"><path d="M1 3H23" stroke="#A3166B" stroke-width="2" stroke-dasharray="4 3"/></svg>航路の記録がない便</span></p></div>
+    <div class="mapbox fmapbox"><div class="fmap" id="fmap" role="img" aria-label="訪れた空港と飛んだ路線の地図"></div><svg id="map" viewBox="0 0 400 420" role="img" aria-label="訪れた空港と路線の地図"></svg>
+      <p class="maplegend"><span><i class="lg" style="background:var(--jal)"></i>JAL</span><span><i class="lg" style="background:var(--ana)"></i>ANA</span><span><i class="lg" style="background:#7C3AED"></i>そのほか</span><span><i class="lg dash"></i>航路の記録がない便</span><span class="mcred">地図：国土地理院</span></p></div>
     <button class="btn2" id="shareMap" style="width:100%;margin-top:10px">記録を画像で共有</button>
     <h2>フライト</h2>
     <div class="bprow"><button class="btn2" id="bpCam">搭乗券を読み取る</button><button class="btn2" id="bpImg">画像から読み取る</button>
@@ -1859,6 +1874,46 @@ function renderMap(){
   for(const a of XA){ if(a.kind === "mil") continue; const [x,y]=proj(a), on=xv.has(a.id), col=a.kind === "glider" ? "#1F7FB6" : "#3D7A4E", s=on?4.4:3.2;
     parts.push(`<rect x="${(x-s/2).toFixed(1)}" y="${(y-s/2).toFixed(1)}" width="${s}" height="${s}" fill="${on?col:"var(--chart-off)"}" stroke="${col}" stroke-width=".8"><title>${a.name}（${XKIND[a.kind].short}）</title></rect>`); }
   $("map").innerHTML = parts.join("");
+  setTimeout(renderFlightMap, 0);
+}
+// フライトの地図（動かせる）：実際の航路は線、記録がない便は空港どうしを結ぶ弧の点線。色は航空会社のグループ
+let FMAP = null, FMAP_LAYER = null;
+const FMAP_COL = { JAL:"#C8102E", ANA:"#1C4FA0", OTHER:"#7C3AED" };
+async function renderFlightMap(){
+  const el = $("fmap"), box = el && el.parentElement; if(!el) return;
+  try{ await loadLeaflet(); }catch(e){ return; }
+  if(!window.L || currentView() !== "log") return;
+  box.classList.add("vec");
+  if(!FMAP){
+    FMAP = L.map(el, { zoomControl:true, attributionControl:false, scrollWheelZoom:false, zoomSnap:0.25, minZoom:5, maxZoom:13 });   // 国土地理院のベクトル地図は 4（Leaflet の 5）より引けない
+    FMAP.zoomControl.setPosition("topright");
+    homeBase(FMAP, { interactive:true });
+  } else FMAP.invalidateSize();
+  if(FMAP_LAYER) FMAP_LAYER.remove();
+  FMAP_LAYER = L.layerGroup().addTo(FMAP);
+  const col = f => FMAP_COL[f.airline ? (ALBY[f.airline] || {}).group || "OTHER" : "OTHER"] || FMAP_COL.OTHER;
+  const tracked = new Set(), pts = [];
+  for(const f of focusFlights()){ if(!f.track || f.track.length < 2) continue;
+    tracked.add([f.from, f.to].sort((x, y) => x - y).join("-"));
+    L.polyline(f.track.map(([lat, lon]) => [lat, lon]), { color:col(f), weight:2.4, opacity:.85, interactive:false }).addTo(FMAP_LAYER); }
+  for(const f of dedupFlights()){
+    if(tracked.has([f.from, f.to].sort((x, y) => x - y).join("-"))) continue;
+    const a = BY[f.from], b = BY[f.to], dx = b.lon - a.lon, dy = b.lat - a.lat, L2 = Math.hypot(dx, dy) || 1, k = Math.min(1.2, L2 * .18);
+    const cx = (a.lon + b.lon) / 2 - dy / L2 * k, cy = (a.lat + b.lat) / 2 + dx / L2 * k, line = [];
+    for(let t = 0; t <= 1.0001; t += .05) line.push([(1 - t) ** 2 * a.lat + 2 * (1 - t) * t * cy + t * t * b.lat, (1 - t) ** 2 * a.lon + 2 * (1 - t) * t * cx + t * t * b.lon]);
+    L.polyline(line, { color:col(f), weight:2, opacity:.75, dashArray:"5 5", interactive:false }).addTo(FMAP_LAYER);
+  }
+  const v = shownAirports();
+  for(const a of A){ const on = v.has(a.id);
+    const m = L.circleMarker([a.lat, a.lon], on ? { radius:5, color:a.rare ? "#A9822E" : "#1F2937", weight:2, fillColor:"#FFFFFF", fillOpacity:1 } : { radius:2.6, stroke:false, fillColor:"#9CA3AF", fillOpacity:.8 })
+      .bindTooltip(a.name, { direction:"top", offset:[0, -4] }).addTo(FMAP_LAYER);
+    if(on) pts.push([a.lat, a.lon]); }
+  const xv = visitedExtra();
+  for(const a of XA){ if(a.kind === "mil" || !xv.has(a.id)) continue;
+    L.circleMarker([a.lat, a.lon], { radius:4, color:a.kind === "glider" ? "#1F7FB6" : "#3D7A4E", weight:2, fillColor:"#FFFFFF", fillOpacity:1 }).bindTooltip(`${a.name}（${XKIND[a.kind].short}）`).addTo(FMAP_LAYER); }
+  if(pts.length >= 2) FMAP.fitBounds(L.latLngBounds(pts), { padding:[36, 36], maxZoom:8, animate:false });
+  else if(pts.length === 1) FMAP.setView(pts[0], 7, { animate:false });
+  else FMAP.setView([36.5, 137.5], 5, { animate:false });
 }
 function dedupFlights(){ const seen=new Set(), out=[]; for(const f of focusFlights()){ const k=[f.from,f.to].sort((x,y)=>x-y).join("-"); if(!seen.has(k)){seen.add(k); out.push(f);} } return out; }
 
@@ -2184,7 +2239,7 @@ document.documentElement.dataset.view = document.documentElement.dataset.view ||
 })();
 // ホームの地図の下地：国土地理院のベクトル地図を、すっきりした配色で描く（陸は薄い灰色・海は水色・道路は白、高速道路は淡い黄色。
 // 地名は市区町村・空港・海や川・駅だけ）。WebGL が使えないときは、淡色地図（画像）にする
-async function homeBase(map){
+async function homeBase(map, opts = {}){
   const pale = () => L.tileLayer("https://cyberjapandata.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png", { maxZoom:18 }).addTo(map);
   try{
     const c = document.createElement("canvas"); if(!(c.getContext("webgl2") || c.getContext("webgl"))) throw new Error("no webgl");
@@ -2193,12 +2248,13 @@ async function homeBase(map){
     if(!L.maplibreGL) throw new Error("no bridge");
     const w = (a, b, c2) => ["interpolate", ["linear"], ["zoom"], 8, a, 12, b, 16, c2];
     const ctg = ["get", "annoCtg"], font = ["NotoSansJP-Regular"];
-    L.maplibreGL({ interactive:false, style:{ version:8,
+    L.maplibreGL({ interactive:!!opts.interactive, style:{ version:8,
       glyphs:"https://gsi-cyberjapan.github.io/optimal_bvmap/glyphs/{fontstack}/{range}.pbf",
       sources:{ gsi:{ type:"vector", tiles:["https://cyberjapandata.gsi.go.jp/xyz/experimental_bvmap/{z}/{x}/{y}.pbf"], minzoom:4, maxzoom:16 } },
       layers:[
         { id:"land", type:"background", paint:{ "background-color":"#F2F3F0" } },
         { id:"water", type:"fill", source:"gsi", "source-layer":"waterarea", paint:{ "fill-color":"#AED6F3" } },
+        { id:"coast", type:"line", source:"gsi", "source-layer":"coastline", maxzoom:9, paint:{ "line-color":"#7FA9CC", "line-width":["interpolate", ["linear"], ["zoom"], 4, .8, 8, 1.4] } },
         { id:"pier", type:"fill", source:"gsi", "source-layer":"wstructurea", paint:{ "fill-color":"#E4E6EA" } },
         { id:"bldg", type:"fill", source:"gsi", "source-layer":"building", minzoom:14, paint:{ "fill-color":"#E6E7EA" } },
         { id:"rail", type:"line", source:"gsi", "source-layer":"railway", paint:{ "line-color":"#C9CDD3", "line-width":w(.5, .9, 1.6) } },
