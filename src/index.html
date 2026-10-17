@@ -697,7 +697,7 @@ ol.steps{padding-left:1.4em;line-height:1.9}
 .cfhead{display:flex;align-items:baseline;gap:8px;margin:2px 0 4px}.cfhead .cfclock{font:700 22px/1 var(--mono, ui-monospace, monospace);letter-spacing:.04em}.cfhead small{color:var(--sumi)}
 .cfl li{display:grid;grid-template-columns:auto 1fr auto;gap:2px 8px;align-items:baseline}.cfl .cfdir{font-size:11px;font-weight:700;color:var(--sumi)}
 .cfl .cft{font-weight:700;font-variant-numeric:tabular-nums}.cfl .cfv{font-size:11px;font-weight:700;border-radius:4px;padding:0 6px;background:var(--line);white-space:nowrap}
-.cfl .cf-ok .cfv{background:#2F855A;color:#fff}.cfl .cf-close .cfv{background:#B7791F;color:#fff}.cfl .cf-over .cfv{background:var(--shu);color:var(--on-shu)}.cfl .cf-done .cfv{background:var(--ink);color:var(--paper)}
+.cfl .cf-ok .cfv{background:#2F855A;color:#fff}.cfl .cf-close .cfv{background:#B7791F;color:#fff}.cfl .cf-over .cfv{background:var(--shu);color:var(--on-shu)}.cfl .cf-done .cfv{background:var(--ink);color:var(--paper)}.cfl .cf-unk .cfv{background:none;border:1px solid var(--line);color:var(--sumi)}
 .cfl li p{grid-column:1/-1}
 .fwlist .fwk{display:inline-block;font-size:11px;font-weight:700;border-radius:4px;padding:0 6px;margin-right:6px;background:var(--line)}
 .fwlist .fw-divert .fwk,.fwlist .fw-divert_landed .fwk,.fwlist .fw-return .fwk{background:var(--shu);color:var(--on-shu)}
@@ -4120,12 +4120,14 @@ function cfPlane(flight){
   return OPS_PLANES.find(p => cs.includes(String(p.callsign || "").trim().toUpperCase())) || null;
 }
 // 1便ぶんの判定：済み（着いた・出た）／欠航／ダイバート／間に合いそう（15分以上前）／ぎりぎり／過ぎる見込み
-function cfJudge(f, close){
+function cfJudge(f, close, now = Date.now()){
   const t = Date.parse(f.actual || f.est || f.sched), min = Math.round((close - t) / 60000), off = m => m >= 0 ? `門限の${m}分前` : `門限の${-m}分後`;
   if(f.cancelled) return { k:"over", v:"欠航", why:"航空会社の運航情報" };
   if(f.dir === "arr" && /divert/i.test(f.status || "")) return { k:"over", v:"ダイバート", why:"航空会社の運航情報" };
   if(f.actual) return { k:min >= 0 ? "done" : "over", v:f.dir === "arr" ? "到着" : "出発", why:`${jstHM(f.actual)}に${f.dir === "arr" ? "着きました" : "出ました"}（${off(min)}）` };
   const base = f.est ? `${f.dir === "arr" ? "到着" : "出発"}の見込み ${jstHM(f.est)}` : `定刻 ${jstHM(f.sched)}`;
+  // 時刻を20分以上過ぎても実際の時刻が届かない便（航空会社の運航情報がない会社など）は、判定しない
+  if(now - t > 20 * 60000) return { k:"unk", v:"記録なし", why:`${base}（実際の${f.dir === "arr" ? "到着" : "出発"}時刻は届いていません）` };
   if(min < 0) return { k:"over", v:"過ぎる見込み", why:`${base}（${off(min)}）` };
   return { k:min < 15 ? "close" : "ok", v:min < 15 ? "ぎりぎり" : "間に合いそう", why:`${base}（${off(min)}）` };
 }
@@ -4137,7 +4139,7 @@ function curfewHTML(now = Date.now()){
   // 門限の2時間前から1時間後まで出す。それ以外の時間は、ひとことだけ
   if(left > 120 || left < -60) return `<div class="fwlist"><div class="opshead"><b>門限チャレンジ</b><span>推定</span></div><p class="hint" style="margin:4px 0 0">${esc(name)}の門限（${h}時）に間に合うかを、${h - 2}時から${h + 1}時まで出します。</p></div>`;
   const list = (CF.flights || []).filter(f => !(f.actual && Date.parse(f.actual) < close - 90 * 60000));
-  const li = f => { const j = cfJudge(f, close), pl = !f.actual && !f.cancelled && f.dir === "arr" ? cfPlane(f.flight) : null;
+  const li = f => { const j = cfJudge(f, close, now), pl = !f.actual && !f.cancelled && f.dir === "arr" ? cfPlane(f.flight) : null;
     const where = pl ? `いま${name}まで約${Math.round(pl.dist_km)}km${pl.alt_ft != null ? "・高度" + (Math.round(pl.alt_ft / 100) * 100).toLocaleString("ja-JP") + "ft" : ""}` : f.dir === "arr" && f.dep_actual && !f.actual ? "飛行中" : "";
     return `<li class="cf-${j.k}"><span class="cfdir">${f.dir === "arr" ? "着" : "発"}</span><span><b>${esc(f.flight)}</b> <small>${esc(placeShort(f.other))}${f.dir === "arr" ? "から" : "へ"}</small></span><span class="cfv">${esc(j.v)}</span><p><small>${esc(j.why)}${where ? "・" + esc(where) : ""}</small></p></li>`; };
   const clock = left > 0 ? `あと ${Math.floor(left / 60) ? Math.floor(left / 60) + "時間" : ""}${left % 60}分` : "門限を過ぎました";
