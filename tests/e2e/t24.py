@@ -3,7 +3,7 @@ HERE=os.path.dirname(os.path.abspath(__file__)); WEB=os.path.abspath(os.path.joi
 import asyncio
 from playwright.async_api import async_playwright
 async def geo_checkin(pg, c, lat, lon):
-    await pg.click('#checkin'); await pg.wait_for_timeout(300)
+    await pg.press('#checkin','Enter'); await pg.wait_for_timeout(300)
     await c.set_geolocation({'latitude':lat,'longitude':lon,'accuracy':20}); await pg.wait_for_timeout(1200)
 async def main():
     async with async_playwright() as p:

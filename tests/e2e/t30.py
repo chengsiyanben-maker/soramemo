@@ -21,7 +21,7 @@ async def main():
         await pg.click('#openSettings'); await pg.click('#toggleDemo'); await pg.click('nav.tabs button[data-v=home]')
         cts = await pg.evaluate("'a:'+A.find(a=>a.iata=='CTS').id")
         for v in ['t:HND-T1', cts]:
-            await pg.select_option('#demoAirport', v); await pg.click('#checkin'); await pg.wait_for_timeout(600); await pg.click('#dStamp .row2 .btn2')
+            await pg.select_option('#demoAirport', v); await pg.press('#checkin','Enter'); await pg.wait_for_timeout(600); await pg.click('#dStamp .row2 .btn2')
         await pg.click('nav.tabs button[data-v=log]'); await pg.wait_for_timeout(200)
         print('demo year plus:', (await pg.inner_text('#yrPlus')).replace('\n',' ')[:200])
         await pg.locator('#yrPlus').scroll_into_view_if_needed(); await pg.screenshot(path=os.path.join(WORK,'plus_year.png'))

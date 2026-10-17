@@ -11,7 +11,7 @@ async def main():
         await pg.click('#openSettings'); await pg.click('#toggleDemo')
         ids = {k: await pg.evaluate(f"'a:'+A.find(a=>a.iata=='{k}').id") for k in ['CTS','OKA','ISG']}
         for v in ['t:HND-T1', ids['CTS'], 't:HND-T2', ids['OKA'], ids['ISG'], ids['OKA'], 't:HND-T3']:
-            await pg.select_option('#demoAirport', v); await pg.click('#checkin'); await pg.wait_for_timeout(600); await pg.click('#dStamp .row2 .btn2')
+            await pg.select_option('#demoAirport', v); await pg.press('#checkin','Enter'); await pg.wait_for_timeout(600); await pg.click('#dStamp .row2 .btn2')
         await pg.evaluate('goTab("co")')
         await pg.evaluate("CO.cash = 200000; coSave(); renderCompany();")
         await pg.evaluate('goTab("fleet")')

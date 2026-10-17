@@ -14,7 +14,7 @@ async def main():
             await pg.click('#openSettings'); await pg.click('#toggleDemo')
             cts = await pg.evaluate("'a:'+A.find(a=>a.iata=='CTS').id")
             for v in ['t:HND-T1', cts]:
-                await pg.select_option('#demoAirport', v); await pg.click('#checkin'); await pg.wait_for_timeout(600)
+                await pg.select_option('#demoAirport', v); await pg.press('#checkin','Enter'); await pg.wait_for_timeout(600)
                 if v=='t:HND-T1': print('  meet:', (await pg.inner_text('#dStamp .meet')).replace('\n',' '))
                 await pg.click('#dStamp .row2 .btn2')
             await pg.click('[data-mode=game]'); await pg.wait_for_timeout(200)
@@ -30,7 +30,7 @@ async def main():
             await pg.click('[data-mode=game]'); await pg.click('#openSettings'); await pg.click('#gameToggle'); await pg.click('#closeSettings')
             print('  game off: mode', await pg.evaluate('MODE'), '| switch hidden', await pg.is_hidden('#modeSw'), '| tabs', await vis())
             await pg.click('#openSettings'); await pg.click('#toggleDemo')
-            await pg.select_option('#demoAirport', 't:HND-T1'); await pg.click('#checkin'); await pg.wait_for_timeout(600)
+            await pg.select_option('#demoAirport', 't:HND-T1'); await pg.press('#checkin','Enter'); await pg.wait_for_timeout(600)
             print('  meet when off:', await pg.locator('#dStamp .meet').count())
             if scheme=='light': await pg.click('#dStamp .row2 .btn2'); await pg.screenshot(path=os.path.join(WORK,'m_rally_off.png'))
             print('  errors', errs); await c.close()

@@ -18,7 +18,7 @@ async def main():
         await pg.evaluate('__fake.login()'); await pg.wait_for_timeout(500)
         await pg.click('nav.tabs button[data-v=book]'); await pg.click('[data-mode=game]')
         # 範囲外のチェックイン（サーバー側で断られる）
-        await pg.click('[data-mode=rally]'); await pg.click('nav.tabs button[data-v=home]'); await pg.click('#checkin'); await pg.wait_for_timeout(300)
+        await pg.click('[data-mode=rally]'); await pg.click('nav.tabs button[data-v=home]'); await pg.press('#checkin','Enter'); await pg.wait_for_timeout(300)
         await c.set_geolocation({'latitude':35.6946,'longitude':139.9826,'accuracy':25}); await pg.wait_for_timeout(1500)
         print('msg:', await pg.inner_text('#msg'))
         await pg.evaluate('window.dispatchEvent(new ErrorEvent("error", {message:"テスト用のエラー", filename:"https://x/index.html", lineno:3, colno:4}))')

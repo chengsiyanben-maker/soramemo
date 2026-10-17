@@ -25,7 +25,7 @@ async def main():
         # 50回目のチェックイン（新千歳）で機長に昇格
         await pg.click('nav.tabs button[data-v=home]')
         await c.grant_permissions(['geolocation']); await c.set_geolocation({'latitude':42.7752,'longitude':141.6923,'accuracy':20})
-        await pg.click('#checkin'); await pg.wait_for_timeout(400); await c.set_geolocation({'latitude':42.7753,'longitude':141.6924,'accuracy':18}); await pg.wait_for_timeout(1500)
+        await pg.press('#checkin','Enter'); await pg.wait_for_timeout(400); await c.set_geolocation({'latitude':42.7753,'longitude':141.6924,'accuracy':18}); await pg.wait_for_timeout(1500)
         print('checkin:', (await pg.inner_text('#dStampBody')).replace('\n',' ')[:160]); await pg.screenshot(path=os.path.join(WORK,'w_rankup.png'))
         print(errs); await b.close()
 asyncio.run(main())

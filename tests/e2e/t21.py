@@ -11,7 +11,7 @@ async def main():
         await pg.click('#openSettings'); await pg.click('#toggleDemo')
         ids = {k: await pg.evaluate(f"'a:'+A.find(a=>a.iata=='{k}').id") for k in ['CTS','OKA','ISG']}
         for i,v in enumerate(['t:HND-T1', ids['CTS'], 't:HND-T2', ids['OKA'], ids['ISG']]):
-            await pg.select_option('#demoAirport', v); await pg.click('#checkin'); await pg.wait_for_timeout(650)
+            await pg.select_option('#demoAirport', v); await pg.press('#checkin','Enter'); await pg.wait_for_timeout(650)
             if i==0: await pg.screenshot(path=os.path.join(WORK,'co_meet.png')); print('meet:', await pg.locator('#dStamp .meet').inner_text())
             await pg.click('#dStamp .row2 .btn2')
         await pg.evaluate('goTab("co")'); await pg.wait_for_timeout(200)

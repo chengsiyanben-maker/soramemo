@@ -17,7 +17,7 @@ async def main():
             await pg.click('#openSettings'); await pg.click('#toggleDemo'); await pg.wait_for_timeout(200)
             cts = await pg.evaluate("'a:'+A.find(a=>a.iata=='CTS').id")
             for v in ['t:HND-T1', cts]:
-                await pg.select_option('#demoAirport', v); await pg.click('#checkin'); await pg.wait_for_timeout(600)
+                await pg.select_option('#demoAirport', v); await pg.press('#checkin','Enter'); await pg.wait_for_timeout(600)
                 if v == cts:
                     await pg.wait_for_timeout(1500)
                     await pg.add_script_tag(content=AXE); r = await pg.evaluate("axe.run(document.querySelector('dialog[open]'), {runOnly:['wcag2a','wcag2aa']})"); allv[(scheme,'stamp-dialog')] = r['violations']

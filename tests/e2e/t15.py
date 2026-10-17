@@ -12,7 +12,7 @@ async def main():
         cts = await pg.evaluate("'a:'+A.find(a=>a.iata=='CTS').id"); isg = await pg.evaluate("'a:'+A.find(a=>a.iata=='ISG').id")
         seq = ['t:HND-T1', cts]*5 + ['t:HND-T2','t:HND-T3', isg]
         for i,v in enumerate(seq):
-            await pg.select_option('#demoAirport', v); await pg.click('#checkin'); await pg.wait_for_timeout(650)
+            await pg.select_option('#demoAirport', v); await pg.press('#checkin','Enter'); await pg.wait_for_timeout(650)
             na = await pg.locator('#dStamp .newach').all_inner_texts()
             if na: print(i, v, '->', na[0].replace('\n',' '))
             if 'HND' in v and i==8: print('tier dlg:', (await pg.inner_text('#dStampBody')).replace(chr(10),' '))

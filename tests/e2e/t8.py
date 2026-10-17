@@ -16,7 +16,7 @@ async def run(scheme):
         await pg.click('#openSettings'); await pg.click('#toggleDemo')
         cts = await pg.evaluate("'a:'+A.find(a=>a.iata=='CTS').id"); oka = await pg.evaluate("'a:'+A.find(a=>a.iata=='ISG').id")
         for v in ['t:HND-T2', cts, oka]:
-            await pg.select_option('#demoAirport', v); await pg.click('#checkin'); await pg.wait_for_timeout(900)
+            await pg.select_option('#demoAirport', v); await pg.press('#checkin','Enter'); await pg.wait_for_timeout(900)
             if v==oka: await pg.screenshot(path=os.path.join(WORK,f'u_stamp_{scheme}.png'))
             if v!=oka: await pg.click('#dStamp .row2 .btn2')
         await pg.click('#dStamp [data-share-a]'); await pg.wait_for_timeout(1200)

@@ -14,7 +14,7 @@ async def main():
         await pg.click('#probe'); await pg.wait_for_timeout(500)
         await c.set_geolocation({'latitude':35.5508,'longitude':139.7881,'accuracy':20}); await pg.wait_for_timeout(1000)
         print('probe:', await pg.inner_text('#probeOut'))
-        await pg.click('#checkin'); await pg.wait_for_timeout(400)
+        await pg.press('#checkin','Enter'); await pg.wait_for_timeout(400)
         await c.set_geolocation({'latitude':35.5509,'longitude':139.7882,'accuracy':18}); await pg.wait_for_timeout(1500)
         print('checkin:', await pg.inner_text('#msg'))
         await pg.screenshot(path=os.path.join(WORK,'u_stamp_real.png'))

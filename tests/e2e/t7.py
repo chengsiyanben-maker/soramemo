@@ -16,7 +16,7 @@ async def main():
         await pg.screenshot(path=os.path.join(WORK,'s_login.png'))
         await pg.evaluate('__fake.login()'); await pg.wait_for_timeout(500)
         print('after login:', await pg.is_visible('#loginBox'), '|', await pg.inner_text('#checkin'))
-        await pg.click('#checkin'); await pg.wait_for_timeout(300)
+        await pg.press('#checkin','Enter'); await pg.wait_for_timeout(300)
         await c.set_geolocation({'latitude':35.548889,'longitude':139.784444,'accuracy':25}); await pg.wait_for_timeout(1200)
         print('checkin:', await pg.inner_text('#msg'), '| stamp dialog', await pg.is_visible('#dStamp'))
         if await pg.is_visible('#dStamp .row2 .btn2'): await pg.click('#dStamp .row2 .btn2')

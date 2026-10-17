@@ -11,9 +11,9 @@ async def main():
         await pg.goto('file://'+os.path.join(WEB,'index.html')); await pg.wait_for_load_state('load'); await pg.wait_for_function('document.readyState === "complete" && typeof render === "function"'); await pg.wait_for_timeout(800)
         await pg.click('#openSettings'); await pg.click('#toggleDemo')
         ids = {k: await pg.evaluate(f"'a:'+A.find(a=>a.iata=='{k}').id") for k in ['CTS','OKA','ITM']}
-        await pg.select_option('#demoAirport','t:HND-T1'); await pg.click('#checkin'); await pg.wait_for_timeout(700); await pg.click('#dStamp .row2 .btn2')
+        await pg.select_option('#demoAirport','t:HND-T1'); await pg.press('#checkin','Enter'); await pg.wait_for_timeout(700); await pg.click('#dStamp .row2 .btn2')
         for k, al, no in [('CTS','JL','501'),('OKA','NH','995'),('ITM',None,None)]:
-            await pg.select_option('#demoAirport', ids[k]); await pg.click('#checkin'); await pg.wait_for_timeout(800)
+            await pg.select_option('#demoAirport', ids[k]); await pg.press('#checkin','Enter'); await pg.wait_for_timeout(800)
             if al: await pg.click('#dStamp [data-flight]'); await pg.select_option('#fAirline',al); await pg.fill('#fNo',no); await pg.click('#fSave'); await pg.wait_for_timeout(150)
             else: await pg.click('#dStamp .row2 .btn2')
         async def snap(mode):

@@ -13,7 +13,7 @@ async def main():
         await pg.click('#openSettings'); await pg.click('#toggleDemo'); await pg.wait_for_timeout(200)
         # 羽田 → 入間基地 → 妻沼滑空場 → 羽田 の順にデモでチェックイン
         for v in ['t:HND-T1', 'a:1010', 'a:2017', 'a:3002', 'a:89', 'a:5']:
-            await pg.select_option('#demoAirport', v); await pg.click('#checkin'); await pg.wait_for_timeout(700)
+            await pg.select_option('#demoAirport', v); await pg.press('#checkin','Enter'); await pg.wait_for_timeout(700)
             body = (await pg.inner_text('#dStamp')).replace('\n',' ')
             print(v, '→', body[:40], '| 注意:', ('基地の中には入れません' in body), ('滑走路や河川敷' in body), ('格納庫' in body), '| 守り神:', await pg.locator('#dStamp .meet').count())
             if v == 'a:1010': await pg.screenshot(path=os.path.join(WORK,'x_mil.png'))

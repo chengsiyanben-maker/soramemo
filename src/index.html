@@ -1928,7 +1928,7 @@ async function renderFlightMap(){
   if(!FMAP){
     FMAP = L.map(el, { zoomControl:true, attributionControl:false, scrollWheelZoom:false, zoomSnap:0.25, minZoom:5, maxZoom:13 });   // 国土地理院のベクトル地図は 4（Leaflet の 5）より引けない
     FMAP.zoomControl.setPosition("topright");
-    homeBase(FMAP, { interactive:true });
+    mapBase(FMAP, { interactive:true });
   } else FMAP.invalidateSize();
   if(FMAP_LAYER) FMAP_LAYER.remove();
   FMAP_LAYER = L.layerGroup().addTo(FMAP);
@@ -2280,7 +2280,7 @@ document.documentElement.dataset.view = document.documentElement.dataset.view ||
 })();
 // ホームの地図の下地：国土地理院のベクトル地図を、すっきりした配色で描く（陸は薄い灰色・海は水色・道路は白、高速道路は淡い黄色。
 // 地名は市区町村・空港・海や川・駅だけ）。WebGL が使えないときは、淡色地図（画像）にする
-async function homeBase(map, opts = {}){
+async function mapBase(map, opts = {}){
   const pale = () => L.tileLayer("https://cyberjapandata.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png", { maxZoom:18 }).addTo(map);
   try{
     const c = document.createElement("canvas"); if(!(c.getContext("webgl2") || c.getContext("webgl"))) throw new Error("no webgl");
@@ -2325,7 +2325,7 @@ async function renderHomeMap(){
   if(!window.L || document.documentElement.dataset.view !== "home") return;
   if(!HOME_MAP){
     HOME_MAP = L.map(el, { zoomControl:false, attributionControl:false, dragging:false, scrollWheelZoom:false, doubleClickZoom:false, boxZoom:false, keyboard:false, touchZoom:false, tap:false, zoomSnap:0.25 });
-    homeBase(HOME_MAP);
+    mapBase(HOME_MAP);
   } else HOME_MAP.invalidateSize();
   const last = S.checkins[S.checkins.length - 1];
   const a = HOME_NEAR ? HOME_NEAR.a : last ? BY[last.a] : A.find(x => x.iata === "HND");
