@@ -8,7 +8,7 @@ async def main():
         await c.add_init_script("localStorage.setItem('soramemo.onboarded','1'); Object.defineProperty(window, 'SORAMEMO_CONFIG', { configurable:true, get(){ return this.__cfg; }, set(v){ this.__cfg = Object.assign({}, v, { gameReleased: true }); } });")
         pg=await c.new_page(); errs=[]; pg.on('pageerror', lambda e: errs.append(str(e)))
         await pg.goto('file://'+os.path.join(WEB,'index.html')); await pg.wait_for_load_state('load'); await pg.wait_for_function('document.readyState === "complete" && typeof render === "function"'); await pg.wait_for_timeout(500)
-        await pg.click('#openSettings'); await pg.click('#toggleDemo')
+        await pg.click('#openSettings'); await pg.click('#toggleDemo'); await pg.evaluate('S = blank(); save(); render()')   # 見本の記録を消して、空の状態から試す
         ids = {k: await pg.evaluate(f"'a:'+A.find(a=>a.iata=='{k}').id") for k in ['CTS','OKA','ISG']}
         for i,v in enumerate(['t:HND-T1', ids['CTS'], 't:HND-T2', ids['OKA'], ids['ISG']]):
             await pg.select_option('#demoAirport', v); await pg.press('#checkin','Enter'); await pg.wait_for_timeout(650)

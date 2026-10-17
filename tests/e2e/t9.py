@@ -10,6 +10,7 @@ async def main():
         await c.add_init_script("localStorage.setItem('soramemo.dev','1')")
         pg=await c.new_page(); errs=[]; pg.on('pageerror', lambda e: errs.append(str(e)))
         await pg.goto('file://'+os.path.join(WEB,'index.html'))
+        await pg.wait_for_function('typeof render === "function"'); await pg.evaluate("document.querySelectorAll('details.dev').forEach(d => d.hidden = false)")   # 検証用の欄はふだん隠してある
         await pg.click('details.dev summary >> nth=0')
         await pg.click('#probe'); await pg.wait_for_timeout(500)
         await c.set_geolocation({'latitude':35.5508,'longitude':139.7881,'accuracy':20}); await pg.wait_for_timeout(1000)

@@ -25,7 +25,7 @@ async def main():
             await pg.click('nav.tabs button[data-v=home]')
         await snap('ALL')
         for m in ['JAL','ANA']:
-            await pg.click('#openSettings'); await pg.click(f'[data-focus={m}]'); await pg.click('#closeSettings'); await pg.wait_for_timeout(150)
+            await pg.click('#openSettings'); await pg.click(f'[data-focus={m}]'); await pg.click('#dSettings .mp-back'); await pg.wait_for_timeout(150)
             await snap(m)
             if m=='JAL':
                 await pg.screenshot(path=os.path.join(WORK,'f_home_jal.png'))

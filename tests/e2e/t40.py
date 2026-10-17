@@ -6,7 +6,7 @@ from playwright.async_api import async_playwright
 async def main():
     async with async_playwright() as p:
         b=await p.chromium.launch(); c=await b.new_context(viewport={'width':760,'height':1000}, device_scale_factor=1)
-        await c.route('https://cdn.jsdelivr.net/**', lambda r: r.fulfill(path=os.path.join(HERE,'fake_admin.js'), content_type='application/javascript'))
+        await c.route('https://cdn.jsdelivr.net/npm/@supabase/**', lambda r: r.fulfill(path=os.path.join(HERE,'fake_admin.js'), content_type='application/javascript'))
         pg=await c.new_page(); errs=[]; pg.on('pageerror', lambda e: errs.append(str(e)))
         await pg.goto('file://'+os.path.join(WORK,'admin_test.html')); await pg.wait_for_load_state('load'); await pg.wait_for_timeout(400)
         await pg.evaluate('__fa.login(true)'); await pg.wait_for_timeout(400)

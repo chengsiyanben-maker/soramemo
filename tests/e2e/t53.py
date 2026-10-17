@@ -24,21 +24,18 @@ async def main():
         await pg.evaluate('__fake.login()'); await pg.wait_for_timeout(500)
         lines = "document.querySelectorAll('#opsMap path.leaflet-interactive').length"
         # 未加入（無料）
-        await pg.click('#opsOpen'); await pg.wait_for_timeout(3000)
+        await pg.evaluate("goTab('home'); goTab('ops')"); await pg.wait_for_timeout(3000)
         print('無料 通報:', await pg.inner_text('#opsWx'))
         print('無料 理由:', (await pg.inner_text('#opsInfo')).split('\n')[1])
         print('無料 線の数:', await pg.evaluate(lines), '| 案内:', await pg.is_visible('#opsJoin'), '| 凡例:', await pg.inner_text('#opsLegend'))
         await pg.click('[data-ops=city]'); await pg.wait_for_timeout(300); print('無料でも手動切り替え:', (await pg.inner_text('#opsInfo')).split('\n')[0])
-        await pg.click('#opsJoin'); await pg.wait_for_timeout(300); print('くわしく見る → 設定:', await pg.evaluate("$('dSettings').open"), '|', (await pg.inner_text('#plusInfo'))[:60])
-        await pg.click('#closeSettings')
         # 加入中
-        await pg.evaluate('PLUS = true'); await pg.click('#opsOpen'); await pg.wait_for_timeout(2000)
+        await pg.evaluate('PLUS = true'); await pg.evaluate("goTab('home'); goTab('ops')"); await pg.wait_for_timeout(2000)
         print('＋ 通報:', await pg.inner_text('#opsWx'))
         print('＋ 理由:', (await pg.inner_text('#opsInfo')).split('\n')[1])
         print('＋ 線の数:', await pg.evaluate(lines), '| 案内:', await pg.locator('#opsJoin').count())
-        await pg.click('#dOps [data-close]')
         # 通報が読めないとき
-        state['ok']=False; await pg.click('#opsOpen'); await pg.wait_for_timeout(1500)
+        state['ok']=False; await pg.evaluate("goTab('home'); goTab('ops')"); await pg.wait_for_timeout(1500)
         print('通報なし:', await pg.inner_text('#opsWx'), '|', (await pg.inner_text('#opsInfo')).split('\n')[0])
         print(errs); await b.close()
 asyncio.run(main())

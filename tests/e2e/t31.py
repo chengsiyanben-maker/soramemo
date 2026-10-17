@@ -5,7 +5,7 @@ from playwright.async_api import async_playwright
 async def main():
     async with async_playwright() as p:
         b=await p.chromium.launch()
-        c=await b.new_context(viewport={'width':400,'height':860}, accept_downloads=True); await c.add_init_script("localStorage.setItem('soramemo.onboarded','1'); Object.defineProperty(window, 'SORAMEMO_CONFIG', { configurable:true, get(){ return this.__cfg; }, set(v){ this.__cfg = Object.assign({}, v, { gameReleased: true }); } });")
+        c=await b.new_context(viewport={'width':400,'height':860}, accept_downloads=True); await c.route('**/web/config.js', lambda r: r.fulfill(body='window.SORAMEMO_CONFIG = {};', content_type='application/javascript')); await c.add_init_script("localStorage.setItem('soramemo.onboarded','1'); Object.defineProperty(window, 'SORAMEMO_CONFIG', { configurable:true, get(){ return this.__cfg; }, set(v){ this.__cfg = Object.assign({}, v, { gameReleased: true }); } });")
         pg=await c.new_page(); errs=[]; pg.on('pageerror', lambda e: errs.append(str(e)))
         await pg.goto('file://'+os.path.join(WEB,'index.html')); await pg.wait_for_load_state('load'); await pg.wait_for_function('document.readyState === "complete" && typeof render === "function"'); await pg.wait_for_timeout(400)
         await pg.evaluate("""() => { const id=i=>A.find(a=>a.iata===i).id, t0=Date.parse('2026-02-01T08:00:00+09:00');
@@ -18,13 +18,14 @@ async def main():
         async with pg.expect_download() as d: await pg.click('[data-export=csv]')
         dl = await d.value; csv = open(await dl.path(), encoding='utf-8-sig').read(); print('csv:', dl.suggested_filename); print(csv)
         # 取り込み形式と互換か（デモで取り込んでみる）
-        await pg.click('#toggleDemo'); await pg.click('nav.tabs button[data-v=log]')
-        await pg.evaluate('document.getElementById("importBox").open = true'); await pg.fill('#impText', csv); await pg.click('#impCheck')
+        # そらメモ＋の入口は隠してあるので、テストでは出して試す
+        await pg.click('#toggleDemo'); await pg.click('nav.tabs button[data-v=log]'); await pg.click('#flAdd')
+        await pg.evaluate('PLUS = true; const x = document.getElementById("importBox"); x.hidden = false; x.open = true');   await pg.fill('#impText', csv); await pg.click('#impCheck'); await pg.wait_for_selector('#impPreview .hint, #impPreview .msg')
         print('reimport preview:', (await pg.inner_text('#impPreview')).splitlines()[0])
         print('legal links:', await pg.locator('.legal a').count(), '| errors', errs); await c.close()
         # サーバー版：アカウント削除
         c=await b.new_context(viewport={'width':400,'height':860}); await c.add_init_script("localStorage.setItem('soramemo.onboarded','1'); Object.defineProperty(window, 'SORAMEMO_CONFIG', { configurable:true, get(){ return this.__cfg; }, set(v){ this.__cfg = Object.assign({}, v, { gameReleased: true }); } });")
-        await c.route('https://cdn.jsdelivr.net/**', lambda r: r.fulfill(path=os.path.join(HERE,'fake_sb.js'), content_type='application/javascript'))
+        await c.route('https://cdn.jsdelivr.net/npm/@supabase/**', lambda r: r.fulfill(path=os.path.join(HERE,'fake_sb.js'), content_type='application/javascript'))
         pg=await c.new_page(); errs=[]; pg.on('pageerror', lambda e: errs.append(str(e)))
         answers = iter(['けす', '削除'])
         pg.on('dialog', lambda dg: asyncio.ensure_future(dg.accept(next(answers, '')) if dg.type == 'prompt' else dg.accept()))

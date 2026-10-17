@@ -4,7 +4,7 @@ import asyncio, json
 from playwright.async_api import async_playwright
 async def main():
     async with async_playwright() as p:
-        b=await p.chromium.launch(); c=await b.new_context(viewport={'width':400,'height':860}, device_scale_factor=2, timezone_id='Asia/Tokyo')
+        b=await p.chromium.launch(); c=await b.new_context(viewport={'width':400,'height':860}, device_scale_factor=2, timezone_id='Asia/Tokyo'); await c.route('**/web/config.js', lambda r: r.fulfill(body='window.SORAMEMO_CONFIG = {};', content_type='application/javascript'))
         await c.add_init_script("localStorage.setItem('soramemo.onboarded','1'); Object.defineProperty(window, 'SORAMEMO_CONFIG', { configurable:true, get(){ return this.__cfg; }, set(v){ this.__cfg = Object.assign({}, v, { gameReleased: true }); } });")
         pg=await c.new_page(); errs=[]; pg.on('pageerror', lambda e: errs.append(str(e)))
         await pg.goto('file://'+os.path.join(WEB,'index.html')); await pg.wait_for_load_state('load'); await pg.wait_for_function('document.readyState === "complete" && typeof render === "function"'); await pg.wait_for_timeout(600)
@@ -31,7 +31,7 @@ async def main():
         await pg.screenshot(path=os.path.join(WORK,'y_home.png'))
         await pg.click('nav.tabs button[data-v=book]'); await pg.click('#v-book [data-seg=main]'); await pg.wait_for_timeout(200); await pg.screenshot(path=os.path.join(WORK,'y_book.png'))
         await pg.click('#book .cell.got >> nth=0'); await pg.wait_for_timeout(200); print('detail:', (await pg.inner_text('#dAirportBody')).replace('\n',' ')); await pg.screenshot(path=os.path.join(WORK,'y_detail.png')); await pg.keyboard.press('Escape')
-        await pg.click('nav.tabs button[data-v=log]'); await pg.wait_for_timeout(200)
+        await pg.click('nav.tabs button[data-v=log]'); await pg.click('[data-lseg=year]'); await pg.wait_for_timeout(200)
         print('year:', (await pg.inner_text('#yrBody')).replace('\n',' '))
         await pg.click('[data-year="2025"]'); print('2025:', (await pg.inner_text('#yrBody')).replace('\n',' '))
         h = await pg.locator('h2:has-text("年ごとの記録")').bounding_box(); await pg.evaluate(f"window.scrollTo(0,{h['y']-70})"); await pg.screenshot(path=os.path.join(WORK,'y_year.png'))

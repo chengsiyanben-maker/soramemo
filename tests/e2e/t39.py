@@ -7,7 +7,7 @@ async def main():
     async with async_playwright() as p:
         b=await p.chromium.launch(); c=await b.new_context(viewport={'width':400,'height':860}, geolocation={'latitude':35,'longitude':135,'accuracy':20}, permissions=['geolocation'])
         await c.add_init_script("localStorage.setItem('soramemo.onboarded','1'); Object.defineProperty(window, 'SORAMEMO_CONFIG', { configurable:true, get(){ return this.__cfg; }, set(v){ this.__cfg = Object.assign({}, v, { gameReleased: true }); } });")
-        await c.route('https://cdn.jsdelivr.net/**', lambda r: r.fulfill(path=os.path.join(HERE,'fake_sb.js'), content_type='application/javascript'))
+        await c.route('https://cdn.jsdelivr.net/npm/@supabase/**', lambda r: r.fulfill(path=os.path.join(HERE,'fake_sb.js'), content_type='application/javascript'))
         sent = []
         async def rpc(route):
             sent.append((route.request.url.split('/')[-1], json.loads(route.request.post_data or '{}'), route.request.headers.get('authorization','')))
@@ -30,7 +30,7 @@ async def main():
         blob = json.dumps([x[1] for x in sent], ensure_ascii=False)
         print('利用者IDを含む:', 'u1' in blob or 'test@example.com' in blob, '| 座標を含む:', '35.69' in blob or '139.98' in blob, '| 匿名キーで送信:', all(x[2] == 'Bearer anon' for x in sent))
         # オフにすると送らない
-        n0 = len(sent); await pg.click('#openSettings'); await pg.click('#anaToggle'); await pg.click('#closeSettings')
+        n0 = len(sent); await pg.click('#openSettings'); await pg.click('#anaToggle'); await pg.click('#dSettings .mp-back')
         await pg.click('nav.tabs button[data-v=log]'); await pg.evaluate('flushEvents()'); await pg.evaluate('window.dispatchEvent(new ErrorEvent("error", {message:"オフのとき"}))'); await pg.wait_for_timeout(400)
         print('オフ後に送った数:', len([x for x in sent[n0:] if not (x[0]=='log_events' and any(e['e']=='analytics' for e in x[1]['p_events']))]))
         print(errs); await b.close()

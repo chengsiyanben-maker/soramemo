@@ -8,9 +8,14 @@ WORK = os.environ.get('SORAMEMO_TEST_WORK', '/tmp/soramemo-e2e'); os.makedirs(WO
 # サーバー版のテスト用：偽のサーバーを指す config.js を、作業用フォルダに置く
 import shutil
 shutil.copy(os.path.join(WEB, 'index.html'), os.path.join(WORK, 'index_server_test.html'))
-shutil.copy(os.path.join(HERE, '..', '..', 'ops-console', 'index.html'), os.path.join(WORK, 'admin_test.html'))   # 運営コンソール（公開しない）
+ADMIN = os.path.join(HERE, '..', '..', 'ops-console', 'index.html')   # 運営コンソール（公開しない）。手元にないときは、運営コンソールのテストを飛ばす
+if os.path.exists(ADMIN): shutil.copy(ADMIN, os.path.join(WORK, 'admin_test.html'))
 open(os.path.join(WORK, 'config.js'), 'w', encoding='utf-8').write('window.SORAMEMO_CONFIG = { supabaseUrl: "https://fake.supabase.co", supabaseAnonKey: "anon" };')
 TESTS = sorted(f for f in os.listdir(HERE) if f.startswith('t') and f.endswith('.py') and f != 'run_all.py')
+if not os.path.exists(ADMIN):
+    skip = [t for t in TESTS if 'admin_test' in open(os.path.join(HERE, t), encoding='utf-8').read()]
+    if skip: print('運営コンソールが手元にないので飛ばす:', ' '.join(skip))
+    TESTS = [t for t in TESTS if t not in skip]
 if len(sys.argv) > 1: TESTS = [t for t in TESTS if any(t.startswith(a) for a in sys.argv[1:])]   # 例: run_all.py t1 t2
 fails = []
 for t in TESTS:

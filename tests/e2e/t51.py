@@ -11,7 +11,7 @@ async def main():
         async def cdn(route):
             if '@zxing' in route.request.url: await route.fulfill(path=ZX[0], content_type='application/javascript')
             else: await route.fulfill(path=os.path.join(HERE,'fake_sb.js'), content_type='application/javascript')
-        await c.route('https://cdn.jsdelivr.net/**', cdn)
+        await c.route('https://cdn.jsdelivr.net/npm/@supabase/**', cdn)
         pg=await c.new_page(); errs=[]; pg.on('pageerror', lambda e: errs.append(str(e)))
         await pg.goto('file://'+os.path.join(WORK,'index_server_test.html')); await pg.wait_for_load_state('load'); await pg.wait_for_timeout(500)
         await pg.evaluate('__fake.login()'); await pg.wait_for_timeout(600)

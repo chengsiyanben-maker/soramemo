@@ -7,14 +7,14 @@ async def main():
     async with async_playwright() as p:
         b=await p.chromium.launch(); c=await b.new_context(viewport={'width':400,'height':860})
         await c.add_init_script("localStorage.setItem('soramemo.onboarded','1'); Object.defineProperty(window, 'SORAMEMO_CONFIG', { configurable:true, get(){ return this.__cfg; }, set(v){ this.__cfg = Object.assign({}, v, { gameReleased: true }); } });; window.__csp = []; document.addEventListener('securitypolicyviolation', e => window.__csp.push(e.violatedDirective + ' ' + (e.blockedURI || '')));")
-        await c.route('https://cdn.jsdelivr.net/**', lambda r: r.fulfill(path=os.path.join(HERE,'fake_sb.js'), content_type='application/javascript'))
+        await c.route('https://cdn.jsdelivr.net/npm/@supabase/**', lambda r: r.fulfill(path=os.path.join(HERE,'fake_sb.js'), content_type='application/javascript'))
         pg=await c.new_page(); errs=[]; pg.on('pageerror', lambda e: errs.append(str(e)))
         await pg.goto('file://'+os.path.join(WORK,'index_server_test.html')); await pg.wait_for_load_state('load'); await pg.wait_for_timeout(600)
         await pg.evaluate('__fake.login()'); await pg.wait_for_timeout(600)
         for v in ['book','log','stats']: await pg.click(f'nav.tabs button[data-v={v}]'); await pg.wait_for_timeout(150)
         await pg.evaluate("goTab('ach')"); await pg.wait_for_timeout(150)
         await pg.click('[data-mode=game]'); await pg.click('[data-mode=rally]')
-        await pg.click('#openSettings'); await pg.click('#closeSettings')
+        await pg.click('#openSettings'); await pg.click('#dSettings .mp-back')
         print('ふだんの操作での違反:', await pg.evaluate('window.__csp'))
         await pg.evaluate("""() => { const s = document.createElement('script'); s.textContent = 'window.__injected = true'; document.body.appendChild(s);
                                      const d = document.createElement('div'); d.innerHTML = '<img src=x onerror="window.__xss=true">'; document.body.appendChild(d); }""")
