@@ -459,7 +459,8 @@ body.game nav.tabs button[aria-current="page"] svg{color:#7FB3FF}
 :root[data-palette="akashiro"]{--stub-hi:#F87171;--stub-lo:#B91C1C;--stub-glow:rgba(185,28,28,.5)}
 :root[data-palette="board"]{--stub-hi:#FFCB7A;--stub-lo:#E08A00;--stub-text:#0B0D10;--stub-glow:rgba(224,138,0,.5)}
 .hmap{position:absolute;left:0;right:0;top:0;height:400px;z-index:0;pointer-events:none;background:#DCE8EF}
-[data-palette="board"] .hmap{background:#0E1218;filter:invert(.92) hue-rotate(180deg) saturate(.6) brightness(.9)}
+[data-palette="board"] .hmap{background:#0E1218}
+[data-palette="board"] .hmap .leaflet-tile-pane,[data-palette="board"] .hmap .maplibregl-canvas,[data-palette="board"] .hmap canvas{filter:invert(.92) hue-rotate(180deg) saturate(.5) brightness(.9)}
 :root:not([data-view="home"]) .hmap{display:none}
 .hmap .leaflet-container,.hmap.leaflet-container{background:transparent}
 .hmap .hm-ap{display:flex;align-items:center;gap:4px;white-space:nowrap;font:700 11px var(--gothic);letter-spacing:.06em;color:#fff;background:#1F2937;padding:3px 9px;border-radius:999px;box-shadow:0 4px 10px -4px rgba(0,0,0,.4);transform:translate(14px,-30px);width:max-content}
@@ -2181,6 +2182,44 @@ document.documentElement.dataset.view = document.documentElement.dataset.view ||
   }
   function nudge(){ wrap.classList.remove("nudge"); void wrap.offsetWidth; wrap.classList.add("nudge"); say("半券を右へ引いて切ると、チェックインします。"); }
 })();
+// ホームの地図の下地：国土地理院のベクトル地図を、すっきりした配色で描く（陸は薄い灰色・海は水色・道路は白、高速道路は淡い黄色。
+// 地名は市区町村・空港・海や川・駅だけ）。WebGL が使えないときは、淡色地図（画像）にする
+async function homeBase(map){
+  const pale = () => L.tileLayer("https://cyberjapandata.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png", { maxZoom:18 }).addTo(map);
+  try{
+    const c = document.createElement("canvas"); if(!(c.getContext("webgl2") || c.getContext("webgl"))) throw new Error("no webgl");
+    if(!document.querySelector(`link[href="${MAPLIBRE.css}"]`)){ const l = document.createElement("link"); l.rel = "stylesheet"; l.href = MAPLIBRE.css; document.head.appendChild(l); }
+    await loadScript(MAPLIBRE.js); await loadScript(MAPLIBRE.bridge);
+    if(!L.maplibreGL) throw new Error("no bridge");
+    const w = (a, b, c2) => ["interpolate", ["linear"], ["zoom"], 8, a, 12, b, 16, c2];
+    const ctg = ["get", "annoCtg"], font = ["NotoSansJP-Regular"];
+    L.maplibreGL({ interactive:false, style:{ version:8,
+      glyphs:"https://gsi-cyberjapan.github.io/optimal_bvmap/glyphs/{fontstack}/{range}.pbf",
+      sources:{ gsi:{ type:"vector", tiles:["https://cyberjapandata.gsi.go.jp/xyz/experimental_bvmap/{z}/{x}/{y}.pbf"], minzoom:4, maxzoom:16 } },
+      layers:[
+        { id:"land", type:"background", paint:{ "background-color":"#F2F3F0" } },
+        { id:"water", type:"fill", source:"gsi", "source-layer":"waterarea", paint:{ "fill-color":"#AED6F3" } },
+        { id:"pier", type:"fill", source:"gsi", "source-layer":"wstructurea", paint:{ "fill-color":"#E4E6EA" } },
+        { id:"bldg", type:"fill", source:"gsi", "source-layer":"building", minzoom:14, paint:{ "fill-color":"#E6E7EA" } },
+        { id:"rail", type:"line", source:"gsi", "source-layer":"railway", paint:{ "line-color":"#C9CDD3", "line-width":w(.5, .9, 1.6) } },
+        { id:"road-case", type:"line", source:"gsi", "source-layer":"road", filter:["!=", ["get", "motorway"], 1], minzoom:11,
+          layout:{ "line-cap":"round", "line-join":"round" }, paint:{ "line-color":"#DADDE2", "line-width":w(.8, 2, 5.5) } },
+        { id:"road", type:"line", source:"gsi", "source-layer":"road", filter:["!=", ["get", "motorway"], 1],
+          layout:{ "line-cap":"round", "line-join":"round" }, paint:{ "line-color":"#FFFFFF", "line-width":w(.4, 1.2, 4) } },
+        { id:"mway-case", type:"line", source:"gsi", "source-layer":"road", filter:["==", ["get", "motorway"], 1],
+          layout:{ "line-cap":"round", "line-join":"round" }, paint:{ "line-color":"#E7C56A", "line-width":w(1.4, 3, 7) } },
+        { id:"mway", type:"line", source:"gsi", "source-layer":"road", filter:["==", ["get", "motorway"], 1],
+          layout:{ "line-cap":"round", "line-join":"round" }, paint:{ "line-color":"#FCE7A2", "line-width":w(.8, 2, 5) } },
+        { id:"lbl-water", type:"symbol", source:"gsi", "source-layer":"label", filter:["in", ctg, ["literal", [321, 322, 341, 342, 343, 344, 345]]],
+          layout:{ "text-field":["get", "annoChar"], "text-font":font, "text-size":11 }, paint:{ "text-color":"#4F86B8", "text-halo-color":"#FFFFFF", "text-halo-width":1 } },
+        { id:"lbl-place", type:"symbol", source:"gsi", "source-layer":"label", filter:["in", ctg, ["literal", [110, 120, 130, 140, 210]]],
+          layout:{ "text-field":["get", "annoChar"], "text-font":font, "text-size":["interpolate", ["linear"], ["zoom"], 9, 11, 14, 13] }, paint:{ "text-color":"#5F6670", "text-halo-color":"#FFFFFF", "text-halo-width":1.4 } },
+        { id:"lbl-sta", type:"symbol", source:"gsi", "source-layer":"label", minzoom:12, filter:["==", ctg, 422],
+          layout:{ "text-field":["get", "annoChar"], "text-font":font, "text-size":10.5 }, paint:{ "text-color":"#7B8390", "text-halo-color":"#FFFFFF", "text-halo-width":1.2 } },
+        { id:"lbl-airport", type:"symbol", source:"gsi", "source-layer":"label", filter:["==", ctg, 441],
+          layout:{ "text-field":["get", "annoChar"], "text-font":font, "text-size":12 }, paint:{ "text-color":"#1F2937", "text-halo-color":"#FFFFFF", "text-halo-width":1.6 } } ] } }).addTo(map);
+  }catch(e){ pale(); }
+}
 // ホームの上の地図：いちばん近い空港（まだなら最後にチェックインした空港）と判定範囲、調べた現在地。動かさない地図（国土地理院の淡色地図）
 let HOME_MAP = null, HOME_LAYER = null, HOME_NEAR = null, HOME_POS = null;
 async function renderHomeMap(){
@@ -2189,7 +2228,7 @@ async function renderHomeMap(){
   if(!window.L || document.documentElement.dataset.view !== "home") return;
   if(!HOME_MAP){
     HOME_MAP = L.map(el, { zoomControl:false, attributionControl:false, dragging:false, scrollWheelZoom:false, doubleClickZoom:false, boxZoom:false, keyboard:false, touchZoom:false, tap:false, zoomSnap:0.25 });
-    L.tileLayer("https://cyberjapandata.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png", { maxZoom:18 }).addTo(HOME_MAP);
+    homeBase(HOME_MAP);
   } else HOME_MAP.invalidateSize();
   const last = S.checkins[S.checkins.length - 1];
   const a = HOME_NEAR ? HOME_NEAR.a : last ? BY[last.a] : A.find(x => x.iata === "HND");
