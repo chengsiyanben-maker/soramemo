@@ -465,12 +465,8 @@ body.game nav.tabs button[aria-current="page"] svg{color:#7FB3FF}
 .wrap{position:relative;z-index:1}
 :root[data-view="home"] header.top .brand{background:rgba(255,255,255,.88);padding:6px 14px 6px 10px;border-radius:999px;box-shadow:0 6px 18px -8px rgba(15,23,42,.3);font-size:16px}
 :root[data-view="home"] header.top .brand svg{width:22px;height:22px}
-:root[data-view="home"] #openSettings.iconbtn{background:rgba(255,255,255,.88);box-shadow:0 6px 18px -8px rgba(15,23,42,.3);color:#4B5563}
-:root[data-palette="board"][data-view="home"] header.top .brand,:root[data-palette="board"][data-view="home"] #openSettings.iconbtn{background:rgba(22,25,31,.88)}
-#v-home .hsheet{position:relative;margin:240px -20px 0;padding:10px 20px 30px;border-radius:28px 28px 0 0;background:var(--sky);
-  box-shadow:0 -18px 40px -18px rgba(15,23,42,.30);min-height:70vh}
-[data-palette="board"] #v-home .hsheet{box-shadow:0 -18px 40px -14px rgba(0,0,0,.7)}
-#v-home .hsheet .grab{width:40px;height:5px;border-radius:3px;background:var(--line);margin:0 auto 14px}
+:root:is([data-view="home"],[data-view="log"]) #openSettings.iconbtn{background:rgba(255,255,255,.88);box-shadow:0 6px 18px -8px rgba(15,23,42,.3);color:#4B5563}
+:root[data-palette="board"][data-view="home"] header.top .brand,:root[data-palette="board"]:is([data-view="home"],[data-view="log"]) #openSettings.iconbtn{background:rgba(22,25,31,.88)}
 #v-home .mapcredit{position:absolute;right:20px;top:-22px;margin:0;font-size:10px;color:#4B5563;background:rgba(255,255,255,.8);padding:1px 8px;border-radius:999px}
 #v-home .bpass{position:relative;display:flex;height:176px}
 #v-home .bp-main{flex:1;min-width:0;background:#111827;color:#F9FAFB;border-radius:24px 6px 6px 24px;padding:18px 16px 16px 20px;box-sizing:border-box;text-align:left;overflow:hidden;
@@ -928,17 +924,41 @@ details.dev summary{cursor:pointer;color:var(--sumi);font-size:14px;padding:6px 
 /* ---------- フライト：上は飛んだ路線の地図、下からせり出すシートに搭乗券の一覧 ---------- */
 #v-log{--lg-ink:#1F2937;--lg-sub:#6B7280;--lg-mute:#6B7280;--lg-card:#FFFFFF;--lg-stub:#FAFAFB;--lg-pill:#FFFFFF;--lg-track:#EEF0F3;--lg-shadow:0 12px 26px -18px rgba(15,23,42,.3)}
 [data-palette="board"] #v-log{--lg-ink:#E5E7EB;--lg-sub:#8B95A3;--lg-mute:#A7B0BC;--lg-card:#16191F;--lg-stub:#1B1F26;--lg-pill:#232830;--lg-track:#2A2F37;--lg-shadow:0 12px 26px -16px rgba(0,0,0,.7)}
-#v-log .lmap{position:relative;z-index:0;isolation:isolate;margin:4px -20px 0;padding:0;border-radius:0;box-shadow:none}
-#v-log .lmap .fmap{height:min(420px,52vh)}
-#v-log .lmap:not(.vec){padding:10px 20px 40px}
-#v-log .lmap .maplegend{position:absolute;left:14px;right:14px;bottom:40px;z-index:500;display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:0;margin:0;pointer-events:none;font-size:11px}
-#v-log .lmap .maplegend>span{display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,.9);color:#374151;padding:4px 9px;border-radius:999px;box-shadow:0 4px 12px -8px rgba(15,23,42,.4);font-weight:700}
-#v-log .lmap .maplegend .mcred{margin-left:auto;font-size:10px;font-weight:600;color:#6B7280}
-[data-palette="board"] #v-log .lmap .maplegend>span{background:rgba(22,25,31,.9);color:#E5E7EB}
-#v-log .lmap .leaflet-bottom.leaflet-right{bottom:70px}
-#v-log .lsheet{position:relative;z-index:1;margin:-30px -20px 0;padding:10px 20px 30px;border-radius:28px 28px 0 0;background:var(--sky);box-shadow:0 -18px 40px -18px rgba(15,23,42,.30);min-height:60vh}
-[data-palette="board"] #v-log .lsheet{box-shadow:0 -18px 40px -14px rgba(0,0,0,.7)}
-#v-log .lsheet .grab{width:40px;height:5px;border-radius:3px;background:var(--line);margin:0 auto 12px}
+/* ---------- 全画面の地図と、引っ張れるシート（ホーム・フライト）：下へ引くと地図だけ、上へ引くとシートだけ ---------- */
+:root[data-view="home"],:root[data-view="log"]{overscroll-behavior:none}
+:root[data-view="home"] body,:root[data-view="log"] body{overflow:hidden}
+.hmap{position:fixed;inset:0;height:auto;pointer-events:auto}
+#v-log .lmap{position:fixed;inset:0;z-index:-1;isolation:isolate;margin:0;padding:0;border-radius:0;box-shadow:none}
+#v-log .lmap .fmap{height:100%}
+#v-log .lmap:not(.vec){padding:130px 20px 0}
+#v-log .lmap .leaflet-top,.hmap .leaflet-top{top:126px}
+:root:is([data-view="home"],[data-view="log"]) header.top .brand{background:rgba(255,255,255,.9);padding:6px 14px 6px 10px;border-radius:999px;box-shadow:0 6px 18px -8px rgba(15,23,42,.3);font-size:16px}
+:root:is([data-view="home"],[data-view="log"]) header.top .brand svg{width:22px;height:22px}
+:root[data-palette="board"]:is([data-view="home"],[data-view="log"]) header.top .brand{background:rgba(22,25,31,.9)}
+:root:is([data-view="home"],[data-view="log"]) .modesw{background:rgba(255,255,255,.86);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);box-shadow:0 6px 18px -10px rgba(15,23,42,.35)}
+:root[data-palette="board"]:is([data-view="home"],[data-view="log"]) .modesw{background:rgba(22,25,31,.86)}
+:root:is([data-view="home"],[data-view="log"]) .demo-banner,:root:is([data-view="home"],[data-view="log"]) .gamenote{background:var(--sky)}
+.sheet{position:fixed;z-index:4;left:50%;width:min(100%,560px);transform:translateX(-50%);top:var(--sheet-top,48vh);bottom:0;margin:0;padding:0 20px;box-sizing:border-box;
+  display:flex;flex-direction:column;border-radius:28px 28px 0 0;background:var(--sky);box-shadow:0 -18px 40px -18px rgba(15,23,42,.30);transition:top .34s cubic-bezier(.2,.8,.2,1),border-radius .2s}
+[data-palette="board"] .sheet{box-shadow:0 -18px 40px -14px rgba(0,0,0,.7)}
+.sheet.dragging{transition:none}
+.sheet:not([data-snap="full"]){touch-action:none}
+.sheet .grabzone{flex:none;touch-action:none}
+.sheet .grab{display:block;width:100%;height:28px;margin:0;padding:0;border:0;background:none;cursor:grab;position:relative}
+.sheet .grab::before{content:"";position:absolute;left:50%;top:10px;width:40px;height:5px;margin-left:-20px;border-radius:3px;background:var(--line)}
+.sheet .grab:focus-visible{outline:3px solid #2563EB;outline-offset:-3px;border-radius:12px}
+.sheet .sbody{flex:1;min-height:0;overflow:hidden;margin:0 -20px;padding:0 20px calc(116px + env(safe-area-inset-bottom,0px))}
+.sheet[data-snap="full"]{box-shadow:0 -10px 30px -16px rgba(15,23,42,.35)}
+.sheet[data-snap="full"] .sbody{overflow-y:auto;overscroll-behavior:contain;touch-action:pan-y}
+.sheet[data-snap="full"] .mapcredit,#v-log .sheet[data-snap="full"] .maplegend{display:none}
+@media (prefers-reduced-motion:reduce){.sheet{transition:none}}
+#v-log .sheet .maplegend{position:absolute;left:14px;right:14px;bottom:calc(100% + 8px);display:flex;flex-wrap:wrap-reverse;gap:6px;align-items:center;padding:0;margin:0;pointer-events:none;font-size:11px}
+#v-log .maplegend>span{display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,.92);color:#374151;padding:4px 9px;border-radius:999px;box-shadow:0 4px 12px -8px rgba(15,23,42,.4);font-weight:700}
+#v-log .maplegend .mcred{margin-left:auto;font-size:10px;font-weight:600;color:#4B5563}
+[data-palette="board"] #v-log .maplegend>span{background:rgba(22,25,31,.92);color:#E5E7EB}
+#v-log .maplegend .lg{display:inline-block;width:18px;height:3px;border-radius:2px}
+#v-log .maplegend .lg.dash{background:repeating-linear-gradient(90deg,#9CA3AF 0 4px,transparent 4px 7px)}
+#v-log .lhead{padding-top:0}
 #v-log .lhead{display:flex;align-items:center;justify-content:space-between}
 #v-log .lhead h2{margin:0;font-family:var(--gothic);font-weight:800;font-size:24px;letter-spacing:.04em;color:var(--lg-ink)}
 #v-log .lbtns{display:flex;gap:8px}
@@ -993,7 +1013,7 @@ details.dev summary{cursor:pointer;color:var(--sumi);font-size:14px;padding:6px 
 </style>
 </head>
 <body>
-<div class="hmap" id="homeMap" aria-hidden="true"></div>
+<div class="hmap" id="homeMap" role="region" aria-label="近くの空港の地図"></div>
 <main class="wrap">
   <div class="topzone">
   <header class="top">
@@ -1016,9 +1036,10 @@ details.dev summary{cursor:pointer;color:var(--sumi);font-size:14px;padding:6px 
   <!-- HOME -->
   <section class="view on" id="v-home" aria-label="ホーム">
     <div class="titlepill" id="titlePill" hidden></div>
-    <div class="hsheet">
-    <div class="grab" aria-hidden="true"></div>
+    <div class="hsheet sheet" id="homeSheet" data-snap="half">
     <p class="mapcredit">地図：国土地理院</p>
+    <div class="grabzone"><button class="grab" type="button" aria-label="シートの大きさを変える"></button></div>
+    <div class="sbody">
     <div class="bpass" id="bpass">
       <div class="bp-main">
         <div class="nearest">
@@ -1065,13 +1086,14 @@ details.dev summary{cursor:pointer;color:var(--sumi);font-size:14px;padding:6px 
     <section class="boardzone" aria-label="最近の印">
     <h2>最近の印</h2>
     <div class="grid" id="recent"></div>
-      </div>
-  </section>
+    </section>
     <details class="dev" hidden><summary>検証用ツール</summary>
       <p class="hint">判定を確かめるための機能です。記録には残りません。</p>
       <button class="btn2" id="probe" style="width:100%">位置だけ測る（検証用・記録しない）</button>
       <div id="probeOut" class="hint" style="margin-top:8px"></div>
     </details>
+    </div>
+    </div>
   </section>
 
   <!-- BOOK -->
@@ -1145,10 +1167,10 @@ details.dev summary{cursor:pointer;color:var(--sumi);font-size:14px;padding:6px 
 
   <!-- FLIGHTS（フライト：路線の地図、フライトの一覧と追加） -->
   <section class="view" id="v-log" aria-label="フライト">
-    <div class="lmap mapbox fmapbox"><div class="fmap" id="fmap" role="region" aria-label="訪れた空港と飛んだ路線の地図"></div><svg id="map" viewBox="0 0 400 420" role="img" aria-label="訪れた空港と路線の地図"></svg>
-      <p class="maplegend"><span><i class="lg" style="background:var(--jal)"></i>JAL</span><span><i class="lg" style="background:var(--ana)"></i>ANA</span><span><i class="lg" style="background:#7C3AED"></i>そのほか</span><span><i class="lg dash"></i>航路なし</span><span class="mcred">地図：国土地理院</span></p></div>
-    <div class="lsheet">
-      <div class="grab" aria-hidden="true"></div>
+    <div class="lmap mapbox fmapbox"><div class="fmap" id="fmap" role="region" aria-label="訪れた空港と飛んだ路線の地図"></div><svg id="map" viewBox="0 0 400 420" role="img" aria-label="訪れた空港と路線の地図"></svg></div>
+    <div class="lsheet sheet" id="logSheet" data-snap="half">
+      <p class="maplegend"><span><i class="lg" style="background:var(--jal)"></i>JAL</span><span><i class="lg" style="background:var(--ana)"></i>ANA</span><span><i class="lg" style="background:#7C3AED"></i>そのほか</span><span><i class="lg dash"></i>航路なし</span><span class="mcred">地図：国土地理院</span></p>
+      <div class="grabzone"><button class="grab" type="button" aria-label="シートの大きさを変える"></button>
       <div class="lhead">
         <h2>フライト</h2>
         <div class="lbtns">
@@ -1162,6 +1184,8 @@ details.dev summary{cursor:pointer;color:var(--sumi);font-size:14px;padding:6px 
         <button role="tab" data-lseg="year" aria-selected="false" aria-controls="lsYear">年ごと</button>
         <button role="tab" data-lseg="book" aria-selected="false" aria-controls="lsBook">記録帳</button>
       </div><button class="lshare" id="shareMap">画像で共有</button></div>
+      </div>
+      <div class="sbody">
       <div id="lsList" role="tabpanel">
         <div id="bpPending"></div>
         <div id="flights"></div>
@@ -1196,6 +1220,7 @@ details.dev summary{cursor:pointer;color:var(--sumi);font-size:14px;padding:6px 
       <div id="impPreview"></div>
     </details>
     <div id="manualList"></div>
+      </div>
       </div>
     </div>
     <details class="dev" hidden><summary>検証ログ</summary>
@@ -2046,7 +2071,7 @@ async function renderFlightMap(){
   box.classList.add("vec");
   if(!FMAP){
     FMAP = L.map(el, { zoomControl:true, attributionControl:false, scrollWheelZoom:false, zoomSnap:0.25, minZoom:5, maxZoom:13 });   // 国土地理院のベクトル地図は 4（Leaflet の 5）より引けない
-    FMAP.zoomControl.setPosition("bottomright");
+    FMAP.zoomControl.setPosition("topright");
     mapBase(FMAP, { interactive:true });
   } else FMAP.invalidateSize();
   if(FMAP_LAYER) FMAP_LAYER.remove();
@@ -2071,7 +2096,7 @@ async function renderFlightMap(){
   const xv = visitedExtra();
   for(const a of XA){ if(a.kind === "mil" || !xv.has(a.id)) continue;
     L.circleMarker([a.lat, a.lon], { radius:4, color:a.kind === "glider" ? "#1F7FB6" : "#3D7A4E", weight:2, fillColor:"#FFFFFF", fillOpacity:1 }).bindTooltip(`${a.name}（${XKIND[a.kind].short}）`).addTo(FMAP_LAYER); }
-  if(pts.length >= 2) FMAP.fitBounds(L.latLngBounds(pts), { paddingTopLeft:[30, 24], paddingBottomRight:[56, 80], maxZoom:8, animate:false });   // 下はシートと凡例に隠れる
+  if(pts.length >= 2) FMAP.fitBounds(L.latLngBounds(pts), { paddingTopLeft:[30, 130], paddingBottomRight:[56, innerHeight - sheetTop("log", "half") + 50], maxZoom:8, animate:false });   // 上は見出し、下はシートと凡例に隠れる
   else if(pts.length === 1) FMAP.setView(pts[0], 7, { animate:false });
   else FMAP.setView([36.5, 137.5], 5, { animate:false });
 }
@@ -2217,7 +2242,7 @@ function setLogSeg(s){
   $("lsList").hidden = s !== "list"; $("lsYear").hidden = s !== "year"; $("lsBook").hidden = s !== "book";
 }
 document.querySelectorAll("#v-log [data-lseg]").forEach(b => b.onclick = () => setLogSeg(b.dataset.lseg));
-$("flAdd").onclick = () => { setLogSeg("book"); const m = $("mFrom"); if(m){ m.scrollIntoView({ block:"center" }); m.focus({ preventScroll:true }); } };
+$("flAdd").onclick = () => { setLogSeg("book"); $("logSheet").sheetGo && $("logSheet").sheetGo("full"); const m = $("mFrom"); if(m){ m.scrollIntoView({ block:"center" }); m.focus({ preventScroll:true }); } };
 function renderLog(){
   const flAll = S.flights.filter(f => inFocus(f) || !f.airline).reverse(), fl = flAll.slice(0, FL_SHOW);
   $("flights").innerHTML = fl.length ? fl.map(f => passHTML({ from:f.from, to:f.to, airline:f.airline, dep:f.dep, arr:f.arr, km:f.km, tap:fid(f),
@@ -2492,7 +2517,7 @@ async function renderHomeMap(){
   try{ await loadLeaflet(); }catch(e){ return; }
   if(!window.L || document.documentElement.dataset.view !== "home") return;
   if(!HOME_MAP){
-    HOME_MAP = L.map(el, { zoomControl:false, attributionControl:false, dragging:false, scrollWheelZoom:false, doubleClickZoom:false, boxZoom:false, keyboard:false, touchZoom:false, tap:false, zoomSnap:0.25 });
+    HOME_MAP = L.map(el, { zoomControl:false, attributionControl:false, scrollWheelZoom:false, boxZoom:false, zoomSnap:0.25, minZoom:5, maxZoom:16 });   // 地図は画面いっぱい。シートをたたむと動かせる
     mapBase(HOME_MAP);
   } else HOME_MAP.invalidateSize();
   const last = S.checkins[S.checkins.length - 1];
@@ -2503,14 +2528,86 @@ async function renderHomeMap(){
   const rad = a.radius || 1500;
   L.circle([a.lat, a.lon], { radius:rad, color:"#1F2937", weight:1.4, dashArray:"4 5", fillColor:"#1F2937", fillOpacity:.06 }).addTo(HOME_LAYER);
   L.circleMarker([a.lat, a.lon], { radius:5, color:"#fff", weight:2, fillColor:"#1F2937", fillOpacity:1 }).addTo(HOME_LAYER);
-  L.marker([a.lat, a.lon], { interactive:false, icon:L.divIcon({ className:"", html:`<div class="hm-ap">${esc(code(a))}・判定範囲</div>`, iconSize:[0, 0] }) }).addTo(HOME_LAYER);
+  L.marker([a.lat, a.lon], { interactive:false, keyboard:false, icon:L.divIcon({ className:"", html:`<div class="hm-ap">${esc(code(a))}・判定範囲</div>`, iconSize:[0, 0] }) }).addTo(HOME_LAYER);
   let bounds = L.latLng(a.lat, a.lon).toBounds(rad * 2);
   if(HOME_POS && HOME_NEAR && HOME_NEAR.a === a){
-    L.marker([HOME_POS.lat, HOME_POS.lon], { interactive:false, icon:L.divIcon({ className:"", html:'<div class="hm-me"></div>', iconSize:[14, 14], iconAnchor:[7, 7] }) }).addTo(HOME_LAYER);
+    L.marker([HOME_POS.lat, HOME_POS.lon], { interactive:false, keyboard:false, icon:L.divIcon({ className:"", html:'<div class="hm-me"></div>', iconSize:[14, 14], iconAnchor:[7, 7] }) }).addTo(HOME_LAYER);
     if(HOME_NEAR.km < 30) bounds = bounds.extend([HOME_POS.lat, HOME_POS.lon]);
   }
-  HOME_MAP.fitBounds(bounds, { paddingTopLeft:[30, 90], paddingBottomRight:[30, 150], maxZoom:14, animate:false });
+  HOME_MAP.fitBounds(bounds, { paddingTopLeft:[30, 130], paddingBottomRight:[30, innerHeight - sheetTop("home", "half") + 24], maxZoom:14, animate:false });   // 下はシートに隠れる
 }
+// ホームとフライトのシート：3つの止まる位置（peek＝地図だけ見える／half＝半分／full＝シートだけ）。
+// たたんでいるときはシートのどこを引いても動く。広げきったときは中身が流れ、いちばん上でさらに下へ引くとたたむ
+const SHEET_SNAPS = ["full", "half", "peek"];
+function sheetTop(view, snap){
+  const vh = innerHeight, nav = 96;
+  const peek = Math.max(160, vh - nav - (view === "home" ? 214 : 148));
+  if(snap === "full"){ const h = document.querySelector("header.top"); return h ? Math.max(0, Math.round(h.getBoundingClientRect().bottom) - 6) : 0; }   // 広げきっても、上のロゴとマイページは見えるように
+  if(snap === "peek") return peek;
+  return Math.min(Math.round(vh * (view === "home" ? .40 : .46)), peek - 60);
+}
+function initSheet(sheet, view){
+  if(!sheet) return;
+  const body = sheet.querySelector(".sbody"), grab = sheet.querySelector(".grab");
+  let snap = "half", pid = null, startY = 0, startTop = 0, moved = false, lastY = 0, lastT = 0, vel = 0, blockClick = false;
+  const curTop = () => sheet.getBoundingClientRect().top;
+  const setTop = t => sheet.style.setProperty("--sheet-top", Math.round(t) + "px");
+  const LABEL = { full:"シートを半分にたたむ", half:"シートを広げる", peek:"シートを半分まで出す" };
+  function go(s){
+    snap = s; sheet.dataset.snap = s; setTop(sheetTop(view, s));
+    if(s !== "full") body.scrollTop = 0;
+    grab.setAttribute("aria-label", LABEL[s]); grab.setAttribute("aria-expanded", String(s === "full"));
+  }
+  // 指を離した位置と速さで、止まる位置を決める（速く払うと次の位置へ）
+  function settle(top){
+    const tops = SHEET_SNAPS.map(x => [x, sheetTop(view, x)]);
+    let pick;
+    if(vel < -0.45) pick = [...tops].reverse().find(([, t]) => t < top - 4) || tops[0];
+    else if(vel > 0.45) pick = tops.find(([, t]) => t > top + 4) || tops[tops.length - 1];
+    else pick = tops.reduce((a, b) => Math.abs(b[1] - top) < Math.abs(a[1] - top) ? b : a);
+    sheet.classList.remove("dragging"); go(pick[0]);
+  }
+  const track = (y, t) => { vel = (y - lastY) / Math.max(1, t - lastT); lastY = y; lastT = t; };
+  sheet.addEventListener("pointerdown", e => {
+    if(e.button > 0 || pid !== null) return;
+    if(e.target.closest(".bp-stub,input,select,textarea,summary,.leaflet-container")) return;
+    if(snap === "full" && body.contains(e.target)) return;                 // 広げきったときの中身は、ふつうに流れる
+    if(e.pointerType === "mouse" && !e.target.closest(".grabzone")) return;  // マウスは上の取っ手のあたりだけ
+    pid = e.pointerId; startY = lastY = e.clientY; lastT = e.timeStamp; startTop = curTop(); moved = false; vel = 0;
+  });
+  window.addEventListener("pointermove", e => {
+    if(e.pointerId !== pid) return;
+    const dy = e.clientY - startY;
+    if(!moved){ if(Math.abs(dy) < 8) return; moved = true; sheet.classList.add("dragging"); try{ sheet.setPointerCapture(pid); }catch(_){} }
+    track(e.clientY, e.timeStamp); setTop(Math.max(0, Math.min(innerHeight - 80, startTop + dy)));
+  });
+  const end = e => { if(e.pointerId !== pid) return; pid = null; if(!moved) return; blockClick = true; setTimeout(() => blockClick = false, 0); settle(curTop()); };
+  window.addEventListener("pointerup", end); window.addEventListener("pointercancel", end);
+  sheet.addEventListener("click", e => { if(blockClick){ e.preventDefault(); e.stopPropagation(); } }, true);
+  // 広げきったとき：中身がいちばん上で、さらに下へ引くとたたむ（指の操作）
+  let ty = 0, tDrag = false;
+  body.addEventListener("touchstart", e => { if(snap !== "full") return; ty = lastY = e.touches[0].clientY; lastT = e.timeStamp; tDrag = false; vel = 0; }, { passive:true });
+  body.addEventListener("touchmove", e => {
+    if(snap !== "full") return;
+    const y = e.touches[0].clientY, dy = y - ty;
+    if(!tDrag){ if(body.scrollTop > 0 || dy < 0){ ty = y; return; } if(dy < 8) return; tDrag = true; sheet.classList.add("dragging"); }
+    e.preventDefault(); track(y, e.timeStamp); setTop(Math.max(0, dy));
+  }, { passive:false });
+  body.addEventListener("touchend", () => { if(tDrag){ tDrag = false; settle(curTop()); } });
+  // 取っ手を押す（キーボード）：半分 → 広げる → たたむ → 半分
+  grab.addEventListener("click", () => go(snap === "half" ? "full" : snap === "full" ? "peek" : "half"));
+  // マウスのホイール：たたんでいるときに下へ回すと広げる。広げきって中身がいちばん上のとき、上へ回すと半分に
+  sheet.addEventListener("wheel", e => {
+    if(snap !== "full" && e.deltaY > 20){ e.preventDefault(); go("full"); }
+    else if(snap === "full" && body.scrollTop <= 0 && e.deltaY < -20){ e.preventDefault(); go("half"); }
+  }, { passive:false });
+  // キーボードで隠れている所へ進んだら、広げる
+  body.addEventListener("focusin", e => { if(snap !== "full" && e.target.getBoundingClientRect().bottom > innerHeight - 90) go("full"); });
+  addEventListener("resize", () => { if(!sheet.classList.contains("dragging")) setTop(sheetTop(view, snap)); });
+  sheet.sheetGo = go;
+  go("half");
+}
+initSheet($("homeSheet"), "home"); initSheet($("logSheet"), "log");
 // ダイアログの「閉じる」（HTMLに直接 onclick を書かない：ページの防御設定 CSP のため）
 document.addEventListener("click", e => { const b = e.target.closest("[data-close]"); if(b) b.closest("dialog").close(); });
 document.querySelectorAll("#modeSw [data-mode]").forEach(b => b.onclick = () => { setMode(b.dataset.mode); track("mode", b.dataset.mode); });

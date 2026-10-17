@@ -28,7 +28,7 @@ for (const f of files) {
   const scripts = [...out.matchAll(/<script>([\s\S]*?)<\/script>/g)];
   for (const m of scripts) {
     const r = await minify(m[1], { compress: { passes: 2 }, mangle: { toplevel: false }, format: { comments: false } });
-    out = out.replace(m[0], `<script>${r.code}</script>`);
+    out = out.replace(m[0], () => `<script>${r.code}</script>`);   // 関数で渡す（縮めたコードの「$`」などを置き換えの記号と取り違えないように）
   }
   // HTMLのコメントと、タグの間の余分な空白
   out = out.replace(/<!--(?!\[)[\s\S]*?-->/g, "").replace(/>\s*\n\s*</g, "><");
