@@ -428,6 +428,83 @@ body.game nav.tabs button[aria-current="page"]{color:#fff}
 .scanframe{position:absolute;inset:18% 8%;border:3px solid rgba(255,255,255,.85);border-radius:10px}
 .bpcard{background:var(--sky);border-radius:12px;padding:12px 14px;margin:8px 0;font-size:15px}
 .bpcard b{font-family:var(--mincho);font-size:20px}
+/* ---------- 下のメニュー：浮いたピル型・すりガラス・線のアイコン ---------- */
+:root{--nav-acc:#2563EB;--nav-glass:rgba(255,255,255,.72);--nav-edge:rgba(255,255,255,.6);--nav-ink:#6B7280;--nav-on:#1F2937;
+  --nav-shadow:0 10px 30px -8px rgba(17,24,39,.22),0 2px 6px rgba(17,24,39,.06)}
+:root[data-palette="akashiro"]{--nav-acc:#D63131}
+:root[data-palette="sora"]{--nav-acc:#1F6FD1}
+:root[data-palette="board"]{--nav-acc:#FFB547;--nav-glass:rgba(22,25,31,.72);--nav-edge:rgba(255,255,255,.08);--nav-ink:#8B95A3;--nav-on:#F3F4F6;
+  --nav-shadow:0 10px 30px -6px rgba(0,0,0,.6)}
+:root[data-focus="JAL"]{--nav-acc:#C8102E}:root[data-focus="ANA"]{--nav-acc:#1C4FA0}
+:root[data-palette="board"][data-focus="JAL"]{--nav-acc:#FF5A6E}:root[data-palette="board"][data-focus="ANA"]{--nav-acc:#6EA0FF}
+nav.tabs{left:0;right:0;bottom:0;background:none;border:0;padding:0 14px calc(12px + env(safe-area-inset-bottom,0px));pointer-events:none}
+nav.tabs .in{pointer-events:auto;max-width:520px;padding:6px;border-radius:999px;background:var(--nav-glass);
+  -webkit-backdrop-filter:blur(20px) saturate(1.6);backdrop-filter:blur(20px) saturate(1.6);
+  box-shadow:var(--nav-shadow),inset 0 0 0 1px var(--nav-edge)}
+nav.tabs button{display:flex;flex-direction:column;align-items:center;gap:2px;padding:7px 0 13px;border-radius:999px;font-size:10.5px;font-weight:600;
+  letter-spacing:.04em;color:var(--nav-ink);transition:color .2s ease,background .2s ease;-webkit-tap-highlight-color:transparent}
+nav.tabs button svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;transition:transform .2s ease}
+nav.tabs button[aria-current="page"]{color:var(--nav-on);font-weight:800}
+nav.tabs button[aria-current="page"] svg{color:var(--nav-acc);stroke-width:1.9;transform:translateY(-1px)}
+nav.tabs button[aria-current="page"]::before{content:"";position:absolute;top:auto;bottom:3px;left:50%;right:auto;width:5px;height:5px;margin-left:-2.5px;
+  border-radius:50%;background:var(--nav-acc);box-shadow:0 0 8px var(--nav-acc)}
+nav.tabs button:active svg{transform:scale(.92)}
+body.game nav.tabs{background:none;border:0}
+body.game nav.tabs .in{background:rgba(19,33,61,.78);box-shadow:var(--nav-shadow),inset 0 0 0 1px rgba(255,255,255,.08)}
+body.game nav.tabs button[aria-current="page"] svg{color:#7FB3FF}
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){nav.tabs .in{background:var(--paper)}}
+
+/* ---------- ホーム：上は近くの空港の地図、下からせり出すシートに搭乗券（半券を引いて切るとチェックイン） ---------- */
+:root{--stub-hi:#60A5FA;--stub-lo:#1D4ED8;--stub-text:#FFFFFF;--stub-glow:rgba(29,78,216,.55)}
+:root[data-palette="akashiro"]{--stub-hi:#F87171;--stub-lo:#B91C1C;--stub-glow:rgba(185,28,28,.5)}
+:root[data-palette="board"]{--stub-hi:#FFCB7A;--stub-lo:#E08A00;--stub-text:#0B0D10;--stub-glow:rgba(224,138,0,.5)}
+.hmap{position:absolute;left:0;right:0;top:0;height:400px;z-index:0;pointer-events:none;background:#DCE8EF}
+[data-palette="board"] .hmap{background:#0E1218;filter:invert(.92) hue-rotate(180deg) saturate(.6) brightness(.9)}
+:root:not([data-view="home"]) .hmap{display:none}
+.hmap .leaflet-container,.hmap.leaflet-container{background:transparent}
+.hmap .hm-ap{display:flex;align-items:center;gap:4px;white-space:nowrap;font:700 11px var(--gothic);letter-spacing:.06em;color:#fff;background:#1F2937;padding:3px 9px;border-radius:999px;box-shadow:0 4px 10px -4px rgba(0,0,0,.4);transform:translate(14px,-30px);width:max-content}
+.hmap .hm-me{width:14px;height:14px;border-radius:50%;background:#2563EB;border:3px solid #fff;box-shadow:0 0 0 10px rgba(37,99,235,.18)}
+.wrap{position:relative;z-index:1}
+:root[data-view="home"] header.top .brand{background:rgba(255,255,255,.88);padding:6px 14px 6px 10px;border-radius:999px;box-shadow:0 6px 18px -8px rgba(15,23,42,.3);font-size:16px}
+:root[data-view="home"] header.top .brand svg{width:22px;height:22px}
+:root[data-view="home"] #openSettings.iconbtn{background:rgba(255,255,255,.88);box-shadow:0 6px 18px -8px rgba(15,23,42,.3);color:#4B5563}
+:root[data-palette="board"][data-view="home"] header.top .brand,:root[data-palette="board"][data-view="home"] #openSettings.iconbtn{background:rgba(22,25,31,.88)}
+#v-home .hsheet{position:relative;margin:240px -20px 0;padding:10px 20px 30px;border-radius:28px 28px 0 0;background:var(--sky);
+  box-shadow:0 -18px 40px -18px rgba(15,23,42,.30);min-height:70vh}
+[data-palette="board"] #v-home .hsheet{box-shadow:0 -18px 40px -14px rgba(0,0,0,.7)}
+#v-home .hsheet .grab{width:40px;height:5px;border-radius:3px;background:var(--line);margin:0 auto 14px}
+#v-home .mapcredit{position:absolute;right:20px;top:-22px;margin:0;font-size:10px;color:#4B5563;background:rgba(255,255,255,.8);padding:1px 8px;border-radius:999px}
+#v-home .bpass{position:relative;display:flex;height:176px}
+#v-home .bp-main{flex:1;min-width:0;background:#111827;color:#F9FAFB;border-radius:24px 6px 6px 24px;padding:18px 16px 16px 20px;box-sizing:border-box;text-align:left;overflow:hidden;
+  box-shadow:0 22px 40px -22px rgba(17,24,39,.75)}
+#v-home .bpass::before{content:"";position:absolute;top:14px;bottom:14px;right:99px;border-left:2px dashed rgba(255,255,255,.35);z-index:2;pointer-events:none}
+#v-home .bp-main .nearest{padding:0}
+#v-home .bp-main .nearest .label{font-size:11px;font-weight:700;letter-spacing:.12em;color:#9CA3AF}
+#v-home .bp-main .flap:not(:empty){justify-content:flex-start;margin:8px 0 6px;gap:4px}
+#v-home .bp-main .flap i{width:34px;height:44px;font-size:30px;line-height:44px;border-radius:5px}
+#v-home .bp-main .flap i::after{top:21px}
+#v-home .bp-main .nearest .name{font-family:var(--gothic);font-size:15px;font-weight:800;line-height:1.4;color:#F9FAFB;margin:0;letter-spacing:0;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+#v-home .bp-main .nearest .name.idle{font-size:17px;color:#F9FAFB;margin-top:14px}
+#v-home .bp-main .nearest .dist{font-size:12px;line-height:1.6;color:#9CA3AF;margin-top:6px}
+#v-home .bp-main .nearest .dist b,#v-home .bp-main .nearest .dist.ok b{color:#6EE7B7}
+#v-home .bp-stub{flex:none;width:100px;margin:0;padding:0;border:0;border-radius:6px 24px 24px 6px;
+  background:radial-gradient(circle at 30% 20%,var(--stub-hi),var(--stub-lo) 82%);color:var(--stub-text);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none;
+  transform-origin:0 100%;transition:transform .3s cubic-bezier(.2,.8,.2,1),opacity .3s ease;box-shadow:0 18px 34px -16px var(--stub-glow);-webkit-tap-highlight-color:transparent;font-family:var(--gothic)}
+#v-home .bp-stub.dragging{transition:none;cursor:grabbing}
+#v-home .bp-stub .v{writing-mode:vertical-rl;font-size:14px;font-weight:800;letter-spacing:.12em}
+#v-home .bp-stub .s{font-size:10px;font-weight:600;opacity:.85}
+#v-home .bp-stub svg{width:26px;height:14px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+#v-home .bp-stub:disabled{opacity:.6;cursor:progress}
+#v-home .bp-stub:focus-visible{outline:3px solid var(--stub-hi);outline-offset:3px}
+#v-home .bpass.nudge .bp-stub{animation:stubNudge .7s ease}
+@keyframes stubNudge{0%,100%{transform:none}30%{transform:translateX(16px) rotate(2deg)}60%{transform:translateX(4px)}}
+@media (prefers-reduced-motion:reduce){#v-home .bpass.nudge .bp-stub{animation:none}}
+#v-home .hsheet>.msg{font-size:14px;margin:10px 4px 0;min-height:0}
+#v-home .ckhint{font-size:11.5px;line-height:1.7;color:var(--hm-sub);margin:8px 4px 0;text-align:center}
+#v-home .inflight,#v-home .tally{box-shadow:0 16px 36px -18px rgba(15,23,42,.28),0 2px 6px rgba(15,23,42,.05)}
+:root[data-palette="board"] #v-home .inflight,:root[data-palette="board"] #v-home .tally{box-shadow:0 16px 36px -18px rgba(0,0,0,.7)}
+
 /* ---------- ホーム（上半分）：ヘッダー・チェックインのカード・直近の記録・3つの数字 ---------- */
 :root{--hm-ink:#374151;--hm-sub:#9CA3AF;--hm-mute:#6B7280;--hm-card:#FFFFFF;--hm-tint:#F8FAFC;--hm-pill:rgba(17,24,39,.05);
   --hm-shadow:0 1px 2px rgba(17,24,39,.04),0 10px 30px -8px rgba(17,24,39,.10);
@@ -442,30 +519,7 @@ header.top{padding:22px 2px 16px}
 header.top .brand{font-size:20px;gap:9px}
 header.top .brand svg{width:26px;height:26px}
 #openSettings.iconbtn{border:0;background:var(--hm-pill);color:var(--hm-mute);font-size:12.5px;font-weight:600;padding:7px 14px;letter-spacing:.02em}
-#v-home .ckcard{position:relative;isolation:isolate;margin:14px 0 0;padding:26px 22px 20px;border-radius:24px;text-align:center;
-  background:linear-gradient(180deg,var(--hm-card) 0%,var(--hm-tint) 100%);box-shadow:var(--hm-shadow);color:var(--hm-ink)}
-#v-home .nearest{padding:0}
-#v-home .nearest .label{font-size:12px;font-weight:600;letter-spacing:.08em;color:var(--hm-sub)}
-#v-home .nearest .name{font-family:var(--gothic);font-weight:800;font-size:clamp(24px,6.6vw,30px);line-height:1.3;letter-spacing:0;color:var(--hm-ink);margin:6px 0 6px}
-#v-home .nearest .name.idle{font-size:18px;font-weight:700;color:var(--hm-mute)}
-#v-home .nearest .dist{font-size:12.5px;line-height:1.7;color:var(--hm-sub)}
-#v-home .nearest .dist b{color:var(--hm-ink)}
-#v-home .flap:not(:empty){justify-content:center}
 #v-home .demo-pick{text-align:left}
-#v-home .cta{position:relative;display:grid;place-items:center;width:164px;height:164px;margin:30px auto 22px;padding:0;border:0;border-radius:50%;
-  background:radial-gradient(circle at 32% 26%,var(--cta-hi) 0%,var(--cta-lo) 72%);color:var(--cta-text);font-size:16px;font-weight:800;letter-spacing:.14em;
-  box-shadow:0 0 0 10px var(--cta-ring),0 0 0 11px var(--cta-ring2),0 22px 44px -14px var(--cta-glow),inset 0 1px 0 rgba(255,255,255,.28),inset 0 -10px 24px rgba(0,0,0,.18);
-  transition:transform .15s ease,box-shadow .2s ease;-webkit-tap-highlight-color:transparent}
-#v-home .cta::before{content:"";position:absolute;inset:-26px;border-radius:50%;z-index:-1;background:radial-gradient(circle,var(--cta-glow) 0%,transparent 68%);
-  filter:blur(12px);opacity:.7;animation:ctaGlow 3.4s ease-in-out infinite}
-#v-home .cta:hover{transform:translateY(-1px)}
-#v-home .cta:active{transform:scale(.97)}
-#v-home .cta:focus-visible{outline:3px solid var(--cta-glow);outline-offset:14px}
-#v-home .cta:disabled{opacity:.55}
-#v-home .cta:disabled::before{animation:none;opacity:.3}
-@keyframes ctaGlow{0%,100%{transform:scale(.94);opacity:.55}50%{transform:scale(1.04);opacity:.85}}
-@media (prefers-reduced-motion:reduce){#v-home .cta::before{animation:none}}
-#v-home .ckcard .msg{font-size:14px;margin:0 0 4px;min-height:0}
 #v-home .ckhint{font-size:12px;line-height:1.7;color:var(--hm-sub);opacity:.9;margin:6px 8px 0}
 #v-home .inflight{position:relative;margin:18px 0 0;padding:18px 20px 18px 24px;border:0;border-radius:20px;background:var(--hm-card);box-shadow:var(--hm-shadow);color:var(--hm-ink)}
 #v-home .inflight::before{content:"";position:absolute;left:12px;top:18px;bottom:18px;width:2px;border-radius:2px;background:var(--accent,var(--shu));opacity:.85}
@@ -484,6 +538,54 @@ header.top .brand svg{width:26px;height:26px}
 #v-home .streak{margin:16px 4px 0;font-size:13px;color:var(--hm-mute)}
 #v-home .titlepill{margin:12px 0 0;border:0;background:var(--hm-pill);font-size:12px;padding:4px 12px}
 #v-home .boardzone{margin-top:36px}
+/* ---------- マイページ：タイル（いちばん上に黒いアカウントのタイル、項目ごとに白いタイル。区切り線なし） ---------- */
+dialog.mypage{--mp-bg:#F4F5F7;--mp-card:#FFFFFF;--mp-ink:#374151;--mp-sub:#9CA3AF;--mp-mute:#6B7280;--mp-shadow:0 12px 26px -18px rgba(15,23,42,.3);
+  max-width:min(460px,100vw);width:100%;max-height:100dvh;height:100dvh;margin:0 auto;border-radius:0;background:var(--mp-bg);color:var(--mp-ink)}
+[data-palette="board"] dialog.mypage{--mp-bg:#0B0D10;--mp-card:#16191F;--mp-ink:#E5E7EB;--mp-sub:#8B95A3;--mp-mute:#A7B0BC;--mp-shadow:0 12px 26px -16px rgba(0,0,0,.7)}
+dialog.mypage{inset:0;overflow-y:auto;overscroll-behavior:contain}
+dialog.mypage .mp-sec:not(:has(.set-row:not([hidden]))){display:none}
+@media (min-width:600px){dialog.mypage{height:auto;max-height:92dvh;margin:auto;border-radius:24px}}
+dialog.mypage .dlg{padding:18px 18px 28px;max-height:none!important;overflow:visible!important}
+dialog.mypage .mp-top{display:flex;align-items:center;justify-content:space-between;margin:2px 0 14px}
+dialog.mypage .mp-top h3{font-family:var(--gothic);font-size:17px;font-weight:800;letter-spacing:.04em;margin:0;color:var(--mp-ink)}
+dialog.mypage .mp-back{display:flex;align-items:center;gap:4px;border:0;background:var(--mp-card);color:var(--mp-ink);font-weight:700;font-size:13px;padding:8px 14px 8px 10px;border-radius:999px;box-shadow:var(--mp-shadow)}
+dialog.mypage .mp-back svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+dialog.mypage .mp-sp{width:78px}
+dialog.mypage .mp-prof{display:grid;grid-template-columns:56px 1fr;gap:6px 14px;align-items:center;background:#111827;color:#F9FAFB;border-radius:24px;padding:20px;box-shadow:0 22px 40px -22px rgba(17,24,39,.7)}
+dialog.mypage .mp-av{width:56px;height:56px;border-radius:50%;display:grid;place-items:center;font-size:22px;font-weight:800;color:#fff;background:radial-gradient(circle at 32% 28%,var(--stub-hi),var(--stub-lo) 72%)}
+[data-palette="board"] dialog.mypage .mp-av{color:#0B0D10}
+dialog.mypage .mp-who{min-width:0}
+dialog.mypage .mp-who b{display:block;font-size:18px;font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+dialog.mypage .mp-who small{display:block;font-size:12px;color:#9CA3AF;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+dialog.mypage .mp-chips{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+dialog.mypage .mp-chip{font-size:11px;font-weight:700;color:#E5E7EB;background:rgba(255,255,255,.1);padding:4px 10px;border-radius:999px}
+dialog.mypage .mp-chip.ok{color:#6EE7B7;background:rgba(16,185,129,.15)}
+dialog.mypage .mp-chip.plus{color:#FDE68A;background:rgba(245,158,11,.18)}
+dialog.mypage .mp-sec{margin:12px 0 0;background:var(--mp-card);border-radius:22px;padding:14px 16px 8px;box-shadow:var(--mp-shadow)}
+dialog.mypage .mp-sec h4{font-size:12px;font-weight:700;color:var(--mp-mute);letter-spacing:.06em;margin:0 0 2px}
+dialog.mypage .set-row{border:0;padding:10px 0;font-size:14px;font-weight:700;color:var(--mp-ink)}
+dialog.mypage .set-row small{font-size:11.5px;font-weight:400;color:var(--mp-sub);margin-top:2px}
+dialog.mypage .btn2{border:0;background:#F3F4F6;color:var(--mp-ink);border-radius:999px;padding:9px 16px;font-size:13px;white-space:nowrap}
+[data-palette="board"] dialog.mypage .btn2{background:#232830}
+dialog.mypage .btn2.danger{background:#FEF2F2;color:#B91C1C}
+[data-palette="board"] dialog.mypage .btn2.danger{background:rgba(229,72,77,.15);color:#FF8A8E}
+dialog.mypage .btn1{border-radius:999px;padding:9px 16px;font-size:13px}
+dialog.mypage .exp{display:flex;gap:6px}
+dialog.mypage .seg{border:0;border-radius:999px;background:#F3F4F6;padding:3px;gap:0;margin:2px 0 8px}
+[data-palette="board"] dialog.mypage .seg{background:#232830}
+dialog.mypage .seg button{border:0!important;border-radius:999px;padding:8px 0;font-size:13px;color:var(--mp-mute);background:none}
+dialog.mypage .seg button[data-focus="JAL"]{color:var(--jal)}dialog.mypage .seg button[data-focus="ANA"]{color:var(--ana)}
+dialog.mypage .seg button[aria-pressed="true"]{background:var(--mp-card);color:var(--mp-ink);box-shadow:0 2px 6px -2px rgba(15,23,42,.2)}
+dialog.mypage .seg button[data-focus="JAL"][aria-pressed="true"]{color:var(--jal)}dialog.mypage .seg button[data-focus="ANA"][aria-pressed="true"]{color:var(--ana)}
+dialog.mypage select{width:auto;max-width:46%;border:0;background:#F3F4F6;border-radius:999px;padding:8px 12px;font-size:13px}
+[data-palette="board"] dialog.mypage select{background:#232830;color:var(--mp-ink)}
+dialog.mypage .swatch i{width:28px;height:28px;border-width:3px;border-color:var(--mp-card)}
+dialog.mypage .plus-list{font-size:13px;color:var(--mp-mute);margin:4px 0 6px;padding-left:1.2em}
+dialog.mypage .hint{font-size:12px;color:var(--mp-sub)}
+dialog.mypage .legal{text-align:center;font-size:11px;color:var(--mp-sub);margin-top:18px}
+dialog.mypage .appver{text-align:center}
+dialog.mypage .dlg .close{display:none}
+
 /* ---------- 成績の画面（航空会社別・ステータスの目安）：ゴシック体・数字を大きく・余白とうすい影のカード ---------- */
 #v-stats{--st-ink:#374151;--st-sub:#9CA3AF;--st-mute:#6B7280;--st-card:#FFFFFF;--st-track:#F1F2F4;--st-wash:#F7F8FA;
   --st-shadow:0 1px 2px rgba(17,24,39,.04),0 6px 20px rgba(17,24,39,.06);--jal:#C8102E;--ana:#1C4FA0;--other:#6B7280;color:var(--st-ink)}
@@ -738,6 +840,7 @@ details.rgrp .rgbar i{display:block;height:100%;background:var(--shu)}
 </style>
 </head>
 <body>
+<div class="hmap" id="homeMap" aria-hidden="true"></div>
 <main class="wrap">
   <div class="topzone">
   <header class="top">
@@ -760,13 +863,22 @@ details.rgrp .rgbar i{display:block;height:100%;background:var(--shu)}
   <!-- HOME -->
   <section class="view on" id="v-home" aria-label="ホーム">
     <div class="titlepill" id="titlePill" hidden></div>
-    <div class="ckcard">
-    <div class="nearest">
-      <div class="label" id="nearLabel">いちばん近い空港</div>
-      <div class="flap" id="nearCode" aria-hidden="true"></div>
-      <div class="name idle" id="nearName">空港に着いたら、印を押そう</div>
-      <div class="dist" id="nearDist">チェックインを押すと、現在地からいちばん近い空港を調べます。</div>
+    <div class="hsheet">
+    <div class="grab" aria-hidden="true"></div>
+    <p class="mapcredit">地図：国土地理院</p>
+    <div class="bpass" id="bpass">
+      <div class="bp-main">
+        <div class="nearest">
+          <div class="label" id="nearLabel">いちばん近い空港</div>
+          <div class="flap" id="nearCode" aria-hidden="true"></div>
+          <div class="name idle" id="nearName">空港に着いたら、印を押そう</div>
+          <div class="dist" id="nearDist">半券を切ると、現在地からいちばん近い空港を調べます。</div>
+        </div>
+      </div>
+      <button class="bp-stub" id="checkin" aria-label="チェックイン（半券を右へ引いて切ります）"><span class="v">チェックイン</span><svg viewBox="0 0 26 14" aria-hidden="true"><path d="M2 7h20"/><path d="M17 2l5 5-5 5"/></svg><span class="s">引いて切る</span></button>
     </div>
+    <p class="msg" id="msg" role="status" aria-live="polite"></p>
+    <p class="hint ckhint">空港の判定範囲（1〜2km）の中で、半券を右へ引いて切ると印が押されます。</p>
     <div class="demo-pick">
       <label for="demoAirport">いる空港（デモ）</label>
       <select id="demoAirport"></select>
@@ -781,10 +893,6 @@ details.rgrp .rgbar i{display:block;height:100%;background:var(--shu)}
         <button class="btn1" id="verifyCode" style="width:100%;margin-top:8px">ログイン</button>
       </div>
       <p class="msg" id="loginMsg" role="status" aria-live="polite"></p>
-    </div>
-    <button class="cta" id="checkin">チェックイン</button>
-    <p class="msg" id="msg" role="status" aria-live="polite"></p>
-    <p class="hint ckhint">空港の判定範囲（1〜2km）の中で押すと、その空港の印が押されます。</p>
     </div>
     <div class="notice-slot" id="noticeSlot" hidden>
     <div class="queuebar" id="queueBar" hidden></div>
@@ -804,7 +912,8 @@ details.rgrp .rgbar i{display:block;height:100%;background:var(--shu)}
     <section class="boardzone" aria-label="最近の印">
     <h2>最近の印</h2>
     <div class="grid" id="recent"></div>
-    </section>
+      </div>
+  </section>
     <details class="dev" hidden><summary>検証用ツール</summary>
       <p class="hint">判定を確かめるための機能です。記録には残りません。</p>
       <button class="btn2" id="probe" style="width:100%">位置だけ測る（検証用・記録しない）</button>
@@ -953,14 +1062,14 @@ details.rgrp .rgbar i{display:block;height:100%;background:var(--shu)}
 </main>
 
 <nav class="tabs" aria-label="画面の切り替え"><div class="in">
-  <button data-v="home" data-mode="rally" aria-current="page">ホーム</button>
-  <button data-v="book" data-mode="rally">図鑑</button>
-  <button data-v="log" data-mode="rally">フライト</button>
-  <button data-v="ops" data-mode="rally">運用</button>
-  <button data-v="stats" data-mode="rally">成績</button>
-  <button data-v="co" data-mode="game" hidden>会社</button>
-  <button data-v="fleet" data-mode="game" hidden>路線・機材</button>
-  <button data-v="gods" data-mode="game" hidden>守り神</button>
+  <button data-v="home" data-mode="rally" aria-current="page"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 10.5 12 4l8.5 6.5"/><path d="M5.5 9v10h4.5v-5.5h4V19h4.5V9"/></svg><span>ホーム</span></button>
+  <button data-v="book" data-mode="rally"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5C4 4.7 4.7 4 5.5 4H11v15H5.5c-.8 0-1.5.5-1.5 1.2V5.5Z"/><path d="M20 5.5c0-.8-.7-1.5-1.5-1.5H13v15h5.5c.8 0 1.5.5 1.5 1.2V5.5Z"/></svg><span>図鑑</span></button>
+  <button data-v="log" data-mode="rally"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10.5 13.5 4 11l1.4-1.4 7 1.1 3.9-3.9c.8-.8 2.1-.8 2.9 0s.8 2.1 0 2.9l-3.9 3.9 1.1 7L15 22l-2.5-6.5-3 3v2.5L8 22.5l-1.3-3.2L3.5 18 5 16.5h2.5Z"/></svg><span>フライト</span></button>
+  <button data-v="ops" data-mode="rally"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.5"/><path d="M12 12 18 6"/><circle cx="12" cy="12" r="1" fill="currentColor"/></svg><span>運用</span></button>
+  <button data-v="stats" data-mode="rally"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h16"/><path d="M7 16v-4"/><path d="M12 16V8"/><path d="M17 16v-6"/></svg><span>成績</span></button>
+  <button data-v="co" data-mode="game" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V8l6-3v15"/><path d="M10 20V10l10 3v7"/><path d="M3 20h18"/></svg><span>会社</span></button>
+  <button data-v="fleet" data-mode="game" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="17" r="2"/><circle cx="18" cy="7" r="2"/><path d="M8 17h4a3 3 0 0 0 3-3v-4a3 3 0 0 1 3-3"/></svg><span>路線・機材</span></button>
+  <button data-v="gods" data-mode="game" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5 14.4 9l5.6.4-4.3 3.6 1.4 5.5L12 15.6l-5.1 2.9 1.4-5.5L4 9.4 9.6 9Z"/></svg><span>守り神</span></button>
 </div></nav>
 
 <dialog id="dStamp"><div class="dlg" id="dStampBody"></div></dialog>
@@ -1014,8 +1123,13 @@ details.rgrp .rgbar i{display:block;height:100%;background:var(--shu)}
 </div></dialog>
 <dialog id="dBP" aria-label="読み取った搭乗券"><div class="dlg" id="dBPBody"></div></dialog>
 <dialog id="dGod" aria-label="守り神"><div class="dlg" id="dGodBody"></div></dialog>
-<dialog id="dSettings"><div class="dlg">
-  <h3>マイページ</h3>
+<dialog id="dSettings" class="mypage"><div class="dlg">
+  <div class="mp-top"><button class="mp-back" data-close type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>ホーム</button><h3>マイページ</h3><span class="mp-sp" aria-hidden="true"></span></div>
+  <div class="mp-prof" id="mpProf">
+    <div class="mp-av" id="mpAv" aria-hidden="true"></div>
+    <div class="mp-who"><b id="mpName">そらメモ</b><small id="mpMail"></small></div>
+    <div class="mp-chips" id="mpChips"></div>
+  </div>
   <section class="mp-sec" aria-labelledby="mpAcct"><h4 id="mpAcct">アカウント</h4>
     <div class="set-row" id="loginRow"><div>ログイン<small>記録をサーバーに保存します。メールアドレスに届くコードでログインできます。</small></div><button class="btn2" id="mpLogin">ログインする</button></div>
     <div class="set-row" id="acctRow" hidden><div>ログイン中<small id="acctEmail"></small></div><button class="btn2" id="logout">ログアウト</button></div>
@@ -1033,7 +1147,7 @@ details.rgrp .rgbar i{display:block;height:100%;background:var(--shu)}
     <p class="hint">月額500円、または年額4,800円（2か月分お得）。</p>
   </section>
   <section class="mp-sec" aria-labelledby="mpShow"><h4 id="mpShow">表示</h4>
-    <div class="set-row"><div>表示<small>JAL・ANAそれぞれのフライトだけで数えた表示に切り替えます。記録は消えません。</small></div></div>
+    <div class="set-row"><div><small>JAL・ANAそれぞれのフライトだけで数えた表示に切り替えます。記録は消えません。</small></div></div>
     <div class="seg" role="group" aria-label="表示">
       <button data-focus="ALL" aria-pressed="true">ノーマル</button><button data-focus="JAL" aria-pressed="false">JAL</button><button data-focus="ANA" aria-pressed="false">ANA</button>
     </div>
@@ -1430,7 +1544,8 @@ function updateAuthUI(){
   $("loginBox").hidden = !needLogin;
   if(needLogin) initCaptcha();
   $("checkin").disabled = needLogin || paused;
-  $("checkin").textContent = needLogin ? "ログインしてください" : paused ? "一時停止中" : "チェックイン";
+  $("checkin").querySelector(".v").textContent = needLogin ? "ログインしてください" : paused ? "一時停止中" : "チェックイン";
+  $("checkin").querySelector(".s").hidden = needLogin || paused;
   $("acctRow").hidden = !(SERVER && user);
   $("loginRow").hidden = !(SERVER && !user && !demo);
   $("acctEmail").textContent = user ? user.email || "" : "";
@@ -1619,7 +1734,7 @@ async function checkin(){
   }
   btn.disabled = false;
   const n = nearest(p);
-  showNearest(n);
+  HOME_POS = p; showNearest(n);
   if(!demo) vlog("チェックイン", p, n);
   if(SERVER && !demo) return checkinServer(p);   // サーバー版は範囲・誤差の判断もサーバーに任せる（断った理由を記録するため）
   if(p.acc > RULE.maxAccuracy) return say(`位置の精度が低すぎます（誤差 約${fmtKm(p.acc)}m）。窓の近くか屋外でもう一度押してください。`, true);
@@ -1679,6 +1794,7 @@ function demoNow(a){
   return last.t + Math.max(60, d/600*60 + 40)*60e3;
 }
 function showNearest(n){
+  HOME_NEAR = n; setTimeout(renderHomeMap, 0);
   $("nearLabel").textContent = "いちばん近い空港";
   $("nearName").textContent = placeName(n.a, n.within ? n.term : null); $("nearName").classList.remove("idle");
   const cd = code(n.a); $("nearCode").innerHTML = /^[A-Z0-9]{3,4}$/.test(cd) ? [...cd].map(ch => `<i>${ch}</i>`).join("") : "";
@@ -1779,9 +1895,10 @@ function render(){
   renderVisible();
 }
 function renderHome(){
+  setTimeout(renderHomeMap, 0);
   const v = visited(), r = routes(), totalKm = focusKm();
   $("tAirports").textContent = shownAirports().size; $("tTotal").textContent = A.length;
-  $("focusBar").hidden = FOCUS === "ALL";
+  $("focusBar").hidden = FOCUS === "ALL"; document.documentElement.dataset.focus = FOCUS;
   $("focusBar").innerHTML = FOCUS === "ALL" ? "" : `<b>${FOCUS_LABEL[FOCUS]}</b>を表示中。${FOCUS}グループのフライトだけで数えています。<button class="linkbtn" id="focusOff">ノーマルに戻す</button>`;
   $("tRoutes").textContent = r.size; $("tKm").textContent = fmtKm(totalKm);
 
@@ -2023,6 +2140,7 @@ function goTab(v, seg){
   b.setAttribute("aria-current","page"); LAST_TAB[MODE] = v;
   const wasOps = $("v-ops").classList.contains("on");
   document.querySelectorAll("section.view").forEach(s => s.classList.toggle("on", s.id === "v-" + v));
+  document.documentElement.dataset.view = v; if(v === "home") setTimeout(renderHomeMap, 0);
   if(v === "ops" && !wasOps) openOps(); else if(v !== "ops" && wasOps) stopTraffic();
   if(seg) setBookSeg(seg);
   renderVisible();
@@ -2046,6 +2164,49 @@ function setGameOn(on){
   setMode(on ? MODE : "rally");
 }
 document.querySelectorAll("nav.tabs button").forEach(b => b.onclick = () => { goTab(b.dataset.v); track("tab", b.dataset.v); });
+document.documentElement.dataset.view = document.documentElement.dataset.view || "home";
+// 搭乗券の半券を右へ引いて切ると、チェックイン。タップだけなら引き方を知らせる（キーボードの Enter・Space ではそのままチェックイン）
+(() => { const b = $("checkin"), wrap = $("bpass"); if(!b || !wrap) return;
+  let x0 = 0, dx = 0, drag = false, moved = false;
+  const set = d => { b.style.transform = d ? `translate(${d}px,${Math.round(d * .12)}px) rotate(${Math.round(d / 10)}deg)` : ""; };
+  b.addEventListener("pointerdown", e => { if(b.disabled) return; drag = true; moved = false; x0 = e.clientX; dx = 0; try{ b.setPointerCapture(e.pointerId); }catch(_){} b.classList.add("dragging"); });
+  b.addEventListener("pointermove", e => { if(!drag) return; dx = Math.max(0, Math.min(170, e.clientX - x0)); if(dx > 4) moved = true; set(dx); });
+  const end = () => { if(!drag) return; drag = false; b.classList.remove("dragging");
+    if(dx > 90) tear(); else { set(0); if(!moved) nudge(); } };
+  b.addEventListener("pointerup", end); b.addEventListener("pointercancel", end);
+  async function tear(){
+    b.style.transform = "translate(210px,40px) rotate(26deg)"; b.style.opacity = "0"; track("tear", 1);
+    const before = S.checkins.length;
+    try{ await checkin(); } finally { setTimeout(() => { b.style.opacity = ""; set(0); }, S.checkins.length > before ? 1200 : 200); }
+  }
+  function nudge(){ wrap.classList.remove("nudge"); void wrap.offsetWidth; wrap.classList.add("nudge"); say("半券を右へ引いて切ると、チェックインします。"); }
+})();
+// ホームの上の地図：いちばん近い空港（まだなら最後にチェックインした空港）と判定範囲、調べた現在地。動かさない地図（国土地理院の淡色地図）
+let HOME_MAP = null, HOME_LAYER = null, HOME_NEAR = null, HOME_POS = null;
+async function renderHomeMap(){
+  const el = $("homeMap"); if(!el || document.documentElement.dataset.view !== "home") return;
+  try{ await loadLeaflet(); }catch(e){ return; }
+  if(!window.L || document.documentElement.dataset.view !== "home") return;
+  if(!HOME_MAP){
+    HOME_MAP = L.map(el, { zoomControl:false, attributionControl:false, dragging:false, scrollWheelZoom:false, doubleClickZoom:false, boxZoom:false, keyboard:false, touchZoom:false, tap:false, zoomSnap:0.25 });
+    L.tileLayer("https://cyberjapandata.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png", { maxZoom:18 }).addTo(HOME_MAP);
+  } else HOME_MAP.invalidateSize();
+  const last = S.checkins[S.checkins.length - 1];
+  const a = HOME_NEAR ? HOME_NEAR.a : last ? BY[last.a] : A.find(x => x.iata === "HND");
+  if(!a) return;
+  if(HOME_LAYER) HOME_LAYER.remove();
+  HOME_LAYER = L.layerGroup().addTo(HOME_MAP);
+  const rad = a.radius || 1500;
+  L.circle([a.lat, a.lon], { radius:rad, color:"#1F2937", weight:1.4, dashArray:"4 5", fillColor:"#1F2937", fillOpacity:.06 }).addTo(HOME_LAYER);
+  L.circleMarker([a.lat, a.lon], { radius:5, color:"#fff", weight:2, fillColor:"#1F2937", fillOpacity:1 }).addTo(HOME_LAYER);
+  L.marker([a.lat, a.lon], { interactive:false, icon:L.divIcon({ className:"", html:`<div class="hm-ap">${esc(code(a))}・判定範囲</div>`, iconSize:[0, 0] }) }).addTo(HOME_LAYER);
+  let bounds = L.latLng(a.lat, a.lon).toBounds(rad * 2);
+  if(HOME_POS && HOME_NEAR && HOME_NEAR.a === a){
+    L.marker([HOME_POS.lat, HOME_POS.lon], { interactive:false, icon:L.divIcon({ className:"", html:'<div class="hm-me"></div>', iconSize:[14, 14], iconAnchor:[7, 7] }) }).addTo(HOME_LAYER);
+    if(HOME_NEAR.km < 30) bounds = bounds.extend([HOME_POS.lat, HOME_POS.lon]);
+  }
+  HOME_MAP.fitBounds(bounds, { paddingTopLeft:[30, 90], paddingBottomRight:[30, 150], maxZoom:14, animate:false });
+}
 // ダイアログの「閉じる」（HTMLに直接 onclick を書かない：ページの防御設定 CSP のため）
 document.addEventListener("click", e => { const b = e.target.closest("[data-close]"); if(b) b.closest("dialog").close(); });
 document.querySelectorAll("#modeSw [data-mode]").forEach(b => b.onclick = () => { setMode(b.dataset.mode); track("mode", b.dataset.mode); });
@@ -2088,7 +2249,7 @@ function openAirport(id){
 }
 document.addEventListener("click", e => { const b = e.target.closest("[data-ap-ops]"); if(!b) return;
   $("dAirport").close(); goTab("ops"); });
-$("checkin").onclick = checkin;
+$("checkin").onclick = e => { if(e.detail === 0) checkin(); };   // マウス・指は半券を切る操作（上）。キーボードと、ほかの機能からの呼び出しはそのまま
 $("probe").onclick = async () => {
   const o = $("probeOut"); o.textContent = "新しい位置を取得しています…（最大12秒）";
   try{
@@ -2101,7 +2262,18 @@ $("probe").onclick = async () => {
 };
 $("vlogClear").onclick = () => { if(confirm("検証ログを消します。")){ try{ localStorage.removeItem("soramemo.vlog"); }catch(e){} showVlog(); } };
 $("demoAirport").onchange = () => { showNearest(nearest(demoPlace())); say(""); };
-$("openSettings").onclick = () => { renderBaseSel(); $("dSettings").showModal(); };
+$("openSettings").onclick = () => { renderBaseSel(); renderMyPage(); $("dSettings").showModal(); };
+// マイページのいちばん上のタイル：アカウント・称号・記録の保存先
+function renderMyPage(){
+  const mail = SERVER && user ? (user.email || "") : "", tn = titleName();
+  $("mpAv").textContent = mail ? mail[0].toUpperCase() : "そ";
+  $("mpName").textContent = mail ? mail.split("@")[0] : demo ? "デモモード" : SERVER ? "ログインしていません" : "この端末の記録";
+  $("mpMail").textContent = mail;
+  const chip = (t, k) => `<span class="mp-chip${k ? " " + k : ""}">${esc(t)}</span>`;
+  $("mpChips").innerHTML = (SERVER && user ? chip("ログイン中", "ok") + chip("記録はサーバーに保存") : demo ? chip("デモ・記録は別") : chip("記録はこの端末に保存"))
+    + (tn ? chip(`称号 ${tn}`) : "") + (typeof PLUS !== "undefined" && PLUS ? chip("そらメモ＋", "plus") : "")
+    + chip(`${visited().size}空港・${S.flights.length}フライト`);
+}
 $("closeSettings").onclick = () => $("dSettings").close();
 // お試しモードの見本：始めたときに、1年ぶんの旅（16空港・30フライト）をたまった状態で見せる。お試しの記録は本番とは別に保存される
 function demoSeed(){
@@ -2125,7 +2297,7 @@ $("toggleDemo").onclick = async () => {
   $("toggleDemo").textContent = demo ? "終了" : "開始";
   await reload(); say("");
   if(demo){ demoSeed(); render(); showNearest(nearest(demoPlace())); say("見本の記録（1年ぶん・16空港・30フライト）を入れてあります。チェックインすると、ここに足されます。"); }
-  else { $("nearName").textContent="空港に着いたら、印を押そう"; $("nearName").classList.add("idle"); $("nearDist").textContent="チェックインを押すと、現在地からいちばん近い空港を調べます。"; $("nearDist").classList.remove("ok"); }
+  else { $("nearName").textContent="空港に着いたら、印を押そう"; $("nearName").classList.add("idle"); $("nearDist").textContent="半券を切ると、現在地からいちばん近い空港を調べます。"; $("nearDist").classList.remove("ok"); }
   $("dSettings").close();
 };
 $("wipe").onclick = () => {
