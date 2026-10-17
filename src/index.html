@@ -135,7 +135,6 @@ section.view.on{display:block}
 /* 案B：ホームのチェックインは中央の丸い印ボタン */
 #checkin.cta{display:block;width:136px;height:136px;margin:24px auto 10px;padding:0;border-radius:50%;font-size:17px;line-height:1.35;letter-spacing:.04em;box-shadow:0 0 0 6px var(--paper),0 0 0 8px var(--shu)}
 /* 案B：図鑑は地域ごとの棚（棚板は枠の色） */
-#book .grid{border-bottom:6px solid var(--line);padding-bottom:10px;margin-bottom:16px}
 .hint{font-size:13px;color:var(--sumi);margin:0 0 6px}
 .msg{min-height:1.7em;font-size:15px;margin:6px 0 0}
 .msg.err{color:var(--shu-text)}
@@ -247,8 +246,6 @@ dialog::backdrop{background:rgba(15,22,38,.55)}
 .seg{display:grid;grid-template-columns:repeat(3,1fr);border:1.5px solid var(--ink);border-radius:10px;overflow:hidden;margin:2px 0 6px}
 .seg button{background:none;border:none;padding:10px 0;font-weight:700;color:var(--ink)}
 .seg button+button{border-left:1.5px solid var(--ink)}
-#v-book .seg{grid-template-columns:repeat(4,1fr)}
-#v-book .seg button{font-size:13px;white-space:nowrap;padding:10px 2px}
 .seg button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
 .cell.dim{opacity:.32}
 .pend{display:block;font-size:11px;color:var(--shu-text);font-weight:700}
@@ -870,7 +867,7 @@ ul.fc{margin:4px 0;padding-left:1.2em;line-height:1.9}
 .xgrp:not([open])>summary h3::after{content:"　▸"}
 /* 画面の外にある部分は、見えるまで配置の計算を後回しにする（記録が多いときの切り替えを軽く） */
 #book .grid,#ach .achgrp,#manualList .flight,#flights .flight{content-visibility:auto;contain-intrinsic-size:auto 360px}
-#manualList .flight,#flights .flight{contain-intrinsic-size:auto 64px}
+#manualList .flight,#flights .flight{contain-intrinsic-size:auto 112px}
 .xnote{background:var(--sky);border-radius:10px;padding:8px 12px;font-size:13px;line-height:1.7}
 details.dev{margin:36px 0 0;border-top:1px solid var(--line);padding-top:12px}
 details.dev summary{cursor:pointer;color:var(--sumi);font-size:14px;padding:6px 0}
@@ -884,15 +881,115 @@ details.dev summary{cursor:pointer;color:var(--sumi);font-size:14px;padding:6px 
 .login input{width:100%;padding:12px;border:1px solid var(--line);border-radius:10px;background:var(--sky)}
 [hidden]{display:none !important}
 
-details.rgrp{border-bottom:1px solid var(--line,#E2E8EF);padding:2px 0 6px}
-details.rgrp>summary{list-style:none;cursor:pointer;display:grid;grid-template-columns:1fr;gap:4px;padding:8px 0 4px}
-details.rgrp>summary::-webkit-details-marker{display:none}
-details.rgrp>summary h3{margin:0;display:flex;justify-content:space-between;align-items:baseline}
-details.rgrp>summary h3::after{content:"＋";font-size:13px;color:var(--sumi);margin-left:8px}
-details.rgrp[open]>summary h3::after{content:"−"}
-details.rgrp .rgn{margin-left:auto;font-size:13px;font-weight:600;color:var(--sumi)}
-details.rgrp .rgbar{display:block;height:4px;border-radius:2px;background:var(--line,#E2E8EF);overflow:hidden}
-details.rgrp .rgbar i{display:block;height:100%;background:var(--shu)}
+/* ---------- 図鑑：全国制覇のカード、地方のタイル、開いた地方の印、最近押した印 ---------- */
+#v-book{--bk-ink:#1F2937;--bk-sub:#6B7280;--bk-mute:#6B7280;--bk-card:#FFFFFF;--bk-pill:#FFFFFF;--bk-track:#EEF0F3;--bk-shadow:0 12px 26px -18px rgba(15,23,42,.3)}
+[data-palette="board"] #v-book{--bk-ink:#E5E7EB;--bk-sub:#8B95A3;--bk-mute:#A7B0BC;--bk-card:#16191F;--bk-pill:#232830;--bk-track:#2A2F37;--bk-shadow:0 12px 26px -16px rgba(0,0,0,.7)}
+#v-book .bk-top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:2px 0 14px}
+#v-book .bk-top h2{margin:0;font-family:var(--gothic);font-weight:800;font-size:24px;letter-spacing:.04em;color:var(--bk-ink);flex:none}
+#v-book .seg{display:flex;gap:6px;border:0;border-radius:0;overflow-x:auto;margin:0;scrollbar-width:none;grid-template-columns:none}
+#v-book .seg::-webkit-scrollbar{display:none}
+#v-book .seg button,#v-book .seg button+button{flex:none;border:0;border-radius:999px;padding:7px 13px;font-size:12.5px;font-weight:700;background:var(--bk-pill);color:var(--bk-mute);box-shadow:0 4px 12px -8px rgba(15,23,42,.35)}
+#v-book .seg button[aria-pressed="true"]{background:var(--bk-ink);color:var(--bk-card)}
+#v-book .bk-hero{display:flex;align-items:center;gap:16px;background:#111827;color:#F9FAFB;border-radius:26px;padding:18px 20px;box-shadow:0 22px 40px -22px rgba(17,24,39,.7)}
+#v-book .bk-ring{position:relative;flex:none;width:92px;height:92px}
+#v-book .bk-ring b{position:absolute;inset:0;display:grid;place-items:center;font-size:14px;font-weight:800}
+#v-book .bk-txt{min-width:0}
+#v-book .bk-txt .l{font-size:11px;font-weight:700;letter-spacing:.1em;color:#9CA3AF}
+#v-book .bk-txt .n{font-size:30px;font-weight:800;line-height:1.15;font-variant-numeric:tabular-nums}
+#v-book .bk-txt .s{font-size:12px;color:#D1D5DB;margin-top:4px}
+#v-book #bookNote{margin:10px 4px 0}
+#v-book .bk-tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:12px}
+#v-book .bk-tile{display:flex;flex-direction:column;align-items:stretch;gap:6px;text-align:left;border:0;border-radius:20px;padding:12px 12px 11px;background:var(--bk-card);box-shadow:var(--bk-shadow);color:var(--bk-ink);font-family:var(--gothic);min-width:0}
+#v-book .bk-tile .h{display:flex;justify-content:space-between;align-items:center;font-size:13px}
+#v-book .bk-tile .n{font-size:22px;font-weight:800;line-height:1;font-variant-numeric:tabular-nums}
+#v-book .bk-tile .n small{font-size:11px;font-weight:600;color:var(--bk-sub)}
+#v-book .bk-tile .dots{display:flex;flex-wrap:wrap;gap:3px}
+#v-book .bk-tile .dots i{width:7px;height:7px;border-radius:50%;background:var(--bk-track)}
+#v-book .bk-tile[aria-pressed="true"]{box-shadow:0 0 0 2px var(--bk-ink),var(--bk-shadow)}
+#v-book .bk-tile:focus-visible,#v-book .bk-close:focus-visible{outline:3px solid #2563EB;outline-offset:2px}
+#v-book .bk-panel{margin-top:12px;background:var(--bk-card);border-radius:22px;padding:14px 16px 16px;box-shadow:var(--bk-shadow);scroll-margin-top:16px}
+#v-book .bk-ph{display:flex;align-items:center;justify-content:space-between;gap:8px}
+#v-book .bk-ph h3{margin:0;font-size:16px;font-weight:800;color:var(--bk-ink);display:flex;align-items:baseline;gap:10px}
+#v-book .bk-ph .rgn{font-size:13px;font-weight:700;color:var(--bk-sub)}
+#v-book .bk-close{border:0;border-radius:999px;background:var(--bk-track);color:var(--bk-ink);font:700 12px var(--gothic);padding:6px 12px;min-height:32px}
+#v-book .bk-panel .rgbar{display:block;height:5px;border-radius:3px;background:var(--bk-track);overflow:hidden;margin:10px 0 14px}
+#v-book .bk-panel .rgbar i{display:block;height:100%;background:var(--rg)}
+#v-book .bk-panel .grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:12px 8px;border:0;padding:0;margin:0}
+#v-book .bk-panel .cell .nm{font-size:11px;color:var(--bk-sub)}
+#v-book .bk-panel .cell.got .nm{color:var(--bk-ink)}
+#v-book .bk-panel>h3{font-size:12px;font-weight:700;color:var(--bk-mute);margin:18px 0 10px}
+#v-book .bk-recent{margin-top:12px;background:var(--bk-card);border-radius:22px;padding:14px 16px 12px;box-shadow:var(--bk-shadow)}
+#v-book .bk-recent h3{margin:0 0 8px;font-size:13px;font-weight:800;color:var(--bk-ink)}
+#v-book .bk-recent .row{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}
+#v-book .bk-recent .cell .slot{aspect-ratio:1}
+#bookAir details.xgrp,#bookExtra details.xgrp,#v-book #ach .achgrp{background:var(--bk-card);border-radius:22px;padding:6px 16px;box-shadow:var(--bk-shadow);margin-top:12px}
+#v-book #ach .achgrp{padding:14px 16px}
+#v-book .book-head h2{font-family:var(--gothic);font-weight:800;font-size:18px;color:var(--bk-ink);margin:18px 0 8px}
+/* ---------- フライト：上は飛んだ路線の地図、下からせり出すシートに搭乗券の一覧 ---------- */
+#v-log{--lg-ink:#1F2937;--lg-sub:#6B7280;--lg-mute:#6B7280;--lg-card:#FFFFFF;--lg-stub:#FAFAFB;--lg-pill:#FFFFFF;--lg-track:#EEF0F3;--lg-shadow:0 12px 26px -18px rgba(15,23,42,.3)}
+[data-palette="board"] #v-log{--lg-ink:#E5E7EB;--lg-sub:#8B95A3;--lg-mute:#A7B0BC;--lg-card:#16191F;--lg-stub:#1B1F26;--lg-pill:#232830;--lg-track:#2A2F37;--lg-shadow:0 12px 26px -16px rgba(0,0,0,.7)}
+#v-log .lmap{position:relative;z-index:0;isolation:isolate;margin:4px -20px 0;padding:0;border-radius:0;box-shadow:none}
+#v-log .lmap .fmap{height:min(420px,52vh)}
+#v-log .lmap:not(.vec){padding:10px 20px 40px}
+#v-log .lmap .maplegend{position:absolute;left:14px;right:14px;bottom:40px;z-index:500;display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:0;margin:0;pointer-events:none;font-size:11px}
+#v-log .lmap .maplegend>span{display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,.9);color:#374151;padding:4px 9px;border-radius:999px;box-shadow:0 4px 12px -8px rgba(15,23,42,.4);font-weight:700}
+#v-log .lmap .maplegend .mcred{margin-left:auto;font-size:10px;font-weight:600;color:#6B7280}
+[data-palette="board"] #v-log .lmap .maplegend>span{background:rgba(22,25,31,.9);color:#E5E7EB}
+#v-log .lmap .leaflet-bottom.leaflet-right{bottom:70px}
+#v-log .lsheet{position:relative;z-index:1;margin:-30px -20px 0;padding:10px 20px 30px;border-radius:28px 28px 0 0;background:var(--sky);box-shadow:0 -18px 40px -18px rgba(15,23,42,.30);min-height:60vh}
+[data-palette="board"] #v-log .lsheet{box-shadow:0 -18px 40px -14px rgba(0,0,0,.7)}
+#v-log .lsheet .grab{width:40px;height:5px;border-radius:3px;background:var(--line);margin:0 auto 12px}
+#v-log .lhead{display:flex;align-items:center;justify-content:space-between}
+#v-log .lhead h2{margin:0;font-family:var(--gothic);font-weight:800;font-size:24px;letter-spacing:.04em;color:var(--lg-ink)}
+#v-log .lbtns{display:flex;gap:8px}
+#v-log .lbtn{width:44px;height:44px;border:0;border-radius:50%;background:var(--lg-card);box-shadow:0 6px 16px -8px rgba(15,23,42,.35);display:grid;place-items:center;padding:0;color:var(--lg-mute)}
+#v-log .lbtn svg{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round}
+#v-log .lbtn.dark{background:var(--lg-ink);color:var(--lg-card)}
+#v-log .lbtn.dark svg{stroke-width:2.2}
+#v-log .ltally{display:flex;gap:18px;margin:12px 2px 0}
+#v-log .ltally b{font-size:24px;font-weight:800;color:var(--lg-ink);font-variant-numeric:tabular-nums}
+#v-log .ltally span{font-size:11px;color:var(--lg-sub);margin-left:3px}
+#v-log .lsegrow{display:flex;align-items:center;gap:6px;margin:14px 0 12px}
+#v-log .lseg{display:flex;gap:6px;align-items:center;overflow-x:auto;scrollbar-width:none;min-width:0}
+#v-log .lseg button{flex:none;border:0;border-radius:999px;padding:8px 15px;font:700 12.5px var(--gothic);background:var(--lg-pill);color:var(--lg-mute);box-shadow:0 4px 12px -8px rgba(15,23,42,.35)}
+#v-log .lseg button[aria-selected="true"]{background:var(--lg-ink);color:var(--lg-card)}
+#v-log .lshare{flex:none;margin-left:auto;border:0;background:none;color:var(--lg-mute);font:700 12.5px var(--gothic);text-decoration:underline;text-underline-offset:3px;padding:8px 4px}
+#v-log h2{font-family:var(--gothic);font-weight:800;font-size:16px;color:var(--lg-ink);margin:22px 2px 10px}
+#v-log .lhint{margin:14px 4px 0;font-size:12px;line-height:1.8;color:var(--lg-sub)}
+#v-log .lhint .linkbtn{display:inline;font-size:12px;padding:0 0 0 4px}
+#v-log .flight.pass{display:flex;padding:0;margin:0 0 10px;border:0;border-radius:20px;overflow:hidden;background:var(--lg-card);box-shadow:var(--lg-shadow);border-top:4px solid #9CA3AF;color:var(--lg-ink);text-align:left}
+#v-log .flight.pass[data-g="JAL"]{border-top-color:var(--jal)}
+#v-log .flight.pass[data-g="ANA"]{border-top-color:var(--ana)}
+#v-log .flight.pass[data-g="OTHER"]{border-top-color:#7C3AED}
+#v-log .flight.pass[data-g="NONE"]{border-top-color:var(--lg-track)}
+#v-log .flight.pass.tap:focus-visible{outline:3px solid #2563EB;outline-offset:2px}
+#v-log .pass .pm{flex:1;min-width:0;padding:12px 14px 13px 16px}
+#v-log .pass .pt{display:flex;flex-wrap:wrap;gap:6px;align-items:center;min-height:22px}
+#v-log .pass .pt .alb{margin:0;border-radius:999px;padding:2px 9px;font-size:11px;background:color-mix(in srgb,var(--lg-ink) 8%,transparent);color:var(--lg-ink)}
+#v-log .pass[data-g="JAL"] .pt .alb{background:color-mix(in srgb,var(--jal) 10%,transparent);color:var(--jal)}
+#v-log .pass[data-g="ANA"] .pt .alb{background:color-mix(in srgb,var(--ana) 12%,transparent);color:var(--ana)}
+[data-palette="board"] #v-log .pass[data-g="JAL"] .pt .alb{color:#FF8A8A}
+[data-palette="board"] #v-log .pass[data-g="ANA"] .pt .alb{color:#8DB4FF}
+#v-log .pass .pt .alb.none{background:none;border:1px dashed var(--lg-sub);color:var(--lg-mute);font-weight:600}
+#v-log .pass .pt .vbadge,#v-log .pass .pt .badge{margin:0;border-radius:999px;font-size:10.5px}
+#v-log .pass .pr{display:flex;align-items:center;gap:10px;margin-top:8px}
+#v-log .pass .pa{min-width:0}
+#v-log .pass .pa b{display:block;font-size:25px;font-weight:800;line-height:1;letter-spacing:.03em;font-variant-numeric:tabular-nums}
+#v-log .pass .pa span{display:block;font-size:11px;color:var(--lg-sub);margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#v-log .pass .pa.r{text-align:right}
+#v-log .pass .parr{flex:1;min-width:16px;height:2px;background:repeating-linear-gradient(90deg,var(--lg-track) 0 3px,transparent 3px 6px);position:relative}
+#v-log .pass .parr::after{content:"";position:absolute;right:-1px;top:-4px;width:7px;height:7px;border-top:2px solid var(--lg-sub);border-right:2px solid var(--lg-sub);transform:rotate(45deg)}
+#v-log .pass .ps{flex:none;width:74px;border-left:2px dashed var(--lg-track);background:var(--lg-stub);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:8px 2px}
+#v-log .pass .ps b{font-size:15px;font-weight:800}
+#v-log .pass .ps small{font-size:10px;color:var(--lg-sub);font-weight:700}
+#v-log .pass .ps span{font-size:11px;color:var(--lg-sub)}
+#v-log #manualList h3{margin:22px 2px 10px;font-size:12px;font-weight:700;color:var(--lg-mute)}
+#v-log .yrgrid{background:transparent;gap:8px;border-radius:0;overflow:visible}
+#v-log .yrgrid>div{background:var(--lg-card);border-radius:18px;box-shadow:var(--lg-shadow)}
+#v-log .yrgrid .n{font-family:var(--gothic);color:var(--lg-ink)}
+#v-log .yrtabs button{border:0;background:var(--lg-pill);color:var(--lg-mute);box-shadow:0 4px 12px -8px rgba(15,23,42,.35);padding:6px 14px}
+#v-log .yrtabs button[aria-pressed="true"]{background:var(--lg-ink);color:var(--lg-card)}
+#v-log .manual{background:var(--lg-card);border-radius:22px;padding:16px;box-shadow:var(--lg-shadow)}
 </style>
 </head>
 <body>
@@ -980,16 +1077,21 @@ details.rgrp .rgbar i{display:block;height:100%;background:var(--shu)}
   <!-- BOOK -->
   <!-- BOOK（86空港・番外編・実績を切り替える） -->
   <section class="view" id="v-book" aria-label="図鑑">
-    <div class="seg" role="group" aria-label="図鑑の切り替え">
-      <button data-seg="main" aria-pressed="true">86空港</button>
-      <button data-seg="air" aria-pressed="false">飛行場・滑空場</button>
-      <button data-seg="extra" aria-pressed="false">番外編</button>
-      <button data-seg="ach" aria-pressed="false">実績</button>
+    <div class="bk-top">
+      <h2>図鑑</h2>
+      <div class="seg" role="group" aria-label="図鑑の切り替え">
+        <button data-seg="main" aria-pressed="true">86空港</button>
+        <button data-seg="air" aria-pressed="false" aria-label="飛行場・滑空場">飛行場</button>
+        <button data-seg="extra" aria-pressed="false">番外編</button>
+        <button data-seg="ach" aria-pressed="false">実績</button>
+      </div>
     </div>
     <div id="bookMain">
-      <div class="book-head"><h2>空港図鑑</h2><span class="p" id="bookProg"></span></div>
+      <div class="bk-hero" id="bookHero"></div>
       <p class="hint" id="bookNote" hidden></p>
+      <div class="bk-tiles" id="bookTiles" role="group" aria-label="地方"></div>
       <div id="book"></div>
+      <div class="bk-recent" id="bookRecent" hidden></div>
     </div>
     <div id="bookAir" hidden>
       <div class="book-head"><h2>飛行場・滑空場</h2></div>
@@ -1043,23 +1145,38 @@ details.rgrp .rgbar i{display:block;height:100%;background:var(--shu)}
 
   <!-- FLIGHTS（フライト：路線の地図、フライトの一覧と追加） -->
   <section class="view" id="v-log" aria-label="フライト">
-    <h2>全体の記録</h2>
-    <div class="yrgrid" id="overallBox"></div>
-    <h2>年ごとの記録</h2>
-    <div class="yrtabs" id="yrTabs"></div>
-    <div id="yrBody"></div>
-    <div id="yrPlus"></div>
-    <h2>飛んだ路線</h2>
-    <div class="mapbox fmapbox"><div class="fmap" id="fmap" role="img" aria-label="訪れた空港と飛んだ路線の地図"></div><svg id="map" viewBox="0 0 400 420" role="img" aria-label="訪れた空港と路線の地図"></svg>
-      <p class="maplegend"><span><i class="lg" style="background:var(--jal)"></i>JAL</span><span><i class="lg" style="background:var(--ana)"></i>ANA</span><span><i class="lg" style="background:#7C3AED"></i>そのほか</span><span><i class="lg dash"></i>航路の記録がない便</span><span class="mcred">地図：国土地理院</span></p></div>
-    <button class="btn2" id="shareMap" style="width:100%;margin-top:10px">記録を画像で共有</button>
-    <h2>フライト</h2>
-    <div class="bprow"><button class="btn2" id="bpCam">搭乗券を読み取る</button><button class="btn2" id="bpImg">画像から読み取る</button>
-      <input type="file" id="bpFile" accept="image/*" hidden><input type="file" id="photoFile" accept="image/*" hidden></div>
-    <p class="hint">搭乗券のバーコードから、便名・航空会社・座席をフライトに付けます。航空会社アプリの搭乗券のスクリーンショットでも読めます。名前と予約番号は読み取っても保存しません。</p>
-    <div id="bpPending"></div>
-    <p class="hint">フライトを押すと、乗った航空会社と便名を記録できます。</p>
-    <div id="flights"></div>
+    <div class="lmap mapbox fmapbox"><div class="fmap" id="fmap" role="region" aria-label="訪れた空港と飛んだ路線の地図"></div><svg id="map" viewBox="0 0 400 420" role="img" aria-label="訪れた空港と路線の地図"></svg>
+      <p class="maplegend"><span><i class="lg" style="background:var(--jal)"></i>JAL</span><span><i class="lg" style="background:var(--ana)"></i>ANA</span><span><i class="lg" style="background:#7C3AED"></i>そのほか</span><span><i class="lg dash"></i>航路なし</span><span class="mcred">地図：国土地理院</span></p></div>
+    <div class="lsheet">
+      <div class="grab" aria-hidden="true"></div>
+      <div class="lhead">
+        <h2>フライト</h2>
+        <div class="lbtns">
+          <button class="lbtn" id="bpCam" aria-label="搭乗券を読み取る" title="搭乗券を読み取る"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8V5.5C4 4.7 4.7 4 5.5 4H8M16 4h2.5c.8 0 1.5.7 1.5 1.5V8M20 16v2.5c0 .8-.7 1.5-1.5 1.5H16M8 20H5.5C4.7 20 4 19.3 4 18.5V16"/><path d="M8 9v6M11 9v6M14 9v6M17 9v6"/></svg></button>
+          <button class="lbtn dark" id="flAdd" aria-label="過去のフライトを記録帳に追加" title="過去のフライトを記録帳に追加"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
+        </div>
+      </div>
+      <div class="ltally" id="logTally"></div>
+      <div class="lsegrow"><div class="lseg" role="tablist" aria-label="フライトの表示">
+        <button role="tab" data-lseg="list" aria-selected="true" aria-controls="lsList">一覧</button>
+        <button role="tab" data-lseg="year" aria-selected="false" aria-controls="lsYear">年ごと</button>
+        <button role="tab" data-lseg="book" aria-selected="false" aria-controls="lsBook">記録帳</button>
+      </div><button class="lshare" id="shareMap">画像で共有</button></div>
+      <div id="lsList" role="tabpanel">
+        <div id="bpPending"></div>
+        <div id="flights"></div>
+        <p class="hint lhint">フライトを押すと、乗った航空会社と便名を記録できます。右上のボタンで搭乗券のバーコードを読むと、便名・航空会社・座席を付けます（名前と予約番号は保存しません）。<button class="linkbtn" id="bpImg">スクリーンショットから読み取る</button></p>
+        <input type="file" id="bpFile" accept="image/*" hidden><input type="file" id="photoFile" accept="image/*" hidden>
+      </div>
+      <div id="lsYear" role="tabpanel" hidden>
+        <h2>全体の記録</h2>
+        <div class="yrgrid" id="overallBox"></div>
+        <h2>年ごとの記録</h2>
+        <div class="yrtabs" id="yrTabs"></div>
+        <div id="yrBody"></div>
+        <div id="yrPlus"></div>
+      </div>
+      <div id="lsBook" role="tabpanel" hidden>
     <h2>過去のフライトを記録帳に残す</h2>
     <p class="hint">現地でチェックインしていないフライトも記録できます。印や路線の数には入らず、記録帳にだけ残ります。</p>
     <div class="manual">
@@ -1079,6 +1196,8 @@ details.rgrp .rgbar i{display:block;height:100%;background:var(--shu)}
       <div id="impPreview"></div>
     </details>
     <div id="manualList"></div>
+      </div>
+    </div>
     <details class="dev" hidden><summary>検証ログ</summary>
       <p class="hint">「位置だけ測る」とチェックインのたびに、座標・誤差・判定結果を残します。下の欄を長押しで全選択してコピーできます。</p>
       <textarea id="vlog" readonly rows="6" style="width:100%;font:12px/1.5 ui-monospace,monospace;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--paper);color:var(--ink)"></textarea>
@@ -1927,7 +2046,7 @@ async function renderFlightMap(){
   box.classList.add("vec");
   if(!FMAP){
     FMAP = L.map(el, { zoomControl:true, attributionControl:false, scrollWheelZoom:false, zoomSnap:0.25, minZoom:5, maxZoom:13 });   // 国土地理院のベクトル地図は 4（Leaflet の 5）より引けない
-    FMAP.zoomControl.setPosition("topright");
+    FMAP.zoomControl.setPosition("bottomright");
     mapBase(FMAP, { interactive:true });
   } else FMAP.invalidateSize();
   if(FMAP_LAYER) FMAP_LAYER.remove();
@@ -1952,7 +2071,7 @@ async function renderFlightMap(){
   const xv = visitedExtra();
   for(const a of XA){ if(a.kind === "mil" || !xv.has(a.id)) continue;
     L.circleMarker([a.lat, a.lon], { radius:4, color:a.kind === "glider" ? "#1F7FB6" : "#3D7A4E", weight:2, fillColor:"#FFFFFF", fillOpacity:1 }).bindTooltip(`${a.name}（${XKIND[a.kind].short}）`).addTo(FMAP_LAYER); }
-  if(pts.length >= 2) FMAP.fitBounds(L.latLngBounds(pts), { padding:[36, 36], maxZoom:8, animate:false });
+  if(pts.length >= 2) FMAP.fitBounds(L.latLngBounds(pts), { paddingTopLeft:[30, 24], paddingBottomRight:[56, 80], maxZoom:8, animate:false });   // 下はシートと凡例に隠れる
   else if(pts.length === 1) FMAP.setView(pts[0], 7, { animate:false });
   else FMAP.setView([36.5, 137.5], 5, { animate:false });
 }
@@ -2011,29 +2130,55 @@ function renderHome(){
   $("titlePill").hidden = !tn; $("titlePill").textContent = tn ? `称号　${tn}` : "";
   $("streak").innerHTML = S.checkins.length ? `毎月の連続記録 <b>${as.curStreak}か月</b>（最長 ${as.bestStreak}か月）` : "";
 }
+// 図鑑の地方の色（タイルと進み具合の線）
+const RG_COL = {"北海道":"#2563EB","東北":"#0F766E","関東":"#C8102E","中部":"#B45309","近畿":"#7C3AED","中国":"#0E7490","四国":"#15803D","九州":"#BE185D","沖縄":"#0369A1"};
+function bkRing(p, s, w, col, track){
+  const r = s / 2 - w / 2, C = 2 * Math.PI * r, d = Math.max(p * C, 0.01);
+  return `<svg class="bkring" width="${s}" height="${s}" viewBox="0 0 ${s} ${s}" aria-hidden="true"><circle cx="${s/2}" cy="${s/2}" r="${r}" fill="none" stroke="${track}" stroke-width="${w}"/><circle cx="${s/2}" cy="${s/2}" r="${r}" fill="none" stroke="${col}" stroke-width="${w}" stroke-linecap="round" stroke-dasharray="${d.toFixed(1)} ${C.toFixed(1)}" transform="rotate(-90 ${s/2} ${s/2})"/></svg>`;
+}
+// 開いている地方（null はまだ選んでいない＝最後に印を押した地方を開く、"" は閉じた）
+let BK_RG = null;
 function renderBook(){
   const v = visited(), fa = focusAirports();
   const vc = new Map(); for(const c of S.checkins) vc.set(c.a, (vc.get(c.a) || 0) + 1);
   // 航空会社が未記録のフライトの空港は、表示を絞っていても薄くしない（記録すれば数に入る）
   const ua = new Set(); for(const f of S.flights){ if(!f.airline){ ua.add(f.from); ua.add(f.to); } }
-  $("bookProg").textContent = FOCUS === "ALL" ? `${v.size} / ${A.length}` : `${FOCUS}で ${fa.size} / ${A.length}`;
+  const shown = FOCUS === "ALL" ? v : fa, n = FOCUS === "ALL" ? v.size : fa.size;
+  const last = [...S.checkins].reverse().find(c => !IS_EXTRA(c.a) && BY[c.a]);
+  const md = t => { const d = new Date(t); return `${d.getMonth() + 1}/${d.getDate()}`; };
+  $("bookHero").innerHTML = `<div class="bk-ring">${bkRing(n / A.length, 92, 9, "#7DD3FC", "rgba(255,255,255,.1)")}<b>${Math.round(n / A.length * 100)}%</b></div>
+    <div class="bk-txt"><div class="l">${FOCUS === "ALL" ? "全国制覇" : FOCUS + "で行った空港"}</div><div class="n" id="bookProg">${FOCUS === "ALL" ? `${v.size} / ${A.length}` : `${FOCUS}で ${fa.size} / ${A.length}`}</div>
+    <div class="s">${last ? `最後の印：${godShort(BY[last.a])}・${md(last.t)}` : "空港でチェックインすると、ここに印が集まります"}</div></div>`;
   const pend = FOCUS === "ALL" ? 0 : [...ua].filter(id => !fa.has(id)).length;
   $("bookNote").hidden = FOCUS === "ALL";
   $("bookNote").textContent = FOCUS === "ALL" ? "" : `薄い印は、${FOCUS}グループのフライトで行っていない空港です。`
     + (pend ? `「便が未記録」の空港は、フライトの画面でそのフライトに航空会社を記録すると${FOCUS}の数に入ります。` : "");
-  $("book").innerHTML = REGION.map(([rg, prefs]) => {
-    const list = A.filter(a => prefs.includes(a.pref)); const got = list.filter(a => v.has(a.id)).length;
-    const open = got > 0 || RB_OPEN.has(rg);
-    return `<details class="rgrp" data-rg="${rg}"${open ? " open" : ""}><summary><h3>${rg}<span class="rgn">${got} / ${list.length}</span></h3><span class="rgbar"><i style="width:${Math.round(got / list.length * 100)}%"></i></span></summary><div class="grid">${list.map(a => v.has(a.id)
-      ? `<button class="cell got${FOCUS !== "ALL" && !fa.has(a.id) && !ua.has(a.id) ? " dim" : ""}" data-a="${a.id}"><div class="slot">${stampSVG(a, v.get(a.id))}${(vc.get(a.id)||0) > 1 ? `<span class="vcount">×${vc.get(a.id)}</span>` : ""}</div><div class="nm">${stripesMini(tierOf(vc.get(a.id)||0))}${a.name}${FOCUS !== "ALL" && !fa.has(a.id) && ua.has(a.id) ? `<span class="pend">便が未記録</span>` : ""}</div></button>`
-      : `<div class="cell"><div class="slot">${emptySVG(a)}</div><div class="nm">${a.name}${a.rare?"（離島）":""}</div></div>`).join("")}</div>${termGrid(prefs)}</details>`;
+  if(BK_RG === null) BK_RG = last ? regionOf(BY[last.a]) : "";
+  $("bookTiles").innerHTML = REGION.map(([rg, prefs]) => {
+    const list = A.filter(a => prefs.includes(a.pref)), got = list.filter(a => shown.has(a.id)).length;
+    return `<button class="bk-tile" data-rg="${rg}" aria-pressed="${BK_RG === rg}" aria-label="${rg} ${got} / ${list.length}"><span class="h"><b>${rg}</b>${bkRing(got / list.length, 26, 4, RG_COL[rg], "var(--bk-track)")}</span>
+      <span class="n">${got}<small> / ${list.length}</small></span><span class="dots" aria-hidden="true">${list.map(a => `<i${shown.has(a.id) ? ` style="background:${RG_COL[rg]}"` : ""}></i>`).join("")}</span></button>`;
   }).join("");
+  const sel = REGION.find(([rg]) => rg === BK_RG);
+  $("book").innerHTML = !sel ? "" : (([rg, prefs]) => {
+    const list = A.filter(a => prefs.includes(a.pref)), got = list.filter(a => v.has(a.id)).length;
+    return `<div class="bk-panel" style="--rg:${RG_COL[rg]}"><div class="bk-ph"><h3>${rg}<span class="rgn">${got} / ${list.length}</span></h3><button class="bk-close" data-rg="${rg}" aria-label="${rg}を閉じる">閉じる</button></div>
+      <span class="rgbar"><i style="width:${Math.round(got / list.length * 100)}%"></i></span><div class="grid">${list.map(a => v.has(a.id)
+      ? `<button class="cell got${FOCUS !== "ALL" && !fa.has(a.id) && !ua.has(a.id) ? " dim" : ""}" data-a="${a.id}"><div class="slot">${stampSVG(a, v.get(a.id))}${(vc.get(a.id)||0) > 1 ? `<span class="vcount">×${vc.get(a.id)}</span>` : ""}</div><div class="nm">${stripesMini(tierOf(vc.get(a.id)||0))}${a.name}${FOCUS !== "ALL" && !fa.has(a.id) && ua.has(a.id) ? `<span class="pend">便が未記録</span>` : ""}</div></button>`
+      : `<div class="cell"><div class="slot">${emptySVG(a)}</div><div class="nm">${a.name}${a.rare?"（離島）":""}</div></div>`).join("")}</div>${termGrid(prefs)}</div>`;
+  })(sel);
+  // 最近押した印（新しい順に5つ。同じ空港は1つ）
+  const seen = new Set(), rec = [];
+  for(let i = S.checkins.length - 1; i >= 0 && rec.length < 5; i--){ const c = S.checkins[i]; if(IS_EXTRA(c.a) || !BY[c.a] || seen.has(c.a)) continue; seen.add(c.a); rec.push(c); }
+  $("bookRecent").hidden = !rec.length;
+  $("bookRecent").innerHTML = rec.length ? `<h3>最近押した印</h3><div class="row">${rec.map(c => `<button class="cell got" data-a="${c.a}" aria-label="${BY[c.a].name}"><div class="slot">${stampSVG(BY[c.a], v.get(c.a))}</div></button>`).join("")}</div>` : "";
   $("bookAir").innerHTML = `<div class="book-head"><h2>飛行場・滑空場</h2></div>` + extraBook(["field", "glider"], "定期便のない空港や小型機の飛行場、グライダーの滑空場です。86空港の全国制覇には数えず、別の実績があります。");
   $("bookExtra").innerHTML = `<div class="book-head"><h2>番外編</h2></div>` + extraBook(["mil"], "自衛隊・米軍の飛行場です。86空港の全国制覇には数えず、別の実績があります。基地の中には入れないので、フェンスの外から押せる距離にしてあります。");
 }
-// 図鑑の地方：印のある地方と、自分で開いた地方だけ開いておく（未訪問の丸が長く続かないように）
-const RB_OPEN = new Set();
-document.addEventListener("toggle", e => { const d = e.target; if(!d.matches || !d.matches("details.rgrp")) return; d.open ? RB_OPEN.add(d.dataset.rg) : RB_OPEN.delete(d.dataset.rg); }, true);
+// 地方のタイルを押すと、その地方の印を下に開く（もう一度押すと閉じる）
+document.addEventListener("click", e => { const b = e.target.closest(".bk-tile,.bk-close"); if(!b) return;
+  BK_RG = b.classList.contains("bk-close") || BK_RG === b.dataset.rg ? "" : b.dataset.rg; renderBook();
+  if(BK_RG){ const p = $("book").firstElementChild; if(p && p.scrollIntoView) p.scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" }); } });
 // 番外編の図鑑（自衛隊・米軍の飛行場、滑空場、飛行場）。全国制覇などには数えない
 function extraBook(kinds, note){
   const xv = visitedExtra(), vc = new Map(); for(const c of S.checkins) if(IS_EXTRA(c.a)) vc.set(c.a, (vc.get(c.a) || 0) + 1);
@@ -2054,15 +2199,38 @@ document.addEventListener("toggle", e => { const d = e.target; if(!d.matches || 
   const k = d.dataset.xk; if(d.open){ XB_OPEN.add(k);
     if(!d.querySelector(".grid")){ const xv = visitedExtra(), vc = new Map(); for(const c of S.checkins) if(IS_EXTRA(c.a)) vc.set(c.a, (vc.get(c.a) || 0) + 1); d.insertAdjacentHTML("beforeend", extraGrid(k, xv, vc)); } }
   else XB_OPEN.delete(k); }, true);
+// フライトの一覧：1便を1枚の搭乗券に見立てる（上の線の色が航空会社のグループ、右の半券に日付と距離）
+const hmOf = t => new Date(t).toLocaleTimeString("ja-JP", { hour:"2-digit", minute:"2-digit" });
+function stubDate(t){ const d = new Date(t), y = d.getFullYear(); return `${y !== new Date().getFullYear() ? `<small>${y}</small>` : ""}<b>${d.getMonth() + 1}/${d.getDate()}</b>`; }
+function passHTML(o){
+  const a = BY[o.from], b = BY[o.to], g = o.airline ? (ALBY[o.airline] || {}).group || "OTHER" : "NONE";
+  return `<div class="flight pass${o.tap ? " tap" : ""}" data-g="${g}"${o.tap ? ` role="button" tabindex="0" data-flight="${o.tap}" aria-label="${a.name}から${b.name}へ。${o.label}"` : ""}>
+    <div class="pm"><div class="pt">${o.badges}</div>
+      <div class="pr"><div class="pa"><b>${code(a)}</b><span>${godShort(a)}${o.dep ? " " + hmOf(o.dep) : ""}</span></div><i class="parr" aria-hidden="true"></i><div class="pa r"><b>${code(b)}</b><span>${godShort(b)}${o.arr ? " " + hmOf(o.arr) : ""}</span></div></div></div>
+    <div class="ps">${o.stub}<span>${fmtKm(o.km)} km</span></div></div>`;
+}
+// フライトの画面の切り替え：一覧・年ごと・記録帳
+let LOG_SEG = "list";
+function setLogSeg(s){
+  LOG_SEG = s;
+  document.querySelectorAll("#v-log [data-lseg]").forEach(b => b.setAttribute("aria-selected", String(b.dataset.lseg === s)));
+  $("lsList").hidden = s !== "list"; $("lsYear").hidden = s !== "year"; $("lsBook").hidden = s !== "book";
+}
+document.querySelectorAll("#v-log [data-lseg]").forEach(b => b.onclick = () => setLogSeg(b.dataset.lseg));
+$("flAdd").onclick = () => { setLogSeg("book"); const m = $("mFrom"); if(m){ m.scrollIntoView({ block:"center" }); m.focus({ preventScroll:true }); } };
 function renderLog(){
   const flAll = S.flights.filter(f => inFocus(f) || !f.airline).reverse(), fl = flAll.slice(0, FL_SHOW);
-  $("flights").innerHTML = fl.length ? fl.map(f => `<div class="flight tap" role="button" tabindex="0" data-flight="${fid(f)}"><div class="route">${BY[f.from].name} → ${BY[f.to].name}${flightBadge(f)}${statusBadge(f)}</div><div class="meta">${fmtDT(f.dep)} 出発　${fmtDT(f.arr)} 到着</div><div class="km">${fmtKm(f.km)} km</div></div>`).join("")
+  $("flights").innerHTML = fl.length ? fl.map(f => passHTML({ from:f.from, to:f.to, airline:f.airline, dep:f.dep, arr:f.arr, km:f.km, tap:fid(f),
+        label:`${fmtDT(f.dep)} 出発、${fmtDT(f.arr)} 到着`, badges:flightBadge(f) + statusBadge(f), stub:stubDate(f.dep) })).join("")
       + (flAll.length > fl.length ? `<button class="btn2" id="flMore" style="width:100%;margin-top:10px">もっと見る（残り${flAll.length - fl.length}件）</button>` : "")
     : `<p class="none">まだフライトはありません。出発する空港と着いた空港の両方でチェックインすると記録されます。</p>`;
 
   const mlAll = [...S.manual].sort((x,y)=>y.d.localeCompare(x.d)), ml = mlAll.slice(0, ML_SHOW);
   const mkm = mlAll.reduce((s,m)=>s+km(BY[m.from],BY[m.to]),0);
-  $("manualList").innerHTML = ml.length ? `<h3>記録帳のみのフライト　${mlAll.length}件 ${fmtKm(mkm)}km</h3>` + ml.map(m => `<div class="flight"><div class="route">${BY[m.from].name} → ${BY[m.to].name}<span class="badge">手入力</span>${m.airline && ALBY[m.airline] ? `<span class="badge">${ALBY[m.airline].short}</span>` : ""}</div><div class="meta">${m.d.replaceAll("-","/")}</div><div class="km">${fmtKm(km(BY[m.from],BY[m.to]))} km</div></div>`).join("") + (mlAll.length > ml.length ? `<button class="btn2" id="mlMore" style="width:100%;margin-top:10px">もっと見る（残り${mlAll.length - ml.length}件）</button>` : "") : "";
+  $("manualList").innerHTML = ml.length ? `<h3>記録帳のみのフライト　${mlAll.length}件 ${fmtKm(mkm)}km</h3>` + ml.map(m => passHTML({ from:m.from, to:m.to, airline:m.airline && ALBY[m.airline] ? m.airline : null, km:km(BY[m.from],BY[m.to]),
+        badges:`<span class="badge">手入力</span>${m.airline && ALBY[m.airline] ? `<span class="alb">${ALBY[m.airline].short}</span>` : ""}`, stub:stubDate(m.d.replaceAll("-","/")) })).join("") + (mlAll.length > ml.length ? `<button class="btn2" id="mlMore" style="width:100%;margin-top:10px">もっと見る（残り${mlAll.length - ml.length}件）</button>` : "") : "";
+  const ff = focusFlights();
+  $("logTally").innerHTML = `<div><b>${ff.length}</b><span>フライト</span></div><div><b>${routes().size}</b><span>路線</span></div><div><b>${fmtKm(focusKm())}</b><span>km</span></div>`;
   renderOverall(); renderYears(); renderYearPlus();
   renderMap();
 }
