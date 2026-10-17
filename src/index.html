@@ -499,12 +499,12 @@ body.game nav.tabs button[aria-current="page"] svg{color:#7FB3FF}
 @keyframes stubNudge{0%,100%{transform:none}30%{transform:translateX(16px) rotate(2deg)}60%{transform:translateX(4px)}}
 @media (prefers-reduced-motion:reduce){#v-home .bpass.nudge .bp-stub{animation:none}}
 #v-home .hsheet>.msg{font-size:14px;margin:10px 4px 0;min-height:0}
-#v-home .ckhint{font-size:11.5px;line-height:1.7;color:var(--hm-sub);margin:8px 4px 0;text-align:center}
+#v-home .ckhint{font-size:11.5px;line-height:1.7;color:var(--hm-mute);margin:8px 4px 0;text-align:center}
 #v-home .inflight,#v-home .tally{box-shadow:0 16px 36px -18px rgba(15,23,42,.28),0 2px 6px rgba(15,23,42,.05)}
 :root[data-palette="board"] #v-home .inflight,:root[data-palette="board"] #v-home .tally{box-shadow:0 16px 36px -18px rgba(0,0,0,.7)}
 
 /* ---------- ホーム（上半分）：ヘッダー・チェックインのカード・直近の記録・3つの数字 ---------- */
-:root{--hm-ink:#374151;--hm-sub:#9CA3AF;--hm-mute:#6B7280;--hm-card:#FFFFFF;--hm-tint:#F8FAFC;--hm-pill:rgba(17,24,39,.05);
+:root{--hm-ink:#374151;--hm-sub:#6B7280;--hm-mute:#5B6270;--hm-card:#FFFFFF;--hm-tint:#F8FAFC;--hm-pill:rgba(17,24,39,.05);
   --hm-shadow:0 1px 2px rgba(17,24,39,.04),0 10px 30px -8px rgba(17,24,39,.10);
   --cta-hi:#3B4252;--cta-lo:#0F172A;--cta-text:#FFFFFF;--cta-glow:rgba(56,189,248,.38);--cta-ring:rgba(255,255,255,.9);--cta-ring2:rgba(17,24,39,.06);
   --jal:#C8102E;--ana:#1C4FA0}
@@ -516,9 +516,9 @@ body.game nav.tabs button[aria-current="page"] svg{color:#7FB3FF}
 header.top{padding:22px 2px 16px}
 header.top .brand{font-size:20px;gap:9px}
 header.top .brand svg{width:26px;height:26px}
-#openSettings.iconbtn{border:0;background:var(--hm-pill);color:var(--hm-mute);font-size:12.5px;font-weight:600;padding:7px 14px;letter-spacing:.02em}
+#openSettings.iconbtn{border:0;background:var(--hm-card);box-shadow:0 4px 12px -8px rgba(15,23,42,.3);color:var(--hm-mute);font-size:12.5px;font-weight:600;padding:7px 14px;letter-spacing:.02em}
 #v-home .demo-pick{text-align:left}
-#v-home .ckhint{font-size:12px;line-height:1.7;color:var(--hm-sub);opacity:.9;margin:6px 8px 0}
+#v-home .ckhint{font-size:12px;line-height:1.7;color:var(--hm-mute);margin:6px 8px 0}
 #v-home .inflight{position:relative;margin:18px 0 0;padding:18px 20px 18px 24px;border:0;border-radius:20px;background:var(--hm-card);box-shadow:var(--hm-shadow);color:var(--hm-ink)}
 #v-home .inflight::before{content:"";position:absolute;left:12px;top:18px;bottom:18px;width:2px;border-radius:2px;background:var(--accent,var(--shu));opacity:.85}
 #v-home .inflight[data-g="JAL"]{--accent:var(--jal)}#v-home .inflight[data-g="ANA"]{--accent:var(--ana)}
@@ -640,7 +640,7 @@ dialog.mypage .dlg .close{display:none}
 #v-ops .hint{color:var(--op-sub)}
 
 /* ---------- 成績の画面（航空会社別・ステータスの目安）：ゴシック体・数字を大きく・余白とうすい影のカード ---------- */
-#v-stats{--st-ink:#374151;--st-sub:#9CA3AF;--st-mute:#6B7280;--st-card:#FFFFFF;--st-track:#F1F2F4;--st-wash:#F7F8FA;
+#v-stats{--st-ink:#374151;--st-sub:#6B7280;--st-mute:#5B6270;--st-card:#FFFFFF;--st-track:#F1F2F4;--st-wash:#F7F8FA;
   --st-shadow:0 1px 2px rgba(17,24,39,.04),0 6px 20px rgba(17,24,39,.06);--jal:#C8102E;--ana:#1C4FA0;--other:#6B7280;color:var(--st-ink)}
 [data-palette="board"] #v-stats{--st-ink:#E5E7EB;--st-sub:#8B95A3;--st-mute:#A7B0BC;--st-card:#171A20;--st-track:#262B33;--st-wash:#1C2027;
   --st-shadow:0 1px 2px rgba(0,0,0,.3),0 6px 20px rgba(0,0,0,.25);--jal:#FF5A6E;--ana:#6EA0FF;--other:#A7B0BC}
@@ -670,7 +670,7 @@ dialog.mypage .dlg .close{display:none}
 #v-stats .scard .sh span{font-size:11px;font-weight:700;color:var(--st-mute);background:var(--st-wash);border-radius:999px;padding:3px 10px}
 #v-stats .scard .hint{font-size:12px;line-height:1.7;color:var(--st-sub);margin:0 0 4px}
 #v-stats .scard .hint.goalline{color:var(--st-mute)}
-#v-stats .alnote,#v-stats .stnote{font-size:12px;line-height:1.7;color:var(--st-sub);margin:16px 4px 0}
+#v-stats .alnote,#v-stats .stnote{font-size:12px;line-height:1.7;color:var(--st-mute);margin:16px 4px 0}
 #v-stats .none{color:var(--st-sub);background:var(--st-card);border-radius:18px;box-shadow:var(--st-shadow);padding:20px;font-size:14px}
 ol.steps{padding-left:1.4em;line-height:1.9}
 .meet .hint{color:var(--ink)}
@@ -926,7 +926,7 @@ details.dev summary{cursor:pointer;color:var(--sumi);font-size:14px;padding:6px 
 #v-book #ach .achgrp{padding:14px 16px}
 #v-book .book-head h2{font-family:var(--gothic);font-weight:800;font-size:18px;color:var(--bk-ink);margin:18px 0 8px}
 /* ---------- フライト：上は飛んだ路線の地図、下からせり出すシートに搭乗券の一覧 ---------- */
-#v-log{--lg-ink:#1F2937;--lg-sub:#6B7280;--lg-mute:#6B7280;--lg-card:#FFFFFF;--lg-stub:#FAFAFB;--lg-pill:#FFFFFF;--lg-track:#EEF0F3;--lg-shadow:0 12px 26px -18px rgba(15,23,42,.3)}
+#v-log{--lg-ink:#1F2937;--lg-sub:#6B7280;--lg-mute:#5B6270;--lg-card:#FFFFFF;--lg-stub:#FAFAFB;--lg-pill:#FFFFFF;--lg-track:#EEF0F3;--lg-shadow:0 12px 26px -18px rgba(15,23,42,.3)}
 [data-palette="board"] #v-log{--lg-ink:#E5E7EB;--lg-sub:#8B95A3;--lg-mute:#A7B0BC;--lg-card:#16191F;--lg-stub:#1B1F26;--lg-pill:#232830;--lg-track:#2A2F37;--lg-shadow:0 12px 26px -16px rgba(0,0,0,.7)}
 #v-log .lmap{position:relative;z-index:0;isolation:isolate;margin:4px -20px 0;padding:0;border-radius:0;box-shadow:none}
 #v-log .lmap .fmap{height:min(420px,52vh)}
@@ -948,14 +948,14 @@ details.dev summary{cursor:pointer;color:var(--sumi);font-size:14px;padding:6px 
 #v-log .lbtn.dark svg{stroke-width:2.2}
 #v-log .ltally{display:flex;gap:18px;margin:12px 2px 0}
 #v-log .ltally b{font-size:24px;font-weight:800;color:var(--lg-ink);font-variant-numeric:tabular-nums}
-#v-log .ltally span{font-size:11px;color:var(--lg-sub);margin-left:3px}
+#v-log .ltally span{font-size:11px;color:var(--lg-mute);margin-left:3px}
 #v-log .lsegrow{display:flex;align-items:center;gap:6px;margin:14px 0 12px}
 #v-log .lseg{display:flex;gap:6px;align-items:center;overflow-x:auto;scrollbar-width:none;min-width:0}
 #v-log .lseg button{flex:none;border:0;border-radius:999px;padding:8px 15px;font:700 12.5px var(--gothic);background:var(--lg-pill);color:var(--lg-mute);box-shadow:0 4px 12px -8px rgba(15,23,42,.35)}
 #v-log .lseg button[aria-selected="true"]{background:var(--lg-ink);color:var(--lg-card)}
 #v-log .lshare{flex:none;margin-left:auto;border:0;background:none;color:var(--lg-mute);font:700 12.5px var(--gothic);text-decoration:underline;text-underline-offset:3px;padding:8px 4px}
 #v-log h2{font-family:var(--gothic);font-weight:800;font-size:16px;color:var(--lg-ink);margin:22px 2px 10px}
-#v-log .lhint{margin:14px 4px 0;font-size:12px;line-height:1.8;color:var(--lg-sub)}
+#v-log .lhint{margin:14px 4px 0;font-size:12px;line-height:1.8;color:var(--lg-mute)}
 #v-log .lhint .linkbtn{display:inline;font-size:12px;padding:0 0 0 4px}
 #v-log .flight.pass{display:flex;padding:0;margin:0 0 10px;border:0;border-radius:20px;overflow:hidden;background:var(--lg-card);box-shadow:var(--lg-shadow);border-top:4px solid #9CA3AF;color:var(--lg-ink);text-align:left}
 #v-log .flight.pass[data-g="JAL"]{border-top-color:var(--jal)}
@@ -993,7 +993,7 @@ details.dev summary{cursor:pointer;color:var(--sumi);font-size:14px;padding:6px 
 </style>
 </head>
 <body>
-<div class="hmap" id="homeMap" aria-hidden="true"></div>
+<div class="hmap" id="homeMap" aria-hidden="true" inert></div>
 <main class="wrap">
   <div class="topzone">
   <header class="top">
