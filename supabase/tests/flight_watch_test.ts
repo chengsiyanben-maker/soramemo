@@ -1,6 +1,6 @@
 // ダイヤと機体の位置の照らし合わせ：離陸・着陸・遅れ・ダイバート・引き返し
 import { assertEquals } from "jsr:@std/assert@1";
-import { type Airport, blankWatch, callsignsFor, hardToSee, normCallsign, onRoute, type Sched, type Seen, step, type Watch } from "../functions/_shared/flight_watch.ts";
+import { type Airport, blankWatch, callsignsFor, cruiseOf, hardToSee, predictEta, normCallsign, onRoute, type Sched, type Seen, step, type Watch } from "../functions/_shared/flight_watch.ts";
 
 const APS = new Map<string, Airport>([
   ["HND", { iata: "HND", lat: 35.5497, lon: 139.787, name: "羽田" }],
@@ -117,4 +117,25 @@ Deno.test("同じ番号の別の会社の便（JL552 と JTA552）：出発・�
   const s: Sched = { id: 3, flight: "JL552", dep: "AKJ", arr: "HND", std: T0, sta: T0 + 100 * MIN };
   assertEquals(onRoute(s, { lat: 26.2, lon: 127.65 }, aps), false);   // 那覇の近く
   assertEquals(onRoute(s, { lat: 39.5, lon: 141.0 }, aps), true);     // 途中の東北
+});
+
+Deno.test("機種ごとの巡航速度：777 は速く、Q400・ATR は遅い（ICAO と ODPT の記号のどちらでも）", () => {
+  assertEquals(cruiseOf("B77W").cruise > cruiseOf("B738").cruise, true);
+  assertEquals(cruiseOf("738").cruise, cruiseOf("B738").cruise);
+  assertEquals(cruiseOf("DH8D").cruise < cruiseOf("E190").cruise, true);
+  assertEquals(cruiseOf("AT76").cruise < cruiseOf("DH8D").cruise, true);
+  assertEquals(cruiseOf(null).cruise, 440);
+});
+
+Deno.test("到着予想：同じ位置でも、プロペラ機は遅く、巡航中は今の対地速度（追い風）を使う", () => {
+  const itm = { iata: "ITM", lat: 34.7855, lon: 135.4382, name: "伊丹" }, now = Date.parse("2026-10-17T12:00:00Z");
+  const p = { lat: 35.2, lon: 137.6, alt_ft: 22000, kt: null, at: now };   // 伊丹の東 約200km
+  const jet = predictEta(p, itm, "B738"), prop = predictEta(p, itm, "DH8D");
+  assertEquals(prop > jet, true);
+  const min = (t: number) => Math.round((t - now) / 60000);
+  assertEquals(min(jet) >= 20 && min(jet) <= 35, true);
+  const tail = predictEta({ ...p, kt: 560 }, itm, "B738");   // 追い風で対地速度 560kt
+  assertEquals(tail < jet, true);
+  const odd = predictEta({ ...p, kt: 900 }, itm, "B738");    // おかしな速度は使わない
+  assertEquals(odd, jet);
 });

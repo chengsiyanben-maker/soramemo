@@ -115,6 +115,7 @@ async function recordPositions(bodies: Map<string, string>) {
       rows.set(cs, { callsign: cs, hex: typeof a.hex === "string" ? a.hex : null, lat: a.lat, lon: a.lon,
         alt_ft: typeof a.alt_baro === "number" ? Math.round(a.alt_baro) : null, ground: a.alt_baro === "ground",
         fpm: typeof a.baro_rate === "number" ? Math.round(a.baro_rate) : typeof a.geom_rate === "number" ? Math.round(a.geom_rate) : null,
+        kt: typeof a.gs === "number" ? Math.round(a.gs) : null, type: typeof a.t === "string" ? a.t.slice(0, 8) : null,
         seen_at: new Date(at).toISOString() });
     }
   }

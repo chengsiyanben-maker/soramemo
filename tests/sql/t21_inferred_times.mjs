@@ -14,7 +14,11 @@ let bad = 0; const check = (label, ok, v) => { console.log((ok ? 'OK ' : 'NG ') 
 const close = `((((now() at time zone 'Asia/Tokyo') - interval '5 hours')::date + interval '21 hours') at time zone 'Asia/Tokyo')`;
 await db.exec(`insert into public.flight_schedule (svc_date, flight, dep, arr, std, sta, source) values
   (current_date, 'IJ123', 'HND', 'ITM', ${close} - interval '80 minutes', ${close} - interval '10 minutes', 'ODPT'),
-  (current_date, 'BC107', 'HND', 'ITM', ${close} - interval '70 minutes', ${close} - interval '5 minutes', 'ODPT')`);
+  (current_date, 'BC107', 'HND', 'ITM', ${close} - interval '70 minutes', ${close} - interval '5 minutes', 'ODPT'),
+  (current_date, '6J21', 'HND', 'ITM', ${close} - interval '60 minutes', ${close} + interval '5 minutes', 'ODPT')`);
+await db.exec(`insert into public.flight_watch (schedule_id, state)
+  select id, jsonb_build_object('phase','air','takeoff_at', extract(epoch from std + interval '10 minutes') * 1000, 'takeoff_est', false,
+    'eta', extract(epoch from sta + interval '18 minutes') * 1000) from public.flight_schedule where flight = '6J21'`);
 await db.exec(`insert into public.flight_watch (schedule_id, state)
   select id, jsonb_build_object('phase','landed','takeoff_at', extract(epoch from std + interval '12 minutes') * 1000, 'takeoff_est', false,
     'landed_at', extract(epoch from sta + interval '3 minutes') * 1000, 'landed_iata', 'ITM') from public.flight_schedule where flight = 'IJ123'`);
@@ -25,6 +29,8 @@ let r = await as('anon', `select public.curfew_flights('ITM')`);
 const ij = (r?.flights ?? []).find((f) => f.flight === 'IJ123'), bc = (r?.flights ?? []).find((f) => f.flight === 'BC107');
 check('門限チャレンジ：推定の着陸時刻が入る', ij && ij.inferred != null && ij.actual == null, r);
 check('ほかの空港に降りた便・離陸が不確かな便は、推定の時刻を返さない', bc && bc.inferred == null && bc.dep_actual == null, bc);
+const sn = (r?.flights ?? []).find((f) => f.flight === '6J21');
+check('飛行中の便は到着予想（推定）が入る', sn && sn.predicted != null && sn.inferred == null, sn);
 r = await as('anon', `select public.flight_candidates('HND', 'ITM', ${close} - interval '70 minutes', ${close} - interval '5 minutes')`);
 const c = (r ?? []).find((f) => f.flight === 'IJ123');
 check('便の候補：推定の離陸・着陸時刻が入る', c && c.atd_est != null && c.ata_est != null && c.atd == null, r);

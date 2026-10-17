@@ -3,6 +3,9 @@
 -- 航空会社の運航情報（atd・ata）がない便（共同運航便・ほかの会社の便）に使う。画面では「推定」と明記する。
 --   離陸：出発空港の40km以内・8,000ft以下で最初に飛んでいるのを見た時刻（takeoff_est が false のときだけ）
 --   着陸：到着空港の近くで最後に見た時刻（landed_iata が到着空港のときだけ）
+-- 機体の対地速度（ノット）と機種（ICAO の記号）も残す（到着予想の計算に使う）
+alter table public.live_positions add column if not exists kt integer, add column if not exists type text check (length(type) <= 8);
+
 create or replace function public.inferred_time(st jsonb, k text) returns timestamptz
 language sql immutable set search_path = public as $$
   select case when st ? k and jsonb_typeof(st -> k) = 'number' then to_timestamp((st ->> k)::double precision / 1000) end
@@ -18,18 +21,19 @@ language sql stable security definer set search_path = public as $$
   ), s as (
     select f.*,
       case when coalesce((w.state ->> 'takeoff_est')::boolean, true) = false then public.inferred_time(w.state, 'takeoff_at') end as atd_inf,
-      case when w.state ->> 'landed_iata' = f.arr then public.inferred_time(w.state, 'landed_at') end as ata_inf
+      case when w.state ->> 'landed_iata' = f.arr then public.inferred_time(w.state, 'landed_at') end as ata_inf,
+      case when w.state ->> 'phase' = 'air' then public.inferred_time(w.state, 'eta') end as eta_inf
     from public.flight_schedule f left join public.flight_watch w on w.schedule_id = f.id, c
     where (f.arr = c.iata or f.dep = c.iata)
       and coalesce(f.std, f.sta) between c.close_at - interval '8 hours' and c.close_at + interval '30 minutes'
   )
   select jsonb_build_object('iata', c.iata, 'close_at', c.close_at, 'flights', coalesce((
     select jsonb_agg(f order by f->>'t') from (
-      select jsonb_build_object('dir', 'arr', 'flight', s.flight, 'other', s.dep, 'sched', s.sta, 'est', s.eta, 'actual', s.ata, 'inferred', s.ata_inf,
+      select jsonb_build_object('dir', 'arr', 'flight', s.flight, 'other', s.dep, 'sched', s.sta, 'est', s.eta, 'actual', s.ata, 'inferred', s.ata_inf, 'predicted', s.eta_inf,
                'status', s.arr_status, 'cancelled', coalesce(s.arr_status ~* 'cancel' or s.dep_status ~* 'cancel', false),
-               'dep_actual', coalesce(s.atd, s.atd_inf), 'source', s.source, 't', coalesce(s.ata, s.ata_inf, s.eta, s.sta)) f
+               'dep_actual', coalesce(s.atd, s.atd_inf), 'source', s.source, 't', coalesce(s.ata, s.ata_inf, s.eta, s.eta_inf, s.sta)) f
       from s
-      where s.arr = c.iata and coalesce(s.ata, s.ata_inf, s.eta, s.sta) between c.close_at - interval '90 minutes' and c.close_at + interval '90 minutes'
+      where s.arr = c.iata and coalesce(s.ata, s.ata_inf, s.eta, s.eta_inf, s.sta) between c.close_at - interval '90 minutes' and c.close_at + interval '90 minutes'
         and s.sta between c.close_at - interval '6 hours' and c.close_at + interval '30 minutes'
       union all
       select jsonb_build_object('dir', 'dep', 'flight', s.flight, 'other', s.arr, 'sched', s.std, 'est', s.etd, 'actual', s.atd, 'inferred', s.atd_inf,
