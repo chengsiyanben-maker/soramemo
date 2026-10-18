@@ -160,3 +160,14 @@ Deno.test("到着の30分前ごろの到着予想を残す", () => {
   ]);
   assertEquals(w.eta30 != null && Math.abs((w.eta30 ?? 0) - (T0 + 95 * MIN)) < 15 * MIN, true);
 });
+
+Deno.test("降りる途中で見えなくなった便：到着予想から15分たったら着いたとみなす（着陸の時刻は入れない）", () => {
+  const { w, all } = run([
+    [at(35.56, 139.80, 2000, T0 + 18 * MIN, 2500), T0 + 18 * MIN],
+    [at(41.6, 141.5, 16000, T0 + 80 * MIN, -1500), T0 + 80 * MIN],
+    [null, T0 + 100 * MIN],
+    [null, T0 + 130 * MIN],
+  ]);
+  assertEquals([w.phase, w.landed_iata, w.landed_at], ["landed", "CTS", null]);
+  assertEquals(all, []);
+});

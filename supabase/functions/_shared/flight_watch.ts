@@ -159,6 +159,12 @@ export function step(s: Sched, w0: Watch, seen: Seen | null, now: number, aps: M
     const arr = aps.get(s.arr);
     if (arr && km(w.last, arr) <= 40 && (w.last.alt_ft ?? 99999) <= 10000) { w.phase = "landed"; w.landed_at = w.last.at; w.landed_iata = s.arr; }
   }
+  // 降りる途中で電波が届かなくなった（空港の近くは受信機が少ない）：到着予想から15分たっても見えなければ、到着空港に着いたとみなす。
+  // 着陸の時刻は分からないので入れない（古い到着予想を出し続けないため）
+  if (w.phase === "air" && !seen && w.last && w.eta != null && now - w.last.at >= 10 * MIN && now - w.eta >= 15 * MIN) {
+    const arr = aps.get(s.arr);
+    if (arr && km(w.last, arr) <= 200) { w.phase = "landed"; w.landed_at = null; w.landed_iata = s.arr; }
+  }
   // 遅れ
   if (w.takeoff_at != null && !w.takeoff_est && !lateStart && w.takeoff_at - s.std >= 75 * MIN) {
     const late = Math.round((w.takeoff_at - 15 * MIN - s.std) / MIN);
