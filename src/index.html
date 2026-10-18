@@ -458,7 +458,7 @@ body.game nav.tabs button[aria-current="page"] svg{color:#7FB3FF}
 .hmap{position:absolute;left:0;right:0;top:0;height:400px;z-index:0;pointer-events:none;background:#DCE8EF}
 [data-palette="board"] .hmap{background:#0E1218}
 [data-palette="board"] .hmap .leaflet-tile-pane,[data-palette="board"] .hmap .maplibregl-canvas,[data-palette="board"] .hmap canvas{filter:invert(.92) hue-rotate(180deg) saturate(.5) brightness(.9)}
-:root:not([data-view="home"]) .hmap{display:none}
+:root:not([data-view="home"]):not([data-view="log"]) .hmap{display:none}
 .hmap .leaflet-container,.hmap.leaflet-container{background:transparent}
 .hmap .hm-ap{display:flex;align-items:center;gap:4px;white-space:nowrap;font:700 11px var(--gothic);letter-spacing:.06em;color:#fff;background:#1F2937;padding:3px 9px;border-radius:999px;box-shadow:0 4px 10px -4px rgba(0,0,0,.4);transform:translate(14px,-30px);width:max-content}
 .hmap .hm-me{width:14px;height:14px;border-radius:50%;background:#2563EB;border:3px solid #fff;box-shadow:0 0 0 10px rgba(37,99,235,.18)}
@@ -543,8 +543,8 @@ header.top .brand svg{width:26px;height:26px}
 .fmapbox .maplegend .mcred{margin-left:auto;font-size:10px;color:var(--hm-sub,#9CA3AF)}
 [data-palette="board"] .fmapbox .fmap canvas,[data-palette="board"] .fmapbox .fmap .leaflet-tile-pane{filter:invert(.92) hue-rotate(180deg) saturate(.5) brightness(.9)}
 [data-palette="board"] .fmapbox .fmap{background:#0E1218}
-.fmap .leaflet-control-zoom a{border-radius:10px!important}
-.fmap .leaflet-bar{border:0;box-shadow:0 6px 16px -8px rgba(15,23,42,.35);border-radius:12px;overflow:hidden}
+.hmap .leaflet-control-zoom a{border-radius:10px!important}
+.hmap .leaflet-bar{border:0;box-shadow:0 6px 16px -8px rgba(15,23,42,.35);border-radius:12px;overflow:hidden}
 
 /* ---------- マイページ：タイル（いちばん上に黒いアカウントのタイル、項目ごとに白いタイル。区切り線なし） ---------- */
 dialog.mypage{--mp-bg:#F4F5F7;--mp-card:#FFFFFF;--mp-ink:#374151;--mp-sub:#9CA3AF;--mp-mute:#6B7280;--mp-shadow:0 12px 26px -18px rgba(15,23,42,.3);
@@ -931,7 +931,11 @@ details.dev summary{cursor:pointer;color:var(--sumi);font-size:14px;padding:6px 
 #v-log .lmap{position:fixed;inset:0;z-index:-1;isolation:isolate;margin:0;padding:0;border-radius:0;box-shadow:none}
 #v-log .lmap .fmap{height:100%}
 #v-log .lmap:not(.vec){padding:130px 20px 0}
-#v-log .lmap .leaflet-top,.hmap .leaflet-top{top:126px}
+.hmap .leaflet-top{top:126px}
+.mapsvg{position:fixed;left:0;right:0;top:120px;width:100%;max-width:560px;margin:0 auto;max-height:50vh;z-index:-1}
+nav.tabs{transition:transform .3s cubic-bezier(.2,.8,.2,1),opacity .2s}
+:root[data-sheet="peek"]:is([data-view="home"],[data-view="log"]) nav.tabs{transform:translateY(130%);opacity:0;pointer-events:none}
+:root[data-sheet="peek"] nav.tabs .in{pointer-events:none}
 :root:is([data-view="home"],[data-view="log"]) header.top .brand{background:rgba(255,255,255,.9);padding:6px 14px 6px 10px;border-radius:999px;box-shadow:0 6px 18px -8px rgba(15,23,42,.3);font-size:16px}
 :root:is([data-view="home"],[data-view="log"]) header.top .brand svg{width:22px;height:22px}
 :root[data-palette="board"]:is([data-view="home"],[data-view="log"]) header.top .brand{background:rgba(22,25,31,.9)}
@@ -950,14 +954,14 @@ details.dev summary{cursor:pointer;color:var(--sumi);font-size:14px;padding:6px 
 .sheet .sbody{flex:1;min-height:0;overflow:hidden;margin:0 -20px;padding:0 20px calc(116px + env(safe-area-inset-bottom,0px))}
 .sheet[data-snap="full"]{box-shadow:0 -10px 30px -16px rgba(15,23,42,.35)}
 .sheet[data-snap="full"] .sbody{overflow-y:auto;overscroll-behavior:contain;touch-action:pan-y}
-.sheet[data-snap="full"] .mapcredit,#v-log .sheet[data-snap="full"] .maplegend{display:none}
+.sheet[data-snap="full"] .maplegend{display:none}
 @media (prefers-reduced-motion:reduce){.sheet{transition:none}}
-#v-log .sheet .maplegend{position:absolute;left:14px;right:14px;bottom:calc(100% + 8px);display:flex;flex-wrap:wrap-reverse;gap:6px;align-items:center;padding:0;margin:0;pointer-events:none;font-size:11px}
-#v-log .maplegend>span{display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,.92);color:#374151;padding:4px 9px;border-radius:999px;box-shadow:0 4px 12px -8px rgba(15,23,42,.4);font-weight:700}
-#v-log .maplegend .mcred{margin-left:auto;font-size:10px;font-weight:600;color:#4B5563}
-[data-palette="board"] #v-log .maplegend>span{background:rgba(22,25,31,.92);color:#E5E7EB}
-#v-log .maplegend .lg{display:inline-block;width:18px;height:3px;border-radius:2px}
-#v-log .maplegend .lg.dash{background:repeating-linear-gradient(90deg,#9CA3AF 0 4px,transparent 4px 7px)}
+.sheet .maplegend{position:absolute;left:14px;right:14px;bottom:calc(100% + 8px);display:flex;flex-wrap:wrap-reverse;gap:6px;align-items:center;padding:0;margin:0;pointer-events:none;font-size:11px}
+.sheet .maplegend>span{display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,.92);color:#374151;padding:4px 9px;border-radius:999px;box-shadow:0 4px 12px -8px rgba(15,23,42,.4);font-weight:700}
+.sheet .maplegend .mcred{margin-left:auto;font-size:10px;font-weight:600;color:#4B5563}
+[data-palette="board"] .sheet .maplegend>span{background:rgba(22,25,31,.92);color:#E5E7EB}
+.sheet .maplegend .lg{display:inline-block;width:18px;height:3px;border-radius:2px}
+.sheet .maplegend .lg.dash{background:repeating-linear-gradient(90deg,#9CA3AF 0 4px,transparent 4px 7px)}
 #v-log .lhead{padding-top:0}
 #v-log .lhead{display:flex;align-items:center;justify-content:space-between}
 #v-log .lhead h2{margin:0;font-family:var(--gothic);font-weight:800;font-size:24px;letter-spacing:.04em;color:var(--lg-ink)}
@@ -1013,7 +1017,7 @@ details.dev summary{cursor:pointer;color:var(--sumi);font-size:14px;padding:6px 
 </style>
 </head>
 <body>
-<div class="hmap" id="homeMap" role="region" aria-label="近くの空港の地図"></div>
+<div class="hmap" id="homeMap" role="region" aria-label="地図（近くの空港・訪れた空港・飛んだ路線）"></div>
 <main class="wrap">
   <div class="topzone">
   <header class="top">
@@ -1037,7 +1041,7 @@ details.dev summary{cursor:pointer;color:var(--sumi);font-size:14px;padding:6px 
   <section class="view on" id="v-home" aria-label="ホーム">
     <div class="titlepill" id="titlePill" hidden></div>
     <div class="hsheet sheet" id="homeSheet" data-snap="half">
-    <p class="mapcredit">地図：国土地理院</p>
+    <p class="maplegend"><span><i class="lg" style="background:var(--jal)"></i>JAL</span><span><i class="lg" style="background:var(--ana)"></i>ANA</span><span><i class="lg" style="background:#7C3AED"></i>そのほか</span><span><i class="lg dash"></i>航路なし</span><span class="mcred">地図：国土地理院</span></p>
     <div class="grabzone"><button class="grab" type="button" aria-label="シートの大きさを変える"></button></div>
     <div class="sbody">
     <div class="bpass" id="bpass">
@@ -1167,7 +1171,7 @@ details.dev summary{cursor:pointer;color:var(--sumi);font-size:14px;padding:6px 
 
   <!-- FLIGHTS（フライト：路線の地図、フライトの一覧と追加） -->
   <section class="view" id="v-log" aria-label="フライト">
-    <div class="lmap mapbox fmapbox"><div class="fmap" id="fmap" role="region" aria-label="訪れた空港と飛んだ路線の地図"></div><svg id="map" viewBox="0 0 400 420" role="img" aria-label="訪れた空港と路線の地図"></svg></div>
+    <svg id="map" class="mapsvg" hidden viewBox="0 0 400 420" role="img" aria-label="訪れた空港と路線の地図"></svg>
     <div class="lsheet sheet" id="logSheet" data-snap="half">
       <p class="maplegend"><span><i class="lg" style="background:var(--jal)"></i>JAL</span><span><i class="lg" style="background:var(--ana)"></i>ANA</span><span><i class="lg" style="background:#7C3AED"></i>そのほか</span><span><i class="lg dash"></i>航路なし</span><span class="mcred">地図：国土地理院</span></p>
       <div class="grabzone"><button class="grab" type="button" aria-label="シートの大きさを変える"></button>
@@ -2062,43 +2066,42 @@ function renderMap(){
   setTimeout(renderFlightMap, 0);
 }
 // フライトの地図（動かせる）：実際の航路は線、記録がない便は空港どうしを結ぶ弧の点線。色は航空会社のグループ
-let FMAP = null, FMAP_LAYER = null;
+// 飛んだ路線と訪れた空港（ホームとフライトで同じ1枚の地図に重ねる）：実際の航路は線、記録がない便は空港どうしを結ぶ弧の点線。色は航空会社のグループ
+let ROUTE_LAYER = null;
 const FMAP_COL = { JAL:"#C8102E", ANA:"#1C4FA0", OTHER:"#7C3AED" };
-async function renderFlightMap(){
-  const el = $("fmap"), box = el && el.parentElement; if(!el) return;
-  try{ await loadLeaflet(); }catch(e){ return; }
-  if(!window.L || currentView() !== "log") return;
-  box.classList.add("vec");
-  if(!FMAP){
-    FMAP = L.map(el, { zoomControl:true, attributionControl:false, scrollWheelZoom:false, zoomSnap:0.25, minZoom:5, maxZoom:13 });   // 国土地理院のベクトル地図は 4（Leaflet の 5）より引けない
-    FMAP.zoomControl.setPosition("topright");
-    mapBase(FMAP, { interactive:true });
-  } else FMAP.invalidateSize();
-  if(FMAP_LAYER) FMAP_LAYER.remove();
-  FMAP_LAYER = L.layerGroup().addTo(FMAP);
+function drawRoutes(map){
+  if(ROUTE_LAYER) ROUTE_LAYER.remove();
+  ROUTE_LAYER = L.layerGroup().addTo(map);
   const col = f => FMAP_COL[f.airline ? (ALBY[f.airline] || {}).group || "OTHER" : "OTHER"] || FMAP_COL.OTHER;
   const tracked = new Set(), pts = [];
   for(const f of focusFlights()){ if(!f.track || f.track.length < 2) continue;
     tracked.add([f.from, f.to].sort((x, y) => x - y).join("-"));
-    L.polyline(f.track.map(([lat, lon]) => [lat, lon]), { color:col(f), weight:2.4, opacity:.85, interactive:false }).addTo(FMAP_LAYER); }
+    L.polyline(f.track.map(([lat, lon]) => [lat, lon]), { color:col(f), weight:2.4, opacity:.85, interactive:false }).addTo(ROUTE_LAYER); }
   for(const f of dedupFlights()){
     if(tracked.has([f.from, f.to].sort((x, y) => x - y).join("-"))) continue;
     const a = BY[f.from], b = BY[f.to], dx = b.lon - a.lon, dy = b.lat - a.lat, L2 = Math.hypot(dx, dy) || 1, k = Math.min(1.2, L2 * .18);
     const cx = (a.lon + b.lon) / 2 - dy / L2 * k, cy = (a.lat + b.lat) / 2 + dx / L2 * k, line = [];
     for(let t = 0; t <= 1.0001; t += .05) line.push([(1 - t) ** 2 * a.lat + 2 * (1 - t) * t * cy + t * t * b.lat, (1 - t) ** 2 * a.lon + 2 * (1 - t) * t * cx + t * t * b.lon]);
-    L.polyline(line, { color:col(f), weight:2, opacity:.75, dashArray:"5 5", interactive:false }).addTo(FMAP_LAYER);
+    L.polyline(line, { color:col(f), weight:2, opacity:.75, dashArray:"5 5", interactive:false }).addTo(ROUTE_LAYER);
   }
   const v = shownAirports();
   for(const a of A){ const on = v.has(a.id);
     const m = L.circleMarker([a.lat, a.lon], on ? { radius:5, color:a.rare ? "#A9822E" : "#1F2937", weight:2, fillColor:"#FFFFFF", fillOpacity:1 } : { radius:2.6, stroke:false, fillColor:"#9CA3AF", fillOpacity:.8 })
-      .bindTooltip(a.name, { direction:"top", offset:[0, -4] }).addTo(FMAP_LAYER);
+      .bindTooltip(a.name, { direction:"top", offset:[0, -4] }).addTo(ROUTE_LAYER);
     if(on) pts.push([a.lat, a.lon]); }
   const xv = visitedExtra();
   for(const a of XA){ if(a.kind === "mil" || !xv.has(a.id)) continue;
-    L.circleMarker([a.lat, a.lon], { radius:4, color:a.kind === "glider" ? "#1F7FB6" : "#3D7A4E", weight:2, fillColor:"#FFFFFF", fillOpacity:1 }).bindTooltip(`${a.name}（${XKIND[a.kind].short}）`).addTo(FMAP_LAYER); }
-  if(pts.length >= 2) FMAP.fitBounds(L.latLngBounds(pts), { paddingTopLeft:[30, 130], paddingBottomRight:[56, innerHeight - sheetTop("log", "half") + 50], maxZoom:8, animate:false });   // 上は見出し、下はシートと凡例に隠れる
-  else if(pts.length === 1) FMAP.setView(pts[0], 7, { animate:false });
-  else FMAP.setView([36.5, 137.5], 5, { animate:false });
+    L.circleMarker([a.lat, a.lon], { radius:4, color:a.kind === "glider" ? "#1F7FB6" : "#3D7A4E", weight:2, fillColor:"#FFFFFF", fillOpacity:1 }).bindTooltip(`${a.name}（${XKIND[a.kind].short}）`).addTo(ROUTE_LAYER); }
+  return pts;
+}
+// フライトの画面：同じ地図を、訪れた空港がみな入る広さで見せる
+async function renderFlightMap(){
+  if(currentView() !== "log") return;
+  const map = await ensureMap(); if(!map || currentView() !== "log"){ if(!map) $("map").hidden = false; return; }
+  const pts = drawRoutes(map);
+  if(pts.length >= 2) map.fitBounds(L.latLngBounds(pts), { paddingTopLeft:[30, 130], paddingBottomRight:[56, innerHeight - sheetTop("log", "half") + 50], maxZoom:8, animate:false });   // 上は見出し、下はシートと凡例に隠れる
+  else if(pts.length === 1) map.setView(pts[0], 7, { animate:false });
+  else map.setView([36.5, 137.5], 5, { animate:false });
 }
 function dedupFlights(){ const seen=new Set(), out=[]; for(const f of focusFlights()){ const k=[f.from,f.to].sort((x,y)=>x-y).join("-"); if(!seen.has(k)){seen.add(k); out.push(f);} } return out; }
 
@@ -2430,7 +2433,8 @@ function goTab(v, seg){
   b.setAttribute("aria-current","page"); LAST_TAB[MODE] = v;
   const wasOps = $("v-ops").classList.contains("on");
   document.querySelectorAll("section.view").forEach(s => s.classList.toggle("on", s.id === "v-" + v));
-  document.documentElement.dataset.view = v; if(v === "home") setTimeout(renderHomeMap, 0);
+  document.documentElement.dataset.view = v; if(v === "home") setTimeout(renderHomeMap, 0); if(v === "log") setTimeout(renderFlightMap, 0);   // 地図は1枚。画面ごとに見せる広さを変える
+  { const sh = v === "home" ? $("homeSheet") : v === "log" ? $("logSheet") : null; document.documentElement.dataset.sheet = sh ? sh.dataset.snap : ""; }
   if(v === "ops" && !wasOps) openOps(); else if(v !== "ops" && wasOps) stopTraffic();
   if(seg) setBookSeg(seg);
   renderVisible();
@@ -2512,14 +2516,23 @@ async function mapBase(map, opts = {}){
 }
 // ホームの上の地図：いちばん近い空港（まだなら最後にチェックインした空港）と判定範囲、調べた現在地。動かさない地図（国土地理院の淡色地図）
 let HOME_MAP = null, HOME_LAYER = null, HOME_NEAR = null, HOME_POS = null;
-async function renderHomeMap(){
-  const el = $("homeMap"); if(!el || document.documentElement.dataset.view !== "home") return;
-  try{ await loadLeaflet(); }catch(e){ return; }
-  if(!window.L || document.documentElement.dataset.view !== "home") return;
+// 地図は1枚（ホームとフライトで使い回す）。国土地理院のベクトル地図の上に、飛んだ路線と、近くの空港の判定範囲を重ねる
+async function ensureMap(){
+  const el = $("homeMap"); if(!el) return null;
+  try{ await loadLeaflet(); }catch(e){ return null; }
+  if(!window.L) return null;
   if(!HOME_MAP){
-    HOME_MAP = L.map(el, { zoomControl:false, attributionControl:false, scrollWheelZoom:false, boxZoom:false, zoomSnap:0.25, minZoom:5, maxZoom:16 });   // 地図は画面いっぱい。シートをたたむと動かせる
-    mapBase(HOME_MAP);
+    HOME_MAP = L.map(el, { zoomControl:true, attributionControl:false, scrollWheelZoom:false, boxZoom:false, zoomSnap:0.25, minZoom:5, maxZoom:16 });   // 国土地理院のベクトル地図は 4（Leaflet の 5）より引けない
+    HOME_MAP.zoomControl.setPosition("topright");
+    mapBase(HOME_MAP, { interactive:true });
   } else HOME_MAP.invalidateSize();
+  return HOME_MAP;
+}
+// ホーム：同じ地図を、近くの空港（判定範囲）に寄せて見せる。引いていくと飛んだ路線も見える
+async function renderHomeMap(){
+  if(document.documentElement.dataset.view !== "home") return;
+  const map = await ensureMap(); if(!map || document.documentElement.dataset.view !== "home") return;
+  drawRoutes(map);
   const last = S.checkins[S.checkins.length - 1];
   const a = HOME_NEAR ? HOME_NEAR.a : last ? BY[last.a] : A.find(x => x.iata === "HND");
   if(!a) return;
@@ -2541,7 +2554,7 @@ async function renderHomeMap(){
 const SHEET_SNAPS = ["full", "half", "peek"];
 function sheetTop(view, snap){
   const vh = innerHeight, nav = 96;
-  const peek = Math.max(160, vh - nav - (view === "home" ? 214 : 148));
+  const peek = Math.max(160, vh - (view === "home" ? 236 : 168));   // 地図だけのときは下のメニューを隠すので、その分シートを下げる
   if(snap === "full"){ const h = document.querySelector("header.top"); return h ? Math.max(0, Math.round(h.getBoundingClientRect().bottom) - 6) : 0; }   // 広げきっても、上のロゴとマイページは見えるように
   if(snap === "peek") return peek;
   return Math.min(Math.round(vh * (view === "home" ? .40 : .46)), peek - 60);
@@ -2555,6 +2568,7 @@ function initSheet(sheet, view){
   const LABEL = { full:"シートを半分にたたむ", half:"シートを広げる", peek:"シートを半分まで出す" };
   function go(s){
     snap = s; sheet.dataset.snap = s; setTop(sheetTop(view, s));
+    if(document.documentElement.dataset.view === view) document.documentElement.dataset.sheet = s;   // 地図だけのときは下のメニューを隠す
     if(s !== "full") body.scrollTop = 0;
     grab.setAttribute("aria-label", LABEL[s]); grab.setAttribute("aria-expanded", String(s === "full"));
   }
