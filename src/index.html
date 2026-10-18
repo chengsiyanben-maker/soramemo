@@ -624,6 +624,37 @@ dialog.mypage .dlg .close{display:none}
 #v-ops .opsbox .rw{border-radius:999px;padding:1px 9px}
 #v-ops .opshours{color:var(--op-mute)}
 #v-ops .opsmap{border-radius:22px;box-shadow:var(--op-shadow)}
+#v-ops .opsboard{background:var(--op-card);border-radius:22px;padding:14px 16px;box-shadow:var(--op-shadow);color:var(--op-ink);margin-top:12px}
+#v-ops .bdhead{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:2px 0 8px}
+#v-ops .bdhead+.bdhead,#v-ops .bdseq+.bdhead,#v-ops .opsboard .hint+.bdhead{margin-top:16px}
+#v-ops .bdhead h3{margin:0;font-size:14px;font-weight:800;color:var(--op-ink)}
+#v-ops .bdtabs{display:flex;gap:4px;background:var(--op-pill);padding:3px;border-radius:999px}
+#v-ops .bdtabs button{border:0;background:none;border-radius:999px;padding:5px 12px;font:700 12px var(--gothic);color:var(--op-mute)}
+#v-ops .bdtabs button[aria-pressed="true"]{background:var(--op-card);color:var(--op-ink);box-shadow:0 2px 6px -2px rgba(15,23,42,.25)}
+#v-ops .bdseq{list-style:none;margin:0;padding:0;display:grid;grid-auto-flow:column;grid-auto-columns:minmax(118px,1fr);gap:8px;overflow-x:auto;scrollbar-width:none;position:relative;padding-top:14px}
+#v-ops .bdseq::-webkit-scrollbar{display:none}
+#v-ops .bdseq::before{content:"";position:absolute;left:0;right:0;top:5px;height:3px;border-radius:2px;background:linear-gradient(90deg,#BFDBFE,#2563EB)}
+#v-ops .bdseq li{position:relative;display:flex;flex-direction:column;gap:1px;font-size:11px;color:var(--op-mute);min-width:0}
+#v-ops .bdseq .dot{position:absolute;left:0;top:-13px;width:9px;height:9px;border-radius:50%;background:var(--op-card);border:2.5px solid #2563EB}
+#v-ops .bdseq li.past{opacity:.6}
+#v-ops .bdseq b{font-size:13px;color:var(--op-ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#v-ops .bdseq .rel{font-size:15px;font-weight:800;color:var(--op-ink);margin-top:2px}
+#v-ops .bdseq .tm em{font-style:normal;color:#B45309;font-weight:700;margin-left:4px}
+#v-ops .bdsum{font-size:12px;color:var(--op-mute)}
+#v-ops .bdsum b{font-size:15px;color:var(--op-ink)}
+#v-ops .bdchart{display:block;width:100%;height:auto}
+#v-ops .bdchart rect{fill:#93B4E8}
+#v-ops .bdchart rect.now{fill:#2563EB}
+#v-ops .bdchart .ref{fill:none;stroke:#6B7280;stroke-width:1.5;stroke-dasharray:3 3}
+#v-ops .bdchart .base{stroke:color-mix(in srgb,var(--op-sub) 40%,transparent);stroke-width:1}
+#v-ops .bdchart text{font-size:9px;fill:var(--op-mute);font-family:var(--gothic)}
+[data-palette="board"] #v-ops .bdchart rect{fill:#3B5C93}
+[data-palette="board"] #v-ops .bdchart rect.now{fill:#7AA7F5}
+[data-palette="board"] #v-ops .bdchart .ref{stroke:#A7B0BC}
+#v-ops .bdleg{display:flex;flex-wrap:wrap;gap:12px;font-size:11px;color:var(--op-mute);margin:4px 0 0}
+#v-ops .bdleg span{display:inline-flex;align-items:center;gap:5px}
+#v-ops .bdleg .bar{width:10px;height:10px;border-radius:2px;background:#93B4E8}
+#v-ops .bdleg .line{width:16px;border-top:1.5px dashed #6B7280}
 #v-ops .fwlist{background:var(--op-card);border-radius:22px;padding:14px 16px;box-shadow:var(--op-shadow);color:var(--op-ink)}
 #v-ops .fwlist li{border-top:0;padding:9px 0}
 #v-ops .fwlist li+li{border-top:1px solid color-mix(in srgb,var(--op-sub) 18%,transparent)}
@@ -640,6 +671,26 @@ dialog.mypage .dlg .close{display:none}
   --st-shadow:0 1px 2px rgba(17,24,39,.04),0 6px 20px rgba(17,24,39,.06);--jal:#C8102E;--ana:#1C4FA0;--other:#6B7280;color:var(--st-ink)}
 [data-palette="board"] #v-stats{--st-ink:#E5E7EB;--st-sub:#8B95A3;--st-mute:#A7B0BC;--st-card:#171A20;--st-track:#262B33;--st-wash:#1C2027;
   --st-shadow:0 1px 2px rgba(0,0,0,.3),0 6px 20px rgba(0,0,0,.25);--jal:#FF5A6E;--ana:#6EA0FF;--other:#A7B0BC}
+#v-stats .passport{margin:6px 0 0;padding:18px 18px 16px;border-radius:26px;color:#F9FAFB;background:linear-gradient(150deg,#111827 0%,#1E2A5A 60%,#23408E 100%);box-shadow:0 22px 40px -22px rgba(17,24,39,.7)}
+#v-stats .pp-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+#v-stats .pp-k{font-size:10.5px;font-weight:700;letter-spacing:.18em;color:#A5B4FC}
+#v-stats .passport h2{margin:2px 0 0;font-family:var(--gothic);font-size:20px;font-weight:800;letter-spacing:.02em;color:#F9FAFB}
+#v-stats .pp-share{flex:none;width:40px;height:40px;border:0;border-radius:50%;background:rgba(255,255,255,.12);display:grid;place-items:center;color:#F9FAFB}
+#v-stats .pp-share svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+#v-stats .pp-tabs{display:flex;gap:6px;margin:12px 0 4px;overflow-x:auto;scrollbar-width:none}
+#v-stats .pp-tabs button{flex:none;border:0;border-radius:999px;padding:6px 13px;font:700 12px var(--gothic);background:rgba(255,255,255,.1);color:#D1D5DB}
+#v-stats .pp-tabs button[aria-pressed="true"]{background:#F9FAFB;color:#111827}
+#v-stats .pp-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px 16px;margin-top:12px}
+#v-stats .pp-grid .l{display:block;font-size:11px;font-weight:700;letter-spacing:.06em;color:#C7D2FE}
+#v-stats .pp-grid b{display:block;font-size:32px;font-weight:800;line-height:1.15;font-variant-numeric:tabular-nums}
+#v-stats .pp-grid b.t{font-size:24px;line-height:1.5}
+#v-stats .pp-grid b small{font-size:13px;font-weight:600;color:#C7D2FE;margin-left:2px}
+#v-stats .pp-grid .s{display:block;font-size:11.5px;color:#C7D2FE;margin-top:2px}
+#v-stats .pp-grid .two{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+#v-stats .pp-rows{list-style:none;margin:14px 0 0;padding:12px 0 0;border-top:1px solid rgba(255,255,255,.14);display:grid;gap:8px}
+#v-stats .pp-rows li{display:flex;justify-content:space-between;gap:10px;font-size:12px;color:#C7D2FE}
+#v-stats .pp-rows b{color:#F9FAFB;font-size:13px;text-align:right}
+#v-stats .pp-empty{margin:12px 0 0;font-size:12.5px;color:#C7D2FE}
 #v-stats h2{font-family:var(--gothic);font-size:13px;font-weight:700;letter-spacing:.08em;color:var(--st-mute);margin:36px 4px 14px}
 #v-stats h2:first-child{margin-top:20px}
 #v-stats .alhead{display:inline-flex;align-items:center;gap:8px;font-family:var(--gothic);font-size:14px;font-weight:700;color:var(--st-ink);
@@ -1236,6 +1287,7 @@ nav.tabs{transition:transform .3s cubic-bezier(.2,.8,.2,1),opacity .2s}
 
   <!-- STATS（成績：ステータスの目安、年ごとの記録、航空会社別） -->
   <section class="view" id="v-stats" aria-label="成績">
+    <div class="passport" id="passport"></div>
     <h2>航空会社別</h2>
     <div id="airlineStats"></div>
     <h2>ステータスの目安</h2>
@@ -1248,6 +1300,7 @@ nav.tabs{transition:transform .3s cubic-bezier(.2,.8,.2,1),opacity .2s}
   <p class="hint" id="opsWx">気象通報を読み込んでいます…</p>
   <div class="opsmodes" id="opsModes" role="group" aria-label="運用の切り替え"></div>
   <div class="opsbox" id="opsInfo"></div>
+  <div class="opsboard" id="opsBoard" hidden></div>
   <div class="fwbox" id="opsAlerts" hidden></div>
   <div class="fwbox" id="opsCurfew" hidden></div>
   <div class="opslayers" role="group" aria-label="地図に出すもの">
@@ -2263,7 +2316,7 @@ function renderLog(){
   renderMap();
 }
 // 成績：航空会社別とステータスの目安、年ごとの記録、航空会社別（成績の画面を開いたときだけ描く）
-function renderStats(){ renderYears(); renderAirlines(); renderStatus(); }
+function renderStats(){ renderYears(); renderPassport(); renderAirlines(); renderStatus(); }
 function renderOverall(){
   const fl = S.flights, km = fl.reduce((x, f) => x + f.km, 0), rt = new Set(fl.map(f => [f.from, f.to].sort((p, q) => p - q).join("-")));
   const cell = (n, u) => `<div><div class="n">${n}</div><div class="u">${u}</div></div>`;
@@ -3304,6 +3357,62 @@ document.addEventListener("click", async e => {
   if(e.target.id === "yrJoin"){ track("plus_view", "year"); $("dSettings").showModal(); return; }
   if(e.target.id === "yrShare" && plusOn()) openShare(await yearCard(YEAR), `soramemo-${YEAR}.png`);
 });
+// パスポート：これまで（または年ごと）のフライトの数・距離・推定の飛行時間・空港・航空会社と、いちばん長いフライト・よく飛んだ路線。
+// チェックインでできたフライトと、記録帳のフライトの両方を数える。飛行時間は距離からの推定（時速780km＋上昇・着陸の20分）
+let PASS_Y = "all";
+function passStats(y){
+  const inY = t => y === "all" || new Date(t).getFullYear() === y;
+  const fl = S.flights.filter(f => inY(f.dep)).map(f => ({ from:f.from, to:f.to, km:f.km, airline:f.airline }));
+  const mn = S.manual.filter(m => inY(m.d.replaceAll("-", "/"))).map(m => ({ from:m.from, to:m.to, km:km(BY[m.from], BY[m.to]), airline:m.airline || null }));
+  const all = fl.concat(mn), tot = all.reduce((x, f) => x + f.km, 0), mins = all.reduce((x, f) => x + f.km / 780 * 60 + 20, 0);
+  const aps = new Set(), als = new Map(), rts = new Map();
+  for(const f of all){ aps.add(f.from); aps.add(f.to); if(f.airline && ALBY[f.airline]) als.set(f.airline, (als.get(f.airline) || 0) + 1);
+    const k = [f.from, f.to].sort((p, q) => p - q).join("-"); rts.set(k, (rts.get(k) || 0) + 1); }
+  const longest = all.reduce((b, f) => !b || f.km > b.km ? f : b, null);
+  const topRt = [...rts].sort((p, q) => q[1] - p[1])[0], topAl = [...als].sort((p, q) => q[1] - p[1])[0];
+  return { n:all.length, manual:mn.length, km:tot, mins, aps:aps.size, als:als.size, longest, topRt, topAl };
+}
+const passTime = m => { const d = Math.floor(m / 1440), h = Math.floor(m % 1440 / 60), mm = Math.round(m % 60); return d ? `${d}日${h}時間` : h ? `${h}時間${mm ? mm + "分" : ""}` : `${mm}分`; };
+function renderPassport(){
+  const box = $("passport"); if(!box) return;
+  const ys = [...new Set([...S.flights.map(f => new Date(f.dep).getFullYear()), ...S.manual.map(m => +m.d.slice(0, 4))])].sort((a, b) => b - a);
+  if(PASS_Y !== "all" && !ys.includes(PASS_Y)) PASS_Y = "all";
+  const st = passStats(PASS_Y), laps = st.km / 40075;
+  const rtName = k => { const [a, b] = k.split("-").map(Number); return `${godShort(BY[a])} ⇄ ${godShort(BY[b])}`; };
+  box.innerHTML = `<div class="pp-head"><div><span class="pp-k">SORAMEMO PASSPORT</span><h2>${PASS_Y === "all" ? "これまでのパスポート" : PASS_Y + "年のパスポート"}</h2></div>
+      <button class="pp-share" id="passShare" aria-label="パスポートを画像で共有"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M8 8l4-4 4 4"/><path d="M6 12v7h12v-7"/></svg></button></div>
+    <div class="pp-tabs" role="group" aria-label="期間">${["all", ...ys].map(y => `<button data-pass-y="${y}" aria-pressed="${y === PASS_Y}">${y === "all" ? "これまで" : y + "年"}</button>`).join("")}</div>
+    <div class="pp-grid">
+      <div><span class="l">フライト</span><b>${st.n}</b><span class="s">${st.manual ? `うち記録帳 ${st.manual}` : "チェックインで記録"}</span></div>
+      <div><span class="l">距離</span><b>${fmtKm(st.km)}<small>km</small></b><span class="s">地球 ${laps >= 10 ? Math.round(laps) : laps.toFixed(1)} 周ぶん</span></div>
+      <div><span class="l">飛行時間（推定）</span><b class="t">${passTime(st.mins)}</b></div>
+      <div class="two"><div><span class="l">空港</span><b>${st.aps}</b></div><div><span class="l">航空会社</span><b>${st.als}</b></div></div>
+    </div>
+    ${st.n ? `<ul class="pp-rows">
+      ${st.longest ? `<li><span>いちばん長いフライト</span><b>${godShort(BY[st.longest.from])} → ${godShort(BY[st.longest.to])}　${fmtKm(st.longest.km)} km</b></li>` : ""}
+      ${st.topRt && st.topRt[1] > 1 ? `<li><span>よく飛んだ路線</span><b>${rtName(st.topRt[0])}　${st.topRt[1]}回</b></li>` : ""}
+      ${st.topAl ? `<li><span>いちばん乗った航空会社</span><b>${esc(ALBY[st.topAl[0]].name)}　${st.topAl[1]}便</b></li>` : ""}
+    </ul>` : `<p class="pp-empty">出発と到着の空港でチェックインすると、ここにフライトが集まります。</p>`}`;
+}
+document.addEventListener("click", async e => {
+  const b = e.target.closest("[data-pass-y]"); if(b){ PASS_Y = b.dataset.passY === "all" ? "all" : +b.dataset.passY; renderPassport(); return; }
+  if(e.target.closest("#passShare")) openShare(await passCard(PASS_Y), `soramemo-passport${PASS_Y === "all" ? "" : "-" + PASS_Y}.png`);
+});
+async function passCard(y){
+  try{ await document.fonts.ready; }catch(e){}
+  const st = passStats(y), [cv, ctx] = cardBase(), laps = st.km / 40075;
+  ctx.textAlign = "left"; ctx.fillStyle = PAL.ink; ctx.font = `800 72px ${MINCHO}`; ctx.fillText(y === "all" ? "これまでのパスポート" : `${y}年のパスポート`, 80, 270);
+  const cells = [[String(st.n), "フライト"], [fmtKm(st.km), `km（地球 ${laps >= 10 ? Math.round(laps) : laps.toFixed(1)} 周ぶん）`], [passTime(st.mins), "飛行時間（推定）"], [`${st.aps}・${st.als}`, "空港・航空会社"]];
+  cells.forEach(([n, u], i) => { const x = 80 + (i % 2) * 460, yy = 420 + Math.floor(i / 2) * 200;
+    ctx.fillStyle = PAL.ink; ctx.font = `800 ${n.length > 7 ? 64 : 84}px ${MINCHO}`; ctx.fillText(n, x, yy);
+    ctx.fillStyle = PAL.sumi; ctx.font = `500 30px ${GOTHIC}`; ctx.fillText(u, x, yy + 50); });
+  ctx.fillStyle = PAL.ink; ctx.font = `700 34px ${GOTHIC}`; let yy = 900;
+  if(st.longest){ ctx.fillText(`いちばん長いフライト　${godShort(BY[st.longest.from])} → ${godShort(BY[st.longest.to])}　${fmtKm(st.longest.km)}km`, 80, yy); yy += 70; }
+  if(st.topRt && st.topRt[1] > 1){ const [a, b] = st.topRt[0].split("-").map(Number); ctx.fillText(`よく飛んだ路線　${godShort(BY[a])} ⇄ ${godShort(BY[b])}　${st.topRt[1]}回`, 80, yy); yy += 70; }
+  if(st.topAl){ ctx.fillText(`いちばん乗った航空会社　${ALBY[st.topAl[0]].name}　${st.topAl[1]}便`, 80, yy); }
+  ctx.fillStyle = PAL.sumi; ctx.font = `500 28px ${GOTHIC}`; ctx.fillText("#そらメモ", 80, 1290);
+  return cv;
+}
 async function yearCard(y){
   try{ await document.fonts.ready; }catch(e){}
   const st = yearStats(y), [cv, ctx] = cardBase();
@@ -4413,7 +4522,7 @@ async function renderSpecial(){
 }
 async function renderOpsAlerts(){
   if(!SERVER) return;
-  renderSpecial(); renderCurfew();
+  renderSpecial(); renderCurfew(); renderBoard();
   const iata = OPS_AP; await loadFlightAlerts(iata); if(OPS_AP !== iata) return;
   const box = $("opsAlerts"), html = fwHTML(FW.get(iata), iata, true);
   box.hidden = !html; box.innerHTML = html;
@@ -4471,6 +4580,56 @@ function curfewHTML(now = Date.now()){
     ${list.length ? `<ul class="cfl">${list.map(li).join("")}</ul>` : `<p class="hint" style="margin:4px 0 0">門限の前後の便は見つかっていません。</p>`}
     <p class="fwnote">門限は運用時間の終わり（AIP JAPAN）。門限を過ぎると、ほかの空港へ行き先を変えたり、欠航になったりすることがあります。時刻は予定の便と、JAL・ANA グループの変更後・実際の時刻（${ODPT_CREDIT}）。ほかの航空会社の便は、機体の位置（adsb.lol）から推定した離陸・着陸のおおよその時刻を「推定」として出します。到着予想は、飛んでいる機体の残りの距離を、今の対地速度（巡航中）か機種ごとの巡航速度で割り、進入の時間を足したおおよその時刻です。「間に合いそう」「ぎりぎり」「過ぎる見込み」は、その時刻と門限を比べた推定で、航空会社の発表ではありません。</p></div>`;
 }
+/* これから着く便・出る便と、今日の遅れ・欠航（JAL・ANA グループの時刻表と運航情報。サーバーの airport_board） */
+let BOARD = null, BOARD_AP = null, BOARD_AT = 0, BOARD_DIR = "arr";
+async function loadBoard(iata){
+  if(!SERVER) return null;
+  if(BOARD && BOARD_AP === iata && Date.now() - BOARD_AT < 110_000) return BOARD;
+  try{ const r = await fetch(SORAMEMO_CONFIG.supabaseUrl.replace(/\/$/, "") + "/rest/v1/rpc/airport_board", { method:"POST",
+      headers:{ "Content-Type":"application/json", apikey:SORAMEMO_CONFIG.supabaseAnonKey, Authorization:"Bearer " + SORAMEMO_CONFIG.supabaseAnonKey }, body:JSON.stringify({ p_iata:iata }) });
+    if(r.ok){ BOARD = await r.json(); BOARD_AP = iata; BOARD_AT = Date.now(); return BOARD; } }catch(e){}
+  return BOARD_AP === iata ? BOARD : null;
+}
+function boardRel(t, now){
+  const m = Math.round((Date.parse(t) - now) / 60000);
+  if(m === 0) return "いま";
+  if(m < 0) return `${-m}分前`;
+  return m < 60 ? `あと${m}分` : `あと${Math.floor(m / 60)}時間${m % 60 ? (m % 60) + "分" : ""}`;
+}
+function boardHTML(d){
+  const now = Date.now(), list = (BOARD_DIR === "arr" ? d.next_arr : d.next_dep) || [], arr = BOARD_DIR === "arr";
+  const hmS = t => new Date(t).toLocaleTimeString("ja-JP", { hour:"2-digit", minute:"2-digit" });
+  const name = c => IATA[c] ? godShort(IATA[c]) : c;
+  const kind = f => f.actual ? ["実際", f.actual] : f.est ? ["見込み", f.est] : (f.inferred || f.predicted) ? ["推定", f.inferred || f.predicted] : ["定刻", f.sched];
+  const items = list.map(f => { const [k, t] = kind(f), past = Date.parse(f.t) <= now, late = Math.round((Date.parse(t) - Date.parse(f.sched)) / 60000);
+    return `<li class="${past ? "past" : ""}"><span class="dot" aria-hidden="true"></span>
+      <b>${esc(arr ? name(f.other) + "から" : name(f.other) + "へ")}</b><span class="fl">${esc(f.flight)}${f.aircraft ? "・" + esc(f.aircraft) : ""}</span>
+      <span class="rel">${boardRel(f.t, now)}</span><span class="tm">${k} ${hmS(t)}${late >= 15 && k !== "定刻" ? `<em>${late}分遅れ</em>` : ""}</span></li>`; }).join("");
+  const hrs = d.hours || [], nowH = new Date(now).getHours();
+  const late = hrs.reduce((x, h) => x + Number(h.late || 0), 0), cancel = hrs.reduce((x, h) => x + Number(h.cancel || 0), 0);
+  const ys = hrs.map(h => Number(h.late || 0) + Number(h.cancel || 0)), refs = hrs.map(h => Number(h.ref || 0));
+  const top = Math.max(4, ...ys, ...refs), W = 300, H = 92, bw = W / 24;
+  const y = v => H - 4 - v / top * (H - 14);
+  const bars = ys.map((v, i) => v ? `<rect x="${(i * bw + 1.5).toFixed(1)}" y="${y(v).toFixed(1)}" width="${(bw - 3).toFixed(1)}" height="${(H - 4 - y(v)).toFixed(1)}" rx="2" class="${i === nowH ? "now" : ""}"><title>${i}時台：遅れ${hrs[i].late}便・欠航${hrs[i].cancel}便（いつもは${hrs[i].ref}便）</title></rect>` : "").join("");
+  const ref = refs.map((v, i) => `${i ? "L" : "M"}${(i * bw + bw / 2).toFixed(1)} ${y(v).toFixed(1)}`).join("");
+  return `<div class="bdhead"><h3>${arr ? "これから着く便" : "これから出る便"}</h3><div class="bdtabs" role="group" aria-label="到着と出発">
+      <button data-board-dir="arr" aria-pressed="${arr}">到着</button><button data-board-dir="dep" aria-pressed="${!arr}">出発</button></div></div>
+    ${items ? `<ol class="bdseq">${items}</ol>` : `<p class="hint">この3時間に${arr ? "着く" : "出る"} JAL・ANA グループの便はありません。</p>`}
+    <div class="bdhead"><h3>今日の遅れ・欠航</h3><span class="bdsum">遅れ <b>${late}</b>便・欠航 <b>${cancel}</b>便</span></div>
+    <svg class="bdchart" viewBox="0 0 ${W} ${H + 14}" role="img" aria-label="今日の1時間ごとの遅れと欠航の便の数。遅れ${late}便、欠航${cancel}便">
+      <line x1="0" y1="${H - 4}" x2="${W}" y2="${H - 4}" class="base"/>${bars}<path d="${ref}" class="ref"/>
+      ${[0, 6, 12, 18].map(h => `<text x="${h * bw + 1}" y="${H + 10}">${h}時</text>`).join("")}</svg>
+    <p class="bdleg"><span><i class="bar"></i>今日（15分以上の遅れと欠航）</span><span><i class="line"></i>いつも（前の7日の平均）</span></p>
+    <p class="fwnote">JAL・ANA グループの便だけです。時刻は「実際」「見込み」が航空会社の運航情報、「推定」は機体の位置からの推定です。${ODPT_CREDIT}</p>`;
+}
+async function renderBoard(){
+  const iata = OPS_AP, box = $("opsBoard"); if(!box) return;
+  const d = await loadBoard(iata); if(OPS_AP !== iata) return;
+  if(!d){ box.hidden = true; box.innerHTML = ""; return; }
+  box.hidden = false; box.innerHTML = boardHTML(d);
+}
+document.addEventListener("click", e => { const b = e.target.closest("[data-board-dir]"); if(!b) return; BOARD_DIR = b.dataset.boardDir; if(BOARD) $("opsBoard").innerHTML = boardHTML(BOARD); });
+
 async function renderCurfew(){
   const iata = OPS_AP, box = $("opsCurfew"); if(!box) return;
   if(!CURFEW[iata]){ box.hidden = true; box.innerHTML = ""; return; }

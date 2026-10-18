@@ -19,9 +19,9 @@ async def main():
         dl = await d.value; csv = open(await dl.path(), encoding='utf-8-sig').read(); print('csv:', dl.suggested_filename); print(csv)
         # 取り込み形式と互換か（デモで取り込んでみる）
         # そらメモ＋の入口は隠してあるので、テストでは出して試す
-        await pg.click('#toggleDemo'); await pg.click('nav.tabs button[data-v=log]'); await pg.click('#flAdd')
+        await pg.click('#toggleDemo'); await pg.click('nav.tabs button[data-v=log]'); await pg.click('#flAdd'); await pg.wait_for_timeout(450)
         await pg.evaluate('PLUS = true; const x = document.getElementById("importBox"); x.hidden = false; x.open = true');   await pg.fill('#impText', csv); await pg.click('#impCheck'); await pg.wait_for_selector('#impPreview .hint, #impPreview .msg')
-        print('reimport preview:', (await pg.inner_text('#impPreview')).splitlines()[0])
+        print('reimport preview:', ((await pg.text_content('#impPreview')) or '').strip().splitlines()[0])
         print('legal links:', await pg.locator('.legal a').count(), '| errors', errs); await c.close()
         # サーバー版：アカウント削除
         c=await b.new_context(viewport={'width':400,'height':860}); await c.add_init_script("localStorage.setItem('soramemo.onboarded','1'); Object.defineProperty(window, 'SORAMEMO_CONFIG', { configurable:true, get(){ return this.__cfg; }, set(v){ this.__cfg = Object.assign({}, v, { gameReleased: true }); } });")
