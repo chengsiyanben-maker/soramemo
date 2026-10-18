@@ -629,6 +629,22 @@ dialog.mypage .dlg .close{display:none}
 #v-ops .sppredout{margin:8px 0 2px;padding:10px 12px;border-radius:14px;background:color-mix(in srgb,var(--op-pill) 70%,transparent)}
 #v-ops .predlist{margin:6px 0 0;padding-left:18px;font-size:12.5px;color:var(--op-ink)}
 #v-ops .predlist small{margin-left:6px;color:var(--op-mute)}
+#v-ops .opsyday .bdhead h3 small{font-size:12px;font-weight:600;color:var(--op-mute);margin-left:4px}
+#v-ops .opsyday .ydshare{min-height:32px;padding:0 12px;font-size:12px;text-decoration:none;background:var(--op-pill);color:var(--op-ink);border-radius:999px}
+#v-ops .ydgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px 14px;margin-top:4px}
+#v-ops .ydgrid .l{display:block;font-size:11px;font-weight:700;color:var(--op-mute)}
+#v-ops .ydgrid b{display:block;font-size:26px;font-weight:800;line-height:1.15;color:var(--op-ink);font-variant-numeric:tabular-nums}
+#v-ops .ydgrid b small{font-size:12px;font-weight:600;color:var(--op-mute);margin-left:2px}
+#v-ops .ydgrid .s{display:block;font-size:11.5px;color:var(--op-mute);margin-top:2px}
+#v-ops .ydgrid em{font-style:normal;font-weight:700;margin-left:4px}
+#v-ops .ydgrid em.up{color:#B45309}
+#v-ops .ydgrid em.dn{color:#047857}
+#v-ops .ydmodes{margin-top:14px}
+#v-ops .ydmodes .bar{display:flex;gap:2px;height:12px;border-radius:6px;overflow:hidden}
+#v-ops .ydmodes .bar i{display:block;height:100%}
+#v-ops .ydmodes p{display:flex;flex-wrap:wrap;gap:6px 12px;margin:8px 0 0;font-size:11.5px;color:var(--op-mute)}
+#v-ops .ydmodes p span{display:inline-flex;align-items:center;gap:5px}
+#v-ops .ydmodes p i{width:9px;height:9px;border-radius:2px}
 #v-ops .opsboard{background:var(--op-card);border-radius:22px;padding:14px 16px;box-shadow:var(--op-shadow);color:var(--op-ink);margin-top:12px}
 #v-ops .bdhead{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:2px 0 8px}
 #v-ops .bdhead+.bdhead,#v-ops .bdseq+.bdhead,#v-ops .opsboard .hint+.bdhead{margin-top:16px}
@@ -1307,6 +1323,7 @@ nav.tabs{transition:transform .3s cubic-bezier(.2,.8,.2,1),opacity .2s}
   <div class="opsmodes" id="opsModes" role="group" aria-label="運用の切り替え"></div>
   <div class="opsbox" id="opsInfo"></div>
   <div class="opsboard" id="opsBoard" hidden></div>
+  <div class="opsboard opsyday" id="opsYday" hidden></div>
   <div class="fwbox" id="opsAlerts" hidden></div>
   <div class="fwbox" id="opsCurfew" hidden></div>
   <div class="opslayers" role="group" aria-label="地図に出すもの">
@@ -4575,7 +4592,7 @@ async function renderSpecial(){
 }
 async function renderOpsAlerts(){
   if(!SERVER) return;
-  renderSpecial(); renderCurfew(); renderBoard();
+  renderSpecial(); renderCurfew(); renderBoard(); renderYday();
   const iata = OPS_AP; await loadFlightAlerts(iata); if(OPS_AP !== iata) return;
   const box = $("opsAlerts"), html = fwHTML(FW.get(iata), iata, true);
   box.hidden = !html; box.innerHTML = html;
@@ -4682,6 +4699,61 @@ async function renderBoard(){
   box.hidden = false; box.innerHTML = boardHTML(d);
 }
 document.addEventListener("click", e => { const b = e.target.closest("[data-board-dir]"); if(!b) return; BOARD_DIR = b.dataset.boardDir; if(BOARD) $("opsBoard").innerHTML = boardHTML(BOARD); });
+
+/* 昨日の〇〇：前の日の空港のまとめ（毎日の記録の airport_daily）と、その前の7日の平均 */
+let YDAY = null, YDAY_AP = null;
+async function loadYday(iata){
+  if(!SERVER) return null;
+  if(YDAY_AP === iata) return YDAY;
+  try{ const r = await fetch(SORAMEMO_CONFIG.supabaseUrl.replace(/\/$/, "") + "/rest/v1/rpc/airport_yesterday", { method:"POST",
+      headers:{ "Content-Type":"application/json", apikey:SORAMEMO_CONFIG.supabaseAnonKey, Authorization:"Bearer " + SORAMEMO_CONFIG.supabaseAnonKey }, body:JSON.stringify({ p_iata:iata }) });
+    if(r.ok){ YDAY = await r.json(); YDAY_AP = iata; return YDAY; } }catch(e){}
+  return null;
+}
+function ydayModes(d, iata){
+  const def = OPS_AIRPORTS[iata], m = d.modes || {}, tot = Object.values(m).reduce((x, v) => x + Number(v), 0);
+  if(!tot) return [];
+  return Object.entries(m).sort((a, b) => b[1] - a[1]).map(([k, v]) => ({ k, label:(def && def.modes && def.modes[k] && def.modes[k].label) || k, min:Number(v), pct:Number(v) / tot }));
+}
+function ydayHTML(d, iata){
+  const name = (OPS_AIRPORTS[iata] || {}).name || iata, dt = new Date(d.day + "T00:00:00+09:00");
+  const md = `${dt.getMonth() + 1}/${dt.getDate()}（${"日月火水木金土"[dt.getDay()]}）`, rate = d.flights ? Math.round(d.late / d.flights * 100) : 0;
+  const ref = d.ref && d.ref.days ? d.ref : null, cmp = (v, r) => r == null ? "" : v > r * 1.2 + 1 ? `<em class="up">いつもより多い</em>` : v < r * 0.8 - 1 ? `<em class="dn">いつもより少ない</em>` : `<em>いつもどおり</em>`;
+  const hrs = m => m >= 60 ? `${Math.floor(m / 60)}時間${m % 60 ? (m % 60) + "分" : ""}` : `${m}分`;
+  const modes = ydayModes(d, iata), seg = ["#2563EB", "#F59E0B", "#10B981", "#8B5CF6", "#6B7280"];
+  return `<div class="bdhead"><h3>昨日の${esc(name)}　<small>${md}</small></h3><button class="linkbtn2 ydshare" id="ydShare" type="button">画像で共有</button></div>
+    <div class="ydgrid">
+      <div><span class="l">便</span><b>${fmtKm(d.flights)}</b><span class="s">到着 ${fmtKm(d.arr)}・出発 ${fmtKm(d.dep)}</span></div>
+      <div><span class="l">15分以上の遅れ</span><b>${fmtKm(d.late)}<small>便</small></b><span class="s">${rate}% ${ref ? cmp(d.late, Number(ref.late)) : ""}</span></div>
+      <div><span class="l">欠航</span><b>${d.cancelled}<small>便</small></b><span class="s">${d.diverted ? `ダイバート ${d.diverted}便` : ref ? cmp(d.cancelled, Number(ref.cancelled)) : ""}</span></div>
+      <div><span class="l">遅れた便の平均</span><b>${d.avg_delay != null ? Math.round(d.avg_delay) : "—"}<small>分</small></b>${d.max_wind != null ? `<span class="s">最大の風 ${d.max_wind}kt</span>` : ""}</div>
+    </div>
+    ${modes.length ? `<div class="ydmodes"><div class="bar" role="img" aria-label="${esc(modes.map(x => `${x.label} ${hrs(x.min)}`).join("、"))}">${modes.map((x, i) => `<i style="width:${(x.pct * 100).toFixed(1)}%;background:${seg[Math.min(i, seg.length - 1)]}"></i>`).join("")}</div>
+      <p>${modes.map((x, i) => `<span><i style="background:${seg[Math.min(i, seg.length - 1)]}"></i>${esc(x.label)} ${hrs(x.min)}</span>`).join("")}</p></div>` : ""}
+    <p class="fwnote">JAL・ANA の時刻表に載っている便を、そらメモが毎晩まとめたもの（遅れは航空会社の運航情報か機体の位置からの推定。運用は推定）。${ref ? `「いつも」はその前の${ref.days}日の平均。` : ""}${ODPT_CREDIT}</p>`;
+}
+async function renderYday(){
+  const iata = OPS_AP, box = $("opsYday"); if(!box) return;
+  const d = await loadYday(iata); if(OPS_AP !== iata) return;
+  if(!d || !d.flights){ box.hidden = true; box.innerHTML = ""; return; }
+  box.hidden = false; box.innerHTML = ydayHTML(d, iata);
+}
+async function ydayCard(d, iata){
+  try{ await document.fonts.ready; }catch(e){}
+  const [cv, ctx] = cardBase(), name = (OPS_AIRPORTS[iata] || {}).name || iata, dt = new Date(d.day + "T00:00:00+09:00");
+  ctx.textAlign = "left"; ctx.fillStyle = PAL.ink; ctx.font = `800 72px ${MINCHO}`; ctx.fillText(`昨日の${name}`, 80, 270);
+  ctx.fillStyle = PAL.sumi; ctx.font = `500 34px ${GOTHIC}`; ctx.fillText(`${dt.getFullYear()}年${dt.getMonth() + 1}月${dt.getDate()}日`, 80, 330);
+  const cells = [[fmtKm(d.flights), "便"], [`${fmtKm(d.late)}`, `15分以上の遅れ（${d.flights ? Math.round(d.late / d.flights * 100) : 0}%）`], [String(d.cancelled), "欠航"], [d.avg_delay != null ? String(Math.round(d.avg_delay)) : "—", "遅れた便の平均（分）"]];
+  cells.forEach(([n, u], i) => { const x = 80 + (i % 2) * 460, yy = 470 + Math.floor(i / 2) * 200;
+    ctx.fillStyle = PAL.ink; ctx.font = `800 84px ${MINCHO}`; ctx.fillText(n, x, yy); ctx.fillStyle = PAL.sumi; ctx.font = `500 30px ${GOTHIC}`; ctx.fillText(u, x, yy + 50); });
+  const modes = ydayModes(d, iata), seg = ["#2563EB", "#F59E0B", "#10B981", "#8B5CF6", "#6B7280"];
+  if(modes.length){ let x = 80; modes.forEach((m, i) => { const w = 920 * m.pct; ctx.fillStyle = seg[Math.min(i, seg.length - 1)]; ctx.fillRect(x, 930, Math.max(2, w - 4), 36); x += w; });
+    ctx.fillStyle = PAL.ink; ctx.font = `600 30px ${GOTHIC}`; modes.slice(0, 3).forEach((m, i) => ctx.fillText(`${m.label}　${Math.round(m.min / 60 * 10) / 10}時間`, 80, 1030 + i * 50)); }
+  ctx.fillStyle = PAL.sumi; ctx.font = `500 24px ${GOTHIC}`; ctx.fillText("JAL・ANA の時刻表の便。遅れ・運用は推定を含みます。", 80, 1215); ctx.fillText("出典：公共交通オープンデータセンター", 80, 1250);
+  ctx.font = `500 28px ${GOTHIC}`; ctx.fillText("#そらメモ", 80, 1295);
+  return cv;
+}
+document.addEventListener("click", async e => { if(!e.target.closest("#ydShare") || !YDAY) return; openShare(await ydayCard(YDAY, YDAY_AP), `soramemo-yesterday-${YDAY_AP}-${YDAY.day}.png`); });
 
 async function renderCurfew(){
   const iata = OPS_AP, box = $("opsCurfew"); if(!box) return;
