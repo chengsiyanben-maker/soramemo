@@ -139,3 +139,24 @@ Deno.test("到着予想：同じ位置でも、プロペラ機は遅く、巡航
   const odd = predictEta({ ...p, kt: 900 }, itm, "B738");    // おかしな速度は使わない
   assertEquals(odd, jet);
 });
+
+Deno.test("着陸して地上を走っているのが見えたら、着陸とみなす（最後に飛んでいた時刻）", () => {
+  const ground = (t: number): Seen => ({ ...at(42.78, 141.69, 0, t), ground: true });
+  const { w, all } = run([
+    [at(35.56, 139.80, 2000, T0 + 18 * MIN, 2500), T0 + 18 * MIN],
+    [at(39.5, 141.0, 37000, T0 + 60 * MIN), T0 + 60 * MIN],
+    [at(42.70, 141.68, 1200, T0 + 92 * MIN, -700), T0 + 92 * MIN],
+    [ground(T0 + 96 * MIN), T0 + 96 * MIN],
+    [ground(T0 + 120 * MIN), T0 + 120 * MIN],
+  ]);
+  assertEquals([w.phase, w.landed_iata, w.landed_at], ["landed", "CTS", T0 + 92 * MIN]);
+  assertEquals(all, []);
+});
+
+Deno.test("到着の30分前ごろの到着予想を残す", () => {
+  const { w } = run([
+    [at(35.56, 139.80, 2000, T0 + 18 * MIN, 2500), T0 + 18 * MIN],
+    [at(40.6, 141.3, 37000, T0 + 70 * MIN), T0 + 70 * MIN],
+  ]);
+  assertEquals(w.eta30 != null && Math.abs((w.eta30 ?? 0) - (T0 + 95 * MIN)) < 15 * MIN, true);
+});

@@ -33,6 +33,7 @@ export type Watch = {
   start?: number;                                   // 見張りを始めた時刻（ダイヤを入れたのが定刻より後なら、離陸を見逃しているので「離陸を確認できず」は出さない）
   eta?: number | null;                              // 到着予想（推定。機体の位置・速度と機種の巡航速度から。ミリ秒）
   cs?: string | null; reg?: string | null; type?: string | null;   // 見つけた機体の呼び出し符号・登録記号・機種（毎日の記録と航跡に使う）
+  eta60?: number | null; eta30?: number | null; eta15?: number | null;   // 到着の60・30・15分前ごろの到着予想（当たり具合を毎日の記録で確かめる）
 };
 export type Alert = { kind: "delay_dep" | "no_takeoff" | "delay_arr" | "divert" | "return" | "divert_landed"; iata: string[]; message: string };
 
@@ -116,7 +117,11 @@ export function step(s: Sched, w0: Watch, seen: Seen | null, now: number, aps: M
     w.last = { lat: seen.lat, lon: seen.lon, alt_ft: seen.alt_ft, at: seen.at };
     w.cs = seen.callsign; if (seen.reg) w.reg = seen.reg; if (seen.type) w.type = seen.type;
     const arrA = aps.get(s.arr);
-    if (arrA) w.eta = Math.round(predictEta(seen, arrA, seen.type || s.aircraft));
+    if (arrA) {
+      w.eta = Math.round(predictEta(seen, arrA, seen.type || s.aircraft));
+      const rem = w.eta - now;
+      for (const m of [60, 30, 15] as const) { const k = `eta${m}` as "eta60" | "eta30" | "eta15"; if (w[k] == null && rem <= m * MIN && rem > (m - 10) * MIN) w[k] = w.eta; }
+    }
     // 空港の近くで低いか
     let low: Airport | null = null;
     for (const a of aps.values()) if (km(seen, a) <= 8 && (seen.alt_ft ?? 99999) <= 1500) { low = a; break; }
@@ -133,6 +138,16 @@ export function step(s: Sched, w0: Watch, seen: Seen | null, now: number, aps: M
         else emit({ kind: "divert", iata: [s.arr, a.iata, s.dep], message: `${route}は、${name(a.iata)}へ向かっているようです（ダイバートの可能性・推定）` });
         break;
       }
+    }
+  }
+  // 地上にいるのが見えた（着陸して地上を走っている）：空港の近くなら着陸とみなす。着陸の時刻は最後に飛んでいるのを見た時刻
+  //（地上の機体も位置を送り続けるので、「見えなくなったら着陸」だけでは、いつまでも飛行中のままになっていた）
+  if (w.phase === "air" && seen && seen.ground) {
+    let near: Airport | null = null;
+    for (const a of aps.values()) if (km(seen, a) <= 8) { near = a; break; }
+    if (near) {
+      w.phase = "landed"; w.landed_iata = near.iata; w.landed_at = w.low_iata === near.iata && w.low_at ? w.low_at : (w.last?.at ?? seen.at);
+      if (w.landed_iata !== s.arr && w.landed_iata !== s.dep) emit({ kind: "divert_landed", iata: [s.arr, w.landed_iata, s.dep], message: `${route}は、${name(w.landed_iata)}に着陸したようです（ダイバート・推定）` });
     }
   }
   // 見えなくなった：空港の近くで低く見たのが最後なら、着陸とみなす

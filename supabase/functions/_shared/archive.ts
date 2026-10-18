@@ -12,6 +12,7 @@ export type History = {
   atd: string | null; ata: string | null; atd_src: "odpt" | "adsb" | null; ata_src: "odpt" | "adsb" | null;
   dep_delay: number | null; arr_delay: number | null; cancelled: boolean; diverted_to: string | null;
   aircraft: string | null; type: string | null; reg: string | null; callsign: string | null; also: string[];
+  eta60?: string | null; eta30?: string | null; eta15?: string | null;
 };
 
 const num = (v: unknown): number | null => typeof v === "number" && Number.isFinite(v) ? v : null;
@@ -32,6 +33,7 @@ export function toHistory(r: SchedRow): History {
     dep_delay: cancelled ? null : mins(atd, r.std), arr_delay: cancelled ? null : mins(ata, r.sta), cancelled,
     diverted_to: !cancelled && landedIata && landedIata !== r.arr && landedIata !== r.dep ? landedIata : null,
     aircraft: r.aircraft, type: str(st.type), reg: str(st.reg), callsign: str(st.cs), also: [],
+    eta60: iso(num(st.eta60)), eta30: iso(num(st.eta30)), eta15: iso(num(st.eta15)),
   };
 }
 
@@ -53,6 +55,7 @@ export function buildHistory(rows: SchedRow[]): History[] {
       if (!best.atd && x.atd) { best.atd = x.atd; best.atd_src = x.atd_src; best.dep_delay = x.dep_delay; }
       if (!best.ata && x.ata) { best.ata = x.ata; best.ata_src = x.ata_src; best.arr_delay = x.arr_delay; }
       best.reg ??= x.reg; best.type ??= x.type; best.callsign ??= x.callsign; best.aircraft ??= x.aircraft;
+      best.eta60 ??= x.eta60; best.eta30 ??= x.eta30; best.eta15 ??= x.eta15;
       if (x.cancelled && !best.atd && !best.ata) best.cancelled = true;
     }
     out.push(best);
