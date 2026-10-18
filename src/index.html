@@ -4667,13 +4667,13 @@ function boardHTML(d){
   const ref = refs.map((v, i) => `${i ? "L" : "M"}${(i * bw + bw / 2).toFixed(1)} ${y(v).toFixed(1)}`).join("");
   return `<div class="bdhead"><h3>${arr ? "これから着く便" : "これから出る便"}</h3><div class="bdtabs" role="group" aria-label="到着と出発">
       <button data-board-dir="arr" aria-pressed="${arr}">到着</button><button data-board-dir="dep" aria-pressed="${!arr}">出発</button></div></div>
-    ${items ? `<ol class="bdseq">${items}</ol>` : `<p class="hint">この3時間に${arr ? "着く" : "出る"} JAL・ANA グループの便はありません。</p>`}
+    ${items ? `<ol class="bdseq">${items}</ol>` : `<p class="hint">この3時間に${arr ? "着く" : "出る"} JAL・ANA の時刻表の便はありません。</p>`}
     <div class="bdhead"><h3>今日の遅れ・欠航</h3><span class="bdsum">遅れ <b>${late}</b>便・欠航 <b>${cancel}</b>便</span></div>
     <svg class="bdchart" viewBox="0 0 ${W} ${H + 14}" role="img" aria-label="今日の1時間ごとの遅れと欠航の便の数。遅れ${late}便、欠航${cancel}便">
       <line x1="0" y1="${H - 4}" x2="${W}" y2="${H - 4}" class="base"/>${bars}<path d="${ref}" class="ref"/>
       ${[0, 6, 12, 18].map(h => `<text x="${h * bw + 1}" y="${H + 10}">${h}時</text>`).join("")}</svg>
     <p class="bdleg"><span><i class="bar"></i>今日（15分以上の遅れと欠航）</span><span><i class="line"></i>いつも（前の7日の平均）</span></p>
-    <p class="fwnote">JAL・ANA グループの便だけです。時刻は「実際」「見込み」が航空会社の運航情報、「推定」は機体の位置からの推定です。${ODPT_CREDIT}</p>`;
+    <p class="fwnote">JAL・ANA の時刻表に載っている便だけです（エア・ドゥ、ソラシドエアなど共同運航の便を含みます）。時刻は「実際」「見込み」が航空会社の運航情報、「推定」は機体の位置からの推定です。${ODPT_CREDIT}</p>`;
 }
 async function renderBoard(){
   const iata = OPS_AP, box = $("opsBoard"); if(!box) return;
