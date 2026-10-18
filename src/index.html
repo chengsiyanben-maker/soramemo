@@ -624,6 +624,11 @@ dialog.mypage .dlg .close{display:none}
 #v-ops .opsbox .rw{border-radius:999px;padding:1px 9px}
 #v-ops .opshours{color:var(--op-mute)}
 #v-ops .opsmap{border-radius:22px;box-shadow:var(--op-shadow)}
+#v-ops .splist .sppred{display:inline-block;margin:6px 0 0;border:0;border-radius:999px;background:var(--op-pill);color:var(--op-ink);font:700 11.5px var(--gothic);padding:5px 11px}
+#v-ops .splist .sppred[aria-expanded="true"]{background:var(--op-ink);color:var(--op-card)}
+#v-ops .sppredout{margin:8px 0 2px;padding:10px 12px;border-radius:14px;background:color-mix(in srgb,var(--op-pill) 70%,transparent)}
+#v-ops .predlist{margin:6px 0 0;padding-left:18px;font-size:12.5px;color:var(--op-ink)}
+#v-ops .predlist small{margin-left:6px;color:var(--op-mute)}
 #v-ops .opsboard{background:var(--op-card);border-radius:22px;padding:14px 16px;box-shadow:var(--op-shadow);color:var(--op-ink);margin-top:12px}
 #v-ops .bdhead{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:2px 0 8px}
 #v-ops .bdhead+.bdhead,#v-ops .bdseq+.bdhead,#v-ops .opsboard .hint+.bdhead{margin-top:16px}
@@ -4503,7 +4508,8 @@ function specialHTML(){
   const list = all.filter(x => x.kind !== "alliance"), ally = all.filter(x => x.kind === "alliance");
   const item = (x, mark) => { const go = x.iata && OPS_AIRPORTS[x.iata] && x.iata !== OPS_AP;
     const body = `<b>${mark}${esc(x.name)}</b> <small>${esc(x.airline)}${x.callsign ? "・" + esc(x.callsign) : ""}（${esc(x.reg)}）</small><br><small>${esc(specialWhere(x))}</small>`;
-    return `<li>${go ? `<button data-ops-ap="${esc(x.iata)}" aria-label="${esc(x.name)}：${esc(OPS_AIRPORTS[x.iata].name)}の運用を見る">${body}</button>` : body}</li>`; };
+    return `<li>${go ? `<button data-ops-ap="${esc(x.iata)}" aria-label="${esc(x.name)}：${esc(OPS_AIRPORTS[x.iata].name)}の運用を見る">${body}</button>` : body}
+      <button class="sppred" data-sp-pred="${esc(x.reg)}" aria-expanded="false">この先の便（推定）</button><div class="sppredout" data-sp-pred-out="${esc(x.reg)}" hidden></div></li>`; };
   const allyHTML = ally.length ? `<details class="spally"><summary>アライアンス塗装 ${ally.length}機</summary><ul>${ally.map(x => item(x, "◇")).join("")}</ul></details>` : "";
   // これから飛ぶ予定（航空会社の運航情報の文に「〇〇で運航いたします」とある便）。この空港の便を先に、ほかの空港の便はたたむ
   const hm2 = t => new Date(t).toLocaleTimeString("ja-JP", { hour:"2-digit", minute:"2-digit" });
@@ -4516,6 +4522,26 @@ function specialHTML(){
   return `<div class="fwlist splist"><div class="opshead"><b>いま飛んでいる特別塗装機</b><span>${list.length}機</span></div>${list.length ? `<ul>${list.map(x => item(x, "★")).join("")}</ul>` : `<p class="hint" style="margin:4px 0 0">キャラクター・記念塗装の機体は、いまは見つかっていません。</p>`}${allyHTML}${planHTML}
     <p class="fwnote">直近15分に位置が届いたもの（adsb.lol）。特別塗装機の一覧は航空会社の発表などをもとに そらメモ がまとめたもので、塗装の期間や機体の入れ替えで違うことがあります。通知はキャラクター・記念塗装の機体だけで、アライアンス塗装（◇）は知らせません。「これから飛ぶ予定」は航空会社の運航情報（${ODPT_CREDIT}）の文に特別塗装機で運航すると書かれた便で、通知を申し込んでいると飛ぶ前にもお知らせします。機体の変更で変わることがあります。</p>${push}</div>`;
 }
+// 機体の運用の予想（推定）：その機体の今日の便のあとに、前の60日でよく続いた便をたどる（サーバーの predict_rotation）
+async function loadPrediction(reg){
+  try{ const r = await fetch(SORAMEMO_CONFIG.supabaseUrl.replace(/\/$/, "") + "/rest/v1/rpc/predict_rotation", { method:"POST",
+      headers:{ "Content-Type":"application/json", apikey:SORAMEMO_CONFIG.supabaseAnonKey, Authorization:"Bearer " + SORAMEMO_CONFIG.supabaseAnonKey }, body:JSON.stringify({ p_reg:reg }) });
+    return r.ok ? await r.json() : null; }catch(e){ return null; }
+}
+function predictionHTML(d){
+  const hm2 = t => new Date(t).toLocaleTimeString("ja-JP", { hour:"2-digit", minute:"2-digit" });
+  if(!d || !d.known) return `<p class="hint">今日この機体が入った便が、まだ分かっていません。</p>`;
+  const k = d.known, rows = (d.next || []).map(n => `<li><b>${esc(n.flight)}</b> ${hm2(n.std)} ${esc(placeShort(n.dep))}→${esc(placeShort(n.arr))}<small>前の60日で${Math.round(Number(n.share) * 100)}%</small></li>`).join("");
+  return `<p class="hint" style="margin:0">いまの便：<b>${esc(k.flight)}</b> ${esc(placeShort(k.dep))}→${esc(placeShort(k.arr))}</p>`
+    + (rows ? `<ol class="predlist">${rows}</ol><p class="fwnote">推定です。過去にこの機体の便のあとに続いた便の記録から出しています。機体の入れ替えで違うことがあります。</p>`
+            : `<p class="hint">この先の便は、まだ記録が足りず予想できません（毎日の記録が貯まると出ます）。</p>`);
+}
+document.addEventListener("click", async e => {
+  const b = e.target.closest("[data-sp-pred]"); if(!b) return;
+  const reg = b.dataset.spPred, out = document.querySelector(`[data-sp-pred-out="${CSS.escape(reg)}"]`); if(!out) return;
+  const open = b.getAttribute("aria-expanded") !== "true"; b.setAttribute("aria-expanded", String(open)); out.hidden = !open;
+  if(open){ out.innerHTML = `<p class="hint">読み込んでいます…</p>`; out.innerHTML = predictionHTML(await loadPrediction(reg)); }
+});
 async function renderSpecial(){
   await loadSpecial(); const box = $("opsSpecial"), html = specialHTML();
   box.hidden = !html; box.innerHTML = html;
