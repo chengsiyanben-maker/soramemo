@@ -1391,6 +1391,7 @@ nav.tabs{transition:transform .3s cubic-bezier(.2,.8,.2,1),opacity .2s}
   <p class="hint">共同運航便は、航空券に書かれた航空会社と便名で記録してください。</p>
   <div id="fFareBox" hidden><label class="flabel" for="fFare">運賃（ステータスの目安の計算用）</label><select id="fFare"></select></div>
   <p class="hint" id="fSeat"></p>
+  <p class="hint ffacts" id="fFacts" hidden></p>
   <button class="btn2" id="fPhoto" style="width:100%;margin-bottom:8px">写真に押す</button>
   <p class="msg" id="fMsg" role="status" aria-live="polite"></p>
   <div class="row2"><button class="btn2" id="fCancel">閉じる</button><button class="btn1" id="fSave">記録する</button></div>
@@ -2424,7 +2425,23 @@ function openFlight(id){
   $("fSeat").textContent = f.seat ? `座席 ${f.seat}` : "";
   if($("dStamp").open) $("dStamp").close();
   $("dFlight").showModal();
-  loadFlightCands(f);
+  loadFlightCands(f); showFacts(f);
+}
+// この便の記録（毎日の記録から）：機体の登録記号・機種と、実際の到着・遅れ
+async function showFacts(f){
+  const box = $("fFacts"); box.hidden = true; box.textContent = "";
+  const k = factKey(f); if(!k) return;
+  if(!FACTS.has(k)) await loadFacts();
+  const x = FACTS.get(k); if(!x || editing !== f) return;
+  const hm = t => new Date(t).toLocaleTimeString("ja-JP", { hour:"2-digit", minute:"2-digit" });
+  const parts = [];
+  if(x.reg || x.type || x.aircraft) parts.push(`機体 ${[x.reg, x.type ? typeName(x.type) : x.aircraft].filter(Boolean).join("（") + (x.reg && (x.type || x.aircraft) ? "）" : "")}`);
+  if(x.cancelled) parts.push("欠航");
+  else if(x.ata) parts.push(`${x.ata_src === "odpt" ? "到着" : "着陸（推定）"} ${hm(x.ata)}` + (x.ata_src === "odpt" && x.arr_delay != null ? (x.arr_delay >= 1 ? `・定刻より${x.arr_delay}分遅れ` : x.arr_delay <= -1 ? `・定刻より${-x.arr_delay}分早く` : "・定刻") : ""));
+  if(x.diverted_to) parts.push(`${placeShort(x.diverted_to)}へダイバート`);
+  if(!parts.length) return;
+  box.textContent = "この便の記録：" + parts.join("　");
+  box.hidden = false;
 }
 // 出発・到着の時刻（チェックインの時刻）にいちばん近い予定の便を出し、押すと航空会社と便名に入れる
 // 時刻表は ODPT のフライト時刻表（JAL・ANA グループ）。サーバーには14日ぶんだけある
