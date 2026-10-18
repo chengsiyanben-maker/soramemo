@@ -3412,7 +3412,8 @@ function passStats(y){
   const topRt = [...rts].sort((p, q) => q[1] - p[1])[0], topAl = [...als].sort((p, q) => q[1] - p[1])[0];
   // 便ごとの実績が付いたフライト：遅れ（到着の遅れの合計）と機種
   const facts = S.flights.filter(f => inY(f.dep)).map(f => FACTS.get(factKey(f))).filter(Boolean);
-  const lost = facts.reduce((x, k) => x + Math.max(0, Number(k.arr_delay) || 0), 0), late = facts.filter(k => Number(k.arr_delay) >= 15).length;
+  // 遅れは航空会社の運航情報（実際の時刻）がある便だけで数える（機体の位置からの推定は着陸の時刻で、到着の定刻とずれるため）
+  const off = facts.filter(k => k.ata_src === "odpt"), lost = off.reduce((x, k) => x + Math.max(0, Number(k.arr_delay) || 0), 0), late = off.filter(k => Number(k.arr_delay) >= 15).length;
   const tys = new Map(); for(const k of facts){ const t = k.type || k.aircraft; if(t) tys.set(t, (tys.get(t) || 0) + 1); }
   const topType = [...tys].sort((p, q) => q[1] - p[1])[0];
   return { n:all.length, manual:mn.length, km:tot, mins, aps:aps.size, als:als.size, longest, topRt, topAl, facts:facts.length, lost, late, topType };
