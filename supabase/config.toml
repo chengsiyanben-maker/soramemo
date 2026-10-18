@@ -445,3 +445,5 @@ verify_jwt = false
 verify_jwt = false
 [functions.odpt-status]
 verify_jwt = false
+[functions.daily-archive]
+verify_jwt = false

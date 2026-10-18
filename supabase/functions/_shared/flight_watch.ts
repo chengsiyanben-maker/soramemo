@@ -22,7 +22,7 @@ export type Sched = {
 // プロペラ機（ATR・ボンバルディア Q400 など）とエンブラエル機：低く飛ぶ・小さな空港を使うため受信機に映らないことが多く、
 // 「離陸を確認できず」が誤りになりやすいので出さない
 export const hardToSee = (t?: string | null) => !!t && /^(AT|AR|Q\d|Q4|D[H8]|DHC|SF|SAB|YS|BN|DO|E\d|EM|ER)/i.test(t.trim());
-export type Seen = { callsign: string; lat: number; lon: number; alt_ft: number | null; ground: boolean; fpm: number | null; kt?: number | null; type?: string | null; at: number };
+export type Seen = { callsign: string; lat: number; lon: number; alt_ft: number | null; ground: boolean; fpm: number | null; kt?: number | null; type?: string | null; reg?: string | null; at: number };
 export type Watch = {
   phase: "sched" | "air" | "landed";
   takeoff_at: number | null; takeoff_est: boolean;
@@ -32,6 +32,7 @@ export type Watch = {
   sent: string[];                                   // 送ったお知らせの種類（同じお知らせを二度出さない）
   start?: number;                                   // 見張りを始めた時刻（ダイヤを入れたのが定刻より後なら、離陸を見逃しているので「離陸を確認できず」は出さない）
   eta?: number | null;                              // 到着予想（推定。機体の位置・速度と機種の巡航速度から。ミリ秒）
+  cs?: string | null; reg?: string | null; type?: string | null;   // 見つけた機体の呼び出し符号・登録記号・機種（毎日の記録と航跡に使う）
 };
 export type Alert = { kind: "delay_dep" | "no_takeoff" | "delay_arr" | "divert" | "return" | "divert_landed"; iata: string[]; message: string };
 
@@ -113,6 +114,7 @@ export function step(s: Sched, w0: Watch, seen: Seen | null, now: number, aps: M
       w.takeoff_at = seen.at; w.takeoff_est = !near;
     }
     w.last = { lat: seen.lat, lon: seen.lon, alt_ft: seen.alt_ft, at: seen.at };
+    w.cs = seen.callsign; if (seen.reg) w.reg = seen.reg; if (seen.type) w.type = seen.type;
     const arrA = aps.get(s.arr);
     if (arrA) w.eta = Math.round(predictEta(seen, arrA, seen.type || s.aircraft));
     // 空港の近くで低いか

@@ -105,7 +105,7 @@ async function snapshot(iata: string): Promise<string> {
 
 // 今回取った円の機体（便名のあるもの）の位置を live_positions に残す
 async function recordPositions(bodies: Map<string, string>) {
-  const keys = new Set([...bodies.keys()].map((k) => REGION_OF[k] ?? k)), rows = new Map<string, Record<string, unknown>>();
+  const keys = new Set([...bodies.keys()].map((k) => REGION_OF[k] ?? k)), rows = new Map<string, Record<string, unknown>>(), track = new Map<string, Record<string, unknown>>();
   for (const k of keys) {
     const c = regionCache.get(k); if (!c || Date.now() - c.at > TTL) continue;
     const t = typeof c.j.now === "number" ? c.j.now : Date.now();
@@ -116,11 +116,17 @@ async function recordPositions(bodies: Map<string, string>) {
         alt_ft: typeof a.alt_baro === "number" ? Math.round(a.alt_baro) : null, ground: a.alt_baro === "ground",
         fpm: typeof a.baro_rate === "number" ? Math.round(a.baro_rate) : typeof a.geom_rate === "number" ? Math.round(a.geom_rate) : null,
         kt: typeof a.gs === "number" ? Math.round(a.gs) : null, type: typeof a.t === "string" ? a.t.slice(0, 8) : null,
+        reg: typeof a.r === "string" && /^[A-Z0-9-]{2,10}$/.test(a.r) ? a.r : null,
         seen_at: new Date(at).toISOString() });
+      // 航跡の点（毎日の記録用）：上昇・降下中（15,000ft 未満）の機体を、1分に1回だけ残す（36時間で消す）
+      if (typeof a.alt_baro === "number" && a.alt_baro < 15000 && Math.floor(t / 30_000) % 2 === 0)
+        track.set(cs, { callsign: cs, t: new Date(at).toISOString(), lat: Math.round(a.lat * 1e4) / 1e4, lon: Math.round(a.lon * 1e4) / 1e4, alt: Math.round(a.alt_baro / 100) });
     }
   }
   const all = [...rows.values()];
   for (let i = 0; i < all.length; i += 500) { const { error } = await admin.from("live_positions").upsert(all.slice(i, i + 500)); if (error) throw error; }
+  const tp = [...track.values()];
+  for (let i = 0; i < tp.length; i += 500) { const { error } = await admin.from("track_points").insert(tp.slice(i, i + 500)); if (error) { console.error("track_points", error.message); break; } }
   return all.length;
 }
 
