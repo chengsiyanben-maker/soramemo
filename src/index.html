@@ -695,6 +695,7 @@ dialog.mypage .dlg .close{display:none}
 #v-stats .pp-rows{list-style:none;margin:14px 0 0;padding:12px 0 0;border-top:1px solid rgba(255,255,255,.14);display:grid;gap:8px}
 #v-stats .pp-rows li{display:flex;justify-content:space-between;gap:10px;font-size:12px;color:#C7D2FE}
 #v-stats .pp-rows b{color:#F9FAFB;font-size:13px;text-align:right}
+#v-stats .pp-note{margin:10px 0 0;font-size:11px;line-height:1.6;color:#C7D2FE}
 #v-stats .pp-empty{margin:12px 0 0;font-size:12.5px;color:#C7D2FE}
 #v-stats h2{font-family:var(--gothic);font-size:13px;font-weight:700;letter-spacing:.08em;color:var(--st-mute);margin:36px 4px 14px}
 #v-stats h2:first-child{margin-top:20px}
@@ -2321,7 +2322,7 @@ function renderLog(){
   renderMap();
 }
 // 成績：航空会社別とステータスの目安、年ごとの記録、航空会社別（成績の画面を開いたときだけ描く）
-function renderStats(){ renderYears(); renderPassport(); renderAirlines(); renderStatus(); }
+function renderStats(){ renderYears(); renderPassport(); renderAirlines(); renderStatus(); loadFacts(); }
 function renderOverall(){
   const fl = S.flights, km = fl.reduce((x, f) => x + f.km, 0), rt = new Set(fl.map(f => [f.from, f.to].sort((p, q) => p - q).join("-")));
   const cell = (n, u) => `<div><div class="n">${n}</div><div class="u">${u}</div></div>`;
@@ -3365,6 +3366,23 @@ document.addEventListener("click", async e => {
 // パスポート：これまで（または年ごと）のフライトの数・距離・推定の飛行時間・空港・航空会社と、いちばん長いフライト・よく飛んだ路線。
 // チェックインでできたフライトと、記録帳のフライトの両方を数える。飛行時間は距離からの推定（時速780km＋上昇・着陸の20分）
 let PASS_Y = "all";
+// 毎日の記録（便ごとの実績）を、便名を記録したフライトに付ける：遅れ・機種・登録記号（サーバーの flight_facts）
+let FACTS = new Map(), FACTS_KEY = "";
+const jstDay = t => new Date(t + 9 * 3600_000).toISOString().slice(0, 10);
+const factKey = f => f.no && BY[f.from] && BY[f.from].iata !== "—" ? `${f.no.toUpperCase()}|${jstDay(f.dep)}|${BY[f.from].iata}` : null;
+async function loadFacts(){
+  if(!SERVER || demo) return;
+  const items = [...new Set(S.flights.map(factKey).filter(Boolean))].slice(-300).map(k => { const [f, d, a] = k.split("|"); return { f, d, a }; });
+  const key = JSON.stringify(items); if(!items.length || key === FACTS_KEY) return; FACTS_KEY = key;
+  try{ const r = await fetch(SORAMEMO_CONFIG.supabaseUrl.replace(/\/$/, "") + "/rest/v1/rpc/flight_facts", { method:"POST",
+      headers:{ "Content-Type":"application/json", apikey:SORAMEMO_CONFIG.supabaseAnonKey, Authorization:"Bearer " + SORAMEMO_CONFIG.supabaseAnonKey }, body:JSON.stringify({ p:items }) });
+    if(r.ok){ FACTS = new Map((await r.json()).map(x => [`${x.f}|${x.d}|${x.a}`, x])); if(currentView() === "stats") renderPassport(); } }catch(e){}
+}
+// 機種の記号（ICAO）を読みやすい名前に
+const TYPE_NAME = { B738:"ボーイング737-800", B38M:"ボーイング737 MAX 8", B737:"ボーイング737-700", B763:"ボーイング767-300", B772:"ボーイング777-200", B773:"ボーイング777-300", B77W:"ボーイング777-300ER",
+  B788:"ボーイング787-8", B789:"ボーイング787-9", B78X:"ボーイング787-10", A320:"エアバスA320", A20N:"エアバスA320neo", A321:"エアバスA321", A21N:"エアバスA321neo", A333:"エアバスA330-300",
+  A359:"エアバスA350-900", A35K:"エアバスA350-1000", E170:"エンブラエル170", E75L:"エンブラエル175", E190:"エンブラエル190", DH8D:"ボンバルディアQ400", AT76:"ATR72-600", AT46:"ATR42-600", SF34:"サーブ340" };
+const typeName = t => TYPE_NAME[t] || t;
 function passStats(y){
   const inY = t => y === "all" || new Date(t).getFullYear() === y;
   const fl = S.flights.filter(f => inY(f.dep)).map(f => ({ from:f.from, to:f.to, km:f.km, airline:f.airline }));
@@ -3375,7 +3393,12 @@ function passStats(y){
     const k = [f.from, f.to].sort((p, q) => p - q).join("-"); rts.set(k, (rts.get(k) || 0) + 1); }
   const longest = all.reduce((b, f) => !b || f.km > b.km ? f : b, null);
   const topRt = [...rts].sort((p, q) => q[1] - p[1])[0], topAl = [...als].sort((p, q) => q[1] - p[1])[0];
-  return { n:all.length, manual:mn.length, km:tot, mins, aps:aps.size, als:als.size, longest, topRt, topAl };
+  // 便ごとの実績が付いたフライト：遅れ（到着の遅れの合計）と機種
+  const facts = S.flights.filter(f => inY(f.dep)).map(f => FACTS.get(factKey(f))).filter(Boolean);
+  const lost = facts.reduce((x, k) => x + Math.max(0, Number(k.arr_delay) || 0), 0), late = facts.filter(k => Number(k.arr_delay) >= 15).length;
+  const tys = new Map(); for(const k of facts){ const t = k.type || k.aircraft; if(t) tys.set(t, (tys.get(t) || 0) + 1); }
+  const topType = [...tys].sort((p, q) => q[1] - p[1])[0];
+  return { n:all.length, manual:mn.length, km:tot, mins, aps:aps.size, als:als.size, longest, topRt, topAl, facts:facts.length, lost, late, topType };
 }
 const passTime = m => { const d = Math.floor(m / 1440), h = Math.floor(m % 1440 / 60), mm = Math.round(m % 60); return d ? `${d}日${h}時間` : h ? `${h}時間${mm ? mm + "分" : ""}` : `${mm}分`; };
 function renderPassport(){
@@ -3397,7 +3420,9 @@ function renderPassport(){
       ${st.longest ? `<li><span>いちばん長いフライト</span><b>${godShort(BY[st.longest.from])} → ${godShort(BY[st.longest.to])}　${fmtKm(st.longest.km)} km</b></li>` : ""}
       ${st.topRt && st.topRt[1] > 1 ? `<li><span>よく飛んだ路線</span><b>${rtName(st.topRt[0])}　${st.topRt[1]}回</b></li>` : ""}
       ${st.topAl ? `<li><span>いちばん乗った航空会社</span><b>${esc(ALBY[st.topAl[0]].name)}　${st.topAl[1]}便</b></li>` : ""}
-    </ul>` : `<p class="pp-empty">出発と到着の空港でチェックインすると、ここにフライトが集まります。</p>`}`;
+      ${st.facts ? `<li><span>遅れで失った時間</span><b>${passTime(st.lost)}${st.late ? `（15分以上の遅れ ${st.late}便）` : ""}</b></li>` : ""}
+      ${st.topType ? `<li><span>いちばん乗った機種</span><b>${esc(typeName(st.topType[0]))}　${st.topType[1]}便</b></li>` : ""}
+    </ul>${st.facts ? `<p class="pp-note">遅れと機種は、便名を記録したフライトのうち${st.facts}便ぶん（航空会社の運航情報と機体の位置から。2026年10月15日以降の便）</p>` : ""}` : `<p class="pp-empty">出発と到着の空港でチェックインすると、ここにフライトが集まります。</p>`}`;
 }
 document.addEventListener("click", async e => {
   const b = e.target.closest("[data-pass-y]"); if(b){ PASS_Y = b.dataset.passY === "all" ? "all" : +b.dataset.passY; renderPassport(); return; }
@@ -3414,7 +3439,9 @@ async function passCard(y){
   ctx.fillStyle = PAL.ink; ctx.font = `700 34px ${GOTHIC}`; let yy = 900;
   if(st.longest){ ctx.fillText(`いちばん長いフライト　${godShort(BY[st.longest.from])} → ${godShort(BY[st.longest.to])}　${fmtKm(st.longest.km)}km`, 80, yy); yy += 70; }
   if(st.topRt && st.topRt[1] > 1){ const [a, b] = st.topRt[0].split("-").map(Number); ctx.fillText(`よく飛んだ路線　${godShort(BY[a])} ⇄ ${godShort(BY[b])}　${st.topRt[1]}回`, 80, yy); yy += 70; }
-  if(st.topAl){ ctx.fillText(`いちばん乗った航空会社　${ALBY[st.topAl[0]].name}　${st.topAl[1]}便`, 80, yy); }
+  if(st.topAl){ ctx.fillText(`いちばん乗った航空会社　${ALBY[st.topAl[0]].name}　${st.topAl[1]}便`, 80, yy); yy += 70; }
+  if(st.topType){ ctx.fillText(`いちばん乗った機種　${typeName(st.topType[0])}　${st.topType[1]}便`, 80, yy); yy += 70; }
+  if(st.facts && st.lost){ ctx.fillText(`遅れで失った時間　${passTime(st.lost)}`, 80, yy); }
   ctx.fillStyle = PAL.sumi; ctx.font = `500 28px ${GOTHIC}`; ctx.fillText("#そらメモ", 80, 1290);
   return cv;
 }
