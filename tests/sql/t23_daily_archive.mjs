@@ -16,7 +16,7 @@ const today = `(now() at time zone 'Asia/Tokyo')::date`;
 for (let d = 1; d <= 3; d++) {
   const nx = d === 2 ? 'JL107' : 'JL105';
   await db.exec(`insert into public.flight_history (svc_date, flight, dep, arr, std, sta, reg, atd, ata, arr_delay, dep_delay) values
-    (${today} - ${d}, 'JL100', 'HND', 'ITM', now() - interval '${d} days 6 hours', now() - interval '${d} days 5 hours', 'JA8980', null, null, 20, 0),
+    (${today} - ${d}, 'JL100', 'HND', 'ITM', now() - interval '${d} days 6 hours', now() - interval '${d} days 5 hours', 'JA8980', null, now() - interval '${d} days 5 hours' + interval '20 minutes', 20, 0),
     (${today} - ${d}, '${nx}', 'ITM', 'HND', now() - interval '${d} days 4 hours', now() - interval '${d} days 3 hours', 'JA8980', null, null, 0, 0),
     (${today} - ${d}, 'JL110', 'HND', 'FUK', now() - interval '${d} days 2 hours', now() - interval '${d} days', 'JA8980', null, null, 0, 0)`);
   const day = await as('postgres', `select (${today} - ${d})::text`);
@@ -28,9 +28,14 @@ const d1 = await as('postgres', `select (${today} - 1)::text`);
 await db.exec(`select public.archive_rotations('${d1}'::date)`);
 r = await as('postgres', `select count(*)::int from public.rotation_obs`);
 check('同じ日を作り直しても重ならない', r === 6, r);
+await db.exec(`update public.flight_history set ata_src = 'odpt' where ata is not null`);
 r = await as('postgres', `select public.archive_airport_daily('${d1}'::date)`);
+await db.exec(`insert into public.flight_history (svc_date, flight, dep, arr, std, sta, atd, atd_src, dep_delay) values ('${d1}', 'JL999', 'ITM', 'HND', now() - interval '1 day', now() - interval '23 hours', now() - interval '1 day' + interval '25 minutes', 'adsb', 25)`);
+const again = await as('postgres', `select public.archive_airport_daily('${d1}'::date)`);
+const itm2 = await as('postgres', `select row_to_json(a) from public.airport_daily a where day = '${d1}' and iata = 'ITM'`);
+check('機体の位置からの推定の遅れは、遅れに数えない', itm2 && itm2.dep === 2 && itm2.late === 1, itm2);
 const hnd = await as('postgres', `select row_to_json(a) from public.airport_daily a where day = '${d1}' and iata = 'ITM'`);
-check('空港のまとめ：到着・出発と15分以上の遅れを数える', hnd && hnd.arr === 1 && hnd.dep === 1 && hnd.late === 1, hnd);
+check('空港のまとめ：到着・出発と15分以上の遅れを数える', hnd && hnd.arr === 1 && hnd.dep >= 1 && hnd.late === 1, hnd);
 // 今日：JA8980 が JL100 に乗っているのを見つけた。今日の時刻表に JL105・JL107・JL110 がある
 await db.exec(`insert into public.flight_schedule (svc_date, flight, dep, arr, std, sta, source) values
   (${today}, 'JL100', 'HND', 'ITM', now() - interval '30 minutes', now() + interval '35 minutes', 'ODPT'),
