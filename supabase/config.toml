@@ -447,3 +447,5 @@ verify_jwt = false
 verify_jwt = false
 [functions.daily-archive]
 verify_jwt = false
+[functions.archive-export]
+verify_jwt = false
