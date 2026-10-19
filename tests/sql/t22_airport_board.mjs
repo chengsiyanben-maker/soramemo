@@ -30,7 +30,15 @@ check('これから出る便：3時間より先の便は出さない', (r?.next_
 const hrs = r?.hours ?? [];
 check('1時間ごとの表は24時間ぶん', hrs.length === 24, hrs.length);
 const tot = (k) => hrs.reduce((x, h) => x + Number(h[k]), 0);
-check('今日の遅れ（15分以上）と欠航を数える', tot('late') === 1 && tot('cancel') === 1, { late: tot('late'), cancel: tot('cancel') });
+// 日付が変わる前後（日本時間）に流すと、上の便が「明日」に入ることがあるので、遅れ・欠航の数は「日本時間の今日のうちの時刻」の便で確かめる
+//（今の時刻の30分後。ただし23時を過ぎていたら今日の23時）
+const T = `(((now() at time zone 'Asia/Tokyo')::date + least((now() at time zone 'Asia/Tokyo')::time + interval '30 minutes', time '23:00')) at time zone 'Asia/Tokyo')`;
+await db.exec(`insert into public.flight_schedule (svc_date, flight, dep, arr, std, sta, source, eta, arr_status) values
+  (current_date, 'JL801', 'ITM', 'HND', ${T} - interval '1 hour', ${T}, 'ODPT', ${T} + interval '40 minutes', null),
+  (current_date, 'JL803', 'ITM', 'HND', ${T} - interval '1 hour', ${T}, 'ODPT', null, 'Cancelled')`);
+r = await as('anon', `select public.airport_board('HND')`);
+const tot2 = (k) => (r?.hours ?? []).reduce((x, h) => x + Number(h[k]), 0);
+check('今日の遅れ（15分以上）と欠航を数える', tot2('late') >= 1 && tot2('cancel') >= 1, { late: tot2('late'), cancel: tot2('cancel') });
 check('前の7日の目安に、前日の遅れが入る', hrs.some((h) => Number(h.ref) > 0), hrs.filter((h) => Number(h.ref) > 0));
 r = await as('anon', `select public.airport_board('ZZZ')`);
 check('便のない空港でも空の一覧を返す', r && Array.isArray(r.next_arr) && r.next_arr.length === 0, r);
