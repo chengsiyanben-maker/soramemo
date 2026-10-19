@@ -33,7 +33,7 @@ export function toPlane(a: any, now: number): Plane | null {
 export function liveState(s: LiveSched, p: Plane | null, dep: Airport | null, arr: Airport | null, now: number): Live {
   const base: Live = { phase: "sched", pos: null, eta: null, progress: null, reg: p?.reg ?? null, type: p?.type ?? null, callsign: p?.callsign ?? null };
   if (s.cancelled) return { ...base, phase: "cancelled" };
-  if (s.ata) return { ...base, phase: "landed", progress: 1 };
+  if (s.ata && s.ata <= now) return { ...base, phase: "landed", progress: 1 };   // 実際の到着の時刻が、まだ来ていない時刻なら使わない
   if (p && dep && arr) {
     const total = km(dep, arr), dDep = km(p, dep), dArr = km(p, arr);
     if (dDep + dArr > total * 1.4 + 300) p = null;   // 道筋から外れた機体

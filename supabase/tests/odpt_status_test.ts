@@ -87,3 +87,14 @@ Deno.test("時刻表と運航情報で定刻が数分ずれていても結ぶ（
   const far = odptStatus([], [{ "odpt:flightNumber": ["JL333"], "odpt:departureAirport": "odpt.Airport:HND", "odpt:scheduledArrivalTime": "22:30", "odpt:actualArrivalTime": "22:40" }], sc, names);
   assertEquals(far.updates.length, 0);
 });
+
+Deno.test("国際線：到着の時刻は到着する国の時刻（ロサンゼルス）で読む", () => {
+  const s: StatusSched = { id: 9, flight: "NH106", dep: "HND", arr: "LAX", std: Date.parse("2026-10-19T15:30:00Z"), sta: Date.parse("2026-10-20T01:45:00Z") };
+  const arr = [{ "odpt:flightNumber": ["NH106"], "odpt:departureAirport": "odpt.Airport:HND", "odpt:scheduledArrivalTime": "18:45", "odpt:estimatedArrivalTime": "18:13" }];
+  const dep = [{ "odpt:flightNumber": ["NH106"], "odpt:departureAirport": "odpt.Airport:HND", "odpt:scheduledDepartureTime": "00:30", "odpt:actualDepartureTime": "00:29" }];
+  const r = odptStatus(dep, arr, [s], (x) => x);
+  const u = r.updates.find((x) => x.id === 9)!;
+  assertEquals(u.eta, "2026-10-20T01:13:00.000Z");   // ロサンゼルス 18:13（UTC-7）
+  assertEquals(u.atd, "2026-10-19T15:29:00.000Z");   // 羽田 0:29（日本時間）
+  assertEquals(atNear(Date.parse("2026-10-20T01:45:00Z"), "18:45", "America/Los_Angeles"), Date.parse("2026-10-20T01:45:00Z"));
+});

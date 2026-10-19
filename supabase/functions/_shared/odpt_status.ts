@@ -1,4 +1,5 @@
 // 航空会社の運航情報（ODPT の FlightInformationDeparture / FlightInformationArrival。JAL・ANA グループ）から、
+import { localTime, tzOf } from "./odpt_schedule.ts";
 //   ・欠航・出発の大きな遅れ・到着の大きな遅れ・ダイバート・引き返しのお知らせ
 //   ・便ごとの実際の時刻（出発・到着）・変更後の時刻・状態・搭乗口（予定の便 flight_schedule に残し、フライトの記録の照合などに使う）
 // を作る。機体の位置からの推定（flight_watch.ts）と違い、航空会社が出している情報なので「推定」ではない。取得とは分けて、テストしやすくしている。
@@ -24,14 +25,15 @@ const st = (v: unknown) => { const s = last(v); return s ? s.slice(0, 40) : null
 // 定刻 base の日の "HH:MM"（日本時間）を、base にいちばん近い時刻（ミリ秒）にする（日付をまたぐ遅れにも対応）
 // 同じ便名・同じ出発空港の予定の便のうち、定刻が "HH:MM" にいちばん近い便（差が20分以内）。
 // 時刻表（予定の便）と運航情報で定刻が数分ずれることがある（例：JL333 の到着が時刻表では 21:05、運航情報では 21:10）
+// 時刻は、その空港の現地時刻（海外の空港は、その国の時間帯で読む。国内は日本時間）
 export function nearestSched(cands: StatusSched[], hm: string, key: "std" | "sta"): StatusSched | undefined {
   let best: StatusSched | undefined, bd = 20 * MIN + 1;
-  for (const x of cands) { const t = x[key]; if (t == null) continue; const d = Math.abs(atNear(t, hm) - t); if (d < bd) { bd = d; best = x; } }
+  for (const x of cands) { const t = x[key]; if (t == null) continue; const d = Math.abs(atNear(t, hm, tzOf(key === "std" ? x.dep : x.arr)) - t); if (d < bd) { bd = d; best = x; } }
   return best;
 }
-export function atNear(base: number, hm: string): number {
-  const d = new Date(base + 9 * 3600_000);
-  const t = Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate(), Number(hm.slice(0, 2)), Number(hm.slice(3, 5))) - 9 * 3600_000;
+export function atNear(base: number, hm: string, tz = "Asia/Tokyo"): number {
+  const day = new Intl.DateTimeFormat("en-CA", { timeZone: tz, year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date(base));   // その空港の日付（YYYY-MM-DD）
+  const t = localTime(day, hm.slice(0, 5), tz).getTime();
   return [t - 864e5, t, t + 864e5].sort((a, b) => Math.abs(a - base) - Math.abs(b - base))[0];
 }
 
@@ -46,7 +48,7 @@ export function odptStatus(depItems: any[], arrItems: any[], scheds: StatusSched
     alerts.set(`${s.id}|${kind}`, { schedule_id: s.id, kind, flight: s.flight, dep: s.dep, arr: s.arr, iata,
       message: (note ? message.replace(/（航空会社の運航情報）$|・航空会社の運航情報）$/, (m) => m.slice(0, -1) + `。${note}）`) : message).slice(0, 300) });
   const upd = (s: StatusSched, u: Omit<StatusUpdate, "id">) => updates.set(s.id, { ...(updates.get(s.id) ?? { id: s.id }), ...u });
-  const iso = (base: number, hm: string | null) => hm ? new Date(atNear(base, hm)).toISOString() : null;
+  const iso = (base: number, hm: string | null, tz: string) => hm ? new Date(atNear(base, hm, tz)).toISOString() : null;
 
   // 出発
   for (const it of Array.isArray(depItems) ? depItems : []) {
@@ -56,13 +58,14 @@ export function odptStatus(depItems: any[], arrItems: any[], scheds: StatusSched
     if (!s) continue;
     note = infoText(it["odpt:flightInformationText"], it["odpt:flightInformationSummary"]);
     const status = st(it["odpt:flightStatus"]), actual = hhmm(it["odpt:actualDepartureTime"]), est = hhmm(it["odpt:estimatedDepartureTime"]);
-    upd(s, { dep_status: status, atd: iso(s.std, actual), etd: iso(s.std, est), dep_gate: gateOf(it["odpt:departureGate"]) });
+    const tzD = tzOf(s.dep);
+    upd(s, { dep_status: status, atd: iso(s.std, actual, tzD), etd: iso(s.std, est, tzD), dep_gate: gateOf(it["odpt:departureGate"]) });
     const sl = (status ?? "").toLowerCase();
     if (/cancel/.test(sl)) { add(s, "cancel", `${route(s)}は、欠航です（航空会社の運航情報）`); continue; }
     if (/return/.test(sl)) add(s, "return", `${route(s)}は、${names(s.dep)}へ引き返しました（航空会社の運航情報）`);
     const t = actual ?? est;
     if (!t) continue;
-    const late = Math.round((atNear(s.std, t) - atNear(s.std, std)) / MIN);   // 運航情報の定刻から
+    const late = Math.round((atNear(s.std, t, tzD) - atNear(s.std, std, tzD)) / MIN);   // 運航情報の定刻から
     if (late >= 60) add(s, "delay_dep", `${route(s)}は、出発が約${late}分遅れ${actual ? "ました" : "る見込みです"}（定刻 ${hmText(std)} → ${actual ? "出発" : "変更後"} ${hmText(t)}・航空会社の運航情報）`);
   }
   // 到着（相手の空港は「出発空港」の項目）
@@ -74,14 +77,15 @@ export function odptStatus(depItems: any[], arrItems: any[], scheds: StatusSched
     if (!s || s.sta == null) continue;
     note = infoText(it["odpt:flightInformationText"], it["odpt:flightInformationSummary"]);
     const status = st(it["odpt:flightStatus"]), actual = hhmm(it["odpt:actualArrivalTime"]), est = hhmm(it["odpt:estimatedArrivalTime"]);
-    upd(s, { arr_status: status, ata: iso(s.sta, actual), eta: iso(s.sta, est), arr_gate: gateOf(it["odpt:arrivalGate"]) });
+    const tzA = tzOf(s.arr);
+    upd(s, { arr_status: status, ata: iso(s.sta, actual, tzA), eta: iso(s.sta, est, tzA), arr_gate: gateOf(it["odpt:arrivalGate"]) });
     const sl = (status ?? "").toLowerCase();
     if (/cancel/.test(sl)) { add(s, "cancel", `${route(s)}は、欠航です（航空会社の運航情報）`); continue; }
     if (/divert/.test(sl)) add(s, "divert", `${route(s)}は、${names(s.arr)}以外の空港へ向かいました（ダイバート・航空会社の運航情報）`, [s.arr, s.dep]);
     if (/return/.test(sl)) add(s, "return", `${route(s)}は、${names(s.dep)}へ引き返しました（航空会社の運航情報）`);
     const t = actual ?? est;
     if (!t) continue;
-    const late = Math.round((atNear(s.sta, t) - atNear(s.sta, sta)) / MIN);
+    const late = Math.round((atNear(s.sta, t, tzA) - atNear(s.sta, sta, tzA)) / MIN);
     if (late >= 60) add(s, "delay_arr", `${route(s)}は、到着が約${late}分遅れ${actual ? "ました" : "る見込みです"}（定刻 ${hmText(sta)} → ${actual ? "到着" : "変更後"} ${hmText(t)}・航空会社の運航情報）`, [s.arr, s.dep]);
   }
   return { alerts: [...alerts.values()], updates: [...updates.values()] };

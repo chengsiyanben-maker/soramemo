@@ -47,3 +47,8 @@ Deno.test("道筋から大きく外れた同じ呼び出し符号の機体は使
 Deno.test("欠航", () => {
   assertEquals(liveState({ ...S, cancelled: true }, P({}), HND, LAX, T0).phase, "cancelled");
 });
+
+Deno.test("実際の到着の時刻が、まだ来ていない時刻なら到着にしない", () => {
+  assertEquals(liveState({ ...S, ata: T0 + 9 * 36e5 }, P({}), HND, LAX, T0 + 4 * 36e5).phase, "air");
+  assertEquals(liveState({ ...S, ata: T0 + 3 * 36e5 }, null, HND, LAX, T0 + 4 * 36e5).phase, "landed");
+});
