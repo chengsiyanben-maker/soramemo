@@ -76,6 +76,11 @@ const PREFIX: Record<string, string[]> = {
   EK: ["UAE"], TG: ["THA"], QR: ["QTR"], AF: ["AFR"], BA: ["BAW"], LH: ["DLH"], UA: ["UAL"], AA: ["AAL"], DL: ["DAL"], CX: ["CPA"],
   SQ: ["SIA"], KE: ["KAL"], OZ: ["AAR"], CI: ["CAL"], BR: ["EVA"], CA: ["CCA"], MU: ["CES"], CZ: ["CSN"], HA: ["HAL"], QF: ["QFA"],
   AC: ["ACA"], TK: ["THY"], VN: ["HVN"], PR: ["PAL"], MH: ["MAS"], GA: ["GIA"], AY: ["FIN"], LX: ["SWR"], "7C": ["JJA"], LJ: ["JNA"],
+  // 日本に乗り入れているほかの航空会社（国際線を便名で探すとき用。2026-10-20）
+  ZG: ["TZP"], "3K": ["JSA"], TW: ["TWB"], ZE: ["ESR"], BX: ["ABL"], RS: ["ASV"], HO: ["DKH"], "9C": ["CQH"], HX: ["CRK"], UO: ["HKE"],
+  IT: ["TTW"], JX: ["SJX"], "5J": ["CEB"], VJ: ["VJC"], TR: ["TGW"], D7: ["XAX"], JQ: ["JST"], NZ: ["ANZ"], KL: ["KLM"], OS: ["AUA"],
+  SK: ["SAS"], EY: ["ETD"], AI: ["AIC"], ET: ["ETH"], "8L": ["LKE"], MF: ["CXA"], HU: ["CHH"], SC: ["CDG"], FM: ["CSH"], GS: ["GCR"],
+  OM: ["MGL"], UL: ["ALK"], WY: ["OMA"], SV: ["SVA"], "6E": ["IGO"], PG: ["BKP"], QH: ["BAV"],
 };
 export function callsignsFor(flight: string): string[] {
   const m = /^([A-Z0-9]{2})(\d{1,4})[A-Z]?$/.exec(flight.trim().toUpperCase());
