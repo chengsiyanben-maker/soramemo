@@ -99,3 +99,14 @@ export function decodePolyline(s: string, precision = 4): { lat: number; lon: nu
 export function jstYesterday(now = Date.now()): string {
   return new Date(now + 9 * 3600_000 - 86_400_000).toISOString().slice(0, 10);
 }
+
+// 便名の0を取る（時刻表は NH059、利用者の記録は NH59）
+export const normFlight = (f: string) => f.toUpperCase().replace(/^([A-Z0-9]{2})0+(\d)/, "$1$2");
+// 利用者のフライトの航跡（flights.track：[[緯度, 経度], ...] 2〜200点）。多ければ間を均等に間引く（最初と最後は残す）
+export function userTrack(pts: { lat: number; lon: number }[], max = 200): [number, number][] | null {
+  if (pts.length < 2) return null;
+  const out: [number, number][] = [];
+  const n = Math.min(max, pts.length);
+  for (let i = 0; i < n; i++) { const p = pts[Math.round(i * (pts.length - 1) / (n - 1))]; out.push([Math.round(p.lat * 1e4) / 1e4, Math.round(p.lon * 1e4) / 1e4]); }
+  return out;
+}
