@@ -630,6 +630,25 @@ dialog.mypage .dlg .close{display:none}
 #v-ops .predlist{margin:6px 0 0;padding-left:18px;font-size:12.5px;color:var(--op-ink)}
 #v-ops .predlist small{margin-left:6px;color:var(--op-mute)}
 #v-ops .opsyday .bdhead h3 small{font-size:12px;font-weight:600;color:var(--op-mute);margin-left:4px}
+#v-ops .opsontime .bdhead h3 small,#v-ops .opsart .bdhead h3 small{font-size:12px;font-weight:600;color:var(--op-mute);margin-left:4px}
+#v-ops .otbig{display:flex;align-items:baseline;gap:10px;margin:2px 0 10px}
+#v-ops .otbig b{font-size:34px;font-weight:800;line-height:1;color:var(--op-ink);font-variant-numeric:tabular-nums}
+#v-ops .otbig b small{font-size:14px;margin-left:1px}
+#v-ops .otbig span{font-size:12px;color:var(--op-mute);line-height:1.45}
+#v-ops .otlist{list-style:none;margin:0;padding:0;display:grid;gap:7px}
+#v-ops .otlist li{display:grid;grid-template-columns:5.5em 1fr 3.2em 4.2em;align-items:center;gap:8px;font-size:12.5px;color:var(--op-ink)}
+#v-ops .otlist .bar{height:8px;border-radius:999px;background:var(--op-pill);overflow:hidden}
+#v-ops .otlist .bar i{display:block;height:100%;border-radius:999px;background:#10B981}
+#v-ops .otlist .bar i.mid{background:#F59E0B}
+#v-ops .otlist .bar i.low{background:#EF4444}
+#v-ops .otlist b{text-align:right;font-variant-numeric:tabular-nums}
+#v-ops .otlist small{color:var(--op-mute);text-align:right;font-variant-numeric:tabular-nums}
+#v-ops .artcv{display:block;width:100%;aspect-ratio:1;border-radius:16px;background:#0B1220;margin:4px 0 8px}
+#v-ops .artnav{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12.5px;color:var(--op-ink)}
+#v-ops .artnav button{min-height:32px;min-width:44px;padding:0 12px;border:0;border-radius:999px;background:var(--op-pill);color:var(--op-ink);font:700 12px var(--gothic)}
+#v-ops .artnav button:disabled{opacity:.4}
+#v-ops .artkey{display:flex;gap:14px;font-size:11.5px;color:var(--op-mute);margin:6px 0 0}
+#v-ops .artkey i{display:inline-block;width:14px;height:3px;border-radius:2px;vertical-align:middle;margin-right:5px}
 #v-ops .opsyday .ydshare{min-height:32px;padding:0 12px;font-size:12px;text-decoration:none;background:var(--op-pill);color:var(--op-ink);border-radius:999px}
 #v-ops .ydgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px 14px;margin-top:4px}
 #v-ops .ydgrid .l{display:block;font-size:11px;font-weight:700;color:var(--op-mute)}
@@ -1324,6 +1343,8 @@ nav.tabs{transition:transform .3s cubic-bezier(.2,.8,.2,1),opacity .2s}
   <div class="opsbox" id="opsInfo"></div>
   <div class="opsboard" id="opsBoard" hidden></div>
   <div class="opsboard opsyday" id="opsYday" hidden></div>
+  <div class="opsboard opsontime" id="opsOntime" hidden></div>
+  <div class="opsboard opsart" id="opsArt" hidden></div>
   <div class="fwbox" id="opsAlerts" hidden></div>
   <div class="fwbox" id="opsCurfew" hidden></div>
   <div class="opslayers" role="group" aria-label="地図に出すもの">
@@ -1392,6 +1413,7 @@ nav.tabs{transition:transform .3s cubic-bezier(.2,.8,.2,1),opacity .2s}
   <div id="fFareBox" hidden><label class="flabel" for="fFare">運賃（ステータスの目安の計算用）</label><select id="fFare"></select></div>
   <p class="hint" id="fSeat"></p>
   <p class="hint ffacts" id="fFacts" hidden></p>
+  <p class="hint ffacts" id="fOntime" hidden></p>
   <button class="btn2" id="fPhoto" style="width:100%;margin-bottom:8px">写真に押す</button>
   <p class="msg" id="fMsg" role="status" aria-live="polite"></p>
   <div class="row2"><button class="btn2" id="fCancel">閉じる</button><button class="btn1" id="fSave">記録する</button></div>
@@ -2118,14 +2140,23 @@ function showStamp(a, t, first, flight, term, firstTerm){
 /* ---------- map ---------- */
 function proj(a){ const x=(a.lon-122.5)*16.4*0.82+20, y=(46.2-a.lat)*17.6+14; return [x,y]; }
 const JP_OUTLINE = "M117.9 267.4L118.2 268.4L116.8 270.6L116.2 269.9ZM143.2 255.5L138.9 275.0L137.2 273.5L135.3 273.6L134.5 275.1L136.1 276.6L133.5 279.4L129.7 281.5L131.6 275.5L130.2 271.9L128.8 271.2L130.1 270.6L131.1 271.6L131.3 269.0L129.5 268.9L128.0 272.5L128.4 275.6L129.7 276.7L128.7 278.8L126.9 277.1L123.8 277.2L122.5 274.3L123.9 274.8L125.4 271.6L123.2 267.6L124.0 267.1L123.3 262.3L125.2 261.8L127.8 258.0L128.5 254.3L129.8 252.5L126.9 253.0L129.3 251.5L129.1 250.1L126.8 247.7L126.5 244.8L124.1 243.0L122.6 244.2L123.8 246.8L122.3 248.5L125.4 248.8L125.7 251.8L123.1 253.5L122.6 251.9L123.7 250.7L122.1 249.9L120.3 250.5L117.4 253.9L119.0 251.2L116.0 247.6L116.6 244.7L117.6 245.5L117.4 246.5L118.5 246.7L118.1 248.5L120.9 249.0L120.1 246.0L117.5 245.2L117.0 243.5L116.4 244.5L116.2 243.0L114.8 242.3L115.2 239.8L116.5 239.3L118.9 241.4L119.1 239.3L118.0 238.3L119.1 238.5L118.9 236.6L121.1 238.5L123.1 236.9L122.1 236.2L123.7 234.6L124.8 236.2L126.1 235.7L126.2 234.5L125.6 235.0L124.8 234.3L126.8 233.7L127.4 231.3L131.0 229.7L133.1 230.6L134.4 229.3L133.8 232.0L135.7 235.3L139.3 236.2L141.3 234.4L143.3 234.6L144.2 237.8L142.3 240.2L141.1 239.9L141.2 241.5L146.4 241.6L145.2 244.1L146.6 244.1L146.1 245.0L147.7 244.7L146.5 246.6L148.8 247.3L143.8 253.7L144.2 255.3ZM183.3 231.3L184.8 231.6L178.9 236.2L177.0 242.2L173.6 237.6L171.1 236.9L165.1 239.9L164.2 243.5L161.2 246.5L160.6 248.9L161.2 251.4L160.1 250.2L156.2 250.7L157.3 247.9L155.3 247.4L154.5 248.2L154.1 245.6L152.9 246.0L154.3 244.0L153.1 242.7L154.3 243.3L155.1 242.3L154.3 241.5L154.8 240.8L152.8 240.7L153.4 238.5L151.9 238.1L147.9 240.2L156.9 233.7L157.3 230.4L160.1 227.5L159.8 226.6L160.4 226.2L162.9 229.9L165.5 228.9L168.1 229.3L169.8 227.3L169.8 225.5L168.7 224.2L170.6 224.6L173.8 222.1L175.7 222.6L176.6 221.8L176.9 223.0L177.6 222.5L180.6 225.1L183.4 224.5L182.6 228.2L184.0 229.6ZM166.9 220.9L165.0 223.1L165.4 222.3L164.5 221.2L163.7 223.8L162.2 224.2L162.2 223.1L163.5 222.5L162.5 221.9L162.0 222.9L159.0 223.2L156.6 225.2L155.2 225.3L154.7 222.5L152.4 222.6L150.7 224.5L149.9 231.5L148.5 232.6L149.1 231.0L145.8 228.7L144.8 229.3L145.4 228.3L144.3 227.7L142.3 228.1L142.1 229.0L140.8 228.2L140.2 229.1L139.6 228.0L137.8 230.0L134.8 227.9L133.2 230.2L132.7 229.8L132.9 222.7L134.8 222.0L133.4 221.8L133.8 221.2L136.6 222.2L136.6 221.2L137.7 221.0L138.1 221.5L137.4 221.4L137.1 222.2L139.9 221.3L142.3 217.1L145.9 216.1L153.2 208.0L156.3 205.9L156.3 203.4L160.8 202.0L162.4 200.5L165.4 201.0L164.8 202.4L166.6 203.1L169.0 201.7L177.8 201.5L181.9 199.3L187.1 199.8L191.2 197.5L192.2 199.3L190.6 201.5L191.4 200.7L192.4 203.3L193.5 202.6L192.6 201.7L194.3 200.5L195.2 202.4L196.8 201.6L196.5 202.6L197.8 202.5L198.0 201.1L198.8 201.8L199.3 201.7L199.0 199.8L201.3 200.0L201.0 198.3L201.8 197.6L202.5 199.5L202.9 197.5L201.1 193.5L203.2 189.1L206.7 186.6L210.8 180.7L211.9 176.3L210.6 173.3L212.1 169.3L218.4 166.7L219.7 167.0L219.7 168.1L218.4 168.4L218.1 170.8L216.5 170.9L215.2 172.7L214.3 171.8L213.1 174.6L214.7 175.1L215.6 174.2L215.1 178.8L219.0 180.2L221.0 177.1L231.7 172.7L235.8 169.3L240.0 161.4L247.6 155.7L248.5 150.3L252.3 143.9L254.2 136.1L255.3 135.0L255.7 126.2L254.3 124.9L252.1 125.6L251.3 123.3L253.6 123.4L255.5 119.0L255.7 116.9L253.5 112.4L256.0 109.6L257.0 110.0L259.0 108.8L259.7 105.0L260.3 105.8L260.8 105.1L258.7 103.3L259.6 102.9L259.9 100.8L261.6 102.3L262.7 101.5L263.8 102.1L264.8 108.1L266.8 107.6L267.3 105.3L270.5 107.8L272.5 102.8L271.6 100.9L269.6 102.3L265.6 103.0L267.5 96.0L272.5 99.3L275.0 97.9L274.0 105.0L274.7 111.3L280.0 118.7L280.1 121.9L281.6 123.2L282.3 127.1L281.7 130.0L282.7 129.5L283.2 131.0L281.6 132.6L283.0 132.5L281.0 134.9L282.0 134.5L280.9 135.9L281.1 137.7L280.1 138.0L281.1 139.0L279.8 139.1L280.2 140.3L278.6 140.1L278.6 141.6L277.4 141.0L277.8 143.3L276.7 142.8L275.8 144.8L276.4 145.9L275.0 146.7L276.0 147.2L275.1 148.3L276.2 149.2L275.1 150.8L276.2 151.5L275.9 153.6L274.5 151.6L272.9 151.1L271.1 152.6L269.9 152.0L268.3 155.3L267.7 158.9L269.1 163.1L268.9 173.6L268.3 176.5L266.2 177.9L265.3 180.0L262.9 188.5L264.0 193.3L267.2 198.4L264.2 199.0L261.8 201.2L260.5 204.4L260.4 208.0L257.2 209.0L254.4 212.8L252.1 211.9L253.6 211.1L252.9 208.3L253.5 206.8L252.4 205.5L256.7 201.1L255.1 199.4L252.5 200.5L252.2 199.6L252.5 202.1L250.5 203.1L250.6 205.9L251.9 206.7L251.1 208.6L250.2 208.8L249.2 205.7L244.4 206.5L242.9 209.8L243.8 213.4L241.9 215.8L241.8 217.3L239.7 218.2L238.5 216.6L238.7 211.5L239.0 210.7L240.6 210.6L239.2 209.0L235.9 209.4L235.4 211.5L233.4 212.6L231.3 216.2L231.6 218.3L228.0 217.0L222.4 216.8L215.2 218.5L216.0 217.0L216.5 217.7L219.6 215.9L218.8 214.5L215.2 214.9L214.4 214.1L214.7 212.5L213.9 215.1L214.6 216.5L213.1 215.7L212.6 211.9L213.5 209.6L213.0 210.4L212.7 209.7L212.8 210.5L210.4 211.4L208.5 216.7L209.0 218.1L213.9 221.1L213.6 224.0L212.8 224.4L212.2 224.3L212.9 223.3L211.0 223.5L211.1 222.8L206.1 225.5L205.7 227.1L204.5 227.4L205.2 229.2L204.7 228.8L204.6 229.8L203.0 230.6L201.0 235.9L198.3 238.7L198.4 237.8L194.1 236.6L192.5 234.5L193.4 233.8L189.7 230.6L188.9 230.8L189.1 229.1L190.3 228.3L189.4 227.5L189.8 226.3L190.7 226.1L188.9 224.0L193.1 220.2L193.7 216.5L191.5 216.4L191.4 217.3L188.7 217.7L184.7 215.2L181.3 214.9L179.4 216.3L177.5 215.9L178.4 216.4L176.6 218.2L174.6 218.0L173.8 218.4L175.3 218.5L173.8 220.8L171.9 220.9L170.9 219.4ZM330.4 64.4L333.7 63.7L331.0 64.9L329.7 67.3L324.4 68.1L324.8 68.9L322.6 69.5L322.8 70.5L321.2 70.7L319.9 69.5L319.1 71.7L315.4 71.4L313.5 70.3L307.6 73.1L303.4 77.3L300.4 82.3L298.9 89.2L295.1 86.1L288.4 83.1L279.8 77.4L274.5 78.0L268.5 82.6L265.2 78.0L262.1 77.7L259.7 80.3L259.3 83.4L262.7 86.1L264.9 85.6L271.5 91.4L268.9 93.0L266.4 92.0L264.9 92.4L265.1 91.2L264.2 91.0L263.5 92.6L261.4 93.5L261.2 96.2L259.0 97.0L258.2 98.5L255.9 97.7L255.1 95.3L257.0 91.2L257.3 88.2L252.5 83.6L253.2 76.9L256.1 75.7L257.8 73.7L259.1 74.6L262.3 70.4L259.9 66.6L260.2 64.6L261.9 63.8L266.0 66.9L268.9 66.3L269.1 67.2L271.1 67.8L274.5 64.7L273.3 57.8L277.4 53.8L277.6 47.8L279.4 42.2L278.9 37.1L276.5 31.5L277.7 27.2L278.1 28.0L279.9 27.7L281.5 26.0L295.4 42.4L301.1 47.1L306.1 49.4L304.8 49.5L305.5 50.7L310.7 50.4L311.2 52.4L312.4 50.6L314.2 53.5L319.1 54.2L327.2 46.6L327.6 48.3L323.5 56.7L327.9 64.9L326.1 64.6L329.5 66.3ZM37.1 397.4L39.3 398.3L38.5 400.2L35.7 399.5L36.7 399.1ZM44.6 394.4L43.4 398.3L42.1 398.7L41.2 397.1L43.0 396.9ZM57.1 389.1L59.6 391.7L57.1 391.8ZM98.5 355.5L95.8 359.8L92.0 361.8L92.9 364.1L91.7 364.0L91.2 367.1L89.3 368.0L90.2 362.0L93.4 359.6L92.3 357.3L94.7 358.2L97.4 353.9ZM103.4 343.9L102.2 345.5L101.1 345.5L101.1 344.6ZM106.7 335.8L107.8 338.3L106.7 339.9L106.1 336.2ZM109.8 331.0L112.1 332.8L110.4 332.6ZM116.9 326.2L113.4 329.2L113.7 330.5L112.1 331.5L112.5 332.2L111.0 330.3L109.4 329.9L111.1 329.8L111.0 328.5L113.8 326.9L114.4 327.4L115.8 325.8L116.1 326.6L116.5 325.3ZM129.9 292.5L129.0 294.7L127.4 295.1L125.9 292.2L127.6 290.9ZM135.0 284.3L135.1 288.4L133.8 292.6L132.6 293.1L132.3 290.8ZM123.8 255.9L127.2 254.9L125.7 257.3L125.6 256.5L124.1 257.0ZM123.0 254.3L123.6 258.0L120.8 260.6L120.3 259.5L121.7 258.5L120.6 258.1L120.9 254.5ZM104.8 249.8L106.1 252.6L104.4 252.5L104.4 253.9L102.0 253.1L102.9 250.1L103.4 250.8ZM108.7 246.5L109.9 246.6L108.3 249.5L107.1 247.2L108.5 245.9L108.9 243.4ZM114.9 239.1L114.0 242.0L113.0 243.2L112.0 243.2L112.9 242.9L113.4 240.2ZM117.7 231.5L117.1 234.0L116.2 233.3L116.7 231.0ZM150.9 231.0L150.8 229.6L152.1 230.5L154.1 229.8L152.8 231.5ZM155.2 227.5L153.9 227.2L154.9 225.6L155.5 226.6ZM111.6 223.8L111.1 226.4L109.7 226.8L110.2 222.9ZM188.1 218.0L186.7 222.2L187.5 224.0L184.5 225.4L183.8 222.9ZM113.7 216.4L112.3 221.6L112.9 222.5L112.0 223.4L111.6 222.0L110.5 222.5L111.6 220.6L111.3 218.7L111.8 217.3ZM246.7 214.7L248.0 215.7L247.8 216.8L246.6 216.0ZM166.1 188.7L165.6 190.7L163.8 189.9L165.1 187.5ZM234.6 157.1L236.2 157.0L235.2 160.0L231.4 161.8L233.1 158.9L231.8 158.7L231.7 157.1L235.4 152.6ZM249.3 83.6L248.7 86.1L248.0 87.0L247.5 84.9ZM273.2 32.1L272.2 33.4L270.6 31.4L271.5 30.7ZM268.3 27.0L269.8 27.6L269.3 30.5ZM179.6 219.0L179.3 221.1L176.9 220.5L177.0 219.6Z";
+// 航跡を線に分ける：点と点が120km以上離れている所（毎日の記録の航跡は上昇・降下の部分だけで、巡航中は点がない）は点線でつなぐ
+function trackSegs(track){
+  const out = []; let cur = [track[0]];
+  for(let i = 1; i < track.length; i++){ const p = track[i - 1], q = track[i];
+    if(km({ lat:p[0], lon:p[1] }, { lat:q[0], lon:q[1] }) >= 120){ if(cur.length >= 2) out.push([cur, false]); out.push([[p, q], true]); cur = [q]; }
+    else cur.push(q); }
+  if(cur.length >= 2) out.push([cur, false]);
+  return out;
+}
 function renderMap(){
   const v = shownAirports(), parts = [`<path d="${JP_OUTLINE}" fill="var(--chart-land)" stroke="var(--chart-coast)" stroke-width=".8" stroke-linejoin="round"/>`];
   // 実際に飛んだ航路がある便はその線を（同じ路線でも便ごとに少しずつ違う）、ない路線は空港どうしを結ぶ点線で描く
   const tracked = new Set();
   for(const f of focusFlights()){ if(!f.track || f.track.length < 2) continue;
     tracked.add([f.from,f.to].sort((x,y)=>x-y).join("-"));
-    const d = f.track.map(([lat, lon], i) => { const [x,y] = proj({lat, lon}); return (i ? "L" : "M") + x.toFixed(1) + " " + y.toFixed(1); }).join("");
-    parts.push(`<path d="${d}" fill="none" stroke="var(--chart-route)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity=".85"/>`);
+    for(const [seg, gap] of trackSegs(f.track)){ const d = seg.map(([lat, lon], i) => { const [x,y] = proj({lat, lon}); return (i ? "L" : "M") + x.toFixed(1) + " " + y.toFixed(1); }).join("");
+      parts.push(`<path d="${d}" fill="none" stroke="var(--chart-route)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity=".85"${gap ? ` stroke-dasharray="4 4"` : ""}/>`); }
   }
   for(const f of dedupFlights()){
     if(tracked.has([f.from,f.to].sort((x,y)=>x-y).join("-"))) continue;
@@ -2153,7 +2184,7 @@ function drawRoutes(map){
   const tracked = new Set(), pts = [];
   for(const f of focusFlights()){ if(!f.track || f.track.length < 2) continue;
     tracked.add([f.from, f.to].sort((x, y) => x - y).join("-"));
-    L.polyline(f.track.map(([lat, lon]) => [lat, lon]), { color:col(f), weight:2.4, opacity:.85, interactive:false }).addTo(ROUTE_LAYER); }
+    for(const [seg, gap] of trackSegs(f.track)) L.polyline(seg, gap ? { color:col(f), weight:2, opacity:.75, dashArray:"5 5", interactive:false } : { color:col(f), weight:2.4, opacity:.85, interactive:false }).addTo(ROUTE_LAYER); }
   for(const f of dedupFlights()){
     if(tracked.has([f.from, f.to].sort((x, y) => x - y).join("-"))) continue;
     const a = BY[f.from], b = BY[f.to], dx = b.lon - a.lon, dy = b.lat - a.lat, L2 = Math.hypot(dx, dy) || 1, k = Math.min(1.2, L2 * .18);
@@ -2425,7 +2456,7 @@ function openFlight(id){
   $("fSeat").textContent = f.seat ? `座席 ${f.seat}` : "";
   if($("dStamp").open) $("dStamp").close();
   $("dFlight").showModal();
-  loadFlightCands(f); showFacts(f);
+  loadFlightCands(f); showFacts(f); showOntime(f);
 }
 // この便の記録（毎日の記録から）：機体の登録記号・機種と、実際の到着・遅れ
 async function showFacts(f){
@@ -4610,7 +4641,7 @@ async function renderSpecial(){
 }
 async function renderOpsAlerts(){
   if(!SERVER) return;
-  renderSpecial(); renderCurfew(); renderBoard(); renderYday();
+  renderSpecial(); renderCurfew(); renderBoard(); renderYday(); renderOntime(); renderArt();
   const iata = OPS_AP; await loadFlightAlerts(iata); if(OPS_AP !== iata) return;
   const box = $("opsAlerts"), html = fwHTML(FW.get(iata), iata, true);
   box.hidden = !html; box.innerHTML = html;
@@ -4772,6 +4803,108 @@ async function ydayCard(d, iata){
   return cv;
 }
 document.addEventListener("click", async e => { if(!e.target.closest("#ydShare") || !YDAY) return; openShare(await ydayCard(YDAY, YDAY_AP), `soramemo-yesterday-${YDAY_AP}-${YDAY.day}.png`); });
+/* 定時率（毎日の記録から）：出発の定刻から15分未満に出た便の割合。航空会社の運航情報の実際の出発時刻がある便だけで数える */
+async function rpcPost(name, body){
+  try{ const r = await fetch(SORAMEMO_CONFIG.supabaseUrl.replace(/\/$/, "") + "/rest/v1/rpc/" + name, { method:"POST",
+      headers:{ "Content-Type":"application/json", apikey:SORAMEMO_CONFIG.supabaseAnonKey, Authorization:"Bearer " + SORAMEMO_CONFIG.supabaseAnonKey }, body:JSON.stringify(body) });
+    return r.ok ? await r.json() : null; }catch(e){ return null; }
+}
+const OT_NOTE = "JAL・ANA グループの運航情報で実際の出発時刻が分かる便だけで数えています（定刻から15分未満の出発を定時。欠航は分母に入れません）。そらメモが毎晩まとめた記録から。";
+const pct = (a, b) => b ? Math.round(a / b * 100) : 0;
+const OT_CACHE = new Map();
+async function loadOntime(key, name, body){ if(!OT_CACHE.has(key)) OT_CACHE.set(key, await rpcPost(name, body)); return OT_CACHE.get(key); }
+async function showOntime(f){
+  const box = $("fOntime"); box.hidden = true; box.textContent = "";
+  const a = BY[f.from], b = BY[f.to];
+  if(!SERVER || demo || !a || !b || !/^[A-Z]{3}$/.test(a.iata) || !/^[A-Z]{3}$/.test(b.iata)) return;
+  const d = await loadOntime(`r|${a.iata}|${b.iata}`, "route_ontime", { p_dep:a.iata, p_arr:b.iata, p_days:30 });
+  if(editing !== f || !d || Number(d.measured) < 10) return;
+  box.textContent = `この路線の定時率（直近30日）：${pct(d.ontime, d.measured)}%（${d.measured}便のうち${d.ontime}便${Number(d.cancelled) ? `・欠航${d.cancelled}便` : ""}）。${OT_NOTE}`;
+  box.hidden = false;
+}
+async function renderOntime(){
+  const iata = OPS_AP, box = $("opsOntime"); if(!box) return;
+  const d = await loadOntime(`a|${iata}`, "airport_ontime", { p_iata:iata, p_days:30 }); if(OPS_AP !== iata) return;
+  if(!d || Number(d.measured) < 20){ box.hidden = true; box.innerHTML = ""; return; }
+  const name = (OPS_AIRPORTS[iata] || {}).name || iata, md = t => { const x = new Date(t + "T00:00:00+09:00"); return `${x.getMonth() + 1}/${x.getDate()}`; };
+  const cls = p => p >= 85 ? "" : p >= 70 ? "mid" : "low";
+  box.hidden = false;
+  box.innerHTML = `<div class="bdhead"><h3>${esc(name)}から出る便の定時率　<small>${md(d.from)}〜${md(d.to)}</small></h3></div>
+    <div class="otbig"><b>${pct(d.ontime, d.measured)}<small>%</small></b><span>${fmtKm(d.measured)}便のうち${fmtKm(d.ontime)}便が定刻から15分未満に出発${Number(d.cancelled) ? `<br>欠航 ${d.cancelled}便` : ""}</span></div>
+    ${d.routes.length ? `<ul class="otlist" aria-label="行き先ごとの定時率">${d.routes.map(r => { const p = pct(r.ontime, r.measured);
+      return `<li><span>→ ${esc(placeShort(r.arr))}</span><span class="bar" aria-hidden="true"><i class="${cls(p)}" style="width:${p}%"></i></span><b>${p}%</b><small>${r.measured}便</small></li>`; }).join("")}</ul>` : ""}
+    <p class="fwnote">${OT_NOTE}${ODPT_CREDIT}</p>`;
+}
+
+/* 航跡アート：その日に空港を出た・着いた便の、上昇・降下の道筋（15,000ft 未満）を重ねた1枚。出発は橙、到着は水色 */
+let ART = { iata:null, day:null, tracks:null };
+const ART_KM = 70;
+const jstToday = () => jstDay(Date.now());
+const addDay = (d, n) => new Date(Date.parse(d + "T00:00:00Z") + n * 86_400_000).toISOString().slice(0, 10);
+function decodePl(s){
+  let i = 0, lat = 0, lon = 0; const out = [];
+  const nx = () => { let r = 0, sh = 0, b; do{ b = s.charCodeAt(i++) - 63; r |= (b & 31) << sh; sh += 5; }while(b >= 32 && i < s.length); return r & 1 ? ~(r >> 1) : r >> 1; };
+  while(i < s.length){ lat += nx(); lon += nx(); out.push([lat / 1e4, lon / 1e4]); }
+  return out;
+}
+async function loadArt(iata, day){
+  if(ART.iata === iata && ART.day === day && ART.tracks) return ART.tracks;
+  const t = await rpcPost("airport_tracks", { p_iata:iata, p_day:day });
+  ART = { iata, day, tracks:Array.isArray(t) ? t.map(x => ({ dep:x.d === 1, pts:decodePl(String(x.p || "")) })).filter(x => x.pts.length >= 2) : [] };
+  return ART.tracks;
+}
+function drawArt(ctx, x0, y0, W, tracks, center){
+  const [clat, clon] = center, s = W / (2 * ART_KM), kx = 111.32 * Math.cos(clat * Math.PI / 180) * s, ky = 110.57 * s;
+  const g = ctx.createRadialGradient(x0 + W / 2, y0 + W / 2, 0, x0 + W / 2, y0 + W / 2, W * .72);
+  g.addColorStop(0, "#14213A"); g.addColorStop(1, "#070B14");
+  ctx.save(); ctx.beginPath(); ctx.rect(x0, y0, W, W); ctx.clip(); ctx.fillStyle = g; ctx.fillRect(x0, y0, W, W);
+  ctx.strokeStyle = "rgba(255,255,255,.07)"; ctx.lineWidth = Math.max(1, W / 900);
+  for(const r of [20, 40, 60]){ ctx.beginPath(); ctx.arc(x0 + W / 2, y0 + W / 2, r * s, 0, Math.PI * 2); ctx.stroke(); }
+  ctx.globalCompositeOperation = "lighter"; ctx.lineWidth = Math.max(1, W / 520); ctx.lineCap = "round"; ctx.lineJoin = "round";
+  for(const t of tracks){
+    ctx.strokeStyle = t.dep ? "rgba(251,176,59,.36)" : "rgba(72,190,255,.36)"; ctx.beginPath();
+    t.pts.forEach(([la, lo], i) => { const x = x0 + W / 2 + (lo - clon) * kx, y = y0 + W / 2 - (la - clat) * ky; i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); });
+    ctx.stroke();
+  }
+  ctx.globalCompositeOperation = "source-over"; ctx.fillStyle = "#FFFFFF";
+  ctx.beginPath(); ctx.arc(x0 + W / 2, y0 + W / 2, Math.max(2.5, W / 220), 0, Math.PI * 2); ctx.fill();
+  ctx.restore();
+}
+const artLabel = d => { const x = new Date(d + "T00:00:00+09:00"); return `${x.getMonth() + 1}/${x.getDate()}（${"日月火水木金土"[x.getDay()]}）`; };
+async function renderArt(day){
+  const iata = OPS_AP, box = $("opsArt"), def = OPS_AIRPORTS[iata]; if(!box) return;
+  if(!def || !def.center){ box.hidden = true; box.innerHTML = ""; return; }
+  const y = addDay(jstToday(), -1), d = day || (ART.iata === iata && ART.day ? ART.day : y);
+  const tracks = await loadArt(iata, d); if(OPS_AP !== iata) return;
+  if(!tracks.length && !day){ box.hidden = true; box.innerHTML = ""; return; }
+  const dep = tracks.filter(t => t.dep).length, name = def.name;
+  box.hidden = false;
+  box.innerHTML = `<div class="bdhead"><h3>${esc(name)}の空の道　<small>${d === y ? "昨日" : artLabel(d)}</small></h3>${tracks.length ? `<button class="linkbtn2 ydshare" id="artShare" type="button">画像で共有</button>` : ""}</div>
+    <canvas class="artcv" id="artCv" role="img" aria-label="${esc(`${artLabel(d)}に${name}を出発した${dep}便と到着した${tracks.length - dep}便の、上昇・降下の道筋`)}"></canvas>
+    <div class="artnav"><button type="button" data-art-day="${addDay(d, -1)}" ${addDay(d, -1) < addDay(jstToday(), -30) ? "disabled" : ""} aria-label="前の日">◀</button>
+      <span>${artLabel(d)}　出発 ${dep}便・到着 ${tracks.length - dep}便</span>
+      <button type="button" data-art-day="${addDay(d, 1)}" ${addDay(d, 1) > y ? "disabled" : ""} aria-label="次の日">▶</button></div>
+    <p class="artkey"><span><i style="background:#FBB03B"></i>出発</span><span><i style="background:#48BEFF"></i>到着</span><span>円は中心から20・40・60km</span></p>
+    <p class="fwnote">空港の近くで15,000ft より低く飛んでいた機体の位置（adsb.lol）を、時刻表の便と結んだもの。電波が届かない所や、見つけられなかった便は描かれません。30日前までさかのぼれます。</p>`;
+  const cv = $("artCv"), w = Math.round(cv.clientWidth * (devicePixelRatio || 1)) || 600;
+  cv.width = w; cv.height = w; drawArt(cv.getContext("2d"), 0, 0, w, tracks, def.center);
+}
+async function artCard(){
+  try{ await document.fonts.ready; }catch(e){}
+  const def = OPS_AIRPORTS[ART.iata] || {}, [cv, ctx] = cardBase(), dep = ART.tracks.filter(t => t.dep).length;
+  ctx.textAlign = "left"; ctx.fillStyle = PAL.ink; ctx.font = `800 64px ${MINCHO}`; ctx.fillText(`${def.name || ART.iata}の空の道`, 80, 250);
+  ctx.fillStyle = PAL.sumi; ctx.font = `500 32px ${GOTHIC}`; const x = new Date(ART.day + "T00:00:00+09:00");
+  ctx.fillText(`${x.getFullYear()}年${x.getMonth() + 1}月${x.getDate()}日　出発 ${dep}便・到着 ${ART.tracks.length - dep}便`, 80, 305);
+  drawArt(ctx, 80, 350, 920, ART.tracks, def.center);
+  ctx.fillStyle = PAL.sumi; ctx.font = `500 24px ${GOTHIC}`; ctx.fillText("橙＝出発・水色＝到着（15,000ft 未満）。機体の位置：adsb.lol", 80, 1310 - 40);
+  ctx.font = `500 28px ${GOTHIC}`; ctx.fillText("#そらメモ", 80, 1312);
+  return cv;
+}
+document.addEventListener("click", async e => {
+  const b = e.target.closest("[data-art-day]"); if(b && !b.disabled){ renderArt(b.dataset.artDay); return; }
+  if(e.target.closest("#artShare") && ART.tracks && ART.tracks.length) openShare(await artCard(), `soramemo-sky-${ART.iata}-${ART.day}.png`);
+});
+
 
 async function renderCurfew(){
   const iata = OPS_AP, box = $("opsCurfew"); if(!box) return;

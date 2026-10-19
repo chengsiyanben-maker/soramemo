@@ -1,5 +1,5 @@
 import { assertEquals, assert } from "jsr:@std/assert@1";
-import { buildHistory, decodePolyline, encodePolyline, jstYesterday, thin, toHistory, type SchedRow } from "../functions/_shared/archive.ts";
+import { buildHistory, decodePolyline, encodePolyline, jstYesterday, normFlight, thin, toHistory, type SchedRow, userTrack } from "../functions/_shared/archive.ts";
 
 const base = (o: Partial<SchedRow>): SchedRow => ({ svc_date: "2026-10-17", flight: "JL100", dep: "HND", arr: "ITM", std: "2026-10-17T00:00:00.000Z", sta: "2026-10-17T01:05:00.000Z",
   atd: null, ata: null, dep_status: null, arr_status: null, aircraft: "B767", source: "ODPT", state: null, ...o });
@@ -31,4 +31,13 @@ Deno.test("航跡：間引きと polyline の往復", () => {
 Deno.test("前の日（日本時間）", () => {
   assertEquals(jstYesterday(Date.parse("2026-10-18T16:00:00Z")), "2026-10-18");   // 日本時間 19日 1:00 → 18日
   assertEquals(jstYesterday(Date.parse("2026-10-18T14:00:00Z")), "2026-10-17");
+});
+
+Deno.test("便名の0を取る・利用者の航跡は200点までに均等に間引く", () => {
+  assertEquals([normFlight("NH059"), normFlight("jl509"), normFlight("HD0018"), normFlight("7G044"), normFlight("NH590")], ["NH59", "JL509", "HD18", "7G44", "NH590"]);
+  const pts = Array.from({ length: 450 }, (_, i) => ({ lat: 35 + i / 1000, lon: 139 + i / 1000 }));
+  const t = userTrack(pts)!;
+  assertEquals(t.length, 200);
+  assertEquals([t[0], t[199]], [[35, 139], [35.449, 139.449]]);
+  assertEquals(userTrack(pts.slice(0, 1)), null);
 });
