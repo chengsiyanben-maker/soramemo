@@ -1,6 +1,6 @@
 // ダイヤと機体の位置の照らし合わせ：離陸・着陸・遅れ・ダイバート・引き返し
 import { assertEquals } from "jsr:@std/assert@1";
-import { type Airport, blankWatch, callsignsFor, cruiseOf, hardToSee, predictEta, normCallsign, onRoute, type Sched, type Seen, step, type Watch } from "../functions/_shared/flight_watch.ts";
+import { type Airport, blankWatch, callsignsFor, cruiseOf, hardToSee, landingFrom, predictEta, normCallsign, onRoute, type Sched, type Seen, step, type Watch } from "../functions/_shared/flight_watch.ts";
 
 const APS = new Map<string, Airport>([
   ["HND", { iata: "HND", lat: 35.5497, lon: 139.787, name: "羽田" }],
@@ -170,4 +170,25 @@ Deno.test("降りる途中で見えなくなった便：到着予想から15分�
   ]);
   assertEquals([w.phase, w.landed_iata, w.landed_at], ["landed", "CTS", null]);
   assertEquals(all, []);
+});
+
+Deno.test("空港の近く（120km以内・15,000ft以下）で見えなくなった便は、最後の位置から着陸の時刻を推定する", () => {
+  // 新千歳の南 約80km・9,000ft で見えなくなった
+  const { w, all } = run([
+    [at(35.56, 139.80, 2000, T0 + 18 * MIN, 2500), T0 + 18 * MIN],
+    [at(42.05, 141.62, 9000, T0 + 85 * MIN, -1500), T0 + 85 * MIN],
+    [null, T0 + 100 * MIN],
+    [null, T0 + 130 * MIN],
+  ]);
+  assertEquals([w.phase, w.landed_iata], ["landed", "CTS"]);
+  // 残り約43海里を進入の速度（220kt）で約12分＋着陸の4分 → 最後に見てから15分前後
+  const after = ((w.landed_at ?? 0) - (T0 + 85 * MIN)) / MIN;
+  assertEquals(after > 12 && after < 19, true);
+  assertEquals(all, []);
+});
+
+Deno.test("着陸の時刻の推定は、最後に見た時刻より前にならない", () => {
+  const ap = APS.get("CTS")!;
+  const t = landingFrom({ lat: ap.lat, lon: ap.lon, alt_ft: 0, at: T0 }, ap, "B738");
+  assertEquals(t >= T0, true);
 });
