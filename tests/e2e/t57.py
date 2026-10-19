@@ -35,7 +35,12 @@ async def main():
         print('乗る便:', 'JL509' in t, '| 遅れの見込み:', '約65分遅れの見込み' in t, '| 前の便:', 'JL500' in t and '伊丹' in t, '| 推定の割合:', '67%' in t)
         await pg.locator('#homeSheet .sbody').screenshot(path=os.path.join(WORK,'t57_ride.png'))
         await pg.click('[data-ride-off]'); await pg.wait_for_timeout(200)
-        print('やめる:', await pg.is_hidden('#rideCard'))
+        print('やめる:', await pg.is_hidden('#rideCard'), '| 入れる欄が出る:', await pg.is_visible('#rideAdd'))
+        await pg.fill('#rideNo', 'xx'); await pg.click('#rideAdd button'); await pg.wait_for_timeout(200)
+        print('形の違う便名:', '2文字と数字' in (await pg.inner_text('#rideMsg')))
+        await pg.fill('#rideNo', 'jl509'); await pg.click('#rideAdd button'); await pg.wait_for_selector('#rideCard:not([hidden])', timeout=5000)
+        print('便名を入れて調べる:', 'JL509' in (await pg.inner_text('#rideCard')), '| 入れる欄は隠れる:', await pg.is_hidden('#rideAdd'))
+        await pg.click('[data-ride-off]'); await pg.wait_for_timeout(200)
         # 2. 乗った機体の図鑑（便名を記録したフライトを2便足す）
         await pg.evaluate("""() => { const h = A.find(a => a.iata === 'HND').id, k = A.find(a => a.iata === 'CTS').id;
           S.flights.push({ id:91, from:h, to:k, dep:Date.now() - 2*864e5, arr:Date.now() - 2*864e5 + 5400000, km:820, airline:'JL', no:'JL501', status:'with_flight_no' },
