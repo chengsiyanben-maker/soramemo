@@ -62,6 +62,11 @@ export function predictEta(p: { lat: number; lon: number; alt_ft: number | null;
   const nearV = alt < 10000 && p.kt != null && p.kt > 100 ? Math.min(approach, p.kt) : approach;
   return p.at + (far / v + near / nearV) * 3600_000 + 4 * MIN;
 }
+// 降りる途中で見えなくなった機体の着陸の時刻（推定）：最後に見た位置から、残りを進入の速度で飛んだとみなす（predictEta と同じ考え方）。
+// 最後に見た時刻より前にはしない
+export function landingFrom(last: { lat: number; lon: number; alt_ft: number | null; at: number }, arr: Airport, type?: string | null): number {
+  return Math.max(last.at, Math.round(predictEta({ ...last, kt: null }, arr, type)));
+}
 export const blankWatch = (): Watch => ({ phase: "sched", takeoff_at: null, takeoff_est: false, landed_at: null, landed_iata: null, low_iata: null, low_at: null, last: null, sent: [] });
 
 // 便名の航空会社の記号 → 呼び出し符号の記号（グループの別会社が運航すると記号が変わることがあるので、候補を並べる）
@@ -157,13 +162,17 @@ export function step(s: Sched, w0: Watch, seen: Seen | null, now: number, aps: M
   }
   if (w.phase === "air" && !seen && w.last && now - w.last.at >= 10 * MIN) {
     const arr = aps.get(s.arr);
-    if (arr && km(w.last, arr) <= 40 && (w.last.alt_ft ?? 99999) <= 10000) { w.phase = "landed"; w.landed_at = w.last.at; w.landed_iata = s.arr; }
+    if (arr && km(w.last, arr) <= 40 && (w.last.alt_ft ?? 99999) <= 10000) { w.phase = "landed"; w.landed_at = landingFrom(w.last, arr, w.type || s.aircraft); w.landed_iata = s.arr; }
   }
   // 降りる途中で電波が届かなくなった（空港の近くは受信機が少ない）：到着予想から15分たっても見えなければ、到着空港に着いたとみなす。
-  // 着陸の時刻は分からないので入れない（古い到着予想を出し続けないため）
+  // 最後に見たのが到着空港から120km以内・15,000ft以下（もう降り始めている）なら、そこから着陸の時刻を推定する。
+  // それより遠い・高いときは、着陸の時刻は分からないので入れない（古い到着予想を出し続けないため）
   if (w.phase === "air" && !seen && w.last && w.eta != null && now - w.last.at >= 10 * MIN && now - w.eta >= 15 * MIN) {
     const arr = aps.get(s.arr);
-    if (arr && km(w.last, arr) <= 200) { w.phase = "landed"; w.landed_at = null; w.landed_iata = s.arr; }
+    if (arr && km(w.last, arr) <= 200) {
+      w.phase = "landed"; w.landed_iata = s.arr;
+      w.landed_at = km(w.last, arr) <= 120 && (w.last.alt_ft ?? 99999) <= 15000 ? landingFrom(w.last, arr, w.type || s.aircraft) : null;
+    }
   }
   // 遅れ
   if (w.takeoff_at != null && !w.takeoff_est && !lateStart && w.takeoff_at - s.std >= 75 * MIN) {
