@@ -146,6 +146,13 @@ Deno.serve(async (req) => {
     }).select("id,created_at").single();
     if (ie) throw ie;
 
+    // 行事のボーナス（期間中、空港ごとに1回。経営の資金）。失敗してもチェックインは成功のまま
+    let bonus: unknown[] = [];
+    {
+      const { data: b, error: be } = await admin.rpc("grant_event_bonus", { p_uid: userId, p_airport: d.place.airport.id, p_at: ci.created_at });
+      if (be) console.error("event bonus", be.message); else if (Array.isArray(b)) bonus = b;
+    }
+
     let flight = null;
     if (d.flight) {
       const { data: f, error: fe } = await admin.from("flights").insert({
@@ -161,7 +168,7 @@ Deno.serve(async (req) => {
       ok: true, at: ci.created_at,
       airport_id: d.place.airport.id, terminal_id: d.place.terminal?.id ?? null,
       first_airport: (fa.count ?? 0) === 0, first_terminal: (ft.count ?? 0) === 0,
-      flight, flags: d.flags, weather: wx.weather, wind_kt: wx.wind_kt, ops,
+      flight, flags: d.flags, weather: wx.weather, wind_kt: wx.wind_kt, ops, bonus,
     });
   } catch (e) {
     console.error(e);
