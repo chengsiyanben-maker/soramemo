@@ -671,6 +671,9 @@ dialog.mypage .dlg .close{display:none}
 #v-ops .bdtabs{display:flex;gap:4px;background:var(--op-pill);padding:3px;border-radius:999px}
 #v-ops .bdtabs button{border:0;background:none;border-radius:999px;padding:5px 12px;font:700 12px var(--gothic);color:var(--op-mute)}
 #v-ops .bdtabs button[aria-pressed="true"]{background:var(--op-card);color:var(--op-ink);box-shadow:0 2px 6px -2px rgba(15,23,42,.25)}
+#v-ops .bdkind{display:inline-flex;margin:0 0 8px}
+#v-ops .bdseq .fl .intl{font-style:normal;font-size:10.5px;font-weight:700;color:#1D4ED8;background:#DBEAFE;border-radius:4px;padding:0 5px;margin-right:5px}
+[data-palette="board"] #v-ops .bdseq .fl .intl{color:#BFDBFE;background:rgba(59,130,246,.25)}
 #v-ops .bdseq{list-style:none;margin:0;padding:0;display:grid;grid-auto-flow:column;grid-auto-columns:minmax(118px,1fr);gap:8px;overflow-x:auto;scrollbar-width:none;position:relative;padding-top:14px}
 #v-ops .bdseq::-webkit-scrollbar{display:none}
 #v-ops .bdseq::before{content:"";position:absolute;left:0;right:0;top:5px;height:3px;border-radius:2px;background:linear-gradient(90deg,#BFDBFE,#2563EB)}
@@ -4831,13 +4834,24 @@ function curfewHTML(now = Date.now()){
     <p class="fwnote">門限は運用時間の終わり（AIP JAPAN）。門限を過ぎると、ほかの空港へ行き先を変えたり、欠航になったりすることがあります。時刻は予定の便と、JAL・ANA グループの変更後・実際の時刻（${ODPT_CREDIT}）。ほかの航空会社の便は、機体の位置（adsb.lol）から推定した離陸・着陸のおおよその時刻を「推定」として出します。到着予想は、飛んでいる機体の残りの距離を、今の対地速度（巡航中）か機種ごとの巡航速度で割り、進入の時間を足したおおよその時刻です。「間に合いそう」「ぎりぎり」「過ぎる見込み」は、その時刻と門限を比べた推定で、航空会社の発表ではありません。</p></div>`;
 }
 /* これから着く便・出る便と、今日の遅れ・欠航（JAL・ANA グループの時刻表と運航情報。サーバーの airport_board） */
-let BOARD = null, BOARD_AP = null, BOARD_AT = 0, BOARD_DIR = "arr";
+let BOARD = null, BOARD_AP = null, BOARD_AT = 0, BOARD_DIR = "arr", BOARD_KIND = "all";
+// 海外の空港の名前（JAL・ANA の国際線の行き先を中心に。表にない空港は記号のまま）
+const WORLD_JA = { ICN:"ソウル（仁川）", GMP:"ソウル（金浦）", PUS:"釜山", CJU:"済州", PEK:"北京（首都）", PKX:"北京（大興）", PVG:"上海（浦東）", SHA:"上海（虹橋）", CAN:"広州", SZX:"深圳",
+  DLC:"大連", TAO:"青島", HGH:"杭州", XMN:"厦門", WUH:"武漢", CTU:"成都", TFU:"成都（天府）", SHE:"瀋陽", HKG:"香港", MFM:"マカオ", TPE:"台北（桃園）", TSA:"台北（松山）", KHH:"高雄", RMQ:"台中",
+  MNL:"マニラ", CEB:"セブ", BKK:"バンコク", DMK:"バンコク（ドンムアン）", SGN:"ホーチミン", HAN:"ハノイ", DAD:"ダナン", SIN:"シンガポール", KUL:"クアラルンプール", CGK:"ジャカルタ", DPS:"バリ（デンパサール）",
+  PNH:"プノンペン", RGN:"ヤンゴン", DEL:"デリー", BOM:"ムンバイ", BLR:"ベンガルール", MAA:"チェンナイ", CMB:"コロンボ", ULN:"ウランバートル", UBN:"ウランバートル", DOH:"ドーハ", DXB:"ドバイ", AUH:"アブダビ", IST:"イスタンブール",
+  SYD:"シドニー", MEL:"メルボルン", BNE:"ブリスベン", PER:"パース", AKL:"オークランド", GUM:"グアム", SPN:"サイパン", HNL:"ホノルル", KOA:"コナ", PPT:"パペーテ", NAN:"ナンディ", NOU:"ヌメア",
+  LAX:"ロサンゼルス", SFO:"サンフランシスコ", SJC:"サンノゼ", SAN:"サンディエゴ", SEA:"シアトル", JFK:"ニューヨーク", EWR:"ニューヨーク（ニューアーク）", ORD:"シカゴ", IAH:"ヒューストン", DFW:"ダラス",
+  BOS:"ボストン", IAD:"ワシントン", ATL:"アトランタ", DTW:"デトロイト", MSP:"ミネアポリス", LAS:"ラスベガス", YVR:"バンクーバー", YYZ:"トロント", MEX:"メキシコシティ", ANC:"アンカレッジ",
+  LHR:"ロンドン", CDG:"パリ", FRA:"フランクフルト", MUC:"ミュンヘン", DUS:"デュッセルドルフ", HEL:"ヘルシンキ", ARN:"ストックホルム", CPH:"コペンハーゲン", AMS:"アムステルダム", BRU:"ブリュッセル",
+  ZRH:"チューリッヒ", VIE:"ウィーン", MXP:"ミラノ", FCO:"ローマ", MAD:"マドリード", BCN:"バルセロナ", LIS:"リスボン", WAW:"ワルシャワ", PRG:"プラハ" };
+const placeAny = c => IATA[c] ? godShort(IATA[c]) : WORLD_JA[c] || c;
 async function loadBoard(iata){
   if(!SERVER) return null;
-  if(BOARD && BOARD_AP === iata && Date.now() - BOARD_AT < 110_000) return BOARD;
+  if(BOARD && BOARD_AP === iata && BOARD.kind === BOARD_KIND && Date.now() - BOARD_AT < 110_000) return BOARD;
   try{ const r = await fetch(SORAMEMO_CONFIG.supabaseUrl.replace(/\/$/, "") + "/rest/v1/rpc/airport_board", { method:"POST",
-      headers:{ "Content-Type":"application/json", apikey:SORAMEMO_CONFIG.supabaseAnonKey, Authorization:"Bearer " + SORAMEMO_CONFIG.supabaseAnonKey }, body:JSON.stringify({ p_iata:iata }) });
-    if(r.ok){ BOARD = await r.json(); BOARD_AP = iata; BOARD_AT = Date.now(); return BOARD; } }catch(e){}
+      headers:{ "Content-Type":"application/json", apikey:SORAMEMO_CONFIG.supabaseAnonKey, Authorization:"Bearer " + SORAMEMO_CONFIG.supabaseAnonKey }, body:JSON.stringify({ p_iata:iata, p_kind:BOARD_KIND }) });
+    if(r.ok){ BOARD = await r.json(); BOARD_AP = iata; BOARD.kind = BOARD_KIND; BOARD_AT = Date.now(); return BOARD; } }catch(e){}
   return BOARD_AP === iata ? BOARD : null;
 }
 function boardRel(t, now){
@@ -4849,11 +4863,11 @@ function boardRel(t, now){
 function boardHTML(d){
   const now = Date.now(), list = (BOARD_DIR === "arr" ? d.next_arr : d.next_dep) || [], arr = BOARD_DIR === "arr";
   const hmS = t => new Date(t).toLocaleTimeString("ja-JP", { hour:"2-digit", minute:"2-digit" });
-  const name = c => IATA[c] ? godShort(IATA[c]) : c;
+  const name = placeAny;
   const kind = f => f.actual ? ["実際", f.actual] : f.est ? ["見込み", f.est] : (f.inferred || f.predicted) ? ["推定", f.inferred || f.predicted] : ["定刻", f.sched];
   const items = list.map(f => { const [k, t] = kind(f), past = Date.parse(f.t) <= now, late = Math.round((Date.parse(t) - Date.parse(f.sched)) / 60000);
     return `<li class="${past ? "past" : ""}"><span class="dot" aria-hidden="true"></span>
-      <b>${esc(arr ? name(f.other) + "から" : name(f.other) + "へ")}</b><span class="fl">${esc(f.flight)}${f.aircraft ? "・" + esc(f.aircraft) : ""}</span>
+      <b>${esc(arr ? name(f.other) + "から" : name(f.other) + "へ")}</b><span class="fl">${f.intl ? `<i class="intl">国際</i>` : ""}${esc(f.flight)}${f.aircraft ? "・" + esc(f.aircraft) : ""}</span>
       <span class="rel">${boardRel(f.t, now)}</span><span class="tm">${k} ${hmS(t)}${late >= 15 && k !== "定刻" ? `<em>${late}分遅れ</em>` : ""}</span></li>`; }).join("");
   const hrs = d.hours || [], nowH = new Date(now).getHours();
   const late = hrs.reduce((x, h) => x + Number(h.late || 0), 0), cancel = hrs.reduce((x, h) => x + Number(h.cancel || 0), 0);
@@ -4864,7 +4878,8 @@ function boardHTML(d){
   const ref = refs.map((v, i) => `${i ? "L" : "M"}${(i * bw + bw / 2).toFixed(1)} ${y(v).toFixed(1)}`).join("");
   return `<div class="bdhead"><h3>${arr ? "これから着く便" : "これから出る便"}</h3><div class="bdtabs" role="group" aria-label="到着と出発">
       <button data-board-dir="arr" aria-pressed="${arr}">到着</button><button data-board-dir="dep" aria-pressed="${!arr}">出発</button></div></div>
-    ${items ? `<ol class="bdseq">${items}</ol>` : `<p class="hint">この3時間に${arr ? "着く" : "出る"} JAL・ANA の時刻表の便はありません。</p>`}
+    <div class="bdtabs bdkind" role="group" aria-label="国内線と国際線">${[["all", "すべて"], ["dom", "国内線"], ["intl", "国際線"]].map(([k, l]) => `<button data-board-kind="${k}" aria-pressed="${BOARD_KIND === k}">${l}</button>`).join("")}</div>
+    ${items ? `<ol class="bdseq">${items}</ol>` : `<p class="hint">この3時間に${arr ? "着く" : "出る"} JAL・ANA の時刻表の${BOARD_KIND === "intl" ? "国際線の" : BOARD_KIND === "dom" ? "国内線の" : ""}便はありません。</p>`}
     <div class="bdhead"><h3>今日の遅れ・欠航</h3><span class="bdsum">遅れ <b>${late}</b>便・欠航 <b>${cancel}</b>便</span></div>
     <svg class="bdchart" viewBox="0 0 ${W} ${H + 14}" role="img" aria-label="今日の1時間ごとの遅れと欠航の便の数。遅れ${late}便、欠航${cancel}便">
       <line x1="0" y1="${H - 4}" x2="${W}" y2="${H - 4}" class="base"/>${bars}<path d="${ref}" class="ref"/>
@@ -4879,6 +4894,7 @@ async function renderBoard(){
   box.hidden = false; box.innerHTML = boardHTML(d);
 }
 document.addEventListener("click", e => { const b = e.target.closest("[data-board-dir]"); if(!b) return; BOARD_DIR = b.dataset.boardDir; if(BOARD) $("opsBoard").innerHTML = boardHTML(BOARD); });
+document.addEventListener("click", e => { const b = e.target.closest("[data-board-kind]"); if(!b || b.dataset.boardKind === BOARD_KIND) return; BOARD_KIND = b.dataset.boardKind; track("board_kind", BOARD_KIND); renderBoard(); });
 
 /* 昨日の〇〇：前の日の空港のまとめ（毎日の記録の airport_daily）と、その前の7日の平均 */
 let YDAY = null, YDAY_AP = null;

@@ -42,4 +42,12 @@ check('今日の遅れ（15分以上）と欠航を数える', tot2('late') >= 1
 check('前の7日の目安に、前日の遅れが入る', hrs.some((h) => Number(h.ref) > 0), hrs.filter((h) => Number(h.ref) > 0));
 r = await as('anon', `select public.airport_board('ZZZ')`);
 check('便のない空港でも空の一覧を返す', r && Array.isArray(r.next_arr) && r.next_arr.length === 0, r);
+await db.exec(`insert into public.flight_schedule (svc_date, flight, dep, arr, std, sta, source) values
+  (current_date, 'NH106', 'HND', 'LAX', now() + interval '40 minutes', now() + interval '10 hours', 'ODPT')`);
+r = await as('anon', `select public.airport_board('HND', 'intl')`);
+check('国際線だけ：相手が日本の空港でない便', (r?.next_dep ?? []).map((f) => f.flight).join(',') === 'NH106' && r.next_dep[0].intl === true, r?.next_dep);
+r = await as('anon', `select public.airport_board('HND', 'dom')`);
+check('国内線だけ：国際線は出さない', (r?.next_dep ?? []).map((f) => f.flight).join(',') === 'JL555', r?.next_dep);
+r = await as('anon', `select public.airport_board('HND')`);
+check('指定なしは全部（国内線・国際線）', (r?.next_dep ?? []).length === 2, r?.next_dep);
 if (bad) process.exit(1);
