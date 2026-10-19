@@ -17,6 +17,10 @@ await db.exec(`insert into public.flight_history (svc_date, flight, dep, arr, st
 let r = await as('anon', `select public.flight_facts('[{"f":"NH4715","d":"2026-10-10","a":"HND"},{"f":"JL501","d":"2026-10-11","a":"HND"},{"f":"JL999","d":"2026-10-11","a":"HND"},{"f":"bad","d":"x","a":"HND"}]'::jsonb)`);
 check('共同運航の便名でも実績が付く', r?.find?.((x) => x.f === 'NH4715')?.arr_delay === 22 && r.find((x) => x.f === 'NH4715').reg === 'JA01HD', r);
 check('記録のない便・形の違う入力は返さない', r?.length === 2, r);
+await db.exec(`insert into public.flight_history (svc_date, flight, dep, arr, std, sta, ata, ata_src, arr_delay, also) values
+  ('2026-10-12', 'NH059', 'HND', 'CTS', '2026-10-12T01:00:00Z', '2026-10-12T02:30:00Z', '2026-10-12T02:40:00Z', 'odpt', 10, '{HD0059}')`);
+r = await as('anon', `select public.flight_facts('[{"f":"NH59","d":"2026-10-12","a":"HND"},{"f":"HD59","d":"2026-10-12","a":"HND"},{"f":"NH590","d":"2026-10-12","a":"HND"}]'::jsonb)`);
+check('時刻表の便名の0（NH059）と利用者の便名（NH59）を同じとみなす。共同運航の便名も', r?.length === 2 && r.every((x) => x.arr_delay === 10), r);
 r = await as('anon', `select public.flight_facts('"oops"'::jsonb)`);
 check('配列でない入力は空で返す', Array.isArray(r) && r.length === 0, r);
 if (bad) process.exit(1);
