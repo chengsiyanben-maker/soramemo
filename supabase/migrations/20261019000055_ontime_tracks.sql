@@ -46,14 +46,14 @@ grant execute on function public.airport_ontime(text, int) to anon, authenticate
 create or replace function public.airport_tracks(p_iata text, p_day date) returns jsonb
 language sql stable security definer set search_path = public as $$
   with d as (select (now() at time zone 'Asia/Tokyo')::date as today)
-  select coalesce(jsonb_agg(jsonb_build_object('d', case when h.dep = p_iata then 1 else 0 end, 'p', t.pts, 'a', t.alts)), '[]'::jsonb)
-  from d, (
-    select t.pts, t.alts, t.svc_date, t.flight, t.dep from public.flight_tracks t, d
-    where t.svc_date = p_day and p_day < d.today and p_day >= d.today - 30
-    order by t.flight limit 2000
-  ) t
-  join public.flight_history h on h.svc_date = t.svc_date and h.flight = t.flight and h.dep = t.dep
-  where h.dep = p_iata or h.arr = p_iata
+  select coalesce(jsonb_agg(jsonb_build_object('d', q.dep_here, 'p', q.pts)), '[]'::jsonb)
+  from (
+    select case when h.dep = p_iata then 1 else 0 end as dep_here, t.pts
+    from d, public.flight_history h
+    join public.flight_tracks t on t.svc_date = h.svc_date and t.flight = h.flight and t.dep = h.dep
+    where h.svc_date = p_day and p_day < d.today and p_day >= d.today - 30 and (h.dep = p_iata or h.arr = p_iata)
+    order by h.std limit 2000
+  ) q
 $$;
 revoke all on function public.airport_tracks(text, date) from public;
 grant execute on function public.airport_tracks(text, date) to anon, authenticated;
