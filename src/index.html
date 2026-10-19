@@ -794,6 +794,8 @@ ol.steps{padding-left:1.4em;line-height:1.9}
 .ridecard .rl{display:block;color:var(--hm-sub,#6B7280);font-size:11.5px;margin-top:6px}
 .ridecard .rv{display:block;font-weight:700}
 .ridecard .late{color:#B45309}
+.ridecard .rbar{height:6px;border-radius:999px;background:var(--hm-pill,rgba(17,24,39,.06));margin:8px 0 2px;overflow:hidden}
+.ridecard .rbar i{display:block;height:100%;border-radius:999px;background:#2563EB}
 .ridecard .ok{color:#047857}
 .ridecard .fwnote{font-size:11px;color:var(--hm-mute,#5B6270);margin:8px 0 0}
 [data-palette="board"] .ridecard .late{color:#FCD34D}
@@ -1736,7 +1738,7 @@ function noticesHTML(a){
 /* 空港の今：天気（気象通報）と、直近の到着・出発便（JAL・ANA の公式のリアルタイム情報）。サーバーの airport-now から取る */
 let NOW = null;   // { a, data, dir, term, more, msg }
 const DIR16 = ["北","北北東","北東","東北東","東","東南東","南東","南南東","南","南南西","南西","西南西","西","西北西","北西","北北西"];
-const placeShort = c => { const a = IATA[c]; if(!a) return c; const m = a.name.match(/（(.+)）/); return m ? m[1] : a.name.replace(/国際空港$|空港$/, ""); };
+const placeShort = c => { const a = IATA[c]; if(!a) return WORLD_JA[c] || c; const m = a.name.match(/（(.+)）/); return m ? m[1] : a.name.replace(/国際空港$|空港$/, ""); };
 const jstHM = iso => { const t = Date.parse(iso); if(!t) return ""; const d = new Date(t + 9*36e5); return `${String(d.getUTCHours()).padStart(2,"0")}:${String(d.getUTCMinutes()).padStart(2,"0")}`; };
 const FKIND = { ok:"定刻", late:"遅れ", board:"搭乗中", cancel:"欠航" };
 const canNow = a => SERVER && !a.kind;
@@ -1841,7 +1843,7 @@ function flightsHTML(a, fl){
   const all = (NOW.dir === "arr" ? fl.arr : fl.dep) || [];
   const list = all.filter(x => NOW.term === "all" || x.term === NOW.term), shown = NOW.more ? list : list.slice(0, 5);
   const row = x => { const k = x.kind === "done" ? (NOW.dir === "arr" ? "到着済み" : "出発済み") : FKIND[x.kind] || "定刻";
-    const ride = NOW.dir === "dep" && ["ok","late","board"].includes(x.kind) && ALBY[x.airline] && IATA[x.place];
+    const ride = NOW.dir === "dep" && ["ok","late","board"].includes(x.kind) && ALBY[x.airline] && /^[A-Z]{3}$/.test(x.place || "");
     return `<li><div class="tm"><b class="${x.newTime || x.kind === "cancel" ? "old" : ""}">${esc(x.time)}</b>${x.newTime ? `<i>→${esc(x.newTime)}</i>` : ""}</div>
       <div class="pl"><b>${esc(placeShort(x.place))}${NOW.dir === "arr" ? "から" : "へ"}</b><span>${esc(x.no.slice(0,2) + " " + x.no.slice(2))}${x.term ? "・" + esc(x.term) : ""}${x.gate ? `・${NOW.dir === "arr" ? "到着口" : "搭乗口"} ${esc(x.gate)}` : ""}${x.ac ? "・" + esc(x.ac) : ""}</span>${x.note ? `<span class="fnote">${esc(x.note)}</span>` : ""}</div>
       <div class="st"><span class="fst ${esc(x.kind)}">${k}</span>${ride ? `<button class="ride" data-ride="${esc(x.no)}">この便に乗る</button>` : ""}</div></li>`; };
@@ -1868,8 +1870,10 @@ document.addEventListener("click", e => {
   else if(more){ NOW.more = !NOW.more; }
   else if(ride){ const x = ((NOW.data.flights || {}).dep || []).find(f => f.no === ride.dataset.ride); if(!x) return;
     const to = IATA[x.place], d = new Date(Date.now() + 9*36e5).toISOString().slice(0, 10);
-    savePlan({ from: NOW.a.id, to: to.id, airline: x.airline, no: x.no, day: d });
-    NOW.msg = `${esc(x.no)}（${esc(placeShort(x.place))}行き）を覚えました。${esc(to.name)}でチェックインすると、このフライトに便名が付きます。`
+    if(to) savePlan({ from: NOW.a.id, to: to.id, airline: x.airline, no: x.no, day: d });
+    else savePlan({ intl: true, dep: NOW.a.iata, arr: x.place, airline: x.airline, no: x.no, day: d });   // 国際線：ホームで出発から到着までを出す
+    NOW.msg = to ? `${esc(x.no)}（${esc(placeShort(x.place))}行き）を覚えました。${esc(to.name)}でチェックインすると、このフライトに便名が付きます。`
+      : `${esc(x.no)}（${esc(placeAny(x.place))}行き）を覚えました。ホームに、出発から到着までの様子を出します。`
       + (SERVER && pushOK() && PUSH_KEY !== null && !pushFlights().includes(`${x.no}@${d}`) ? `<br><button class="linkbtn2" data-ride-push="${esc(x.no)}@${d}">この便の遅れ・ダイバートを通知する</button>` : ""); }
   else return;
   renderNow();
@@ -1877,8 +1881,37 @@ document.addEventListener("click", e => {
 /* 乗る便の機体はいまどこ（推定）：「この便に乗る」で選んだ便の前に、同じ機体が飛んでくる便（機体のつながりの記録から推定）と、出発の遅れの見込み */
 let RIDE = null, RIDE_T = 0;
 const ridePlan = () => { try{ return JSON.parse(localStorage.getItem(PLAN_KEY) || "null"); }catch(e){ return null; } };
+// 国際線・海外の航空会社の便：出発から到着まで（flight-live。機体は世界中の機体の位置から便名で探す）
+let RIDE_LIVE = null, RIDE_LIVE_T = 0;
+const tzHM = (t, iata) => t ? new Date(t).toLocaleTimeString("ja-JP", { hour:"2-digit", minute:"2-digit", timeZone: IATA[iata] ? "Asia/Tokyo" : (WORLD_TZ[iata] || "Asia/Tokyo") }) : "—";
+const localNote = iata => IATA[iata] ? "" : WORLD_TZ[iata] ? "（現地）" : "";
+async function fetchLive(no, dep){
+  try{ const r = await fetch(SORAMEMO_CONFIG.supabaseUrl.replace(/\/$/, "") + `/functions/v1/flight-live?flight=${encodeURIComponent(no)}${dep ? "&dep=" + dep : ""}`, { headers:{ apikey:SORAMEMO_CONFIG.supabaseAnonKey } });
+    return r.ok ? await r.json() : null; }catch(e){ return null; }
+}
+async function renderRideIntl(p, force){
+  const box = $("rideCard"), today = new Date(Date.now() + 9*36e5).toISOString().slice(0, 10);
+  if(p.day < today){ box.hidden = true; box.innerHTML = ""; return; }
+  if(force || !RIDE_LIVE || RIDE_LIVE.no !== p.no || Date.now() - RIDE_LIVE_T > 60_000){ RIDE_LIVE_T = Date.now(); RIDE_LIVE = { no:p.no, d: await fetchLive(p.no, p.dep) }; }
+  const d = RIDE_LIVE.d || {}, dep = d.dep || p.dep, arr = d.arr || p.arr, est = d.source === "route_estimate";
+  const ph = d.phase, pct = d.progress != null ? Math.round(Number(d.progress) * 100) : null;
+  const st = !d.found ? `<span class="rv">いまは見つかりません。${p.day > today ? "当日になると出します。" : "出発が近づくと出ます。"}</span>`
+    : ph === "cancelled" ? `<span class="rv late">欠航（航空会社の運航情報）</span>`
+    : ph === "landed" ? `<span class="rv ok">到着しました${d.ata ? `（${tzHM(d.ata, arr)}${localNote(arr)}）` : ""}</span>`
+    : ph === "air" ? `<span class="rv ok">飛行中${d.pos && d.pos.alt_ft != null ? `　高度 ${fmtKm(d.pos.alt_ft)}ft` : ""}${d.pos && d.pos.kt ? `・時速 ${fmtKm(Math.round(d.pos.kt * 1.852))}km` : ""}</span>${d.eta_pred ? `<span>到着予想 ${tzHM(d.eta_pred, arr)}${localNote(arr)}（推定）</span>` : ""}`
+    : ph === "lost" ? `<span class="rv">飛行中のようです（いまは機体の位置が届かない所を飛んでいます）</span>`
+    : ph === "taxi" ? `<span class="rv">地上を移動しています（出発の前）</span>`
+    : `<span class="rv">出発前${d.etd ? `（出発の見込み ${tzHM(d.etd, dep)}${localNote(dep)}）` : ""}</span>`;
+  const bar = pct != null && d.found && ph !== "cancelled" ? `<div class="rbar" role="img" aria-label="飛んだ道のり ${pct}%"><i style="width:${pct}%"></i></div>` : "";
+  box.hidden = false;
+  box.innerHTML = `<div class="rh"><b>乗る便 ${esc(p.no)}</b><span>${esc(placeAny(dep))} → ${esc(placeAny(arr))}${est ? "（推定）" : ""}</span><button type="button" data-ride-off>やめる</button></div>
+    ${d.std ? `<span class="rl">出発 定刻 ${tzHM(d.std, dep)}${localNote(dep)}　到着 定刻 ${tzHM(d.sta, arr)}${localNote(arr)}${!IATA[arr] && WORLD_TZ[arr] ? `（日本時間 ${tzHM(d.sta, "HND")}）` : ""}</span>` : ""}
+    ${st}${bar}${d.reg || d.type ? `<span class="rl">機体 ${esc([d.reg, d.type].filter(Boolean).join("・"))}</span>` : ""}
+    <p class="fwnote">機体の位置は adsb.lol から便名で探した推定で、海の上などでは届かないことがあります。${est ? "この便は時刻表がないため、出発・到着の空港も機体の位置の情報の経路のデータからの推定です。" : `時刻は時刻表（現地時刻）と航空会社の運航情報。${ODPT_CREDIT}`}　空港の時間帯：OpenFlights（ODbL）</p>`;
+}
 async function renderRide(force){
   const box = $("rideCard"); if(!box) return;
+  if(ridePlan() && ridePlan().intl && SERVER){ if($("rideAdd")) $("rideAdd").hidden = true; return renderRideIntl(ridePlan(), force); }
   const p = ridePlan(), a = p && BY[p.from], b = p && BY[p.to], today = new Date(Date.now() + 9*36e5).toISOString().slice(0, 10);
   const show = SERVER && !!p && !!a && !!b && p.day >= today && /^[A-Z]{3}$/.test(a.iata);
   if($("rideAdd")) $("rideAdd").hidden = !SERVER || show;
@@ -1907,19 +1940,25 @@ document.addEventListener("submit", async e => {
   const no = $("rideNo").value.trim().toUpperCase().replace(/\s/g, ""), msg = $("rideMsg");
   if(!/^[A-Z0-9]{2}\d{1,4}$/.test(no)){ msg.textContent = "便名は「JL509」のように、航空会社の2文字と数字で入れてください。"; return; }
   msg.textContent = "探しています…";
-  const d = await rpcPost("inbound_aircraft", { p_flight:no, p_dep:null });
-  if(!d || !d.found || !IATA[d.dep] || !IATA[d.arr]){ msg.textContent = "今日・明日のJAL・ANAグループの時刻表に、この便が見つかりませんでした。"; return; }
-  msg.textContent = ""; $("rideNo").value = ""; track("ride", "input");
-  savePlan({ from:IATA[d.dep].id, to:IATA[d.arr].id, airline:no.slice(0, 2), no, day:new Date(Date.parse(d.std) + 9*36e5).toISOString().slice(0, 10) });
+  const d = await rpcPost("inbound_aircraft", { p_flight:no, p_dep:null }), dayOf = t => new Date(Date.parse(t) + 9*36e5).toISOString().slice(0, 10);
+  if(d && d.found && IATA[d.dep] && IATA[d.arr]){
+    msg.textContent = ""; $("rideNo").value = ""; track("ride", "input");
+    return savePlan({ from:IATA[d.dep].id, to:IATA[d.arr].id, airline:no.slice(0, 2), no, day:dayOf(d.std) });
+  }
+  // 国際線（JAL・ANA の時刻表にある）か、時刻表にない便（海外の航空会社など。いま飛んでいるときだけ見つかる）
+  const L = d && d.found ? { found:true, dep:d.dep, arr:d.arr, std:d.std } : await fetchLive(no, null);
+  if(!L || !L.found){ msg.textContent = "見つかりませんでした。JAL・ANAグループは今日・明日の時刻表から、そのほかの航空会社は、いま飛んでいる便だけ探せます。"; return; }
+  msg.textContent = ""; $("rideNo").value = ""; track("ride", "input_intl");
+  savePlan({ intl:true, dep:L.dep, arr:L.arr, airline:no.slice(0, 2), no, day: L.std ? dayOf(L.std) : new Date(Date.now() + 9*36e5).toISOString().slice(0, 10) });
 });
-document.addEventListener("click", e => { if(!e.target.closest("[data-ride-off]")) return; try{ localStorage.removeItem(PLAN_KEY); }catch(_){ } RIDE = null; renderRide(); });
+document.addEventListener("click", e => { if(!e.target.closest("[data-ride-off]")) return; try{ localStorage.removeItem(PLAN_KEY); }catch(_){ } RIDE = null; RIDE_LIVE = null; renderRide(); });
 setInterval(() => { if(document.visibilityState === "visible" && currentView() === "home" && ridePlan()) renderRide(); }, 60_000);
 /* 「この便に乗る」で選んだ便。次にできたフライト（同じ出発・到着、同じ日）に便名を付ける */
 const PLAN_KEY = "soramemo.plan";
-function savePlan(p){ try{ localStorage.setItem(PLAN_KEY, JSON.stringify(p)); }catch(e){} RIDE = null; setTimeout(() => renderRide(true), 0); }
+function savePlan(p){ try{ localStorage.setItem(PLAN_KEY, JSON.stringify(p)); }catch(e){} RIDE = null; RIDE_LIVE = null; setTimeout(() => renderRide(true), 0); }
 async function applyPlan(){
   let p = null; try{ p = JSON.parse(localStorage.getItem(PLAN_KEY) || "null"); }catch(e){}
-  if(!p || !SERVER || demo || !user) return;
+  if(!p || p.intl || !SERVER || demo || !user) return;   // 国際線は着いた先でチェックインしないので、便名は付けない
   const jst = t => new Date(t + 9*36e5).toISOString().slice(0, 10);
   if(Date.parse(p.day) < Date.now() - 2 * 864e5){ try{ localStorage.removeItem(PLAN_KEY); }catch(e){} return; }   // 2日たったら忘れる
   const f = S.flights.find(x => x.from === p.from && x.to === p.to && !x.airline && jst(x.dep) === p.day);
@@ -4846,6 +4885,8 @@ const WORLD_JA = { ICN:"ソウル（仁川）", GMP:"ソウル（金浦）", PUS
   LHR:"ロンドン", CDG:"パリ", FRA:"フランクフルト", MUC:"ミュンヘン", DUS:"デュッセルドルフ", HEL:"ヘルシンキ", ARN:"ストックホルム", CPH:"コペンハーゲン", AMS:"アムステルダム", BRU:"ブリュッセル",
   ZRH:"チューリッヒ", VIE:"ウィーン", MXP:"ミラノ", FCO:"ローマ", MAD:"マドリード", BCN:"バルセロナ", LIS:"リスボン", WAW:"ワルシャワ", PRG:"プラハ" };
 const placeAny = c => IATA[c] ? godShort(IATA[c]) : WORLD_JA[c] || c;
+// 海外の空港の時間帯（現地時刻を出すため。OpenFlights の airports.dat〔ODbL〕から）
+const WORLD_TZ = {"YVR":"America/Vancouver","YYZ":"America/Toronto","BRU":"Europe/Brussels","FRA":"Europe/Berlin","DUS":"Europe/Berlin","MUC":"Europe/Berlin","HEL":"Europe/Helsinki","LHR":"Europe/London","AMS":"Europe/Amsterdam","CPH":"Europe/Copenhagen","WAW":"Europe/Warsaw","ARN":"Europe/Stockholm","BCN":"Europe/Madrid","MAD":"Europe/Madrid","CDG":"Europe/Paris","MXP":"Europe/Rome","FCO":"Europe/Rome","PRG":"Europe/Prague","VIE":"Europe/Vienna","LIS":"Europe/Lisbon","ZRH":"Europe/Zurich","MEX":"America/Mexico_City","NAN":"Pacific/Fiji","NOU":"Pacific/Noumea","AKL":"Pacific/Auckland","AUH":"Asia/Dubai","DXB":"Asia/Dubai","SPN":"Pacific/Saipan","GUM":"Pacific/Guam","KHH":"Asia/Taipei","RMQ":"Asia/Taipei","TSA":"Asia/Taipei","TPE":"Asia/Taipei","CJU":"Asia/Seoul","PUS":"Asia/Seoul","GMP":"Asia/Seoul","MNL":"Asia/Manila","BOM":"Asia/Calcutta","CMB":"Asia/Colombo","PNH":"Asia/Phnom_Penh","HKG":"Asia/Hong_Kong","DEL":"Asia/Calcutta","MFM":"Asia/Macau","BLR":"Asia/Calcutta","MAA":"Asia/Calcutta","DMK":"Asia/Bangkok","DAD":"Asia/Saigon","HAN":"Asia/Saigon","SGN":"Asia/Saigon","RGN":"Asia/Rangoon","CGK":"Asia/Jakarta","KUL":"Asia/Kuala_Lumpur","SIN":"Asia/Singapore","BNE":"Australia/Brisbane","MEL":"Australia/Hobart","PER":"Australia/Perth","SYD":"Australia/Sydney","PEK":"Asia/Shanghai","CAN":"Asia/Shanghai","SZX":"Asia/Shanghai","WUH":"Asia/Shanghai","ULN":"Asia/Ulaanbaatar","XMN":"Asia/Shanghai","HGH":"Asia/Shanghai","TAO":"Asia/Shanghai","SHA":"Asia/Shanghai","CTU":"Asia/Shanghai","DLC":"Asia/Shanghai","PVG":"Asia/Shanghai","BOS":"America/New_York","SFO":"America/Los_Angeles","LAX":"America/Los_Angeles","EWR":"America/New_York","KOA":"Pacific/Honolulu","IAH":"America/Chicago","SEA":"America/Los_Angeles","DTW":"America/New_York","DFW":"America/Chicago","ATL":"America/New_York","IAD":"America/New_York","HNL":"Pacific/Honolulu","SAN":"America/Los_Angeles","SJC":"America/Los_Angeles","ANC":"America/Anchorage","JFK":"America/New_York","ORD":"America/Chicago","MSP":"America/Chicago","LAS":"America/Los_Angeles","BKK":"Asia/Bangkok","ICN":"Asia/Seoul","DPS":"Asia/Makassar","PPT":"Pacific/Tahiti","SHE":"Asia/Shanghai","CEB":"Asia/Manila","PKX":"Asia/Shanghai","TFU":"Asia/Shanghai","UBN":"Asia/Ulaanbaatar","DOH":"Asia/Qatar","IST":"Europe/Istanbul"};
 async function loadBoard(iata){
   if(!SERVER) return null;
   if(BOARD && BOARD_AP === iata && BOARD.kind === BOARD_KIND && Date.now() - BOARD_AT < 110_000) return BOARD;
