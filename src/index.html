@@ -746,6 +746,11 @@ ol.steps{padding-left:1.4em;line-height:1.9}
 .opsbtn{width:100%;margin:6px 0 4px}
 .dlg-wide{max-width:640px}
 .notice-slot{margin:0}
+.evbar{margin:10px 0 0;padding:10px 12px;border-radius:14px;background:#FFF7E6;color:#6B4200;font-size:12.5px;line-height:1.6}
+.evbar b{font-size:13.5px;margin-right:6px}
+.evbar small{display:block;color:#7A5410;font-size:11.5px}
+[data-palette="board"] .evbar{background:rgba(245,158,11,.14);color:#FCD34D}
+[data-palette="board"] .evbar small{color:#FDE68A}
 .mp-sec{margin:16px 0 4px}
 .mp-sec h4{font-size:13px;color:var(--sumi);margin:0 0 4px;letter-spacing:.04em}
 .plus-list{margin:6px 0 0;padding-left:1.2em;font-size:14px;line-height:1.8}
@@ -1129,6 +1134,7 @@ nav.tabs{transition:transform .3s cubic-bezier(.2,.8,.2,1),opacity .2s}
       <button class="bp-stub" id="checkin" aria-label="チェックイン（半券を右へ引いて切ります）"><span class="v">チェックイン</span><svg viewBox="0 0 26 14" aria-hidden="true"><path d="M2 7h20"/><path d="M17 2l5 5-5 5"/></svg><span class="s">引いて切る</span></button>
     </div>
     <p class="msg" id="msg" role="status" aria-live="polite"></p>
+    <div class="evbar" id="eventBar" hidden></div>
     <p class="hint ckhint">空港の判定範囲（1〜2km）の中で、半券を右へ引いて切ると印が押されます。</p>
     <div class="demo-pick">
       <label for="demoAirport">いる空港（デモ）</label>
@@ -1617,7 +1623,7 @@ let APP_STATUS = { maintenance:false, checkin_enabled:true, message:"" };
 async function loadAppStatus(){
   try{ const { data, error } = await sb.rpc("app_status"); if(!error && data){
     APP_STATUS = { maintenance: data.maintenance === true, checkin_enabled: data.checkin_enabled !== false, message: data.message || "" };
-    const was = GAME_RELEASED; GAME_RELEASED = data.game_released === true;
+    const was = GAME_RELEASED; GAME_RELEASED = data.game_released === true; renderEventBar();
     if(was !== GAME_RELEASED){ setMode(MODE); if(GAME_RELEASED && user && gameAvail()) loadCompanyServer().then(() => { DIRTY.game = true; renderVisible(); }); }
   } }catch(e){}
   const bar = $("statusBar"), stop = APP_STATUS.maintenance || !APP_STATUS.checkin_enabled;
@@ -1628,6 +1634,26 @@ async function loadAppStatus(){
 }
 // 空港ごとのお知らせ（公式の発表を、出典つきで運営者が手入力したもの）。airport_id ごとに新しい順
 let AP_NOTICES = new Map();
+/* 行事のボーナス：期間中に空港でチェックインすると、エアライン経営の資金（空港ごとに1回、珍しい空港は倍） */
+let EVENTS = [], EVB = null;
+const evMD = t => { const d = new Date(t); return `${d.getMonth() + 1}/${d.getDate()}`; };
+async function loadEvents(){
+  try{ const { data, error } = await sb.rpc("current_events"); if(error || !Array.isArray(data)) return; EVENTS = data; renderEventBar(); }catch(e){}
+}
+function renderEventBar(){
+  const box = $("eventBar"); if(!box) return;
+  const e = EVENTS.find(x => x.open) || EVENTS[0];
+  if(!e){ box.hidden = true; box.innerHTML = ""; return; }
+  const last = new Date(Date.parse(e.ends_at) - 1), soon = !e.open;
+  box.hidden = false;
+  box.innerHTML = `<b>${soon ? "まもなく　" : ""}${esc(e.name)}</b>${evMD(e.starts_at)}〜${evMD(last)}<br>空港でチェックインすると、エアライン経営の資金 +${yen(e.bonus)}（空港ごとに1回${Number(e.rare_mult) > 1 ? `・珍しい空港は${Number(e.rare_mult)}倍` : ""}）`
+    + `<small>${GAME_RELEASED ? "経営の画面の「受け取る」で資金に入ります。" : "エアライン経営の公開後に、経営の画面で受け取れます。"}${e.note ? esc(e.note) : ""}</small>`;
+}
+async function loadEvb(){
+  if(!SERVER || demo || !user || !sb) return null;
+  try{ const { data, error } = await sb.rpc("my_event_bonus"); if(!error && data) EVB = data; }catch(e){}
+  return EVB;
+}
 async function loadNotices(){
   try{ const { data, error } = await sb.rpc("airport_notices"); if(error || !Array.isArray(data)) return;
     const m = new Map(); for(const n of data){ if(!BY[n.airport_id] || !/^https:\/\//.test(n.source_url || "")) continue; if(!m.has(n.airport_id)) m.set(n.airport_id, []); m.get(n.airport_id).push(n); }
@@ -1845,7 +1871,7 @@ function loadScript(src){
 async function initServer(){
   try{ await loadScript(SUPABASE_JS); if(!window.supabase || !window.supabase.createClient) throw new Error("supabase-js missing"); }catch(e){ say("サーバーにつながりませんでした。電波のよい場所で開き直してください。", true); return; }
   sb = window.supabase.createClient(SORAMEMO_CONFIG.supabaseUrl, SORAMEMO_CONFIG.supabaseAnonKey);
-  loadAppStatus(); loadNotices();
+  loadAppStatus(); loadNotices(); loadEvents();
   const { data } = await sb.auth.getSession(); user = data.session ? data.session.user : null;
   sb.auth.onAuthStateChange((_ev, session) => { const u = session ? session.user : null; if((u&&u.id) !== (user&&user.id)){ user = u; CO = null; reload().then(() => flushQueue(true)); } });
   await reload(); flushQueue(true); afterCheckout();
@@ -2065,7 +2091,10 @@ async function checkinServer(p){
   await reload();
   const a = BY[r.airport_id], term = r.terminal_id ? TBY[r.terminal_id] : null;
   const flight = r.flight ? {id:r.flight.id, from:r.flight.from_airport, to:r.flight.to_airport, km:r.flight.distance_km} : null;
-  say(flight ? `フライトを記録しました：${BY[flight.from].name} → ${a.name}` : `${placeName(a, term)}にチェックインしました。`);
+  const bon = Array.isArray(r.bonus) ? r.bonus : [];
+  say((flight ? `フライトを記録しました：${BY[flight.from].name} → ${a.name}` : `${placeName(a, term)}にチェックインしました。`)
+    + bon.map(b => `　${b.name}：経営の資金 +${yen(b.amount)}${GAME_RELEASED ? "" : "（経営の公開後に受け取れます）"}`).join(""));
+  if(bon.length) EVB = null;
   showStamp(a, Date.parse(r.at), r.first_airport, flight, term, r.first_terminal);
 }
 function demoNow(a){
@@ -3233,7 +3262,9 @@ function renderCompany(){
   $("coRate").textContent = rs.length ? `1日の収益 ${yen(daily)}（役職 +${Math.round(coBonus()*100)}%・評判 +${Math.round(coRepBonus()*100)}%）。${ECON.capDays}日分まで貯まります。` : "フライトを記録すると、その路線で収益が出はじめます。";
   const st = coStars();
   $("coStars").innerHTML = `評判 <b>${"★".repeat(st)}${"☆".repeat(5 - st)}</b> ${fmtKm(coRepPoints())}点`;
-  $("coCollect").disabled = !p.amount; $("coCollect").textContent = p.amount ? `受け取る　+${yen(p.amount)}${p.capped ? "（上限）" : ""}` : "収益を受け取る";
+  const ev = CO.server && EVB ? Number(EVB.pending) || 0 : 0, amt = p.amount + ev;
+  if(CO.server && !EVB) loadEvb().then(x => { if(x && Number(x.pending) && currentView() === "co") renderCompany(); });
+  $("coCollect").disabled = !amt; $("coCollect").textContent = amt ? `受け取る　+${yen(amt)}${p.capped ? "（上限）" : ""}${ev ? `（行事のボーナス ${yen(ev)}を含む）` : ""}` : "収益を受け取る";
   $("coRoles").innerHTML = ECON.roles.map(([id, label, pct]) => { const g = CO.roles[id] && BY[CO.roles[id]] && vc.has(CO.roles[id]) ? BY[CO.roles[id]] : null;
     return `<div class="role"><div class="rn">${label}</div>${g ? godSVG(g) : `<svg viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="50" fill="none" stroke="var(--line)" stroke-width="3" stroke-dasharray="4 6"/></svg>`}
       <div class="rb">${g ? `+${Math.round((pct + ECON.rankBonus * tierOf(vc.get(g.id))) * 100)}%` : `+${Math.round(pct*100)}%〜`}</div>
@@ -3270,7 +3301,7 @@ document.addEventListener("click", e => {
     $("dGod").showModal(); }
 });
 $("coCollect").onclick = async () => { const p = coPending(); if(!p.amount) return;
-  if(CO.server){ $("coCollect").disabled = true; const before = CO.cash; if(await coRpc("co_collect")){ $("coMsg").textContent = `${yen(CO.cash - before)}を受け取りました。`; $("coMsg").className = "msg"; } return; }
+  if(CO.server){ $("coCollect").disabled = true; const before = CO.cash; if(await coRpc("co_collect")){ EVB = { pending:0 }; $("coMsg").textContent = `${yen(CO.cash - before)}を受け取りました。`; $("coMsg").className = "msg"; } return; }
   CO.cash += p.amount; CO.last = Date.now(); coSave(); renderCompany();
   $("coMsg").textContent = `${yen(p.amount)}を受け取りました。`; $("coMsg").className = "msg"; };
 $("coName").onclick = async () => { const n = prompt("会社名（20文字まで）", CO.name); if(CO.server){ if(n && n.trim()) await coRpc("co_rename", {p_name:n}); return; } if(n && n.trim()){ CO.name = n.trim().slice(0, 20); coSave(); renderCompany(); } };

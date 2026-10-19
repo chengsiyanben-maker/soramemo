@@ -15,11 +15,13 @@
     rpc: async (name, a) => { window.__rpcs = (window.__rpcs||[]).concat([name]);
       const C = window.__co = window.__co || {name:'そらメモ航空', cash:500000, last:new Date(Date.now()-2*864e5).toISOString(), roles:{}, daily:344, bonus:0, routes:[{k:'5-6', base:344, level:1, cost:10320, mult:1}], fleet:[], total_km:820, rep_points:80, stars:1, facilities:{}};
       if(name === 'set_flight_details'){ const r = db.flights.find(x => x.id === a.p_flight_id); if(!r) return {data:null, error:{message:'flight not found'}}; r.fare = a.p_fare; r.seat = a.p_seat; window.__details = a; return {data:null, error:null}; }
+      if(name === 'current_events'){ return {data: window.__events || [], error:null}; }
+      if(name === 'my_event_bonus'){ return {data: window.__evb || {pending:0, total:0, count:0}, error:null}; }
       if(name === 'app_status'){ return {data: window.__appStatus || {maintenance:false, checkin_enabled:true, message:'', game_released: window.__gameReleased !== false}, error:null}; }
       if(name === 'plus_status'){ return {data:{plus:!!window.__plus, status: window.__plus ? 'active' : null, until: window.__plus ? new Date(Date.now()+20*864e5).toISOString() : null}, error:null}; }
       if(name === 'import_manual_flights'){ if(!window.__plus) return {error:{message:'plus required'}}; a.p_rows.forEach((r,i)=>db.manual_flights.push({id:100+i, from_airport:r.from, to_airport:r.to, flown_on:r.date, airline:r.airline})); return {data:a.p_rows.length, error:null}; }
       if(name === 'co_state'){ window.__coCalls = (window.__coCalls||0) + 1; if(window.__gameReleased === false) return {data:null, error:{message:'game not released'}}; return {data:{...C, pending:Math.floor(C.daily*2)}, error:null}; }
-      if(name === 'co_collect'){ C.cash += C.daily*2; C.last = new Date().toISOString(); return {data:{...C, pending:0}, error:null}; }
+      if(name === 'co_collect'){ C.cash += C.daily*2 + ((window.__evb && window.__evb.pending) || 0); if(window.__evb) window.__evb.pending = 0; C.last = new Date().toISOString(); return {data:{...C, pending:0}, error:null}; }
       if(name === 'co_upgrade'){ const r = C.routes.find(x=>x.k===a.p_route); if(!r) return {error:{message:'route not found'}}; if(C.cash < r.cost) return {error:{message:'not enough cash'}}; C.cash -= r.cost; r.level++; r.cost = r.base*3*r.level; C.daily = Math.round(r.base*(1+.25*(r.level-1))); return {data:{...C}, error:null}; }
       if(name === 'co_set_role'){ if(a.p_airport && a.p_airport !== 5) return {error:{message:'guardian not met'}}; C.roles[a.p_role] = a.p_airport; C.bonus = a.p_airport ? .1 : 0; return {data:{...C}, error:null}; }
       if(name === 'co_buy'){ if(a.p_type==='wb') return {error:{message:'aircraft locked'}}; C.cash -= 1000; C.fleet.push({id:C.fleet.length+1, type:a.p_type, route:null}); return {data:{...C}, error:null}; }
@@ -36,7 +38,7 @@
       const at = new Date(body.queued ? body.ts : Date.now()).toISOString();
       const first = !db.checkins.some(c=>c.airport_id===n.a.id);
       db.checkins.push({airport_id:n.a.id, terminal_id:n.term?n.term.id:null, created_at:at, accuracy_m:body.acc});
-      return {data:{ok:true, at, airport_id:n.a.id, terminal_id:n.term?n.term.id:null, first_airport:first, first_terminal:true, flight:null, flags:[]}, error:null};
+      return {data:{ok:true, at, airport_id:n.a.id, terminal_id:n.term?n.term.id:null, first_airport:first, first_terminal:true, flight:null, flags:[], bonus: window.__bonus || []}, error:null};
     }}
   }; } };
 })();
