@@ -4,6 +4,7 @@
 //       odpt:isValidFrom / odpt:isValidTo（その期間だけ）・odpt:aircraftType
 export type ScheduleRow = { svc_date: string; flight: string; dep: string; arr: string; std: string; sta: string; aircraft: string | null; source: string };
 
+import { worldAirport } from "./world_airports.ts";
 const DAY = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 export const ODPT_SOURCE = "ODPT（公共交通オープンデータセンター）フライト時刻表";
 
@@ -29,9 +30,11 @@ export function scheduleRows(items: any[], dates: string[], operator: string): S
         const no = Array.isArray(f?.["odpt:flightNumber"]) ? String(f["odpt:flightNumber"][0] ?? "") : "";
         const t1 = hm(f?.["odpt:originTime"]), t2 = hm(f?.["odpt:destinationTime"]);
         if (!/^[A-Z0-9]{2}\d{1,4}[A-Z]?$/.test(no) || !t1 || !t2) continue;
-        const std = new Date(`${date}T${t1}:00+09:00`);
-        let sta = new Date(`${date}T${t2}:00+09:00`);
-        if (sta <= std) sta = new Date(sta.getTime() + 864e5);   // 日付をまたぐ便
+        // 時刻表の時刻は、それぞれの空港の現地時刻（国内線はどちらも日本時間）。海外の空港は、その国の時間帯で読む
+        const std = localTime(date, t1, tzOf(dep));
+        let sta = localTime(date, t2, tzOf(arr));
+        while (sta <= std) sta = new Date(sta.getTime() + 864e5);   // 日付をまたぐ便（日付変更線を東へ越える便は前の日付になることもある）
+        if (sta.getTime() - std.getTime() > 864e5) sta = new Date(sta.getTime() - 864e5);
         const row = { svc_date: date, flight: no, dep, arr, std: std.toISOString(), sta: sta.toISOString(),
           aircraft: typeof f["odpt:aircraftType"] === "string" ? f["odpt:aircraftType"].slice(0, 20) : null, source: `${ODPT_SOURCE}（${operator}）` };
         out.set(`${date}|${no}|${dep}`, row);
@@ -41,6 +44,19 @@ export function scheduleRows(items: any[], dates: string[], operator: string): S
   return [...out.values()];
 }
 
+// 空港の時間帯（日本の空港と、表にない空港は日本時間）
+export function tzOf(iata: string): string { const w = worldAirport(iata); return w ? w.tz : "Asia/Tokyo"; }
+// その時間帯の「日付 + 時刻」を、世界の時刻（UTC）にする（夏時間も Intl で考える）
+export function localTime(date: string, hm: string, tz: string): Date {
+  const guess = Date.parse(`${date}T${hm}:00Z`);
+  const off = (t: number) => {
+    const p = Object.fromEntries(new Intl.DateTimeFormat("en-US", { timeZone: tz, hourCycle: "h23", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" })
+      .formatToParts(new Date(t)).map((x) => [x.type, x.value]));
+    return Date.UTC(+p.year, +p.month - 1, +p.day, +p.hour, +p.minute) - t;
+  };
+  let t = guess - off(guess); t = guess - off(t);   // 夏時間の切り替わりの近くでも合うように2回
+  return new Date(t);
+}
 // 日本時間の今日から n 日ぶんの日付
 export function jstDates(now: Date, n: number): string[] {
   return Array.from({ length: n }, (_, i) => new Date(now.getTime() + 9 * 36e5 + i * 864e5).toISOString().slice(0, 10));
