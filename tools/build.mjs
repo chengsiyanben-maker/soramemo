@@ -2,6 +2,12 @@
 //   cd tools && npm install terser@5 csso@5 && cd .. && node tools/build.mjs
 // 関数や変数の名前は変えない（テストや運営画面から呼ぶため。toplevel の名前は短くしない）。
 import { readFileSync, writeFileSync } from "node:fs";
+// 特別塗装機の一覧（アライアンス塗装は除く）。期間が終わったものも、乗ったときの記録として名前は残す
+function liveryNames() {
+  const ts = readFileSync(new URL("../supabase/functions/_shared/liveries.ts", import.meta.url), "utf8"), m = {};
+  for (const x of ts.matchAll(/\{\s*reg:\s*"([A-Z0-9-]+)",\s*name:\s*"([^"]+)"([^}]*)\}/g)) if (!/kind:\s*"alliance"/.test(x[3])) m[x[1]] = x[2];
+  return JSON.stringify(m);
+}
 import { gzipSync } from "node:zlib";
 import { createHash } from "node:crypto";
 import { execFileSync } from "node:child_process";
@@ -22,6 +28,7 @@ for (const f of files) {
   if (f === "index.html") console.log(`版の番号: ${src.match(/const APP_VERSION = "([^"]+)"/)[1]}`);
   // 「空港のいま」には、アプリ本体と同じ運用の判定の中心を差し込む（判定の仕方がずれないように）
   let out = f === "now.html" ? src.replace("/*@OPS_CORE@*/", () => opsCoreParts().join("\n")) : src;
+  out = out.replace("/*@LIVERIES@*/{}", () => liveryNames());   // 特別塗装機の一覧（登録記号 → 名前）を、サーバーの liveries.ts からアプリに入れる（乗った機体の図鑑の印）
   // CSS
   out = out.replace(/<style>([\s\S]*?)<\/style>/g, (_, css) => `<style>${cssMinify(css).css}</style>`);
   // JS（<script src> 以外の、中身のある script）
