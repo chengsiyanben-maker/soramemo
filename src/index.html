@@ -4849,14 +4849,14 @@ async function showOntime(f){
   const a = BY[f.from], b = BY[f.to];
   if(!SERVER || demo || !a || !b || !/^[A-Z]{3}$/.test(a.iata) || !/^[A-Z]{3}$/.test(b.iata)) return;
   const d = await loadOntime(`r|${a.iata}|${b.iata}`, "route_ontime", { p_dep:a.iata, p_arr:b.iata, p_days:30 });
-  if(editing !== f || !d || Number(d.measured) < 10) return;
+  if(editing !== f || !d || !(Number(d.measured) >= 10)) return;
   box.textContent = `この路線の定時率（直近30日）：${pct(d.ontime, d.measured)}%（${d.measured}便のうち${d.ontime}便${Number(d.cancelled) ? `・欠航${d.cancelled}便` : ""}）。${OT_NOTE}`;
   box.hidden = false;
 }
 async function renderOntime(){
   const iata = OPS_AP, box = $("opsOntime"); if(!box) return;
   const d = await loadOntime(`a|${iata}`, "airport_ontime", { p_iata:iata, p_days:30 }); if(OPS_AP !== iata) return;
-  if(!d || Number(d.measured) < 20){ box.hidden = true; box.innerHTML = ""; return; }
+  if(!d || !(Number(d.measured) >= 20) || !Array.isArray(d.routes)){ box.hidden = true; box.innerHTML = ""; return; }
   const name = (OPS_AIRPORTS[iata] || {}).name || iata, md = t => { const x = new Date(t + "T00:00:00+09:00"); return `${x.getMonth() + 1}/${x.getDate()}`; };
   const cls = p => p >= 85 ? "" : p >= 70 ? "mid" : "low";
   box.hidden = false;
