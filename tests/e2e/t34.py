@@ -18,7 +18,11 @@ async def main():
           cs.push({a:id('KIX'),t:(t+=864e5),acc:20,term:'KIX-T1'}); cs.push({a:id('KIX'),t:(t+=36e5),acc:20,term:'KIX-T2'});
           cs.push({a:id('CTS'),t:(t+=864e5),acc:20,term:'CTS-D'});
           localStorage.setItem('soramemo.v1', JSON.stringify({checkins:cs, flights:[], manual:[]})); }""")
-        await pg.wait_for_timeout(400); await pg.reload(); await pg.wait_for_load_state('load'); await pg.wait_for_timeout(600)
+        await pg.wait_for_timeout(400); await pg.reload(); await pg.wait_for_load_state('load'); 
+        for _ in range(150):
+            if await pg.evaluate('typeof render === "function" && typeof S !== "undefined" && S.checkins.length > 0'): break
+            await pg.wait_for_timeout(200)
+        await pg.wait_for_timeout(300)     # 読み込みが終わるまで待つ（まとめて流すと重く、決まった時間では足りないことがあった）
         print('done:', await pg.evaluate('JSON.stringify([...achState().done.keys()].filter(k=>/^v|^t/.test(k)))'))
         await pg.evaluate("goTab('ach')"); await pg.wait_for_timeout(200)
         await pg.locator('.vreg >> nth=0').scroll_into_view_if_needed(); await pg.screenshot(path=os.path.join(WORK,'vach.png'))

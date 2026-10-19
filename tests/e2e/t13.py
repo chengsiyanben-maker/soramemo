@@ -32,7 +32,7 @@ async def main():
                 await pg.click('nav.tabs button[data-v=book]'); await pg.screenshot(path=os.path.join(WORK,'f_book_jal.png')); await pg.click('nav.tabs button[data-v=home]')
                 await pg.click('nav.tabs button[data-v=log]'); await pg.click('#shareMap'); await pg.wait_for_timeout(900)
                 src=await pg.get_attribute('#shareImg','src'); open(os.path.join(WORK,'f_mapcard_jal.png'),'wb').write(base64.b64decode(src.split(',')[1])); await pg.click('#shareClose'); await pg.click('nav.tabs button[data-v=home]')
-        await pg.wait_for_timeout(400); await pg.reload(); await pg.wait_for_load_state('load'); await pg.wait_for_timeout(500); print('persist:', await pg.evaluate('FOCUS'))
+        await pg.wait_for_timeout(400); await pg.reload(); await pg.wait_for_load_state('load'); await pg.wait_for_selector('#focusOff', timeout=30000); print('persist:', await pg.evaluate('FOCUS'))
         await pg.click('#focusOff'); print('after off:', await pg.evaluate('FOCUS'), await pg.is_visible('#focusBar'))
         print(errs); await b.close()
 asyncio.run(main())

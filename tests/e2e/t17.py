@@ -21,7 +21,11 @@ async def main():
           fs.forEach(f => f.km = km(f.from, f.to));
           localStorage.setItem('soramemo.v1', JSON.stringify({checkins:cs, flights:fs, manual:[]}));
         }""")
-        await pg.wait_for_timeout(400); await pg.reload(); await pg.wait_for_load_state('load'); await pg.wait_for_timeout(700)
+        await pg.wait_for_timeout(400); await pg.reload(); await pg.wait_for_load_state('load'); 
+        for _ in range(150):
+            if await pg.evaluate('typeof render === "function" && typeof S !== "undefined" && S.checkins.length > 0'): break
+            await pg.wait_for_timeout(200)
+        await pg.wait_for_timeout(300)     # 読み込みが終わるまで待つ（まとめて流すと重く、決まった時間では足りないことがあった）
         r = await pg.evaluate("""(() => { const s = achState(); const ids = ['morn1','morn10','night1','night10','ny','season1','st3','st6','st12','st24','yr10','yrkm','day3','day5','rt_1','ends','ns','both','rep20','thnd'];
            return {done: ids.filter(i => s.done.has(i)), not: ids.filter(i => !s.done.has(i)), cur: s.curStreak, best: s.bestStreak, ends: s.value(ACH.find(x=>x.id==='ends'))}; })()""")
         print(json.dumps(r, ensure_ascii=False))
