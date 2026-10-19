@@ -40,4 +40,6 @@ r = await as('anon', `select public.inbound_aircraft('JL1', 'HND')`);
 check('時刻表にない便は found=false', r?.found === false, r);
 r = await as('anon', `select public.inbound_aircraft('bad', 'HND')`);
 check('形の違う便名は null', r === null || r === 'ok', r);
+r = await as('anon', `select public.inbound_aircraft('JL509', null)`);
+check('出発空港を省いても、便名だけで見つける', r?.found && r.dep === 'HND' && r.inbound?.flight === 'JL0500', r);
 if (bad) process.exit(1);

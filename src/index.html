@@ -779,6 +779,12 @@ ol.steps{padding-left:1.4em;line-height:1.9}
 .dlg-wide{max-width:640px}
 .notice-slot{margin:0}
 .ridecard{margin:10px 0 0;padding:12px 14px;border-radius:16px;background:var(--hm-card,#FFFFFF);box-shadow:0 10px 24px -18px rgba(15,23,42,.35);color:var(--hm-ink,#1F2937);font-size:12.5px;line-height:1.6}
+.rideadd{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:8px;margin:10px 0 0;padding:8px 10px 8px 14px;border-radius:16px;background:var(--hm-card,#FFFFFF);box-shadow:0 10px 24px -18px rgba(15,23,42,.35)}
+.rideadd label{font-size:12px;font-weight:700;color:var(--hm-sub,#6B7280)}
+.rideadd input{min-width:0;min-height:36px;border:1px solid var(--line);border-radius:10px;padding:0 10px;font:600 14px var(--gothic);text-transform:uppercase;background:transparent;color:var(--hm-ink,#1F2937)}
+.rideadd .chip{min-height:36px}
+.rideadd .hint{grid-column:1/-1;margin:0;font-size:11.5px}
+.rideadd .hint:empty{display:none}
 .ridecard .rh{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
 .ridecard .rh b{font-size:15px}
 .ridecard .rh button{border:0;background:none;color:var(--hm-sub,#6B7280);font:600 12px var(--gothic);min-height:32px;padding:0 4px;text-decoration:underline}
@@ -1183,6 +1189,7 @@ nav.tabs{transition:transform .3s cubic-bezier(.2,.8,.2,1),opacity .2s}
     </div>
     <p class="msg" id="msg" role="status" aria-live="polite"></p>
     <div class="ridecard" id="rideCard" hidden aria-live="polite"></div>
+    <form class="rideadd" id="rideAdd" hidden><label for="rideNo">これから乗る便</label><input id="rideNo" placeholder="例 JL509" autocapitalize="characters" autocomplete="off" maxlength="7" inputmode="latin"><button class="chip" type="submit">機体を調べる</button><p class="hint" id="rideMsg" role="status" aria-live="polite"></p></form>
     <div class="evbar" id="eventBar" hidden></div>
     <p class="hint ckhint">空港の判定範囲（1〜2km）の中で、半券を右へ引いて切ると印が押されます。</p>
     <div class="demo-pick">
@@ -1870,7 +1877,9 @@ const ridePlan = () => { try{ return JSON.parse(localStorage.getItem(PLAN_KEY) |
 async function renderRide(force){
   const box = $("rideCard"); if(!box) return;
   const p = ridePlan(), a = p && BY[p.from], b = p && BY[p.to], today = new Date(Date.now() + 9*36e5).toISOString().slice(0, 10);
-  if(!SERVER || !p || !a || !b || p.day !== today || !/^[A-Z]{3}$/.test(a.iata)){ box.hidden = true; box.innerHTML = ""; return; }
+  const show = SERVER && !!p && !!a && !!b && p.day >= today && /^[A-Z]{3}$/.test(a.iata);
+  if($("rideAdd")) $("rideAdd").hidden = !SERVER || show;
+  if(!show || p.day !== today){ box.hidden = true; box.innerHTML = ""; if(show && p.day > today){ box.hidden = false; box.innerHTML = `<div class="rh"><b>乗る便 ${esc(p.no)}</b><span>${esc(placeShort(b.iata))}行き・明日</span><button type="button" data-ride-off>やめる</button></div><span class="rl">当日になると、この便の機体がいまどこにいるかを出します。</span>`; } return; }
   if(force || !RIDE || RIDE.no !== p.no || Date.now() - RIDE_T > 120_000){
     RIDE_T = Date.now(); const d = await rpcPost("inbound_aircraft", { p_flight:p.no, p_dep:a.iata }); RIDE = { no:p.no, d };
   }
@@ -1889,6 +1898,17 @@ async function renderRide(force){
     ${st}${ibLine}
     <p class="fwnote">前の便は、前の60日に同じ機体が続けて飛んだ記録から推定しています${ib ? `（${Math.round(Number(ib.share) * 100)}%）` : ""}。出発の見込みは、前の便の到着に折り返しの最短の時間（${d.turn || 35}分）を足した目安で、航空会社の発表ではありません。${ODPT_CREDIT}</p>`;
 }
+// ホームで便名を入れる：今日・明日のこれから出る便から探して、「この便に乗る」と同じように覚える
+document.addEventListener("submit", async e => {
+  if(e.target.id !== "rideAdd") return; e.preventDefault();
+  const no = $("rideNo").value.trim().toUpperCase().replace(/\s/g, ""), msg = $("rideMsg");
+  if(!/^[A-Z0-9]{2}\d{1,4}$/.test(no)){ msg.textContent = "便名は「JL509」のように、航空会社の2文字と数字で入れてください。"; return; }
+  msg.textContent = "探しています…";
+  const d = await rpcPost("inbound_aircraft", { p_flight:no, p_dep:null });
+  if(!d || !d.found || !IATA[d.dep] || !IATA[d.arr]){ msg.textContent = "今日・明日のJAL・ANAグループの時刻表に、この便が見つかりませんでした。"; return; }
+  msg.textContent = ""; $("rideNo").value = ""; track("ride", "input");
+  savePlan({ from:IATA[d.dep].id, to:IATA[d.arr].id, airline:no.slice(0, 2), no, day:new Date(Date.parse(d.std) + 9*36e5).toISOString().slice(0, 10) });
+});
 document.addEventListener("click", e => { if(!e.target.closest("[data-ride-off]")) return; try{ localStorage.removeItem(PLAN_KEY); }catch(_){ } RIDE = null; renderRide(); });
 setInterval(() => { if(document.visibilityState === "visible" && currentView() === "home" && ridePlan()) renderRide(); }, 60_000);
 /* 「この便に乗る」で選んだ便。次にできたフライト（同じ出発・到着、同じ日）に便名を付ける */
