@@ -25,8 +25,8 @@ export function foreignNear(pos: LivePos[], at: { lat: number; lon: number }, ma
 }
 
 // adsb.lol の routeset の答え → 呼び出し符号ごとの経路（途中の空港があれば最初と最後）
-// deno-lint-ignore no-explicit-any
 //   答えに呼び出し符号がないときは、問い合わせた順（asked）で対応させる
+// deno-lint-ignore no-explicit-any
 export function parseRoutes(rows: any[], asked: string[] = []): Map<string, Route> {
   const m = new Map<string, Route>();
   (Array.isArray(rows) ? rows : []).forEach((x, i) => {
