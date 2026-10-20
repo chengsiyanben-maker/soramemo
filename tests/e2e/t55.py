@@ -22,7 +22,7 @@ RO = {'dep': 'HND', 'arr': 'CTS', 'days': 30, 'flights': 130, 'measured': 96, 'o
 async def main():
     async with async_playwright() as p:
         b=await p.chromium.launch(); c=await b.new_context(viewport={'width':400,'height':860}, timezone_id='Asia/Tokyo')
-        await c.add_init_script("localStorage.setItem('soramemo.onboarded','1'); localStorage.setItem('soramemo.install.later','1')")
+        await c.add_init_script("localStorage.setItem('soramemo.onboarded','1'); localStorage.setItem('soramemo.install.later','1'); localStorage.setItem('soramemo.view.ops','ontime')")
         await c.route('https://cdn.jsdelivr.net/npm/@supabase/**', lambda r: r.fulfill(path=os.path.join(HERE,'fake_sb.js'), content_type='application/javascript'))
         calls=[]
         async def rpc(r):
@@ -37,6 +37,7 @@ async def main():
         await pg.evaluate("goTab('home'); goTab('ops')"); await pg.wait_for_selector('#opsOntime:not([hidden])', timeout=8000)
         t = await pg.inner_text('#opsOntime')
         print('定時率:', '84%' in t.replace('\n', ''), '| 路線:', await pg.locator('#opsOntime .otlist li').count(), '| 福岡は黄色:', await pg.locator('#opsOntime .otlist i.mid').count() == 1)
+        await pg.click('[data-vw="ops:art"]')   # 見方の切り替え：空の道すじ
         await pg.wait_for_selector('#opsArt:not([hidden]) canvas', timeout=8000)
         lit = await pg.evaluate("""() => { const cv = document.getElementById('artCv'), d = cv.getContext('2d').getImageData(0, 0, cv.width, cv.height).data; let n = 0;
           for(let i = 0; i < d.length; i += 4) if(d[i] > d[i + 2] + 30) n++; return n; }""")

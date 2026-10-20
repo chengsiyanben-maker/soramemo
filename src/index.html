@@ -181,6 +181,8 @@ h3{font-size:14px;color:var(--sumi);font-weight:500;margin:22px 0 10px}
 .manual{margin-top:14px;display:grid;gap:10px}
 .manual .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .manual input[type=date]{width:100%;padding:11px;border:1px solid var(--line);border-radius:10px;background:var(--paper)}
+.manual .row>*{min-width:0}
+.manual input:not([type]){width:100%;box-sizing:border-box;padding:12px;border:1px solid var(--line);border-radius:10px;background:var(--paper);font:inherit;color:inherit}
 .btn2{padding:12px 16px;border:1.5px solid var(--ink);background:none;border-radius:10px;font-weight:700}
 
 /* tabs */
@@ -794,6 +796,8 @@ ol.steps{padding-left:1.4em;line-height:1.9}
 .ridecard .rl{display:block;color:var(--hm-sub,#6B7280);font-size:11.5px;margin-top:6px}
 .ridecard .rv{display:block;font-weight:700}
 .ridecard .late{color:#B45309}
+.ridecard .rrec{display:block;width:100%;margin-top:10px}
+.pass .ps .idel{font-size:11px;padding:4px 0;min-height:0}
 .ridecard .rbar{height:6px;border-radius:999px;background:var(--hm-pill,rgba(17,24,39,.06));margin:8px 0 2px;overflow:hidden}
 .ridecard .rbar i{display:block;height:100%;border-radius:999px;background:#2563EB}
 .ridecard .ok{color:#047857}
@@ -1017,6 +1021,137 @@ details.dev summary{cursor:pointer;color:var(--sumi);font-size:14px;padding:6px 
 /* ---------- 図鑑：全国制覇のカード、地方のタイル、開いた地方の印、最近押した印 ---------- */
 #v-book{--bk-ink:#1F2937;--bk-sub:#6B7280;--bk-mute:#6B7280;--bk-card:#FFFFFF;--bk-pill:#FFFFFF;--bk-track:#EEF0F3;--bk-shadow:0 12px 26px -18px rgba(15,23,42,.3)}
 [data-palette="board"] #v-book{--bk-ink:#E5E7EB;--bk-sub:#8B95A3;--bk-mute:#A7B0BC;--bk-card:#16191F;--bk-pill:#232830;--bk-track:#2A2F37;--bk-shadow:0 12px 26px -16px rgba(0,0,0,.7)}
+/* 見方の切り替え（図鑑・フライト・運用で共通。色は画面ごとの色の組み合わせから） */
+#v-book{--vw-ink:var(--bk-ink);--vw-mute:var(--bk-mute);--vw-card:var(--bk-card);--vw-track:var(--bk-track);--vw-shadow:var(--bk-shadow)}
+#v-log{--vw-ink:var(--lg-ink);--vw-mute:var(--lg-mute);--vw-card:var(--lg-card);--vw-track:var(--lg-track);--vw-shadow:var(--lg-shadow)}
+#v-ops{--vw-ink:var(--op-ink);--vw-mute:var(--op-mute);--vw-card:var(--op-card);--vw-track:var(--op-pill);--vw-shadow:var(--op-shadow)}
+.viewsw{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin:0 -2px 12px;padding:2px}
+.viewsw::-webkit-scrollbar{display:none}
+.viewsw button{flex:none;min-height:38px;border:1px solid var(--vw-track);border-radius:12px;padding:8px 13px;background:var(--vw-card);color:var(--vw-mute);font:700 12.5px var(--gothic)}
+.viewsw button[aria-selected="true"]{background:var(--vw-ink);border-color:var(--vw-ink);color:var(--vw-card)}
+.ovoff{display:none!important}
+/* 使う人ごとの構成：ホームのいちばん上のカードと、勧める画面 */
+.pcard{margin:2px 0 12px;display:flex;flex-direction:column;gap:8px}
+.pcard .ph{background:var(--ink);color:var(--paper);border-radius:22px;padding:14px 16px}
+.pcard .ph .l{display:flex;justify-content:space-between;gap:8px;font-size:11px;opacity:.75}
+.pcard .ph .v{font-size:26px;font-weight:900;margin-top:4px;line-height:1.15}
+.pcard .ph .v small{font-size:12px;font-weight:700}
+.pcard .ph .tr{height:7px;border-radius:4px;background:rgba(255,255,255,.18);margin-top:10px;overflow:hidden}
+.pcard .ph .tr i{display:block;height:7px;border-radius:4px;background:var(--gold)}
+.pcard .ph .s{display:flex;justify-content:space-between;gap:8px;font-size:12px;margin-top:8px}
+.pcard .pg{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.pcard .pg>div{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:9px 11px;min-width:0}
+.pcard .pg small{display:block;font-size:10.5px;color:var(--sumi)}
+.pcard .pg b{display:block;font-size:18px;font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pcard .pl{background:var(--paper);border:1px solid var(--line);border-radius:20px;padding:10px 14px}
+.pcard .pl h4{margin:2px 0 4px;font-size:13px}
+.pcard .pl li{display:flex;align-items:center;gap:10px;padding:8px 0;border-top:1px solid var(--line);font-size:13px}
+.pcard .pl ul{list-style:none;margin:0;padding:0}
+.pcard .pl li:first-child{border-top:0}
+.pcard .pl li b.t{width:44px;flex:none}
+.pcard .pl li span{flex:1;min-width:0}
+.pcard .pl li small{display:block;font-size:11px;color:var(--sumi)}
+.pcard .pl li em{font-style:normal;font-size:10.5px;font-weight:800;border-radius:7px;padding:3px 7px;background:var(--ink);color:var(--paper)}
+.pcard .pb{display:flex;gap:8px}
+.pcard .pb button{flex:1;min-height:44px;border-radius:14px;border:1px solid var(--line);background:var(--paper);color:var(--ink);font:700 13px var(--gothic)}
+dialog.psheet{margin:auto auto 0;width:100%;max-width:560px;border:0;border-radius:28px 28px 0 0;padding:0}
+dialog.psheet .dlg{padding:18px 20px calc(24px + env(safe-area-inset-bottom,0px))}
+dialog.psheet h3{font-size:21px;line-height:1.4;margin:4px 0 0}
+dialog.psheet .pchg{display:flex;gap:8px;margin-top:14px}
+dialog.psheet .pchg div{flex:1;border:1px solid var(--line);border-radius:14px;padding:9px 11px;font-size:12.5px;font-weight:800}
+dialog.psheet .pchg small{display:block;font-size:10.5px;font-weight:500;color:var(--sumi)}
+dialog.psheet .btn1,dialog.psheet .btn2{display:block;width:100%;margin-top:10px}
+.pmore{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+#v-ops .viewsw{margin-top:4px}
+#v-ops .opsday .hb{display:flex;align-items:flex-end;gap:3px;height:150px;margin-top:12px}
+#v-ops .opsday .hb>span{flex:1;display:flex;flex-direction:column;justify-content:flex-end;height:100%}
+#v-ops .opsday .hb i{display:block}
+#v-ops .opsday .hx{display:flex;justify-content:space-between;font-size:10px;color:var(--op-mute);margin-top:6px}
+#v-ops .opsday .big{font-size:44px;font-weight:900;line-height:1;color:var(--op-ink)}
+#v-ops .opsruler .rl{position:relative;margin:14px 0 4px 56px;border-left:2px solid var(--op-ink)}
+#v-ops .opsruler .tk{position:absolute;left:-58px;width:48px;text-align:right;font-size:12px;font-weight:800;color:var(--op-ink);transform:translateY(-50%)}
+#v-ops .opsruler .tk::after{content:"";position:absolute;right:-12px;top:50%;width:9px;height:2px;background:var(--op-ink)}
+#v-ops .opsruler .fl{position:absolute;width:calc(50% - 14px);box-sizing:border-box;border-radius:10px;padding:4px 8px;font-size:11.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transform:translateY(-50%)}
+#v-ops .opsruler .fl.d{left:8px;background:var(--op-ink);color:var(--op-card)}
+#v-ops .opsruler .fl.a{right:0;background:var(--shu-wash);color:var(--shu-text);border:1px solid var(--shu)}
+#v-ops .opsruler .now{position:absolute;left:-10px;right:0;height:2px;background:var(--shu)}
+#v-ops .opsstrip ol{list-style:none;margin:10px 0 0;padding:0;display:flex;flex-direction:column;gap:7px}
+#v-ops .opsstrip li{display:flex;border-radius:6px;overflow:hidden;background:var(--op-pill);min-height:50px}
+#v-ops .opsstrip li>i{width:8px;flex:none}
+#v-ops .opsstrip li>div{padding:6px 8px;border-right:1px solid var(--op-card);min-width:0}
+#v-ops .opsstrip .n{width:84px;flex:none;font-family:var(--dotfont);font-size:15px}
+#v-ops .opsstrip .p{flex:1;font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#v-ops .opsstrip .t{width:64px;flex:none;text-align:right;font-family:var(--dotfont);font-size:15px;border-right:0}
+#v-ops .opsstrip small{display:block;font-family:var(--gothic);font-size:10px;color:var(--op-mute);font-weight:500}
+#v-ops .opsapcards{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;padding:2px 2px 10px;margin:0 -2px}
+#v-ops .opsapcards>button{flex:none;width:76%;scroll-snap-align:start;border:0;border-radius:24px;padding:16px;text-align:left;background:var(--op-card);color:var(--op-ink);box-shadow:var(--op-shadow);font-family:var(--gothic)}
+#v-ops .opsapcards>button[aria-current="true"]{background:var(--op-ink);color:var(--op-card)}
+#v-ops .opsapcards .h{display:flex;justify-content:space-between;font-size:12px;font-weight:700}
+#v-ops .opsapcards .n{display:block;font-size:38px;font-weight:900;line-height:1;margin-top:16px}
+#v-ops .opsapcards .n small{font-size:13px;font-weight:700}
+#v-ops .opsapcards .s{display:block;font-size:12px;margin-top:6px;opacity:.85}
+#v-ops .opsapcards .c{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+#v-ops .opsapcards .c span{border-radius:999px;padding:4px 10px;font-size:11px;font-weight:700;background:var(--op-pill);color:var(--op-ink)}
+#v-ops .opsphoto ul{list-style:none;margin:10px 0 0;padding:0;display:flex;flex-direction:column;gap:8px}
+#v-ops .opsphoto li{display:flex;align-items:center;gap:12px;background:var(--op-pill);border-radius:14px;padding:10px 14px}
+#v-ops .opsphoto li b.t{width:46px;flex:none;font-size:15px}
+#v-ops .opsphoto li div{flex:1;min-width:0}
+#v-ops .opsphoto li div b{display:block;font-size:14px}
+#v-ops .opsphoto li small{display:block;font-size:11px;color:var(--op-mute)}
+#v-ops .opsphoto li em{font-style:normal;border-radius:8px;padding:3px 8px;font-size:11px;font-weight:800;background:var(--op-ink);color:var(--op-card)}
+.vwcard{background:var(--vw-card);border-radius:22px;padding:14px 16px;box-shadow:var(--vw-shadow);color:var(--vw-ink)}
+.vwnote{font-size:11.5px;color:var(--vw-mute);line-height:1.6;margin:8px 2px 0}
+/* 図鑑：地図 */
+#v-book .bkmap{position:relative;width:100%;aspect-ratio:.9;max-height:62vh;margin:0 auto}
+#v-book .bkmap i,#v-book .bkmap button{position:absolute;transform:translate(-50%,-50%);border-radius:50%;padding:0;border:0}
+#v-book .bkmap i{width:7px;height:7px;background:var(--bk-track)}
+#v-book .bkmap button{z-index:2;width:24px;height:24px;background:transparent;display:flex;align-items:center;justify-content:center}
+#v-book .bkmap button b{display:block;width:12px;height:12px;border-radius:50%;background:var(--shu);box-shadow:0 0 0 2px var(--bk-card)}
+#v-book .bkmap button.many b{width:17px;height:17px;box-shadow:0 0 0 2px var(--bk-card),0 0 0 4px var(--shu)}
+#v-book .bkleg{display:flex;gap:14px;font-size:11.5px;color:var(--bk-mute);margin:6px 2px 0}
+#v-book .bkleg i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px;vertical-align:-1px}
+#v-book .bknear{margin-top:12px}
+#v-book .bknear h3,#v-book .bksec{margin:0 0 6px;font-size:12px;font-weight:800;color:var(--bk-mute)}
+#v-book .bknear li{display:flex;justify-content:space-between;padding:9px 0;border-top:1px solid var(--bk-track);font-size:14px}
+#v-book .bknear li:first-child{border-top:0}
+#v-book .bknear ul{list-style:none;margin:0;padding:0}
+/* 図鑑：案内標 */
+#v-book .bksigns{display:flex;flex-direction:column;gap:10px}
+#v-book .bksign{display:block;width:100%;text-align:center;border:0;border-radius:10px;overflow:hidden;background:var(--bk-card);color:var(--bk-ink);box-shadow:var(--bk-shadow);padding:0;font-family:var(--gothic)}
+#v-book .bksign .band{display:flex;justify-content:space-between;padding:5px 12px;font-size:11px;font-weight:800;letter-spacing:.1em;background:var(--bk-track);color:var(--bk-mute)}
+#v-book .bksign.on .band{background:var(--shu);color:var(--on-shu)}
+#v-book .bksign .nm{display:block;font-size:26px;font-weight:900;letter-spacing:.12em;padding:10px 8px 0;line-height:1.15}
+#v-book .bksign .sub{display:block;font-size:11px;color:var(--bk-mute);letter-spacing:.12em;margin-top:2px}
+#v-book .bksign .nb{display:flex;justify-content:space-between;padding:6px 12px 9px;font-size:11px;color:var(--bk-mute)}
+#v-book .bksign:not(.on) .nm{color:var(--bk-mute)}
+/* 図鑑：年代記 */
+#v-book .bktl{position:relative;padding-left:4px}
+#v-book .bktl::before{content:"";position:absolute;left:61px;top:8px;bottom:8px;width:2px;background:var(--bk-track)}
+#v-book .bktl .yr{font:800 18px var(--mincho);color:var(--shu-text);margin:14px 0 8px}
+#v-book .bktl .yr:first-child{margin-top:2px}
+#v-book .bktl button{display:flex;align-items:center;gap:12px;width:100%;border:0;background:none;padding:5px 0;text-align:left;font-family:var(--gothic);color:var(--bk-ink)}
+#v-book .bktl .md{width:44px;flex:none;text-align:right;font-size:11px;color:var(--bk-mute)}
+#v-book .bktl .pt{width:12px;height:12px;flex:none;border-radius:50%;border:2.5px solid var(--shu);background:var(--bk-card);position:relative;z-index:1;box-sizing:border-box}
+#v-book .bktl .cd{flex:1;display:flex;justify-content:space-between;align-items:center;background:var(--bk-card);border-radius:14px;padding:10px 14px;box-shadow:var(--bk-shadow)}
+#v-book .bktl .cd b{font-size:15px}
+#v-book .bktl .cd small{display:block;font-size:11px;color:var(--bk-mute);font-weight:500}
+#v-book .bktl .cd em{font-style:normal;font-size:16px;font-weight:900;color:var(--shu-text)}
+/* 図鑑：タイル */
+#v-book .bkbento{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+#v-book .bkbento>div,#v-book .bkbento>button{border:0;border-radius:22px;padding:14px 16px;background:var(--bk-card);color:var(--bk-ink);box-shadow:var(--bk-shadow);text-align:left;font-family:var(--gothic);min-width:0}
+#v-book .bkbento .big{grid-row:span 2;background:var(--shu);color:var(--on-shu);display:flex;flex-direction:column;justify-content:space-between;min-height:210px}
+#v-book .bkbento .l{font-size:12px;font-weight:700;opacity:.85}
+#v-book .bkbento .n{font-size:64px;font-weight:900;line-height:.95}
+#v-book .bkbento .c{font-size:28px;font-weight:900;line-height:1;margin-top:8px}
+#v-book .bkbento .s{font-size:12px;margin-top:4px;opacity:.85}
+/* 図鑑：地方（輪と棒） */
+#v-book #bkBars{margin-top:12px}
+#v-book .bkbars button{display:grid;grid-template-columns:56px 1fr 48px;gap:10px;align-items:center;width:100%;border:0;border-top:1px solid var(--bk-track);background:none;padding:11px 0;font-family:var(--gothic);color:var(--bk-ink);text-align:left}
+#v-book .bkbars button:first-child{border-top:0}
+#v-book .bkbars button[aria-pressed="true"] b{color:var(--shu-text)}
+#v-book .bkbars .tr{display:block;height:8px;border-radius:4px;background:var(--bk-track);overflow:hidden}
+#v-book .bkbars .tr i{display:block;height:8px;border-radius:4px}
+#v-book .bkbars .v{font-size:12px;font-weight:800;text-align:right}
 #v-book .bk-top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:2px 0 14px}
 #v-book .bk-top h2{margin:0;font-family:var(--gothic);font-weight:800;font-size:24px;letter-spacing:.04em;color:var(--bk-ink);flex:none}
 #v-book .seg{display:flex;gap:6px;border:0;border-radius:0;overflow-x:auto;margin:0;scrollbar-width:none;grid-template-columns:none}
@@ -1115,6 +1250,57 @@ nav.tabs{transition:transform .3s cubic-bezier(.2,.8,.2,1),opacity .2s}
 #v-log .lseg button{flex:none;border:0;border-radius:999px;padding:8px 15px;font:700 12.5px var(--gothic);background:var(--lg-pill);color:var(--lg-mute);box-shadow:0 4px 12px -8px rgba(15,23,42,.35)}
 #v-log .lseg button[aria-selected="true"]{background:var(--lg-ink);color:var(--lg-card)}
 #v-log .lshare{flex:none;margin-left:auto;border:0;background:none;color:var(--lg-mute);font:700 12.5px var(--gothic);text-decoration:underline;text-underline-offset:3px;padding:8px 4px}
+/* フライトの見方 */
+#v-log .lgrows{list-style:none;margin:0;padding:0}
+#v-log .lgrow{display:flex;align-items:center;gap:12px;width:100%;border:0;border-top:1px solid var(--lg-track);background:none;padding:11px 0;text-align:left;font-family:var(--gothic);color:var(--lg-ink)}
+#v-log .lgrows li:first-child .lgrow{border-top:0}
+#v-log .lgrow .d{width:46px;flex:none;font-size:11.5px;color:var(--lg-mute);line-height:1.35}
+#v-log .lgrow .m{flex:1;min-width:0}
+#v-log .lgrow .m b{display:block;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#v-log .lgrow .m small{display:block;font-size:11.5px;color:var(--lg-mute)}
+#v-log .lgrow .r{font-size:12.5px;font-weight:700;white-space:nowrap}
+#v-log .lgdot{width:10px;height:10px;border-radius:50%;flex:none;background:#7C3AED}
+#v-log .lgdot[data-g="JAL"]{background:var(--jal)}#v-log .lgdot[data-g="ANA"]{background:var(--ana)}#v-log .lgdot[data-g="NONE"]{background:var(--lg-track)}
+#v-log .lgboard{background:#14171C;color:#F3F4F6;border-radius:22px;padding:12px;box-shadow:var(--lg-shadow)}
+#v-log .lgboard .hd,#v-log .lgboard button{display:grid;grid-template-columns:50px 64px minmax(0,1fr) 54px;gap:6px;align-items:center}
+#v-log .lgboard .hd{font-size:10px;font-weight:700;color:#A1A7B0;letter-spacing:.08em;padding:0 2px 6px}
+#v-log .lgboard button{width:100%;border:0;background:none;padding:3px 0;color:inherit;text-align:left}
+#v-log .lgboard button span{background:#23272E;border-radius:4px;padding:8px 6px;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#v-log .lgboard .t{font-family:var(--dotfont);color:#FFD166;text-align:center}
+#v-log .lgboard .n{font-family:var(--dotfont);text-align:center}
+#v-log .lgboard .p{font-weight:700}
+#v-log .lgboard .s{text-align:center;font-size:11.5px;font-weight:700;color:#8FE3A8}
+#v-log .lgboard .ft{display:flex;justify-content:space-between;font-family:var(--dotfont);font-size:12px;color:#A1A7B0;padding:10px 4px 2px}
+#v-log .lgcal .hd{display:flex;align-items:center;justify-content:space-between}
+#v-log .lgcal .hd b{font-size:20px}
+#v-log .lgcal .hd button{width:44px;height:44px;border:1px solid var(--lg-track);border-radius:12px;background:var(--lg-card);color:var(--lg-ink);font:700 16px var(--gothic)}
+#v-log .lgcal .wk,#v-log .lgcal .gd{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;text-align:center}
+#v-log .lgcal .wk{font-size:11px;font-weight:700;color:var(--lg-mute);margin:12px 0 4px}
+#v-log .lgcal .gd>*{height:46px;border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;font-size:13.5px;border:0;background:none;color:var(--lg-ink);font-family:var(--gothic);padding:0}
+#v-log .lgcal .gd button{background:var(--shu-wash);color:var(--shu-text);font-weight:800}
+#v-log .lgcal .gd button[aria-pressed="true"]{background:var(--shu);color:var(--on-shu)}
+#v-log .lgcal .gd small{font-size:9px;font-weight:700}
+#v-log .lgsum{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+#v-log .lgsum b{display:block;font-size:28px;font-weight:900;line-height:1}
+#v-log .lgsum small{font-size:11px;color:var(--lg-mute)}
+#v-log .lgsplit{display:flex;height:8px;border-radius:4px;overflow:hidden;margin-top:14px;background:var(--lg-track)}
+#v-log .lgsplit i{display:block;height:8px}
+#v-log .lgleg{display:flex;flex-wrap:wrap;gap:12px;font-size:11px;color:var(--lg-mute);margin-top:8px}
+#v-log .lgmh{font-size:13px;font-weight:800;color:var(--lg-mute);margin:16px 4px 8px}
+#v-log .lgalt svg{display:block;width:100%;height:auto}
+#v-log .lgalt .cap{display:flex;justify-content:space-between;font-size:12px;font-weight:800;margin-top:4px}
+#v-log .lgtext .lead{font-size:30px;font-weight:300;line-height:1.3;margin:6px 2px 18px;color:var(--lg-ink)}
+#v-log .lgtext .lead b{font-weight:900}
+#v-log .lgtext .lgrow .m b{font-weight:500}
+#v-log .lgroute{display:flex;flex-direction:column;gap:10px}
+#v-log .lgroute .vwcard{padding:12px 16px}
+#v-log .lgroute .top{display:flex;justify-content:space-between;align-items:center}
+#v-log .lgroute .top b{font-size:16px}
+#v-log .lgroute .top em{font-style:normal;font-size:22px;font-weight:900}
+#v-log .lgroute .tk{display:flex;gap:3px;margin-top:8px}
+#v-log .lgroute .tk i{flex:1;height:6px;border-radius:3px;background:var(--lg-track)}
+#v-log .lgroute .tk i.on{background:var(--shu)}
+#v-log .lgroute small{display:block;font-size:11.5px;color:var(--lg-mute);margin-top:6px}
 #v-log h2{font-family:var(--gothic);font-weight:800;font-size:16px;color:var(--lg-ink);margin:22px 2px 10px}
 #v-log .lhint{margin:14px 4px 0;font-size:12px;line-height:1.8;color:var(--lg-mute)}
 #v-log .lhint .linkbtn{display:inline;font-size:12px;padding:0 0 0 4px}
@@ -1144,7 +1330,7 @@ nav.tabs{transition:transform .3s cubic-bezier(.2,.8,.2,1),opacity .2s}
 #v-log .pass .ps b{font-size:15px;font-weight:800}
 #v-log .pass .ps small{font-size:10px;color:var(--lg-sub);font-weight:700}
 #v-log .pass .ps span{font-size:11px;color:var(--lg-sub)}
-#v-log #manualList h3{margin:22px 2px 10px;font-size:12px;font-weight:700;color:var(--lg-mute)}
+#v-log #manualList h3,#v-log #intlList h3{margin:22px 2px 10px;font-size:12px;font-weight:700;color:var(--lg-mute)}
 #v-log .yrgrid{background:transparent;gap:8px;border-radius:0;overflow:visible}
 #v-log .yrgrid>div{background:var(--lg-card);border-radius:18px;box-shadow:var(--lg-shadow)}
 #v-log .yrgrid .n{font-family:var(--gothic);color:var(--lg-ink)}
@@ -1181,6 +1367,7 @@ nav.tabs{transition:transform .3s cubic-bezier(.2,.8,.2,1),opacity .2s}
     <p class="maplegend"><span><i class="lg" style="background:var(--jal)"></i>JAL</span><span><i class="lg" style="background:var(--ana)"></i>ANA</span><span><i class="lg" style="background:#7C3AED"></i>そのほか</span><span><i class="lg dash"></i>航路なし</span><span class="mcred">地図：国土地理院</span></p>
     <div class="grabzone"><button class="grab" type="button" aria-label="シートの大きさを変える"></button></div>
     <div class="sbody">
+    <div class="pcard" id="personaCard" hidden aria-live="polite"></div>
     <div class="bpass" id="bpass">
       <div class="bp-main">
         <div class="nearest">
@@ -1253,6 +1440,8 @@ nav.tabs{transition:transform .3s cubic-bezier(.2,.8,.2,1),opacity .2s}
       </div>
     </div>
     <div id="bookMain">
+      <div class="viewsw" id="bookViews" role="tablist" aria-label="図鑑の見方"></div>
+      <div id="bkAlt"></div>
       <div class="bk-hero" id="bookHero"></div>
       <p class="hint" id="bookNote" hidden></p>
       <div class="bk-tiles" id="bookTiles" role="group" aria-label="地方"></div>
@@ -1331,6 +1520,7 @@ nav.tabs{transition:transform .3s cubic-bezier(.2,.8,.2,1),opacity .2s}
       </div>
       <div class="sbody">
       <div id="lsList" role="tabpanel">
+        <div class="viewsw" id="logViews" role="tablist" aria-label="フライトの見方"></div>
         <div id="bpPending"></div>
         <div id="flights"></div>
         <p class="hint lhint">フライトを押すと、乗った航空会社と便名を記録できます。右上のボタンで搭乗券のバーコードを読むと、便名・航空会社・座席を付けます（名前と予約番号は保存しません）。<button class="linkbtn" id="bpImg">スクリーンショットから読み取る</button></p>
@@ -1364,6 +1554,16 @@ nav.tabs{transition:transform .3s cubic-bezier(.2,.8,.2,1),opacity .2s}
       <div id="impPreview"></div>
     </details>
     <div id="manualList"></div>
+    <h2 id="intlH">国際線を記録する</h2>
+    <p class="hint">日本の空港と海外の空港を結ぶフライトを残せます。記録帳と同じく、印・路線の数・図鑑には入りません。空港は「ソウル」「ICN」のように入れます。</p>
+    <div class="manual" id="intlForm">
+      <div class="row"><input id="iFrom" list="intlApts" placeholder="出発（例：羽田）" aria-label="出発空港" autocomplete="off"><input id="iTo" list="intlApts" placeholder="到着（例：ソウル）" aria-label="到着空港" autocomplete="off"></div>
+      <div class="row"><input type="date" id="iDate" aria-label="搭乗日"><input id="iNo" placeholder="便名（任意）" aria-label="便名（任意）" autocapitalize="characters" autocomplete="off" maxlength="7"></div>
+      <button class="btn2" id="iAdd">国際線を追加</button>
+      <p class="msg" id="iMsg" role="status" aria-live="polite"></p>
+      <datalist id="intlApts"></datalist>
+    </div>
+    <div id="intlList"></div>
       </div>
       </div>
     </div>
@@ -1389,22 +1589,28 @@ nav.tabs{transition:transform .3s cubic-bezier(.2,.8,.2,1),opacity .2s}
   <p class="msg" id="opsMsg" role="status" aria-live="polite"></p>
   <div class="opsaps" id="opsAps" role="tablist" aria-label="空港の切り替え"></div>
   <p class="hint" id="opsWx">気象通報を読み込んでいます…</p>
-  <div class="opsmodes" id="opsModes" role="group" aria-label="運用の切り替え"></div>
-  <div class="opsbox" id="opsInfo"></div>
-  <div class="opsboard" id="opsBoard" hidden></div>
-  <div class="opsboard opsyday" id="opsYday" hidden></div>
-  <div class="opsboard opsontime" id="opsOntime" hidden></div>
-  <div class="opsboard opsart" id="opsArt" hidden></div>
-  <div class="fwbox" id="opsAlerts" hidden></div>
-  <div class="fwbox" id="opsCurfew" hidden></div>
-  <div class="opslayers" role="group" aria-label="地図に出すもの">
+  <div class="viewsw" id="opsViews" role="tablist" aria-label="運用の見方"></div>
+  <div class="opsmodes" id="opsModes" role="group" aria-label="運用の切り替え" data-ov="runway"></div>
+  <div class="opsbox" id="opsInfo" data-ov="runway"></div>
+  <div class="opsboard" id="opsBoard" hidden data-ov="board"></div>
+  <div class="opsboard opsday" id="opsDay" hidden data-ov="day"></div>
+  <div class="opsboard opsyday" id="opsYday" hidden data-ov="day"></div>
+  <div class="opsboard opsontime" id="opsOntime" hidden data-ov="ontime"></div>
+  <div class="opsboard opsart" id="opsArt" hidden data-ov="art"></div>
+  <div class="opsboard opsruler" id="opsRuler" hidden data-ov="ruler"></div>
+  <div class="opsboard opsstrip" id="opsStrip" hidden data-ov="strip"></div>
+  <div class="opsapcards" id="opsApCards" hidden data-ov="aps"></div>
+  <div class="opsboard opsphoto" id="opsPhoto" hidden data-ov="photo"></div>
+  <div class="fwbox" id="opsAlerts" hidden data-ov="runway board"></div>
+  <div class="fwbox" id="opsCurfew" hidden data-ov="runway"></div>
+  <div class="opslayers" role="group" aria-label="地図に出すもの" data-ov="runway">
     <button class="chip" data-layer="traffic" aria-pressed="true">機体</button><button class="chip" data-layer="star" aria-pressed="true">到着経路</button><button class="chip" data-layer="app" aria-pressed="true">進入経路</button><button class="chip" data-layer="sid" aria-pressed="true">出発経路</button><button class="chip" data-layer="spots" aria-pressed="true">見る場所</button><button class="chip" id="opsFitAll">全体を見る</button>
   </div>
-  <div class="opslayers opssiddir" id="opsSidDir" role="group" aria-label="出発経路の行き先の方向" hidden></div>
-  <div class="opsmap" id="opsMap" role="img" aria-label="羽田空港の滑走路と、進入・出発・到着の経路、今飛んでいる機体の地図"></div>
-  <p class="opsstat" id="trafficNote"></p>
-  <div class="fwbox" id="opsSpecial" hidden></div>
-  <div class="fwbox opsspots" id="opsSpots" hidden></div>
+  <div class="opslayers opssiddir" id="opsSidDir" role="group" aria-label="出発経路の行き先の方向" hidden data-ov="runway"></div>
+  <div class="opsmap" id="opsMap" role="img" aria-label="羽田空港の滑走路と、進入・出発・到着の経路、今飛んでいる機体の地図" data-ov="runway"></div>
+  <p class="opsstat" id="trafficNote" data-ov="runway"></p>
+  <div class="fwbox" id="opsSpecial" hidden data-ov="runway photo"></div>
+  <div class="fwbox opsspots" id="opsSpots" hidden data-ov="runway photo"></div>
   <details class="opsabout"><summary>この地図について・出典<small>推定です。航法には使えません</small></summary>
     <p class="hint" id="opsLegend"></p>
     <p class="hint">機体の位置は <a href="https://adsb.lol" target="_blank" rel="noopener">adsb.lol</a>（有志の受信機による ADS-B のオープンデータ、ODbL）。少し遅れることがあり、受信できない機体は出ません。通ってきた線は最大20分ぶん（サーバーで30秒ごとに記録。新千歳・那覇は1分ごと）。</p>
@@ -1477,6 +1683,7 @@ nav.tabs{transition:transform .3s cubic-bezier(.2,.8,.2,1),opacity .2s}
 </div></dialog>
 <dialog id="dBP" aria-label="読み取った搭乗券"><div class="dlg" id="dBPBody"></div></dialog>
 <dialog id="dGod" aria-label="守り神"><div class="dlg" id="dGodBody"></div></dialog>
+<dialog id="dPersona" class="psheet" aria-labelledby="pTitle"><div class="dlg" id="dPersonaBody"></div></dialog>
 <dialog id="dSettings" class="mypage"><div class="dlg">
   <div class="mp-top"><button class="mp-back" data-close type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>ホーム</button><h3>マイページ</h3><span class="mp-sp" aria-hidden="true"></span></div>
   <div class="mp-prof" id="mpProf">
@@ -1500,6 +1707,14 @@ nav.tabs{transition:transform .3s cubic-bezier(.2,.8,.2,1),opacity .2s}
     </ul>
     <p class="hint">月額500円、または年額4,800円（2か月分お得）。</p>
   </section>
+  <section class="mp-sec" aria-labelledby="mpPersona"><h4 id="mpPersona">構成</h4>
+    <div class="set-row"><div><small>使い方に合わせて、下のタブの並びとホームに出すものを変えます。記録は変わりません。</small></div></div>
+    <div class="seg pseg" role="group" aria-label="構成">
+      <button data-persona="casual" aria-pressed="true">気軽に</button><button data-persona="spot" aria-pressed="false">撮影</button><button data-persona="shugyo" aria-pressed="false">修行</button>
+    </div>
+    <p class="hint" id="personaNote"></p>
+    <div class="pmore" id="personaMore"></div>
+  </section>
   <section class="mp-sec" aria-labelledby="mpShow"><h4 id="mpShow">表示</h4>
     <div class="set-row"><div><small>JAL・ANAそれぞれのフライトだけで数えた表示に切り替えます。記録は消えません。</small></div></div>
     <div class="seg" role="group" aria-label="表示">
@@ -1515,7 +1730,7 @@ nav.tabs{transition:transform .3s cubic-bezier(.2,.8,.2,1),opacity .2s}
     <div class="set-row" id="gameRow"><div>エアライン経営<small>オフにすると、スタンプラリーだけのアプリとして使えます。記録はそのまま残り、オンに戻せば続きから遊べます。</small></div><button class="btn2" id="gameToggle" aria-pressed="true">使う（オン）</button></div>
   </section>
   <section class="mp-sec" aria-labelledby="mpData"><h4 id="mpData">データ</h4>
-    <div class="set-row"><div>記録を書き出す<small>チェックイン・フライト・記録帳を書き出します（無料）。CSVは「まとめて取り込む」と同じ形です。</small></div>
+    <div class="set-row"><div>記録を書き出す<small>チェックイン・フライト・記録帳・国際線を書き出します（無料）。CSVは「まとめて取り込む」と同じ形です。</small></div>
       <div class="exp"><button class="btn2" data-export="json">JSON</button><button class="btn2" data-export="csv">CSV</button></div></div>
     <div class="set-row" id="wipeRow"><div>記録を消す<small>この端末に保存した本番の記録をすべて消します。</small></div><button class="btn2 danger" id="wipe">消す</button></div>
   </section>
@@ -1646,7 +1861,7 @@ function setAnalytics(on){ ANALYTICS_ON = on; if(!on) EVQ = []; try{ localStorag
 /* ---------- storage ---------- */
 let demo = false;
 const key = () => demo ? "soramemo.demo.v1" : "soramemo.v1";
-const blank = () => ({checkins:[], flights:[], manual:[], demoClock:null});
+const blank = () => ({checkins:[], flights:[], manual:[], intl:[], demoClock:null});
 let S = blank();
 // 端末への保存は配列の短い形（v:2）。以前の形（オブジェクトの配列）もそのまま読める
 function packS(x){
@@ -1656,15 +1871,17 @@ function packS(x){
     c: x.checkins.map(c => c.term ? [c.a, c.t, Math.round(c.acc || 0), c.term] : [c.a, c.t, Math.round(c.acc || 0)]),
     f: x.flights.map(f => { const r = [f.from, f.to, f.dep, f.arr, Math.round(f.km * 10) / 10];
       const e = extra({a:f.airline, n:f.no, f:f.fare, s:f.seat, i: f.id != null && f.id !== "a" + f.arr ? f.id : null}); if(e) r.push(e); return r; }),
-    m: x.manual.map(m => { const r = [m.from, m.to, m.d]; const e = extra({a:m.airline, f:m.fare, s:m.seat}); if(e) r.push(e); return r; }) };
+    m: x.manual.map(m => { const r = [m.from, m.to, m.d]; const e = extra({a:m.airline, f:m.fare, s:m.seat}); if(e) r.push(e); return r; }),
+    i: (x.intl || []).map(g => { const r = [g.dep, g.arr, g.d]; const e = extra({n:g.no, a:g.airline, s:g.seat, k:g.km, da:g.depAt, aa:g.arrAt}); if(e) r.push(e); return r; }) };
 }
 function unpackS(o){
-  if(!o || (o.v !== 2 && o.v !== 3)) return Object.assign(blank(), o || {});
+  if(!o || (o.v !== 2 && o.v !== 3)) return Object.assign(blank(), o || {}, { intl: (o && Array.isArray(o.intl)) ? o.intl : [] });
   const fl = r => { if(o.v === 3){ const e = r[5] || {}; return {id: e.i != null ? e.i : "a" + r[3], from:r[0], to:r[1], dep:r[2], arr:r[3], km:r[4], airline:e.a || null, no:e.n || null, fare:e.f || null, seat:e.s || null}; }
     return {id: r[7] != null ? r[7] : "a" + r[3], from:r[0], to:r[1], dep:r[2], arr:r[3], km:r[4], airline:r[5] || null, no:r[6] || null, fare:null, seat:null}; };
   const mn = r => { if(o.v === 3){ const e = r[3] || {}; return {from:r[0], to:r[1], d:r[2], airline:e.a || null, fare:e.f || null, seat:e.s || null}; }
     return {from:r[0], to:r[1], d:r[2], airline:r[3] || null, fare:null, seat:null}; };
-  return { demoClock:o.dc || null, checkins:(o.c || []).map(r => ({a:r[0], t:r[1], acc:r[2], term:r[3] || null})), flights:(o.f || []).map(fl), manual:(o.m || []).map(mn) };
+  const it = r => { const e = r[3] || {}; return {dep:r[0], arr:r[1], d:r[2], no:e.n || null, airline:e.a || null, seat:e.s || null, km:e.k != null ? e.k : intlKm(r[0], r[1]), depAt:e.da || null, arrAt:e.aa || null}; };
+  return { demoClock:o.dc || null, checkins:(o.c || []).map(r => ({a:r[0], t:r[1], acc:r[2], term:r[3] || null})), flights:(o.f || []).map(fl), manual:(o.m || []).map(mn), intl:(o.i || []).map(it) };
 }
 function load(){ try{ const v = localStorage.getItem(key()); S = v ? unpackS(JSON.parse(v)) : blank(); }catch(e){ S = blank(); } }
 function save(){ if(SERVER && !demo) return; try{ localStorage.setItem(key(), JSON.stringify(packS(S))); }catch(e){ say("この端末に記録を保存できませんでした。ブラウザの設定で保存が許可されているか確認してください。", true); } }
@@ -1889,6 +2106,18 @@ async function fetchLive(no, dep){
   try{ const r = await fetch(SORAMEMO_CONFIG.supabaseUrl.replace(/\/$/, "") + `/functions/v1/flight-live?flight=${encodeURIComponent(no)}${dep ? "&dep=" + dep : ""}`, { headers:{ apikey:SORAMEMO_CONFIG.supabaseAnonKey } });
     return r.ok ? await r.json() : null; }catch(e){ return null; }
 }
+const rideRecorded = p => (S.intl || []).some(g => g.no === p.no && g.d === p.day);
+// 乗っている便を国際線の記録に入れる（時刻は実際の時刻、なければ定刻。到着前なら到着は定刻）
+document.addEventListener("click", async e => {
+  const b = e.target.closest("[data-ride-rec]"); if(!b) return;
+  const p = ridePlan(), d = (RIDE_LIVE && RIDE_LIVE.d) || {}; if(!p || !p.intl || rideRecorded(p)) return;
+  const dep = d.dep || p.dep, arr = d.arr || p.arr, t = v => v ? Date.parse(v) : null;
+  const depAt = t(d.atd) || t(d.std), arrAt = (d.phase === "landed" && t(d.ata)) || t(d.sta);
+  b.disabled = true; b.textContent = "記録しています…";
+  const err = await addIntl({ dep, arr, d:p.day, no:p.no, km:intlKm(dep, arr), depAt, arrAt: depAt && arrAt && arrAt > depAt ? arrAt : null });
+  if(err){ b.disabled = false; b.textContent = err; return; }
+  renderRide();
+});
 async function renderRideIntl(p, force){
   const box = $("rideCard"), today = new Date(Date.now() + 9*36e5).toISOString().slice(0, 10);
   if(p.day < today){ box.hidden = true; box.innerHTML = ""; return; }
@@ -1907,6 +2136,7 @@ async function renderRideIntl(p, force){
   box.innerHTML = `<div class="rh"><b>乗る便 ${esc(p.no)}</b><span>${esc(placeAny(dep))} → ${esc(placeAny(arr))}${est ? "（推定）" : ""}</span><button type="button" data-ride-off>やめる</button></div>
     ${d.std ? `<span class="rl">出発 定刻 ${tzHM(d.std, dep)}${localNote(dep)}　到着 定刻 ${tzHM(d.sta, arr)}${localNote(arr)}${!IATA[arr] && WORLD_TZ[arr] ? `（日本時間 ${tzHM(d.sta, "HND")}）` : ""}</span>` : ""}
     ${st}${bar}${d.reg || d.type ? `<span class="rl">機体 ${esc([d.reg, d.type].filter(Boolean).join("・"))}</span>` : ""}
+    ${d.found && ["air", "lost", "landed"].includes(ph) && !!IATA[dep] !== !!IATA[arr] ? (rideRecorded(p) ? `<span class="rl">国際線の記録に入れました（フライトの「記録帳」）</span>` : `<button type="button" class="btn2 rrec" data-ride-rec>この便を国際線の記録に入れる</button>`) : ""}
     <p class="fwnote">機体の位置は adsb.lol から便名で探した推定で、海の上などでは届かないことがあります。${est ? "この便は時刻表がないため、出発・到着の空港も機体の位置の情報の経路のデータからの推定です。" : `時刻は時刻表（現地時刻）と航空会社の運航情報。${ODPT_CREDIT}`}　空港の時間帯：OpenFlights（ODbL）</p>`;
 }
 async function renderRide(force){
@@ -1971,10 +2201,11 @@ async function applyPlan(){
 }
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 async function loadServer(){
-  const [c, f, m] = await Promise.all([
+  const [c, f, m, g] = await Promise.all([
     fetchAll("checkins", "id,airport_id,terminal_id,created_at,accuracy_m,weather,wind_kt,ops", "created_at"),
     fetchAll("flights", "id,from_airport,to_airport,dep_at,arr_at,distance_km,status,airline,flight_no,fare,seat,track", "arr_at"),
     fetchAll("manual_flights", "id,from_airport,to_airport,flown_on,airline,fare,seat", null),
+    fetchAll("intl_flights", "id,flown_on,dep,arr,flight_no,airline,seat,dep_at,arr_at,distance_km", null),
   ]);
   await loadPlus();
   if(gameAvail()) await loadCompanyServer();   // 経営が公開前か、オフにしている人には、会社の計算を頼まない
@@ -1983,7 +2214,10 @@ async function loadServer(){
   S = { demoClock:null,
     checkins: c.data.map(r => ({a:r.airport_id, term:r.terminal_id, t:Date.parse(r.created_at), acc:r.accuracy_m, wx:r.weather || null, wind:r.wind_kt ?? null, ops:r.ops || null})),
     flights: f.data.map(r => ({id:r.id, from:r.from_airport, to:r.to_airport, dep:Date.parse(r.dep_at), arr:Date.parse(r.arr_at), km:r.distance_km, status:r.status, airline:r.airline, no:r.flight_no, fare:r.fare || null, seat:r.seat || null, track:Array.isArray(r.track) ? r.track : null})),
-    manual: m.data.map(r => ({id:r.id, from:r.from_airport, to:r.to_airport, d:r.flown_on, airline:r.airline, fare:r.fare || null, seat:r.seat || null})) };
+    manual: m.data.map(r => ({id:r.id, from:r.from_airport, to:r.to_airport, d:r.flown_on, airline:r.airline, fare:r.fare || null, seat:r.seat || null})),
+    // 国際線の記録（読めなくてもほかの記録は出す。表がまだない古いサーバーでも動くように）
+    intl: (g.data || []).map(r => ({id:r.id, dep:r.dep, arr:r.arr, d:r.flown_on, no:r.flight_no, airline:r.airline, seat:r.seat, km:r.distance_km != null ? r.distance_km : intlKm(r.dep, r.arr),
+      depAt:r.dep_at ? Date.parse(r.dep_at) : null, arrAt:r.arr_at ? Date.parse(r.arr_at) : null})) };
 }
 async function reload(){
   if(SERVER && !demo){ if(user) await loadServer(); else S = blank(); } else load();
@@ -2415,6 +2649,7 @@ function renderHome(){
   const as = achState(), tn = titleName();
   $("titlePill").hidden = !tn; $("titlePill").textContent = tn ? `称号　${tn}` : "";
   $("streak").innerHTML = S.checkins.length ? `毎月の連続記録 <b>${as.curStreak}か月</b>（最長 ${as.bestStreak}か月）` : "";
+  renderPersonaCard(); setTimeout(maybeSuggestPersona, 1500);
 }
 // 図鑑の地方の色（タイルと進み具合の線）
 const RG_COL = {"北海道":"#2563EB","東北":"#0F766E","関東":"#C8102E","中部":"#B45309","近畿":"#7C3AED","中国":"#0E7490","四国":"#15803D","九州":"#BE185D","沖縄":"#0369A1"};
@@ -2458,11 +2693,81 @@ function renderBook(){
   for(let i = S.checkins.length - 1; i >= 0 && rec.length < 5; i--){ const c = S.checkins[i]; if(IS_EXTRA(c.a) || !BY[c.a] || seen.has(c.a)) continue; seen.add(c.a); rec.push(c); }
   $("bookRecent").hidden = !rec.length;
   $("bookRecent").innerHTML = rec.length ? `<h3>最近押した印</h3><div class="row">${rec.map(c => `<button class="cell got" data-a="${c.a}" aria-label="${BY[c.a].name}"><div class="slot">${stampSVG(BY[c.a], v.get(c.a))}</div></button>`).join("")}</div>` : "";
+  renderBookView(v, vc, shown);
   $("bookAir").innerHTML = `<div class="book-head"><h2>飛行場・滑空場</h2></div>` + extraBook(["field", "glider"], "定期便のない空港や小型機の飛行場、グライダーの滑空場です。86空港の全国制覇には数えず、別の実績があります。");
   $("bookExtra").innerHTML = `<div class="book-head"><h2>番外編</h2></div>` + extraBook(["mil"], "自衛隊・米軍の飛行場です。86空港の全国制覇には数えず、別の実績があります。基地の中には入れないので、フェンスの外から押せる距離にしてあります。");
 }
+/* ---------- 見方の切り替え（図鑑・フライト・運用）。選んだ見方は端末に覚える ---------- */
+const VIEWS = {
+  book: [["map", "地図"], ["signs", "案内標"], ["tiles", "タイル"], ["chron", "年代記"], ["region", "地方"]],
+  log: [["pass", "搭乗券"], ["board", "案内板"], ["map", "地図"], ["cal", "カレンダー"], ["month", "月ごと"], ["alt", "高度"], ["text", "文字だけ"], ["route", "路線"]],
+  ops: [["board", "案内板"], ["day", "1日の山"], ["runway", "滑走路"], ["ontime", "定時"], ["art", "空の道すじ"], ["ruler", "ものさし"], ["strip", "短冊"], ["aps", "空港をめくる"], ["photo", "撮る人"]],
+};
+const VIEW_DEF = { book:"tiles", log:"pass", ops:"runway" };
+function viewOf(k){ try{ const v = localStorage.getItem("soramemo.view." + k); if(VIEWS[k].some(x => x[0] === v)) return v; }catch(e){} return VIEW_DEF[k]; }
+const VIEW = { book:viewOf("book"), log:viewOf("log"), ops:viewOf("ops") };
+const viewswHTML = k => VIEWS[k].map(([id, l]) => `<button role="tab" data-vw="${k}:${id}" aria-selected="${VIEW[k] === id}">${l}</button>`).join("");
+const VIEW_RENDER = {};
+// 切り替えを描いたら、選んでいるボタンが見えるところまで横に送る
+function setViewsw(id, k){ const el = $(id); if(!el) return; el.innerHTML = viewswHTML(k); const b = el.querySelector('[aria-selected="true"]'); if(b) el.scrollLeft = Math.max(0, b.offsetLeft - el.offsetLeft - 24); }
+document.addEventListener("click", e => {
+  const b = e.target.closest("[data-vw]"); if(!b) return;
+  const [k, id] = b.dataset.vw.split(":"); if(VIEW[k] === id) return;
+  VIEW[k] = id; try{ localStorage.setItem("soramemo.view." + k, id); }catch(_){}
+  track("view_" + k, id);
+  b.parentElement.querySelectorAll("[data-vw]").forEach(x => x.setAttribute("aria-selected", String(x === b)));
+  if(VIEW_RENDER[k]) VIEW_RENDER[k]();
+});
+
+/* 図鑑の見方：地図（02）・案内標（04）・タイル（05）・年代記（07）・地方（10） */
+const BK_LAT = [45.8, 24.0], BK_LON = [122.6, 146.4];
+const bkXY = a => [((a.lon - BK_LON[0]) / (BK_LON[1] - BK_LON[0]) * 100).toFixed(2), ((BK_LAT[0] - a.lat) / (BK_LAT[0] - BK_LAT[1]) * 100).toFixed(2)];
+function renderBookView(v, vc, shown){
+  const mode = VIEW.book, box = $("bkAlt");
+  setViewsw("bookViews", "book");
+  $("bookHero").hidden = mode !== "region"; $("bookTiles").hidden = mode !== "tiles";
+  $("book").hidden = mode !== "tiles" && mode !== "region"; $("bookRecent").hidden = true;
+  const ymd = t => { const d = new Date(t); return `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日`; };
+  if(mode === "map"){
+    const home = [...vc.entries()].sort((x, y) => y[1] - x[1])[0], h = home && BY[home[0]];
+    const near = h ? A.filter(a => !shown.has(a.id)).map(a => [a, km(h, a)]).sort((x, y) => x[1] - y[1]).slice(0, 3) : [];
+    box.innerHTML = `<div class="vwcard"><div class="bkmap" role="group" aria-label="日本地図の上の空港。色のついた点が行った空港">${A.map(a => { const [x, y] = bkXY(a);
+        return shown.has(a.id) ? `<button data-bka="${a.id}" class="${(vc.get(a.id) || 0) >= 3 ? "many" : ""}" style="left:${x}%;top:${y}%" aria-label="${esc(a.name)}（${vc.get(a.id) || 1}回）"><b></b></button>`
+          : `<i style="left:${x}%;top:${y}%" aria-hidden="true"></i>`; }).join("")}</div>
+      <p class="bkleg"><span><i style="background:var(--shu)"></i>行った（大きい点は3回以上）</span><span><i style="background:var(--bk-track)"></i>まだ</span></p></div>`
+      + (near.length ? `<div class="vwcard bknear"><h3>${esc(godShort(h))}から近い、まだの空港</h3><ul>${near.map(([a, d]) => `<li><b>${esc(a.name)}</b><span>${fmtKm(d)}km</span></li>`).join("")}</ul></div>` : "");
+  } else if(mode === "signs"){
+    const list = [...A].sort((x, y) => y.lat - x.lat);
+    box.innerHTML = `<p class="bksec">北から順・${shown.size} / ${A.length}</p><div class="bksigns">${list.map((a, i) => { const on = shown.has(a.id), pv = list[i - 1], nx = list[i + 1];
+        const inner = `<span class="band"><span>${esc(code(a))}</span><span>${on ? `行った${(vc.get(a.id) || 0) > 1 ? "・" + vc.get(a.id) + "回" : ""}` : "まだ"}</span></span><span class="nm">${esc(godShort(a))}</span><span class="sub">${esc(a.pref)}${a.rare ? "・離島" : ""}</span>
+          <span class="nb"><span>‹ ${pv ? esc(godShort(pv)) : "—"}</span><span>${nx ? esc(godShort(nx)) : "—"} ›</span></span>`;
+        return on ? `<button class="bksign on" data-bka="${a.id}">${inner}</button>` : `<div class="bksign">${inner}</div>`; }).join("")}</div>`;
+  } else if(mode === "chron"){
+    const first = [...v.entries()].filter(([id]) => shown.has(id)).sort((x, y) => x[1] - y[1]);
+    let yr = null;
+    box.innerHTML = first.length ? `<p class="bksec">はじめて訪れた順・${first.length}空港</p><div class="bktl">${first.map(([id, t]) => { const d = new Date(t), y = d.getFullYear(), a = BY[id];
+        const head = y !== yr ? `<div class="yr">${y}年</div>` : ""; yr = y;
+        return head + `<button data-bka="${id}" aria-label="${esc(a.name)}、${ymd(t)}"><span class="md">${d.getMonth() + 1}/${d.getDate()}</span><span class="pt" aria-hidden="true"></span>
+          <span class="cd"><span><b>${esc(godShort(a))}</b><small>${esc(a.pref)}・${vc.get(id) || 1}回</small></span><em>${esc(code(a))}</em></span></button>`; }).join("")}</div>`
+      : `<div class="vwcard"><p class="none" style="margin:0">まだ印はありません。空港でチェックインすると、はじめて訪れた順に並びます。</p></div>`;
+  } else if(mode === "tiles"){
+    const n = shown.size, last = [...S.checkins].reverse().find(c => !IS_EXTRA(c.a) && BY[c.a]), top = [...vc.entries()].filter(([id]) => BY[id] && !IS_EXTRA(id)).sort((x, y) => y[1] - x[1])[0];
+    box.innerHTML = `<div class="bkbento"><div class="big"><span class="l">${FOCUS === "ALL" ? "行った空港" : FOCUS + "で行った空港"}</span><span><span class="n">${n}</span><span class="s" style="display:block">${A.length}空港のうち・${Math.round(n / A.length * 100)}%</span></span></div>
+      ${last ? `<button data-bka="${last.a}"><span class="l">最近の印</span><span class="c" style="display:block">${esc(code(BY[last.a]))}</span><span class="s" style="display:block">${esc(godShort(BY[last.a]))}・${new Date(last.t).getMonth() + 1}月${new Date(last.t).getDate()}日</span></button>` : `<div><span class="l">最近の印</span><span class="s" style="display:block">まだありません</span></div>`}
+      ${top ? `<button data-bka="${top[0]}"><span class="l">いちばん多い</span><span class="c" style="display:block">${esc(code(BY[top[0]]))}</span><span class="s" style="display:block">${esc(godShort(BY[top[0]]))}・${top[1]}回</span></button>` : `<div><span class="l">いちばん多い</span><span class="s" style="display:block">まだありません</span></div>`}</div>`;
+  } else {
+    box.innerHTML = "";
+    const bars = REGION.map(([rg, prefs]) => { const list = A.filter(a => prefs.includes(a.pref)), got = list.filter(a => shown.has(a.id)).length;
+      return `<button class="bk-bar" data-rg="${rg}" aria-pressed="${BK_RG === rg}" aria-label="${rg} ${got} / ${list.length}"><b>${rg}</b><span class="tr"><i style="width:${Math.max(got ? 4 : 0, Math.round(got / list.length * 100))}%;background:${RG_COL[rg]}"></i></span><span class="v">${got} / ${list.length}</span></button>`; }).join("");
+    let bb = $("bkBars"); if(!bb){ bb = document.createElement("div"); bb.id = "bkBars"; bb.className = "vwcard bkbars"; $("bookHero").after(bb); }
+    bb.innerHTML = bars;
+  }
+  if($("bkBars")) $("bkBars").hidden = mode !== "region";
+}
+VIEW_RENDER.book = () => renderBook();
+document.addEventListener("click", e => { const b = e.target.closest("[data-bka]"); if(b) openAirport(+b.dataset.bka); });
 // 地方のタイルを押すと、その地方の印を下に開く（もう一度押すと閉じる）
-document.addEventListener("click", e => { const b = e.target.closest(".bk-tile,.bk-close"); if(!b) return;
+document.addEventListener("click", e => { const b = e.target.closest(".bk-tile,.bk-close,.bk-bar"); if(!b) return;
   BK_RG = b.classList.contains("bk-close") || BK_RG === b.dataset.rg ? "" : b.dataset.rg; renderBook();
   if(BK_RG){ const p = $("book").firstElementChild; if(p && p.scrollIntoView) p.scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" }); } });
 // 番外編の図鑑（自衛隊・米軍の飛行場、滑空場、飛行場）。全国制覇などには数えない
@@ -2506,7 +2811,9 @@ document.querySelectorAll("#v-log [data-lseg]").forEach(b => b.onclick = () => s
 $("flAdd").onclick = () => { setLogSeg("book"); $("logSheet").sheetGo && $("logSheet").sheetGo("full"); const m = $("mFrom"); if(m){ m.scrollIntoView({ block:"center" }); m.focus({ preventScroll:true }); } };
 function renderLog(){
   const flAll = S.flights.filter(f => inFocus(f) || !f.airline).reverse(), fl = flAll.slice(0, FL_SHOW);
-  $("flights").innerHTML = fl.length ? fl.map(f => passHTML({ from:f.from, to:f.to, airline:f.airline, dep:f.dep, arr:f.arr, km:f.km, tap:fid(f),
+  setViewsw("logViews", "log");
+  if(VIEW.log !== "pass" && flAll.length) $("flights").innerHTML = logViewHTML(flAll);
+  else $("flights").innerHTML = fl.length ? fl.map(f => passHTML({ from:f.from, to:f.to, airline:f.airline, dep:f.dep, arr:f.arr, km:f.km, tap:fid(f),
         label:`${fmtDT(f.dep)} 出発、${fmtDT(f.arr)} 到着`, badges:flightBadge(f) + statusBadge(f), stub:stubDate(f.dep) })).join("")
       + (flAll.length > fl.length ? `<button class="btn2" id="flMore" style="width:100%;margin-top:10px">もっと見る（残り${flAll.length - fl.length}件）</button>` : "")
     : `<p class="none">まだフライトはありません。出発する空港と着いた空港の両方でチェックインすると記録されます。</p>`;
@@ -2517,9 +2824,82 @@ function renderLog(){
         badges:`<span class="badge">手入力</span>${m.airline && ALBY[m.airline] ? `<span class="alb">${ALBY[m.airline].short}</span>` : ""}`, stub:stubDate(m.d.replaceAll("-","/")) })).join("") + (mlAll.length > ml.length ? `<button class="btn2" id="mlMore" style="width:100%;margin-top:10px">もっと見る（残り${mlAll.length - ml.length}件）</button>` : "") : "";
   const ff = focusFlights();
   $("logTally").innerHTML = `<div><b>${ff.length}</b><span>フライト</span></div><div><b>${routes().size}</b><span>路線</span></div><div><b>${fmtKm(focusKm())}</b><span>km</span></div>`;
-  renderOverall(); renderYears(); renderYearPlus();
+  renderOverall(); renderYears(); renderYearPlus(); renderIntl();
   renderMap();
 }
+/* フライトの見方：案内板（02）・地図（03）・カレンダー（04）・月ごと（05）・高度（07）・文字だけ（09）・路線（10）。搭乗券（01）は今までの一覧 */
+let LOG_CAL = null, LOG_DAY = null;
+const lgG = f => f.airline ? (ALBY[f.airline] || {}).group || "OTHER" : "NONE";
+const lgMD = t => { const d = new Date(t); return `${d.getMonth() + 1}/${d.getDate()}`; };
+const lgNo = f => f.no ? f.no.slice(0, 2) + " " + f.no.slice(2) : f.airline && ALBY[f.airline] ? ALBY[f.airline].short : "便名なし";
+const lgRow = (f, right, sub) => `<li><button class="lgrow" data-flight="${fid(f)}" aria-label="${esc(BY[f.from].name)}から${esc(BY[f.to].name)}へ、${fmtDT(f.dep)}"><span class="lgdot" data-g="${lgG(f)}" aria-hidden="true"></span><span class="d">${lgMD(f.dep)}<br>${new Date(f.dep).getFullYear()}</span>
+  <span class="m"><b>${esc(godShort(BY[f.from]))} → ${esc(godShort(BY[f.to]))}</b><small>${sub != null ? sub : esc(lgNo(f)) + "・" + fmtKm(f.km) + "km"}</small></span><span class="r">${right || ""}</span></button></li>`;
+// 巡航の高度の目安（距離から。機体の実際の高度ではない）
+const cruiseFt = k => k < 250 ? 18000 : k < 500 ? 26000 : k < 900 ? 33000 : k < 1500 ? 37000 : 39000;
+function altPath(f, W, H, pad){ const top = pad + (1 - cruiseFt(f.km) / 41000) * (H - pad * 2), b = H - pad, c = Math.min(.32, 120 / Math.max(f.km, 1) * .5 + .12);
+  return `M0 ${b} C${W * c * .5} ${b} ${W * c * .6} ${top} ${W * c} ${top} L${W * (1 - c)} ${top} C${W * (1 - c * .6)} ${top} ${W * (1 - c * .5)} ${b} ${W} ${b}`; }
+function logViewHTML(all){
+  const mode = VIEW.log;
+  if(mode === "board"){
+    const yr = new Date().getFullYear(), ty = all.filter(f => new Date(f.dep).getFullYear() === yr);
+    return `<div class="lgboard"><div class="hd"><span>月日</span><span>便名</span><span>行き先</span><span style="text-align:center">到着</span></div>
+      ${all.slice(0, 40).map(f => `<button data-flight="${fid(f)}" aria-label="${esc(BY[f.to].name)}行き、${fmtDT(f.dep)}"><span class="t">${String(new Date(f.dep).getMonth() + 1).padStart(2, "0")}/${String(new Date(f.dep).getDate()).padStart(2, "0")}</span><span class="n">${esc(f.no || "—")}</span><span class="p">${esc(godShort(BY[f.to]))}</span><span class="s">${hmOf(f.arr)}</span></button>`).join("")}
+      <div class="ft"><span>${yr}年 ${ty.length}便</span><span>${fmtKm(ty.reduce((x, f) => x + f.km, 0))}km</span></div></div>`;
+  }
+  if(mode === "map"){
+    return `<div class="vwcard"><p class="vwnote" style="margin:0 0 6px">上の地図に、これまでに飛んだ線を出しています。シートを下げると地図が広く見えます。</p><ul class="lgrows">${all.slice(0, 4).map(f => lgRow(f, fmtKm(f.km) + "km")).join("")}</ul></div>`;
+  }
+  if(mode === "cal"){
+    const days = new Map(); for(const f of all){ const d = new Date(f.dep), k = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`; if(!days.has(k)) days.set(k, []); days.get(k).push(f); }
+    if(!LOG_CAL){ const d = new Date(all[0].dep); LOG_CAL = [d.getFullYear(), d.getMonth()]; }
+    const [y, m] = LOG_CAL, first = new Date(y, m, 1).getDay(), n = new Date(y, m + 1, 0).getDate(), cells = [];
+    for(let i = 0; i < first; i++) cells.push(`<span></span>`);
+    for(let d = 1; d <= n; d++){ const fs = days.get(`${y}-${m}-${d}`), k = `${y}-${m}-${d}`;
+      cells.push(fs ? `<button data-lgday="${k}" aria-pressed="${LOG_DAY === k}" aria-label="${m + 1}月${d}日、${fs.length}便"><span>${d}</span><small>${esc(godShort(BY[fs[0].to]).slice(0, 3))}</small></button>` : `<span>${d}</span>`); }
+    const sel = LOG_DAY && days.get(LOG_DAY), cnt = [...days.keys()].filter(k => k.startsWith(`${y}-${m}-`)).reduce((x, k) => x + days.get(k).length, 0);
+    return `<div class="vwcard lgcal"><div class="hd"><button data-lgcal="-1" aria-label="前の月">‹</button><span style="text-align:center"><small style="display:block;font-size:11px;color:var(--lg-mute)">${y}年・${cnt}便</small><b>${m + 1}月</b></span><button data-lgcal="1" aria-label="次の月">›</button></div>
+      <div class="wk" aria-hidden="true"><span>日</span><span>月</span><span>火</span><span>水</span><span>木</span><span>金</span><span>土</span></div><div class="gd">${cells.join("")}</div></div>`
+      + (sel ? `<div class="vwcard" style="margin-top:10px"><ul class="lgrows">${sel.map(f => lgRow(f, hmOf(f.dep) + "発")).join("")}</ul></div>` : `<p class="vwnote">色のついた日を押すと、その日のフライトを出します。</p>`);
+  }
+  if(mode === "month"){
+    const yr = new Date().getFullYear(), ty = all.filter(f => new Date(f.dep).getFullYear() === yr), base = ty.length ? ty : all;
+    const kmT = base.reduce((x, f) => x + f.km, 0), hrs = base.reduce((x, f) => x + (f.arr - f.dep), 0) / 36e5;
+    const gs = {}; for(const f of base){ const g = lgG(f); gs[g] = (gs[g] || 0) + 1; }
+    const GC = { JAL:"var(--jal)", ANA:"var(--ana)", OTHER:"#7C3AED", NONE:"var(--lg-mute)" }, GL = { JAL:"JAL", ANA:"ANA", OTHER:"そのほか", NONE:"航空会社なし" };
+    const months = new Map(); for(const f of all){ const d = new Date(f.dep), k = `${d.getFullYear()}年${d.getMonth() + 1}月`; if(!months.has(k)) months.set(k, []); months.get(k).push(f); }
+    return `<div class="vwcard"><div style="display:flex;justify-content:space-between;font-size:12px;color:var(--lg-mute);margin-bottom:10px"><b style="color:var(--lg-ink)">${ty.length ? yr + "年" : "これまで"}</b><span>${base.length}便</span></div>
+      <div class="lgsum"><div><b>${base.length}</b><small>便</small></div><div><b>${kmT >= 10000 ? (kmT / 1000).toFixed(1) + "<small>千km</small>" : fmtKm(kmT) + "<small>km</small>"}</b><small>飛んだ距離</small></div><div><b>${Math.round(hrs)}<small>時間</small></b><small>空の上</small></div></div>
+      <div class="lgsplit">${Object.entries(gs).map(([g, c]) => `<i style="width:${c / base.length * 100}%;background:${GC[g]}"></i>`).join("")}</div>
+      <div class="lgleg">${Object.entries(gs).map(([g, c]) => `<span>${GL[g]} ${c}</span>`).join("")}</div></div>`
+      + [...months.entries()].slice(0, 12).map(([k, fs]) => `<div class="lgmh">${k}　${fs.length}便</div><div class="vwcard" style="padding:2px 16px"><ul class="lgrows">${fs.map(f => lgRow(f, fmtKm(f.km) + "km")).join("")}</ul></div>`).join("");
+  }
+  if(mode === "alt"){
+    const f0 = all[0], W = 340, H = 150;
+    return `<div class="vwcard lgalt"><div style="font-size:12px;color:var(--lg-mute)">いちばん新しいフライト・${fmtDT(f0.dep)}</div><div style="font-size:22px;font-weight:900;margin:2px 0 8px">${esc(godShort(BY[f0.from]))} → ${esc(godShort(BY[f0.to]))}</div>
+      <svg viewBox="0 0 ${W} ${H}" role="img" aria-label="巡航の高度の目安 ${fmtKm(cruiseFt(f0.km))}フィート"><path d="${altPath(f0, W, H, 12)} L${W} ${H} L0 ${H} Z" fill="var(--shu-wash)"/><path d="${altPath(f0, W, H, 12)}" fill="none" stroke="var(--shu)" stroke-width="3"/>
+        <text x="${W / 2}" y="${12 + (1 - cruiseFt(f0.km) / 41000) * (H - 24) - 6}" text-anchor="middle" font-size="12" font-weight="800" fill="var(--lg-ink)">約${fmtKm(cruiseFt(f0.km))}ft</text></svg>
+      <div class="cap"><span>${esc(code(BY[f0.from]))} ${hmOf(f0.dep)}</span><span>${esc(code(BY[f0.to]))} ${hmOf(f0.arr)}</span></div></div>
+      <div class="vwcard" style="margin-top:10px;padding:2px 16px"><ul class="lgrows">${all.slice(1, 30).map(f => lgRow(f, `約${fmtKm(cruiseFt(f.km))}ft`, `<svg viewBox="0 0 64 22" width="64" height="22" aria-hidden="true" style="vertical-align:middle"><path d="${altPath(f, 64, 22, 2)}" fill="none" stroke="currentColor" stroke-width="2"/></svg>`)).join("")}</ul></div>
+      <p class="vwnote">高度は、距離からの巡航の高度の目安（推定）です。実際に飛んだ高度ではありません。</p>`;
+  }
+  if(mode === "text"){
+    const yr = new Date().getFullYear(), ty = all.filter(f => new Date(f.dep).getFullYear() === yr), base = ty.length ? ty : all, kmT = base.reduce((x, f) => x + f.km, 0);
+    return `<div class="lgtext"><p class="lead">${ty.length ? "今年は" : "これまでに"}<b>${base.length}便</b>、<br>地球を<b>${(kmT / 40075).toFixed(2)}周</b>。</p><ul class="lgrows">${all.slice(0, 40).map(f => lgRow(f, esc(f.no || ""), "")).join("")}</ul></div>`;
+  }
+  // 路線ごと（行きと帰りはまとめる）
+  const rs = new Map(); for(const f of all){ const k = [f.from, f.to].sort((a, b) => a - b).join("-"); if(!rs.has(k)) rs.set(k, []); rs.get(k).push(f); }
+  const list = [...rs.values()].sort((a, b) => b.length - a.length || b[0].dep - a[0].dep), mx = Math.max(6, ...list.map(x => x.length));
+  return `<div class="lgroute">${list.slice(0, 30).map(fs => { const a = BY[Math.min(fs[0].from, fs[0].to)], b = BY[Math.max(fs[0].from, fs[0].to)], als = [...new Set(fs.map(f => f.airline && ALBY[f.airline] ? ALBY[f.airline].short : null).filter(Boolean))];
+      return `<button class="vwcard" data-flight="${fid(fs[0])}" style="border:0;text-align:left;font-family:var(--gothic)"><span class="top"><b>${esc(godShort(a))} ⇄ ${esc(godShort(b))}</b><em>${fs.length}<span style="font-size:11px;font-weight:500;color:var(--lg-mute)">回</span></em></span>
+        <span class="tk" aria-hidden="true">${Array.from({ length: Math.min(mx, 12) }, (_, i) => `<i class="${i < fs.length ? "on" : ""}"></i>`).join("")}</span>
+        <small>最後 ${fmtD(fs[0].dep)}${als.length ? "・" + esc(als.join(" / ")) : ""}・${fmtKm(fs[0].km)}km</small></button>`; }).join("")}</div>`;
+}
+document.addEventListener("click", e => {
+  const c = e.target.closest("[data-lgcal]"), d = e.target.closest("[data-lgday]");
+  if(c && LOG_CAL){ let [y, m] = LOG_CAL; m += +c.dataset.lgcal; if(m < 0){ m = 11; y--; } if(m > 11){ m = 0; y++; } LOG_CAL = [y, m]; LOG_DAY = null; renderLog(); }
+  else if(d){ LOG_DAY = LOG_DAY === d.dataset.lgday ? null : d.dataset.lgday; renderLog(); }
+});
+VIEW_RENDER.log = () => { renderLog(); if(VIEW.log === "map" && $("logSheet").sheetGo) $("logSheet").sheetGo("half"); };
 // 成績：航空会社別とステータスの目安、年ごとの記録、航空会社別（成績の画面を開いたときだけ描く）
 function renderStats(){ renderYears(); renderPassport(); renderFleetBook(); renderAirlines(); renderStatus(); loadFacts(); }
 function renderOverall(){
@@ -2689,6 +3069,76 @@ $("mAdd").onclick = async () => {
   S.manual.push({from:f,to:t,d,airline:$("mAirline").value || null, fare: $("mFare").hidden ? null : ($("mFare").value || null)}); save(); render(); done();
 };
 
+/* ---------- 国際線の記録（日本の空港と海外の空港を結ぶ便。印・路線・図鑑には入らない） ---------- */
+// 入力の空港：「HND」「羽田」「ソウル（仁川）」「ソウル（ICN）」のどれでも。日本の空港は IATA の記号があるものだけ
+function parseIntlApt(v){
+  const t = String(v || "").trim(); if(!t) return null;
+  const m = /(?:^|[（(\s])([A-Za-z]{3})\s*[）)]?$/.exec(t), c = m ? m[1].toUpperCase() : null;
+  if(c && (IATA[c] || WORLD_JA[c])) return c;
+  const n = t.replace(/[（(].*$/, "");
+  const jp = A.find(a => /^[A-Z]{3}$/.test(a.iata || "") && (a.name === t || godShort(a) === t || a.name.replace(/空港$/, "") === t || godShort(a) === n));
+  if(jp) return jp.iata;
+  const w = Object.entries(WORLD_JA).find(([, j]) => j === t) || Object.entries(WORLD_JA).find(([, j]) => j.replace(/[（(].*$/, "") === n);
+  return w ? w[0] : null;
+}
+const intlName = c => IATA[c] ? godShort(IATA[c]) : WORLD_JA[c] || c;
+const intlAirline = no => { const k = (no || "").slice(0, 2); return no && ALBY[k] ? ALBY[k].short : k || ""; };
+function intlOpts(){
+  const dl = $("intlApts"); if(!dl || dl.childElementCount) return;
+  dl.innerHTML = [...A.filter(a => /^[A-Z]{3}$/.test(a.iata || "")).map(a => [godShort(a), a.iata]), ...Object.entries(WORLD_JA).map(([c, n]) => [n, c])]
+    .map(([n, c]) => `<option value="${esc(n)}（${c}）"></option>`).join("");
+}
+function intlPassHTML(g){
+  const sh = s => esc(s.length > 7 ? s.slice(0, 7) + "…" : s);
+  return `<div class="flight pass" data-g="${g.no && ALBY[g.no.slice(0, 2)] ? ALBY[g.no.slice(0, 2)].group || "OTHER" : "OTHER"}">
+    <div class="pm"><div class="pt"><span class="badge">国際線</span>${g.no ? `<span class="alb">${esc(g.no.slice(0, 2) + " " + g.no.slice(2))}</span>` : ""}${g.depAt ? `<span class="alb">追跡</span>` : ""}</div>
+      <div class="pr"><div class="pa"><b>${esc(g.dep)}</b><span>${sh(intlName(g.dep))}</span></div><i class="parr" aria-hidden="true"></i><div class="pa r"><b>${esc(g.arr)}</b><span>${sh(intlName(g.arr))}</span></div></div></div>
+    <div class="ps">${stubDate(g.d.replaceAll("-", "/"))}<span>${g.km ? fmtKm(g.km) + " km" : "—"}</span><button type="button" class="linkbtn2 idel" data-intl-del="${esc(String(g.id ?? g.d + g.dep + g.arr))}">消す</button></div></div>`;
+}
+let INTL_SHOW = 5, INTL_DEL = null;
+function renderIntl(){
+  const box = $("intlList"); if(!box) return;
+  const all = [...(S.intl || [])].sort((x, y) => y.d.localeCompare(x.d)), shown = all.slice(0, INTL_SHOW);
+  box.innerHTML = all.length ? `<h3>国際線　${all.length}件 ${fmtKm(all.reduce((s, g) => s + (g.km || 0), 0))}km</h3>` + shown.map(intlPassHTML).join("")
+    + (all.length > shown.length ? `<button class="btn2" data-intl-more style="width:100%;margin-top:10px">もっと見る（残り${all.length - shown.length}件）</button>` : "")
+    + `<p class="hint">距離は空港の位置からの大圏距離（空港の位置：OpenFlights〔ODbL〕）。</p>` : "";
+}
+const intlKey = g => String(g.id ?? g.d + g.dep + g.arr);
+async function addIntl(g){
+  if(SERVER && !demo){
+    if(!user) return "ログインしてください。";
+    const { error } = await sb.from("intl_flights").insert({ flown_on:g.d, dep:g.dep, arr:g.arr, flight_no:g.no || null, airline:g.no ? g.no.slice(0, 2) : null, seat:g.seat || null,
+      dep_at:g.depAt ? new Date(g.depAt).toISOString() : null, arr_at:g.arrAt ? new Date(g.arrAt).toISOString() : null, distance_km:g.km || null });
+    if(error) return "保存できませんでした。もう一度試してください。";
+    await reload(); return null;
+  }
+  (S.intl = S.intl || []).push(g); save(); render(); return null;
+}
+$("iAdd").onclick = async () => {
+  intlOpts();
+  const m = $("iMsg"), dep = parseIntlApt($("iFrom").value), arr = parseIntlApt($("iTo").value), d = $("iDate").value, no = $("iNo").value.trim().toUpperCase().replace(/\s/g, "");
+  const err = t => { m.textContent = t; m.className = "msg err"; };
+  if(!dep || !arr) return err(!dep && !arr ? "出発と到着の空港が見つかりません。「羽田」「ソウル」「ICN」のように入れてください。" : `${!dep ? "出発" : "到着"}の空港が見つかりません。候補から選ぶか、空港の記号（3文字）を入れてください。`);
+  if(!d) return err("搭乗日を選んでください。");
+  if(!!IATA[dep] === !!IATA[arr]) return err(IATA[dep] ? "日本の空港どうしは、上の記録帳に追加してください。" : "日本の空港をどちらかに入れてください（そらメモは日本発着の便を記録します）。");
+  if(no && !/^[A-Z0-9]{2}\d{1,4}[A-Z]?$/.test(no)) return err("便名は「NH106」のように、航空会社の2文字と数字で入れてください。");
+  const e = await addIntl({ dep, arr, d, no:no || null, km:intlKm(dep, arr), depAt:null, arrAt:null });
+  if(e) return err(e);
+  m.textContent = `${intlName(dep)} → ${intlName(arr)} を国際線に追加しました。`; m.className = "msg";
+  $("iFrom").value = $("iTo").value = $("iNo").value = "";
+};
+["iFrom", "iTo"].forEach(id => $(id).addEventListener("focus", intlOpts));
+document.addEventListener("click", async e => {
+  if(e.target.closest("[data-intl-more]")){ INTL_SHOW += 20; renderIntl(); return; }
+  const b = e.target.closest("[data-intl-del]"); if(!b) return;
+  const k = b.dataset.intlDel;
+  if(INTL_DEL !== k){ INTL_DEL = k; b.textContent = "もう一度押すと消します"; setTimeout(() => { if(INTL_DEL === k){ INTL_DEL = null; renderIntl(); } }, 4000); return; }
+  INTL_DEL = null;
+  const g = (S.intl || []).find(x => intlKey(x) === k); if(!g) return;
+  if(SERVER && !demo){ const { error } = await sb.from("intl_flights").delete().eq("id", g.id); if(error){ say("消せませんでした。もう一度試してください。", true); return; } await reload(); }
+  else { S.intl = S.intl.filter(x => x !== g); save(); render(); }
+});
+
 /* ---------- ui wiring ---------- */
 /* ---------- スタンプラリーとエアライン経営の切り替え ---------- */
 let GAME_ON = (() => { try{ return localStorage.getItem("soramemo.game") !== "0"; }catch(e){ return true; } })();
@@ -2721,9 +3171,128 @@ function setMode(m, go = true){
   $("modeSw").hidden = !gameAvail(); $("gameNote").hidden = MODE !== "game";
   $("gameRow").hidden = !(GAME_RELEASED || demo);
   document.querySelectorAll("#modeSw [data-mode]").forEach(b => b.setAttribute("aria-selected", String(b.dataset.mode === MODE)));
-  document.querySelectorAll("nav.tabs button").forEach(b => b.hidden = b.dataset.mode !== MODE);
+  document.querySelectorAll("nav.tabs button").forEach(b => b.hidden = b.dataset.mode !== MODE || (b.dataset.mode === "rally" && b.dataset.pOff === "1"));
   if(go) goTab(LAST_TAB[MODE]);
 }
+/* ---------- 使う人ごとの構成：気軽に（はじめ）・撮影（1つの空港でずっと撮る）・修行 ----------
+   タブの並びと数、ホームのいちばん上に出すもの、各画面のはじめの見方を変える。記録は変えない。
+   使い方（運用の画面を同じ空港で長く開く・短い間にたくさん乗る・修行の計画を使う）から、合いそうな構成を1回だけ勧める */
+const PERSONAS = {
+  casual: { name:"気軽に好きな人", short:"気軽に", tabs:["home", "book", "log", "ops", "stats"], views:{ book:"tiles" },
+    note:"チェックインと図鑑を中心にした、はじめの構成です。" },
+  spot: { name:"撮影する人", short:"撮影", tabs:["ops", "home", "book", "log"], views:{ ops:"photo" },
+    note:"1つの空港で長く撮る人向け。運用をいちばん左に、ホームには運用・これから来る大きな機体・今日いた時間を出します。成績はマイページから開けます。" },
+  shugyo: { name:"修行する人", short:"修行", tabs:["home", "log", "stats", "ops"], views:{ log:"month" },
+    note:"たくさん乗る人向け。フライトと成績を前に、ホームにはポイントの進み・乗る便・今年の便数を出します。図鑑はマイページから開けます。" },
+};
+const PERSONA_KEY = "soramemo.persona";
+let PERSONA = (() => { try{ const v = localStorage.getItem(PERSONA_KEY); return PERSONAS[v] ? v : "casual"; }catch(e){ return "casual"; } })();
+const personaChosen = () => { try{ return !!localStorage.getItem(PERSONA_KEY); }catch(e){ return false; } };
+function applyPersonaTabs(){
+  const box = document.querySelector("nav.tabs .in"), P = PERSONAS[PERSONA];
+  for(const v of P.tabs){ const b = box.querySelector(`button[data-v="${v}"][data-mode="rally"]`); if(b) box.appendChild(b); }
+  box.querySelectorAll('button[data-mode="rally"]').forEach(b => { if(!P.tabs.includes(b.dataset.v)){ box.appendChild(b); b.dataset.pOff = "1"; } else delete b.dataset.pOff; });
+  box.querySelectorAll('button[data-mode="game"]').forEach(b => box.appendChild(b));
+  document.querySelectorAll("nav.tabs button").forEach(b => b.hidden = b.dataset.mode !== MODE || (b.dataset.mode === "rally" && b.dataset.pOff === "1"));
+  document.documentElement.dataset.persona = PERSONA;
+}
+function setPersona(p, how){
+  if(!PERSONAS[p]) return;
+  PERSONA = p; try{ localStorage.setItem(PERSONA_KEY, p); }catch(e){}
+  for(const [k, v] of Object.entries(PERSONAS[p].views)){ VIEW[k] = v; try{ localStorage.setItem("soramemo.view." + k, v); }catch(e){} }
+  track("persona", `${p}:${how || "set"}`);
+  applyPersonaTabs(); renderPersonaSettings();
+  for(const k in DIRTY) DIRTY[k] = true;
+  goTab(PERSONAS[p].tabs[0]); renderPersonaCard();
+}
+function renderPersonaSettings(){
+  document.querySelectorAll("button[data-persona]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.persona === PERSONA)));
+  if($("personaNote")) $("personaNote").textContent = PERSONAS[PERSONA].note;
+  const off = ["home", "book", "log", "ops", "stats"].filter(v => !PERSONAS[PERSONA].tabs.includes(v)), L = { book:"図鑑を開く", stats:"成績を開く", log:"フライトを開く", ops:"運用を開く" };
+  if($("personaMore")) $("personaMore").innerHTML = off.map(v => `<button class="btn2" data-persona-open="${v}">${L[v] || v}</button>`).join("");
+}
+document.addEventListener("click", e => {
+  const b = e.target.closest("button[data-persona]"); if(b){ if($("dSettings").open) $("dSettings").close(); setPersona(b.dataset.persona, "mypage"); return; }
+  const o = e.target.closest("[data-persona-open]"); if(o){ $("dSettings").close(); goTab(o.dataset.personaOpen); return; }
+  const g = e.target.closest("[data-pgo]"); if(g){ goTab(g.dataset.pgo); if(g.dataset.pview && VIEW_RENDER[g.dataset.pgo]){ VIEW[g.dataset.pgo] = g.dataset.pview; } return; }
+});
+// ホームのいちばん上のカード（撮影・修行のとき）
+const isBig = a => /^(B?7[4678]|A3[3-8])/i.test(String(a || "").trim());
+async function renderPersonaCard(){
+  const box = $("personaCard"); if(!box) return;
+  if(PERSONA === "casual" || MODE !== "rally"){ box.hidden = true; box.innerHTML = ""; return; }
+  const now = Date.now(), hm = t => new Date(t).toLocaleTimeString("ja-JP", { hour:"2-digit", minute:"2-digit" });
+  if(PERSONA === "shugyo"){
+    const y = new Date().getFullYear(), st = statusSummary(y), ana = st.ana.n >= st.jal.n;
+    const cur = ana ? st.ana.pp : st.jal.fop, unit = ana ? "PP" : "FOP", tiers = ana ? ANA_TIERS : jalTiers(y), nx = tiers.find(([v]) => v > cur);
+    const fy = S.flights.filter(f => new Date(f.dep).getFullYear() === y), fm = fy.filter(f => new Date(f.dep).getMonth() === new Date().getMonth());
+    box.hidden = false;
+    box.innerHTML = `<div class="ph"><div class="l"><span>${y}年の修行（${ana ? "ANA" : "JAL"}）</span><span>${nx ? `目標 ${esc(nx[1])} ${fmtKm(nx[0])}` : "いちばん上に届いています"}</span></div>
+        <div class="v">${fmtKm(cur)} <small>${unit}</small></div>${nx ? `<div class="tr"><i style="width:${Math.min(100, Math.round(cur / nx[0] * 100))}%"></i></div><div class="s"><span>あと ${fmtKm(nx[0] - cur)} ${unit}</span><span>各社の公開情報からの目安</span></div>` : ""}</div>
+      <div class="pg"><div><small>今年</small><b>${fy.length}便</b></div><div><small>今月</small><b>${fm.length}便</b></div><div><small>今年の距離</small><b>${fmtKm(fy.reduce((x, f) => x + f.km, 0))}km</b></div></div>
+      <div class="pb"><button data-pgo="stats">修行の計画</button><button data-pgo="log">フライト</button></div>`;
+    return;
+  }
+  // 撮影：いつもの空港（運用で選んだ空港）の、これから来る大きな機体と、今日いた時間
+  const ap = OPS_AIRPORTS[OPS_AP] ? OPS_AP : "HND", def = OPS_AIRPORTS[ap], a = IATA[ap];
+  const today = new Date(now + 9 * 36e5).toISOString().slice(0, 10), mine = S.checkins.filter(c => a && c.a === a.id && new Date(c.t + 9 * 36e5).toISOString().slice(0, 10) === today);
+  const since = mine.length ? mine[0].t : null;
+  const head = `<div class="ph"><div class="l"><span>いつもの空港</span><span>${since ? `今日は ${hm(since)} から・${Math.floor((now - since) / 36e5)}時間${Math.round((now - since) / 6e4) % 60}分` : "今日はまだチェックインしていません"}</span></div>
+      <div class="v">${esc(def ? def.name : ap)}</div><div class="s"><span>運用時間 ${def ? opsHours(def) : ""}${def ? (opsOpen(def) ? "・いまは運用中" : "・いまは時間外") : ""}</span></div></div>`;
+  const pb = `<div class="pb"><button data-pgo="ops">運用を見る</button></div>`;
+  box.hidden = false; box.innerHTML = head + `<div class="pl"><h4>これから来る大きな機体</h4><p class="hint" style="margin:4px 0">読み込んでいます…</p></div>` + pb;
+  const d = SERVER ? await Promise.resolve().then(() => apSummary(ap)).catch(() => null) : null; if(PERSONA !== "spot") return;
+  const all = d ? [...(d.next_arr || []).map(f => ({ ...f, dir:"arr" })), ...(d.next_dep || []).map(f => ({ ...f, dir:"dep" }))].filter(f => Date.parse(f.t) >= now - 5 * 6e4 && isBig(f.aircraft)).sort((x, y) => Date.parse(x.t) - Date.parse(y.t)).slice(0, 4) : [];
+  box.innerHTML = head + `<div class="pl"><h4>これから来る大きな機体（JAL・ANA）</h4>${all.length ? `<ul>${all.map(f => `<li><b class="t">${hm(f.t)}</b><span><b>${esc(f.flight)}　${esc(f.aircraft)}</b><small>${esc(placeAny(f.other))}${f.dir === "arr" ? "から・着陸" : "へ・離陸"}</small></span><em>${f.intl ? "国際" : "大型"}</em></li>`).join("")}</ul>`
+      : `<p class="hint" style="margin:4px 0">${d ? "この3時間はありません。" : "いまは読み込めません。"}</p>`}<p class="hint" style="margin:6px 0 0;font-size:10.5px">機材は時刻表の予定。${ODPT_CREDIT}</p></div>` + pb;
+}
+
+/* 使い方から構成を勧める（選んだことのない人に、合いそうなときだけ。断ったら30日は聞かない） */
+const USAGE_KEY = "soramemo.usage";
+function usageGet(){ try{ return JSON.parse(localStorage.getItem(USAGE_KEY) || "{}") || {}; }catch(e){ return {}; } }
+function usageSet(u){ try{ localStorage.setItem(USAGE_KEY, JSON.stringify(u)); }catch(e){} }
+// 運用の画面を開いているあいだ、1分ごとに「その日・その空港」の分数を足す（14日より前は消す）
+setInterval(() => {
+  if(document.visibilityState !== "visible" || currentView() !== "ops" || !OPS_AP) return;
+  const u = usageGet(), d = new Date(Date.now() + 9 * 36e5).toISOString().slice(0, 10), lim = new Date(Date.now() + 9 * 36e5 - 14 * 864e5).toISOString().slice(0, 10);
+  u.ops = u.ops || {}; for(const k of Object.keys(u.ops)) if(k < lim) delete u.ops[k];
+  u.ops[d] = u.ops[d] || {}; u.ops[d][OPS_AP] = (u.ops[d][OPS_AP] || 0) + 1; usageSet(u);
+}, 60_000);
+// 使った日（30日ぶん）。はじめて開いた日にすぐ聞かないよう、3日以上使ってから勧める
+{ const u = usageGet(), d = new Date(Date.now() + 9 * 36e5).toISOString().slice(0, 10), lim = new Date(Date.now() + 9 * 36e5 - 30 * 864e5).toISOString().slice(0, 10);
+  u.days = [...new Set([...(u.days || []).filter(x => x >= lim), d])].sort(); usageSet(u); }
+const markPlanUsed = () => { const u = usageGet(); if(!u.plan){ u.plan = Date.now(); usageSet(u); } };
+function personaSuggestion(){
+  const u = usageGet(), byAp = {};
+  for(const day of Object.values(u.ops || {})) for(const [ap, m] of Object.entries(day)) if(m >= 30){ byAp[ap] = byAp[ap] || { days:0, min:0 }; byAp[ap].days++; byAp[ap].min += m; }
+  const top = Object.entries(byAp).sort((x, y) => y[1].min - x[1].min)[0];
+  if(top && top[1].days >= 3) return { p:"spot", why:`この2週間、${OPS_AIRPORTS[top[0]] ? OPS_AIRPORTS[top[0]].name : top[0]}で運用の画面を長く開いています（${top[1].days}日・あわせて${Math.round(top[1].min / 60)}時間）。` };
+  const n90 = S.flights.filter(f => f.dep >= Date.now() - 90 * 864e5).length;
+  if(n90 >= 6) return { p:"shugyo", why:`この90日で${n90}便に乗っています。` };
+  if(u.plan) return { p:"shugyo", why:"修行の計画を使っています。" };
+  return null;
+}
+let PERSONA_ASKED = false;
+function maybeSuggestPersona(){
+  if(PERSONA_ASKED || personaChosen() || demo || currentView() !== "home" || document.querySelector("dialog[open]")) return;
+  const u = usageGet(); if(u.declined && Date.now() - u.declined < 30 * 864e5) return;
+  if((u.days || []).length < 3) return;
+  const s = personaSuggestion(); if(!s) return;
+  PERSONA_ASKED = true; track("persona_suggest", s.p);
+  const P = PERSONAS[s.p], TAB = { home:"ホーム", book:"図鑑", log:"フライト", ops:"運用", stats:"成績" };
+  const V = { ops:{ photo:"撮る人" }, log:{ month:"月ごと" }, book:{ tiles:"タイル" } }, [vk, vv] = Object.entries(P.views)[0];
+  $("dPersonaBody").innerHTML = `<p class="hint" style="margin:0">そらメモの使い方から</p><h3 id="pTitle">${P.name}の構成にしますか？</h3>
+    <p style="font-size:13.5px;line-height:1.8;margin:10px 0 0">${esc(s.why)}${esc(P.note)}</p>
+    <div class="pchg"><div><small>下のタブ</small>${P.tabs.map(v => TAB[v]).join("・")}</div><div><small>${TAB[vk]}のはじめ</small>${V[vk][vv]}</div></div>
+    <button class="btn1" data-persona-yes="${s.p}">この構成にする</button><button class="btn2" data-persona-no>今のままにする</button>
+    <p class="hint" style="text-align:center;margin:12px 0 0">マイページの「構成」で、いつでも変えられます</p>`;
+  $("dPersona").showModal();
+}
+document.addEventListener("click", e => {
+  const y = e.target.closest("[data-persona-yes]"), n = e.target.closest("[data-persona-no]");
+  if(y){ $("dPersona").close(); setPersona(y.dataset.personaYes, "suggest"); }
+  else if(n){ $("dPersona").close(); const u = usageGet(); u.declined = Date.now(); usageSet(u); track("persona_suggest", "no"); }
+});
 function setGameOn(on){
   const turnedOn = on && !GAME_ON;
   GAME_ON = on;
@@ -3766,7 +4335,8 @@ function exportData(kind){
     const out = { app:"soramemo", exported_at:d.toISOString(),
       checkins:S.checkins.map(c => ({at:new Date(c.t).toISOString(), airport:ap(c.a), terminal:c.term || null, accuracy_m:c.acc})),
       flights:S.flights.map(f => ({dep:new Date(f.dep).toISOString(), arr:new Date(f.arr).toISOString(), from:ap(f.from), to:ap(f.to), km:Math.round(f.km), airline:f.airline || null, flight_no:f.no || null})),
-      manual:S.manual.map(m => ({date:m.d, from:ap(m.from), to:ap(m.to), airline:m.airline || null})) };
+      manual:S.manual.map(m => ({date:m.d, from:ap(m.from), to:ap(m.to), airline:m.airline || null})),
+      international:(S.intl || []).map(g => ({date:g.d, from:g.dep, to:g.arr, flight_no:g.no || null, km:g.km || null, dep:g.depAt ? new Date(g.depAt).toISOString() : null, arr:g.arrAt ? new Date(g.arrAt).toISOString() : null})) };
     blob = new Blob([JSON.stringify(out, null, 1)], {type:"application/json"}); name = `soramemo-${stamp}.json`;
   } else {
     const q = v => /[",\n]/.test(String(v)) ? `"${String(v).replace(/"/g, '""')}"` : String(v);
@@ -3774,7 +4344,8 @@ function exportData(kind){
     const ymd = t => { const x = new Date(t); return `${x.getFullYear()}-${String(x.getMonth()+1).padStart(2,"0")}-${String(x.getDate()).padStart(2,"0")}`; };
     const rows = [["日付","出発","到着","航空会社","便名","距離km","種類"],
       ...S.flights.map(f => [ymd(f.dep), code(f.from), code(f.to), f.airline || "", f.no || "", Math.round(f.km), "チェックイン"]),
-      ...S.manual.map(m => [m.d, code(m.from), code(m.to), m.airline || "", "", Math.round(km(BY[m.from], BY[m.to])), "記録帳"])];
+      ...S.manual.map(m => [m.d, code(m.from), code(m.to), m.airline || "", "", Math.round(km(BY[m.from], BY[m.to])), "記録帳"]),
+      ...(S.intl || []).map(g => [g.d, g.dep, g.arr, g.no ? g.no.slice(0, 2) : "", g.no || "", Math.round(g.km || 0), "国際線"])];
     blob = new Blob(["\uFEFF" + rows.map(r => r.map(q).join(",")).join("\r\n")], {type:"text/csv"}); name = `soramemo-flights-${stamp}.csv`;
   }
   const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click(); a.remove();
@@ -4561,8 +5132,89 @@ function renderOps(){
     </div>
     <details class="opswhy"><summary>くわしく</summary><p>${why ? why + "<br>" : ""}${op.note}${mode === "north" && est.northNew && OPS_MODE === "auto" ? "　この時間帯は、C滑走路（34R）から北へ離陸して荒川沿いを上昇する新しいルートが使われることがあります。" : ""}</p></details>`;
   $("opsLegend").textContent = !def.detail && def.app ? `${def.name}は、滑走路の位置（AIP JAPAN 2026年10月1日版の AD 2.12）と、風・実際の機体から「どちら向きに使っているか」を出しています。太い点線は、その向きで使う ILS の進入経路、白い点はその上のフィックスです。細かい点線は、その進入につながる標準到着経路（RNAV STAR）で、入口のフィックスの名前を付けています。経路は、AIP JAPAN（2026年10月1日版）の進入・到着チャートの座標をもとに そらメモ が作ったもので、国が作ったものではなく、最新でない場合があります。実際は管制の指示で途中を短くすることが多く、線はおおよそです。${def.sid ? `青の点線は、標準出発経路（RNAV SID。行き先の方向ごと）です。${def.rwy.length > 1 ? `${def.name}は、どちらの滑走路から離陸するかを管制がその都度決めるため、両方の滑走路からの経路を出しています（主な方向のものだけ）。` : ""}` : "出発経路はまだ入れていません（滑走路の向きに短い線だけ）。"}${def.noObs ? "伊丹の14運用は、32Lの進入で近づいて空港の西側を回り14Rに降りる「周回進入」で、回る部分の線は そらメモ が滑走路の位置から作ったおおよその線です。14運用でも着陸機は32Lの進入の線を通るため、伊丹は、着陸機の線では向きを見分けられないため、離陸した機体を最初に見た位置が空港のどちら側か（8km以内・まだ低い機体）で判定し、そろわないときは風から推定しています。" : ""}航空機の運航には使えません。` : !def.detail ? `${def.name}は、滑走路の位置（AIP JAPAN 2026年10月1日版の AD 2.12）と、風・実際の機体から「どちら向きに使っているか」を出しています。太い点線は、今の向きの最終進入（滑走路の延長線、約10海里）で、実際の経路ではありません。平行な滑走路は、どちらも着陸・離陸に使う前提の表示です。進入・出発・到着の経路は、空港ごとに AIP から足していきます。航空機の運航には使えません。` : "太い点線は、いまの運用と天気で使うと推定した進入の経路、白い点はその上のフィックスです。経路は、AIP JAPAN（2026年10月1日版）の進入チャートの座標をもとに そらメモ が作ったもので、国が作ったものではなく、最新でない場合があります。実際は管制の指示で途中を短くすることが多く、LDA の最後の曲がる部分は目で見て飛ぶため、線はおおよそです。航空機の運航には使えません。青の点線は、その運用で使う主な標準出発経路（RNAV SID。AIP の同じ版から作成）で、行き先の方向ごとに分かれます。時間帯によって経路が変わるもの（ROVER・BEKLA）は、いまの時刻のものを出しています。細かい点線は、その進入につながる標準到着経路（RNAV STAR）で、入口の名前を付けています（深夜早朝の経路は出していません）。";
-  drawOpsMap(rw, op, plus, mode, est.good); opsLegendKey(); renderSpots(def, op, rw);
+  drawOpsMap(rw, op, plus, mode, est.good); opsLegendKey(); renderSpots(def, op, rw); applyOpsView();
 }
+// 地図が見えているか（見方の切り替えで隠れているときに位置を合わせると、大きさが0で計算できない）
+const opsMapShown = () => { const m = $("opsMap"); return !!m && m.offsetWidth > 0 && m.offsetHeight > 0; };
+/* 運用の見方：案内板（01）・1日の山（02）・滑走路（03）・定時（04）・空の道すじ（05）・ものさし（06）・短冊（07）・空港をめくる（08）・撮る人（09） */
+function applyOpsView(){
+  setViewsw("opsViews", "ops");
+  const v = VIEW.ops;
+  document.querySelectorAll("#v-ops [data-ov]").forEach(el => el.classList.toggle("ovoff", !el.dataset.ov.split(" ").includes(v)));
+  if(v === "aps") renderApCards();
+  if(["day", "ruler", "strip", "photo"].includes(v) && BOARD && BOARD_AP === OPS_AP) renderOpsDerived(BOARD);
+}
+VIEW_RENDER.ops = () => { if(VIEW.ops === "runway"){ renderOps(); if(OPS_MAP) setTimeout(() => { if(opsMapShown()){ OPS_MAP.invalidateSize(); OPS_MAP.setView(opsDef().center, 10, { animate:false }); } }, 30); } else applyOpsView(); };
+const OPS_CREDIT_S = () => `<p class="fwnote">時刻は JAL・ANA の時刻表と運航情報。${ODPT_CREDIT}</p>`;
+function renderOpsDerived(d){
+  if(!d || BOARD_AP !== OPS_AP) return;
+  const v = VIEW.ops, now = Date.now(), hm = t => new Date(t).toLocaleTimeString("ja-JP", { hour:"2-digit", minute:"2-digit" });
+  const kind = f => f.actual || f.est || f.inferred || f.predicted || f.sched;
+  const all = [...(d.next_arr || []).map(f => ({ ...f, dir:"arr" })), ...(d.next_dep || []).map(f => ({ ...f, dir:"dep" }))].sort((a, b) => Date.parse(a.t) - Date.parse(b.t));
+  const def = opsDef();
+  if(v === "day"){
+    const hrs = d.hours || [], tot = hrs.reduce((x, h) => x + Number(h.flights || 0), 0), late = hrs.reduce((x, h) => x + Number(h.late || 0), 0), cancel = hrs.reduce((x, h) => x + Number(h.cancel || 0), 0);
+    const top = Math.max(4, ...hrs.map(h => Number(h.flights || 0))), nowH = new Date(now).getHours();
+    $("opsDay").hidden = false;
+    $("opsDay").innerHTML = `<div class="bdhead"><h3>${esc(def.name)}・今日</h3></div><div><span class="big">${fmtKm(tot)}</span> <b>便の予定</b></div>
+      <p class="bdsum" style="margin:4px 0 0">遅れ ${late}便・欠航 ${cancel}便</p>
+      <div class="hb" role="img" aria-label="1時間ごとの便の数。いちばん多い時間は${hrs.length ? hrs.reduce((a, h) => Number(h.flights) > Number(a.flights) ? h : a, hrs[0]).h : 0}時台">${hrs.map((h, i) => { const f = Number(h.flights || 0), l = Number(h.late || 0) + Number(h.cancel || 0);
+        return `<span title="${i}時台：${f}便（遅れ・欠航 ${l}）"><i style="height:${(l / top * 140).toFixed(1)}px;background:#F07A2B;border-radius:2px 2px 0 0"></i><i style="height:${(Math.max(0, f - l) / top * 140).toFixed(1)}px;background:var(--op-ink);opacity:${i === nowH ? 1 : .55}"></i></span>`; }).join("")}</div>
+      <div class="hx"><span>0時</span><span>6時</span><span>12時</span><span>18時</span><span>24時</span></div>
+      <p class="bdleg"><span><i class="bar" style="background:var(--op-ink)"></i>便の予定</span><span><i class="bar" style="background:#F07A2B"></i>15分以上の遅れ・欠航</span></p>${OPS_CREDIT_S()}`;
+  }
+  if(v === "ruler"){
+    const lo = now - 10 * 60000, hi = now + 70 * 60000, list = all.filter(f => { const t = Date.parse(kind(f)); return t >= lo && t <= hi; }).slice(0, 18), H = 520, y = t => ((t - lo) / (hi - lo) * H).toFixed(1);
+    const ticks = []; for(let t = Math.ceil(lo / 6e5) * 6e5; t <= hi; t += 6e5) ticks.push(t);
+    const used = { arr:[], dep:[] };
+    $("opsRuler").hidden = false;
+    $("opsRuler").innerHTML = `<div class="bdhead"><h3>これからの1時間</h3><span class="bdsum">${hm(now)}〜${hm(hi)}</span></div>
+      <div class="rl" style="height:${H}px">${ticks.map(t => `<span class="tk" style="top:${y(t)}px">${hm(t)}</span>`).join("")}<span class="now" style="top:${y(now)}px" aria-hidden="true"></span>
+      ${list.map(f => { let top = +y(Date.parse(kind(f))); const u = used[f.dir]; while(u.some(x => Math.abs(x - top) < 22)) top += 22; u.push(top);
+        return `<span class="fl ${f.dir === "arr" ? "a" : "d"}" style="top:${top}px"><b>${esc(f.flight)}</b> ${esc(placeAny(f.other))}${f.dir === "arr" ? "から" : ""}</span>`; }).join("")}</div>
+      <p class="bdleg"><span><i class="bar" style="background:var(--op-ink)"></i>出発</span><span><i class="bar" style="background:var(--shu-wash);outline:1px solid var(--shu)"></i>到着</span></p>${list.length ? "" : `<p class="hint">この1時間の JAL・ANA の便はありません。</p>`}${OPS_CREDIT_S()}`;
+  }
+  if(v === "strip"){
+    const list = all.filter(f => Date.parse(f.t) >= now - 15 * 60000).slice(0, 14);
+    $("opsStrip").hidden = false;
+    $("opsStrip").innerHTML = `<div class="bdhead"><h3>${esc(def.name)}の短冊</h3><span class="bdsum">上ほど早い</span></div>
+      ${list.length ? `<ol>${list.map(f => { const t = kind(f), late = Math.round((Date.parse(t) - Date.parse(f.sched)) / 60000), st = f.actual ? (f.dir === "arr" ? "着いた" : "出た") : late >= 15 ? `${late}分遅れ` : "定刻ごろ";
+        return `<li><i style="background:${f.dir === "arr" ? "#6CC3E8" : "#F08A3E"}" aria-hidden="true"></i><div class="n">${esc(f.flight)}<small>${esc(f.aircraft || (f.intl ? "国際線" : ""))}</small></div>
+          <div class="p">${esc(placeAny(f.other))}${f.dir === "arr" ? "から" : "へ"}<small>${f.dir === "arr" ? "到着" : "出発"}${f.intl ? "・国際線" : ""}</small></div><div class="t">${hm(t)}<small style="color:${late >= 15 ? "#C2410C" : "var(--op-mute)"}">${st}</small></div></li>`; }).join("")}</ol>` : `<p class="hint">この3時間の JAL・ANA の便はありません。</p>`}
+      <p class="bdleg"><span><i class="bar" style="background:#F08A3E"></i>出発</span><span><i class="bar" style="background:#6CC3E8"></i>到着</span></p>${OPS_CREDIT_S()}`;
+  }
+  if(v === "photo"){
+    const big = all.filter(f => Date.parse(f.t) >= now - 5 * 60000 && /^(B?7[4678]|A3[3-8])/i.test(String(f.aircraft || "").trim())).slice(0, 8);
+    $("opsPhoto").hidden = false;
+    $("opsPhoto").innerHTML = `<div class="bdhead"><h3>これから来る大きな機体</h3><span class="bdsum">JAL・ANA</span></div>
+      ${big.length ? `<ul>${big.map(f => `<li><b class="t">${hm(kind(f))}</b><div><b>${esc(f.flight)}　${esc(f.aircraft)}</b><small>${esc(placeAny(f.other))}${f.dir === "arr" ? "から・着陸" : "へ・離陸"}</small></div><em>${f.intl ? "国際" : "大型"}</em></li>`).join("")}</ul>`
+        : `<p class="hint">この3時間に、JAL・ANA の大きな機体（ボーイング777・787・767、エアバスA350 など）の便はありません。</p>`}
+      <p class="fwnote">機材は時刻表の予定で、変わることがあります。見る場所と光の向きは下に出します。${ODPT_CREDIT}</p>`;
+  }
+}
+// 空港をめくる：14空港を1枚ずつ（運用時間と、この1時間の便。便は空港ごとに読んで5分ためる）
+const APC = new Map();
+async function apSummary(iata){
+  const c = APC.get(iata); if(c && Date.now() - c.at < 300_000) return c.d;
+  try{ const r = await fetch(SORAMEMO_CONFIG.supabaseUrl.replace(/\/$/, "") + "/rest/v1/rpc/airport_board", { method:"POST",
+      headers:{ "Content-Type":"application/json", apikey:SORAMEMO_CONFIG.supabaseAnonKey, Authorization:"Bearer " + SORAMEMO_CONFIG.supabaseAnonKey }, body:JSON.stringify({ p_iata:iata, p_kind:"all" }) });
+    if(r.ok){ const d = await r.json(); APC.set(iata, { at:Date.now(), d }); return d; } }catch(e){}
+  return null;
+}
+async function renderApCards(){
+  const box = $("opsApCards"); if(!box) return;
+  const ORDER = ["CTS","SDJ","HND","NRT","NGO","ITM","KIX","HIJ","MYJ","FUK","NGS","KMJ","KOJ","OKA"], h = new Date().getHours();
+  const card = (d, sum) => { const open = opsOpen(d), hr = sum && (sum.hours || [])[h], late = sum ? (sum.hours || []).reduce((x, y) => x + Number(y.late || 0) + Number(y.cancel || 0), 0) : null;
+    return `<button data-apcard="${d.iata}" aria-current="${d.iata === OPS_AP}"><span class="h"><span>${esc(d.name)}</span><span>${d.iata}</span></span>
+      <span class="n">${hr ? Number(hr.flights || 0) : "—"}<small> 便/この1時間</small></span><span class="s">運用時間 ${opsHours(d)}・${open ? "いまは運用中" : "いまは時間外"}</span>
+      <span class="c"><span>${late == null ? "遅れ・欠航 —" : `遅れ・欠航 ${late}便`}</span>${d.iata === OPS_NEAR ? "<span>近く</span>" : ""}</span></button>`; };
+  const defs = ORDER.map(i => OPS_AIRPORTS[i]).filter(Boolean);
+  box.hidden = false;
+  box.innerHTML = defs.map(d => card(d, APC.get(d.iata) && APC.get(d.iata).d)).join("") ;
+  for(const d of defs){ if(VIEW.ops !== "aps") return; const sum = await apSummary(d.iata); const el = box.querySelector(`[data-apcard="${d.iata}"]`); if(el && sum) el.outerHTML = card(d, sum); }
+}
+document.addEventListener("click", e => { const b = e.target.closest("[data-apcard]"); if(!b) return; OPS_PICKED = true; VIEW.ops = "runway"; try{ localStorage.setItem("soramemo.view.ops", "runway"); }catch(_){}
+  applyOpsView(); setOpsAirport(b.dataset.apcard).then(() => { if(OPS_MAP && opsMapShown()){ OPS_MAP.invalidateSize(); OPS_MAP.setView(opsDef().center, 10, { animate:false }); } }); });
 function drawOpsMap(rw, op, plus, mode, good){
   if(!window.L || !opsOn()) return;
   if(!OPS_MAP){
@@ -4619,7 +5271,7 @@ function drawOpsMap(rw, op, plus, mode, good){
       L.polyline(line, { color:"#2B6CB0", weight:2, dashArray:"2 6", opacity:.85, noFit:true }).bindTooltip(`RWY ${id} から ${n}（${sd.dir}）の出発経路`).addTo(OPS_LAYER);
       const e = pts[pts.length - 1]; L.marker([e[0], e[1]], { icon:L.divIcon({ className:"sidlabel", html:`${n}<small>${sd.dir}</small>`, iconSize:[54, 26], iconAnchor:[27, 13] }) }).addTo(OPS_LAYER); }
   }
-  setTimeout(() => { OPS_MAP.invalidateSize(); if(TRAFFIC_FIT) return; const bd = L.featureGroup(OPS_LAYER.getLayers().filter(l => l instanceof L.Polyline && !l.options.noFit)).getBounds(); if(bd.isValid()) OPS_MAP.fitBounds(bd, { padding:[18, 18], animate:false }); }, 60);
+  setTimeout(() => { if(!opsMapShown()) return; OPS_MAP.invalidateSize(); if(TRAFFIC_FIT) return; const bd = L.featureGroup(OPS_LAYER.getLayers().filter(l => l instanceof L.Polyline && !l.options.noFit)).getBounds(); if(bd.isValid()) OPS_MAP.fitBounds(bd, { padding:[18, 18], animate:false }); }, 60);
 }
 let OPS_SID_DIR = "all";   // 出発経路の行き先の方向（"all" か「北へ」など）。空港を切り替えると「すべて」に戻る
 const DIR8 = ["北へ", "北東へ", "東へ", "南東へ", "南へ", "南西へ", "西へ", "北西へ"];
@@ -4666,7 +5318,7 @@ document.querySelectorAll("[data-layer]").forEach(b => {
     else renderOps(); };
 });
 $("opsFitAll").onclick = () => { if(!OPS_MAP) return; const ls = [...(OPS_LAYER ? OPS_LAYER.getLayers() : []), ...(TRAFFIC_LAYER && OPS_SHOW.traffic ? TRAFFIC_LAYER.getLayers() : [])].filter(l => l instanceof L.Polyline);
-  const bd = L.featureGroup(ls).getBounds(); if(bd.isValid()) OPS_MAP.fitBounds(bd, { padding:[16, 16] }); };
+  const bd = L.featureGroup(ls).getBounds(); if(bd.isValid() && opsMapShown()) OPS_MAP.fitBounds(bd, { padding:[16, 16] }); };
 /* 今飛んでいる機体と、通ってきた線（OpenSky。10〜20秒遅れ）。地図を開いているあいだ、30秒ごとに読み直す */
 let TRAFFIC_LAYER = null, TRAFFIC_TIMER = null, TRAFFIC_FIT = false;
 const TRAFFIC_COL = { arr:"#A3166B", dep:"#2B6CB0", other:"#5C6B7A" };
@@ -4701,7 +5353,7 @@ async function loadTraffic(){
   // はじめて読み込んだときだけ、着陸に向かう機体の線が入るように地図を合わせる
   if(!TRAFFIC_FIT && arr.length){ TRAFFIC_FIT = true;
     const pts = arr.flatMap(p => [...(p.trail || []), [p.lat, p.lon]]).concat([opsDef().center]);
-    setTimeout(() => { OPS_MAP.invalidateSize(); OPS_MAP.stop(); OPS_MAP.fitBounds(L.latLngBounds(pts), { padding:[20, 20], maxZoom:11, animate:false }); }, 400); }
+    setTimeout(() => { if(!opsMapShown()) return; OPS_MAP.invalidateSize(); OPS_MAP.stop(); OPS_MAP.fitBounds(L.latLngBounds(pts), { padding:[20, 20], maxZoom:11, animate:false }); }, 400); }
   if(!OPS_MAP._declutter){ OPS_MAP._declutter = true; OPS_MAP.on("zoomend", declutterLabels); }
   setTimeout(declutterLabels, 0); setTimeout(declutterLabels, 450);
   $("trafficNote").innerHTML = `<i style="background:${TRAFFIC_COL.arr}"></i>着陸に向かう ${arr.length}機　<i style="background:${TRAFFIC_COL.dep}"></i>離陸して上昇中 ${dep.length}機<span>${jstHM(d.at)} 時点</span>`;
@@ -4887,6 +5539,11 @@ const WORLD_JA = { ICN:"ソウル（仁川）", GMP:"ソウル（金浦）", PUS
 const placeAny = c => IATA[c] ? godShort(IATA[c]) : WORLD_JA[c] || c;
 // 海外の空港の時間帯（現地時刻を出すため。OpenFlights の airports.dat〔ODbL〕から）
 const WORLD_TZ = {"YVR":"America/Vancouver","YYZ":"America/Toronto","BRU":"Europe/Brussels","FRA":"Europe/Berlin","DUS":"Europe/Berlin","MUC":"Europe/Berlin","HEL":"Europe/Helsinki","LHR":"Europe/London","AMS":"Europe/Amsterdam","CPH":"Europe/Copenhagen","WAW":"Europe/Warsaw","ARN":"Europe/Stockholm","BCN":"Europe/Madrid","MAD":"Europe/Madrid","CDG":"Europe/Paris","MXP":"Europe/Rome","FCO":"Europe/Rome","PRG":"Europe/Prague","VIE":"Europe/Vienna","LIS":"Europe/Lisbon","ZRH":"Europe/Zurich","MEX":"America/Mexico_City","NAN":"Pacific/Fiji","NOU":"Pacific/Noumea","AKL":"Pacific/Auckland","AUH":"Asia/Dubai","DXB":"Asia/Dubai","SPN":"Pacific/Saipan","GUM":"Pacific/Guam","KHH":"Asia/Taipei","RMQ":"Asia/Taipei","TSA":"Asia/Taipei","TPE":"Asia/Taipei","CJU":"Asia/Seoul","PUS":"Asia/Seoul","GMP":"Asia/Seoul","MNL":"Asia/Manila","BOM":"Asia/Calcutta","CMB":"Asia/Colombo","PNH":"Asia/Phnom_Penh","HKG":"Asia/Hong_Kong","DEL":"Asia/Calcutta","MFM":"Asia/Macau","BLR":"Asia/Calcutta","MAA":"Asia/Calcutta","DMK":"Asia/Bangkok","DAD":"Asia/Saigon","HAN":"Asia/Saigon","SGN":"Asia/Saigon","RGN":"Asia/Rangoon","CGK":"Asia/Jakarta","KUL":"Asia/Kuala_Lumpur","SIN":"Asia/Singapore","BNE":"Australia/Brisbane","MEL":"Australia/Hobart","PER":"Australia/Perth","SYD":"Australia/Sydney","PEK":"Asia/Shanghai","CAN":"Asia/Shanghai","SZX":"Asia/Shanghai","WUH":"Asia/Shanghai","ULN":"Asia/Ulaanbaatar","XMN":"Asia/Shanghai","HGH":"Asia/Shanghai","TAO":"Asia/Shanghai","SHA":"Asia/Shanghai","CTU":"Asia/Shanghai","DLC":"Asia/Shanghai","PVG":"Asia/Shanghai","BOS":"America/New_York","SFO":"America/Los_Angeles","LAX":"America/Los_Angeles","EWR":"America/New_York","KOA":"Pacific/Honolulu","IAH":"America/Chicago","SEA":"America/Los_Angeles","DTW":"America/New_York","DFW":"America/Chicago","ATL":"America/New_York","IAD":"America/New_York","HNL":"Pacific/Honolulu","SAN":"America/Los_Angeles","SJC":"America/Los_Angeles","ANC":"America/Anchorage","JFK":"America/New_York","ORD":"America/Chicago","MSP":"America/Chicago","LAS":"America/Los_Angeles","BKK":"Asia/Bangkok","ICN":"Asia/Seoul","DPS":"Asia/Makassar","PPT":"Pacific/Tahiti","SHE":"Asia/Shanghai","CEB":"Asia/Manila","PKX":"Asia/Shanghai","TFU":"Asia/Shanghai","UBN":"Asia/Ulaanbaatar","DOH":"Asia/Qatar","IST":"Europe/Istanbul"};
+// 海外の空港の位置（国際線の記録の距離。OpenFlights の airports.dat〔ODbL〕から、小数2けた）
+const WORLD_POS = {"ICN":[37.47,126.45],"GMP":[37.56,126.79],"PUS":[35.18,128.94],"CJU":[33.51,126.49],"PEK":[40.08,116.59],"PKX":[39.51,116.41],"PVG":[31.14,121.81],"SHA":[31.2,121.34],"CAN":[23.39,113.3],"SZX":[22.64,113.81],"DLC":[38.97,121.54],"TAO":[36.27,120.37],"HGH":[30.23,120.43],"XMN":[24.54,118.13],"WUH":[30.78,114.21],"CTU":[30.58,103.95],"TFU":[30.31,104.44],"SHE":[41.64,123.48],"HKG":[22.31,113.92],"MFM":[22.15,113.59],"TPE":[25.08,121.23],"TSA":[25.07,121.55],"KHH":[22.58,120.35],"RMQ":[24.26,120.62],"MNL":[14.51,121.02],"CEB":[10.31,123.98],"BKK":[13.68,100.75],"DMK":[13.91,100.61],"SGN":[10.82,106.65],"HAN":[21.22,105.81],"DAD":[16.04,108.2],"SIN":[1.35,103.99],"KUL":[2.75,101.71],"CGK":[-6.13,106.66],"DPS":[-8.75,115.17],"PNH":[11.55,104.84],"RGN":[16.91,96.13],"DEL":[28.57,77.1],"BOM":[19.09,72.87],"BLR":[13.2,77.71],"MAA":[12.99,80.17],"CMB":[7.18,79.88],"ULN":[47.84,106.77],"UBN":[47.65,106.82],"DOH":[25.27,51.61],"DXB":[25.25,55.36],"AUH":[24.43,54.65],"IST":[41.28,28.75],"SYD":[-33.95,151.18],"MEL":[-37.67,144.84],"BNE":[-27.38,153.12],"PER":[-31.94,115.97],"AKL":[-37.01,174.79],"GUM":[13.48,144.8],"SPN":[15.12,145.73],"HNL":[21.32,-157.92],"KOA":[19.74,-156.05],"PPT":[-17.55,-149.61],"NAN":[-17.76,177.44],"NOU":[-22.01,166.21],"LAX":[33.94,-118.41],"SFO":[37.62,-122.37],"SJC":[37.36,-121.93],"SAN":[32.73,-117.19],"SEA":[47.45,-122.31],"JFK":[40.64,-73.78],"EWR":[40.69,-74.17],"ORD":[41.98,-87.9],"IAH":[29.98,-95.34],"DFW":[32.9,-97.04],"BOS":[42.36,-71.01],"IAD":[38.94,-77.46],"ATL":[33.64,-84.43],"DTW":[42.21,-83.35],"MSP":[44.88,-93.22],"LAS":[36.08,-115.15],"YVR":[49.19,-123.18],"YYZ":[43.68,-79.63],"MEX":[19.44,-99.07],"ANC":[61.17,-150],"LHR":[51.47,-0.46],"CDG":[49.01,2.55],"FRA":[50.03,8.57],"MUC":[48.35,11.79],"DUS":[51.29,6.77],"HEL":[60.32,24.96],"ARN":[59.65,17.92],"CPH":[55.62,12.66],"AMS":[52.31,4.76],"BRU":[50.9,4.48],"ZRH":[47.46,8.55],"VIE":[48.11,16.57],"MXP":[45.63,8.73],"FCO":[41.8,12.24],"MAD":[40.47,-3.56],"BCN":[41.3,2.08],"LIS":[38.78,-9.14],"WAW":[52.17,20.97],"PRG":[50.1,14.26]};
+// 空港の位置（日本の空港は空港の表、海外は WORLD_POS）。読み込みの途中で呼ばれても止まらないよう、関数の宣言にして中で確かめる
+function aptPos(c){ try{ return IATA[c] || (WORLD_POS[c] ? { lat:WORLD_POS[c][0], lon:WORLD_POS[c][1] } : null); }catch(e){ return null; } }
+function intlKm(a, b){ const p = aptPos(a), q = aptPos(b); return p && q ? Math.round(km(p, q)) : 0; }
 async function loadBoard(iata){
   if(!SERVER) return null;
   if(BOARD && BOARD_AP === iata && BOARD.kind === BOARD_KIND && Date.now() - BOARD_AT < 110_000) return BOARD;
@@ -4895,13 +5552,40 @@ async function loadBoard(iata){
     if(r.ok){ BOARD = await r.json(); BOARD_AP = iata; BOARD.kind = BOARD_KIND; BOARD_AT = Date.now(); return BOARD; } }catch(e){}
   return BOARD_AP === iata ? BOARD : null;
 }
+// 海外の航空会社の便（推定）：時刻表がないので、空港の近くにいる機体の位置と経路のデータから（airport-foreign）
+let FOREIGN = null, FOREIGN_AP = null, FOREIGN_AT = 0;
+const FOREIGN_JA = { KE:"大韓航空", OZ:"アシアナ航空", "7C":"チェジュ航空", LJ:"ジンエアー", TW:"ティーウェイ航空", ZE:"イースター航空", BX:"エアプサン", RS:"エアソウル",
+  CI:"チャイナエアライン", BR:"エバー航空", IT:"タイガーエア台湾", JX:"スターラックス航空", CX:"キャセイパシフィック航空", UO:"香港エクスプレス", HX:"香港航空",
+  CA:"中国国際航空", MU:"中国東方航空", CZ:"中国南方航空", HO:"吉祥航空", "9C":"春秋航空", HU:"海南航空", MF:"厦門航空", SC:"山東航空", FM:"上海航空",
+  TG:"タイ国際航空", SQ:"シンガポール航空", TR:"スクート", MH:"マレーシア航空", D7:"エアアジアX", VN:"ベトナム航空", VJ:"ベトジェット", PR:"フィリピン航空", "5J":"セブパシフィック航空", GA:"ガルーダ・インドネシア航空",
+  UA:"ユナイテッド航空", AA:"アメリカン航空", DL:"デルタ航空", HA:"ハワイアン航空", AC:"エア・カナダ", QF:"カンタス航空", JQ:"ジェットスター", NZ:"ニュージーランド航空",
+  EK:"エミレーツ航空", QR:"カタール航空", EY:"エティハド航空", TK:"ターキッシュ エアラインズ", AF:"エールフランス", KL:"KLM", BA:"ブリティッシュ・エアウェイズ", LH:"ルフトハンザ", LX:"スイス", AY:"フィンエアー", OS:"オーストリア航空", SK:"スカンジナビア航空",
+  OM:"MIATモンゴル航空", AI:"エア・インディア", ZG:"ZIPAIR", "3K":"ジェットスター・アジア" };
+async function loadForeign(iata){
+  if(!SERVER) return null;
+  if(FOREIGN && FOREIGN_AP === iata && Date.now() - FOREIGN_AT < 60_000) return FOREIGN;
+  try{ const r = await fetch(SORAMEMO_CONFIG.supabaseUrl.replace(/\/$/, "") + `/functions/v1/airport-foreign?iata=${iata}`, { headers:{ apikey:SORAMEMO_CONFIG.supabaseAnonKey } });
+    if(r.ok){ const d = await r.json(); if(Array.isArray(d.planes)){ FOREIGN = d; FOREIGN_AP = iata; FOREIGN_AT = Date.now(); return d; } } }catch(e){}
+  return FOREIGN_AP === iata ? FOREIGN : null;
+}
+function foreignHTML(d, arr){
+  if(!d || BOARD_KIND === "dom") return "";
+  const ST = { approach:"着陸に向かっています", landed:"着陸しました", ground:"出発前（地上）", departed:"離陸しました" };
+  const list = (d.planes || []).filter(p => p.kind === (arr ? "arr" : "dep"));
+  const rows = list.map(p => `<li><span class="dot" aria-hidden="true"></span><b>${esc(arr ? placeAny(p.other) + "から" : placeAny(p.other) + "へ")}</b>
+      <span class="fl"><i class="intl">海外</i>${esc(p.flight)}${p.type ? "・" + esc(p.type) : ""}${FOREIGN_JA[p.airline] ? "・" + esc(FOREIGN_JA[p.airline]) : ""}</span>
+      <span class="rel">${ST[p.status] || ""}</span><span class="tm">推定${p.alt_ft != null ? `　高度 ${fmtKm(p.alt_ft)}ft` : ""}　${p.km}km</span></li>`).join("");
+  return `<div class="bdhead"><h3>海外の航空会社（いま近くにいる便）</h3></div>
+    ${rows ? `<ol class="bdseq foreign">${rows}</ol>` : `<p class="hint">いま、この空港の近くに${arr ? "着く" : "出た"}海外の航空会社の便は見つかりません。</p>`}
+    <p class="fwnote">時刻表がない航空会社の便を、空港から60km以内の機体の位置と、その経路のデータ（adsb.lol）から推定しています。便名は機体の呼び出し符号から読んでいるため、航空会社の発表とは違うことがあります。</p>`;
+}
 function boardRel(t, now){
   const m = Math.round((Date.parse(t) - now) / 60000);
   if(m === 0) return "いま";
   if(m < 0) return `${-m}分前`;
   return m < 60 ? `あと${m}分` : `あと${Math.floor(m / 60)}時間${m % 60 ? (m % 60) + "分" : ""}`;
 }
-function boardHTML(d){
+function boardHTML(d, fg){
   const now = Date.now(), list = (BOARD_DIR === "arr" ? d.next_arr : d.next_dep) || [], arr = BOARD_DIR === "arr";
   const hmS = t => new Date(t).toLocaleTimeString("ja-JP", { hour:"2-digit", minute:"2-digit" });
   const name = placeAny;
@@ -4921,6 +5605,7 @@ function boardHTML(d){
       <button data-board-dir="arr" aria-pressed="${arr}">到着</button><button data-board-dir="dep" aria-pressed="${!arr}">出発</button></div></div>
     <div class="bdtabs bdkind" role="group" aria-label="国内線と国際線">${[["all", "すべて"], ["dom", "国内線"], ["intl", "国際線"]].map(([k, l]) => `<button data-board-kind="${k}" aria-pressed="${BOARD_KIND === k}">${l}</button>`).join("")}</div>
     ${items ? `<ol class="bdseq">${items}</ol>` : `<p class="hint">この3時間に${arr ? "着く" : "出る"} JAL・ANA の時刻表の${BOARD_KIND === "intl" ? "国際線の" : BOARD_KIND === "dom" ? "国内線の" : ""}便はありません。</p>`}
+    ${foreignHTML(fg, arr)}
     <div class="bdhead"><h3>今日の遅れ・欠航</h3><span class="bdsum">遅れ <b>${late}</b>便・欠航 <b>${cancel}</b>便</span></div>
     <svg class="bdchart" viewBox="0 0 ${W} ${H + 14}" role="img" aria-label="今日の1時間ごとの遅れと欠航の便の数。遅れ${late}便、欠航${cancel}便">
       <line x1="0" y1="${H - 4}" x2="${W}" y2="${H - 4}" class="base"/>${bars}<path d="${ref}" class="ref"/>
@@ -4930,11 +5615,11 @@ function boardHTML(d){
 }
 async function renderBoard(){
   const iata = OPS_AP, box = $("opsBoard"); if(!box) return;
-  const d = await loadBoard(iata); if(OPS_AP !== iata) return;
+  const [d, fg] = await Promise.all([loadBoard(iata), loadForeign(iata)]); if(OPS_AP !== iata) return;
   if(!d){ box.hidden = true; box.innerHTML = ""; return; }
-  box.hidden = false; box.innerHTML = boardHTML(d);
+  box.hidden = false; box.innerHTML = boardHTML(d, fg); renderOpsDerived(d);
 }
-document.addEventListener("click", e => { const b = e.target.closest("[data-board-dir]"); if(!b) return; BOARD_DIR = b.dataset.boardDir; if(BOARD) $("opsBoard").innerHTML = boardHTML(BOARD); });
+document.addEventListener("click", e => { const b = e.target.closest("[data-board-dir]"); if(!b) return; BOARD_DIR = b.dataset.boardDir; if(BOARD) $("opsBoard").innerHTML = boardHTML(BOARD, FOREIGN_AP === OPS_AP ? FOREIGN : null); });
 document.addEventListener("click", e => { const b = e.target.closest("[data-board-kind]"); if(!b || b.dataset.boardKind === BOARD_KIND) return; BOARD_KIND = b.dataset.boardKind; track("board_kind", BOARD_KIND); renderBoard(); });
 
 /* 昨日の〇〇：前の日の空港のまとめ（毎日の記録の airport_daily）と、その前の7日の平均 */
@@ -5365,7 +6050,7 @@ function planHTML(y, st){
   return body;   // そらメモ＋を休んでいるあいだは、全員に見せる
 }
 document.addEventListener("click", e => {
-  const q = e.target.closest("[data-plan-q]"); if(q){ const [a, b] = q.dataset.planQ.split("-"); PLAN.from = IATA[a].id; PLAN.to = IATA[b].id; PLAN.carSet = PLAN.car; renderStatus(); return; }
+  const q = e.target.closest("[data-plan-q]"); if(q){ markPlanUsed(); const [a, b] = q.dataset.planQ.split("-"); PLAN.from = IATA[a].id; PLAN.to = IATA[b].id; PLAN.carSet = PLAN.car; renderStatus(); return; }
   const c = e.target.closest("[data-plan-car]"); if(c){ PLAN.car = c.dataset.planCar; PLAN.from = null; renderStatus(); track("plan", PLAN.car); return; }
   if(e.target.id === "planJoin"){ track("plus_view", "plan"); $("dSettings").showModal(); }
 });
@@ -5571,6 +6256,7 @@ document.addEventListener("click", async e => {
 
 fillSelects(); showVlog();
 if(SERVER){ S = blank(); render(); updateAuthUI(); initServer(); } else { load(); render(); updateAuthUI(); }
+applyPersonaTabs(); renderPersonaSettings(); LAST_TAB.rally = PERSONAS[PERSONA].tabs[0];   // 構成：タブの並びと、はじめに開くタブ
 setGameOn(GAME_ON); setAnalytics(ANALYTICS_ON); $("anaRow").hidden = !SERVER; renderInstall();
 track("open", MODE);
 maybeGuide();
