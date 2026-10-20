@@ -1,0 +1,74 @@
+import os, sys
+HERE=os.path.dirname(os.path.abspath(__file__)); WEB=os.path.abspath(os.path.join(HERE,'..','..','web')); WORK=os.environ.get('SORAMEMO_TEST_WORK','/tmp/soramemo-e2e'); os.makedirs(WORK, exist_ok=True)
+# 撮る人の見方：注目の機体・機体のくわしく・撮影条件と天気・近づいたら知らせる
+import asyncio, json
+from datetime import datetime, timedelta, timezone
+from playwright.async_api import async_playwright
+now = datetime.now(timezone.utc)
+iso = lambda m: (now + timedelta(minutes=m)).isoformat()
+HRS = [{'h': h, 'flights': [0,0,0,0,0,2,30,48,52,50,44,46,48,44,42,46,48,50,52,48,40,30,20,6][h], 'late': (h % 5 == 0) * 2, 'cancel': 0, 'ref': 1} for h in range(24)]
+BOARD = {'iata': 'HND', 'now': iso(0), 'hours': HRS,
+  'next_arr': [{'flight': 'JL500', 'other': 'ITM', 'sched': iso(5), 't': iso(5), 'aircraft': 'B738'}, {'flight': 'NH212', 'other': 'LHR', 'sched': iso(25), 't': iso(25), 'intl': True, 'aircraft': 'B789'}],
+  'next_dep': [{'flight': 'NH106', 'other': 'LAX', 'sched': iso(15), 't': iso(15), 'intl': True, 'aircraft': 'B77W'}, {'flight': 'JL903', 'other': 'OKA', 'sched': iso(30), 'est': iso(48), 't': iso(48), 'aircraft': 'A359'}, {'flight': 'BC101', 'other': 'UKB', 'sched': iso(40), 't': iso(40), 'aircraft': 'B738'}]}
+fails = []
+def check(label, ok):
+    print(label, ok)
+    if not ok: fails.append(label)
+async def main():
+    async with async_playwright() as p:
+        b=await p.chromium.launch(); c=await b.new_context(viewport={'width':400,'height':860}, timezone_id='Asia/Tokyo')
+        await c.add_init_script("localStorage.setItem('soramemo.onboarded','1'); localStorage.setItem('soramemo.install.later','1')")
+        await c.route('https://cdn.jsdelivr.net/npm/@supabase/**', lambda r: r.fulfill(path=os.path.join(HERE,'fake_sb.js'), content_type='application/javascript'))
+        async def rpc(r):
+            name = r.request.url.rsplit('/', 1)[-1]
+            await r.fulfill(status=200, body=json.dumps(BOARD if name == 'airport_board' else []), content_type='application/json', headers={'Access-Control-Allow-Origin':'*'})
+        await c.route('https://fake.supabase.co/rest/v1/rpc/**', rpc)
+        FG = {'planes': [{'flight': 'TG660', 'airline': 'TG', 'other': 'BKK', 'kind': 'arr', 'status': 'approach', 'km': 40, 'alt_ft': 6000, 'type': 'A359'}]}
+        await c.route('https://fake.supabase.co/functions/v1/airport-foreign**', lambda r: r.fulfill(status=200, body=json.dumps(FG), content_type='application/json', headers={'Access-Control-Allow-Origin':'*'}))
+        NOWD = {'weather': {'time': iso(-10), 'wdir': 340, 'wspd': 12, 'wgst': None, 'vis_m': 10000, 'vis_plus': True, 'sky': '晴れ', 'ceil_ft': None, 'temp': 16, 'dewp': 14, 'low_ft': 1800, 'layers': [{'cover': 'FEW', 'base': 1800}, {'cover': 'SCT', 'base': 4500}]},
+          'taf': {'periods': [{'from': int(now.timestamp()) - 3600, 'to': int(now.timestamp()) + 86400, 'kind': 'base', 'wdir': 340, 'wspd': 10, 'sky': '晴れ', 'low_ft': 2500, 'prob': None, 'wgst': None, 'vis_m': 10000, 'ceil_ft': None}]}, 'flights': None}
+        await c.route('https://fake.supabase.co/functions/v1/airport-now**', lambda r: r.fulfill(status=200, body=json.dumps(NOWD), content_type='application/json', headers={'Access-Control-Allow-Origin':'*'}))
+        pg=await c.new_page(); errs=[]; pg.on('pageerror', lambda e: errs.append(str(e) + ' @ ' + (e.stack or '')[:300]))
+        await pg.goto('file://'+os.path.join(WORK,'index_server_test.html')); await pg.wait_for_load_state('load'); await pg.wait_for_timeout(600)
+        await pg.evaluate('__fake.login()'); await pg.wait_for_timeout(800)
+        await pg.evaluate("localStorage.setItem('soramemo.view.ops', 'photo')")
+        await pg.evaluate("goTab('ops')"); await pg.wait_for_timeout(1800)
+        await pg.click('[data-vw="ops:photo"]'); await pg.wait_for_timeout(1200)
+        t = await pg.inner_text('#opsPhoto'); print('PHOTO', t.replace('\n', ' | '))
+        check('注目の機体のカード:', await pg.locator('#opsPhoto .sphero').count() == 1)
+        check('注目だけ（B738 は出ない）:', 'NH212' in t and 'TG660' in t and 'JL500' not in t and 'BC101' not in t)
+        check('天気の札:', '雲底 1,800ft' in t and 'ベイパー 出やすい' in t)
+        await pg.click('[data-spfilter="all"]'); await pg.wait_for_timeout(200)
+        check('すべてで B738 も出る:', 'JL500' in await pg.inner_text('#opsPhoto'))
+        await pg.click('[data-spfilter="dep"]'); await pg.wait_for_timeout(200)
+        t2 = await pg.inner_text('#opsPhoto .splist2'); check('離陸だけ:', 'NH106' in t2 and 'NH212' not in t2)
+        await pg.locator('#opsPhoto .sprow').first.click(); await pg.wait_for_timeout(300)
+        check('機体のくわしく:', await pg.evaluate("$('dSpotFl').open") and '離陸' in await pg.inner_text('#dSpotFl'))
+        await pg.screenshot(path=os.path.join(WORK, 't63_detail.png'))
+        await pg.click('#dSpotFl .spx'); await pg.wait_for_timeout(200)
+        check('閉じる:', not await pg.evaluate("$('dSpotFl').open"))
+        await pg.locator('#opsPhoto [data-spcond]').last.click(); await pg.wait_for_timeout(800)
+        tc = await pg.inner_text('#dSpotCond'); print('COND', tc[:300].replace('\n', ' | '))
+        check('撮影条件と天気:', await pg.evaluate("$('dSpotCond').open") and '1,800' in tc and '4,500ft' in tc and '日の出' in tc and 'これから' in tc)
+        check('撮影地の地図:', await pg.locator('#dSpotCond svg.spmap circle').count() >= 2)
+        await pg.screenshot(path=os.path.join(WORK, 't63_cond.png'), full_page=True)
+        await pg.click('#dSpotCond [data-close]'); await pg.wait_for_timeout(200)
+        # 知らせの設定（端末の通知の申し込みは置き換えて、送る中身だけ確かめる）
+        await pg.evaluate("window.pushOK = () => true; syncPush = async (a, f, s, spot) => { window.__spot = spot; localStorage.setItem('soramemo.pushSpot', JSON.stringify(spot)); return true; }")
+        await pg.click('#opsPhoto [data-sppush]'); await pg.wait_for_timeout(300)
+        check('知らせの設定:', await pg.evaluate("$('dSpotPush').open"))
+        await pg.click('[data-spkind="special"]'); await pg.click('[data-spkind="reg"]'); await pg.wait_for_timeout(100)
+        await pg.fill('#spRegs', 'ja01xj, bad JA873A'); await pg.click('[data-splead="10"]'); await pg.wait_for_timeout(100)
+        await pg.click('[data-spsave]'); await pg.wait_for_timeout(300)
+        sp = await pg.evaluate('window.__spot'); print('SPOT', sp)
+        check('保存した中身:', sp and sp['iata'] == 'HND' and sp['kinds'] == ['special', 'reg'] and sp['regs'] == ['JA01XJ', 'JA873A'] and sp['lead'] == 10)
+        await pg.click('[data-spfilter="pick"]'); await pg.wait_for_timeout(200)
+        n = pg.locator('#opsPhoto .spnote'); check('10分前に知らせるボタン:', '10分前' in await n.inner_text())
+        await n.click(); await pg.wait_for_timeout(300)
+        sp = await pg.evaluate('window.__spot'); print('SPOT2', sp)
+        check('便を知らせに足す:', len(sp['flights']) == 1 and sp['kinds'] == ['special', 'reg'])
+        check('取り消しに変わる:', '取り消す' in await pg.locator('#opsPhoto .spnote').inner_text())
+        await pg.click('[data-sppush]'); await pg.wait_for_timeout(200); await pg.click('[data-spoff]'); await pg.wait_for_timeout(300)
+        check('すべてやめる:', (await pg.evaluate('window.__spot'))['iata'] is None)
+        print('errors', errs, 'fails', fails); await b.close()
+asyncio.run(main())

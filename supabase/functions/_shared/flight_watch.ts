@@ -99,6 +99,13 @@ export function foreignFlightOf(cs: string): { flight: string; airline: string }
   const a = ICAO_TO_IATA.get(m[1]);
   return a && !JAPAN_CARRIERS.has(a) ? { flight: a + m[2], airline: a } : null;
 }
+// 呼び出し符号 → 便名（JAL123 → JL123、KAL703 → KE703）
+export function flightOfCallsign(cs: string): string | null {
+  const m = /^([A-Z]{3})0*(\d{1,4})[A-Z]?$/.exec(String(cs ?? "").trim().toUpperCase());
+  if (!m) return null;
+  const a = ICAO_TO_IATA.get(m[1]);
+  return a ? a + m[2] : null;
+}
 // 呼び出し符号の形をそろえる（JAL0509 → JAL509）
 export function normCallsign(cs: string): string {
   const m = /^([A-Z]{3})0*(\d{1,4})([A-Z]?)$/.exec(cs.trim().toUpperCase());
