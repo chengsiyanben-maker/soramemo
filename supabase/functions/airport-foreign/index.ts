@@ -36,6 +36,18 @@ Deno.serve(async (req) => {
   try {
     const iata = (new URL(req.url).searchParams.get("iata") ?? "").toUpperCase();
     if (!/^[A-Z]{3}$/.test(iata)) return json({ error: "bad_request" }, 400);
+    // 経路のデータの問い合わせ先の確かめ（一時的。答えの頭だけを返す）
+    if (new URL(req.url).searchParams.get("diag") === "1") {
+      const body = JSON.stringify({ planes: [{ callsign: "KAL2707", lat: 35.6, lng: 139.9 }] }), out: Record<string, string> = {};
+      for (const u of ["https://api.adsb.lol/api/0/routeset", "https://adsb.im/api/0/routeset", "https://api.adsb.lol/api/0/route/KAL2707"]) {
+        try {
+          const r = await fetch(u, u.includes("/route/") ? { headers: { "User-Agent": "soramemo (airport-foreign)" }, signal: AbortSignal.timeout(10000) }
+            : { method: "POST", headers: { "Content-Type": "application/json", "Accept": "application/json", "User-Agent": "soramemo (airport-foreign)" }, body, signal: AbortSignal.timeout(10000) });
+          out[u] = `${r.status} ${(await r.text()).slice(0, 300)}`;
+        } catch (e) { out[u] = "error " + (e instanceof Error ? e.message : String(e)); }
+      }
+      return json(out);
+    }
     const c = cache.get(iata); if (c && Date.now() - c.at < TTL) return json(c.body);
     const at = (await japan()).get(iata); if (!at) return json({ error: "unknown_airport" }, 404);
     const d = 0.6;   // 約65km四方を先に絞る
