@@ -1,11 +1,12 @@
 (function(){
-  const db = {checkins:[{airport_id:5, terminal_id:null, created_at:new Date(Date.now()-9e6).toISOString(), accuracy_m:20}], flights:[{id:7, from_airport:5, to_airport:6, dep_at:new Date(Date.now()-7.2e6).toISOString(), arr_at:new Date().toISOString(), distance_km:820, status:'verified', airline:null, flight_no:null},{id:8, from_airport:6, to_airport:5, dep_at:new Date(Date.now()-3*864e5).toISOString(), arr_at:new Date(Date.now()-3*864e5+7e6).toISOString(), distance_km:820, status:'no_data', airline:null, flight_no:null},{id:9, from_airport:5, to_airport:23, dep_at:new Date(Date.now()-2*864e5).toISOString(), arr_at:new Date(Date.now()-2*864e5+9e6).toISOString(), distance_km:1555, status:'provisional', airline:null, flight_no:null}], manual_flights:[]}; let session = null; const listeners = [];
+  const db = {checkins:[{airport_id:5, terminal_id:null, created_at:new Date(Date.now()-9e6).toISOString(), accuracy_m:20}], flights:[{id:7, from_airport:5, to_airport:6, dep_at:new Date(Date.now()-7.2e6).toISOString(), arr_at:new Date().toISOString(), distance_km:820, status:'verified', airline:null, flight_no:null},{id:8, from_airport:6, to_airport:5, dep_at:new Date(Date.now()-3*864e5).toISOString(), arr_at:new Date(Date.now()-3*864e5+7e6).toISOString(), distance_km:820, status:'no_data', airline:null, flight_no:null},{id:9, from_airport:5, to_airport:23, dep_at:new Date(Date.now()-2*864e5).toISOString(), arr_at:new Date(Date.now()-2*864e5+9e6).toISOString(), distance_km:1555, status:'provisional', airline:null, flight_no:null}], manual_flights:[], intl_flights:[]}; let session = null; const listeners = [];
   window.__fake = {db, login(){ session = {user:{id:'u1', email:'test@example.com'}}; listeners.forEach(f=>f('SIGNED_IN', session)); }};
   function q(table){ let lo = 0, hi = 999; window.__queries = (window.__queries || 0) + 1;
     const rows = () => db[table].slice(lo, Math.min(hi, lo + 999) + 1);   // 本物と同じく1回に1,000行まで
     const api = { select(){ return api; }, order(){ return api; }, range(a, b){ lo = a; hi = b; return api; },
       then(res){ res({data: rows(), error:null}); },
-      insert(row){ (Array.isArray(row) ? row : [row]).forEach(r => db[table].push(Object.assign({id: db[table].length+1}, r))); window.__inserts = (window.__inserts||0) + 1; return Promise.resolve({error:null}); } };
+      insert(row){ (Array.isArray(row) ? row : [row]).forEach(r => db[table].push(Object.assign({id: db[table].length+1}, r))); window.__inserts = (window.__inserts||0) + 1; return Promise.resolve({error:null}); },
+      delete(){ return { eq(k, v){ db[table] = db[table].filter(r => r[k] !== v); return Promise.resolve({error:null}); } }; } };
     return api; }
   window.supabase = { createClient(){ return {
     auth:{ getSession: async()=>({data:{session}}), onAuthStateChange(f){ listeners.push(f); },

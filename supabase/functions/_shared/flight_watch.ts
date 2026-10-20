@@ -88,6 +88,17 @@ export function callsignsFor(flight: string): string[] {
   const n = String(Number(m[2]));
   return PREFIX[m[1]].map((p) => p + n);
 }
+// 日本の航空会社（便名の記号）。海外の航空会社の便を見分けるのに使う
+export const JAPAN_CARRIERS = new Set(["JL", "NH", "BC", "HD", "6J", "7G", "NU", "MM", "GK", "IJ", "JH", "OC", "FW", "3X"]);
+const ICAO_TO_IATA = new Map<string, string>();
+for (const [iata, icaos] of Object.entries(PREFIX)) for (const c of icaos) if (!ICAO_TO_IATA.has(c) || JAPAN_CARRIERS.has(iata)) ICAO_TO_IATA.set(c, iata);
+// 呼び出し符号 → 海外の航空会社の便名（KAL703 → KE703）。日本の航空会社と、表にない会社は null
+export function foreignFlightOf(cs: string): { flight: string; airline: string } | null {
+  const m = /^([A-Z]{3})0*(\d{1,4})([A-Z]?)$/.exec(String(cs ?? "").trim().toUpperCase());
+  if (!m) return null;
+  const a = ICAO_TO_IATA.get(m[1]);
+  return a && !JAPAN_CARRIERS.has(a) ? { flight: a + m[2], airline: a } : null;
+}
 // 呼び出し符号の形をそろえる（JAL0509 → JAL509）
 export function normCallsign(cs: string): string {
   const m = /^([A-Z]{3})0*(\d{1,4})([A-Z]?)$/.exec(cs.trim().toUpperCase());

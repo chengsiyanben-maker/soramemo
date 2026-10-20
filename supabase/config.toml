@@ -451,3 +451,5 @@ verify_jwt = false
 verify_jwt = false
 [functions.flight-live]
 verify_jwt = false
+[functions.airport-foreign]
+verify_jwt = false

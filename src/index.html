@@ -181,6 +181,8 @@ h3{font-size:14px;color:var(--sumi);font-weight:500;margin:22px 0 10px}
 .manual{margin-top:14px;display:grid;gap:10px}
 .manual .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .manual input[type=date]{width:100%;padding:11px;border:1px solid var(--line);border-radius:10px;background:var(--paper)}
+.manual .row>*{min-width:0}
+.manual input:not([type]){width:100%;box-sizing:border-box;padding:12px;border:1px solid var(--line);border-radius:10px;background:var(--paper);font:inherit;color:inherit}
 .btn2{padding:12px 16px;border:1.5px solid var(--ink);background:none;border-radius:10px;font-weight:700}
 
 /* tabs */
@@ -794,6 +796,8 @@ ol.steps{padding-left:1.4em;line-height:1.9}
 .ridecard .rl{display:block;color:var(--hm-sub,#6B7280);font-size:11.5px;margin-top:6px}
 .ridecard .rv{display:block;font-weight:700}
 .ridecard .late{color:#B45309}
+.ridecard .rrec{display:block;width:100%;margin-top:10px}
+.pass .ps .idel{font-size:11px;padding:4px 0;min-height:0}
 .ridecard .rbar{height:6px;border-radius:999px;background:var(--hm-pill,rgba(17,24,39,.06));margin:8px 0 2px;overflow:hidden}
 .ridecard .rbar i{display:block;height:100%;border-radius:999px;background:#2563EB}
 .ridecard .ok{color:#047857}
@@ -1144,7 +1148,7 @@ nav.tabs{transition:transform .3s cubic-bezier(.2,.8,.2,1),opacity .2s}
 #v-log .pass .ps b{font-size:15px;font-weight:800}
 #v-log .pass .ps small{font-size:10px;color:var(--lg-sub);font-weight:700}
 #v-log .pass .ps span{font-size:11px;color:var(--lg-sub)}
-#v-log #manualList h3{margin:22px 2px 10px;font-size:12px;font-weight:700;color:var(--lg-mute)}
+#v-log #manualList h3,#v-log #intlList h3{margin:22px 2px 10px;font-size:12px;font-weight:700;color:var(--lg-mute)}
 #v-log .yrgrid{background:transparent;gap:8px;border-radius:0;overflow:visible}
 #v-log .yrgrid>div{background:var(--lg-card);border-radius:18px;box-shadow:var(--lg-shadow)}
 #v-log .yrgrid .n{font-family:var(--gothic);color:var(--lg-ink)}
@@ -1364,6 +1368,16 @@ nav.tabs{transition:transform .3s cubic-bezier(.2,.8,.2,1),opacity .2s}
       <div id="impPreview"></div>
     </details>
     <div id="manualList"></div>
+    <h2 id="intlH">国際線を記録する</h2>
+    <p class="hint">日本の空港と海外の空港を結ぶフライトを残せます。記録帳と同じく、印・路線の数・図鑑には入りません。空港は「ソウル」「ICN」のように入れます。</p>
+    <div class="manual" id="intlForm">
+      <div class="row"><input id="iFrom" list="intlApts" placeholder="出発（例：羽田）" aria-label="出発空港" autocomplete="off"><input id="iTo" list="intlApts" placeholder="到着（例：ソウル）" aria-label="到着空港" autocomplete="off"></div>
+      <div class="row"><input type="date" id="iDate" aria-label="搭乗日"><input id="iNo" placeholder="便名（任意）" aria-label="便名（任意）" autocapitalize="characters" autocomplete="off" maxlength="7"></div>
+      <button class="btn2" id="iAdd">国際線を追加</button>
+      <p class="msg" id="iMsg" role="status" aria-live="polite"></p>
+      <datalist id="intlApts"></datalist>
+    </div>
+    <div id="intlList"></div>
       </div>
       </div>
     </div>
@@ -1515,7 +1529,7 @@ nav.tabs{transition:transform .3s cubic-bezier(.2,.8,.2,1),opacity .2s}
     <div class="set-row" id="gameRow"><div>エアライン経営<small>オフにすると、スタンプラリーだけのアプリとして使えます。記録はそのまま残り、オンに戻せば続きから遊べます。</small></div><button class="btn2" id="gameToggle" aria-pressed="true">使う（オン）</button></div>
   </section>
   <section class="mp-sec" aria-labelledby="mpData"><h4 id="mpData">データ</h4>
-    <div class="set-row"><div>記録を書き出す<small>チェックイン・フライト・記録帳を書き出します（無料）。CSVは「まとめて取り込む」と同じ形です。</small></div>
+    <div class="set-row"><div>記録を書き出す<small>チェックイン・フライト・記録帳・国際線を書き出します（無料）。CSVは「まとめて取り込む」と同じ形です。</small></div>
       <div class="exp"><button class="btn2" data-export="json">JSON</button><button class="btn2" data-export="csv">CSV</button></div></div>
     <div class="set-row" id="wipeRow"><div>記録を消す<small>この端末に保存した本番の記録をすべて消します。</small></div><button class="btn2 danger" id="wipe">消す</button></div>
   </section>
@@ -1646,7 +1660,7 @@ function setAnalytics(on){ ANALYTICS_ON = on; if(!on) EVQ = []; try{ localStorag
 /* ---------- storage ---------- */
 let demo = false;
 const key = () => demo ? "soramemo.demo.v1" : "soramemo.v1";
-const blank = () => ({checkins:[], flights:[], manual:[], demoClock:null});
+const blank = () => ({checkins:[], flights:[], manual:[], intl:[], demoClock:null});
 let S = blank();
 // 端末への保存は配列の短い形（v:2）。以前の形（オブジェクトの配列）もそのまま読める
 function packS(x){
@@ -1656,15 +1670,17 @@ function packS(x){
     c: x.checkins.map(c => c.term ? [c.a, c.t, Math.round(c.acc || 0), c.term] : [c.a, c.t, Math.round(c.acc || 0)]),
     f: x.flights.map(f => { const r = [f.from, f.to, f.dep, f.arr, Math.round(f.km * 10) / 10];
       const e = extra({a:f.airline, n:f.no, f:f.fare, s:f.seat, i: f.id != null && f.id !== "a" + f.arr ? f.id : null}); if(e) r.push(e); return r; }),
-    m: x.manual.map(m => { const r = [m.from, m.to, m.d]; const e = extra({a:m.airline, f:m.fare, s:m.seat}); if(e) r.push(e); return r; }) };
+    m: x.manual.map(m => { const r = [m.from, m.to, m.d]; const e = extra({a:m.airline, f:m.fare, s:m.seat}); if(e) r.push(e); return r; }),
+    i: (x.intl || []).map(g => { const r = [g.dep, g.arr, g.d]; const e = extra({n:g.no, a:g.airline, s:g.seat, k:g.km, da:g.depAt, aa:g.arrAt}); if(e) r.push(e); return r; }) };
 }
 function unpackS(o){
-  if(!o || (o.v !== 2 && o.v !== 3)) return Object.assign(blank(), o || {});
+  if(!o || (o.v !== 2 && o.v !== 3)) return Object.assign(blank(), o || {}, { intl: (o && Array.isArray(o.intl)) ? o.intl : [] });
   const fl = r => { if(o.v === 3){ const e = r[5] || {}; return {id: e.i != null ? e.i : "a" + r[3], from:r[0], to:r[1], dep:r[2], arr:r[3], km:r[4], airline:e.a || null, no:e.n || null, fare:e.f || null, seat:e.s || null}; }
     return {id: r[7] != null ? r[7] : "a" + r[3], from:r[0], to:r[1], dep:r[2], arr:r[3], km:r[4], airline:r[5] || null, no:r[6] || null, fare:null, seat:null}; };
   const mn = r => { if(o.v === 3){ const e = r[3] || {}; return {from:r[0], to:r[1], d:r[2], airline:e.a || null, fare:e.f || null, seat:e.s || null}; }
     return {from:r[0], to:r[1], d:r[2], airline:r[3] || null, fare:null, seat:null}; };
-  return { demoClock:o.dc || null, checkins:(o.c || []).map(r => ({a:r[0], t:r[1], acc:r[2], term:r[3] || null})), flights:(o.f || []).map(fl), manual:(o.m || []).map(mn) };
+  const it = r => { const e = r[3] || {}; return {dep:r[0], arr:r[1], d:r[2], no:e.n || null, airline:e.a || null, seat:e.s || null, km:e.k != null ? e.k : intlKm(r[0], r[1]), depAt:e.da || null, arrAt:e.aa || null}; };
+  return { demoClock:o.dc || null, checkins:(o.c || []).map(r => ({a:r[0], t:r[1], acc:r[2], term:r[3] || null})), flights:(o.f || []).map(fl), manual:(o.m || []).map(mn), intl:(o.i || []).map(it) };
 }
 function load(){ try{ const v = localStorage.getItem(key()); S = v ? unpackS(JSON.parse(v)) : blank(); }catch(e){ S = blank(); } }
 function save(){ if(SERVER && !demo) return; try{ localStorage.setItem(key(), JSON.stringify(packS(S))); }catch(e){ say("この端末に記録を保存できませんでした。ブラウザの設定で保存が許可されているか確認してください。", true); } }
@@ -1889,6 +1905,18 @@ async function fetchLive(no, dep){
   try{ const r = await fetch(SORAMEMO_CONFIG.supabaseUrl.replace(/\/$/, "") + `/functions/v1/flight-live?flight=${encodeURIComponent(no)}${dep ? "&dep=" + dep : ""}`, { headers:{ apikey:SORAMEMO_CONFIG.supabaseAnonKey } });
     return r.ok ? await r.json() : null; }catch(e){ return null; }
 }
+const rideRecorded = p => (S.intl || []).some(g => g.no === p.no && g.d === p.day);
+// 乗っている便を国際線の記録に入れる（時刻は実際の時刻、なければ定刻。到着前なら到着は定刻）
+document.addEventListener("click", async e => {
+  const b = e.target.closest("[data-ride-rec]"); if(!b) return;
+  const p = ridePlan(), d = (RIDE_LIVE && RIDE_LIVE.d) || {}; if(!p || !p.intl || rideRecorded(p)) return;
+  const dep = d.dep || p.dep, arr = d.arr || p.arr, t = v => v ? Date.parse(v) : null;
+  const depAt = t(d.atd) || t(d.std), arrAt = (d.phase === "landed" && t(d.ata)) || t(d.sta);
+  b.disabled = true; b.textContent = "記録しています…";
+  const err = await addIntl({ dep, arr, d:p.day, no:p.no, km:intlKm(dep, arr), depAt, arrAt: depAt && arrAt && arrAt > depAt ? arrAt : null });
+  if(err){ b.disabled = false; b.textContent = err; return; }
+  renderRide();
+});
 async function renderRideIntl(p, force){
   const box = $("rideCard"), today = new Date(Date.now() + 9*36e5).toISOString().slice(0, 10);
   if(p.day < today){ box.hidden = true; box.innerHTML = ""; return; }
@@ -1907,6 +1935,7 @@ async function renderRideIntl(p, force){
   box.innerHTML = `<div class="rh"><b>乗る便 ${esc(p.no)}</b><span>${esc(placeAny(dep))} → ${esc(placeAny(arr))}${est ? "（推定）" : ""}</span><button type="button" data-ride-off>やめる</button></div>
     ${d.std ? `<span class="rl">出発 定刻 ${tzHM(d.std, dep)}${localNote(dep)}　到着 定刻 ${tzHM(d.sta, arr)}${localNote(arr)}${!IATA[arr] && WORLD_TZ[arr] ? `（日本時間 ${tzHM(d.sta, "HND")}）` : ""}</span>` : ""}
     ${st}${bar}${d.reg || d.type ? `<span class="rl">機体 ${esc([d.reg, d.type].filter(Boolean).join("・"))}</span>` : ""}
+    ${d.found && ["air", "lost", "landed"].includes(ph) && !!IATA[dep] !== !!IATA[arr] ? (rideRecorded(p) ? `<span class="rl">国際線の記録に入れました（フライトの「記録帳」）</span>` : `<button type="button" class="btn2 rrec" data-ride-rec>この便を国際線の記録に入れる</button>`) : ""}
     <p class="fwnote">機体の位置は adsb.lol から便名で探した推定で、海の上などでは届かないことがあります。${est ? "この便は時刻表がないため、出発・到着の空港も機体の位置の情報の経路のデータからの推定です。" : `時刻は時刻表（現地時刻）と航空会社の運航情報。${ODPT_CREDIT}`}　空港の時間帯：OpenFlights（ODbL）</p>`;
 }
 async function renderRide(force){
@@ -1971,10 +2000,11 @@ async function applyPlan(){
 }
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 async function loadServer(){
-  const [c, f, m] = await Promise.all([
+  const [c, f, m, g] = await Promise.all([
     fetchAll("checkins", "id,airport_id,terminal_id,created_at,accuracy_m,weather,wind_kt,ops", "created_at"),
     fetchAll("flights", "id,from_airport,to_airport,dep_at,arr_at,distance_km,status,airline,flight_no,fare,seat,track", "arr_at"),
     fetchAll("manual_flights", "id,from_airport,to_airport,flown_on,airline,fare,seat", null),
+    fetchAll("intl_flights", "id,flown_on,dep,arr,flight_no,airline,seat,dep_at,arr_at,distance_km", null),
   ]);
   await loadPlus();
   if(gameAvail()) await loadCompanyServer();   // 経営が公開前か、オフにしている人には、会社の計算を頼まない
@@ -1983,7 +2013,10 @@ async function loadServer(){
   S = { demoClock:null,
     checkins: c.data.map(r => ({a:r.airport_id, term:r.terminal_id, t:Date.parse(r.created_at), acc:r.accuracy_m, wx:r.weather || null, wind:r.wind_kt ?? null, ops:r.ops || null})),
     flights: f.data.map(r => ({id:r.id, from:r.from_airport, to:r.to_airport, dep:Date.parse(r.dep_at), arr:Date.parse(r.arr_at), km:r.distance_km, status:r.status, airline:r.airline, no:r.flight_no, fare:r.fare || null, seat:r.seat || null, track:Array.isArray(r.track) ? r.track : null})),
-    manual: m.data.map(r => ({id:r.id, from:r.from_airport, to:r.to_airport, d:r.flown_on, airline:r.airline, fare:r.fare || null, seat:r.seat || null})) };
+    manual: m.data.map(r => ({id:r.id, from:r.from_airport, to:r.to_airport, d:r.flown_on, airline:r.airline, fare:r.fare || null, seat:r.seat || null})),
+    // 国際線の記録（読めなくてもほかの記録は出す。表がまだない古いサーバーでも動くように）
+    intl: (g.data || []).map(r => ({id:r.id, dep:r.dep, arr:r.arr, d:r.flown_on, no:r.flight_no, airline:r.airline, seat:r.seat, km:r.distance_km != null ? r.distance_km : intlKm(r.dep, r.arr),
+      depAt:r.dep_at ? Date.parse(r.dep_at) : null, arrAt:r.arr_at ? Date.parse(r.arr_at) : null})) };
 }
 async function reload(){
   if(SERVER && !demo){ if(user) await loadServer(); else S = blank(); } else load();
@@ -2517,7 +2550,7 @@ function renderLog(){
         badges:`<span class="badge">手入力</span>${m.airline && ALBY[m.airline] ? `<span class="alb">${ALBY[m.airline].short}</span>` : ""}`, stub:stubDate(m.d.replaceAll("-","/")) })).join("") + (mlAll.length > ml.length ? `<button class="btn2" id="mlMore" style="width:100%;margin-top:10px">もっと見る（残り${mlAll.length - ml.length}件）</button>` : "") : "";
   const ff = focusFlights();
   $("logTally").innerHTML = `<div><b>${ff.length}</b><span>フライト</span></div><div><b>${routes().size}</b><span>路線</span></div><div><b>${fmtKm(focusKm())}</b><span>km</span></div>`;
-  renderOverall(); renderYears(); renderYearPlus();
+  renderOverall(); renderYears(); renderYearPlus(); renderIntl();
   renderMap();
 }
 // 成績：航空会社別とステータスの目安、年ごとの記録、航空会社別（成績の画面を開いたときだけ描く）
@@ -2688,6 +2721,76 @@ $("mAdd").onclick = async () => {
   }
   S.manual.push({from:f,to:t,d,airline:$("mAirline").value || null, fare: $("mFare").hidden ? null : ($("mFare").value || null)}); save(); render(); done();
 };
+
+/* ---------- 国際線の記録（日本の空港と海外の空港を結ぶ便。印・路線・図鑑には入らない） ---------- */
+// 入力の空港：「HND」「羽田」「ソウル（仁川）」「ソウル（ICN）」のどれでも。日本の空港は IATA の記号があるものだけ
+function parseIntlApt(v){
+  const t = String(v || "").trim(); if(!t) return null;
+  const m = /(?:^|[（(\s])([A-Za-z]{3})\s*[）)]?$/.exec(t), c = m ? m[1].toUpperCase() : null;
+  if(c && (IATA[c] || WORLD_JA[c])) return c;
+  const n = t.replace(/[（(].*$/, "");
+  const jp = A.find(a => /^[A-Z]{3}$/.test(a.iata || "") && (a.name === t || godShort(a) === t || a.name.replace(/空港$/, "") === t || godShort(a) === n));
+  if(jp) return jp.iata;
+  const w = Object.entries(WORLD_JA).find(([, j]) => j === t) || Object.entries(WORLD_JA).find(([, j]) => j.replace(/[（(].*$/, "") === n);
+  return w ? w[0] : null;
+}
+const intlName = c => IATA[c] ? godShort(IATA[c]) : WORLD_JA[c] || c;
+const intlAirline = no => { const k = (no || "").slice(0, 2); return no && ALBY[k] ? ALBY[k].short : k || ""; };
+function intlOpts(){
+  const dl = $("intlApts"); if(!dl || dl.childElementCount) return;
+  dl.innerHTML = [...A.filter(a => /^[A-Z]{3}$/.test(a.iata || "")).map(a => [godShort(a), a.iata]), ...Object.entries(WORLD_JA).map(([c, n]) => [n, c])]
+    .map(([n, c]) => `<option value="${esc(n)}（${c}）"></option>`).join("");
+}
+function intlPassHTML(g){
+  const sh = s => esc(s.length > 7 ? s.slice(0, 7) + "…" : s);
+  return `<div class="flight pass" data-g="${g.no && ALBY[g.no.slice(0, 2)] ? ALBY[g.no.slice(0, 2)].group || "OTHER" : "OTHER"}">
+    <div class="pm"><div class="pt"><span class="badge">国際線</span>${g.no ? `<span class="alb">${esc(g.no.slice(0, 2) + " " + g.no.slice(2))}</span>` : ""}${g.depAt ? `<span class="alb">追跡</span>` : ""}</div>
+      <div class="pr"><div class="pa"><b>${esc(g.dep)}</b><span>${sh(intlName(g.dep))}</span></div><i class="parr" aria-hidden="true"></i><div class="pa r"><b>${esc(g.arr)}</b><span>${sh(intlName(g.arr))}</span></div></div></div>
+    <div class="ps">${stubDate(g.d.replaceAll("-", "/"))}<span>${g.km ? fmtKm(g.km) + " km" : "—"}</span><button type="button" class="linkbtn2 idel" data-intl-del="${esc(String(g.id ?? g.d + g.dep + g.arr))}">消す</button></div></div>`;
+}
+let INTL_SHOW = 5, INTL_DEL = null;
+function renderIntl(){
+  const box = $("intlList"); if(!box) return;
+  const all = [...(S.intl || [])].sort((x, y) => y.d.localeCompare(x.d)), shown = all.slice(0, INTL_SHOW);
+  box.innerHTML = all.length ? `<h3>国際線　${all.length}件 ${fmtKm(all.reduce((s, g) => s + (g.km || 0), 0))}km</h3>` + shown.map(intlPassHTML).join("")
+    + (all.length > shown.length ? `<button class="btn2" data-intl-more style="width:100%;margin-top:10px">もっと見る（残り${all.length - shown.length}件）</button>` : "")
+    + `<p class="hint">距離は空港の位置からの大圏距離（空港の位置：OpenFlights〔ODbL〕）。</p>` : "";
+}
+const intlKey = g => String(g.id ?? g.d + g.dep + g.arr);
+async function addIntl(g){
+  if(SERVER && !demo){
+    if(!user) return "ログインしてください。";
+    const { error } = await sb.from("intl_flights").insert({ flown_on:g.d, dep:g.dep, arr:g.arr, flight_no:g.no || null, airline:g.no ? g.no.slice(0, 2) : null, seat:g.seat || null,
+      dep_at:g.depAt ? new Date(g.depAt).toISOString() : null, arr_at:g.arrAt ? new Date(g.arrAt).toISOString() : null, distance_km:g.km || null });
+    if(error) return "保存できませんでした。もう一度試してください。";
+    await reload(); return null;
+  }
+  (S.intl = S.intl || []).push(g); save(); render(); return null;
+}
+$("iAdd").onclick = async () => {
+  intlOpts();
+  const m = $("iMsg"), dep = parseIntlApt($("iFrom").value), arr = parseIntlApt($("iTo").value), d = $("iDate").value, no = $("iNo").value.trim().toUpperCase().replace(/\s/g, "");
+  const err = t => { m.textContent = t; m.className = "msg err"; };
+  if(!dep || !arr) return err(!dep && !arr ? "出発と到着の空港が見つかりません。「羽田」「ソウル」「ICN」のように入れてください。" : `${!dep ? "出発" : "到着"}の空港が見つかりません。候補から選ぶか、空港の記号（3文字）を入れてください。`);
+  if(!d) return err("搭乗日を選んでください。");
+  if(!!IATA[dep] === !!IATA[arr]) return err(IATA[dep] ? "日本の空港どうしは、上の記録帳に追加してください。" : "日本の空港をどちらかに入れてください（そらメモは日本発着の便を記録します）。");
+  if(no && !/^[A-Z0-9]{2}\d{1,4}[A-Z]?$/.test(no)) return err("便名は「NH106」のように、航空会社の2文字と数字で入れてください。");
+  const e = await addIntl({ dep, arr, d, no:no || null, km:intlKm(dep, arr), depAt:null, arrAt:null });
+  if(e) return err(e);
+  m.textContent = `${intlName(dep)} → ${intlName(arr)} を国際線に追加しました。`; m.className = "msg";
+  $("iFrom").value = $("iTo").value = $("iNo").value = "";
+};
+["iFrom", "iTo"].forEach(id => $(id).addEventListener("focus", intlOpts));
+document.addEventListener("click", async e => {
+  if(e.target.closest("[data-intl-more]")){ INTL_SHOW += 20; renderIntl(); return; }
+  const b = e.target.closest("[data-intl-del]"); if(!b) return;
+  const k = b.dataset.intlDel;
+  if(INTL_DEL !== k){ INTL_DEL = k; b.textContent = "もう一度押すと消します"; setTimeout(() => { if(INTL_DEL === k){ INTL_DEL = null; renderIntl(); } }, 4000); return; }
+  INTL_DEL = null;
+  const g = (S.intl || []).find(x => intlKey(x) === k); if(!g) return;
+  if(SERVER && !demo){ const { error } = await sb.from("intl_flights").delete().eq("id", g.id); if(error){ say("消せませんでした。もう一度試してください。", true); return; } await reload(); }
+  else { S.intl = S.intl.filter(x => x !== g); save(); render(); }
+});
 
 /* ---------- ui wiring ---------- */
 /* ---------- スタンプラリーとエアライン経営の切り替え ---------- */
@@ -3766,7 +3869,8 @@ function exportData(kind){
     const out = { app:"soramemo", exported_at:d.toISOString(),
       checkins:S.checkins.map(c => ({at:new Date(c.t).toISOString(), airport:ap(c.a), terminal:c.term || null, accuracy_m:c.acc})),
       flights:S.flights.map(f => ({dep:new Date(f.dep).toISOString(), arr:new Date(f.arr).toISOString(), from:ap(f.from), to:ap(f.to), km:Math.round(f.km), airline:f.airline || null, flight_no:f.no || null})),
-      manual:S.manual.map(m => ({date:m.d, from:ap(m.from), to:ap(m.to), airline:m.airline || null})) };
+      manual:S.manual.map(m => ({date:m.d, from:ap(m.from), to:ap(m.to), airline:m.airline || null})),
+      international:(S.intl || []).map(g => ({date:g.d, from:g.dep, to:g.arr, flight_no:g.no || null, km:g.km || null, dep:g.depAt ? new Date(g.depAt).toISOString() : null, arr:g.arrAt ? new Date(g.arrAt).toISOString() : null})) };
     blob = new Blob([JSON.stringify(out, null, 1)], {type:"application/json"}); name = `soramemo-${stamp}.json`;
   } else {
     const q = v => /[",\n]/.test(String(v)) ? `"${String(v).replace(/"/g, '""')}"` : String(v);
@@ -3774,7 +3878,8 @@ function exportData(kind){
     const ymd = t => { const x = new Date(t); return `${x.getFullYear()}-${String(x.getMonth()+1).padStart(2,"0")}-${String(x.getDate()).padStart(2,"0")}`; };
     const rows = [["日付","出発","到着","航空会社","便名","距離km","種類"],
       ...S.flights.map(f => [ymd(f.dep), code(f.from), code(f.to), f.airline || "", f.no || "", Math.round(f.km), "チェックイン"]),
-      ...S.manual.map(m => [m.d, code(m.from), code(m.to), m.airline || "", "", Math.round(km(BY[m.from], BY[m.to])), "記録帳"])];
+      ...S.manual.map(m => [m.d, code(m.from), code(m.to), m.airline || "", "", Math.round(km(BY[m.from], BY[m.to])), "記録帳"]),
+      ...(S.intl || []).map(g => [g.d, g.dep, g.arr, g.no ? g.no.slice(0, 2) : "", g.no || "", Math.round(g.km || 0), "国際線"])];
     blob = new Blob(["\uFEFF" + rows.map(r => r.map(q).join(",")).join("\r\n")], {type:"text/csv"}); name = `soramemo-flights-${stamp}.csv`;
   }
   const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click(); a.remove();
@@ -4887,6 +4992,11 @@ const WORLD_JA = { ICN:"ソウル（仁川）", GMP:"ソウル（金浦）", PUS
 const placeAny = c => IATA[c] ? godShort(IATA[c]) : WORLD_JA[c] || c;
 // 海外の空港の時間帯（現地時刻を出すため。OpenFlights の airports.dat〔ODbL〕から）
 const WORLD_TZ = {"YVR":"America/Vancouver","YYZ":"America/Toronto","BRU":"Europe/Brussels","FRA":"Europe/Berlin","DUS":"Europe/Berlin","MUC":"Europe/Berlin","HEL":"Europe/Helsinki","LHR":"Europe/London","AMS":"Europe/Amsterdam","CPH":"Europe/Copenhagen","WAW":"Europe/Warsaw","ARN":"Europe/Stockholm","BCN":"Europe/Madrid","MAD":"Europe/Madrid","CDG":"Europe/Paris","MXP":"Europe/Rome","FCO":"Europe/Rome","PRG":"Europe/Prague","VIE":"Europe/Vienna","LIS":"Europe/Lisbon","ZRH":"Europe/Zurich","MEX":"America/Mexico_City","NAN":"Pacific/Fiji","NOU":"Pacific/Noumea","AKL":"Pacific/Auckland","AUH":"Asia/Dubai","DXB":"Asia/Dubai","SPN":"Pacific/Saipan","GUM":"Pacific/Guam","KHH":"Asia/Taipei","RMQ":"Asia/Taipei","TSA":"Asia/Taipei","TPE":"Asia/Taipei","CJU":"Asia/Seoul","PUS":"Asia/Seoul","GMP":"Asia/Seoul","MNL":"Asia/Manila","BOM":"Asia/Calcutta","CMB":"Asia/Colombo","PNH":"Asia/Phnom_Penh","HKG":"Asia/Hong_Kong","DEL":"Asia/Calcutta","MFM":"Asia/Macau","BLR":"Asia/Calcutta","MAA":"Asia/Calcutta","DMK":"Asia/Bangkok","DAD":"Asia/Saigon","HAN":"Asia/Saigon","SGN":"Asia/Saigon","RGN":"Asia/Rangoon","CGK":"Asia/Jakarta","KUL":"Asia/Kuala_Lumpur","SIN":"Asia/Singapore","BNE":"Australia/Brisbane","MEL":"Australia/Hobart","PER":"Australia/Perth","SYD":"Australia/Sydney","PEK":"Asia/Shanghai","CAN":"Asia/Shanghai","SZX":"Asia/Shanghai","WUH":"Asia/Shanghai","ULN":"Asia/Ulaanbaatar","XMN":"Asia/Shanghai","HGH":"Asia/Shanghai","TAO":"Asia/Shanghai","SHA":"Asia/Shanghai","CTU":"Asia/Shanghai","DLC":"Asia/Shanghai","PVG":"Asia/Shanghai","BOS":"America/New_York","SFO":"America/Los_Angeles","LAX":"America/Los_Angeles","EWR":"America/New_York","KOA":"Pacific/Honolulu","IAH":"America/Chicago","SEA":"America/Los_Angeles","DTW":"America/New_York","DFW":"America/Chicago","ATL":"America/New_York","IAD":"America/New_York","HNL":"Pacific/Honolulu","SAN":"America/Los_Angeles","SJC":"America/Los_Angeles","ANC":"America/Anchorage","JFK":"America/New_York","ORD":"America/Chicago","MSP":"America/Chicago","LAS":"America/Los_Angeles","BKK":"Asia/Bangkok","ICN":"Asia/Seoul","DPS":"Asia/Makassar","PPT":"Pacific/Tahiti","SHE":"Asia/Shanghai","CEB":"Asia/Manila","PKX":"Asia/Shanghai","TFU":"Asia/Shanghai","UBN":"Asia/Ulaanbaatar","DOH":"Asia/Qatar","IST":"Europe/Istanbul"};
+// 海外の空港の位置（国際線の記録の距離。OpenFlights の airports.dat〔ODbL〕から、小数2けた）
+const WORLD_POS = {"ICN":[37.47,126.45],"GMP":[37.56,126.79],"PUS":[35.18,128.94],"CJU":[33.51,126.49],"PEK":[40.08,116.59],"PKX":[39.51,116.41],"PVG":[31.14,121.81],"SHA":[31.2,121.34],"CAN":[23.39,113.3],"SZX":[22.64,113.81],"DLC":[38.97,121.54],"TAO":[36.27,120.37],"HGH":[30.23,120.43],"XMN":[24.54,118.13],"WUH":[30.78,114.21],"CTU":[30.58,103.95],"TFU":[30.31,104.44],"SHE":[41.64,123.48],"HKG":[22.31,113.92],"MFM":[22.15,113.59],"TPE":[25.08,121.23],"TSA":[25.07,121.55],"KHH":[22.58,120.35],"RMQ":[24.26,120.62],"MNL":[14.51,121.02],"CEB":[10.31,123.98],"BKK":[13.68,100.75],"DMK":[13.91,100.61],"SGN":[10.82,106.65],"HAN":[21.22,105.81],"DAD":[16.04,108.2],"SIN":[1.35,103.99],"KUL":[2.75,101.71],"CGK":[-6.13,106.66],"DPS":[-8.75,115.17],"PNH":[11.55,104.84],"RGN":[16.91,96.13],"DEL":[28.57,77.1],"BOM":[19.09,72.87],"BLR":[13.2,77.71],"MAA":[12.99,80.17],"CMB":[7.18,79.88],"ULN":[47.84,106.77],"UBN":[47.65,106.82],"DOH":[25.27,51.61],"DXB":[25.25,55.36],"AUH":[24.43,54.65],"IST":[41.28,28.75],"SYD":[-33.95,151.18],"MEL":[-37.67,144.84],"BNE":[-27.38,153.12],"PER":[-31.94,115.97],"AKL":[-37.01,174.79],"GUM":[13.48,144.8],"SPN":[15.12,145.73],"HNL":[21.32,-157.92],"KOA":[19.74,-156.05],"PPT":[-17.55,-149.61],"NAN":[-17.76,177.44],"NOU":[-22.01,166.21],"LAX":[33.94,-118.41],"SFO":[37.62,-122.37],"SJC":[37.36,-121.93],"SAN":[32.73,-117.19],"SEA":[47.45,-122.31],"JFK":[40.64,-73.78],"EWR":[40.69,-74.17],"ORD":[41.98,-87.9],"IAH":[29.98,-95.34],"DFW":[32.9,-97.04],"BOS":[42.36,-71.01],"IAD":[38.94,-77.46],"ATL":[33.64,-84.43],"DTW":[42.21,-83.35],"MSP":[44.88,-93.22],"LAS":[36.08,-115.15],"YVR":[49.19,-123.18],"YYZ":[43.68,-79.63],"MEX":[19.44,-99.07],"ANC":[61.17,-150],"LHR":[51.47,-0.46],"CDG":[49.01,2.55],"FRA":[50.03,8.57],"MUC":[48.35,11.79],"DUS":[51.29,6.77],"HEL":[60.32,24.96],"ARN":[59.65,17.92],"CPH":[55.62,12.66],"AMS":[52.31,4.76],"BRU":[50.9,4.48],"ZRH":[47.46,8.55],"VIE":[48.11,16.57],"MXP":[45.63,8.73],"FCO":[41.8,12.24],"MAD":[40.47,-3.56],"BCN":[41.3,2.08],"LIS":[38.78,-9.14],"WAW":[52.17,20.97],"PRG":[50.1,14.26]};
+// 空港の位置（日本の空港は空港の表、海外は WORLD_POS）。読み込みの途中で呼ばれても止まらないよう、関数の宣言にして中で確かめる
+function aptPos(c){ try{ return IATA[c] || (WORLD_POS[c] ? { lat:WORLD_POS[c][0], lon:WORLD_POS[c][1] } : null); }catch(e){ return null; } }
+function intlKm(a, b){ const p = aptPos(a), q = aptPos(b); return p && q ? Math.round(km(p, q)) : 0; }
 async function loadBoard(iata){
   if(!SERVER) return null;
   if(BOARD && BOARD_AP === iata && BOARD.kind === BOARD_KIND && Date.now() - BOARD_AT < 110_000) return BOARD;
@@ -4895,13 +5005,40 @@ async function loadBoard(iata){
     if(r.ok){ BOARD = await r.json(); BOARD_AP = iata; BOARD.kind = BOARD_KIND; BOARD_AT = Date.now(); return BOARD; } }catch(e){}
   return BOARD_AP === iata ? BOARD : null;
 }
+// 海外の航空会社の便（推定）：時刻表がないので、空港の近くにいる機体の位置と経路のデータから（airport-foreign）
+let FOREIGN = null, FOREIGN_AP = null, FOREIGN_AT = 0;
+const FOREIGN_JA = { KE:"大韓航空", OZ:"アシアナ航空", "7C":"チェジュ航空", LJ:"ジンエアー", TW:"ティーウェイ航空", ZE:"イースター航空", BX:"エアプサン", RS:"エアソウル",
+  CI:"チャイナエアライン", BR:"エバー航空", IT:"タイガーエア台湾", JX:"スターラックス航空", CX:"キャセイパシフィック航空", UO:"香港エクスプレス", HX:"香港航空",
+  CA:"中国国際航空", MU:"中国東方航空", CZ:"中国南方航空", HO:"吉祥航空", "9C":"春秋航空", HU:"海南航空", MF:"厦門航空", SC:"山東航空", FM:"上海航空",
+  TG:"タイ国際航空", SQ:"シンガポール航空", TR:"スクート", MH:"マレーシア航空", D7:"エアアジアX", VN:"ベトナム航空", VJ:"ベトジェット", PR:"フィリピン航空", "5J":"セブパシフィック航空", GA:"ガルーダ・インドネシア航空",
+  UA:"ユナイテッド航空", AA:"アメリカン航空", DL:"デルタ航空", HA:"ハワイアン航空", AC:"エア・カナダ", QF:"カンタス航空", JQ:"ジェットスター", NZ:"ニュージーランド航空",
+  EK:"エミレーツ航空", QR:"カタール航空", EY:"エティハド航空", TK:"ターキッシュ エアラインズ", AF:"エールフランス", KL:"KLM", BA:"ブリティッシュ・エアウェイズ", LH:"ルフトハンザ", LX:"スイス", AY:"フィンエアー", OS:"オーストリア航空", SK:"スカンジナビア航空",
+  OM:"MIATモンゴル航空", AI:"エア・インディア", ZG:"ZIPAIR", "3K":"ジェットスター・アジア" };
+async function loadForeign(iata){
+  if(!SERVER) return null;
+  if(FOREIGN && FOREIGN_AP === iata && Date.now() - FOREIGN_AT < 60_000) return FOREIGN;
+  try{ const r = await fetch(SORAMEMO_CONFIG.supabaseUrl.replace(/\/$/, "") + `/functions/v1/airport-foreign?iata=${iata}`, { headers:{ apikey:SORAMEMO_CONFIG.supabaseAnonKey } });
+    if(r.ok){ const d = await r.json(); if(Array.isArray(d.planes)){ FOREIGN = d; FOREIGN_AP = iata; FOREIGN_AT = Date.now(); return d; } } }catch(e){}
+  return FOREIGN_AP === iata ? FOREIGN : null;
+}
+function foreignHTML(d, arr){
+  if(!d || BOARD_KIND === "dom") return "";
+  const ST = { approach:"着陸に向かっています", landed:"着陸しました", ground:"出発前（地上）", departed:"離陸しました" };
+  const list = (d.planes || []).filter(p => p.kind === (arr ? "arr" : "dep"));
+  const rows = list.map(p => `<li><span class="dot" aria-hidden="true"></span><b>${esc(arr ? placeAny(p.other) + "から" : placeAny(p.other) + "へ")}</b>
+      <span class="fl"><i class="intl">海外</i>${esc(p.flight)}${p.type ? "・" + esc(p.type) : ""}${FOREIGN_JA[p.airline] ? "・" + esc(FOREIGN_JA[p.airline]) : ""}</span>
+      <span class="rel">${ST[p.status] || ""}</span><span class="tm">推定${p.alt_ft != null ? `　高度 ${fmtKm(p.alt_ft)}ft` : ""}　${p.km}km</span></li>`).join("");
+  return `<div class="bdhead"><h3>海外の航空会社（いま近くにいる便）</h3></div>
+    ${rows ? `<ol class="bdseq foreign">${rows}</ol>` : `<p class="hint">いま、この空港の近くに${arr ? "着く" : "出た"}海外の航空会社の便は見つかりません。</p>`}
+    <p class="fwnote">時刻表がない航空会社の便を、空港から60km以内の機体の位置と、その経路のデータ（adsb.lol）から推定しています。便名は機体の呼び出し符号から読んでいるため、航空会社の発表とは違うことがあります。</p>`;
+}
 function boardRel(t, now){
   const m = Math.round((Date.parse(t) - now) / 60000);
   if(m === 0) return "いま";
   if(m < 0) return `${-m}分前`;
   return m < 60 ? `あと${m}分` : `あと${Math.floor(m / 60)}時間${m % 60 ? (m % 60) + "分" : ""}`;
 }
-function boardHTML(d){
+function boardHTML(d, fg){
   const now = Date.now(), list = (BOARD_DIR === "arr" ? d.next_arr : d.next_dep) || [], arr = BOARD_DIR === "arr";
   const hmS = t => new Date(t).toLocaleTimeString("ja-JP", { hour:"2-digit", minute:"2-digit" });
   const name = placeAny;
@@ -4921,6 +5058,7 @@ function boardHTML(d){
       <button data-board-dir="arr" aria-pressed="${arr}">到着</button><button data-board-dir="dep" aria-pressed="${!arr}">出発</button></div></div>
     <div class="bdtabs bdkind" role="group" aria-label="国内線と国際線">${[["all", "すべて"], ["dom", "国内線"], ["intl", "国際線"]].map(([k, l]) => `<button data-board-kind="${k}" aria-pressed="${BOARD_KIND === k}">${l}</button>`).join("")}</div>
     ${items ? `<ol class="bdseq">${items}</ol>` : `<p class="hint">この3時間に${arr ? "着く" : "出る"} JAL・ANA の時刻表の${BOARD_KIND === "intl" ? "国際線の" : BOARD_KIND === "dom" ? "国内線の" : ""}便はありません。</p>`}
+    ${foreignHTML(fg, arr)}
     <div class="bdhead"><h3>今日の遅れ・欠航</h3><span class="bdsum">遅れ <b>${late}</b>便・欠航 <b>${cancel}</b>便</span></div>
     <svg class="bdchart" viewBox="0 0 ${W} ${H + 14}" role="img" aria-label="今日の1時間ごとの遅れと欠航の便の数。遅れ${late}便、欠航${cancel}便">
       <line x1="0" y1="${H - 4}" x2="${W}" y2="${H - 4}" class="base"/>${bars}<path d="${ref}" class="ref"/>
@@ -4930,11 +5068,11 @@ function boardHTML(d){
 }
 async function renderBoard(){
   const iata = OPS_AP, box = $("opsBoard"); if(!box) return;
-  const d = await loadBoard(iata); if(OPS_AP !== iata) return;
+  const [d, fg] = await Promise.all([loadBoard(iata), loadForeign(iata)]); if(OPS_AP !== iata) return;
   if(!d){ box.hidden = true; box.innerHTML = ""; return; }
-  box.hidden = false; box.innerHTML = boardHTML(d);
+  box.hidden = false; box.innerHTML = boardHTML(d, fg);
 }
-document.addEventListener("click", e => { const b = e.target.closest("[data-board-dir]"); if(!b) return; BOARD_DIR = b.dataset.boardDir; if(BOARD) $("opsBoard").innerHTML = boardHTML(BOARD); });
+document.addEventListener("click", e => { const b = e.target.closest("[data-board-dir]"); if(!b) return; BOARD_DIR = b.dataset.boardDir; if(BOARD) $("opsBoard").innerHTML = boardHTML(BOARD, FOREIGN_AP === OPS_AP ? FOREIGN : null); });
 document.addEventListener("click", e => { const b = e.target.closest("[data-board-kind]"); if(!b || b.dataset.boardKind === BOARD_KIND) return; BOARD_KIND = b.dataset.boardKind; track("board_kind", BOARD_KIND); renderBoard(); });
 
 /* 昨日の〇〇：前の日の空港のまとめ（毎日の記録の airport_daily）と、その前の7日の平均 */
