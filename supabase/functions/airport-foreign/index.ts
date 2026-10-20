@@ -27,7 +27,8 @@ async function routes(planes: { callsign: string; lat: number; lon: number }[]) 
   lastRoute = Date.now();
   const r = await fetch("https://api.adsb.lol/api/0/routeset", { method: "POST", headers: { "Content-Type": "application/json", "User-Agent": "soramemo (airport-foreign)" },
     body: JSON.stringify({ planes: planes.map((p) => ({ callsign: p.callsign, lat: p.lat, lng: p.lon })) }), signal: AbortSignal.timeout(10000) });
-  return r.ok ? parseRoutes(await r.json(), planes.map((p) => p.callsign)) : new Map();
+  if (!r.ok) throw new Error(`routeset ${r.status}`);
+  return parseRoutes(await r.json(), planes.map((p) => p.callsign));
 }
 
 Deno.serve(async (req) => {
@@ -43,9 +44,12 @@ Deno.serve(async (req) => {
       .gte("lat", at.lat - d).lte("lat", at.lat + d).gte("lon", at.lon - d * 1.25).lte("lon", at.lon + d * 1.25).limit(500);
     if (error) throw error;
     const near = foreignNear((data ?? []) as LivePos[], at, 60).slice(0, 40);
-    const rt = await routes(near).catch(() => new Map());
+    let routeErr: string | null = null;
+    const rt = await routes(near).catch((e) => { routeErr = e instanceof Error ? e.message : String(e); return new Map(); });
     const planes = classifyForeign(near, rt, iata);
-    const body = { iata, at: new Date().toISOString(), planes, source: "adsb.lol（機体の位置と経路のデータ。推定）" };
+    // 件数（調べるとき用）：近くの機体の数・海外の航空会社の機体の数・経路が分かった数
+    const body = { iata, at: new Date().toISOString(), planes, source: "adsb.lol（機体の位置と経路のデータ。推定）",
+      counts: { positions: (data ?? []).length, foreign: near.length, routed: rt.size }, route_error: routeErr };
     cache.set(iata, { at: Date.now(), body });
     return json(body);
   } catch (e) {
