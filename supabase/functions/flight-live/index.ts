@@ -37,9 +37,9 @@ async function findPlane(cs: string): Promise<Plane | null> {
   cache.set(cs, { at: Date.now(), p });
   return p;
 }
-// 時刻表にない便：機体の位置から経路を推定する（adsb.lol の経路のデータ。もっともらしいものだけ）
+// 時刻表にない便：機体の位置から経路を推定する（adsb.im の経路のデータ。tar1090 と同じ問い合わせ先。もっともらしいものだけ）
 async function guessRoute(p: Plane): Promise<{ dep: string; arr: string } | null> {
-  const r = await fetch("https://api.adsb.lol/api/0/routeset", { method: "POST", headers: { "Content-Type": "application/json", "User-Agent": "soramemo (flight-live)" },
+  const r = await fetch("https://adsb.im/api/0/routeset", { method: "POST", headers: { "Content-Type": "application/json", "User-Agent": "soramemo (flight-live)" },
     body: JSON.stringify({ planes: [{ callsign: p.callsign, lat: p.lat, lng: p.lon }] }), signal: AbortSignal.timeout(10000) });
   if (!r.ok) return null;
   const x = ((await r.json()) as { _airport_codes_iata?: string; plausible?: boolean | number }[])?.[0];

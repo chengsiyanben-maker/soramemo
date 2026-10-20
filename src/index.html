@@ -2137,7 +2137,7 @@ async function renderRideIntl(p, force){
     ${d.std ? `<span class="rl">出発 定刻 ${tzHM(d.std, dep)}${localNote(dep)}　到着 定刻 ${tzHM(d.sta, arr)}${localNote(arr)}${!IATA[arr] && WORLD_TZ[arr] ? `（日本時間 ${tzHM(d.sta, "HND")}）` : ""}</span>` : ""}
     ${st}${bar}${d.reg || d.type ? `<span class="rl">機体 ${esc([d.reg, d.type].filter(Boolean).join("・"))}</span>` : ""}
     ${d.found && ["air", "lost", "landed"].includes(ph) && !!IATA[dep] !== !!IATA[arr] ? (rideRecorded(p) ? `<span class="rl">国際線の記録に入れました（フライトの「記録帳」）</span>` : `<button type="button" class="btn2 rrec" data-ride-rec>この便を国際線の記録に入れる</button>`) : ""}
-    <p class="fwnote">機体の位置は adsb.lol から便名で探した推定で、海の上などでは届かないことがあります。${est ? "この便は時刻表がないため、出発・到着の空港も機体の位置の情報の経路のデータからの推定です。" : `時刻は時刻表（現地時刻）と航空会社の運航情報。${ODPT_CREDIT}`}　空港の時間帯：OpenFlights（ODbL）</p>`;
+    <p class="fwnote">機体の位置は adsb.lol から便名で探した推定で、海の上などでは届かないことがあります。${est ? "この便は時刻表がないため、出発・到着の空港も経路のデータ（adsb.im）からの推定です。" : `時刻は時刻表（現地時刻）と航空会社の運航情報。${ODPT_CREDIT}`}　空港の時間帯：OpenFlights（ODbL）</p>`;
 }
 async function renderRide(force){
   const box = $("rideCard"); if(!box) return;
@@ -5577,7 +5577,7 @@ function foreignHTML(d, arr){
       <span class="rel">${ST[p.status] || ""}</span><span class="tm">推定${p.alt_ft != null ? `　高度 ${fmtKm(p.alt_ft)}ft` : ""}　${p.km}km</span></li>`).join("");
   return `<div class="bdhead"><h3>海外の航空会社（いま近くにいる便）</h3></div>
     ${rows ? `<ol class="bdseq foreign">${rows}</ol>` : `<p class="hint">いま、この空港の近くに${arr ? "着く" : "出た"}海外の航空会社の便は見つかりません。</p>`}
-    <p class="fwnote">時刻表がない航空会社の便を、空港から60km以内の機体の位置と、その経路のデータ（adsb.lol）から推定しています。便名は機体の呼び出し符号から読んでいるため、航空会社の発表とは違うことがあります。</p>`;
+    <p class="fwnote">時刻表がない航空会社の便を、空港から60km以内の機体の位置（adsb.lol）と、その便の経路のデータ（adsb.im）から推定しています。便名は機体の呼び出し符号から読んでいるため、航空会社の発表とは違うことがあります。</p>`;
 }
 function boardRel(t, now){
   const m = Math.round((Date.parse(t) - now) / 60000);
