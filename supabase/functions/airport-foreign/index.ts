@@ -27,7 +27,7 @@ async function routes(planes: { callsign: string; lat: number; lon: number }[]) 
   lastRoute = Date.now();
   const r = await fetch("https://api.adsb.lol/api/0/routeset", { method: "POST", headers: { "Content-Type": "application/json", "User-Agent": "soramemo (airport-foreign)" },
     body: JSON.stringify({ planes: planes.map((p) => ({ callsign: p.callsign, lat: p.lat, lng: p.lon })) }), signal: AbortSignal.timeout(10000) });
-  return r.ok ? parseRoutes(await r.json()) : new Map();
+  return r.ok ? parseRoutes(await r.json(), planes.map((p) => p.callsign)) : new Map();
 }
 
 Deno.serve(async (req) => {

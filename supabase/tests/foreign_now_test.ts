@@ -27,6 +27,11 @@ Deno.test("経路のデータを読む（もっともらしいものだけ・途
   assertEquals([...r.values()].map((x) => `${x.callsign}:${x.dep}-${x.arr}`), ["KAL2707:GMP-HND", "CPA500:HKG-HND"]);
 });
 
+Deno.test("答えに呼び出し符号がなければ、問い合わせた順で対応させる", () => {
+  const r = parseRoutes([{ _airport_codes_iata: "GMP-HND", plausible: 1 }, { _airport_codes_iata: "HND-SFO", plausible: 1 }], ["KAL2707", "UAL838"]);
+  assertEquals([...r.values()].map((x) => `${x.callsign}:${x.dep}-${x.arr}`), ["KAL2707:GMP-HND", "UAL838:HND-SFO"]);
+});
+
 Deno.test("この空港に着く便・出た便に分ける", () => {
   const near = foreignNear([P({}), P({ callsign: "UAL838", lat: 35.56, lon: 139.79, ground: true, alt_ft: null }), P({ callsign: "CPA501", lat: 35.4, alt_ft: 9000, fpm: 2000 }),
     P({ callsign: "THA661", lat: 35.9, lon: 140.3, ground: true, alt_ft: null }), P({ callsign: "EVA197", lat: 35.8 })], HND, 60);

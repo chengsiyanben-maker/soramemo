@@ -26,13 +26,15 @@ export function foreignNear(pos: LivePos[], at: { lat: number; lon: number }, ma
 
 // adsb.lol の routeset の答え → 呼び出し符号ごとの経路（途中の空港があれば最初と最後）
 // deno-lint-ignore no-explicit-any
-export function parseRoutes(rows: any[]): Map<string, Route> {
+//   答えに呼び出し符号がないときは、問い合わせた順（asked）で対応させる
+export function parseRoutes(rows: any[], asked: string[] = []): Map<string, Route> {
   const m = new Map<string, Route>();
-  for (const x of Array.isArray(rows) ? rows : []) {
+  (Array.isArray(rows) ? rows : []).forEach((x, i) => {
     const r = /^([A-Z]{3})-(?:[A-Z]{3}-)*([A-Z]{3})$/.exec(String(x?._airport_codes_iata ?? ""));
-    if (!r || !x?.plausible || typeof x?.callsign !== "string") continue;
-    m.set(x.callsign.trim().toUpperCase(), { callsign: x.callsign.trim().toUpperCase(), dep: r[1], arr: r[2] });
-  }
+    const cs = String(typeof x?.callsign === "string" ? x.callsign : asked[i] ?? "").trim().toUpperCase();
+    if (!r || !x?.plausible || !cs) return;
+    m.set(cs, { callsign: cs, dep: r[1], arr: r[2] });
+  });
   return m;
 }
 
