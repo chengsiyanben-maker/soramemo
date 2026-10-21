@@ -805,6 +805,17 @@ dialog.sgd .dlg{padding:14px 16px 36px;max-width:480px;margin:0 auto;max-height:
 .sgd small.t{margin-top:14px;padding-top:12px;border-top:1px solid var(--sg-line)}
 .sgd .dot{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px}.sgd .dot.red{background:#C53030}.sgd .dot.blue{background:#1D4ED8}
 .sgopen{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 10px}
+#v-ops .gali{display:block;width:100%;border:0;background:none;text-align:left;padding:6px 0;color:inherit;font:inherit}
+#v-ops .gali small{display:block;color:var(--op-mute);font-size:11px}
+#v-ops .gabtns{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.gachart{display:block;width:100%;height:auto}
+.gafc{display:flex;gap:4px;margin-top:8px}
+.gafc span{flex:1;text-align:center;border-radius:8px;padding:5px 0;font-size:10px;font-weight:700}
+.gafc .o,.sgd .ga4 .o{background:#E7F6EC;color:#1F7A3F}.gafc .l,.sgd .ga4 .l{background:#FDF1E1;color:#8A5A00}.gafc .x,.sgd .ga4 .x{background:#FDE7E7;color:#B42318}
+.sgd .ga4{margin-top:10px}.sgd .ga4>span{border-radius:10px;padding:6px 2px;text-align:center}.sgd .ga4 small{color:inherit;font-size:9.5px}.sgd .ga4 b{font-size:12.5px}
+.sg-card.ga-x{border:2px solid #FDE7E7}.sg-card.ga-l{border:2px solid #FDF1E1}
+.sg-hero .ga3>span{background:#2A2A2A;color:#fff}.sg-hero .ga3 small{color:#BDBDBD}
+.sgd .ga2>div{background:var(--sg-bg);border-radius:14px;padding:10px 12px}
 dialog.mypage{--mp-bg:#F4F5F7;--mp-card:#FFFFFF;--mp-ink:#374151;--mp-sub:#9CA3AF;--mp-mute:#6B7280;--mp-shadow:0 12px 26px -18px rgba(15,23,42,.3);
   max-width:min(460px,100vw);width:100%;max-height:100dvh;height:100dvh;margin:0 auto;border-radius:0;background:var(--mp-bg);color:var(--mp-ink)}
 [data-palette="board"] dialog.mypage{--mp-bg:#0B0D10;--mp-card:#16191F;--mp-ink:#E5E7EB;--mp-sub:#8B95A3;--mp-mute:#A7B0BC;--mp-shadow:0 12px 26px -16px rgba(0,0,0,.7)}
@@ -1894,6 +1905,7 @@ nav.tabs{transition:transform .3s cubic-bezier(.2,.8,.2,1),opacity .2s}
   <div class="opsboard opsphoto" id="opsPhoto" hidden data-ov="photo"></div>
   <div class="fwbox" id="opsAlerts" hidden data-ov="runway board"></div>
   <div class="fwbox" id="opsCurfew" hidden data-ov="runway"></div>
+  <div class="fwbox" id="opsGa" hidden data-ov="runway board photo"></div>
   <div class="opslayers" role="group" aria-label="地図に出すもの" data-ov="runway">
     <button class="chip" data-layer="traffic" aria-pressed="true">機体</button><button class="chip" data-layer="star" aria-pressed="true">到着経路</button><button class="chip" data-layer="app" aria-pressed="true">進入経路</button><button class="chip" data-layer="sid" aria-pressed="true">出発経路</button><button class="chip" data-layer="spots" aria-pressed="true">見る場所</button><button class="chip" id="opsFitAll">全体を見る</button>
   </div>
@@ -1980,6 +1992,7 @@ nav.tabs{transition:transform .3s cubic-bezier(.2,.8,.2,1),opacity .2s}
 <dialog id="dSpotCond" class="spfull" aria-label="撮影条件と天気"><div class="dlg" id="dSpotCondBody"></div></dialog>
 <dialog id="dSpotPush" class="spfull" aria-label="近づいたら知らせる"><div class="dlg" id="dSpotPushBody"></div></dialog>
 <dialog id="dShugyo" class="sgd" aria-label="修行"><div class="dlg" id="dShugyoBody"></div></dialog>
+<dialog id="dGa" class="sgd" aria-label="ゴーアラウンド"><div class="dlg" id="dGaBody"></div></dialog>
 <dialog id="dSettings" class="mypage"><div class="dlg">
   <div class="mp-top"><button class="mp-back" data-close type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>ホーム</button><h3>マイページ</h3><span class="mp-sp" aria-hidden="true"></span></div>
   <div class="mp-prof" id="mpProf">
@@ -5763,7 +5776,7 @@ async function renderSpecial(){
 }
 async function renderOpsAlerts(){
   if(!SERVER) return;
-  renderSpecial(); renderCurfew(); renderBoard(); renderYday(); renderOntime(); renderArt();
+  renderSpecial(); renderCurfew(); renderBoard(); renderYday(); renderOntime(); renderArt(); renderGaBox();
   const iata = OPS_AP; await loadFlightAlerts(iata); if(OPS_AP !== iata) return;
   const box = $("opsAlerts"), html = fwHTML(FW.get(iata), iata, true);
   box.hidden = !html; box.innerHTML = html;
@@ -6111,24 +6124,25 @@ function uiSay(t){
 const pushFlights = () => { try{ const t = new Date(Date.now() + 9*36e5 - 2*864e5).toISOString().slice(0, 10);
   return JSON.parse(localStorage.getItem("soramemo.pushFlights") || "[]").filter(k => k.split("@")[1] >= t); }catch(e){ return []; } };
 // 通知の申し込みを、選んでいる空港と便に合わせる（どちらも空なら取り消し）。成功したら true
-async function syncPush(airports, flights, sp = pushSp(), spot = pushSpot()){
+async function syncPush(airports, flights, sp = pushSp(), spot = pushSpot(), ga = pushGa()){
   try{
     await loadPushKey(); if(!PUSH_KEY || !pushOK()) throw new Error("push unavailable");
     const reg = await navigator.serviceWorker.ready;
     let sub = await reg.pushManager.getSubscription();
     const url = SORAMEMO_CONFIG.supabaseUrl.replace(/\/$/, "") + "/functions/v1/push-subscribe", H = { "Content-Type":"application/json", apikey:SORAMEMO_CONFIG.supabaseAnonKey };
-    if(!airports.length && !flights.length && !sp.length && !spotActive(spot)){
+    if(!airports.length && !flights.length && !sp.length && !spotActive(spot) && !gaActive(ga)){
       if(sub){ await fetch(url, { method:"POST", headers:H, body:JSON.stringify({ endpoint:sub.endpoint, remove:true }) }); await sub.unsubscribe(); }
     }else{
       if(Notification.permission !== "granted" && (await Notification.requestPermission()) !== "granted"){ uiSay("通知が許可されていないため、申し込めませんでした。端末の設定で、そらメモの通知を許可してください。"); return false; }
       if(!sub) sub = await reg.pushManager.subscribe({ userVisibleOnly:true, applicationServerKey:b64u(PUSH_KEY) });
-      const j = sub.toJSON(), r = await fetch(url, { method:"POST", headers:H, body:JSON.stringify({ endpoint:j.endpoint, keys:j.keys, airports, flights, sp_airports:sp, spot:spotActive(spot) ? spot : null }) });
+      const j = sub.toJSON(), r = await fetch(url, { method:"POST", headers:H, body:JSON.stringify({ endpoint:j.endpoint, keys:j.keys, airports, flights, sp_airports:sp, spot:spotActive(spot) ? spot : null, ga:gaActive(ga) ? ga : null }) });
       if(!r.ok) throw new Error("subscribe " + r.status);
     }
     localStorage.setItem("soramemo.pushAirports", JSON.stringify(airports));
     localStorage.setItem("soramemo.pushFlights", JSON.stringify(flights));
     localStorage.setItem("soramemo.pushSpecial", JSON.stringify(sp));
     localStorage.setItem("soramemo.pushSpot", JSON.stringify(spot));
+    localStorage.setItem("soramemo.pushGa", JSON.stringify(ga));
     return true;
   }catch(e){ uiSay("通知の申し込みに失敗しました。少し待って、もう一度お試しください。"); return false; }
 }
@@ -7095,6 +7109,133 @@ document.addEventListener("change", e => {
   sgKeep(() => {});
 });
 
+/* ---------- ゴーアラウンドの知らせ（推定） ----------
+   着陸に向かう機体が、空港の近くで 1,000ft 以下まで降りてから、着陸せずに 500ft 以上上がったことを、サーバーが機体の位置（adsb.lol）から見つけて残す。
+   起きやすい天気は、気象通報（METAR）・予報（TAF）からの目安（横風20kt・突風30kt・雲底500ft・見通し1,600m・雷雨・ウインドシア）。どれも推定 */
+const pushGa = () => { try{ return Object.assign({ airports:[], kinds:[], quiet:false, gap:3 }, JSON.parse(localStorage.getItem("soramemo.pushGa") || "null") || {}); }catch(e){ return { airports:[], kinds:[], quiet:false, gap:3 }; } };
+const gaActive = g => !!(g && g.airports && g.airports.length && g.kinds && g.kinds.length);
+const GA_ORDER = ["CTS","SDJ","HND","NRT","NGO","ITM","KIX","HIJ","MYJ","FUK","NGS","KMJ","KOJ","OKA"];
+const GA_KINDS = [["plane", "ゴーアラウンドした機体", "1機ごとに（推定）"], ["cluster", "ゴーアラウンドが続いたとき", "1時間に2機以上（推定）"], ["wind", "強い横風・突風", "使っている滑走路に対して横風 20kt 以上、突風 30kt 以上"],
+  ["cloud", "低い雲・見通しが悪い", "雲底 500ft 未満、見通し 1,600m 未満"], ["ts", "雷・ウインドシア", "気象通報に雷雨（TS）やウインドシア（WS）があるとき"]];
+const GA_LV = [["ふつう", "o"], ["注意", "l"], ["起きやすい", "x"]];
+let GA_PAGE = "set", GA_EV = null, GA_DRAFT = null, GA_MSG = "";
+const GA_REC = new Map();
+async function gaRecent(iata){ const c = GA_REC.get(iata); if(c && Date.now() - c.at < 60_000) return c.d; const d = await rpcPost("ga_recent", { p_iata:iata, p_hours:24 }); if(Array.isArray(d)) GA_REC.set(iata, { at:Date.now(), d }); return Array.isArray(d) ? d : null; }
+// 起きやすさ（サーバーの _shared/go_around.ts の wxRisk と同じ目安）
+function gaRisk(w, hdgs){
+  const o = { level:0, xwind:null, gust:w ? w.wgst ?? null : null, ceil:w ? (w.ceil_ft ?? null) : null, vis:w ? w.vis_m ?? null : null, reasons:[] }; if(!w) return o;
+  if(w.wdir != null && w.wspd != null && hdgs.length) o.xwind = Math.round(Math.min(...hdgs.map(h => Math.abs(Math.sin((w.wdir - h) * D2R)) * w.wspd)));
+  const ts = w.ts || w.sky === "雷" && !w.vcts, up = (l, why) => { o.level = Math.max(o.level, l); o.reasons.push(why); };
+  if(o.xwind != null && o.xwind >= 20) up(2, `横風 ${o.xwind}kt`); else if(o.xwind != null && o.xwind >= 15) up(1, `横風 ${o.xwind}kt`);
+  if(o.gust != null && o.gust >= 30) up(2, `突風 ${o.gust}kt`); else if(o.gust != null && o.gust >= 25) up(1, `突風 ${o.gust}kt`);
+  if(o.ceil != null && o.ceil < 500) up(2, `雲底 ${fmtKm(o.ceil)}ft`); else if(o.ceil != null && o.ceil < 1000) up(1, `雲底 ${fmtKm(o.ceil)}ft`);
+  if(o.vis != null && o.vis < 1600) up(2, `見通し ${fmtKm(o.vis)}m`); else if(o.vis != null && o.vis < 3000) up(1, `見通し ${fmtKm(o.vis)}m`);
+  if(ts) up(2, "雷雨"); else if(w.vcts) up(1, "近くで雷雨");
+  if(w.ws) up(2, "ウインドシア");
+  return o;
+}
+// 使っている（着陸の）滑走路の向き：天気からの運用の推定
+function gaArr(iata, w){ const def = OPS_AIRPORTS[iata]; if(!def) return { hdgs:[], label:"" };
+  try{ const est = def.estimate(w ? { wdir:w.wdir, wspd:w.wspd, wgst:w.wgst, vis_m:w.vis_m, time:w.time } : null), op = def.modes[est.mode], rw = runwaysOf(def);
+    return { hdgs:op ? op.arr.map(id => rw[id] && rw[id].hdg).filter(x => x != null) : [], label:op ? `${op.label}・${op.arr.join("/")} に着陸${est.unsure ? "（向きは仮）" : ""}` : "" }; }catch(e){ return { hdgs:[], label:"" }; } }
+const gaHM = t => t ? new Date(t).toLocaleTimeString("ja-JP", { hour:"2-digit", minute:"2-digit" }) : "—";
+// 運用のタブ：この空港の今日のゴーアラウンド（推定）と、知らせ・天気への入口
+async function renderGaBox(){
+  const box = $("opsGa"); if(!box || !SERVER) return;
+  const iata = OPS_AP, list = await gaRecent(iata); if(OPS_AP !== iata) return;
+  const today = (list || []).filter(e => Date.parse(e.at) > Date.now() - 24 * 36e5), on = gaActive(pushGa()) && pushGa().airports.includes(iata);
+  box.hidden = false;
+  box.innerHTML = `<div class="fwlist"><div class="opshead"><b>ゴーアラウンド（推定）</b><span>${today.length ? `24時間で${today.length}機` : "24時間で なし"}</span></div>
+    ${today.length ? `<ul>${today.slice(0, 5).map(e => `<li><button class="gali" data-ga-ev="${e.id}" type="button"><b>${gaHM(e.at)}</b> ${esc(e.flight || e.callsign || "")}${e.type ? "・" + esc(e.type) : ""}<small>${[e.rwy && e.rwy, `いちばん低く ${fmtKm(e.low_ft)}ft`, e.again_at && `${gaHM(e.again_at)} もう一度進入`].filter(Boolean).join("・")}</small></button></li>`).join("")}</ul>` : ""}
+    <div class="gabtns"><button class="linkbtn2" data-ga-open="set" type="button">${on ? "知らせの設定" : "ゴーアラウンドを知らせる"}</button><button class="linkbtn2" data-ga-open="wx" type="button">着陸の天気</button></div>
+    <p class="fwnote">機体の位置（adsb.lol）から、空港の近くで 1,000ft 以下まで降りてから着陸せずに上がった機体を見つけた推定です。航空会社・管制の発表ではありません。</p></div>`;
+}
+function gaSetHTML(){
+  const d = GA_DRAFT, sw = (k, l, sub) => `<button class="sg-sw" type="button" role="switch" data-ga-kind="${k}" aria-checked="${d.kinds.includes(k)}"><span><b>${l}</b><small>${sub}</small></span><i aria-hidden="true"></i></button>`;
+  return `<div class="sg-top"><button class="sg-back" data-close type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>運用</button><h3>ゴーアラウンドを知らせる</h3><span class="sg-sp"></span></div>
+    ${!pushOK() ? `<p class="sg-note">スマホへの通知は、この端末のブラウザでは使えません（iPhone はホーム画面に追加したそらメモから使えます）。</p>` : ""}
+    <div class="sg-h"><b>知らせる空港</b><small>いくつでも</small></div>
+    <div class="sg-chips">${GA_ORDER.filter(i => OPS_AIRPORTS[i]).map(i => `<button type="button" data-ga-ap="${i}" aria-pressed="${d.airports.includes(i)}">${esc(OPS_AIRPORTS[i].name)}</button>`).join("")}</div>
+    <div class="sg-h"><b>何を知らせる</b></div>
+    <div class="sg-card">${GA_KINDS.map(([k, l, sub]) => sw(k, l, sub)).join("")}</div>
+    <div class="sg-card"><small>知らせない時間</small>${sgSeg("gaquiet", [[0, "なし"], [1, "23時〜7時"]], d.quiet ? 1 : 0)}
+      <small class="t">同じ空港の天気の知らせ</small>${sgSeg("gagap", [[0, "通報が出るたび"], [3, "3時間に1回まで"]], d.gap)}</div>
+    ${GA_MSG ? `<p class="sg-msg">${esc(GA_MSG)}</p>` : ""}
+    <div class="sg-2b"><button class="sg-btn ghost" data-ga-off type="button">すべてやめる</button><button class="sg-btn" data-ga-save type="button" ${pushOK() ? "" : "disabled"}>保存する</button></div>
+    <p class="sg-foot">ゴーアラウンドは、着陸に向かう機体が空港の近くで 1,000ft 以下まで降りてから、着陸せずに 500ft 以上上がったことを、機体の位置（adsb.lol）から見つけた推定です。航空会社や管制の発表ではありません。天気の知らせは気象通報（METAR）からの目安で、実際に着陸できるかどうかは機体と乗員と管制が決めます。航法には使えません。</p>`;
+}
+function gaEvHTML(e, list){
+  if(!e) return `<div class="sg-top"><button class="sg-back" data-close type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>運用</button><h3>ゴーアラウンド（推定）</h3><span class="sg-sp"></span></div><p class="sg-note">${GA_EV === "loading" ? "読み込んでいます…" : "見つかりませんでした（30日より前のものは消えています）。"}</p>`;
+  const def = OPS_AIRPORTS[e.iata] || { name:e.iata }, pts = Array.isArray(e.pts) ? e.pts : [], w = e.wx || null;
+  let chart = "";
+  if(pts.length >= 2){ const t0 = pts[0][0], t1 = pts[pts.length - 1][0], top = Math.max(1000, ...pts.map(p => p[1])), X = t => 10 + (t - t0) / Math.max(1, t1 - t0) * 300, Y = a => 110 - a / top * 95;
+    const low = pts.reduce((a, p) => p[1] < a[1] ? p : a, pts[0]), li = pts.indexOf(low);
+    const d1 = pts.slice(0, li + 1).map((p, i) => `${i ? "L" : "M"}${X(p[0]).toFixed(1)} ${Y(p[1]).toFixed(1)}`).join(" "), d2 = pts.slice(li).map((p, i) => `${i ? "L" : "M"}${X(p[0]).toFixed(1)} ${Y(p[1]).toFixed(1)}`).join(" ");
+    chart = `<svg viewBox="0 0 326 130" class="gachart" role="img" aria-label="高さの動き。いちばん低く${low[1]}フィートまで降りてから上昇"><line x1="0" y1="110" x2="326" y2="110" stroke="#E5E5E5"/>
+      <path d="${d1}" stroke="#2563EB" stroke-width="3" fill="none"/><path d="${d2}" stroke="#C2410C" stroke-width="3" fill="none"/>
+      <circle cx="${X(low[0]).toFixed(1)}" cy="${Y(low[1]).toFixed(1)}" r="5" fill="#C2410C"/><text x="${X(low[0]).toFixed(1)}" y="${(Y(low[1]) + 16).toFixed(1)}" font-size="10" font-weight="700" fill="#C2410C" text-anchor="middle">${fmtKm(low[1])}ft</text>
+      <text x="10" y="126" font-size="9" fill="#6B7280">${gaHM(t0 * 1000)}</text><text x="316" y="126" font-size="9" fill="#6B7280" text-anchor="end">${gaHM(t1 * 1000)}</text><text x="8" y="12" font-size="9" fill="#6B7280">${fmtKm(top)}ft</text></svg>`; }
+  const ceil = w && w.raw ? (String(w.raw).match(/\b(?:BKN|OVC|VV)(\d{3})\b/g) || []).map(x => Number(x.slice(-3)) * 100).sort((a, b) => a - b)[0] : null;
+  const today = (list || []).filter(x => Date.parse(x.at) > Date.now() - 24 * 36e5);
+  return `<div class="sg-top"><button class="sg-back" data-close type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>運用</button><h3>ゴーアラウンド（推定）</h3><span class="sg-sp"></span></div>
+    <div class="sg-hero"><div class="h"><span>${esc(def.name)}・${new Date(e.at).toLocaleDateString("ja-JP", { month:"long", day:"numeric" })} ${gaHM(e.at)}</span><span>機体の位置から</span></div>
+      <div class="sg-sp2"><span><b class="xl">${esc(e.flight || e.callsign || "")}</b><small>${[e.callsign && e.flight ? esc(e.callsign) : "", e.type && esc(e.type), e.reg && esc(e.reg)].filter(Boolean).join("・")}</small></span>${sgTag("ゴーアラウンド", "#C2410C")}</div>
+      <div class="sg-3 c ga3"><span><small>いちばん低く</small><b>${fmtKm(e.low_ft)}ft</b></span><span><small>空港まで</small><b>${e.low_km != null ? `約${e.low_km}km` : "—"}</b></span><span><small>${e.again_at ? "もう一度進入" : "滑走路"}</small><b>${e.again_at ? gaHM(e.again_at) : e.rwy ? esc(e.rwy) + "（推定）" : "—"}</b></span></div></div>
+    ${chart ? `<div class="sg-h"><b>高さの動き</b><small>${e.rwy ? esc(e.rwy) + " に向かって（推定）" : ""}</small></div><div class="sg-card">${chart}<p class="sg-note">30秒ごとの機体の位置。青が降りてくるところ、橙が上がったところ。</p></div>` : ""}
+    <div class="sg-h"><b>そのときの天気</b></div>
+    <div class="sg-card">${w ? `<div class="sg-2c ga2"><div><small>風</small><b>${w.wspd == null ? "—" : `${w.wdir == null ? "風向き不定" : DIR16[Math.round(w.wdir / 22.5) % 16]} ${w.wspd}kt`}</b><small>${w.wgst ? `突風 ${w.wgst}kt` : ""}</small></div><div><small>雲・見通し</small><b>${ceil ? `雲底 ${fmtKm(ceil)}ft` : "低い雲なし"}</b><small>${w.vis_m != null ? (w.vis_m >= 9999 ? "見通し 10km以上" : `見通し ${fmtKm(w.vis_m)}m`) : ""}</small></div></div>
+      <p class="sg-note">気象通報（${gaHM(w.time)}）。ゴーアラウンドの理由は分かりません（風・前の機体・滑走路の状況などいろいろあります）。</p>` : `<p class="sg-note">そのときの気象通報はありません。</p>`}</div>
+    <div class="sg-h"><b>今日の${esc(def.name)}のゴーアラウンド</b><small>${today.length}機</small></div>
+    <div class="sg-card list">${today.map(x => `<button class="sg-li" data-ga-ev="${x.id}" type="button"><span class="d"><b>${gaHM(x.at)}</b></span><span><b>${esc(x.flight || x.callsign || "")}</b><small>${[x.rwy, `いちばん低く ${fmtKm(x.low_ft)}ft`, x.again_at && `${gaHM(x.again_at)} もう一度進入`].filter(Boolean).join("・")}</small></span></button>`).join("") || `<p class="sg-note">ありません。</p>`}</div>
+    <p class="sg-foot">機体の位置は adsb.lol（ODbL）。空港の近くで 1,000ft 以下まで降りてから、着陸せずに 500ft 以上上がった機体を「ゴーアラウンド（推定）」としています。航空会社・管制の発表ではありません。</p>`;
+}
+function gaWxHTML(rows){
+  return `<div class="sg-top"><button class="sg-back" data-close type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>運用</button><h3>着陸の天気</h3><span class="sg-sp"></span></div>
+    <p class="sg-note">${gaActive(pushGa()) ? "知らせる空港" : "いま見ている空港"}の、ゴーアラウンドが起きやすい天気かどうか（気象通報・予報からの目安）。</p>
+    ${rows.map(r => { if(!r.w) return `<div class="sg-card"><b>${esc(r.name)}</b><p class="sg-note">${r.loading ? "読み込んでいます…" : "気象通報を読み込めませんでした。"}</p></div>`;
+      const lv = GA_LV[r.risk.level], it = (k, v, l) => `<span class="${GA_LV[l][1]}"><small>${k}</small><b>${v}</b></span>`, R = r.risk;
+      const lvOf = (v, a, b) => v == null ? 0 : v >= a ? 2 : v >= b ? 1 : 0, lvLow = (v, a, b) => v == null ? 0 : v < a ? 2 : v < b ? 1 : 0;
+      return `<div class="sg-card ga-${lv[1]}"><div class="sg-sp2"><span><b class="xl">${esc(r.name)}</b><small>${esc(r.arr.label)}</small></span><span class="sg-st ${lv[1]}">${lv[0]}</span></div>
+        <div class="sg-4 ga4">${it("横風", R.xwind == null ? "—" : R.xwind + "kt", lvOf(R.xwind, 20, 15))}${it("突風", R.gust ? R.gust + "kt" : "なし", lvOf(R.gust, 30, 25))}${it("雲底", R.ceil == null ? "なし" : fmtKm(R.ceil) + "ft", lvLow(R.ceil, 500, 1000))}${it("見通し", R.vis == null ? "—" : R.vis >= 9999 ? "10km+" : fmtKm(R.vis) + "m", lvLow(R.vis, 1600, 3000))}</div>
+        <p class="sg-note">${R.reasons.length ? esc(R.reasons.join("・")) + (R.level === 2 ? "。ゴーアラウンドが起きやすい天気です。" : "。") : "着陸に影響しそうな天気はありません。"}</p>
+        ${r.fc.length ? `<div class="gafc">${r.fc.map(f => `<span class="${GA_LV[f.level][1]}">${esc(f.t)}</span>`).join("")}</div><small>予報（TAF）から、この先の起きやすさ</small>` : ""}
+        <small>${r.ga == null ? "" : `今日のゴーアラウンド（推定）${r.ga ? r.ga + "機" : "なし"}`}</small></div>`; }).join("")}
+    <p class="sg-leg"><span><i style="background:#E7F6EC"></i>ふつう</span><span><i style="background:#FDF1E1"></i>注意</span><span><i style="background:#FDE7E7"></i>起きやすい</span></p>
+    <p class="sg-foot">目安：使っている滑走路に対して横風 20kt 以上か突風 30kt 以上、雲底 500ft 未満か見通し 1,600m 未満、雷雨（TS）・ウインドシア（WS）の通報。滑走路の向きは天気からの推定です。どれも そらメモ の目安で、実際に着陸できるかどうかは機体・乗員・管制が決めます。航法には使えません。</p>`;
+}
+async function openGa(page, id){
+  GA_PAGE = page; GA_MSG = ""; track("ga", page); const body = $("dGaBody");
+  if(page === "set"){ const g = pushGa(); GA_DRAFT = { airports:[...(g.airports.length ? g.airports : [OPS_AP])], kinds:[...(g.kinds.length ? g.kinds : ["plane", "cluster", "wind", "cloud"])], quiet:!!g.quiet, gap:g.gap === 0 ? 0 : 3 }; body.innerHTML = gaSetHTML(); }
+  if(page === "ev"){ GA_EV = "loading"; body.innerHTML = gaEvHTML(null); }
+  if(page === "wx"){ body.innerHTML = gaWxHTML([]); }
+  if(!$("dGa").open) $("dGa").showModal(); $("dGa").scrollTop = 0;
+  if(page === "ev"){ const e = await rpcPost("ga_event", { p_id:Number(id) }); GA_EV = e && e.id ? e : null; const list = GA_EV ? await gaRecent(GA_EV.iata) : null; if(GA_PAGE === "ev") body.innerHTML = gaEvHTML(GA_EV, list); }
+  if(page === "wx"){ const aps = gaActive(pushGa()) ? GA_ORDER.filter(i => pushGa().airports.includes(i)) : [OPS_AP];
+    const rows = aps.map(i => ({ iata:i, name:(OPS_AIRPORTS[i] || {}).name || i, loading:true })); body.innerHTML = gaWxHTML(rows);
+    await Promise.all(rows.map(async r => { const [now, rec] = await Promise.all([fetchNow(r.iata), gaRecent(r.iata)]); r.loading = false; r.w = now && now.weather; if(!r.w) return;
+      r.arr = gaArr(r.iata, r.w); r.risk = gaRisk(r.w, r.arr.hdgs); r.ga = rec ? rec.filter(e => Date.parse(e.at) > Date.now() - 24 * 36e5).length : null;
+      const per = (now.taf && now.taf.periods) || [], lab = sec => { const d = new Date(sec * 1000 + 9 * 36e5); return (d.toISOString().slice(0, 10) === sgToday() ? "" : "明日") + d.getUTCHours() + "時"; };
+      r.fc = per.slice(0, 5).map(p => ({ t:lab(p.from) + (p.kind === "TEMPO" ? "一時" : ""), level:gaRisk({ wdir:p.wdir, wspd:p.wspd, wgst:p.wgst, vis_m:p.vis_m, ceil_ft:p.ceil_ft, sky:p.sky }, gaArr(r.iata, { wdir:p.wdir, wspd:p.wspd }).hdgs).level }));
+      if(GA_PAGE === "wx") body.innerHTML = gaWxHTML(rows); })); }
+}
+document.addEventListener("click", async e => {
+  const o = e.target.closest("[data-ga-open]"); if(o){ openGa(o.dataset.gaOpen); return; }
+  const ev = e.target.closest("[data-ga-ev]"); if(ev){ openGa("ev", ev.dataset.gaEv); return; }
+  if(!e.target.closest("#dGa") || GA_PAGE !== "set") return;
+  const d = GA_DRAFT, redraw = () => { $("dGaBody").innerHTML = gaSetHTML(); };
+  const ap = e.target.closest("[data-ga-ap]"); if(ap){ const i = ap.dataset.gaAp; d.airports = d.airports.includes(i) ? d.airports.filter(x => x !== i) : [...d.airports, i]; redraw(); return; }
+  const k = e.target.closest("[data-ga-kind]"); if(k){ const v = k.dataset.gaKind; d.kinds = d.kinds.includes(v) ? d.kinds.filter(x => x !== v) : [...d.kinds, v]; redraw(); return; }
+  const s = e.target.closest("[data-sg-set]"); if(s){ if(s.dataset.sgSet === "gaquiet") d.quiet = s.dataset.v === "1"; if(s.dataset.sgSet === "gagap") d.gap = +s.dataset.v; redraw(); return; }
+  if(e.target.closest("[data-ga-save]") || e.target.closest("[data-ga-off]")){
+    const off = !!e.target.closest("[data-ga-off]"), next = off ? { airports:[], kinds:[], quiet:false, gap:3 } : { ...d };
+    if(!off && (!next.airports.length || !next.kinds.length)){ GA_MSG = "空港と、知らせる種類を1つ以上選んでください。"; redraw(); return; }
+    GA_MSG = "保存しています…"; redraw();
+    const ok = await syncPush(pushAps(), pushFlights(), pushSp(), pushSpot(), next);
+    if(ok){ track("push", off ? "ga_off" : "ga_on"); $("dGa").close(); uiSay(off ? "ゴーアラウンドの知らせをやめました。" : `${next.airports.map(i => OPS_AIRPORTS[i].name).join("・")}のゴーアラウンド（推定）と、起きやすい天気を知らせます。`); renderGaBox(); }
+    else { GA_MSG = "保存できませんでした。通知の許可を確かめて、もう一度お試しください。"; redraw(); }
+  }
+});
+
 /* ---------- ステータスの先読み（そらメモ＋）：到達の予測と、あと何回 ---------- */
 let PLAN = { car:"ANA", from:null, to:null, fare:null, price:null };
 // よく使われる修行の路線（両社とも飛んでいる路線）
@@ -7411,11 +7552,13 @@ if("serviceWorker" in navigator && window.isSecureContext && location.protocol !
   $("updateGo").onclick = () => location.reload();
   // 通知を押して開いたときは、運用のタブへ
   navigator.serviceWorker.addEventListener("message", e => { if(e.data && e.data.type === "open-ops"){ goTab("ops");
-    const m = /#ops-([A-Z]{3})$/.exec(e.data.url || ""); if(m && OPS_AIRPORTS[m[1]]){ OPS_PICKED = true; if(m[1] !== OPS_AP) setOpsAirport(m[1]); } } });
+    const m = /#ops-([A-Z]{3})(\/[a-z]+(?:\/\d+)?)?$/.exec(e.data.url || ""); if(m && OPS_AIRPORTS[m[1]]){ OPS_PICKED = true; if(m[1] !== OPS_AP) setOpsAirport(m[1]); gaFromHash(m[2]); } } });
 }
 // 運用のタブへのリンク（#ops、空港つきは #ops-NRT など）。通知や共有のリンクから開いたとき
-{ const m = /^#ops(?:-([A-Z]{3}))?$/.exec(location.hash);
-  if(m) setTimeout(() => { if(m[1] && OPS_AIRPORTS[m[1]]){ OPS_PICKED = true; OPS_AP = m[1]; try{ localStorage.setItem("soramemo.opsAirport", m[1]); }catch(e){} } goTab("ops"); }, 0); }
+// ゴーアラウンドの知らせから開いたとき：/ga/123（その1件）・/gawx（着陸の天気）
+function gaFromHash(s){ if(!s) return; const g = /^\/ga\/(\d+)$/.exec(s); if(g) setTimeout(() => openGa("ev", g[1]), 300); else if(s === "/gawx") setTimeout(() => openGa("wx"), 300); }
+{ const m = /^#ops(?:-([A-Z]{3}))?(\/[a-z]+(?:\/\d+)?)?$/.exec(location.hash);
+  if(m) setTimeout(() => { if(m[1] && OPS_AIRPORTS[m[1]]){ OPS_PICKED = true; OPS_AP = m[1]; try{ localStorage.setItem("soramemo.opsAirport", m[1]); }catch(e){} } goTab("ops"); gaFromHash(m[2]); }, 0); }
 // 運用の共有：いまの空港のリンクと、ひとことの文（推定であることも書く）
 $("opsShare").onclick = async () => {
   const def = opsDef(), url = `https://soramemo.jp/#ops-${def.iata}`, mode = $("opsInfo").querySelector(".mode");
