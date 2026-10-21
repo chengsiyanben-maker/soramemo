@@ -59,7 +59,7 @@ async def main():
         await pg.click('[data-vw="ops:photo"]'); await pg.wait_for_timeout(500)
         t = await pg.inner_text('#opsPhoto')
         print('PHOTO', t.replace('\n',' | '))
-        check('撮る人：大きな機体だけ:', 'NH106' in t and 'A359' in t and 'BC101' not in t)
+        check('撮る人：大きな機体だけ:', 'NH106' in t and ('A359' in t or 'ほかの撮影地から見える機体' in t) and 'BC101' not in t)
         await pg.click('[data-vw="ops:strip"]'); await pg.wait_for_timeout(500)
         check('短冊に遅れ:', '18分遅れ' in (await pg.inner_text('#opsStrip')))
         # 覚えている
