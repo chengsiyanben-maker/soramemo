@@ -18,7 +18,9 @@ export function gaStep(iata: string, planes: GaPlane[], watch: Map<string, Watch
     if (!p.callsign || isPrivate(p.callsign) || p.alt_ft == null) continue;
     const w = watch.get(p.id), pt: [number, number, number] = [Math.floor(now / 1000), p.alt_ft, p.dist_km];
     const fresh = !!(w && w.low_at && now - Date.parse(w.low_at) <= GA.windowMin * 60_000);
-    if (w && fresh && w.low_ft != null && w.low_ft <= GA.lowFt && p.alt_ft >= w.low_ft + GA.climbFt && (p.fpm ?? 0) >= 300 && p.dist_km <= GA.maxKm) {
+    // 降りてくるところ（いちばん低い所より 400ft 以上高い点）を見ていないもの（離陸した直後の機体など）は数えない
+    const seenDescent = !!(w && w.low_ft != null && w.low_at && w.pts.some((q) => q[0] < Date.parse(w.low_at!) / 1000 && q[1] >= w.low_ft! + 400));
+    if (w && fresh && seenDescent && w.low_ft != null && w.low_ft <= GA.lowFt && p.alt_ft >= w.low_ft + GA.climbFt && (p.fpm ?? 0) >= 300 && p.dist_km <= GA.maxKm) {
       const cs = normCallsign(p.callsign), fl = flightOfCallsign(cs);
       events.push({ iata, at: iso(now), hex: p.id, callsign: cs, flight: fl && /^[A-Z0-9]{2}[0-9]{1,4}$/.test(fl) ? fl : null, type: p.type ?? null, reg: p.reg ?? null,
         low_ft: w.low_ft, low_km: w.low_km, low_at: w.low_at, low_lat: w.low_lat, low_lon: w.low_lon, low_hdg: w.low_hdg, pts: [...w.pts, pt].slice(-24) });

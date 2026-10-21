@@ -27,6 +27,10 @@ Deno.test("6分より後に上がったもの（着陸してまた離陸した�
   const seq = [{ alt_ft: 600, dist_km: 3 }, ...Array.from({ length: 13 }, () => ({ alt_ft: 99999, dist_km: 99, phase: "other" })), { alt_ft: 1500, dist_km: 2, fpm: 2000, phase: "dep" }];
   assertEquals(run(seq).length, 0);
 });
+Deno.test("離陸した直後（降りてくるところを見ていない）：ゴーアラウンドにしない", () => {
+  assertEquals(run([{ alt_ft: 125, dist_km: 1.3, hdg: 157 }, { alt_ft: 1225, dist_km: 3.1, fpm: 2200, hdg: 157, phase: "dep" }]).length, 0);
+  assertEquals(run([{ alt_ft: 300, dist_km: 1.1 }, { alt_ft: 175, dist_km: 1.1 }, { alt_ft: 1250, dist_km: 2.5, fpm: 2000, phase: "dep" }]).length, 0);
+});
 Deno.test("自家用機など（呼び出し符号が JA…）は除く", () => {
   assertEquals(run([{ callsign: "JA4123", alt_ft: 600, dist_km: 3 }, { callsign: "JA4123", alt_ft: 1300, dist_km: 2, fpm: 1500, phase: "dep" }]).length, 0);
 });
