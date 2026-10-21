@@ -563,6 +563,43 @@ dialog.spfull .dlg{padding:16px 16px 32px;max-width:480px;margin:0 auto;max-heig
 .spdh h3{margin:0;font-family:var(--gothic);font-size:26px;font-weight:900}
 .spdh em,.spcard em{font-style:normal;color:#fff;border-radius:10px;padding:6px 10px;font-size:12px;font-weight:800}
 .spcard{display:block;margin-top:10px;background:var(--s-card);border:1px solid var(--s-line);border-radius:18px;padding:12px 14px}
+.atchero{margin-top:12px;background:#111827;color:#fff;border-radius:24px;padding:16px}
+.atchero .h{display:flex;justify-content:space-between;gap:8px;font-size:11.5px;color:#BDBDBD}
+.atchero .f{display:flex;justify-content:space-between;align-items:flex-end;margin-top:8px;gap:8px}
+.atchero .f b{font-size:30px;letter-spacing:.5px;font-variant-numeric:tabular-nums}.atchero .f small{display:block;font-size:12px;color:#E5E5E5}
+.atctabs{display:flex;gap:6px;margin-top:12px;overflow-x:auto;scrollbar-width:none}.atctabs .chip{flex:none}
+.atclist{list-style:none;margin:10px 0 0;padding:4px 16px;background:var(--s-card);border-radius:22px}
+.atclist li{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--s-line)}.atclist li:last-child{border-bottom:0}
+.atclist .n{flex:1;min-width:0}.atclist .n b{font-size:14px}.atclist .n small{display:block;font-size:11px;color:var(--s-mute);line-height:1.5}
+.atclist .v{text-align:right}.atclist .v b{font-size:16px;font-variant-numeric:tabular-nums}.atclist .v small{display:block;font-size:10.5px;color:var(--s-mute)}
+.atcrule{margin-top:10px;background:#FDF1E1;color:#5C3A00;border-radius:18px;padding:12px 14px;font-size:11.5px;line-height:1.7}.atcrule b{display:block;font-size:13px}
+.atcsteps{display:flex;margin-top:12px}.atcsteps span{flex:1;text-align:center;font-size:11px;color:var(--s-mute)}
+.atcsteps i{display:block;width:12px;height:12px;border-radius:50%;margin:0 auto 6px;background:var(--s-line)}
+.atcsteps .past i{background:#9CA3AF}.atcsteps .on{color:#1D4ED8;font-weight:800}.atcsteps .on i{background:#1D4ED8;box-shadow:0 0 0 4px #E0ECFF}
+.atcnow{display:flex;justify-content:space-between;align-items:center;margin-top:12px;background:#111827;color:#fff;border-radius:16px;padding:10px 14px}
+.atcnow small{display:block;font-size:11px;color:#BDBDBD}.atcnow b.f{font-size:20px;font-variant-numeric:tabular-nums}
+.atcfeed{list-style:none;margin:10px 0 0;padding:0}
+.atcfeed li{background:var(--s-card);border-radius:20px;padding:12px 14px;margin-bottom:8px}.atcfeed li.warn{box-shadow:inset 0 0 0 2px #FDE7E7}
+.atcfeed .h{display:flex;justify-content:space-between;align-items:center;gap:8px}.atcfeed .h b{font-size:15px}.atcfeed .h small{font-size:11px;color:var(--s-mute)}
+.atcfeed .ch{display:inline-block;margin-left:6px;border-radius:6px;padding:2px 7px;font-size:10.5px;font-weight:800}
+.atcfeed .ch.twr{background:#FDE8DC;color:#C2410C}.atcfeed .ch.gnd,.atcfeed .ch.ramp{background:#E7F6EC;color:#1F7A3F}.atcfeed .ch.app{background:#E0ECFF;color:#1D4ED8}.atcfeed .ch.dep{background:#F1E8FD;color:#6D28D9}
+.atcfeed p{margin:6px 0 0;font-size:14.5px;font-weight:700;line-height:1.55}
+.atcfeed .tg{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}.atcfeed .tg span{border-radius:7px;padding:3px 8px;font-size:11px;font-weight:800;background:var(--s-bg)}.atcfeed .tg span.w{background:#FDE7E7;color:#B42318}
+.atcfeed .mapl{margin-top:8px;background:none;border:0;padding:0;font:inherit;font-size:12.5px;font-weight:800;color:#1D4ED8;cursor:pointer}
+.atclive{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:6px 11px;font-size:12px;font-weight:800;background:var(--s-card)}.atclive i{width:8px;height:8px;border-radius:50%;background:#9CA3AF}.atclive.on i{background:#16A34A}
+.atcmap{height:360px;border-radius:20px;overflow:hidden;margin-top:10px;background:#EEF2F6}
+.atcstep{list-style:none;margin:10px 0 0;padding:6px 14px;background:var(--s-card);border-radius:20px}.atcstep li{display:flex;gap:10px;align-items:center;padding:7px 0;font-size:13.5px}
+.atcstep b{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font-size:11.5px;color:#fff;background:#1D4ED8;flex:none}.atcstep b.stop{background:#DC2626}
+.atcneed{list-style:none;margin:10px 0 0;padding:4px 14px;background:var(--s-card);border-radius:20px}.atcneed li{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:9px 0;border-bottom:1px solid var(--s-line);font-size:13px}.atcneed li:last-child{border-bottom:0}
+.atcneed em{font-style:normal;border-radius:7px;padding:3px 8px;font-size:11px;font-weight:800}.atcneed em.ok{background:#E7F6EC;color:#1F7A3F}.atcneed em.few{background:#FDF1E1;color:#8A5A00}.atcneed em.none{background:#FDE7E7;color:#B42318}
+.atcway{display:block;width:100%;text-align:left;margin-top:8px;border:0;border-radius:20px;padding:14px 16px;font:inherit;background:var(--s-card);color:var(--s-ink);cursor:pointer}.atcway[aria-pressed="true"]{background:#111827;color:#fff}
+.atcway b{font-size:15px}.atcway small{display:block;font-size:12px;line-height:1.6;margin-top:4px;opacity:.85}
+.atcform{margin-top:10px;background:var(--s-card);border-radius:20px;padding:12px 14px;display:grid;gap:10px}.atcform label{display:grid;gap:4px;font-size:12px;color:var(--s-mute)}
+.atcform select{font:inherit;font-size:14px;padding:8px;border-radius:10px;border:1px solid var(--s-line);background:var(--s-bg);color:var(--s-ink)}
+.atcform .cb{display:flex;gap:8px;align-items:flex-start;color:var(--s-ink);line-height:1.6}
+.atcrx{margin-top:10px;background:#0F1115;color:#fff;border-radius:22px;padding:14px 16px}.atcrx .meter{display:flex;align-items:flex-end;gap:3px;height:44px;margin-top:10px}.atcrx .meter i{flex:1;border-radius:2px;background:#374151}.atcrx .meter i.on{background:#22C55E}
+.atcrx .st{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-top:10px;text-align:center}.atcrx .st div{background:#1F2329;border-radius:12px;padding:8px 4px;font-size:10.5px;color:#9CA3AF}.atcrx .st b{display:block;font-size:17px;color:#fff}
+.atctok{margin-top:10px;background:var(--s-card);border-radius:16px;padding:12px 14px;font-size:12px;line-height:1.6;word-break:break-all}.atctok code{font-size:12.5px;font-weight:700}
 .spfull .spcard{border:0;border-radius:22px}
 .spcard.soft{background:var(--s-bg);border:0}
 .spcard.nopad{padding:0;overflow:hidden}
@@ -1991,6 +2028,10 @@ nav.tabs{transition:transform .3s cubic-bezier(.2,.8,.2,1),opacity .2s}
 <dialog id="dPersona" class="psheet" aria-labelledby="pTitle"><div class="dlg" id="dPersonaBody"></div></dialog>
 <dialog id="dSpotFl" class="spsheet" aria-label="来る機体のくわしく"><div class="dlg" id="dSpotFlBody"></div></dialog>
 <dialog id="dSpotCond" class="spfull" aria-label="撮影条件と天気"><div class="dlg" id="dSpotCondBody"></div></dialog>
+<dialog id="dAtc" class="spfull" aria-label="いま聞く周波数"><div class="dlg" id="dAtcBody"></div></dialog>
+<dialog id="dAtcFeed" class="spfull" aria-label="管制の交信"><div class="dlg" id="dAtcFeedBody"></div></dialog>
+<dialog id="dAtcTaxi" class="spfull" aria-label="誘導路の指示"><div class="dlg" id="dAtcTaxiBody"></div></dialog>
+<dialog id="dAtcJoin" class="spfull" aria-label="受信に協力する"><div class="dlg" id="dAtcJoinBody"></div></dialog>
 <dialog id="dSpotPush" class="spfull" aria-label="近づいたら知らせる"><div class="dlg" id="dSpotPushBody"></div></dialog>
 <dialog id="dShugyo" class="sgd" aria-label="修行"><div class="dlg" id="dShugyoBody"></div></dialog>
 <dialog id="dGa" class="sgd" aria-label="ゴーアラウンド"><div class="dlg" id="dGaBody"></div></dialog>
@@ -6435,7 +6476,7 @@ function renderPhoto(d){
     <div class="spfilter" role="group" aria-label="一覧の絞り込み">${F.map(([k, l]) => `<button class="chip" data-spfilter="${k}" aria-pressed="${SP_FILTER === k}">${l}</button>`).join("")}</div>
     ${rows ? `<ul class="splist2">${rows}</ul>` : `<p class="hint">${spot ? `${esc(spot.name)}から見える` : "この3時間に、"}${SP_FILTER === "pick" ? "特別塗装機・大きな機体・国際線・海外の航空会社の便は見つかりません。「すべて」で全部の便を見られます。" : "便はありません。"}</p>`}
     ${spot && other ? `<p class="hint spother">ほかの撮影地から見える機体 ${other}機（撮影地を変えると出ます）</p>` : ""}
-    <div class="splinks"><button class="linkbtn2" data-spcond>撮影条件と天気</button>${SERVER ? `<button class="linkbtn2" data-sppush>近づいたら知らせる</button>` : ""}</div>
+    <div class="splinks"><button class="linkbtn2" data-spcond>撮影条件と天気</button>${atcHas(OPS_AP) ? `<button class="linkbtn2" data-atcfeed>管制の交信</button><button class="linkbtn2" data-atc>いま聞く周波数</button>` : ""}${SERVER ? `<button class="linkbtn2" data-sppush>近づいたら知らせる</button>` : ""}</div>
     <p class="fwnote">時刻は JAL・ANA の時刻表と運航情報。海外の航空会社の便と、機体の登録記号・滑走路は推定です。機材は予定で、変わることがあります。${spot ? `見えるかどうかは、いまの運用で使う滑走路（推定）の着陸・離陸の線から撮影地まで2.5km以内かで決めた目安です。着陸の滑走路が2本あるときは、${OPS_AP === "HND" ? "来た方面（北・東からか、南・西からか）で1本に絞り、絞れないときは" : ""}どちらかが見えれば出します。${OPS_AP === "HND" ? "離陸も、2本のときは行き先の方面で1本に絞ります（推定）。" : ""}建物などで見えないこともあります。` : ""}${ODPT_CREDIT}</p>`;
   if(!(SP_WX_AP === OPS_AP && SP_WX)) loadSpWx(OPS_AP).then(x => { if(x && VIEW.ops === "photo" && BOARD) renderPhoto(BOARD); });
 }
@@ -6461,6 +6502,7 @@ function spDetailHTML(x){
     <div class="spgrid"><div class="spcard"><small>${x.dir === "arr" ? "着陸" : "離陸"}</small><b>${x.t ? spHM(x.t) + "ごろ" : "—"}</b><small>${x.sched ? `定刻 ${spHM(x.sched)}${late >= 5 ? `・${late}分遅れ` : ""}` : "推定"}${x.est ? "・見込み" : ""}</small></div>
       <div class="spcard"><small>滑走路</small><b>${rw ? esc(rw) : "—"}</b><small>${rw ? (rwi.side ? (x.dir === "arr" ? "運用と来た方面からの推定" : "運用と行き先の方面からの推定") : "いまの運用からの推定") : "向きが分かりません"}</small></div></div>
     ${where ? `<div class="spcard"><small>いまどこ</small><b class="m">${esc(where)}</b>${lv || x.km ? `<span class="bar"><i style="width:${Math.max(4, Math.min(100, 100 - (lv ? spKm(lv) : x.km) / 2))}%"></i></span>` : ""}</div>` : ""}
+    ${atcSceneHTML(x)}
     ${spots ? `<div class="spcard"><small>どこから撮る</small><ul class="spwhere">${spots}</ul></div>` : ""}
     ${x.dir === "arr" && SERVER && key ? `<button class="spnote big" data-spnote="${esc(key)}" aria-pressed="${on}">${on ? "知らせを取り消す" : `着陸の${ps.lead || 5}分前に知らせる`}</button>` : ""}
     <p class="fwnote">${x.foreign ? "時刻表がない便のため、時刻・機種は機体の位置（adsb.lol）と経路のデータ（adsb.im）からの推定です。" : `時刻は JAL・ANA の時刻表と運航情報。${ODPT_CREDIT}`}滑走路と順光・逆光は推定です。</p>`;
@@ -6579,6 +6621,221 @@ async function openSpCond(){
   const iata = OPS_AP; await loadSpWx(iata); if(iata === OPS_AP && $("dSpotCond").open) $("dSpotCondBody").innerHTML = spCondHTML();
 }
 document.addEventListener("click", e => { if(e.target.closest("[data-spcond]")) openSpCond(); });
+
+// ---- いま聞く周波数（受信機で聞く人向け）と、機体のいまの管制の場面（推定） ----
+//   周波数は国土交通省 航空局の航空路誌（AIP Japan）に載っているもの。どれを使っているかは時間・混み具合で変わるため、
+//   いちばんよく使うものを先に、ほかを「ほかに」で並べる。交信の音や内容はここでは扱わない
+const ATC_FREQ = {
+  HND:{ atis:["128.80"], del:["121.82", "121.87"], gnd:["121.70", "118.22", "121.62", "121.97", "122.07"], twr:["118.10", "124.35", "118.57", "118.72", "118.80", "126.20"],
+        app:["119.10", "119.40", "119.70", "119.65", "124.40", "125.20", "125.40", "125.80", "127.70"], dep:["126.00", "120.80", "119.60", "120.60", "124.20", "125.52", "127.50", "127.60"],
+        name:{ gnd:"東京グランド", twr:"東京タワー", app:"東京アプローチ", dep:"東京ディパーチャー", del:"東京デリバリー" } },
+  NRT:{ atis:["128.25"], del:["121.65", "121.90"], gnd:["121.85", "121.95"], ramp:["121.60", "121.75"], twr:["118.20", "118.35", "122.70", "126.20"],
+        app:["124.40", "125.20", "125.80", "127.70", "121.27"], dep:["124.20", "120.60", "119.60", "125.52", "127.50"],
+        name:{ gnd:"成田グランド", ramp:"成田ランプ", twr:"成田タワー", app:"東京アプローチ", dep:"東京ディパーチャー", del:"成田デリバリー" } }
+};
+const ATC_WHAT = { atis:"空港の天気と運用（滑走路・風・気圧）をくり返し放送", del:"出発前の飛行経路の許可", ramp:"駐機場の中の案内", gnd:"地上を走る機体の案内（誘導路）",
+  twr:"着陸と離陸の許可・ゴーアラウンドの指示", app:"着陸に向かう機体を、滑走路の手前まで並べる", dep:"離陸したあと、上昇中の機体" };
+const ATC_SHOW = { all:["atis", "twr", "gnd", "ramp", "del"], arr:["app", "twr", "atis"], dep:["twr", "dep", "gnd"] };
+let ATC_TAB = "all";
+const atcHas = iata => !!ATC_FREQ[iata];
+const atcName = (iata, k) => k === "atis" ? "ATIS" : ATC_FREQ[iata].name[k];
+// 機体のいまの管制の場面（推定）：高さと空港までの距離から。arr＝着陸する機体、dep＝離陸する機体
+function atcScene(x, lv){
+  if(!lv || lv.alt_ft == null) return x.dir === "dep" ? { k:"gnd", steps:["gnd", "twr", "dep", "cruise"], i:0 } : null;
+  const km0 = spKm(lv), alt = lv.alt_ft;
+  if(x.dir === "arr"){ const steps = ["cruise", "app", "twr", "gnd"];
+    const i = km0 <= 3 && alt < 300 ? 3 : km0 <= 20 && alt <= 3500 ? 2 : km0 <= 90 && alt <= 16000 ? 1 : 0;
+    return { k:steps[i], steps, i, next:i === 1 ? Math.max(1, Math.round((km0 - 15) / 4)) : null }; }
+  const steps = ["gnd", "twr", "dep", "cruise"], i = alt < 100 && km0 <= 5 ? 0 : alt <= 2500 && km0 <= 12 ? 1 : alt <= 20000 ? 2 : 3;
+  return { k:steps[i], steps, i };
+}
+const ATC_STEP = { cruise:"巡航", app:"アプローチ", twr:"タワー", gnd:"グランド", dep:"ディパーチャー" };
+function atcSceneHTML(x){
+  if(!atcHas(OPS_AP)) return "";
+  const sc = atcScene(x, x.live || spLive(x.fl)); if(!sc) return "";
+  const F = ATC_FREQ[OPS_AP], f = F[sc.k] ? F[sc.k][0] : null;
+  return `<div class="spcard"><small>いまの管制の場面（推定）</small>
+    <div class="atcsteps">${sc.steps.map((k, i) => `<span class="${i < sc.i ? "past" : i === sc.i ? "on" : ""}"><i></i>${ATC_STEP[k]}</span>`).join("")}</div>
+    ${f ? `<div class="atcnow"><span><small>受信機で聞くなら</small><b>${esc(atcName(OPS_AP, sc.k))}</b></span><b class="f">${f}</b></div>` : `<small>${sc.k === "cruise" ? "まだ空港から遠く、航空路の管制（東京コントロールなど）にいるころです。" : ""}</small>`}
+    ${sc.next ? `<small>あと約${sc.next}分でタワー（${F.twr[0]}）に移るころです。</small>` : ""}
+    <button class="linkbtn2" data-atc type="button">ほかの周波数</button></div>`;
+}
+function atcHTML(){
+  const iata = OPS_AP, F = ATC_FREQ[iata], cur = OPS_CUR, op = cur && cur.op;
+  const best = ATC_TAB === "dep" ? "twr" : ATC_TAB === "arr" ? "app" : "twr";
+  const rows = ATC_SHOW[ATC_TAB].filter(k => F[k]).map(k => `<li><span class="n"><b>${esc(atcName(iata, k))}</b><small>${ATC_WHAT[k]}</small></span>
+    <span class="v"><b>${F[k][0]}</b><small>${F[k].length > 1 ? "ほかに " + F[k].slice(1, 3).join("・") + (F[k].length > 3 ? " など" : "") : ""}</small></span></li>`).join("");
+  return `<div class="spctop"><button class="mp-back" data-close type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>撮影</button><h3>いま聞く周波数</h3><span class="sp" aria-hidden="true"></span></div>
+    <p class="hint">受信機（エアバンド）で聞く人向け。いまの運用に合わせて、聞くとよい管制を並べます。</p>
+    <div class="atchero"><div class="h"><span>${esc(opsDef().name)}${op ? "・" + esc(op.label) : ""}</span><span>${op ? `${esc(op.arr.join("/"))} に着陸・${esc(op.dep.join("/"))} から離陸` : ""}</span></div>
+      <div class="f"><span><small>いちばんおすすめ</small><b>${F[best][0]}</b><small>${esc(atcName(iata, best))}（${best === "app" ? "着陸に向かう機体" : "着陸・離陸の許可"}）</small></span></div></div>
+    <div class="atctabs" role="group" aria-label="聞くもの">${[["all", "空港"], ["arr", "着陸を聞く"], ["dep", "離陸を聞く"]].map(([k, l]) => `<button class="chip" data-atctab="${k}" aria-pressed="${ATC_TAB === k}">${l}</button>`).join("")}</div>
+    <ul class="atclist">${rows}</ul>
+    <p class="hint">周波数は時間や混み具合で変わります。いちばん上が、よく使われるものです。</p>
+    <div class="splinks"><button class="linkbtn2" data-atcfeed type="button">管制の交信を日本語で見る</button><button class="linkbtn2" data-atcjoin type="button">受信に協力する</button></div>
+    <div class="atcrule"><b>聞くときの注意（電波法）</b>聞いた内容を録音して公開したり、人に伝えたりすることについては、電波法59条の解釈が分かれています。気をつけて楽しんでください。</div>
+    <p class="fwnote">周波数は国土交通省 航空局の航空路誌（AIP Japan）から。どの周波数を使っているかは推定で、実際と違うことがあります。航法には使えません。非公式。</p>`;
+}
+function openAtc(){ if(!atcHas(OPS_AP)) return; track("spot", "atc"); $("dAtcBody").innerHTML = atcHTML(); if(!$("dAtc").open) $("dAtc").showModal(); }
+document.addEventListener("click", e => { if(e.target.closest("[data-atc]")) openAtc();
+  const t = e.target.closest("[data-atctab]"); if(t){ ATC_TAB = t.dataset.atctab; $("dAtcBody").innerHTML = atcHTML(); } });
+
+// ---- 管制の交信（受信の協力者が聞き取ったものを、日本語で） ----
+//   協力者の端末で英語の文字にし（音は送らない）、サーバーで読み解いて、その時間に空港の近くを飛んでいる機体と合ったものだけ出す
+const ATC_CH = { twr:"タワー", gnd:"グランド", ramp:"ランプ", app:"アプローチ", dep:"ディパーチャー", del:"デリバリー", atis:"ATIS" };
+let ATC_FEED = { tab:"all", rows:[], at:0, timer:null }, ATC_COV = null;
+const atcFn = path => SORAMEMO_CONFIG.supabaseUrl.replace(/\/$/, "") + "/functions/v1/" + path;
+async function atcLoad(){ const d = await rpcPost("atc_recent", { p_iata:OPS_AP, p_ch:ATC_FEED.tab === "all" ? null : ATC_FEED.tab, p_minutes:60 }); if(Array.isArray(d)){ ATC_FEED.rows = d; ATC_FEED.at = Date.now(); } return d; }
+async function atcCov(){ const d = await rpcPost("atc_coverage", {}); if(d && d.ch) ATC_COV = d; return ATC_COV; }
+const atcLiveN = (iata, ch) => ATC_COV ? (ATC_COV.ch.filter(x => x.iata === iata && (!ch || x.ch === ch)).reduce((a, x) => a + x.live, 0)) : 0;
+function atcFeedHTML(){
+  const live = atcLiveN(OPS_AP), F = [["all", "すべて"], ["twr", "タワー"], ["gnd", "グランド"], ["app", "アプローチ"], ["dep", "ディパーチャー"]];
+  const rows = ATC_FEED.rows.map((r, i) => { const warn = (r.tags || []).includes("ゴーアラウンド"), taxi = (r.items || []).some(x => x.k === "taxi" && x.via && x.via.length);
+    return `<li class="${warn ? "warn" : ""}"><div class="h"><span><b>${esc(r.flight || r.callsign || "")}</b><span class="ch ${esc(r.ch)}">${ATC_CH[r.ch] || ""}</span></span><small>${new Date(r.at).toLocaleTimeString("ja-JP")}${r.heard > 1 ? `・${r.heard}人が受信` : ""}</small></div>
+      <p>${esc(r.ja)}</p>${(r.tags || []).length ? `<div class="tg">${r.tags.map(t => `<span class="${t === "ゴーアラウンド" ? "w" : ""}">${esc(t)}</span>`).join("")}</div>` : ""}
+      ${taxi ? `<button class="mapl" data-atctaxi="${i}" type="button">誘導路を地図で見る ›</button>` : ""}</li>`; }).join("");
+  return `<div class="spctop"><button class="mp-back" data-close type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>撮影</button><h3>${esc(opsDef().name)}の管制</h3><span class="atclive ${live ? "on" : ""}"><i></i>${live ? `受信中 ${live}人` : "受信なし"}</span></div>
+    <p class="hint">受信の協力者が聞き取った交信を、AIが日本語にしたもの（推定）。</p>
+    <div class="atctabs" role="group" aria-label="管制">${F.map(([k, l]) => `<button class="chip" data-atcft="${k}" aria-pressed="${ATC_FEED.tab === k}">${l}</button>`).join("")}</div>
+    ${rows ? `<ul class="atcfeed">${rows}</ul>` : `<p class="hint" style="margin-top:14px">${ATC_FEED.at ? "この1時間の交信はまだありません。" : "読み込んでいます…"}${!live ? "いま受信している協力者がいません。" : ""}</p>`}
+    <button class="linkbtn2" data-atcjoin type="button">受信に協力する</button>
+    <p class="fwnote">交信は協力者の受信機で受け、AIが聞き取って日本語にした推定です。聞き間違いがあります。便名は呼び出し符号からの推定で、その時間に空港の近くを飛んでいた機体と合ったものだけ出しています。航法には使えません。非公式。</p>`;
+}
+async function openAtcFeed(){
+  if(!atcHas(OPS_AP)) return; track("spot", "atcfeed");
+  $("dAtcFeedBody").innerHTML = atcFeedHTML(); if(!$("dAtcFeed").open) $("dAtcFeed").showModal();
+  await Promise.all([atcLoad(), atcCov()]); if($("dAtcFeed").open) $("dAtcFeedBody").innerHTML = atcFeedHTML();
+  clearInterval(ATC_FEED.timer);
+  ATC_FEED.timer = setInterval(async () => { if(!$("dAtcFeed").open){ clearInterval(ATC_FEED.timer); return; } if(document.hidden) return; await atcLoad(); if($("dAtcFeed").open) $("dAtcFeedBody").innerHTML = atcFeedHTML(); }, 10000);
+}
+// ---- 誘導路の指示を地図に（誘導路の地図は OpenStreetMap） ----
+const ATC_TAXI = new Map();
+async function atcTaxiData(iata){ if(ATC_TAXI.has(iata)) return ATC_TAXI.get(iata); try{ const r = await fetch(`taxi/${iata.toLowerCase()}.json`); if(r.ok){ const d = await r.json(); ATC_TAXI.set(iata, d); return d; } }catch(e){} return null; }
+let ATC_MAP = null;
+async function openAtcTaxi(r){
+  const tx = (r.items || []).find(x => x.k === "taxi"), holds = (r.items || []).filter(x => x.k === "hold").map(x => x.at);
+  const steps = [...(tx.via || []).map((v, i) => [String(i + 1), `${i ? "" : "誘導路 "}${v}${i ? " へ" : " を通る"}`, ""]), ...holds.map(h => ["止", `${h.startsWith("RWY") ? h.slice(4) + "滑走路" : "誘導路 " + h}の手前で待機`, "stop"]),
+    ...(tx.to ? [["着", tx.to.startsWith("SPOT") ? `スポット ${tx.to.slice(5)}` : `${tx.to}滑走路`, ""]] : [])];
+  $("dAtcTaxiBody").innerHTML = `<div class="spctop"><button class="mp-back" data-close type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>交信</button><h3>誘導路の指示</h3><span class="sp" aria-hidden="true"></span></div>
+    <div class="atchero"><div class="h"><span>${ATC_CH[r.ch] || ""}・${new Date(r.at).toLocaleTimeString("ja-JP")}</span></div><div class="f"><span><b style="font-size:22px">${esc(r.flight || r.callsign || "")}</b><small>${esc(r.ja)}</small></span></div></div>
+    <div class="atcmap" id="atcMap" role="img" aria-label="空港の図。指示された誘導路を青、手前で待つところを赤で示す"></div>
+    <ol class="atcstep">${steps.map(([n, t, c]) => `<li><b class="${c}">${n}</b><span>${esc(t)}</span></li>`).join("")}</ol>
+    <p class="fwnote">誘導路の地図は © OpenStreetMap contributors（ODbL）。色を付けたのは指示に出た誘導路の全体で、実際に通るのはその一部です。道すじはAIが聞き取った指示からの推定で、実際と違うことがあります。航法・地上走行には使えません。</p>`;
+  if(!$("dAtcTaxi").open) $("dAtcTaxi").showModal();
+  const [d] = await Promise.all([atcTaxiData(OPS_AP), loadLeaflet()]);
+  if(!d || !window.L || !$("atcMap")) return;
+  if(ATC_MAP){ try{ ATC_MAP.remove(); }catch(e){} }
+  ATC_MAP = L.map("atcMap", { zoomControl:false, attributionControl:false });
+  const g = L.featureGroup().addTo(ATC_MAP), hl = L.featureGroup().addTo(ATC_MAP);
+  d.bg.forEach(p => L.polyline(p, { color:"#CBD5E1", weight:2 }).addTo(g));
+  Object.values(d.ref).forEach(ls => ls.forEach(p => L.polyline(p, { color:"#94A3B8", weight:3 }).addTo(g)));
+  d.rwy.forEach(w => L.polyline(w.p, { color:"#374151", weight:9 }).addTo(g));
+  (tx.via || []).forEach(v => (d.ref[v] || []).forEach(p => L.polyline(p, { color:"#1D4ED8", weight:6 }).addTo(hl)));
+  holds.forEach(h => { if(h.startsWith("RWY")){ const id = h.slice(4); d.rwy.filter(w => (w.ref || "").split("/").includes(id)).forEach(w => L.polyline(w.p, { color:"#DC2626", weight:9 }).addTo(hl)); }
+    else (d.ref[h] || []).forEach(p => L.polyline(p, { color:"#DC2626", weight:6 }).addTo(hl)); });
+  ATC_MAP.fitBounds((hl.getLayers().length ? hl : g).getBounds(), { padding:[20, 20] });
+}
+// ---- 受信に協力する ----
+const ATC_AREAS = { HND:[["ota", "大田区"], ["shinagawa", "品川区"], ["minato", "港区"], ["koto", "江東区"], ["kawasaki", "川崎市"], ["yokohama", "横浜市"], ["kisarazu", "木更津市"], ["hnd-other", "そのほか（羽田の近く）"]],
+  NRT:[["narita", "成田市"], ["shibayama", "芝山町"], ["tomisato", "富里市"], ["tako", "多古町"], ["sakura", "佐倉市"], ["nrt-other", "そのほか（成田の近く）"]] };
+let ATC_JOIN = { way:"phone", iata:"HND", ch:"twr", area:null, ok:false, token:null };
+const atcTok = () => { try{ return localStorage.getItem("soramemo.atcFeeder"); }catch(e){ return null; } };
+function atcJoinHTML(){
+  const j = ATC_JOIN, ch = ["twr", "gnd", "app", "dep"];
+  const need = ["HND", "NRT"].flatMap(ap => ch.map(c => { const n = atcLiveN(ap, c); return `<li><span><b>${ap === "HND" ? "羽田" : "成田"}</b> ${ATC_CH[c]} <small>${ATC_FREQ[ap][c][0]}</small></span><em class="${n >= 2 ? "ok" : n ? "few" : "none"}">${n >= 2 ? `受信中 ${n}人` : n ? "1人だけ" : "だれもいない"}</em></li>`; })).join("");
+  const areas = ATC_COV && ATC_COV.areas ? Object.entries(ATC_COV.areas) : [];
+  const lab = Object.fromEntries([...ATC_AREAS.HND, ...ATC_AREAS.NRT]);
+  return `<div class="spctop"><button class="mp-back" data-close type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>戻る</button><h3>受信に協力する</h3><span class="sp" aria-hidden="true"></span></div>
+    <p class="hint">あなたの受信機で聞いた交信を、みんなの「管制」の画面に届けます。</p>
+    <ul class="atcneed" aria-label="いま足りない周波数">${need}</ul>
+    ${areas.length ? `<p class="hint">協力者がいる地域：${areas.map(([k, n]) => `${esc(lab[k] || k)} ${n}人`).join("・")}</p>` : ""}
+    <button class="atcway" data-atcway="phone" aria-pressed="${j.way === "phone"}"><b>スマホで協力</b><small>ハンディ受信機のスピーカーにスマホを近づけるか、イヤホン端子をつなぐ。この画面を開いている間、声のところだけを、このスマホの中で英語の文字にして送ります。</small></button>
+    <button class="atcway" data-atcway="pc" aria-pressed="${j.way === "pc"}"><b>受信機とPCで協力</b><small>SDR受信機やハンディ受信機をPC・ラズパイにつなぎ、そらメモの受信プログラムを動かします。一日中受けられます。</small></button>
+    ${!user ? `<p class="hint" style="margin-top:12px">協力にはログインが必要です（だれが送ったかを、いたずら対策のために運営だけが分かるようにするため）。</p><button class="linkbtn2" data-atclogin type="button">ログインする</button>`
+    : `<div class="atcform">
+      <label>空港<select id="atcAp">${["HND", "NRT"].map(a => `<option value="${a}" ${j.iata === a ? "selected" : ""}>${a === "HND" ? "羽田" : "成田"}</option>`).join("")}</select></label>
+      ${j.way === "phone" ? `<label>聞く管制（受信機もこの周波数に合わせる）<select id="atcCh">${ch.map(c => `<option value="${c}" ${j.ch === c ? "selected" : ""}>${ATC_CH[c]} ${ATC_FREQ[j.iata][c][0]}</option>`).join("")}</select></label>` : ""}
+      <label>受信している地域（地図には地域までしか出しません）<select id="atcArea"><option value="">選ばない</option>${ATC_AREAS[j.iata].map(([k, l]) => `<option value="${k}" ${j.area === k ? "selected" : ""}>${l}</option>`).join("")}</select></label>
+      <label class="cb"><input type="checkbox" id="atcOk" ${j.ok ? "checked" : ""}><span>送るのは交信を聞き取った文字だけで、音は送りません。航空無線の内容を公開することには、電波法59条の解釈が分かれる点があることを理解し、同意して協力します。</span></label>
+      <button class="btn" data-atcstart type="button">${j.way === "phone" ? "スマホで受信をはじめる" : "PC用の合言葉を作る"}</button></div>`}
+    ${j.token ? `<div class="atctok">PCの受信プログラムに、次の合言葉を入れてください（この画面を閉じると、もう見られません）。<br><code>${esc(j.token)}</code><br>受信プログラムと使い方：<a href="https://github.com/chengsiyanben-maker/soramemo/blob/main/tools/atc_feeder.py" target="_blank" rel="noopener">tools/atc_feeder.py</a></div>` : ""}
+    <div id="atcRx"></div>`;
+}
+async function openAtcJoin(){ track("spot", "atcjoin"); ATC_JOIN.iata = atcHas(OPS_AP) ? OPS_AP : "HND"; $("dAtcJoinBody").innerHTML = atcJoinHTML(); if(!$("dAtcJoin").open) $("dAtcJoin").showModal(); await atcCov(); if($("dAtcJoin").open && !ATC_RX.on) $("dAtcJoinBody").innerHTML = atcJoinHTML(); }
+function atcReadForm(){ const v = id => $(id) ? $(id).value : null; ATC_JOIN.iata = v("atcAp") || ATC_JOIN.iata; if($("atcCh")) ATC_JOIN.ch = v("atcCh"); ATC_JOIN.area = v("atcArea") || null; ATC_JOIN.ok = !!($("atcOk") && $("atcOk").checked); }
+async function atcStart(){
+  atcReadForm(); if(!ATC_JOIN.ok){ say("同意の確認にチェックを入れてください。", true); return; }
+  let tok = ATC_JOIN.way === "phone" ? atcTok() : null;
+  if(!tok){ const { data, error } = await sb.rpc("atc_new_feeder", { p_kind:ATC_JOIN.way, p_area:ATC_JOIN.area, p_consent:true });
+    if(error || !data){ say("協力をはじめられませんでした。時間をおいてもう一度お試しください。", true); return; }
+    tok = data.token; if(ATC_JOIN.way === "phone"){ try{ localStorage.setItem("soramemo.atcFeeder", tok); }catch(e){} } }
+  if(ATC_JOIN.way === "pc"){ ATC_JOIN.token = tok; $("dAtcJoinBody").innerHTML = atcJoinHTML(); return; }
+  atcRxStart(tok);
+}
+// スマホで受信：マイクの音から声のところだけを切り出し、この端末の中の音声認識AI（Whisper）で英語の文字にして送る
+const ATC_RX = { on:false, ctx:null, stream:null, asr:null, buf:[], speaking:false, quiet:0, sent:0, shown:0, rows:[], lvl:[], ping:null, lock:null, busy:false, floor:0.01 };
+async function atcAsr(){ if(ATC_RX.asr) return ATC_RX.asr;
+  const m = await import("https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2");
+  ATC_RX.asr = await m.pipeline("automatic-speech-recognition", "Xenova/whisper-base.en"); return ATC_RX.asr; }
+function atcRxHTML(msg){
+  const R = ATC_RX;
+  return `<div class="atcrx"><div style="display:flex;justify-content:space-between;align-items:center"><b>${R.on ? "受信中" : "止まっています"}・${ATC_JOIN.iata === "HND" ? "羽田" : "成田"} ${ATC_CH[ATC_JOIN.ch]} ${ATC_FREQ[ATC_JOIN.iata][ATC_JOIN.ch][0]}</b><button class="chip" data-atcstop type="button">終わる</button></div>
+    <div class="meter" aria-hidden="true">${R.lvl.map(v => `<i class="${v > 0.5 ? "on" : ""}" style="height:${Math.max(4, Math.round(v * 44))}px"></i>`).join("")}</div>
+    ${msg ? `<p style="font-size:12px;color:#D1D5DB;margin:8px 0 0">${esc(msg)}</p>` : ""}
+    <div class="st"><div>送った交信<b>${R.sent}</b></div><div>画面に出た<b>${R.shown}</b></div><div>この端末で<b>聞き取り</b></div></div>
+    ${R.rows.length ? `<ul class="atcfeed" style="margin-top:10px">${R.rows.slice(0, 4).map(r => `<li style="background:#1F2329;color:#fff"><div class="h"><small style="color:#9CA3AF">${r.t}</small><small style="color:#9CA3AF">${r.q}</small></div><p style="font-size:13px">${esc(r.ja || "（読み取れませんでした）")}</p></li>`).join("")}</ul>` : ""}
+    <p style="font-size:10.5px;color:#9CA3AF;margin:10px 0 0;line-height:1.6">この画面を開いている間だけ受信します。画面を消すと止まります。充電しながら使うのがおすすめです。声のない間は送りません。</p></div>`;
+}
+const atcRxDraw = msg => { const b = $("atcRx"); if(b) b.innerHTML = atcRxHTML(msg); };
+async function atcRxStart(tok){
+  const R = ATC_RX; if(R.on) return;
+  atcRxDraw("音声認識AIを読み込んでいます（はじめは約80MBを読み込みます）…");
+  try{ R.stream = await navigator.mediaDevices.getUserMedia({ audio:{ echoCancellation:false, noiseSuppression:false, autoGainControl:true } }); }
+  catch(e){ atcRxDraw("マイクを使えませんでした。ブラウザの設定でマイクを許可してください。"); return; }
+  try{ await atcAsr(); }catch(e){ atcRxDraw("音声認識AIを読み込めませんでした。電波のよい場所でもう一度お試しください。"); R.stream.getTracks().forEach(t => t.stop()); return; }
+  R.on = true; R.tok = tok; R.lvl = Array(30).fill(0);
+  try{ R.lock = await navigator.wakeLock.request("screen"); }catch(e){}
+  R.ctx = new AudioContext({ sampleRate:16000 }); const src = R.ctx.createMediaStreamSource(R.stream), pr = R.ctx.createScriptProcessor(2048, 1, 1);
+  src.connect(pr); pr.connect(R.ctx.destination);
+  pr.onaudioprocess = ev => { const x = ev.inputBuffer.getChannelData(0); let e = 0; for(let i = 0; i < x.length; i++) e += x[i] * x[i]; const rms = Math.sqrt(e / x.length);
+    if(!R.speaking) R.floor = R.floor * 0.98 + rms * 0.02;
+    const loud = rms > Math.max(0.012, R.floor * 3);
+    R.lvl.push(Math.min(1, rms / Math.max(0.02, R.floor * 6))); R.lvl.shift();
+    if(loud){ R.speaking = true; R.quiet = 0; R.buf.push(new Float32Array(x)); }
+    else if(R.speaking){ R.buf.push(new Float32Array(x)); if(++R.quiet >= 6){ const clip = R.buf; R.buf = []; R.speaking = false; R.quiet = 0; atcRxClip(clip); } }
+    if(R.buf.length > 120){ const clip = R.buf; R.buf = []; R.speaking = false; atcRxClip(clip); } };
+  R.ping = setInterval(() => { if(R.on) fetch(atcFn("atc-ingest"), { method:"POST", headers:{ "Content-Type":"application/json", "x-feeder-token":R.tok, apikey:SORAMEMO_CONFIG.supabaseAnonKey },
+    body:JSON.stringify({ ping:true, iata:ATC_JOIN.iata, ch:ATC_JOIN.ch, freq:ATC_FREQ[ATC_JOIN.iata][ATC_JOIN.ch][0] }) }).catch(() => {}); atcRxDraw(); }, 60000);
+  R.draw = setInterval(() => { if(R.on) atcRxDraw(); }, 500);
+  fetch(atcFn("atc-ingest"), { method:"POST", headers:{ "Content-Type":"application/json", "x-feeder-token":tok, apikey:SORAMEMO_CONFIG.supabaseAnonKey }, body:JSON.stringify({ ping:true, iata:ATC_JOIN.iata, ch:ATC_JOIN.ch, freq:ATC_FREQ[ATC_JOIN.iata][ATC_JOIN.ch][0] }) }).catch(() => {});
+  track("spot", "atcrx");
+}
+async function atcRxClip(chunks){
+  const R = ATC_RX, n = chunks.reduce((a, c) => a + c.length, 0); if(n < 16000 * 0.6 || !R.on) return;
+  const a = new Float32Array(n); let o = 0; for(const c of chunks){ a.set(c, o); o += c.length; }
+  const at = Date.now() - Math.round(n / 16);
+  if(R.busy) return; R.busy = true;
+  try{ const out = await R.asr(a); const text = String(out && out.text || "").trim();
+    if(text.length >= 4){ const r = await fetch(atcFn("atc-ingest"), { method:"POST", headers:{ "Content-Type":"application/json", "x-feeder-token":R.tok, apikey:SORAMEMO_CONFIG.supabaseAnonKey },
+        body:JSON.stringify({ iata:ATC_JOIN.iata, ch:ATC_JOIN.ch, freq:ATC_FREQ[ATC_JOIN.iata][ATC_JOIN.ch][0], at, text }) });
+      const j = r.ok ? await r.json() : null; R.sent++; if(j && j.shown) R.shown++;
+      R.rows.unshift({ t:new Date(at).toLocaleTimeString("ja-JP"), ja:j && j.ja, q:j && j.shown ? "画面に出ました" : j && j.ja ? "機体と合わず" : "読み取れず" }); R.rows = R.rows.slice(0, 8); } }
+  catch(e){} finally{ R.busy = false; }
+}
+function atcRxStop(){ const R = ATC_RX; R.on = false; clearInterval(R.ping); clearInterval(R.draw);
+  try{ R.stream && R.stream.getTracks().forEach(t => t.stop()); }catch(e){} try{ R.ctx && R.ctx.close(); }catch(e){} try{ R.lock && R.lock.release(); }catch(e){} R.buf = []; atcRxDraw(); }
+document.addEventListener("click", e => {
+  if(e.target.closest("[data-atcfeed]")) openAtcFeed();
+  if(e.target.closest("[data-atcjoin]")) openAtcJoin();
+  const f = e.target.closest("[data-atcft]"); if(f){ ATC_FEED.tab = f.dataset.atcft; ATC_FEED.rows = []; ATC_FEED.at = 0; $("dAtcFeedBody").innerHTML = atcFeedHTML(); atcLoad().then(() => { if($("dAtcFeed").open) $("dAtcFeedBody").innerHTML = atcFeedHTML(); }); }
+  const t = e.target.closest("[data-atctaxi]"); if(t){ const r = ATC_FEED.rows[+t.dataset.atctaxi]; if(r) openAtcTaxi(r); }
+  const w = e.target.closest("[data-atcway]"); if(w){ atcReadForm(); ATC_JOIN.way = w.dataset.atcway; ATC_JOIN.token = null; $("dAtcJoinBody").innerHTML = atcJoinHTML(); }
+  if(e.target.closest("[data-atcstart]")) atcStart();
+  if(e.target.closest("[data-atcstop]")) atcRxStop();
+  if(e.target.closest("[data-atclogin]")){ $("dAtcJoin").close(); if($("dSettings")) $("dSettings").showModal(); }
+});
+document.addEventListener("change", e => { if(e.target && (e.target.id === "atcAp") && $("dAtcJoin").open){ atcReadForm(); ATC_JOIN.ch = "twr"; ATC_JOIN.area = null; $("dAtcJoinBody").innerHTML = atcJoinHTML(); } });
+$("dAtcJoin").addEventListener("close", () => { ATC_JOIN.token = null; if(ATC_RX.on) atcRxStop(); });
 
 // ---- 近づいたら知らせる（設定） ----
 const SP_KINDS = [["special", "特別塗装機", "JAL・ANA などの特別塗装機（推定）"], ["big", "大きな機体", "B777・B787・A350 など"], ["foreign", "海外の航空会社", "いま近くにいる便（推定）"], ["reg", "指定した機体", "登録記号で選ぶ（例 JA01XJ）"], ["ops", "運用が変わったとき", "北風 ⇄ 南風など"]];

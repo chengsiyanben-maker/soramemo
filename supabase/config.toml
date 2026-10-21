@@ -453,3 +453,5 @@ verify_jwt = false
 verify_jwt = false
 [functions.airport-foreign]
 verify_jwt = false
+[functions.atc-ingest]
+verify_jwt = false
