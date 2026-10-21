@@ -5,6 +5,7 @@
 //        sp_airports:["HND", ...] を付けると、その空港に特別塗装機が着陸に向かってきたときも知らせる
 //        spot:{ iata:"HND", kinds:["special","big","foreign","reg","ops"], lead:5, regs:["JA01XJ"], flights:["JL123@2026-10-21"] } を付けると、
 //        撮影の知らせ（その空港に、選んだ種類の機体が着陸の lead 分前になったら。運用が変わったときも）。spot:null で撮影の知らせをやめる
+//        ga:{ airports:["HND","NRT"], kinds:["plane","cluster","wind","cloud","ts"], quiet:true, gap:3 } を付けると、ゴーアラウンドの知らせ（推定）
 //   POST /functions/v1/push-subscribe  { endpoint, remove:true }                              → 取り消し
 import { createClient } from "npm:@supabase/supabase-js@2.117.2";
 
@@ -30,11 +31,22 @@ function spotOf(v: unknown) {
   };
 }
 
+// ゴーアラウンドの知らせの設定
+const GA_KINDS = new Set(["plane", "cluster", "wind", "cloud", "ts"]);
+function gaOf(v: unknown) {
+  const o = (v && typeof v === "object" ? v : {}) as Record<string, unknown>;
+  return {
+    ga_airports: Array.isArray(o.airports) ? [...new Set(o.airports.filter((x) => typeof x === "string" && /^[A-Z]{3}$/.test(x)))].slice(0, 14) as string[] : [],
+    ga_kinds: Array.isArray(o.kinds) ? [...new Set(o.kinds.filter((k) => typeof k === "string" && GA_KINDS.has(k)))] as string[] : [],
+    ga_quiet: o.quiet === true, ga_gap: o.gap === 0 ? 0 : 3,
+  };
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: CORS });
   if (req.method === "GET") return res({ key: Deno.env.get("VAPID_PUBLIC_KEY") || null });
   if (req.method !== "POST") return res({ error: "GET/POST only" }, 405);
-  let b: { endpoint?: unknown; keys?: { p256dh?: unknown; auth?: unknown }; airports?: unknown; flights?: unknown; sp_airports?: unknown; spot?: unknown; remove?: unknown };
+  let b: { endpoint?: unknown; keys?: { p256dh?: unknown; auth?: unknown }; airports?: unknown; flights?: unknown; sp_airports?: unknown; spot?: unknown; ga?: unknown; remove?: unknown };
   try { b = await req.json(); } catch { return res({ error: "bad json" }, 400); }
   const endpoint = typeof b.endpoint === "string" ? b.endpoint : "";
   if (!PUSH_HOSTS.test(endpoint) || endpoint.length > 1000) return res({ error: "bad endpoint" }, 400);
@@ -48,12 +60,13 @@ Deno.serve(async (req) => {
   const flights = Array.isArray(b.flights) ? [...new Set(b.flights.filter((x) => typeof x === "string" && /^[A-Z0-9]{2}\d{1,4}[A-Z]?@\d{4}-\d{2}-\d{2}$/.test(x)))].slice(0, 5) as string[] : [];
   const sp_airports = Array.isArray(b.sp_airports) ? [...new Set(b.sp_airports.filter((x) => typeof x === "string" && /^[A-Z]{3}$/.test(x)))].slice(0, 14) as string[] : [];
   const spot = spotOf(b.spot), hasSpot = !!spot.spot_iata && (spot.spot_kinds.length > 0 || spot.spot_flights.length > 0);
-  if (!airports.length && !flights.length && !sp_airports.length && !hasSpot) {   // 何も選ばれていなければ取り消し
+  const ga = gaOf(b.ga), hasGa = ga.ga_airports.length > 0 && ga.ga_kinds.length > 0;
+  if (!airports.length && !flights.length && !sp_airports.length && !hasSpot && !hasGa) {   // 何も選ばれていなければ取り消し
     await admin.from("push_subs").delete().eq("endpoint", endpoint);
     return res({ ok: true, removed: true });
   }
-  const row = { endpoint, p256dh, auth, airports, flights, sp_airports, ...(hasSpot ? spot : { spot_iata: null, spot_kinds: [] as string[], spot_lead: 5, spot_regs: [] as string[], spot_flights: [] as string[] }) };
+  const row = { endpoint, p256dh, auth, airports, flights, sp_airports, ...(hasSpot ? spot : { spot_iata: null, spot_kinds: [] as string[], spot_lead: 5, spot_regs: [] as string[], spot_flights: [] as string[] }), ...(hasGa ? ga : { ga_airports: [] as string[], ga_kinds: [] as string[], ga_quiet: false, ga_gap: 3 }) };
   const { error } = await admin.from("push_subs").upsert(row, { onConflict: "endpoint" });
   if (error) { console.error(error); return res({ error: "save failed" }, 500); }
-  return res({ ok: true, airports, flights, sp_airports, spot: hasSpot ? spot : null });
+  return res({ ok: true, airports, flights, sp_airports, spot: hasSpot ? spot : null, ga: hasGa ? ga : null });
 });

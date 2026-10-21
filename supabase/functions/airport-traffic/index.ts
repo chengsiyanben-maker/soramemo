@@ -8,7 +8,8 @@
 import { createClient } from "npm:@supabase/supabase-js@2.117.2";
 import { planesFromAdsb, type Trails, updateTrails } from "../_shared/traffic.ts";
 import { fetchMetars } from "../_shared/metar.ts";
-import { OPS_AIRPORTS, observeOps } from "../_shared/ops_core.js";
+import { OPS_AIRPORTS, observeOps, runwaysOf } from "../_shared/ops_core.js";
+import { gaStep, guessRwy, quietNow, type Watch, wxRisk } from "../_shared/go_around.ts";
 import { liveryMap } from "../_shared/liveries.ts";
 import { normCallsign } from "../_shared/flight_watch.ts";
 import { dueNow, etaMin, jstDate, opsChanged, spotMessage, spotReason, type SpotPlane, type SpotSub } from "../_shared/spot_push.ts";
@@ -235,6 +236,75 @@ async function notifyOpsChange(iatas: string[]) {
   return sent;
 }
 
+
+// ---- ゴーアラウンド（推定）：着陸に向かう機体の高さの動きを見張り、降りてから上がった機体を残して、選んだ空港の人に知らせる ----
+const LAST_WX = new Map<string, Record<string, unknown>>();   // 空港ごとの直近の気象通報（ゴーアラウンドを残すときに添える）
+const GA_COLS = "id, endpoint, p256dh, auth, ga_airports, ga_kinds, ga_quiet, ga_gap";
+// deno-lint-ignore no-explicit-any
+const apName = (iata: string) => (OPS_AIRPORTS as any)[iata]?.name ?? iata;
+async function gaSubs(iata: string, kind: string) {
+  const { data } = await admin.from("push_subs").select(GA_COLS).contains("ga_airports", [iata]).contains("ga_kinds", [kind]);
+  return (data ?? []).filter((s) => !(s.ga_quiet && quietNow()));
+}
+async function trackGoArounds(bodies: Map<string, string>) {
+  const since = new Date(Date.now() - 10 * 60_000).toISOString();
+  const { data: rows } = await admin.from("ga_watch").select("*").in("iata", [...bodies.keys()]).gt("updated_at", since);
+  const byAp = new Map<string, Map<string, Watch>>();
+  for (const r of (rows ?? []) as Watch[]) { if (!byAp.has(r.iata)) byAp.set(r.iata, new Map()); byAp.get(r.iata)!.set(r.hex, r); }
+  const now = Date.now(); let found = 0;
+  for (const [iata, body] of bodies) {
+    // deno-lint-ignore no-explicit-any
+    const def = (OPS_AIRPORTS as any)[iata]; if (!def) continue;
+    const planes = JSON.parse(body).planes ?? [], r = gaStep(iata, planes, byAp.get(iata) ?? new Map(), now);
+    if (r.upserts.length) await admin.from("ga_watch").upsert(r.upserts);
+    if (r.deletes.length) await admin.from("ga_watch").delete().eq("iata", iata).in("hex", r.deletes);
+    // もう一度進入して低く降りた（着陸したとみられる）：40分以内のゴーアラウンドの機体が、空港の近くで 300ft 以下に
+    for (const p of planes) if (p.phase === "arr" && p.alt_ft != null && p.alt_ft <= 300 && p.dist_km <= 5)
+      await admin.from("ga_events").update({ again_at: new Date(now).toISOString() }).eq("iata", iata).eq("hex", p.id).is("again_at", null).gt("at", new Date(now - 40 * 60_000).toISOString()).lt("at", new Date(now - 2 * 60_000).toISOString());
+    for (const e of r.events) {
+      if (!LAST_WX.get(iata)) { try { const m = (await fetchMetars([def.icao])).get(def.icao); if (m) LAST_WX.set(iata, { time: m.time, wdir: m.wdir, wspd: m.wspd, wgst: m.wgst, vis_m: m.vis_m, raw: m.raw }); } catch { /* 天気なしで残す */ } }
+      const rwy = guessRwy(e.low_lat, e.low_lon, e.low_hdg, runwaysOf(def));
+      const { low_lat: _a, low_lon: _b, low_hdg: _c, ...rest } = e;
+      const { data: ins, error } = await admin.from("ga_events").insert({ ...rest, rwy, wx: LAST_WX.get(iata) ?? null }).select("id").single();
+      if (error || !ins) { console.error("ga insert", error?.message); continue; }
+      found++;
+      const w = LAST_WX.get(iata) as { wdir?: number; wspd?: number; wgst?: number } | undefined;
+      const wind = w && w.wspd != null ? `。いまの風 ${w.wdir == null ? "風向き不定" : DIR16[Math.round(w.wdir / 22.5) % 16]} ${w.wspd}kt${w.wgst ? `・突風 ${w.wgst}kt` : ""}` : "";
+      const name = e.flight ?? e.callsign ?? "機体";
+      for (const s of await gaSubs(iata, "plane")) {
+        if (!(await firstTime(s.id, `ga-${ins.id}`))) continue;
+        await sendOne(s, { title: `そらメモ：${apName(iata)}で ${name} がゴーアラウンドしたようです`, body: `${rwy ? rwy + " に" : ""}降りる手前で上昇に移りました（機体の位置からの推定）${wind}。`, tag: `ga-${ins.id}`, url: `./#ops-${iata}/ga/${ins.id}` });
+      }
+      // 続いたとき：1時間に2機以上
+      const { count } = await admin.from("ga_events").select("id", { count: "exact", head: true }).eq("iata", iata).gt("at", new Date(now - 3600_000).toISOString());
+      if ((count ?? 0) >= 2) {
+        const hour = new Date(now + 9 * 3600_000).toISOString().slice(0, 13);
+        for (const s of await gaSubs(iata, "cluster")) {
+          if (!(await firstTime(s.id, `gac-${iata}@${hour}`))) continue;
+          await sendOne(s, { title: `そらメモ：${apName(iata)}でゴーアラウンドが続いています`, body: `この1時間に ${count}機（機体の位置からの推定）${wind}。`, tag: `gac-${iata}`, url: `./#ops-${iata}/ga` });
+        }
+      }
+    }
+  }
+  return found;
+}
+const DIR16 = ["北", "北北東", "北東", "東北東", "東", "東南東", "南東", "南南東", "南", "南南西", "南西", "西南西", "西", "西北西", "北西", "北北西"];
+const GA_KIND_JA: Record<string, string> = { wind: "強い横風・突風", cloud: "低い雲・見通しの悪さ", ts: "雷・ウインドシア" };
+// ゴーアラウンドが起きやすい天気（気象通報からの目安）を、選んだ人に知らせる。同じ空港・種類は3時間に1回（または通報ごと）
+// deno-lint-ignore no-explicit-any
+async function notifyGaWeather(def: any, m: any, mode: string | null) {
+  const arr = (def.modes?.[mode ?? ""]?.arr ?? []) as string[], rw = runwaysOf(def);
+  const risk = wxRisk(m ? { ...m, raw: m.raw } : null, arr.map((id) => rw[id]?.hdg).filter((h): h is number => typeof h === "number"));
+  if (risk.level < 2) return 0;
+  let sent = 0;
+  for (const kind of risk.kinds) for (const s of await gaSubs(def.iata, kind)) {
+    const key = s.ga_gap === 0 ? `gaw-${def.iata}-${kind}@${m.time}` : `gaw-${def.iata}-${kind}@${Math.floor(Date.now() / (3 * 3600_000))}`;
+    if (!(await firstTime(s.id, key.slice(0, 60)))) continue;
+    if (await sendOne(s, { title: `そらメモ：${def.name}は、ゴーアラウンドが起きやすい天気です`, body: `${risk.reasons.join("・")}（気象通報からの目安。${GA_KIND_JA[kind] ?? ""}）。`, tag: `gaw-${def.iata}`, url: `./#ops-${def.iata}/gawx` })) sent++;
+  }
+  return sent;
+}
+
 // 運用の判定を ops_log に残す（気象通報は14空港を1回でまとめて取る）
 // deno-lint-ignore no-explicit-any
 async function logOps(bodies: Map<string, string>) {
@@ -245,6 +315,8 @@ async function logOps(bodies: Map<string, string>) {
     const body = bodies.get(d.iata); if (!body) continue;
     const planes = (JSON.parse(body).planes ?? []) as any[];
     const m = wx.get(d.icao) ?? null, est = d.estimate(m), obs = observeOps(planes, d) as any;
+    if (m) LAST_WX.set(d.iata, { time: m.time, wdir: m.wdir, wspd: m.wspd, wgst: m.wgst, vis_m: m.vis_m, raw: m.raw });
+    try { await notifyGaWeather(d, m, obs && !obs.mixed && obs.mode ? obs.mode : est.unsure ? null : est.mode); } catch (e) { console.error("ga weather", e); }
     rows.push({
       iata: d.iata, wdir: m?.wdir ?? null, wspd: m?.wspd ?? null, metar_at: m?.time ?? null,
       est_mode: est.mode, est_unsure: !!est.unsure,
@@ -286,13 +358,16 @@ Deno.serve(async (req) => {
       const only = first ? null : ["OKA"];
       try { logged = await logOps(only ? new Map([...bodies].filter(([k]) => only.includes(k))) : bodies); } catch (e) { console.error("ops_log", e); }
     }
+    // ゴーアラウンド（推定）を見張る
+    let ga = 0;
+    try { ga = await trackGoArounds(bodies); } catch (e) { console.error("go-around", e); }
     // 撮影の知らせ（着陸の数分前）と、運用の変化の知らせ（運用を記録したあと）
     let spot = 0;
     try { spot = await notifySpot(bodies); } catch (e) { console.error("spot push", e); }
     if (logged) { try { spot += await notifyOpsChange([...bodies.keys()]); } catch (e) { console.error("ops push", e); } }
     // 知らせた記録は2日で消す（30分に1回）
     if (new Date().getUTCMinutes() % 30 === 0 && first) { try { await admin.from("spot_notified").delete().lt("notified_at", new Date(Date.now() - 2 * 864e5).toISOString()); } catch { /* 次の回に */ } }
-    return new Response(JSON.stringify({ recorded: done, logged, liveries, spot }), { headers: JSON_HEADERS });
+    return new Response(JSON.stringify({ recorded: done, logged, liveries, spot, ga }), { headers: JSON_HEADERS });
   }
   if (!AIRPORTS[iata]) return new Response(JSON.stringify({ error: "unsupported airport" }), { status: 404, headers: JSON_HEADERS });
   try {

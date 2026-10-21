@@ -61,7 +61,7 @@ Deno.test("空模様：雨・霧・雪・雷・晴れ・くもり", () => {
 
 Deno.test("天気の整形：視程9999は10km以上", () => {
   const w = weather({ rawOb: "RJTT 121230Z 34012G22KT 9999 FEW030 17/10 Q1015", reportTime: "2026-10-12T12:30:00Z", wdir: 340, wspd: 12, wgst: 22, visib: "6+", clouds: [{ cover: "FEW" }] });
-  assertEquals(w, { time: "2026-10-12T12:30:00Z", wdir: 340, wspd: 12, wgst: 22, vis_m: 10000, vis_plus: true, sky: "晴れ", ceil_ft: null, temp: null, dewp: null, low_ft: null, layers: [] });
+  assertEquals(w, { time: "2026-10-12T12:30:00Z", wdir: 340, wspd: 12, wgst: 22, vis_m: 10000, vis_plus: true, sky: "晴れ", ceil_ft: null, temp: null, dewp: null, low_ft: null, layers: [], ts: false, vcts: false, ws: false });
 });
 
 Deno.test("天気の整形：気温・露点と、雲の層（低い順・量によらないいちばん低い雲）", () => {
@@ -118,4 +118,11 @@ import { wxCode } from "../functions/_shared/airport_now.ts";
 Deno.test("チェックインに残す天気の記号", () => {
   assertEquals([wxCode("晴れ"), wxCode("くもり"), wxCode("雨"), wxCode("雪"), wxCode("霧"), wxCode("雷"), wxCode(null), wxCode("？")],
     ["clear", "cloudy", "rain", "snow", "fog", "thunder", null, null]);
+});
+
+Deno.test("天気の整形：雷雨・近くの雷雨・ウインドシア", () => {
+  assertEquals(weather({ rawOb: "ROAH 210530Z 20010KT 8000 +TSRA BKN015CB 25/23 Q1006" }).ts, true);
+  assertEquals(weather({ rawOb: "ROAH 210530Z 20010KT 9999 VCTS FEW020CB 25/23 Q1006" }).vcts, true);
+  assertEquals(weather({ rawOb: "ROAH 210530Z 20010KT 9999 VCTS FEW020CB 25/23 Q1006" }).ts, false);
+  assertEquals(weather({ rawOb: "RJFF 210530Z 20010KT 9999 FEW020 25/23 Q1006 WS R34" }).ws, true);
 });

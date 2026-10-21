@@ -101,7 +101,8 @@ export function recent(rows: FlightRow[], nowMin: number, before = 60, after = 1
 // ---------- 天気（METAR） ----------
 export type Layer = { cover: string; base: number };
 export type Weather = { time: string | null; wdir: number | null; wspd: number | null; wgst: number | null; vis_m: number | null; vis_plus: boolean; sky: string | null; ceil_ft: number | null;
-  temp: number | null; dewp: number | null; low_ft: number | null; layers: Layer[] };   // 気温・露点（℃）、いちばん低い雲の高さ（量によらない）、雲の層（下から3つまで）
+  temp: number | null; dewp: number | null; low_ft: number | null; layers: Layer[];
+  ts: boolean; vcts: boolean; ws: boolean };   // 雷雨・近くの雷雨・ウインドシア（ゴーアラウンドが起きやすい天気の目安に使う）   // 気温・露点（℃）、いちばん低い雲の高さ（量によらない）、雲の層（下から3つまで）
 
 // 雲の層：量（FEW・SCT・BKN・OVC）と高さ（フィート）のそろったものを、低い順に3つまで
 export function layersOf(clouds: { cover?: string; base?: number | null }[] = []): Layer[] {
@@ -148,6 +149,9 @@ export function weather(m: Record<string, unknown>): Weather {
     temp: num(m.temp), dewp: num(m.dewp),
     low_ft: layersOf(Array.isArray(m.clouds) ? m.clouds as { cover?: string; base?: number }[] : [])[0]?.base ?? null,
     layers: layersOf(Array.isArray(m.clouds) ? m.clouds as { cover?: string; base?: number }[] : []),
+    ts: /\s[-+]?TS[A-Z]*\s/.test(" " + raw.replace(/\s(RMK|TEMPO|BECMG|NOSIG)\b.*$/, "") + " "),
+    vcts: /\sVCTS\s/.test(" " + raw + " "),
+    ws: /\sWS\s|\sWS\s?R(?:WY)?\d{2}/.test(" " + raw + " "),
   };
 }
 
