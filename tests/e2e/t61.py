@@ -4,7 +4,8 @@ HERE=os.path.dirname(os.path.abspath(__file__)); WEB=os.path.abspath(os.path.joi
 import asyncio, json
 from datetime import datetime, timedelta, timezone
 from playwright.async_api import async_playwright
-now = datetime.now(timezone.utc)
+# 時刻は昼の12時（日本時間）に固定する（深夜は滑走路が1本になり、撮影地から見える機体が変わるため）
+_d = datetime.now(timezone.utc); now = datetime(_d.year, _d.month, _d.day, 3, 0, tzinfo=timezone.utc)
 iso = lambda m: (now + timedelta(minutes=m)).isoformat()
 HRS = [{'h': h, 'flights': [0,0,0,0,0,2,30,48,52,50,44,46,48,44,42,46,48,50,52,48,40,30,20,6][h], 'late': (h % 5 == 0) * 2, 'cancel': 0, 'ref': 1} for h in range(24)]
 BOARD = {'iata': 'HND', 'now': iso(0), 'hours': HRS,
@@ -24,7 +25,7 @@ async def main():
             await r.fulfill(status=200, body=json.dumps(BOARD if name == 'airport_board' else []), content_type='application/json', headers={'Access-Control-Allow-Origin':'*'})
         await c.route('https://fake.supabase.co/rest/v1/rpc/**', rpc)
         await c.route('https://fake.supabase.co/functions/v1/airport-foreign**', lambda r: r.fulfill(status=200, body=json.dumps({'planes': []}), content_type='application/json', headers={'Access-Control-Allow-Origin':'*'}))
-        pg=await c.new_page(); errs=[]; pg.on('pageerror', lambda e: errs.append(str(e) + ' @ ' + (e.stack or '')[:300]))
+        pg=await c.new_page(); await pg.clock.set_fixed_time(now); errs=[]; pg.on('pageerror', lambda e: errs.append(str(e) + ' @ ' + (e.stack or '')[:300]))
         await pg.goto('file://'+os.path.join(WORK,'index_server_test.html')); await pg.wait_for_load_state('load'); await pg.wait_for_timeout(600)
         await pg.evaluate('__fake.login()'); await pg.wait_for_timeout(800)
         # 図鑑
