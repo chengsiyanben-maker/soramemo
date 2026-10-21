@@ -10,6 +10,7 @@ import { planesFromAdsb, type Trails, updateTrails } from "../_shared/traffic.ts
 import { fetchMetars } from "../_shared/metar.ts";
 import { OPS_AIRPORTS, observeOps, runwaysOf } from "../_shared/ops_core.js";
 import { gaStep, guessRwy, quietNow, type Watch, wxRisk } from "../_shared/go_around.ts";
+import { type ArrWatch, arrStep } from "../_shared/rwy_learn.ts";
 import { liveryMap } from "../_shared/liveries.ts";
 import { normCallsign } from "../_shared/flight_watch.ts";
 import { dueNow, etaMin, jstDate, opsChanged, spotMessage, spotReason, type SpotPlane, type SpotSub } from "../_shared/spot_push.ts";
@@ -237,6 +238,24 @@ async function notifyOpsChange(iatas: string[]) {
 }
 
 
+// ---- 着陸する滑走路の学習用の記録（羽田・成田）：来た方面と途中のルート、着陸した滑走路を残す（運営の分析用） ----
+const LEARN_APS = ["HND", "NRT"];
+async function learnRunways(bodies: Map<string, string>) {
+  const aps = LEARN_APS.filter((k) => bodies.has(k)); if (!aps.length) return 0;
+  const { data: rows } = await admin.from("arr_watch").select("*").in("iata", aps).gt("updated_at", new Date(Date.now() - 10 * 60_000).toISOString());
+  const now = Date.now(); let n = 0;
+  for (const iata of aps) {
+    // deno-lint-ignore no-explicit-any
+    const def = (OPS_AIRPORTS as any)[iata]; if (!def) continue;
+    const w = new Map<string, ArrWatch>(); for (const r of (rows ?? []) as ArrWatch[]) if (r.iata === iata) w.set(r.hex, r);
+    const r = arrStep(iata, def.center, runwaysOf(def), JSON.parse(bodies.get(iata)!).planes ?? [], w, now);
+    if (r.upserts.length) await admin.from("arr_watch").upsert(r.upserts);
+    if (r.samples.length) { const { error } = await admin.from("rwy_samples").insert(r.samples); if (error) console.error("rwy_samples", error.message); else n += r.samples.length; }
+    if (r.deletes.length) await admin.from("arr_watch").delete().eq("iata", iata).in("hex", r.deletes);
+  }
+  return n;
+}
+
 // ---- ゴーアラウンド（推定）：着陸に向かう機体の高さの動きを見張り、降りてから上がった機体を残して、選んだ空港の人に知らせる ----
 const LAST_WX = new Map<string, Record<string, unknown>>();   // 空港ごとの直近の気象通報（ゴーアラウンドを残すときに添える）
 const GA_COLS = "id, endpoint, p256dh, auth, ga_airports, ga_kinds, ga_quiet, ga_gap";
@@ -361,13 +380,16 @@ Deno.serve(async (req) => {
     // ゴーアラウンド（推定）を見張る
     let ga = 0;
     try { ga = await trackGoArounds(bodies); } catch (e) { console.error("go-around", e); }
+    // 着陸する滑走路の学習用の記録（羽田・成田）
+    let learned = 0;
+    try { learned = await learnRunways(bodies); } catch (e) { console.error("rwy learn", e); }
     // 撮影の知らせ（着陸の数分前）と、運用の変化の知らせ（運用を記録したあと）
     let spot = 0;
     try { spot = await notifySpot(bodies); } catch (e) { console.error("spot push", e); }
     if (logged) { try { spot += await notifyOpsChange([...bodies.keys()]); } catch (e) { console.error("ops push", e); } }
     // 知らせた記録は2日で消す（30分に1回）
     if (new Date().getUTCMinutes() % 30 === 0 && first) { try { await admin.from("spot_notified").delete().lt("notified_at", new Date(Date.now() - 2 * 864e5).toISOString()); } catch { /* 次の回に */ } }
-    return new Response(JSON.stringify({ recorded: done, logged, liveries, spot, ga }), { headers: JSON_HEADERS });
+    return new Response(JSON.stringify({ recorded: done, logged, liveries, spot, ga, learned }), { headers: JSON_HEADERS });
   }
   if (!AIRPORTS[iata]) return new Response(JSON.stringify({ error: "unsupported airport" }), { status: 404, headers: JSON_HEADERS });
   try {

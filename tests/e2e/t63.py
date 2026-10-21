@@ -48,6 +48,12 @@ async def main():
         await btns.nth(len(names) - 1).click(); await pg.wait_for_timeout(200)
         check('撮影地を変えると選び直される:', names[-1] in await pg.inner_text('#opsPhoto .spsel') and await pg.evaluate("localStorage.getItem('soramemo.photoSpot.HND')") == names[-1])
         await btns.nth(0).click(); await pg.wait_for_timeout(200)
+        # 羽田の着陸：来た方面で1本に絞る（伊丹＝南西→34L、新千歳＝北→34R、出発地が分からなければ2本のまま）
+        rws = await pg.evaluate("""() => { const op = { arr:['34L','34R'], dep:['05','34R'] };
+          return [spRwsOf({ dir:'arr', other:'ITM', fl:'X1' }, op), spRwsOf({ dir:'arr', other:'CTS', fl:'X2' }, op), spRwsOf({ dir:'arr', other:'ZZZ', fl:'X3' }, op), spRwsOf({ dir:'dep', other:'ITM', fl:'X4' }, op),
+            spRwsOf({ dir:'arr', other:'FUK', fl:'X5' }, { arr:['22','23'], dep:[] }), spRwsOf({ dir:'arr', other:'LAX', fl:'X6' }, { arr:['16L','16R'], dep:[] })]; }""")
+        print('RWS', rws)
+        check('来た方面で滑走路を絞る:', rws[0] == {'rws': ['34L'], 'side': True} and rws[1]['rws'] == ['34R'] and rws[2] == {'rws': ['34L', '34R'], 'side': False} and rws[3]['rws'] == ['05', '34R'] and rws[4]['rws'] == ['22'] and rws[5]['rws'] == ['16R'])
         check('天気の札:', '雲底 1,800ft' in t and 'ベイパー 出やすい' in t)
         await pg.click('[data-spfilter="all"]'); await pg.wait_for_timeout(200)
         check('すべてで B738 も出る:', 'JL500' in await pg.inner_text('#opsPhoto'))
