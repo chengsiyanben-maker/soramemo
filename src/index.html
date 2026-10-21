@@ -6365,7 +6365,17 @@ function spArrSide(x){
 // その機体が使う滑走路（推定）。{ rws, side }：side があれば来た方面で1本に絞ったもの
 function spRwsOf(x, op){
   if(!op) return { rws:[], side:false };
-  if(x.dir !== "arr") return { rws:op.dep, side:false };
+  if(x.dir !== "arr"){
+    // 羽田の離陸：行き先の方面で2本のどちらかを決める（10月18〜20日の JAL・ANA の航跡で、南風の運用は約86%合った目安）
+    //   南風（16L・16R）：北・東・北西へ → 16L、西・南へ → 16R。北風（05・34R）：北・東・北西へ → 34R、西・南へ → 05
+    if(OPS_AP === "HND" && op.dep.length === 2){
+      const pair = [...op.dep].sort().join(","), o = aptPos(x.other), b = o ? bearingTo(opsDef().center, [o.lat, o.lon]) : null;
+      const north = b != null && (b >= 270 || b < 100);
+      if(b != null && pair === "16L,16R") return { rws:[north ? "16L" : "16R"], side:true };
+      if(b != null && pair === "05,34R") return { rws:[north ? "34R" : "05"], side:true };
+    }
+    return { rws:op.dep, side:false };
+  }
   if(OPS_AP === "HND" && op.arr.length === 2 && op.arr.every(r => HND_SIDE[r]) && HND_SIDE[op.arr[0]] !== HND_SIDE[op.arr[1]]){
     const b = spArrSide(x);
     if(b != null){ const sd = b >= 300 || b < 100 ? "N" : "S"; return { rws:op.arr.filter(r => HND_SIDE[r] === sd), side:true }; }
@@ -6413,20 +6423,20 @@ function renderPhoto(d){
       <span class="h"><span>${hero.kind ? "つぎに来る注目の機体" : "つぎに来る機体"}</span><span>${hero.dir === "arr" ? "着陸まで" : "離陸まで"}</span></span>
       <span class="m"><span class="l"><b>${esc(hero.fl)}　${esc(hero.type || "機材不明")}</b><small>${[hero.liv && `特別塗装「${esc(hero.liv)}」`, hero.reg && `${esc(hero.reg)}（推定）`, esc(placeAny(hero.other)) + (hero.dir === "arr" ? "から" : "へ")].filter(Boolean).join("・")}</small></span>
         <span class="r"><b>${m}<small>分</small></b><small>${spHM(hero.t)}ごろ</small></span></span>
-      <span class="tags">${tag(hero.kind)}${rwOf(hero) ? `<i>${esc(rwOf(hero))}${hero.dir === "arr" ? "に着陸" : "から離陸"}（推定${spRwsOf(hero, op).side ? "・来た方面から" : ""}）</i>` : ""}</span></button>
+      <span class="tags">${tag(hero.kind)}${rwOf(hero) ? `<i>${esc(rwOf(hero))}${hero.dir === "arr" ? "に着陸" : "から離陸"}（推定${spRwsOf(hero, op).side ? (hero.dir === "arr" ? "・来た方面から" : "・行き先の方面から") : ""}）</i>` : ""}</span></button>
       ${hero.dir === "arr" && SERVER ? `<button class="spnote" data-spnote="${esc(key)}" aria-pressed="${on}">${on ? "知らせを取り消す" : `${lead}分前に知らせる`}</button>` : ""}</div>`; })()
     : `<p class="hint">この3時間に来る便は、まだ読み込めていません。</p>`;
   const F = [["pick", "注目だけ"], ["arr", "着陸"], ["dep", "離陸"], ["all", "すべて"]];
   const rows = list.map(x => { const i = SP_ITEMS.indexOf(x), lv = x.live, where = lv && lv.alt_ft != null ? `いま高度 ${spFt(lv.alt_ft)}ft` : x.foreign && x.status === "ground" ? "いま地上" : x.foreign && x.alt != null ? `いま高度 ${spFt(x.alt)}ft` : "";
     return `<li><button class="sprow" data-spfl="${i}"><span class="t"><b>${x.t != null ? spHM(x.t) : "—"}</b><small>${x.dir === "arr" ? "着陸" : "離陸"}</small></span>
-      <span class="n"><b>${esc(x.fl)}　${esc(x.type || "")}</b><small>${[esc(placeAny(x.other)) + (x.dir === "arr" ? "から" : "へ"), spOf(x) && `${esc(spRwsOf(x, op).rws.join("/"))}${spRwsOf(x, op).side ? "（来た方面から）" : ""}・${kmS(spOf(x).km)}`, x.reg && `${esc(x.reg)}（推定）`, where].filter(Boolean).join("・")}</small></span>${tag(x.kind)}<span class="go" aria-hidden="true">›</span></button></li>`; }).join("");
+      <span class="n"><b>${esc(x.fl)}　${esc(x.type || "")}</b><small>${[esc(placeAny(x.other)) + (x.dir === "arr" ? "から" : "へ"), spOf(x) && `${esc(spRwsOf(x, op).rws.join("/"))}${spRwsOf(x, op).side ? (x.dir === "arr" ? "（来た方面から）" : "（行き先の方面から）") : ""}・${kmS(spOf(x).km)}`, x.reg && `${esc(x.reg)}（推定）`, where].filter(Boolean).join("・")}</small></span>${tag(x.kind)}<span class="go" aria-hidden="true">›</span></button></li>`; }).join("");
   box.hidden = false;
   box.innerHTML = `${chips ? `<div class="spchips">${chips}</div>` : ""}${spotHTML}${heroHTML}
     <div class="spfilter" role="group" aria-label="一覧の絞り込み">${F.map(([k, l]) => `<button class="chip" data-spfilter="${k}" aria-pressed="${SP_FILTER === k}">${l}</button>`).join("")}</div>
     ${rows ? `<ul class="splist2">${rows}</ul>` : `<p class="hint">${spot ? `${esc(spot.name)}から見える` : "この3時間に、"}${SP_FILTER === "pick" ? "特別塗装機・大きな機体・国際線・海外の航空会社の便は見つかりません。「すべて」で全部の便を見られます。" : "便はありません。"}</p>`}
     ${spot && other ? `<p class="hint spother">ほかの撮影地から見える機体 ${other}機（撮影地を変えると出ます）</p>` : ""}
     <div class="splinks"><button class="linkbtn2" data-spcond>撮影条件と天気</button>${SERVER ? `<button class="linkbtn2" data-sppush>近づいたら知らせる</button>` : ""}</div>
-    <p class="fwnote">時刻は JAL・ANA の時刻表と運航情報。海外の航空会社の便と、機体の登録記号・滑走路は推定です。機材は予定で、変わることがあります。${spot ? `見えるかどうかは、いまの運用で使う滑走路（推定）の着陸・離陸の線から撮影地まで2.5km以内かで決めた目安です。着陸の滑走路が2本あるときは、${OPS_AP === "HND" ? "来た方面（北・東からか、南・西からか）で1本に絞り、絞れないときは" : ""}どちらかが見えれば出します。建物などで見えないこともあります。` : ""}${ODPT_CREDIT}</p>`;
+    <p class="fwnote">時刻は JAL・ANA の時刻表と運航情報。海外の航空会社の便と、機体の登録記号・滑走路は推定です。機材は予定で、変わることがあります。${spot ? `見えるかどうかは、いまの運用で使う滑走路（推定）の着陸・離陸の線から撮影地まで2.5km以内かで決めた目安です。着陸の滑走路が2本あるときは、${OPS_AP === "HND" ? "来た方面（北・東からか、南・西からか）で1本に絞り、絞れないときは" : ""}どちらかが見えれば出します。${OPS_AP === "HND" ? "離陸も、2本のときは行き先の方面で1本に絞ります（推定）。" : ""}建物などで見えないこともあります。` : ""}${ODPT_CREDIT}</p>`;
   if(!(SP_WX_AP === OPS_AP && SP_WX)) loadSpWx(OPS_AP).then(x => { if(x && VIEW.ops === "photo" && BOARD) renderPhoto(BOARD); });
 }
 document.addEventListener("click", e => { const b = e.target.closest("[data-spfilter]"); if(!b) return; SP_FILTER = b.dataset.spfilter; if(BOARD) renderPhoto(BOARD); });
@@ -6449,7 +6459,7 @@ function spDetailHTML(x){
     <div class="spcard soft"><small>機体${x.reg ? "（推定）" : ""}</small><b>${[x.reg, x.type].filter(Boolean).map(esc).join("・") || "機材は分かっていません"}</b>
       ${x.liv ? `<span>特別塗装「${esc(x.liv)}」</span>` : ""}<small>${x.foreign ? `${esc(FOREIGN_JA[x.airline] || x.airline || "")}の便。機種は機体の位置のデータから` : x.reg ? "いま飛んでいる特別塗装機の位置から推定" : "機材は時刻表の予定"}</small></div>
     <div class="spgrid"><div class="spcard"><small>${x.dir === "arr" ? "着陸" : "離陸"}</small><b>${x.t ? spHM(x.t) + "ごろ" : "—"}</b><small>${x.sched ? `定刻 ${spHM(x.sched)}${late >= 5 ? `・${late}分遅れ` : ""}` : "推定"}${x.est ? "・見込み" : ""}</small></div>
-      <div class="spcard"><small>滑走路</small><b>${rw ? esc(rw) : "—"}</b><small>${rw ? (rwi.side ? "運用と来た方面からの推定" : "いまの運用からの推定") : "向きが分かりません"}</small></div></div>
+      <div class="spcard"><small>滑走路</small><b>${rw ? esc(rw) : "—"}</b><small>${rw ? (rwi.side ? (x.dir === "arr" ? "運用と来た方面からの推定" : "運用と行き先の方面からの推定") : "いまの運用からの推定") : "向きが分かりません"}</small></div></div>
     ${where ? `<div class="spcard"><small>いまどこ</small><b class="m">${esc(where)}</b>${lv || x.km ? `<span class="bar"><i style="width:${Math.max(4, Math.min(100, 100 - (lv ? spKm(lv) : x.km) / 2))}%"></i></span>` : ""}</div>` : ""}
     ${spots ? `<div class="spcard"><small>どこから撮る</small><ul class="spwhere">${spots}</ul></div>` : ""}
     ${x.dir === "arr" && SERVER && key ? `<button class="spnote big" data-spnote="${esc(key)}" aria-pressed="${on}">${on ? "知らせを取り消す" : `着陸の${ps.lead || 5}分前に知らせる`}</button>` : ""}

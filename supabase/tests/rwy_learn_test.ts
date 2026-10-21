@@ -1,5 +1,5 @@
 import { assertEquals } from "jsr:@std/assert@1";
-import { arrStep, onFinal, sideOf, type ArrWatch } from "../functions/_shared/rwy_learn.ts";
+import { arrStep, onDeparture, onFinal, sideOf, type ArrWatch } from "../functions/_shared/rwy_learn.ts";
 
 const RW = { "34L": { id: "34L", thr: [35.5366, 139.7857] as [number, number], hdg: 337 }, "34R": { id: "34R", thr: [35.5425, 139.8031] as [number, number], hdg: 337 }, "22": { id: "22", thr: [35.5675, 139.7771] as [number, number], hdg: 217 } };
 const C: [number, number] = [35.5533, 139.7811];
@@ -19,3 +19,16 @@ Deno.test("来た方面を残して、延長線に乗ったら記録する", () 
   assertEquals(sideOf(out[0].ent120 as number), "N");
 });
 Deno.test("北側・南西側", () => { assertEquals(sideOf(10), "N"); assertEquals(sideOf(320), "N"); assertEquals(sideOf(200), "S"); assertEquals(sideOf(120), "S"); });
+Deno.test("離陸：滑走路の先の線から上がり、60km を出たら方角と滑走路を記録する", () => {
+  const RW2 = { "16R": { id: "16R", thr: [35.5563, 139.7717] as [number, number], end: [35.560452, 139.768734] as [number, number], hdg: 150 } };
+  assertEquals(onDeparture({ lat: 35.53, lon: 139.79, hdg: 150 }, RW2), "16R");
+  assertEquals(onDeparture({ lat: 35.53, lon: 139.79, hdg: 330 }, RW2), null);
+  const w = new Map<string, ArrWatch>(), t0 = Date.parse("2026-10-21T06:00:00Z");
+  const seq = [{ lat: 35.53, lon: 139.79, alt_ft: 1500, hdg: 150 }, { lat: 35.40, lon: 139.60, alt_ft: 9000, hdg: 240 }, { lat: 35.20, lon: 139.25, alt_ft: 16000, hdg: 250 }];
+  let out: Record<string, unknown>[] = [];
+  seq.forEach((s, i) => { const r = arrStep("HND", C, RW2, [{ id: "86d2", callsign: "ANA21", phase: "dep", dist_km: 0, ...s }], w, t0 + i * 120_000);
+    for (const u of r.upserts) w.set(u.hex, u); for (const d of r.deletes) w.delete(d); out = out.concat(r.samples); });
+  assertEquals(out.length, 1);
+  assertEquals(out[0].dir, "dep"); assertEquals(out[0].rwy, "16R"); assertEquals(out[0].flight, "NH21");
+  assertEquals(typeof out[0].ex60, "number");
+});
