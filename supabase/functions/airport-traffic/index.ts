@@ -11,6 +11,7 @@ import { fetchMetars } from "../_shared/metar.ts";
 import { OPS_AIRPORTS, observeOps } from "../_shared/ops_core.js";
 import { liveryMap } from "../_shared/liveries.ts";
 import { normCallsign } from "../_shared/flight_watch.ts";
+import { dueNow, etaMin, jstDate, opsChanged, spotMessage, spotReason, type SpotPlane, type SpotSub } from "../_shared/spot_push.ts";
 import webpush from "npm:web-push@3.6.7";
 
 const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, { auth: { persistSession: false } });
@@ -165,8 +166,10 @@ async function notifyLivery(v: any) {
   const { data: done } = await admin.from("livery_notified").select("reg").eq("reg", v.reg).eq("iata", v.iata).gt("notified_at", since);
   if (done?.length) return;
   await admin.from("livery_notified").upsert({ reg: v.reg, iata: v.iata, notified_at: new Date().toISOString() });
-  const { data: subs } = await admin.from("push_subs").select("id, endpoint, p256dh, auth").contains("sp_airports", [v.iata]);
-  if (!subs?.length) return;
+  const { data: all } = await admin.from("push_subs").select("id, endpoint, p256dh, auth, spot_iata, spot_kinds").contains("sp_airports", [v.iata]);
+  // 撮影の知らせで同じ空港の特別塗装機を選んでいる人には、そちら（着陸の数分前）で知らせるので、ここでは送らない
+  const subs = (all ?? []).filter((s) => !(s.spot_iata === v.iata && (s.spot_kinds ?? []).includes("special")));
+  if (!subs.length) return;
   webpush.setVapidDetails(Deno.env.get("VAPID_SUBJECT") || "https://soramemo.jp", pub, priv);
   // deno-lint-ignore no-explicit-any
   const name = (OPS_AIRPORTS as any)[v.iata]?.name ?? v.iata;
@@ -175,6 +178,61 @@ async function notifyLivery(v: any) {
     try { await webpush.sendNotification({ endpoint: s.endpoint, keys: { p256dh: s.p256dh, auth: s.auth } }, body, { TTL: 900 }); }
     catch (e) { const code = (e as { statusCode?: number }).statusCode; if (code === 404 || code === 410) await admin.from("push_subs").delete().eq("id", s.id); }
   }
+}
+
+// ---- 撮影の知らせ（いつもの空港に、選んだ種類の機体が着陸の数分前になったら。同じ機体は1日1回） ----
+const SPOT_COLS = "id, endpoint, p256dh, auth, spot_iata, spot_kinds, spot_lead, spot_regs, spot_flights";
+async function sendOne(s: { id: number; endpoint: string; p256dh: string; auth: string }, payload: Record<string, string>, ttl = 900) {
+  try { await webpush.sendNotification({ endpoint: s.endpoint, keys: { p256dh: s.p256dh, auth: s.auth } }, JSON.stringify(payload), { TTL: ttl }); return true; }
+  catch (e) { const code = (e as { statusCode?: number }).statusCode; if (code === 404 || code === 410) await admin.from("push_subs").delete().eq("id", s.id); return false; }
+}
+// 知らせた記録を先に入れ、入ったとき（はじめてのとき）だけ送る
+async function firstTime(sub_id: number, key: string) {
+  const { data, error } = await admin.from("spot_notified").upsert({ sub_id, key }, { onConflict: "sub_id,key", ignoreDuplicates: true }).select("key");
+  return !error && !!data?.length;
+}
+async function notifySpot(bodies: Map<string, string>) {
+  const pub = Deno.env.get("VAPID_PUBLIC_KEY"), priv = Deno.env.get("VAPID_PRIVATE_KEY");
+  if (!pub || !priv) return 0;
+  const { data: subs } = await admin.from("push_subs").select(SPOT_COLS).not("spot_iata", "is", null);
+  if (!subs?.length) return 0;
+  webpush.setVapidDetails(Deno.env.get("VAPID_SUBJECT") || "https://soramemo.jp", pub, priv);
+  const L = liveryMap(), planesOf = new Map<string, SpotPlane[]>(), today = jstDate();
+  let sent = 0;
+  for (const s of subs as (SpotSub & { endpoint: string; p256dh: string; auth: string })[]) {
+    const iata = s.spot_iata!, body = bodies.get(iata); if (!body) continue;
+    if (!planesOf.has(iata)) planesOf.set(iata, (JSON.parse(body).planes ?? []) as SpotPlane[]);
+    for (const p of planesOf.get(iata)!) {
+      const r = spotReason(p, s, p.reg ? L.get(p.reg) : undefined); if (!r) continue;
+      const eta = etaMin(p); if (!dueNow(eta, s.spot_lead)) continue;
+      if (!(await firstTime(s.id, `${normCallsign(p.callsign!)}@${today}`))) continue;
+      // deno-lint-ignore no-explicit-any
+      const name = (OPS_AIRPORTS as any)[iata]?.name ?? iata, m = spotMessage(p, r, name, eta);
+      if (await sendOne(s, { ...m, tag: `spot-${normCallsign(p.callsign!)}`, url: `./#ops-${iata}` })) sent++;
+    }
+  }
+  return sent;
+}
+// 運用が変わったら、「運用が変わったとき」を選んでいる人に知らせる（ops_log の新しい4回から。同じ変化は1時間に1回）
+async function notifyOpsChange(iatas: string[]) {
+  const pub = Deno.env.get("VAPID_PUBLIC_KEY"), priv = Deno.env.get("VAPID_PRIVATE_KEY");
+  if (!pub || !priv || !iatas.length) return 0;
+  const { data: subs } = await admin.from("push_subs").select(SPOT_COLS).in("spot_iata", iatas).contains("spot_kinds", ["ops"]);
+  if (!subs?.length) return 0;
+  webpush.setVapidDetails(Deno.env.get("VAPID_SUBJECT") || "https://soramemo.jp", pub, priv);
+  let sent = 0;
+  for (const iata of new Set(subs.map((s) => s.spot_iata as string))) {
+    const { data: rows } = await admin.from("ops_log").select("obs_mode, obs_mixed").eq("iata", iata).order("at", { ascending: false }).limit(4);
+    const ch = opsChanged(rows ?? []); if (!ch) continue;
+    // deno-lint-ignore no-explicit-any
+    const def = (OPS_AIRPORTS as any)[iata], label = (k: string) => def?.modes?.[k]?.label ?? k;
+    const hour = new Date(Date.now() + 9 * 3600_000).toISOString().slice(0, 13);
+    for (const s of subs.filter((x) => x.spot_iata === iata)) {
+      if (!(await firstTime(s.id, `ops-${iata}-${ch.to}@${hour}`))) continue;
+      if (await sendOne(s, { title: `そらメモ：${def?.name ?? iata}の運用が変わりました`, body: `${label(ch.from)} → ${label(ch.to)}（実際の機体の動きからの推定）。`, tag: `ops-${iata}`, url: `./#ops-${iata}` })) sent++;
+    }
+  }
+  return sent;
 }
 
 // 運用の判定を ops_log に残す（気象通報は14空港を1回でまとめて取る）
@@ -228,7 +286,13 @@ Deno.serve(async (req) => {
       const only = first ? null : ["OKA"];
       try { logged = await logOps(only ? new Map([...bodies].filter(([k]) => only.includes(k))) : bodies); } catch (e) { console.error("ops_log", e); }
     }
-    return new Response(JSON.stringify({ recorded: done, logged, liveries }), { headers: JSON_HEADERS });
+    // 撮影の知らせ（着陸の数分前）と、運用の変化の知らせ（運用を記録したあと）
+    let spot = 0;
+    try { spot = await notifySpot(bodies); } catch (e) { console.error("spot push", e); }
+    if (logged) { try { spot += await notifyOpsChange([...bodies.keys()]); } catch (e) { console.error("ops push", e); } }
+    // 知らせた記録は2日で消す（30分に1回）
+    if (new Date().getUTCMinutes() % 30 === 0 && first) { try { await admin.from("spot_notified").delete().lt("notified_at", new Date(Date.now() - 2 * 864e5).toISOString()); } catch { /* 次の回に */ } }
+    return new Response(JSON.stringify({ recorded: done, logged, liveries, spot }), { headers: JSON_HEADERS });
   }
   if (!AIRPORTS[iata]) return new Response(JSON.stringify({ error: "unsupported airport" }), { status: 404, headers: JSON_HEADERS });
   try {

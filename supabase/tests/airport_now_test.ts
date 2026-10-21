@@ -61,7 +61,14 @@ Deno.test("空模様：雨・霧・雪・雷・晴れ・くもり", () => {
 
 Deno.test("天気の整形：視程9999は10km以上", () => {
   const w = weather({ rawOb: "RJTT 121230Z 34012G22KT 9999 FEW030 17/10 Q1015", reportTime: "2026-10-12T12:30:00Z", wdir: 340, wspd: 12, wgst: 22, visib: "6+", clouds: [{ cover: "FEW" }] });
-  assertEquals(w, { time: "2026-10-12T12:30:00Z", wdir: 340, wspd: 12, wgst: 22, vis_m: 10000, vis_plus: true, sky: "晴れ", ceil_ft: null });
+  assertEquals(w, { time: "2026-10-12T12:30:00Z", wdir: 340, wspd: 12, wgst: 22, vis_m: 10000, vis_plus: true, sky: "晴れ", ceil_ft: null, temp: null, dewp: null, low_ft: null, layers: [] });
+});
+
+Deno.test("天気の整形：気温・露点と、雲の層（低い順・量によらないいちばん低い雲）", () => {
+  const w = weather({ rawOb: "RJTT 210620Z 34012KT 9999 FEW018 SCT045 BKN100 16/14 Q1015", reportTime: "2026-10-21T06:20:00Z", wdir: 340, wspd: 12, visib: "6+", temp: 16, dewp: 14,
+    clouds: [{ cover: "SCT", base: 4500 }, { cover: "FEW", base: 1800 }, { cover: "BKN", base: 10000 }, { cover: "OVC", base: 20000 }] });
+  assertEquals([w.temp, w.dewp, w.low_ft, w.ceil_ft], [16, 14, 1800, 10000]);
+  assertEquals(w.layers, [{ cover: "FEW", base: 1800 }, { cover: "SCT", base: 4500 }, { cover: "BKN", base: 10000 }]);
 });
 
 import { amedasNearest, amedasWeather, tafPeriods } from "../functions/_shared/airport_now.ts";
@@ -80,6 +87,7 @@ Deno.test("TAF：これから先の区切りだけ、変化の種類つきで", 
   assertEquals(p[1].from, 1791871200);                // BECMG は変わり始めの時刻
   assertEquals([p[0].sky, p[1].sky, p[2].sky], ["くもり", "晴れ", "雨"]);
   assertEquals(p[2].vis_m, 4827);
+  assertEquals(tafPeriods([{ timeFrom: now - 10, timeTo: now + 3600, wdir: 0, wspd: 5, clouds: [{ cover: "SCT", base: 3000 }, { cover: "FEW", base: 1200 }] }], now)[0].low_ft, 1200);
 });
 
 Deno.test("アメダス：風を測っている近くの観測所。遠すぎれば使わない", () => {

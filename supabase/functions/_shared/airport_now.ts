@@ -99,7 +99,16 @@ export function recent(rows: FlightRow[], nowMin: number, before = 60, after = 1
 }
 
 // ---------- 天気（METAR） ----------
-export type Weather = { time: string | null; wdir: number | null; wspd: number | null; wgst: number | null; vis_m: number | null; vis_plus: boolean; sky: string | null; ceil_ft: number | null };
+export type Layer = { cover: string; base: number };
+export type Weather = { time: string | null; wdir: number | null; wspd: number | null; wgst: number | null; vis_m: number | null; vis_plus: boolean; sky: string | null; ceil_ft: number | null;
+  temp: number | null; dewp: number | null; low_ft: number | null; layers: Layer[] };   // 気温・露点（℃）、いちばん低い雲の高さ（量によらない）、雲の層（下から3つまで）
+
+// 雲の層：量（FEW・SCT・BKN・OVC）と高さ（フィート）のそろったものを、低い順に3つまで
+export function layersOf(clouds: { cover?: string; base?: number | null }[] = []): Layer[] {
+  return clouds.filter((c) => /^(FEW|SCT|BKN|OVC)$/i.test(String(c.cover ?? "")) && typeof c.base === "number")
+    .map((c) => ({ cover: String(c.cover).toUpperCase(), base: c.base as number })).sort((a, b) => a.base - b.base).slice(0, 3);
+}
+const num = (v: unknown) => typeof v === "number" && Number.isFinite(v) ? v : null;
 
 // 雲底：曇り（BKN）・本曇り（OVC）・空が見えない（OVX・鉛直視程）のうち、いちばん低い高さ（フィート）。なければ null
 export function ceilingOf(clouds: { cover?: string; base?: number | null }[] = [], vertVis?: unknown): number | null {
@@ -136,6 +145,9 @@ export function weather(m: Record<string, unknown>): Weather {
     vis_plus: mv ? mv[1] === "9999" || mv[1] === "CAVOK" : visRaw.endsWith("+"),
     sky: skyOf(" " + raw + " ", Array.isArray(m.clouds) ? m.clouds as { cover?: string }[] : []),
     ceil_ft: ceilingOf(Array.isArray(m.clouds) ? m.clouds as { cover?: string; base?: number }[] : [], m.vertVis),
+    temp: num(m.temp), dewp: num(m.dewp),
+    low_ft: layersOf(Array.isArray(m.clouds) ? m.clouds as { cover?: string; base?: number }[] : [])[0]?.base ?? null,
+    layers: layersOf(Array.isArray(m.clouds) ? m.clouds as { cover?: string; base?: number }[] : []),
   };
 }
 
@@ -147,6 +159,7 @@ export type TafPeriod = {
   prob: number | null;                 // PROB30 など
   wdir: number | null; wspd: number | null; wgst: number | null;
   vis_m: number | null; sky: string | null; ceil_ft: number | null;
+  low_ft: number | null;               // いちばん低い雲の高さ（量によらない）
 };
 export function tafPeriods(fcsts: Record<string, unknown>[], nowSec: number, hours = 24, max = 5): TafPeriod[] {
   const out: TafPeriod[] = [];
@@ -163,6 +176,7 @@ export function tafPeriods(fcsts: Record<string, unknown>[], nowSec: number, hou
       vis_m: visRaw.endsWith("+") ? 10000 : Number.isFinite(mi) ? Math.round(mi * 1609) : null,
       sky: skyOf(" X " + String(f.wxString ?? "") + " ", Array.isArray(f.clouds) ? f.clouds as { cover?: string }[] : []),
       ceil_ft: ceilingOf(Array.isArray(f.clouds) ? f.clouds as { cover?: string; base?: number }[] : [], f.vertVis),
+      low_ft: layersOf(Array.isArray(f.clouds) ? f.clouds as { cover?: string; base?: number }[] : [])[0]?.base ?? null,
     });
     if (out.length >= max) break;
   }
