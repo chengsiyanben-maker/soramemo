@@ -1324,13 +1324,6 @@ dialog.psheet .btn1,dialog.psheet .btn2{display:block;width:100%;margin-top:10px
 #v-ops .opsday .hb i{display:block}
 #v-ops .opsday .hx{display:flex;justify-content:space-between;font-size:10px;color:var(--op-mute);margin-top:6px}
 #v-ops .opsday .big{font-size:44px;font-weight:900;line-height:1;color:var(--op-ink)}
-#v-ops .opsruler .rl{position:relative;margin:14px 0 4px 56px;border-left:2px solid var(--op-ink)}
-#v-ops .opsruler .tk{position:absolute;left:-58px;width:48px;text-align:right;font-size:12px;font-weight:800;color:var(--op-ink);transform:translateY(-50%)}
-#v-ops .opsruler .tk::after{content:"";position:absolute;right:-12px;top:50%;width:9px;height:2px;background:var(--op-ink)}
-#v-ops .opsruler .fl{position:absolute;width:calc(50% - 14px);box-sizing:border-box;border-radius:10px;padding:4px 8px;font-size:11.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transform:translateY(-50%)}
-#v-ops .opsruler .fl.d{left:8px;background:var(--op-ink);color:var(--op-card)}
-#v-ops .opsruler .fl.a{right:0;background:var(--shu-wash);color:var(--shu-text);border:1px solid var(--shu)}
-#v-ops .opsruler .now{position:absolute;left:-10px;right:0;height:2px;background:var(--shu)}
 #v-ops .opsstrip ol{list-style:none;margin:10px 0 0;padding:0;display:flex;flex-direction:column;gap:7px}
 #v-ops .opsstrip li{display:flex;border-radius:6px;overflow:hidden;background:var(--op-pill);min-height:50px}
 #v-ops .opsstrip li>i{width:8px;flex:none}
@@ -1339,15 +1332,6 @@ dialog.psheet .btn1,dialog.psheet .btn2{display:block;width:100%;margin-top:10px
 #v-ops .opsstrip .p{flex:1;font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #v-ops .opsstrip .t{width:64px;flex:none;text-align:right;font-family:var(--dotfont);font-size:15px;border-right:0}
 #v-ops .opsstrip small{display:block;font-family:var(--gothic);font-size:10px;color:var(--op-mute);font-weight:500}
-#v-ops .opsapcards{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;padding:2px 2px 10px;margin:0 -2px}
-#v-ops .opsapcards>button{flex:none;width:76%;scroll-snap-align:start;border:0;border-radius:24px;padding:16px;text-align:left;background:var(--op-card);color:var(--op-ink);box-shadow:var(--op-shadow);font-family:var(--gothic)}
-#v-ops .opsapcards>button[aria-current="true"]{background:var(--op-ink);color:var(--op-card)}
-#v-ops .opsapcards .h{display:flex;justify-content:space-between;font-size:12px;font-weight:700}
-#v-ops .opsapcards .n{display:block;font-size:38px;font-weight:900;line-height:1;margin-top:16px}
-#v-ops .opsapcards .n small{font-size:13px;font-weight:700}
-#v-ops .opsapcards .s{display:block;font-size:12px;margin-top:6px;opacity:.85}
-#v-ops .opsapcards .c{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
-#v-ops .opsapcards .c span{border-radius:999px;padding:4px 10px;font-size:11px;font-weight:700;background:var(--op-pill);color:var(--op-ink)}
 #v-ops .opsphoto ul{list-style:none;margin:10px 0 0;padding:0;display:flex;flex-direction:column;gap:8px}
 #v-ops .opsphoto li{display:flex;align-items:center;gap:12px;background:var(--op-pill);border-radius:14px;padding:10px 14px}
 #v-ops .opsphoto li b.t{width:46px;flex:none;font-size:15px}
@@ -1888,9 +1872,7 @@ nav.tabs{transition:transform .3s cubic-bezier(.2,.8,.2,1),opacity .2s}
   <div class="opsboard opsyday" id="opsYday" hidden data-ov="day"></div>
   <div class="opsboard opsontime" id="opsOntime" hidden data-ov="ontime"></div>
   <div class="opsboard opsart" id="opsArt" hidden data-ov="art"></div>
-  <div class="opsboard opsruler" id="opsRuler" hidden data-ov="ruler"></div>
   <div class="opsboard opsstrip" id="opsStrip" hidden data-ov="strip"></div>
-  <div class="opsapcards" id="opsApCards" hidden data-ov="aps"></div>
   <div class="opsboard opsphoto" id="opsPhoto" hidden data-ov="photo"></div>
   <div class="fwbox" id="opsAlerts" hidden data-ov="runway board"></div>
   <div class="fwbox" id="opsCurfew" hidden data-ov="runway"></div>
@@ -3000,7 +2982,7 @@ function renderBook(){
 const VIEWS = {
   book: [["map", "地図"], ["signs", "案内標"], ["tiles", "タイル"], ["chron", "年代記"], ["region", "地方"]],
   log: [["pass", "搭乗券"], ["board", "案内板"], ["map", "地図"], ["cal", "カレンダー"], ["month", "月ごと"], ["alt", "高度"], ["text", "文字だけ"], ["route", "路線"]],
-  ops: [["board", "案内板"], ["day", "1日の山"], ["runway", "滑走路"], ["ontime", "定時"], ["art", "空の道すじ"], ["ruler", "ものさし"], ["strip", "短冊"], ["aps", "空港をめくる"], ["photo", "撮る人"]],
+  ops: [["board", "案内板"], ["day", "1日の山"], ["runway", "滑走路"], ["ontime", "定時"], ["art", "空の道すじ"], ["strip", "短冊"], ["photo", "撮る人"]],
 };
 const VIEW_DEF = { book:"tiles", log:"pass", ops:"runway" };
 function viewOf(k){ try{ const v = localStorage.getItem("soramemo.view." + k); if(VIEWS[k].some(x => x[0] === v)) return v; }catch(e){} return VIEW_DEF[k]; }
@@ -5440,13 +5422,12 @@ function renderOps(){
 }
 // 地図が見えているか（見方の切り替えで隠れているときに位置を合わせると、大きさが0で計算できない）
 const opsMapShown = () => { const m = $("opsMap"); return !!m && m.offsetWidth > 0 && m.offsetHeight > 0; };
-/* 運用の見方：案内板（01）・1日の山（02）・滑走路（03）・定時（04）・空の道すじ（05）・ものさし（06）・短冊（07）・空港をめくる（08）・撮る人（09） */
+/* 運用の見方：案内板（01）・1日の山（02）・滑走路（03）・定時（04）・空の道すじ（05）・短冊（07）・撮る人（09） */
 function applyOpsView(){
   setViewsw("opsViews", "ops");
   const v = VIEW.ops;
   document.querySelectorAll("#v-ops [data-ov]").forEach(el => el.classList.toggle("ovoff", !el.dataset.ov.split(" ").includes(v)));
-  if(v === "aps") renderApCards();
-  if(["day", "ruler", "strip", "photo"].includes(v) && BOARD && BOARD_AP === OPS_AP) renderOpsDerived(BOARD);
+  if(["day", "strip", "photo"].includes(v) && BOARD && BOARD_AP === OPS_AP) renderOpsDerived(BOARD);
 }
 VIEW_RENDER.ops = () => { if(VIEW.ops === "runway"){ renderOps(); if(OPS_MAP) setTimeout(() => { if(opsMapShown()){ OPS_MAP.invalidateSize(); OPS_MAP.setView(opsDef().center, 10, { animate:false }); } }, 30); } else applyOpsView(); };
 const OPS_CREDIT_S = () => `<p class="fwnote">時刻は JAL・ANA の時刻表と運航情報。${ODPT_CREDIT}</p>`;
@@ -5467,17 +5448,6 @@ function renderOpsDerived(d){
       <div class="hx"><span>0時</span><span>6時</span><span>12時</span><span>18時</span><span>24時</span></div>
       <p class="bdleg"><span><i class="bar" style="background:var(--op-ink)"></i>便の予定</span><span><i class="bar" style="background:#F07A2B"></i>15分以上の遅れ・欠航</span></p>${OPS_CREDIT_S()}`;
   }
-  if(v === "ruler"){
-    const lo = now - 10 * 60000, hi = now + 70 * 60000, list = all.filter(f => { const t = Date.parse(kind(f)); return t >= lo && t <= hi; }).slice(0, 18), H = 520, y = t => ((t - lo) / (hi - lo) * H).toFixed(1);
-    const ticks = []; for(let t = Math.ceil(lo / 6e5) * 6e5; t <= hi; t += 6e5) ticks.push(t);
-    const used = { arr:[], dep:[] };
-    $("opsRuler").hidden = false;
-    $("opsRuler").innerHTML = `<div class="bdhead"><h3>これからの1時間</h3><span class="bdsum">${hm(now)}〜${hm(hi)}</span></div>
-      <div class="rl" style="height:${H}px">${ticks.map(t => `<span class="tk" style="top:${y(t)}px">${hm(t)}</span>`).join("")}<span class="now" style="top:${y(now)}px" aria-hidden="true"></span>
-      ${list.map(f => { let top = +y(Date.parse(kind(f))); const u = used[f.dir]; while(u.some(x => Math.abs(x - top) < 22)) top += 22; u.push(top);
-        return `<span class="fl ${f.dir === "arr" ? "a" : "d"}" style="top:${top}px"><b>${esc(f.flight)}</b> ${esc(placeAny(f.other))}${f.dir === "arr" ? "から" : ""}</span>`; }).join("")}</div>
-      <p class="bdleg"><span><i class="bar" style="background:var(--op-ink)"></i>出発</span><span><i class="bar" style="background:var(--shu-wash);outline:1px solid var(--shu)"></i>到着</span></p>${list.length ? "" : `<p class="hint">この1時間の JAL・ANA の便はありません。</p>`}${OPS_CREDIT_S()}`;
-  }
   if(v === "strip"){
     const list = all.filter(f => Date.parse(f.t) >= now - 15 * 60000).slice(0, 14);
     $("opsStrip").hidden = false;
@@ -5489,7 +5459,7 @@ function renderOpsDerived(d){
   }
   if(v === "photo") renderPhoto(d);
 }
-// 空港をめくる：14空港を1枚ずつ（運用時間と、この1時間の便。便は空港ごとに読んで5分ためる）
+// 空港ごとの便のまとめ（ホームの撮影のカード用。空港ごとに読んで5分ためる）
 const APC = new Map();
 async function apSummary(iata){
   const c = APC.get(iata); if(c && Date.now() - c.at < 300_000) return c.d;
@@ -5498,20 +5468,6 @@ async function apSummary(iata){
     if(r.ok){ const d = await r.json(); APC.set(iata, { at:Date.now(), d }); return d; } }catch(e){}
   return null;
 }
-async function renderApCards(){
-  const box = $("opsApCards"); if(!box) return;
-  const ORDER = ["CTS","SDJ","HND","NRT","NGO","ITM","KIX","HIJ","MYJ","FUK","NGS","KMJ","KOJ","OKA"], h = new Date().getHours();
-  const card = (d, sum) => { const open = opsOpen(d), hr = sum && (sum.hours || [])[h], late = sum ? (sum.hours || []).reduce((x, y) => x + Number(y.late || 0) + Number(y.cancel || 0), 0) : null;
-    return `<button data-apcard="${d.iata}" aria-current="${d.iata === OPS_AP}"><span class="h"><span>${esc(d.name)}</span><span>${d.iata}</span></span>
-      <span class="n">${hr ? Number(hr.flights || 0) : "—"}<small> 便/この1時間</small></span><span class="s">運用時間 ${opsHours(d)}・${open ? "いまは運用中" : "いまは時間外"}</span>
-      <span class="c"><span>${late == null ? "遅れ・欠航 —" : `遅れ・欠航 ${late}便`}</span>${d.iata === OPS_NEAR ? "<span>近く</span>" : ""}</span></button>`; };
-  const defs = ORDER.map(i => OPS_AIRPORTS[i]).filter(Boolean);
-  box.hidden = false;
-  box.innerHTML = defs.map(d => card(d, APC.get(d.iata) && APC.get(d.iata).d)).join("") ;
-  for(const d of defs){ if(VIEW.ops !== "aps") return; const sum = await apSummary(d.iata); const el = box.querySelector(`[data-apcard="${d.iata}"]`); if(el && sum) el.outerHTML = card(d, sum); }
-}
-document.addEventListener("click", e => { const b = e.target.closest("[data-apcard]"); if(!b) return; OPS_PICKED = true; VIEW.ops = "runway"; try{ localStorage.setItem("soramemo.view.ops", "runway"); }catch(_){}
-  applyOpsView(); setOpsAirport(b.dataset.apcard).then(() => { if(OPS_MAP && opsMapShown()){ OPS_MAP.invalidateSize(); OPS_MAP.setView(opsDef().center, 10, { animate:false }); } }); });
 function drawOpsMap(rw, op, plus, mode, good){
   if(!window.L || !opsOn()) return;
   if(!OPS_MAP){
