@@ -1,10 +1,12 @@
 (function(){
-  const db = {checkins:[{airport_id:5, terminal_id:null, created_at:new Date(Date.now()-9e6).toISOString(), accuracy_m:20}], flights:[{id:7, from_airport:5, to_airport:6, dep_at:new Date(Date.now()-7.2e6).toISOString(), arr_at:new Date().toISOString(), distance_km:820, status:'verified', airline:null, flight_no:null},{id:8, from_airport:6, to_airport:5, dep_at:new Date(Date.now()-3*864e5).toISOString(), arr_at:new Date(Date.now()-3*864e5+7e6).toISOString(), distance_km:820, status:'no_data', airline:null, flight_no:null},{id:9, from_airport:5, to_airport:23, dep_at:new Date(Date.now()-2*864e5).toISOString(), arr_at:new Date(Date.now()-2*864e5+9e6).toISOString(), distance_km:1555, status:'provisional', airline:null, flight_no:null}], manual_flights:[], intl_flights:[]}; let session = null; const listeners = [];
+  const db = {checkins:[{airport_id:5, terminal_id:null, created_at:new Date(Date.now()-9e6).toISOString(), accuracy_m:20}], flights:[{id:7, from_airport:5, to_airport:6, dep_at:new Date(Date.now()-7.2e6).toISOString(), arr_at:new Date().toISOString(), distance_km:820, status:'verified', airline:null, flight_no:null},{id:8, from_airport:6, to_airport:5, dep_at:new Date(Date.now()-3*864e5).toISOString(), arr_at:new Date(Date.now()-3*864e5+7e6).toISOString(), distance_km:820, status:'no_data', airline:null, flight_no:null},{id:9, from_airport:5, to_airport:23, dep_at:new Date(Date.now()-2*864e5).toISOString(), arr_at:new Date(Date.now()-2*864e5+9e6).toISOString(), distance_km:1555, status:'provisional', airline:null, flight_no:null}], manual_flights:[], intl_flights:[], shugyo_prefs:[]}; let session = null; const listeners = [];
   window.__fake = {db, login(){ session = {user:{id:'u1', email:'test@example.com'}}; listeners.forEach(f=>f('SIGNED_IN', session)); }};
   function q(table){ let lo = 0, hi = 999; window.__queries = (window.__queries || 0) + 1;
     const rows = () => db[table].slice(lo, Math.min(hi, lo + 999) + 1);   // 本物と同じく1回に1,000行まで
     const api = { select(){ return api; }, order(){ return api; }, range(a, b){ lo = a; hi = b; return api; },
       then(res){ res({data: rows(), error:null}); },
+      maybeSingle(){ return Promise.resolve({data: db[table][0] || null, error:null}); },
+      upsert(row){ db[table] = db[table].filter(r => r.user_id !== row.user_id); db[table].push(JSON.parse(JSON.stringify(row))); window.__upserts = (window.__upserts||0) + 1; return Promise.resolve({error:null}); },
       insert(row){ (Array.isArray(row) ? row : [row]).forEach(r => db[table].push(Object.assign({id: db[table].length+1}, r))); window.__inserts = (window.__inserts||0) + 1; return Promise.resolve({error:null}); },
       delete(){ return { eq(k, v){ db[table] = db[table].filter(r => r[k] !== v); return Promise.resolve({error:null}); } }; } };
     return api; }
@@ -16,6 +18,7 @@
     rpc: async (name, a) => { window.__rpcs = (window.__rpcs||[]).concat([name]);
       const C = window.__co = window.__co || {name:'そらメモ航空', cash:500000, last:new Date(Date.now()-2*864e5).toISOString(), roles:{}, daily:344, bonus:0, routes:[{k:'5-6', base:344, level:1, cost:10320, mult:1}], fleet:[], total_km:820, rep_points:80, stars:1, facilities:{}};
       if(name === 'set_flight_details'){ const r = db.flights.find(x => x.id === a.p_flight_id); if(!r) return {data:null, error:{message:'flight not found'}}; r.fare = a.p_fare; r.seat = a.p_seat; window.__details = a; return {data:null, error:null}; }
+      if(name === 'set_flight_price'){ const r = db.flights.find(x => x.id === a.p_flight_id); if(!r) return {data:null, error:{message:'flight not found'}}; r.price = a.p_price; return {data:null, error:null}; }
       if(name === 'current_events'){ return {data: window.__events || [], error:null}; }
       if(name === 'my_event_bonus'){ return {data: window.__evb || {pending:0, total:0, count:0}, error:null}; }
       if(name === 'app_status'){ return {data: window.__appStatus || {maintenance:false, checkin_enabled:true, message:'', game_released: window.__gameReleased !== false}, error:null}; }
