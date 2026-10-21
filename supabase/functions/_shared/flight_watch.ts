@@ -62,6 +62,11 @@ export function predictEta(p: { lat: number; lon: number; alt_ft: number | null;
   const nearV = alt < 10000 && p.kt != null && p.kt > 100 ? Math.min(approach, p.kt) : approach;
   return p.at + (far / v + near / nearV) * 3600_000 + 4 * MIN;
 }
+// 着陸してから搭乗口に着くまでの地上走行（分・目安）。航空会社の「到着」は搭乗口に着いた時刻なので、画面の到着予想にはこれを足す。
+// 10月14〜20日の到着予想の当たり具合（eta_accuracy）で、運航情報（搭乗口）と機体の位置（着陸）の差が機種ごとに5〜8分、
+// 羽田・成田に多い大型機ほど大きかったことからの目安。空港ごとの値は eta_accuracy の by_arr で見直す
+export const TAXI_IN: Record<string, number> = { HND: 9, NRT: 10, KIX: 7, ITM: 6, CTS: 7, FUK: 6, OKA: 7, NGO: 6 };
+export const taxiIn = (iata?: string | null) => TAXI_IN[iata ?? ""] ?? 4;
 // 降りる途中で見えなくなった機体の着陸の時刻（推定）：最後に見た位置から、残りを進入の速度で飛んだとみなす（predictEta と同じ考え方）。
 // 最後に見た時刻より前にはしない
 export function landingFrom(last: { lat: number; lon: number; alt_ft: number | null; at: number }, arr: Airport, type?: string | null): number {

@@ -52,3 +52,8 @@ Deno.test("実際の到着の時刻が、まだ来ていない時刻なら到着
   assertEquals(liveState({ ...S, ata: T0 + 9 * 36e5 }, P({}), HND, LAX, T0 + 4 * 36e5).phase, "air");
   assertEquals(liveState({ ...S, ata: T0 + 3 * 36e5 }, null, HND, LAX, T0 + 4 * 36e5).phase, "landed");
 });
+
+Deno.test("到着予想は着陸の予想に地上走行の目安を足す（羽田は9分）", async () => {
+  const { taxiIn } = await import("../functions/_shared/flight_watch.ts");
+  assertEquals(taxiIn("HND"), 9); assertEquals(taxiIn("KMJ"), 4); assertEquals(taxiIn(null), 4);
+});
