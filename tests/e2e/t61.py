@@ -1,6 +1,6 @@
 import os, sys
 HERE=os.path.dirname(os.path.abspath(__file__)); WEB=os.path.abspath(os.path.join(HERE,'..','..','web')); WORK=os.environ.get('SORAMEMO_TEST_WORK','/tmp/soramemo-e2e'); os.makedirs(WORK, exist_ok=True)
-# 見方の切り替え：図鑑（5つ）・フライト（8つ）・運用（9つ）。選んだ見方は覚える
+# 見方の切り替え：図鑑（5つ）・フライト（8つ）・運用（7つ・ものさしと空港をめくるはなくした）。選んだ見方は覚える
 import asyncio, json
 from datetime import datetime, timedelta, timezone
 from playwright.async_api import async_playwright
@@ -49,9 +49,9 @@ async def main():
         await pg.evaluate("document.querySelectorAll('dialog[open]').forEach(d => d.close())")
         # 運用
         await pg.evaluate("goTab('ops')"); await pg.wait_for_timeout(1500)
-        check('運用の見方が9つ:', await pg.locator('#opsViews [data-vw]').count() == 9)
+        check('運用の見方が7つ（ものさし・空港をめくるはない）:', await pg.locator('#opsViews [data-vw]').count() == 7 and await pg.locator('[data-vw="ops:ruler"], [data-vw="ops:aps"]').count() == 0)
         check('はじめは滑走路:', await pg.is_visible('#opsInfo') and not await pg.is_visible('#opsBoard'))
-        for v, sel in [('board', '#opsBoard'), ('day', '#opsDay'), ('ruler', '#opsRuler'), ('strip', '#opsStrip'), ('photo', '#opsPhoto'), ('aps', '#opsApCards')]:
+        for v, sel in [('board', '#opsBoard'), ('day', '#opsDay'), ('strip', '#opsStrip'), ('photo', '#opsPhoto')]:
             await pg.click(f'[data-vw="ops:{v}"]'); await pg.wait_for_timeout(700)
             check(f'運用 {v}:', await pg.is_visible(sel) and not await pg.is_visible('#opsInfo'))
             await pg.screenshot(path=os.path.join(WORK, f't61_ops_{v}.png'))
@@ -62,9 +62,6 @@ async def main():
         check('撮る人：大きな機体だけ:', 'NH106' in t and 'A359' in t and 'BC101' not in t)
         await pg.click('[data-vw="ops:strip"]'); await pg.wait_for_timeout(500)
         check('短冊に遅れ:', '18分遅れ' in (await pg.inner_text('#opsStrip')))
-        await pg.click('[data-vw="ops:aps"]'); await pg.wait_for_timeout(800)
-        await pg.locator('[data-apcard="ITM"]').click(); await pg.wait_for_timeout(800)
-        check('空港のカードから滑走路へ:', await pg.is_visible('#opsInfo') and 'ITM' == await pg.evaluate("OPS_AP"))
         # 覚えている
         await pg.click('[data-vw="ops:day"]'); await pg.wait_for_timeout(300)
         await pg.reload(); await pg.wait_for_timeout(800); await pg.evaluate('__fake.login()'); await pg.wait_for_timeout(600)
