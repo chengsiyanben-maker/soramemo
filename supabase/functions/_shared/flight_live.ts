@@ -1,13 +1,13 @@
 // 乗る便を出発から到着まで追う（国際線も）：便名から機体の呼び出し符号を作り、世界中の機体の位置（adsb.lol）から探して、
 // 今どこを飛んでいるか・到着予想（推定）・進み具合を返す。取得（index.ts）とは分けて、テストしやすくしている。
-import { type Airport, predictEta } from "./flight_watch.ts";
+import { type Airport, predictEta, taxiIn } from "./flight_watch.ts";
 
 export type Plane = { callsign: string; lat: number; lon: number; alt_ft: number | null; ground: boolean; kt: number | null; track: number | null; type: string | null; reg: string | null; at: number };
 export type LiveSched = { flight: string; dep: string; arr: string; std: number; sta: number; etd?: number | null; eta?: number | null; atd?: number | null; ata?: number | null; cancelled?: boolean };
 export type Live = {
   phase: "sched" | "taxi" | "air" | "landed" | "lost" | "cancelled";
   pos: { lat: number; lon: number; alt_ft: number | null; kt: number | null; track: number | null; at: number } | null;
-  eta: number | null; progress: number | null; reg: string | null; type: string | null; callsign: string | null;
+  eta: number | null; land?: number | null; progress: number | null; reg: string | null; type: string | null; callsign: string | null;
 };
 
 function km(a: { lat: number; lon: number }, b: { lat: number; lon: number }) {
@@ -43,7 +43,7 @@ export function liveState(s: LiveSched, p: Plane | null, dep: Airport | null, ar
       if (p.ground && dDep <= 10) return { ...base, phase: "taxi", pos, progress: 0 };
       if (!p.ground) {
         const prog = Math.max(0, Math.min(1, 1 - dArr / Math.max(1, total)));
-        return { ...base, phase: "air", pos, progress: Math.round(prog * 100) / 100, eta: Math.round(predictEta({ ...p, kt: p.kt }, arr, p.type)) };
+        return { ...base, phase: "air", pos, progress: Math.round(prog * 100) / 100, ...(() => { const land = Math.round(predictEta({ ...p, kt: p.kt }, arr, p.type)); return { land, eta: land + taxiIn(s.arr) * 60_000 }; })() };
       }
     }
   }

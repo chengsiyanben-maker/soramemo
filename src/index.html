@@ -2438,7 +2438,7 @@ async function renderRideIntl(p, force){
   const st = !d.found ? `<span class="rv">いまは見つかりません。${p.day > today ? "当日になると出します。" : "出発が近づくと出ます。"}</span>`
     : ph === "cancelled" ? `<span class="rv late">欠航（航空会社の運航情報）</span>`
     : ph === "landed" ? `<span class="rv ok">到着しました${d.ata ? `（${tzHM(d.ata, arr)}${localNote(arr)}）` : ""}</span>`
-    : ph === "air" ? `<span class="rv ok">飛行中${d.pos && d.pos.alt_ft != null ? `　高度 ${fmtKm(d.pos.alt_ft)}ft` : ""}${d.pos && d.pos.kt ? `・時速 ${fmtKm(Math.round(d.pos.kt * 1.852))}km` : ""}</span>${d.eta_pred ? `<span>到着予想 ${tzHM(d.eta_pred, arr)}${localNote(arr)}（推定）</span>` : ""}`
+    : ph === "air" ? `<span class="rv ok">飛行中${d.pos && d.pos.alt_ft != null ? `　高度 ${fmtKm(d.pos.alt_ft)}ft` : ""}${d.pos && d.pos.kt ? `・時速 ${fmtKm(Math.round(d.pos.kt * 1.852))}km` : ""}</span>${d.eta_pred ? `<span>到着予想 ${tzHM(d.eta_pred, arr)}${localNote(arr)}（推定${d.land_pred ? `・着陸 ${tzHM(d.land_pred, arr)}ごろ` : ""}）</span>` : ""}`
     : ph === "lost" ? `<span class="rv">飛行中のようです（いまは機体の位置が届かない所を飛んでいます）</span>`
     : ph === "taxi" ? `<span class="rv">地上を移動しています（出発の前）</span>`
     : `<span class="rv">出発前${d.etd ? `（出発の見込み ${tzHM(d.etd, dep)}${localNote(dep)}）` : ""}</span>`;

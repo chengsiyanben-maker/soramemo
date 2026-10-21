@@ -75,7 +75,7 @@ Deno.serve(async (req) => {
       etd: sc?.etd ?? null, eta: sc?.eta ?? null, atd: sc?.atd ?? null, ata: sc?.ata ?? null, aircraft: sc?.aircraft ?? null,
       dep_pos: a ? [a.lat, a.lon] : null, arr_pos: b ? [b.lat, b.lon] : null,
       phase: live.phase, progress: live.progress, reg: live.reg, type: live.type, callsign: live.callsign,
-      eta_pred: live.eta ? new Date(live.eta).toISOString() : null, pos: live.pos ? { ...live.pos, at: new Date(live.pos.at).toISOString() } : null });
+      eta_pred: live.eta ? new Date(live.eta).toISOString() : null, land_pred: live.land ? new Date(live.land).toISOString() : null, pos: live.pos ? { ...live.pos, at: new Date(live.pos.at).toISOString() } : null });
   } catch (e) {
     console.error(e);
     return json({ error: "failed" }, 500);

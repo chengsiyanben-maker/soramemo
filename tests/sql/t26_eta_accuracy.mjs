@@ -18,4 +18,10 @@ let r = await as('anon', `select public.eta_accuracy(7)`);
 const b = (r?.by_type ?? []).find((x) => x.type === 'B763');
 check('機種ごとに、予想と実際の差をまとめる（早すぎると負）', b && b.n === 4 && Number(b.mean) === -7.5, r);
 check('3便より少ない機種は出さない', (r?.by_type ?? []).length === 1, r);
+check('地上走行の目安を足した差（伊丹は6分）', b && Number(b.median_adj) === Number(b.median) + 6, r);
+for (let i = 0; i < 5; i++) await db.exec(`insert into public.flight_history (svc_date, flight, dep, arr, std, sta, ata, ata_src, eta30, type)
+  values (${d0}, 'NH20${i}', 'ITM', 'HND', now() - interval '3 hours', now() - interval '2 hours', now() - interval '2 hours', 'adsb', now() - interval '2 hours' - interval '2 minutes', 'B738')`);
+r = await as('anon', `select public.eta_accuracy(7)`);
+const h = (r?.by_arr ?? []).find((x) => x.arr === 'HND' && x.src === 'adsb');
+check('空港ごとのまとめ（5便から。着陸とくらべるときは足さない）', h && h.n === 5 && Number(h.median) === -2 && Number(h.median_adj) === -2 && h.taxi === 9 && !(r.by_arr ?? []).some((x) => x.arr === 'ITM'), r);
 if (bad) process.exit(1);
