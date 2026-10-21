@@ -249,7 +249,7 @@ function rwModeOf(def){ const m = {}; for(const [k, op] of Object.entries(def.mo
 //    空港の中心ではなく滑走路の端から測る（関西など長い滑走路では、滑走を始めた直後の位置が離陸と反対側に出るため）。
 // 地上の機体（300ft未満）と、上がってから旋回して戻ってきた機体（4,000ft超で、まっすぐ遠ざかっていない）は数えない
 // 便名の代わりに登録記号（JA86MV など）を出している機体は、小型機の訓練や遊覧が多く、滑走路の運用と関係なく飛ぶので数えない
-const isGA = p => /^JA[0-9A-Z]{3,5}$/.test(p.callsign || "");
+const isGA = p => /^JA(?:\d{4}|\d{3}[A-Z]|\d{2}[A-Z]{2})$/.test(p.callsign || "");   // 登録記号（JA4123・JA123A・JA86MV）。JAL123 などの便名は含めない
 function observeDeps(planes, def, min = 2){
   const rw = runwaysOf(def), H = def.center, votes = {}, km = (a, b) => nmToLine(a, [b, b]) * 1.852, off = (x, y) => Math.abs(((x - y) + 540) % 360 - 180);
   for(const p of planes){
