@@ -563,6 +563,11 @@ dialog.spfull .dlg{padding:16px 16px 32px;max-width:480px;margin:0 auto;max-heig
 .spdh h3{margin:0;font-family:var(--gothic);font-size:26px;font-weight:900}
 .spdh em,.spcard em{font-style:normal;color:#fff;border-radius:10px;padding:6px 10px;font-size:12px;font-weight:800}
 .spcard{display:block;margin-top:10px;background:var(--s-card);border:1px solid var(--s-line);border-radius:18px;padding:12px 14px}
+.dpl{list-style:none;margin:12px 0 0;padding:4px 16px;background:var(--s-card);border-radius:22px}.dpl li{display:flex;gap:12px;align-items:flex-start;padding:14px 0;border-bottom:1px solid var(--s-line)}.dpl li:last-child{border-bottom:0}
+.dpl .t{flex:1}.dpl .t b{font-size:14px}.dpl .t small{display:block;font-size:11.5px;color:var(--s-mute);line-height:1.6;margin-top:3px}.dpl .t em{display:inline-block;margin-top:6px;font-style:normal;border-radius:6px;padding:3px 7px;font-size:10.5px;font-weight:700;background:#E7F6EC;color:#1F7A3F}
+.dsw{flex:none;width:48px;height:28px;border:0;border-radius:999px;position:relative;cursor:pointer;background:#D4D4D4}.dsw::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;transition:left .15s}
+.dsw[aria-checked="true"]{background:#111827}.dsw[aria-checked="true"]::after{left:23px}
+.dnever{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.dnever span{border-radius:8px;padding:5px 9px;background:var(--s-bg);font-size:11.5px;font-weight:700}
 .spfull .spcard{border:0;border-radius:22px}
 .spcard.soft{background:var(--s-bg);border:0}
 .spcard.nopad{padding:0;overflow:hidden}
@@ -1993,6 +1998,7 @@ nav.tabs{transition:transform .3s cubic-bezier(.2,.8,.2,1),opacity .2s}
 <dialog id="dSpotCond" class="spfull" aria-label="撮影条件と天気"><div class="dlg" id="dSpotCondBody"></div></dialog>
 <dialog id="dSpotPush" class="spfull" aria-label="近づいたら知らせる"><div class="dlg" id="dSpotPushBody"></div></dialog>
 <dialog id="dShugyo" class="sgd" aria-label="修行"><div class="dlg" id="dShugyoBody"></div></dialog>
+<dialog id="dData" class="spfull" aria-label="データの使い方"><div class="dlg" id="dDataBody"></div></dialog>
 <dialog id="dGa" class="sgd" aria-label="ゴーアラウンド"><div class="dlg" id="dGaBody"></div></dialog>
 <dialog id="dSettings" class="mypage"><div class="dlg">
   <div class="mp-top"><button class="mp-back" data-close type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>ホーム</button><h3>マイページ</h3><span class="mp-sp" aria-hidden="true"></span></div>
@@ -2049,6 +2055,7 @@ nav.tabs{transition:transform .3s cubic-bezier(.2,.8,.2,1),opacity .2s}
     <div class="set-row"><div>判定のしくみ<small>出発と到着の空港で24時間以内にチェックインし、移動速度が時速1,000km以下ならフライトとして記録します。</small></div></div>
     <div class="set-row" id="installRow"><div>ホーム画面に追加<small>アプリのように、ホーム画面から開けるようにします。iPhone・Android・パソコンで使えます。</small></div><button class="btn2" data-install="go">追加する</button></div>
     <div class="set-row" id="anaRow"><div>使われ方とエラーを送る<small>アプリの改善のため、開いた画面や使った機能、エラーを送ります。利用者のIDや位置は含みません。</small></div><button class="btn2" id="anaToggle" aria-pressed="true">送る（オン）</button></div>
+    <div class="set-row" id="dataRow"><div>データの使い方<small>統計に使うか、案内や調査に協力するかを選べます。</small></div><button class="btn2" id="openData">選ぶ</button></div>
     <div class="set-row"><div>使い方<small>はじめに出る案内をもう一度見ます。</small></div><button class="btn2" id="openGuide">見る</button></div>
   </section>
   <p class="legal"><a href="terms.html" target="_blank" rel="noopener">利用規約</a>・<a href="privacy.html" target="_blank" rel="noopener">プライバシーポリシー</a>・<a href="tokushoho.html" target="_blank" rel="noopener">特定商取引法にもとづく表記</a></p>
@@ -6568,6 +6575,33 @@ async function openSpCond(){
   track("spot", "cond"); $("dSpotCondBody").innerHTML = spCondHTML(); if(!$("dSpotCond").open) $("dSpotCond").showModal();
   const iata = OPS_AP; await loadSpWx(iata); if(iata === OPS_AP && $("dSpotCond").open) $("dSpotCondBody").innerHTML = spCondHTML();
 }
+// ---- データの使い方（統計に使う・案内を受け取る・調査に協力する） ----
+const DATA_ITEMS = [["stats", "統計に使う", "空港ごとの人数や、人気の時間帯・路線などの集計に、あなたの記録を入れます。個人が分からない形にしてから使い、10人未満の区切りは出しません。集計した統計は、空港や旅行メディアなどに提供することがあります。", "集計だけ・個人は分かりません"],
+  ["offers", "カードやホテルの案内を受け取る", "修行の計画に合いそうなカード・ホテルなどの案内を、アプリの中で出します。案内から申し込むと、そらメモに紹介料が入ることがあります。", "あなたの情報は相手に渡しません"],
+  ["research", "研究・調査への協力", "大学や空港の調査に協力するとき、そのつど内容を見せて、あなたが選んだときだけ参加します。", "そのつど確認します"]];
+let DATA_PREFS = null;
+function dataHTML(){
+  const p = DATA_PREFS;
+  return `<div class="spctop"><button class="mp-back" data-close type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>設定</button><h3>データの使い方</h3><span class="sp" aria-hidden="true"></span></div>
+    <p class="hint">そらメモがあなたの記録をどう使うかを、ここで選べます。いつでも変えられます。</p>
+    ${!user ? `<p class="hint">ログインして使っているときに選べます。ログインせずに使っている記録は、この端末の中だけにあり、統計には使いません。</p>` : !p ? `<p class="hint">読み込んでいます…</p>` :
+    `<ul class="dpl">${DATA_ITEMS.map(([k, t, d, tag]) => `<li><span class="t"><b>${t}</b><small>${d}</small><em>${tag}</em></span><button class="dsw" role="switch" aria-checked="${!!p[k]}" aria-label="${t}" data-dpref="${k}"></button></li>`).join("")}</ul>`}
+    <div class="spcard"><b>外に出さないもの</b><div class="dnever">${["チェックインした場所", "乗った便の記録", "金額", "カード・会員の情報", "メールアドレス"].map(x => `<span>${x}</span>`).join("")}</div>
+      <small>どの設定でも、これらを1人ずつの形で会社に渡すことはありません。</small></div>
+    <p class="fwnote">くわしくは<a href="privacy.html" target="_blank" rel="noopener">プライバシーポリシー</a>をご覧ください。自分の記録の書き出し・削除は、設定からいつでもできます。</p>`;
+}
+async function openData(){
+  DATA_PREFS = null; $("dDataBody").innerHTML = dataHTML(); if(!$("dData").open) $("dData").showModal();
+  if(user && sb){ try{ const { data } = await sb.rpc("my_data_prefs"); DATA_PREFS = data || { stats:true, offers:false, research:false }; }catch(e){ DATA_PREFS = { stats:true, offers:false, research:false }; } $("dDataBody").innerHTML = dataHTML(); }
+}
+document.addEventListener("click", async e => {
+  if(e.target.closest("#openData")) openData();
+  const b = e.target.closest("[data-dpref]"); if(!b || !DATA_PREFS) return;
+  const next = { ...DATA_PREFS, [b.dataset.dpref]:!DATA_PREFS[b.dataset.dpref] };
+  const { data, error } = await sb.rpc("set_data_prefs", { p_stats:next.stats, p_offers:next.offers, p_research:next.research });
+  if(error){ say("変えられませんでした。時間をおいてもう一度お試しください。", true); return; }
+  DATA_PREFS = data || next; track("data", b.dataset.dpref + (DATA_PREFS[b.dataset.dpref] ? "_on" : "_off")); $("dDataBody").innerHTML = dataHTML();
+});
 document.addEventListener("click", e => { if(e.target.closest("[data-spcond]")) openSpCond(); });
 
 // ---- 近づいたら知らせる（設定） ----
