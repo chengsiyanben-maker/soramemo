@@ -10,6 +10,7 @@ TABLES = [  # 戻す順番（参照される側が先）、重なりの判定に
     ("public.flights",        "(id)",                      True),
     ("public.manual_flights", "(id)",                      True),
     ("public.intl_flights",   "(id)",                      True),
+    ("public.shugyo_prefs",   "(user_id)",                 False),
     ("public.companies",      "(user_id)",                 False),
     ("public.route_levels",   "(user_id, route_key)",      False),
     ("public.aircraft",       "(id)",                      True),
