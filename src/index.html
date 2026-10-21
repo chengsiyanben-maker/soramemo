@@ -563,6 +563,21 @@ dialog.spfull .dlg{padding:16px 16px 32px;max-width:480px;margin:0 auto;max-heig
 .spdh h3{margin:0;font-family:var(--gothic);font-size:26px;font-weight:900}
 .spdh em,.spcard em{font-style:normal;color:#fff;border-radius:10px;padding:6px 10px;font-size:12px;font-weight:800}
 .spcard{display:block;margin-top:10px;background:var(--s-card);border:1px solid var(--s-line);border-radius:18px;padding:12px 14px}
+.atchero{margin-top:12px;background:#111827;color:#fff;border-radius:24px;padding:16px}
+.atchero .h{display:flex;justify-content:space-between;gap:8px;font-size:11.5px;color:#BDBDBD}
+.atchero .f{display:flex;justify-content:space-between;align-items:flex-end;margin-top:8px;gap:8px}
+.atchero .f b{font-size:30px;letter-spacing:.5px;font-variant-numeric:tabular-nums}.atchero .f small{display:block;font-size:12px;color:#E5E5E5}
+.atctabs{display:flex;gap:6px;margin-top:12px}.atctabs .chip{flex:none}
+.atclist{list-style:none;margin:10px 0 0;padding:4px 16px;background:var(--s-card);border-radius:22px}
+.atclist li{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--s-line)}.atclist li:last-child{border-bottom:0}
+.atclist .n{flex:1;min-width:0}.atclist .n b{font-size:14px}.atclist .n small{display:block;font-size:11px;color:var(--s-mute);line-height:1.5}
+.atclist .v{text-align:right}.atclist .v b{font-size:16px;font-variant-numeric:tabular-nums}.atclist .v small{display:block;font-size:10.5px;color:var(--s-mute)}
+.atcrule{margin-top:10px;background:#FDF1E1;color:#5C3A00;border-radius:18px;padding:12px 14px;font-size:11.5px;line-height:1.7}.atcrule b{display:block;font-size:13px}
+.atcsteps{display:flex;margin-top:12px}.atcsteps span{flex:1;text-align:center;font-size:11px;color:var(--s-mute)}
+.atcsteps i{display:block;width:12px;height:12px;border-radius:50%;margin:0 auto 6px;background:var(--s-line)}
+.atcsteps .past i{background:#9CA3AF}.atcsteps .on{color:#1D4ED8;font-weight:800}.atcsteps .on i{background:#1D4ED8;box-shadow:0 0 0 4px #E0ECFF}
+.atcnow{display:flex;justify-content:space-between;align-items:center;margin-top:12px;background:#111827;color:#fff;border-radius:16px;padding:10px 14px}
+.atcnow small{display:block;font-size:11px;color:#BDBDBD}.atcnow b.f{font-size:20px;font-variant-numeric:tabular-nums}
 .spfull .spcard{border:0;border-radius:22px}
 .spcard.soft{background:var(--s-bg);border:0}
 .spcard.nopad{padding:0;overflow:hidden}
@@ -1991,6 +2006,7 @@ nav.tabs{transition:transform .3s cubic-bezier(.2,.8,.2,1),opacity .2s}
 <dialog id="dPersona" class="psheet" aria-labelledby="pTitle"><div class="dlg" id="dPersonaBody"></div></dialog>
 <dialog id="dSpotFl" class="spsheet" aria-label="来る機体のくわしく"><div class="dlg" id="dSpotFlBody"></div></dialog>
 <dialog id="dSpotCond" class="spfull" aria-label="撮影条件と天気"><div class="dlg" id="dSpotCondBody"></div></dialog>
+<dialog id="dAtc" class="spfull" aria-label="いま聞く周波数"><div class="dlg" id="dAtcBody"></div></dialog>
 <dialog id="dSpotPush" class="spfull" aria-label="近づいたら知らせる"><div class="dlg" id="dSpotPushBody"></div></dialog>
 <dialog id="dShugyo" class="sgd" aria-label="修行"><div class="dlg" id="dShugyoBody"></div></dialog>
 <dialog id="dGa" class="sgd" aria-label="ゴーアラウンド"><div class="dlg" id="dGaBody"></div></dialog>
@@ -6425,7 +6441,7 @@ function renderPhoto(d){
     <div class="spfilter" role="group" aria-label="一覧の絞り込み">${F.map(([k, l]) => `<button class="chip" data-spfilter="${k}" aria-pressed="${SP_FILTER === k}">${l}</button>`).join("")}</div>
     ${rows ? `<ul class="splist2">${rows}</ul>` : `<p class="hint">${spot ? `${esc(spot.name)}から見える` : "この3時間に、"}${SP_FILTER === "pick" ? "特別塗装機・大きな機体・国際線・海外の航空会社の便は見つかりません。「すべて」で全部の便を見られます。" : "便はありません。"}</p>`}
     ${spot && other ? `<p class="hint spother">ほかの撮影地から見える機体 ${other}機（撮影地を変えると出ます）</p>` : ""}
-    <div class="splinks"><button class="linkbtn2" data-spcond>撮影条件と天気</button>${SERVER ? `<button class="linkbtn2" data-sppush>近づいたら知らせる</button>` : ""}</div>
+    <div class="splinks"><button class="linkbtn2" data-spcond>撮影条件と天気</button>${atcHas(OPS_AP) ? `<button class="linkbtn2" data-atc>いま聞く周波数</button>` : ""}${SERVER ? `<button class="linkbtn2" data-sppush>近づいたら知らせる</button>` : ""}</div>
     <p class="fwnote">時刻は JAL・ANA の時刻表と運航情報。海外の航空会社の便と、機体の登録記号・滑走路は推定です。機材は予定で、変わることがあります。${spot ? `見えるかどうかは、いまの運用で使う滑走路（推定）の着陸・離陸の線から撮影地まで2.5km以内かで決めた目安です。着陸の滑走路が2本あるときは、${OPS_AP === "HND" ? "来た方面（北・東からか、南・西からか）で1本に絞り、絞れないときは" : ""}どちらかが見えれば出します。建物などで見えないこともあります。` : ""}${ODPT_CREDIT}</p>`;
   if(!(SP_WX_AP === OPS_AP && SP_WX)) loadSpWx(OPS_AP).then(x => { if(x && VIEW.ops === "photo" && BOARD) renderPhoto(BOARD); });
 }
@@ -6451,6 +6467,7 @@ function spDetailHTML(x){
     <div class="spgrid"><div class="spcard"><small>${x.dir === "arr" ? "着陸" : "離陸"}</small><b>${x.t ? spHM(x.t) + "ごろ" : "—"}</b><small>${x.sched ? `定刻 ${spHM(x.sched)}${late >= 5 ? `・${late}分遅れ` : ""}` : "推定"}${x.est ? "・見込み" : ""}</small></div>
       <div class="spcard"><small>滑走路</small><b>${rw ? esc(rw) : "—"}</b><small>${rw ? (rwi.side ? "運用と来た方面からの推定" : "いまの運用からの推定") : "向きが分かりません"}</small></div></div>
     ${where ? `<div class="spcard"><small>いまどこ</small><b class="m">${esc(where)}</b>${lv || x.km ? `<span class="bar"><i style="width:${Math.max(4, Math.min(100, 100 - (lv ? spKm(lv) : x.km) / 2))}%"></i></span>` : ""}</div>` : ""}
+    ${atcSceneHTML(x)}
     ${spots ? `<div class="spcard"><small>どこから撮る</small><ul class="spwhere">${spots}</ul></div>` : ""}
     ${x.dir === "arr" && SERVER && key ? `<button class="spnote big" data-spnote="${esc(key)}" aria-pressed="${on}">${on ? "知らせを取り消す" : `着陸の${ps.lead || 5}分前に知らせる`}</button>` : ""}
     <p class="fwnote">${x.foreign ? "時刻表がない便のため、時刻・機種は機体の位置（adsb.lol）と経路のデータ（adsb.im）からの推定です。" : `時刻は JAL・ANA の時刻表と運航情報。${ODPT_CREDIT}`}滑走路と順光・逆光は推定です。</p>`;
@@ -6569,6 +6586,63 @@ async function openSpCond(){
   const iata = OPS_AP; await loadSpWx(iata); if(iata === OPS_AP && $("dSpotCond").open) $("dSpotCondBody").innerHTML = spCondHTML();
 }
 document.addEventListener("click", e => { if(e.target.closest("[data-spcond]")) openSpCond(); });
+
+// ---- いま聞く周波数（受信機で聞く人向け）と、機体のいまの管制の場面（推定） ----
+//   周波数は国土交通省 航空局の航空路誌（AIP Japan）に載っているもの。どれを使っているかは時間・混み具合で変わるため、
+//   いちばんよく使うものを先に、ほかを「ほかに」で並べる。交信の音や内容はここでは扱わない
+const ATC_FREQ = {
+  HND:{ atis:["128.80"], del:["121.82", "121.87"], gnd:["121.70", "118.22", "121.62", "121.97", "122.07"], twr:["118.10", "124.35", "118.57", "118.72", "118.80", "126.20"],
+        app:["119.10", "119.40", "119.70", "119.65", "124.40", "125.20", "125.40", "125.80", "127.70"], dep:["126.00", "120.80", "119.60", "120.60", "124.20", "125.52", "127.50", "127.60"],
+        name:{ gnd:"東京グランド", twr:"東京タワー", app:"東京アプローチ", dep:"東京ディパーチャー", del:"東京デリバリー" } },
+  NRT:{ atis:["128.25"], del:["121.65", "121.90"], gnd:["121.85", "121.95"], ramp:["121.60", "121.75"], twr:["118.20", "118.35", "122.70", "126.20"],
+        app:["124.40", "125.20", "125.80", "127.70", "121.27"], dep:["124.20", "120.60", "119.60", "125.52", "127.50"],
+        name:{ gnd:"成田グランド", ramp:"成田ランプ", twr:"成田タワー", app:"東京アプローチ", dep:"東京ディパーチャー", del:"成田デリバリー" } }
+};
+const ATC_WHAT = { atis:"空港の天気と運用（滑走路・風・気圧）をくり返し放送", del:"出発前の飛行経路の許可", ramp:"駐機場の中の案内", gnd:"地上を走る機体の案内（誘導路）",
+  twr:"着陸と離陸の許可・ゴーアラウンドの指示", app:"着陸に向かう機体を、滑走路の手前まで並べる", dep:"離陸したあと、上昇中の機体" };
+const ATC_SHOW = { all:["atis", "twr", "gnd", "ramp", "del"], arr:["app", "twr", "atis"], dep:["twr", "dep", "gnd"] };
+let ATC_TAB = "all";
+const atcHas = iata => !!ATC_FREQ[iata];
+const atcName = (iata, k) => k === "atis" ? "ATIS" : ATC_FREQ[iata].name[k];
+// 機体のいまの管制の場面（推定）：高さと空港までの距離から。arr＝着陸する機体、dep＝離陸する機体
+function atcScene(x, lv){
+  if(!lv || lv.alt_ft == null) return x.dir === "dep" ? { k:"gnd", steps:["gnd", "twr", "dep", "cruise"], i:0 } : null;
+  const km0 = spKm(lv), alt = lv.alt_ft;
+  if(x.dir === "arr"){ const steps = ["cruise", "app", "twr", "gnd"];
+    const i = km0 <= 3 && alt < 300 ? 3 : km0 <= 20 && alt <= 3500 ? 2 : km0 <= 90 && alt <= 16000 ? 1 : 0;
+    return { k:steps[i], steps, i, next:i === 1 ? Math.max(1, Math.round((km0 - 15) / 4)) : null }; }
+  const steps = ["gnd", "twr", "dep", "cruise"], i = alt < 100 && km0 <= 5 ? 0 : alt <= 2500 && km0 <= 12 ? 1 : alt <= 20000 ? 2 : 3;
+  return { k:steps[i], steps, i };
+}
+const ATC_STEP = { cruise:"巡航", app:"アプローチ", twr:"タワー", gnd:"グランド", dep:"ディパーチャー" };
+function atcSceneHTML(x){
+  if(!atcHas(OPS_AP)) return "";
+  const sc = atcScene(x, x.live || spLive(x.fl)); if(!sc) return "";
+  const F = ATC_FREQ[OPS_AP], f = F[sc.k] ? F[sc.k][0] : null;
+  return `<div class="spcard"><small>いまの管制の場面（推定）</small>
+    <div class="atcsteps">${sc.steps.map((k, i) => `<span class="${i < sc.i ? "past" : i === sc.i ? "on" : ""}"><i></i>${ATC_STEP[k]}</span>`).join("")}</div>
+    ${f ? `<div class="atcnow"><span><small>受信機で聞くなら</small><b>${esc(atcName(OPS_AP, sc.k))}</b></span><b class="f">${f}</b></div>` : `<small>${sc.k === "cruise" ? "まだ空港から遠く、航空路の管制（東京コントロールなど）にいるころです。" : ""}</small>`}
+    ${sc.next ? `<small>あと約${sc.next}分でタワー（${F.twr[0]}）に移るころです。</small>` : ""}
+    <button class="linkbtn2" data-atc type="button">ほかの周波数</button></div>`;
+}
+function atcHTML(){
+  const iata = OPS_AP, F = ATC_FREQ[iata], cur = OPS_CUR, op = cur && cur.op;
+  const best = ATC_TAB === "dep" ? "twr" : ATC_TAB === "arr" ? "app" : "twr";
+  const rows = ATC_SHOW[ATC_TAB].filter(k => F[k]).map(k => `<li><span class="n"><b>${esc(atcName(iata, k))}</b><small>${ATC_WHAT[k]}</small></span>
+    <span class="v"><b>${F[k][0]}</b><small>${F[k].length > 1 ? "ほかに " + F[k].slice(1, 3).join("・") + (F[k].length > 3 ? " など" : "") : ""}</small></span></li>`).join("");
+  return `<div class="spctop"><button class="mp-back" data-close type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>撮影</button><h3>いま聞く周波数</h3><span class="sp" aria-hidden="true"></span></div>
+    <p class="hint">受信機（エアバンド）で聞く人向け。いまの運用に合わせて、聞くとよい管制を並べます。</p>
+    <div class="atchero"><div class="h"><span>${esc(opsDef().name)}${op ? "・" + esc(op.label) : ""}</span><span>${op ? `${esc(op.arr.join("/"))} に着陸・${esc(op.dep.join("/"))} から離陸` : ""}</span></div>
+      <div class="f"><span><small>いちばんおすすめ</small><b>${F[best][0]}</b><small>${esc(atcName(iata, best))}（${best === "app" ? "着陸に向かう機体" : "着陸・離陸の許可"}）</small></span></div></div>
+    <div class="atctabs" role="group" aria-label="聞くもの">${[["all", "空港"], ["arr", "着陸を聞く"], ["dep", "離陸を聞く"]].map(([k, l]) => `<button class="chip" data-atctab="${k}" aria-pressed="${ATC_TAB === k}">${l}</button>`).join("")}</div>
+    <ul class="atclist">${rows}</ul>
+    <p class="hint">周波数は時間や混み具合で変わります。いちばん上が、よく使われるものです。</p>
+    <div class="atcrule"><b>聞くときの注意（電波法）</b>聞いた内容を録音して公開したり、人に伝えたりすることについては、電波法59条の解釈が分かれています。気をつけて楽しんでください。</div>
+    <p class="fwnote">周波数は国土交通省 航空局の航空路誌（AIP Japan）から。どの周波数を使っているかは推定で、実際と違うことがあります。航法には使えません。非公式。</p>`;
+}
+function openAtc(){ if(!atcHas(OPS_AP)) return; track("spot", "atc"); $("dAtcBody").innerHTML = atcHTML(); if(!$("dAtc").open) $("dAtc").showModal(); }
+document.addEventListener("click", e => { if(e.target.closest("[data-atc]")) openAtc();
+  const t = e.target.closest("[data-atctab]"); if(t){ ATC_TAB = t.dataset.atctab; $("dAtcBody").innerHTML = atcHTML(); } });
 
 // ---- 近づいたら知らせる（設定） ----
 const SP_KINDS = [["special", "特別塗装機", "JAL・ANA などの特別塗装機（推定）"], ["big", "大きな機体", "B777・B787・A350 など"], ["foreign", "海外の航空会社", "いま近くにいる便（推定）"], ["reg", "指定した機体", "登録記号で選ぶ（例 JA01XJ）"], ["ops", "運用が変わったとき", "北風 ⇄ 南風など"]];
