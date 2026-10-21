@@ -37,6 +37,17 @@ async def main():
         t = await pg.inner_text('#opsPhoto'); print('PHOTO', t.replace('\n', ' | '))
         check('注目の機体のカード:', await pg.locator('#opsPhoto .sphero').count() == 1)
         check('注目だけ（B738 は出ない）:', 'NH212' in t and 'TG660' in t and 'JL500' not in t and 'BC101' not in t)
+        # 撮影地ごとの絞り込み
+        n_spots = await pg.locator('#opsPhoto [data-spspot]').count()
+        check('撮影地のボタンが並ぶ:', n_spots >= 3)
+        sel = await pg.inner_text('#opsPhoto .spsel'); print('SEL', sel.replace('\n', ' | '))
+        check('選んでいる撮影地と見える線:', '見える：' in sel)
+        before = await pg.locator('#opsPhoto .sprow').count()
+        btns = pg.locator('#opsPhoto [data-spspot]:not([disabled])')
+        names = [await btns.nth(i).get_attribute('data-spspot') for i in range(await btns.count())]
+        await btns.nth(len(names) - 1).click(); await pg.wait_for_timeout(200)
+        check('撮影地を変えると選び直される:', names[-1] in await pg.inner_text('#opsPhoto .spsel') and await pg.evaluate("localStorage.getItem('soramemo.photoSpot.HND')") == names[-1])
+        await btns.nth(0).click(); await pg.wait_for_timeout(200)
         check('天気の札:', '雲底 1,800ft' in t and 'ベイパー 出やすい' in t)
         await pg.click('[data-spfilter="all"]'); await pg.wait_for_timeout(200)
         check('すべてで B738 も出る:', 'JL500' in await pg.inner_text('#opsPhoto'))

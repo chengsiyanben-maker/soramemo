@@ -1382,6 +1382,25 @@ dialog.psheet .btn1,dialog.psheet .btn2{display:block;width:100%;margin-top:10px
 #v-ops .sprow .n small{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #v-ops .sprow em{flex:none;font-style:normal;border-radius:7px;padding:3px 7px;font-size:10.5px;font-weight:800;color:#fff}
 #v-ops .sprow .go{flex:none;color:var(--op-sub);font-size:16px}
+#v-ops .sph5{display:flex;justify-content:space-between;align-items:baseline;margin:14px 2px 6px}
+#v-ops .sph5 b{font-size:14px}#v-ops .sph5 small{font-size:11px;color:var(--op-mute)}
+#v-ops .spspots2{display:flex;gap:8px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none}
+#v-ops .spspots2 button{flex:none;width:132px;text-align:left;border:0;border-radius:16px;padding:10px 12px;background:var(--op-card);color:var(--op-ink);font-family:var(--gothic);box-shadow:var(--op-shadow)}
+#v-ops .spspots2 button[aria-pressed="true"]{background:#111827;color:#fff}
+#v-ops .spspots2 button:disabled{opacity:.45}
+#v-ops .spspots2 span{display:flex;justify-content:space-between;align-items:center;gap:6px}
+#v-ops .spspots2 b{font-size:12.5px;line-height:1.3}
+#v-ops .spspots2 b.n{flex:none;font-size:15px;color:#8A5A00}#v-ops .spspots2 button[aria-pressed="true"] b.n{color:#E9C46A}
+#v-ops .spspots2 small{display:block;margin-top:4px;font-size:10.5px;font-weight:700;color:var(--op-mute)}
+#v-ops .spspots2 small.back{color:#8A5A00}#v-ops .spspots2 button[aria-pressed="true"] small{color:#BDBDBD}#v-ops .spspots2 button[aria-pressed="true"] small.back{color:#E9C46A}
+#v-ops .spsel{margin-top:10px;background:var(--op-card);border-radius:20px;padding:12px 14px;box-shadow:var(--op-shadow)}
+#v-ops .spsel .h{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+#v-ops .spsel small{display:block;font-size:11px;color:var(--op-mute)}#v-ops .spsel b{font-size:16px;font-weight:900}
+#v-ops .spsel .pill{flex:none;border-radius:999px;padding:5px 10px;font-size:11px;font-weight:800;background:var(--op-pill);color:var(--op-mute)}#v-ops .spsel .pill.back{background:#FDF1E1;color:#8A5A00}
+#v-ops .spsel .sees{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+#v-ops .spsel .sees span{border-radius:8px;padding:4px 8px;font-size:11.5px;font-weight:700}
+#v-ops .spsel .sees .arr{background:#E0ECFF;color:#1D4ED8}#v-ops .spsel .sees .dep{background:#FDE8DC;color:#C2410C}
+#v-ops .spother{margin:8px 4px 0}
 #v-ops .splinks{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
 .vwcard{background:var(--vw-card);border-radius:22px;padding:14px 16px;box-shadow:var(--vw-shadow);color:var(--vw-ink)}
 .vwnote{font-size:11.5px;color:var(--vw-mute);line-height:1.6;margin:8px 2px 0}
@@ -6324,12 +6343,36 @@ function sunDay(t, lat, lon){
 const azWord = az => DIR16[Math.round(az / 22.5) % 16];
 
 // ---- 撮る人の見方（運用のタブ）----
+// 撮影地ごとに見える線：いまの運用の着陸・離陸の線（spotRank と同じ線）から 2.5km 以内のものを、滑走路と向きごとに
+const SP_SEE_KM = 2.5;
+function spSees(def, op, rw){
+  const lines = [...op.arr.filter(id => rw[id]).map(id => { const r = rw[id]; return { rw:id, dir:"arr", ln:[dest(r.thr, (r.hdg + 180) % 360, 8), r.thr] }; }),
+                 ...op.dep.filter(id => rw[id]).map(id => { const r = rw[id]; return { rw:id, dir:"dep", ln:[r.opp, dest(r.opp, r.hdg, 6)] }; })];
+  return (OPS_SPOTS[def.iata] || []).map(([name, lat, lon]) => {
+    const sees = lines.map(l => ({ rw:l.rw, dir:l.dir, km:nmToLine([lat, lon], l.ln) * 1.852, view:nearestOn([lat, lon], l.ln) })).filter(x => x.km <= SP_SEE_KM).sort((a, b) => a.km - b.km);
+    return { name, lat, lon, sees, li:sees.length ? lightInfo([lat, lon], sees[0].view) : null };
+  });
+}
+// その機体がその撮影地から見えるか（着陸の滑走路が2本あるときは、どちらかが見えれば）。見える線を返す
+const spSeeOf = (spot, x, op) => { const cand = x.dir === "arr" ? op.arr : op.dep; return spot.sees.find(s => s.dir === x.dir && cand.includes(s.rw)) || null; };
+let SP_SPOT = null;
 function renderPhoto(d){
   const box = $("opsPhoto"); if(!box) return;
   SP_ITEMS = spItems(d);
   const now = Date.now(), cur = OPS_CUR, op = cur && cur.op;
-  const pick = SP_ITEMS.filter(x => x.kind), hero = pick.find(x => x.t != null && x.t >= now) || SP_ITEMS.find(x => x.t != null && x.t >= now) || null;
-  const list = SP_ITEMS.filter(x => SP_FILTER === "all" ? true : SP_FILTER === "pick" ? x.kind : x.dir === SP_FILTER).slice(0, 14);
+  // 撮影地を選ぶと、そこから見える機体だけに絞る（運用の向きが分からないときは絞らない）
+  const known = !!(op && op.arr.length + op.dep.length), SPOTS = known ? spSees(cur.def, op, cur.rw) : [];
+  if(SP_SPOT == null){ try{ SP_SPOT = localStorage.getItem("soramemo.photoSpot." + OPS_AP); }catch(e){} }
+  const soon = x => x.t == null || x.t >= now - 2 * 60000;
+  const cnt = s => SP_ITEMS.filter(x => soon(x) && spSeeOf(s, x, op)).length;
+  let spot = SPOTS.find(s => s.name === SP_SPOT && s.sees.length) || null;
+  if(!spot && SPOTS.length){ spot = SPOTS.filter(s => s.sees.length).sort((a, b) => cnt(b) - cnt(a))[0] || null; }
+  const inSpot = x => !spot || !!spOf(x);
+  const spOf = x => spot ? spSeeOf(spot, x, op) : null;
+  const ITEMS = SP_ITEMS.filter(inSpot);
+  const pick = ITEMS.filter(x => x.kind), hero = pick.find(x => x.t != null && x.t >= now) || ITEMS.find(x => x.t != null && x.t >= now) || null;
+  const list = ITEMS.filter(x => SP_FILTER === "all" ? true : SP_FILTER === "pick" ? x.kind : x.dir === SP_FILTER).slice(0, 14);
+  const other = SP_ITEMS.filter(x => !inSpot(x) && soon(x) && (SP_FILTER === "all" ? true : SP_FILTER === "pick" ? x.kind : x.dir === SP_FILTER)).length;
   const tag = k => k && SP_KIND[k] ? `<em style="background:${SP_KIND[k][1]}">${SP_KIND[k][0]}</em>` : "";
   const ps = pushSpot(), lead = ps.lead || 5;
   // 上の札：運用・光・雲・ベイパー
@@ -6340,7 +6383,12 @@ function renderPhoto(d){
     li ? `<button class="spchip" data-spcond>${LIGHT[li.cur]}${li.cur === "back" && li.until ? ` あと${dur(li.until)}` : ""}</button>` : "",
     wx ? `<button class="spchip" data-spcond>${wx.low_ft != null ? `雲底 ${spFt(wx.low_ft)}ft` : "雲 なし"}</button>` : "",
     vp ? `<button class="spchip" data-spcond>ベイパー ${vp.label}</button>` : ""].join("");
-  const rwOf = x => op ? (x.dir === "arr" ? op.arr : op.dep).join("・") : "";
+  const rwOf = x => op ? (x.dir === "arr" ? op.arr : op.dep).join(x.dir === "arr" ? " か " : "・") : "";
+  const DIRJ = { arr:"着陸", dep:"離陸" }, kmS = k => k < 0.95 ? `約${Math.round(k * 10) / 10}km` : `約${Math.round(k * 10) / 10}km`;
+  const spotHTML = SPOTS.length ? `<div class="sph5"><b>どこで撮る</b><small>数字はこの3時間に見える機体</small></div>
+    <div class="spspots2" role="group" aria-label="撮影地">${SPOTS.map(s => `<button data-spspot="${esc(s.name)}" aria-pressed="${spot === s}" ${s.sees.length ? "" : "disabled"}><span><b>${esc(s.name.replace(/ターミナル 展望デッキ$/, "展望デッキ"))}</b><b class="n">${s.sees.length ? cnt(s) : "—"}</b></span><small class="${s.li ? s.li.cur : ""}">${s.sees.length ? (s.li ? LIGHT[s.li.cur] : "") : "いまは見えない"}</small></button>`).join("")}</div>
+    ${spot ? `<div class="spsel"><div class="h"><span><small>いま選んでいる撮影地</small><b>${esc(spot.name)}</b></span>${spot.li ? `<span class="pill ${spot.li.cur}">${LIGHT[spot.li.cur]}</span>` : ""}</div>
+      <div class="sees">${spot.sees.map(s => `<span class="${s.dir}">見える：${esc(s.rw)} ${DIRJ[s.dir]}</span>`).join("")}</div></div>` : ""}` : "";
   const heroHTML = hero ? (() => { const m = Math.max(0, Math.round((hero.t - now) / 60000)), i = SP_ITEMS.indexOf(hero), key = `${hero.fl}@${spJstDate(hero.t)}`, on = ps.flights.includes(key);
     return `<div class="sphero"><button class="spheromain" data-spfl="${i}" aria-label="${esc(hero.fl)}のくわしく">
       <span class="h"><span>${hero.kind ? "つぎに来る注目の機体" : "つぎに来る機体"}</span><span>${hero.dir === "arr" ? "着陸まで" : "離陸まで"}</span></span>
@@ -6352,16 +6400,18 @@ function renderPhoto(d){
   const F = [["pick", "注目だけ"], ["arr", "着陸"], ["dep", "離陸"], ["all", "すべて"]];
   const rows = list.map(x => { const i = SP_ITEMS.indexOf(x), lv = x.live, where = lv && lv.alt_ft != null ? `いま高度 ${spFt(lv.alt_ft)}ft` : x.foreign && x.status === "ground" ? "いま地上" : x.foreign && x.alt != null ? `いま高度 ${spFt(x.alt)}ft` : "";
     return `<li><button class="sprow" data-spfl="${i}"><span class="t"><b>${x.t != null ? spHM(x.t) : "—"}</b><small>${x.dir === "arr" ? "着陸" : "離陸"}</small></span>
-      <span class="n"><b>${esc(x.fl)}　${esc(x.type || "")}</b><small>${[esc(placeAny(x.other)) + (x.dir === "arr" ? "から" : "へ"), x.reg && `${esc(x.reg)}（推定）`, where].filter(Boolean).join("・")}</small></span>${tag(x.kind)}<span class="go" aria-hidden="true">›</span></button></li>`; }).join("");
+      <span class="n"><b>${esc(x.fl)}　${esc(x.type || "")}</b><small>${[esc(placeAny(x.other)) + (x.dir === "arr" ? "から" : "へ"), spOf(x) && `${esc((x.dir === "arr" ? op.arr : op.dep).join("/"))}・${kmS(spOf(x).km)}`, x.reg && `${esc(x.reg)}（推定）`, where].filter(Boolean).join("・")}</small></span>${tag(x.kind)}<span class="go" aria-hidden="true">›</span></button></li>`; }).join("");
   box.hidden = false;
-  box.innerHTML = `${chips ? `<div class="spchips">${chips}</div>` : ""}${heroHTML}
+  box.innerHTML = `${chips ? `<div class="spchips">${chips}</div>` : ""}${spotHTML}${heroHTML}
     <div class="spfilter" role="group" aria-label="一覧の絞り込み">${F.map(([k, l]) => `<button class="chip" data-spfilter="${k}" aria-pressed="${SP_FILTER === k}">${l}</button>`).join("")}</div>
-    ${rows ? `<ul class="splist2">${rows}</ul>` : `<p class="hint">${SP_FILTER === "pick" ? "この3時間に、特別塗装機・大きな機体・国際線・海外の航空会社の便は見つかりません。「すべて」で全部の便を見られます。" : "この3時間の便はありません。"}</p>`}
+    ${rows ? `<ul class="splist2">${rows}</ul>` : `<p class="hint">${spot ? `${esc(spot.name)}から見える` : "この3時間に、"}${SP_FILTER === "pick" ? "特別塗装機・大きな機体・国際線・海外の航空会社の便は見つかりません。「すべて」で全部の便を見られます。" : "便はありません。"}</p>`}
+    ${spot && other ? `<p class="hint spother">ほかの撮影地から見える機体 ${other}機（撮影地を変えると出ます）</p>` : ""}
     <div class="splinks"><button class="linkbtn2" data-spcond>撮影条件と天気</button>${SERVER ? `<button class="linkbtn2" data-sppush>近づいたら知らせる</button>` : ""}</div>
-    <p class="fwnote">時刻は JAL・ANA の時刻表と運航情報。海外の航空会社の便と、機体の登録記号・滑走路は推定です。機材は予定で、変わることがあります。${ODPT_CREDIT}</p>`;
+    <p class="fwnote">時刻は JAL・ANA の時刻表と運航情報。海外の航空会社の便と、機体の登録記号・滑走路は推定です。機材は予定で、変わることがあります。${spot ? "見えるかどうかは、いまの運用で使う滑走路（推定）の着陸・離陸の線から撮影地まで2.5km以内かで決めた目安です。着陸の滑走路が2本あるときは、どちらかが見えれば出します。建物などで見えないこともあります。" : ""}${ODPT_CREDIT}</p>`;
   if(!(SP_WX_AP === OPS_AP && SP_WX)) loadSpWx(OPS_AP).then(x => { if(x && VIEW.ops === "photo" && BOARD) renderPhoto(BOARD); });
 }
 document.addEventListener("click", e => { const b = e.target.closest("[data-spfilter]"); if(!b) return; SP_FILTER = b.dataset.spfilter; if(BOARD) renderPhoto(BOARD); });
+document.addEventListener("click", e => { const b = e.target.closest("[data-spspot]"); if(!b) return; SP_SPOT = b.dataset.spspot; try{ localStorage.setItem("soramemo.photoSpot." + OPS_AP, SP_SPOT); }catch(_){} track("spot", "pick"); if(BOARD) renderPhoto(BOARD); });
 
 // ---- 機体のくわしく ----
 function spDetailHTML(x){
@@ -6566,6 +6616,7 @@ document.addEventListener("click", e => { const b = e.target.closest("[data-ops]
 async function setOpsAirport(iata){
   if(!OPS_AIRPORTS[iata]) return;
   OPS_AP = iata; try{ localStorage.setItem("soramemo.opsAirport", iata); }catch(e){}
+  SP_SPOT = null;
   OPS_MODE = "auto"; OPS_OBS = null; OPS_WX = null; OPS_PLANES = []; TRAFFIC_FIT = false; OPS_SID_DIR = "all";
   if(TRAFFIC_LAYER){ TRAFFIC_LAYER.remove(); TRAFFIC_LAYER = null; }
   if(OPS_MAP){ OPS_MAP._opsAp = iata; OPS_MAP.setView(opsDef().center, 10, { animate:false }); }
