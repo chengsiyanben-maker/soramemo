@@ -6053,6 +6053,7 @@ async function renderOntime(){
 /* 航跡アート：その日に空港を出た・着いた便の、上昇・降下の道筋（15,000ft 未満）を重ねた1枚。出発は橙、到着は水色 */
 let ART = { iata:null, day:null, tracks:null };
 const ART_KM = 70;
+const ART_FIRST = "2026-10-18";   // 航跡の記録を始めた日（ここからずっと残している）
 const jstToday = () => jstDay(Date.now());
 const addDay = (d, n) => new Date(Date.parse(d + "T00:00:00Z") + n * 86_400_000).toISOString().slice(0, 10);
 function decodePl(s){
@@ -6095,11 +6096,11 @@ async function renderArt(day){
   box.hidden = false;
   box.innerHTML = `<div class="bdhead"><h3>${esc(name)}の空の道　<small>${d === y ? "昨日" : artLabel(d)}</small></h3>${tracks.length ? `<button class="linkbtn2 ydshare" id="artShare" type="button">画像で共有</button>` : ""}</div>
     <canvas class="artcv" id="artCv" role="img" aria-label="${esc(`${artLabel(d)}に${name}を出発した${dep}便と到着した${tracks.length - dep}便の、上昇・降下の道筋`)}"></canvas>
-    <div class="artnav"><button type="button" data-art-day="${addDay(d, -1)}" ${addDay(d, -1) < addDay(jstToday(), -366) ? "disabled" : ""} aria-label="前の日">◀</button>
-      <label class="artdate"><span>${artLabel(d)}　出発 ${dep}便・到着 ${tracks.length - dep}便</span><input type="date" id="artDate" value="${d}" min="${addDay(jstToday(), -366)}" max="${y}" aria-label="日を選ぶ"></label>
+    <div class="artnav"><button type="button" data-art-day="${addDay(d, -1)}" ${addDay(d, -1) < ART_FIRST ? "disabled" : ""} aria-label="前の日">◀</button>
+      <label class="artdate"><span>${artLabel(d)}　出発 ${dep}便・到着 ${tracks.length - dep}便</span><input type="date" id="artDate" value="${d}" min="${ART_FIRST}" max="${y}" aria-label="日を選ぶ"></label>
       <button type="button" data-art-day="${addDay(d, 1)}" ${addDay(d, 1) > y ? "disabled" : ""} aria-label="次の日">▶</button></div>
     <p class="artkey"><span><i style="background:#FBB03B"></i>出発</span><span><i style="background:#48BEFF"></i>到着</span><span>円は中心から20・40・60km</span></p>
-    <p class="fwnote">空港の近くで15,000ft より低く飛んでいた、航空会社の便すべての位置（adsb.lol・ODbL）。10月22日より前の日は JAL・ANA の便だけです。電波が届かない所は描かれません。1年前までさかのぼれます（記録を始めた10月18日より前はありません）。</p>`;
+    <p class="fwnote">空港の近くで15,000ft より低く飛んでいた、航空会社の便すべての位置（adsb.lol・ODbL）。10月22日より前の日は JAL・ANA の便だけです。電波が届かない所は描かれません。記録を始めた2026年10月18日から、どの日でも見られます。</p>`;
   const cv = $("artCv"), w = Math.round(cv.clientWidth * (devicePixelRatio || 1)) || 600;
   cv.width = w; cv.height = w; drawArt(cv.getContext("2d"), 0, 0, w, tracks, def.center);
 }

@@ -50,7 +50,7 @@ async def main():
         mn = await pg.get_attribute('#artDate', 'min')
         await pg.fill('#artDate', mn); await pg.dispatch_event('#artDate', 'change'); await pg.wait_for_timeout(600)
         days = [x[1].get('p_day') for x in calls if x[0] == 'airport_tracks']
-        print('日を選んで1年前まで:', days[-1] == mn and mn <= (datetime.now(timezone.utc) + timedelta(hours=9) - timedelta(days=360)).strftime('%Y-%m-%d'))
+        print('日を選んで記録の最初の日まで:', days[-1] == mn and mn == '2026-10-18')
         await pg.click('#opsArt [aria-label="次の日"]'); await pg.wait_for_timeout(600)
         await pg.click('#artShare'); await pg.wait_for_selector('#dShare[open]', timeout=5000)
         print('共有の画像:', (await pg.get_attribute('#shareImg', 'src') or '')[:22])
