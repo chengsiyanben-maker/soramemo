@@ -457,3 +457,7 @@ verify_jwt = false
 verify_jwt = false
 [functions.rwy-learn]
 verify_jwt = false
+[functions.cold-archive]
+verify_jwt = false
+[functions.cold-tracks]
+verify_jwt = false

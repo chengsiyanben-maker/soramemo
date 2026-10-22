@@ -51,6 +51,10 @@ async def main():
         await pg.fill('#artDate', mn); await pg.dispatch_event('#artDate', 'change'); await pg.wait_for_timeout(600)
         days = [x[1].get('p_day') for x in calls if x[0] == 'airport_tracks']
         print('日を選んで記録の最初の日まで:', days[-1] == mn and mn == '2026-10-18')
+        cold = []
+        await c.route('https://fake.supabase.co/functions/v1/cold-tracks**', lambda r: (cold.append(r.request.url), r.fulfill(status=200, body=json.dumps(TR), content_type='application/json', headers={'Access-Control-Allow-Origin':'*'}))[1])
+        await pg.evaluate("(async () => { ART = { iata:null }; const t = await loadArt('KIX', addDay(jstToday(), -420)); window.__cold = t.length; })()"); await pg.wait_for_timeout(800)
+        print('古い日はファイル置き場から読む:', len(cold) == 1 and 'iata=KIX' in cold[0] and await pg.evaluate('window.__cold') == len(TR))
         await pg.click('#opsArt [aria-label="次の日"]'); await pg.wait_for_timeout(600)
         await pg.click('#artShare'); await pg.wait_for_selector('#dShare[open]', timeout=5000)
         print('共有の画像:', (await pg.get_attribute('#shareImg', 'src') or '')[:22])
