@@ -53,19 +53,23 @@ export function cruiseOf(type?: string | null): { cruise: number; approach: numb
   return { cruise: 440, approach: 210 };
 }
 // 到着予想（推定）：到着空港まで残りの距離を、巡航中は今の対地速度（上空の風を含む）か機種の巡航速度で、
-// 最後の40海里（約74km）は進入の平均速度で飛ぶとみなし、進入・着陸に4分を足す。上昇中は機種の巡航速度を使う
+// 最後の40海里（約74km）は進入の平均速度で飛ぶとみなし、進入・着陸に4分と、空港ごとの寄り道（ARR_EXTRA）を足す。上昇中は機種の巡航速度を使う
 export function predictEta(p: { lat: number; lon: number; alt_ft: number | null; kt?: number | null; at: number }, arr: Airport, type?: string | null): number {
   const { cruise, approach } = cruiseOf(type), nm = km(p, arr) / 1.852, alt = p.alt_ft ?? 0;
   const inCruise = alt >= 18000 && p.kt != null && p.kt > cruise * 0.6 && p.kt < cruise * 1.5;
   const v = inCruise ? p.kt! : cruise * 0.95;
   const far = Math.max(0, nm - 40), near = Math.min(nm, 40);
   const nearV = alt < 10000 && p.kt != null && p.kt > 100 ? Math.min(approach, p.kt) : approach;
-  return p.at + (far / v + near / nearV) * 3600_000 + 4 * MIN;
+  return p.at + (far / v + near / nearV) * 3600_000 + 4 * MIN + arrExtra(arr.iata, nm) * MIN;
 }
 // 着陸してから搭乗口に着くまでの地上走行（分・目安）。航空会社の「到着」は搭乗口に着いた時刻なので、画面の到着予想にはこれを足す。
-// 10月14〜20日の到着予想の当たり具合（eta_accuracy）で、運航情報（搭乗口）と機体の位置（着陸）の差が機種ごとに5〜8分、
-// 羽田・成田に多い大型機ほど大きかったことからの目安。空港ごとの値は eta_accuracy の by_arr で見直す
-export const TAXI_IN: Record<string, number> = { HND: 9, NRT: 10, KIX: 7, ITM: 6, CTS: 7, FUK: 6, OKA: 7, NGO: 6 };
+// 10月8〜21日の当たり具合（eta_accuracy の by_arr）で、運航情報（搭乗口）と機体の位置（着陸）の差の中央値の差から決めた値。
+// 機体の位置の記録が少ない空港（成田・関西など）は、似た空港からの目安
+export const TAXI_IN: Record<string, number> = { HND: 10, NRT: 10, KIX: 7, ITM: 5, CTS: 8, FUK: 6, OKA: 6, NGO: 3, SDJ: 4, KMJ: 4, KOJ: 4, HIJ: 3, KMI: 2, HKD: 3, AKJ: 3, UKB: 4 };
+// 着陸までの寄り道（分・目安）：まっすぐの距離より長く飛ぶ分（進入の順番待ち・大回り）。同じ記録で、着陸の時刻とくらべた予想の早すぎ（中央値）から。
+// 空港に近いほど小さくする（残り60海里より近いと、残りの距離に比例して減らす）
+export const ARR_EXTRA: Record<string, number> = { HND: 10, NRT: 8, KIX: 6, FUK: 3, OKA: 3, NGO: 3, NGS: 3 };
+export const arrExtra = (iata: string | null | undefined, nm: number) => (ARR_EXTRA[iata ?? ""] ?? 0) * Math.max(0, Math.min(1, nm / 60));
 export const taxiIn = (iata?: string | null) => TAXI_IN[iata ?? ""] ?? 4;
 // 降りる途中で見えなくなった機体の着陸の時刻（推定）：最後に見た位置から、残りを進入の速度で飛んだとみなす（predictEta と同じ考え方）。
 // 最後に見た時刻より前にはしない

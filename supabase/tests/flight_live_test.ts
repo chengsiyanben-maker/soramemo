@@ -53,7 +53,15 @@ Deno.test("実際の到着の時刻が、まだ来ていない時刻なら到着
   assertEquals(liveState({ ...S, ata: T0 + 3 * 36e5 }, null, HND, LAX, T0 + 4 * 36e5).phase, "landed");
 });
 
-Deno.test("到着予想は着陸の予想に地上走行の目安を足す（羽田は9分）", async () => {
+Deno.test("到着予想は着陸の予想に地上走行の目安を足す（羽田は10分）", async () => {
   const { taxiIn } = await import("../functions/_shared/flight_watch.ts");
-  assertEquals(taxiIn("HND"), 9); assertEquals(taxiIn("KMJ"), 4); assertEquals(taxiIn(null), 4);
+  assertEquals(taxiIn("HND"), 10); assertEquals(taxiIn("KMJ"), 4); assertEquals(taxiIn("TAK"), 4); assertEquals(taxiIn(null), 4);
+});
+
+Deno.test("空港ごとの寄り道：遠いときは全部、近づくと減る", async () => {
+  const { arrExtra, predictEta } = await import("../functions/_shared/flight_watch.ts");
+  assertEquals(arrExtra("HND", 200), 10); assertEquals(arrExtra("HND", 30), 5); assertEquals(arrExtra("HND", 0), 0); assertEquals(arrExtra("KMJ", 200), 0);
+  const p = { lat: 34.7, lon: 135.4, alt_ft: 35000, kt: 450, at: 0 };
+  const hnd = predictEta(p, { iata: "HND", lat: 35.5533, lon: 139.7811, name: "" }, "B738"), x = predictEta(p, { iata: "XXX", lat: 35.5533, lon: 139.7811, name: "" }, "B738");
+  assertEquals(Math.round((hnd - x) / 60_000), 10);
 });
