@@ -54,6 +54,20 @@ async def main():
         await pg.click('[data-thatday]'); await pg.wait_for_timeout(1200)
         td = await pg.inner_text('#dThatDay'); print('THATDAY', td[:300].replace('\n', ' | '))
         check('あの日の空（その日の運用・滑走路）:', await pg.evaluate("$('dThatDay').open") and '22' in td and '16R' in td and '1200' in td and '18kt' in td)
+        TR = [{'d': 1, 'p': '_seyEkzbsY_ibE_ibE'}, {'d': 0, 'p': 'wieyE_mwsY~hbE~hbE'}]
+        await pg.evaluate("ART = { iata:null }")
+        await c.unroute('https://fake.supabase.co/rest/v1/rpc/**')
+        async def rpc2(r):
+            name = r.request.url.rsplit('/', 1)[-1]
+            if name == 'airport_tracks': await r.fulfill(status=200, body=json.dumps(TR), content_type='application/json', headers={'Access-Control-Allow-Origin':'*'}); return
+            await rpc(r)
+        await c.route('https://fake.supabase.co/rest/v1/rpc/**', rpc2)
+        await pg.evaluate("() => { TD.key = null; }")
+        await pg.evaluate("() => { tdChoices = (orig => () => { const C = orig(); C.flown.forEach(x => x.day = addDay(jstToday(), -1)); return C; })(tdChoices); return renderThatDay(); }"); await pg.wait_for_timeout(900)
+        await pg.evaluate("() => { window.openShare = async (cv, name) => { window.__share = [cv.width, cv.height, name]; }; }")
+        await pg.click('#dThatDay [data-tdshare]'); await pg.wait_for_timeout(600)
+        sh = await pg.evaluate('window.__share'); print('SHARE', sh)
+        check('あの日の空を画像で共有:', sh and sh[0] == 1080 and 'soramemo-thatday-' in sh[2])
         await pg.click('#dThatDay [data-tdtab="ago"]'); await pg.wait_for_timeout(800)
         check('1年前の今日（記録の前の日）:', '10月18日より前' in await pg.inner_text('#dThatDay'))
         await pg.screenshot(path=os.path.join(WORK, 't68_thatday.png'))

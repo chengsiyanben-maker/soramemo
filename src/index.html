@@ -5915,23 +5915,43 @@ async function renderThatDay(){
     + `<canvas class="tdcv" id="tdCv" width="900" height="900" role="img" aria-label="その日の空港の航跡"></canvas><div class="spcard" id="tdInfo"><p class="hint">読み込んでいます…</p></div>`;
   const tracks = cur.day < ART_FIRST ? [] : await loadArt(cur.iata, cur.day), info = await rpcPost("airport_day", { p_iata:cur.iata, p_day:cur.day });
   const cv = $("tdCv"); if(!cv) return;
+  TD.last = { cur, tracks };
   const def = OPS_AIRPORTS[cur.iata], a = IATA[cur.iata], center = def ? def.center : a ? [a.lat, a.lon] : null;
   const ctx = cv.getContext("2d");
   if(center){ drawArt(ctx, 0, 0, 900, tracks, center);
-    // 自分の便（白）
-    const f = cur.f; if(f && f.track && f.track.length > 1){ const s = 900 / (2 * ART_KM), kx = 111.32 * Math.cos(center[0] * Math.PI / 180) * s, ky = 110.57 * s;
-      ctx.save(); ctx.strokeStyle = "#FFFFFF"; ctx.lineWidth = 6; ctx.lineCap = "round"; ctx.beginPath();
-      f.track.forEach(([la, lo], i) => { const x = 450 + (lo - center[1]) * kx, y = 450 - (la - center[0]) * ky; i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }); ctx.stroke(); ctx.restore(); } }
+    tdOwn(ctx, 0, 0, 900, cur.f, center); }
   const d = info && info.daily, modes = d && d.modes ? Object.entries(d.modes).sort((x, y) => y[1] - x[1]) : [];
   const ml = modes.length && def && def.modes && def.modes[modes[0][0]] ? def.modes[modes[0][0]].label : null;
   const rw = info && info.rwy ? Object.entries(info.rwy) : [], top = dir => { const r = rw.filter(([k]) => k.startsWith(dir + ":")).sort((x, y) => y[1] - x[1])[0]; return r ? r[0].split(":")[1] : "—"; };
   const facts = [["運用", ml ? ml.replace(/運用.*$/, "") : "—"], ["着陸", top("arr")], ["離陸", top("dep")], ["その日の便", d ? d.flights : tracks.length || "—"], ["最大の風", d && d.max_wind != null ? d.max_wind + "kt" : "—"], ["ゴーアラウンド", info && info.ga != null ? info.ga + "機" : "—"]];
-  $("tdInfo").innerHTML = `<small>${esc(cur.label)}</small><b style="display:block;font-size:17px;margin-top:2px">${esc(placeShort(cur.iata))}の空　${artLabel(cur.day)}</b>
+  TD.last.facts = facts; TD.last.center = center;
+  $("tdInfo").innerHTML = `${tracks.length && center ? `<button class="linkbtn2" data-tdshare type="button" style="float:right">画像で共有</button>` : ""}<small>${esc(cur.label)}</small><b style="display:block;font-size:17px;margin-top:2px">${esc(placeShort(cur.iata))}の空　${artLabel(cur.day)}</b>
     <div class="tdfacts">${facts.map(([k, v]) => `<div>${k}<b>${esc(String(v))}</b></div>`).join("")}</div>
     ${!tracks.length ? `<p class="hint">${cur.day < ART_FIRST ? "記録を始めた2026年10月18日より前の日です。航跡はありません。" : "この日の航跡は、まだありません（その日の分は次の朝にできます）。"}</p>` : ""}
     <p class="fwnote">航跡は空港の近くで15,000ft より低く飛んだ機体（adsb.lol・ODbL）。橙が出発、水色が到着、白があなたの便。運用・滑走路は推定です。</p>`;
 }
-document.addEventListener("click", e => {
+// 自分の便の航跡を白で重ねる（x0・y0 から一辺 W の四角に、drawArt と同じ縮尺で）
+function tdOwn(ctx, x0, y0, W, f, center){
+  if(!f || !f.track || f.track.length < 2 || !center) return;
+  const s = W / (2 * ART_KM), kx = 111.32 * Math.cos(center[0] * Math.PI / 180) * s, ky = 110.57 * s;
+  ctx.save(); ctx.beginPath(); ctx.rect(x0, y0, W, W); ctx.clip(); ctx.strokeStyle = "#FFFFFF"; ctx.lineWidth = Math.max(3, W / 150); ctx.lineCap = "round"; ctx.lineJoin = "round"; ctx.beginPath();
+  f.track.forEach(([la, lo], i) => { const x = x0 + W / 2 + (lo - center[1]) * kx, y = y0 + W / 2 - (la - center[0]) * ky; i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }); ctx.stroke(); ctx.restore();
+}
+async function tdCard(){
+  try{ await document.fonts.ready; }catch(e){}
+  const L = TD.last, [cv, ctx] = cardBase(), x = new Date(L.cur.day + "T00:00:00+09:00");
+  ctx.textAlign = "left"; ctx.fillStyle = PAL.ink; ctx.font = `800 64px ${MINCHO}`; ctx.fillText(`${placeShort(L.cur.iata)}の空`, 80, 250);
+  ctx.fillStyle = PAL.sumi; ctx.font = `500 32px ${GOTHIC}`;
+  ctx.fillText(`${x.getFullYear()}年${x.getMonth() + 1}月${x.getDate()}日　${TD.tab === "flown" ? "あの日乗った便" : TD.tab === "first" ? "はじめて来た日" : "1年前の今日"}`, 80, 305);
+  drawArt(ctx, 140, 340, 800, L.tracks, L.center); tdOwn(ctx, 140, 340, 800, L.cur.f, L.center);
+  ctx.font = `600 30px ${GOTHIC}`; ctx.fillStyle = PAL.ink;
+  ctx.fillText(L.facts.filter(([k, v]) => v !== "—" && ["運用", "着陸", "離陸", "最大の風"].includes(k)).map(([k, v]) => `${k} ${v}`).join("・"), 80, 1200);
+  ctx.fillStyle = PAL.sumi; ctx.font = `500 24px ${GOTHIC}`; ctx.fillText(`橙＝出発・水色＝到着${L.cur.f && L.cur.f.track ? "・白＝わたしの便" : ""}。機体の位置：adsb.lol`, 80, 1310 - 40);
+  ctx.font = `500 28px ${GOTHIC}`; ctx.fillText("#そらメモ", 80, 1312);
+  return cv;
+}
+document.addEventListener("click", async e => {
+  if(e.target.closest("[data-tdshare]") && TD.last && TD.last.tracks.length){ track("stats", "thatday_share"); openShare(await tdCard(), `soramemo-thatday-${TD.last.cur.iata}-${TD.last.cur.day}.png`); return; }
   if(e.target.closest("[data-thatday]")){ openThatDay(); return; }
   const t = e.target.closest("[data-tdtab]"); if(t){ TD.tab = t.dataset.tdtab; TD.key = null; renderThatDay(); }
 });
