@@ -42,3 +42,40 @@ Deno.test("分からないものは出さない", () => {
   const r = parseAtc("roger");
   assertEquals(r.items.length, 0); assertEquals(r.callsign, null); assertEquals(r.ja, "");
 });
+
+// 音声認識AIの書き方のゆれと、日本の管制でよく使う言い回し
+const P = (s: string) => parseAtc(s);
+const K = (s: string) => P(s).items.map((i) => i.k);
+Deno.test("呼び出しの書き方のゆれ", () => {
+  assertEquals(P("JAL123, runway 34R, cleared to land").flight, "JL123");
+  assertEquals(P("ANA 106 contact tower").flight, "NH106");
+  assertEquals(P("Japan Airlines 503 cleared for takeoff").flight, "JL503");
+  assertEquals(P("All Nipon 21, taxi to runway 16 left via Charlie").flight, "NH21");
+  assertEquals(P("Peach 104 line up and wait runway 22").callsign, "APJ104");
+  assertEquals(P("Air Do 15, descend and maintain 4000").callsign, "ADO15");
+  assertEquals(P("Zippy 1 contact departure 126.0").callsign, "TZP1");
+});
+Deno.test("滑走路と許可の書き方のゆれ", () => {
+  assertEquals(P("Japan Air 123 runway 34R cleared to land").items[0], { k: "land", rwy: "34R" });
+  assertEquals(P("Skymark 7 RWY 22 clear to land wind 210 degrees 15").items, [{ k: "land", rwy: "22" }, { k: "wind", deg: 210, kt: 15 }]);
+  assertEquals(P("All Nippon 33 runway 16 right cleared for take off").items[0], { k: "takeoff", rwy: "16R" });
+});
+Deno.test("進入の許可（日本の言い回し）", () => {
+  assertEquals(P("Japan Air 903 cleared ILS Z runway 34 left approach").items[0], { k: "app", type: "ILS", rwy: "34L" });
+  assertEquals(P("All Nippon 5 cleared RNAV approach runway 22").items[0], { k: "app", type: "RNAV", rwy: "22" });
+  assertEquals(P("Japan Air 9 cleared for the visual approach runway 16 left").items[0], { k: "app", type: "VISUAL", rwy: "16L" });
+});
+Deno.test("数の言い方", () => {
+  assertEquals(P("Japan Air 1 descend and maintain one zero thousand").items[0], { k: "alt", dir: "down", ft: 10000, fl: null });
+  assertEquals(P("All Nippon 2 climb FL350").items[0], { k: "alt", dir: "up", ft: null, fl: 350 });
+  assertEquals(P("Japan Air 3 contact Tokyo approach 119 point 1").items[0], { k: "contact", unit: "APPROACH", freq: "119.1" });
+  assertEquals(P("Skymark 4 reduce to 160 knots").items[0], { k: "spd", kt: 160 });
+});
+Deno.test("地上走行・待機・ゴーアラウンド", () => {
+  const t = P("All Nippon 106 taxi via C, H to runway 16 R, holding short runway 22");
+  assertEquals(t.items.find((i) => i.k === "taxi"), { k: "taxi", to: "16R", via: ["C", "H"] });
+  assertEquals(t.items.find((i) => i.k === "hold"), { k: "hold", at: "RWY 22" });
+  assertEquals(P("Japan Air 5 taxi to spot 12 via B5, A").items[0], { k: "taxi", to: "SPOT 12", via: ["B5", "A"] });
+  assertEquals(K("Japan Air 7 execute missed approach climb and maintain 3000"), ["goaround", "alt"]);
+  assertEquals(P("Japan Air 7 monitor tower 118.1").items[0], { k: "contact", unit: "TOWER", freq: "118.1" });
+});

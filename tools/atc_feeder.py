@@ -97,7 +97,7 @@ def main():
             while True:
                 at, audio = clips.get()
                 segs, info = model.transcribe(audio, language="en", beam_size=3, vad_filter=False,
-                                              initial_prompt="Air traffic control. Japan Air, All Nippon, runway, taxi via, hold short, cleared to land, cleared for takeoff.")
+                                              initial_prompt="Air traffic control at Tokyo. Japan Air, All Nippon, Skymark, Air Do, Peach, Orange Liner, Starflyer, New Sky. Runway 34 right, taxi via Charlie, hold short of runway 22, cleared to land, cleared for takeoff, line up and wait, contact Tokyo Tower 118.1.")
                 segs = list(segs)
                 text = " ".join(s.text.strip() for s in segs).strip()
                 if len(text) < 4: continue
