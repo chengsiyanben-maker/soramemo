@@ -20,8 +20,8 @@ async def main():
         await pg.evaluate("""() => { const id = i => A.find(a => a.iata === i).id, t0 = Date.now() - 864e5;
           const cs = ['HND','CTS','OKA','ISG'].map((i,k) => ({a:id(i), t:t0 + k*36e5, acc:20, term:null}));
           const fs = [{id:'a1', from:id('HND'), to:id('CTS'), dep:t0, arr:t0+36e5, km:819.6, airline:'JL', no:'JL501'},{id:'a2', from:id('OKA'), to:id('ISG'), dep:t0+2*36e5, arr:t0+3*36e5, km:395.4, airline:null, no:null}];
-          localStorage.setItem('soramemo.v1', JSON.stringify({checkins:cs, flights:fs, manual:[]})); localStorage.removeItem('soramemo.company'); }""")
-        await pg.wait_for_timeout(400); await pg.reload(); await pg.wait_for_load_state('load'); await pg.wait_for_timeout(500)
+          S = Object.assign(blank(), {checkins:cs, flights:fs, manual:[]}); save(); render(); }""")
+        await pg.wait_for_timeout(500)
         await pg.evaluate("FACTS = new Map([[factKey(S.flights.find(f => f.no)), {reg:'JA01XJ', type:'A359'}]]); CO = null; HANGAR = null; goTab('co')"); await pg.wait_for_timeout(300)
         check('はじめの資金 5,000:', await pg.evaluate('CO.cash') == 5000)
         check('機体なしは ×0.5:', await pg.evaluate('CO.routes.every(r => r.mult === .5)'))
@@ -36,7 +36,7 @@ async def main():
         d0 = await pg.evaluate('CO.gross'); await pg.select_option('[data-assign]', oi); await pg.wait_for_timeout(300)
         check('路線に入れると収益が上がる（×0.5 → ×1.1）:', await pg.evaluate('CO.gross') > d0 and await pg.evaluate(f"CO.routes.find(r => r.k === '{oi}').mult") == 1.1)
         await pg.locator('#coRoutes details', has_text='名前のない機体').locator('summary').click(); await pg.wait_for_timeout(150)
-        rc = await pg.inner_text('#coRoutes'); check('路線の内わけ（機体・古さ・実際の空）:', '基本（距離と空港の大きさ）' in rc and '機体の古さ' in rc and '実際の空' in rc)
+        rc = await pg.inner_text('#coRoutes'); check('路線の内わけ（機体・古さ・実際の空）:', '基本（' in rc and '拠点' in rc and '機体の古さ' in rc and '実際の空' in rc)
         await pg.screenshot(path=os.path.join(WORK, 't69_local_fleet.png'), full_page=True)
         await pg.click('[data-sell]'); await pg.wait_for_timeout(150)
         check('売るのは2回押す（1回目は確かめ）:', await pg.evaluate('CO.fleet.length') == 1 and 'もう一度押すと' in await pg.inner_text('[data-sell]'))

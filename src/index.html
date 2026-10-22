@@ -1887,7 +1887,7 @@ nav.tabs{transition:transform .3s cubic-bezier(.2,.8,.2,1),opacity .2s}
   <!-- GAME: ROUTES & FLEET -->
   <section class="view" id="v-fleet" aria-label="路線と機体">
     <h2>自社路線</h2>
-    <p class="hint">実際に飛んだ区間（国際線は便名を入れた記録）が、あなたの会社の路線になります。機体を入れると機体の倍率に、機体がないと収益は半分です。路線を押すと計算の内わけが見られます。</p>
+    <p class="hint">実際に飛んだ区間（国際線は便名を入れた記録）が、あなたの会社の路線になります。機体を入れると機体の倍率に、機体がないと収益は半分です。路線を押すと計算の内わけが見られます。空港の大きさは、1日の発着便数で5段階（超大規模・拠点・大規模・中規模・小規模）。大型ジェットは拠点以上どうし、中型ジェットは大規模以上どうしの路線に入れられます。</p>
     <div id="coRoutes"></div>
     <h2>機体</h2>
     <p class="hint">あなたが乗った機体だけを、会社の機体として買えます。登録記号は、便名を入れたフライトの毎日の記録（機体の位置・adsb.lol）から。分からないときは、時刻表の機種で「名前のない機体」を1機買えます。国際線に入れられるのは、国際線で乗った機体だけです。</p>
@@ -4239,8 +4239,10 @@ ${eyes}<ellipse cx="38" cy="70" rx="5" ry="3" fill="#F2A3A3" opacity=".8"/><elli
 const ECON = {
   capDays: 7,                 // 何日分まで貯められるか（放置しても損をしない）
   startCash: 5000,            // はじめの資金。最初の1機は半額
-  sizeOf: a => a.radius >= 2000 ? 3 : a.radius >= 1500 ? 2 : 1.5,   // 大規模3・中規模2・離島1.5（海外の空港は3）
-  daily: (km, s1, s2) => Math.round(Math.sqrt(km) * (s1 + s2) * 2), // 1日の基本収益（万円）
+  // 空港の大きさ：サーバーは1日の発着便数（前の28日の平均）で決める。超大規模6・拠点4.5・大規模3・中規模2・小規模1.5（海外の空港は4.5）
+  //   お試し版は、主な空港の一覧と滑走路まわりの広さで（サーバーで記録がない空港と同じ）
+  sizeOf: a => a.iata === "HND" ? 6 : ["NRT","KIX","ITM","NGO","CTS","FUK","OKA"].includes(a.iata) ? 4.5 : a.radius >= 2000 ? 3 : a.radius >= 1500 ? 2 : 1.5,
+  daily: (km, s1, s2) => Math.round(Math.sqrt(km) * Math.sqrt(s1 * s2) * 4), // 1日の基本収益（万円）。小さいほうの空港に引っぱられる
   levelMul: lv => 1 + 0.25 * (lv - 1), maxLevel: 5,
   upCost: (base, lv) => base * 30 * lv * lv,
   roles: [["crew","乗員",.10],["maint","整備",.05],["sales","営業",.15]],
@@ -4251,7 +4253,7 @@ const ECON = {
     {id:"rj",   name:"リージョナルジェット", mult:1.25, price:15000, minSize:1.5},
     {id:"nb",   name:"小型ジェット",         mult:1.50, price:25000, minSize:2},
     {id:"wb",   name:"中型ジェット",         mult:1.90, price:50000, minSize:3},
-    {id:"lg",   name:"大型ジェット",         mult:2.30, price:80000, minSize:3},
+    {id:"lg",   name:"大型ジェット",         mult:2.30, price:80000, minSize:4.5},
   ],
   acEscalation: .25,          // 持っている機体1機ごとに、次の機体の値段が +25%
   upkeep: x => Math.round(x.price / 1000),                          // 維持費（毎日、値段の0.1%）
@@ -4280,7 +4282,8 @@ function yen(man){ man = Math.round(man); if(Math.abs(man) < 10000) return `${fm
   const oku = Math.trunc(man / 10000), rest = Math.abs(man % 10000); return `${fmtKm(oku)}億${rest ? fmtKm(rest) + "万" : ""}円`; }
 const sgn = n => (n > 0 ? "+" : n < 0 ? "−" : "") + fmtKm(Math.abs(n));
 const starsOf = p => { let s = 1; ECON.rep.stars.forEach((t, i) => { if(p >= t) s = i + 1; }); return s; };
-const SIZE_LABEL = s => s >= 3 ? "大規模" : s >= 2 ? "中規模" : "離島";
+const SIZE_LABEL = s => s >= 6 ? "超大規模" : s >= 4.5 ? "拠点" : s >= 3 ? "大規模" : s >= 2 ? "中規模" : "小規模";
+const SIZE_RULE = m => m >= 4.5 ? "拠点以上どうし" : m >= 3 ? "大規模以上どうし" : m >= 2 ? "中規模以上どうし" : "どの空港も可";
 const coKey = () => demo ? "soramemo.company.demo" : (SERVER && user ? "soramemo.company." + user.id : "soramemo.company");
 let CO = null, HANGAR = null, CO_TAB = "have", RK = null, RK_SCOPE = "all";
 // チェックインした日（日本時間）の数を、空港ごとに（守り神の階級・役職のボーナスに使う）
@@ -4294,7 +4297,7 @@ function coFromServer(j){
   return {server:true, name:j.name, cash:+j.cash, last:Date.parse(j.last), roles:j.roles || {}, daily:+j.daily, gross:+j.gross || 0, upkeep:+j.upkeep || 0, bonus:+j.bonus,
     routes:(j.routes || []).map(r => { const ids = byId.get(r.k);
       return {k:r.k, intl:!!r.intl, a:r.intl ? apOf(r.a, true) : BY[ids[0]], b:r.intl ? apOf(r.b, true) : BY[ids[1]], km:+r.km || 0, base:+r.base, lv:+r.level, cost:+r.cost,
-        minSize:+r.min_size, acId:r.ac_id, mult:+r.mult, hub:+r.hub || 1, sky:+r.sky || 1}; }).filter(r => r.a && r.b),
+        minSize:+r.min_size, sa:+r.sa || null, sb:+r.sb || null, acId:r.ac_id, mult:+r.mult, hub:+r.hub || 1, sky:+r.sky || 1}; }).filter(r => r.a && r.b),
     fleet:(j.fleet || []).map(x => ({id:x.id, type:x.type, route:x.route, reg:x.reg, icao:x.icao, intl:!!x.intl, paid:+x.paid, age:+x.age, value:+x.value, sell:+x.sell, upkeep:+x.upkeep,
       rodeOn:x.rode_on, flight:x.flight, boughtAt:Date.parse(x.bought_at)})),
     sky:j.sky || {}, repPoints:+j.rep_points || 0, stars:+j.stars || 1, bought:+j.bought || 0, value:+j.value || 0,
@@ -4322,7 +4325,7 @@ function coLocalState(){
   const L = CO_LOCAL, fac = L.fac || {}, m = new Map();
   for(const f of S.flights){ const k = rkey(f.from, f.to); if(m.has(k)) continue; const [x, y] = k.split("-").map(Number), a = BY[x], b = BY[y]; if(!a || !b) continue;
     const s1 = ECON.sizeOf(a), s2 = ECON.sizeOf(b), d = km(a, b);
-    m.set(k, {k, intl:false, a, b, km:d, base:ECON.daily(d, s1, s2), minSize:Math.min(s1, s2), hub:1 + ECON.facility.perLevel * ((fac[x] || 0) + (fac[y] || 0)), sky:1}); }
+    m.set(k, {k, intl:false, a, b, km:d, base:ECON.daily(d, s1, s2), sa:s1, sb:s2, minSize:Math.min(s1, s2), hub:1 + ECON.facility.perLevel * ((fac[x] || 0) + (fac[y] || 0)), sky:1}); }
   const fleet = (L.fleet || []).map(x => { const age = ECON.age(x.boughtAt); return {...x, age, value:Math.round(x.paid * age), sell:Math.round(x.paid * age * ECON.sellRate), upkeep:ECON.upkeep(ACB[x.type])}; });
   const routes = [...m.values()].map(r => { const lv = Math.min(ECON.maxLevel, (L.levels || {})[r.k] || 1), ac = fleet.find(x => x.route === r.k);
     return {...r, lv, cost:ECON.upCost(r.base, lv), acId:ac ? ac.id : null, mult:ac ? Math.round(ACB[ac.type].mult * ac.age * 1000) / 1000 : ECON.noAircraft}; });
@@ -4395,7 +4398,7 @@ function renderFleet(){
   // 路線（収益の多い順）。押すと計算の内わけ
   $("coRoutes").innerHTML = rs.length ? [...rs].sort((x, y) => routeInc(y) - routeInc(x)).map(r => {
     const inc = routeInc(r), max = r.lv >= ECON.maxLevel, ac = fl.find(a => a.id === r.acId), st = skyText(r), sp = Math.round((r.sky - 1) * 100);
-    const parts = [["基本（距離と空港の大きさ）", fmtKm(r.base)], [`増便 ${r.lv}段`, `×${ECON.levelMul(r.lv).toFixed(2)}`],
+    const parts = [[`基本（${fmtKm(r.km)}km・${r.sa ? `${SIZE_LABEL(r.sa)}と${SIZE_LABEL(r.sb)}` : "空港の大きさ"}）`, fmtKm(r.base)], [`増便 ${r.lv}段`, `×${ECON.levelMul(r.lv).toFixed(2)}`],
       [ac ? `機体 ${esc(ac.reg || "名前のない機体")}（${ACB[ac.type].name}）` : "機体なし", `×${(ac ? ACB[ac.type].mult : ECON.noAircraft).toFixed(2)}`],
       ...(ac ? [[`機体の古さ（買って ${Math.floor((Date.now() - ac.boughtAt) / 864e5)}日）`, `×${ac.age.toFixed(2)}`]] : []),
       ...(r.hub > 1 ? [["施設", `×${r.hub.toFixed(2)}`]] : []), ...(r.intl ? [] : [["実際の空", `×${r.sky.toFixed(2)}`]]),
@@ -4423,7 +4426,7 @@ function renderFleet(){
     const list = H.filter(x => !x.owned);
     $("coFleet").innerHTML = list.length ? list.map(x => { const sp = ACB[x.cls], liv = x.reg && LIVERY_NAMES[x.reg];
       return `<div class="ride${liv ? " liv" : ""}">${acSVG(x.cls)}<div class="rd"><b>${esc(x.reg || acTypeName(x.icao) || sp.name)}</b><span>${x.reg ? esc(acTypeName(x.icao)) : "名前のない機体"}（${sp.name}・×${sp.mult}）${x.intl ? "・国際線" : ""}</span>${liv ? `<em>★ ${esc(liv)}</em>` : ""}
-        <small>${x.rodeOn ? `${esc(String(x.rodeOn).slice(5).replace("-", "/"))} ${esc(x.flight || "")} で乗った${x.n > 1 ? `・${x.n}回` : ""}` : ""}${x.reg ? "" : "（登録記号は分からず）"}・${sp.minSize >= 3 ? "大規模どうし" : sp.minSize >= 2 ? "中規模以上どうし" : "どの空港も可"}・維持費 −${fmtKm(x.upkeep)}/日</small></div>
+        <small>${x.rodeOn ? `${esc(String(x.rodeOn).slice(5).replace("-", "/"))} ${esc(x.flight || "")} で乗った${x.n > 1 ? `・${x.n}回` : ""}` : ""}${x.reg ? "" : "（登録記号は分からず）"}・${SIZE_RULE(sp.minSize)}・維持費 −${fmtKm(x.upkeep)}/日</small></div>
         <button class="btn2" data-buy="${esc(x.ride)}"${CO.cash < x.price ? " disabled" : ""}>買う ${yen(x.price)}${CO.bought ? "" : "（半額）"}</button></div>`; }).join("")
       : `<p class="none">買える機体はありません。便名を入れたフライトの次の日の朝に、乗った機体が分かります。</p>`;
   }

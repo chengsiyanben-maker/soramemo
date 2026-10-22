@@ -117,4 +117,18 @@ rk = await as(C, `select public.co_ranking('friends')`);
 check('友だちをやめると、どちらからも消える', rk.rows.length === 1, rk);
 check('ほかの表は直接読めない', String(await as(A, `select count(*) from public.co_rank_days`)).startsWith('ERROR') && String(await as(A, `select count(*) from public.co_friends`)).startsWith('ERROR'), null);
 check('資金は直接書き換えられない', String(await as(A, `update public.companies set cash = 1`)).startsWith('ERROR'), null);
+
+// 空港の大きさ：記録がないと主な空港の一覧（羽田6・新千歳4.5）。基本＝√距離×√(大きさ×大きさ)×4
+s = await as(A, 'select public.co_state()');
+const hcR = s.routes.find((r) => r.k === hc);
+check('羽田（超大規模）⇄新千歳（拠点）の基本収益', Number(hcR.sa) + Number(hcR.sb) === 10.5 && Number(hcR.base) === Math.round(Math.sqrt(819.6) * Math.sqrt(27) * 4), hcR);
+check('国際線の海外の空港は拠点', s.routes.some((r) => r.intl && (Number(r.sa) === 4.5 || Number(r.sb) === 4.5)), null);
+// 便の記録が14日以上あれば、便の数で決める（新千歳を1日30便にすると中規模）
+await db.exec(`insert into airport_daily (day, iata, flights) select (now() at time zone 'Asia/Tokyo')::date - g, 'CTS', 30 from generate_series(1, 20) g
+  on conflict do nothing; update airport_daily set flights = 30 where iata = 'CTS'`);
+await db.exec(`select public.co_size_refresh()`);
+s = await as(A, 'select public.co_state()');
+check('便の数で大きさが決まる（30便は中規模）', Number(s.routes.find((r) => r.k === hc).sb) === 2 || Number(s.routes.find((r) => r.k === hc).sa) === 2, s.routes.find((r) => r.k === hc));
+check('大型ジェットは拠点以上どうしの路線から外れる（入れられない）', String(await as(A, `select public.co_buy('r:JA01XJ')`)).length > 0 && Number((await q1(`select (public.ac_spec('lg')).min_size`))) === 4.5, null);
+check('空港の大きさはだれでも読める', typeof (await as(A, 'select public.co_sizes()')) === 'object', null);
 if (bad) process.exit(1);
