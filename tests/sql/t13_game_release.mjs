@@ -14,7 +14,7 @@ await db.exec(`insert into auth.users (id) values ('${ADM}'),('${U}'); insert in
 const as = async (role, uid, sql) => { try { await db.exec(`set role ${role}; select set_config('request.jwt.claim.sub','${uid}',false);`); const r = await db.query(sql); return r.rows.length ? Object.values(r.rows[0])[0] : 'ok'; } catch (e) { return 'ERROR: ' + e.message.split('\n')[0]; } finally { await db.exec('reset role'); } };
 console.log('app_status:', JSON.stringify(await as('anon', '', 'select public.app_status()')));
 console.log('公開前 利用者 co_state:', await as('authenticated', U, 'select public.co_state()'));
-console.log('公開前 利用者 co_buy:', await as('authenticated', U, `select public.co_buy('prop')`));
+console.log('公開前 利用者 co_buy:', await as('authenticated', U, `select public.co_buy('r:JA01XJ')`));
 console.log('公開前 運営者 co_state:', typeof (await as('authenticated', ADM, 'select public.co_state()')) === 'object' ? '使える' : 'NG');
 console.log('利用者が公開しようとする:', await as('authenticated', U, `select public.admin_set_flag('game_released','true'::jsonb)`));
 console.log('運営者が公開:', await as('authenticated', ADM, `select public.admin_set_flag('game_released','true'::jsonb)`));

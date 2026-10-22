@@ -12,9 +12,9 @@ async def main():
           const cs = ['HND','CTS','OKA','ISG'].map((i,k) => ({a:id(i), t:t0 + k*36e5, acc:20, term:null}));
           const fs = [{id:'a1', from:id('HND'), to:id('CTS'), dep:t0, arr:t0+36e5, km:819.6, airline:null, no:null},{id:'a2', from:id('OKA'), to:id('ISG'), dep:t0+2*36e5, arr:t0+3*36e5, km:395.4, airline:null, no:null}];
           localStorage.setItem('soramemo.v1', JSON.stringify({checkins:cs, flights:fs, manual:[]}));
-          localStorage.setItem('soramemo.company', JSON.stringify({name:'テスト航空', cash:500000, last:Date.now(), levels:{}, roles:{}, fleet:[], fac:{}})); }""")
+          localStorage.setItem('soramemo.company', JSON.stringify({v2:true, name:'テスト航空', cash:500000, last:Date.now(), levels:{}, roles:{}, fleet:[], fac:{}})); }""")
         await pg.wait_for_timeout(400); await pg.reload(); await pg.wait_for_load_state('load'); await pg.wait_for_timeout(500); await pg.evaluate('goTab("co")')
-        st = lambda: pg.evaluate("JSON.stringify({pts:coRepPoints(), stars:coStars(), daily:coDaily(), cash:CO.cash, fac:CO.fac})")
+        st = lambda: pg.evaluate("JSON.stringify({pts:coRepPoints(), stars:coStars(), daily:coDaily(), cash:CO.cash, fac:coFac()})")
         print('start:', await st())
         hnd = await pg.evaluate("A.find(a=>a.iata==='HND').id"); cts = await pg.evaluate("A.find(a=>a.iata==='CTS').id")
         await pg.evaluate('goTab("co")')

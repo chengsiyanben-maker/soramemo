@@ -17,7 +17,7 @@ async def main():
         await pg.evaluate('goTab("co")')
         await pg.click('#coCollect'); await pg.wait_for_timeout(300); print('collect:', await pg.inner_text('#coCash'), '|', await pg.inner_text('#coMsg'))
         await pg.evaluate('goTab("fleet")')
-        await pg.click('[data-up="5-6"]'); await pg.wait_for_timeout(300); print('upgrade:', await pg.inner_text('#coCash'), '|', await pg.inner_text('#coMsg'), '|', await pg.evaluate('CO.routes.get("5-6").level'))
+        await pg.click('#coRoutes summary'); await pg.click('[data-up="5-6"]'); await pg.wait_for_timeout(300); print('upgrade:', await pg.inner_text('#coCash'), '|', await pg.inner_text('#coMsg'), '|', await pg.evaluate('CO.routes.find(r=>r.k==="5-6").lv'))
         await pg.evaluate('goTab("co")')
         await pg.select_option('[data-role=crew]', '5'); await pg.wait_for_timeout(300); print('role:', await pg.inner_text('#coRate'), await pg.evaluate('JSON.stringify(CO.roles)'))
         await pg.evaluate('goTab("co")')

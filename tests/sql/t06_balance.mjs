@@ -20,7 +20,4 @@ const as = async (sql) => { try { await db.exec(`set role authenticated; select 
 const b = j => typeof j==='string'? j : JSON.stringify({cash:j.cash, pts:j.rep_points, stars:j.stars, costs:j.routes.map(r=>r.k+':'+r.cost), fleet:j.fleet.length});
 console.log('state:', b(await as('select public.co_state()')));          // HND-CTS cost 344*30*1 = 10320
 console.log('upgrade:', b(await as(`select public.co_upgrade('5-6')`)));   // cash -10320 -> next cost 344*30*4 = 41280
-console.log('buy prop #1 (10000):', b(await as(`select public.co_buy('prop')`)));
-console.log('buy prop #2 (12500):', b(await as(`select public.co_buy('prop')`)));
-console.log('buy prop #3 (15000):', b(await as(`select public.co_buy('prop')`)));
 console.log('build HND (30000):', b(await as(`select public.co_build(${ids.HND})`)));

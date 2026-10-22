@@ -18,7 +18,7 @@ async def main():
         await pg.evaluate('goTab("co")')
         print('rate:', await pg.inner_text('#coRate')); print('collect btn:', await pg.inner_text('#coCollect'), await pg.is_disabled('#coCollect'))
         # 3日たったことにする
-        await pg.evaluate("CO.last = Date.now() - 3*864e5; coSave(); renderCompany();")
+        await pg.evaluate("CO_LOCAL.last = Date.now() - 3*864e5; coLocalSave(); renderCompany();")
         await pg.evaluate('goTab("co")')
         print('after 3d:', await pg.inner_text('#coCollect'))
         await pg.evaluate('goTab("co")')
@@ -34,11 +34,12 @@ async def main():
         # 増便
         await pg.evaluate('goTab("fleet")')
         btn = pg.locator('[data-up]:not([disabled]) >> nth=0')
-        await pg.evaluate('goTab("co")')
+        await pg.evaluate('goTab("fleet")')
+        await pg.evaluate("document.querySelectorAll('#coRoutes details').forEach(d => d.open = true)")
         if await btn.count(): await btn.click(); print('upgrade:', await pg.inner_text('#coMsg'), '| cash', await pg.inner_text('#coCash'))
         # 10日放置は7日で上限
         await pg.evaluate('goTab("co")')
-        await pg.evaluate("CO.last = Date.now() - 10*864e5; renderCompany();"); print('cap:', await pg.inner_text('#coCollect'))
+        await pg.evaluate("CO_LOCAL.last = Date.now() - 10*864e5; renderCompany();"); print('cap:', await pg.inner_text('#coCollect'))
         await pg.screenshot(path=os.path.join(WORK,'co_tab.png'), full_page=True)
         await pg.evaluate('goTab("gods")')
         await pg.click('[data-god] >> nth=0'); await pg.wait_for_timeout(200); print('god:', (await pg.inner_text('#dGodBody')).replace('\n',' ')[:120])
