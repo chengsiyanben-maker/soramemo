@@ -8,6 +8,12 @@ function liveryNames() {
   for (const x of ts.matchAll(/\{\s*reg:\s*"([A-Z0-9-]+)",\s*name:\s*"([^"]+)"([^}]*)\}/g)) if (!/kind:\s*"alliance"/.test(x[3])) m[x[1]] = x[2];
   return JSON.stringify(m);
 }
+// 特別塗装機の航空会社（図鑑で分ける）
+function liveryAirlines() {
+  const ts = readFileSync(new URL("../supabase/functions/_shared/liveries.ts", import.meta.url), "utf8"), m = {};
+  for (const x of ts.matchAll(/\{\s*reg:\s*"([A-Z0-9-]+)",\s*name:\s*"[^"]+",\s*airline:\s*"([^"]+)"([^}]*)\}/g)) if (!/kind:\s*"alliance"/.test(x[3])) m[x[1]] = x[2];
+  return JSON.stringify(m);
+}
 import { gzipSync } from "node:zlib";
 import { createHash } from "node:crypto";
 import { execFileSync } from "node:child_process";
@@ -29,6 +35,7 @@ for (const f of files) {
   // 「空港のいま」には、アプリ本体と同じ運用の判定の中心を差し込む（判定の仕方がずれないように）
   let out = f === "now.html" ? src.replace("/*@OPS_CORE@*/", () => opsCoreParts().join("\n")) : src;
   out = out.replace("/*@LIVERIES@*/{}", () => liveryNames());   // 特別塗装機の一覧（登録記号 → 名前）を、サーバーの liveries.ts からアプリに入れる（乗った機体の図鑑の印）
+  out = out.replace("/*@LIVERY_AIR@*/{}", () => liveryAirlines());   // 特別塗装機の航空会社（特別塗装機の図鑑で分ける）
   // CSS
   out = out.replace(/<style>([\s\S]*?)<\/style>/g, (_, css) => `<style>${cssMinify(css).css}</style>`);
   // JS（<script src> 以外の、中身のある script）

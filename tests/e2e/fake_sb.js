@@ -22,6 +22,7 @@
       if(name === 'atc_new_feeder'){ window.__atcFeeder = a; if(!a.p_consent) return {data:null, error:{message:'consent required'}}; return {data:{id:'f1', token:'a'.repeat(64)}, error:null}; }
       if(name === 'my_data_prefs'){ return {data: window.__dp || {stats:true, offers:false, research:false}, error:null}; }
       if(name === 'set_data_prefs'){ window.__dp = {stats:a.p_stats, offers:a.p_offers, research:a.p_research}; return {data: window.__dp, error:null}; }
+      if(name === 'my_livery_seen'){ return {data: window.__livSeen || [], error:null}; }
       if(name === 'current_events'){ return {data: window.__events || [], error:null}; }
       if(name === 'my_event_bonus'){ return {data: window.__evb || {pending:0, total:0, count:0}, error:null}; }
       if(name === 'app_status'){ return {data: window.__appStatus || {maintenance:false, checkin_enabled:true, message:'', game_released: window.__gameReleased !== false}, error:null}; }
