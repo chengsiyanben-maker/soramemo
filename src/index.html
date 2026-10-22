@@ -6064,7 +6064,11 @@ function decodePl(s){
 }
 async function loadArt(iata, day){
   if(ART.iata === iata && ART.day === day && ART.tracks) return ART.tracks;
-  const t = await rpcPost("airport_tracks", { p_iata:iata, p_day:day });
+  let t = await rpcPost("airport_tracks", { p_iata:iata, p_day:day });
+  // 400日より前の日は、ファイル置き場に移してある（cold-tracks から読む）
+  if(Array.isArray(t) && !t.length && day < addDay(jstToday(), -395)){
+    try{ const r = await fetch(SORAMEMO_CONFIG.supabaseUrl.replace(/\/$/, "") + `/functions/v1/cold-tracks?iata=${encodeURIComponent(iata)}&day=${day}`, { headers:{ apikey:SORAMEMO_CONFIG.supabaseAnonKey } }); if(r.ok) t = await r.json(); }catch(e){}
+  }
   ART = { iata, day, tracks:Array.isArray(t) ? t.map(x => ({ dep:x.d === 1, pts:decodePl(String(x.p || "")) })).filter(x => x.pts.length >= 2) : [] };
   return ART.tracks;
 }
