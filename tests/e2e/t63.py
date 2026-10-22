@@ -55,6 +55,12 @@ async def main():
             spRwsOf({ dir:'arr', other:'FUK', fl:'X5' }, { arr:['22','23'], dep:[] }), spRwsOf({ dir:'arr', other:'LAX', fl:'X6' }, { arr:['16L','16R'], dep:[] }),
             spRwsOf({ dir:'dep', other:'CTS', fl:'X7' }, { arr:['22','23'], dep:['16L','16R'] }), spRwsOf({ dir:'dep', other:'FUK', fl:'X8' }, { arr:['22','23'], dep:['16L','16R'] }), spRwsOf({ dir:'dep', other:'ZZZ', fl:'X9' }, op)]; }""")
         print('RWS', rws)
+        ln = await pg.evaluate("""() => { const keep = OPS_AP; OPS_AP = 'CTS';
+          SP_LEARN.set('CTS', { at:Date.now(), d:{ rows:[{ dir:'arr', rwy:'01R', sec:4, n:80 }, { dir:'arr', rwy:'01L', sec:4, n:6 }, { dir:'dep', rwy:'01L', sec:4, n:20 }, { dir:'dep', rwy:'01R', sec:4, n:15 }] } });
+          const op = { arr:['01L','01R'], dep:['01L','01R'] }; const r = [spRwsOf({ dir:'arr', other:'HND', fl:'Y1' }, op), spRwsOf({ dir:'dep', other:'HND', fl:'Y2' }, op)];
+          OPS_AP = keep; return r; }""")
+        print('LEARN', ln)
+        check('学習した使い分けで絞る（8割以上・30機以上だけ）:', ln[0] == {'rws': ['01R'], 'side': False, 'learn': 93} and ln[1]['rws'] == ['01L', '01R'])
         check('来た方面で滑走路を絞る:', rws[0] == {'rws': ['34L'], 'side': True} and rws[1]['rws'] == ['34R'] and rws[2] == {'rws': ['34L', '34R'], 'side': False} and rws[3] == {'rws': ['05'], 'side': True} and rws[6]['rws'] == ['16L'] and rws[7]['rws'] == ['16R'] and rws[8] == {'rws': ['05', '34R'], 'side': False} and rws[4]['rws'] == ['22'] and rws[5]['rws'] == ['16R'])
         check('天気の札:', '雲底 1,800ft' in t and 'ベイパー 出やすい' in t)
         await pg.click('[data-spfilter="all"]'); await pg.wait_for_timeout(200)

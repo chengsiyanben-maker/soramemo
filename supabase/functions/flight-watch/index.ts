@@ -4,7 +4,7 @@
 // 見つけたお知らせは flight_alerts に残し、その空港を選んでいる人のスマホへ通知する（VAPID の鍵があるときだけ）。
 import { createClient } from "npm:@supabase/supabase-js@2.117.2";
 import { sendAlertPush } from "../_shared/alert_push.ts";
-import { type Airport, blankWatch, callsignsFor, onRoute, type Sched, type Seen, step, type Watch } from "../_shared/flight_watch.ts";
+import { type Airport, blankWatch, callsignsFor, onRoute, type Sched, type Seen, step, type Watch, loadCalib } from "../_shared/flight_watch.ts";
 
 const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, { auth: { persistSession: false } });
 const JSON_HEADERS = { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" };
@@ -19,6 +19,7 @@ async function airports() {
 }
 
 Deno.serve(async () => {
+  await loadCalib(() => admin.from("eta_calib").select("iata, taxi, extra"));
   try {
     // 1分に1回だけ
     const { data: run } = await admin.from("flight_watch_runs").update({ ran_at: new Date().toISOString() })

@@ -4,7 +4,7 @@
 // 時刻表にない便（海外の航空会社）は、機体が見つかったときだけ、adsb.lol の経路のデータから出発・到着の空港を推定する（日本発着の便だけ）。
 // adsb.lol への問い合わせは、同じ呼び出し符号は45秒に1回まで（覚えておく）。
 import { createClient } from "npm:@supabase/supabase-js@2.117.2";
-import { callsignsFor, type Airport } from "../_shared/flight_watch.ts";
+import { callsignsFor, type Airport, loadCalib } from "../_shared/flight_watch.ts";
 import { liveState, type LiveSched, type Plane, toPlane } from "../_shared/flight_live.ts";
 import { worldAirport } from "../_shared/world_airports.ts";
 
@@ -50,6 +50,7 @@ async function guessRoute(p: Plane): Promise<{ dep: string; arr: string } | null
 }
 
 Deno.serve(async (req) => {
+  await loadCalib(() => admin.from("eta_calib").select("iata, taxi, extra"));
   if (req.method === "OPTIONS") return new Response("ok", { headers: { ...H, "Access-Control-Allow-Headers": "apikey, content-type" } });
   try {
     const u = new URL(req.url), flight = (u.searchParams.get("flight") ?? "").toUpperCase().replace(/\s/g, ""), dep = (u.searchParams.get("dep") ?? "").toUpperCase() || null;

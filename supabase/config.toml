@@ -455,3 +455,5 @@ verify_jwt = false
 verify_jwt = false
 [functions.atc-ingest]
 verify_jwt = false
+[functions.rwy-learn]
+verify_jwt = false

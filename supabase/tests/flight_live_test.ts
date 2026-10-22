@@ -65,3 +65,12 @@ Deno.test("空港ごとの寄り道：遠いときは全部、近づくと減る
   const hnd = predictEta(p, { iata: "HND", lat: 35.5533, lon: 139.7811, name: "" }, "B738"), x = predictEta(p, { iata: "XXX", lat: 35.5533, lon: 139.7811, name: "" }, "B738");
   assertEquals(Math.round((hnd - x) / 60_000), 10);
 });
+
+Deno.test("学習した空港ごとの値があればそれを使う", async () => {
+  const { setCalib, taxiIn, arrExtra } = await import("../functions/_shared/flight_watch.ts");
+  setCalib([{ iata: "KMJ", taxi: 6.4, extra: 2 }, { iata: "HND", taxi: null, extra: 12 }]);
+  assertEquals(taxiIn("KMJ"), 6); assertEquals(arrExtra("KMJ", 200), 2);
+  assertEquals(taxiIn("HND"), 10); assertEquals(arrExtra("HND", 200), 12);   // 地上走行は目安のまま、寄り道は学習した値
+  assertEquals(taxiIn("TAK"), 4);
+  setCalib([]);
+});

@@ -69,8 +69,19 @@ export const TAXI_IN: Record<string, number> = { HND: 10, NRT: 10, KIX: 7, ITM: 
 // 着陸までの寄り道（分・目安）：まっすぐの距離より長く飛ぶ分（進入の順番待ち・大回り）。同じ記録で、着陸の時刻とくらべた予想の早すぎ（中央値）から。
 // 空港に近いほど小さくする（残り60海里より近いと、残りの距離に比例して減らす）
 export const ARR_EXTRA: Record<string, number> = { HND: 10, NRT: 8, KIX: 6, FUK: 3, OKA: 3, NGO: 3, NGS: 3 };
-export const arrExtra = (iata: string | null | undefined, nm: number) => (ARR_EXTRA[iata ?? ""] ?? 0) * Math.max(0, Math.min(1, nm / 60));
-export const taxiIn = (iata?: string | null) => TAXI_IN[iata ?? ""] ?? 4;
+// 空港ごとに記録から毎晩決め直した値（eta_calib。refresh_eta_calib）。読めたものはこちらを使い、ない空港は上の目安
+let CALIB: Record<string, { taxi: number | null; extra: number | null }> = {};
+export function setCalib(rows: { iata: string; taxi: number | null; extra: number | null }[] | null | undefined) {
+  if (!rows) return; CALIB = Object.fromEntries(rows.filter((r) => /^[A-Z]{3}$/.test(r.iata)).map((r) => [r.iata, { taxi: r.taxi, extra: r.extra }]));
+}
+// 毎回読まない：10分に1回だけ読み直す（読めなければ前の値のまま）
+let CALIB_AT = 0;
+export async function loadCalib(read: () => PromiseLike<{ data: unknown }>) {
+  if (Date.now() - CALIB_AT < 10 * 60_000) return; CALIB_AT = Date.now();
+  try { const { data } = await read(); if (Array.isArray(data)) setCalib(data as { iata: string; taxi: number | null; extra: number | null }[]); } catch { /* 前の値のまま */ }
+}
+export const arrExtra = (iata: string | null | undefined, nm: number) => (CALIB[iata ?? ""]?.extra ?? ARR_EXTRA[iata ?? ""] ?? 0) * Math.max(0, Math.min(1, nm / 60));
+export const taxiIn = (iata?: string | null) => Math.round(CALIB[iata ?? ""]?.taxi ?? TAXI_IN[iata ?? ""] ?? 4);
 // 降りる途中で見えなくなった機体の着陸の時刻（推定）：最後に見た位置から、残りを進入の速度で飛んだとみなす（predictEta と同じ考え方）。
 // 最後に見た時刻より前にはしない
 export function landingFrom(last: { lat: number; lon: number; alt_ft: number | null; at: number }, arr: Airport, type?: string | null): number {
