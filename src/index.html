@@ -6640,10 +6640,23 @@ function spSees(def, op, rw){
     return { name, lat, lon, sees, li:sees.length ? lightInfo([lat, lon], sees[0].view) : null };
   });
 }
-// 羽田の着陸：2本のどちらに降りるかを、来た方面（空港から見た方角）で決める（JAL・ANA の航跡971機で約9割合った目安）
-//   北・東から来る機体 → 34R・23・16R、南・西から来る機体 → 34L・22・16L
-//   方角は、いま空港から60〜150kmにいればその位置、ほかは出発した空港の位置から
-const HND_SIDE = { "34R":"N", "34L":"S", "23":"N", "22":"S", "16R":"N", "16L":"S" };
+// 羽田・成田の着陸：2本のどちらに降りるかを、来た方面（空港から見た方角）で決める。
+//   10月21〜22日の全航空会社の着陸（羽田4,200機・成田3,000機）で、空港から60kmの円に入った方角と、降りた滑走路から作った決まり。
+//   [始まり, 終わり（度）, 滑走路]。どれにも当たらない方角は絞らない（2本のまま）
+//   羽田 北風（34L/34R）：北〜南東（0〜150°）から→34R、南〜南西（150〜240°）から→34L（97%）
+//        南風（22/23）  ：北東〜東（20〜120°）から→23、ほか→22（91%）
+//        都心ルート（16L/16R）：北〜東（0〜120°）から→16L、南〜西（150〜270°）から→16R（68機で100%）
+//   成田 34L/34R：南南東（150〜170°）から→34L、ほか→34R（96%）。16L/16R：南〜北西（160〜330°）から→16R、ほか→16L（97%）
+//   方角は、いま空港から60〜150kmにいればその位置、ほかは出発した空港の位置から（西の空港から来る便は南から入るので、240〜300°も南側に入れる。北西は絞らない）
+const ARR_SIDE = {
+  HND:{ "34L,34R":[[0, 150, "34R"], [150, 300, "34L"]], "22,23":[[20, 120, "23"], [120, 380, "22"]], "16L,16R":[[0, 120, "16L"], [150, 300, "16R"]] },
+  NRT:{ "34L,34R":[[150, 170, "34L"], [170, 510, "34R"]], "16L,16R":[[160, 330, "16R"], [330, 520, "16L"]] }
+};
+function sidePick(iata, arr, b){
+  const R = ARR_SIDE[iata] && ARR_SIDE[iata][[...arr].sort().join(",")]; if(!R || b == null) return null;
+  for(const [lo, hi, rw] of R) if((b >= lo && b < hi) || (b + 360 >= lo && b + 360 < hi)) return rw;
+  return null;
+}
 function spArrSide(x){
   const c = opsDef().center, lv = x.live || spLive(x.fl);
   if(lv && lv.lat != null){ const k = spKm(lv); if(k >= 60 && k <= 150) return bearingTo(c, [lv.lat, lv.lon]); }
@@ -6676,10 +6689,7 @@ function spRwsOf(x, op){
     }
     return { rws:op.dep, side:false };
   }
-  if(OPS_AP === "HND" && op.arr.length === 2 && op.arr.every(r => HND_SIDE[r]) && HND_SIDE[op.arr[0]] !== HND_SIDE[op.arr[1]]){
-    const b = spArrSide(x);
-    if(b != null){ const sd = b >= 300 || b < 100 ? "N" : "S"; return { rws:op.arr.filter(r => HND_SIDE[r] === sd), side:true }; }
-  }
+  if(op.arr.length === 2 && ARR_SIDE[OPS_AP]){ const rw = sidePick(OPS_AP, op.arr, spArrSide(x)); if(rw && op.arr.includes(rw)) return { rws:[rw], side:true }; }
   return { rws:op.arr, side:false };
 }
 // その機体がその撮影地から見えるか（着陸の滑走路が2本で絞れないときは、どちらかが見えれば）。見える線を返す
@@ -6737,7 +6747,7 @@ function renderPhoto(d){
     ${rows ? `<ul class="splist2">${rows}</ul>` : `<p class="hint">${spot ? `${esc(spot.name)}から見える` : "この3時間に、"}${SP_FILTER === "pick" ? "特別塗装機・大きな機体・国際線・海外の航空会社の便は見つかりません。「すべて」で全部の便を見られます。" : "便はありません。"}</p>`}
     ${spot && other ? `<p class="hint spother">ほかの撮影地から見える機体 ${other}機（撮影地を変えると出ます）</p>` : ""}
     <div class="splinks"><button class="linkbtn2" data-spcond>撮影条件と天気</button><button class="linkbtn2" data-trend>空港の傾向</button><button class="linkbtn2" data-plane="">機体を探す</button>${atcHas(OPS_AP) ? `<button class="linkbtn2" data-atcfeed>管制の交信</button><button class="linkbtn2" data-atc>いま聞く周波数</button>` : ""}${SERVER ? `<button class="linkbtn2" data-sppush>近づいたら知らせる</button>` : ""}</div>
-    <p class="fwnote">時刻は JAL・ANA の時刻表と運航情報。海外の航空会社の便と、機体の登録記号・滑走路は推定です。機材は予定で、変わることがあります。${spot ? `見えるかどうかは、いまの運用で使う滑走路（推定）の着陸・離陸の線から撮影地まで2.5km以内かで決めた目安です。着陸の滑走路が2本あるときは、${OPS_AP === "HND" ? "来た方面（北・東からか、南・西からか）で1本に絞り、絞れないときは" : ""}どちらかが見えれば出します。${OPS_AP === "HND" ? "離陸も、2本のときは行き先の方面で1本に絞ります（推定）。" : ""}建物などで見えないこともあります。` : ""}${ODPT_CREDIT}</p>`;
+    <p class="fwnote">時刻は JAL・ANA の時刻表と運航情報。海外の航空会社の便と、機体の登録記号・滑走路は推定です。機材は予定で、変わることがあります。${spot ? `見えるかどうかは、いまの運用で使う滑走路（推定）の着陸・離陸の線から撮影地まで2.5km以内かで決めた目安です。着陸の滑走路が2本あるときは、${ARR_SIDE[OPS_AP] ? "来た方面で1本に絞り、絞れないときは" : ""}どちらかが見えれば出します。${OPS_AP === "HND" ? "離陸も、2本のときは行き先の方面で1本に絞ります（推定）。" : ""}建物などで見えないこともあります。` : ""}${ODPT_CREDIT}</p>`;
   if(!(SP_WX_AP === OPS_AP && SP_WX)) loadSpWx(OPS_AP).then(x => { if(x && VIEW.ops === "photo" && BOARD) renderPhoto(BOARD); });
 }
 document.addEventListener("click", e => { const b = e.target.closest("[data-spfilter]"); if(!b) return; SP_FILTER = b.dataset.spfilter; if(BOARD) renderPhoto(BOARD); });
