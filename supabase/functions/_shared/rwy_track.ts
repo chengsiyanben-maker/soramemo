@@ -5,6 +5,7 @@
 //         次の点への進む向きが滑走路の向きと45°以内
 //   来た方面：航跡が空港から120・60・30km の円に入った方角（着陸）、出た方角（離陸）
 import { flightOfCallsign } from "./flight_watch.ts";
+import { encodePolyline } from "./archive.ts";
 
 export type Rwy = { id: string; thr: [number, number]; hdg: number };
 export type Ap = { center: [number, number]; rw: Record<string, Rwy> };
@@ -97,6 +98,26 @@ export function samplesOf(callsign: string, pts: Pt[], aps: Record<string, Ap>, 
         if (rw) out.push({ iata, dir: "dep", at: new Date(first[0] * 1000).toISOString(), callsign, flight: fl, rwy: rw, first_brg: null, first_km: null,
           ent120: null, ent60: null, ent30: null, ex30: leave(ap.center, tr, 30), ex60: leave(ap.center, tr, 60), pts: tr.slice(0, 40).map((p) => [p[0], p[1], p[2], p[3] * 100]) });
       }
+    }
+  }
+  return out;
+}
+
+// 空の道すじ用：1つの機体の航跡のうち、空港から80km 以内の部分（出発・到着した空港ごとに1本）
+export type TrackRow = { iata: string; day: string; callsign: string; at: string; dep_here: 0 | 1; pts: string };
+export function tracksOf(callsign: string, pts: Pt[], aps: Record<string, Ap>): TrackRow[] {
+  if (!/^[A-Z]{3}\d{1,4}[A-Z]?$/.test(callsign)) return [];
+  const out: TrackRow[] = [];
+  for (const tr of splitTracks(pts)) {
+    if (tr.length < 3) continue;
+    const first = tr[0], last = tr[tr.length - 1];
+    for (const [iata, ap] of Object.entries(aps)) {
+      const arr = km(ap.center, ll(last)) <= 22, dep = !arr && km(ap.center, ll(first)) <= 22;
+      if (!arr && !dep) continue;
+      const near = tr.filter((p) => km(ap.center, ll(p)) <= 80); if (near.length < 2) continue;
+      const t = arr ? last[0] : first[0];
+      const s = encodePolyline(near.map((p) => ({ lat: p[1], lon: p[2] }))); if (s.length > 4000) continue;
+      out.push({ iata, day: new Date(t * 1000 + 9 * 3600_000).toISOString().slice(0, 10), callsign, at: new Date(t * 1000).toISOString(), dep_here: dep ? 1 : 0, pts: s });
     }
   }
   return out;

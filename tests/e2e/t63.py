@@ -60,6 +60,8 @@ async def main():
           const op = { arr:['01L','01R'], dep:['01L','01R'] }; const r = [spRwsOf({ dir:'arr', other:'HND', fl:'Y1' }, op), spRwsOf({ dir:'dep', other:'HND', fl:'Y2' }, op)];
           OPS_AP = keep; return r; }""")
         print('LEARN', ln)
+        ph = await pg.evaluate("""() => predictionHTML({ src:'reg', known:{ callsign:'ANA21', dep:'HND', arr:'ITM', last:new Date().toISOString() }, next:[{ callsign:'ANA30', dep:'ITM', arr:'HND', time:'13:05', seen:4, share:0.8 }] })""")
+        check('全機の運用の予想（呼び出し符号を便名に）:', 'NH21' in ph and 'NH30' in ph and '13:05ごろ' in ph and '80%（4回）' in ph and '全機の位置の記録' in ph)
         check('学習した使い分けで絞る（8割以上・30機以上だけ）:', ln[0] == {'rws': ['01R'], 'side': False, 'learn': 93} and ln[1]['rws'] == ['01L', '01R'])
         check('来た方面で滑走路を絞る:', rws[0] == {'rws': ['34L'], 'side': True} and rws[1]['rws'] == ['34R'] and rws[2] == {'rws': ['34L', '34R'], 'side': False} and rws[3] == {'rws': ['05'], 'side': True} and rws[6]['rws'] == ['16L'] and rws[7]['rws'] == ['16R'] and rws[8] == {'rws': ['05', '34R'], 'side': False} and rws[4]['rws'] == ['22'] and rws[5]['rws'] == ['16R'])
         check('天気の札:', '雲底 1,800ft' in t and 'ベイパー 出やすい' in t)

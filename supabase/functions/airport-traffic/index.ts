@@ -128,6 +128,12 @@ async function recordPositions(bodies: Map<string, string>) {
   }
   const all = [...rows.values()];
   for (let i = 0; i < all.length; i += 500) { const { error } = await admin.from("live_positions").upsert(all.slice(i, i + 500)); if (error) throw error; }
+  // 機体（登録記号）ごとの便の記録：2分に1回（航空会社の便だけ。自家用機などは残さない）
+  if (Math.floor(Date.now() / 30_000) % 4 === 0) {
+    const legs = all.filter((r) => typeof r.reg === "string" && /^[A-Z]{3}\d{1,4}[A-Z]?$/.test(String(r.callsign)))
+      .map((r) => ({ reg: r.reg, cs: r.callsign, type: r.type, at: r.seen_at }));
+    for (let i = 0; i < legs.length; i += 1000) { const { error } = await admin.rpc("reg_legs_touch", { p_rows: legs.slice(i, i + 1000) }); if (error) { console.error("reg_legs", error.message); break; } }
+  }
   const tp = [...track.values()];
   for (let i = 0; i < tp.length; i += 500) { const { error } = await admin.from("track_points").insert(tp.slice(i, i + 500)); if (error) { console.error("track_points", error.message); break; } }
   return all.length;

@@ -33,3 +33,11 @@ Deno.test("途切れで分ける・来た方面・自家用機は除く", () => 
   assertEquals(Math.round(km(HND.center, far)), 70); assertEquals(Math.round(brg(HND.center, far)), 20);
   assertEquals(samplesOf("JA4123", pts, { HND }).length, 0);
 });
+Deno.test("空の道すじ：出発・到着した空港ごとに、80km 以内の部分", async () => {
+  const { tracksOf } = await import("../functions/_shared/rwy_track.ts");
+  const r = HND.rw["22"], t0 = Date.parse("2026-10-21T15:30:00Z") / 1000;   // 日本時間 0:30（日付は22日）
+  const pts: Pt[] = [[t0, ...fwd(HND.center, 20, 150), 140], [t0 + 300, ...fwd(HND.center, 20, 60), 100], [t0 + 600, ...back(r.thr, r.hdg, 12), 30], [t0 + 720, ...back(r.thr, r.hdg, 4), 10]];
+  const t = tracksOf("ANA24", pts, { HND });
+  assertEquals(t.length, 1); assertEquals(t[0].dep_here, 0); assertEquals(t[0].day, "2026-10-22"); assertEquals(t[0].iata, "HND");
+  assertEquals(tracksOf("JA4123", pts, { HND }).length, 0);
+});
