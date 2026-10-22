@@ -1,6 +1,7 @@
 import os, sys
 HERE=os.path.dirname(os.path.abspath(__file__)); WEB=os.path.abspath(os.path.join(HERE,'..','..','web')); WORK=os.environ.get('SORAMEMO_TEST_WORK','/tmp/soramemo-e2e'); os.makedirs(WORK, exist_ok=True)
 # 運用タブの「定時率」と「空の道（航跡アート）」、フライトの画面の「この路線の定時率」、航跡の巡航の部分を点線にする
+from datetime import datetime, timedelta, timezone
 import asyncio, json, math
 from playwright.async_api import async_playwright
 
@@ -46,6 +47,10 @@ async def main():
         await pg.click('#opsArt [aria-label="前の日"]'); await pg.wait_for_timeout(600)
         days = [x[1].get('p_day') for x in calls if x[0] == 'airport_tracks']
         print('前の日を読みにいく:', len(days) >= 2 and days[-1] < days[0], '| 空の日でも枠は残る:', await pg.is_visible('#opsArt'))
+        mn = await pg.get_attribute('#artDate', 'min')
+        await pg.fill('#artDate', mn); await pg.dispatch_event('#artDate', 'change'); await pg.wait_for_timeout(600)
+        days = [x[1].get('p_day') for x in calls if x[0] == 'airport_tracks']
+        print('日を選んで1年前まで:', days[-1] == mn and mn <= (datetime.now(timezone.utc) + timedelta(hours=9) - timedelta(days=360)).strftime('%Y-%m-%d'))
         await pg.click('#opsArt [aria-label="次の日"]'); await pg.wait_for_timeout(600)
         await pg.click('#artShare'); await pg.wait_for_selector('#dShare[open]', timeout=5000)
         print('共有の画像:', (await pg.get_attribute('#shareImg', 'src') or '')[:22])

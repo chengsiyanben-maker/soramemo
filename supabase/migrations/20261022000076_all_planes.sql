@@ -1,7 +1,7 @@
 -- 全機の記録：
---   ・airport_tracks_all：空港ごと・日ごとの、全航空会社の機体の上昇・降下の航跡（毎晩 rwy-learn が track_points から作る）。31日残す
+--   ・airport_tracks_all：空港ごと・日ごとの、全航空会社の機体の上昇・降下の航跡（毎晩 rwy-learn が track_points から作る）。1年残す
 --   ・reg_legs：機体（登録記号）ごとの、その日に飛んだ便（呼び出し符号）・時刻・出発と到着の空港。airport-traffic が2分ごとに足し、
---     rwy-learn が出発・到着の空港を入れる。400日残す。航空会社の便（呼び出し符号が「英字3文字＋数字」）だけで、自家用機などは記録しない
+--     rwy-learn が出発・到着の空港を入れる。1年残す。航空会社の便（呼び出し符号が「英字3文字＋数字」）だけで、自家用機などは記録しない
 --   ・predict_rotation：時刻表のある JAL・ANA の便はこれまでどおり。ない機体は reg_legs の「この便のあとによく続く便」から予想する
 create table if not exists public.airport_tracks_all (
   iata     text not null check (iata ~ '^[A-Z]{3}$'),
@@ -73,12 +73,12 @@ revoke all on function public.reg_legs_route(jsonb) from public, anon, authentic
 create or replace function public.airport_tracks(p_iata text, p_day date) returns jsonb
 language sql stable security definer set search_path = public as $$
   with d as (select (now() at time zone 'Asia/Tokyo')::date as today),
-  a as (select dep_here, pts from public.airport_tracks_all, d where iata = p_iata and day = p_day and p_day < d.today and p_day >= d.today - 30 order by at limit 3000)
+  a as (select dep_here, pts from public.airport_tracks_all, d where iata = p_iata and day = p_day and p_day < d.today and p_day >= d.today - 366 order by at limit 3000)
   select case when exists (select 1 from a) then (select jsonb_agg(jsonb_build_object('d', dep_here, 'p', pts)) from a)
   else coalesce((select jsonb_agg(jsonb_build_object('d', q.dep_here, 'p', q.pts)) from (
     select case when h.dep = p_iata then 1 else 0 end as dep_here, t.pts
     from d, public.flight_history h join public.flight_tracks t on t.svc_date = h.svc_date and t.flight = h.flight and t.dep = h.dep
-    where h.svc_date = p_day and p_day < d.today and p_day >= d.today - 30 and (h.dep = p_iata or h.arr = p_iata)
+    where h.svc_date = p_day and p_day < d.today and p_day >= d.today - 366 and (h.dep = p_iata or h.arr = p_iata)
     order by h.std limit 2000) q), '[]'::jsonb) end
 $$;
 revoke all on function public.airport_tracks(text, date) from public;
@@ -132,8 +132,8 @@ do $outer$
 begin
   if not exists (select 1 from pg_extension where extname = 'pg_cron') then return; end if;
   execute $q$ select cron.schedule('all-planes-cleanup', '27 19 * * *', $job$
-    delete from public.airport_tracks_all where day < (now() at time zone 'Asia/Tokyo')::date - 31;
-    delete from public.reg_legs where day < (now() at time zone 'Asia/Tokyo')::date - 400
+    delete from public.airport_tracks_all where day < (now() at time zone 'Asia/Tokyo')::date - 366;
+    delete from public.reg_legs where day < (now() at time zone 'Asia/Tokyo')::date - 366
   $job$) $q$;
 end
 $outer$;

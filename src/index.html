@@ -577,6 +577,7 @@ dialog.spfull .dlg{padding:16px 16px 32px;max-width:480px;margin:0 auto;max-heig
 .atcsteps i{display:block;width:12px;height:12px;border-radius:50%;margin:0 auto 6px;background:var(--s-line)}
 .atcsteps .past i{background:#9CA3AF}.atcsteps .on{color:#1D4ED8;font-weight:800}.atcsteps .on i{background:#1D4ED8;box-shadow:0 0 0 4px #E0ECFF}
 .atcnow{display:flex;justify-content:space-between;align-items:center;margin-top:12px;background:#111827;color:#fff;border-radius:16px;padding:10px 14px}
+.artdate{position:relative;cursor:pointer}.artdate input{position:absolute;inset:0;opacity:0;width:100%;cursor:pointer}
 .atcnow small{display:block;font-size:11px;color:#BDBDBD}.atcnow b.f{font-size:20px;font-variant-numeric:tabular-nums}
 .atcfeed{list-style:none;margin:10px 0 0;padding:0}
 .atcfeed li{background:var(--s-card);border-radius:20px;padding:12px 14px;margin-bottom:8px}.atcfeed li.warn{box-shadow:inset 0 0 0 2px #FDE7E7}
@@ -6094,11 +6095,11 @@ async function renderArt(day){
   box.hidden = false;
   box.innerHTML = `<div class="bdhead"><h3>${esc(name)}の空の道　<small>${d === y ? "昨日" : artLabel(d)}</small></h3>${tracks.length ? `<button class="linkbtn2 ydshare" id="artShare" type="button">画像で共有</button>` : ""}</div>
     <canvas class="artcv" id="artCv" role="img" aria-label="${esc(`${artLabel(d)}に${name}を出発した${dep}便と到着した${tracks.length - dep}便の、上昇・降下の道筋`)}"></canvas>
-    <div class="artnav"><button type="button" data-art-day="${addDay(d, -1)}" ${addDay(d, -1) < addDay(jstToday(), -30) ? "disabled" : ""} aria-label="前の日">◀</button>
-      <span>${artLabel(d)}　出発 ${dep}便・到着 ${tracks.length - dep}便</span>
+    <div class="artnav"><button type="button" data-art-day="${addDay(d, -1)}" ${addDay(d, -1) < addDay(jstToday(), -366) ? "disabled" : ""} aria-label="前の日">◀</button>
+      <label class="artdate"><span>${artLabel(d)}　出発 ${dep}便・到着 ${tracks.length - dep}便</span><input type="date" id="artDate" value="${d}" min="${addDay(jstToday(), -366)}" max="${y}" aria-label="日を選ぶ"></label>
       <button type="button" data-art-day="${addDay(d, 1)}" ${addDay(d, 1) > y ? "disabled" : ""} aria-label="次の日">▶</button></div>
     <p class="artkey"><span><i style="background:#FBB03B"></i>出発</span><span><i style="background:#48BEFF"></i>到着</span><span>円は中心から20・40・60km</span></p>
-    <p class="fwnote">空港の近くで15,000ft より低く飛んでいた、航空会社の便すべての位置（adsb.lol・ODbL）。10月22日より前の日は JAL・ANA の便だけです。電波が届かない所は描かれません。30日前までさかのぼれます。</p>`;
+    <p class="fwnote">空港の近くで15,000ft より低く飛んでいた、航空会社の便すべての位置（adsb.lol・ODbL）。10月22日より前の日は JAL・ANA の便だけです。電波が届かない所は描かれません。1年前までさかのぼれます（記録を始めた10月18日より前はありません）。</p>`;
   const cv = $("artCv"), w = Math.round(cv.clientWidth * (devicePixelRatio || 1)) || 600;
   cv.width = w; cv.height = w; drawArt(cv.getContext("2d"), 0, 0, w, tracks, def.center);
 }
@@ -6115,6 +6116,7 @@ async function artCard(){
 }
 document.addEventListener("click", async e => {
   const b = e.target.closest("[data-art-day]"); if(b && !b.disabled){ renderArt(b.dataset.artDay); return; }
+  const dl = e.target.closest(".artdate"); if(dl && e.target.id !== "artDate"){ const i = $("artDate"); if(i){ try{ i.showPicker(); }catch(_){ i.focus(); } } }
   if(e.target.closest("#artShare") && ART.tracks && ART.tracks.length) openShare(await artCard(), `soramemo-sky-${ART.iata}-${ART.day}.png`);
 });
 
@@ -6890,6 +6892,7 @@ document.addEventListener("click", e => {
   if(e.target.closest("[data-atcstop]")) atcRxStop();
   if(e.target.closest("[data-atclogin]")){ $("dAtcJoin").close(); if($("dSettings")) $("dSettings").showModal(); }
 });
+document.addEventListener("change", e => { if(e.target && e.target.id === "artDate" && /^\d{4}-\d{2}-\d{2}$/.test(e.target.value)) renderArt(e.target.value); });
 document.addEventListener("change", e => { if(e.target && (e.target.id === "atcAp") && $("dAtcJoin").open){ atcReadForm(); ATC_JOIN.ch = "twr"; ATC_JOIN.area = null; $("dAtcJoinBody").innerHTML = atcJoinHTML(); } });
 $("dAtcJoin").addEventListener("close", () => { ATC_JOIN.token = null; if(ATC_RX.on) atcRxStop(); });
 
