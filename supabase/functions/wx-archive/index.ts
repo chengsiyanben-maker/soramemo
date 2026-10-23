@@ -16,8 +16,10 @@ Deno.serve(async (req) => {
     const { data: aps } = await admin.from("airports").select("icao").not("icao", "is", null);
     const icaos = [...new Set(((aps ?? []) as { icao: string }[]).map((a) => a.icao).filter((c) => /^R[JO][A-Z]{2}$/.test(c)))];
     const rows: WxRow[] = [];
-    for (let i = 0; i < icaos.length; i += 40) {
-      const r = await fetch(`https://aviationweather.gov/api/data/metar?ids=${icaos.slice(i, i + 40).join(",")}&format=json&hours=${hours}`, { headers: UA, signal: AbortSignal.timeout(20000) });
+    // 1回に返る件数に上限があるので、さかのぼるときは空港を少しずつに分ける
+    const step = hours > 6 ? 4 : 40;
+    for (let i = 0; i < icaos.length; i += step) {
+      const r = await fetch(`https://aviationweather.gov/api/data/metar?ids=${icaos.slice(i, i + step).join(",")}&format=json&hours=${hours}`, { headers: UA, signal: AbortSignal.timeout(20000) });
       if (!r.ok) { out.metar_error = r.status; continue; }
       for (const m of (await r.json()) as unknown[]) { const x = metarRow(m); if (x) rows.push(x); }
     }
