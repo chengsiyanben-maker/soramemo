@@ -7,15 +7,17 @@ const J = { "Content-Type": "application/json" };
 const UA = { "User-Agent": "soramemo (wx-archive)" };
 const JMA = "https://www.jma.go.jp/bosai/typhoon/data";
 
-Deno.serve(async () => {
+Deno.serve(async (req) => {
   const out: Record<string, unknown> = {};
+  // 取る時間の幅（ふだんは3時間。始めたときや抜けたときは ?hours=48 などで、さかのぼって取れる）
+  const hours = Math.min(72, Math.max(1, Number(new URL(req.url).searchParams.get("hours")) || 3));
   // METAR
   try {
     const { data: aps } = await admin.from("airports").select("icao").not("icao", "is", null);
     const icaos = [...new Set(((aps ?? []) as { icao: string }[]).map((a) => a.icao).filter((c) => /^R[JO][A-Z]{2}$/.test(c)))];
     const rows: WxRow[] = [];
     for (let i = 0; i < icaos.length; i += 40) {
-      const r = await fetch(`https://aviationweather.gov/api/data/metar?ids=${icaos.slice(i, i + 40).join(",")}&format=json&hours=3`, { headers: UA, signal: AbortSignal.timeout(20000) });
+      const r = await fetch(`https://aviationweather.gov/api/data/metar?ids=${icaos.slice(i, i + 40).join(",")}&format=json&hours=${hours}`, { headers: UA, signal: AbortSignal.timeout(20000) });
       if (!r.ok) { out.metar_error = r.status; continue; }
       for (const m of (await r.json()) as unknown[]) { const x = metarRow(m); if (x) rows.push(x); }
     }
