@@ -15,16 +15,23 @@ Deno.serve(async (req) => {
   try {
     const { data: aps } = await admin.from("airports").select("icao").not("icao", "is", null);
     const icaos = [...new Set(((aps ?? []) as { icao: string }[]).map((a) => a.icao).filter((c) => /^R[JO][A-Z]{2}$/.test(c)))];
-    const rows: WxRow[] = [];
-    // 1回に返る件数に上限があるので、さかのぼるときは空港を少しずつに分ける
+    // 1回に返る件数に上限があるので、さかのぼるときは空港を少しずつに分ける。1つの組が失敗しても、ほかは残す
     const step = hours > 6 ? 4 : 40;
+    let saved = 0, failed = 0;
     for (let i = 0; i < icaos.length; i += step) {
-      const r = await fetch(`https://aviationweather.gov/api/data/metar?ids=${icaos.slice(i, i + step).join(",")}&format=json&hours=${hours}`, { headers: UA, signal: AbortSignal.timeout(20000) });
-      if (!r.ok) { out.metar_error = r.status; continue; }
-      for (const m of (await r.json()) as unknown[]) { const x = metarRow(m); if (x) rows.push(x); }
+      try {
+        const r = await fetch(`https://aviationweather.gov/api/data/metar?ids=${icaos.slice(i, i + step).join(",")}&format=json&hours=${hours}`, { headers: UA, signal: AbortSignal.timeout(20000) });
+        const text = r.ok ? await r.text() : "";
+        if (!r.ok) { failed++; continue; }
+        if (!text.trim()) continue;   // 通報がない空港だけの組は空で返る
+        const rows: WxRow[] = [];
+        for (const m of JSON.parse(text) as unknown[]) { const x = metarRow(m); if (x) rows.push(x); }
+        if (!rows.length) continue;
+        const { error } = await admin.from("wx_obs").upsert(rows, { onConflict: "icao,at", ignoreDuplicates: true });
+        if (error) { failed++; out.metar_error = error.message; } else saved += rows.length;
+      } catch (e) { failed++; out.metar_error = String(e); }
     }
-    const { error } = rows.length ? await admin.from("wx_obs").upsert(rows, { onConflict: "icao,at", ignoreDuplicates: true }) : { error: null };
-    out.metar = rows.length; if (error) out.metar_error = error.message;
+    out.metar = saved; out.metar_failed = failed;
   } catch (e) { out.metar_error = String(e); }
   // 台風
   try {
