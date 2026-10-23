@@ -461,3 +461,6 @@ verify_jwt = false
 verify_jwt = false
 [functions.cold-tracks]
 verify_jwt = false
+
+[functions.wx-archive]
+verify_jwt = false
