@@ -20,7 +20,7 @@ permissions:
 jobs:
   test:
     name: テスト
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - uses: denoland/setup-deno@v2
@@ -47,7 +47,7 @@ jobs:
     name: データベースと関数
     needs: test
     if: ${{ vars.SUPABASE_PROJECT_REF != '' }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     env:
       SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
       SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
@@ -91,7 +91,7 @@ jobs:
     name: アプリ
     needs: [test, database]
     if: ${{ always() && needs.test.result == 'success' && (needs.database.result == 'success' || needs.database.result == 'skipped') }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     environment:
       name: github-pages
       url: ${{ steps.deploy.outputs.page_url }}
