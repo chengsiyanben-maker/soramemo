@@ -488,7 +488,7 @@ body.game nav.tabs button[aria-current="page"] svg{color:#7FB3FF}
   display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none;
   transform-origin:0 100%;transition:transform .3s cubic-bezier(.2,.8,.2,1),opacity .3s ease;box-shadow:0 18px 34px -16px var(--stub-glow);-webkit-tap-highlight-color:transparent;font-family:var(--gothic)}
 #v-home .bp-stub.dragging{transition:none;cursor:grabbing}
-#v-home .bp-stub .v{writing-mode:vertical-rl;font-size:14px;font-weight:800;letter-spacing:.12em}
+#v-home .bp-stub .v{writing-mode:vertical-rl;white-space:nowrap;font-size:14px;font-weight:800;letter-spacing:.12em}
 #v-home .bp-stub .s{font-size:10px;font-weight:600;opacity:.85}
 #v-home .bp-stub svg{width:26px;height:14px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 #v-home .bp-stub:disabled{opacity:.6;cursor:progress}
@@ -2618,7 +2618,7 @@ function updateAuthUI(){
   $("loginBox").hidden = !needLogin;
   if(needLogin) initCaptcha();
   $("checkin").disabled = needLogin || paused;
-  $("checkin").querySelector(".v").textContent = needLogin ? "ログインしてください" : paused ? "一時停止中" : "チェックイン";
+  $("checkin").querySelector(".v").textContent = needLogin ? "まずログイン" : paused ? "一時停止中" : "チェックイン";
   $("checkin").querySelector(".s").hidden = needLogin || paused;
   $("acctRow").hidden = !(SERVER && user);
   $("loginRow").hidden = !(SERVER && !user && !demo);
@@ -2950,6 +2950,7 @@ function renderMap(){
 // フライトの地図（動かせる）：実際の航路は線、記録がない便は空港どうしを結ぶ弧の点線。色は航空会社のグループ
 // 飛んだ路線と訪れた空港（ホームとフライトで同じ1枚の地図に重ねる）：実際の航路は線、記録がない便は空港どうしを結ぶ弧の点線。色は航空会社のグループ
 let ROUTE_LAYER = null;
+const JAPAN_BOUNDS = [[24.0, 122.9], [45.6, 146.0]];   // 与那国〜稚内・根室
 const FMAP_COL = { JAL:"#C8102E", ANA:"#1C4FA0", OTHER:"#7C3AED" };
 function drawRoutes(map){
   if(ROUTE_LAYER) ROUTE_LAYER.remove();
@@ -2981,9 +2982,9 @@ async function renderFlightMap(){
   if(currentView() !== "log") return;
   const map = await ensureMap(); if(!map || currentView() !== "log"){ if(!map) $("map").hidden = false; return; }
   const pts = drawRoutes(map);
+  if(HOME_LAYER){ HOME_LAYER.remove(); HOME_LAYER = null; }   // ホームの判定範囲の円と札はフライトの地図では出さない（ホームに戻ると描き直す）
   if(pts.length >= 2) map.fitBounds(L.latLngBounds(pts), { paddingTopLeft:[30, 130], paddingBottomRight:[56, innerHeight - sheetTop("log", "half") + 50], maxZoom:8, animate:false });   // 上は見出し、下はシートと凡例に隠れる
-  else if(pts.length === 1) map.setView(pts[0], 7, { animate:false });
-  else map.setView([36.5, 137.5], 5, { animate:false });
+  else map.fitBounds(pts.length === 1 ? L.latLng(pts[0]).toBounds(160000) : JAPAN_BOUNDS, { paddingTopLeft:[30, 130], paddingBottomRight:[56, innerHeight - sheetTop("log", "half") + 50], maxZoom:7, animate:false });   // 記録がないときも、シートに隠れない所に日本全体を出す
 }
 function dedupFlights(){ const seen=new Set(), out=[]; for(const f of focusFlights()){ const k=[f.from,f.to].sort((x,y)=>x-y).join("-"); if(!seen.has(k)){seen.add(k); out.push(f);} } return out; }
 
