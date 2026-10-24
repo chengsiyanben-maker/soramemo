@@ -624,6 +624,22 @@ dialog.spfull .dlg{padding:16px 16px 32px;max-width:480px;margin:0 auto;max-heig
 .dpl .t{flex:1}.dpl .t b{font-size:14px}.dpl .t small{display:block;font-size:11.5px;color:var(--s-mute);line-height:1.6;margin-top:3px}.dpl .t em{display:inline-block;margin-top:6px;font-style:normal;border-radius:6px;padding:3px 7px;font-size:10.5px;font-weight:700;background:#E7F6EC;color:#1F7A3F}
 .dsw{flex:none;width:48px;height:28px;border:0;border-radius:999px;position:relative;cursor:pointer;background:#D4D4D4}.dsw::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;transition:left .15s}
 .dsw[aria-checked="true"]{background:#111827}.dsw[aria-checked="true"]::after{left:23px}
+.lo-off{display:none!important}
+.vwrow{display:flex;gap:6px;align-items:flex-start}.vwrow>.viewsw{flex:1;min-width:0}
+.vwedit{flex:none;display:flex;align-items:center;justify-content:center;width:40px;min-height:38px;margin-top:2px;padding:0;border:1px dashed var(--vw-track,var(--line));border-radius:12px;background:var(--vw-card,var(--paper));color:var(--vw-mute,var(--sumi));cursor:pointer}.vwedit svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.opsaps .opsmore{color:var(--sumi);font-weight:600;border-bottom-color:transparent}
+#v-stats .lo h2:first-child{margin-top:36px}#v-stats .lo:first-child h2:first-child{margin-top:20px}
+.loh{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin:20px 4px 0;font-size:12.5px;font-weight:700;color:var(--s-mute)}.loh small{font-size:11px;font-weight:500}
+.lol li{align-items:center;padding:6px 0;min-height:44px}.lol .dsw:disabled{opacity:.45;cursor:not-allowed}
+.lomv{display:flex;flex:none;width:84px;justify-content:flex-end}.lomv button{width:40px;height:40px;border:0;border-radius:12px;background:none;color:var(--s-ink);display:flex;align-items:center;justify-content:center;cursor:pointer}
+.lomv button:disabled{opacity:.25;cursor:default}.lomv svg,.lonav svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.lonav li{padding:0}.lonav button{all:unset;box-sizing:border-box;display:flex;align-items:center;gap:12px;width:100%;padding:12px 0;cursor:pointer}.lonav button:focus-visible{outline:2px solid var(--s-ink);outline-offset:2px}
+.lochips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}.lochip{min-height:40px;padding:0 14px;border-radius:999px;border:1px solid var(--s-line);background:var(--s-card);color:var(--s-ink);font:600 13px var(--gothic);cursor:pointer}
+.lochip[aria-pressed="true"]{background:var(--s-ink);border-color:var(--s-ink);color:var(--s-card)}.lochip:disabled{cursor:not-allowed}
+.loreset{border:1px solid var(--s-line);background:var(--s-card);color:var(--s-ink);border-radius:999px;padding:8px 12px;font:600 12px var(--gothic)}.loreset:disabled{opacity:.45}
+#dLayout .pseg{margin-top:8px}
+[data-palette="board"] #dLayout .dsw{background:#3A414C}[data-palette="board"] #dLayout .dsw[aria-checked="true"]{background:var(--shu)}[data-palette="board"] #dLayout .dsw::after{background:#E8ECF1}[data-palette="board"] #dLayout .dsw[aria-checked="true"]::after{background:#0B0D10}
+#dLayout{--s-mute:#555B66}[data-palette="board"] #dLayout{--s-mute:#A7B0BC}#dLayout .hint{color:var(--s-mute)}
 .dnever{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.dnever span{border-radius:8px;padding:5px 9px;background:var(--s-bg);font-size:11.5px;font-weight:700}
 .spfull .spcard{border:0;border-radius:22px}
 .spcard.soft{background:var(--s-bg);border:0}
@@ -1733,7 +1749,7 @@ nav.tabs{transition:transform .3s cubic-bezier(.2,.8,.2,1),opacity .2s}
     <p class="maplegend"><span><i class="lg" style="background:var(--jal)"></i>JAL</span><span><i class="lg" style="background:var(--ana)"></i>ANA</span><span><i class="lg" style="background:#7C3AED"></i>そのほか</span><span><i class="lg dash"></i>航路なし</span><span class="mcred">地図：国土地理院</span></p>
     <div class="grabzone"><button class="grab" type="button" aria-label="シートの大きさを変える"></button></div>
     <div class="sbody">
-    <div class="pcard" id="personaCard" hidden aria-live="polite"></div>
+    <div class="pcard lo" data-lo="home:persona" id="personaCard" hidden aria-live="polite"></div>
     <div class="bpass" id="bpass">
       <div class="bp-main">
         <div class="nearest">
@@ -1746,9 +1762,6 @@ nav.tabs{transition:transform .3s cubic-bezier(.2,.8,.2,1),opacity .2s}
       <button class="bp-stub" id="checkin" aria-label="チェックイン（半券を右へ引いて切ります）"><span class="v">チェックイン</span><svg viewBox="0 0 26 14" aria-hidden="true"><path d="M2 7h20"/><path d="M17 2l5 5-5 5"/></svg><span class="s">引いて切る</span></button>
     </div>
     <p class="msg" id="msg" role="status" aria-live="polite"></p>
-    <div class="ridecard" id="rideCard" hidden aria-live="polite"></div>
-    <form class="rideadd" id="rideAdd" hidden><label for="rideNo">これから乗る便</label><input id="rideNo" placeholder="例 JL509" autocapitalize="characters" autocomplete="off" maxlength="7" inputmode="latin"><button class="chip" type="submit">機体を調べる</button><p class="hint" id="rideMsg" role="status" aria-live="polite"></p></form>
-    <div class="evbar" id="eventBar" hidden></div>
     <p class="hint ckhint">空港の判定範囲（1〜2km）の中で、半券を右へ引いて切ると印が押されます。</p>
     <div class="demo-pick">
       <label for="demoAirport">いる空港（デモ）</label>
@@ -1773,17 +1786,30 @@ nav.tabs{transition:transform .3s cubic-bezier(.2,.8,.2,1),opacity .2s}
       <button class="btn2" data-install="go">追加する</button> <button class="btn2" data-install="later">閉じる</button></div>
     </div>
     <div id="inflight"></div>
-    <div class="tally" aria-label="これまでの記録">
-      <div><div class="n"><span id="tAirports">0</span><small>/<span id="tTotal">86</span></small></div><div class="u">空港</div></div>
-      <div><div class="n"><span id="tRoutes">0</span></div><div class="u">路線</div></div>
-      <div><div class="n"><span id="tKm">0</span><small>km</small></div><div class="u">飛行距離</div></div>
-    </div>
-    <p class="streak" id="streak"></p>
     <button class="btn2 opsbtn" id="opsOpen" hidden>羽田の今の運用（滑走路・進入）</button>
-    <section class="boardzone" aria-label="最近の印">
-    <h2>最近の印</h2>
-    <div class="grid" id="recent"></div>
-    </section>
+    <div class="lo-zone" id="homeBlocks">
+    <div class="lo" data-lo="home:ride">
+      <div class="ridecard" id="rideCard" hidden aria-live="polite"></div>
+      <form class="rideadd" id="rideAdd" hidden><label for="rideNo">これから乗る便</label><input id="rideNo" placeholder="例 JL509" autocapitalize="characters" autocomplete="off" maxlength="7" inputmode="latin"><button class="chip" type="submit">機体を調べる</button><p class="hint" id="rideMsg" role="status" aria-live="polite"></p></form>
+    </div>
+    <div class="lo" data-lo="home:event">
+      <div class="evbar" id="eventBar" hidden></div>
+    </div>
+    <div class="lo" data-lo="home:tally">
+      <div class="tally" aria-label="これまでの記録">
+        <div><div class="n"><span id="tAirports">0</span><small>/<span id="tTotal">86</span></small></div><div class="u">空港</div></div>
+        <div><div class="n"><span id="tRoutes">0</span></div><div class="u">路線</div></div>
+        <div><div class="n"><span id="tKm">0</span><small>km</small></div><div class="u">飛行距離</div></div>
+      </div>
+      <p class="streak" id="streak"></p>
+    </div>
+    <div class="lo" data-lo="home:recent">
+      <section class="boardzone" aria-label="最近の印">
+      <h2>最近の印</h2>
+      <div class="grid" id="recent"></div>
+      </section>
+    </div>
+    </div>
     <details class="dev" hidden><summary>検証用ツール</summary>
       <p class="hint">判定を確かめるための機能です。記録には残りません。</p>
       <button class="btn2" id="probe" style="width:100%">位置だけ測る（検証用・記録しない）</button>
@@ -1945,14 +1971,14 @@ nav.tabs{transition:transform .3s cubic-bezier(.2,.8,.2,1),opacity .2s}
 
   <!-- STATS（成績：ステータスの目安、年ごとの記録、航空会社別） -->
   <section class="view" id="v-stats" aria-label="成績">
-    <div class="passport" id="passport"></div>
-    <h2>乗った機体</h2>
-    <div class="fleetbook" id="fleetBook"></div>
-    <h2>航空会社別</h2>
-    <div id="airlineStats"></div>
-    <h2>ステータスの目安</h2>
+    <div class="lo" data-lo="stats:passport"><div class="passport" id="passport"></div></div>
+    <div class="lo" data-lo="stats:fleet"><h2>乗った機体</h2>
+    <div class="fleetbook" id="fleetBook"></div></div>
+    <div class="lo" data-lo="stats:airline"><h2>航空会社別</h2>
+    <div id="airlineStats"></div></div>
+    <div class="lo" data-lo="stats:status"><h2>ステータスの目安</h2>
     <div class="sgopen"><button class="btn2" data-thatday type="button">あの日の空</button><button class="btn1" data-sg-open="main" type="button">修行の画面を開く</button><button class="btn2" data-sg-open="quick" type="button">この路線に乗ったら</button></div>
-    <div class="sgrid" id="statusBox"></div>
+    <div class="sgrid" id="statusBox"></div></div>
   </section>
   <section class="view" id="v-ops" aria-label="運用">
   <div class="opstitle"><h2 id="opsTitle">羽田の今の運用</h2><button class="linkbtn2" id="opsShare" type="button">共有</button></div>
@@ -1969,17 +1995,31 @@ nav.tabs{transition:transform .3s cubic-bezier(.2,.8,.2,1),opacity .2s}
   <div class="opsboard opsart" id="opsArt" hidden data-ov="art"></div>
   <div class="opsboard opsstrip" id="opsStrip" hidden data-ov="strip"></div>
   <div class="opsboard opsphoto" id="opsPhoto" hidden data-ov="photo"></div>
-  <div class="fwbox" id="opsAlerts" hidden data-ov="runway board"></div>
-  <div class="fwbox" id="opsCurfew" hidden data-ov="runway"></div>
-  <div class="fwbox" id="opsGa" hidden data-ov="runway board photo"></div>
-  <div class="opslayers" role="group" aria-label="地図に出すもの" data-ov="runway">
-    <button class="chip" data-layer="traffic" aria-pressed="true">機体</button><button class="chip" data-layer="star" aria-pressed="true">到着経路</button><button class="chip" data-layer="app" aria-pressed="true">進入経路</button><button class="chip" data-layer="sid" aria-pressed="true">出発経路</button><button class="chip" data-layer="spots" aria-pressed="true">見る場所</button><button class="chip" id="opsFitAll">全体を見る</button>
+  <div class="lo-zone" id="opsBlocks">
+  <div class="lo" data-lo="opsb:alerts">
+    <div class="fwbox" id="opsAlerts" hidden data-ov="runway board"></div>
   </div>
-  <div class="opslayers opssiddir" id="opsSidDir" role="group" aria-label="出発経路の行き先の方向" hidden data-ov="runway"></div>
-  <div class="opsmap" id="opsMap" role="img" aria-label="羽田空港の滑走路と、進入・出発・到着の経路、今飛んでいる機体の地図" data-ov="runway"></div>
-  <p class="opsstat" id="trafficNote" data-ov="runway"></p>
-  <div class="fwbox" id="opsSpecial" hidden data-ov="runway photo"></div>
-  <div class="fwbox opsspots" id="opsSpots" hidden data-ov="runway photo"></div>
+  <div class="lo" data-lo="opsb:map">
+    <div class="opslayers" role="group" aria-label="地図に出すもの" data-ov="runway">
+      <button class="chip" data-layer="traffic" aria-pressed="true">機体</button><button class="chip" data-layer="star" aria-pressed="true">到着経路</button><button class="chip" data-layer="app" aria-pressed="true">進入経路</button><button class="chip" data-layer="sid" aria-pressed="true">出発経路</button><button class="chip" data-layer="spots" aria-pressed="true">見る場所</button><button class="chip" id="opsFitAll">全体を見る</button>
+    </div>
+    <div class="opslayers opssiddir" id="opsSidDir" role="group" aria-label="出発経路の行き先の方向" hidden data-ov="runway"></div>
+    <div class="opsmap" id="opsMap" role="img" aria-label="羽田空港の滑走路と、進入・出発・到着の経路、今飛んでいる機体の地図" data-ov="runway"></div>
+    <p class="opsstat" id="trafficNote" data-ov="runway"></p>
+  </div>
+  <div class="lo" data-lo="opsb:special">
+    <div class="fwbox" id="opsSpecial" hidden data-ov="runway photo"></div>
+  </div>
+  <div class="lo" data-lo="opsb:spots">
+    <div class="fwbox opsspots" id="opsSpots" hidden data-ov="runway photo"></div>
+  </div>
+  <div class="lo" data-lo="opsb:curfew">
+    <div class="fwbox" id="opsCurfew" hidden data-ov="runway"></div>
+  </div>
+  <div class="lo" data-lo="opsb:ga">
+    <div class="fwbox" id="opsGa" hidden data-ov="runway board photo"></div>
+  </div>
+  </div>
   <details class="opsabout"><summary>この地図について・出典<small>推定です。航法には使えません</small></summary>
     <p class="hint" id="opsLegend"></p>
     <p class="hint">機体の位置は <a href="https://adsb.lol" target="_blank" rel="noopener">adsb.lol</a>（有志の受信機による ADS-B のオープンデータ、ODbL）。少し遅れることがあり、受信できない機体は出ません。通ってきた線は最大20分ぶん（サーバーで30秒ごとに記録。新千歳・那覇は1分ごと）。</p>
@@ -2067,6 +2107,7 @@ nav.tabs{transition:transform .3s cubic-bezier(.2,.8,.2,1),opacity .2s}
 <dialog id="dPlane" class="spfull" aria-label="機体の1日"><div class="dlg" id="dPlaneBody"></div></dialog>
 <dialog id="dTrend" class="spfull" aria-label="空港の傾向"><div class="dlg" id="dTrendBody"></div></dialog>
 <dialog id="dGa" class="sgd" aria-label="ゴーアラウンド"><div class="dlg" id="dGaBody"></div></dialog>
+<dialog id="dLayout" class="spfull" aria-label="表示を編集"><div class="dlg" id="dLayoutBody"></div></dialog>
 <dialog id="dSettings" class="mypage"><div class="dlg">
   <div class="mp-top"><button class="mp-back" data-close type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>ホーム</button><h3>マイページ</h3><span class="mp-sp" aria-hidden="true"></span></div>
   <div class="mp-prof" id="mpProf">
@@ -2096,6 +2137,7 @@ nav.tabs{transition:transform .3s cubic-bezier(.2,.8,.2,1),opacity .2s}
       <button data-persona="casual" aria-pressed="true">気軽に</button><button data-persona="spot" aria-pressed="false">撮影</button><button data-persona="shugyo" aria-pressed="false">修行</button>
     </div>
     <p class="hint" id="personaNote"></p>
+    <button class="btn2" type="button" data-lo-open="top" style="width:100%;margin-top:8px">表示を編集（タブ・見方・出すもの）</button>
     <div class="pmore" id="personaMore"></div>
   </section>
   <section class="mp-sec" aria-labelledby="mpShow"><h4 id="mpShow">表示</h4>
@@ -3097,12 +3139,79 @@ const VIEWS = {
   ops: [["board", "案内板"], ["day", "1日の山"], ["runway", "滑走路"], ["ontime", "定時"], ["art", "空の道すじ"], ["strip", "短冊"], ["photo", "撮る人"]],
 };
 const VIEW_DEF = { book:"tiles", log:"pass", ops:"runway" };
-function viewOf(k){ try{ const v = localStorage.getItem("soramemo.view." + k); if(VIEWS[k].some(x => x[0] === v)) return v; }catch(e){} return VIEW_DEF[k]; }
+/* ---------- 表示の編集：見たい表示だけにする（この端末だけに保存） ----------
+   下のタブ（出す・並び）、各画面の見方（隠す）、運用の空港（よく見る空港だけ並べる）、
+   ホーム・運用（滑走路の下）・成績のかたまり（出す・並び）。何も変えていなければ、構成（気軽に・撮影・修行）のまま */
+const LO_KEY = "soramemo.layout";
+const TAB_ALL = ["home", "book", "log", "ops", "stats"], TAB_NAME = { home:"ホーム", book:"図鑑", log:"フライト", ops:"運用", stats:"成績" };
+const LO_BLOCKS = {
+  home: [["persona", "いちばん上のカード", "撮影・修行の構成のときに出るカード。いつもいちばん上", true], ["ride", "これから乗る便", "便名を入れると機体を調べる"], ["event", "イベントのお知らせ"], ["tally", "これまでの記録", "空港・路線・距離の数"], ["recent", "最近の印"]],
+  opsb: [["alerts", "遅れ・ダイバートのお知らせ"], ["map", "地図と近くを飛ぶ機体"], ["special", "特別塗装機"], ["spots", "撮影地"], ["curfew", "門限のある時間"], ["ga", "ゴーアラウンド（推定）"]],
+  stats: [["passport", "これまでのパスポート"], ["fleet", "乗った機体"], ["airline", "航空会社別"], ["status", "ステータスの目安"]],
+};
+const LO_ZONE = { home:"homeBlocks", opsb:"opsBlocks", stats:"v-stats" };   // opsb：運用の滑走路の下（見方の ops と分ける）
+let LAYOUT = (() => { try{ const o = JSON.parse(localStorage.getItem(LO_KEY) || "null"); return o && typeof o === "object" && !Array.isArray(o) ? o : null; }catch(e){ return null; } })();
+function loSave(){
+  if(LAYOUT && !Object.keys(LAYOUT).length) LAYOUT = null;
+  try{ if(LAYOUT) localStorage.setItem(LO_KEY, JSON.stringify(LAYOUT)); else localStorage.removeItem(LO_KEY); }catch(e){}
+}
+const loOff = k => new Set(LAYOUT && LAYOUT.off && Array.isArray(LAYOUT.off[k]) ? LAYOUT.off[k] : []);
+// 見方：隠したものを除く（全部隠すことはできない。万一そうなっていたら全部出す）
+const viewsShown = k => { const off = loOff(k), v = VIEWS[k].filter(([id]) => !off.has(id)); return v.length ? v : VIEWS[k]; };
+function loOrder(k){
+  const ids = LO_BLOCKS[k].filter(b => !b[3]).map(b => b[0]);
+  const o = LAYOUT && LAYOUT.order && Array.isArray(LAYOUT.order[k]) ? LAYOUT.order[k].filter(x => ids.includes(x)) : [];
+  return [...new Set([...o, ...ids])];
+}
+// 下のタブ：ホームはいつも出す。2つ以上
+function loTabs(){
+  const t = LAYOUT && Array.isArray(LAYOUT.tabs) ? [...new Set(LAYOUT.tabs.filter(v => TAB_ALL.includes(v)))] : null;
+  const base = t && t.length ? t : PERSONAS[PERSONA].tabs;
+  const out = base.includes("home") ? base : ["home", ...base];
+  return out.length >= 2 ? out : PERSONAS[PERSONA].tabs;
+}
+const loAps = () => LAYOUT && Array.isArray(LAYOUT.aps) && LAYOUT.aps.length ? LAYOUT.aps : null;
+const loCustom = () => !!LAYOUT;
+let OPS_APS_ALL = false;   // 運用：よく見る空港だけにしているときに「ほかの空港」を開いた
+// 変えるときの入れ物を用意する（はじめの値は、いまの構成の見え方）
+function loEdit(){ if(!LAYOUT) LAYOUT = {}; LAYOUT.off = LAYOUT.off || {}; LAYOUT.order = LAYOUT.order || {}; return LAYOUT; }
+function loToggleOff(k, id, hide){
+  const L = loEdit(), set = new Set(L.off[k] || []);
+  if(hide) set.add(id); else set.delete(id);
+  if(VIEWS[k] && set.size >= VIEWS[k].length) return false;   // 見方は1つ以上残す
+  L.off[k] = [...set]; if(!L.off[k].length) delete L.off[k];
+  return true;
+}
+function loMove(k, id, d){
+  const L = loEdit(), o = loOrder(k), i = o.indexOf(id), j = i + d;
+  if(i < 0 || j < 0 || j >= o.length) return;
+  [o[i], o[j]] = [o[j], o[i]]; L.order[k] = o;
+}
+// 画面に当てる
+function applyLayout(){
+  for(const k of Object.keys(VIEWS)){
+    const sh = viewsShown(k);
+    if(!sh.some(([id]) => id === VIEW[k])){ VIEW[k] = sh[0][0]; try{ localStorage.setItem("soramemo.view." + k, VIEW[k]); }catch(e){} }
+  }
+  for(const k of Object.keys(LO_BLOCKS)){
+    const off = loOff(k), zone = $(LO_ZONE[k]);
+    for(const [id] of LO_BLOCKS[k]){ const el = document.querySelector(`.lo[data-lo="${k}:${id}"]`); if(el) el.classList.toggle("lo-off", off.has(id)); }
+    if(zone) for(const id of loOrder(k)){ const el = zone.querySelector(`:scope > .lo[data-lo="${k}:${id}"]`); if(el) zone.appendChild(el); }
+  }
+  if(typeof applyPersonaTabs === "function") applyPersonaTabs();
+}
+function viewOf(k){ const sh = viewsShown(k); try{ const v = localStorage.getItem("soramemo.view." + k); if(sh.some(x => x[0] === v)) return v; }catch(e){} return sh.some(x => x[0] === VIEW_DEF[k]) ? VIEW_DEF[k] : sh[0][0]; }
 const VIEW = { book:viewOf("book"), log:viewOf("log"), ops:viewOf("ops") };
-const viewswHTML = k => VIEWS[k].map(([id, l]) => `<button role="tab" data-vw="${k}:${id}" aria-selected="${VIEW[k] === id}">${l}</button>`).join("");
+const viewswHTML = k => viewsShown(k).map(([id, l]) => `<button role="tab" data-vw="${k}:${id}" aria-selected="${VIEW[k] === id}">${l}</button>`).join("");
+// 見方の切り替えの右に「表示を編集」の鉛筆を置く（切り替えの列の中には、タブ以外を入れない）
+function vwEditBtn(el, k){
+  if(el.parentElement && el.parentElement.classList.contains("vwrow")) return;
+  const row = document.createElement("div"); row.className = "vwrow"; el.parentNode.insertBefore(row, el); row.appendChild(el);
+  row.insertAdjacentHTML("beforeend", `<button class="vwedit" type="button" data-lo-open="${k}" aria-label="${TAB_NAME[k]}の表示を編集"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="m13.5 6.5 4 4"/></svg></button>`);
+}
 const VIEW_RENDER = {};
 // 切り替えを描いたら、選んでいるボタンが見えるところまで横に送る
-function setViewsw(id, k){ const el = $(id); if(!el) return; el.innerHTML = viewswHTML(k); const b = el.querySelector('[aria-selected="true"]'); if(b) el.scrollLeft = Math.max(0, b.offsetLeft - el.offsetLeft - 24); }
+function setViewsw(id, k){ const el = $(id); if(!el) return; el.innerHTML = viewswHTML(k); vwEditBtn(el, k); const b = el.querySelector('[aria-selected="true"]'); if(b) el.scrollLeft = Math.max(0, b.offsetLeft - el.offsetLeft - 24); }
 document.addEventListener("click", e => {
   const b = e.target.closest("[data-vw]"); if(!b) return;
   const [k, id] = b.dataset.vw.split(":"); if(VIEW[k] === id) return;
@@ -3586,7 +3695,7 @@ const PERSONA_KEY = "soramemo.persona";
 let PERSONA = (() => { try{ const v = localStorage.getItem(PERSONA_KEY); return PERSONAS[v] ? v : "casual"; }catch(e){ return "casual"; } })();
 const personaChosen = () => { try{ return !!localStorage.getItem(PERSONA_KEY); }catch(e){ return false; } };
 function applyPersonaTabs(){
-  const box = document.querySelector("nav.tabs .in"), P = PERSONAS[PERSONA];
+  const box = document.querySelector("nav.tabs .in"), P = { tabs:loTabs() };
   for(const v of P.tabs){ const b = box.querySelector(`button[data-v="${v}"][data-mode="rally"]`); if(b) box.appendChild(b); }
   box.querySelectorAll('button[data-mode="rally"]').forEach(b => { if(!P.tabs.includes(b.dataset.v)){ box.appendChild(b); b.dataset.pOff = "1"; } else delete b.dataset.pOff; });
   box.querySelectorAll('button[data-mode="game"]').forEach(b => box.appendChild(b));
@@ -3596,16 +3705,18 @@ function applyPersonaTabs(){
 function setPersona(p, how){
   if(!PERSONAS[p]) return;
   PERSONA = p; try{ localStorage.setItem(PERSONA_KEY, p); }catch(e){}
+  LAYOUT = null; loSave();   // ひな形を選んだら、自分で変えた表示はいったん戻す
   for(const [k, v] of Object.entries(PERSONAS[p].views)){ VIEW[k] = v; try{ localStorage.setItem("soramemo.view." + k, v); }catch(e){} }
   track("persona", `${p}:${how || "set"}`);
-  applyPersonaTabs(); renderPersonaSettings();
+  applyLayout(); renderPersonaSettings();
   for(const k in DIRTY) DIRTY[k] = true;
-  goTab(PERSONAS[p].tabs[0]); renderPersonaCard();
+  if(how !== "layout") goTab(PERSONAS[p].tabs[0]); else goTab(currentView()); renderPersonaCard();
 }
 function renderPersonaSettings(){
   document.querySelectorAll("button[data-persona]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.persona === PERSONA)));
   if($("personaNote")) $("personaNote").textContent = PERSONAS[PERSONA].note;
-  const off = ["home", "book", "log", "ops", "stats"].filter(v => !PERSONAS[PERSONA].tabs.includes(v)), L = { book:"図鑑を開く", stats:"成績を開く", log:"フライトを開く", ops:"運用を開く" };
+  const off = TAB_ALL.filter(v => !loTabs().includes(v)), L = { book:"図鑑を開く", stats:"成績を開く", log:"フライトを開く", ops:"運用を開く" };
+  if($("personaNote") && loCustom()) $("personaNote").textContent = `「${PERSONAS[PERSONA].short}」をもとに、表示を自分で変えています。`;
   if($("personaMore")) $("personaMore").innerHTML = off.map(v => `<button class="btn2" data-persona-open="${v}">${L[v] || v}</button>`).join("");
 }
 document.addEventListener("click", e => {
@@ -3613,6 +3724,93 @@ document.addEventListener("click", e => {
   const o = e.target.closest("[data-persona-open]"); if(o){ $("dSettings").close(); goTab(o.dataset.personaOpen); return; }
   const g = e.target.closest("[data-pgo]"); if(g){ goTab(g.dataset.pgo); if(g.dataset.pview && VIEW_RENDER[g.dataset.pgo]){ VIEW[g.dataset.pgo] = g.dataset.pview; } return; }
 });
+// 表示を編集の画面（全体と、画面ごと）。変えたらすぐに当てて、この端末に保存する
+let LO_PAGE = "top", LO_FROM = "settings";
+const LO_ICON = { up:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 15 6-6 6 6"/></svg>', down:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>', go:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>' };
+const loSw = (on, label, attr, disabled) => `<button class="dsw" role="switch" type="button" aria-checked="${on}" aria-label="${esc(label)}を出す" ${attr}${disabled ? " disabled" : ""}></button>`;
+const loMv = (label, attrUp, attrDown, first, last) => `<span class="lomv"><button type="button" aria-label="${esc(label)}を上へ" ${attrUp}${first ? " disabled" : ""}>${LO_ICON.up}</button><button type="button" aria-label="${esc(label)}を下へ" ${attrDown}${last ? " disabled" : ""}>${LO_ICON.down}</button></span>`;
+function loBlocksHTML(k, title){
+  const off = loOff(k), ord = loOrder(k), fixed = LO_BLOCKS[k].filter(b => b[3]), by = Object.fromEntries(LO_BLOCKS[k].map(b => [b[0], b]));
+  const row = (b, i, n) => `<li><span class="t"><b>${esc(b[1])}</b>${b[2] ? `<small>${esc(b[2])}</small>` : ""}</span>${loSw(!off.has(b[0]), b[1], `data-lo-blk="${k}:${b[0]}"`)}${b[3] ? `<span class="lomv fixed" aria-hidden="true"></span>` : loMv(b[1], `data-lo-mv="${k}:${b[0]}:-1"`, `data-lo-mv="${k}:${b[0]}:1"`, i === 0, i === n - 1)}</li>`;
+  return `<h4 class="loh">${title}</h4><ul class="dpl lol">${fixed.map(b => row(b, 0, 1)).join("")}${ord.map((id, i) => row(by[id], i, ord.length)).join("")}</ul>`;
+}
+function loViewsHTML(k){
+  const off = loOff(k), n = VIEWS[k].length - off.size;
+  return `<h4 class="loh">見方<small>押して出す・隠す（1つ以上）</small></h4><div class="lochips">${VIEWS[k].map(([id, l]) => { const on = !off.has(id); return `<button type="button" class="lochip" aria-pressed="${on}" data-lo-view="${k}:${id}"${on && n <= 1 ? " disabled" : ""}>${l}</button>`; }).join("")}</div>`;
+}
+function loSummary(k){
+  const bk = k === "ops" ? "opsb" : k, v = VIEWS[k] ? `見方 ${viewsShown(k).length}/${VIEWS[k].length}` : "", b = LO_BLOCKS[bk] ? `${k === "ops" ? "下に出すもの" : "出すもの"} ${LO_BLOCKS[bk].length - loOff(bk).size}/${LO_BLOCKS[bk].length}` : "";
+  const a = k === "ops" ? `空港 ${loAps() ? loAps().length : Object.keys(OPS_AIRPORTS).length}/${Object.keys(OPS_AIRPORTS).length}` : "";
+  return [v, a, b].filter(Boolean).join(" ・ ");
+}
+function layoutHTML(){
+  const back = LO_PAGE === "top" ? `<button class="mp-back" type="button" data-close><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>${LO_FROM === "settings" ? "設定" : "閉じる"}</button>`
+    : `<button class="mp-back" type="button" data-lo-page="top"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>表示を編集</button>`;
+  if(LO_PAGE === "top"){
+    const tabs = loTabs(), hidden = TAB_ALL.filter(v => !tabs.includes(v));
+    const tabRow = (v, i) => { const on = tabs.includes(v), home = v === "home";
+      return `<li><span class="t"><b>${TAB_NAME[v]}</b>${home ? "<small>いつも出す</small>" : ""}</span>${home ? "" : loSw(on, TAB_NAME[v], `data-lo-tab="${v}"`, on && tabs.length <= 2)}${on ? loMv(TAB_NAME[v], `data-lo-tmv="${v}:-1"`, `data-lo-tmv="${v}:1"`, i === 0, i === tabs.length - 1) : `<span class="lomv fixed" aria-hidden="true"></span>`}</li>`; };
+    return `<div class="spctop">${back}<h3>表示を編集</h3><button class="loreset" type="button" data-lo-reset${loCustom() ? "" : " disabled"}>はじめに戻す</button></div>
+      <p class="hint">見たい表示だけにできます。隠しても記録や機能は消えません。この端末だけに保存します。</p>
+      <h4 class="loh">ひな形から始める</h4>
+      <div class="seg pseg" role="group" aria-label="ひな形">${Object.entries(PERSONAS).map(([k, P]) => `<button type="button" data-lo-persona="${k}" aria-pressed="${k === PERSONA}">${P.short}</button>`).join("")}</div>
+      <p class="hint">${loCustom() ? `「${PERSONAS[PERSONA].short}」をもとに、自分で変えています。ひな形を押すと、その形に戻ります。` : esc(PERSONAS[PERSONA].note)}</p>
+      <h4 class="loh">下のタブ<small>2〜5個</small></h4>
+      <ul class="dpl lol">${tabs.map(tabRow).join("")}${hidden.map(v => tabRow(v, -1)).join("")}</ul>
+      <p class="hint">出さないタブも、マイページから開けます。</p>
+      <h4 class="loh">画面ごとの中身</h4>
+      <ul class="dpl lol lonav">${["ops", "home", "book", "log", "stats"].map(k => `<li><button type="button" data-lo-page="${k}"><span class="t"><b>${TAB_NAME[k]}</b><small>${loSummary(k)}</small></span>${LO_ICON.go}</button></li>`).join("")}</ul>`;
+  }
+  const k = LO_PAGE, head = `<div class="spctop">${back}<h3>${TAB_NAME[k]}の画面</h3><span class="sp" aria-hidden="true"></span></div>`;
+  if(k === "home") return head + loBlocksHTML("home", "出すもの<small>チェックインの半券はいつも出す</small>");
+  if(k === "stats") return head + loBlocksHTML("stats", "出すもの");
+  if(k === "book" || k === "log") return head + loViewsHTML(k);
+  const ORDER = ["CTS","SDJ","HND","NRT","NGO","ITM","KIX","HIJ","MYJ","FUK","NGS","KMJ","KOJ","OKA"], mine = loAps() || [];
+  return head + loViewsHTML("ops")
+    + `<h4 class="loh">よく見る空港<small>${mine.length ? `${mine.length}/${ORDER.length}・選ばなかった空港は「ほかの空港」から` : "選ばなければ、14空港すべてを並べます"}</small></h4>
+      <div class="lochips">${ORDER.filter(c => OPS_AIRPORTS[c]).map(c => `<button type="button" class="lochip" aria-pressed="${mine.includes(c)}" data-lo-ap="${c}">${esc(OPS_AIRPORTS[c].name)}</button>`).join("")}</div>`
+    + loBlocksHTML("opsb", "滑走路の見方の下に出すもの");
+}
+function openLayout(page, from){
+  LO_PAGE = page && (page === "top" || TAB_NAME[page]) ? page : "top"; LO_FROM = from || LO_FROM;
+  $("dLayoutBody").innerHTML = layoutHTML();
+  if(!$("dLayout").open){ $("dLayout").showModal(); track("layout_open", LO_PAGE); }
+}
+// 変えたあと：保存して画面に当て、開いている画面を描き直す
+function loChanged(what){
+  loSave(); applyLayout(); renderPersonaSettings();
+  for(const k in DIRTY) DIRTY[k] = true;
+  const v = currentView();
+  if(v === "ops" && typeof OPS_CUR !== "undefined" && OPS_CUR) renderOps();
+  else if(v === "book" || v === "log" || v === "stats") renderVisible();
+  if(v === "home") renderPersonaCard();
+  track("layout", what);
+  const y = $("dLayout").scrollTop; $("dLayoutBody").innerHTML = layoutHTML(); $("dLayout").scrollTop = y;
+}
+document.addEventListener("click", e => {
+  const o = e.target.closest("[data-lo-open]"); if(o){ const k = o.dataset.loOpen; openLayout(k === "top" ? "top" : k, o.closest("#dSettings") ? "settings" : "screen"); return; }
+  if(!e.target.closest("#dLayout")) return;
+  const q = sel => e.target.closest(sel);
+  let b;
+  if((b = q("[data-lo-page]"))){ LO_PAGE = b.dataset.loPage; $("dLayoutBody").innerHTML = layoutHTML(); $("dLayout").scrollTop = 0; return; }
+  if((b = q("[data-lo-persona]"))){ setPersona(b.dataset.loPersona, "layout"); $("dLayoutBody").innerHTML = layoutHTML(); return; }
+  if((b = q("[data-lo-reset]"))){ LAYOUT = null; loChanged("reset"); return; }
+  if((b = q("[data-lo-tab]"))){ const v = b.dataset.loTab, t = loTabs(), on = t.includes(v);
+    if(on && t.length <= 2) return;
+    loEdit().tabs = on ? t.filter(x => x !== v) : [...t, v];
+    if(on && currentView() === v) goTab(loEdit().tabs[0]);
+    loChanged("tab_" + v + (on ? "_off" : "_on")); return; }
+  if((b = q("[data-lo-tmv]"))){ const [v, d] = b.dataset.loTmv.split(":"), t = loTabs(), i = t.indexOf(v), j = i + Number(d);
+    if(i < 0 || j < 0 || j >= t.length) return; [t[i], t[j]] = [t[j], t[i]]; loEdit().tabs = t; loChanged("tab_move"); return; }
+  if((b = q("[data-lo-view]"))){ const [k, id] = b.dataset.loView.split(":"); if(!loToggleOff(k, id, !loOff(k).has(id))) return; loChanged("view_" + k); return; }
+  if((b = q("[data-lo-blk]"))){ const [k, id] = b.dataset.loBlk.split(":"), L = loEdit(), set = new Set(L.off[k] || []);
+    if(set.has(id)) set.delete(id); else set.add(id); L.off[k] = [...set]; if(!L.off[k].length) delete L.off[k]; loChanged("blk_" + k); return; }
+  if((b = q("[data-lo-mv]"))){ const [k, id, d] = b.dataset.loMv.split(":"); loMove(k, id, Number(d)); loChanged("move_" + k); return; }
+  if((b = q("[data-lo-ap]"))){ const c = b.dataset.loAp, L = loEdit(), set = new Set(L.aps || []);
+    if(set.has(c)) set.delete(c); else set.add(c); L.aps = [...set]; if(!L.aps.length) delete L.aps; OPS_APS_ALL = false; loChanged("aps"); return; }
+});
+// 運用：よく見る空港だけ／ほかの空港も
+document.addEventListener("click", e => { if(!e.target.closest("[data-ops-more]")) return; OPS_APS_ALL = !OPS_APS_ALL; renderOps(); });
 // ホームのいちばん上のカード（撮影・修行のとき）
 const isBig = a => /^(B?7[4678]|A3[3-8])/i.test(String(a || "").trim());
 async function renderPersonaCard(){
@@ -3671,7 +3869,7 @@ function personaSuggestion(){
 }
 let PERSONA_ASKED = false;
 function maybeSuggestPersona(){
-  if(PERSONA_ASKED || personaChosen() || demo || currentView() !== "home" || document.querySelector("dialog[open]")) return;
+  if(PERSONA_ASKED || personaChosen() || loCustom() || demo || currentView() !== "home" || document.querySelector("dialog[open]")) return;
   const u = usageGet(); if(u.declined && Date.now() - u.declined < 30 * 864e5) return;
   if((u.days || []).length < 3) return;
   const s = personaSuggestion(); if(!s) return;
@@ -5511,8 +5709,11 @@ function renderOps(){
   $("opsTitle").textContent = `${def.name}の今の運用`;
   // 北から順に並べる
   const ORDER = ["CTS","SDJ","HND","NRT","NGO","ITM","KIX","HIJ","MYJ","FUK","NGS","KMJ","KOJ","OKA"];
+  const mine = loAps(), apAll = !mine || OPS_APS_ALL;   // よく見る空港だけ（いま見ている空港・近くの空港はいつも出す）
   $("opsAps").innerHTML = Object.values(OPS_AIRPORTS).sort((x, y) => ORDER.indexOf(x.iata) - ORDER.indexOf(y.iata))
-    .map(d => `<button class="opstab" role="tab" data-ops-ap="${d.iata}" aria-selected="${d.iata === OPS_AP}">${d.name}${d.iata === OPS_NEAR ? "<small>近く</small>" : ""}</button>`).join("");
+    .filter(d => apAll || mine.includes(d.iata) || d.iata === OPS_AP || d.iata === OPS_NEAR)
+    .map(d => `<button class="opstab" role="tab" data-ops-ap="${d.iata}" aria-selected="${d.iata === OPS_AP}">${d.name}${d.iata === OPS_NEAR ? "<small>近く</small>" : ""}</button>`).join("")
+    + (mine ? `<button class="opstab opsmore" type="button" data-ops-more aria-expanded="${apAll}">${apAll ? "よく見る空港だけ" : "ほかの空港"}</button>` : "");
   const cur = $("opsAps").querySelector('[aria-selected="true"]');
   if(cur){ const box = $("opsAps"); box.scrollLeft = Math.max(0, cur.offsetLeft - (box.clientWidth - cur.offsetWidth) / 2); }
   $("opsModes").innerHTML = `<button class="chip" data-ops="auto" aria-pressed="${OPS_MODE === "auto"}">今の運用</button>` + Object.entries(def.modes).map(([k, o]) => `<button class="chip" data-ops="${k}" aria-pressed="${OPS_MODE === k}">${o.label.replace(/の運用$|運用$/, "").replace(/運用（/, "（")}</button>`).join("");
@@ -8087,7 +8288,7 @@ document.addEventListener("click", async e => {
 
 fillSelects(); showVlog();
 if(SERVER){ S = blank(); render(); updateAuthUI(); initServer(); } else { load(); render(); updateAuthUI(); }
-applyPersonaTabs(); renderPersonaSettings(); LAST_TAB.rally = PERSONAS[PERSONA].tabs[0];   // 構成：タブの並びと、はじめに開くタブ
+applyLayout(); renderPersonaSettings(); LAST_TAB.rally = loTabs()[0];   // 構成：タブの並びと、はじめに開くタブ
 setGameOn(GAME_ON); setAnalytics(ANALYTICS_ON); $("anaRow").hidden = !SERVER; renderInstall();
 track("open", MODE);
 maybeGuide();
