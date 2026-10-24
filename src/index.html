@@ -6488,6 +6488,9 @@ let ART = { iata:null, day:null, tracks:null };
 const ART_KM = 70;
 const ART_FIRST = "2026-10-18";   // 航跡の記録を始めた日（ここからずっと残している）
 const jstToday = () => jstDay(Date.now());
+// 航跡は毎朝5時15分ごろに、前の24時間の分をまとめる。6時までは「昨日」がまだそろっていないので、おとといまでを出す
+const ART_READY_H = 6;
+const artLatest = () => addDay(jstToday(), new Date(Date.now() + 9 * 36e5).getUTCHours() < ART_READY_H ? -2 : -1);
 const addDay = (d, n) => new Date(Date.parse(d + "T00:00:00Z") + n * 86_400_000).toISOString().slice(0, 10);
 function decodePl(s){
   let i = 0, lat = 0, lon = 0; const out = [];
@@ -6526,16 +6529,17 @@ const artLabel = d => { const x = new Date(d + "T00:00:00+09:00"); return `${x.g
 async function renderArt(day){
   const iata = OPS_AP, box = $("opsArt"), def = OPS_AIRPORTS[iata]; if(!box) return;
   if(!def || !def.center){ box.hidden = true; box.innerHTML = ""; return; }
-  const y = addDay(jstToday(), -1), d = day || (ART.iata === iata && ART.day ? ART.day : y);
+  const yd = addDay(jstToday(), -1), y = artLatest(), d = day || (ART.iata === iata && ART.day && ART.day <= y ? ART.day : y);
   const tracks = await loadArt(iata, d); if(OPS_AP !== iata) return;
   if(!tracks.length && !day){ box.hidden = true; box.innerHTML = ""; return; }
   const dep = tracks.filter(t => t.dep).length, name = def.name;
   box.hidden = false;
-  box.innerHTML = `<div class="bdhead"><h3>${esc(name)}の空の道　<small>${d === y ? "昨日" : artLabel(d)}</small></h3>${tracks.length ? `<button class="linkbtn2 ydshare" id="artShare" type="button">画像で共有</button>` : ""}</div>
+  box.innerHTML = `<div class="bdhead"><h3>${esc(name)}の空の道　<small>${d === yd ? "昨日" : artLabel(d)}</small></h3>${tracks.length ? `<button class="linkbtn2 ydshare" id="artShare" type="button">画像で共有</button>` : ""}</div>
     <canvas class="artcv" id="artCv" role="img" aria-label="${esc(`${artLabel(d)}に${name}を出発した${dep}便と到着した${tracks.length - dep}便の、上昇・降下の道筋`)}"></canvas>
     <div class="artnav"><button type="button" data-art-day="${addDay(d, -1)}" ${addDay(d, -1) < ART_FIRST ? "disabled" : ""} aria-label="前の日">◀</button>
       <label class="artdate"><span>${artLabel(d)}　出発 ${dep}便・到着 ${tracks.length - dep}便</span><input type="date" id="artDate" value="${d}" min="${ART_FIRST}" max="${y}" aria-label="日を選ぶ"></label>
       <button type="button" data-art-day="${addDay(d, 1)}" ${addDay(d, 1) > y ? "disabled" : ""} aria-label="次の日">▶</button></div>
+    ${y < yd ? `<p class="fwnote artwait">昨日（${artLabel(yd)}）の分は、毎朝5時15分ごろにまとめます。6時からここで見られます。</p>` : ""}
     <p class="artkey"><span><i style="background:#FBB03B"></i>出発</span><span><i style="background:#48BEFF"></i>到着</span><span>円は中心から20・40・60km</span></p>
     <p class="fwnote">空港の近くで15,000ft より低く飛んでいた、航空会社の便すべての位置（adsb.lol・ODbL）。10月22日より前の日は JAL・ANA の便だけです。電波が届かない所は描かれません。記録を始めた2026年10月18日から、どの日でも見られます。</p>`;
   const cv = $("artCv"), w = Math.round(cv.clientWidth * (devicePixelRatio || 1)) || 600;
