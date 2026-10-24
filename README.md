@@ -334,3 +334,11 @@ node tools/build.mjs
 ```
 
 配る用は、原本から説明文や空白を省く。明朝体（Shippori Mincho、SIL Open Font License 1.1。`web/fonts/OFL.txt`）は Google Fonts を使わず、このアプリに出てくる文字（約840字）と英数字・記号だけを抜き出したフォント（`web/fonts/mincho-….woff2`、約160KB）を作って自前で配る。文字が増えても作り直すだけでよい。サービスワーカー（`web/sw.js`）の版の番号も中身から自動で付く。フォントを作るには `pip install fonttools brotli` が必要。2026年10月の見直しで、フォントの通信量は約1,060KBから約300KBに、アプリのファイルは圧縮配信で58KBから53KBになった。
+
+## データベースのSQLの番号
+
+`supabase/migrations/` のファイル名の順に本番へ流れます。番号は「日付8桁＋通し番号6桁」です。
+
+- 新しいSQLを作るとき：`node tools/migrations.mjs next 名前` で次のファイル名を出す
+- ブランチを反映する前：`node tools/migrations.mjs rebase origin/main` で、ブランチで足したSQLの番号を本番側の最新の後ろに付け直す
+- テストで `node tools/migrations.mjs check` が番号の重なりを調べる。反映では `supabase db push --include-all` を使うので、付け直しを忘れても止まらない

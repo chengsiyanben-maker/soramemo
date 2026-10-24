@@ -26,6 +26,8 @@ jobs:
       - uses: denoland/setup-deno@v2
         with:
           deno-version: v2.x
+      - name: SQLの番号の重なりがないか
+        run: node tools/migrations.mjs check
       - name: チェックインの判定・便の照合のテスト
         run: deno test --allow-read supabase/tests/
       - uses: actions/setup-node@v4
@@ -60,9 +62,11 @@ jobs:
       - name: プロジェクトにつなぐ
         run: supabase link --project-ref "$PROJECT_REF" --password "$SUPABASE_DB_PASSWORD"
       - name: これから流すSQL
-        run: supabase db push --linked --password "$SUPABASE_DB_PASSWORD" --dry-run
+        run: supabase db push --linked --password "$SUPABASE_DB_PASSWORD" --include-all --dry-run
+      # --include-all：ブランチで作ったSQLの番号が、先に本番に入ったSQLより前になっていても止めずに流す（まだ流していないものは全部流す）。
+      #   ふだんは反映の前に node tools/migrations.mjs rebase で番号を付け直しておく
       - name: まだ流していないSQLを番号順に流す
-        run: supabase db push --linked --password "$SUPABASE_DB_PASSWORD" --yes
+        run: supabase db push --linked --password "$SUPABASE_DB_PASSWORD" --include-all --yes
       # 容量の見張り：テーブルごとの大きさをログに出すだけ（失敗しても公開は止めない）
       - name: データベースの容量を見る
         continue-on-error: true
