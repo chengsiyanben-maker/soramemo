@@ -127,8 +127,12 @@ export function tracksOf(callsign: string, pts: Pt[], aps: Record<string, Ap>, w
     let nf: string | null | undefined, nl: string | null | undefined;
     for (const [iata, ap] of Object.entries(aps)) {
       const dl = km(ap.center, ll(last)), df = km(ap.center, ll(first));
-      const arr = dl <= TRK_NEAR || (dl <= TRK_LOOSE && last[3] <= TRK_LOW && last3[3] > last[3] && km(ap.center, ll(last3)) > dl && (nl ??= nearestAp(last, aps)) === iata);
-      const dep = !arr && (df <= TRK_NEAR || (df <= TRK_LOOSE && first[3] <= TRK_LOW && first3[3] > first[3] && km(ap.center, ll(first3)) > df && (nf ??= nearestAp(first, aps)) === iata));
+      // 高さの変わり方（百フィート）。離陸してから空港の上へ戻ってくる出発（成田の西行きなど）は、最後の点も空港の近くになるので、
+      // 全体で2,000ft より上っていれば到着にしない。下っていれば出発にしない
+      const climb = (last[3] ?? 0) - (first[3] ?? 0);
+      const arrGeo = dl <= TRK_NEAR || (dl <= TRK_LOOSE && last[3] <= TRK_LOW && last3[3] > last[3] && km(ap.center, ll(last3)) > dl && (nl ??= nearestAp(last, aps)) === iata);
+      const arr = arrGeo && climb <= 20;
+      const dep = !arr && climb >= -20 && (df <= TRK_NEAR || (df <= TRK_LOOSE && first[3] <= TRK_LOW && first3[3] > first[3] && km(ap.center, ll(first3)) > df && (nf ??= nearestAp(first, aps)) === iata));
       if (!arr && !dep) continue;
       const near = tr.filter((p) => km(ap.center, ll(p)) <= 80); if (near.length < 2) continue;
       const t = arr ? last[0] : first[0];
