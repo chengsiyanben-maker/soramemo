@@ -60,3 +60,11 @@ Deno.test("空の道すじ：最初に見えたのが22km より先でも、低�
   const ht = tracksOf("ANA200", h, { NRT, HND });
   assertEquals(ht.map((x) => x.iata), ["HND"]);
 });
+Deno.test("空の道すじ：読んだ幅の端で切れているかもしれない航跡は入れない", async () => {
+  const { tracksOf } = await import("../functions/_shared/rwy_track.ts");
+  const r = HND.rw["16R"], s = HND.rw["34L"].thr, t0 = Date.parse("2026-10-24T03:00:00Z") / 1000;
+  const h: Pt[] = [[t0, ...fwd(s, r.hdg, 4.5), 15], [t0 + 60, ...fwd(s, r.hdg, 10), 40], [t0 + 120, ...fwd(s, r.hdg, 16), 60], [t0 + 180, ...fwd(s, r.hdg, 24), 80]];
+  assertEquals(tracksOf("ANA200", h, { HND }, { from: t0 - 3600, to: t0 + 7200 }).length, 1);
+  assertEquals(tracksOf("ANA200", h, { HND }, { from: t0 - 600, to: t0 + 7200 }).length, 0);    // 始まりが幅の端に近い
+  assertEquals(tracksOf("ANA200", h, { HND }, { from: t0 - 3600, to: t0 + 900 }).length, 0);    // 終わりが幅の端に近い（まだ飛んでいるかもしれない）
+});

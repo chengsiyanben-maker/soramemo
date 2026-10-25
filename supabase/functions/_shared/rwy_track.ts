@@ -114,11 +114,15 @@ function nearestAp(p: Pt, aps: Record<string, Ap>): string | null {
   for (const [iata, ap] of Object.entries(aps)) { const d = km(ap.center, ll(p)); if (d < bd) { bd = d; best = iata; } }
   return best;
 }
-export function tracksOf(callsign: string, pts: Pt[], aps: Record<string, Ap>): TrackRow[] {
+// win：読んだ時間の幅（秒）。幅の端から20分以内に始まる・終わる航跡は、まだ途中かもしれないので入れない
+//   （3時間ごとに、前後が重なる幅で読むので、途中で切れた航跡は次か前の回にまるごと入る）
+export const TRK_EDGE = 20 * 60;
+export function tracksOf(callsign: string, pts: Pt[], aps: Record<string, Ap>, win?: { from: number; to: number }): TrackRow[] {
   if (!/^[A-Z]{3}\d{1,4}[A-Z]?$/.test(callsign)) return [];
   const out: TrackRow[] = [];
   for (const tr of splitTracks(pts)) {
     if (tr.length < 3) continue;
+    if (win && (tr[0][0] < win.from + TRK_EDGE || tr[tr.length - 1][0] > win.to - TRK_EDGE)) continue;
     const first = tr[0], last = tr[tr.length - 1], first3 = tr[Math.min(tr.length - 1, 3)], last3 = tr[Math.max(0, tr.length - 4)];
     let nf: string | null | undefined, nl: string | null | undefined;
     for (const [iata, ap] of Object.entries(aps)) {

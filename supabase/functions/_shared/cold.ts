@@ -11,7 +11,8 @@ export async function gunzip(b: Uint8Array | ArrayBuffer): Promise<string> {
   return await new Response(new Blob([b as BlobPart]).stream().pipeThrough(new DecompressionStream("gzip"))).text();
 }
 // 空の道すじ：移した記録から、その空港の航跡を airport_tracks と同じ形（{d: 出発なら1, p: 線}）で
-export function tracksFrom(tbl: "airport_tracks_all" | "flight_tracks", rows: Record<string, unknown>[], iata: string): { d: number; p: string }[] {
-  if (tbl === "airport_tracks_all") return rows.filter((r) => r.iata === iata).map((r) => ({ d: Number(r.dep_here) ? 1 : 0, p: String(r.pts) }));
+const jstHour = (v: unknown) => { const t = Date.parse(String(v ?? "")); return Number.isFinite(t) ? new Date(t + 9 * 3600_000).getUTCHours() : undefined; };
+export function tracksFrom(tbl: "airport_tracks_all" | "flight_tracks", rows: Record<string, unknown>[], iata: string): { d: number; p: string; h?: number }[] {
+  if (tbl === "airport_tracks_all") return rows.filter((r) => r.iata === iata).map((r) => { const h = jstHour(r.at); return h === undefined ? { d: Number(r.dep_here) ? 1 : 0, p: String(r.pts) } : { d: Number(r.dep_here) ? 1 : 0, p: String(r.pts), h }; });
   return rows.filter((r) => r.dep === iata || r.arr === iata).map((r) => ({ d: r.dep === iata ? 1 : 0, p: String(r.pts) }));
 }
