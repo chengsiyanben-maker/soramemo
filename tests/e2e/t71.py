@@ -53,16 +53,18 @@ async def main():
         for v in ['board', 'strip', 'photo']: await pg.click(f'[data-lo-view="ops:{v}"]')
         # 空港
         for a in ['HND', 'HIJ']: await pg.click(f'[data-lo-ap="{a}"]')
-        aps = await pg.eval_on_selector_all('#opsAps [data-ops-ap]', 'e => e.map(x => x.dataset.opsAp)')
-        check('よく見る空港だけ並ぶ:', 'HND' in aps and 'HIJ' in aps and len(aps) <= 3 and await pg.locator('#opsAps [data-ops-more]').count() == 1)
+        aps = await pg.eval_on_selector_all('#opsAps .aplist [data-ops-ap]', 'e => e.map(x => x.dataset.opsAp)')
+        check('よく見る空港が、空港を選ぶ画面のいちばん上に並ぶ:', aps == ['HND', 'HIJ'] and await pg.locator('#opsAps .apgrid [data-ops-ap]').count() == 14)
         # 運用の下：地図を隠す・特別塗装機を上へ
-        await pg.click('[data-lo-blk="opsb:map"]'); await pg.click('[data-lo-mv="opsb:special:-1"]'); await pg.click('[data-lo-mv="opsb:special:-1"]')
+        await pg.click('[data-lo-blk="opsb:map"]'); await pg.click('[data-lo-drag="opsb:special"]'); await pg.click('[data-lo-mv="opsb:special:-99"]')
         check('地図を隠す:', await pg.evaluate("$('opsBlocks').querySelector('[data-lo=\"opsb:map\"]').classList.contains('lo-off')"))
         check('特別塗装機がいちばん上:', await pg.evaluate("$('opsBlocks').firstElementChild.dataset.lo") == 'opsb:special')
         # 全体：成績のタブを隠し、運用を左へ
         await pg.click('[data-lo-page="top"]'); await pg.wait_for_timeout(200)
         await pg.click('[data-lo-tab="stats"]')
-        for _ in range(3): await pg.click('[data-lo-tmv="ops:-1"]')
+        # ≡ を押すと動かし方のメニュー。「いちばん上へ」で運用を左端へ
+        await pg.click('[data-lo-drag="tabs:ops"]'); check('≡ を押すと動かし方のメニュー:', await pg.locator('#dLayout .lomenu button').count() == 4)
+        await pg.click('[data-lo-mv="tabs:ops:-99"]')
         check('タブ：成績を隠し、運用を左に:', await pg.evaluate(TABS) == 'ops,home,book,log')
         check('隠したタブはマイページから開ける:', '成績を開く' in (await pg.inner_text('#personaMore')))
         await pg.click('[data-lo-tab="book"]'); await pg.click('[data-lo-tab="log"]')
@@ -71,7 +73,12 @@ async def main():
         # ホーム・成績
         await pg.click('[data-lo-page="home"]'); await pg.click('[data-lo-blk="home:recent"]')
         await pg.click('[data-lo-page="top"]'); await pg.click('[data-lo-page="stats"]')
-        for _ in range(3): await pg.click('[data-lo-mv="stats:status:-1"]')
+        # ≡ をつまんで動かす：ステータスの目安をいちばん上へ
+        h = pg.locator('[data-lo-drag="stats:status"]'); top = pg.locator('[data-lo-row="stats:passport"]')
+        hb = await h.bounding_box(); tb = await top.bounding_box()
+        await pg.mouse.move(hb['x'] + hb['width'] / 2, hb['y'] + hb['height'] / 2); await pg.mouse.down()
+        for k in range(1, 9): await pg.mouse.move(hb['x'] + hb['width'] / 2, hb['y'] + hb['height'] / 2 + (tb['y'] + 4 - hb['y']) * k / 8)
+        await pg.mouse.up(); await pg.wait_for_timeout(300)
         check('ホーム：最近の印を隠す:', await pg.evaluate("document.querySelector('[data-lo=\"home:recent\"]').classList.contains('lo-off')"))
         check('成績：ステータスの目安がいちばん上:', await pg.evaluate("$('v-stats').querySelector('.lo').dataset.lo") == 'stats:status')
         # フライト・図鑑の見方
@@ -85,7 +92,11 @@ async def main():
         await pg.evaluate("goTab('ops')"); await pg.wait_for_timeout(1000)
         check('開き直しても見方が残る:', await pg.locator('#opsViews [data-vw]').count() == 4)
         check('開き直しても順番が残る:', await pg.evaluate("$('opsBlocks').firstElementChild.dataset.lo") == 'opsb:special' and await pg.evaluate("$('v-stats').querySelector('.lo').dataset.lo") == 'stats:status')
-        check('ほかの空港を開ける:', True if await pg.click('[data-ops-more]') is None and await pg.locator('#opsAps [data-ops-ap]').count() == 14 else False)
+        await pg.click('#opsApBtn'); await pg.fill('#opsApQ', 'oka'); await pg.wait_for_timeout(200)
+        check('空港を3レターで探せる:', await pg.eval_on_selector_all('#opsAps [data-ops-ap]', 'e => e.map(x => x.dataset.opsAp)') == ['OKA'])
+        await pg.click('#opsAps [data-ops-ap="OKA"]'); await pg.wait_for_timeout(600)
+        check('選ぶと閉じて、その空港の運用:', not await pg.evaluate("$('dOpsAp').open") and await pg.evaluate("OPS_AP") == 'OKA')
+        await pg.evaluate("setOpsAirport('HND')"); await pg.wait_for_timeout(400)
 
         # はじめに戻す
         await pg.evaluate("openLayout('top', 'settings')"); await pg.click('[data-lo-reset]'); await pg.wait_for_timeout(300)
