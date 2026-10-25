@@ -28,7 +28,7 @@ async def main():
         print('無料 通報:', await pg.inner_text('#opsWx'))
         print('無料 理由:', (await pg.inner_text('#opsInfo')).split('\n')[1])
         print('無料 線の数:', await pg.evaluate(lines), '| 案内:', await pg.is_visible('#opsJoin'), '| 凡例:', await pg.inner_text('#opsLegend'))
-        await pg.click('[data-ops=city]'); await pg.wait_for_timeout(300); print('無料でも手動切り替え:', (await pg.inner_text('#opsInfo')).split('\n')[0])
+        await pg.evaluate("document.querySelector('#opsInfo .opsmd').open = true"); await pg.click('[data-ops=city]')   # 向きの切り替えは「ほかの向き」の中; await pg.wait_for_timeout(300); print('無料でも手動切り替え:', (await pg.inner_text('#opsInfo')).split('\n')[0])
         # 加入中
         await pg.evaluate('PLUS = true'); await pg.evaluate("goTab('home'); goTab('ops')"); await pg.wait_for_timeout(2000)
         print('＋ 通報:', await pg.inner_text('#opsWx'))
