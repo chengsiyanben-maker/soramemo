@@ -29,6 +29,10 @@ check('この先の便の予想（よく続く便）', p.known.callsign === 'ANA
 await db.exec(`insert into public.airport_tracks_all (iata, day, callsign, at, dep_here, pts) values ('KMJ', (now() at time zone 'Asia/Tokyo')::date - 1, 'SNJ51', now() - interval '1 day', 0, 'abc')`);
 await db.exec('set role anon'); const a = (await db.query(`select public.airport_tracks('KMJ', (now() at time zone 'Asia/Tokyo')::date - 1) as a`)).rows[0].a; await db.exec('reset role');
 check('空の道すじは全機の航跡', Array.isArray(a) && a.length === 1 && a[0].p === 'abc', a);
+check('線ごとに日本時間の「時」も返す', Number.isInteger(a?.[0]?.h) && a[0].h >= 0 && a[0].h <= 23, a);
+await db.exec(`insert into public.airport_tracks_all (iata, day, callsign, at, dep_here, pts) values ('KMJ', (now() at time zone 'Asia/Tokyo')::date, 'SNJ53', now(), 1, 'def')`);
+await db.exec('set role anon'); const td = (await db.query(`select public.airport_tracks('KMJ', (now() at time zone 'Asia/Tokyo')::date) as a`)).rows[0].a; await db.exec('reset role');
+check('今日の分も、まとめた所まで返す（3時間ごと）', Array.isArray(td) && td.length === 1 && td[0].p === 'def', td);
 let denied = false; await db.exec('set role anon'); try { await db.query(`select public.reg_legs_touch('[]'::jsonb)`); } catch { denied = true; } await db.exec('reset role');
 check('記録を足せるのは運営だけ', denied);
 if (bad) process.exit(1);
