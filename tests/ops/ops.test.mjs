@@ -119,7 +119,8 @@ for (const url of ["index.html#ops-FUK", "now.html?ap=FUK"]) {
   await p.goto(`${BASE}/${url}`); await p.waitForTimeout(2500);
   const txt = await p.locator("body").innerText().catch(() => "");
   ok(txt.includes("運用時間外") && txt.includes("22時〜7時は離着陸できません"), `福岡 23:00（${url}）：運用時間外`, txt.slice(0, 200));
-  ok(txt.includes("運用時間：7時〜22時") && txt.includes("いまは時間外"), `福岡 23:00（${url}）：運用時間の表示`, txt.slice(0, 200));
+  // 運用のタブは計器のタイル（「運用時間」と「7時〜22時」が別の行）、空港のいまは1行
+  ok((txt.includes("運用時間：7時〜22時") || /運用時間\s*\n\s*7時〜22時/.test(txt)) && txt.includes("いまは時間外"), `福岡 23:00（${url}）：運用時間の表示`, txt.slice(0, 200));
   ok(errs.length === 0, `福岡 23:00（${url}）：画面のエラーなし`, errs.join(" / "));
   await ctx.close();
 }
