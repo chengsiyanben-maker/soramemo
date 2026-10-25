@@ -31,7 +31,8 @@ Deno.serve(async (req) => {
       // 空の道すじ（羽田・成田も）と、機体の便の出発・到着の空港
       for (const t of tracksOf(x.cs, x.p, APS, win)) { tracks.push(t); route.push({ cs: t.callsign, dir: t.dep_here ? "dep" : "arr", iata: t.iata, at: t.at }); }
     }
-    for (let i = 0; i < tracks.length; i += 500) { const { error: e } = await admin.from("airport_tracks_all").upsert(tracks.slice(i, i + 500), { onConflict: "iata,day,callsign,at", ignoreDuplicates: true }); if (e) console.error("tracks", e.message); }
+    // 入れるとき、同じ機体・同じ空港の90分以内の前の線で、時刻か出発・到着が食い違うものは入れ替える（判定を直したあとの読み直しで、古い判定の線を残さない）
+    for (let i = 0; i < tracks.length; i += 500) { const { error: e } = await admin.rpc("airport_tracks_put", { p_rows: tracks.slice(i, i + 500) }); if (e) console.error("tracks", e.message); }
     for (let i = 0; i < route.length; i += 300) { const { error: e } = await admin.rpc("reg_legs_route", { p_rows: route.slice(i, i + 300) }); if (e) console.error("route", e.message); }
     nTracks += tracks.length;
     for (let i = 0; i < rows.length; i += 500) { const { error: e } = await admin.from("rwy_samples").upsert(rows.slice(i, i + 500), { onConflict: "src,iata,dir,callsign,at", ignoreDuplicates: true }); if (e) return new Response(JSON.stringify({ error: e.message }), { status: 500, headers: J }); }

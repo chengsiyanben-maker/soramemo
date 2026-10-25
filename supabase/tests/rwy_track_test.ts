@@ -68,3 +68,20 @@ Deno.test("空の道すじ：読んだ幅の端で切れているかもしれな
   assertEquals(tracksOf("ANA200", h, { HND }, { from: t0 - 600, to: t0 + 7200 }).length, 0);    // 始まりが幅の端に近い
   assertEquals(tracksOf("ANA200", h, { HND }, { from: t0 - 3600, to: t0 + 900 }).length, 0);    // 終わりが幅の端に近い（まだ飛んでいるかもしれない）
 });
+Deno.test("空の道すじ：離陸して空港の上へ戻ってくる出発は、最後の点が空港の近くでも出発", async () => {
+  const { tracksOf } = await import("../functions/_shared/rwy_track.ts");
+  const NRT: Ap = { center: [35.76858, 140.388714], rw: {} }, t0 = Date.parse("2026-10-24T03:00:00Z") / 1000;
+  // 北へ離陸して30km 出てから、左に回って空港の西12km を 15,000ft 近くで通る（ここで記録が終わる）
+  const u: Pt[] = [[t0, ...fwd(NRT.center, 340, 3), 10], [t0 + 60, ...fwd(NRT.center, 340, 12), 40], [t0 + 120, ...fwd(NRT.center, 340, 22), 70], [t0 + 180, ...fwd(NRT.center, 330, 30), 95],
+    [t0 + 240, ...fwd(NRT.center, 300, 24), 115], [t0 + 300, ...fwd(NRT.center, 270, 16), 130], [t0 + 360, ...fwd(NRT.center, 250, 12), 145]];
+  const t = tracksOf("UAL32", u, { NRT, HND });
+  assertEquals(t.length, 1); assertEquals(t[0].dep_here, 1);
+  // 空港の近くを通ってから下りてきて着く到着（ダウンウインド）は、これまでどおり到着
+  const a: Pt[] = [[t0, ...fwd(NRT.center, 90, 5), 60], [t0 + 60, ...fwd(NRT.center, 150, 14), 50], [t0 + 120, ...fwd(NRT.center, 170, 24), 40], [t0 + 180, ...fwd(NRT.center, 175, 18), 30], [t0 + 240, ...fwd(NRT.center, 160, 11), 20]];
+  const ta = tracksOf("JAL5", a, { NRT, HND });
+  assertEquals(ta.length, 1); assertEquals(ta[0].dep_here, 0);
+  // 羽田を出て成田の近くで 15,000ft に届く機体は、成田の到着にしない
+  const r = HND.rw["34R"], s = HND.rw["34R"].thr;
+  const h: Pt[] = [[t0, ...fwd(s, r.hdg, 4), 15], [t0 + 120, ...fwd(s, 40, 25), 70], [t0 + 240, ...fwd(NRT.center, 230, 30), 120], [t0 + 300, ...fwd(NRT.center, 230, 18), 148]];
+  assertEquals(tracksOf("ANA401", h, { NRT, HND }).map((x) => x.iata + x.dep_here), ["HND1"]);
+});
