@@ -739,6 +739,8 @@ div.viewsw>button[aria-selected="true"]{background:none;border-color:var(--vw-in
 .sg-res{background:#111827!important;color:#fff!important;border:0!important}.sg-res small{color:rgba(255,255,255,.72)!important}.sg-res b{color:#fff}.sg-res b.gold{color:#E9C46A!important}
 .sg-res .sg-verdict{background:rgba(255,255,255,.08)!important;color:#fff}.sg-res .sg-li{color:#fff;background:rgba(255,255,255,.06)}
 [data-palette="board"] .sgcond{background:#131A27!important}[data-palette="board"] .sgcond .sg-card{background:#161F30}[data-palette="board"] .sg-res{background:#161F30!important}
+.sg-res .sg-break>div{border-bottom-color:rgba(255,255,255,.14)}.sg-res .sg-break span{color:#fff}.sg-res .redt{color:#FF8A8A!important}
+.sg-res.rj{box-shadow:inset 4px 0 0 #C8102E}.sg-res.ra{box-shadow:inset 4px 0 0 #6EA0FF}.sg-res .sg-3 span{background:rgba(255,255,255,.08)!important}
 #dLayout .pseg{margin-top:8px}
 [data-palette="board"] #dLayout .dsw{background:#3A414C}[data-palette="board"] #dLayout .dsw[aria-checked="true"]{background:var(--shu)}[data-palette="board"] #dLayout .dsw::after{background:#E8ECF1}[data-palette="board"] #dLayout .dsw[aria-checked="true"]::after{background:#0B0D10}
 #dLayout{--s-mute:#555B66}[data-palette="board"] #dLayout{--s-mute:#A7B0BC}#dLayout .hint{color:var(--s-mute)}
@@ -2111,7 +2113,7 @@ nav.tabs{transition:transform .3s cubic-bezier(.2,.8,.2,1),opacity .2s}
       <button class="chip" data-layer="traffic" aria-pressed="true">機体</button><button class="chip" data-layer="star" aria-pressed="true">到着経路</button><button class="chip" data-layer="app" aria-pressed="true">進入経路</button><button class="chip" data-layer="sid" aria-pressed="true">出発経路</button><button class="chip" data-layer="spots" aria-pressed="true">見る場所</button><button class="chip" id="opsFitAll">全体を見る</button>
     </div>
     <div class="opslayers opssiddir" id="opsSidDir" role="group" aria-label="出発経路の行き先の方向" hidden data-ov="runway"></div>
-    <div class="opsmap" id="opsMap" role="img" aria-label="羽田空港の滑走路と、進入・出発・到着の経路、今飛んでいる機体の地図" data-ov="runway"></div>
+    <div class="opsmap" id="opsMap" role="region" aria-label="羽田空港の滑走路と、進入・出発・到着の経路、今飛んでいる機体の地図" data-ov="runway"></div>
     <p class="opsstat" id="trafficNote" data-ov="runway"></p>
   </div>
   <div class="lo" data-lo="opsb:special">
@@ -5867,6 +5869,7 @@ document.addEventListener("click", e => {
 document.addEventListener("input", e => { if(e.target.id === "opsApQ") renderOpsApPicker(["CTS","SDJ","HND","NRT","NGO","ITM","KIX","HIJ","MYJ","FUK","NGS","KMJ","KOJ","OKA"]); });
 function renderOps(){
   const def = opsDef(), est = def.estimate(OPS_WX), obs = OPS_MODE === "auto" && OPS_OBS && OPS_OBS.mode ? OPS_OBS : null;
+  { const m = $("opsMap"); if(m) m.setAttribute("aria-label", `${def.name}空港の滑走路と、進入・出発・到着の経路、今飛んでいる機体の地図`); }
   if(OPS_MODE !== "auto" && !def.modes[OPS_MODE]) OPS_MODE = "auto";
   const unsure = OPS_MODE === "auto" && !obs && est.unsure;
   const mode = OPS_MODE === "auto" ? (obs ? obs.mode : est.mode) : OPS_MODE, rw = hndRunways();
@@ -6090,6 +6093,7 @@ async function loadTraffic(){
     const mk = L.marker([p.lat, p.lon], { icon:planeIcon(p), zIndexOffset:p.phase === "arr" ? 1000 : 0 }); TRAFFIC_MK.push({ mk, p });
     mk
       .bindTooltip(`${esc(p.callsign || "（便名不明）")}${p.type ? "（" + esc(p.type) + "）" : ""}<br>${p.alt_ft != null ? p.alt_ft.toLocaleString("ja-JP") + "ft・" : ""}${p.kt != null ? p.kt + "ノット" : ""}${p.fpm != null && Math.abs(p.fpm) >= 300 ? `・${p.fpm > 0 ? "上昇" : "降下"}中` : ""}`).addTo(TRAFFIC_LAYER);
+    { const el = mk.getElement(); if(el) el.setAttribute("aria-label", `${p.callsign || "便名不明"}（${p.phase === "arr" ? "到着" : "出発"}${p.alt_ft != null ? "・" + p.alt_ft.toLocaleString("ja-JP") + "フィート" : ""}）`); }
   }
   // はじめて読み込んだときだけ、着陸に向かう機体の線が入るように地図を合わせる
   if(!TRAFFIC_FIT && arr.length){ TRAFFIC_FIT = true;
@@ -8006,14 +8010,14 @@ function sgQuick(){
       <div class="sg-sp2">${sgSeg("qside", [["one", "片道"], ["round", "往復"]], SG_QSIDE)}<small>${ML ? `${fmtKm(ML.mi)}マイル（区間マイル）` : ""}</small></div>
       ${recent.length ? `<div class="sg-chips s"><small>最近</small>${recent.map(r => `<button type="button" data-sg-recent="${r[0]}-${r[1]}">${esc(placeShort(BY[r[0]].iata))}→${esc(placeShort(BY[r[1]].iata))}</button>`).join("")}</div>` : ""}</div>
     <div class="sg-h"><b>あなたの場合</b><button class="sg-a" data-sg-go="profile" type="button">会員情報 ›</button></div>
-    <div class="sg-card ${mc === "JAL" ? "bred" : "bblue"}">${sgSeg("qcar", [["JAL", "JAL"], ["ANA", "ANA"]], mc)}
+    <div class="sg-card sgcond" role="group" aria-label="あなたの条件">${sgSeg("qcar", [["JAL", "JAL"], ["ANA", "ANA"]], mc)}
       <div class="sg-tags">${prof.filter(Boolean).map(x => `<span>${esc(x)}</span>`).join("") || `<span>会員情報が入っていません</span>`}</div>
-      <div class="sg-row2"><select id="sgQmf" aria-label="運賃">${sgFareOpts(mc, t, mine.fare)}</select><label class="sg-yen"><input type="number" inputmode="numeric" min="0" step="100" id="sgQmp" value="${mine.price || ""}" placeholder="金額">円</label></div>
-      ${ML ? `<div class="sg-break"><div><span>フライトマイル<small>${fmtKm(ML.mi)}マイル × ${Math.round(ML.fr.rate * 100)}%</small></span><b>${fmtKm(ML.fm * x2)}</b></div>
+      <div class="sg-row2"><select id="sgQmf" aria-label="運賃">${sgFareOpts(mc, t, mine.fare)}</select><label class="sg-yen"><input type="number" inputmode="numeric" min="0" step="100" id="sgQmp" value="${mine.price || ""}" placeholder="金額">円</label></div></div>
+      ${ML ? `<div class="sg-card sg-res ${mc === "JAL" ? "rj" : "ra"}" aria-label="計算の結果"><div class="sg-break"><div><span>フライトマイル<small>${fmtKm(ML.mi)}マイル × ${Math.round(ML.fr.rate * 100)}%</small></span><b>${fmtKm(ML.fm * x2)}</b></div>
         ${ML.bonusPct ? `<div><span>${esc(ML.bonusWhy)}のボーナス ＋${ML.bonusPct}%<small>ステイタスとカードのボーナスは重ならず、多いほうだけ</small></span><b>+${fmtKm(ML.bonusMi * x2)}</b></div>` : ""}
         ${ML.payMi ? `<div><span>${mc}カードで払う<small>${sgYen(mine.price)}${mc === "JAL" ? "・JAL の航空券は2倍" : "・ANAカードマイルプラスとカードのポイント"}</small></span><b>+${fmtKm(ML.payMi * x2)}</b></div>` : ""}</div>
         <div class="sg-sp2"><b>たまるマイル</b><span><b class="xxl">${fmtKm(ML.totalMi * x2)}</b> マイル</span></div>
-        <div class="sg-3 c"><span><small>${mc === "JAL" ? "FOP" : "PP"}</small><b class="${mc === "JAL" ? "redt" : ""}">${fmtKm(ML.pts * x2)}</b></span><span><small>搭乗回数</small><b>+${x2}</b></span><span><small>Life Status</small><b>${mc === "JAL" ? "+" + 5 * x2 : "—"}</b>${mc === "JAL" && ML.payMi ? `<small>カード分 ${fmtKm(ML.payMi * x2)}/2,000</small>` : ""}</span></div>` : `<p class="sg-note">この区間は計算できません。</p>`}</div>
+        <div class="sg-3 c"><span><small>${mc === "JAL" ? "FOP" : "PP"}</small><b class="${mc === "JAL" ? "redt" : ""}">${fmtKm(ML.pts * x2)}</b></span><span><small>搭乗回数</small><b>+${x2}</b></span><span><small>Life Status</small><b>${mc === "JAL" ? "+" + 5 * x2 : "—"}</b>${mc === "JAL" && ML.payMi ? `<small>カード分 ${fmtKm(ML.payMi * x2)}/2,000</small>` : ""}</span></div></div>` : `<p class="sg-note">この区間は計算できません。</p>`}
     <div class="sg-h"><b>いちばん貯まる運賃なら</b><small>${SG_QSIDE === "round" ? "往復" : "片道"}・ボーナスなし</small></div>
     <div class="sg-2c">${card("ANA")}${card("JAL")}</div>
     <div class="sg-h"><b>運賃ごと</b>${sgSeg("qcar", [["ANA", "ANA"], ["JAL", "JAL"]], SG_QCAR)}</div>
