@@ -57,13 +57,13 @@ await db.exec(`update ops.flags set value = 'true' where key = 'co_v3'`);
 s = await as(A, `select public.co_state()`);
 const e = s.econ.find((x) => x.k === hc);
 // 手計算（仕様書の式）：客 20便×170席×0.7×0.5 ＝ 1,190人。大きい空港どうし（仕事の客6割）、FSC は仕事の客 1.0・旅行の客 0.85 → ×0.94
-//   1社なので取り合いなし → 1,118.6人。A350（350席）は 820km で1日6便 → 運べる 6×350×0.85 ＝ 1,785人 → 1,118.6人
+//   1社なので取り合いなし → 1,118.6人。A350-900（機種の表で369席）は 820km で1日6便 → 運べる 6×369×0.85 ＝ 1,882人 → 1,118.6人
 //   運賃 0.25＋820×0.0003 ＝ 0.496、はじめの上乗せ 1.5 → 収益 832.3
-//   費用 6便 × 350席 × 0.5 × 0.496 ＝ 520.8。着陸料 1便の客 186.4人 × 0.027 ＋ 大きいジェット 1.0 ＝ 6.03 × 6 ＝ 36.2
+//   費用 6便 × 369席 × 0.5 × 0.496 ＝ 549.0。着陸料 1便の客 186.4人 × 0.027 ＋ 大きいジェット 1.0 ＝ 6.03 × 6 ＝ 36.2
 const pax = 1190 * (0.6 * 1.0 + 0.4 * 0.85), fare = 0.25 + 820 * 0.0003;
-const rev = pax * fare * 1.5, cost = 6 * 350 * 0.5 * fare, land = 6 * ((pax / 6) * 0.027 + 1.0);
+const rev = pax * fare * 1.5, cost = 6 * 369 * 0.5 * fare, land = 6 * ((pax / 6) * 0.027 + 1.0);
 check('路線の客：1,190人 → 方針で 1,118.6人', Number(e.demand) === 1190 && near(Number(e.own), pax, 0.1), e);
-check('1日6便・A350 350席・全員運べる', e.flights === 6 && Number(e.seats) === 350 && near(Number(e.carried), pax, 0.1), e);
+check('1日6便・A350-900 369席（機種の表）・全員運べる', e.flights === 6 && Number(e.seats) === 369 && near(Number(e.carried), pax, 0.1), e);
 check('収益（運賃 × はじめの上乗せ 1.5）', near(Number(e.revenue), rev, 0.05), { got: e.revenue, want: rev });
 check('運航の費用', near(Number(e.cost), cost, 0.05), { got: e.cost, want: cost });
 check('着陸料', near(Number(e.landing), land, 0.05), { got: e.landing, want: land });
@@ -73,7 +73,7 @@ check('1日の収益（co_gross）＝ 手計算のもうけ', Number(s.gross) ==
 // 便数を変える：2便にすると、運べるのが 2×350×0.85 ＝ 595人まで
 s = await as(A, `select public.co3_set_flights('${hc}', 2)`);
 const e2 = s.econ.find((x) => x.k === hc);
-check('便数を2便に：運べる客は595人まで', e2.flights === 2 && near(Number(e2.carried), 595, 0.1), e2);
+check('便数を2便に：運べる客は 2×369×0.85 ＝ 627.3人まで', e2.flights === 2 && near(Number(e2.carried), 627.3, 0.1), e2);
 check('奇数の便数は入れられない', String(await as(A, `select public.co3_set_flights('${hc}', 3)`)).includes('invalid flights'), null);
 check('持っていない路線は入れられない', String(await as(A, `select public.co3_set_flights('1-2', 4)`)).includes('route not found'), null);
 check('ほかの人の便数は見えない', Number(await as(B, `select count(*) from co3_plans`)) === 0 && Number(await as(A, `select count(*) from co3_plans`)) === 1, null);
@@ -109,7 +109,7 @@ check('申し込みが枠を超えたので、A の便は申し込みの割合�
 // 本拠地と地元の応援：山形（小規模）を本拠地にして30日すぎ。山形⇄羽田（本物の便あり、1日4便×85席）
 await db.exec(`insert into flight_history (svc_date, flight, dep, arr, std, sta, type)
   select (now() at time zone 'Asia/Tokyo')::date - d, 'JL' || (170 + s), case s when 0 then 'HND' else 'GAJ' end, case s when 0 then 'GAJ' else 'HND' end,
-         now() - d * interval '1 day', now() - d * interval '1 day' + interval '60 minutes', 'E170'
+         now() - d * interval '1 day', now() - d * interval '1 day' + interval '60 minutes', 'B738'
     from generate_series(1, 28) d, generate_series(0, 3) s;
   insert into flights (user_id, from_airport, to_airport, dep_at, arr_at, distance_km) values
     ('${A}', ${ids.HND}, ${ids.GAJ}, now() - interval '2 day', now() - interval '2 day' + interval '60 minutes', 300);
@@ -118,13 +118,13 @@ await q1(`select public.co3_route_real_refresh()`);
 s = await as(A, `select public.co_state()`);
 const hg = `${Math.min(ids.HND, ids.GAJ)}-${Math.max(ids.HND, ids.GAJ)}`;
 const e6 = s.econ.find((x) => x.k === hg);
-// 客 4便×90席（E170）×0.35 ＝ 126人 × FSC（仕事の客45%）0.9175 ＝ 115.6人 → 小規模なので ×5 ＝ 578人（500人より多い）
-check('本拠地（小規模）の路線は ×5（羽田⇄山形 115.6人 → 578人）', e6 && near(Number(e6.own), 126 * (0.45 + 0.55 * 0.85) * 5, 0.1), e6);
+// 客 4便×170席（B738）×0.35 ＝ 238人 × FSC（仕事の客45%）0.9175 ＝ 218.4人 → 小規模なので ×5 ＝ 1,092人（500人より多い）
+check('本拠地（小規模）の路線は ×5（羽田⇄山形 218.4人 → 1,092人）', e6 && near(Number(e6.own), 238 * (0.45 + 0.55 * 0.85) * 5, 0.1), e6);
 await db.exec(`update flight_history set type = 'DH8D' where flight in ('JL170', 'JL171', 'JL172', 'JL173')`);
 await q1(`select public.co3_route_real_refresh()`);
 s = await as(A, `select public.co_state()`);
 const e7 = s.econ.find((x) => x.k === hg);
-// プロペラ機（70席）なら 4×70×0.35 ＝ 98人 × 0.9175 × 5 ＝ 449.6人 → 最低500人
+// Q400（機種の表で74席）なら 4×74×0.35 ＝ 103.6人 × 0.9175 × 5 ＝ 475.3人 → 最低500人
 check('×5 しても500人に届かなければ500人（本物の便がある路線だけ）', e7 && near(Number(e7.own), 500, 0.1), e7);
 check('機体のない路線は便が0で、もうけも0', e6 && e6.flights === 0 && Number(e6.profit) === 0, e6);
 check('本拠地はチェックインした空港だけ', String(await as(A, `select public.co3_set_home(${ids.HIJ})`)).includes('not visited'), null);

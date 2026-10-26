@@ -45,12 +45,13 @@ const hc = `${Math.min(ids.HND, ids.CTS)}-${Math.max(ids.HND, ids.CTS)}`;
 s = await as(A, `select public.co_assign(${s.fleet[0].id}, '${hc}')`);
 check('FSC のはじめの上級席は20%', s.premium === 20, s.premium);
 let e = s.econ.find((x) => x.k === hc);
-// 手計算：客 1,190人 × 0.94 ＝ 1,118.6人。上級席の客 ＝ 1,190 × 仕事の客 0.6 × 12% ＝ 85.68人（上級席 50席×6便×0.85 ＝ 255席に収まる）
-//   普通席 ＝ min(1,118.6 − 85.68, 200席×6便×0.85 ＝ 1,020) ＝ 1,020人
+// 手計算：A350-900 は機種の表で369席 → 上級席20%で上級席52・普通席213。
+//   客 1,190人 × 0.94 ＝ 1,118.6人。上級席の客 ＝ 1,190 × 仕事の客 0.6 × 12% ＝ 85.68人（上級席 52席×6便×0.85 ＝ 265席に収まる）
+//   普通席 ＝ min(1,118.6 − 85.68, 213席×6便×0.85 ＝ 1,086.3) ＝ 1,032.9人
 //   収益 ＝（1,020 ＋ 85.68 × 5.6）× 運賃 0.496 × はじめの上乗せ 1.5
-const fare = 0.25 + 820 * 0.0003, pp = 1190 * 0.6 * 0.12, ep = Math.min(1190 * 0.94 - pp, 200 * 6 * 0.85);
-const rev = (ep + pp * 5.6) * fare * 1.5, cost = 6 * 350 * 0.5 * fare, land = 6 * (((ep + pp) / 6) * 0.027 + 1.0);
-check('上級席の客 85.7人・普通席の客 1,020人（普通席が満席に近い）', near(Number(e.p_pax), pp, 0.1) && near(Number(e.e_pax), ep, 0.1) && Number(e.p_seats) === 50, e);
+const fare = 0.25 + 820 * 0.0003, pp = 1190 * 0.6 * 0.12, ep = Math.min(1190 * 0.94 - pp, 213 * 6 * 0.85);
+const rev = (ep + pp * 5.6) * fare * 1.5, cost = 6 * 369 * 0.5 * fare, land = 6 * (((ep + pp) / 6) * 0.027 + 1.0);
+check('上級席52席・上級席の客 85.7人・普通席の客 1,032.9人', near(Number(e.p_pax), pp, 0.1) && near(Number(e.e_pax), ep, 0.1) && Number(e.p_seats) === 52, e);
 check('収益 ＝（普通席 ＋ 上級席 × 5.6）× 運賃 × 1.5', near(Number(e.revenue), rev, 0.05), { got: e.revenue, want: rev });
 check('1日の収益 ＝ 手計算のもうけ', Number(s.gross) === Math.round(rev - cost - land), { got: s.gross, want: Math.round(rev - cost - land) });
 const g20 = Number(s.gross);
