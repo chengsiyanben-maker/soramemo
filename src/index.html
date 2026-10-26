@@ -6349,7 +6349,7 @@ function spbListHTML(){
     ${SPB ? "" : `<p class="hint">記録を読み込んでいます…</p>`}
     ${sec("flying", "いま飛んでいる", "直近15分に位置が届いた")}${sec("today", "今日飛んだ", "いまは地上か、記録の外")}${sec("recent", "この30日に飛んだ")}
     ${none.length ? `<details class="spbnone"><summary>しばらく見ていない ${none.length}機</summary><ul class="spbl">${none.map(spbRowHTML).join("")}</ul></details>` : ""}
-    <p class="fwnote">位置は adsb.lol、時刻表と便名は航空会社の運航情報（${ODPT_CREDIT}）。足あとは主な空港のまわりで見えた分なので、抜けることがあります。着く時刻は位置と速さからの推定です。特別塗装機の一覧は航空会社の発表などをもとに そらメモ がまとめたもので、塗装の期間や機体の入れ替えで違うことがあります。</p>`;
+    <p class="fwnote">位置は adsb.lol、時刻表と便名は航空会社の運航情報（${ODPT_CREDIT}）。足あとは主な空港のまわりで見えた分なので、抜けることがあります。時刻表にない便の行き先は、同じ便名のこの30日の路線からの推定です。着く時刻は位置と速さからの推定です。特別塗装機の一覧は航空会社の発表などをもとに そらメモ がまとめたもので、塗装の期間や機体の入れ替えで違うことがあります。</p>`;
 }
 function spbDetailHTML(reg){
   const r = spbRows().find(x => x.reg === reg); if(!r) return spbListHTML();
@@ -6360,7 +6360,7 @@ function spbDetailHTML(reg){
       <div class="spbtiles">${tile("着く時刻（推定）", eta ? spHM(eta) : "—")}${tile("時刻表", l.sta ? spHM(l.sta) : "—")}${tile("高さ", r.now.alt_ft != null ? `${(Math.round(r.now.alt_ft / 100) * 100).toLocaleString("ja-JP")}<small>ft</small>` : "—")}</div>`
     : `<p class="spbidle">${r.st === "today" ? "いまは地上か、記録の外にいます。" : r.st === "recent" ? `いまは飛んでいません。最後に見えたのは${esc(spbMd(r.b.last_day))}です。` : "この30日は、記録に入っていません。"}</p>`;
   const legLi = (x, i) => { const live = r.st === "flying" && i === r.legs.length - 1 && x.cs === r.now.callsign;
-    return `<li class="${live ? "now" : ""}"><span class="tm">${live ? "いま" : spHM(x.first)}</span><span class="rt">${spbCode(x.dep)}${spbArrow}${spbCode(x.arr)}</span><span class="fl">${esc(spbFl(x.cs))}${x.sch ? "<small>時刻表から</small>" : ""}${live ? "<small>飛行中</small>" : ""}</span></li>`; };
+    return `<li class="${live ? "now" : ""}"><span class="tm">${live ? "いま" : spHM(x.first)}</span><span class="rt">${spbCode(x.dep)}${spbArrow}${spbCode(x.arr)}</span><span class="fl">${esc(spbFl(x.cs))}${x.sch ? "<small>時刻表から</small>" : x.hist ? "<small>いつもの路線から</small>" : ""}${live ? "<small>飛行中</small>" : ""}</span></li>`; };
   return `<div class="spctop"><button class="mp-back" type="button" data-spb-back><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>特別塗装機</button><h3 class="srt">${esc(r.name)}</h3><span class="spbreg">${esc(reg)}</span></div>
     <div class="spbhero g-${r.g}"><div class="spbname"><small>${esc(r.air)}</small><b>${esc(r.name)}</b></div>${hero}</div>
     <h4 class="loh">今日の足あと<small>主な空港で見えた記録から</small></h4>

@@ -15,7 +15,7 @@ export const LIVERIES: Livery[] = [
   { reg: "JA383A", name: "FLYING HONU（オレンジ）", airline: "ANA", src: "https://www.aviationwire.jp/archives/208555" },
   { reg: "JA339J", name: "JAL Jubilee Express", airline: "JAL", src: "https://press.jal.co.jp/ja/release/202604/009482.html", until: "2027-04-30" },
   { reg: "JA01XJ", name: "A350 1号機（赤のロゴ）", airline: "JAL", src: "https://www.aviationwire.jp/archives/173663" },
-  { reg: "JA02XJ", name: "A350 2号機（銀のロゴ）", airline: "JAL", src: "https://www.aviationwire.jp/archives/173663" },
+  { reg: "JA02XJ", name: "A350 2号機（銀のロゴ）", airline: "JAL", src: "https://www.aviationwire.jp/archives/308931" },   // 2024-09 の記事でも銀のロゴ
   { reg: "JA03XJ", name: "A350 3号機（緑のロゴ）", airline: "JAL", src: "https://www.aviationwire.jp/archives/173663" },
   { reg: "JA05RK", name: "ジンベエジェット", airline: "JTA", src: "https://www.aviationwire.jp/archives/336787" },
   { reg: "JA06RK", name: "さくらジンベエ", airline: "JTA", src: "https://www.aviationwire.jp/archives/336787" },
@@ -100,6 +100,7 @@ export const LIVERIES: Livery[] = [
   { reg: "N24988", name: "The future is SAF（787-9）", airline: "ユナイテッド航空", src: "https://www.planespotters.net/photo/news/archive/2024/10" },
   { reg: "N61101", name: "100周年ステッカー（787-9）", airline: "ユナイテッド航空", src: "https://www.planespotters.net/photo/news/archive/2026/03" },
   { reg: "N784HA", name: "オーロラ Global 塗装（787-9）", airline: "アラスカ航空", src: "https://www.planespotters.net/photo/news/archive/2026/01" },
+  { reg: "HL8322", name: "ZEROBASEONE ステッカー", airline: "チェジュ航空", src: "https://www.planespotters.net/photo/news/archive/2026/6?page=2" },
   { reg: "A6-BMA", name: "ワーナー・ブラザース・ワールド塗装（787-10）", airline: "エティハド航空", src: "https://www.planespotters.net/photo/news/archive/2024/07" },
 ];
 
