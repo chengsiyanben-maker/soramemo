@@ -42,6 +42,8 @@ check('偽装の印つきのチェックインでは見えない', (await as(B, 
 check('見た機体の値段：貨物機は1.5倍（B747-8F 48,300 → 72,450）・旅客機は1.3倍（B787-9 42,600 → 55,380）', Number(kz.price) === 72450 && Number(jl.price) === 55380, { kz: kz.price, jl: jl.price });
 
 await db.exec(`update companies set cash = 1000000, satisfaction = 60 where user_id = '${A}'`);
+// FSC は機体の1割までしか貨物機を持てない（t53）ので、ここは貨物の会社で確かめる
+await db.exec(`update companies set policy = 'cargo' where user_id = '${A}'`);
 let s = await as(A, `select public.co3_buy_seen('JA11KZ')`);
 const f = s.fleet.find((x) => x.reg === 'JA11KZ');
 check('貨物機を買う：72,450 で、差なし（見ただけの旅客機の印はなし）', near(Number(s.cash), 1000000 - 72450, 2) && f, { cash: s.cash });
