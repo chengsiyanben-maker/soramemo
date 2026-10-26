@@ -758,15 +758,16 @@ div.viewsw>button[aria-selected="true"]{background:none;border-color:var(--vw-in
 .spbrow .l{display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:13px}.spbrow .m{color:var(--s-mute)}
 .spbrow .s{font-size:11.5px;color:var(--s-mute)}
 .spbc{font:700 14px/1 var(--gothic);letter-spacing:.02em}.spbc.q{color:var(--s-mute)}
-.spbar{width:16px;height:10px;fill:none;stroke:var(--s-mute);stroke-width:1.8;flex-shrink:0}
+.spbar{width:16px!important;height:10px!important;fill:none;stroke:var(--s-mute);stroke-width:1.8;flex-shrink:0;background:none!important;border-radius:0!important}
 .spbnone{margin-top:14px}.spbnone summary{cursor:pointer;font-size:13px;color:var(--s-mute);padding:10px 2px;min-height:24px}
 .spbhero{background:#111827;color:#fff;border-radius:22px;padding:16px;display:flex;flex-direction:column;gap:12px;margin:4px 0 6px;box-shadow:inset 4px 0 0 #A9822E,0 4px 16px rgba(17,24,39,.18)}
 .spbhero.g-jal{box-shadow:inset 4px 0 0 #E0485F,0 4px 16px rgba(17,24,39,.18)}.spbhero.g-ana{box-shadow:inset 4px 0 0 #6EA0FF,0 4px 16px rgba(17,24,39,.18)}
 .spbname{display:flex;flex-direction:column;gap:2px}.spbname small{font-size:12px;color:#D1D5DB}.spbname b{font-size:21px;line-height:1.3}
-.spbroute{display:flex;align-items:center;gap:10px}.spbroute .spbc{font-size:26px}.spbroute .spbar{width:34px;height:14px;stroke:#E9C46A}.spbroute small{margin-left:auto;font-size:12px;color:#D1D5DB}
+.spbroute{display:flex;align-items:center;gap:10px}.spbroute .spbc{font-size:26px}.spbroute .spbar{width:34px!important;height:14px!important;stroke:#E9C46A}.spbroute small{margin-left:auto;font-size:12px;color:#D1D5DB}
 .spbtiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
 .spbtiles div{background:rgba(255,255,255,.08);border-radius:12px;padding:8px 10px;display:flex;flex-direction:column;gap:2px}
 .spbtiles span{font-size:11px;color:#D1D5DB}.spbtiles b{font:700 18px/1.2 var(--gothic)}.spbtiles b small{font-size:11px;color:#D1D5DB;margin-left:2px}
+.spbunk{font-size:15px;color:#E5E7EB}
 .spbidle{margin:0;font-size:13px;color:#E5E7EB;line-height:1.6}
 .spblegs{list-style:none;margin:0;padding:4px 14px;background:var(--s-card);border-radius:18px;box-shadow:0 1px 6px rgba(17,24,39,.06)}
 .spblegs li{display:flex;align-items:center;gap:10px;min-height:44px}.spblegs li+li{border-top:1px solid var(--s-line)}
@@ -779,8 +780,8 @@ div.viewsw>button[aria-selected="true"]{background:none;border-color:var(--vw-in
 .spbbtn{min-height:48px;border-radius:24px;border:1px solid #C9CED6;background:var(--s-card);color:var(--s-ink);font:700 13px/1.3 var(--gothic);padding:6px 12px;cursor:pointer}
 .spbbtn[aria-pressed="true"]{background:#111827;color:#fff;border-color:#111827}
 .spin{list-style:none;margin:6px 0 0;padding:0}
-.spin li>button,.spin li>div{width:100%;display:flex;align-items:center;gap:10px;min-height:52px;background:none;border:0;color:inherit;font:inherit;text-align:left;padding:4px 0}
-.spin li>button{cursor:pointer}.spin li+li{border-top:1px solid var(--op-line,#E5E7EB)}
+#opsSpecial .spin li>button,.spin li>button,.spin li>div{width:100%;display:flex;align-items:center;gap:10px;min-height:52px;background:none;border:0;color:inherit;font:inherit;text-align:left;padding:4px 0}
+#opsSpecial .spin li>button{cursor:pointer;flex-direction:row;padding:4px 0;margin:0;border-radius:0}.spin li+li{border-top:1px solid var(--op-line,#E5E7EB)}
 .spin .tm{font:700 16px/1 var(--gothic);width:52px;flex-shrink:0}.spin .tm.hot{color:#92400E}
 [data-palette="board"] .spin .tm.hot{color:#E9C46A}
 .spin .tx{display:flex;flex-direction:column;gap:2px;min-width:0}.spin .tx b{font-size:14px}.spin .tx small{font-size:12px;opacity:.8}
@@ -6298,7 +6299,10 @@ async function loadSpb(force){
 function spbRows(){
   const by = new Map((SPB || []).map(b => [b.reg, b])), today = spJstDate(Date.now());
   return Object.entries(LIVERY_NAMES).map(([reg, name]) => {
-    const b = by.get(reg) || {}, air = LIVERY_AIR[reg] || "", legs = Array.isArray(b.today) ? b.today : [];
+    const b = by.get(reg) || {}, air = LIVERY_AIR[reg] || "", legs = (Array.isArray(b.today) ? b.today : []).map(l => ({ ...l }));
+    // 発着が分からない便は、前後の便でつなぐ（前の便の到着 ＝ 次の便の出発）
+    for(let i = 0; i < legs.length; i++){ if(!legs[i].dep && i > 0 && legs[i - 1].arr) legs[i].dep = legs[i - 1].arr; if(!legs[i].arr && i < legs.length - 1 && legs[i + 1].dep) legs[i].arr = legs[i + 1].dep; }
+    for(let i = legs.length - 1; i > 0; i--) if(!legs[i - 1].arr && legs[i].dep) legs[i - 1].arr = legs[i].dep;
     const now = b.now && (b.now.alt_ft == null || b.now.alt_ft > 300) ? b.now : null;
     const leg = now ? (legs.filter(l => l.cs === now.callsign).pop() || { cs:now.callsign }) : null;
     const st = now ? "flying" : legs.length ? "today" : b.last_day && b.last_day !== today ? "recent" : "none";
@@ -6352,7 +6356,7 @@ function spbDetailHTML(reg){
   const eta = r.st === "flying" ? spbEta(r) : null, l = r.leg, on = pushSpRegs().includes(reg);
   const arr30 = Object.entries(r.b.arr30 || {}).sort((a, b) => b[1] - a[1]);
   const tile = (k, v) => `<div><span>${k}</span><b>${v}</b></div>`;
-  const hero = r.st === "flying" ? `<div class="spbroute">${spbCode(l.dep)}${spbArrow}${spbCode(l.arr)}<small>${esc(spbFl(l.cs))}</small></div>
+  const hero = r.st === "flying" ? `<div class="spbroute">${l.dep || l.arr ? `${spbCode(l.dep)}${spbArrow}${spbCode(l.arr)}` : `<span class="spbunk">行き先は分からない</span>`}<small>${esc(spbFl(l.cs))}</small></div>
       <div class="spbtiles">${tile("着く時刻（推定）", eta ? spHM(eta) : "—")}${tile("時刻表", l.sta ? spHM(l.sta) : "—")}${tile("高さ", r.now.alt_ft != null ? `${(Math.round(r.now.alt_ft / 100) * 100).toLocaleString("ja-JP")}<small>ft</small>` : "—")}</div>`
     : `<p class="spbidle">${r.st === "today" ? "いまは地上か、記録の外にいます。" : r.st === "recent" ? `いまは飛んでいません。最後に見えたのは${esc(spbMd(r.b.last_day))}です。` : "この30日は、記録に入っていません。"}</p>`;
   const legLi = (x, i) => { const live = r.st === "flying" && i === r.legs.length - 1 && x.cs === r.now.callsign;
