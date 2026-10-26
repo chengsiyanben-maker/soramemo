@@ -2,8 +2,8 @@
 // ・アプリ本体と設定（HTML・config.js）は最新版を優先し、圏外のときだけ保存した版を使う（更新がすぐ届くように）
 // ・アイコンや、版の番号が付いた外部の部品・フォントは、保存した版を使う
 // ・サーバー（Supabase）などとの通信には手を出さない（失敗は失敗としてアプリに伝える）
-const CACHE = "soramemo-79f52cc5e0";   // 配る用を作るとき（tools/build.mjs）に中身から自動で付く
-const CORE = ["./", "./index.html", "./config.js", "./manifest.webmanifest", "./icon.svg", "./icon-192.png", "./icon-512.png", "./privacy.html", "./terms.html", "./tokushoho.html", "./fonts/mincho0-399b7e77a2.woff2", "./fonts/dot0-d4c1155849.woff2"];
+const CACHE = "soramemo-b60fffd901";   // 配る用を作るとき（tools/build.mjs）に中身から自動で付く
+const CORE = ["./", "./index.html", "./config.js", "./manifest.webmanifest", "./icon.svg", "./icon-192.png", "./icon-512.png", "./privacy.html", "./terms.html", "./tokushoho.html", "./fonts/mincho0-11097731a8.woff2", "./fonts/dot0-edfd8d572c.woff2"];
 // フォント（fonts/ の中身はファイル名に中身の印が付いている）は、版が変わっても消さない別の保存場所に置く（公開のたびに取り直さない）
 const FONTS = "soramemo-fonts";
 const CDN = ["https://cdn.jsdelivr.net/", "https://fonts.googleapis.com/", "https://fonts.gstatic.com/"];
@@ -58,7 +58,7 @@ self.addEventListener("fetch", (e) => {
 // スマホへの通知（遅れ・ダイバートの推定、特別塗装機）。サーバーの flight-watch・airport-traffic から届く
 self.addEventListener("push", (e) => {
   let d = {}; try { d = e.data ? e.data.json() : {}; } catch (_) { d = { body: e.data ? e.data.text() : "" }; }
-  e.waitUntil(self.registration.showNotification(d.title || "そらメモ", { body: d.body || "", tag: d.tag || "soramemo", icon: "icon-192.png", badge: "icon-192.png", data: { url: typeof d.url === "string" && d.url.startsWith("./#ops") ? d.url : "./#ops" } }));
+  e.waitUntil(self.registration.showNotification(d.title || "そらメモ", { body: d.body || "", tag: d.tag || "soramemo", icon: "icon-192.png", badge: "icon-192.png", data: { url: typeof d.url === "string" && (d.url.startsWith("./#ops") || /^\.\/#special-[A-Z0-9-]{2,10}$/.test(d.url)) ? d.url : "./#ops" } }));
 });
 self.addEventListener("notificationclick", (e) => {
   e.notification.close();

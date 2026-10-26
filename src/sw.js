@@ -58,7 +58,7 @@ self.addEventListener("fetch", (e) => {
 // スマホへの通知（遅れ・ダイバートの推定、特別塗装機）。サーバーの flight-watch・airport-traffic から届く
 self.addEventListener("push", (e) => {
   let d = {}; try { d = e.data ? e.data.json() : {}; } catch (_) { d = { body: e.data ? e.data.text() : "" }; }
-  e.waitUntil(self.registration.showNotification(d.title || "そらメモ", { body: d.body || "", tag: d.tag || "soramemo", icon: "icon-192.png", badge: "icon-192.png", data: { url: typeof d.url === "string" && d.url.startsWith("./#ops") ? d.url : "./#ops" } }));
+  e.waitUntil(self.registration.showNotification(d.title || "そらメモ", { body: d.body || "", tag: d.tag || "soramemo", icon: "icon-192.png", badge: "icon-192.png", data: { url: typeof d.url === "string" && (d.url.startsWith("./#ops") || /^\.\/#special-[A-Z0-9-]{2,10}$/.test(d.url)) ? d.url : "./#ops" } }));
 });
 self.addEventListener("notificationclick", (e) => {
   e.notification.close();

@@ -3,6 +3,7 @@
 //   POST /functions/v1/push-subscribe  { endpoint, keys:{p256dh, auth}, airports:["HND", ...], flights:["JL509@2026-10-26", ...] }
 //        → 申し込み（同じ endpoint は上書き）。flights は「この便に乗る」で選んだ便（5便まで）
 //        sp_airports:["HND", ...] を付けると、その空港に特別塗装機が着陸に向かってきたときも知らせる
+//        sp_regs:["JA339J", ...] を付けると、その特別塗装機が新しい便で飛び始めたときに知らせる（どの空港でも。20機まで）
 //        spot:{ iata:"HND", kinds:["special","big","foreign","reg","ops"], lead:5, regs:["JA01XJ"], flights:["JL123@2026-10-21"] } を付けると、
 //        撮影の知らせ（その空港に、選んだ種類の機体が着陸の lead 分前になったら。運用が変わったときも）。spot:null で撮影の知らせをやめる
 //        ga:{ airports:["HND","NRT"], kinds:["plane","cluster","wind","cloud","ts"], quiet:true, gap:3 } を付けると、ゴーアラウンドの知らせ（推定）
@@ -46,7 +47,7 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: CORS });
   if (req.method === "GET") return res({ key: Deno.env.get("VAPID_PUBLIC_KEY") || null });
   if (req.method !== "POST") return res({ error: "GET/POST only" }, 405);
-  let b: { endpoint?: unknown; keys?: { p256dh?: unknown; auth?: unknown }; airports?: unknown; flights?: unknown; sp_airports?: unknown; spot?: unknown; ga?: unknown; remove?: unknown };
+  let b: { endpoint?: unknown; keys?: { p256dh?: unknown; auth?: unknown }; airports?: unknown; flights?: unknown; sp_airports?: unknown; sp_regs?: unknown; spot?: unknown; ga?: unknown; remove?: unknown };
   try { b = await req.json(); } catch { return res({ error: "bad json" }, 400); }
   const endpoint = typeof b.endpoint === "string" ? b.endpoint : "";
   if (!PUSH_HOSTS.test(endpoint) || endpoint.length > 1000) return res({ error: "bad endpoint" }, 400);
@@ -59,14 +60,15 @@ Deno.serve(async (req) => {
   const airports = Array.isArray(b.airports) ? [...new Set(b.airports.filter((x) => typeof x === "string" && /^[A-Z]{3}$/.test(x)))].slice(0, 12) as string[] : [];
   const flights = Array.isArray(b.flights) ? [...new Set(b.flights.filter((x) => typeof x === "string" && /^[A-Z0-9]{2}\d{1,4}[A-Z]?@\d{4}-\d{2}-\d{2}$/.test(x)))].slice(0, 5) as string[] : [];
   const sp_airports = Array.isArray(b.sp_airports) ? [...new Set(b.sp_airports.filter((x) => typeof x === "string" && /^[A-Z]{3}$/.test(x)))].slice(0, 14) as string[] : [];
+  const sp_regs = Array.isArray(b.sp_regs) ? [...new Set(b.sp_regs.filter((x) => typeof x === "string" && /^[A-Z0-9-]{2,10}$/.test(x)))].slice(0, 20) as string[] : [];
   const spot = spotOf(b.spot), hasSpot = !!spot.spot_iata && (spot.spot_kinds.length > 0 || spot.spot_flights.length > 0);
   const ga = gaOf(b.ga), hasGa = ga.ga_airports.length > 0 && ga.ga_kinds.length > 0;
-  if (!airports.length && !flights.length && !sp_airports.length && !hasSpot && !hasGa) {   // 何も選ばれていなければ取り消し
+  if (!airports.length && !flights.length && !sp_airports.length && !sp_regs.length && !hasSpot && !hasGa) {   // 何も選ばれていなければ取り消し
     await admin.from("push_subs").delete().eq("endpoint", endpoint);
     return res({ ok: true, removed: true });
   }
-  const row = { endpoint, p256dh, auth, airports, flights, sp_airports, ...(hasSpot ? spot : { spot_iata: null, spot_kinds: [] as string[], spot_lead: 5, spot_regs: [] as string[], spot_flights: [] as string[] }), ...(hasGa ? ga : { ga_airports: [] as string[], ga_kinds: [] as string[], ga_quiet: false, ga_gap: 3 }) };
+  const row = { endpoint, p256dh, auth, airports, flights, sp_airports, sp_regs, ...(hasSpot ? spot : { spot_iata: null, spot_kinds: [] as string[], spot_lead: 5, spot_regs: [] as string[], spot_flights: [] as string[] }), ...(hasGa ? ga : { ga_airports: [] as string[], ga_kinds: [] as string[], ga_quiet: false, ga_gap: 3 }) };
   const { error } = await admin.from("push_subs").upsert(row, { onConflict: "endpoint" });
   if (error) { console.error(error); return res({ error: "save failed" }, 500); }
-  return res({ ok: true, airports, flights, sp_airports, spot: hasSpot ? spot : null, ga: hasGa ? ga : null });
+  return res({ ok: true, airports, flights, sp_airports, sp_regs, spot: hasSpot ? spot : null, ga: hasGa ? ga : null });
 });
