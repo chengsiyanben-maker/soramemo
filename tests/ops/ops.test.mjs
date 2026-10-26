@@ -80,7 +80,7 @@ for (const def of Object.values(OPS_AIRPORTS)) {
   ok(errs.length === 0, `${def.iata}：画面のエラーなし`, errs.join(" / "));
   if (def.iata === "HND") {
     const sp = await p.locator("#opsSpecial").innerText().catch(() => "");
-    ok(sp.includes("ポケモンジェット 赤") && sp.includes("羽田に着陸へ"), "特別塗装機の欄が出る", sp.slice(0, 80));
+    ok(sp.includes("羽田に来る特別塗装機") && sp.includes("ポケモンジェット 赤") && sp.includes("着陸に向かっている"), "特別塗装機の欄が出る（羽田に来る特別塗装機）", sp.slice(0, 120));
     const tag = await p.locator(".tlabel.sp").count();
     ok(tag > 0, "地図の名札に特別塗装機の★が出る");
   }

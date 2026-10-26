@@ -163,7 +163,27 @@ async function recordLiveries(bodies: Map<string, string>) {
   if (seen.size) { const { error } = await admin.from("livery_sightings").upsert([...seen.values()]); if (error) throw error; }
   // 着陸に向かってきた特別塗装機は、その空港を選んでいる人に知らせる（同じ機体・空港は6時間に1回）。アライアンス塗装は毎日飛んでいるので知らせない
   for (const v of seen.values()) if (v.iata && v.phase === "arr" && v.kind !== "alliance") { try { await notifyLivery(v); } catch (e) { console.error("livery push", e); } }
+  // 機体を選んでいる人には、その機体が新しい便（便名）で飛んでいるのを見つけたときに知らせる（1便に1回）
+  for (const v of seen.values()) if (v.kind !== "alliance" && v.callsign && typeof v.alt_ft === "number" && v.alt_ft > 1000) { try { await notifyRegFly(v); } catch (e) { console.error("livery reg push", e); } }
   return seen.size;
+}
+
+// deno-lint-ignore no-explicit-any
+async function notifyRegFly(v: any) {
+  const pub = Deno.env.get("VAPID_PUBLIC_KEY"), priv = Deno.env.get("VAPID_PRIVATE_KEY");
+  if (!pub || !priv) return;
+  const key = `F:${v.callsign}`, since = new Date(Date.now() - 12 * 3600_000).toISOString();
+  const { data: done } = await admin.from("livery_notified").select("reg").eq("reg", v.reg).eq("iata", key).gt("notified_at", since);
+  if (done?.length) return;
+  await admin.from("livery_notified").upsert({ reg: v.reg, iata: key, notified_at: new Date().toISOString() });
+  const { data: subs } = await admin.from("push_subs").select("id, endpoint, p256dh, auth").contains("sp_regs", [v.reg]);
+  if (!subs?.length) return;
+  webpush.setVapidDetails(Deno.env.get("VAPID_SUBJECT") || "https://soramemo.jp", pub, priv);
+  const body = JSON.stringify({ title: `そらメモ：★${v.name}`, body: `${v.name}（${v.airline}・${v.callsign}）が飛んでいます（推定）。`, tag: `spr-${v.reg}`, url: `./#special-${v.reg}` });
+  for (const s of subs) {
+    try { await webpush.sendNotification({ endpoint: s.endpoint, keys: { p256dh: s.p256dh, auth: s.auth } }, body, { TTL: 900 }); }
+    catch (e) { const code = (e as { statusCode?: number }).statusCode; if (code === 404 || code === 410) await admin.from("push_subs").delete().eq("id", s.id); }
+  }
 }
 
 // deno-lint-ignore no-explicit-any

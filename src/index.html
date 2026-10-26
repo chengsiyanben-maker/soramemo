@@ -741,6 +741,53 @@ div.viewsw>button[aria-selected="true"]{background:none;border-color:var(--vw-in
 [data-palette="board"] .sgcond{background:#131A27!important}[data-palette="board"] .sgcond .sg-card{background:#161F30}[data-palette="board"] .sg-res{background:#161F30!important}
 .sg-res .sg-break>div{border-bottom-color:rgba(255,255,255,.14)}.sg-res .sg-break span{color:#fff}.sg-res .redt{color:#FF8A8A!important}
 .sg-res.rj{box-shadow:inset 4px 0 0 #C8102E}.sg-res.ra{box-shadow:inset 4px 0 0 #6EA0FF}.sg-res .sg-3 span{background:rgba(255,255,255,.08)!important}
+/* 特別塗装機の画面 */
+#dSpecial{--s-mute:#555B66}[data-palette="board"] #dSpecial{--s-mute:#A7B0BC}
+#dSpecial .spctop h3.srt{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.spbreg{font:600 12px/1 var(--gothic);color:var(--s-mute)}
+.spbmapw{position:relative;margin:4px 0 12px}
+.spbmap{height:170px;border-radius:18px;overflow:hidden;background:#DCE6F2;box-shadow:0 2px 10px rgba(17,24,39,.08)}
+.spbmapn{position:absolute;left:10px;bottom:10px;z-index:500;background:rgba(255,255,255,.94);color:#374151;border-radius:12px;padding:3px 9px;font-size:11.5px}
+.spbtabs{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 4px}.spbtabs button{min-height:36px;padding:0 14px;border-radius:18px;border:1px solid #C9CED6;background:var(--s-card);color:var(--s-ink);font:600 13px/1 var(--gothic);cursor:pointer}.spbtabs button[aria-pressed="true"]{background:#111827;border-color:#111827;color:#fff}[data-palette="board"] .spbtabs button[aria-pressed="true"]{background:#E5E7EB;color:#0B0D10;border-color:#E5E7EB}
+.spbl{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.spbrow{width:100%;text-align:left;border:0;background:var(--s-card);color:var(--s-ink);border-radius:18px;padding:12px 14px 12px 18px;display:flex;flex-direction:column;gap:4px;font:inherit;box-shadow:0 1px 6px rgba(17,24,39,.06);position:relative;cursor:pointer;min-height:48px}
+.spbrow::before{content:"";position:absolute;left:7px;top:12px;bottom:12px;width:4px;border-radius:2px;background:#A9822E}
+.spbrow.g-jal::before{background:#C8102E}.spbrow.g-ana::before{background:#1C4FA0}
+.spbrow .t{display:flex;justify-content:space-between;align-items:baseline;gap:8px}.spbrow .t b{font-size:15px}
+.spbrow .reg{font:600 11.5px/1 var(--gothic);color:var(--s-mute);flex-shrink:0}
+.spbrow .l{display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:13px}.spbrow .m{color:var(--s-mute)}
+.spbrow .s{font-size:11.5px;color:var(--s-mute)}
+.spbc{font:700 14px/1 var(--gothic);letter-spacing:.02em}.spbc.q{color:var(--s-mute)}
+.spbar{width:16px;height:10px;fill:none;stroke:var(--s-mute);stroke-width:1.8;flex-shrink:0}
+.spbnone{margin-top:14px}.spbnone summary{cursor:pointer;font-size:13px;color:var(--s-mute);padding:10px 2px;min-height:24px}
+.spbhero{background:#111827;color:#fff;border-radius:22px;padding:16px;display:flex;flex-direction:column;gap:12px;margin:4px 0 6px;box-shadow:inset 4px 0 0 #A9822E,0 4px 16px rgba(17,24,39,.18)}
+.spbhero.g-jal{box-shadow:inset 4px 0 0 #E0485F,0 4px 16px rgba(17,24,39,.18)}.spbhero.g-ana{box-shadow:inset 4px 0 0 #6EA0FF,0 4px 16px rgba(17,24,39,.18)}
+.spbname{display:flex;flex-direction:column;gap:2px}.spbname small{font-size:12px;color:#D1D5DB}.spbname b{font-size:21px;line-height:1.3}
+.spbroute{display:flex;align-items:center;gap:10px}.spbroute .spbc{font-size:26px}.spbroute .spbar{width:34px;height:14px;stroke:#E9C46A}.spbroute small{margin-left:auto;font-size:12px;color:#D1D5DB}
+.spbtiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.spbtiles div{background:rgba(255,255,255,.08);border-radius:12px;padding:8px 10px;display:flex;flex-direction:column;gap:2px}
+.spbtiles span{font-size:11px;color:#D1D5DB}.spbtiles b{font:700 18px/1.2 var(--gothic)}.spbtiles b small{font-size:11px;color:#D1D5DB;margin-left:2px}
+.spbidle{margin:0;font-size:13px;color:#E5E7EB;line-height:1.6}
+.spblegs{list-style:none;margin:0;padding:4px 14px;background:var(--s-card);border-radius:18px;box-shadow:0 1px 6px rgba(17,24,39,.06)}
+.spblegs li{display:flex;align-items:center;gap:10px;min-height:44px}.spblegs li+li{border-top:1px solid var(--s-line)}
+.spblegs .tm{font:600 12px/1 var(--gothic);color:var(--s-mute);width:44px;flex-shrink:0}
+.spblegs .rt{display:flex;align-items:center;gap:6px}.spblegs .fl{margin-left:auto;text-align:right;font-size:12px;color:var(--s-mute);display:flex;flex-direction:column;align-items:flex-end}
+.spblegs .fl small{font-size:10.5px}.spblegs li.now .tm,.spblegs li.now .fl small:last-child{color:#92400E;font-weight:700}
+[data-palette="board"] .spblegs li.now .tm,[data-palette="board"] .spblegs li.now .fl small:last-child{color:#E9C46A}
+.spbaps{display:flex;flex-wrap:wrap;gap:6px}.spbaps span{background:var(--s-card);border-radius:14px;padding:6px 11px;font-size:12.5px;box-shadow:0 1px 4px rgba(17,24,39,.05)}.spbaps b{font-size:14px}
+.spbbtns{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:16px}
+.spbbtn{min-height:48px;border-radius:24px;border:1px solid #C9CED6;background:var(--s-card);color:var(--s-ink);font:700 13px/1.3 var(--gothic);padding:6px 12px;cursor:pointer}
+.spbbtn[aria-pressed="true"]{background:#111827;color:#fff;border-color:#111827}
+.spin{list-style:none;margin:6px 0 0;padding:0}
+.spin li>button,.spin li>div{width:100%;display:flex;align-items:center;gap:10px;min-height:52px;background:none;border:0;color:inherit;font:inherit;text-align:left;padding:4px 0}
+.spin li>button{cursor:pointer}.spin li+li{border-top:1px solid var(--op-line,#E5E7EB)}
+.spin .tm{font:700 16px/1 var(--gothic);width:52px;flex-shrink:0}.spin .tm.hot{color:#92400E}
+[data-palette="board"] .spin .tm.hot{color:#E9C46A}
+.spin .tx{display:flex;flex-direction:column;gap:2px;min-width:0}.spin .tx b{font-size:14px}.spin .tx small{font-size:12px;opacity:.8}
+.spinbtns{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;align-items:center}
+.spinall{min-height:44px;border-radius:22px;border:1px solid currentColor;background:none;color:inherit;font:700 13px/1 var(--gothic);padding:0 16px;cursor:pointer}
+.spnow{margin-top:10px}
+.spbreg,.spbrow .reg,.spbc,.spbtiles b,.spblegs .tm,.spin .tm{font-variant-numeric:tabular-nums}
 #dLayout .pseg{margin-top:8px}
 [data-palette="board"] #dLayout .dsw{background:#3A414C}[data-palette="board"] #dLayout .dsw[aria-checked="true"]{background:var(--shu)}[data-palette="board"] #dLayout .dsw::after{background:#E8ECF1}[data-palette="board"] #dLayout .dsw[aria-checked="true"]::after{background:#0B0D10}
 #dLayout{--s-mute:#555B66}[data-palette="board"] #dLayout{--s-mute:#A7B0BC}#dLayout .hint{color:var(--s-mute)}
@@ -2221,6 +2268,7 @@ nav.tabs{transition:transform .3s cubic-bezier(.2,.8,.2,1),opacity .2s}
   <label class="apsearch"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg><input id="opsApQ" type="search" placeholder="空港名か3レターで探す（例：OKA）" autocomplete="off" aria-label="空港を探す"></label>
   <div class="opsaps" id="opsAps"></div></div></dialog>
 <dialog id="dLayout" class="spfull" aria-label="表示を編集"><div class="dlg" id="dLayoutBody"></div></dialog>
+<dialog id="dSpecial" class="spfull" aria-label="特別塗装機"><div class="dlg" id="dSpecialBody"></div></dialog>
 <dialog id="dSettings" class="mypage"><div class="dlg">
   <div class="mp-top"><button class="mp-back" data-close type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>ホーム</button><h3>マイページ</h3><span class="mp-sp" aria-hidden="true"></span></div>
   <div class="mp-prof" id="mpProf">
@@ -6188,8 +6236,27 @@ function spPushHTML(){
   const on = pushSp().includes(OPS_AP), name = opsDef().name;
   return `<button class="linkbtn2 fwpush" data-sp-push="${esc(OPS_AP)}" aria-pressed="${on}">${on ? `${esc(name)}の特別塗装機の通知をやめる` : `${esc(name)}に特別塗装機が来たら通知する`}</button>`;
 }
+// この空港に3時間のうちに来る特別塗装機：飛んでいる機体（行き先がこの空港）と、運航情報に特別塗装機と書かれた便
+function spInboundHTML(){
+  const here = OPS_AP, until = Date.now() + 3 * 36e5, items = [];
+  for(const r of spbRows()) if(r.st === "flying" && ((r.leg && r.leg.arr === here) || (r.now.iata === here && r.now.phase === "arr"))){
+    const eta = spbEta(r) || (r.leg && r.leg.sta && Date.parse(r.leg.sta)) || null;
+    items.push({ t:eta, reg:r.reg, name:r.name, hot:r.now.iata === here && r.now.phase === "arr", sub:`${esc(spbFl((r.leg && r.leg.cs) || r.now.callsign))}${r.leg && r.leg.dep ? `・${esc(placeShort(r.leg.dep))}から` : ""}・${r.now.iata === here && r.now.phase === "arr" ? "着陸に向かっている" : "飛行中"}${eta ? "（推定）" : ""}` });
+  }
+  // 足あとの記録がまだ届いていなくても、着陸に向かっているのが見えている機体は出す
+  for(const x of SPECIAL.values()) if(x.kind !== "alliance" && x.iata === here && x.phase === "arr" && !items.some(i => i.reg === x.reg))
+    items.push({ t:null, reg:LIVERY_NAMES[x.reg] ? x.reg : null, name:x.name, hot:true, sub:`${esc(spbFl(x.callsign))}・着陸に向かっている` });
+  for(const p of SP_PLANS) if(p.arr === here && !p.cancelled && p.sta && Date.parse(p.sta) < until && Date.parse(p.sta) > Date.now() - 6e5 && !items.some(x => x.sub.startsWith(esc(p.flight))))
+    items.push({ t:Date.parse(p.sta), reg:null, name:p.livery, sub:`${esc(p.flight)}・${esc(placeShort(p.dep))}から・運航情報に特別塗装機と書かれた便` });
+  items.sort((a, b) => (a.t || 9e15) - (b.t || 9e15));
+  const li = x => { const body = `<span class="tm${x.hot ? " hot" : ""}">${x.t ? spHM(x.t) : "—"}</span><span class="tx"><b>${esc(x.name)}</b><small>${x.sub}</small></span>`;
+    return `<li>${x.reg ? `<button type="button" data-spb-open="${esc(x.reg)}">${body}</button>` : `<div>${body}</div>`}</li>`; };
+  return `<div class="opshead"><b>${esc(opsDef().name)}に来る特別塗装機</b><span>この3時間</span></div>`
+    + (items.length ? `<ul class="spin">${items.map(li).join("")}</ul>` : `<p class="hint" style="margin:4px 0 0">この3時間に来る特別塗装機は、いまは見つかっていません。</p>`)
+    + `<div class="spinbtns"><button type="button" class="spinall" data-spb-open="">すべての特別塗装機</button>${spPushHTML()}</div>`;
+}
 function specialHTML(){
-  const all = [...SPECIAL.values()].sort((a, b) => (b.iata === OPS_AP) - (a.iata === OPS_AP) || (!!b.iata) - (!!a.iata)), push = spPushHTML();
+  const all = [...SPECIAL.values()].sort((a, b) => (b.iata === OPS_AP) - (a.iata === OPS_AP) || (!!b.iata) - (!!a.iata));
   // アライアンス塗装（スターアライアンス・ワンワールド）は数が多いので、たたんだ欄に分ける
   const list = all.filter(x => x.kind !== "alliance"), ally = all.filter(x => x.kind === "alliance");
   const item = (x, mark) => { const go = x.iata && OPS_AIRPORTS[x.iata] && x.iata !== OPS_AP;
@@ -6204,10 +6271,134 @@ function specialHTML(){
   const planHTML = SP_PLANS.length ? `<div class="opshead" style="margin-top:10px"><b>これから飛ぶ予定</b><span>航空会社の運航情報</span></div>`
     + (here.length ? `<ul>${here.map(planLi).join("")}</ul>` : `<p class="hint" style="margin:4px 0 0">${esc(opsDef().name)}を出発・到着する予定の便は、いまはありません。</p>`)
     + (other.length ? `<details class="spally"><summary>ほかの空港 ${other.length}便</summary><ul>${other.map(planLi).join("")}</ul></details>` : "") : "";
-  if(!list.length && !ally.length) return push || planHTML ? `<div class="fwlist splist"><div class="opshead"><b>いま飛んでいる特別塗装機</b></div><p class="hint" style="margin:4px 0 0">いまは見つかっていません。</p>${planHTML}${push}</div>` : "";
-  return `<div class="fwlist splist"><div class="opshead"><b>いま飛んでいる特別塗装機</b><span>${list.length}機</span></div>${list.length ? `<ul>${list.map(x => item(x, "★")).join("")}</ul>` : `<p class="hint" style="margin:4px 0 0">キャラクター・記念塗装の機体は、いまは見つかっていません。</p>`}${allyHTML}${planHTML}
-    <p class="fwnote">直近15分に位置が届いたもの（adsb.lol）。特別塗装機の一覧は航空会社の発表などをもとに そらメモ がまとめたもので、塗装の期間や機体の入れ替えで違うことがあります。通知はキャラクター・記念塗装の機体だけで、アライアンス塗装（◇）は知らせません。「これから飛ぶ予定」は航空会社の運航情報（${ODPT_CREDIT}）の文に特別塗装機で運航すると書かれた便で、通知を申し込んでいると飛ぶ前にもお知らせします。機体の変更で変わることがあります。</p>${push}</div>`;
+  if(!SERVER) return "";
+  return `<div class="fwlist splist">${spInboundHTML()}<details class="spally spnow"><summary>いま飛んでいる特別塗装機 ${list.length}機${ally.length ? `・アライアンス塗装 ${ally.length}機` : ""}</summary>${list.length ? `<ul>${list.map(x => item(x, "★")).join("")}</ul>` : `<p class="hint" style="margin:4px 0 0">キャラクター・記念塗装の機体は、いまは見つかっていません。</p>`}${allyHTML}</details>${planHTML}
+    <p class="fwnote">直近15分に位置が届いたもの（adsb.lol）。特別塗装機の一覧は航空会社の発表などをもとに そらメモ がまとめたもので、塗装の期間や機体の入れ替えで違うことがあります。通知はキャラクター・記念塗装の機体だけで、アライアンス塗装（◇）は知らせません。「これから飛ぶ予定」は航空会社の運航情報（${ODPT_CREDIT}）の文に特別塗装機で運航すると書かれた便で、通知を申し込んでいると飛ぶ前にもお知らせします。機体の変更で変わることがあります。</p></div>`;
 }
+/* ---------- 特別塗装機の画面：一覧（いま飛んでいる・今日飛んだ・この30日・しばらく見ていない）と、機体ごとの今日の足あと ----------
+   足あとは機体ごとの便の記録（livery_board。主な空港のまわりで見えた分）。発着がまだ分からない便は航空会社の時刻表で埋める */
+let SPB = null, SPB_AT = 0, SPB_TAB = "all", SPB_REG = null, SPB_MAP = null;
+const SPB_DOM = new Set(["JAL", "JTA", "ANA", "スカイマーク", "AIRDO", "ソラシドエア", "ZIPAIR", "IBEX", "天草エアライン", "FDA"]);
+const spbGroup = air => air === "JAL" || air === "JTA" ? "jal" : air === "ANA" ? "ana" : air === "FDA" ? "fda" : SPB_DOM.has(air) ? "dom" : "intl";
+const SPB_TABS = [["all", "すべて"], ["jal", "JAL"], ["ana", "ANA"], ["fda", "FDA"], ["dom", "ほかの国内"], ["intl", "海外"]];
+const pushSpRegs = () => { try{ return JSON.parse(localStorage.getItem("soramemo.pushSpRegs") || "[]"); }catch(e){ return []; } };
+async function loadSpb(force){
+  if(!SERVER) return SPB || [];
+  if(SPB && !force && Date.now() - SPB_AT < 60_000) return SPB;
+  try{ const r = await fetch(SORAMEMO_CONFIG.supabaseUrl.replace(/\/$/, "") + "/rest/v1/rpc/livery_board", { method:"POST",
+      headers:{ "Content-Type":"application/json", apikey:SORAMEMO_CONFIG.supabaseAnonKey, Authorization:"Bearer " + SORAMEMO_CONFIG.supabaseAnonKey }, body:JSON.stringify({ p_regs:Object.keys(LIVERY_NAMES) }) });
+    if(r.ok){ const d = await r.json(); SPB = Array.isArray(d) ? d : []; SPB_AT = Date.now(); } }catch(e){}
+  return SPB || [];
+}
+// 機体ごとの状態。flying：いま空にいる、today：今日飛んだ、recent：この30日、none：見ていない
+function spbRows(){
+  const by = new Map((SPB || []).map(b => [b.reg, b])), today = spJstDate(Date.now());
+  return Object.entries(LIVERY_NAMES).map(([reg, name]) => {
+    const b = by.get(reg) || {}, air = LIVERY_AIR[reg] || "", legs = Array.isArray(b.today) ? b.today : [];
+    const now = b.now && (b.now.alt_ft == null || b.now.alt_ft > 300) ? b.now : null;
+    const leg = now ? (legs.filter(l => l.cs === now.callsign).pop() || { cs:now.callsign }) : null;
+    const st = now ? "flying" : legs.length ? "today" : b.last_day && b.last_day !== today ? "recent" : "none";
+    return { reg, name, air, g:spbGroup(air), b, legs, now, leg, st };
+  });
+}
+const spbFl = cs => spFl(cs) || cs || "";
+const spbMd = d => { const m = /^\d{4}-(\d{2})-(\d{2})/.exec(String(d || "")); return m ? `${+m[1]}月${+m[2]}日` : ""; };
+// 着く時刻の推定：いまの位置から到着の空港までの距離 ÷ 速さ ＋ 降りるまでの6分
+function spbEta(r){
+  const ap = r.leg && r.leg.arr && IATA[r.leg.arr];
+  if(!ap || !r.now || !(r.now.kt > 60)) return null;
+  const d = km({ lat:r.now.lat, lon:r.now.lon }, ap);
+  return d < 8 ? Date.now() : Date.now() + (d / (r.now.kt * 1.852) * 60 + 6) * 60_000;
+}
+const spbCode = c => c ? `<span class="spbc">${esc(c)}</span>` : `<span class="spbc q" aria-label="空港は分からない">？</span>`;
+const spbArrow = `<svg class="spbar" viewBox="0 0 20 12" aria-hidden="true"><path d="M1 6h16M13 2l4 4-4 4"/></svg>`;
+function spbRowHTML(r){
+  let main = "", sub = "";
+  if(r.st === "flying"){
+    const eta = spbEta(r), l = r.leg;
+    main = l.dep || l.arr ? `${spbCode(l.dep)}${spbArrow}${spbCode(l.arr)}<span class="m">${esc(spbFl(l.cs))}${eta ? `・${spHM(eta)}着（推定）` : ""}</span>` : `<span class="m">${esc(spbFl(r.now.callsign))}・行き先は分からない</span>`;
+    const path = r.legs.length ? [r.legs[0].dep, ...r.legs.map(x => x.arr)].map(c => c ? placeShort(c) : "？").join("→") : "";
+    sub = `今日 ${Math.max(1, r.legs.length)}便目${path ? "・" + esc(path) : ""}`;
+  }else if(r.st === "today"){
+    const l = r.legs[r.legs.length - 1];
+    main = `<span class="m">${l.arr ? `${esc(placeShort(l.arr))}に ${spHM(l.last)}ごろ着` : `${spHM(l.last)}まで見えた`}</span>`;
+    sub = `今日 ${r.legs.length}便`;
+  }else if(r.st === "recent") main = `<span class="m">${esc(spbMd(r.b.last_day))}に飛んだ</span>`;
+  return `<li><button type="button" class="spbrow g-${r.g}" data-spb-reg="${esc(r.reg)}"><span class="t"><b>${esc(r.name)}</b><small class="reg">${esc(r.reg)}</small></span>
+    ${main ? `<span class="l">${main}</span>` : ""}${sub ? `<small class="s">${sub}</small>` : ""}</button></li>`;
+}
+function spbListHTML(){
+  const rows = spbRows(), cnt = g => g === "all" ? rows.length : rows.filter(r => r.g === g).length;
+  const vis = rows.filter(r => SPB_TAB === "all" || r.g === SPB_TAB);
+  const sec = (st, title, note) => { const xs = vis.filter(r => r.st === st); if(!xs.length) return "";
+    if(st === "flying") xs.sort((a, b) => (spbEta(a) || 9e15) - (spbEta(b) || 9e15));
+    if(st === "recent") xs.sort((a, b) => String(b.b.last_day).localeCompare(String(a.b.last_day)));
+    return `<h4 class="loh">${title}<small>${note || `${xs.length}機`}</small></h4><ul class="spbl">${xs.map(spbRowHTML).join("")}</ul>`; };
+  const none = vis.filter(r => r.st === "none"), flying = rows.filter(r => r.st === "flying");
+  return `<div class="spctop"><button class="mp-back" type="button" data-close><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>閉じる</button><h3>特別塗装機</h3><span class="sp" aria-hidden="true"></span></div>
+    <div class="spbmapw"><div id="spbMap" class="spbmap" role="region" aria-label="いま飛んでいる特別塗装機の地図（${flying.length}機）"></div><span class="spbmapn">いま飛んでいる ${flying.length}機</span></div>
+    <div class="spbtabs" role="group" aria-label="航空会社で絞り込む">${SPB_TABS.map(([k, n]) => `<button type="button" data-spb-tab="${k}" aria-pressed="${SPB_TAB === k}">${n} ${cnt(k)}</button>`).join("")}</div>
+    ${SPB ? "" : `<p class="hint">記録を読み込んでいます…</p>`}
+    ${sec("flying", "いま飛んでいる", "直近15分に位置が届いた")}${sec("today", "今日飛んだ", "いまは地上か、記録の外")}${sec("recent", "この30日に飛んだ")}
+    ${none.length ? `<details class="spbnone"><summary>しばらく見ていない ${none.length}機</summary><ul class="spbl">${none.map(spbRowHTML).join("")}</ul></details>` : ""}
+    <p class="fwnote">位置は adsb.lol、時刻表と便名は航空会社の運航情報（${ODPT_CREDIT}）。足あとは主な空港のまわりで見えた分なので、抜けることがあります。着く時刻は位置と速さからの推定です。特別塗装機の一覧は航空会社の発表などをもとに そらメモ がまとめたもので、塗装の期間や機体の入れ替えで違うことがあります。</p>`;
+}
+function spbDetailHTML(reg){
+  const r = spbRows().find(x => x.reg === reg); if(!r) return spbListHTML();
+  const eta = r.st === "flying" ? spbEta(r) : null, l = r.leg, on = pushSpRegs().includes(reg);
+  const arr30 = Object.entries(r.b.arr30 || {}).sort((a, b) => b[1] - a[1]);
+  const tile = (k, v) => `<div><span>${k}</span><b>${v}</b></div>`;
+  const hero = r.st === "flying" ? `<div class="spbroute">${spbCode(l.dep)}${spbArrow}${spbCode(l.arr)}<small>${esc(spbFl(l.cs))}</small></div>
+      <div class="spbtiles">${tile("着く時刻（推定）", eta ? spHM(eta) : "—")}${tile("時刻表", l.sta ? spHM(l.sta) : "—")}${tile("高さ", r.now.alt_ft != null ? `${(Math.round(r.now.alt_ft / 100) * 100).toLocaleString("ja-JP")}<small>ft</small>` : "—")}</div>`
+    : `<p class="spbidle">${r.st === "today" ? "いまは地上か、記録の外にいます。" : r.st === "recent" ? `いまは飛んでいません。最後に見えたのは${esc(spbMd(r.b.last_day))}です。` : "この30日は、記録に入っていません。"}</p>`;
+  const legLi = (x, i) => { const live = r.st === "flying" && i === r.legs.length - 1 && x.cs === r.now.callsign;
+    return `<li class="${live ? "now" : ""}"><span class="tm">${live ? "いま" : spHM(x.first)}</span><span class="rt">${spbCode(x.dep)}${spbArrow}${spbCode(x.arr)}</span><span class="fl">${esc(spbFl(x.cs))}${x.sch ? "<small>時刻表から</small>" : ""}${live ? "<small>飛行中</small>" : ""}</span></li>`; };
+  return `<div class="spctop"><button class="mp-back" type="button" data-spb-back><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>特別塗装機</button><h3 class="srt">${esc(r.name)}</h3><span class="spbreg">${esc(reg)}</span></div>
+    <div class="spbhero g-${r.g}"><div class="spbname"><small>${esc(r.air)}</small><b>${esc(r.name)}</b></div>${hero}</div>
+    <h4 class="loh">今日の足あと<small>主な空港で見えた記録から</small></h4>
+    ${r.legs.length ? `<ul class="spblegs">${r.legs.map(legLi).join("")}</ul>` : `<p class="hint">今日は、まだ記録がありません。</p>`}
+    <h4 class="loh">この30日に来た空港<small>着いた回数</small></h4>
+    ${arr30.length ? `<div class="spbaps">${arr30.slice(0, 12).map(([c, n]) => `<span>${esc(placeShort(c))} <b>${n}</b>回</span>`).join("")}</div>` : `<p class="hint">この30日の記録はありません。</p>`}
+    <div class="spbbtns">${SERVER && PUSH_KEY && pushOK() ? `<button type="button" class="spbbtn" data-spb-push="${esc(reg)}" aria-pressed="${on}">${on ? "この機体の通知をやめる" : "この機体が飛んだら通知"}</button>` : ""}
+      <button type="button" class="spbbtn" data-spb-book>特別塗装機の図鑑</button></div>
+    <p class="fwnote">位置は adsb.lol、時刻表と便名は航空会社の運航情報（${ODPT_CREDIT}）。主な空港から遠いところは記録がないので、足あとが抜けることがあります。通知は、この機体が新しい便で飛んでいるのを見つけたときに1便に1回です（推定）。</p>`;
+}
+function spbMap(){
+  if(SPB_MAP){ SPB_MAP.remove(); SPB_MAP = null; }
+  const el = $("spbMap"); if(!el || !window.L) return;
+  SPB_MAP = L.map(el, { zoomControl:false, attributionControl:true, keyboard:false, dragging:true, scrollWheelZoom:false }).setView([36.5, 136.5], 4);
+  L.tileLayer("https://cyberjapandata.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png", { maxZoom:10, attribution:GSI_ATTR }).addTo(SPB_MAP);
+  for(const r of spbRows().filter(x => x.st === "flying" && (SPB_TAB === "all" || x.g === SPB_TAB)))
+    L.circleMarker([r.now.lat, r.now.lon], { radius:6, color:"#fff", weight:1.5, fillColor:"#A9822E", fillOpacity:1, interactive:false, keyboard:false }).addTo(SPB_MAP);
+  setTimeout(() => SPB_MAP && SPB_MAP.invalidateSize(), 60);
+}
+function renderSpb(){
+  const body = $("dSpecialBody"); if(!body) return;
+  body.innerHTML = SPB_REG ? spbDetailHTML(SPB_REG) : spbListHTML();
+  if(!SPB_REG) spbMap(); else if(SPB_MAP){ SPB_MAP.remove(); SPB_MAP = null; }
+}
+async function openSpecial(reg){
+  SPB_REG = reg && LIVERY_NAMES[reg] ? reg : null;
+  if(!$("dSpecial").open){ $("dSpecial").showModal(); track("special_open", SPB_REG ? "reg" : "list"); }
+  renderSpb(); await loadSpb(); if($("dSpecial").open) renderSpb();
+}
+async function toggleSpRegPush(reg){
+  const cur = pushSpRegs(), on = cur.includes(reg), next = on ? cur.filter(x => x !== reg) : [...cur, reg].slice(-20);
+  try{ localStorage.setItem("soramemo.pushSpRegs", JSON.stringify(next)); }catch(e){}
+  if(await syncPush(pushAps(), pushFlights())){ uiSay(on ? "この機体の通知をやめました。" : "この機体が新しい便で飛び始めたら、この端末に通知します（推定・1便に1回）。"); track("push", on ? "spr_off" : "spr_on"); }
+  else try{ localStorage.setItem("soramemo.pushSpRegs", JSON.stringify(cur)); }catch(e){}
+  renderSpb();
+}
+document.addEventListener("click", e => {
+  if(!e.target.closest("#dSpecial") && !e.target.closest("[data-spb-open]")) return;
+  const o = e.target.closest("[data-spb-open]"); if(o){ openSpecial(o.dataset.spbOpen || null); return; }
+  const t = e.target.closest("[data-spb-tab]"); if(t){ SPB_TAB = t.dataset.spbTab; renderSpb(); return; }
+  const g = e.target.closest("[data-spb-reg]"); if(g){ SPB_REG = g.dataset.spbReg; renderSpb(); $("dSpecial").scrollTop = 0; $("dSpecialBody").querySelector(".mp-back").focus(); return; }
+  if(e.target.closest("[data-spb-back]")){ const prev = SPB_REG; SPB_REG = null; renderSpb(); const b = $("dSpecialBody").querySelector(`[data-spb-reg="${CSS.escape(prev || "")}"]`); if(b) b.focus(); return; }
+  const p = e.target.closest("[data-spb-push]"); if(p){ toggleSpRegPush(p.dataset.spbPush); return; }
+  if(e.target.closest("[data-spb-book]")){ $("dSpecial").close(); goTab("book"); return; }
+});
+$("dSpecial").addEventListener("close", () => { if(SPB_MAP){ SPB_MAP.remove(); SPB_MAP = null; } });
 // ---- 特別塗装機の図鑑：乗った（便名を入れたフライトの毎日の記録の登録記号）・見た（チェックインした空港に前後45分で着いた・出た機体） ----
 let LIV_TAB = "all", LIV_SEEN = null, LIV_SEEN_AT = 0;
 async function loadLivSeen(){
@@ -6434,7 +6625,7 @@ document.addEventListener("click", async e => {
   if(open){ out.innerHTML = `<p class="hint">読み込んでいます…</p>`; out.innerHTML = predictionHTML(await loadPrediction(reg)); }
 });
 async function renderSpecial(){
-  await loadSpecial(); const box = $("opsSpecial"), html = specialHTML();
+  await Promise.all([loadSpecial(), loadSpb()]); const box = $("opsSpecial"), html = specialHTML();
   box.hidden = !html; box.innerHTML = html;
 }
 async function renderOpsAlerts(){
@@ -6812,18 +7003,18 @@ function uiSay(t){
 const pushFlights = () => { try{ const t = new Date(Date.now() + 9*36e5 - 2*864e5).toISOString().slice(0, 10);
   return JSON.parse(localStorage.getItem("soramemo.pushFlights") || "[]").filter(k => k.split("@")[1] >= t); }catch(e){ return []; } };
 // 通知の申し込みを、選んでいる空港と便に合わせる（どちらも空なら取り消し）。成功したら true
-async function syncPush(airports, flights, sp = pushSp(), spot = pushSpot(), ga = pushGa()){
+async function syncPush(airports, flights, sp = pushSp(), spot = pushSpot(), ga = pushGa(), spr = pushSpRegs()){
   try{
     await loadPushKey(); if(!PUSH_KEY || !pushOK()) throw new Error("push unavailable");
     const reg = await navigator.serviceWorker.ready;
     let sub = await reg.pushManager.getSubscription();
     const url = SORAMEMO_CONFIG.supabaseUrl.replace(/\/$/, "") + "/functions/v1/push-subscribe", H = { "Content-Type":"application/json", apikey:SORAMEMO_CONFIG.supabaseAnonKey };
-    if(!airports.length && !flights.length && !sp.length && !spotActive(spot) && !gaActive(ga)){
+    if(!airports.length && !flights.length && !sp.length && !spr.length && !spotActive(spot) && !gaActive(ga)){
       if(sub){ await fetch(url, { method:"POST", headers:H, body:JSON.stringify({ endpoint:sub.endpoint, remove:true }) }); await sub.unsubscribe(); }
     }else{
       if(Notification.permission !== "granted" && (await Notification.requestPermission()) !== "granted"){ uiSay("通知が許可されていないため、申し込めませんでした。端末の設定で、そらメモの通知を許可してください。"); return false; }
       if(!sub) sub = await reg.pushManager.subscribe({ userVisibleOnly:true, applicationServerKey:b64u(PUSH_KEY) });
-      const j = sub.toJSON(), r = await fetch(url, { method:"POST", headers:H, body:JSON.stringify({ endpoint:j.endpoint, keys:j.keys, airports, flights, sp_airports:sp, spot:spotActive(spot) ? spot : null, ga:gaActive(ga) ? ga : null }) });
+      const j = sub.toJSON(), r = await fetch(url, { method:"POST", headers:H, body:JSON.stringify({ endpoint:j.endpoint, keys:j.keys, airports, flights, sp_airports:sp, sp_regs:spr, spot:spotActive(spot) ? spot : null, ga:gaActive(ga) ? ga : null }) });
       if(!r.ok) throw new Error("subscribe " + r.status);
     }
     localStorage.setItem("soramemo.pushAirports", JSON.stringify(airports));
@@ -8561,12 +8752,16 @@ if("serviceWorker" in navigator && window.isSecureContext && location.protocol !
   navigator.serviceWorker.addEventListener("controllerchange", () => { if(hadController){ $("updateBar").hidden = false; track("update", "ready"); } });
   $("updateGo").onclick = () => location.reload();
   // 通知を押して開いたときは、運用のタブへ
-  navigator.serviceWorker.addEventListener("message", e => { if(e.data && e.data.type === "open-ops"){ goTab("ops");
+  navigator.serviceWorker.addEventListener("message", e => { if(e.data && e.data.type === "open-ops"){
+    const sp = /#special-([A-Z0-9-]{2,10})$/.exec(e.data.url || ""); if(sp){ openSpecial(sp[1]); return; }
+    goTab("ops");
     const m = /#ops-([A-Z]{3})(\/[a-z]+(?:\/\d+)?)?$/.exec(e.data.url || ""); if(m && OPS_AIRPORTS[m[1]]){ OPS_PICKED = true; if(m[1] !== OPS_AP) setOpsAirport(m[1]); gaFromHash(m[2]); } } });
 }
 // 運用のタブへのリンク（#ops、空港つきは #ops-NRT など）。通知や共有のリンクから開いたとき
 // ゴーアラウンドの知らせから開いたとき：/ga/123（その1件）・/gawx（着陸の天気）
 function gaFromHash(s){ if(!s) return; const g = /^\/ga\/(\d+)$/.exec(s); if(g) setTimeout(() => openGa("ev", g[1]), 300); else if(s === "/gawx") setTimeout(() => openGa("wx"), 300); }
+{ const sp = () => { const m = /^#special-([A-Z0-9-]{2,10})$/.exec(location.hash); if(m) setTimeout(() => openSpecial(m[1]), 300); };
+  sp(); window.addEventListener("hashchange", sp); }
 { const m = /^#ops(?:-([A-Z]{3}))?(\/[a-z]+(?:\/\d+)?)?$/.exec(location.hash);
   if(m) setTimeout(() => { if(m[1] && OPS_AIRPORTS[m[1]]){ OPS_PICKED = true; OPS_AP = m[1]; try{ localStorage.setItem("soramemo.opsAirport", m[1]); }catch(e){} } goTab("ops"); gaFromHash(m[2]); }, 0); }
 // 運用の共有：いまの空港のリンクと、ひとことの文（推定であることも書く）

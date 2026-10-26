@@ -2,16 +2,18 @@
 //   cd tools && npm install terser@5 csso@5 && cd .. && node tools/build.mjs
 // 関数や変数の名前は変えない（テストや運営画面から呼ぶため。toplevel の名前は短くしない）。
 import { readFileSync, writeFileSync } from "node:fs";
+// まだ始まっていない塗装（from が今日より後）は入れない。普通の塗装で飛んでいる機体を、その名前で出さないため
+const notYet = (rest) => { const f = rest.match(/from:\s*"(\d{4}-\d{2}-\d{2})"/); return !!f && f[1] > new Date().toISOString().slice(0, 10); };
 // 特別塗装機の一覧（アライアンス塗装は除く）。期間が終わったものも、乗ったときの記録として名前は残す
 function liveryNames() {
   const ts = readFileSync(new URL("../supabase/functions/_shared/liveries.ts", import.meta.url), "utf8"), m = {};
-  for (const x of ts.matchAll(/\{\s*reg:\s*"([A-Z0-9-]+)",\s*name:\s*"([^"]+)"([^}]*)\}/g)) if (!/kind:\s*"alliance"/.test(x[3])) m[x[1]] = x[2];
+  for (const x of ts.matchAll(/\{\s*reg:\s*"([A-Z0-9-]+)",\s*name:\s*"([^"]+)"([^}]*)\}/g)) if (!/kind:\s*"alliance"/.test(x[3]) && !notYet(x[3])) m[x[1]] = x[2];
   return JSON.stringify(m);
 }
 // 特別塗装機の航空会社（図鑑で分ける）
 function liveryAirlines() {
   const ts = readFileSync(new URL("../supabase/functions/_shared/liveries.ts", import.meta.url), "utf8"), m = {};
-  for (const x of ts.matchAll(/\{\s*reg:\s*"([A-Z0-9-]+)",\s*name:\s*"[^"]+",\s*airline:\s*"([^"]+)"([^}]*)\}/g)) if (!/kind:\s*"alliance"/.test(x[3])) m[x[1]] = x[2];
+  for (const x of ts.matchAll(/\{\s*reg:\s*"([A-Z0-9-]+)",\s*name:\s*"[^"]+",\s*airline:\s*"([^"]+)"([^}]*)\}/g)) if (!/kind:\s*"alliance"/.test(x[3]) && !notYet(x[3])) m[x[1]] = x[2];
   return JSON.stringify(m);
 }
 import { gzipSync } from "node:zlib";
