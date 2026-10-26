@@ -38,6 +38,8 @@ await db.exec(`insert into flights (user_id, from_airport, to_airport, dep_at, a
     (((now() - interval '1 day') at time zone 'Asia/Tokyo')::date, 'JL601', 'HND', 'CTS', now() - interval '1 day', now() - interval '1 day' + interval '90 minutes', 'A359', 'JA01XJ', '359')`);
 await as(A, `select public.co_state()`);
 await db.exec(`update companies set cash = 500000 where user_id = '${A}'`);
+// 手計算は満足度の倍率なし（満足度60）で確かめる。満足度は t47
+await db.exec(`update companies set satisfaction = 60`).catch(() => {});
 let s = await as(A, `select public.co_buy('r:JA01XJ')`);
 const hc = `${Math.min(ids.HND, ids.CTS)}-${Math.max(ids.HND, ids.CTS)}`;
 s = await as(A, `select public.co_assign(${s.fleet[0].id}, '${hc}')`);
@@ -64,6 +66,7 @@ await as(A, `select public.co3_set_premium(0)`);
 // 運賃での取り合い：B（LCC、運賃 0.72）が同じ路線に入る
 await db.exec(`insert into companies (user_id, policy) values ('${B}', 'lcc') on conflict (user_id) do update set policy = 'lcc';
   insert into aircraft (user_id, type, route_key, paid) values ('${B}', 'nb', '${hc}', 1000);
+  update companies set satisfaction = 60 where user_id = '${B}';
   insert into flights (user_id, from_airport, to_airport, dep_at, arr_at, distance_km) values
     ('${B}', ${ids.HND}, ${ids.CTS}, now() - interval '3 day', now() - interval '3 day' + interval '90 minutes', 819.6)`);
 s = await as(A, `select public.co_state()`);

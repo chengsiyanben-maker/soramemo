@@ -41,6 +41,8 @@ await db.exec(`insert into flights (user_id, from_airport, to_airport, dep_at, a
   insert into checkins (user_id, airport_id, lat, lon, accuracy_m, position_at) values ('${A}', ${ids.HND}, 35.55, 139.78, 10, now());`);
 await as(A, `select public.co_state()`);
 await db.exec(`update companies set cash = 500000 where user_id = '${A}'`);
+// 手計算は満足度の倍率なし（満足度60）で確かめる。満足度は t47
+await db.exec(`update companies set satisfaction = 60`).catch(() => {});
 let s = await as(A, `select public.co_buy('r:JA01XJ')`);
 const ac = s.fleet[0];
 const hc = `${Math.min(ids.HND, ids.CTS)}-${Math.max(ids.HND, ids.CTS)}`;
@@ -87,6 +89,7 @@ await as(A, `select public.co3_set_policy('fsc')`);
 // ほかの会社 B が同じ路線に機体を入れると、客は 2社で 75%ずつ
 await db.exec(`insert into companies (user_id) values ('${B}') on conflict do nothing;
   insert into aircraft (user_id, type, route_key, paid) values ('${B}', 'nb', '${hc}', 1000)`);
+await db.exec(`update companies set satisfaction = 60`).catch(() => {});
 s = await as(A, `select public.co_state()`);
 const e4 = s.econ.find((x) => x.k === hc);
 check('2社で取り合うと 75%', e4.n === 2 && near(Number(e4.own), pax * 0.75, 0.1), e4);
