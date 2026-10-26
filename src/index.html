@@ -6285,9 +6285,13 @@ const pushSpRegs = () => { try{ return JSON.parse(localStorage.getItem("soramemo
 async function loadSpb(force){
   if(!SERVER) return SPB || [];
   if(SPB && !force && Date.now() - SPB_AT < 60_000) return SPB;
-  try{ const r = await fetch(SORAMEMO_CONFIG.supabaseUrl.replace(/\/$/, "") + "/rest/v1/rpc/livery_board", { method:"POST",
-      headers:{ "Content-Type":"application/json", apikey:SORAMEMO_CONFIG.supabaseAnonKey, Authorization:"Bearer " + SORAMEMO_CONFIG.supabaseAnonKey }, body:JSON.stringify({ p_regs:Object.keys(LIVERY_NAMES) }) });
-    if(r.ok){ const d = await r.json(); SPB = Array.isArray(d) ? d : []; SPB_AT = Date.now(); } }catch(e){}
+  // 30機ずつ分けて同時に読む（まとめて読むと、サーバーの時間の上限に近くなるため）。読めなかった組があっても、読めた分は出す
+  const regs = Object.keys(LIVERY_NAMES), parts = [];
+  for(let i = 0; i < regs.length; i += 30) parts.push(regs.slice(i, i + 30));
+  const got = await Promise.all(parts.map(async p => { try{ const r = await fetch(SORAMEMO_CONFIG.supabaseUrl.replace(/\/$/, "") + "/rest/v1/rpc/livery_board", { method:"POST",
+      headers:{ "Content-Type":"application/json", apikey:SORAMEMO_CONFIG.supabaseAnonKey, Authorization:"Bearer " + SORAMEMO_CONFIG.supabaseAnonKey }, body:JSON.stringify({ p_regs:p }) });
+    if(r.ok){ const d = await r.json(); return Array.isArray(d) ? d : []; } }catch(e){} return null; }));
+  if(got.some(Boolean)){ SPB = got.flatMap(x => x || []); SPB_AT = Date.now(); }
   return SPB || [];
 }
 // 機体ごとの状態。flying：いま空にいる、today：今日飛んだ、recent：この30日、none：見ていない
