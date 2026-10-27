@@ -457,9 +457,12 @@ body.game nav.tabs button[aria-current="page"] svg{color:#7FB3FF}
 @supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){nav.tabs .in{background:var(--paper)}}
 
 /* ---------- ホーム：上は近くの空港の地図、下からせり出すシートに搭乗券（半券を引いて切るとチェックイン） ---------- */
-:root{--stub-hi:#60A5FA;--stub-lo:#1D4ED8;--stub-text:#FFFFFF;--stub-glow:rgba(29,78,216,.55)}
-:root[data-palette="akashiro"]{--stub-hi:#F87171;--stub-lo:#B91C1C;--stub-glow:rgba(185,28,28,.5)}
-:root[data-palette="board"]{--stub-hi:#FFCB7A;--stub-lo:#E08A00;--stub-text:#0B0D10;--stub-glow:rgba(224,138,0,.5)}
+/* 半券は、紺の搭乗券の中で押せるものと同じ琥珀色の平らな面（航空会社の青・赤に見えないように、テーマで変えない） */
+:root{--stub:#E9C46A;--stub-text:#111827;--stub-sub:#3A2E0B;--stub-hi:#B7862A}
+/* マイページの頭の丸（前の半券の色のまま） */
+:root{--av-hi:#60A5FA;--av-lo:#1D4ED8}
+:root[data-palette="akashiro"]{--av-hi:#F87171;--av-lo:#B91C1C}
+:root[data-palette="board"]{--av-hi:#FFCB7A;--av-lo:#E08A00}
 .hmap{position:absolute;left:0;right:0;top:0;height:400px;z-index:0;pointer-events:none;background:#DCE8EF}
 [data-palette="board"] .hmap{background:#0E1218}
 [data-palette="board"] .hmap .leaflet-tile-pane,[data-palette="board"] .hmap .maplibregl-canvas,[data-palette="board"] .hmap canvas{filter:invert(.92) hue-rotate(180deg) saturate(.5) brightness(.9)}
@@ -487,12 +490,12 @@ body.game nav.tabs button[aria-current="page"] svg{color:#7FB3FF}
 #v-home .bp-main .nearest .dist{font-size:12px;line-height:1.6;color:#9CA3AF;margin-top:6px}
 #v-home .bp-main .nearest .dist b,#v-home .bp-main .nearest .dist.ok b{color:#6EE7B7}
 #v-home .bp-stub{flex:none;width:100px;margin:0;padding:0;border:0;border-radius:6px 24px 24px 6px;
-  background:radial-gradient(circle at 30% 20%,var(--stub-hi),var(--stub-lo) 82%);color:var(--stub-text);
+  background:var(--stub);color:var(--stub-text);
   display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none;
-  transform-origin:0 100%;transition:transform .3s cubic-bezier(.2,.8,.2,1),opacity .3s ease;box-shadow:0 18px 34px -16px var(--stub-glow);-webkit-tap-highlight-color:transparent;font-family:var(--gothic)}
+  transform-origin:0 100%;transition:transform .3s cubic-bezier(.2,.8,.2,1),opacity .3s ease;box-shadow:inset 0 0 0 1px rgba(17,24,39,.14),0 12px 24px -16px rgba(17,24,39,.5);-webkit-tap-highlight-color:transparent;font-family:var(--gothic)}
 #v-home .bp-stub.dragging{transition:none;cursor:grabbing}
 #v-home .bp-stub .v{writing-mode:vertical-rl;white-space:nowrap;font-size:14px;font-weight:800;letter-spacing:.12em}
-#v-home .bp-stub .s{font-size:10px;font-weight:600;opacity:.85}
+#v-home .bp-stub .s{font-size:10px;font-weight:700;color:var(--stub-sub)}
 #v-home .bp-stub svg{width:26px;height:14px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 #v-home .bp-stub:disabled{opacity:.6;cursor:progress}
 #v-home .bp-stub:focus-visible{outline:3px solid var(--stub-hi);outline-offset:3px}
@@ -506,7 +509,7 @@ body.game nav.tabs button[aria-current="page"] svg{color:#7FB3FF}
 
 /* ---------- ホーム（上半分）：ヘッダー・チェックインのカード・直近の記録・3つの数字 ---------- */
 :root{--hm-ink:#374151;--hm-sub:#6B7280;--hm-mute:#5B6270;--hm-card:#FFFFFF;--hm-tint:#F8FAFC;--hm-pill:rgba(17,24,39,.05);
-  --hm-shadow:0 1px 2px rgba(17,24,39,.04),0 10px 30px -8px rgba(17,24,39,.10);
+  --hm-shadow:0 1px 2px rgba(17,24,39,.04),0 10px 30px -8px rgba(17,24,39,.10),inset 0 0 0 1px rgba(17,24,39,.07);
   --cta-hi:#3B4252;--cta-lo:#0F172A;--cta-text:#FFFFFF;--cta-glow:rgba(56,189,248,.38);--cta-ring:rgba(255,255,255,.9);--cta-ring2:rgba(17,24,39,.06);
   --jal:#C8102E;--ana:#1C4FA0}
 :root[data-palette="akashiro"]{--hm-tint:#FFF7F7;--cta-hi:#F05252;--cta-lo:#B91C1C;--cta-glow:rgba(239,68,68,.40)}
@@ -1046,7 +1049,7 @@ dialog.sgd .dlg{padding:14px 16px 36px;max-width:480px;margin:0 auto;max-height:
 .sg-card.ga-x{border:2px solid #FDE7E7}.sg-card.ga-l{border:2px solid #FDF1E1}
 .sg-hero .ga3>span{background:#2A2A2A;color:#fff}.sg-hero .ga3 small{color:#BDBDBD}
 .sgd .ga2>div{background:var(--sg-bg);border-radius:14px;padding:10px 12px}
-dialog.mypage{--mp-bg:#F4F5F7;--mp-card:#FFFFFF;--mp-ink:#374151;--mp-sub:#9CA3AF;--mp-mute:#6B7280;--mp-shadow:0 12px 26px -18px rgba(15,23,42,.3);
+dialog.mypage{--mp-bg:#F4F5F7;--mp-card:#FFFFFF;--mp-ink:#374151;--mp-sub:#9CA3AF;--mp-mute:#6B7280;--mp-shadow:0 12px 26px -18px rgba(15,23,42,.3),inset 0 0 0 1px rgba(17,24,39,.07);
   max-width:min(460px,100vw);width:100%;max-height:100dvh;height:100dvh;margin:0 auto;border-radius:0;background:var(--mp-bg);color:var(--mp-ink)}
 [data-palette="board"] dialog.mypage{--mp-bg:#0B0D10;--mp-card:#16191F;--mp-ink:#E5E7EB;--mp-sub:#8B95A3;--mp-mute:#A7B0BC;--mp-shadow:0 12px 26px -16px rgba(0,0,0,.7)}
 dialog.mypage{inset:0;overflow-y:auto;overscroll-behavior:contain}
@@ -1059,7 +1062,7 @@ dialog.mypage .mp-back{display:flex;align-items:center;gap:4px;border:0;backgrou
 dialog.mypage .mp-back svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 dialog.mypage .mp-sp{width:78px}
 dialog.mypage .mp-prof{display:grid;grid-template-columns:56px 1fr;gap:6px 14px;align-items:center;background:#111827;color:#F9FAFB;border-radius:24px;padding:20px;box-shadow:0 22px 40px -22px rgba(17,24,39,.7)}
-dialog.mypage .mp-av{width:56px;height:56px;border-radius:50%;display:grid;place-items:center;font-size:22px;font-weight:800;color:#fff;background:radial-gradient(circle at 32% 28%,var(--stub-hi),var(--stub-lo) 72%)}
+dialog.mypage .mp-av{width:56px;height:56px;border-radius:50%;display:grid;place-items:center;font-size:22px;font-weight:800;color:#fff;background:radial-gradient(circle at 32% 28%,var(--av-hi),var(--av-lo) 72%)}
 [data-palette="board"] dialog.mypage .mp-av{color:#0B0D10}
 dialog.mypage .mp-who{min-width:0}
 dialog.mypage .mp-who b{display:block;font-size:18px;font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -1099,7 +1102,7 @@ dialog.mypage .dlg .close{display:none}
 .modesw button[aria-selected="true"]{background:var(--hm-card);color:var(--hm-ink);box-shadow:0 2px 8px -2px rgba(15,23,42,.25)}
 [data-palette="board"] .modesw button[aria-selected="true"]{background:var(--shu);color:var(--on-shu)}
 /* ---------- 運用タブ：ホーム・成績と同じルール（ゴシック体・ピル型・区切り線なし・うすい影のカード） ---------- */
-#v-ops{--op-ink:#374151;--op-sub:#9CA3AF;--op-mute:#545B66;--op-card:#FFFFFF;--op-pill:#EEF0F3;--op-shadow:0 12px 26px -18px rgba(15,23,42,.3)}
+#v-ops{--op-ink:#374151;--op-sub:#9CA3AF;--op-mute:#545B66;--op-card:#FFFFFF;--op-pill:#EEF0F3;--op-shadow:0 12px 26px -18px rgba(15,23,42,.3),inset 0 0 0 1px rgba(17,24,39,.07)}
 [data-palette="board"] #v-ops{--op-ink:#E5E7EB;--op-sub:#8B95A3;--op-mute:#A7B0BC;--op-card:#161F30;--op-pill:#1F2A3F;--op-shadow:0 12px 26px -16px rgba(0,0,0,.7)}
 #v-ops .opstitle h2,#v-ops h2{font-family:var(--gothic);font-weight:800;font-size:20px;letter-spacing:.02em;color:var(--op-ink)}
 #v-ops .opstitle .linkbtn2{text-decoration:none;background:var(--op-pill);color:var(--op-ink);border-radius:999px;min-height:36px;padding:0 16px;font-size:12.5px}
@@ -1212,7 +1215,7 @@ dialog.mypage .dlg .close{display:none}
 
 /* ---------- 成績の画面（航空会社別・ステータスの目安）：ゴシック体・数字を大きく・余白とうすい影のカード ---------- */
 #v-stats{--st-ink:#374151;--st-sub:#6B7280;--st-mute:#5B6270;--st-card:#FFFFFF;--st-track:#F1F2F4;--st-wash:#F7F8FA;
-  --st-shadow:0 1px 2px rgba(17,24,39,.04),0 6px 20px rgba(17,24,39,.06);--jal:#C8102E;--ana:#1C4FA0;--other:#6B7280;color:var(--st-ink)}
+  --st-shadow:0 1px 2px rgba(17,24,39,.04),0 6px 20px rgba(17,24,39,.06),inset 0 0 0 1px rgba(17,24,39,.07);--jal:#C8102E;--ana:#1C4FA0;--other:#6B7280;color:var(--st-ink)}
 [data-palette="board"] #v-stats{--st-ink:#E5E7EB;--st-sub:#8B95A3;--st-mute:#A7B0BC;--st-card:#171A20;--st-track:#262B33;--st-wash:#1C2027;
   --st-shadow:0 1px 2px rgba(0,0,0,.3),0 6px 20px rgba(0,0,0,.25);--jal:#FF5A6E;--ana:#6EA0FF;--other:#A7B0BC}
 #v-stats .passport{margin:6px 0 0;padding:18px 18px 16px;border-radius:26px;color:#F9FAFB;background:linear-gradient(150deg,#111827 0%,#1E2A5A 60%,#23408E 100%);box-shadow:0 22px 40px -22px rgba(17,24,39,.7)}
@@ -1518,7 +1521,7 @@ details.dev summary{cursor:pointer;color:var(--sumi);font-size:14px;padding:6px 
 [hidden]{display:none !important}
 
 /* ---------- 図鑑：全国制覇のカード、地方のタイル、開いた地方の印、最近押した印 ---------- */
-#v-book{--bk-ink:#1F2937;--bk-sub:#6B7280;--bk-mute:#6B7280;--bk-card:#FFFFFF;--bk-pill:#FFFFFF;--bk-track:#EEF0F3;--bk-shadow:0 12px 26px -18px rgba(15,23,42,.3)}
+#v-book{--bk-ink:#1F2937;--bk-sub:#6B7280;--bk-mute:#6B7280;--bk-card:#FFFFFF;--bk-pill:#FFFFFF;--bk-track:#EEF0F3;--bk-shadow:0 12px 26px -18px rgba(15,23,42,.3),inset 0 0 0 1px rgba(17,24,39,.07)}
 [data-palette="board"] #v-book{--bk-ink:#E5E7EB;--bk-sub:#8B95A3;--bk-mute:#A7B0BC;--bk-card:#16191F;--bk-pill:#232830;--bk-track:#2A2F37;--bk-shadow:0 12px 26px -16px rgba(0,0,0,.7)}
 /* 見方の切り替え（図鑑・フライト・運用で共通。色は画面ごとの色の組み合わせから） */
 #v-book{--vw-ink:var(--bk-ink);--vw-mute:var(--bk-mute);--vw-card:var(--bk-card);--vw-track:var(--bk-track);--vw-shadow:var(--bk-shadow)}
@@ -1729,7 +1732,7 @@ dialog.psheet .btn1,dialog.psheet .btn2{display:block;width:100%;margin-top:10px
 #v-book #ach .achgrp{padding:14px 16px}
 #v-book .book-head h2{font-family:var(--gothic);font-weight:800;font-size:18px;color:var(--bk-ink);margin:18px 0 8px}
 /* ---------- フライト：上は飛んだ路線の地図、下からせり出すシートに搭乗券の一覧 ---------- */
-#v-log{--lg-ink:#1F2937;--lg-sub:#6B7280;--lg-mute:#5B6270;--lg-card:#FFFFFF;--lg-stub:#FAFAFB;--lg-pill:#FFFFFF;--lg-track:#EEF0F3;--lg-shadow:0 12px 26px -18px rgba(15,23,42,.3)}
+#v-log{--lg-ink:#1F2937;--lg-sub:#6B7280;--lg-mute:#5B6270;--lg-card:#FFFFFF;--lg-stub:#FAFAFB;--lg-pill:#FFFFFF;--lg-track:#EEF0F3;--lg-shadow:0 12px 26px -18px rgba(15,23,42,.3),inset 0 0 0 1px rgba(17,24,39,.07)}
 [data-palette="board"] #v-log{--lg-ink:#E5E7EB;--lg-sub:#8B95A3;--lg-mute:#A7B0BC;--lg-card:#16191F;--lg-stub:#1B1F26;--lg-pill:#232830;--lg-track:#2A2F37;--lg-shadow:0 12px 26px -16px rgba(0,0,0,.7)}
 /* ---------- 全画面の地図と、引っ張れるシート（ホーム・フライト）：下へ引くと地図だけ、上へ引くとシートだけ ---------- */
 :root[data-view="home"],:root[data-view="log"]{overscroll-behavior:none}
@@ -1915,10 +1918,10 @@ nav.tabs{transition:transform .3s cubic-bezier(.2,.8,.2,1),opacity .2s}
           <div class="dist" id="nearDist">半券を切ると、現在地からいちばん近い空港を調べます。</div>
         </div>
       </div>
-      <button class="bp-stub" id="checkin" aria-label="チェックイン（半券を右へ引いて切ります）"><span class="v">チェックイン</span><svg viewBox="0 0 26 14" aria-hidden="true"><path d="M2 7h20"/><path d="M17 2l5 5-5 5"/></svg><span class="s">引いて切る</span></button>
+      <button class="bp-stub" id="checkin" aria-label="チェックイン（半券を右か下へ引いて切ります）"><span class="v">チェックイン</span><svg viewBox="0 0 26 14" aria-hidden="true"><path d="M2 7h20"/><path d="M17 2l5 5-5 5"/></svg><span class="s">引いて切る</span></button>
     </div>
     <p class="msg" id="msg" role="status" aria-live="polite"></p>
-    <p class="hint ckhint">空港の判定範囲（1〜2km）の中で、半券を右へ引いて切ると印が押されます。</p>
+    <p class="hint ckhint">空港の判定範囲（1〜2km）の中で、半券を右か下へ引いて切ると印が押されます。</p>
     <div class="demo-pick">
       <label for="demoAirport">いる空港（デモ）</label>
       <select id="demoAirport"></select>
@@ -4092,21 +4095,31 @@ function setGameOn(on){
 }
 document.querySelectorAll("nav.tabs button").forEach(b => b.onclick = () => { goTab(b.dataset.v); track("tab", b.dataset.v); });
 document.documentElement.dataset.view = document.documentElement.dataset.view || "home";
-// 搭乗券の半券を右へ引いて切ると、チェックイン。タップだけなら引き方を知らせる（キーボードの Enter・Space ではそのままチェックイン）
+// 搭乗券の半券を右か下へ引いて切ると、チェックイン（56px 引けば切れる。半券の真ん中をつかんでも画面の端までに届く）。
+// タップだけなら引き方を知らせる（キーボードの Enter・Space ではそのままチェックイン）
+const TEAR_AT = 56;
 (() => { const b = $("checkin"), wrap = $("bpass"); if(!b || !wrap) return;
-  let x0 = 0, dx = 0, drag = false, moved = false;
-  const set = d => { b.style.transform = d ? `translate(${d}px,${Math.round(d * .12)}px) rotate(${Math.round(d / 10)}deg)` : ""; };
-  b.addEventListener("pointerdown", e => { if(b.disabled) return; drag = true; moved = false; x0 = e.clientX; dx = 0; try{ b.setPointerCapture(e.pointerId); }catch(_){} b.classList.add("dragging"); });
-  b.addEventListener("pointermove", e => { if(!drag) return; dx = Math.max(0, Math.min(170, e.clientX - x0)); if(dx > 4) moved = true; set(dx); });
+  let x0 = 0, y0 = 0, dx = 0, dy = 0, axis = "", drag = false, moved = false;
+  const set = () => {
+    if(axis === "y"){ b.style.transformOrigin = "0 0"; b.style.transform = dy ? `translate(${Math.round(dy * .1)}px,${dy}px) rotate(${Math.round(dy / 8)}deg)` : ""; }
+    else { b.style.transformOrigin = ""; b.style.transform = dx ? `translate(${dx}px,${Math.round(dx * .12)}px) rotate(${Math.round(dx / 10)}deg)` : ""; }
+  };
+  const reset = () => { dx = dy = 0; axis = ""; b.style.transform = ""; b.style.transformOrigin = ""; };
+  b.addEventListener("pointerdown", e => { if(b.disabled) return; drag = true; moved = false; x0 = e.clientX; y0 = e.clientY; dx = dy = 0; axis = ""; try{ b.setPointerCapture(e.pointerId); }catch(_){} b.classList.add("dragging"); });
+  b.addEventListener("pointermove", e => { if(!drag) return;
+    const mx = e.clientX - x0, my = e.clientY - y0;
+    if(!axis && Math.hypot(mx, my) > 6) axis = Math.abs(my) > Math.abs(mx) ? "y" : "x";   // 最初に動いた向きで、右か下かを決める
+    if(axis === "x") dx = Math.max(0, Math.min(170, mx)); else if(axis === "y") dy = Math.max(0, Math.min(170, my));
+    if(dx > 4 || dy > 4) moved = true; set(); });
   const end = () => { if(!drag) return; drag = false; b.classList.remove("dragging");
-    if(dx > 90) tear(); else { set(0); if(!moved) nudge(); } };
-  b.addEventListener("pointerup", end); b.addEventListener("pointercancel", end);
+    if(dx >= TEAR_AT || dy >= TEAR_AT) tear(); else { const m = moved; reset(); if(!m) nudge(); } };
+  b.addEventListener("pointerup", end); b.addEventListener("pointercancel", () => { if(!drag) return; drag = false; b.classList.remove("dragging"); reset(); });
   async function tear(){
-    b.style.transform = "translate(210px,40px) rotate(26deg)"; b.style.opacity = "0"; track("tear", 1);
+    b.style.transform = axis === "y" ? "translate(24px,220px) rotate(18deg)" : "translate(210px,40px) rotate(26deg)"; b.style.opacity = "0"; track("tear", 1);
     const before = S.checkins.length;
-    try{ await checkin(); } finally { setTimeout(() => { b.style.opacity = ""; set(0); }, S.checkins.length > before ? 1200 : 200); }
+    try{ await checkin(); } finally { setTimeout(() => { b.style.opacity = ""; reset(); }, S.checkins.length > before ? 1200 : 200); }
   }
-  function nudge(){ wrap.classList.remove("nudge"); void wrap.offsetWidth; wrap.classList.add("nudge"); say("半券を右へ引いて切ると、チェックインします。"); }
+  function nudge(){ wrap.classList.remove("nudge"); void wrap.offsetWidth; wrap.classList.add("nudge"); say("半券を右か下へ引いて切ると、チェックインします。"); }
 })();
 // ホームの地図の下地：国土地理院のベクトル地図を、すっきりした配色で描く（陸は薄い灰色・海は水色・道路は白、高速道路は淡い黄色。
 // 地名は市区町村・空港・海や川・駅だけ）。WebGL が使えないときは、淡色地図（画像）にする
@@ -4190,7 +4203,13 @@ function sheetTop(view, snap){
   const peek = Math.max(160, vh - (view === "home" ? 236 : 168));   // 地図だけのときは下のメニューを隠すので、その分シートを下げる
   if(snap === "full"){ const h = document.querySelector("header.top"); return h ? Math.max(0, Math.round(h.getBoundingClientRect().bottom) - 6) : 0; }   // 広げきっても、上のロゴとマイページは見えるように
   if(snap === "peek") return peek;
-  return Math.min(Math.round(vh * (view === "home" ? .40 : .46)), peek - 60);
+  if(view === "home"){   // ホームは下から決める：搭乗券の下端をタブバーの上 24px に置く（片手の親指が届く所。画面の大きさが変わっても同じ）
+    const sh = $("homeSheet"), bp = $("bpass"), tb = document.querySelector("nav.tabs");
+    const navTop = tb && tb.offsetHeight ? tb.getBoundingClientRect().top : vh - nav;
+    const off = sh && bp && bp.offsetHeight ? bp.getBoundingClientRect().bottom - sh.getBoundingClientRect().top : 204;
+    return Math.max(Math.round(vh * .25), Math.min(Math.round(navTop - 24 - off), peek - 60));
+  }
+  return Math.min(Math.round(vh * .46), peek - 60);
 }
 function initSheet(sheet, view){
   if(!sheet) return;
@@ -4251,6 +4270,8 @@ function initSheet(sheet, view){
   // キーボードで隠れている所へ進んだら、広げる
   body.addEventListener("focusin", e => { if(snap !== "full" && e.target.getBoundingClientRect().bottom > innerHeight - 90) go("full"); });
   addEventListener("resize", () => { if(!sheet.classList.contains("dragging")) setTop(sheetTop(view, snap)); });
+  if(view === "home" && window.ResizeObserver && $("personaCard"))   // いちばん上のカードが出たり消えたりしたら、搭乗券の位置を合わせ直す
+    new ResizeObserver(() => { if(!sheet.classList.contains("dragging") && snap === "half") setTop(sheetTop(view, snap)); }).observe($("personaCard"));
   sheet.sheetGo = go;
   go("half");
 }
