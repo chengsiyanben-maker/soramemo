@@ -14,7 +14,7 @@ BOARD = [
             {'cs':'JAL113','dep':'HND','arr':'ITM','first':iso(-25),'last':iso(-1),'sta':iso(30),'sch':True}],
    'last_day':str(jst),'arr30':{'CTS':14,'ITM':18,'HND':52}},
   {'reg':'JA819A','now':{'at':iso(-1),'lat':35.45,'lon':139.9,'alt_ft':3000,'callsign':'ANA18','iata':'HND','phase':'arr','kt':180},
-   'today':[{'cs':'ANA18','dep':'ITM','arr':'HND','first':iso(-60),'last':iso(-1),'sch':False}],'last_day':str(jst),'arr30':{'HND':9}},
+   'today':[{'cs':'ANA18','dep':'ITM','arr':'HND','first':iso(-60),'last':iso(-1),'sch':False,'hist':True}],'last_day':str(jst),'arr30':{'HND':9}},
   {'reg':'JA05RK','now':None,'today':[{'cs':'JTA41','dep':'HND','arr':'OKA','first':iso(-300),'last':iso(-150),'sch':False}],'last_day':str(jst),'arr30':{'OKA':5}},
   {'reg':'B-16740','now':None,'today':[],'last_day':str(jst - timedelta(days=3)),'arr30':{'NRT':2}},
 ]
@@ -72,6 +72,9 @@ async def main():
         check('戻るボタンに移る:', await pg.evaluate("document.activeElement && document.activeElement.hasAttribute('data-spb-back')"))
         await pg.screenshot(path=os.path.join(WORK, 't72_detail.png'))
         await axe('機体の画面')
+        await pg.click('[data-spb-back]'); await pg.wait_for_timeout(200); await pg.click('[data-spb-reg="JA819A"]'); await pg.wait_for_timeout(300)
+        check('時刻表にない便は「いつもの路線から」:', 'いつもの路線から' in await pg.inner_text('#dSpecialBody'))
+        await pg.click('[data-spb-back]'); await pg.wait_for_timeout(200); await pg.click('[data-spb-reg="JA339J"]'); await pg.wait_for_timeout(300)
         await pg.click('[data-spb-back]'); await pg.wait_for_timeout(300)
         check('戻ると一覧、押した機体に移る:', await pg.locator('#spbMap').count() == 1 and await pg.evaluate("document.activeElement && document.activeElement.dataset.spbReg") == 'JA339J')
         await pg.keyboard.press('Escape'); await pg.wait_for_timeout(200)

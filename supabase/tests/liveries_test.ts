@@ -13,3 +13,14 @@ Deno.test("特別塗装機の一覧は、登録記号の形・出典・重複が
   assertEquals(liveryMap(new Date("2026-10-15")).has("9V-OJJ"), true);
   assertEquals(liveryMap(new Date("2027-05-01")).has("JA339J"), false);   // 期間が過ぎたものは外れる
 });
+
+Deno.test("まだ始まっていない塗装（from）は出さず、終わる日のあるアライアンス塗装は外れる。スカイチームの名前", () => {
+  const m = liveryMap(new Date("2026-10-26"));
+  assertEquals(m.has("JA56AN"), false);   // ポケモンジェット 青：就航日が未発表
+  assertEquals(m.has("JA609A"), true);
+  assertEquals(m.has("HL7730"), true);
+  assertEquals(liveryMap(new Date("2026-12-17")).has("HL7730"), false);   // アシアナはスカイチームへ
+  assertEquals(m.get("VN-A897")?.name.startsWith("スカイチーム塗装"), true);
+  assertEquals(m.get("N375HA")?.name.startsWith("ワンワールド塗装"), true);
+  assertEquals(m.has("JA731A") || m.has("9V-SRI") || m.has("JA604J"), false);   // 退役・塗り替えで消したもの
+});
