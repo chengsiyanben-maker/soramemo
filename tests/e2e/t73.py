@@ -28,7 +28,9 @@ async def main():
         await pg.goto('file://'+os.path.join(WORK,'index_server_test.html')); await pg.wait_for_load_state('load'); await pg.wait_for_timeout(600)
         # 記録：羽田→那覇（ANA・金額あり）、那覇→羽田（ANA・金額なし）、40日前の羽田→那覇（ANA）
         await pg.evaluate("""() => { const h = A.find(a => a.iata === 'HND').id, o = A.find(a => a.iata === 'OKA').id, F = __fake.db.flights;
-          Object.assign(F[0], { from_airport:h, to_airport:o, airline:'NH', flight_no:'NH461', fare:'ANA:E_FLEX', price:28700 });
+          // 日本時間で「きょう」の便にする（日付が変わった直後に流しても、きょうの予定と同じ日になるように）
+          const d0 = new Date(Date.now() + 9 * 36e5).toISOString().slice(0, 10), t0 = Date.parse(d0 + 'T00:01:00+09:00');
+          Object.assign(F[0], { from_airport:h, to_airport:o, airline:'NH', flight_no:'NH461', fare:'ANA:E_FLEX', price:28700, dep_at:new Date(t0).toISOString(), arr_at:new Date(t0 + 60e3).toISOString() });
           Object.assign(F[1], { from_airport:o, to_airport:h, airline:'NH', flight_no:'NH468', fare:'ANA:E_STD', price:null, dep_at:new Date(Date.now() - 40 * 864e5).toISOString(), arr_at:new Date(Date.now() - 40 * 864e5 + 9e6).toISOString() });
           Object.assign(F[2], { from_airport:h, to_airport:o, airline:'NH', flight_no:'NH463', fare:'ANA:E_STD', price:null }); }""")
         await pg.evaluate('__fake.login()'); await pg.wait_for_timeout(1000)
@@ -48,8 +50,8 @@ async def main():
         check('ホーム：その日の行程と合計（乗った便は入れない）:', 'の行程' in t and 'この日の合計' in t and '2回' in t and '那覇 → 石垣' in t)
         await pg.locator('#personaCard').screenshot(path=os.path.join(WORK, 't73_home.png'))
         # 計画を作る → 修行のタブ（窓は開かない）
-        await pg.click('#personaCard [data-sg-open="planner"]'); await pg.wait_for_timeout(400)
-        check('計画を作るは修行のタブで開く:', await pg.evaluate("currentView()") == 'sg' and not await pg.evaluate("$('dShugyo').open") and '修行の計画を作る' in await pg.inner_text('#v-sg'))
+        await pg.click('#personaCard [data-sg-open="find"]'); await pg.wait_for_timeout(400)
+        check('計画を作るは修行のタブで開く:', await pg.evaluate("currentView()") == 'sg' and not await pg.evaluate("$('dShugyo').open") and '計画を作る' in await pg.inner_text('#v-sg') and await pg.evaluate('SG_PAGE') == 'find')
         await pg.click('#v-sg .sg-back'); await pg.wait_for_timeout(300)
         t = await pg.inner_text('#v-sg')
         check('戻るとまとめ（閉じるはなく、会員情報がある）:', '年の修行' in t and '会員情報' in t and '閉じる' not in t)

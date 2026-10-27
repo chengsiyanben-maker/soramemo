@@ -464,3 +464,5 @@ verify_jwt = false
 
 [functions.wx-archive]
 verify_jwt = false
+[functions.timetable-sync]
+verify_jwt = false
