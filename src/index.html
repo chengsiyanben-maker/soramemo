@@ -384,6 +384,15 @@ dialog::backdrop{background:rgba(15,22,38,.55)}
 .pillrow{display:flex;gap:6px;margin:0 0 10px;flex-wrap:wrap}
 .pillrow.fares{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:4px}.pillrow.fares .cotab{min-width:0;padding:6px 0;font-size:11px;line-height:1.3;white-space:nowrap;border-radius:14px}
 .pillrow.fares .cotab small{display:block;font-size:10px;color:#8A909A;font-weight:500}.pillrow.fares .cotab.on small{color:inherit;opacity:.75}
+.trb{background:#1F2329;color:#fff;border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:8px;margin-bottom:10px}
+.trb .trh{display:flex;gap:6px;flex-wrap:wrap}.trb .trt{font-size:20px;font-weight:900}.trb small{font-size:12px;opacity:.85}.trb small.dim{opacity:.65;font-size:11px}
+.tag.warn{background:#FFB547;color:#1F2329}.tag.ghost{background:transparent;color:#fff;border:1px solid rgba(255,255,255,.35)}
+.trbar{display:flex;align-items:center;gap:10px}.trbar i{flex:1;height:8px;border-radius:4px;background:rgba(255,255,255,.18);overflow:hidden}.trbar u{display:block;height:8px;background:#FFB547}.trbar span{font-size:13px;font-weight:700;color:#FFB547;white-space:nowrap}
+.trcards{display:flex;flex-direction:column;gap:8px;margin-bottom:10px}
+.trcard{text-align:left;border:1px solid #D9DCE1;background:var(--paper,#fff);border-radius:18px;padding:12px 14px;font:inherit;color:inherit;display:flex;flex-direction:column;gap:4px}
+.trcard.on{border:2px solid #1F2329}.trcard .r1{display:flex;justify-content:space-between;align-items:center;gap:8px}.trcard b{font-size:15px}.trcard small{font-size:12px;color:#5F6672}
+.btn2.trgo{background:#1F2329;color:#fff;border:none;min-height:48px;border-radius:24px;font-weight:700}.btn2.trgo:disabled{opacity:.5}
+.trauto{display:flex;align-items:center;gap:10px;font-size:13px;color:#5F6672;margin:4px 0 12px}.trauto input{width:20px;height:20px}
 .v3box.ops{display:flex;flex-direction:column;gap:10px}
 .opshd{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
 .opshd>div{display:flex;flex-direction:column;gap:2px}.opshd small{font-size:12px;color:var(--sub,#5F6672)}.opshd b{font-size:20px;font-weight:900;letter-spacing:.02em}
@@ -4332,7 +4341,7 @@ function coFromServer(j){
       rodeOn:x.rode_on, flight:x.flight, boughtAt:Date.parse(x.bought_at), kind:x.kind || null})),
     sky:j.sky || {}, repPoints:+j.rep_points || 0, stars:+j.stars || 1, bought:+j.bought || 0, value:+j.value || 0,
     friendCode:j.friend_code || "", hideRank:!!j.hide_rank, friends:+j.friends || 0,
-    v3:!!j.v3, policy:j.policy || "fsc", premium:+j.premium || 0, sat:j.satisfaction == null ? 40 : +j.satisfaction, satMult:+j.sat_mult || 1, satParts:j.sat_parts || null, econ:j.econ || [], fares:j.fares || {}, meal:j.meal || "none", bag:j.bag || "free", home:j.home == null ? null : +j.home, homeSince:j.home_since || null, cargoRoutes:j.cargo_routes || [], cargo:j.cargo || [], pj:j.pj || [], jobs:j.jobs || [], subsidy:j.subsidy || [], small:j.small || [], plans:j.plans || {},
+    v3:!!j.v3, policy:j.policy || "fsc", premium:+j.premium || 0, sat:j.satisfaction == null ? 40 : +j.satisfaction, satMult:+j.sat_mult || 1, satParts:j.sat_parts || null, econ:j.econ || [], fares:j.fares || {}, meal:j.meal || "none", bag:j.bag || "free", troubles:j.troubles || [], autoTrouble:!!j.auto_trouble, home:j.home == null ? null : +j.home, homeSince:j.home_since || null, cargoRoutes:j.cargo_routes || [], cargo:j.cargo || [], pj:j.pj || [], jobs:j.jobs || [], subsidy:j.subsidy || [], small:j.small || [], plans:j.plans || {},
     facilities:Object.fromEntries(Object.entries(j.facilities || {}).map(([k, v]) => [+k, +v]))}; }
 // 端末だけの版（お試し・サーバーなし）：同じ形の状態を、端末の記録から作る
 let CO_LOCAL = null;
@@ -4374,7 +4383,7 @@ const coMsg = (t, err) => { $("coMsg").textContent = t; $("coMsg").className = e
 async function coRpc(name, args){
   const { data, error } = await sb.rpc(name, args || {});
   if(error){ const m = String(error.message || "");
-    coMsg(m.includes("not enough") ? "資金が足りません。" : m.includes("not met") ? "まだ出会っていない守り神です。" : m.includes("invalid name") ? "会社名は1〜20文字で入れてください。" : m.includes("game not released") ? "エアライン経営は、まだ公開されていません。" : m.includes("not ridden") ? "乗った機体だけを買えます。" : m.includes("already owned") ? "もう持っている機体です。" : m.includes("no free slot") ? "評判の星の数までしか施設を建てられません。" : m.includes("not visited") ? "訪れた空港にだけ施設を建てられます。" : m.includes("too small") ? "この路線の空港には就航できない機体です。" : m.includes("not intl") ? "国際線には、国際線で乗った機体だけを入れられます。" : m.includes("seen limit per day") ? "見ただけの旅客機は1日3機までです。" : m.includes("too many seen") ? "見ただけの旅客機は、会社の機体の半分までです。" : m.includes("10 percent") ? "貨物機は機体の1割までです。" : m.includes("cannot own freighters") ? "この方針では貨物機を持てません。" : m.includes("not seen") ? "見た機体だけを買えます。" : m.includes("invalid policy") ? "その方針は選べません。" : m.includes("premium not allowed") ? "この方針では、その割合の上級席は選べません。" : m.includes("invalid service") ? "そのサービスは選べません。" : m.includes("fare once a day") ? "運賃を変えられるのは1日1回です。" : m.includes("invalid fare") ? "その運賃は選べません。" : m.includes("not a freighter") ? "貨物機だけを貨物の路線に入れられます。" : m.includes("too far") ? "この機体では遠すぎて飛べません。" : m.includes("invalid flights") ? "便数は往復の数（偶数）で決めてください。" : m.includes("not a small") ? "小型機だけを買えます。" : m.includes("code not found") ? "その合言葉の会社は見つかりません。" : m.includes("own code") ? "自分の合言葉です。" : m.includes("too many") ? "友だちは100社までです。" : "保存できませんでした。電波のよい場所でもう一度試してください。", true);
+    coMsg(m.includes("not enough") ? "資金が足りません。" : m.includes("not met") ? "まだ出会っていない守り神です。" : m.includes("invalid name") ? "会社名は1〜20文字で入れてください。" : m.includes("game not released") ? "エアライン経営は、まだ公開されていません。" : m.includes("not ridden") ? "乗った機体だけを買えます。" : m.includes("already owned") ? "もう持っている機体です。" : m.includes("no free slot") ? "評判の星の数までしか施設を建てられません。" : m.includes("not visited") ? "訪れた空港にだけ施設を建てられます。" : m.includes("too small") ? "この路線の空港には就航できない機体です。" : m.includes("not intl") ? "国際線には、国際線で乗った機体だけを入れられます。" : m.includes("seen limit per day") ? "見ただけの旅客機は1日3機までです。" : m.includes("too many seen") ? "見ただけの旅客機は、会社の機体の半分までです。" : m.includes("10 percent") ? "貨物機は機体の1割までです。" : m.includes("cannot own freighters") ? "この方針では貨物機を持てません。" : m.includes("not seen") ? "見た機体だけを買えます。" : m.includes("invalid policy") ? "その方針は選べません。" : m.includes("premium not allowed") ? "この方針では、その割合の上級席は選べません。" : m.includes("too late") ? "対応できる6時間を過ぎました。" : m.includes("already done") ? "このトラブルにはもう対応しました。" : m.includes("trouble not found") ? "そのトラブルは見つかりません。" : m.includes("invalid service") ? "そのサービスは選べません。" : m.includes("fare once a day") ? "運賃を変えられるのは1日1回です。" : m.includes("invalid fare") ? "その運賃は選べません。" : m.includes("not a freighter") ? "貨物機だけを貨物の路線に入れられます。" : m.includes("too far") ? "この機体では遠すぎて飛べません。" : m.includes("invalid flights") ? "便数は往復の数（偶数）で決めてください。" : m.includes("not a small") ? "小型機だけを買えます。" : m.includes("code not found") ? "その合言葉の会社は見つかりません。" : m.includes("own code") ? "自分の合言葉です。" : m.includes("too many") ? "友だちは100社までです。" : "保存できませんでした。電波のよい場所でもう一度試してください。", true);
     return false; }
   if(data && typeof data === "object" && "cash" in data){ CO = coFromServer(data); HANGAR = null; renderCompany(); }
   return data || true;
@@ -4581,7 +4590,7 @@ function renderV3(){
   const sat = CO.sat, tgt = sp.target == null ? null : +sp.target, eff = Math.round((CO.satMult - 1) * 100);
   const step = tgt == null ? 0 : Math.max(-3, Math.min(3, (tgt - sat) * 0.1));
   const part = (k, v) => v ? `<div class="v3row"><span>${k}</span><b>${v > 0 ? "+" : "−"}${Math.abs(+v)}</b></div>` : "";
-  box.innerHTML = `<h2>方針</h2><p class="hint">稼ぎ方が変わります。変えるとその日から新しい方針で数えます。</p>
+  box.innerHTML = `${troubleHtml()}<h2>方針</h2><p class="hint">稼ぎ方が変わります。変えるとその日から新しい方針で数えます。</p>
     <div class="polgrid">${Object.entries(POLICIES).map(([k, p]) => `<button class="polcard${sel === k ? " on" : ""}" data-pol="${k}" aria-pressed="${sel === k}"><b>${p.name}</b><span>${p.short}</span><em class="${CO.policy === k ? "now" : ""}">${CO.policy === k ? "今の方針" : p.where}</em></button>`).join("")}</div>
     <div class="v3box"><h3>${d.name}</h3><div class="v3stats">${d.stats.map(([k, v]) => `<div><small>${k}</small><b>${v}</b></div>`).join("")}</div>
       <ul>${d.points.map(t => `<li>${t}</li>`).join("")}</ul>
@@ -4593,8 +4602,8 @@ function renderV3(){
       <p style="margin:0 0 8px">毎日 深夜3時に、目標値へ少しずつ近づきます（あしたは <b>${step >= 0 ? "+" : "−"}${fmtNum(Math.abs(step), 1)}</b>）。</p>
       <div class="v3row"><span>お客さんへの効き目（60から5離れるごとに ±1%）</span><b>${eff > 0 ? "+" : eff < 0 ? "−" : "±"}${Math.abs(eff)}%</b></div></div>
     ${tgt == null ? "" : `<div class="v3box"><h3>目標値の中身</h3><div class="v3row"><span>基本</span><b>${fmtNum(+sp.base || 50, 0)}</b></div>
-      ${part("新しい機体（会社に入れて90日まで）の割合 ×6", +sp.new_share)}${part("機体の古さ", +sp.aging)}${part("席を詰める", +sp.packed)}${part("方針の補正", +sp.policy_adj)}${part("機内食", +sp.meal)}${part("預ける荷物", +sp.bag)}</div>`}
-    <p class="hint">始まりは40です。定時率・トラブルの対応は、その機能ができたら目標値に入ります。</p>`;
+      ${part("新しい機体（会社に入れて90日まで）の割合 ×6", +sp.new_share)}${part("機体の古さ", +sp.aging)}${part("席を詰める", +sp.packed)}${part("方針の補正", +sp.policy_adj)}${part("機内食", +sp.meal)}${part("預ける荷物", +sp.bag)}${part("トラブルの対応（前の30日）", +sp.response)}</div>`}
+    <p class="hint">始まりは40です。定時率は、便の時刻ができたら目標値に入ります。</p>`;
 }
 // 本拠地（チェックインした空港から）と上級席の割合（FSC 0・10・20・30%、ミドルコスト 0・10%）
 function v3HomeHtml(){
@@ -4668,6 +4677,43 @@ function routeV3Html(r, e, ac){
           : `<p class="hint">機体を入れると飛べます。v3 では、機体のない路線は飛びません。</p>`}
         <p class="hint">数字はゲームの中の計算です。本物の便の乗客数ではありません。</p></div></details>`;
 }
+// トラブル（1日まとめ：前の日の本物の欠航から、毎朝7時に決まる。6時間以内に対応、はじめの1時間に合うカードで神対応）
+const TR_CARDS = [["transfer", "振替の手配", 0.20, "自社の後の便や、ほかの便に振り替える"], ["hotel", "ホテルの手配", 0.30, "夜の欠航や台風での足止めに"], ["snack", "軽食とおわび", 0.10, "2時間以上の遅れに"]];
+let TR_SEL = {};
+function troubleHtml(){
+  const T = CO.troubles || []; if(!T.length) return "";
+  const now = Date.now(), open = T.filter(t => !t.result && Date.parse(t.deadline) > now), past = T.filter(t => !open.includes(t));
+  const mins = ms => ms >= 36e5 ? `${Math.floor(ms / 36e5)}時間${Math.round(ms % 36e5 / 6e4)}分` : `${Math.max(1, Math.round(ms / 6e4))}分`;
+  const card = t => { const sel = TR_SEL[t.id] || "transfer", god = Date.parse(t.god_until) - now, left = Date.parse(t.deadline) - now, gs = Date.parse(t.god_until) - Date.parse(t.created_at);
+    const pct = god > 0 ? Math.max(0, Math.min(100, (1 - god / gs) * 100)) : 100, rName2 = opsRoute(t.k) || t.k, day = String(t.day).slice(5).replace("-", "/");
+    return `<div class="trb"><div class="trh"><em class="tag warn">欠航</em><em class="tag ghost">本物の欠航から（理由は分かりません）</em></div>
+      <b class="trt">${esc(rName2)}</b>
+      <small>${esc(day)}（きのう） 自社 ${t.flights}便のうち ${t.cancelled}便が欠航 ・ 本物の便は ${t.real_n + t.real_cxl}便のうち ${t.real_cxl}便が欠航</small>
+      <div class="trbar"><i><u style="width:${pct}%"></u></i><span>${god > 0 ? `神対応まで あと${mins(god)}` : `対応できるのは あと${mins(left)}`}</span></div>
+      <small class="dim">対応できるのは6時間。はじめの1時間に合うカードを使うと「神対応」</small></div>
+      <div class="trcards" role="radiogroup" aria-label="対応カード">${TR_CARDS.map(([k, l, r, note]) => { const fit = k === "transfer", c = Math.ceil(r * +t.rev_flight * t.cancelled);
+        return `<button class="trcard${sel === k ? " on" : ""}" role="radio" aria-checked="${sel === k}" data-trsel="${t.id}" data-card="${k}"><span class="r1"><b>${l}</b>${fit ? `<em class="tag green">この欠航に合う</em>` : `<em class="tag">ふつうの対応になる</em>`}</span><small>${note} ・ 費用 その便の収益の${Math.round(r * 100)}%（約${fmtKm(c)}）</small></button>`; }).join("")}</div>
+      <div class="v3box" style="margin-bottom:8px"><small>神対応になると</small><br><b>満足度 +8 ・ 評判 +15</b></div>
+      <button class="btn2 trgo" data-trgo="${t.id}" style="width:100%">${TR_CARDS.find(x => x[0] === sel)[1]}を使う</button>`; };
+  const resJa = {god:"神対応", normal:"ふつうの対応", none:"対応なし"};
+  return `<h2>対応してください</h2>${open.map(card).join("")}
+    ${open.length ? "" : `<p class="hint">いま対応が必要なトラブルはありません。</p>`}
+    <label class="trauto"><input type="checkbox" id="trAuto"${CO.autoTrouble ? " checked" : ""}> 次から自動で対応する（振替の手配で、ふつうの対応になる）</label>
+    ${past.length ? `<div class="v3box"><h3>前の7日のトラブル</h3>${past.map(t => `<div class="v3row"><span>${esc(String(t.day).slice(5).replace("-", "/"))} ${esc(opsRoute(t.k) || t.k)} ・ 欠航 ${t.cancelled}便${t.auto ? "（自動）" : ""}</span><b class="${t.result === "god" ? "pos" : t.result === "none" ? "neg" : ""}">${resJa[t.result] || ""}</b></div>`).join("")}</div>` : ""}`;
+}
+document.addEventListener("click", async e => {
+  const s1 = e.target.closest("[data-trsel]");
+  if(s1){ TR_SEL[s1.dataset.trsel] = s1.dataset.card; renderV3(); return; }
+  const go = e.target.closest("[data-trgo]"); if(!go) return;
+  const id = +go.dataset.trgo, card = TR_SEL[id] || "transfer"; go.disabled = true;
+  const r = await coRpc("co3_trouble_respond", {p_id:id, p_card:card});
+  if(r){ const t = (CO.troubles || []).find(x => x.id === id); coMsg(t && t.result === "god" ? "神対応！ 満足度 +8・評判 +15" : "ふつうの対応をしました。"); }
+});
+document.addEventListener("change", async e => {
+  if(e.target.id !== "trAuto") return;
+  e.target.disabled = true; if(await coRpc("co3_set_auto_trouble", {p_on:e.target.checked})) coMsg(e.target.checked ? "トラブルに自動で対応します（ふつうの対応）。" : "自動の対応をやめました。");
+});
+setInterval(() => { if(CO && CO.v3 && (CO.troubles || []).some(t => !t.result) && currentView() === "co" && !document.querySelector("#coV3 [data-trgo]:disabled")) renderV3(); }, 60000);
 const fmtNum = (v, d) => (Math.round(v * 10 ** d) / 10 ** d).toFixed(d);
 document.addEventListener("click", async e => {
   const pb = e.target.closest("[data-pol]"); if(pb){ POL_SEL = pb.dataset.pol; renderV3(); return; }
