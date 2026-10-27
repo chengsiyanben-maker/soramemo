@@ -126,7 +126,7 @@ section.view.on{display:block}
 /* home */
 .nearest{padding:28px 0 10px}
 .nearest .label{font-size:14px;color:var(--sumi)}
-.nearest .name{font-family:var(--mincho);font-weight:800;font-size:clamp(30px,8vw,40px);line-height:1.25;margin:4px 0 6px;letter-spacing:.02em}
+.nearest .name{font-family:var(--gothic);font-weight:800;font-size:clamp(30px,8vw,40px);line-height:1.25;margin:4px 0 6px;letter-spacing:.02em}
 .nearest .dist{font-size:15px;color:var(--sumi)}
 .nearest .dist b{color:var(--ink);font-weight:700}
 .nearest .dist.ok b{color:var(--shu-text)}
@@ -153,10 +153,10 @@ select{width:100%;padding:12px;border:1px solid var(--line);border-radius:10px;b
 .tally{display:grid;grid-template-columns:repeat(3,1fr);gap:0;margin:30px 0 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
 .tally>div{padding:14px 4px;text-align:center}
 .tally>div+div{border-left:1px solid var(--line)}
-.tally .n{font-family:var(--mincho);font-weight:800;font-size:26px;line-height:1.2}
+.tally .n{font-family:var(--gothic);font-weight:800;font-size:26px;line-height:1.2}
 .tally .u{font-size:12px;color:var(--sumi)}
 
-h2{font-family:var(--mincho);font-weight:700;font-size:20px;margin:34px 0 12px;letter-spacing:.04em}
+h2{font-family:var(--gothic);font-weight:700;font-size:20px;margin:34px 0 12px;letter-spacing:.04em}
 h3{font-size:14px;color:var(--sumi);font-weight:500;margin:22px 0 10px}
 
 /* stamp book */
@@ -169,13 +169,13 @@ h3{font-size:14px;color:var(--sumi);font-weight:500;margin:22px 0 10px}
 .cell .nm{font-size:12px;line-height:1.35;margin-top:2px;color:var(--sumi)}
 .cell.got .nm{color:var(--ink)}
 .empty-slot circle{fill:none;stroke:var(--line);stroke-width:1.5;stroke-dasharray:3 4}
-.empty-slot text{fill:var(--dot);opacity:.75;font-family:var(--mincho);font-weight:700}
+.empty-slot text{fill:var(--dot);opacity:.75;font-family:var(--gothic);font-weight:700}
 
 /* records */
 .mapbox{border-radius:14px;padding:10px;margin-top:12px}
 .mapbox>svg{width:100%;height:auto;display:block}
 .flight{display:grid;grid-template-columns:1fr auto;gap:2px 12px;padding:14px 0;border-bottom:1px solid var(--line)}
-.flight .route{font-family:var(--mincho);font-weight:700;font-size:17px}
+.flight .route{font-family:var(--gothic);font-weight:700;font-size:17px}
 .flight .meta{font-size:13px;color:var(--sumi)}
 .flight .km{grid-row:1/3;grid-column:2;align-self:center;font-weight:700}
 .badge{display:inline-block;font-size:11px;border:1px solid var(--sumi);color:var(--sumi);border-radius:4px;padding:0 5px;margin-left:6px;vertical-align:2px;font-family:var(--gothic);font-weight:500}
@@ -198,7 +198,7 @@ nav.tabs button[aria-current="page"]::before{content:"";position:absolute;top:-1
 dialog{border:none;border-radius:18px;padding:0;max-width:min(420px,92vw);width:100%;background:var(--paper);color:var(--ink)}
 dialog::backdrop{background:rgba(15,22,38,.55)}
 .dlg{padding:26px 24px 22px}
-.dlg h3{margin:0 0 4px;color:var(--ink);font-family:var(--mincho);font-size:22px;font-weight:800}
+.dlg h3{margin:0 0 4px;color:var(--ink);font-family:var(--gothic);font-size:22px;font-weight:800}
 .dlg p{margin:6px 0;font-size:15px}
 .dlg .close{margin-top:16px;width:100%}
 .stampbig{width:220px;height:220px;margin:6px auto 4px;display:block}
@@ -238,19 +238,19 @@ dialog::backdrop{background:rgba(15,22,38,.55)}
 .alstats{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
 .alcard{background:var(--paper);border-radius:12px;padding:14px 16px}
 .alcard .g{font-weight:700;font-size:15px}
-.alcard .big{font-family:var(--mincho);font-weight:800;font-size:28px;line-height:1.2;margin-top:4px}
+.alcard .big{font-family:var(--gothic);font-weight:800;font-size:28px;line-height:1.2;margin-top:4px}
 .alcard .sub{font-size:13px;color:var(--sumi)}
 .alcard .bar{height:6px;border-radius:3px;background:var(--line);margin-top:10px;overflow:hidden}
 .alcard .bar i{display:block;height:100%;background:var(--shu)}
 .alcard .goal{font-size:12px;color:var(--sumi);margin-top:4px}
-.alhead{font-family:var(--mincho);font-weight:800;font-size:20px;margin:0 0 12px}
+.alhead{font-family:var(--gothic);font-weight:800;font-size:20px;margin:0 0 12px}
 .alnote{font-size:13px;color:var(--sumi);margin:10px 0 0}
 .focusbar{margin:4px 0 8px;padding:10px 14px;border-radius:10px;background:var(--shu-wash);font-size:14px;line-height:1.6}
 .linkbtn{background:none;border:none;padding:0 0 0 6px;color:var(--shu-text);font-weight:700;text-decoration:underline;font-size:14px}
-.seg{display:grid;grid-template-columns:repeat(3,1fr);border:1.5px solid var(--ink);border-radius:10px;overflow:hidden;margin:2px 0 6px}
-.seg button{background:none;border:none;padding:10px 0;font-weight:700;color:var(--ink)}
-.seg button+button{border-left:1.5px solid var(--ink)}
-.seg button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+.seg{display:grid;grid-template-columns:repeat(3,1fr);border:0;border-radius:999px;background:#ECEEF1;padding:3px;gap:0;overflow:hidden;margin:2px 0 6px}
+.seg button{background:none;border:none;border-radius:999px;padding:9px 0;font-weight:700;color:#4B5563;min-height:40px}
+.seg button+button{border-left:0}
+.seg button[aria-pressed="true"]{background:#fff;color:var(--ink);box-shadow:0 2px 6px -2px rgba(15,23,42,.25)}
 .cell.dim{opacity:.32}
 .pend{display:block;font-size:11px;color:var(--shu-text);font-weight:700}
 .achgrp{margin:22px 0 0}
@@ -295,7 +295,7 @@ dialog::backdrop{background:rgba(15,22,38,.55)}
 .yrtabs button[aria-pressed="true"]{border-color:var(--ink);background:var(--ink);color:var(--paper)}
 .yrgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border-radius:12px;overflow:hidden}
 .yrgrid>div{background:var(--paper);padding:12px 6px;text-align:center}
-.yrgrid .n{font-family:var(--mincho);font-weight:800;font-size:24px;line-height:1.2}
+.yrgrid .n{font-family:var(--gothic);font-weight:800;font-size:24px;line-height:1.2}
 .yrgrid .u{font-size:12px;color:var(--sumi)}
 .cohead{background:var(--paper);border-radius:14px;padding:18px 18px 14px;margin-top:18px}
 .coname{background:none;border:none;padding:0;font-family:var(--mincho);font-weight:800;font-size:22px;color:var(--ink);text-align:left}
@@ -312,7 +312,7 @@ dialog::backdrop{background:rgba(15,22,38,.55)}
 .role svg{width:56px;height:56px;display:block;margin:4px auto}
 .role select{width:100%;padding:6px;font-size:12px;border-radius:8px}
 .route{display:grid;grid-template-columns:1fr auto;gap:2px 10px;padding:12px 0;border-bottom:1px solid var(--line);align-items:center}
-.route .rt{font-family:var(--mincho);font-weight:700;font-size:16px}
+.route .rt{font-family:var(--gothic);font-weight:700;font-size:16px}
 .route .rm{font-size:13px;color:var(--sumi)}
 .route .rv{grid-row:1/4;grid-column:2;text-align:right}
 .route .rv b{display:block;font-size:15px}
@@ -364,7 +364,7 @@ dialog::backdrop{background:rgba(15,22,38,.55)}
 .imp td{padding:4px 6px;border-bottom:1px solid var(--line)}
 .imp .ng{color:var(--shu-text)}
 .yp{background:var(--paper);border-radius:12px;padding:14px;margin-top:12px}
-.yp h3{margin:0 0 8px;color:var(--ink);font-family:var(--mincho);font-size:17px}
+.yp h3{margin:0 0 8px;color:var(--ink);font-family:var(--gothic);font-size:17px}
 .yp svg{width:100%;height:auto;display:block}
 .chips{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
 .chips span{font-size:12px;background:var(--sky);border-radius:999px;padding:2px 10px}
@@ -419,7 +419,7 @@ body.game nav.tabs button[aria-current="page"]{color:#fff}
 .scard{background:var(--paper);border-radius:12px;padding:12px 14px}
 .scard .sh{display:flex;justify-content:space-between;font-size:14px}
 .scard .sh span{color:var(--sumi);font-size:12px}
-.scard .sv{font-family:var(--mincho);font-weight:800;font-size:28px;line-height:1.3}
+.scard .sv{font-family:var(--gothic);font-weight:800;font-size:28px;line-height:1.3}
 .scard .sv small{font-size:13px;color:var(--sumi);font-family:var(--gothic);font-weight:600}
 .sbar{height:6px;border-radius:3px;background:var(--line);overflow:hidden;margin:4px 0}
 .sbar i{display:block;height:100%;background:var(--gold)}
@@ -429,7 +429,7 @@ body.game nav.tabs button[aria-current="page"]{color:#fff}
 .scanbox video{width:100%;height:100%;object-fit:cover;display:block}
 .scanframe{position:absolute;inset:18% 8%;border:3px solid rgba(255,255,255,.85);border-radius:10px}
 .bpcard{background:var(--sky);border-radius:12px;padding:12px 14px;margin:8px 0;font-size:15px}
-.bpcard b{font-family:var(--mincho);font-size:20px}
+.bpcard b{font-family:var(--gothic);font-size:20px}
 /* ---------- 下のメニュー：浮いたピル型・すりガラス・線のアイコン ---------- */
 :root{--nav-acc:#2563EB;--nav-glass:rgba(255,255,255,.72);--nav-edge:rgba(255,255,255,.6);--nav-ink:#6B7280;--nav-on:#1F2937;
   --nav-shadow:0 10px 30px -8px rgba(17,24,39,.22),0 2px 6px rgba(17,24,39,.06)}
@@ -1034,7 +1034,7 @@ dialog.sgd .dlg{padding:14px 16px 36px;max-width:480px;margin:0 auto;max-height:
 .sg-sw[aria-checked="true"] i{background:var(--sg-ink)}.sg-sw[aria-checked="true"] i::after{left:21px}
 .sgd small.t{margin-top:14px;padding-top:12px;border-top:1px solid var(--sg-line)}
 .sgd .dot{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px}.sgd .dot.red{background:#C53030}.sgd .dot.blue{background:#1D4ED8}
-.sgopen{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 10px}
+.sgopen{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 10px}.sgopen button{border-radius:999px;min-height:44px;padding:0 18px}
 #v-ops .gali{display:block;width:100%;border:0;background:none;text-align:left;padding:6px 0;color:inherit;font:inherit}
 #v-ops .gali small{display:block;color:var(--op-mute);font-size:11px}
 #v-ops .gabtns{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
@@ -1336,7 +1336,7 @@ ol.steps{padding-left:1.4em;line-height:1.9}
 /* 空港の今・お知らせ */
 .apnow{margin:18px 0 0;background:var(--sky);border-radius:14px;padding:14px 14px 12px}
 .apnow .nowhead{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
-.apnow .nowhead h3{margin:0;font-family:var(--mincho);font-size:18px}
+.apnow .nowhead h3{margin:0;font-family:var(--gothic);font-size:18px}
 .apnow .nowhead span,.apnow .src{font-size:11px;color:var(--sumi)}
 .wxgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:10px 0 4px}
 .wxgrid div{background:var(--paper);border-radius:10px;padding:8px 10px;display:flex;flex-direction:column;gap:2px;min-width:0}
@@ -1432,7 +1432,7 @@ ol.steps{padding-left:1.4em;line-height:1.9}
 .chip{border:1.5px solid var(--line);background:var(--paper);color:var(--ink);border-radius:999px;padding:6px 12px;font-size:13px;font-weight:600}
 .chip[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
 .opsbox{background:var(--sky);border-radius:12px;padding:10px 14px;font-size:14px;line-height:1.8}
-.opsbox b.mode{font-family:var(--mincho);font-size:20px}
+.opsbox b.mode{font-family:var(--gothic);font-size:20px}
 .opshead{display:flex;align-items:baseline;justify-content:space-between;gap:8px;flex-wrap:wrap}
 .opssrc{font-size:12px;color:#5C6B7A;border:1px solid #C9D2DE;border-radius:999px;padding:0 8px;line-height:20px}
 .opssrc.live{color:#0E7A4F;border-color:#7CC3A3}.opssrc.live::before{content:"●";margin-right:4px;font-size:9px;vertical-align:1px}
@@ -1571,9 +1571,9 @@ dialog.psheet .btn1,dialog.psheet .btn2{display:block;width:100%;margin-top:10px
 #v-ops .opsstrip li{display:flex;border-radius:6px;overflow:hidden;background:var(--op-pill);min-height:50px}
 #v-ops .opsstrip li>i{width:8px;flex:none}
 #v-ops .opsstrip li>div{padding:6px 8px;border-right:1px solid var(--op-card);min-width:0}
-#v-ops .opsstrip .n{width:84px;flex:none;font-family:var(--dotfont);font-size:15px}
+#v-ops .opsstrip .n{width:84px;flex:none;font-family:var(--gothic);font-weight:700;font-size:15px;font-variant-numeric:tabular-nums}
 #v-ops .opsstrip .p{flex:1;font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-#v-ops .opsstrip .t{width:64px;flex:none;text-align:right;font-family:var(--dotfont);font-size:15px;border-right:0}
+#v-ops .opsstrip .t{width:64px;flex:none;text-align:right;font-family:var(--gothic);font-weight:700;font-size:15px;font-variant-numeric:tabular-nums;border-right:0}
 #v-ops .opsstrip small{display:block;font-family:var(--gothic);font-size:10px;color:var(--op-mute);font-weight:500}
 #v-ops .opsphoto ul{list-style:none;margin:10px 0 0;padding:0;display:flex;flex-direction:column;gap:8px}
 #v-ops .opsphoto li{display:flex;align-items:center;gap:12px;background:var(--op-pill);border-radius:14px;padding:10px 14px}
@@ -1633,7 +1633,7 @@ dialog.psheet .btn1,dialog.psheet .btn2{display:block;width:100%;margin-top:10px
 #v-ops .spsel .sees span{border-radius:8px;padding:4px 8px;font-size:11.5px;font-weight:700}
 #v-ops .spsel .sees .arr{background:#E0ECFF;color:#1D4ED8}#v-ops .spsel .sees .dep{background:#FDE8DC;color:#C2410C}
 #v-ops .spother{margin:8px 4px 0}
-#v-ops .splinks{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+#v-ops .splinks{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.splinks .linkbtn2{text-decoration:none;background:var(--op-pill,#EEF0F3);color:var(--op-ink,var(--ink));border-radius:999px;min-height:40px;padding:0 14px;font-size:12.5px}
 .vwcard{background:var(--vw-card);border-radius:22px;padding:14px 16px;box-shadow:var(--vw-shadow);color:var(--vw-ink)}
 .vwnote{font-size:11.5px;color:var(--vw-mute);line-height:1.6;margin:8px 2px 0}
 /* 図鑑：地図 */
@@ -1662,7 +1662,7 @@ dialog.psheet .btn1,dialog.psheet .btn2{display:block;width:100%;margin-top:10px
 /* 図鑑：年代記 */
 #v-book .bktl{position:relative;padding-left:4px}
 #v-book .bktl::before{content:"";position:absolute;left:61px;top:8px;bottom:8px;width:2px;background:var(--bk-track)}
-#v-book .bktl .yr{font:800 18px var(--mincho);color:var(--shu-text);margin:14px 0 8px}
+#v-book .bktl .yr{font:800 18px var(--gothic);color:var(--shu-text);margin:14px 0 8px}
 #v-book .bktl .yr:first-child{margin-top:2px}
 #v-book .bktl button{display:flex;align-items:center;gap:12px;width:100%;border:0;background:none;padding:5px 0;text-align:left;font-family:var(--gothic);color:var(--bk-ink)}
 #v-book .bktl .md{width:44px;flex:none;text-align:right;font-size:11px;color:var(--bk-mute)}
@@ -2950,8 +2950,8 @@ ${opt.big ? `<filter id="ink${id}"><feTurbulence type="fractalNoise" baseFrequen
 <circle cx="60" cy="60" r="54" stroke-width="4"/><circle cx="60" cy="60" r="47" stroke-width="1.2"/>
 ${tierRings(opt.tier || 0, col)}
 ${a.rare ? `<path d="M60 9l3 5h-6z" fill="${col}" stroke="none"/>` : ""}
-<text font-family="var(--mincho)" font-weight="700" font-size="${afs}" fill="${col}" stroke="none" letter-spacing="1"><textPath href="#arc${id}" startOffset="50%" text-anchor="middle">${arcName}</textPath></text>
-${opt.term ? `<text x="60" y="47" text-anchor="middle" font-family="var(--gothic)" font-weight="700" font-size="13" fill="${col}" stroke="none">${opt.term.tag}</text>` : ""}<text x="60" y="${opt.term?76:(c.length>2?72:73)}" text-anchor="middle" font-family="var(--mincho)" font-weight="800" font-size="${opt.term?27:fs}" fill="${col}" stroke="none" letter-spacing="1">${c}</text>
+<text font-family="var(--gothic)" font-weight="700" font-size="${afs}" fill="${col}" stroke="none" letter-spacing="1"><textPath href="#arc${id}" startOffset="50%" text-anchor="middle">${arcName}</textPath></text>
+${opt.term ? `<text x="60" y="47" text-anchor="middle" font-family="var(--gothic)" font-weight="700" font-size="13" fill="${col}" stroke="none">${opt.term.tag}</text>` : ""}<text x="60" y="${opt.term?76:(c.length>2?72:73)}" text-anchor="middle" font-family="var(--gothic)" font-weight="800" font-size="${opt.term?27:fs}" fill="${col}" stroke="none" letter-spacing="1">${c}</text>
 <line x1="30" y1="82" x2="90" y2="82" stroke-width="1"/>
 <text x="60" y="95" text-anchor="middle" font-family="var(--gothic)" font-weight="700" font-size="9" fill="${col}" stroke="none">${date}</text>
 </g></svg>`;
@@ -4266,7 +4266,7 @@ document.addEventListener("click", e => {
   const a = BY[+c.dataset.a], t = TBY[c.dataset.t];
   const first = visitedTerms().get(t.id), times = S.checkins.filter(x => x.term === t.id).length;
   $("dStampBody").innerHTML = `<div class="stampbig">${insigniaSVG(a, first, {big:true, term:t}, 0)}</div><h3>${placeName(a, t)}</h3><p>${a.pref}${a.rare?"・離島の空港":""}</p>
-  <p>はじめての訪問 ${fmtD(first)}　訪問 ${times}回</p><div class="row2"><button class="btn2" data-close>閉じる</button><button class="btn1" data-share-a="${a.id}" data-share-t="${t.id}" data-share-at="${first}">画像で共有</button></div>`;
+  <p>${first ? `はじめての訪問 ${fmtD(first)}　訪問 ${times}回` : "まだ行っていません"}</p><div class="row2"><button class="btn2" data-close>閉じる</button><button class="btn1" data-share-a="${a.id}" data-share-t="${t.id}" data-share-at="${first}">画像で共有</button></div>`;
   $("dStamp").showModal();
 });
 // 空港ページ：印・記章・階級・四季・ターミナル・訪問の記録・守り神・羽田の運用・写真・共有
@@ -4283,7 +4283,7 @@ function openAirport(id){
   b.innerHTML = `<div class="stampbig${dt ? " wide" : ""}">${insigniaSVG(a, first, {big:true, term:null}, dt)}</div>
   <h3>${a.name}</h3><p>${a.pref}${a.rare?"・離島の空港":""}${a.kind ? "・番外編" : ""}</p>
   <p class="marks">${SEASONS.map((x,i) => `<span class="mark${ss.has(i) ? " on" : " off"}">${x}</span>`).join("")}${ss.size === 4 ? `<span class="mark gold">四季がそろった</span>` : ""}</p>
-  <p>はじめての訪問 ${fmtD(first)}　訪問 ${times}回${visitTier(times) ? `　<span class="rankbadge">${visitTier(times)}</span>` : ""}</p>
+  <p>${first ? `はじめての訪問 ${fmtD(first)}　訪問 ${times}回` : "まだ行っていません"}${visitTier(times) ? `　<span class="rankbadge">${visitTier(times)}</span>` : ""}</p>
   <p class="hint">${dt < TOP ? `次の${RANKS[dt+1]}まであと${RANK_AT[dt+1] - times}回` : "最高の階級です"}</p>
   ${canNow(a) ? `<section class="apnow" id="apNow" aria-label="空港の今" hidden></section>` : ""}
   ${noticesHTML(a)}
@@ -5033,10 +5033,10 @@ document.addEventListener("click", async e => {
 async function passCard(y){
   try{ await document.fonts.ready; }catch(e){}
   const st = passStats(y), [cv, ctx] = cardBase(), laps = st.km / 40075;
-  ctx.textAlign = "left"; ctx.fillStyle = PAL.ink; ctx.font = `800 72px ${MINCHO}`; ctx.fillText(y === "all" ? "これまでのパスポート" : `${y}年のパスポート`, 80, 270);
+  ctx.textAlign = "left"; ctx.fillStyle = PAL.ink; ctx.font = `800 72px ${GOTHIC}`; ctx.fillText(y === "all" ? "これまでのパスポート" : `${y}年のパスポート`, 80, 270);
   const cells = [[String(st.n), "フライト"], [fmtKm(st.km), `km（地球 ${laps >= 10 ? Math.round(laps) : laps.toFixed(1)} 周ぶん）`], [passTime(st.mins), "飛行時間（推定）"], [`${st.aps}・${st.als}`, "空港・航空会社"]];
   cells.forEach(([n, u], i) => { const x = 80 + (i % 2) * 460, yy = 420 + Math.floor(i / 2) * 200;
-    ctx.fillStyle = PAL.ink; ctx.font = `800 ${n.length > 7 ? 64 : 84}px ${MINCHO}`; ctx.fillText(n, x, yy);
+    ctx.fillStyle = PAL.ink; ctx.font = `800 ${n.length > 7 ? 64 : 84}px ${GOTHIC}`; ctx.fillText(n, x, yy);
     ctx.fillStyle = PAL.sumi; ctx.font = `500 30px ${GOTHIC}`; ctx.fillText(u, x, yy + 50); });
   ctx.fillStyle = PAL.ink; ctx.font = `700 34px ${GOTHIC}`; let yy = 900;
   if(st.longest){ ctx.fillText(`いちばん長いフライト　${godShort(BY[st.longest.from])} → ${godShort(BY[st.longest.to])}　${fmtKm(st.longest.km)}km`, 80, yy); yy += 70; }
@@ -5050,10 +5050,10 @@ async function passCard(y){
 async function yearCard(y){
   try{ await document.fonts.ready; }catch(e){}
   const st = yearStats(y), [cv, ctx] = cardBase();
-  ctx.textAlign = "left"; ctx.fillStyle = PAL.ink; ctx.font = `800 72px ${MINCHO}`; ctx.fillText(`${y}年のまとめ`, 80, 270);
+  ctx.textAlign = "left"; ctx.fillStyle = PAL.ink; ctx.font = `800 72px ${GOTHIC}`; ctx.fillText(`${y}年のまとめ`, 80, 270);
   const cells = [[st.ap.size, "空港"], [st.fresh.length, "新しい空港"], [st.fs.length, "フライト"], [fmtKm(st.km), "km"]];
   cells.forEach(([n, u], i) => { const x = 80 + (i % 2) * 460, yy = 400 + Math.floor(i / 2) * 170;
-    ctx.fillStyle = PAL.ink; ctx.font = `800 84px ${MINCHO}`; ctx.fillText(String(n), x, yy);
+    ctx.fillStyle = PAL.ink; ctx.font = `800 84px ${GOTHIC}`; ctx.fillText(String(n), x, yy);
     ctx.fillStyle = PAL.sumi; ctx.font = `500 32px ${GOTHIC}`; ctx.fillText(u, x, yy + 48); });
   const max = Math.max(1, ...st.m.map(x => x.c)), bx = 80, by = 1020, bw = 920 / 12, bh = 260;
   st.m.forEach((x, i) => { const h = x.c / max * bh, hf = x.f / max * bh;
@@ -6546,7 +6546,7 @@ function tdOwn(ctx, x0, y0, W, f, center){
 async function tdCard(){
   try{ await document.fonts.ready; }catch(e){}
   const L = TD.last, [cv, ctx] = cardBase(), x = new Date(L.cur.day + "T00:00:00+09:00");
-  ctx.textAlign = "left"; ctx.fillStyle = PAL.ink; ctx.font = `800 64px ${MINCHO}`; ctx.fillText(`${placeShort(L.cur.iata)}の空`, 80, 250);
+  ctx.textAlign = "left"; ctx.fillStyle = PAL.ink; ctx.font = `800 64px ${GOTHIC}`; ctx.fillText(`${placeShort(L.cur.iata)}の空`, 80, 250);
   ctx.fillStyle = PAL.sumi; ctx.font = `500 32px ${GOTHIC}`;
   ctx.fillText(`${x.getFullYear()}年${x.getMonth() + 1}月${x.getDate()}日　${TD.tab === "flown" ? "あの日乗った便" : TD.tab === "first" ? "はじめて来た日" : "1年前の今日"}`, 80, 305);
   drawArt(ctx, 140, 340, 800, L.tracks, L.center); tdOwn(ctx, 140, 340, 800, L.cur.f, L.center);
@@ -6836,11 +6836,11 @@ async function renderYday(){
 async function ydayCard(d, iata){
   try{ await document.fonts.ready; }catch(e){}
   const [cv, ctx] = cardBase(), name = (OPS_AIRPORTS[iata] || {}).name || iata, dt = new Date(d.day + "T00:00:00+09:00");
-  ctx.textAlign = "left"; ctx.fillStyle = PAL.ink; ctx.font = `800 72px ${MINCHO}`; ctx.fillText(`昨日の${name}`, 80, 270);
+  ctx.textAlign = "left"; ctx.fillStyle = PAL.ink; ctx.font = `800 72px ${GOTHIC}`; ctx.fillText(`昨日の${name}`, 80, 270);
   ctx.fillStyle = PAL.sumi; ctx.font = `500 34px ${GOTHIC}`; ctx.fillText(`${dt.getFullYear()}年${dt.getMonth() + 1}月${dt.getDate()}日`, 80, 330);
   const cells = [[fmtKm(d.flights), "便"], [`${fmtKm(d.late)}`, `15分以上の遅れ（${d.flights ? Math.round(d.late / d.flights * 100) : 0}%）`], [String(d.cancelled), "欠航"], [d.avg_delay != null ? String(Math.round(d.avg_delay)) : "—", "遅れた便の平均（分）"]];
   cells.forEach(([n, u], i) => { const x = 80 + (i % 2) * 460, yy = 470 + Math.floor(i / 2) * 200;
-    ctx.fillStyle = PAL.ink; ctx.font = `800 84px ${MINCHO}`; ctx.fillText(n, x, yy); ctx.fillStyle = PAL.sumi; ctx.font = `500 30px ${GOTHIC}`; ctx.fillText(u, x, yy + 50); });
+    ctx.fillStyle = PAL.ink; ctx.font = `800 84px ${GOTHIC}`; ctx.fillText(n, x, yy); ctx.fillStyle = PAL.sumi; ctx.font = `500 30px ${GOTHIC}`; ctx.fillText(u, x, yy + 50); });
   const modes = ydayModes(d, iata), seg = ["#2563EB", "#F59E0B", "#10B981", "#8B5CF6", "#6B7280"];
   if(modes.length){ let x = 80; modes.forEach((m, i) => { const w = 920 * m.pct; ctx.fillStyle = seg[Math.min(i, seg.length - 1)]; ctx.fillRect(x, 930, Math.max(2, w - 4), 36); x += w; });
     ctx.fillStyle = PAL.ink; ctx.font = `600 30px ${GOTHIC}`; modes.slice(0, 3).forEach((m, i) => ctx.fillText(`${m.label}　${Math.round(m.min / 60 * 10) / 10}時間`, 80, 1030 + i * 50)); }
@@ -6960,7 +6960,7 @@ async function renderArt(day){
 async function artCard(){
   try{ await document.fonts.ready; }catch(e){}
   const def = OPS_AIRPORTS[ART.iata] || {}, [cv, ctx] = cardBase(), sh = artShown(), dep = sh.filter(t => t.dep).length, bl = artBandLabel();
-  ctx.textAlign = "left"; ctx.fillStyle = PAL.ink; ctx.font = `800 64px ${MINCHO}`; ctx.fillText(`${def.name || ART.iata}の空の道`, 80, 250);
+  ctx.textAlign = "left"; ctx.fillStyle = PAL.ink; ctx.font = `800 64px ${GOTHIC}`; ctx.fillText(`${def.name || ART.iata}の空の道`, 80, 250);
   ctx.fillStyle = PAL.sumi; ctx.font = `500 32px ${GOTHIC}`; const x = new Date(ART.day + "T00:00:00+09:00");
   ctx.fillText(`${x.getFullYear()}年${x.getMonth() + 1}月${x.getDate()}日${bl ? " " + bl : ""}　出発 ${dep}便・到着 ${sh.length - dep}便`, 80, 305);
   drawArt(ctx, 80, 350, 920, sh, def.center);
@@ -8553,7 +8553,7 @@ document.querySelectorAll("[data-focus]").forEach(b => b.onclick = () => { setFo
 document.addEventListener("click", e => { if(e.target.id === "focusOff") setFocus("ALL"); const t = e.target.closest("[data-title]"); if(t) setTitle(t.dataset.title); });
 document.querySelectorAll("[data-focus]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.focus === FOCUS)));
 setPalette(document.documentElement.getAttribute("data-palette") || "mono");
-const MINCHO = '"Shippori Mincho","Hiragino Mincho ProN","Yu Mincho",serif', GOTHIC = '"Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic UI","Yu Gothic","Meiryo","Noto Sans JP",sans-serif';
+const GOTHIC = '"Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic UI","Yu Gothic","Meiryo","Noto Sans JP",sans-serif';
 function circle(ctx, x, y, r){ ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI*2); ctx.stroke(); }
 function drawStamp(ctx, cx, cy, R, a, t, term){
   const k = R/54, col = a.kind === "mil" ? XCOL.mil : a.kind === "secret" ? XCOL.secret : a.kind === "glider" ? XCOL.glider : a.kind === "field" ? XCOL.field : a.rare ? PAL.gold : PAL.shu, c = code(a);
@@ -8562,13 +8562,13 @@ function drawStamp(ctx, cx, cy, R, a, t, term){
   ctx.lineWidth = 4*k; circle(ctx, 0, 0, 54*k); ctx.lineWidth = 1.2*k; circle(ctx, 0, 0, 47*k);
 
   const name = term ? `${term.short} ${term.name}` : a.name.replace("空港","");
-  ctx.font = `700 ${(name.length > 6 ? 9 : 10.5)*k}px ${MINCHO}`;
+  ctx.font = `700 ${(name.length > 6 ? 9 : 10.5)*k}px ${GOTHIC}`;
   const sp = 1*k, ws = [...name].map(ch => ctx.measureText(ch).width + sp), total = ws.reduce((x,y)=>x+y,0), rr = 38*k;
   let acc = 0;
   for(const [i, ch] of [...name].entries()){ const ang = -Math.PI/2 - total/rr/2 + (acc + ws[i]/2)/rr; acc += ws[i];
     ctx.save(); ctx.rotate(ang + Math.PI/2); ctx.fillText(ch, 0, -rr); ctx.restore(); }
   if(term){ ctx.font = `700 ${13*k}px ${GOTHIC}`; ctx.fillText(term.tag, 0, -13*k); }
-  ctx.font = `800 ${(term ? 27 : /[^\x00-\x7f]/.test(c) ? 22 : c.length > 3 ? 25 : (c.length > 2 ? 30 : 34))*k}px ${MINCHO}`;
+  ctx.font = `800 ${(term ? 27 : /[^\x00-\x7f]/.test(c) ? 22 : c.length > 3 ? 25 : (c.length > 2 ? 30 : 34))*k}px ${GOTHIC}`;
   ctx.fillText(c, 0, (term ? 16 : (c.length > 2 ? 12 : 13))*k);
   ctx.lineWidth = 1*k; ctx.beginPath(); ctx.moveTo(-30*k, 22*k); ctx.lineTo(30*k, 22*k); ctx.stroke();
   ctx.font = `700 ${9*k}px ${GOTHIC}`;
@@ -8580,7 +8580,7 @@ function cardBase(){
   const ctx = cv.getContext("2d"); ctx.fillStyle = PAL.sky; ctx.fillRect(0, 0, 1080, 1350);
   ctx.strokeStyle = PAL.shu; ctx.lineWidth = 7; circle(ctx, 104, 104, 30);
   ctx.fillStyle = PAL.shu; ctx.beginPath(); ctx.moveTo(84,112); ctx.lineTo(124,96); ctx.lineTo(114,121); ctx.lineTo(107,110); ctx.closePath(); ctx.fill();
-  ctx.fillStyle = PAL.ink; ctx.font = `800 50px ${MINCHO}`; ctx.textAlign = "left"; ctx.textBaseline = "middle"; ctx.fillText("そらメモ", 152, 106);
+  ctx.fillStyle = PAL.ink; ctx.font = `800 50px ${GOTHIC}`; ctx.textAlign = "left"; ctx.textBaseline = "middle"; ctx.fillText("そらメモ", 152, 106);
   ctx.textBaseline = "alphabetic";
   const tn = titleName(); if(tn){ ctx.textAlign = "right"; ctx.fillStyle = PAL.shu; ctx.font = `700 32px ${GOTHIC}`; ctx.fillText(`称号　${tn}`, 1000, 116); }
   return [cv, ctx];
@@ -8590,7 +8590,7 @@ function tallyLine(ctx, y){
   const items = [[`${v.size}`, `空港 / ${A.length}`], [`${r.size}`, "路線"], [fmtKm(k), "飛行距離 km"]];
   ctx.strokeStyle = PAL.line; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(80, y-90); ctx.lineTo(1000, y-90); ctx.moveTo(80, y+70); ctx.lineTo(1000, y+70); ctx.stroke();
   items.forEach(([n, u], i) => { const x = 80 + 920/6*(2*i+1); ctx.textAlign = "center";
-    ctx.fillStyle = PAL.ink; ctx.font = `800 64px ${MINCHO}`; ctx.fillText(n, x, y);
+    ctx.fillStyle = PAL.ink; ctx.font = `800 64px ${GOTHIC}`; ctx.fillText(n, x, y);
     ctx.fillStyle = PAL.sumi; ctx.font = `500 28px ${GOTHIC}`; ctx.fillText(u, x, y+44);
     if(i){ ctx.beginPath(); ctx.moveTo(80 + 920/3*i, y-90); ctx.lineTo(80 + 920/3*i, y+70); ctx.stroke(); } });
 }
@@ -8612,7 +8612,7 @@ async function stampCard(a, t, term){
     ctx.textAlign = "center"; ctx.fillStyle = PAL.gold; ctx.font = `700 34px ${GOTHIC}`; ctx.fillText(RANKS[tier], 540, end + 52);
     ny = end + 140; }
   else drawStamp(ctx, 540, 560, 330, a, t, term);
-  ctx.textAlign = "center"; ctx.fillStyle = PAL.ink; ctx.font = `800 ${placeName(a,term).length > 12 ? 52 : 64}px ${MINCHO}`;
+  ctx.textAlign = "center"; ctx.fillStyle = PAL.ink; ctx.font = `800 ${placeName(a,term).length > 12 ? 52 : 64}px ${GOTHIC}`;
   ctx.fillText(placeName(a, term), 540, ny);
   ctx.fillStyle = PAL.sumi; ctx.font = `500 32px ${GOTHIC}`;
   ctx.fillText(`${a.pref}　${fmtD(t)}${a.rare ? "　離島の空港" : ""}`, 540, ny + 56);
@@ -8667,9 +8667,9 @@ async function photoStamp(img, tg){
   ctx.textAlign = "left"; ctx.fillStyle = "#fff"; ctx.shadowColor = "rgba(0,0,0,.45)"; ctx.shadowBlur = m * 0.01;
   const title = f ? `${godShort(BY[f.from])} → ${godShort(BY[f.to])}` : placeName(a, term);
   const sub = f ? [fmtD(f.dep), `${fmtKm(f.km)}km`, f.no || ""].filter(Boolean).join("　") : [fmtD(tg.at || Date.now()), a.pref].join("　");
-  ctx.font = `800 ${big}px ${MINCHO}`; ctx.fillText(title, pad, h - pad - small * 1.9, cx - R * 1.3 - pad);
+  ctx.font = `800 ${big}px ${GOTHIC}`; ctx.fillText(title, pad, h - pad - small * 1.9, cx - R * 1.3 - pad);
   ctx.font = `600 ${small}px ${GOTHIC}`; ctx.fillText(sub, pad, h - pad - small * 0.4, cx - R * 1.3 - pad);
-  ctx.font = `800 ${Math.round(small * .9)}px ${MINCHO}`; ctx.globalAlpha = .9; ctx.fillText("そらメモ", pad, pad + small);
+  ctx.font = `800 ${Math.round(small * .9)}px ${GOTHIC}`; ctx.globalAlpha = .9; ctx.fillText("そらメモ", pad, pad + small);
   ctx.shadowBlur = 0; ctx.globalAlpha = 1;
   return cv;
 }
