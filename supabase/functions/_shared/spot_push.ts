@@ -4,12 +4,26 @@
 import { callsignsFor, flightOfCallsign, foreignFlightOf, normCallsign } from "./flight_watch.ts";
 
 export type SpotKind = "special" | "big" | "foreign" | "reg" | "ops";
-export type SpotSub = { id: number; spot_iata: string | null; spot_kinds: string[]; spot_lead: number; spot_regs: string[]; spot_flights: string[] };
+export type SpotSub = { id: number; spot_iata: string | null; spot_kinds: string[]; spot_lead: number; spot_regs: string[]; spot_flights: string[];
+  spot_fams?: string[] | null; spot_livs?: string[] | null };
 export type SpotPlane = { callsign: string | null; reg: string | null; type: string | null; phase: string; dist_km: number; kt: number | null; alt_ft: number | null };
 export type Livery = { name: string; kind?: string };
 
 // 大きな機体（ボーイング747・767・777・787、エアバスA330・A340・A350・A380）。ICAO の機種の記号
 export const BIG = /^(B7[4678]|A3[3458])/i;
+
+// 機種のまとまり（撮る人の「表示する機体」と同じ。アプリの SP_FAMS と同じ並び・同じ書き方にする）
+//   機種の記号は ICAO（B77W・B789・A359・A21N・E190・DH8D など）。時刻表の書き方（789・77W・Q4A など）も読めるように
+export const FAMS: [string, string, RegExp][] = [
+  ["777", "777", /^B?77[0-9A-Z]/i], ["787", "787", /^B?78[0-9A-Z]/i], ["767", "767", /^B?76[0-9A-Z]/i], ["747", "747", /^B?74[0-9A-Z]/i],
+  ["737", "737", /^(B?73[0-9A-Z]|B3[789]M)/i], ["A350", "A350", /^A?35[0-9K]/i], ["A330", "A330", /^A?33[0-9N]/i], ["A380", "A380", /^A?38[0-9]/i],
+  ["A320", "A320・A321", /^(A?3(19|20|21)|A[12][019]N|32[01N])/i], ["small", "小さな機体", /^(E1[79]0|E17|E19|E7|E75|E90|DH8|Q4|AT[4-7]|SF3|SB3|CRJ|DHC)/i],
+];
+export const famOf = (type: string | null | undefined): string | null => {
+  const t = String(type ?? "").trim().toUpperCase(); if (!t) return null;
+  const f = FAMS.find(([, , re]) => re.test(t)); return f ? f[0] : "other";
+};
+export const FAM_KEYS = [...FAMS.map(([k]) => k), "other"];
 
 // 着陸までの分（推定）：まっすぐの距離より少し長く飛ぶ（1.15倍）として、いまの対地速度で割る。速度が分からなければ180ノット
 export function etaMin(p: Pick<SpotPlane, "dist_km" | "kt">): number {
@@ -22,7 +36,7 @@ export const jstDate = (t = Date.now()) => new Date(t + 9 * 3600_000).toISOStrin
 
 // 知らせる理由（いちばん強いもの1つ）。知らせないなら null
 //   flight：「この便を知らせる」で選んだ便 / reg：指定した登録記号 / special：特別塗装機 / big：大きな機体 / foreign：海外の航空会社
-export function spotReason(p: SpotPlane, sub: SpotSub, livery: Livery | undefined, now = Date.now()): { why: "flight" | "reg" | "special" | "big" | "foreign"; label: string } | null {
+export function spotReason(p: SpotPlane, sub: SpotSub, livery: Livery | undefined, now = Date.now()): { why: "flight" | "reg" | "special" | "big" | "fam" | "foreign"; label: string } | null {
   if (p.phase !== "arr" || !p.callsign) return null;
   const cs = normCallsign(p.callsign), today = jstDate(now), k = new Set(sub.spot_kinds);
   for (const f of sub.spot_flights) {
@@ -30,8 +44,11 @@ export function spotReason(p: SpotPlane, sub: SpotSub, livery: Livery | undefine
     if (day === today && callsignsFor(no).includes(cs)) return { why: "flight", label: "知らせを選んだ便" };
   }
   if (p.reg && k.has("reg") && sub.spot_regs.includes(p.reg)) return { why: "reg", label: `指定した機体 ${p.reg}` };
-  if (livery && livery.kind !== "alliance" && k.has("special")) return { why: "special", label: `特別塗装機「${livery.name}」` };
+  if (livery && livery.kind !== "alliance" && (k.has("special") || (sub.spot_livs ?? []).includes(livery.name))) return { why: "special", label: `特別塗装機「${livery.name}」` };
   if (p.type && BIG.test(p.type) && k.has("big")) return { why: "big", label: "大きな機体" };
+  // 表示する機体と同じ選び方（機種のまとまり）で知らせる人
+  const fam = famOf(p.type);
+  if (fam && (sub.spot_fams ?? []).includes(fam)) { const f = FAMS.find(([key]) => key === fam); return { why: "fam", label: f ? f[1] : "選んだ機種" }; }
   if (foreignFlightOf(cs) && k.has("foreign")) return { why: "foreign", label: "海外の航空会社" };
   return null;
 }

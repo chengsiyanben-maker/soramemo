@@ -5,7 +5,7 @@ import { foreignFlightOf } from "./flight_watch.ts";
 
 export type LivePos = { callsign: string; lat: number; lon: number; alt_ft: number | null; ground: boolean; fpm: number | null; type?: string | null; reg?: string | null; seen_at: string };
 export type Route = { callsign: string; dep: string; arr: string };
-export type ForeignNow = { flight: string; airline: string; kind: "arr" | "dep"; other: string; status: "approach" | "landed" | "departed" | "ground"; alt_ft: number | null; type: string | null; km: number };
+export type ForeignNow = { flight: string; airline: string; kind: "arr" | "dep"; other: string; status: "approach" | "landed" | "departed" | "ground"; alt_ft: number | null; type: string | null; reg: string | null; km: number };
 
 export function kmBetween(a: { lat: number; lon: number }, b: { lat: number; lon: number }) {
   const r = Math.PI / 180, dl = (b.lat - a.lat) * r, dn = (b.lon - a.lon) * r;
@@ -47,7 +47,7 @@ export function classifyForeign(near: (LivePos & { flight: string; airline: stri
     const onGround = p.ground || (p.alt_ft != null && p.alt_ft < 200);
     if (onGround && p.km > 8) continue;
     const status = kind === "arr" ? (onGround ? "landed" : "approach") : (onGround ? "ground" : "departed");
-    out.push({ flight: p.flight, airline: p.airline, kind, other: kind === "arr" ? r.dep : r.arr, status, alt_ft: onGround ? null : p.alt_ft, type: p.type ?? null, km: Math.round(p.km) });
+    out.push({ flight: p.flight, airline: p.airline, kind, other: kind === "arr" ? r.dep : r.arr, status, alt_ft: onGround ? null : p.alt_ft, type: p.type ?? null, reg: p.reg ?? null, km: Math.round(p.km) });
   }
   return out;
 }

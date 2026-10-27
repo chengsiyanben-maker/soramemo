@@ -1,5 +1,5 @@
 import { assert, assertEquals } from "jsr:@std/assert@1";
-import { dueNow, etaMin, opsChanged, spotMessage, spotReason, type SpotSub } from "../functions/_shared/spot_push.ts";
+import { dueNow, etaMin, famOf, opsChanged, spotMessage, spotReason, type SpotSub } from "../functions/_shared/spot_push.ts";
 import { flightOfCallsign } from "../functions/_shared/flight_watch.ts";
 
 const sub = (o: Partial<SpotSub> = {}): SpotSub => ({ id: 1, spot_iata: "HND", spot_kinds: ["special", "big", "foreign", "reg"], spot_lead: 5, spot_regs: ["JA01XJ"], spot_flights: [], ...o });
@@ -40,4 +40,19 @@ Deno.test("運用の変化：前の2回と新しい2回がそれぞれそろっ�
   assertEquals(opsChanged(r("north", "north", "north", "north")), null);
   assertEquals(opsChanged(r("south", "south", null, "north")), null);
   assertEquals(opsChanged([{ obs_mode: "south", obs_mixed: true }, ...r("south", "north", "north")]), null);
+});
+
+Deno.test("機種のまとまり：ICAO の記号と時刻表の書き方の両方", () => {
+  const t = ["B77W", "77W", "B789", "789", "B763", "B744", "B738", "B38M", "A359", "A35K", "A333", "A388", "A320", "A21N", "321", "E190", "E75L", "DH8D", "Q4A", "AT76", "SF34", "C172", ""];
+  assertEquals(t.map(famOf), ["777", "777", "787", "787", "767", "747", "737", "737", "A350", "A350", "A330", "A380", "A320", "A320", "A320", "small", "small", "small", "small", "small", "small", "other", null]);
+});
+
+Deno.test("表示する機体と同じ選び方で知らせる：機種のまとまりと、1機ずつ選んだ特別塗装機", () => {
+  const s = sub({ spot_kinds: [], spot_regs: [], spot_fams: ["787", "small"], spot_livs: ["嵐ジェット"] });
+  assertEquals(spotReason({ ...plane, type: "B789" }, s, undefined, NOW), { why: "fam", label: "787" });
+  assertEquals(spotReason({ ...plane, type: "DH8D" }, s, undefined, NOW)?.label, "小さな機体");
+  assertEquals(spotReason(plane, s, undefined, NOW), null);   // 737 は選んでいない
+  assertEquals(spotReason(plane, s, { name: "嵐ジェット", kind: "special" }, NOW)?.why, "special");
+  assertEquals(spotReason(plane, s, { name: "ミッキー", kind: "special" }, NOW), null);   // 選んでいない塗装機
+  assertEquals(spotReason({ ...plane, type: "A359" }, sub({ spot_fams: undefined }), undefined, NOW)?.why, "big");   // 欄がない古い行もこれまでどおり
 });
