@@ -10,11 +10,13 @@ grant usage on schema public, auth to anon, authenticated, service_role; grant e
 for (const f of fs.readdirSync(dir).sort()) await db.exec(fs.readFileSync(dir + f, 'utf8'));
 let bad = 0; const check = (label, ok, v) => { console.log((ok ? 'OK ' : 'NG ') + label, ok ? '' : JSON.stringify(v)); if (!ok) bad++; };
 const q = async (sql) => (await db.query(sql)).rows[0];
-await db.query(`select public.reg_legs_touch($1::jsonb)`, [JSON.stringify([{ reg: 'JA801A', cs: 'ANA21', type: 'B788', at: new Date(Date.now() - 3600e3).toISOString() }, { reg: 'JA801A', cs: 'ANA21', type: null, at: new Date(Date.now() - 1800e3).toISOString() },
+// 日本時間で日付が変わった直後は、「1時間前」と「30分前」が別の日になる。そのときは前の日の夜の時刻で作る
+const jstMin = Math.floor((Date.now() + 9 * 3600e3) % 864e5 / 60e3), base = Date.now() - (jstMin < 70 ? (jstMin + 10) * 60e3 : 0);
+await db.query(`select public.reg_legs_touch($1::jsonb)`, [JSON.stringify([{ reg: 'JA801A', cs: 'ANA21', type: 'B788', at: new Date(base - 3600e3).toISOString() }, { reg: 'JA801A', cs: 'ANA21', type: null, at: new Date(base - 1800e3).toISOString() },
   { reg: 'JA4123', cs: 'JA4123', type: 'C172', at: new Date().toISOString() }])]);
 const l = await q(`select count(*)::int as n, min(type) as type, max(last_at) - min(first_at) as span from public.reg_legs`);
 check('便を足す（自家用機は残さない・最初と最後の時刻）', l.n === 1 && l.type === 'B788', l);
-await db.query(`select public.reg_legs_route($1::jsonb)`, [JSON.stringify([{ cs: 'ANA21', dir: 'dep', iata: 'HND', at: new Date(Date.now() - 3700e3).toISOString() }, { cs: 'ANA21', dir: 'arr', iata: 'ITM', at: new Date(Date.now() - 1700e3).toISOString() }])]);
+await db.query(`select public.reg_legs_route($1::jsonb)`, [JSON.stringify([{ cs: 'ANA21', dir: 'dep', iata: 'HND', at: new Date(base - 3700e3).toISOString() }, { cs: 'ANA21', dir: 'arr', iata: 'ITM', at: new Date(base - 1700e3).toISOString() }])]);
 const r = await q(`select dep, arr from public.reg_legs where reg = 'JA801A'`);
 check('出発と到着の空港', r.dep === 'HND' && r.arr === 'ITM', r);
 // 前の日々：ANA21 のあとに ANA30 が4回、ANA99 が1回

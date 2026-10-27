@@ -15,8 +15,8 @@ const ap = (await db.query(`select id from public.airports where iata = 'HND' li
 const as = async (uid, sql) => { await db.exec(`set request.jwt.claim.sub = '${uid ?? ''}'; set role ${uid ? 'authenticated' : 'anon'}`); try { return Object.values((await db.query(sql)).rows[0])[0]; } finally { await db.exec(`reset role; reset request.jwt.claim.sub`); } };
 if (ap) {
   await db.exec(`insert into public.checkins (user_id, airport_id, lat, lon, accuracy_m, position_at, created_at) values ('${A}', ${ap}, 35.55, 139.78, 10, now() - interval '2 hours', now() - interval '2 hours'), ('${B}', ${ap}, 35.55, 139.78, 10, now() - interval '9 hours', now() - interval '9 hours');
-    insert into public.reg_legs (reg, callsign, day, first_at, last_at, dep, arr) values ('JA01XJ', 'JAL1', (now() at time zone 'Asia/Tokyo')::date, now() - interval '3 hours', now() - interval '110 minutes', 'ITM', 'HND'),
-      ('JA02XJ', 'JAL2', (now() at time zone 'Asia/Tokyo')::date, now() - interval '6 hours', now() - interval '5 hours', 'HND', 'CTS')`);
+    insert into public.reg_legs (reg, callsign, day, first_at, last_at, dep, arr) values ('JA01XJ', 'JAL1', ((now() - interval '110 minutes') at time zone 'Asia/Tokyo')::date, now() - interval '3 hours', now() - interval '110 minutes', 'ITM', 'HND'),
+      ('JA02XJ', 'JAL2', ((now() - interval '5 hours') at time zone 'Asia/Tokyo')::date, now() - interval '6 hours', now() - interval '5 hours', 'HND', 'CTS')`);
   const a = await as(A, `select public.my_livery_seen(array['JA01XJ','JA02XJ'])`), b = await as(B, `select public.my_livery_seen(array['JA01XJ','JA02XJ'])`);
   check('見た：自分のチェックインの前後45分に着いた機体だけ', a.length === 1 && a[0].reg === 'JA01XJ' && a[0].iata === 'HND' && b.length === 0, { a, b });
 } else console.log('（空港の表が空なので、見たの確かめは飛ばす）');
