@@ -20,7 +20,8 @@ async def main():
         await pg.click('#flights .flight.tap >> nth=0'); await pg.wait_for_timeout(200)
         await pg.select_option('#fAirline', 'NH'); await pg.wait_for_timeout(100)
         opts = await pg.locator('#fFare option').count(); print('ANAの運賃の選択肢:', opts)
-        await pg.select_option('#fFare', index=3); await pg.click('#fSave'); await pg.wait_for_timeout(500)
+        await pg.click('#dFlight .flist2 button >> nth=3');   # 運賃の区分の札（座席はエコノミー）
+        await pg.click('#fSave'); await pg.wait_for_timeout(500)
         print('保存した運賃:', await pg.evaluate("JSON.stringify(window.__details)"))
         await pg.click('nav.tabs button[data-v=stats]')
         print('ステータス:', (await pg.inner_text('#statusBox')).replace('\n',' ')[:80])

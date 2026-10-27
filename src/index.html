@@ -739,6 +739,22 @@ div.viewsw>button[aria-selected="true"]{background:none;border-color:var(--vw-in
 [data-palette="board"] .fwraw summary,[data-palette="board"] .opsapbtn small,[data-palette="board"] .aprow small,[data-palette="board"] .otile.lock>b{color:var(--shu)}
 [data-palette="board"] .apcell[aria-current="true"]{background:var(--shu);border-color:var(--shu);color:#0A0E17}[data-palette="board"] .apcell{border-color:transparent;background:var(--s-bg)}
 .sgcond{background:#E7E9ED!important;border-radius:20px;padding:10px 12px 6px;margin:4px 0 12px;border:0!important}.sgcond .sg-card{background:#fff}.sgcond .sg-h{margin-top:10px}
+/* 運賃：座席のピルと区分 */
+.fseat{display:inline-flex;flex-wrap:wrap;background:var(--sky,#F4F4F4);border-radius:999px;padding:3px;gap:2px;margin:4px 0 6px}
+.fseat button{border:0;border-radius:999px;background:transparent;color:var(--sumi,#444);font:700 12.5px var(--gothic);padding:7px 13px;min-height:34px}
+.fseat button[aria-pressed="true"]{background:var(--ink,#222);color:var(--paper,#fff);font-weight:800}
+.sgd .fseat,.sgtab .fseat{background:var(--sg-bg)}.sgd .fseat button,.sgtab .fseat button{color:var(--sg-mute)}.sgd .fseat button[aria-pressed="true"],.sgtab .fseat button[aria-pressed="true"]{background:var(--sg-ink);color:var(--sg-card)}
+.flist2{display:flex;flex-direction:column;gap:6px;margin-top:4px}.flist2:empty{display:none}
+.flist2 button{display:flex;align-items:center;gap:10px;border:0;background:var(--sky,#F4F4F4);border-radius:14px;padding:10px 12px;text-align:left;color:var(--ink,#222);font-family:var(--gothic);min-height:48px}
+.flist2 button[aria-checked="true"]{background:var(--shu-wash,#EDEDED)}.flist2 .r{width:18px;height:18px;border-radius:50%;border:2px solid #9A9A9A;box-sizing:border-box;flex:none}.flist2 button[aria-checked="true"] .r{border:6px solid var(--ink,#222)}
+.flist2 .t{flex:1;min-width:0}.flist2 .t b{display:block;font-size:14px}.flist2 small{display:block;font-size:11px;color:var(--sumi,#6B6B6B)}.flist2 .n{text-align:right}.flist2 .n b{display:block;font-size:13px}
+.sgfare{margin-top:-4px}.sgfare select{flex:1 1 100%;min-width:0}.sgfh{margin:10px 0 0;font-size:12px;font-weight:800;color:var(--sg-ink)}
+.sgseg2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));background:var(--sg-card);border-radius:999px;padding:4px;gap:4px;margin-bottom:10px}
+.sgseg2 button{border:0;border-radius:999px;background:transparent;color:var(--sg-mute);font:700 14px var(--gothic);padding:11px 0;min-height:44px}.sgseg2 button[aria-pressed="true"]{background:var(--sg-ink);color:var(--sg-card);font-weight:800}
+.sgap{display:flex;flex-direction:column;gap:6px}.sgap>b{font-size:15px}.sgap small.t0{margin-top:8px}
+.sgaps{display:flex;flex-wrap:wrap;gap:6px;align-items:center}.sgaps span{display:inline-flex;align-items:center;gap:6px;background:var(--sg-bg);border-radius:999px;padding:5px 6px 5px 12px;font:700 12.5px var(--gothic)}
+.sgaps span.on{background:var(--sg-ink);color:var(--sg-card)}.sgaps span button{border:0;width:24px;height:24px;border-radius:50%;background:rgba(127,127,127,.25);color:inherit;font-size:12px}
+.sgaps .sgapadd{border:1.5px dashed #9A9A9A;background:transparent;border-radius:999px;padding:6px 10px;font:700 12.5px var(--gothic);color:var(--sg-ink);max-width:150px}
 /* 実績の確認 */
 .sgcf{background:var(--paper,#fff);border-radius:20px;padding:14px 16px;margin-bottom:10px;box-shadow:0 1px 3px rgba(0,0,0,.06);color:var(--ink,#111)}
 .sgtab .sgcf,.sgd .sgcf{background:var(--sg-card);color:var(--sg-ink)}
@@ -2203,7 +2219,7 @@ nav.tabs{transition:transform .3s cubic-bezier(.2,.8,.2,1),opacity .2s}
         <select id="mTo" aria-label="到着空港"></select>
       </div>
       <div class="row"><input type="date" id="mDate" aria-label="搭乗日"><select id="mAirline" aria-label="航空会社（任意）"></select></div>
-      <select id="mFare" aria-label="運賃（ステータスの目安の計算用）" hidden></select>
+      <div id="mFareSeat"></div><select id="mFare" aria-label="運賃（ステータスの目安の計算用）" hidden></select><div class="flist2" role="radiogroup" aria-label="運賃の区分"></div>
       <input id="mPrice" type="number" inputmode="numeric" min="0" step="100" placeholder="払った金額（円・任意）" aria-label="払った金額（円・任意）">
       <button class="btn2" id="mAdd">記録帳に追加</button>
       <p class="msg" id="mMsg" role="status" aria-live="polite"></p>
@@ -2345,7 +2361,7 @@ nav.tabs{transition:transform .3s cubic-bezier(.2,.8,.2,1),opacity .2s}
   <label class="flabel" for="fNo">便名（数字、わかれば）</label>
   <div class="fno"><span id="fPrefix"></span><input id="fNo" inputmode="numeric" autocomplete="off" maxlength="6" placeholder="例：501"></div>
   <p class="hint">共同運航便は、航空券に書かれた航空会社と便名で記録してください。</p>
-  <div id="fFareBox" hidden><label class="flabel" for="fFare">運賃（ステータスの目安の計算用）</label><select id="fFare"></select>
+  <div id="fFareBox" hidden><label class="flabel" for="fFare">運賃（ステータスの目安の計算用）</label><div id="fFareSeat"></div><select id="fFare" class="fsel2" hidden></select><div class="flist2" role="radiogroup" aria-label="運賃の区分"></div>
     <label class="flabel" for="fPrice">払った金額（任意・修行の予算と1ポイントあたりの計算用）</label><div class="fno"><input id="fPrice" type="number" inputmode="numeric" min="0" step="100" placeholder="例：38900"><span>円</span></div></div>
   <p class="hint" id="fSeat"></p>
   <p class="hint ffacts" id="fFacts" hidden></p>
@@ -3759,8 +3775,7 @@ function fillSelects(){
   $("demoAirport").value = "t:HND-T1";
   $("fAirline").innerHTML = airlineOptions("記録しない");
   $("mAirline").innerHTML = airlineOptions("航空会社（任意）");
-  const syncMFare = () => { const d = $("mDate").value, t = d ? Date.parse(d + "T12:00:00+09:00") : Date.now(), o = fareOptions($("mAirline").value, t, null);
-    $("mFare").hidden = !o; $("mFare").innerHTML = o; };
+  const syncMFare = () => { const d = $("mDate").value, t = d ? Date.parse(d + "T12:00:00+09:00") : Date.now(); fareSeatSync($("mAirline").value, t, null, "mFare"); $("mFare").hidden = true; };
   $("mAirline").onchange = syncMFare; $("mDate").onchange = syncMFare;
   $("mDate").max = new Date().toISOString().slice(0,10);
 }
@@ -3821,8 +3836,8 @@ document.addEventListener("click", e => { const b = e.target.closest("[data-cand
   document.querySelectorAll("[data-cand]").forEach(x => x.setAttribute("aria-pressed", String(x === b))); track("fcand_pick", no); });
 function syncPrefix(){ const v = $("fAirline").value; $("fPrefix").textContent = v && v !== "OT" ? v : "";
   $("fNo").placeholder = v === "OT" ? "例：ABC123" : "例：501"; $("fNo").inputMode = v === "OT" ? "text" : "numeric"; }
-function syncFare(){ const opts = editing ? fareOptions($("fAirline").value, editing.dep, editing.fare) : "";
-  $("fFareBox").hidden = !opts; $("fFare").innerHTML = opts; }
+function syncFare(){ const opts = editing ? fareSeatSync($("fAirline").value, editing.dep, editing.fare, "fFare") : "";
+  $("fFareBox").hidden = !opts; }
 $("fAirline").onchange = () => { syncPrefix(); syncFare(); };
 $("fCancel").onclick = () => $("dFlight").close();
 $("fSave").onclick = async () => {
@@ -5463,11 +5478,52 @@ function renderStatus(){
       <p class="hint goalline">JGC入会の基準（${fmtKm(JGC_LS)}）まで　あと <b>${fmtKm(Math.max(0, JGC_LS - st.ls))}</b></p><p class="hint">このアプリに記録した国内線の搭乗分（1搭乗5ポイント）だけを数えています。</p></div>
     <p class="stnote">各社の公開情報（2026年10月時点）をもとにした目安です。区間マイルは、JALが公開している国内線区間マイル表にある区間はその値を、ない区間は地図上の距離から計算しています。キャンペーンのボーナスは含みません。正式な数字は各社のサイトで確かめてください。運賃は、フライトを押すと選べます。</p>` + planHTML(y, st);
 }
+/* ---------- 運賃の選び方：座席と運賃の区分を分ける ----------
+   保存する中身（運賃の記号 "JAL:Y_SAVER" など）は変えない。座席をピルで選ぶと、その座席の区分だけが並ぶ。
+   元の select（値＝運賃の記号）はそのまま残すので、選んだあとの処理は今までどおり */
+function fareSeat(tb, id){ const r = FARES[tb] && FARES[tb].find(x => x[0] === id); if(!r) return null;
+  if(tb === "ANAO") return /^P1/.test(id) ? "プレミアムクラス" : "普通席";
+  const s = r[1].split("：")[0]; return tb === "ANA" && s === "ファースト" ? "プレミアムクラス" : s; }
+const fareSeats = tb => [...new Set(FARES[tb].map(r => fareSeat(tb, r[0])))];
+function fareParts(tb, id){ const r = FARES[tb].find(x => x[0] === id), t = r[1].includes("：") ? r[1].split("：").slice(1).join("：") : r[1], p = t.split("・");
+  return { name:p[0], sub:p.slice(1).join("・"), rate:r[2], bonus:r[3] }; }
+const fareTag = (tb, id) => { const f = fareParts(tb, id); return `${f.name}　${Math.round(f.rate * 100)}%・＋${f.bonus}`; };
+// その座席の区分の option（none：「選ばない」を先頭に）
+function fareSeatOpts(tb, seat, curId, none){
+  const head = none ? `<option value="">選ばない（${esc(fareSeat(tb, FARE_DEFAULT[tb]))}の${esc(fareParts(tb, FARE_DEFAULT[tb]).name)}として計算）</option>` : "";
+  return head + FARES[tb].filter(r => fareSeat(tb, r[0]) === seat).map(r => `<option value="${tb}:${r[0]}"${r[0] === curId ? " selected" : ""}>${esc(fareTag(tb, r[0]))}</option>`).join("");
+}
+// 座席のピル（target：運賃の select を指す CSS の書き方）
+const farePills = (tb, seat, target) => `<div class="fseat" role="group" aria-label="座席">${fareSeats(tb).map(s => `<button type="button" data-fseat="${esc(s)}" data-ftb="${tb}" data-ftarget="${esc(target)}" aria-pressed="${s === seat}">${esc(s)}</button>`).join("")}</div>`;
+// 区分を札で並べる（便の記録・記録帳。元の select は隠して、値だけを使う）
+function fareList(sel){
+  const box = sel && sel.nextElementSibling && sel.nextElementSibling.classList.contains("flist2") ? sel.nextElementSibling : null; if(!box) return;
+  box.innerHTML = [...sel.options].map(o => { const m = /^(\w+):(\w+)$/.exec(o.value), f = m ? fareParts(m[1], m[2]) : null;
+    return `<button type="button" role="radio" aria-checked="${o.selected}" data-flv="${esc(o.value)}"><span class="r" aria-hidden="true"></span><span class="t"><b>${esc(f ? f.name : o.textContent)}</b>${f && f.sub ? `<small>${esc(f.sub)}</small>` : ""}</span>${f ? `<span class="n"><b>${Math.round(f.rate * 100)}%</b><small>＋${f.bonus}</small></span>` : ""}</button>`; }).join("");
+}
+document.addEventListener("click", e => {
+  const b = e.target.closest && e.target.closest("[data-fseat]");
+  if(b){ const sel = document.querySelector(b.dataset.ftarget), tb = b.dataset.ftb; if(!sel) return;
+    const cur = /^\w+:(\w+)$/.exec(sel.value), curName = cur && FARES[tb].some(r => r[0] === cur[1]) ? fareParts(tb, cur[1]).name : null, seat = b.dataset.fseat;
+    const rows = FARES[tb].filter(r => fareSeat(tb, r[0]) === seat), pick = rows.find(r => curName && fareParts(tb, r[0]).name === curName) || rows[0];
+    sel.innerHTML = fareSeatOpts(tb, seat, pick[0], sel.dataset.fnone === "1"); sel.value = `${tb}:${pick[0]}`;
+    b.parentElement.querySelectorAll("[data-fseat]").forEach(x => x.setAttribute("aria-pressed", String(x === b)));
+    fareList(sel); sel.dispatchEvent(new Event("change", { bubbles:true })); return; }
+  const l = e.target.closest && e.target.closest("[data-flv]");
+  if(l){ const sel = l.parentElement.previousElementSibling; if(!sel) return; sel.value = l.dataset.flv; fareList(sel); sel.dispatchEvent(new Event("change", { bubbles:true })); }
+});
 function fareOptions(airline, t, current){
   const tb = fareTable(airline, t); if(!tb) return "";
+  const cur = current && current.startsWith(tb + ":") && FARES[tb].some(r => r[0] === current.slice(tb.length + 1)) ? current.slice(tb.length + 1) : "";
+  return fareSeatOpts(tb, fareSeat(tb, cur || FARE_DEFAULT[tb]), cur, true);
+}
+// 座席のピルと区分の select をそろえて出す（select の id をもらう）
+function fareSeatSync(airline, t, current, id){
+  const tb = fareTable(airline, t), sel = $(id), box = $(id + "Seat"); if(!sel) return "";
+  if(!tb){ if(box) box.innerHTML = ""; sel.innerHTML = ""; fareList(sel); return ""; }
   const cur = current && current.startsWith(tb + ":") ? current.slice(tb.length + 1) : "";
-  return `<option value="">選ばない（${FARES[tb].find(r => r[0] === FARE_DEFAULT[tb])[1].replace(/^.*：/, "")}として計算）</option>`
-    + FARES[tb].map(([id, label]) => `<option value="${tb}:${id}"${cur === id ? " selected" : ""}>${label}</option>`).join("");
+  sel.dataset.fnone = "1"; sel.innerHTML = fareOptions(airline, t, current); if(box) box.innerHTML = farePills(tb, fareSeat(tb, cur || FARE_DEFAULT[tb]), "#" + id); fareList(sel);
+  return sel.innerHTML;
 }
 
 
@@ -8174,7 +8230,10 @@ const sgBack = (to, label) => `<div class="sg-top"><button class="sg-back" data-
 const sgHead = (title, to = "main", label = "修行") => `${sgBack(to, label)}<h3>${title}</h3><span class="sg-sp" aria-hidden="true"></span></div>`;
 const sgSeg = (name, opts, cur) => `<div class="sg-seg" role="group">${opts.map(([v, l]) => `<button type="button" data-sg-set="${name}" data-v="${esc(String(v))}" aria-pressed="${String(cur) === String(v)}">${l}</button>`).join("")}</div>`;
 const sgApOpts = sel => A.filter(a => /^[A-Z]{3}$/.test(a.iata || "")).map(a => `<option value="${a.id}"${a.id === sel ? " selected" : ""}>${esc(placeShort(a.iata))}</option>`).join("");
-const sgFareOpts = (car, t, sel) => FARES[sgFareKey(car, t)].map(r => `<option value="${sgFareKey(car, t)}:${r[0]}"${sel === sgFareKey(car, t) + ":" + r[0] ? " selected" : ""}>${esc(r[1])}</option>`).join("");
+// 修行の画面の運賃：座席のピル（sgFarePills）と、その座席の区分の select（sgFareOpts）
+const sgFareId = (car, t, sel) => { const tb = sgFareKey(car, t); return sel && sel.startsWith(tb + ":") && FARES[tb].some(r => r[0] === sel.slice(tb.length + 1)) ? sel.slice(tb.length + 1) : FARE_DEFAULT[tb]; };
+const sgFareOpts = (car, t, sel) => { const tb = sgFareKey(car, t), id = sgFareId(car, t, sel); return fareSeatOpts(tb, fareSeat(tb, id), id, false); };
+const sgFarePills = (car, t, sel, target) => { const tb = sgFareKey(car, t); return farePills(tb, fareSeat(tb, sgFareId(car, t, sel)), target); };
 function sgBar(cur, add, goal){ const a = Math.min(100, cur / goal * 100), b = Math.min(100 - a, add / goal * 100);
   return `<div class="sg-bar"><i style="width:${a.toFixed(1)}%"></i><i class="p" style="left:${a.toFixed(1)}%;width:${b.toFixed(1)}%"></i></div>`; }
 const SG_TAG_A = `<span class="sgk a">実績</span>`, SG_TAG_P = `<span class="sgk p">予定</span>`, SG_TAG_C = `<span class="sgk c">計画</span>`;
@@ -8409,7 +8468,7 @@ function sgPlanner(){
     <div class="sg-card list">${trip.legs.map((l, i) => { const L = c.legs[i];
       return `<div class="sg-leg${i === SG_LEG ? " on" : ""}"><button class="n" data-sg-leg="${i}" type="button" aria-label="区間${i + 1}の運賃をくらべる">${i + 1}</button>
         <div class="b"><div class="sg-row2"><select data-sg-legf="${i}" aria-label="出発">${sgApOpts(l.from)}</select><span>→</span><select data-sg-legt="${i}" aria-label="到着">${sgApOpts(l.to)}</select></div>
-        <select data-sg-legfare="${i}" aria-label="運賃">${sgFareOpts(car, legT, l.fare)}</select><label class="sg-yen"><input type="number" inputmode="numeric" min="0" step="100" data-sg-legp="${i}" value="${l.price || ""}" placeholder="金額（任意）">円</label>
+        ${sgFarePills(car, legT, l.fare, `[data-sg-legfare="${i}"]`)}<select data-sg-legfare="${i}" aria-label="運賃の区分">${sgFareOpts(car, legT, l.fare)}</select><label class="sg-yen"><input type="number" inputmode="numeric" min="0" step="100" data-sg-legp="${i}" value="${l.price || ""}" placeholder="金額（任意）">円</label>
         <small>${L ? `${fmtKm(L.mi)}マイル${L.official ? "" : "（地図上の距離から）"}` : "この区間は計算できません"}</small></div>
         <div class="r"><b>${L ? fmtKm(L.pts) : "—"}</b><small>${unit}</small>${trip.legs.length > 1 ? `<button class="sg-x" data-sg-legdel="${i}" aria-label="この区間を消す" type="button">×</button>` : ""}</div></div>`; }).join("")}
       <div class="sg-sp2 pad"><button class="sg-a" data-sg-legadd type="button">＋ 区間を足す</button><button class="sg-a" data-sg-fareall type="button">運賃をそろえる</button></div></div>
@@ -8422,8 +8481,8 @@ function sgPlanner(){
       <div class="sg-2b"><button class="sg-btn ghost" data-sg-go="profile" type="button">会員情報</button><button class="sg-btn" data-sg-addtrip type="button" ${c.ok ? "" : "disabled"}>予定に入れる</button></div>
       ${SG_MSG ? `<p class="sg-msg">${esc(SG_MSG)}</p>` : ""}</div>
     <div class="sg-h"><b>運賃をくらべる</b><small>区間${SG_LEG + 1} ${esc(placeShort(BY[L0.from].iata))}→${esc(placeShort(BY[L0.to].iata))}</small></div>
-    <div class="sg-card list">${fares.map(x => `<div class="sg-li${x.code === L0.fare ? " sel" : ""}"><button class="sg-fare" data-sg-pickfare="${esc(x.code)}" type="button"><b>${esc(x.r[1].split("：").pop())}</b><small>${esc(x.r[1].split("：")[0])}・${Math.round(x.r[2] * 100)}%・搭乗 ${x.r[3]}${x === cheapest ? "" : ""}</small>${x === cheapest ? sgTag("いちばん安い", "#A9822E") : x.code === L0.fare ? sgTag("選んでいる", "#111827") : ""}</button>
-      <span class="r"><b>${fmtKm(x.L.pts)}</b><small>${unit}</small></span><label class="sg-yen s"><input type="number" inputmode="numeric" min="0" step="100" data-sg-fp="${esc(x.r[0])}" value="${x.pr || ""}" placeholder="金額" aria-label="${esc(x.r[1])}の金額">円</label><span class="r"><b>${x.yen != null ? x.yen + "円" : "—"}</b><small>1${unit}</small></span></div>`).join("")}
+    <div class="sg-card list">${(() => { const tbk = sgFareKey(car, legT); let last = null; return fares.slice().sort((a, b) => fareSeats(tbk).indexOf(fareSeat(tbk, a.r[0])) - fareSeats(tbk).indexOf(fareSeat(tbk, b.r[0]))).map(x => { const st = fareSeat(tbk, x.r[0]), fp = fareParts(tbk, x.r[0]), head = st !== last ? `<p class="sgfh">${esc(st)}</p>` : ""; last = st; return head + `<div class="sg-li${x.code === L0.fare ? " sel" : ""}"><button class="sg-fare" data-sg-pickfare="${esc(x.code)}" type="button"><b>${esc(fp.name)}</b><small>${fp.sub ? esc(fp.sub) + "・" : ""}${Math.round(x.r[2] * 100)}%・搭乗 ${x.r[3]}</small>${x === cheapest ? sgTag("いちばん安い", "#A9822E") : x.code === L0.fare ? sgTag("選んでいる", "#111827") : ""}</button>
+      <span class="r"><b>${fmtKm(x.L.pts)}</b><small>${unit}</small></span><label class="sg-yen s"><input type="number" inputmode="numeric" min="0" step="100" data-sg-fp="${esc(x.r[0])}" value="${x.pr || ""}" placeholder="金額" aria-label="${esc(x.r[1])}の金額">円</label><span class="r"><b>${x.yen != null ? x.yen + "円" : "—"}</b><small>1${unit}</small></span></div>`; }).join(""); })()}
       <p class="sg-note pad">運賃をタップすると、この区間の運賃が変わります。金額は自分で入れる目安です。</p></div>
     <p class="sg-foot">${car === "JAL" ? "JAL：区間マイル × 運賃の積算率 × 2 ＋ 搭乗ボーナス。回数は JAL グループ便の搭乗回数。" : "ANA：区間基本マイレージ × 運賃の積算率 × 2 ＋ 搭乗ポイント。"}各社の公開情報（2026年10月に確認）からの目安で、キャンペーンのボーナスは含みません。運賃の金額は自分で入れたもので、そらメモは航空会社のサイトから運賃を取りません。</p>`;
 }
@@ -8483,7 +8542,7 @@ function sgQuick(){
     <div class="sg-h"><b>あなたの場合</b><button class="sg-a" data-sg-go="profile" type="button">会員情報 ›</button></div>
     <div class="sg-card sgcond" role="group" aria-label="あなたの条件">${sgSeg("qcar", [["JAL", "JAL"], ["ANA", "ANA"]], mc)}
       <div class="sg-tags">${prof.filter(Boolean).map(x => `<span>${esc(x)}</span>`).join("") || `<span>会員情報が入っていません</span>`}</div>
-      <div class="sg-row2"><select id="sgQmf" aria-label="運賃">${sgFareOpts(mc, t, mine.fare)}</select><label class="sg-yen"><input type="number" inputmode="numeric" min="0" step="100" id="sgQmp" value="${mine.price || ""}" placeholder="金額">円</label></div></div>
+      <div class="sg-row2">${sgFarePills(mc, t, mine.fare, "#sgQmf")}<select id="sgQmf" aria-label="運賃の区分">${sgFareOpts(mc, t, mine.fare)}</select><label class="sg-yen"><input type="number" inputmode="numeric" min="0" step="100" id="sgQmp" value="${mine.price || ""}" placeholder="金額">円</label></div></div>
       ${ML ? `<div class="sg-card sg-res ${mc === "JAL" ? "rj" : "ra"}" aria-label="計算の結果"><div class="sg-break"><div><span>フライトマイル<small>${fmtKm(ML.mi)}マイル × ${Math.round(ML.fr.rate * 100)}%</small></span><b>${fmtKm(ML.fm * x2)}</b></div>
         ${ML.bonusPct ? `<div><span>${esc(ML.bonusWhy)}のボーナス ＋${ML.bonusPct}%<small>ステイタスとカードのボーナスは重ならず、多いほうだけ</small></span><b>+${fmtKm(ML.bonusMi * x2)}</b></div>` : ""}
         ${ML.payMi ? `<div><span>${mc}カードで払う<small>${sgYen(mine.price)}${mc === "JAL" ? "・JAL の航空券は2倍" : "・ANAカードマイルプラスとカードのポイント"}</small></span><b>+${fmtKm(ML.payMi * x2)}</b></div>` : ""}</div>
@@ -8540,7 +8599,7 @@ async function sgLoadTT(d, car){
   if(v) SG_TT.set(k, v); return v;
 }
 // 探す条件（端末かアカウントに保存）
-function sgPQ(){ const g = sgGet(), car = sgCar(); g.pq = Object.assign({ d:null, home:"HND", start:"05:30", end:"22:00", mode:"pts" }, g.pq || {}); if(!g.pq.d || g.pq.d < sgToday()) g.pq.d = sgToday(); g.pq.car = car; return g.pq; }
+function sgPQ(){ const g = sgGet(), car = sgCar(); g.pq = Object.assign({ d:null, home:"HND", start:"05:30", end:"22:00", mode:"pts", how:"auto", apmode:"any", via:[], avoid:[], fresh:false }, g.pq || {}); if(!g.pq.d || g.pq.d < sgToday()) g.pq.d = sgToday(); g.pq.car = car; return g.pq; }
 // 探すときの運賃：選んだもの、なければ計画の行程の運賃
 const sgFareNow = car => { const q = sgGet().pq, d = q && q.d ? sgDayT(q.d) : Date.now(), f = q && q.fare && q.fare[car];
   return f && f.startsWith(sgFareKey(car, d) + ":") ? f : sgTrip(car).legs[0].fare; };
@@ -8558,7 +8617,9 @@ function sgLatest(fl, car, home, end){
 // 行程を探す：家の空港を出て、決まりを守って乗り継ぎ、帰っていたい時刻までに家の空港へ戻る行程（6区間まで）
 function sgSolve(T, q, car, fare){
   const start = sgMin(q.start) ?? 330, end = sgMin(q.end) ?? 1320, home = q.home, extra = q.mode === "easy" ? 45 : 0, P = sgPtsOf(car, fare, q.d);
-  const fl = T.f.filter(f => f.d >= start && f.a <= end + 0), by = new Map(); for(const f of fl){ if(!by.has(f.dep)) by.set(f.dep, []); by.get(f.dep).push(f); }
+  // 行く空港：この空港だけで（選んだ空港と出発の空港のあいだだけ）・行かない空港（その空港を通る便を使わない）
+  const only = q.apmode === "only" && q.via.length ? new Set([home, ...q.via]) : null, avoid = new Set((q.avoid || []).filter(c => c !== home));
+  const fl = T.f.filter(f => f.d >= start && f.a <= end + 0 && !avoid.has(f.dep) && !avoid.has(f.arr) && (!only || (only.has(f.dep) && only.has(f.arr)))), by = new Map(); for(const f of fl){ if(!by.has(f.dep)) by.set(f.dep, []); by.get(f.dep).push(f); }
   const late = sgLatest(fl, car, home, end), out = new Map(); let nodes = 0;
   const walk = (ap, ready, legs, pts) => {
     if(++nodes > 250000 || legs.length >= 6) return;
@@ -8577,7 +8638,10 @@ function sgSolve(T, q, car, fare){
     return { ...r, n:r.legs.length, back:r.legs[r.legs.length - 1].a, minLay:lay.length ? Math.min(...lay) : 0, air:r.legs.reduce((x, f) => x + f.a - f.d, 0),
       yen:pr.every(Boolean) ? pr.reduce((x, y) => x + y, 0) : null, fresh:[...new Set(r.legs.map(f => f.arr))].filter(c => sgAp(c) && !vis.has(sgAp(c))) }; });
   const by2 = { pts:(a, b) => b.pts - a.pts || a.n - b.n || a.back - b.back, count:(a, b) => b.n - a.n || b.pts - a.pts, cheap:(a, b) => (a.yen != null ? a.yen / a.pts : 1e9) - (b.yen != null ? b.yen / b.pts : 1e9) || b.pts - a.pts, easy:(a, b) => b.pts - a.pts || b.minLay - a.minLay };
-  res.sort(by2[q.mode] || by2.pts);
+  // この空港に寄る：選んだ空港をすべて通る行程だけ
+  const need = q.apmode === "via" ? q.via : [];
+  if(need.length){ const ok = res.filter(r => need.every(c => r.legs.some(f => f.arr === c))); res.length = 0; res.push(...ok); }
+  res.sort((a, b) => (q.fresh ? b.fresh.length - a.fresh.length : 0) || (by2[q.mode] || by2.pts)(a, b));
   return { list:res.slice(0, 5), total:res.length, nodes, maxPts:Math.max(0, ...res.map(r => r.pts)), maxN:Math.max(0, ...res.map(r => r.n)) };
 }
 // 行程の名前：2つの空港を行き来するだけなら「羽田⇄那覇 2往復」
@@ -8589,23 +8653,34 @@ function sgDayBar(legs){ const x = m => Math.max(0, Math.min(100, (m - 300) / (1
   return `<div class="sgday" role="img" aria-label="乗っている時間：${legs.map(f => `${sgHM(f.d)}から${sgHM(f.a)}`).join("、")}">${legs.map(f => `<i style="left:${x(f.d).toFixed(1)}%;width:${Math.max(1.2, x(f.a) - x(f.d)).toFixed(1)}%"></i>`).join("")}</div>
     <div class="sgdayax" aria-hidden="true"><span>5時</span><span>12時</span><span>18時</span><span>24時</span></div>`; }
 let SG_FIND = null, SG_BUILD = null;
+// 「＋ 空港を足す」（選ぶと足す。出発の空港と、もう選んだ空港は出さない）
+const sgApAdd = (id, skip) => `<select id="${id}" class="sgapadd" aria-label="空港を足す"><option value="">＋ 空港を足す</option>${A.filter(a => /^[A-Z]{3}$/.test(a.iata || "") && !a.kind && !skip.includes(a.iata)).map(a => `<option value="${a.iata}">${esc(placeShort(a.iata))}</option>`).join("")}</select>`;
 const sgApSel = (id, sel) => `<select id="${id}" aria-label="空港">${A.filter(a => /^[A-Z]{3}$/.test(a.iata || "") && !a.kind).map(a => `<option value="${a.iata}"${a.iata === sel ? " selected" : ""}>${esc(placeShort(a.iata))}</option>`).join("")}</select>`;
 // P1：この日の行程を探す
 function sgFind(){
   const Y = sgYear(), car = sgCar(Y), q = sgPQ(), g = sgGet(), unit = car === "JAL" ? "FOP" : "PP";
   const drafts = (g.drafts || []).filter(x => x.d >= sgToday());
   return `${sgHead("計画を作る")}
-    <div class="sg-row">${sgSeg("car", [["ANA", "ANA"], ["JAL", "JAL"]], car)}<label class="sg-goal">運賃 <select id="sgPqF" aria-label="運賃">${sgFareOpts(car, sgDayT(q.d), sgFareNow(car))}</select></label></div>
+    <div class="sg-row">${sgSeg("car", [["ANA", "ANA"], ["JAL", "JAL"]], car)}</div>
+    <div class="sg-row sgfare">${sgFarePills(car, sgDayT(q.d), sgFareNow(car), "#sgPqF")}<select id="sgPqF" aria-label="運賃の区分">${sgFareOpts(car, sgDayT(q.d), sgFareNow(car))}</select></div>
+    <div class="sgseg2" role="group" aria-label="作り方">${[["auto", "自動で作る"], ["manual", "手動で作る"]].map(([k, l]) => `<button type="button" data-sg-set="phow" data-v="${k}" aria-pressed="${q.how === k}">${l}</button>`).join("")}</div>
+    ${q.how === "manual" ? `<div class="sg-card list">
+      <button class="sg-li tap" data-sg-build="" type="button"><span><b>時刻表から1区間ずつ組む</b><small>着いた空港から乗れる便を選んでつなぐ</small></span><b>›</b></button>
+      <button class="sg-li tap" data-sg-go="planner" type="button"><span><b>区間を入れて計算する</b><small>時刻表の出ていない先の日など</small></span><b>›</b></button></div>
+      <p class="sg-note">時刻表から組むときは、上の乗る日・出発して帰る空港・時刻を使います。</p>` : ""}
     <div class="sg-card sgq"><div class="sgq2">
       <label><small>乗る日</small><input type="date" id="sgPqD" value="${esc(q.d)}" min="${sgToday()}"></label>
       <label><small>出発して帰る空港</small>${sgApSel("sgPqH", q.home)}</label>
       <label><small>家を出られる</small><input type="time" id="sgPqS" value="${esc(q.start)}" step="300"></label>
       <label><small>帰っていたい</small><input type="time" id="sgPqE" value="${esc(q.end)}" step="300"></label></div>
-      <small class="t0">ねらい</small>${sgSeg("pmode", [["pts", "ポイント"], ["count", "回数"], ["cheap", "安さ"], ["easy", "ゆとり"]], q.mode)}</div>
+      ${q.how === "auto" ? `<small class="t0">ねらい</small>${sgSeg("pmode", [["pts", "ポイント"], ["count", "回数"], ["cheap", "安さ"], ["easy", "ゆとり"]], q.mode)}` : ""}</div>
+    ${q.how === "auto" ? `<div class="sg-card sgap"><b>行く空港</b>
+      <div class="sgsyr" role="radiogroup" aria-label="行く空港">${[["any", "おまかせ", "どこの空港でも、ねらいに合う行程を探す"], ["via", "この空港に寄る", "選んだ空港を必ず通る行程だけ"], ["only", "この空港だけで", "選んだ空港と出発の空港のあいだだけを行き来する"]].map(([k, l, d]) => `<button type="button" role="radio" data-sg-set="apmode" data-v="${k}" aria-checked="${q.apmode === k}"><b>${l}</b><small>${d}</small></button>`).join("")}</div>
+      ${q.apmode !== "any" ? `<small class="t0">選んだ空港</small><div class="sgaps">${q.via.map(c => `<span class="on">${esc(placeShort(c))}<button type="button" data-sg-apdel="via:${c}" aria-label="${esc(placeShort(c))}を外す">×</button></span>`).join("")}${sgApAdd("sgPqVia", [q.home, ...q.via, ...q.avoid])}</div>` : ""}
+      <small class="t0">行かない空港（任意）</small><div class="sgaps">${q.avoid.map(c => `<span>${esc(placeShort(c))}<button type="button" data-sg-apdel="avoid:${c}" aria-label="${esc(placeShort(c))}を外す">×</button></span>`).join("")}${sgApAdd("sgPqAvoid", [q.home, ...q.via, ...q.avoid])}</div>
+      <button class="sg-sw" type="button" role="switch" data-sg-pfresh aria-checked="${!!q.fresh}"><span><b>まだ行っていない空港を優先</b><small>新しい空港の印がもらえる行程を上に</small></span><i aria-hidden="true"></i></button></div>
     <div class="sg-h"><b class="hh">${SG_TAG_C}この日に組める行程</b><small id="sgFindN"></small></div>
-    <div id="sgFindRes"><p class="sg-note">${SERVER ? "時刻表を読んでいます…" : "時刻表から探すのは、サーバー版で使えます。下の「自分で1区間ずつ組む」から組めます。"}</p></div>
-    <button class="sg-link" data-sg-build="" type="button"><span><b>時刻表から1区間ずつ組む</b><small>便を選んでつなぐ</small></span><b>›</b></button>
-    <button class="sg-link" data-sg-go="planner" type="button"><span><b>自分で区間を入れて計算する</b><small>時刻表の出ていない先の日など</small></span><b>›</b></button>
+    <div id="sgFindRes"><p class="sg-note">${SERVER ? "時刻表を読んでいます…" : "時刻表から探すのは、サーバー版で使えます。「手動で作る」の「区間を入れて計算する」から組めます。"}</p></div>` : ""}
     ${drafts.length ? `<div class="sg-h"><b class="hh">${SG_TAG_C}残した案</b><button class="sg-a" data-sg-go="compare" type="button">${drafts.length}件をくらべる ›</button></div><div class="sg-card list">${drafts.map(x => `<div class="sg-li"><span class="d"><b>${sgMD(x.d)}</b><small>${sgWD(x.d)}</small></span><span><b>${esc(sgTripLabel(x.legs))}</b><small>${x.car}・+${fmtKm(x.pts)} ${x.car === "JAL" ? "FOP" : "PP"}・${sgHM(x.legs[0].d)}発</small></span><button class="sg-a" data-sg-draft="${esc(x.id)}" type="button">開く</button><button class="sg-x" data-sg-undraft="${esc(x.id)}" aria-label="この案を消す" type="button">×</button></div>`).join("")}</div>` : ""}
     <p class="sg-foot">時刻と機材は ANA・JAL の公式の時刻表から。${ODPT_CREDIT} 乗り継ぎは各社が決めている時間（ANA は羽田35分・伊丹と関西25分・那覇30分・ほか20分、JAL は羽田と那覇30分・ほか20分）より短い便を組みません。空席と運賃は航空会社のサイトでお確かめください。ポイントは各社の公開情報（2026年10月に確認）からの目安です。</p>`;
 }
@@ -8615,8 +8690,8 @@ async function sgFillFind(){
   if(!T){ box.innerHTML = `<p class="sg-note">時刻表を読めませんでした。電波のよい場所で、開き直してください。</p>`; return; }
   if(T.until && q.d > T.until){ box.innerHTML = `<p class="sg-note">${sgMD(q.d)}の時刻表は、まだ出ていません（${esc(T.until.slice(5).replace("-", "/"))}まで）。「自分で区間を入れて計算する」から組めます。</p>`; return; }
   const R = sgSolve(T, q, car, fare); SG_FIND = { q:{ ...q }, car, fare, R };
-  if($("sgFindN")) $("sgFindN").textContent = R.total ? `${R.total}通りから` : "";
-  if(!R.list.length){ box.innerHTML = `<p class="sg-note">この条件で、その日のうちに${esc(placeShort(q.home))}へ戻れる行程はありません。時刻か空港を変えてみてください。</p>`; return; }
+  if($("sgFindN")) $("sgFindN").textContent = R.total ? `${q.apmode === "via" && q.via.length ? q.via.map(placeShort).join("・") + "を通る " : q.apmode === "only" && q.via.length ? q.via.map(placeShort).join("・") + "だけで " : ""}${R.total}通り` : "";
+  if(!R.list.length){ box.innerHTML = `<p class="sg-note">この条件で、その日のうちに${esc(placeShort(q.home))}へ戻れる行程はありません。時刻か、行く空港の決め方を変えてみてください。</p>`; return; }
   box.innerHTML = R.list.map((r, i) => { const tag = r.pts === R.maxPts && (q.mode === "pts" || i === 0) ? "いちばんたまる" : r.n === R.maxN && R.list[0].n < R.maxN ? "回数がかせげる" : r.minLay >= 90 ? "ゆとりあり" : "";
     const acs = r.legs.map(f => f.ac).filter(Boolean), ac = acs.length ? [...new Set(acs)].slice(0, 2).join("・") : "";
     return `<button class="sg-card tap sgr" data-sg-res="${i}" type="button"><span class="sg-sp2"><b>${esc(sgTripLabel(r.legs))}</b>${tag ? `<em>${tag}</em>` : ""}</span>
@@ -8679,6 +8754,16 @@ document.addEventListener("click", async e => {
   if((b = t.closest("[data-sg-draft]"))){ const x = (g.drafts || []).find(y => y.id === b.dataset.sgDraft); if(!x) return;
     Object.assign(sgPQ(), { d:x.d, home:x.home, start:x.start, end:x.end }); g.car = x.car;
     SG_BUILD = { d:x.d, car:x.car, fare:x.fare, home:x.home, start:x.start, end:x.end, legs:x.legs.slice() }; SG_BF = "all"; sgGo("build"); await sgLoadTT(x.d, x.car); if(SG_PAGE === "build") sgKeep(() => {}); return; }
+});
+document.addEventListener("click", e => {
+  const t = e.target; if(!t.closest || !t.closest("#dShugyo, #v-sg")) return; let b;
+  if((b = t.closest("[data-sg-apdel]"))){ const [k, c] = b.dataset.sgApdel.split(":"), q = sgPQ(); q[k] = q[k].filter(x => x !== c); sgSave(); sgKeep(() => {}); return; }
+  if(t.closest("[data-sg-pfresh]")){ const q = sgPQ(); q.fresh = !q.fresh; sgSave(); sgKeep(() => {}); }
+});
+document.addEventListener("change", e => {
+  const t = e.target; if(!t.closest || !t.closest("#dShugyo, #v-sg") || !/^sgPq(Via|Avoid)$/.test(t.id || "") || !t.value) return;
+  const q = sgPQ(), k = t.id === "sgPqVia" ? "via" : "avoid", o = k === "via" ? "avoid" : "via";
+  q[k] = [...new Set([...q[k], t.value])].slice(0, 6); q[o] = q[o].filter(x => x !== t.value); sgSave(); sgKeep(() => {});
 });
 document.addEventListener("click", async e => { const b = e.target.closest && e.target.closest("[data-sg-undraft]"); if(!b) return; const g = sgGet(); g.drafts = (g.drafts || []).filter(x => x.id !== b.dataset.sgUndraft); await sgSave(); sgKeep(() => {}); });
 document.addEventListener("change", e => {
@@ -8867,7 +8952,7 @@ document.addEventListener("click", async e => {
   const go = t.closest("[data-sg-go]"); if(go){ sgGo(go.dataset.sgGo); return; }
   const g = sgGet();
   const set = t.closest("[data-sg-set]"); if(set){ const k = set.dataset.sgSet, v = set.dataset.v;
-    if(k === "car"){ g.car = v; SG_LEG = 0; sgSave(); } else if(k === "dir") SG_DIR = +v; else if(k === "qside") SG_QSIDE = v; else if(k === "qcar"){ SG_QCAR = v; SG_QF = "all"; } else if(k === "pmode"){ sgPQ().mode = v; sgSave(); }
+    if(k === "car"){ g.car = v; SG_LEG = 0; sgSave(); } else if(k === "dir") SG_DIR = +v; else if(k === "qside") SG_QSIDE = v; else if(k === "qcar"){ SG_QCAR = v; SG_QF = "all"; } else if(k === "pmode"){ sgPQ().mode = v; sgSave(); } else if(k === "phow"){ sgPQ().how = v; sgSave(); } else if(k === "apmode"){ sgPQ().apmode = v; sgSave(); }
     sgKeep(() => {}); return; }
   const rt = t.closest("[data-sg-route]"); if(rt){ SG_ROUTE = +rt.dataset.sgRoute; SG_DIR = 0; if(SG_PAGE !== "ops") sgGo("ops"); else sgKeep(() => {}); return; }
   const ur = t.closest("[data-sg-unroute]"); if(ur){ const cur = sgFavRoutes(sgYear()).slice(); cur.splice(+ur.dataset.sgUnroute, 1); g.routes = cur; SG_ROUTE = 0; await sgSave(); sgKeep(() => {}); return; }
@@ -9092,7 +9177,8 @@ function planHTML(y, st){
     <h4>あと何回</h4>
     <div class="quick" role="group" aria-label="よく使われる路線">${PLAN_QUICK.filter(([a, b]) => IATA[a] && IATA[b]).map(([a, b]) => `<button class="chip" data-plan-q="${a}-${b}" aria-pressed="${PLAN.from === IATA[a].id && PLAN.to === IATA[b].id}">${esc(placeShort(a))}⇄${esc(placeShort(b))}</button>`).join("")}</div>
     <div class="row"><select id="planFrom" aria-label="出発">${opt("f", PLAN.from)}</select><select id="planTo" aria-label="到着">${opt("t", PLAN.to)}</select></div>
-    <select id="planFare" aria-label="運賃">${fareOptions(car === "JAL" ? "JL" : "NH", t, PLAN.fare)}</select>
+    ${(() => { const tb = fareTable(car === "JAL" ? "JL" : "NH", t), cur = PLAN.fare && tb && PLAN.fare.startsWith(tb + ":") ? PLAN.fare.slice(tb.length + 1) : FARE_DEFAULT[tb]; return tb ? farePills(tb, fareSeat(tb, cur) || fareSeat(tb, FARE_DEFAULT[tb]), "#planFare") : ""; })()}
+    <select id="planFare" aria-label="運賃の区分" data-fnone="1">${fareOptions(car === "JAL" ? "JL" : "NH", t, PLAN.fare)}</select>
     <p>1区間 <b>${fmtKm(per)} ${unit}</b>（片道）</p>${need || ls ? `<ul class="fc">${need}${ls}</ul>` : `<p class="hint">すべての段階に届いています。</p>`}
     <label class="price">1区間の運賃<input id="planPrice" type="number" inputmode="numeric" min="0" step="100" placeholder="例 25000" value="${PLAN.price || ""}">円</label>
     ${unitCost ? `<p>${unit}単価 <b>${unitCost}円</b>（運賃 ÷ ${fmtKm(per)} ${unit}）</p>` : ""}${rel}
