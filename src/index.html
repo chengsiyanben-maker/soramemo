@@ -739,6 +739,20 @@ div.viewsw>button[aria-selected="true"]{background:none;border-color:var(--vw-in
 [data-palette="board"] .fwraw summary,[data-palette="board"] .opsapbtn small,[data-palette="board"] .aprow small,[data-palette="board"] .otile.lock>b{color:var(--shu)}
 [data-palette="board"] .apcell[aria-current="true"]{background:var(--shu);border-color:var(--shu);color:#0A0E17}[data-palette="board"] .apcell{border-color:transparent;background:var(--s-bg)}
 .sgcond{background:#E7E9ED!important;border-radius:20px;padding:10px 12px 6px;margin:4px 0 12px;border:0!important}.sgcond .sg-card{background:#fff}.sgcond .sg-h{margin-top:10px}
+/* 案をくらべる・年末までの道のり */
+.sgcmp{overflow-x:auto;padding:12px 10px}.sgcmp table{width:100%;border-collapse:collapse;font-size:12.5px}.sgcmp caption{text-align:left;font-size:11px;color:var(--sg-mute);padding:0 4px 8px}
+.sgcmp th,.sgcmp td{text-align:left;padding:8px 6px;vertical-align:top;min-width:84px}.sgcmp tbody th{font-weight:500;color:var(--sg-mute);min-width:72px}.sgcmp thead small{font-weight:500;white-space:normal}
+.sgcmp tbody tr:nth-child(even){background:var(--sg-bg)}.sgcmp b.pts{font-size:14px}
+.sgd .sg-card.plan2,.sgtab .sg-card.plan2{background:#E6EDF6;color:#16263D}.sg-card.plan2 small,.sg-card.plan2 .sg-note{color:#3D4F68}
+.sgeff{display:flex;justify-content:space-between;align-items:center;gap:8px;background:rgba(255,255,255,.8);border-radius:14px;padding:10px 12px;margin-top:8px;font-size:12.5px}
+.sgcmpb{display:flex;flex-direction:column;gap:8px;margin-top:12px}.sgcmpb>div{display:flex;align-items:center;gap:8px}.sgcmpb>div>b{width:40px;flex:none}.sgcmpb .sg-btn{margin-top:0;flex:1;background:#23406A;color:#fff}.sgcmpb .sg-btn.ghost{background:var(--sg-card);color:#23406A;border:1px solid #C9D6E8}
+.sg-hero.sm .v{font-size:30px}
+.sgroad .mh{display:block;font-size:15px}.sg-cal button.pp{background:#E9D6A6;color:#2B2414;font-weight:800}.sg-cal button.pd{background:#E6EDF6;color:#23406A;border:1.5px dashed #23406A;font-weight:800}
+.sgrrs{display:flex;flex-direction:column;gap:6px;margin-top:10px}.sgrr{display:flex;justify-content:space-between;gap:8px;border-radius:12px;padding:8px 10px;font-size:12.5px}
+.sgrr.p{background:#FBF6EC;color:#2B2414}.sgrr.p>b{color:#856620}.sgrr.c{background:#E6EDF6;color:#23406A}
+.sgrleg i{display:inline-block;width:12px;height:12px;border-radius:4px;margin-right:4px;vertical-align:-1px}.sgrleg i.pp{background:#E9D6A6}.sgrleg i.pd{background:#E6EDF6;border:1.5px dashed #23406A;box-sizing:border-box}.sgrleg i.fr{border:1.5px solid var(--sg-ink);border-radius:50%;box-sizing:border-box}
+.sgrc p{margin:4px 0 0;font-size:13px}.sglinks{margin-top:8px}.sglinks .sg-link{margin:0}
+[data-palette="board"] .sg-card.plan2,[data-palette="board"] .sgrr.c{background:#1A2436;color:#DCE6F5}[data-palette="board"] .sgrr.p{background:#2A2414;color:#F3E6C4}
 /* 計画を作る：時刻表から探す・組む */
 .sgq{display:flex;flex-direction:column;gap:6px}.sgq2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
 .sgq2 label{display:block;background:var(--sg-bg);border-radius:14px;padding:7px 10px}.sgq2 input,.sgq2 select{display:block;width:100%;box-sizing:border-box;border:0;background:transparent;color:var(--sg-ink);font:800 16px var(--gothic);padding:2px 0;min-height:30px}
@@ -8191,6 +8205,7 @@ function sgMain(){
     ${sgHero(car, Y, goal, note)}
     ${sgPlanBox(car, Y, goal)}
     <button class="sg-link big" data-sg-go="${SERVER ? "find" : "planner"}" type="button"><span><b>修行の計画を作る</b><small>行程・運賃くらべ・${car === "JAL" ? "回数の条件" : "届く日"}</small></span><b>›</b></button>
+    <div class="sg-2b sglinks"><button class="sg-link" data-sg-go="road" type="button"><span><b>年末までの道のり</b><small>予定・案・乗れる日</small></span><b>›</b></button><button class="sg-link" data-sg-go="compare" type="button"><span><b>案をくらべる</b><small>${sgDrafts(car).length}件</small></span><b>›</b></button></div>
     <div class="sg-h"><b class="hh">${SG_TAG_P}次に乗る便</b><button class="sg-a" data-sg-go="plan" type="button">予定と計画 ›</button></div>
     ${next ? `<button class="sg-card tap" data-sg-go="plan" type="button"><span class="sg-sp2"><span><small>${sgMD(next.d)}（${sgWD(next.d)}）${next.hm ? esc(next.hm) + "発" : ""}</small><b class="xl">${esc(placeShort(BY[next.from].iata))} → ${esc(placeShort(BY[next.to].iata))}</b><small>${esc(next.no || next.car)}・${esc(nextL ? nextL.fr.label.split("：").pop() : "")}</small></span>
       <span class="r"><small>この便で</small><b class="gold">+${nextL ? fmtKm(nextL.pts) : "—"}</b><small>${next.car === "JAL" ? "FOP" : "PP"}</small></span></span></button>`
@@ -8491,6 +8506,7 @@ const SG_MCT = { ANA:{ HND:35, ITM:25, KIX:25, OKA:30, _:20 }, JAL:{ HND:30, OKA
 const sgMct = (c1, c2, ap) => { const t = c1 === c2 ? SG_MCT[c1] : SG_MCT.X; return t[ap] ?? t._; };
 const sgMin = t => { const m = /^(\d{1,2}):(\d{2})$/.exec(t || ""); return m ? +m[1] * 60 + +m[2] : null; };
 const sgHM = m => `${m >= 1440 ? "翌" : ""}${Math.floor(m % 1440 / 60)}:${String(m % 60).padStart(2, "0")}`;
+const sgHM0 = m => `${Math.floor(m % 1440 / 60)}:${String(m % 60).padStart(2, "0")}`;   // 予定に入れる出発時刻（「翌」を付けない）
 const sgDur = m => m >= 60 ? `${Math.floor(m / 60)}時間${m % 60 ? String(m % 60).padStart(2, "0") + "分" : ""}` : `${m}分`;
 const sgAp = c => IATA[c] ? IATA[c].id : null;
 // その日の時刻表（日付・航空会社ごとに1回だけ読む）
@@ -8568,7 +8584,7 @@ function sgFind(){
     <div id="sgFindRes"><p class="sg-note">${SERVER ? "時刻表を読んでいます…" : "時刻表から探すのは、サーバー版で使えます。下の「自分で1区間ずつ組む」から組めます。"}</p></div>
     <button class="sg-link" data-sg-build="" type="button"><span><b>時刻表から1区間ずつ組む</b><small>便を選んでつなぐ</small></span><b>›</b></button>
     <button class="sg-link" data-sg-go="planner" type="button"><span><b>自分で区間を入れて計算する</b><small>時刻表の出ていない先の日など</small></span><b>›</b></button>
-    ${drafts.length ? `<div class="sg-h"><b class="hh">${SG_TAG_C}残した案</b><small>${drafts.length}件</small></div><div class="sg-card list">${drafts.map(x => `<div class="sg-li"><span class="d"><b>${sgMD(x.d)}</b><small>${sgWD(x.d)}</small></span><span><b>${esc(sgTripLabel(x.legs))}</b><small>${x.car}・+${fmtKm(x.pts)} ${x.car === "JAL" ? "FOP" : "PP"}・${sgHM(x.legs[0].d)}発</small></span><button class="sg-a" data-sg-draft="${esc(x.id)}" type="button">開く</button><button class="sg-x" data-sg-undraft="${esc(x.id)}" aria-label="この案を消す" type="button">×</button></div>`).join("")}</div>` : ""}
+    ${drafts.length ? `<div class="sg-h"><b class="hh">${SG_TAG_C}残した案</b><button class="sg-a" data-sg-go="compare" type="button">${drafts.length}件をくらべる ›</button></div><div class="sg-card list">${drafts.map(x => `<div class="sg-li"><span class="d"><b>${sgMD(x.d)}</b><small>${sgWD(x.d)}</small></span><span><b>${esc(sgTripLabel(x.legs))}</b><small>${x.car}・+${fmtKm(x.pts)} ${x.car === "JAL" ? "FOP" : "PP"}・${sgHM(x.legs[0].d)}発</small></span><button class="sg-a" data-sg-draft="${esc(x.id)}" type="button">開く</button><button class="sg-x" data-sg-undraft="${esc(x.id)}" aria-label="この案を消す" type="button">×</button></div>`).join("")}</div>` : ""}
     <p class="sg-foot">時刻と機材は ANA・JAL の公式の時刻表から。${ODPT_CREDIT} 乗り継ぎは各社が決めている時間（ANA は羽田35分・伊丹と関西25分・那覇30分・ほか20分、JAL は羽田と那覇30分・ほか20分）より短い便を組みません。空席と運賃は航空会社のサイトでお確かめください。ポイントは各社の公開情報（2026年10月に確認）からの目安です。</p>`;
 }
 async function sgFillFind(){
@@ -8623,7 +8639,7 @@ async function sgOpenBuild(legs){
   SG_BUILD = { d:q.d, car, fare:sgFareNow(car), home:q.home, start:q.start, end:q.end, legs:legs || [] }; SG_BF = "all";
   sgGo("build"); await sgLoadTT(q.d, car); if(SG_PAGE === "build") sgKeep(() => {});
 }
-const sgBuildLegs = B => B.legs.map(f => ({ from:sgAp(f.dep), to:sgAp(f.arr), fare:B.fare, price:sgPriceFor(B.car, sgAp(f.dep), sgAp(f.arr), B.fare.split(":")[1]), no:f.no, hm:sgHM(f.d) }));
+const sgBuildLegs = B => B.legs.map(f => ({ from:sgAp(f.dep), to:sgAp(f.arr), fare:B.fare, price:sgPriceFor(B.car, sgAp(f.dep), sgAp(f.arr), B.fare.split(":")[1]), no:f.no, hm:sgHM0(f.d) }));
 document.addEventListener("click", async e => {
   const t = e.target; if(!t.closest || !t.closest("#dShugyo, #v-sg")) return;
   const g = sgGet(); let b;
@@ -8649,7 +8665,95 @@ document.addEventListener("change", e => {
   const k = { sgPqD:"d", sgPqH:"home", sgPqS:"start", sgPqE:"end" }[t.id];
   if(t.value && (k !== "d" || t.value >= sgToday())) q[k] = t.value; sgSave(); sgKeep(() => {});
 });
-const SG_PAGES = { main:sgMain, plan:sgPlan, year:sgYearPage, ops:sgOps, routes:sgRoutesPage, planner:sgPlanner, budget:sgBudget, quick:sgQuick, profile:sgProfile, find:sgFind, build:sgBuild };
+/* ---------- 案をくらべる（P3）・年末までの道のり（P4） ----------
+   案は計画（うすい青）。実績・予定とは数字をまぜず、「いまの実績と予定に、案を1つ足したら」を一文の結論として出す（推定） */
+const sgDrafts = car => (sgGet().drafts || []).filter(x => x.d >= sgToday() && (!car || x.car === car)).sort((a, b) => a.d < b.d ? -1 : a.d > b.d ? 1 : a.legs[0].d - b.legs[0].d);
+const SG_ABC = "ABCDEFGHIJKLMNOPQRST";
+// 案の1区間ずつのポイント（届く日の計算に使う）
+function sgDraftItems(x){ const P = sgPtsOf(x.car, x.fare, x.d); return x.legs.map(f => ({ d:x.d, m:f.d, pts:P(f) })); }
+// 届く日：実績から、予定（と、足す案）を日付と時刻の順に足していく
+function sgReachWith(goal, Y, extra){
+  const car = goal.car; let F = Y[car].pts, N = Y[car].n;
+  const done = () => car === "ANA" ? F >= goal.pts : sgJalDone(goal.tier, F, N);
+  if(done()) return { already:true };
+  const items = sgFuture().filter(p => p.car === car && p.d.slice(0, 4) === String(Y.y)).map(p => { const L = sgPlanLeg(p); return { d:p.d, m:sgMin(p.hm) ?? 720, pts:L ? L.pts : 0 }; })
+    .concat((extra || []).filter(e => e.d.slice(0, 4) === String(Y.y))).sort((a, b) => a.d < b.d ? -1 : a.d > b.d ? 1 : a.m - b.m);
+  for(const it of items){ F += it.pts; N++; if(done()) return { d:it.d, F, N }; }
+  return { F, N };
+}
+function sgReachText(goal, r, unit){
+  if(r.already) return "実績で届いています";
+  if(r.d) return `${sgMD(r.d)}（${sgWD(r.d)}）に届く`;
+  const n = sgNeed(goal, r.F, r.N, 0, 0);
+  return `年内は届かない・あと ${fmtKm(n.left)}${goal.car === "JAL" && n.leftN ? `（回数の道ならあと${n.leftN}回）` : ""}`;
+}
+function sgDraftStat(x){ const P = sgPtsOf(x.car, x.fare, x.d), vis = visited();
+  const pr = x.legs.map(f => sgPriceFor(x.car, sgAp(f.dep), sgAp(f.arr), x.fare.split(":")[1])), yen = pr.every(Boolean) ? pr.reduce((a, b) => a + b, 0) : null, pts = x.legs.reduce((a, f) => a + P(f), 0);
+  return { pts, yen, per:yen && pts ? Math.round(yen / pts * 10) / 10 : null, air:x.legs.reduce((a, f) => a + f.a - f.d, 0), back:x.legs[x.legs.length - 1].a,
+    fresh:[...new Set(x.legs.map(f => f.arr))].filter(c => sgAp(c) && !vis.has(sgAp(c))) }; }
+function sgCompare(){
+  const Y = sgYear(), car = sgCar(Y), goal = sgGoal(car, Y), unit = car === "JAL" ? "FOP" : "PP", list = sgDrafts(car), other = sgDrafts().length - list.length;
+  if(!list.length) return `${sgHead("案をくらべる", "find", "探す")}<div class="sg-card"><p class="sg-note">${car}の残した案はまだありません。「計画を作る」で行程を組んで「案として残す」を押すと、ここでくらべられます。</p></div>
+    ${other ? `<p class="sg-note">ほかの航空会社の案が${other}件あります。上で航空会社を切り替えてください。</p>` : ""}<button class="sg-link" data-sg-go="find" type="button"><span><b>計画を作る</b><small>時刻表から探す</small></span><b>›</b></button>`;
+  const S2 = list.map(sgDraftStat), row = (label, f) => `<tr><th scope="row">${label}</th>${list.map((x, i) => `<td>${f(x, S2[i], i)}</td>`).join("")}</tr>`;
+  return `${sgHead("案をくらべる", "find", "探す")}
+    <div class="sg-row">${sgSeg("car", [["ANA", "ANA"], ["JAL", "JAL"]], car)}<small class="sg-goal">${SG_TAG_C}残した案（まだ予定ではありません）</small></div>
+    <div class="sg-card sgcmp"><table><caption>${list.length}つの案</caption><thead><tr><th scope="col"></th>${list.map((x, i) => `<th scope="col"><b>案${SG_ABC[i]}</b><small>${esc(sgTripLabel(x.legs))}</small></th>`).join("")}</tr></thead><tbody>
+      ${row("日", x => `${sgMD(x.d)}（${sgWD(x.d)}）`)}
+      ${row("区間", x => x.legs.length)}
+      ${row("この案の分", (x, s) => `<b class="pts">+${fmtKm(s.pts)}</b>`)}
+      ${row("金額", (x, s) => s.yen ? `${fmtKm(s.yen)}円` : "—")}
+      ${row(`1${unit}あたり`, (x, s) => s.per != null ? `<b>${s.per}円</b>` : "—")}
+      ${row("乗っている時間", (x, s) => sgDur(s.air))}
+      ${row("出発 → 帰り", (x, s) => `${sgHM(x.legs[0].d)} → ${sgHM(s.back)}`)}
+      ${row("新しい空港", (x, s) => s.fresh.length ? esc(s.fresh.map(placeShort).join("・")) : "—")}
+    </tbody></table></div>
+    <div class="sg-card plan2"><b>目標（${esc(goal.name)} ${fmtKm(goal.pts)}）への効き</b><small>いまの実績と予定に、案を1つ足したときの見込み（推定）</small>
+      ${list.map((x, i) => `<div class="sgeff"><b>案${SG_ABC[i]}</b><span>${sgReachText(goal, sgReachWith(goal, Y, sgDraftItems(x)), unit)}</span></div>`).join("")}</div>
+    <div class="sgcmpb">${list.map((x, i) => `<div><b>案${SG_ABC[i]}</b><button class="sg-btn" data-sg-d2plan="${esc(x.id)}" type="button">予定に入れる</button><button class="sg-btn ghost" data-sg-draft="${esc(x.id)}" type="button">開く</button><button class="sg-x" data-sg-undraft="${esc(x.id)}" aria-label="案${SG_ABC[i]}を消す" type="button">×</button></div>`).join("")}</div>
+    ${SG_MSG ? `<p class="sg-msg">${esc(SG_MSG)}</p>` : ""}
+    <p class="sg-foot">金額は自分で入れたものだけ。金額のない区間がある案は、1${unit}あたりを出していません。予定に入れた案は、案の一覧から消えて「予定」に移ります。</p>`;
+}
+// 年末までの道のり
+function sgRoad(){
+  const Y = sgYear(), car = sgCar(Y), goal = sgGoal(car, Y), unit = car === "JAL" ? "FOP" : "PP", g = sgGet(), today = sgToday();
+  const fut = sgFuture(), drafts = sgDrafts(car), byDay = new Map();
+  for(const p of fut){ if(!byDay.has(p.d)) byDay.set(p.d, []); byDay.get(p.d).push(p); }
+  const dDay = new Map(drafts.map((x, i) => [x.d, { x, i }])), free = new Set(g.days);
+  const now = new Date(sgDayT(today)), months = [];
+  for(let m = now.getMonth(); m < 12; m++) months.push(m);
+  const planLabel = ps => { const s = ps.slice().sort((a, b) => (sgMin(a.hm) ?? 720) - (sgMin(b.hm) ?? 720)), aps = s.map(p => BY[p.from].iata).concat(BY[s[s.length - 1].to].iata), u = [...new Set(aps)];
+    return u.length === 2 && s.length % 2 === 0 && aps[0] === aps[aps.length - 1] ? `${placeShort(u[0])}⇄${placeShort(u[1])} ${s.length / 2}往復` : aps.map(placeShort).join("→"); };
+  const monthHTML = m => { const y = Y.y, first = new Date(y, m, 1).getDay(), dim = new Date(y, m + 1, 0).getDate(), ym = `${y}-${String(m + 1).padStart(2, "0")}`;
+    let cal = ""; for(let i = 0; i < first; i++) cal += "<span></span>";
+    for(let d = 1; d <= dim; d++){ const ds = `${ym}-${String(d).padStart(2, "0")}`, wd = (first + d - 1) % 7, past = ds < today, pl = byDay.has(ds), dr = dDay.has(ds);
+      cal += `<button type="button" class="${pl ? "pp" : dr ? "pd" : free.has(ds) ? "fr" : ""}${wd === 0 ? " su" : wd === 6 ? " sa" : ""}" data-sg-day="${ds}" ${past ? "disabled" : ""} aria-pressed="${free.has(ds)}" aria-label="${m + 1}月${d}日${pl ? "・予定あり" : ""}${dr ? "・案あり" : ""}${free.has(ds) ? "・乗れる日" : ""}">${d}</button>`; }
+    const rows = [...byDay.keys()].filter(d => d.startsWith(ym)).sort().map(d => { const ps = byDay.get(d), pts = ps.filter(p => p.car === car).reduce((a, p) => { const L = sgPlanLeg(p); return a + (L ? L.pts : 0); }, 0);
+        return `<div class="sgrr p"><span><b>${+d.slice(8)}日</b>　${esc(planLabel(ps))}</span><b>${pts ? "+" + fmtKm(pts) : ps[0].car}</b></div>`; })
+      .concat(drafts.filter(x => x.d.startsWith(ym)).map(x => `<div class="sgrr c"><span><b>${+x.d.slice(8)}日</b>　案${SG_ABC[dDay.get(x.d).i]} ${esc(sgTripLabel(x.legs))}</span><b>+${fmtKm(sgDraftStat(x).pts)}</b></div>`)).join("");
+    const freeL = [...free].filter(d => d.startsWith(ym) && d >= today && !byDay.has(d) && !dDay.has(d)).sort().map(d => `${+d.slice(8)}日`);
+    return `<div class="sg-card sgroad"><b class="mh">${m + 1}月</b><div class="sg-cal h"><span class="su">日</span><span>月</span><span>火</span><span>水</span><span>木</span><span>金</span><span class="sa">土</span></div><div class="sg-cal">${cal}</div>
+      ${rows ? `<div class="sgrrs">${rows}</div>` : ""}${freeL.length ? `<p class="sg-note">乗れる日：${freeL.join("・")}</p>` : ""}</div>`; };
+  const r0 = sgReachWith(goal, Y, []), P = sgPlanSum(car, Y), next = [...free].filter(d => d >= today && !byDay.has(d) && !dDay.has(d)).sort()[0];
+  return `${sgHead("年末までの道のり")}
+    <div class="sg-row">${sgSeg("car", [["ANA", "ANA"], ["JAL", "JAL"]], car)}</div>
+    <div class="sg-hero sm"><div class="h"><span>${SG_TAG_A}きょうまで</span><span>目標 ${esc(goal.name)} ${fmtKm(goal.pts)}</span></div><div class="v">${fmtKm(Y[car].pts)}<small> ${unit}</small></div><p class="sg-note light">${r0.already ? "実績で届いています" : `あと ${fmtKm(sgNeed(goal, Y[car].pts, Y[car].n, 0, 0).left)}`}・記録した便だけ</p></div>
+    <p class="sg-leg sgrleg"><span><i class="pp"></i>予定</span><span><i class="pd"></i>案</span><span><i class="fr"></i>乗れる日（押して ○ をつける）</span></p>
+    ${months.map(monthHTML).join("")}
+    <div class="sg-card plan sgrc"><span class="hh">${SG_TAG_P}<b>予定だけなら</b></span><p>${P.n ? `${sgReachText(goal, r0, unit)}（予定の分 +${fmtKm(P.pts)}・推定）` : "予定の便はまだありません"}</p></div>
+    ${drafts.map((x, i) => `<div class="sg-card plan2 sgrc"><span class="hh">${SG_TAG_C}<b>予定に案${SG_ABC[i]}も足すと</b></span><p>${sgReachText(goal, sgReachWith(goal, Y, sgDraftItems(x)), unit)}（推定）</p></div>`).join("")}
+    <button class="sg-btn" data-sg-roadfind="${esc(next || "")}" type="button">${next ? `乗れる日（${sgMD(next)}）の案を作る` : "乗れる日から案を作る"}</button>
+    <p class="sg-foot">日付を押すと「乗れる日」の ○ がつきます。実績・予定・案は、数字をまぜずに別々に出します。</p>`;
+}
+document.addEventListener("click", async e => {
+  const t = e.target; if(!t.closest || !t.closest("#dShugyo, #v-sg")) return;
+  const g = sgGet(); let b;
+  if((b = t.closest("[data-sg-d2plan]"))){ const x = (g.drafts || []).find(y => y.id === b.dataset.sgD2plan); if(!x) return;
+    sgAddPlans(x.legs.map(f => ({ from:sgAp(f.dep), to:sgAp(f.arr), fare:x.fare, price:sgPriceFor(x.car, sgAp(f.dep), sgAp(f.arr), x.fare.split(":")[1]), no:f.no, hm:sgHM0(f.d) })), x.car, x.d);
+    g.drafts = g.drafts.filter(y => y.id !== x.id); SG_MSG = (await sgSave()) ? `${sgMD(x.d)}の予定に${x.legs.length}便入れました。` : SG_MSG; sgKeep(() => {}); return; }
+  if((b = t.closest("[data-sg-roadfind]"))){ if(!b.dataset.sgRoadfind){ SG_MSG = ""; return; } sgPQ().d = b.dataset.sgRoadfind; sgSave(); sgGo(SERVER ? "find" : "planner"); return; }
+});
+const SG_PAGES = { main:sgMain, plan:sgPlan, year:sgYearPage, ops:sgOps, routes:sgRoutesPage, planner:sgPlanner, budget:sgBudget, quick:sgQuick, profile:sgProfile, find:sgFind, build:sgBuild, compare:sgCompare, road:sgRoad };
 /* 修行の画面は2つの置き場所で同じものを出す：修行のタブ（下のタブに修行があるとき）と、窓（ないとき） */
 const sgTabOn = () => { const v = $("v-sg"); return !!v && v.classList.contains("on") && !$("dShugyo").open; };
 const sgCanTab = () => MODE === "rally" && loTabs().includes("sg");
