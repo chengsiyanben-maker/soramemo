@@ -192,3 +192,18 @@ Deno.test("着陸の時刻の推定は、最後に見た時刻より前になら
   const t = landingFrom({ lat: ap.lat, lon: ap.lon, alt_ft: 0, at: T0 }, ap, "B738");
   assertEquals(t >= T0, true);
 });
+
+Deno.test("寄り道：滑走路の使い方ごとの値があれば、いまの使い方の値を使う（分からなければ空港全体）", async () => {
+  const { setCalib, setModeCalib, arrExtra } = await import("../functions/_shared/flight_watch.ts");
+  setCalib([{ iata: "HND", taxi: 8, extra: 4 }]);
+  setModeCalib([{ iata: "HND", mode: "south", extra: 15 }, { iata: "HND", mode: "north", extra: 3 }], [{ iata: "HND", mode: "south" }]);
+  assertEquals(arrExtra("HND", 120), 15);
+  assertEquals(arrExtra("HND", 30), 7.5);   // 近いほど小さくするのは同じ
+  setModeCalib(null, [{ iata: "HND", mode: "north" }]);
+  assertEquals(arrExtra("HND", 120), 3);
+  setModeCalib(null, [{ iata: "HND", mode: "city" }]);   // まだ学んでいない使い方
+  assertEquals(arrExtra("HND", 120), 4);
+  setModeCalib(null, []);   // 使い方が分からない
+  assertEquals(arrExtra("HND", 120), 4);
+  setModeCalib([], []); setCalib([]);
+});
