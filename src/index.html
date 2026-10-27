@@ -384,6 +384,9 @@ dialog::backdrop{background:rgba(15,22,38,.55)}
 .pillrow{display:flex;gap:6px;margin:0 0 10px;flex-wrap:wrap}
 .pillrow.fares{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:4px}.pillrow.fares .cotab{min-width:0;padding:6px 0;font-size:11px;line-height:1.3;white-space:nowrap;border-radius:14px}
 .pillrow.fares .cotab small{display:block;font-size:10px;color:#8A909A;font-weight:500}.pillrow.fares .cotab.on small{color:inherit;opacity:.75}
+.legs{display:flex;flex-direction:column;gap:6px;margin:2px 0}.leg{display:grid;grid-template-columns:44px 1fr 92px 36px;align-items:center;gap:6px;font-size:12px}
+.leg .lt{font-weight:700}.leg .ld{color:#5F6672;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.leg .lb{display:flex;height:10px;border-radius:5px;background:#EEF0F3;overflow:hidden}.leg .lb i{display:block;height:10px}
+.leg .lb .b,.lgd.b{background:#1C4FA0}.leg .lb .l,.lgd.l{background:#8FB0E3}.leg .lp{text-align:right;font-weight:700}.lgd{display:inline-block;width:10px;height:10px;border-radius:3px;margin:0 3px -1px 0}
 .v3box.morning .mhd{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}.v3box.morning .mhd small{font-size:12px;color:#5F6672}
 .trb{background:#1F2329;color:#fff;border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:8px;margin-bottom:10px}
 .trb .trh{display:flex;gap:6px;flex-wrap:wrap}.trb .trt{font-size:20px;font-weight:900}.trb small{font-size:12px;opacity:.85}.trb small.dim{opacity:.65;font-size:11px}
@@ -4342,7 +4345,7 @@ function coFromServer(j){
       rodeOn:x.rode_on, flight:x.flight, boughtAt:Date.parse(x.bought_at), kind:x.kind || null})),
     sky:j.sky || {}, repPoints:+j.rep_points || 0, stars:+j.stars || 1, bought:+j.bought || 0, value:+j.value || 0,
     friendCode:j.friend_code || "", hideRank:!!j.hide_rank, friends:+j.friends || 0,
-    v3:!!j.v3, policy:j.policy || "fsc", premium:+j.premium || 0, sat:j.satisfaction == null ? 40 : +j.satisfaction, satMult:+j.sat_mult || 1, satParts:j.sat_parts || null, econ:j.econ || [], fares:j.fares || {}, meal:j.meal || "none", bag:j.bag || "free", troubles:j.troubles || [], autoTrouble:!!j.auto_trouble, morning:j.morning || null, home:j.home == null ? null : +j.home, homeSince:j.home_since || null, cargoRoutes:j.cargo_routes || [], cargo:j.cargo || [], pj:j.pj || [], jobs:j.jobs || [], subsidy:j.subsidy || [], small:j.small || [], plans:j.plans || {},
+    v3:!!j.v3, policy:j.policy || "fsc", premium:+j.premium || 0, sat:j.satisfaction == null ? 40 : +j.satisfaction, satMult:+j.sat_mult || 1, satParts:j.sat_parts || null, econ:j.econ || [], fares:j.fares || {}, meal:j.meal || "none", bag:j.bag || "free", troubles:j.troubles || [], autoTrouble:!!j.auto_trouble, morning:j.morning || null, legs:j.legs || {}, home:j.home == null ? null : +j.home, homeSince:j.home_since || null, cargoRoutes:j.cargo_routes || [], cargo:j.cargo || [], pj:j.pj || [], jobs:j.jobs || [], subsidy:j.subsidy || [], small:j.small || [], plans:j.plans || {},
     facilities:Object.fromEntries(Object.entries(j.facilities || {}).map(([k, v]) => [+k, +v]))}; }
 // 端末だけの版（お試し・サーバーなし）：同じ形の状態を、端末の記録から作る
 let CO_LOCAL = null;
@@ -4643,6 +4646,18 @@ document.addEventListener("click", async e => {
 });
 // v3 の旅客の路線（お客さん・取り合い・便数・もうけ）
 const KIND_JA = {resort:"リゾート", intl:"国際線", big:"大きい空港どうし", local:"地方"};
+// 便ごとの搭乗率（おまかせのスケジュール。仕事の客は朝夕、旅行の客は昼に多い）
+const hhmm = m => `${String(Math.floor(m / 60) % 24).padStart(2, "0")}:${String(m % 60).padStart(2, "0")}`;
+function legsHtml(k){
+  const L = (CO.legs || {})[k]; if(!L || !L.length) return "";
+  const pct = x => +x.seats ? Math.round((+x.biz + +x.lei) / +x.seats * 100) : 0, avg = Math.round(L.reduce((a, x) => a + pct(x), 0) / L.length);
+  const low = L.reduce((m, x) => pct(x) < pct(m) ? x : m, L[0]);
+  return `<small class="lbl" style="margin-top:8px">便ごとの搭乗率（1日${L.length}便・平均 ${avg}%）</small>
+    <div class="legs">${L.map(x => { const w = v => `${Math.min(100, +v / +x.seats * 100).toFixed(1)}%`;
+      return `<div class="leg"><span class="lt">${hhmm(x.t)}</span><span class="ld">${esc(apNm(x.f))}→${esc(apNm(x.to))}</span>
+        <span class="lb" aria-hidden="true"><i class="b" style="width:${w(x.biz)}"></i><i class="l" style="width:${w(x.lei)}"></i></span><span class="lp">${pct(x)}%</span></div>`; }).join("")}</div>
+    <p class="hint" style="margin:4px 0 6px"><i class="lgd b"></i>仕事の客 <i class="lgd l"></i>旅行の客 ・ いちばん空いているのは ${hhmm(low.t)} の便（${pct(low)}%）。いまは「おまかせ」で 6:30〜23:30 に並べています。</p>`;
+}
 // 運賃の5段階（路線ごと、1日1回）。ほかの会社の段も見える（会社名は出さない）
 const FARE_LV = [[-2, "とても安い", "×0.7"], [-1, "安い", "×0.85"], [0, "普通", "×1.0"], [1, "高い", "×1.2"], [2, "とても高い", "×1.4"]];
 function fareHtml(k){
@@ -4669,6 +4684,7 @@ function routeV3Html(r, e, ac){
         <div class="v3stats"><div><small>この路線のお客さん</small><b>${fmtKm(Math.round(+e.demand))}<i>人/日</i></b></div><div><small>自社に乗った人</small><b>${fmtKm(Math.round(+e.carried))}<i>人</i></b></div><div><small>取り合い</small><b>${+e.n || 1}<i>社</i></b></div></div>
         ${row(`路線の種類`, KIND_JA[e.kind] || "")}${row("本物の便（前の28日の1日あたり）", e.real == null ? "なし" : `${fmtNum(+e.real, 1)}便`)}
         ${row("自社の取り分", `${share}%`)}${["fsc", "mcc"].includes(CO.policy) ? row("仕事の客の運賃（仕事の客が多い路線ほど高い）", `+${Math.round(Math.min(0.2, Math.max(0, ((BIZ_SHARE[e.kind] ?? 0.45) - 0.3) / 0.3 * 0.2)) * 100)}%`) : ""}${+e.p_seats ? row(`上級席（${fmtKm(Math.round(+e.p_seats))}席）`, `${fmtKm(Math.round(+e.p_pax))}人`) : ""}
+        ${legsHtml(r.k)}
         ${fareHtml(r.k)}
         ${row("収益", fmtKm(Math.round(+e.revenue)))}${row("運航の費用", `−${fmtKm(Math.round(+e.cost))}`, "neg")}${row("着陸料", `−${fmtKm(Math.round(+e.landing))}`, "neg")}${+e.congestion ? row("混雑料", `−${fmtKm(Math.round(+e.congestion))}`, "neg") : ""}
         ${row("もうけ", `${pf >= 0 ? "+" : "−"}${fmtKm(Math.round(Math.abs(pf)))}`, pf >= 0 ? "pos" : "neg")}
