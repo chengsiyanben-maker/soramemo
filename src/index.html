@@ -390,10 +390,11 @@ dialog::backdrop{background:rgba(15,22,38,.55)}
 .wave{display:flex;flex-direction:column;gap:6px;margin:2px 0 4px}.wax{display:flex;justify-content:space-between;font-size:10px;color:#8A909A;margin-left:64px}
 .wv{display:grid;grid-template-columns:58px 1fr;gap:6px;align-items:center}.wv .wr{font-size:11px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .wv .wt{position:relative;height:14px;border-radius:7px;background:#F4F5F7}.wv .wt i{position:absolute;top:2px;height:10px;border-radius:5px}
-.wv .wt i.o,.wlg i.o{background:#8FB0E3}.wv .wt i.d,.wlg i.d{background:#FFB547}.wv .wt i.x,.wlg i.x{background:#fff;border:2px solid #C8432B;box-sizing:border-box}.wv .wt i.g{background:transparent;border:1px dashed #B9BEC6;box-sizing:border-box}
+.wv .wt i.o,.wlg i.o{background:#8FB0E3}.wv .wt i.d,.wlg i.d{background:#FFB547}.wv .wt i.x,.wlg i.x{background:#fff;border:2px solid #C8432B;box-sizing:border-box}.wv .wt i.x.b{background:#F3D2CB}.wv .wt i.g{background:transparent;border:1px dashed #B9BEC6;box-sizing:border-box}
 .wlg{display:flex;gap:12px;font-size:11px;color:#5F6672;margin-left:64px}.wlg i{display:inline-block;width:14px;height:8px;border-radius:4px;margin-right:4px;vertical-align:middle}
 .v3stats.rt{grid-template-columns:repeat(4,minmax(0,1fr))}
 .v3box.morning .mhd{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}.v3box.morning .mhd small{font-size:12px;color:#5F6672}
+.ride em.brk{display:block;font-style:normal;font-size:12px;font-weight:700;color:#A3531F;margin:2px 0}.ride em.brk.sp{color:#1C4FA0}
 .trb{background:#1F2329;color:#fff;border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:8px;margin-bottom:10px}
 .trb .trh{display:flex;gap:6px;flex-wrap:wrap}.trb .trt{font-size:20px;font-weight:900}.trb small{font-size:12px;opacity:.85}.trb small.dim{opacity:.65;font-size:11px}
 .tag.warn{background:#FFB547;color:#1F2329}.tag.ghost{background:transparent;color:#fff;border:1px solid rgba(255,255,255,.35)}
@@ -4351,7 +4352,7 @@ function coFromServer(j){
       rodeOn:x.rode_on, flight:x.flight, boughtAt:Date.parse(x.bought_at), kind:x.kind || null})),
     sky:j.sky || {}, repPoints:+j.rep_points || 0, stars:+j.stars || 1, bought:+j.bought || 0, value:+j.value || 0,
     friendCode:j.friend_code || "", hideRank:!!j.hide_rank, friends:+j.friends || 0,
-    v3:!!j.v3, policy:j.policy || "fsc", premium:+j.premium || 0, sat:j.satisfaction == null ? 40 : +j.satisfaction, satMult:+j.sat_mult || 1, satParts:j.sat_parts || null, econ:j.econ || [], fares:j.fares || {}, meal:j.meal || "none", bag:j.bag || "free", troubles:j.troubles || [], autoTrouble:!!j.auto_trouble, morning:j.morning || null, legs:j.legs || {}, rating:j.rating == null ? null : +j.rating, ratingHave:j.rating_have || null, home:j.home == null ? null : +j.home, homeSince:j.home_since || null, cargoRoutes:j.cargo_routes || [], cargo:j.cargo || [], pj:j.pj || [], jobs:j.jobs || [], subsidy:j.subsidy || [], small:j.small || [], plans:j.plans || {},
+    v3:!!j.v3, policy:j.policy || "fsc", premium:+j.premium || 0, sat:j.satisfaction == null ? 40 : +j.satisfaction, satMult:+j.sat_mult || 1, satParts:j.sat_parts || null, econ:j.econ || [], fares:j.fares || {}, meal:j.meal || "none", bag:j.bag || "free", troubles:j.troubles || [], autoTrouble:!!j.auto_trouble, morning:j.morning || null, legs:j.legs || {}, rating:j.rating == null ? null : +j.rating, breakdowns:j.breakdowns || [], ratingHave:j.rating_have || null, home:j.home == null ? null : +j.home, homeSince:j.home_since || null, cargoRoutes:j.cargo_routes || [], cargo:j.cargo || [], pj:j.pj || [], jobs:j.jobs || [], subsidy:j.subsidy || [], small:j.small || [], plans:j.plans || {},
     facilities:Object.fromEntries(Object.entries(j.facilities || {}).map(([k, v]) => [+k, +v]))}; }
 // 端末だけの版（お試し・サーバーなし）：同じ形の状態を、端末の記録から作る
 let CO_LOCAL = null;
@@ -4475,6 +4476,8 @@ function renderFleet(){
   if(CO_TAB === "have"){
     $("coFleet").innerHTML = fl.length ? fl.map(a => { const ok = rs.filter(r => r.minSize >= ACB[a.type].minSize && (!r.intl || a.intl)), liv = a.reg && LIVERY_NAMES[a.reg];
       return `<div class="ride have${liv ? " liv" : ""}">${acSVG(a.type)}<div class="rd"><b>${esc(a.reg || "名前のない機体")}</b><span>${esc(acTypeName(a.icao) || "")}（${ACB[a.type].name}）${a.intl ? "・国際線" : ""}</span>${liv ? `<em>★ ${esc(liv)}</em>` : ""}
+        ${(() => { const today = jstToday(), b = (CO.breakdowns || []).find(x => x.ac_id === a.id && String(x.start) <= today && String(x.end) >= today), sp = (CO.breakdowns || []).find(x => x.spare_id === a.id && String(x.end) >= today);
+          return b ? `<em class="brk">故障で運休中（${esc(String(b.end).slice(5).replace("-", "/"))}まで）・${b.spare_reg ? `予備機 ${esc(b.spare_reg)} が代わりに飛んでいます` : "予備機がないので、この路線は欠航"}</em>` : sp ? `<em class="brk sp">予備機として ${esc(sp.reg || "")} の代わりに飛んでいます</em>` : ""; })()}
         <small>${a.rodeOn ? `${esc(String(a.rodeOn).slice(5).replace("-", "/"))} ${esc(a.flight || "")} で乗った・` : ""}買って ${Math.floor((Date.now() - a.boughtAt) / 864e5)}日${a.age < 1 ? `・古さ −${Math.round((1 - a.age) * 100)}%` : ""}・維持費 −${fmtKm(a.upkeep)}/日</small></div>
         <select data-assign="${a.id}" aria-label="${esc(a.reg || "名前のない機体")}の路線"><option value="">路線に入れない</option>${ok.map(r => `<option value="${r.k}"${a.route === r.k ? " selected" : ""}>${esc(rName(r))}${r.acId && r.acId !== a.id ? "（交代）" : ""}</option>`).join("")}</select>
         <button class="linkbtn2" data-sell="${a.id}">売る（${yen(a.sell)}）</button></div>`; }).join("")
@@ -4612,8 +4615,8 @@ function renderV3(){
       <p style="margin:0 0 8px">毎日 深夜3時に、目標値へ少しずつ近づきます（あしたは <b>${step >= 0 ? "+" : "−"}${fmtNum(Math.abs(step), 1)}</b>）。</p>
       <div class="v3row"><span>お客さんへの効き目（60から5離れるごとに ±1%）</span><b>${eff > 0 ? "+" : eff < 0 ? "−" : "±"}${Math.abs(eff)}%</b></div></div>
     ${tgt == null ? "" : `<div class="v3box"><h3>目標値の中身</h3><div class="v3row"><span>基本</span><b>${fmtNum(+sp.base || 50, 0)}</b></div>
-      ${part("新しい機体（会社に入れて90日まで）の割合 ×6", +sp.new_share)}${part("機体の古さ", +sp.aging)}${part("席を詰める", +sp.packed)}${part("方針の補正", +sp.policy_adj)}${part("機内食", +sp.meal)}${part("預ける荷物", +sp.bag)}${part("トラブルの対応（前の30日）", +sp.response)}</div>`}
-    <p class="hint">始まりは40です。定時率は、便の時刻ができたら目標値に入ります。</p>`;
+      ${part("新しい機体（会社に入れて90日まで）の割合 ×6", +sp.new_share)}${part("機体の古さ", +sp.aging)}${part("席を詰める", +sp.packed)}${part("方針の補正", +sp.policy_adj)}${part("機内食", +sp.meal)}${part("預ける荷物", +sp.bag)}${part("トラブルの対応（前の30日）", +sp.response)}${sp.ontime_rate != null ? `<div class="v3row"><span>定時率（前の30日、会社のせいの欠航だけ） ${Math.round(+sp.ontime_rate * 100)}%</span><b>${+sp.ontime > 0 ? "+" : +sp.ontime < 0 ? "−" : "±"}${Math.abs(+sp.ontime)}</b></div>` : ""}${part("自分のせいの欠航（故障）", +sp.own_cxl)}</div>`}
+    <p class="hint">始まりは40です。定時率と自分のせいの欠航は、故障が起きる格付け3から数えます。</p>`;
 }
 // 本拠地（チェックインした空港から）と上級席の割合（FSC 0・10・20・30%、ミドルコスト 0・10%）
 function v3HomeHtml(){
@@ -4705,13 +4708,16 @@ function waveHtml(W){
   if(!W || !W.length) return "";
   const X = m => Math.max(0, Math.min(100, (m - 360) / 1080 * 100));
   const rows = W.map(w => `<div class="wv"><span class="wr">${esc(w.reg || "機体")}</span><span class="wt">${w.legs.map(l => {
-      const t0 = l.t + (l.s === "delay" ? +l.d : 0), cls = l.s === "cxl" ? "x" : l.s === "delay" ? "d" : "o";
+      const t0 = l.t + (l.s === "delay" ? +l.d : 0), cls = l.s === "cxl" ? (l.why === "breakdown" ? "x b" : "x") : l.s === "delay" ? "d" : "o";
       return `${l.s === "delay" ? `<i class="g" style="left:${X(l.t)}%;width:${X(l.t + l.blk) - X(l.t)}%"></i>` : ""}<i class="${cls}" style="left:${X(t0)}%;width:${Math.max(1, X(t0 + l.blk) - X(t0))}%" title="${hhmm(l.t)} ${esc(apNm(l.f))}→${esc(apNm(l.to))}"></i>`; }).join("")}</span></div>`).join("");
   const notes = W.map(w => { const g = w.legs, out = [], who = esc(w.reg || "機体");
     const first = g.find(l => l.s === "delay" && !+l.c);
     if(first){ const tail = g.filter(l => l.n > first.n && +l.c > 0).pop();
       out.push(`${hhmm(first.t)}発 ${esc(apNm(first.f))}→${esc(apNm(first.to))} が${first.d}分遅れ（本物の便の遅れ）${tail ? `、折り返しの余裕が足りず ${hhmm(tail.t)}発まで続いた` : "、次の便までに吸収した"}`); }
-    g.filter(l => l.s === "cxl").forEach(l => out.push(`${hhmm(l.t)}発 ${esc(apNm(l.f))}→${esc(apNm(l.to))} は欠航（本物の便の欠航から）`));
+    const bk = g.filter(l => l.s === "cxl" && l.why === "breakdown");
+    if(bk.length) out.push(`機体の故障で ${bk.length}便が欠航（予備機があれば飛べた）`);
+    g.filter(l => l.s === "cxl" && l.why !== "breakdown").forEach(l => out.push(`${hhmm(l.t)}発 ${esc(apNm(l.f))}→${esc(apNm(l.to))} は欠航（本物の便の欠航から）`));
+    if(g.some(l => l.spare)) out.push("故障した機体の代わりに予備機が飛んだ");
     return out.length ? `${who}：${out.join("。")}。` : ""; }).filter(Boolean);
   return `<small class="lbl" style="margin-top:6px">遅れの波（きのう）</small>
     <div class="wave"><div class="wax"><span>6時</span><span>12時</span><span>18時</span><span>24時</span></div>${rows}
@@ -4771,9 +4777,9 @@ function troubleHtml(){
   const card = t => { const sel = TR_SEL[t.id] || ((t.fits || [])[0]) || "transfer", god = Date.parse(t.god_until) - now, left = Date.parse(t.deadline) - now, gs = Date.parse(t.god_until) - Date.parse(t.created_at);
     const pct = god > 0 ? Math.max(0, Math.min(100, (1 - god / gs) * 100)) : 100, rName2 = opsRoute(t.k) || t.k, day = String(t.day).slice(5).replace("-", "/");
     const isLeg = t.leg != null, dl = t.kind === "delay", dt = t.dep_at ? new Date(t.dep_at) : null, dhm = dt ? `${String((dt.getUTCHours() + 9) % 24).padStart(2, "0")}:${String(dt.getUTCMinutes()).padStart(2, "0")}` : "";
-    return `<div class="trb"><div class="trh"><em class="tag warn">${dl ? `遅れ 約${t.delay_min}分` : "欠航"}</em><em class="tag ghost">${dl ? "本物の便の遅れから" : "本物の欠航から"}（理由は分かりません）</em></div>
+    return `<div class="trb"><div class="trh"><em class="tag warn">${dl ? `遅れ 約${t.delay_min}分` : "欠航"}</em><em class="tag ghost">${t.cause === "breakdown" ? "機体の故障（会社のせい）" : `${dl ? "本物の便の遅れから" : "本物の欠航から"}（理由は分かりません）`}</em></div>
       <b class="trt">${isLeg ? `${esc(dhm)}発 ${esc(apNm(t.dep))} → ${esc(apNm(t.arr))}` : esc(rName2)}</b>
-      <small>${isLeg ? (dl ? `前後の本物の便が遅れています（前の便からの遅れも含む）・ 1便の収益の10%が減ります` : `同じ時間の本物の便 ${t.real_n}便のうち ${t.real_cxl}便が欠航 ・ この便の収益は0です`)
+      <small>${isLeg ? (dl ? `前後の本物の便が遅れています（前の便からの遅れも含む）・ 1便の収益の10%が減ります` : t.cause === "breakdown" ? `機体が故障して、予備機もないため欠航 ・ この日のこの路線の便はすべて収益0です` : `同じ時間の本物の便 ${t.real_n}便のうち ${t.real_cxl}便が欠航 ・ この便の収益は0です`)
         : `${esc(day)}（きのう） 自社 ${t.flights}便のうち ${t.cancelled}便が欠航 ・ 本物の便は ${t.real_n + t.real_cxl}便のうち ${t.real_cxl}便が欠航`}</small>
       <div class="trbar"><i><u style="width:${pct}%"></u></i><span>${god > 0 ? `神対応まで あと${mins(god)}` : `対応できるのは あと${mins(left)}`}</span></div>
       <small class="dim">対応できるのは6時間。はじめの1時間に合うカードを使うと「神対応」</small></div>
