@@ -52,6 +52,7 @@ async def main():
         d = await pg.evaluate("__fake.db.shugyo_prefs[0] && __fake.db.shugyo_prefs[0].data")
         check('会員情報がサーバーに保存される:', d and d['jal']['status'] == 'sapphire' and d['jal']['card'] == 'cluba' and d['jal']['pay'] is True)
         await pg.click('#dShugyo .sg-back'); await pg.wait_for_timeout(200)
+        await pg.click('#dShugyo [data-ftarget="#sgQmf"][data-fseat="クラスJ"]'); await pg.wait_for_timeout(200)   # 座席を選んでから区分
         await pg.select_option('#sgQmf', 'JAL:J_FLEX'); await pg.fill('#sgQmp', '52000'); await pg.dispatch_event('#sgQmp', 'change'); await pg.wait_for_timeout(300)
         t = await pg.inner_text('#dShugyo .sg-res.rj'); print('MINE', t.replace('\n', ' | '))
         check('あなたの場合：1,082 ＋ サファイア105% 1,136 ＋ 支払い 1,040 ＝ 3,258:', '1,082' in t and '+1,136' in t and '+1,040' in t and '3,258' in t and '2,564' in t)

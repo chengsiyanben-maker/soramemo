@@ -23,7 +23,8 @@ async def main():
         # フライトの画面で運賃を選ぶ
         await pg.click('#flights .flight.tap >> nth=2'); await pg.wait_for_timeout(200)
         print('運賃の選択肢:', await pg.locator('#fFare option').count(), '| 選択中:', await pg.evaluate("$('fFare').value"), '| 座席:', await pg.inner_text('#fSeat'))
-        await pg.select_option('#fFare', 'JAL:Y_FLEX'); await pg.click('#fSave'); await pg.wait_for_timeout(200)
+        await pg.click('#dFlight [data-flv="JAL:Y_FLEX"]');   # 運賃は座席と区分に分けて、区分を札で選ぶ
+        await pg.click('#fSave'); await pg.wait_for_timeout(200)
         print('選んだ後:', await pg.evaluate("JSON.stringify(statusSummary(2026).jal)"))
         await pg.screenshot(path=os.path.join(WORK,'status.png'), full_page=False)
         print(errs); await b.close()
