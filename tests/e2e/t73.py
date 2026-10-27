@@ -13,7 +13,7 @@ window.__co = {name:'そらメモ航空', cash:100000, last:iso(now), roles:{}, 
   routes:[{k:'5-6', a:'HND', b:'CTS', km:820, base:344, level:1, cost:10320, mult:.5, hub:1, sky:1, min_size:4.5, sa:6, sb:4.5, ac_id:1, intl:false}],
   fleet:[{id:1, type:'lg', reg:'JA01XJ', icao:'A359', kind:'pax', route:'5-6', paid:40000, age:1, value:40000, sell:12000, upkeep:80, bought_at:iso(now)}],
   sky:{}, total_km:820, rep_points:0, stars:1, facilities:{}, bought:1, value:100000, friend_code:'ABCD1234', hide_rank:false, friends:0,
-  v3:true, policy:'fsc', premium:20, satisfaction:41.2, sat_mult:0.97, sat_parts:{base:50, meal:-8, bag:0, response:0, target:37}, meal:'none', bag:'free', home:null, home_since:null, plans:{}, fares:{}, auto_trouble:false, morning:{day:y, profit:1240, prev_profit:1100, gross:1500, upkeep:260, sat:41.2, prev_sat:40.9, cancelled:1, open:1, god:0, sky:[{k:'5-6', mult:0.9, n:18, cxl:2, avg4:20}]},
+  v3:true, policy:'fsc', premium:20, satisfaction:41.2, sat_mult:0.97, sat_parts:{base:50, meal:-8, bag:0, response:0, target:37}, meal:'none', bag:'free', home:null, home_since:null, plans:{}, fares:{}, auto_trouble:false, morning:{day:y, profit:1240, prev_profit:1100, gross:1500, upkeep:260, sat:41.2, prev_sat:40.9, cancelled:1, open:1, god:0, legs_done:6, delayed:2, cxl_legs:1, wave:[{k:'5-6', reg:'JA01XJ', legs:[{n:1,f:'HND',to:'CTS',t:390,blk:100,s:'ok',d:0,c:0},{n:2,f:'CTS',to:'HND',t:570,blk:100,s:'delay',d:70,c:0},{n:3,f:'HND',to:'CTS',t:750,blk:100,s:'delay',d:30,c:30},{n:4,f:'CTS',to:'HND',t:930,blk:100,s:'ok',d:0,c:0},{n:5,f:'HND',to:'CTS',t:1110,blk:100,s:'cxl',d:0,c:0},{n:6,f:'CTS',to:'HND',t:1290,blk:100,s:'ok',d:0,c:0}]}], sky:[{k:'5-6', mult:0.9, n:18, cxl:2, avg4:20}]},
   econ:[{k:'5-6', kind:'big', real:20, demand:1190, n:1, own:1118, flights:6, seats:369, carried:1118, revenue:938, cost:556, landing:36, congestion:0, profit:346, p_seats:0, p_pax:0, e_pax:1118}],
   troubles:[{id:11, k:'5-6', day:y, flights:6, cancelled:1, real_n:18, real_cxl:2, rev_flight:156.4, created_at:iso(now - 18 * 6e4), god_until:iso(now + 42 * 6e4), deadline:iso(now + 342 * 6e4), card:null, cost:null, result:null, auto:false, done_at:null},
             {id:12, k:'5-6', day:y, leg:5, kind:'delay', delay_min:150, dep_at:iso(now + 3 * 36e5), dep:'HND', arr:'CTS', fits:['snack'], flights:6, cancelled:0, real_n:2, real_cxl:0, rev_flight:156.4, created_at:iso(now - 5 * 6e4), god_until:iso(now + 55 * 6e4), deadline:iso(now + 355 * 6e4), card:null, cost:null, result:null, auto:false, done_at:null},
@@ -31,6 +31,7 @@ async def main():
         b = await p.chromium.launch(); errs = []
         c, pg = await open_page(b, V3, errs)
         v = await pg.inner_text('#coV3'); print('V3', v.replace('\n', ' | ')[:500])
+        check('遅れの波：帯と説明:', await pg.locator('.wv .wt i').count() == 8 and '遅れの波（きのう）' in v and '09:30発 新千歳→羽田 が70分遅れ' in v and '12:30発まで続いた' in v and '18:30発 羽田→新千歳 は欠航' in v)
         check('朝のまとめ：きのうのもうけ・前の日より・欠航・実際の空:', 'のまとめ' in v and '+1,240' in v and '前の日より +140' in v and '羽田' in v and '欠航 2便' in v and '−10%' in v and '（+0.3）' in v)
         check('対応してください：欠航の中身:', '対応してください' in v and '6便のうち 1便が欠航' in v and '20便のうち 2便が欠航' in v and '理由は分かりません' in v)
         check('神対応まであと何分:', '神対応まで あと4' in v)
