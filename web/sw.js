@@ -2,7 +2,7 @@
 // ・アプリ本体と設定（HTML・config.js）は最新版を優先し、圏外のときだけ保存した版を使う（更新がすぐ届くように）
 // ・アイコンや、版の番号が付いた外部の部品・フォントは、保存した版を使う
 // ・サーバー（Supabase）などとの通信には手を出さない（失敗は失敗としてアプリに伝える）
-const CACHE = "soramemo-c22df004a7";   // 配る用を作るとき（tools/build.mjs）に中身から自動で付く
+const CACHE = "soramemo-093134c54c";   // 配る用を作るとき（tools/build.mjs）に中身から自動で付く
 const CORE = ["./", "./index.html", "./config.js", "./manifest.webmanifest", "./icon.svg", "./icon-192.png", "./icon-512.png", "./privacy.html", "./terms.html", "./tokushoho.html", "./fonts/mincho0-11097731a8.woff2", "./fonts/dot0-edfd8d572c.woff2"];
 // フォント（fonts/ の中身はファイル名に中身の印が付いている）は、版が変わっても消さない別の保存場所に置く（公開のたびに取り直さない）
 const FONTS = "soramemo-fonts";
