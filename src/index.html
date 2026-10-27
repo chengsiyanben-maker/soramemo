@@ -739,9 +739,27 @@ div.viewsw>button[aria-selected="true"]{background:none;border-color:var(--vw-in
 [data-palette="board"] .fwraw summary,[data-palette="board"] .opsapbtn small,[data-palette="board"] .aprow small,[data-palette="board"] .otile.lock>b{color:var(--shu)}
 [data-palette="board"] .apcell[aria-current="true"]{background:var(--shu);border-color:var(--shu);color:#0A0E17}[data-palette="board"] .apcell{border-color:transparent;background:var(--s-bg)}
 .sgcond{background:#E7E9ED!important;border-radius:20px;padding:10px 12px 6px;margin:4px 0 12px;border:0!important}.sgcond .sg-card{background:#fff}.sgcond .sg-h{margin-top:10px}
-.sg-res{background:#111827!important;color:#fff!important;border:0!important}.sg-res small{color:rgba(255,255,255,.72)!important}.sg-res b{color:#fff}.sg-res b.gold{color:#E9C46A!important}
-.sg-res .sg-verdict{background:rgba(255,255,255,.08)!important;color:#fff}.sg-res .sg-li{color:#fff;background:rgba(255,255,255,.06)}
-[data-palette="board"] .sgcond{background:#131A27!important}[data-palette="board"] .sgcond .sg-card{background:#161F30}[data-palette="board"] .sg-res{background:#161F30!important}
+/* 計画を作る：時刻表から探す・組む */
+.sgq{display:flex;flex-direction:column;gap:6px}.sgq2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.sgq2 label{display:block;background:var(--sg-bg);border-radius:14px;padding:7px 10px}.sgq2 input,.sgq2 select{display:block;width:100%;box-sizing:border-box;border:0;background:transparent;color:var(--sg-ink);font:800 16px var(--gothic);padding:2px 0;min-height:30px}
+.sgq small.t0{margin-top:6px}
+.sgr{display:block}.sgr em{font-style:normal;font-size:11px;font-weight:800;background:#FBF3E0;color:#6E5418;border-radius:999px;padding:3px 10px;flex:none}
+.sgr2{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-top:4px}.sgd b.pts,.sgtab b.pts{font-size:22px;color:#23406A}.sgd b.pts small,.sgtab b.pts small{display:inline;font-size:11px}
+.sgday{position:relative;height:20px;margin-top:10px;background:var(--sg-bg);border-radius:6px}.sgday i{position:absolute;top:4px;bottom:4px;background:var(--sg-ink);border-radius:4px}
+.sgdayax{display:flex;justify-content:space-between;font-size:10px;color:var(--sg-mute);margin-top:2px}.sgr3{margin-top:6px}
+.sglegs{padding:6px 16px}.sglg{display:flex;gap:12px;align-items:flex-start;padding:10px 0}.sglg .n{flex:none;width:26px;height:26px;border-radius:50%;background:var(--sg-ink);color:var(--sg-card);font:800 12px/26px var(--gothic);text-align:center}
+.sglg .m{flex:1;min-width:0}.sglg .t{display:flex;gap:8px;align-items:baseline}.sglg .t b:first-child{font-size:17px}.sglg b.g{flex:none;color:#856620;font-size:14px}
+.sgd .dlg p.sglay,.sgtab p.sglay{margin:0 0 0 38px;display:inline-block;font-size:11px;color:var(--sg-mute);background:var(--sg-bg);border-radius:999px;padding:3px 10px}
+.sgc{display:flex;align-items:center;gap:12px;width:100%;border:0;border-bottom:1px solid var(--sg-line);background:none;color:var(--sg-ink);padding:11px 0;text-align:left;font-family:var(--gothic);min-height:52px}
+.sgc:last-child{border-bottom:0}.sgc .t{flex:none;width:52px;font-size:16px}.sgc span{flex:1;min-width:0}.sgc span b{display:block;font-size:14px}.sgc b.g{flex:none;color:#856620;font-size:13px}
+.sgbar{position:sticky;bottom:10px;margin-top:14px;background:#E6EDF6;color:#16263D;border-radius:22px;padding:12px 14px;box-shadow:0 4px 16px rgba(0,0,0,.10);z-index:2}
+.sgbar small{color:#3D4F68}.sgbar b.pts small{display:inline!important}.sgbar .sg-2b{margin-top:8px}.sgbar .sg-btn{background:#23406A;color:#fff}.sgbar .sg-btn.ghost{background:#fff;color:#23406A}
+.sgtab .sgbar{bottom:calc(96px + env(safe-area-inset-bottom,0px))}
+[data-palette="board"] .sgbar{background:#1A2436;color:#DCE6F5}[data-palette="board"] .sgbar small{color:#A9B8CF}
+/* 計画（まだ予定にしていない案）の色：うすい青。実績（黒）・予定（うすい金色）とまぜない */
+.sg-res{background:#E6EDF6!important;color:#16263D!important;border:0!important}.sg-res small{color:#3D4F68!important}.sg-res b{color:#16263D}.sg-res b.gold{color:#23406A!important}
+.sg-res .sg-verdict{background:rgba(255,255,255,.75)!important;color:#16263D}.sg-res .sg-li{color:#16263D;background:rgba(255,255,255,.6)}
+[data-palette="board"] .sgcond{background:#131A27!important}[data-palette="board"] .sgcond .sg-card{background:#161F30}[data-palette="board"] .sg-res{background:#1A2436!important;color:#DCE6F5!important}[data-palette="board"] .sg-res b{color:#DCE6F5}[data-palette="board"] .sg-res small{color:#A9B8CF!important}
 .sg-res .sg-break>div{border-bottom-color:rgba(255,255,255,.14)}.sg-res .sg-break span{color:#fff}.sg-res .redt{color:#FF8A8A!important}
 .sg-res.rj{box-shadow:inset 4px 0 0 #C8102E}.sg-res.ra{box-shadow:inset 4px 0 0 #6EA0FF}.sg-res .sg-3 span{background:rgba(255,255,255,.08)!important}
 /* 特別塗装機の画面 */
@@ -1588,6 +1606,21 @@ details.dev summary{cursor:pointer;color:var(--sumi);font-size:14px;padding:6px 
 .pcard .ph .p2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:10px}
 .pcard .ph .p2>div{background:rgba(255,255,255,.08);border-radius:14px;padding:9px 11px;min-width:0}
 .pcard .ph .p2 small{display:block;font-size:10.5px;opacity:.75}.pcard .ph .p2 b{display:block;font-size:17px;font-weight:900;line-height:1.3}.pcard .ph .p2 b.g{color:#E9C46A}
+.sgk{display:inline-block;font-size:10.5px;font-weight:800;border-radius:999px;padding:1px 9px;margin-right:6px;vertical-align:1px;line-height:1.6}
+.sgk.a{background:#FFFFFF;color:#111827}.sgk.p{background:#FBF3E0;color:#6E5418}.sgk.c{background:#E6EDF6;color:#23406A}
+.sg-card .sgk.a,.sgsum .sgk.a,.sg-h .sgk.a{background:var(--sg-ink,#111827);color:var(--sg-card,#fff)}
+.hh{display:flex;align-items:center;gap:2px}
+.pcard .ph .pn{font-size:10.5px;opacity:.72;margin:8px 0 0}
+.pcard .ppl{background:#FBF6EC;color:#2B2414;border-radius:20px;padding:12px 14px}
+.pcard .ppl .hh b{font-size:14px}.pcard .ppl .p3{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:6px}
+.pcard .ppl small{font-size:10.5px;color:#6B5A33}.pcard .ppl .p3 b{display:block;font-size:18px;font-weight:900}.pcard .ppl .p3 b.g{color:#856620}
+.pcard .ppl small.u{display:inline;font-size:11px;font-weight:600}
+.pcard .ppl p{font-size:12px;margin:6px 0 0;line-height:1.6}
+.sgd .sg-card.plan,.sgtab .sg-card.plan{background:#FBF6EC;color:#2B2414}.sg-card.plan .sg-note,.sg-card.plan small{color:#6B5A33}
+.sg-card.plan .sg-box{background:rgba(133,102,32,.10)}
+.sg-2c0{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.sg-2c0>span{border-radius:12px;padding:8px 10px;background:var(--sg-bg)}.sg-2c0>span.pl{background:#FBF6EC;color:#2B2414}.sg-2c0 b{display:block;font-size:16px}
+.sgsum .c.plan{background:#FBF6EC;color:#2B2414}.sgsum .c.plan small{color:#6B5A33}.sgsum .pm{display:flex;justify-content:space-between;gap:8px;font-size:13px;padding:7px 0}.sgsum .pm small{display:inline}.sgsum .pv{font-size:12px;margin:6px 0 0}
+[data-palette="board"] .sgk.p,[data-palette="board"] .pcard .ppl,[data-palette="board"] .sg-card.plan,[data-palette="board"] .sgsum .c.plan,[data-palette="board"] .sg-2c0>span.pl{background:#2A2414;color:#F3E6C4}
 .pcard .pnh{margin:6px 2px 0;font-size:14px}
 .pcard .pnx{background:var(--paper);border:1px solid var(--line);border-radius:20px;padding:12px 14px}
 .pcard .pnx .t{display:flex;justify-content:space-between;align-items:center;gap:8px}.pcard .pnx small{font-size:11.5px;color:var(--sumi)}
@@ -4098,17 +4131,12 @@ async function renderPersonaCard(){
 // 修行のホームのカード：ポイントの進み・予定の便を乗るといくつ、次に乗る便（あと何日・この便で何ポイント・運航の状況）、その日の行程
 async function renderShugyoCard(box){
   const Y = sgYear(), car = sgCar(Y), goal = sgGoal(car, Y), unit = sgUnit(car), cur = Y[car];
-  const fut = sgFuture(), mine = fut.filter(p => p.car === car && p.d.slice(0, 4) === String(Y.y));
-  const futPts = mine.reduce((x, p) => { const L = sgPlanLeg(p); return x + (L ? L.pts : 0); }, 0);
-  const need = sgNeed(goal, cur.pts, cur.n, 0, 0), reach = sgReach(goal, Y), trip = sgTrip(car), tc = sgTripCalc(trip, Date.now()), nt = sgNeed(goal, cur.pts, cur.n, tc.pts, tc.n);
+  const fut = sgFuture();
+  const need = sgNeed(goal, cur.pts, cur.n, 0, 0), trip = sgTrip(car), tc = sgTripCalc(trip, Date.now()), nt = sgNeed(goal, cur.pts, cur.n, tc.pts, tc.n);
   const tripName = trip.legs.map(l => placeShort(BY[l.from].iata)).concat(placeShort(BY[trip.legs[trip.legs.length - 1].to].iata)).join("→");
-  const max = goal.pts || 1, w1 = Math.min(100, cur.pts / max * 100), w2 = Math.min(100 - w1, futPts / max * 100);
-  const after = cur.pts + futPts, gap = Math.max(0, goal.pts - after);
-  const right = reach.already ? `<small>${esc(goal.name)}</small><b>届いています</b><small>おめでとうございます</small>`
-    : reach.d ? `<small>届く見込み</small><b class="g">${sgMD(reach.d)}（${sgWD(reach.d)}）</b><small>予定の便を乗ると（推定）</small>`
-    : mine.length ? `<small>予定の便を乗ると</small><b class="g">${fmtKm(after)}</b><small>${car === "JAL" ? `FOP だけなら あと ${fmtKm(gap)} 足りない` : `あと ${fmtKm(gap)} 足りない`}</small>`
-    : `<small>予定の便</small><b>まだありません</b><small>計画を作ると、届く日を出します</small>`;
+  const max = goal.pts || 1, w1 = Math.min(100, cur.pts / max * 100), P = sgPlanSum(car, Y);
   const left = need.left || need.leftN ? `<small>${esc(goal.name)}まで</small><b>あと ${fmtKm(need.left)}</b><small>${nt.trips ? `${esc(tripName)} あと${nt.trips}回${nt.byCount ? "（回数の道）" : ""}` : ""}</small>` : `<small>${esc(goal.name)}</small><b>届いています</b><small></small>`;
+  const right = `<small>乗った便</small><b>${cur.n}回</b><small>今年・${car}</small>`;
   const next = fut[0], nL = next && sgPlanLeg(next), today = sgToday();
   const dleft = next ? Math.round((sgDayT(next.d) - sgDayT(today)) / 864e5) : 0, dl = dleft <= 0 ? "きょう" : dleft === 1 ? "あした" : `あと${dleft}日`;
   const day = next ? fut.filter(p => p.d === next.d) : [];
@@ -4123,11 +4151,14 @@ async function renderShugyoCard(box){
   const dayHTML = day.length > 1 ? `<div class="pl"><h4>${sgMD(next.d)}（${sgWD(next.d)}）の行程</h4><ul>${day.map(p => `<li><b class="t">${p.hm ? esc(p.hm) : "—"}</b><span><b>${esc(placeShort(BY[p.from].iata))} → ${esc(placeShort(BY[p.to].iata))}</b><small>${esc(p.no || p.car)}</small></span><b class="g">+${fmtKm(legPts(p))}</b></li>`).join("")}
       <li><span>この日の合計</span><b>+${fmtKm(day.reduce((x, p) => x + legPts(p), 0))} ${unit}・${day.length}回</b></li></ul></div>` : "";
   box.hidden = false;
-  box.innerHTML = `<div class="ph"><div class="l"><span>${Y.y}年の修行（${car}）</span><span>目標 ${esc(goal.name)} ${fmtKm(goal.pts)}</span></div>
-      <div class="v">${fmtKm(cur.pts)} <small>${unit}</small></div><div class="tr"><i style="width:${w1.toFixed(1)}%"></i>${w2 ? `<i class="p" style="width:${w2.toFixed(1)}%"></i>` : ""}</div>
-      <div class="p2"><div>${left}</div><div>${right}</div></div></div>
-    <h4 class="pnh">次に乗る便</h4>${nextHTML}${dayHTML}
-    <div class="pb"><button data-sg-open="main">修行の画面</button><button data-sg-open="planner">計画を作る</button><button data-sg-open="quick">この路線なら</button></div>`;
+  box.innerHTML = `<div class="ph"><div class="l"><span><span class="sgk a">実績</span>${Y.y}年・${car}</span><span>目標 ${esc(goal.name)} ${fmtKm(goal.pts)}</span></div>
+      <div class="v">${fmtKm(cur.pts)} <small>${unit}</small></div><div class="tr"><i style="width:${w1.toFixed(1)}%"></i></div>
+      <div class="p2"><div>${left}</div><div>${right}</div></div><p class="pn">記録した便だけで数えています</p></div>
+    <div class="ppl"><div class="hh"><span class="sgk p">予定</span><b>これから乗る便</b></div>
+      <div class="p3"><div><small>予定の便</small><b>${P.n}便</b></div><div><small>予定の分</small><b class="g">+${fmtKm(P.pts)}<small class="u"> ${unit}</small></b></div></div>
+      <p>${sgPlanVerdict(car, Y, goal)}</p></div>
+    <h4 class="pnh"><span class="sgk p">予定</span>次に乗る便</h4>${nextHTML}${dayHTML}
+    <div class="pb"><button data-sg-open="main">修行の画面</button><button data-sg-open="${SERVER ? "find" : "planner"}">計画を作る</button><button data-sg-open="quick">この路線なら</button></div>`;
   // 乗る日なら、航空会社の運航情報から運航の状況と機材を出す
   if(!next || !next.no || next.d !== today || !SERVER) return;
   const dep = BY[next.from].iata, arr = BY[next.to].iata, no = next.no.replace(/^([A-Z0-9]{2})0*/, "$1");
@@ -7948,12 +7979,15 @@ document.addEventListener("click", e => { const b = e.target.closest("[data-ops-
 /* ---------- 修行の画面：まとめ・予定と計画・今年の記録・路線の運航状況・計画を作る・お金と乗れる日・この路線に乗ったら・会員情報 ----------
    計算は各社の公開情報（2026年10月に確認）からの目安。ステイタス・カードのボーナスは重ならず、多いほうだけ。キャンペーンは含まない。
    予定の便・会員情報・予算・乗れる日は、サーバー版は shugyo_prefs（本人だけ）、端末版はこの端末に保存する */
+const SG_OK = Symbol("sg");
 const SG_DEF = () => ({ v:1, car:null, jal:{ status:"none", jgc:false, card:"none", smp:false, pay:false }, ana:{ status:"none", yr:1, card:"none", pay:false, conv:0 },
   goal:{ ANA:null, JAL:null }, budget:null, month:null, days:[], plans:[], trip:null, recent:[], routes:[], fp:{} });
-function sgGet(){ const d = SG_DEF(), s = S.shugyo || {};
+// 修行の保存を、決まった形にそろえて返す。そろえた入れ物はそのまま使い回す（毎回作り直すと、手元で持っている入れ物への書き込みが消える）
+function sgGet(){ if(S.shugyo && S.shugyo[SG_OK]) return S.shugyo;
+  const d = SG_DEF(), s = S.shugyo || {};
   S.shugyo = Object.assign(d, s, { jal:Object.assign(d.jal, s.jal || {}), ana:Object.assign(d.ana, s.ana || {}), goal:Object.assign(d.goal, s.goal || {}),
     days:Array.isArray(s.days) ? s.days : [], plans:Array.isArray(s.plans) ? s.plans : [], recent:Array.isArray(s.recent) ? s.recent : [], routes:Array.isArray(s.routes) ? s.routes : [], fp:s.fp && typeof s.fp === "object" ? s.fp : {} });
-  return S.shugyo; }
+  Object.defineProperty(S.shugyo, SG_OK, { value:true, enumerable:false }); return S.shugyo; }
 let SG_SAVING = null;
 async function sgSave(){
   const g = sgGet(); g.plans = g.plans.slice(-120); g.days = g.days.slice(-200); g.recent = g.recent.slice(0, 8);
@@ -8026,7 +8060,11 @@ function sgYear(y = new Date().getFullYear()){
   }
   return out;
 }
-const sgFuture = () => { const t = sgToday(); return sgGet().plans.filter(p => p.d >= t).sort((a, b) => { const x = a.d + " " + (a.hm || "99:99"), y = b.d + " " + (b.hm || "99:99"); return x < y ? -1 : x > y ? 1 : 0; }); };
+// 予定の便のうち、記録した便（日本時間で同じ日・同じ区間）があるものは「乗った」として予定から外す（実績と二重に数えない）
+const sgJstDay = t => new Date(t + 9 * 36e5).toISOString().slice(0, 10);
+function sgDoneKeys(){ const k = new Set(); for(const r of statusRows()) k.add(`${sgJstDay(r.t)}|${r.from}|${r.to}`); return k; }
+const sgPlanDone = (p, keys = sgDoneKeys()) => keys.has(`${p.d}|${p.from}|${p.to}`);
+const sgFuture = () => { const t = sgToday(), keys = sgDoneKeys(); return sgGet().plans.filter(p => p.d >= t && !sgPlanDone(p, keys)).sort((a, b) => { const x = a.d + " " + (a.hm || "99:99"), y = b.d + " " + (b.hm || "99:99"); return x < y ? -1 : x > y ? 1 : 0; }); };
 const sgPlanLeg = p => sgLeg(p.car, p.from, p.to, p.fare, sgDayT(p.d), p.price);
 // 使う航空会社（選んだもの、なければ今年よく乗っているほう）
 function sgCar(Y = sgYear()){ const g = sgGet(); return g.car || (Y.JAL.n > Y.ANA.n ? "JAL" : "ANA"); }
@@ -8079,7 +8117,7 @@ function sgMoney(Y){
   const g = sgGet(), t = sgToday(), ym = t.slice(0, 7), fut = sgFuture();
   const spent = Y.ANA.price + Y.JAL.price, planned = fut.filter(p => p.d.slice(0, 4) === String(Y.y)).reduce((x, p) => x + (p.price || 0), 0);
   const mSpent = Y.months[new Date().getMonth()].price, mPlanned = fut.filter(p => p.d.slice(0, 7) === ym).reduce((x, p) => x + (p.price || 0), 0);
-  return { budget:g.budget, month:g.month, spent, planned, left:g.budget != null ? g.budget - spent - planned : null, mSpent, mPlanned, unpriced:Y.ANA.n + Y.JAL.n - Y.ANA.priced - Y.JAL.priced, fut };
+  return { budget:g.budget, month:g.month, spent, planned, left:g.budget != null ? g.budget - spent : null, leftAfter:g.budget != null ? g.budget - spent - planned : null, mSpent, mPlanned, unpriced:Y.ANA.n + Y.JAL.n - Y.ANA.priced - Y.JAL.priced, fut };
 }
 // 予算と乗れる日からの計画の案：乗れる日に、計画の行程を、目標に届くか予算がなくなるまで足す
 function sgSuggest(car, goal, Y, M){
@@ -8090,7 +8128,7 @@ function sgSuggest(car, goal, Y, M){
   if(done()) return { already:true, list:[] };
   const busy = new Set(fut.map(p => p.d)), days = sgGet().days.filter(d => d >= sgToday() && d.slice(0, 4) === String(Y.y) && !busy.has(d)).sort();
   if(!days.length) return { why:"乗れる日に ○ をつけると、案を出します" };
-  let left = M.left, cost = 0; const list = [];
+  let left = M.leftAfter, cost = 0; const list = [];
   for(const d of days){ if(done()) break; if(left != null && c.price != null && c.price > left) break;
     list.push({ d, pts:c.pts, price:c.price }); F += c.pts; N += c.n; cost += c.price || 0; if(left != null && c.price != null) left -= c.price; }
   return { list, reached:done(), F, cost, left, priced:c.price != null, trip };
@@ -8105,51 +8143,68 @@ const sgApOpts = sel => A.filter(a => /^[A-Z]{3}$/.test(a.iata || "")).map(a => 
 const sgFareOpts = (car, t, sel) => FARES[sgFareKey(car, t)].map(r => `<option value="${sgFareKey(car, t)}:${r[0]}"${sel === sgFareKey(car, t) + ":" + r[0] ? " selected" : ""}>${esc(r[1])}</option>`).join("");
 function sgBar(cur, add, goal){ const a = Math.min(100, cur / goal * 100), b = Math.min(100 - a, add / goal * 100);
   return `<div class="sg-bar"><i style="width:${a.toFixed(1)}%"></i><i class="p" style="left:${a.toFixed(1)}%;width:${b.toFixed(1)}%"></i></div>`; }
-function sgHero(car, Y, goal, add = 0, addN = 0, note = ""){
-  const cur = Y[car], unit = car === "JAL" ? "FOP" : "PP";
+const SG_TAG_A = `<span class="sgk a">実績</span>`, SG_TAG_P = `<span class="sgk p">予定</span>`, SG_TAG_C = `<span class="sgk c">計画</span>`;
+// いちばん上のかたまりは実績だけ（記録した便）。予定は sgPlanBox に分ける
+function sgHero(car, Y, goal, note = ""){
+  const cur = Y[car], unit = car === "JAL" ? "FOP" : "PP", add = 0;
   let tiersHTML = "";
   if(car === "ANA"){ const T = sgAnaTiers(), top = T[T.length - 1].pts;
     tiersHTML = `<div class="sg-ticks">${T.map(t => `<span style="left:${(t.pts / top * 100).toFixed(1)}%">${esc(t.name)} ${t.pts / 10000}万</span>`).join("")}</div>`;
-    return `<div class="sg-hero"><div class="h"><span>プレミアムポイント・${Y.y}年</span><span>目標 ${esc(goal.name)} ${fmtKm(goal.pts)}</span></div><div class="v">${fmtKm(cur.pts)}<small> PP</small></div>
-      ${sgBar(cur.pts, add, top)}${tiersHTML}${note}</div>`; }
-  const t = goal.tier, n = sgNeed(goal, cur.pts + add, cur.n + addN, 0, 0);
-  return `<div class="sg-hero"><div class="h"><span>FLY ON ポイント・搭乗 ${cur.n + addN}回</span><span>目標 ${esc(goal.name)}</span></div><div class="v">${fmtKm(cur.pts)}<small> FOP</small></div>
+    return `<div class="sg-hero"><div class="h"><span>${SG_TAG_A}プレミアムポイント・${Y.y}年</span><span>目標 ${esc(goal.name)} ${fmtKm(goal.pts)}</span></div><div class="v">${fmtKm(cur.pts)}<small> PP</small></div>
+      ${sgBar(cur.pts, add, top)}${tiersHTML}${note}<p class="sg-note light">記録した便だけで数えています</p></div>`; }
+  const t = goal.tier, n = sgNeed(goal, cur.pts, cur.n, 0, 0);
+  return `<div class="sg-hero"><div class="h"><span>${SG_TAG_A}FLY ON ポイント・搭乗 ${cur.n}回</span><span>目標 ${esc(goal.name)}</span></div><div class="v">${fmtKm(cur.pts)}<small> FOP</small></div>
     ${sgBar(cur.pts, add, t.fop)}
     <div class="sg-2"><div><small>FOP だけで（${fmtKm(t.fop)}）</small><b>${n.left ? `あと ${fmtKm(n.left)}` : "届いています"}</b></div><div><small>${t.n}回 ＋ ${fmtKm(t.nf)} FOP</small><b>${n.leftN || n.leftNF ? [n.leftN && `あと${n.leftN}回`, n.leftNF && `FOP あと${fmtKm(n.leftNF)}`].filter(Boolean).join("・") : "届いています"}</b></div></div>
-    <div class="sg-ls"><span>JGC（Life Status 1,500）</span><b>${fmtKm(Y.ls)}${Y.ls < JGC_LS ? `・あと${Math.ceil((JGC_LS - Y.ls) / 5)}回` : "・届いています"}</b></div>${note}</div>`;
+    <div class="sg-ls"><span>JGC（Life Status 1,500）</span><b>${fmtKm(Y.ls)}${Y.ls < JGC_LS ? `・あと${Math.ceil((JGC_LS - Y.ls) / 5)}回` : "・届いています"}</b></div>${note}<p class="sg-note light">記録した便だけで数えています</p></div>`;
+}
+// 予定のかたまり：予定の便・予定の分のポイント・予定の金額と、予定を全部乗ったときの結論（推定）。合計の数字は出さない
+function sgPlanSum(car, Y){
+  const fut = sgFuture().filter(p => p.car === car && p.d.slice(0, 4) === String(Y.y));
+  let pts = 0, yen = 0, priced = 0; for(const p of fut){ const L = sgPlanLeg(p); if(L) pts += L.pts; if(p.price){ yen += p.price; priced++; } }
+  return { n:fut.length, pts, yen, priced, all:sgFuture().length };
+}
+function sgPlanVerdict(car, Y, goal){
+  const P = sgPlanSum(car, Y), r = sgReach(goal, Y);
+  if(r.already) return "実績で目標に届いています";
+  if(!P.n) return "予定の便を入れると、届くかどうかを出します";
+  return r.d ? `予定を全部乗ると、${sgMD(r.d)}（${sgWD(r.d)}）に${esc(goal.name)}に届く見込みです（推定）` : `予定を全部乗っても、${esc(goal.name)}には届きません（推定）`;
+}
+function sgPlanBox(car, Y, goal){
+  const P = sgPlanSum(car, Y), unit = car === "JAL" ? "FOP" : "PP";
+  return `<div class="sg-card plan"><div class="sg-sp2"><span class="hh">${SG_TAG_P}<b>これから乗る便</b></span><small>${Y.y}年・${car}</small></div>
+    <div class="sg-3"><span><small>予定の便</small><b>${P.n}便</b></span><span><small>予定の分</small><b class="gold">+${fmtKm(P.pts)}</b><small>${unit}</small></span><span><small>予定の金額</small><b>${P.priced ? fmtKm(P.yen) : "—"}</b><small>${P.priced ? `円${P.priced < P.n ? `・${P.priced}便ぶん` : ""}` : "金額はまだ"}</small></span></div>
+    <p class="sg-note">${sgPlanVerdict(car, Y, goal)}</p></div>`;
 }
 function sgMain(){
   const Y = sgYear(), car = sgCar(Y), goal = sgGoal(car, Y), unit = car === "JAL" ? "FOP" : "PP", fut = sgFuture(), next = fut[0];
-  const futPts = fut.filter(p => p.car === car && p.d.slice(0, 4) === String(Y.y)).reduce((x, p) => { const L = sgPlanLeg(p); return x + (L ? L.pts : 0); }, 0);
-  const futN = fut.filter(p => p.car === car && p.d.slice(0, 4) === String(Y.y)).length;
-  const reach = sgReach(goal, Y), trip = sgTripCalc(sgTrip(car), Date.now()), need = sgNeed(goal, Y[car].pts, Y[car].n, trip.pts, trip.n);
+  const trip = sgTripCalc(sgTrip(car), Date.now()), need = sgNeed(goal, Y[car].pts, Y[car].n, trip.pts, trip.n);
   const tripName = sgTrip(car).legs.map(l => placeShort(BY[l.from].iata)).concat(placeShort(BY[sgTrip(car).legs.slice(-1)[0].to].iata)).join("→");
-  const note = `<div class="sg-2"><div><small>${esc(goal.name)}まで</small><b>${need.left || need.leftN ? `あと ${fmtKm(need.left)}` : "届いています"}</b><small>${need.trips ? `${esc(tripName)} あと${need.trips}回${need.byCount ? "（回数の道）" : ""}` : ""}</small></div>
-    <div><small>届く見込み</small><b>${reach.already ? "届いています" : reach.d ? `${sgMD(reach.d)}（${sgWD(reach.d)}）` : "予定では届かない"}</b><small>${reach.already ? "" : reach.d ? "予定の便を乗ると（推定）" : "予定の便を足すと出ます"}</small></div></div>
-    ${futPts ? `<p class="sg-note">点線は予定に入れた便の分（+${fmtKm(futPts)}）</p>` : ""}`;
+  const note = `<div class="sg-2"><div><small>${esc(goal.name)}まで</small><b>${need.left || need.leftN ? `あと ${fmtKm(need.left)}` : "届いています"}</b></div>
+    <div><small>この行程なら</small><b>${need.trips ? `あと${need.trips}回` : "—"}</b><small>${need.trips ? `${esc(tripName)}${need.byCount ? "（回数の道）" : ""}` : ""}</small></div></div>`;
   const routes = sgFavRoutes(Y);
   const mo = Y.months.map((m, i) => m.ANA + m.JAL), top = Math.max(1, ...mo), nowM = new Date().getMonth();
   const nextL = next && sgPlanLeg(next);
   return `<div class="sg-top">${sgTabOn() ? `<h3>${Y.y}年の修行</h3><button class="sg-back" data-sg-go="profile" type="button">会員情報</button>` : `<button class="sg-back" data-close type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>閉じる</button><h3>${Y.y}年の修行</h3><span class="sg-sp"></span>`}</div>
     <button class="sg-search" data-sg-go="quick" type="button">路線を入れて、たまるマイル・ポイントを見る</button>
     <div class="sg-row">${sgSeg("car", [["ANA", "ANA"], ["JAL", "JAL"]], car)}</div>
-    ${sgHero(car, Y, goal, futPts, futN, note)}
-    <button class="sg-link big" data-sg-go="planner" type="button"><span><b>修行の計画を作る</b><small>行程・運賃くらべ・${car === "JAL" ? "回数の条件" : "届く日"}</small></span><b>›</b></button>
-    <div class="sg-h"><b>次に乗る便</b><button class="sg-a" data-sg-go="plan" type="button">予定と計画 ›</button></div>
+    ${sgHero(car, Y, goal, note)}
+    ${sgPlanBox(car, Y, goal)}
+    <button class="sg-link big" data-sg-go="${SERVER ? "find" : "planner"}" type="button"><span><b>修行の計画を作る</b><small>行程・運賃くらべ・${car === "JAL" ? "回数の条件" : "届く日"}</small></span><b>›</b></button>
+    <div class="sg-h"><b class="hh">${SG_TAG_P}次に乗る便</b><button class="sg-a" data-sg-go="plan" type="button">予定と計画 ›</button></div>
     ${next ? `<button class="sg-card tap" data-sg-go="plan" type="button"><span class="sg-sp2"><span><small>${sgMD(next.d)}（${sgWD(next.d)}）${next.hm ? esc(next.hm) + "発" : ""}</small><b class="xl">${esc(placeShort(BY[next.from].iata))} → ${esc(placeShort(BY[next.to].iata))}</b><small>${esc(next.no || next.car)}・${esc(nextL ? nextL.fr.label.split("：").pop() : "")}</small></span>
       <span class="r"><small>この便で</small><b class="gold">+${nextL ? fmtKm(nextL.pts) : "—"}</b><small>${next.car === "JAL" ? "FOP" : "PP"}</small></span></span></button>`
       : `<div class="sg-card"><p class="sg-note">予定の便はまだありません。「修行の計画を作る」から入れられます。</p></div>`}
     <div class="sg-h"><b>修行の路線の運航状況</b><button class="sg-a" data-sg-go="ops" type="button">くわしく ›</button></div>
     <div class="sg-card list">${routes.map((r, i) => `<button class="sg-li" data-sg-route="${i}" type="button"><span><b>${esc(placeShort(r[0]))} ⇄ ${esc(placeShort(r[1]))}</b><small id="sgRt${i}">${SERVER ? "読み込んでいます…" : "サーバー版で出ます"}</small></span><span class="sg-st" id="sgRs${i}"></span></button>`).join("")}</div>
-    <div class="sg-h"><b>今年の記録</b><button class="sg-a" data-sg-go="year" type="button">記録を見る ›</button></div>
+    <div class="sg-h"><b class="hh">${SG_TAG_A}今年の記録</b><button class="sg-a" data-sg-go="year" type="button">記録を見る ›</button></div>
     <button class="sg-card tap" data-sg-go="year" type="button"><span class="sg-3"><span><small>搭乗</small><b>${Y.ANA.n + Y.JAL.n}回</b></span><span><small>今月</small><b>${Y.months[nowM].n}回</b></span><span><small>1${unit}あたり</small><b>${sgYearPer(Y, car) != null ? sgYearPer(Y, car) + "円" : "—"}</b></span></span>
       <span class="sg-mini">${mo.map((v, i) => `<i style="height:${Math.max(3, v / top * 60).toFixed(0)}px;background:${i === nowM ? "#A9822E" : i > nowM ? "var(--sg-line)" : "var(--sg-ink)"}"></i>`).join("")}</span></button>
     <p class="sg-foot">ポイントは各社の公開情報（2026年10月に確認）からの目安で、キャンペーンのボーナスは含みません。記録の運賃が分からない便は、よく使われる運賃で数えています。</p>`;
 }
 function sgPlan(){
   const Y = sgYear(), car = sgCar(Y), goal = sgGoal(car, Y), fut = sgFuture(), unit = car === "JAL" ? "FOP" : "PP";
-  let F = Y[car].pts; const rows = fut.map(p => { const L = sgPlanLeg(p); if(L && p.car === car) F += L.pts; return { p, L, sum:F }; });
-  const reach = sgReach(goal, Y);
+  const rows = fut.map(p => ({ p, L:sgPlanLeg(p) }));
   const eff = sgFavRoutes(Y).concat(SG_TRIPS.filter(t => t.length === 3).map(t => [t[0], t[1]])).filter((r, i, a) => a.findIndex(x => [...x].sort().join() === [...r].sort().join()) === i).slice(0, 6).map(([a, b]) => {
     const f = IATA[a] && IATA[b] ? IATA[a].id : null, t = IATA[b] ? IATA[b].id : null; if(!f || !t) return null;
     const tr = sgTrip(car), fare = tr.legs[0].fare, id = fare.split(":")[1], L1 = sgLeg(car, f, t, fare), L2 = sgLeg(car, t, f, fare); if(!L1 || !L2) return null;
@@ -8158,12 +8213,11 @@ function sgPlan(){
   }).filter(Boolean).sort((x, y) => (x.yen ?? 1e9) - (y.yen ?? 1e9) || y.pts - x.pts);
   const best = eff.find(e => e.yen != null);
   return `${sgHead("次に乗る便と計画")}
-    <div class="sg-hero"><div class="h"><span>予定の便を全部乗ると</span><span>${car}</span></div><div class="v">${fmtKm(F)}<small> ${unit}</small></div>
-      ${sgBar(Y[car].pts, F - Y[car].pts, goal.pts)}<p class="sg-note light">${reach.already ? `${esc(goal.name)}に届いています` : reach.d ? `${sgMD(reach.d)}に${esc(goal.name)}に届く見込み（推定）` : `予定だけでは${esc(goal.name)}に届きません（あと ${fmtKm(Math.max(0, goal.pts - F))}）`}</p></div>
-    <div class="sg-h"><b>予定の便</b><small>${fut.length}便</small></div>
-    <div class="sg-card list">${rows.length ? rows.map(({ p, L, sum }) => `<div class="sg-li"><span class="d"><b>${sgMD(p.d)}</b><small>${sgWD(p.d)}${p.hm ? "・" + esc(p.hm) : ""}</small></span><span><b>${esc(placeShort(BY[p.from].iata))} → ${esc(placeShort(BY[p.to].iata))}</b><small>${esc(p.no || p.car)}・${esc(L ? L.fr.label.split("：").pop() : "")}${p.price ? "・" + sgYen(p.price) : ""}</small></span>
-      <span class="r"><b class="gold">+${L ? fmtKm(L.pts) : "—"}</b><small>${p.car === car ? "累計 " + fmtKm(sum) : p.car}</small></span><button class="sg-x" data-sg-unplan="${esc(p.id)}" aria-label="この予定を消す" type="button">×</button></div>`).join("")
-      : `<p class="sg-note">予定の便はまだありません。</p>`}<button class="sg-li add" data-sg-go="planner" type="button">＋ 行程を計算して予定に足す</button></div>
+    ${sgPlanBox(car, Y, goal)}
+    <div class="sg-h"><b class="hh">${SG_TAG_P}予定の便</b><small>${fut.length}便</small></div>
+    <div class="sg-card list plan">${rows.length ? rows.map(({ p, L }) => `<div class="sg-li"><span class="d"><b>${sgMD(p.d)}</b><small>${sgWD(p.d)}${p.hm ? "・" + esc(p.hm) : ""}</small></span><span><b>${esc(placeShort(BY[p.from].iata))} → ${esc(placeShort(BY[p.to].iata))}</b><small>${esc(p.no || p.car)}・${esc(L ? L.fr.label.split("：").pop() : "")}${p.price ? "・" + sgYen(p.price) : ""}</small></span>
+      <span class="r"><b class="gold">+${L ? fmtKm(L.pts) : "—"}</b><small>${p.car === "JAL" ? "FOP" : "PP"}</small></span><button class="sg-x" data-sg-unplan="${esc(p.id)}" aria-label="この予定を消す" type="button">×</button></div>`).join("")
+      : `<p class="sg-note">予定の便はまだありません。</p>`}<button class="sg-li add" data-sg-go="${SERVER ? "find" : "planner"}" type="button">＋ 行程を計算して予定に足す</button></div>
     <div class="sg-h"><b>路線ごとの効率</b><small>1往復・${esc(FARES[sgFareKey(car)].find(r => r[0] === sgTrip(car).legs[0].fare.split(":")[1])?.[1].split("：").pop() || "")}</small></div>
     <div class="sg-card list">${eff.map(e => `<div class="sg-li"><span><b>${esc(placeShort(e.a))}⇄${esc(placeShort(e.b))}</b>${best && e === best ? sgTag("いちばん", "#A9822E") : ""}</span><span class="r"><b>${fmtKm(e.pts)}</b><small>${unit}</small></span><span class="r"><b>${e.yen != null ? e.yen + "円" : "—"}</b><small>1${unit}</small></span></div>`).join("")}</div>
     <p class="sg-foot">1${unit}あたりの金額は、記録に入れた運賃の金額か、計画で入れた目安から出しています（ないものは「—」）。届く見込みは、予定の便を全部乗ったときの推定です。</p>`;
@@ -8229,10 +8283,10 @@ document.addEventListener("click", e => { const b = e.target.closest("[data-sglo
 function renderSgSum(){
   const el = $("sgSum"); if(!el) return;
   const Y = sgYear(), car = sgCar(Y), unit = sgUnit(car), nowM = new Date().getMonth();
-  const fut = sgFuture().filter(p => p.car === car && p.d.slice(0, 4) === String(Y.y)), plan = Array(12).fill(0);
-  for(const p of fut){ const L = sgPlanLeg(p); if(L) plan[+p.d.slice(5, 7) - 1] += L.pts; }
+  const fut = sgFuture().filter(p => p.car === car && p.d.slice(0, 4) === String(Y.y)), plan = Array.from({ length:12 }, () => ({ pts:0, n:0, yen:0, priced:0 }));
+  for(const p of fut){ const L = sgPlanLeg(p), m = plan[+p.d.slice(5, 7) - 1]; if(L) m.pts += L.pts; m.n++; if(p.price){ m.yen += p.price; m.priced++; } }
   if(!Y[car].n && !fut.length){ el.innerHTML = `<p class="hint">${Y.y}年の JAL・ANA の便を記録すると、月ごとのポイントや1ポイントあたりの金額を出します。</p><div class="sgopen"><button class="btn1" data-sg-open="main" type="button">修行の画面を開く</button></div>`; return; }
-  const mo = Y.months.map(m => m[car]), top = Math.max(1, ...mo.map((v, i) => v + plan[i]));
+  const mo = Y.months.map(m => m[car]), top = Math.max(1, ...mo);
   const rows = Y.rows.filter(r => r.car === car), pm = Array.from({ length:12 }, () => ({ yen:0, pts:0 }));
   let yen = 0, ppts = 0, nPriced = 0; for(const r of rows) if(r.price){ yen += r.price; ppts += r.L.pts; nPriced++; const m = pm[new Date(r.t).getMonth()]; m.yen += r.price; m.pts += r.L.pts; }
   const pv = pm.map((m, i) => ({ i, v:sgPer(m.yen, m.pts) })).filter(x => x.v != null), best = pv.length >= 2 ? pv.sort((a, b) => a.v - b.v)[0] : null;   // 2か月以上あるときだけ「いちばん安い月」
@@ -8240,9 +8294,10 @@ function renderSgSum(){
   const H = 110, h = v => Math.max(3, Math.round(v / top * H));
   el.innerHTML = `<div class="sgsum">
     <div class="c"><div class="h"><b>月ごとの${car === "JAL" ? "FLY ON ポイント" : "プレミアムポイント"}</b><small>${Y.y}年・${car}</small></div>
-      <div class="bars" role="img" aria-label="月ごとの${unit}。${mo.map((v, i) => v ? `${i + 1}月 ${fmtKm(v)}` : "").filter(Boolean).join("、")}${plan.some(Boolean) ? "。予定の便の分は点線" : ""}">${mo.map((v, i) => `<span>${plan[i] ? `<i class="p" style="height:${h(plan[i])}px"></i>` : ""}<i class="${i === nowM ? "now" : v ? "" : "z"}" style="height:${v ? h(v) : 3}px"></i></span>`).join("")}</div>
+      <div class="bars" role="img" aria-label="月ごとの${unit}（記録した便だけ）。${mo.map((v, i) => v ? `${i + 1}月 ${fmtKm(v)}` : "").filter(Boolean).join("、") || "まだありません"}">${mo.map((v, i) => `<span><i class="${i === nowM ? "now" : v ? "" : "z"}" style="height:${v ? h(v) : 3}px"></i></span>`).join("")}</div>
       <div class="ax">${mo.map((_, i) => `<span${i === nowM ? ' class="now"' : ""}>${i + 1}</span>`).join("")}</div>
-      <div class="lg"><span><i></i>乗った</span><span><i class="now"></i>今月</span>${plan.some(Boolean) ? `<span><i class="p"></i>予定</span>` : ""}</div></div>
+      <div class="lg"><span><i></i>乗った</span><span><i class="now"></i>今月</span><span>記録した便だけ</span></div></div>
+    ${fut.length ? `<div class="c plan"><div class="h"><b class="hh"><span class="sgk p">予定</span>これからの月</b><small>予定に入れた便</small></div>${plan.map((m, i) => m.n ? `<div class="pm"><b>${i + 1}月${i === nowM ? "（残り）" : ""}</b><span><b class="g">+${fmtKm(m.pts)}</b><small> ${unit}・${m.n}便・${m.priced ? `${fmtKm(m.yen)}円${m.priced < m.n ? `（${m.priced}便ぶん）` : ""}` : "金額はまだ"}</small></span></div>` : "").join("")}<p class="pv">${sgPlanVerdict(car, Y, sgGoal(car, Y))}</p></div>` : ""}
     <div class="c2"><div class="c"><small>今年 払った</small><b>${nPriced ? fmtKm(yen) : "—"}</b><small>${nPriced ? `円・金額のある${nPriced}便` : "フライトの便を開くと金額を入れられます"}</small></div>
       <div class="c"><small>1${unit}あたり</small><b>${sgPer(yen, ppts) ?? "—"}</b><small>${sgPer(yen, ppts) ? `円${best ? `・${best.i + 1}月がいちばん安い ${best.v}円` : ""}` : "金額を入れると出ます"}</small></div></div>
     ${routes.length ? `<div class="c"><div class="h"><b>路線ごと</b><small>${unit}</small></div>${routes.map(r => `<div class="rt"><div><b>${esc(r.key.split("⇄").map(placeShort).join(" ⇄ "))}</b><span><b>${fmtKm(r[car])}</b><small> ${unit}・${r.n}回</small></span></div><i><i style="width:${Math.round(r[car] / rtop * 100)}%"></i></i></div>`).join("")}</div>` : ""}
@@ -8305,14 +8360,12 @@ function sgPlanner(){
   const Y = sgYear(), car = sgCar(Y), goal = sgGoal(car, Y), g = sgGet(), trip = sgTrip(car), t = trip.d ? sgDayT(trip.d) : Date.now(), c = sgTripCalc(trip, t), unit = car === "JAL" ? "FOP" : "PP";
   const tiers = car === "ANA" ? sgAnaTiers().map(x => [x.pts, x.name]) : sgJalTiers(Y.y).filter(x => !x.jgc || g.jal.jgc).map(x => [x.k, x.name]);
   const need = sgNeed(goal, Y[car].pts, Y[car].n, c.pts, c.n), M = sgMoney(Y);
-  const futPts = sgFuture().filter(p => p.car === car && p.d.slice(0, 4) === String(Y.y)).reduce((x, p) => { const L = sgPlanLeg(p); return x + (L ? L.pts : 0); }, 0);
-  const needWith = sgNeed(goal, Y[car].pts + futPts, Y[car].n + sgFuture().filter(p => p.car === car).length, c.pts, c.n);
   const L0 = trip.legs[SG_LEG] || trip.legs[0], legT = trip.d ? sgDayT(trip.d) : Date.now();
   const fares = FARES[sgFareKey(car, legT)].map(r => { const code = sgCode(car, r[0], legT), L = sgLeg(car, L0.from, L0.to, code, legT, null), pr = sgPriceFor(car, L0.from, L0.to, r[0]);
     return { r, code, L, pr, yen:pr && L ? Math.round(pr / L.pts * 10) / 10 : null }; }).filter(x => x.L).sort((a, b) => (a.yen ?? 1e9) - (b.yen ?? 1e9) || b.L.pts - a.L.pts);
   const cheapest = fares.find(x => x.yen != null);
   const verdict = !c.ok ? "区間を確かめてください" : need.trips === 0 || (!need.left && !need.leftN) ? `${esc(goal.name)}に届いています` : need.trips ? `あと${need.trips}回この行程で、${esc(goal.name)}に届きます` : "";
-  return `${sgHead("修行の計画を作る")}
+  return `${sgHead("自分で区間を入れて計算する", SERVER ? "find" : "main", SERVER ? "探す" : "修行")}
     <div class="sgcond" role="group" aria-label="計算の条件">
     <div class="sg-row">${sgSeg("car", [["ANA", "ANA"], ["JAL", "JAL"]], car)}<label class="sg-goal">目標 <select id="sgGoal">${tiers.map(([v, n]) => `<option value="${esc(String(v))}"${String(v) === String(goal.tier.pts ?? goal.tier.k) || n === goal.name ? " selected" : ""}>${esc(n)}</option>`).join("")}</select></label></div>
     <div class="sg-h"><b>行程</b><label class="sg-date"><input type="date" id="sgTripD" value="${esc(trip.d || "")}" min="${sgToday()}" aria-label="乗る日"></label></div>
@@ -8325,11 +8378,11 @@ function sgPlanner(){
         <div class="r"><b>${L ? fmtKm(L.pts) : "—"}</b><small>${unit}</small>${trip.legs.length > 1 ? `<button class="sg-x" data-sg-legdel="${i}" aria-label="この区間を消す" type="button">×</button>` : ""}</div></div>`; }).join("")}
       <div class="sg-sp2 pad"><button class="sg-a" data-sg-legadd type="button">＋ 区間を足す</button><button class="sg-a" data-sg-fareall type="button">運賃をそろえる</button></div></div>
     </div>
-    ${sgHero(car, Y, goal, c.pts, c.n, `<div class="sg-2"><div><small>この行程なら</small><b>${need.trips != null ? `あと${need.trips}回` : "—"}</b><small>${car === "JAL" && need.trips != null ? (need.byCount ? "回数の道が近い" : "FOP の道が近い") : ""}</small></div><div><small>予定の便をふくめると</small><b>${needWith.trips != null ? `あと${needWith.trips}回` : "—"}</b><small>${futPts ? `予定 +${fmtKm(futPts)}` : "予定の便なし"}</small></div></div>`)}
-    <div class="sg-h"><b>この計画で</b><button class="sg-a" data-sg-go="budget" type="button">お金と乗れる日 ›</button></div>
-    <div class="sg-card sg-res"><div class="sg-3"><span><small>行程で</small><b class="gold">+${fmtKm(c.pts)}</b><small>${unit}・${c.n}区間</small></span><span><small>乗ったあと</small><b>${fmtKm(Y[car].pts + c.pts)}</b><small>${futPts ? `予定とあわせて ${fmtKm(Y[car].pts + c.pts + futPts)}` : ""}</small></span><span><small>1${unit}あたり</small><b>${c.price ? (Math.round(c.price / c.pts * 10) / 10) + "円" : "—"}</b><small>${c.price ? "運賃 " + sgYen(c.price) : "金額を入れると出ます"}</small></span></div>
+    ${sgHero(car, Y, goal)}
+    <div class="sg-h"><b class="hh">${SG_TAG_C}この行程で</b><button class="sg-a" data-sg-go="budget" type="button">お金と乗れる日 ›</button></div>
+    <div class="sg-card sg-res"><div class="sg-3"><span><small>行程で</small><b class="gold">+${fmtKm(c.pts)}</b><small>${unit}・${c.n}区間</small></span><span><small>この行程なら</small><b>${need.trips != null ? `あと${need.trips}回` : "—"}</b><small>${car === "JAL" && need.trips != null ? (need.byCount ? "回数の道が近い" : "FOP の道が近い") : "実績から目標まで"}</small></span><span><small>1${unit}あたり</small><b>${c.price ? (Math.round(c.price / c.pts * 10) / 10) + "円" : "—"}</b><small>${c.price ? "運賃 " + sgYen(c.price) : "金額を入れると出ます"}</small></span></div>
       <div class="sg-verdict"><small>目標まで</small><b>${verdict}</b><small>たまるマイル ${fmtKm(c.mi)}（ボーナス・支払いの分をふくむ）${car === "JAL" ? `・搭乗回数 +${c.n}・Life Status +${c.n * 5}` : ""}</small></div>
-      ${M.budget != null ? `<button class="sg-li tap" data-sg-go="budget" type="button"><span><small>今年の予算の のこり</small><b>${sgYen(M.left)}${c.price ? ` → ${sgYen(M.left - c.price)}` : ""}</b></span><span>›</span></button>` : ""}
+      ${M.budget != null ? `<button class="sg-li tap" data-sg-go="budget" type="button"><span><small>今年の予算の のこり</small><b>${sgYen(M.left)}</b><small>${c.price ? `この行程の金額 ${sgYen(c.price)}` : ""}</small></span><span>›</span></button>` : ""}
       <div class="sg-2b"><button class="sg-btn ghost" data-sg-go="profile" type="button">会員情報</button><button class="sg-btn" data-sg-addtrip type="button" ${c.ok ? "" : "disabled"}>予定に入れる</button></div>
       ${SG_MSG ? `<p class="sg-msg">${esc(SG_MSG)}</p>` : ""}</div>
     <div class="sg-h"><b>運賃をくらべる</b><small>区間${SG_LEG + 1} ${esc(placeShort(BY[L0.from].iata))}→${esc(placeShort(BY[L0.to].iata))}</small></div>
@@ -8340,7 +8393,7 @@ function sgPlanner(){
 }
 function sgBudget(){
   const Y = sgYear(), car = sgCar(Y), goal = sgGoal(car, Y), M = sgMoney(Y), g = sgGet(), unit = car === "JAL" ? "FOP" : "PP";
-  const S2 = sgSuggest(car, goal, Y, M), nowM = new Date().getMonth(), mo = Y.months.map(m => m.price), top = Math.max(1, ...mo, M.mSpent + M.mPlanned, M.month || 0);
+  const S2 = sgSuggest(car, goal, Y, M), nowM = new Date().getMonth(), mo = Y.months.map(m => m.price), top = Math.max(1, ...mo);
   const base = SG_MONTH || sgToday().slice(0, 7), [yy, mm] = base.split("-").map(Number), first = new Date(yy, mm - 1, 1).getDay(), dim = new Date(yy, mm, 0).getDate();
   const free = new Set(g.days), planD = new Set(sgFuture().map(p => p.d)), sug = new Set((S2.list || []).map(x => x.d)), today = sgToday();
   let cal = ""; for(let i = 0; i < first; i++) cal += `<span></span>`;
@@ -8350,13 +8403,14 @@ function sgBudget(){
   const over = M.month != null && M.mSpent + M.mPlanned > M.month;
   return `${sgHead("お金と乗れる日", "planner", "計画")}
     <div class="sg-hero"><div class="h"><span>${Y.y}年の予算</span><label class="sg-in">予算 <input type="number" inputmode="numeric" min="0" step="10000" id="sgBudget" value="${g.budget ?? ""}" placeholder="例 600000">円</label></div>
-      ${M.budget != null ? `<small class="l">のこり</small><div class="v">${fmtKm(M.left)}<small> 円</small></div>${sgBar(M.spent, M.planned, Math.max(M.budget, 1))}
-      <p class="sg-note light">使った ${sgYen(M.spent)}・予定 ${sgYen(M.planned)}</p>
-      <div class="sg-box">${S2.already ? `<b>予定の便で${esc(goal.name)}に届きます</b>` : S2.list ? `<small>のこりで${esc(goal.name)}に届く？</small><b>${S2.reached ? `届きます${S2.priced ? `・あと約${sgYen(S2.cost)}` : ""}` : S2.priced ? "予算か乗れる日が足りません" : "届く見込みです（金額を入れると予算で計算します）"}</b>` : `<small>${esc(S2.why || "")}</small>`}</div>`
-      : `<p class="sg-note light">予算を入れると、のこりと、届くかどうかを出します。</p>`}</div>
+      ${M.budget != null ? `<small class="l">${SG_TAG_A}のこり（使った金額だけを引く）</small><div class="v">${fmtKm(M.left)}<small> 円</small></div>${sgBar(M.spent, 0, Math.max(M.budget, 1))}
+      <p class="sg-note light">使った ${sgYen(M.spent)}（記録した便の金額）</p>` : `<p class="sg-note light">予算を入れると、のこりと、届くかどうかを出します。</p>`}</div>
+    ${M.budget != null ? `<div class="sg-card plan"><div class="sg-sp2"><span class="hh">${SG_TAG_P}<b>予定の金額</b></span><b>${M.planned ? sgYen(M.planned) : "—"}</b></div>
+      <p class="sg-note">${M.planned ? `予定を払うと、予算の のこりは ${sgYen(M.leftAfter)}${M.leftAfter < 0 ? "（予算をこえます）" : ""}` : "予定の便に金額を入れると、払ったあとの のこりを出します"}</p>
+      <div class="sg-box">${S2.already ? `<b>予定の便で${esc(goal.name)}に届きます</b>` : S2.list ? `<small>のこりで${esc(goal.name)}に届く？</small><b>${S2.reached ? `届きます${S2.priced ? `・あと約${sgYen(S2.cost)}` : ""}` : S2.priced ? "予算か乗れる日が足りません" : "届く見込みです（金額を入れると予算で計算します）"}</b>` : `<small>${esc(S2.why || "")}</small>`}</div></div>` : ""}
     <div class="sg-h"><b>今月（${nowM + 1}月）</b><label class="sg-in dark">月の目安 <input type="number" inputmode="numeric" min="0" step="10000" id="sgMonth" value="${g.month ?? ""}" placeholder="任意">円</label></div>
-    <div class="sg-card"><div class="sg-3"><span><small>使った</small><b>${sgYen(M.mSpent)}</b><small>${Y.months[nowM].n}便</small></span><span><small>予定</small><b>${sgYen(M.mPlanned)}</b></span><span><small>月末の見込み</small><b class="${over ? "red" : ""}">${sgYen(M.mSpent + M.mPlanned)}</b><small class="${over ? "red" : ""}">${M.month != null ? (over ? `目安を ${sgYen(M.mSpent + M.mPlanned - M.month)} こえる` : `目安まで ${sgYen(M.month - M.mSpent - M.mPlanned)}`) : ""}</small></span></div>
-      <span class="sg-mini">${mo.map((v, i) => `<i style="height:${Math.max(3, (v + (i === nowM ? M.mPlanned : 0)) / top * 60).toFixed(0)}px;background:${i === nowM ? "#A9822E" : i > nowM ? "var(--sg-line)" : "var(--sg-ink)"}"></i>`).join("")}</span>
+    <div class="sg-card"><div class="sg-2c0"><span><small>${SG_TAG_A}使った</small><b>${sgYen(M.mSpent)}</b><small>${Y.months[nowM].n}便${M.month != null ? `・目安まで ${sgYen(M.month - M.mSpent)}` : ""}</small></span><span class="pl"><small>${SG_TAG_P}払う予定</small><b>${M.mPlanned ? sgYen(M.mPlanned) : "—"}</b><small class="${over ? "red" : ""}">${M.month != null && M.mPlanned ? (over ? `予定を払うと目安を ${sgYen(M.mSpent + M.mPlanned - M.month)} こえる` : `予定を払っても目安の内`) : ""}</small></span></div>
+      <span class="sg-mini">${mo.map((v, i) => `<i style="height:${Math.max(3, v / top * 60).toFixed(0)}px;background:${i === nowM ? "#A9822E" : i > nowM ? "var(--sg-line)" : "var(--sg-ink)"}"></i>`).join("")}</span>
       ${M.unpriced ? `<p class="sg-note">金額が入っていない便が ${M.unpriced}便あり、使った額に入っていません。</p>` : ""}</div>
     <div class="sg-h"><b>乗れる日</b><small>タップで ○ をつける</small></div>
     <div class="sg-card"><div class="sg-sp2"><button class="sg-a" data-sg-month="${ymOf(prev)}" type="button" aria-label="前の月">‹</button><b>${yy}年${mm}月</b><button class="sg-a" data-sg-month="${ymOf(next)}" type="button" aria-label="次の月">›</button></div>
@@ -8429,7 +8483,173 @@ function sgProfile(){
     <p class="sg-foot">保存先は${SERVER ? "アカウント（ほかの人には見えません）" : "この端末"}です。ボーナスの割合は各社の公開情報（2026年10月に確認）：JAL のマイルUPボーナスはクリスタル55%・サファイア105%・JGCプレミア105%・ダイヤモンド130%・JGC 35%、JAL カードは搭乗ごとに10%（普通）・25%（CLUB-A 以上）。ANA はステイタスと年数とカードで35%〜130%、ANA カードは10%・25%・50%。どちらも、ステイタスとカードのボーナスは重ならず、多いほうだけを足します。</p>`;
 }
 let SG_BACK = null;
-const SG_PAGES = { main:sgMain, plan:sgPlan, year:sgYearPage, ops:sgOps, routes:sgRoutesPage, planner:sgPlanner, budget:sgBudget, quick:sgQuick, profile:sgProfile };
+/* ---------- 計画を作る：時刻表から1日の行程を探す・組む ----------
+   時刻と機材は JAL・ANA の公式の時刻表（ODPT。サーバーの plan_timetable）。乗り継ぎは JAL・ANA が決めている時間を守り、それより短い便は組まない。
+   探した行程・組んでいる行程は「計画」（うすい青）。予定に入れるまでは、実績にも予定にも入れない。 */
+// 乗り継ぎの決まり（分）。前の便の到着から次の便の出発まで。2026年10月27日に各社の公開ページで確認（修行の計算ルールの文書）
+const SG_MCT = { ANA:{ HND:35, ITM:25, KIX:25, OKA:30, _:20 }, JAL:{ HND:30, OKA:30, _:20 }, X:{ HND:50, NRT:50, _:30 } };
+const sgMct = (c1, c2, ap) => { const t = c1 === c2 ? SG_MCT[c1] : SG_MCT.X; return t[ap] ?? t._; };
+const sgMin = t => { const m = /^(\d{1,2}):(\d{2})$/.exec(t || ""); return m ? +m[1] * 60 + +m[2] : null; };
+const sgHM = m => `${m >= 1440 ? "翌" : ""}${Math.floor(m % 1440 / 60)}:${String(m % 60).padStart(2, "0")}`;
+const sgDur = m => m >= 60 ? `${Math.floor(m / 60)}時間${m % 60 ? String(m % 60).padStart(2, "0") + "分" : ""}` : `${m}分`;
+const sgAp = c => IATA[c] ? IATA[c].id : null;
+// その日の時刻表（日付・航空会社ごとに1回だけ読む）
+const SG_TT = new Map();
+async function sgLoadTT(d, car){
+  const k = d + car; if(SG_TT.has(k)) return SG_TT.get(k);
+  const r = SERVER ? await rpcPost("plan_timetable", { p_date:d, p_operator:car }) : null;
+  const v = r && Array.isArray(r.f) ? { until:r.until, f:r.f.map(([no, dep, arr, t1, t2, nd, ac]) => ({ no, dep, arr, d:sgMin(t1), a:sgMin(t2) + (nd ? 1440 : 0), ac:ac || null })).filter(f => f.d != null && f.a != null && sgAp(f.dep) && sgAp(f.arr)) } : null;
+  if(v) SG_TT.set(k, v); return v;
+}
+// 探す条件（端末かアカウントに保存）
+function sgPQ(){ const g = sgGet(), car = sgCar(); g.pq = Object.assign({ d:null, home:"HND", start:"05:30", end:"22:00", mode:"pts" }, g.pq || {}); if(!g.pq.d || g.pq.d < sgToday()) g.pq.d = sgToday(); g.pq.car = car; return g.pq; }
+// 探すときの運賃：選んだもの、なければ計画の行程の運賃
+const sgFareNow = car => { const q = sgGet().pq, d = q && q.d ? sgDayT(q.d) : Date.now(), f = q && q.fare && q.fare[car];
+  return f && f.startsWith(sgFareKey(car, d) + ":") ? f : sgTrip(car).legs[0].fare; };
+// 便のポイント（区間ごとに1回だけ計算）
+function sgPtsOf(car, fare, d){ const memo = new Map(), t = sgDayT(d);
+  return f => { const k = f.dep + f.arr; if(!memo.has(k)){ const L = sgLeg(car, sgAp(f.dep), sgAp(f.arr), fare, t, null); memo.set(k, L ? L.pts : 0); } return memo.get(k); }; }
+// それぞれの空港から、決まりを守ってその日のうちに帰れる、いちばん遅い出発（分）
+function sgLatest(fl, car, home, end){
+  const late = { [home]:Infinity }; let changed = true, guard = 0;
+  while(changed && guard++ < 10){ changed = false;
+    for(const f of fl){ const ok = f.arr === home ? f.a <= end : late[f.arr] != null && f.a + sgMct(car, car, f.arr) <= late[f.arr];
+      if(ok && f.dep !== home && (late[f.dep] == null || f.d > late[f.dep])){ late[f.dep] = f.d; changed = true; } } }
+  return late;
+}
+// 行程を探す：家の空港を出て、決まりを守って乗り継ぎ、帰っていたい時刻までに家の空港へ戻る行程（6区間まで）
+function sgSolve(T, q, car, fare){
+  const start = sgMin(q.start) ?? 330, end = sgMin(q.end) ?? 1320, home = q.home, extra = q.mode === "easy" ? 45 : 0, P = sgPtsOf(car, fare, q.d);
+  const fl = T.f.filter(f => f.d >= start && f.a <= end + 0), by = new Map(); for(const f of fl){ if(!by.has(f.dep)) by.set(f.dep, []); by.get(f.dep).push(f); }
+  const late = sgLatest(fl, car, home, end), out = new Map(); let nodes = 0;
+  const walk = (ap, ready, legs, pts) => {
+    if(++nodes > 250000 || legs.length >= 6) return;
+    const best = new Map();   // 行き先ごとに、乗れるいちばん早い便だけ（同じ行き先なら早いほうがあとの選び方が広い）
+    for(const f of by.get(ap) || []){ if(f.d < ready || best.has(f.arr)) continue;
+      const back = f.arr === home ? f.a <= end : late[f.arr] != null && f.a + sgMct(car, car, f.arr) + extra <= late[f.arr]; if(!back) continue;
+      best.set(f.arr, f); }
+    for(const f of best.values()){ const L = [...legs, f], p = pts + P(f);
+      if(f.arr === home && L.length >= 2){ const key = L.map(x => x.dep).join("-") + "-" + home, cur = out.get(key);
+        if(!cur || f.a < cur.legs[cur.legs.length - 1].a) out.set(key, { legs:L, pts:p }); }
+      walk(f.arr, f.a + sgMct(car, car, f.arr) + extra, L, p); }
+  };
+  walk(home, start, [], 0);
+  const vis = visited(), res = [...out.values()].map(r => { const lay = r.legs.slice(1).map((f, i) => f.d - r.legs[i].a);
+    const pr = r.legs.map(f => sgPriceFor(car, sgAp(f.dep), sgAp(f.arr), fare.split(":")[1]));
+    return { ...r, n:r.legs.length, back:r.legs[r.legs.length - 1].a, minLay:lay.length ? Math.min(...lay) : 0, air:r.legs.reduce((x, f) => x + f.a - f.d, 0),
+      yen:pr.every(Boolean) ? pr.reduce((x, y) => x + y, 0) : null, fresh:[...new Set(r.legs.map(f => f.arr))].filter(c => sgAp(c) && !vis.has(sgAp(c))) }; });
+  const by2 = { pts:(a, b) => b.pts - a.pts || a.n - b.n || a.back - b.back, count:(a, b) => b.n - a.n || b.pts - a.pts, cheap:(a, b) => (a.yen != null ? a.yen / a.pts : 1e9) - (b.yen != null ? b.yen / b.pts : 1e9) || b.pts - a.pts, easy:(a, b) => b.pts - a.pts || b.minLay - a.minLay };
+  res.sort(by2[q.mode] || by2.pts);
+  return { list:res.slice(0, 5), total:res.length, nodes, maxPts:Math.max(0, ...res.map(r => r.pts)), maxN:Math.max(0, ...res.map(r => r.n)) };
+}
+// 行程の名前：2つの空港を行き来するだけなら「羽田⇄那覇 2往復」
+function sgTripLabel(legs){ const aps = legs.map(f => f.dep).concat(legs[legs.length - 1].arr), u = [...new Set(aps)];
+  if(u.length === 2 && legs.length % 2 === 0) return `${placeShort(u[0])}⇄${placeShort(u[1])} ${legs.length / 2}往復`;
+  return aps.map(placeShort).join("→"); }
+// 1日の帯（5時〜24時）
+function sgDayBar(legs){ const x = m => Math.max(0, Math.min(100, (m - 300) / (1440 - 300) * 100));
+  return `<div class="sgday" role="img" aria-label="乗っている時間：${legs.map(f => `${sgHM(f.d)}から${sgHM(f.a)}`).join("、")}">${legs.map(f => `<i style="left:${x(f.d).toFixed(1)}%;width:${Math.max(1.2, x(f.a) - x(f.d)).toFixed(1)}%"></i>`).join("")}</div>
+    <div class="sgdayax" aria-hidden="true"><span>5時</span><span>12時</span><span>18時</span><span>24時</span></div>`; }
+let SG_FIND = null, SG_BUILD = null;
+const sgApSel = (id, sel) => `<select id="${id}" aria-label="空港">${A.filter(a => /^[A-Z]{3}$/.test(a.iata || "") && !a.kind).map(a => `<option value="${a.iata}"${a.iata === sel ? " selected" : ""}>${esc(placeShort(a.iata))}</option>`).join("")}</select>`;
+// P1：この日の行程を探す
+function sgFind(){
+  const Y = sgYear(), car = sgCar(Y), q = sgPQ(), g = sgGet(), unit = car === "JAL" ? "FOP" : "PP";
+  const drafts = (g.drafts || []).filter(x => x.d >= sgToday());
+  return `${sgHead("計画を作る")}
+    <div class="sg-row">${sgSeg("car", [["ANA", "ANA"], ["JAL", "JAL"]], car)}<label class="sg-goal">運賃 <select id="sgPqF" aria-label="運賃">${sgFareOpts(car, sgDayT(q.d), sgFareNow(car))}</select></label></div>
+    <div class="sg-card sgq"><div class="sgq2">
+      <label><small>乗る日</small><input type="date" id="sgPqD" value="${esc(q.d)}" min="${sgToday()}"></label>
+      <label><small>出発して帰る空港</small>${sgApSel("sgPqH", q.home)}</label>
+      <label><small>家を出られる</small><input type="time" id="sgPqS" value="${esc(q.start)}" step="300"></label>
+      <label><small>帰っていたい</small><input type="time" id="sgPqE" value="${esc(q.end)}" step="300"></label></div>
+      <small class="t0">ねらい</small>${sgSeg("pmode", [["pts", "ポイント"], ["count", "回数"], ["cheap", "安さ"], ["easy", "ゆとり"]], q.mode)}</div>
+    <div class="sg-h"><b class="hh">${SG_TAG_C}この日に組める行程</b><small id="sgFindN"></small></div>
+    <div id="sgFindRes"><p class="sg-note">${SERVER ? "時刻表を読んでいます…" : "時刻表から探すのは、サーバー版で使えます。下の「自分で1区間ずつ組む」から組めます。"}</p></div>
+    <button class="sg-link" data-sg-build="" type="button"><span><b>時刻表から1区間ずつ組む</b><small>便を選んでつなぐ</small></span><b>›</b></button>
+    <button class="sg-link" data-sg-go="planner" type="button"><span><b>自分で区間を入れて計算する</b><small>時刻表の出ていない先の日など</small></span><b>›</b></button>
+    ${drafts.length ? `<div class="sg-h"><b class="hh">${SG_TAG_C}残した案</b><small>${drafts.length}件</small></div><div class="sg-card list">${drafts.map(x => `<div class="sg-li"><span class="d"><b>${sgMD(x.d)}</b><small>${sgWD(x.d)}</small></span><span><b>${esc(sgTripLabel(x.legs))}</b><small>${x.car}・+${fmtKm(x.pts)} ${x.car === "JAL" ? "FOP" : "PP"}・${sgHM(x.legs[0].d)}発</small></span><button class="sg-a" data-sg-draft="${esc(x.id)}" type="button">開く</button><button class="sg-x" data-sg-undraft="${esc(x.id)}" aria-label="この案を消す" type="button">×</button></div>`).join("")}</div>` : ""}
+    <p class="sg-foot">時刻と機材は ANA・JAL の公式の時刻表から。${ODPT_CREDIT} 乗り継ぎは各社が決めている時間（ANA は羽田35分・伊丹と関西25分・那覇30分・ほか20分、JAL は羽田と那覇30分・ほか20分）より短い便を組みません。空席と運賃は航空会社のサイトでお確かめください。ポイントは各社の公開情報（2026年10月に確認）からの目安です。</p>`;
+}
+async function sgFillFind(){
+  if(!SERVER) return; const car = sgCar(), q = sgPQ(), fare = sgFareNow(car), unit = car === "JAL" ? "FOP" : "PP";
+  const T = await sgLoadTT(q.d, car), box = $("sgFindRes"); if(!box || SG_PAGE !== "find") return;
+  if(!T){ box.innerHTML = `<p class="sg-note">時刻表を読めませんでした。電波のよい場所で、開き直してください。</p>`; return; }
+  if(T.until && q.d > T.until){ box.innerHTML = `<p class="sg-note">${sgMD(q.d)}の時刻表は、まだ出ていません（${esc(T.until.slice(5).replace("-", "/"))}まで）。「自分で区間を入れて計算する」から組めます。</p>`; return; }
+  const R = sgSolve(T, q, car, fare); SG_FIND = { q:{ ...q }, car, fare, R };
+  if($("sgFindN")) $("sgFindN").textContent = R.total ? `${R.total}通りから` : "";
+  if(!R.list.length){ box.innerHTML = `<p class="sg-note">この条件で、その日のうちに${esc(placeShort(q.home))}へ戻れる行程はありません。時刻か空港を変えてみてください。</p>`; return; }
+  box.innerHTML = R.list.map((r, i) => { const tag = r.pts === R.maxPts && (q.mode === "pts" || i === 0) ? "いちばんたまる" : r.n === R.maxN && R.list[0].n < R.maxN ? "回数がかせげる" : r.minLay >= 90 ? "ゆとりあり" : "";
+    const acs = r.legs.map(f => f.ac).filter(Boolean), ac = acs.length ? [...new Set(acs)].slice(0, 2).join("・") : "";
+    return `<button class="sg-card tap sgr" data-sg-res="${i}" type="button"><span class="sg-sp2"><b>${esc(sgTripLabel(r.legs))}</b>${tag ? `<em>${tag}</em>` : ""}</span>
+      <span class="sgr2"><b class="pts">+${fmtKm(r.pts)}<small> ${unit}</small></b><small>${r.n}区間・${sgHM(r.legs[0].d)}発 → ${sgHM(r.back)}着${r.yen ? `・${fmtKm(r.yen)}円（1${unit} ${Math.round(r.yen / r.pts * 10) / 10}円）` : ""}</small></span>
+      ${sgDayBar(r.legs)}
+      <small class="sgr3">${r.n > 1 ? `乗り継ぎ いちばん短くて ${sgDur(r.minLay)}` : ""}${ac ? `・機材 ${esc(ac)}` : ""}${r.fresh.length ? `・新しい空港の印：${esc(r.fresh.map(placeShort).join("・"))}` : ""}</small></button>`; }).join("");
+}
+// P2：時刻表から組む
+function sgBuild(){
+  const B = SG_BUILD, car = B.car, unit = car === "JAL" ? "FOP" : "PP", P = sgPtsOf(car, B.fare, B.d), T = SG_TT.get(B.d + car);
+  const legs = B.legs, last = legs[legs.length - 1], ap = last ? last.arr : B.home, ready = last ? last.a + sgMct(car, car, ap) : sgMin(B.start) ?? 330;
+  const pts = legs.reduce((x, f) => x + P(f), 0), atHome = last && last.arr === B.home;
+  const legHTML = legs.map((f, i) => `${i ? (() => { const lay = f.d - legs[i - 1].a; return `<p class="sglay">${esc(placeShort(f.dep))}で乗り継ぎ ${sgDur(lay)}（${car} の決まり ${sgMct(car, car, f.dep)}分以上）</p>`; })() : ""}
+    <div class="sglg"><span class="n">${i + 1}</span><span class="m"><span class="t"><b>${sgHM(f.d)}</b><b>${esc(placeShort(f.dep))} → ${esc(placeShort(f.arr))}</b></span><small>${esc(f.no.slice(0, 2) + " " + f.no.slice(2))}・${sgHM(f.a)}着${f.ac ? "・" + esc(f.ac) : ""}</small></span><b class="g">+${fmtKm(P(f))}</b></div>`).join("");
+  let cand = "", hidden = [];
+  if(T && legs.length < 8){
+    const late = sgLatest(T.f, car, B.home, sgMin(B.end) ?? 1320), all = T.f.filter(f => f.dep === ap && f.d >= (last ? last.a : ready));
+    hidden = all.filter(f => f.d < ready);
+    const ok = all.filter(f => f.d >= ready && (SG_BF === "all" || (SG_BF === "home" ? f.arr === B.home : f.arr !== B.home))).slice(0, 40);
+    cand = ok.length ? ok.map(f => { const back = f.arr === B.home || (late[f.arr] != null && f.a + sgMct(car, car, f.arr) <= late[f.arr]);
+      return `<button class="sgc" data-sg-add="${esc(f.no)}|${f.d}" type="button"><b class="t">${sgHM(f.d)}</b><span><b>→ ${esc(placeShort(f.arr))}　${esc(f.no.slice(0, 2) + " " + f.no.slice(2))}</b><small>${last ? `乗り継ぎ ${sgDur(f.d - last.a)}・` : ""}${sgHM(f.a)}着${f.ac ? "・" + esc(f.ac) : ""}${back ? "" : `・その日に${esc(placeShort(B.home))}へ帰る便はありません`}</small></span><b class="g">+${fmtKm(P(f))}</b></button>`; }).join("")
+      : `<p class="sg-note pad">この条件で乗れる便はありません。</p>`;
+  }
+  const price = legs.map(f => sgPriceFor(car, sgAp(f.dep), sgAp(f.arr), B.fare.split(":")[1])), yen = legs.length && price.every(Boolean) ? price.reduce((x, y) => x + y, 0) : null;
+  return `${sgHead(`${sgMD(B.d)}（${sgWD(B.d)}）の行程`, "find", "探す")}
+    <div class="sg-row"><small class="sg-goal" style="margin-left:0">${car}・${esc(FARES[sgFareKey(car, sgDayT(B.d))].find(r => B.fare.endsWith(":" + r[0]))?.[1].split("：").pop() || "")}・${esc(placeShort(B.home))}を${esc(B.start)}から${esc(B.end)}まで</small></div>
+    ${legs.length ? `<div class="sg-card sglegs">${legHTML}<div class="sg-sp2 pad"><button class="sg-a" data-sg-pop type="button">最後の区間を消す</button>${atHome ? `<small>${esc(placeShort(B.home))}に${sgHM(last.a)}に戻ります</small>` : ""}</div></div>` : ""}
+    ${T ? `<div class="sg-h"><b>${legs.length + 1}区間目：${esc(placeShort(ap))}から</b><small>${last ? `${sgHM(ready)}から乗れます（決まり ${sgMct(car, car, ap)}分）` : `${sgHM(ready)}から`}</small></div>
+      <div class="sg-chips">${[["all", "すべて"], ["home", `${placeShort(B.home)}へ帰る`], ["other", "ほかの空港へ"]].map(([k, l]) => `<button type="button" data-sg-bf="${k}" aria-pressed="${SG_BF === k}">${esc(l)}</button>`).join("")}</div>
+      <div class="sg-card list">${cand}</div>
+      ${hidden.length ? `<p class="sg-note">${hidden.length}便は、乗り継ぎが決まり（${sgMct(car, car, ap)}分）より短いので出していません（${esc(hidden.slice(0, 2).map(f => `${sgHM(f.d)}発 ${f.no.slice(0, 2)} ${f.no.slice(2)}`).join("・"))}）。</p>` : ""}`
+      : `<p class="sg-note">時刻表を読んでいます…</p>`}
+    <div class="sgbar"><div class="sg-sp2"><span class="hh">${SG_TAG_C}<b>この行程の分</b></span><small>${legs.length}区間・${!legs.length ? "まだ区間がありません" : atHome ? `${sgHM(last.a)}に${esc(placeShort(B.home))}着` : "帰りがまだ"}</small></div>
+      <div class="sg-sp2"><b class="pts">+${fmtKm(pts)}<small> ${unit}</small></b><small>${yen ? `${fmtKm(yen)}円・1${unit} ${Math.round(yen / pts * 10) / 10}円` : legs.length ? "金額は「自分で区間を入れて計算する」で入れられます" : ""}</small></div>
+      <div class="sg-2b"><button class="sg-btn ghost" data-sg-savedraft type="button" ${legs.length ? "" : "disabled"}>案として残す</button><button class="sg-btn" data-sg-buildplan type="button" ${legs.length ? "" : "disabled"}>予定に入れる</button></div>
+      ${SG_MSG ? `<p class="sg-msg">${esc(SG_MSG)}</p>` : ""}</div>
+    <p class="sg-foot">時刻と機材は ANA・JAL の公式の時刻表から。${ODPT_CREDIT} 乗り継ぎは各社が決めている時間より短い便を出しません。</p>`;
+}
+let SG_BF = "all";
+async function sgOpenBuild(legs){
+  const q = sgPQ(), car = sgCar();
+  SG_BUILD = { d:q.d, car, fare:sgFareNow(car), home:q.home, start:q.start, end:q.end, legs:legs || [] }; SG_BF = "all";
+  sgGo("build"); await sgLoadTT(q.d, car); if(SG_PAGE === "build") sgKeep(() => {});
+}
+const sgBuildLegs = B => B.legs.map(f => ({ from:sgAp(f.dep), to:sgAp(f.arr), fare:B.fare, price:sgPriceFor(B.car, sgAp(f.dep), sgAp(f.arr), B.fare.split(":")[1]), no:f.no, hm:sgHM(f.d) }));
+document.addEventListener("click", async e => {
+  const t = e.target; if(!t.closest || !t.closest("#dShugyo, #v-sg")) return;
+  const g = sgGet(); let b;
+  if((b = t.closest("[data-sg-res]"))){ const r = SG_FIND && SG_FIND.R.list[+b.dataset.sgRes]; if(r) sgOpenBuild(r.legs.slice()); return; }
+  if((b = t.closest("[data-sg-build]"))){ sgOpenBuild([]); return; }
+  if(!SG_BUILD && !t.closest("[data-sg-draft]")) return;
+  if((b = t.closest("[data-sg-bf]"))){ SG_BF = b.dataset.sgBf; sgKeep(() => {}); return; }
+  if((b = t.closest("[data-sg-add]"))){ const [no, d] = b.dataset.sgAdd.split("|"), T = SG_TT.get(SG_BUILD.d + SG_BUILD.car), f = T && T.f.find(x => x.no === no && x.d === +d); if(f) SG_BUILD.legs.push(f); sgKeep(() => {}); return; }
+  if(t.closest("[data-sg-pop]")){ SG_BUILD.legs.pop(); sgKeep(() => {}); return; }
+  if(t.closest("[data-sg-savedraft]")){ const B = SG_BUILD, P = sgPtsOf(B.car, B.fare, B.d);
+    g.drafts = [...(g.drafts || []).filter(x => x.d >= sgToday()), { id:Math.random().toString(36).slice(2, 10), d:B.d, car:B.car, fare:B.fare, home:B.home, start:B.start, end:B.end, legs:B.legs, pts:B.legs.reduce((x, f) => x + P(f), 0) }].slice(-20);
+    SG_MSG = (await sgSave()) ? "案として残しました。「計画を作る」の下に並びます。" : SG_MSG; sgKeep(() => {}); return; }
+  if(t.closest("[data-sg-buildplan]")){ const B = SG_BUILD; sgAddPlans(sgBuildLegs(B), B.car, B.d);
+    SG_MSG = (await sgSave()) ? `${sgMD(B.d)}の予定に${B.legs.length}便入れました。` : SG_MSG; sgKeep(() => {}); return; }
+  if((b = t.closest("[data-sg-draft]"))){ const x = (g.drafts || []).find(y => y.id === b.dataset.sgDraft); if(!x) return;
+    Object.assign(sgPQ(), { d:x.d, home:x.home, start:x.start, end:x.end }); g.car = x.car;
+    SG_BUILD = { d:x.d, car:x.car, fare:x.fare, home:x.home, start:x.start, end:x.end, legs:x.legs.slice() }; SG_BF = "all"; sgGo("build"); await sgLoadTT(x.d, x.car); if(SG_PAGE === "build") sgKeep(() => {}); return; }
+});
+document.addEventListener("click", async e => { const b = e.target.closest && e.target.closest("[data-sg-undraft]"); if(!b) return; const g = sgGet(); g.drafts = (g.drafts || []).filter(x => x.id !== b.dataset.sgUndraft); await sgSave(); sgKeep(() => {}); });
+document.addEventListener("change", e => {
+  const t = e.target; if(!t.closest || !t.closest("#dShugyo, #v-sg") || !/^sgPq[DHSEF]$/.test(t.id || "")) return;
+  const q = sgPQ(); if(t.id === "sgPqF"){ q.fare = Object.assign({}, q.fare, { [sgCar()]:t.value }); sgSave(); sgKeep(() => {}); return; }
+  const k = { sgPqD:"d", sgPqH:"home", sgPqS:"start", sgPqE:"end" }[t.id];
+  if(t.value && (k !== "d" || t.value >= sgToday())) q[k] = t.value; sgSave(); sgKeep(() => {});
+});
+const SG_PAGES = { main:sgMain, plan:sgPlan, year:sgYearPage, ops:sgOps, routes:sgRoutesPage, planner:sgPlanner, budget:sgBudget, quick:sgQuick, profile:sgProfile, find:sgFind, build:sgBuild };
 /* 修行の画面は2つの置き場所で同じものを出す：修行のタブ（下のタブに修行があるとき）と、窓（ないとき） */
 const sgTabOn = () => { const v = $("v-sg"); return !!v && v.classList.contains("on") && !$("dShugyo").open; };
 const sgCanTab = () => MODE === "rally" && loTabs().includes("sg");
@@ -8438,7 +8658,7 @@ function renderShugyo(){
   const tab = sgTabOn(), body = tab ? $("sgTabBody") : $("dShugyoBody"), other = tab ? $("dShugyoBody") : $("sgTabBody"); if(!body) return;
   if(other) other.innerHTML = "";   // 同じ id が2つにならないように、使っていないほうは空にする
   const y = sgScroller().scrollTop; body.innerHTML = (SG_PAGES[SG_PAGE] || sgMain)(); SG_MSG = "";
-  if(SG_PAGE === "main") sgFillRoutes(); if(SG_PAGE === "ops") sgFillOps();
+  if(SG_PAGE === "main") sgFillRoutes(); if(SG_PAGE === "ops") sgFillOps(); if(SG_PAGE === "find") sgFillFind();
   return y;
 }
 function openShugyo(page = "main"){
@@ -8450,7 +8670,7 @@ function sgGo(p, from){ if(p === "profile") SG_BACK = from || SG_PAGE; SG_PAGE =
 const sgKeep = fn => { const d = sgScroller(), y = d.scrollTop; fn(); renderShugyo(); d.scrollTop = y; };
 function sgAddPlans(legs, car, d){
   const g = sgGet();
-  for(const l of legs) g.plans.push({ id:Math.random().toString(36).slice(2, 10), d, from:l.from, to:l.to, car, fare:l.fare, price:l.price || null, no:l.no || null });
+  for(const l of legs) g.plans.push({ id:Math.random().toString(36).slice(2, 10), d, from:l.from, to:l.to, car, fare:l.fare, price:l.price || null, no:l.no || null, hm:l.hm || null });
 }
 document.addEventListener("click", async e => {
   const t = e.target;
@@ -8459,7 +8679,7 @@ document.addEventListener("click", async e => {
   const go = t.closest("[data-sg-go]"); if(go){ sgGo(go.dataset.sgGo); return; }
   const g = sgGet();
   const set = t.closest("[data-sg-set]"); if(set){ const k = set.dataset.sgSet, v = set.dataset.v;
-    if(k === "car"){ g.car = v; SG_LEG = 0; sgSave(); } else if(k === "dir") SG_DIR = +v; else if(k === "qside") SG_QSIDE = v; else if(k === "qcar"){ SG_QCAR = v; SG_QF = "all"; }
+    if(k === "car"){ g.car = v; SG_LEG = 0; sgSave(); } else if(k === "dir") SG_DIR = +v; else if(k === "qside") SG_QSIDE = v; else if(k === "qcar"){ SG_QCAR = v; SG_QF = "all"; } else if(k === "pmode"){ sgPQ().mode = v; sgSave(); }
     sgKeep(() => {}); return; }
   const rt = t.closest("[data-sg-route]"); if(rt){ SG_ROUTE = +rt.dataset.sgRoute; SG_DIR = 0; if(SG_PAGE !== "ops") sgGo("ops"); else sgKeep(() => {}); return; }
   const ur = t.closest("[data-sg-unroute]"); if(ur){ const cur = sgFavRoutes(sgYear()).slice(); cur.splice(+ur.dataset.sgUnroute, 1); g.routes = cur; SG_ROUTE = 0; await sgSave(); sgKeep(() => {}); return; }

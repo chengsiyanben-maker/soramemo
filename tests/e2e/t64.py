@@ -57,7 +57,7 @@ async def main():
         check('あなたの場合：1,082 ＋ サファイア105% 1,136 ＋ 支払い 1,040 ＝ 3,258:', '1,082' in t and '+1,136' in t and '+1,040' in t and '3,258' in t and '2,564' in t)
         # 計画に入れる → 予定に入れる
         await pg.click('[data-sg-q2trip]'); await pg.wait_for_timeout(300)
-        check('計画の画面へ:', '修行の計画を作る' in await pg.inner_text('#dShugyo'))
+        check('計画の画面へ:', '自分で区間を入れて計算する' in await pg.inner_text('#dShugyo'))
         await pg.fill('#sgTripD', '2026-12-05'); await pg.dispatch_event('#sgTripD', 'change'); await pg.wait_for_timeout(200)
         await pg.click('[data-sg-addtrip]'); await pg.wait_for_timeout(300)
         d = await pg.evaluate("__fake.db.shugyo_prefs[0].data")
