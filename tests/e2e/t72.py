@@ -12,7 +12,7 @@ V3 = """window.__co = {name:'そらメモ航空', cash:100000, last:new Date().t
   routes:[{k:'5-6', a:'HND', b:'CTS', km:820, base:344, level:1, cost:10320, mult:.5, hub:1, sky:1, min_size:4.5, sa:6, sb:4.5, ac_id:1, intl:false}],
   fleet:[{id:1, type:'lg', reg:'JA01XJ', icao:'A359', kind:'pax', route:'5-6', paid:40000, age:1, value:40000, sell:12000, upkeep:80, bought_at:new Date().toISOString()}],
   sky:{}, total_km:820, rep_points:0, stars:1, facilities:{}, bought:1, value:100000, friend_code:'ABCD1234', hide_rank:false, friends:0,
-  v3:true, policy:'fsc', premium:20, satisfaction:41.2, sat_mult:0.97, sat_parts:{base:50, target:46}, home:null, home_since:null, plans:{}, fares:{'5-6':{level:0, set_on:null, others:[-1, 0]}},
+  v3:true, policy:'fsc', premium:20, satisfaction:41.2, sat_mult:0.97, sat_parts:{base:50, meal:-8, bag:0, target:37}, meal:'none', bag:'free', home:null, home_since:null, plans:{}, fares:{'5-6':{level:0, set_on:null, others:[-1, 0]}},
   econ:[{k:'5-6', kind:'big', real:52.4, demand:18500, n:3, own:1200, flights:12, seats:3888, carried:3110, revenue:2300, cost:1420, landing:84, congestion:35, profit:761, p_seats:466, p_pax:420, e_pax:2690}]};"""
 async def open_page(b, extra, errs):
     c = await b.new_context(viewport={'width':400,'height':860}); await c.add_init_script(INIT + extra)
@@ -37,6 +37,12 @@ async def main():
         check('上級席：FSC は 0・10・20・30%:', await pg.locator('[data-prem]').count() == 4 and await pg.get_attribute('[data-prem="20"]', 'aria-pressed') == 'true')
         await pg.click('[data-prem="30"]'); await pg.wait_for_timeout(400)
         check('上級席を30%に（co3_set_premium）:', await pg.evaluate('window.__setPrem.p_pct') == 30 and await pg.get_attribute('[data-prem="30"]', 'aria-pressed') == 'true')
+        check('サービス：はじめは機内食なし・荷物無料:', await pg.get_attribute('[data-svc=meal][data-v=none]', 'aria-pressed') == 'true' and await pg.get_attribute('[data-svc=bag][data-v=free]', 'aria-pressed') == 'true')
+        await pg.click('[data-svc=meal][data-v=free]'); await pg.wait_for_timeout(400)
+        check('サービス：機内食を無料に（co3_set_service）:', await pg.evaluate('window.__setSvc.p_meal === "free" && window.__setSvc.p_bag === "free"') and '満足度 +8' in await pg.inner_text('#coV3'))
+        check('サービス：目標値の中身に機内食:', '機内食' in await pg.inner_text('#coV3') and '+8' in await pg.inner_text('#coV3'))
+        await pg.click('[data-svc=bag][data-v=paid]'); await pg.wait_for_timeout(400)
+        check('サービス：荷物を有料に（機内食は無料のまま）:', await pg.evaluate('window.__setSvc.p_meal === "free" && window.__setSvc.p_bag === "paid"') and '旅行の客 −5%' in await pg.inner_text('#coV3'))
         await pg.screenshot(path=os.path.join(WORK, 't72_home.png'), full_page=True)
         # 路線（v3 の内わけ）
         await pg.evaluate("goTab('fleet')"); await pg.wait_for_timeout(400)

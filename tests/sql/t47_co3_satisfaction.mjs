@@ -20,7 +20,7 @@ const ids = Object.fromEntries((await db.query(`select iata, id from airports wh
 
 let s = await as(A, `select public.co_state()`);
 check('満足度の始まりは40', Number(s.satisfaction) === 40, s.satisfaction);
-check('目標値：FSC・機体なしは 50 − 5 ＝ 45', Number(s.sat_parts.target) === 45, s.sat_parts);
+check('目標値：FSC・機体なし・機内食なしは 50 − 5 − 8 ＝ 37', Number(s.sat_parts.target) === 37 && Number(s.sat_parts.meal) === -8, s.sat_parts);
 check('満足度40のお客さんの倍率は −4%', near(Number(s.sat_mult), 0.96, 1e-9), s.sat_mult);
 const m = await q1(`select string_agg(co3.satisfaction_mult(x)::text, ',') from unnest(array[40, 59, 60, 64, 65, 100, 0]::numeric[]) x`);
 check('倍率：40 −4%・59 0・60 0・64 0・65 +1%・100 +8%（上限）・0 −8%（上限）', m === '0.96,1.00,1.00,1.00,1.01,1.08,0.92', m);
@@ -29,16 +29,16 @@ check('1日の動き：(目標 − 今) × 0.1、±3まで', await n(`select co3
 // 毎日の処理：同じ日に2回動かしても1回分
 await q1(`select public.co3_satisfaction_refresh()`);
 await q1(`select public.co3_satisfaction_refresh()`);
-check('毎日の処理で 40 → 40.5（2回動かしても1回分）', await n(`select satisfaction from companies where user_id = '${A}'`) === 40.5, null);
+check('毎日の処理で 40 → 39.7（2回動かしても1回分）', await n(`select satisfaction from companies where user_id = '${A}'`) === 39.7, null);
 
-// LCC：席を詰める −4・方針 +5 → 51
+// LCC：席を詰める −4・方針 +5・機内食なし −8 → 43
 s = await as(A, `select public.co3_set_policy('lcc')`);
-check('目標値：LCC は 50 − 4 ＋ 5 ＝ 51', Number(s.sat_parts.target) === 51 && Number(s.sat_parts.packed) === -4, s.sat_parts);
+check('目標値：LCC は 50 − 4 ＋ 5 − 8 ＝ 43', Number(s.sat_parts.target) === 43 && Number(s.sat_parts.packed) === -4, s.sat_parts);
 // 新しい機体の割合 ×6（会社に入れて90日まで）と、古さ（ac_age 0.8 で −8）
 await db.exec(`insert into aircraft (user_id, type, paid, bought_at) values ('${A}', 'nb', 1000, now()), ('${A}', 'nb', 1000, now() - interval '400 days')`);
 s = await as(A, `select public.co_state()`);
 // 1機は新しい（割合 0.5 × 6 ＝ +3）、古さの平均 (1 + 0.8) / 2 ＝ 0.9 → −8 × 0.1 / 0.2 ＝ −4
-check('新しい機体の半分で +3、古さの平均 0.9 で −4 → 目標値 50', Number(s.sat_parts.new_share) === 3 && Number(s.sat_parts.aging) === -4 && Number(s.sat_parts.target) === 50, s.sat_parts);
+check('新しい機体の半分で +3、古さの平均 0.9 で −4 → 目標値 42', Number(s.sat_parts.new_share) === 3 && Number(s.sat_parts.aging) === -4 && Number(s.sat_parts.target) === 42, s.sat_parts);
 
 // お客さんに倍率が効く：羽田⇄新千歳（本物の便 1日20便×170席）に機体を入れる
 await db.exec(`insert into flight_history (svc_date, flight, dep, arr, std, sta, type)

@@ -4332,7 +4332,7 @@ function coFromServer(j){
       rodeOn:x.rode_on, flight:x.flight, boughtAt:Date.parse(x.bought_at), kind:x.kind || null})),
     sky:j.sky || {}, repPoints:+j.rep_points || 0, stars:+j.stars || 1, bought:+j.bought || 0, value:+j.value || 0,
     friendCode:j.friend_code || "", hideRank:!!j.hide_rank, friends:+j.friends || 0,
-    v3:!!j.v3, policy:j.policy || "fsc", premium:+j.premium || 0, sat:j.satisfaction == null ? 40 : +j.satisfaction, satMult:+j.sat_mult || 1, satParts:j.sat_parts || null, econ:j.econ || [], fares:j.fares || {}, home:j.home == null ? null : +j.home, homeSince:j.home_since || null, cargoRoutes:j.cargo_routes || [], cargo:j.cargo || [], pj:j.pj || [], jobs:j.jobs || [], subsidy:j.subsidy || [], small:j.small || [], plans:j.plans || {},
+    v3:!!j.v3, policy:j.policy || "fsc", premium:+j.premium || 0, sat:j.satisfaction == null ? 40 : +j.satisfaction, satMult:+j.sat_mult || 1, satParts:j.sat_parts || null, econ:j.econ || [], fares:j.fares || {}, meal:j.meal || "none", bag:j.bag || "free", home:j.home == null ? null : +j.home, homeSince:j.home_since || null, cargoRoutes:j.cargo_routes || [], cargo:j.cargo || [], pj:j.pj || [], jobs:j.jobs || [], subsidy:j.subsidy || [], small:j.small || [], plans:j.plans || {},
     facilities:Object.fromEntries(Object.entries(j.facilities || {}).map(([k, v]) => [+k, +v]))}; }
 // 端末だけの版（お試し・サーバーなし）：同じ形の状態を、端末の記録から作る
 let CO_LOCAL = null;
@@ -4374,7 +4374,7 @@ const coMsg = (t, err) => { $("coMsg").textContent = t; $("coMsg").className = e
 async function coRpc(name, args){
   const { data, error } = await sb.rpc(name, args || {});
   if(error){ const m = String(error.message || "");
-    coMsg(m.includes("not enough") ? "資金が足りません。" : m.includes("not met") ? "まだ出会っていない守り神です。" : m.includes("invalid name") ? "会社名は1〜20文字で入れてください。" : m.includes("game not released") ? "エアライン経営は、まだ公開されていません。" : m.includes("not ridden") ? "乗った機体だけを買えます。" : m.includes("already owned") ? "もう持っている機体です。" : m.includes("no free slot") ? "評判の星の数までしか施設を建てられません。" : m.includes("not visited") ? "訪れた空港にだけ施設を建てられます。" : m.includes("too small") ? "この路線の空港には就航できない機体です。" : m.includes("not intl") ? "国際線には、国際線で乗った機体だけを入れられます。" : m.includes("seen limit per day") ? "見ただけの旅客機は1日3機までです。" : m.includes("too many seen") ? "見ただけの旅客機は、会社の機体の半分までです。" : m.includes("10 percent") ? "貨物機は機体の1割までです。" : m.includes("cannot own freighters") ? "この方針では貨物機を持てません。" : m.includes("not seen") ? "見た機体だけを買えます。" : m.includes("invalid policy") ? "その方針は選べません。" : m.includes("premium not allowed") ? "この方針では、その割合の上級席は選べません。" : m.includes("fare once a day") ? "運賃を変えられるのは1日1回です。" : m.includes("invalid fare") ? "その運賃は選べません。" : m.includes("not a freighter") ? "貨物機だけを貨物の路線に入れられます。" : m.includes("too far") ? "この機体では遠すぎて飛べません。" : m.includes("invalid flights") ? "便数は往復の数（偶数）で決めてください。" : m.includes("not a small") ? "小型機だけを買えます。" : m.includes("code not found") ? "その合言葉の会社は見つかりません。" : m.includes("own code") ? "自分の合言葉です。" : m.includes("too many") ? "友だちは100社までです。" : "保存できませんでした。電波のよい場所でもう一度試してください。", true);
+    coMsg(m.includes("not enough") ? "資金が足りません。" : m.includes("not met") ? "まだ出会っていない守り神です。" : m.includes("invalid name") ? "会社名は1〜20文字で入れてください。" : m.includes("game not released") ? "エアライン経営は、まだ公開されていません。" : m.includes("not ridden") ? "乗った機体だけを買えます。" : m.includes("already owned") ? "もう持っている機体です。" : m.includes("no free slot") ? "評判の星の数までしか施設を建てられません。" : m.includes("not visited") ? "訪れた空港にだけ施設を建てられます。" : m.includes("too small") ? "この路線の空港には就航できない機体です。" : m.includes("not intl") ? "国際線には、国際線で乗った機体だけを入れられます。" : m.includes("seen limit per day") ? "見ただけの旅客機は1日3機までです。" : m.includes("too many seen") ? "見ただけの旅客機は、会社の機体の半分までです。" : m.includes("10 percent") ? "貨物機は機体の1割までです。" : m.includes("cannot own freighters") ? "この方針では貨物機を持てません。" : m.includes("not seen") ? "見た機体だけを買えます。" : m.includes("invalid policy") ? "その方針は選べません。" : m.includes("premium not allowed") ? "この方針では、その割合の上級席は選べません。" : m.includes("invalid service") ? "そのサービスは選べません。" : m.includes("fare once a day") ? "運賃を変えられるのは1日1回です。" : m.includes("invalid fare") ? "その運賃は選べません。" : m.includes("not a freighter") ? "貨物機だけを貨物の路線に入れられます。" : m.includes("too far") ? "この機体では遠すぎて飛べません。" : m.includes("invalid flights") ? "便数は往復の数（偶数）で決めてください。" : m.includes("not a small") ? "小型機だけを買えます。" : m.includes("code not found") ? "その合言葉の会社は見つかりません。" : m.includes("own code") ? "自分の合言葉です。" : m.includes("too many") ? "友だちは100社までです。" : "保存できませんでした。電波のよい場所でもう一度試してください。", true);
     return false; }
   if(data && typeof data === "object" && "cash" in data){ CO = coFromServer(data); HANGAR = null; renderCompany(); }
   return data || true;
@@ -4593,8 +4593,8 @@ function renderV3(){
       <p style="margin:0 0 8px">毎日 深夜3時に、目標値へ少しずつ近づきます（あしたは <b>${step >= 0 ? "+" : "−"}${fmtNum(Math.abs(step), 1)}</b>）。</p>
       <div class="v3row"><span>お客さんへの効き目（60から5離れるごとに ±1%）</span><b>${eff > 0 ? "+" : eff < 0 ? "−" : "±"}${Math.abs(eff)}%</b></div></div>
     ${tgt == null ? "" : `<div class="v3box"><h3>目標値の中身</h3><div class="v3row"><span>基本</span><b>${fmtNum(+sp.base || 50, 0)}</b></div>
-      ${part("新しい機体（会社に入れて90日まで）の割合 ×6", +sp.new_share)}${part("機体の古さ", +sp.aging)}${part("席を詰める", +sp.packed)}${part("方針の補正", +sp.policy_adj)}</div>`}
-    <p class="hint">始まりは40です。機内食・定時率・トラブルの対応は、その機能ができたら目標値に入ります。</p>`;
+      ${part("新しい機体（会社に入れて90日まで）の割合 ×6", +sp.new_share)}${part("機体の古さ", +sp.aging)}${part("席を詰める", +sp.packed)}${part("方針の補正", +sp.policy_adj)}${part("機内食", +sp.meal)}${part("預ける荷物", +sp.bag)}</div>`}
+    <p class="hint">始まりは40です。定時率・トラブルの対応は、その機能ができたら目標値に入ります。</p>`;
 }
 // 本拠地（チェックインした空港から）と上級席の割合（FSC 0・10・20・30%、ミドルコスト 0・10%）
 function v3HomeHtml(){
@@ -4605,6 +4605,13 @@ function v3HomeHtml(){
       <div class="satnum"><div><small>いまの本拠地</small><br><b style="font-size:26px">${home ? esc(home.name) : "まだ決めていません"}</b></div>${home && days < 30 ? `<div style="text-align:right"><small>地元の応援まで</small><br><b style="font-size:26px">${30 - days}</b> <small>日</small></div>` : ""}</div>
       <p style="margin:0 0 8px">本拠地の空港の路線は、自社のお客さんが増えます（地元の応援 ×3〜×5、空港が小さいほど大きい）。変えると、新しい本拠地の応援は30日たってから効きます。</p>
       <select id="v3Home" aria-label="本拠地"><option value="">選ぶ（チェックインした空港）</option>${vis.map(a => `<option value="${a.id}"${CO.home === a.id ? " selected" : ""}>${esc(a.name)}</option>`).join("")}</select></div>
+    ${CO.policy === "cargo" ? "" : `<h2>サービス</h2><div class="v3box">
+      <small class="lbl">機内食・飲み物</small>
+      <div class="pillrow" role="group" aria-label="機内食">${[["free", "無料"], ["paid", "有料"], ["none", "なし"]].map(([k, l]) => `<button class="cotab${CO.meal === k ? " on" : ""}" data-svc="meal" data-v="${k}" aria-pressed="${CO.meal === k}">${l}</button>`).join("")}</div>
+      <p class="hint" style="margin:0 0 10px">${{free:"満足度 +8。運航の費用が少し増えます（+2ポイント）。", paid:"満足度 −3。収益 +3%。", none:"満足度 −8。費用も収益も変わりません。"}[CO.meal] || ""}</p>
+      <small class="lbl">預ける荷物</small>
+      <div class="pillrow" role="group" aria-label="預ける荷物">${[["free", "無料"], ["paid", "有料"]].map(([k, l]) => `<button class="cotab${CO.bag === k ? " on" : ""}" data-svc="bag" data-v="${k}" aria-pressed="${CO.bag === k}">${l}</button>`).join("")}</div>
+      <p class="hint" style="margin:0">${CO.bag === "paid" ? `満足度 −4。収益 +${CO.policy === "lcc" ? 6 : 4}%、旅行の客 −5%。` : "満足度も収益も変わりません。"}</p></div>`}
     ${opts ? `<h2>上級席</h2><div class="v3box"><p style="margin:0 0 8px">座席のうち上級席にする割合です。上級席1席は普通席2席分（大型機は3席分）の場所を使い、仕事の客の多い路線で稼げます。</p>
       <div class="pillrow" role="group" aria-label="上級席の割合">${opts.map(n => `<button class="cotab${CO.premium === n ? " on" : ""}" data-prem="${n}" aria-pressed="${CO.premium === n}">${n}%</button>`).join("")}</div></div>` : ""}`;
 }
@@ -4613,6 +4620,12 @@ document.addEventListener("change", async e => {
   const sel = e.target; sel.disabled = true; const a = A.find(x => x.id === +sel.value);
   if(await coRpc("co3_set_home", {p_airport:+sel.value}) && a) coMsg(`本拠地を${a.name}にしました。地元の応援は30日たってから効きます。`);
   sel.disabled = false;
+});
+document.addEventListener("click", async e => {
+  const b = e.target.closest("[data-svc]"); if(!b || b.disabled) return;
+  const meal = b.dataset.svc === "meal" ? b.dataset.v : CO.meal, bag = b.dataset.svc === "bag" ? b.dataset.v : CO.bag;
+  if(meal === CO.meal && bag === CO.bag) return;
+  b.disabled = true; if(await coRpc("co3_set_service", {p_meal:meal, p_bag:bag})) coMsg(b.dataset.svc === "meal" ? `機内食を「${b.textContent}」にしました。満足度は毎日少しずつ動きます。` : `預ける荷物を「${b.textContent}」にしました。`);
 });
 document.addEventListener("click", async e => {
   const b = e.target.closest("[data-prem]"); if(!b) return;
