@@ -424,6 +424,7 @@ dialog::backdrop{background:rgba(15,22,38,.55)}
 .v3row.job{align-items:center;min-height:48px}.v3row.job>span{display:flex;flex-direction:column;gap:2px}.v3row.job small{font-size:12px;color:#5F6672}
 .v3row.job .r{align-items:flex-end;gap:4px}
 small.lbl{display:block;font-size:12px;color:#5F6672;margin-bottom:6px}
+.slt{display:grid;grid-template-columns:1fr auto;gap:2px 10px;align-items:center;padding:10px 0}.slt+.slt{border-top:1px solid var(--line,#eceef1)}.slt .sv{display:flex;align-items:center;gap:8px}.slt .sv b{min-width:52px;text-align:center;font-size:18px}.slt .sv button{width:34px;height:34px;border-radius:999px;border:0;background:var(--ink);color:var(--paper);font:700 18px/1 var(--sans)}.slt .sv button:disabled{background:#c9cdd3}.slbar{height:6px;border-radius:9px;background:#eceef1;overflow:hidden;margin:6px 0 2px}.slbar i{display:block;height:100%;background:#1C4FA0;border-radius:9px}
 .v3box{background:var(--paper);border-radius:14px;padding:14px;margin-bottom:10px;font-size:13px}
 .v3box h3{margin:0 0 8px;font-size:15px}
 .v3stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin:8px 0}
@@ -1948,6 +1949,7 @@ nav.tabs{transition:transform .3s cubic-bezier(.2,.8,.2,1),opacity .2s}
     <h2>自社路線</h2>
     <p class="hint" id="coRouteHintV3" hidden>実際に飛んだ区間（国際線は便名を入れた記録）が、あなたの会社の路線になります。路線のお客さんを、同じ路線の会社で取り合います（運賃・便数・満足度・地元の応援で取り分が決まります）。機体を入れた路線だけが飛びます。路線を押すと、お客さんと収益の内わけ、1日の便数が見られます。</p>
     <p class="hint" id="coRouteHint">実際に飛んだ区間（国際線は便名を入れた記録）が、あなたの会社の路線になります。機体を入れると機体の倍率に、機体がないと収益は半分です。路線を押すと計算の内わけが見られます。空港の大きさは、1日の発着便数で5段階（超大規模・拠点・大規模・中規模・小規模）。大型ジェットは拠点以上どうし、中型ジェットは大規模以上どうしの路線に入れられます。</p>
+    <div class="pillrow" id="coRouteTabs" hidden></div>
     <div id="coRoutes"></div>
     <h2>機体</h2>
     <p class="hint">あなたが乗った機体だけを、会社の機体として買えます。登録記号は、便名を入れたフライトの毎日の記録（機体の位置・adsb.lol）から。分からないときは、時刻表の機種で「名前のない機体」を1機買えます。国際線に入れられるのは、国際線で乗った機体だけです。</p>
@@ -4359,10 +4361,11 @@ function coFromServer(j){
       return {k:r.k, intl:!!r.intl, a:r.intl ? apOf(r.a, true) : BY[ids[0]], b:r.intl ? apOf(r.b, true) : BY[ids[1]], km:+r.km || 0, base:+r.base, lv:+r.level, cost:+r.cost,
         minSize:+r.min_size, sa:+r.sa || null, sb:+r.sb || null, acId:r.ac_id, mult:+r.mult, hub:+r.hub || 1, sky:+r.sky || 1}; }).filter(r => r.a && r.b),
     fleet:(j.fleet || []).map(x => ({id:x.id, type:x.type, route:x.route, reg:x.reg, icao:x.icao, intl:!!x.intl, paid:+x.paid, age:+x.age, value:+x.value, sell:+x.sell, upkeep:+x.upkeep,
-      rodeOn:x.rode_on, flight:x.flight, boughtAt:Date.parse(x.bought_at), kind:x.kind || null, lease:!!x.lease, leaseFee:+x.lease_fee || 0, listed:x.listed || null})),
+      rodeOn:x.rode_on, flight:x.flight, boughtAt:Date.parse(x.bought_at), kind:x.kind || null, lease:!!x.lease, leaseFee:+x.lease_fee || 0, listed:x.listed || null,
+      flyHours:x.fly_hours == null ? null : +x.fly_hours, checkLeft:x.check_left_hours == null ? null : +x.check_left_hours, checkedDay:x.checked_day || null, checkReq:!!x.check_req, checkCost:+x.check_cost || 0, wifi:!!x.wifi, wifiCost:+x.wifi_cost || 0, cat3:!!x.cat3, cat3Cost:+x.cat3_cost || 0, heavyNext:x.heavy_next || null})),
     sky:j.sky || {}, repPoints:+j.rep_points || 0, stars:+j.stars || 1, bought:+j.bought || 0, value:+j.value || 0,
     friendCode:j.friend_code || "", hideRank:!!j.hide_rank, friends:+j.friends || 0,
-    v3:!!j.v3, policy:j.policy || "fsc", premium:+j.premium || 0, sat:j.satisfaction == null ? 40 : +j.satisfaction, satMult:+j.sat_mult || 1, satParts:j.sat_parts || null, econ:j.econ || [], fares:j.fares || {}, meal:j.meal || "none", bag:j.bag || "free", troubles:j.troubles || [], autoTrouble:!!j.auto_trouble, morning:j.morning || null, legs:j.legs || {}, rating:j.rating == null ? null : +j.rating, breakdowns:j.breakdowns || [], scheds:j.scheds || {}, market:j.market || [], news:j.news || [], leaseRoom:j.lease_room == null ? null : +j.lease_room, ratingHave:j.rating_have || null, home:j.home == null ? null : +j.home, homeSince:j.home_since || null, cargoRoutes:j.cargo_routes || [], cargo:j.cargo || [], pj:j.pj || [], jobs:j.jobs || [], subsidy:j.subsidy || [], small:j.small || [], plans:j.plans || {},
+    v3:!!j.v3, policy:j.policy || "fsc", premium:+j.premium || 0, sat:j.satisfaction == null ? 40 : +j.satisfaction, satMult:+j.sat_mult || 1, satParts:j.sat_parts || null, econ:j.econ || [], fares:j.fares || {}, meal:j.meal || "none", bag:j.bag || "free", troubles:j.troubles || [], autoTrouble:!!j.auto_trouble, morning:j.morning || null, legs:j.legs || {}, rating:j.rating == null ? null : +j.rating, breakdowns:j.breakdowns || [], scheds:j.scheds || {}, market:j.market || [], news:j.news || [], leaseRoom:j.lease_room == null ? null : +j.lease_room, ratingHave:j.rating_have || null, home:j.home == null ? null : +j.home, homeSince:j.home_since || null, cargoRoutes:j.cargo_routes || [], cargo:j.cargo || [], pj:j.pj || [], jobs:j.jobs || [], subsidy:j.subsidy || [], small:j.small || [], plans:j.plans || {}, people:j.people || null, invest:j.invest || null, cs:j.cs || null, ally:j.ally || null, allyCooldown:j.ally_cooldown || null, orders:j.orders || [], wx:j.wx || null, heavy:j.heavy || [], extra:j.extra || null, season:j.season || null, money3:j.money3 || null, slots:j.slots || null, checkMode:j.check_mode || "auto",
     facilities:Object.fromEntries(Object.entries(j.facilities || {}).map(([k, v]) => [+k, +v]))}; }
 // 端末だけの版（お試し・サーバーなし）：同じ形の状態を、端末の記録から作る
 let CO_LOCAL = null;
@@ -4404,7 +4407,7 @@ const coMsg = (t, err) => { $("coMsg").textContent = t; $("coMsg").className = e
 async function coRpc(name, args){
   const { data, error } = await sb.rpc(name, args || {});
   if(error){ const m = String(error.message || "");
-    coMsg(m.includes("not enough") ? "資金が足りません。" : m.includes("not met") ? "まだ出会っていない守り神です。" : m.includes("invalid name") ? "会社名は1〜20文字で入れてください。" : m.includes("game not released") ? "エアライン経営は、まだ公開されていません。" : m.includes("not ridden") ? "乗った機体だけを買えます。" : m.includes("already owned") ? "もう持っている機体です。" : m.includes("no free slot") ? "評判の星の数までしか施設を建てられません。" : m.includes("not visited") ? "訪れた空港にだけ施設を建てられます。" : m.includes("too small") ? "この路線の空港には就航できない機体です。" : m.includes("not intl") ? "国際線には、国際線で乗った機体だけを入れられます。" : m.includes("seen limit per day") ? "見ただけの旅客機は1日3機までです。" : m.includes("too many seen") ? "見ただけの旅客機は、会社の機体の半分までです。" : m.includes("10 percent") ? "貨物機は機体の1割までです。" : m.includes("cannot own freighters") ? "この方針では貨物機を持てません。" : m.includes("not seen") ? "見た機体だけを買えます。" : m.includes("invalid policy") ? "その方針は選べません。" : m.includes("premium not allowed") ? "この方針では、その割合の上級席は選べません。" : m.includes("rating required") ? `格付け${m.replace(/.*rating required (\d).*/, "$1")}から使えます。` : m.includes("lease limit") ? "リースで借りられる数がいっぱいです（2機＋自社機2機ごとに1機）。" : m.includes("leased") ? "リースの機体は売れません（返すことはできます）。" : m.includes("type not known") ? "この機種に乗った（見た）会社だけが買えます。" : m.includes("one per day") ? "中古機を買えるのは1日1機までです。" : m.includes("same partner") ? "同じ会社との取引は30日に1回までです。" : m.includes("already listed") ? "もう売りに出しています。" : m.includes("listing not found") ? "その中古機はもう売れたか、取り下げられました。" : m.includes("own listing") ? "自分の機体は買えません。" : m.includes("not connected") ? "便がつながっていません（着いた空港から次の便を出してください）。" : m.includes("turn too short") ? "折り返しの時間が短すぎます。" : m.includes("outside hours") ? "空港の運用時間の外の便があります。" : m.includes("must end at") ? "1日の最後は、最初の便が出る空港に戻ってください。" : m.includes("legs 1 to 16") ? "便は1日1〜16便までです。" : m.includes("not a passenger aircraft") ? "旅客機だけを自分で組めます。" : m.includes("too late") ? "対応できる6時間を過ぎました。" : m.includes("already done") ? "このトラブルにはもう対応しました。" : m.includes("trouble not found") ? "そのトラブルは見つかりません。" : m.includes("invalid service") ? "そのサービスは選べません。" : m.includes("fare once a day") ? "運賃を変えられるのは1日1回です。" : m.includes("invalid fare") ? "その運賃は選べません。" : m.includes("not a freighter") ? "貨物機だけを貨物の路線に入れられます。" : m.includes("too far") ? "この機体では遠すぎて飛べません。" : m.includes("invalid flights") ? "便数は往復の数（偶数）で決めてください。" : m.includes("not a small") ? "小型機だけを買えます。" : m.includes("code not found") ? "その合言葉の会社は見つかりません。" : m.includes("own code") ? "自分の合言葉です。" : m.includes("too many") ? "友だちは100社までです。" : "保存できませんでした。電波のよい場所でもう一度試してください。", true);
+    coMsg(m.includes("not enough") ? "資金が足りません。" : m.includes("not met") ? "まだ出会っていない守り神です。" : m.includes("invalid name") ? "会社名は1〜20文字で入れてください。" : m.includes("game not released") ? "エアライン経営は、まだ公開されていません。" : m.includes("not ridden") ? "乗った機体だけを買えます。" : m.includes("already owned") ? "もう持っている機体です。" : m.includes("no free slot") ? "評判の星の数までしか施設を建てられません。" : m.includes("not visited") ? "訪れた空港にだけ施設を建てられます。" : m.includes("too small") ? "この路線の空港には就航できない機体です。" : m.includes("not intl") ? "国際線には、国際線で乗った機体だけを入れられます。" : m.includes("seen limit per day") ? "見ただけの旅客機は1日3機までです。" : m.includes("too many seen") ? "見ただけの旅客機は、会社の機体の半分までです。" : m.includes("10 percent") ? "貨物機は機体の1割までです。" : m.includes("cannot own freighters") ? "この方針では貨物機を持てません。" : m.includes("not seen") ? "見た機体だけを買えます。" : m.includes("invalid policy") ? "その方針は選べません。" : m.includes("premium not allowed") ? "この方針では、その割合の上級席は選べません。" : m.includes("rating required") ? `格付け${m.replace(/.*rating required (\d).*/, "$1")}から使えます。` : m.includes("invest total limit") ? "受けられる出資は合計49%までです。" : m.includes("invest limit") ? "出資できるのは相手の会社の価値の20%までです。" : m.includes("already invested") ? "この会社にはもう出資しています。" : m.includes("invest locked") ? "引き上げは出資してから30日後からです。" : m.includes("investor cannot pay") ? "出資する会社の資金が足りません。" : m.includes("not partner") ? "友だちかアライアンスの仲間とだけ結べます。" : m.includes("not connected") ? "どちらかの空港が自分の路線にある路線だけ売れます。" : m.includes("sellers full") ? "この路線の販売会社はもう3社です。" : m.includes("codeshare limit") ? "格付けで決まる本数まで売っています。" : m.includes("already requested") ? "もう申し込んでいます。" : m.includes("seller cannot pay") ? "販売会社がブロック買い取りの代金を払えません。" : m.includes("fsc only") ? "アライアンスを作れるのは FSC だけです。" : m.includes("real alliance name") ? "本物のアライアンスの名前は使えません。" : m.includes("already in alliance") ? "もうアライアンスに入っています。" : m.includes("alliance cooldown") ? "抜けてから7日たつと入れます。" : m.includes("lcc cannot join") ? "LCC はアライアンスに入れません。" : m.includes("alliance full") ? "このアライアンスは50社でいっぱいです。" : m.includes("not orderable") ? "その機種は発注できません（今も作られている新しい世代だけ）。" : m.includes("prep max") ? "これ以上は上げられません。" : m.includes("no typhoon") ? "この路線に台風の予報はありません。" : m.includes("not peak") ? "臨時便は繁忙期のあいだだけ組めます。" : m.includes("not a spare") ? "予備機（路線に入れていない機体）だけで組めます。" : m.includes("already extra") ? "この機体はもう臨時便を飛んでいます。" : m.includes("lounge max") ? "ラウンジは3段までです。" : m.includes("debt limit") ? "借りられるのは会社の価値の半分までです。" : m.includes("invalid amount") ? "その金額にはできません。" : m.includes("invalid hire") ? "その人数にはできません。" : m.includes("no home airport") ? "拠点の空港を決めると、地上の仕事を自社にできます。" : m.includes("slot auto") ? "おまかせのあいだは申し込めません。" : m.includes("invalid airport") ? "その空港には申し込めません。" : m.includes("lease limit") ? "リースで借りられる数がいっぱいです（2機＋自社機2機ごとに1機）。" : m.includes("leased") ? "リースの機体は売れません（返すことはできます）。" : m.includes("type not known") ? "この機種に乗った（見た）会社だけが買えます。" : m.includes("one per day") ? "中古機を買えるのは1日1機までです。" : m.includes("same partner") ? "同じ会社との取引は30日に1回までです。" : m.includes("already listed") ? "もう売りに出しています。" : m.includes("listing not found") ? "その中古機はもう売れたか、取り下げられました。" : m.includes("own listing") ? "自分の機体は買えません。" : m.includes("not connected") ? "便がつながっていません（着いた空港から次の便を出してください）。" : m.includes("turn too short") ? "折り返しの時間が短すぎます。" : m.includes("outside hours") ? "空港の運用時間の外の便があります。" : m.includes("must end at") ? "1日の最後は、最初の便が出る空港に戻ってください。" : m.includes("legs 1 to 16") ? "便は1日1〜16便までです。" : m.includes("not a passenger aircraft") ? "旅客機だけを自分で組めます。" : m.includes("too late") ? "対応できる6時間を過ぎました。" : m.includes("already done") ? "このトラブルにはもう対応しました。" : m.includes("trouble not found") ? "そのトラブルは見つかりません。" : m.includes("invalid service") ? "そのサービスは選べません。" : m.includes("fare once a day") ? "運賃を変えられるのは1日1回です。" : m.includes("invalid fare") ? "その運賃は選べません。" : m.includes("not a freighter") ? "貨物機だけを貨物の路線に入れられます。" : m.includes("too far") ? "この機体では遠すぎて飛べません。" : m.includes("invalid flights") ? "便数は往復の数（偶数）で決めてください。" : m.includes("not a small") ? "小型機だけを買えます。" : m.includes("code not found") ? "その合言葉の会社は見つかりません。" : m.includes("own code") ? "自分の合言葉です。" : m.includes("too many") ? "友だちは100社までです。" : "保存できませんでした。電波のよい場所でもう一度試してください。", true);
     return false; }
   if(data && typeof data === "object" && "cash" in data){ CO = coFromServer(data); HANGAR = null; renderCompany(); }
   return data || true;
@@ -4462,6 +4465,9 @@ function renderFleet(){
   const pf3 = r => E3 && E3[r.k] ? +E3[r.k].profit || 0 : -1e9;
   if($("coRouteHint")){ $("coRouteHint").hidden = !!E3; $("coRouteHintV3").hidden = !E3; }
   const openK = [...document.querySelectorAll("#coRoutes details[open][data-k]")].map(d => d.dataset.k);
+  const slotsOn = !!(CO.server && CO.v3 && CO.slots);
+  if($("coRouteTabs")){ $("coRouteTabs").hidden = !slotsOn; $("coRouteTabs").innerHTML = slotsOn ? [["routes", "路線"], ["slots", "発着枠"]].map(([k, l]) => `<button class="cotab${ROUTE_TAB === k ? " on" : ""}" data-rtab="${k}" aria-pressed="${ROUTE_TAB === k}">${l}</button>`).join("") : ""; }
+  if(slotsOn && ROUTE_TAB === "slots") $("coRoutes").innerHTML = slotsHtml(); else
   $("coRoutes").innerHTML = rs.length ? [...rs].sort((x, y) => E3 ? pf3(y) - pf3(x) : routeInc(y) - routeInc(x)).map(r => {
     if(E3 && E3[r.k]) return routeV3Html(r, E3[r.k], fl.find(a => a.id === r.acId));
     const inc = routeInc(r), max = r.lv >= ECON.maxLevel, ac = fl.find(a => a.id === r.acId), st = skyText(r), sp = Math.round((r.sky - 1) * 100);
@@ -4481,14 +4487,15 @@ function renderFleet(){
   for(const k of openK){ const d = document.querySelector(`#coRoutes details[data-k="${CSS.escape(k)}"]`); if(d) d.open = true; }
   // 機体
   const H = HANGAR, tabs = [["have", `持っている ${fl.length}`], ["buy", `買える${H ? " " + H.filter(x => !x.owned).length : ""}`],
-    ...(CO.server && CO.v3 ? [["seen", `見た機体${SEEN ? " " + SEEN.filter(x => !x.owned).length : ""}`], ["used", `中古機 ${(CO.market || []).length}`]] : [])];
+    ...(CO.server && CO.v3 ? [["seen", `見た機体${SEEN ? " " + SEEN.filter(x => !x.owned).length : ""}`], ["used", `中古機 ${(CO.market || []).length}`], ["order", `発注${(CO.orders || []).length ? " " + CO.orders.length : ""}`]] : [])];
   $("coTabs").innerHTML = tabs.map(([k, l]) => `<button class="cotab${CO_TAB === k ? " on" : ""}" data-cotab="${k}">${l}</button>`).join("");
   if(CO_TAB === "have" && SCHED_EDIT && fl.some(a => a.id === SCHED_EDIT.ac)){ renderSchedEdit();
   } else if(CO_TAB === "have"){
-    $("coFleet").innerHTML = fl.length ? fl.map(a => { const ok = rs.filter(r => r.minSize >= ACB[a.type].minSize && (!r.intl || a.intl)), liv = a.reg && LIVERY_NAMES[a.reg];
+    $("coFleet").innerHTML = (fl.length ? checkModeHtml() : "") + (fl.length ? fl.map(a => { const ok = rs.filter(r => r.minSize >= ACB[a.type].minSize && (!r.intl || a.intl)), liv = a.reg && LIVERY_NAMES[a.reg];
       return `<div class="ride have${liv ? " liv" : ""}">${acSVG(a.type)}<div class="rd"><b>${esc(a.reg || "名前のない機体")}</b><span>${esc(acTypeName(a.icao) || "")}（${ACB[a.type].name}）${a.intl ? "・国際線" : ""}</span>${liv ? `<em>★ ${esc(liv)}</em>` : ""}
         ${(() => { const today = jstToday(), b = (CO.breakdowns || []).find(x => x.ac_id === a.id && String(x.start) <= today && String(x.end) >= today), sp = (CO.breakdowns || []).find(x => x.spare_id === a.id && String(x.end) >= today);
           return b ? `<em class="brk">故障で運休中（${esc(String(b.end).slice(5).replace("-", "/"))}まで）・${b.spare_reg ? `予備機 ${esc(b.spare_reg)} が代わりに飛んでいます` : "予備機がないので、この路線は欠航"}</em>` : sp ? `<em class="brk sp">予備機として ${esc(sp.reg || "")} の代わりに飛んでいます</em>` : ""; })()}
+        ${checkHtml(a)}${heavyHtml(a)}${extraHtml(a, ok)}
         <small>${a.rodeOn ? `${esc(String(a.rodeOn).slice(5).replace("-", "/"))} ${esc(a.flight || "")} で乗った・` : ""}買って ${Math.floor((Date.now() - a.boughtAt) / 864e5)}日${a.age < 1 ? `・古さ −${Math.round((1 - a.age) * 100)}%` : ""}・維持費 −${fmtKm(a.upkeep)}/日</small></div>
         <select data-assign="${a.id}" aria-label="${esc(a.reg || "名前のない機体")}の路線"><option value="">路線に入れない</option>${ok.map(r => `<option value="${r.k}"${a.route === r.k ? " selected" : ""}>${esc(rName(r))}${r.acId && r.acId !== a.id ? "（交代）" : ""}</option>`).join("")}</select>
         ${CO.server && CO.v3 && ["fsc", "mcc", "lcc", "regional"].includes(CO.policy) && !["freighter", "bizjet"].includes(a.kind) ? `<button class="linkbtn2" data-sched="${a.id}">${(CO.scheds || {})[a.id] ? `自分で組んだスケジュール（${CO.scheds[a.id].length}便）を見る` : "スケジュールを自分で組む"}</button>` : ""}
@@ -4496,9 +4503,10 @@ function renderFleet(){
           : `${CO.server && CO.v3 ? (a.listed ? `<em class="brk sp">中古で売りに出し中 ${yen(+a.listed.price)}（${esc(String(new Date(a.listed.expires).getMonth() + 1))}/${new Date(a.listed.expires).getDate()}まで）</em><button class="linkbtn2" data-mk-cancel="${a.listed.id}">取り下げる</button>`
               : `<span class="mkl"><select data-mk-pct="${a.id}" aria-label="中古の値段"${ratingOk(2) ? "" : " disabled"}>${[50, 80, 100, 120, 150].map(p => `<option value="${p}"${p === 100 ? " selected" : ""}>${p}%（${yen(Math.round(a.value * p / 100))}）</option>`).join("")}</select><button class="linkbtn2" data-mk-list="${a.id}"${ratingOk(2) ? "" : " disabled"}>中古で売りに出す${ratingOk(2) ? "" : "（格付け2から）"}</button></span>`) : ""}
         <button class="linkbtn2" data-sell="${a.id}">売る（${yen(a.sell)}）</button>`}</div>`; }).join("")
-      : `<p class="none">まだ機体がありません。「買える」から、乗った機体を選びましょう。${CO.bought ? "" : "最初の1機は半額です。"}</p>`;
+      : `<p class="none">まだ機体がありません。「買える」から、乗った機体を選びましょう。${CO.bought ? "" : "最初の1機は半額です。"}</p>`);
   } else if(CO_TAB === "seen" && CO.server && CO.v3){ renderSeen();
   } else if(CO_TAB === "used" && CO.server && CO.v3){ renderUsed();
+  } else if(CO_TAB === "order" && CO.server && CO.v3){ renderOrder();
   } else {
     if(!H){ $("coFleet").innerHTML = `<p class="none">乗った機体を調べています…</p>`; loadHangar().then(() => { if(currentView() === "fleet") renderFleet(); }); return; }
     const list = H.filter(x => !x.owned);
@@ -4567,6 +4575,91 @@ document.addEventListener("click", async e => {
   coLocalDo(L => { L.cash -= cost; (L.fac = L.fac || {})[id] = cur + 1; });
   coMsg(`${godShort(a)}の施設が${F.names[cur + 1]}になりました。`);
 });
+// アライアンス（一覧・作る・入る・抜ける。仲間とは認めなしでフリーセールの共同運航）
+let ALLY = null;
+async function loadAlly(){ try{ const { data, error } = await sb.rpc("co3_ally_list"); if(!error) ALLY = data || []; }catch(e){ ALLY = []; } if(currentView() === "co") renderRank(); }
+function allyHtml(){
+  if(ALLY == null){ loadAlly(); return `<p class="none">読み込んでいます…</p>`; }
+  const A = CO.ally, md = d => String(d).slice(5, 10).replace("-", "/");
+  const mine = A ? `<div class="v3box"><div class="satnum"><div><small>あなたのアライアンス</small><br><b style="font-size:20px">${esc(A.name)}</b></div><div style="text-align:right"><small>リーダー</small><br><b style="font-size:14px">${esc(A.leader_name || "")}</b></div></div>
+      ${(A.members || []).map(m => `<div class="v3row"><span>${esc(m.name)}${m.me ? "（自分）" : ""}</span><b>${yen(+m.value)}</b>${A.leader && !m.me ? `<button class="linkbtn2" data-akick="${esc(m.code)}">外す</button>` : ""}</div>`).join("")}
+      <button class="linkbtn2" id="allyLeave">抜ける（7日は入れません）</button></div>` : "";
+  const make = !A && ratingOk(3) && CO.policy === "fsc" ? `<div class="frin"><input id="allyName" maxlength="20" placeholder="新しいアライアンスの名前" aria-label="アライアンスの名前"><button class="btn2" id="allyMake">作る</button></div>` : "";
+  return mine + `<div class="rklist">${ALLY.length ? ALLY.map((x, i) => `<div class="rkrow${x.mine ? " me" : ""}"><b>${i + 1}</b><div><b>${esc(x.name)}</b><small>${x.n}社・リーダー ${esc(x.leader || "")}・今月 ${+x.growth >= 0 ? "+" : "−"}${yen(Math.abs(+x.growth))}</small></div><b>${yen(+x.value)}</b>${!A && !x.mine && CO.policy !== "lcc" && +x.n < 50 ? `<button class="linkbtn2" data-ajoin="${x.id}"${CO.allyCooldown ? " disabled" : ""}>入る</button>` : ""}</div>`).join("") : `<p class="none">まだアライアンスはありません。</p>`}</div>
+    ${make}${CO.allyCooldown ? `<p class="hint">${md(CO.allyCooldown)} から入れます。</p>` : ""}
+    <p class="hint">50社まで。作れるのは格付け3以上の FSC、入るのはだれでも（LCC は入れません）。仲間とは認めなしでフリーセールの共同運航ができ、仲間の施設の効き目の半分が自分の路線にも効きます。シーズンごとの対抗戦で上位3つに賞金と印。本物のアライアンスとは関係ありません。</p>`;
+}
+document.addEventListener("click", async e => {
+  const b = e.target.closest("#allyMake,#allyLeave,[data-ajoin],[data-akick]"); if(!b || b.disabled) return; b.disabled = true;
+  let ok = null;
+  if(b.id === "allyMake"){ const n = ($("allyName").value || "").trim(); if(n) ok = await coRpc("co3_ally_create", {p_name:n}); if(ok) coMsg(`アライアンス「${n}」を作りました。`); }
+  else if(b.id === "allyLeave"){ ok = await coRpc("co3_ally_leave", {}); if(ok) coMsg("アライアンスを抜けました。"); }
+  else if(b.dataset.ajoin){ ok = await coRpc("co3_ally_join", {p_id:+b.dataset.ajoin}); if(ok) coMsg("アライアンスに入りました。"); }
+  else if(b.dataset.akick){ ok = await coRpc("co3_ally_kick", {p_code:b.dataset.akick}); if(ok) coMsg("仲間から外しました。"); }
+  b.disabled = false; if(ok){ ALLY = null; renderRank(); }
+});
+// 出資（資本提携。格付け3から）
+function investHtml(){
+  const I = CO.invest; if(!I) return "";
+  if(!ratingOk(3)) return "";
+  const md = d => String(d).slice(5, 10).replace("-", "/"), pc = v => `${Math.round(+v * 1000) / 10}%`;
+  const rows = (I.list || []).map(x => `<div class="v3row"><span>${x.role === "out" ? `${esc(x.partner)} に出資` : `${esc(x.partner)} から出資`} ${yen(+x.amount)}${x.pct != null ? `（${pc(x.pct)}）` : ""}<br><small>${x.status === "offer" ? "認め待ち" : `${x.role === "out" ? "受け取り" : "渡す"} ${fmtKm(+x.daily)}/日${x.role === "out" ? ` ・ 引き上げは ${md(x.unlock)} から` : ""}`}</small></span><b></b>
+      ${x.status === "offer" && x.role === "in" ? `<button class="linkbtn2" data-invok="${x.id}">認める</button><button class="linkbtn2" data-invno="${x.id}">断る</button>`
+        : x.role === "out" ? `<button class="linkbtn2" data-invwd="${x.id}"${x.status === "active" && Date.parse(x.unlock) > Date.now() ? " disabled" : ""}>${x.status === "offer" ? "取り消す" : "引き上げる"}</button>` : ""}</div>`).join("");
+  return `<h2>出資</h2><div class="v3box">
+    ${rows || `<p class="hint" style="margin:0 0 6px">まだ出資はありません。</p>`}
+    ${opsStats([["受け渡し", `${+I.flow >= 0 ? "+" : "−"}${fmtKm(Math.abs(+I.flow))}`, "/日"], ["受けている出資", pc(I.taken), "/49%"]])}
+    <div class="frin"><input id="invCode" maxlength="8" autocomplete="off" autocapitalize="characters" placeholder="相手の合言葉" aria-label="出資する会社の合言葉"><input id="invAmt" inputmode="numeric" placeholder="金額" aria-label="出資する金額"><button class="btn2" id="invGo">出資を申し込む</button></div>
+    <p class="hint" style="margin:6px 0 0">相手が認めると、相手に資金が入り、あなたは相手の毎日のもうけのうち出資した割合を受け取ります。相手の会社の価値の20%まで、1社が受けられるのは合計49%まで。引き上げは30日後から、そのときの価値で戻ります。</p></div>`;
+}
+document.addEventListener("click", async e => {
+  const b = e.target.closest("#invGo,[data-invok],[data-invno],[data-invwd]"); if(!b || b.disabled) return; b.disabled = true; const d = b.dataset;
+  if(b.id === "invGo"){ const code = ($("invCode").value || "").trim(), amt = Math.floor(+String($("invAmt").value || "").replace(/[^0-9]/g, ""));
+    if(code && amt > 0 && await coRpc("co3_inv_offer", {p_code:code, p_amount:amt})) coMsg("出資を申し込みました。相手が認めると成立します。"); }
+  else if(d.invok){ if(await coRpc("co3_inv_answer", {p_id:+d.invok, p_ok:true})) coMsg("出資を受けました。資金が入りました。"); }
+  else if(d.invno){ if(await coRpc("co3_inv_answer", {p_id:+d.invno, p_ok:false})) coMsg("断りました。"); }
+  else if(d.invwd){ if(await coRpc("co3_inv_withdraw", {p_id:+d.invwd})) coMsg("出資を引き上げました。"); }
+  b.disabled = false;
+});
+// 共同運航（友だち・仲間の路線に自社の便名をつけて売る）
+let CSC = null;
+async function loadCsc(){ try{ const { data, error } = await sb.rpc("co3_cs_candidates"); if(!error) CSC = data || []; }catch(e){ CSC = []; } if(currentView() === "co") renderV3(); }
+function csHtml(){
+  const C = CO.cs; if(!C) return "";
+  const nm = (a, b) => `${esc(apNm(a))} ⇄ ${esc(apNm(b))}`, kj = {free:"フリーセール", block:"ブロック買い取り"};
+  const mine = (C.list || []).map(x => `<div class="v3row"><span>${x.role === "op" ? `運航：自社 ・ 販売：${esc(x.partner)}` : `運航：${esc(x.partner)} ・ 販売：自社`}<br><small>${nm(x.a, x.b)} ・ ${kj[x.kind]}${x.status === "pending" ? "（認め待ち）" : ""}</small></span>
+      <b>${x.share != null ? `+${fmtKm(+x.share)}/日` : ""}</b>${x.role === "op" && x.status === "pending" ? `<button class="linkbtn2" data-csok="${x.id}"${ratingOk(3) ? "" : " disabled"}>認める${x.kind === "block" ? `（${yen(+x.block_price)}を受け取る）` : ""}</button><button class="linkbtn2" data-csno="${x.id}">断る</button>` : `<button class="linkbtn2" data-csend="${x.id}">やめる</button>`}</div>`).join("");
+  if(CSC == null) loadCsc();
+  const cand = (CSC || []).filter(x => !x.mine).map(x => `<div class="v3row"><span>${esc(x.op_name)}${x.ally ? "（仲間）" : ""} ・ ${nm(x.a, x.b)}<br><small>収益 ${fmtKm(+x.revenue)}/日 ・ フリーセールで +${fmtKm(Math.round(+x.revenue * 0.15))}/日 ・ 販売会社 ${x.sellers}/3社</small></span><b></b>
+      <button class="linkbtn2" data-csreq="${esc(x.op_code)}" data-k="${esc(x.k)}" data-kind="free"${+x.sellers >= 3 ? " disabled" : ""}>フリーセール</button><button class="linkbtn2" data-csreq="${esc(x.op_code)}" data-k="${esc(x.k)}" data-kind="block"${+x.sellers >= 3 ? " disabled" : ""}>ブロック（${yen(Math.ceil(+x.revenue * 5))}/月）</button></div>`).join("");
+  return `<h2>共同運航</h2><div class="v3box">
+    ${mine || `<p class="hint" style="margin:0 0 6px">まだ共同運航はありません。</p>`}
+    ${opsStats([["売っている", (C.list || []).filter(x => x.role === "seller").length, `/${C.limit}本`], ["取り分", fmtKm(+C.income), "/日"]])}
+    ${cand ? `<small class="lbl" style="margin-top:6px">売れる路線（友だち・仲間）</small>${cand}` : `<p class="hint" style="margin:6px 0 0">友だちやアライアンスの仲間が、あなたの路線の空港につながる路線を飛ばしていると、ここに出ます。</p>`}
+    <p class="hint" style="margin:6px 0 0">フリーセール：前払いなしで、その路線の収益の15%。ブロック買い取り：月のはじめに5日分を払い、その月は35%。運航会社は販売会社1社ごとに収益 +5%、販売会社は空港でつながる自分の路線が +5%（最大 +15%）。認めるのは格付け3から。</p></div>`;
+}
+document.addEventListener("click", async e => {
+  const b = e.target.closest("[data-csreq],[data-csok],[data-csno],[data-csend]"); if(!b || b.disabled) return; b.disabled = true; const d = b.dataset;
+  let ok = null;
+  if(d.csreq){ ok = await coRpc("co3_cs_request", {p_op_code:d.csreq, p_route:d.k, p_kind:d.kind}); if(ok) coMsg("共同運航を申し込みました。"); }
+  else if(d.csok){ ok = await coRpc("co3_cs_answer", {p_id:+d.csok, p_ok:true}); if(ok) coMsg("共同運航を認めました。"); }
+  else if(d.csno){ ok = await coRpc("co3_cs_answer", {p_id:+d.csno, p_ok:false}); if(ok) coMsg("断りました。"); }
+  else if(d.csend){ ok = await coRpc("co3_cs_end", {p_id:+d.csend}); if(ok) coMsg("共同運航をやめました。"); }
+  b.disabled = false; if(ok){ CSC = null; }
+});
+// シーズン順位（co-v3。3か月ごとの伸び率・格付けの部門）
+let SR = null;
+async function loadSeasonRank(){ try{ const { data, error } = await sb.rpc("co3_season_rank"); if(!error && data){ SR = data; if(currentView() === "co") renderRank(); } }catch(e){} }
+function seasonRankHtml(){
+  if(!SR){ loadSeasonRank(); return `<p class="none">読み込んでいます…</p>`; }
+  const pc = g => `${+g >= 0 ? "+" : "−"}${Math.round(Math.abs(+g) * 100)}%`, dv = {"1-2":"格付け1〜2", "3":"格付け3", "4-5":"格付け4〜5"}[SR.division] || "";
+  const toTop = SR.top10_cut != null && +SR.growth < +SR.top10_cut ? `上位10%（印がもらえる）まで あと伸び率 +${Math.max(1, Math.round((+SR.top10_cut - +SR.growth) * 100))}%` : "いま上位10%に入っています";
+  return `<div class="rkme season"><div><small>${esc(SR.season)} ・ ${dv}の部門</small><b>${SR.rank}位</b><small>${SR.total}社のうち</small></div>
+      <div class="r"><small>あと${SR.days_left}日</small><b>伸び率 ${pc(SR.growth)}</b><small>${toTop}</small></div></div>
+    <div class="rklist">${(SR.rows || []).map((x, i, a) => `${i && x.no - a[i - 1].no > 1 ? `<div class="rkgap">…</div>` : ""}<div class="rkrow${x.me ? " me" : ""}"><b>${x.no}</b><div><b>${esc(x.name)}${x.me ? "（自分）" : ""}</b></div><b>${pc(x.growth)}</b></div>`).join("")}</div>
+    ${(SR.awards || []).length ? `<div class="v3box"><h3 style="margin:0 0 6px">もらった印と称号</h3>${SR.awards.map(x => `<div class="v3row"><span>${esc(x.label)}</span><b>${["season_top10", "ally_top3"].includes(x.kind) ? "印" : "称号"}</b></div>`).join("")}</div>` : ""}
+    <p class="hint">シーズンは3か月ごと。順位はそのシーズンに伸ばした会社の価値の割合で、格付けの部門ごとに並べます。終わると部門ごとに上位10%に印、1位に称号。会社・機体・資金は消えません。</p>`;
+}
 // ランキング（サーバー版だけ）：全国・拠点の空港・友だち
 async function loadRank(scope){
   if(!CO.server) return;
@@ -4576,8 +4669,10 @@ function renderRank(){
   const box = $("coRank"); if(!box) return;
   if(!CO.server){ box.innerHTML = `<p class="none">ランキングと友だちは、サインインすると使えます。</p>`; return; }
   const home = RK && RK.home && BY[RK.home] ? godShort(BY[RK.home]) : "拠点";
-  const tabs = [["all", "全国"], ["home", `${home}が拠点`], ["friends", "友だち"]];
+  const tabs = [["all", "全国"], ["home", `${home}が拠点`], ["friends", "友だち"], ...(CO.v3 ? [["ally", "アライアンス"], ["season", "シーズン"]] : [])];
   const head = `<div class="cotabs">${tabs.map(([k, l]) => `<button class="cotab${RK_SCOPE === k ? " on" : ""}" data-rk="${k}">${esc(l)}</button>`).join("")}</div>`;
+  if(RK_SCOPE === "season"){ box.innerHTML = head + seasonRankHtml(); return; }
+  if(RK_SCOPE === "ally"){ box.innerHTML = head + allyHtml(); return; }
   if(!RK || RK.scope !== RK_SCOPE){ box.innerHTML = head + `<p class="none">読み込んでいます…</p>`; if(!RK || RK.scope !== RK_SCOPE) loadRank(RK_SCOPE); return; }
   const mv = RK.prev && RK.rank ? RK.prev - RK.rank : 0;
   box.innerHTML = head + `<div class="rkme"><div><small>あなた（${esc(CO.name)}）</small><b>${tabs.find(t => t[0] === RK_SCOPE)[1]} ${RK.rank}位</b><small>${RK.total}社のうち</small></div>
@@ -4619,7 +4714,7 @@ function renderV3(){
   const sat = CO.sat, tgt = sp.target == null ? null : +sp.target, eff = Math.round((CO.satMult - 1) * 100);
   const step = tgt == null ? 0 : Math.max(-3, Math.min(3, (tgt - sat) * 0.1));
   const part = (k, v) => v ? `<div class="v3row"><span>${k}</span><b>${v > 0 ? "+" : "−"}${Math.abs(+v)}</b></div>` : "";
-  box.innerHTML = `${morningHtml()}${troubleHtml()}${ratingHtml()}<h2>方針</h2><p class="hint">稼ぎ方が変わります。変えるとその日から新しい方針で数えます。</p>
+  box.innerHTML = `${seasonHtml()}${typhoonHtml()}${morningHtml()}${troubleHtml()}${ratingHtml()}${peopleHtml()}${moneyHtml()}${csHtml()}${investHtml()}${wxHtml()}<h2>方針</h2><p class="hint">稼ぎ方が変わります。変えるとその日から新しい方針で数えます。</p>
     <div class="polgrid">${Object.entries(POLICIES).map(([k, p]) => `<button class="polcard${sel === k ? " on" : ""}" data-pol="${k}" aria-pressed="${sel === k}"><b>${p.name}</b><span>${p.short}</span><em class="${CO.policy === k ? "now" : ""}">${CO.policy === k ? "今の方針" : p.where}</em></button>`).join("")}</div>
     <div class="v3box"><h3>${d.name}</h3><div class="v3stats">${d.stats.map(([k, v]) => `<div><small>${k}</small><b>${v}</b></div>`).join("")}</div>
       <ul>${d.points.map(t => `<li>${t}</li>`).join("")}</ul>
@@ -4631,7 +4726,7 @@ function renderV3(){
       <p style="margin:0 0 8px">毎日 深夜3時に、目標値へ少しずつ近づきます（あしたは <b>${step >= 0 ? "+" : "−"}${fmtNum(Math.abs(step), 1)}</b>）。</p>
       <div class="v3row"><span>お客さんへの効き目（60から5離れるごとに ±1%）</span><b>${eff > 0 ? "+" : eff < 0 ? "−" : "±"}${Math.abs(eff)}%</b></div></div>
     ${tgt == null ? "" : `<div class="v3box"><h3>目標値の中身</h3><div class="v3row"><span>基本</span><b>${fmtNum(+sp.base || 50, 0)}</b></div>
-      ${part("新しい機体（会社に入れて90日まで）の割合 ×6", +sp.new_share)}${part("機体の古さ", +sp.aging)}${part("席を詰める", +sp.packed)}${part("方針の補正", +sp.policy_adj)}${part("機内食", +sp.meal)}${part("預ける荷物", +sp.bag)}${part("トラブルの対応（前の30日）", +sp.response)}${sp.ontime_rate != null ? `<div class="v3row"><span>定時率（前の30日、会社のせいの欠航だけ） ${Math.round(+sp.ontime_rate * 100)}%</span><b>${+sp.ontime > 0 ? "+" : +sp.ontime < 0 ? "−" : "±"}${Math.abs(+sp.ontime)}</b></div>` : ""}${part("自分のせいの欠航（故障）", +sp.own_cxl)}</div>`}
+      ${part("新しい機体（会社に入れて90日まで）の割合 ×6", +sp.new_share)}${part("機体の古さ", +sp.aging)}${part("席を詰める", +sp.packed)}${part("方針の補正", +sp.policy_adj)}${part("機内食", +sp.meal)}${part("預ける荷物", +sp.bag)}${part("トラブルの対応（前の30日）", +sp.response)}${sp.ontime_rate != null ? `<div class="v3row"><span>定時率（前の30日、会社のせいの欠航だけ） ${Math.round(+sp.ontime_rate * 100)}%</span><b>${+sp.ontime > 0 ? "+" : +sp.ontime < 0 ? "−" : "±"}${Math.abs(+sp.ontime)}</b></div>` : ""}${part("自分のせいの欠航（故障）", +sp.own_cxl)}${sp.lounge != null ? part("ラウンジ（1段 +2、最大 +6）", +sp.lounge) : ""}${sp.miles != null ? part("マイルの上級会員", +sp.miles) : ""}${sp.wifi != null ? part("機内Wi-Fi を付けた機体の割合 ×6", +sp.wifi) : ""}</div>`}
     <p class="hint">始まりは40です。定時率と自分のせいの欠航は、故障が起きる格付け3から数えます。</p>${newsHtml()}`;
 }
 // 本拠地（チェックインした空港から）と上級席の割合（FSC 0・10・20・30%、ミドルコスト 0・10%）
@@ -4719,6 +4814,210 @@ function routeV3Html(r, e, ac){
           : `<p class="hint">機体を入れると飛べます。v3 では、機体のない路線は飛びません。</p>`}
         <p class="hint">数字はゲームの中の計算です。本物の便の乗客数ではありません。</p></div></details>`;
 }
+// C点検・重整備（格付け3から自動）と機内Wi-Fi（格付け4から）
+function heavyHtml(a){
+  if(!CO.server || !CO.v3) return "";
+  const md = d => String(d).slice(5).replace("-", "/"), h = (CO.heavy || []).find(x => x.ac_id === a.id), sp = (CO.heavy || []).find(x => x.spare_reg && x.spare_reg === a.reg);
+  const nm = h ? (h.kind === "heavy" ? "重整備" : "C点検") : "";
+  const st = h ? `<em class="brk${h.spare_reg ? " sp" : ""}">${nm}中（${md(h.end)}まで・${yen(+h.cost)}）・${h.spare_reg ? `予備機 ${esc(h.spare_reg)} が代わりに飛んでいます` : "予備機がないので、この路線は飛びません（計画した運休）"}</em>` : sp ? `<em class="brk sp">点検中の機体の代わりに飛んでいます</em>` : "";
+  const nx = ratingOk(3) && a.heavyNext && !h ? `<small class="dim">次のC点検 ${esc(String(a.heavyNext).slice(0, 7).replace("-", "年"))}月ごろ（7〜10日運休・自動）</small>` : "";
+  const wf = ["freighter"].includes(a.kind) ? "" : ratingOk(4) ? `<button class="linkbtn2" data-wifi="${a.id}" data-on="${a.wifi ? 0 : 1}">${a.wifi ? "機内Wi-Fi あり（外す）" : `機内Wi-Fi を付ける（${yen(a.wifiCost)}）`}</button>` : "";
+  const c3 = !CO.wx || a.kind === "freighter" ? "" : a.cat3 ? `<small class="dim">低い視界での運航（CAT III）：あり</small>` : `<button class="linkbtn2" data-cat3="${a.id}">低い視界での運航を付ける（${yen(a.cat3Cost)}）</button>`;
+  return st + nx + wf + c3;
+}
+document.addEventListener("click", async e => {
+  const b = e.target.closest("[data-wifi]"); if(!b || b.disabled) return; b.disabled = true;
+  if(await coRpc("co3_set_wifi", {p_aircraft:+b.dataset.wifi, p_on:b.dataset.on === "1"})) coMsg(b.dataset.on === "1" ? "機内Wi-Fi を付けました。この機体の路線で仕事の客が増えます。" : "機内Wi-Fi を外しました（付けたお金は戻りません）。");
+  b.disabled = false;
+});
+// 臨時便（繁忙期だけ。予備機に組む）
+function extraHtml(a, ok){
+  const X = CO.extra; if(!CO.server || !CO.v3 || !X) return "";
+  const md = d => String(d).slice(5).replace("-", "/"), cur = (X.list || []).find(x => x.ac_id === a.id);
+  if(cur){ const r = (CO.routes || []).find(r => r.k === cur.k);
+    return `<em class="brk sp">臨時便：${esc(r ? rName(r) : cur.k)} 1日${cur.flights}便・客 ${fmtKm(Math.round(+cur.pax))}人・もうけ ${+cur.profit >= 0 ? "+" : "−"}${fmtKm(Math.round(Math.abs(+cur.profit)))}（${md(cur.end)}まで）</em><button class="linkbtn2" data-xstop="${cur.id}">臨時便をやめる</button>`; }
+  if(!X.peak_end || a.route || (CO.scheds || {})[a.id] || ["freighter", "bizjet"].includes(a.kind)) return "";
+  if(!ratingOk(3)) return `<small class="dim">繁忙期の臨時便は格付け3から組めます。</small>`;
+  const rs = ok.filter(r => !r.intl || a.intl);
+  return rs.length ? `<span class="mkl"><select data-xr="${a.id}" aria-label="臨時便の路線">${rs.map(r => `<option value="${esc(r.k)}">${esc(rName(r))}</option>`).join("")}</select><select data-xf="${a.id}" aria-label="臨時便の便数">${[2, 4, 6, 8].map(n => `<option value="${n}"${n === 4 ? " selected" : ""}>1日${n}便</option>`).join("")}</select><button class="linkbtn2" data-xgo="${a.id}">臨時便を組む（${md(X.peak_end)}まで）</button></span>` : "";
+}
+document.addEventListener("click", async e => {
+  const b = e.target.closest("[data-xgo],[data-xstop]"); if(!b || b.disabled) return; b.disabled = true;
+  if(b.dataset.xgo){ const id = b.dataset.xgo, k = document.querySelector(`[data-xr="${id}"]`).value, n = +document.querySelector(`[data-xf="${id}"]`).value;
+    if(await coRpc("co3_set_extra", {p_aircraft:+id, p_route:k, p_flights:n})) coMsg("臨時便を組みました。繁忙期で増えた旅行の客を運びます。"); }
+  else if(await coRpc("co3_stop_extra", {p_id:+b.dataset.xstop})) coMsg("臨時便をやめました。予備機に戻ります。");
+  b.disabled = false;
+});
+// 定期点検（A点検）。格付け1・2は自動（維持費に込み）。3から「おまかせ」か「自分で入れる」
+function checkHtml(a){
+  if(!CO.server || !CO.v3 || a.flyHours == null) return "";
+  const left = a.checkLeft, self = ratingOk(3) && CO.checkMode === "self", over = self && left <= 0;
+  const last = a.checkedDay ? `・前の点検 ${esc(String(a.checkedDay).slice(5).replace("-", "/"))}` : "";
+  return `${over ? `<em class="brk">A点検の期限切れで飛べません（この機体の便は欠航・会社のせい）</em>` : ""}
+    <small>飛んだ時間 ${fmtKm(a.flyHours)}時間・A点検まで ${left > 0 ? `あと${fmtKm(left)}時間` : "期限です"}${last}</small>
+    ${self ? `<button class="linkbtn2" data-chk="${a.id}" data-on="${a.checkReq ? 0 : 1}">${a.checkReq ? "今夜の点検を取り消す" : `今夜A点検を入れる（${yen(a.checkCost)}）`}</button>${a.checkReq ? `<em class="brk sp">今夜A点検を入れます（あしたも飛べます）</em>` : ""}` : ""}`;
+}
+function checkModeHtml(){
+  if(!CO.server || !CO.v3) return "";
+  if(!ratingOk(3)) return `<p class="hint" style="margin:0 0 8px">A点検は自動で入ります（維持費に込み・+10%）。格付け3「${RATINGS[2].name}」から、点検のやり方を選べます。</p>`;
+  const m = CO.checkMode;
+  return `<small class="lbl">A点検のやり方</small><div class="pillrow" role="group" aria-label="A点検のやり方">${[["auto", "おまかせ"], ["self", "自分で入れる"]].map(([k, l]) =>
+      `<button class="cotab${m === k ? " on" : ""}" data-chkmode="${k}" aria-pressed="${m === k}">${l}</button>`).join("")}</div>
+    <p class="hint" style="margin:0 0 8px">${m === "auto" ? "期限が来た夜に自動で点検します（費用は1割高い）。" : "頼んだ機体をその夜に点検します。期限を過ぎた機体は飛べません。"}点検の後30日は故障が半分になります。</p>`;
+}
+document.addEventListener("click", async e => {
+  const b = e.target.closest("[data-chk],[data-chkmode]"); if(!b || b.disabled) return; b.disabled = true;
+  if(b.dataset.chkmode){ if(b.dataset.chkmode !== CO.checkMode && await coRpc("co3_set_check_mode", {p_mode:b.dataset.chkmode})) coMsg(b.dataset.chkmode === "self" ? "A点検を自分で入れます。期限に気をつけてください。" : "A点検はおまかせにしました。"); }
+  else if(await coRpc("co3_request_check", {p_aircraft:+b.dataset.chk, p_on:b.dataset.on === "1"})) coMsg(b.dataset.on === "1" ? "今夜A点検を入れます。" : "今夜の点検を取り消しました。");
+  b.disabled = false;
+});
+// 台風の計画欠航（明日、台風が近づきそうな空港を結ぶ路線）
+function typhoonHtml(){
+  const W = CO.wx; if(!W || !(W.typhoon || []).length) return "";
+  const md = d => { const x = new Date(String(d) + "T00:00:00+09:00"); return `${x.getMonth() + 1}月${x.getDate()}日`; };
+  return `<div class="v3box"><h3 style="margin:0 0 6px">台風が近づきそうです</h3>${W.typhoon.map(x => { const r = (CO.routes || []).find(r => r.k === x.k);
+      return `<div class="v3row"><span>${md(x.day)} ${esc(apNm(x.iata))} ・ ${esc(r ? rName(r) : x.k)}</span><b>${x.cancel === true ? "計画欠航" : x.cancel === false ? "飛ばす" : "まだ決めていない"}</b></div>
+        <div class="pillrow" role="group" aria-label="計画欠航するか">${[[true, "計画欠航する"], [false, "飛ばす"]].map(([v, l]) => `<button class="cotab${x.cancel === v ? " on" : ""}" data-typh="${esc(x.k)}" data-v="${v ? 1 : 0}" aria-pressed="${x.cancel === v}">${l}</button>`).join("")}</div>`; }).join("")}
+    <p class="hint" style="margin:0">計画欠航：その日の便は出さず、評判は下がりません。飛ばして台風が来ると、その日の収益は0・次の日も半分（避難の備えがあれば足止めなし）・評判 −10。それたら収益 +30%。決めなければ飛ばします。予報はゲームの運営が入れています。</p></div>`;
+}
+// 天気の備え（防除氷・横風の訓練・雷・台風の避難。CAT III は機体ごと）
+function wxHtml(){
+  const W = CO.wx; if(!W) return "";
+  const aps = [...new Map((CO.routes || []).flatMap(r => [r.a, r.b]).filter(a => a && a.iata).map(a => [a.iata, a])).values()];
+  const lv = (ia, k) => +((W.prep || []).find(p => p.iata === ia && p.kind === k) || {level:0}).level;
+  const K = [["deice", "防除氷の設備", 3, [5000, 12000, 30000], "雪の欠航 −30%・−50%・−70%、雪の遅れは半分"], ["thunder", "雷の作業の備え", 1, [8000], "雷の遅れが半分"], ["typhoon", "台風の避難の備え", 2, [20000, 60000], "台風のあとの足止めがなくなる（1段は小型・中型、2段で大型も）"]];
+  const have = (W.prep || []).map(p => { const k = K.find(x => x[0] === p.kind); return `<div class="v3row"><span>${esc(apNm(p.iata))} ・ ${k[1]}</span><b>${p.level}段</b></div>`; }).join("");
+  return `<h2>天気の備え</h2><div class="v3box">
+    ${have || `<p class="hint" style="margin:0 0 6px">まだありません。</p>`}
+    <div class="mkl"><select id="wxAp" aria-label="備えを入れる空港">${aps.map(a => `<option value="${esc(a.iata)}">${esc(apNm(a.iata))}</option>`).join("")}</select><select id="wxKind" aria-label="備えの種類">${K.map(k => `<option value="${k[0]}">${k[1]}</option>`).join("")}</select><button class="linkbtn2" id="wxBuild"${aps.length ? "" : " disabled"}>建てる・上げる</button></div>
+    <p class="hint" style="margin:4px 0 10px">${K.map(k => `${k[1]}（${k[3].map(yen).join("・")}）：${k[4]}`).join("。")}。どれも自社の便の、その天気で欠航・遅れになった分だけに効きます。</p>
+    <small class="lbl">横風・強風の訓練</small>
+    <div class="pillrow" role="group" aria-label="横風・強風の訓練">${[["none", "なし"], ["normal", "普通"], ["high", "手厚い"]].map(([k, l]) => `<button class="cotab${W.wind === k ? " on" : ""}" data-wind="${k}" aria-pressed="${W.wind === k}">${l}</button>`).join("")}</div>
+    <p class="hint" style="margin:0">強風の欠航 ${{none:"そのまま", normal:"−20%（毎日 機体1機あたり 1）", high:"−40%（毎日 機体1機あたり 3）"}[W.wind]}。霧には機体ごとの「低い視界での運航」（CAT III に対応した空港 ${(W.cat3_airports || []).length ? W.cat3_airports.map(apNm).join("・") : "は確かめ中"}で効きます）。天気は空港の気象通報から読みます。</p></div>`;
+}
+document.addEventListener("click", async e => {
+  const b = e.target.closest("#wxBuild,[data-wind],[data-cat3],[data-typh]"); if(!b || b.disabled) return; b.disabled = true; const d = b.dataset;
+  if(b.id === "wxBuild"){ const ap = $("wxAp").value, k = $("wxKind").value; if(await coRpc("co3_build_prep", {p_kind:k, p_iata:ap})) coMsg(`${apNm(ap)}に備えを入れました。`); }
+  else if(d.wind){ if(d.wind !== CO.wx.wind && await coRpc("co3_set_wind_training", {p_level:d.wind})) coMsg("横風・強風の訓練を変えました。"); }
+  else if(d.cat3){ if(await coRpc("co3_set_cat3", {p_aircraft:+d.cat3})) coMsg("低い視界での運航を付けました。"); }
+  else if(d.typh){ if(await coRpc("co3_typhoon_decide", {p_route:d.typh, p_cancel:d.v === "1"})) coMsg(d.v === "1" ? "計画欠航にしました。" : "飛ばすことにしました。"); }
+  b.disabled = false;
+});
+// 季節の需要（繁忙期）：いまの時期と、次の繁忙期までの日数
+function seasonHtml(){
+  const S = CO.season; if(!S) return "";
+  const x = v => `×${+v}`, nx = S.next ? `次の繁忙期「${esc(S.next.name)}」まで あと${S.next.days}日` : "";
+  return `<p class="hint season" style="margin:0 0 10px">${S.name ? `いまは<b>${esc(S.name)}</b>（旅行の客 ${x(S.lei)}・仕事の客 ${x(S.biz)}・運賃 ${x(S.fare)}）${nx ? "・" + nx : ""}` : nx || "いまは季節の上がり下がりはありません"}。北海道・沖縄などは地域のシーズンもかかります。</p>`;
+}
+// ラウンジ・マイル制度・安全への投資・借金（格付け3から）
+function moneyHtml(){
+  const M = CO.money3; if(!M) return "";
+  if(!ratingOk(3)) return `<h2>ラウンジ・マイル・安全・借金</h2><div class="v3box">${ratingLock(3)}</div>`;
+  const aps = [...new Map((CO.routes || []).flatMap(r => [r.a, r.b]).filter(a => a && a.iata).map(a => [a.iata, a])).values()];
+  const lv = Object.fromEntries((M.lounges || []).map(l => [l.iata, +l.level]));
+  const evJa = {drink:"乗員の飲酒問題（3日間 収益 −20%）", maint:"整備のミス（同じ機種が2日運休）"}, md = d => String(d).slice(5).replace("-", "/");
+  return `<h2>ラウンジ・マイル・安全・借金</h2><div class="v3box">
+    <small class="lbl">ラウンジ（1段 ${yen(40000)}・3段まで）</small>
+    ${(M.lounges || []).length ? M.lounges.map(l => `<div class="v3row"><span>${esc(apNm(l.iata))}</span><b>${l.level}段</b></div>`).join("") : `<p class="hint" style="margin:0 0 6px">まだありません。</p>`}
+    <div class="mkl"><select id="lgAp" aria-label="ラウンジを建てる空港">${aps.map(a => `<option value="${esc(a.iata)}"${(lv[a.iata] || 0) >= 3 ? " disabled" : ""}>${esc(apNm(a.iata))}${lv[a.iata] ? `（${lv[a.iata]}段）` : ""}</option>`).join("")}</select><button class="linkbtn2" id="lgBuild"${aps.length && CO.cash >= 40000 ? "" : " disabled"}>建てる・上げる</button></div>
+    <p class="hint" style="margin:4px 0 10px">その空港の路線で仕事の客 +5%/段（LCC は半分）、満足度 +2/段（最大 +6）。</p>
+    <small class="lbl">マイル制度</small>
+    <div class="pillrow" role="group" aria-label="マイル制度">${[[0, "なし"], [1, "1段"], [2, "2段"], [3, "3段"]].map(([n, l]) => `<button class="cotab${+M.miles === n ? " on" : ""}" data-miles="${n}" aria-pressed="${+M.miles === n}">${l}</button>`).join("")}</div>
+    <p class="hint" style="margin:0 0 10px">費用は収益の ${+M.miles * 2}%。ほかの会社もいる路線で仕事の客 +${Math.round(+M.miles_eff * 100)}%${+M.miles ? `（続けて ${M.miles_since ? Math.max(0, Math.round((Date.now() - Date.parse(M.miles_since)) / 864e5)) : 0}日。180日で1.5倍）` : ""}。やめると日数は0から。</p>
+    <small class="lbl">安全への投資</small>
+    <div class="pillrow" role="group" aria-label="安全への投資">${[["low", "少なめ"], ["normal", "普通"], ["high", "手厚い"]].map(([k, l]) => `<button class="cotab${M.safety === k ? " on" : ""}" data-safety="${k}" aria-pressed="${M.safety === k}">${l}</button>`).join("")}</div>
+    <p class="hint" style="margin:0 0 6px">${{low:"費用 +0。悪い出来事が 1.5倍 起きやすい。", normal:"運航の費用 +1ポイント。", high:"運航の費用 +3ポイント。飲酒問題と整備ミスが 0.4倍 に。"}[M.safety]} 起きやすさ：1年に 飲酒問題 約${fmtNum(+M.rates.drink, 1)}回・整備のミス 約${fmtNum(+M.rates.maint, 1)}回。</p>
+    ${(M.events || []).length ? `<div class="v3row"><span>前の90日の出来事</span><b></b></div>${M.events.map(x => `<div class="v3row"><span>${md(x.day)} ${evJa[x.kind]}</span><b class="neg">評判 −${x.kind === "drink" ? 40 : 30}</b></div>`).join("")}` : ""}
+    <small class="lbl" style="margin-top:10px">借金</small>
+    ${opsStats([["借金", fmtKm(+M.debt), ""], ["まだ借りられる", fmtKm(+M.debt_room), ""]])}
+    <div class="pillrow">${[10000, 50000].map(n => `<button class="cotab" data-borrow="${n}"${+M.debt_room >= n ? "" : " disabled"}>${yen(n)} 借りる</button>`).join("")}${+M.debt ? `<button class="cotab" data-borrow="${-Math.min(+M.debt, Math.floor(CO.cash))}"${CO.cash >= 1 ? "" : " disabled"}>返す（${yen(Math.min(+M.debt, Math.floor(CO.cash)))}）</button>` : ""}</div>
+    <p class="hint" style="margin:0">会社の価値（借金を引いたもの）の半分まで。利息は30日ごとに借金の3%${M.debt_next ? `（次は ${md(String(M.debt_next).slice(0, 10))}）` : ""}。いつでも返せます。</p></div>`;
+}
+document.addEventListener("click", async e => {
+  const b = e.target.closest("#lgBuild,[data-miles],[data-safety],[data-borrow]"); if(!b || b.disabled) return; b.disabled = true; const d = b.dataset;
+  if(b.id === "lgBuild"){ const ap = $("lgAp").value; if(await coRpc("co3_build_lounge", {p_iata:ap})) coMsg(`${apNm(ap)}にラウンジを建てました。`); }
+  else if(d.miles != null){ if(+d.miles !== +CO.money3.miles && await coRpc("co3_set_miles", {p_level:+d.miles})) coMsg(+d.miles ? `マイル制度を${d.miles}段にしました。` : "マイル制度をやめました。"); }
+  else if(d.safety){ if(d.safety !== CO.money3.safety && await coRpc("co3_set_safety", {p_level:d.safety})) coMsg("安全への投資を変えました。"); }
+  else if(d.borrow){ const n = +d.borrow; if(await coRpc("co3_borrow", {p_amount:n})) coMsg(n > 0 ? `${yen(n)}借りました。` : `${yen(-n)}返しました。`); }
+  b.disabled = false;
+});
+// 乗員・整備士と地上の仕事（格付け3から。人数は「機体何機分」で数える）
+function peopleHtml(){
+  const P = CO.people; if(!P) return "";
+  if(!ratingOk(3)) return `<h2>乗員と整備士</h2><div class="v3box">${ratingLock(3).replace("から使えます。", "から、人を雇う・地上の仕事を選べます。")}<p class="hint" style="margin:0">いまは人の不足は起きません。地上の仕事は委託です（運航の費用に込み）。</p></div>`;
+  const pct = (h, n) => n ? Math.round(n / h * 100) : 0, cp = pct(P.crew, P.need), mp = pct(P.mech, P.need);
+  const row = (k, have, hired, use, fee, pay, note) => `<div class="slt"><div><b>${k}</b><br><small class="dim">${have}機分いる（雇った ${hired}）・使う割合 ${use}%</small></div>
+      <div class="sv"><button data-hire="${fee}" data-d="-1" aria-label="${k}を1機分へらす"${hired > 0 ? "" : " disabled"}>−</button><b>${hired}<small>機分</small></b><button data-hire="${fee}" data-d="1" aria-label="${k}を1機分雇う"${CO.cash >= pay ? "" : " disabled"}>＋</button></div>
+      ${note ? `<small class="${use > 100 ? "neg" : "dim"}" style="grid-column:1/3">${note}</small>` : ""}</div>`;
+  return `<h2>乗員と整備士</h2><div class="v3box">
+    ${opsStats([["要る人", P.need, "機分"], ["乗員", P.crew, "機分"], ["整備士", P.mech, "機分"]])}
+    ${row("乗員", P.crew, P.crew_hired, cp, "crew", 2000, cp > 100 ? `足りません。便は ${Math.round(+P.crew_ratio * 100)}% まで飛び、残りは運休です。` : cp > 90 ? "もうすぐ足りなくなります。" : "")}
+    ${row("整備士", P.mech, P.mech_hired, mp, "mech", 1500, mp > 100 ? `足りません。故障が ${fmtNum(+P.mech_mult, 1)}倍 起きやすくなっています。` : "")}
+    <p class="hint" style="margin:6px 0 10px">飛んでいる機体1機で1機分、中型以上は2機分です。はじめから3機分いて、役職「乗員」「整備」の守り神の階級でも増えます。雇う：乗員 採用費 ${yen(2000)}・給料 ${yen(20)}/日、整備士 採用費 ${yen(1500)}・給料 ${yen(15)}/日（減らしても採用費は戻りません）。いまの給料 ${yen(+P.cost)}/日。</p>
+    <small class="lbl">地上の仕事</small>
+    <div class="pillrow" role="group" aria-label="地上の仕事">${[["outsource", "委託"], ["self", "自社（拠点だけ）"]].map(([k, l]) => `<button class="cotab${P.ground === k ? " on" : ""}" data-ground="${k}" aria-pressed="${P.ground === k}"${k === "self" && CO.home == null ? " disabled" : ""}>${l}</button>`).join("")}</div>
+    <p class="hint" style="margin:0">${P.ground === "self" ? `拠点を発着する便の運航の費用が3%安くなり、人件費 ${yen(30)}/日がかかります（便が少ないと損）。` : `どの空港でも使えます。費用は運航の費用に込みです。${CO.home == null ? "拠点を決めると自社にできます。" : ""}`}</p></div>`;
+}
+document.addEventListener("click", async e => {
+  const b = e.target.closest("[data-hire],[data-ground]"); if(!b || b.disabled) return; b.disabled = true;
+  if(b.dataset.ground){ if(b.dataset.ground !== (CO.people || {}).ground && await coRpc("co3_set_ground", {p_mode:b.dataset.ground})) coMsg(b.dataset.ground === "self" ? "地上の仕事を自社にしました。" : "地上の仕事を委託にしました。"); }
+  else { const k = b.dataset.hire, d = +b.dataset.d; if(await coRpc("co3_hire", {p_kind:k, p_delta:d})) coMsg(`${k === "crew" ? "乗員" : "整備士"}を1機分${d > 0 ? "雇いました" : "減らしました"}。`); }
+  b.disabled = false;
+});
+// 混雑空港の発着枠（毎月の申し込み。格付け3から自分で申し込める）
+let ROUTE_TAB = "routes";
+const SLOT_AP = {HND:"羽田", NRT:"成田", KIX:"関西", ITM:"伊丹", FUK:"福岡"};
+const slotName = x => `${SLOT_AP[x.iata]}${x.pool === "regional" ? "（地方の枠）" : ""}`;
+function slotsHtml(){
+  const S = CO.slots, L = S.list || [], mon = d => +String(d).slice(5, 7), self = !S.auto && ratingOk(3);
+  const last = new Date(String(S.next) + "T00:00:00+09:00"); last.setDate(last.getDate() - 1);
+  const now = L.filter(x => x.granted != null);
+  const nowHtml = S.decided ? (now.length ? now.map(x => { const pct = x.applied ? Math.round(x.granted / x.applied * 100) : 100, cut = Math.max(0, x.use - x.granted);
+      return `<div class="v3box"><div class="satnum"><div><small>${esc(slotName(x))}</small><br><b>${x.granted}</b> <small>/ 申し込み ${x.applied}便（${pct}%）</small></div></div>
+        <div class="slbar"><i style="width:${Math.min(100, pct)}%"></i></div>
+        <p class="hint" style="margin:4px 0 0">${x.granted < x.applied ? `申し込みが枠の約${fmtNum(+x.cong, 2)}倍だったので、約${Math.round(pct / 10)}割に。` : "申し込みどおり使えます。"}${cut ? `いま組んでいる ${x.use}便のうち、${cut}便ぶんが運休中です。` : ""}${+x.cong > 1 ? ` 混雑料金 ${Math.round(Math.min(0.2, (+x.cong - 1) * 0.2) * 100)}%${x.pool === "regional" ? "（地方の枠は半分）" : ""}` : ""}</p></div>`; }).join("")
+      : `<p class="hint">${mon(S.month)}月は、混雑空港の枠を使っていません。</p>`)
+    : `<p class="hint">${mon(S.month)}月の枠はまだ決まっていません（いまは組んでいる便数で分けています）。毎月1日の深夜3時に決まります。</p>`;
+  const rows = L.map(x => { const v = x.apply != null ? x.apply : x.use, key = `${x.iata}:${x.pool}`;
+    return `<div class="slt"><div><b>${esc(slotName(x))}</b><br><small class="dim">${x.use ? `スケジュールでは${x.use}便` : "スケジュールに便なし"}${x.apply != null ? "・申し込みずみ" : ""}</small></div>
+      <div class="sv"><button data-slot="${key}" data-v="${Math.max(0, v - 2)}" aria-label="${esc(slotName(x))}の申し込みを2便へらす"${self && v > 0 ? "" : " disabled"}>−</button><b>${v}<small>便</small></b><button data-slot="${key}" data-v="${v + 2}" aria-label="${esc(slotName(x))}の申し込みを2便ふやす"${self ? "" : " disabled"}>＋</button></div></div>`; }).join("");
+  return `<p class="hint">枠があるのは混雑空港の5つ（羽田・成田・関西・伊丹・福岡）だけです。ほかの空港は、混む時間帯に遅れやすくなるだけです。</p>
+    <small class="lbl">${mon(S.month)}月に使えている枠（1日の便数）</small>${nowHtml}
+    <small class="lbl" style="margin-top:10px">${mon(S.next)}月の申し込み（${last.getMonth() + 1}月${last.getDate()}日まで）</small>
+    <div class="v3box">${ratingOk(3) ? `<label class="trauto" style="margin:0 0 6px"><input type="checkbox" id="slotAuto"${S.auto ? " checked" : ""}> おまかせで申し込む（組んだスケジュールの便数をそのまま申し込みます）</label>` : ratingLock(3).replace("から使えます。", "から自分で申し込めます（いまはおまかせ）。")}
+      ${rows}</div>
+    <p class="hint">申し込みの合計が空港の枠を超えると、申し込んだ便数の割合で分けます。外れて全部止まることはなく、どの会社も最低1日4便は使えます。羽田の2割は「地方の枠」で、地方の空港と羽田を結ぶ路線だけで分けます。数字はゲームの中の計算です。</p>`;
+}
+document.addEventListener("click", async e => {
+  const t = e.target.closest("[data-rtab]"); if(t){ ROUTE_TAB = t.dataset.rtab; renderFleet(); return; }
+  const b = e.target.closest("[data-slot]"); if(!b || b.disabled) return; b.disabled = true;
+  const [iata, pool] = b.dataset.slot.split(":");
+  if(await coRpc("co3_slot_apply", {p_iata:iata, p_pool:pool, p_flights:+b.dataset.v})) coMsg(`${SLOT_AP[iata]}${pool === "regional" ? "（地方の枠）" : ""}に1日${b.dataset.v}便を申し込みました。`);
+  b.disabled = false;
+});
+document.addEventListener("change", async e => {
+  if(e.target.id !== "slotAuto") return;
+  if(await coRpc("co3_set_slot_auto", {p_on:e.target.checked})) coMsg(e.target.checked ? "発着枠はおまかせで申し込みます。" : "発着枠を自分で申し込みます。月末までに申し込んでください。");
+});
+// 新しい機体の発注（格付け4から）：乗った（見た）新しい世代の機種だけ。登録記号は SM- で始まるゲーム用
+let ORDERS = null;
+async function loadOrders(){ try{ const { data, error } = await sb.rpc("co3_order_list"); if(!error) ORDERS = data || []; }catch(e){ ORDERS = []; } if(currentView() === "fleet" && CO_TAB === "order") renderFleet(); }
+function renderOrder(){
+  const md = d => String(d).slice(5).replace("-", "/");
+  const pend = (CO.orders || []).length ? `<small class="lbl">発注中</small>${CO.orders.map(o => `<div class="v3row"><span>${esc(o.reg)}（${esc(o.name || o.code)}）</span><b>${md(o.deliver_on)} 納入</b></div>`).join("")}` : "";
+  if(!ratingOk(4)){ $("coFleet").innerHTML = ratingLock(4) + pend; return; }
+  if(ORDERS == null){ $("coFleet").innerHTML = `<p class="none">発注できる機種を調べています…</p>`; loadOrders(); return; }
+  $("coFleet").innerHTML = pend + (ORDERS.length ? ORDERS.map(x => `<div class="ride">${acSVG(x.cls)}<div class="rd"><b>${esc(x.name)}</b><span>${x.kind === "freighter" ? "貨物機" : `${fmtKm(+x.seats)}席`}・航続 ${fmtKm(+x.range)}km</span>
+      <small>納入まで ${x.days}日・古さなし・登録記号は SM- で始まるゲーム用の記号</small></div>
+      <button class="btn2" data-order="${esc(x.code)}"${CO.cash < +x.price ? " disabled" : ""}>発注 ${yen(+x.price)}</button></div>`).join("")
+    : `<p class="none">発注できる機種はありません。今も作られている新しい世代の機種に乗る（見る）と発注できます。</p>`)
+    + `<p class="hint">値段は機種の表の1.3倍（持っている機体が多いほど上がります）。払うのは発注したときで、取り消しはできません。</p>`;
+}
+document.addEventListener("click", async e => {
+  const b = e.target.closest("[data-order]"); if(!b || b.disabled) return; b.disabled = true;
+  if(await coRpc("co3_order", {p_code:b.dataset.order})){ ORDERS = null; coMsg("発注しました。納入されたら「持っている」に入ります。"); }
+  b.disabled = false;
+});
 // 中古機の売り場（格付け2から）。その機種に乗った（見た）会社だけ買える。1日1機、同じ相手とは30日に1回
 function renderUsed(){
   const M = CO.market || [];
@@ -4800,7 +5099,7 @@ function waveHtml(W){
   if(!W || !W.length) return "";
   const X = m => Math.max(0, Math.min(100, (m - 360) / 1080 * 100));
   const rows = W.map(w => `<div class="wv"><span class="wr">${esc(w.reg || "機体")}</span><span class="wt">${w.legs.map(l => {
-      const t0 = l.t + (l.s === "delay" ? +l.d : 0), cls = l.s === "cxl" ? (l.why === "breakdown" ? "x b" : "x") : l.s === "delay" ? "d" : "o";
+      const t0 = l.t + (l.s === "delay" ? +l.d : 0), cls = l.s === "cxl" ? (["breakdown", "check"].includes(l.why) ? "x b" : "x") : l.s === "delay" ? "d" : "o";
       return `${l.s === "delay" ? `<i class="g" style="left:${X(l.t)}%;width:${X(l.t + l.blk) - X(l.t)}%"></i>` : ""}<i class="${cls}" style="left:${X(t0)}%;width:${Math.max(1, X(t0 + l.blk) - X(t0))}%" title="${hhmm(l.t)} ${esc(apNm(l.f))}→${esc(apNm(l.to))}"></i>`; }).join("")}</span></div>`).join("");
   const notes = W.map(w => { const g = w.legs, out = [], who = esc(w.reg || "機体");
     const first = g.find(l => l.s === "delay" && !+l.c);
@@ -4808,7 +5107,9 @@ function waveHtml(W){
       out.push(`${hhmm(first.t)}発 ${esc(apNm(first.f))}→${esc(apNm(first.to))} が${first.d}分遅れ（本物の便の遅れ）${tail ? `、折り返しの余裕が足りず ${hhmm(tail.t)}発まで続いた` : "、次の便までに吸収した"}`); }
     const bk = g.filter(l => l.s === "cxl" && l.why === "breakdown");
     if(bk.length) out.push(`機体の故障で ${bk.length}便が欠航（予備機があれば飛べた）`);
-    g.filter(l => l.s === "cxl" && l.why !== "breakdown").forEach(l => out.push(`${hhmm(l.t)}発 ${esc(apNm(l.f))}→${esc(apNm(l.to))} は欠航（本物の便の欠航から）`));
+    const ck = g.filter(l => l.s === "cxl" && l.why === "check");
+    if(ck.length) out.push(`A点検の期限切れで ${ck.length}便が欠航`);
+    g.filter(l => l.s === "cxl" && !["breakdown", "check"].includes(l.why)).forEach(l => out.push(`${hhmm(l.t)}発 ${esc(apNm(l.f))}→${esc(apNm(l.to))} は欠航（本物の便の欠航から）`));
     if(g.some(l => l.spare)) out.push("故障した機体の代わりに予備機が飛んだ");
     return out.length ? `${who}：${out.join("。")}。` : ""; }).filter(Boolean);
   return `<small class="lbl" style="margin-top:6px">遅れの波（きのう）</small>
@@ -4845,7 +5146,8 @@ function ratingHtml(){
 // 朝のまとめ（前の日の記録・欠航・神対応・実際の空）。閉じるとその日は出さない（この端末だけ）
 const MORNING_KEY = "soramemo.co3.morning";
 function morningHtml(){
-  const m = CO.morning; if(!m || (m.profit == null && !+m.cancelled && !+m.god)) return "";
+  const m = CO.morning, near = ratingOk(3) && CO.checkMode === "self" ? (CO.fleet || []).filter(a => a.checkLeft != null && a.checkLeft <= 50 && !a.checkReq) : [];
+  if(!m || (m.profit == null && !+m.cancelled && !+m.god && !near.length)) return "";
   let shut = null; try{ shut = localStorage.getItem(MORNING_KEY); }catch(e){}
   if(shut === String(m.day)) return "";
   const d = new Date(String(m.day) + "T00:00:00+09:00"), wd = "日月火水木金土"[d.getDay()], sg = v => `${v >= 0 ? "+" : "−"}${fmtKm(Math.round(Math.abs(v)))}`;
@@ -4858,6 +5160,7 @@ function morningHtml(){
     ${opsStats([["欠航", +m.cxl_legs || +m.cancelled || 0, "便"], ["対応が必要", +m.open || 0, "件"], ["満足度", m.sat == null ? "—" : fmtNum(+m.sat, 1), sd != null && Math.abs(sd) >= 0.05 ? `（${sd > 0 ? "+" : "−"}${fmtNum(Math.abs(sd), 1)}）` : ""]])}
     ${waveHtml(m.wave)}
     ${skyRows ? `<small class="lbl" style="margin-top:6px">実際の空（きのう）</small>${skyRows}` : ""}
+    ${near.length ? `<div class="v3row"><span>A点検の期限が近い：${near.map(a => `${esc(a.reg || "機体")}（${a.checkLeft > 0 ? `あと${a.checkLeft}時間` : "期限切れ"}）`).join("・")}</span><b class="neg">今夜入れる</b></div>` : ""}
     ${+m.god ? `<div class="v3row"><span>よい出来事</span><b class="pos">神対応で話題に（評判 +15）</b></div>` : ""}
     ${+m.open ? `<p class="hint" style="margin:8px 0 0">下の「対応してください」から、きょうの13時までに対応できます。</p>` : ""}</div>`;
 }
@@ -4876,9 +5179,9 @@ function troubleHtml(){
   const card = t => { const sel = TR_SEL[t.id] || ((t.fits || [])[0]) || "transfer", god = Date.parse(t.god_until) - now, left = Date.parse(t.deadline) - now, gs = Date.parse(t.god_until) - Date.parse(t.created_at);
     const pct = god > 0 ? Math.max(0, Math.min(100, (1 - god / gs) * 100)) : 100, rName2 = opsRoute(t.k) || t.k, day = String(t.day).slice(5).replace("-", "/");
     const isLeg = t.leg != null, dl = t.kind === "delay", dt = t.dep_at ? new Date(t.dep_at) : null, dhm = dt ? `${String((dt.getUTCHours() + 9) % 24).padStart(2, "0")}:${String(dt.getUTCMinutes()).padStart(2, "0")}` : "";
-    return `<div class="trb"><div class="trh"><em class="tag warn">${dl ? `遅れ 約${t.delay_min}分` : "欠航"}</em><em class="tag ghost">${t.cause === "breakdown" ? "機体の故障（会社のせい）" : `${dl ? "本物の便の遅れから" : "本物の欠航から"}（理由は分かりません）`}</em></div>
+    return `<div class="trb"><div class="trh"><em class="tag warn">${dl ? `遅れ 約${t.delay_min}分` : "欠航"}</em><em class="tag ghost">${t.cause === "breakdown" ? "機体の故障（会社のせい）" : t.cause === "check" ? "A点検の期限切れ（会社のせい）" : `${dl ? "本物の便の遅れから" : "本物の欠航から"}（理由は分かりません）`}</em></div>
       <b class="trt">${isLeg ? `${esc(dhm)}発 ${esc(apNm(t.dep))} → ${esc(apNm(t.arr))}` : esc(rName2)}</b>
-      <small>${isLeg ? (dl ? `前後の本物の便が遅れています（前の便からの遅れも含む）・ 1便の収益の10%が減ります` : t.cause === "breakdown" ? `機体が故障して、予備機もないため欠航 ・ この日のこの路線の便はすべて収益0です` : `同じ時間の本物の便 ${t.real_n}便のうち ${t.real_cxl}便が欠航 ・ この便の収益は0です`)
+      <small>${isLeg ? (dl ? `前後の本物の便が遅れています（前の便からの遅れも含む）・ 1便の収益の10%が減ります` : t.cause === "breakdown" ? `機体が故障して、予備機もないため欠航 ・ この日のこの路線の便はすべて収益0です` : t.cause === "check" ? `A点検の期限を過ぎて飛べないため欠航 ・ この日のこの機体の便はすべて収益0です` : `同じ時間の本物の便 ${t.real_n}便のうち ${t.real_cxl}便が欠航 ・ この便の収益は0です`)
         : `${esc(day)}（きのう） 自社 ${t.flights}便のうち ${t.cancelled}便が欠航 ・ 本物の便は ${t.real_n + t.real_cxl}便のうち ${t.real_cxl}便が欠航`}</small>
       <div class="trbar"><i><u style="width:${pct}%"></u></i><span>${god > 0 ? `神対応まで あと${mins(god)}` : `対応できるのは あと${mins(left)}`}</span></div>
       <small class="dim">対応できるのは6時間。はじめの1時間に合うカードを使うと「神対応」</small></div>

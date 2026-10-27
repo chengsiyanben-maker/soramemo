@@ -8,6 +8,7 @@ create function auth.uid() returns uuid language sql stable as $$ select nullif(
 create function auth.jwt() returns jsonb language sql stable as $$ select jsonb_build_object('sub', current_setting('request.jwt.claim.sub', true), 'aal', 'aal2') $$;
 grant usage on schema public, auth to anon, authenticated, service_role; grant execute on function auth.uid(), auth.jwt() to anon, authenticated, service_role;`);
 for (const f of fs.readdirSync(dir).sort()) await db.exec(fs.readFileSync(dir + f, 'utf8'));
+await db.exec(`set co3.season_day = '2026-05-20'`);   // 季節の需要のない日で手計算する（季節は t72）
 await db.exec(`update ops.flags set value = 'true' where key in ('game_released', 'co_v3')`);
 let bad = 0; const check = (label, ok, v) => { console.log((ok ? 'OK ' : 'NG ') + label, ok ? '' : JSON.stringify(v)); if (!ok) bad++; };
 const A = '00000000-0000-0000-0000-00000000000a', B = '00000000-0000-0000-0000-00000000000b';
@@ -63,6 +64,7 @@ await db.exec(`update aircraft set bought_at = now() - interval '65 days' where 
 check('60日すぎで 0.95（30日ごとに +0.05、最大 0.95）', Number(await q1(`select public.co3_ac_earn(${pr.id})`)) === 0.95, null);
 await db.exec(`update aircraft set bought_at = now() - interval '400 days' where id = ${pr.id}`);
 check('最大 0.95 のまま', Number(await q1(`select public.co3_ac_earn(${pr.id})`)) === 0.95, null);
+await db.exec(`update companies set rating = 3`).catch(() => {});   // 格付け1・2の維持費 +10%（自動の点検の分）は t68 で試す
 check('維持費は機種の表の +30%（B787-9 30 → 39）', Number(await q1(`select public.co3_ac_upkeep(${pr.id})`)) === 39, null);
 check('貨物機の維持費は表のまま（B747-8F 48）', Number(await q1(`select public.co3_ac_upkeep(id) from aircraft where reg = 'JA11KZ'`)) === 48, null);
 await db.exec(`update aircraft set bought_at = now() where id = ${pr.id}`);

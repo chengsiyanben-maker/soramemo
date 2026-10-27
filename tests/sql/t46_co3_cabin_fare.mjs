@@ -8,6 +8,7 @@ create function auth.uid() returns uuid language sql stable as $$ select nullif(
 create function auth.jwt() returns jsonb language sql stable as $$ select jsonb_build_object('sub', current_setting('request.jwt.claim.sub', true), 'aal', 'aal2') $$;
 grant usage on schema public, auth to anon, authenticated, service_role; grant execute on function auth.uid(), auth.jwt() to anon, authenticated, service_role;`);
 for (const f of fs.readdirSync(dir).sort()) await db.exec(fs.readFileSync(dir + f, 'utf8'));
+await db.exec(`set co3.season_day = '2026-05-20'`);   // 季節の需要のない日で手計算する（季節は t72）
 await db.exec(`update ops.flags set value = 'true' where key in ('game_released', 'co_v3')`);
 let bad = 0; const check = (label, ok, v) => { console.log((ok ? 'OK ' : 'NG ') + label, ok ? '' : JSON.stringify(v)); if (!ok) bad++; };
 const A = '00000000-0000-0000-0000-00000000000a', B = '00000000-0000-0000-0000-00000000000b';
@@ -39,6 +40,7 @@ await db.exec(`insert into flights (user_id, from_airport, to_airport, dep_at, a
 await as(A, `select public.co_state()`);
 await db.exec(`update companies set cash = 500000 where user_id = '${A}'`);
 await db.exec(`update companies set rating = 5`).catch(() => {});   // 格付けの鍵は t63 で試す。ここでは解放ずみの形で
+await db.exec(`update companies set safety = 'low'`).catch(() => {});   // 安全への投資の費用（普通 +1ポイント）は t71 で試す。ここでは費用 +0 で手計算
 // 手計算は満足度の倍率なし（満足度60）で確かめる。満足度は t47
 await db.exec(`update companies set satisfaction = 60`).catch(() => {});
 let s = await as(A, `select public.co_buy('r:JA01XJ')`);

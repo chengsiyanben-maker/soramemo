@@ -8,6 +8,7 @@ create function auth.uid() returns uuid language sql stable as $$ select nullif(
 create function auth.jwt() returns jsonb language sql stable as $$ select jsonb_build_object('sub', current_setting('request.jwt.claim.sub', true), 'aal', 'aal2') $$;
 grant usage on schema public, auth to anon, authenticated, service_role; grant execute on function auth.uid(), auth.jwt() to anon, authenticated, service_role;`);
 for (const f of fs.readdirSync(dir).sort()) await db.exec(fs.readFileSync(dir + f, 'utf8'));
+await db.exec(`set co3.season_day = '2026-05-20'`);   // 季節の需要のない日で手計算する（季節は t72）
 let bad = 0; const check = (label, ok, v) => { console.log((ok ? 'OK ' : 'NG ') + label, ok ? '' : JSON.stringify(v)); if (!ok) bad++; };
 await db.exec(`insert into public.track_points (callsign, t, lat, lon, alt) values ('JAL123', now() - interval '1 hour', 35.6, 139.9, 30), ('JAL123', now() - interval '59 minutes', 35.58, 139.85, 20), ('JA4123', now() - interval '1 hour', 35, 139, 10)`);
 const pts = (await db.query(`select public.rwy_learn_points(now() - interval '2 hours', now(), 0, 1) as p`)).rows[0].p;
