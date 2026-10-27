@@ -381,7 +381,9 @@ dialog::backdrop{background:rgba(15,22,38,.55)}
 .polcard{text-align:left;border:2px solid transparent;background:var(--paper);border-radius:14px;padding:10px 12px;min-height:84px;font:inherit;color:var(--ink);display:flex;flex-direction:column;gap:3px}
 .polcard.on{border-color:var(--ink)}.polcard b{font-size:15px}.polcard span{font-size:11.5px;color:var(--sumi);line-height:1.5}.polcard em{font-style:normal;font-size:11px;font-weight:700;color:var(--sumi)}
 .polcard em.now{color:var(--ink)}
-.pillrow{display:flex;gap:6px;margin:0 0 10px}
+.pillrow{display:flex;gap:6px;margin:0 0 10px;flex-wrap:wrap}
+.pillrow.fares{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:4px}.pillrow.fares .cotab{min-width:0;padding:6px 0;font-size:11px;line-height:1.3;white-space:nowrap;border-radius:14px}
+.pillrow.fares .cotab small{display:block;font-size:10px;color:#8A909A;font-weight:500}.pillrow.fares .cotab.on small{color:inherit;opacity:.75}
 .v3box.ops{display:flex;flex-direction:column;gap:10px}
 .opshd{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
 .opshd>div{display:flex;flex-direction:column;gap:2px}.opshd small{font-size:12px;color:var(--sub,#5F6672)}.opshd b{font-size:20px;font-weight:900;letter-spacing:.02em}
@@ -4330,7 +4332,7 @@ function coFromServer(j){
       rodeOn:x.rode_on, flight:x.flight, boughtAt:Date.parse(x.bought_at), kind:x.kind || null})),
     sky:j.sky || {}, repPoints:+j.rep_points || 0, stars:+j.stars || 1, bought:+j.bought || 0, value:+j.value || 0,
     friendCode:j.friend_code || "", hideRank:!!j.hide_rank, friends:+j.friends || 0,
-    v3:!!j.v3, policy:j.policy || "fsc", premium:+j.premium || 0, sat:j.satisfaction == null ? 40 : +j.satisfaction, satMult:+j.sat_mult || 1, satParts:j.sat_parts || null, econ:j.econ || [], home:j.home == null ? null : +j.home, homeSince:j.home_since || null, cargoRoutes:j.cargo_routes || [], cargo:j.cargo || [], pj:j.pj || [], jobs:j.jobs || [], subsidy:j.subsidy || [], small:j.small || [], plans:j.plans || {},
+    v3:!!j.v3, policy:j.policy || "fsc", premium:+j.premium || 0, sat:j.satisfaction == null ? 40 : +j.satisfaction, satMult:+j.sat_mult || 1, satParts:j.sat_parts || null, econ:j.econ || [], fares:j.fares || {}, home:j.home == null ? null : +j.home, homeSince:j.home_since || null, cargoRoutes:j.cargo_routes || [], cargo:j.cargo || [], pj:j.pj || [], jobs:j.jobs || [], subsidy:j.subsidy || [], small:j.small || [], plans:j.plans || {},
     facilities:Object.fromEntries(Object.entries(j.facilities || {}).map(([k, v]) => [+k, +v]))}; }
 // 端末だけの版（お試し・サーバーなし）：同じ形の状態を、端末の記録から作る
 let CO_LOCAL = null;
@@ -4372,7 +4374,7 @@ const coMsg = (t, err) => { $("coMsg").textContent = t; $("coMsg").className = e
 async function coRpc(name, args){
   const { data, error } = await sb.rpc(name, args || {});
   if(error){ const m = String(error.message || "");
-    coMsg(m.includes("not enough") ? "資金が足りません。" : m.includes("not met") ? "まだ出会っていない守り神です。" : m.includes("invalid name") ? "会社名は1〜20文字で入れてください。" : m.includes("game not released") ? "エアライン経営は、まだ公開されていません。" : m.includes("not ridden") ? "乗った機体だけを買えます。" : m.includes("already owned") ? "もう持っている機体です。" : m.includes("no free slot") ? "評判の星の数までしか施設を建てられません。" : m.includes("not visited") ? "訪れた空港にだけ施設を建てられます。" : m.includes("too small") ? "この路線の空港には就航できない機体です。" : m.includes("not intl") ? "国際線には、国際線で乗った機体だけを入れられます。" : m.includes("seen limit per day") ? "見ただけの旅客機は1日3機までです。" : m.includes("too many seen") ? "見ただけの旅客機は、会社の機体の半分までです。" : m.includes("10 percent") ? "貨物機は機体の1割までです。" : m.includes("cannot own freighters") ? "この方針では貨物機を持てません。" : m.includes("not seen") ? "見た機体だけを買えます。" : m.includes("invalid policy") ? "その方針は選べません。" : m.includes("premium not allowed") ? "この方針では、その割合の上級席は選べません。" : m.includes("not a freighter") ? "貨物機だけを貨物の路線に入れられます。" : m.includes("too far") ? "この機体では遠すぎて飛べません。" : m.includes("invalid flights") ? "便数は往復の数（偶数）で決めてください。" : m.includes("not a small") ? "小型機だけを買えます。" : m.includes("code not found") ? "その合言葉の会社は見つかりません。" : m.includes("own code") ? "自分の合言葉です。" : m.includes("too many") ? "友だちは100社までです。" : "保存できませんでした。電波のよい場所でもう一度試してください。", true);
+    coMsg(m.includes("not enough") ? "資金が足りません。" : m.includes("not met") ? "まだ出会っていない守り神です。" : m.includes("invalid name") ? "会社名は1〜20文字で入れてください。" : m.includes("game not released") ? "エアライン経営は、まだ公開されていません。" : m.includes("not ridden") ? "乗った機体だけを買えます。" : m.includes("already owned") ? "もう持っている機体です。" : m.includes("no free slot") ? "評判の星の数までしか施設を建てられません。" : m.includes("not visited") ? "訪れた空港にだけ施設を建てられます。" : m.includes("too small") ? "この路線の空港には就航できない機体です。" : m.includes("not intl") ? "国際線には、国際線で乗った機体だけを入れられます。" : m.includes("seen limit per day") ? "見ただけの旅客機は1日3機までです。" : m.includes("too many seen") ? "見ただけの旅客機は、会社の機体の半分までです。" : m.includes("10 percent") ? "貨物機は機体の1割までです。" : m.includes("cannot own freighters") ? "この方針では貨物機を持てません。" : m.includes("not seen") ? "見た機体だけを買えます。" : m.includes("invalid policy") ? "その方針は選べません。" : m.includes("premium not allowed") ? "この方針では、その割合の上級席は選べません。" : m.includes("fare once a day") ? "運賃を変えられるのは1日1回です。" : m.includes("invalid fare") ? "その運賃は選べません。" : m.includes("not a freighter") ? "貨物機だけを貨物の路線に入れられます。" : m.includes("too far") ? "この機体では遠すぎて飛べません。" : m.includes("invalid flights") ? "便数は往復の数（偶数）で決めてください。" : m.includes("not a small") ? "小型機だけを買えます。" : m.includes("code not found") ? "その合言葉の会社は見つかりません。" : m.includes("own code") ? "自分の合言葉です。" : m.includes("too many") ? "友だちは100社までです。" : "保存できませんでした。電波のよい場所でもう一度試してください。", true);
     return false; }
   if(data && typeof data === "object" && "cash" in data){ CO = coFromServer(data); HANGAR = null; renderCompany(); }
   return data || true;
@@ -4618,6 +4620,20 @@ document.addEventListener("click", async e => {
 });
 // v3 の旅客の路線（お客さん・取り合い・便数・もうけ）
 const KIND_JA = {resort:"リゾート", intl:"国際線", big:"大きい空港どうし", local:"地方"};
+// 運賃の5段階（路線ごと、1日1回）。ほかの会社の段も見える（会社名は出さない）
+const FARE_LV = [[-2, "とても安い", "×0.7"], [-1, "安い", "×0.85"], [0, "普通", "×1.0"], [1, "高い", "×1.2"], [2, "とても高い", "×1.4"]];
+function fareHtml(k){
+  const f = (CO.fares || {})[k] || {level:0, others:[]}, lv = +f.level || 0, locked = f.set_on && String(f.set_on).slice(0, 10) === jstToday();
+  const name = v => (FARE_LV.find(x => x[0] === +v) || FARE_LV[2])[1];
+  return `<small class="lbl" style="margin-top:8px">運賃（変えられるのは1日1回）</small>
+    <div class="pillrow fares" role="group" aria-label="運賃">${FARE_LV.map(([v, l, m]) => `<button class="cotab${lv === v ? " on" : ""}" data-fare="${esc(k)}" data-lv="${v}" aria-pressed="${lv === v}"${locked && lv !== v ? " disabled" : ""}>${l}<small>${m}</small></button>`).join("")}</div>
+    <p class="hint" style="margin:0 0 6px">${f.others && f.others.length ? `同じ路線のほかの会社：${f.others.map(name).join("・")}` : "同じ路線に、ほかの会社はいません"}。安くすると旅行の客を多く取れますが、1人あたりの収益は下がります。${locked ? "きょうはもう変えました（あしたの0時から変えられます）。" : ""}</p>`;
+}
+document.addEventListener("click", async e => {
+  const b = e.target.closest("[data-fare]"); if(!b || b.disabled) return;
+  const lv = +b.dataset.lv, cur = +(((CO.fares || {})[b.dataset.fare] || {}).level || 0); if(lv === cur) return;
+  b.disabled = true; if(await coRpc("co3_set_fare", {p_route:b.dataset.fare, p_level:lv})) coMsg(`運賃を「${FARE_LV.find(x => x[0] === lv)[1]}」にしました。`);
+});
 const BIZ_SHARE = {big:0.60, resort:0.12, local:0.45};   // 路線の客のうち仕事の客の割合（サーバーの co3_route_econ と同じ）
 function routeV3Html(r, e, ac){
   const plan = CO.plans ? CO.plans[r.k] : undefined, pf = +e.profit || 0, load = +e.seats ? Math.round(+e.carried / +e.seats * 100) : 0;
@@ -4630,6 +4646,7 @@ function routeV3Html(r, e, ac){
         <div class="v3stats"><div><small>この路線のお客さん</small><b>${fmtKm(Math.round(+e.demand))}<i>人/日</i></b></div><div><small>自社に乗った人</small><b>${fmtKm(Math.round(+e.carried))}<i>人</i></b></div><div><small>取り合い</small><b>${+e.n || 1}<i>社</i></b></div></div>
         ${row(`路線の種類`, KIND_JA[e.kind] || "")}${row("本物の便（前の28日の1日あたり）", e.real == null ? "なし" : `${fmtNum(+e.real, 1)}便`)}
         ${row("自社の取り分", `${share}%`)}${["fsc", "mcc"].includes(CO.policy) ? row("仕事の客の運賃（仕事の客が多い路線ほど高い）", `+${Math.round(Math.min(0.2, Math.max(0, ((BIZ_SHARE[e.kind] ?? 0.45) - 0.3) / 0.3 * 0.2)) * 100)}%`) : ""}${+e.p_seats ? row(`上級席（${fmtKm(Math.round(+e.p_seats))}席）`, `${fmtKm(Math.round(+e.p_pax))}人`) : ""}
+        ${fareHtml(r.k)}
         ${row("収益", fmtKm(Math.round(+e.revenue)))}${row("運航の費用", `−${fmtKm(Math.round(+e.cost))}`, "neg")}${row("着陸料", `−${fmtKm(Math.round(+e.landing))}`, "neg")}${+e.congestion ? row("混雑料", `−${fmtKm(Math.round(+e.congestion))}`, "neg") : ""}
         ${row("もうけ", `${pf >= 0 ? "+" : "−"}${fmtKm(Math.round(Math.abs(pf)))}`, pf >= 0 ? "pos" : "neg")}
         ${ac ? `<small class="lbl" style="margin-top:8px">1日の便数（往復の数）</small><div class="pillrow" role="group" aria-label="1日の便数">${[[0, "おまかせ"], [2, "2便"], [4, "4便"], [6, "6便"], [8, "8便"], [10, "10便"]].map(([n, l]) => { const on = n ? plan === n : plan == null;
