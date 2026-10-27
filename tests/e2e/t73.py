@@ -16,6 +16,7 @@ window.__co = {name:'そらメモ航空', cash:100000, last:iso(now), roles:{}, 
   v3:true, policy:'fsc', premium:20, satisfaction:41.2, sat_mult:0.97, sat_parts:{base:50, meal:-8, bag:0, response:0, target:37}, meal:'none', bag:'free', home:null, home_since:null, plans:{}, fares:{}, auto_trouble:false, morning:{day:y, profit:1240, prev_profit:1100, gross:1500, upkeep:260, sat:41.2, prev_sat:40.9, cancelled:1, open:1, god:0, sky:[{k:'5-6', mult:0.9, n:18, cxl:2, avg4:20}]},
   econ:[{k:'5-6', kind:'big', real:20, demand:1190, n:1, own:1118, flights:6, seats:369, carried:1118, revenue:938, cost:556, landing:36, congestion:0, profit:346, p_seats:0, p_pax:0, e_pax:1118}],
   troubles:[{id:11, k:'5-6', day:y, flights:6, cancelled:1, real_n:18, real_cxl:2, rev_flight:156.4, created_at:iso(now - 18 * 6e4), god_until:iso(now + 42 * 6e4), deadline:iso(now + 342 * 6e4), card:null, cost:null, result:null, auto:false, done_at:null},
+            {id:12, k:'5-6', day:y, leg:5, kind:'delay', delay_min:150, dep_at:iso(now + 3 * 36e5), dep:'HND', arr:'CTS', fits:['snack'], flights:6, cancelled:0, real_n:2, real_cxl:0, rev_flight:156.4, created_at:iso(now - 5 * 6e4), god_until:iso(now + 55 * 6e4), deadline:iso(now + 355 * 6e4), card:null, cost:null, result:null, auto:false, done_at:null},
             {id:9, k:'5-6', day:y3, flights:6, cancelled:2, real_n:10, real_cxl:5, rev_flight:156.4, created_at:iso(now - 3 * 864e5), god_until:iso(now - 3 * 864e5 + 36e5), deadline:iso(now - 3 * 864e5 + 6 * 36e5), card:null, cost:null, result:'none', auto:false, done_at:null}]}; })();"""
 async def open_page(b, extra, errs):
     c = await b.new_context(viewport={'width':400,'height':860}); await c.add_init_script(INIT + extra)
@@ -35,6 +36,7 @@ async def main():
         check('神対応まであと何分:', '神対応まで あと4' in v)
         check('カード3枚・振替が合う・費用:', await pg.locator('[data-trsel="11"]').count() == 3 and 'この欠航に合う' in v and '約32' in v and '約47' in v and '約16' in v)
         check('前の7日：対応なし:', '前の7日のトラブル' in v and '対応なし' in v)
+        check('便ごとの遅れ：時刻・向き・約150分・軽食が合う・はじめから軽食を選ぶ:', '遅れ 約150分' in v and '発 羽田' in v and '新千歳' in v and 'この遅れに合う' in v and await pg.get_attribute('[data-trsel="12"][data-card="snack"]', 'aria-checked') == 'true' and '軽食とおわびを使う' in await pg.inner_text('[data-trgo="12"]'))
         await pg.screenshot(path=os.path.join(WORK, 't73_trouble.png'), full_page=True)
         await pg.click('[data-trsel="11"][data-card="snack"]'); await pg.wait_for_timeout(200)
         check('カードを選ぶとボタンが変わる:', '軽食とおわびを使う' in await pg.inner_text('[data-trgo="11"]') and await pg.get_attribute('[data-trsel="11"][data-card="snack"]', 'aria-checked') == 'true')
@@ -42,11 +44,12 @@ async def main():
         await pg.click('[data-trgo="11"]'); await pg.wait_for_timeout(500)
         check('振替の手配で神対応（co3_trouble_respond）:', await pg.evaluate('window.__trResp.p_id === 11 && window.__trResp.p_card === "transfer"') and '神対応！' in await pg.inner_text('#coMsg') and await pg.evaluate('CO.cash') == 100000 - 32)
         v = await pg.inner_text('#coV3')
-        check('対応のあと：いま対応が必要なものはない・前の7日に神対応:', 'いま対応が必要なトラブルはありません' in v and '神対応' in v)
+        check('対応のあと：その欠航は消え（遅れの1件は残る）・前の7日に神対応:', await pg.locator('[data-trgo="11"]').count() == 0 and await pg.locator('[data-trgo="12"]').count() == 1 and '神対応' in v)
         await pg.click('#morningClose'); await pg.wait_for_timeout(200)
         check('朝のまとめを閉じると出さない:', 'のまとめ' not in await pg.inner_text('#coV3'))
         await pg.reload(); await pg.wait_for_function('typeof render === "function"'); await pg.wait_for_timeout(600); await pg.evaluate('__fake.login()'); await pg.wait_for_timeout(800); await pg.evaluate("goTab('co')"); await pg.wait_for_timeout(400)
-        check('開き直しても閉じたまま（その日だけ）:', 'のまとめ' not in await pg.inner_text('#coV3'))
+        v2 = await pg.inner_text('#coV3'); print('RELOAD', v2[:200].replace('\n', ' | '))
+        check('開き直しても閉じたまま（その日だけ）:', 'のまとめ' not in v2)
         await pg.click('#trAuto'); await pg.wait_for_timeout(400)
         check('自動で対応する（co3_set_auto_trouble）:', await pg.evaluate('window.__trAuto.p_on === true') and await pg.is_checked('#trAuto'))
         await c.close()

@@ -4706,7 +4706,8 @@ function morningHtml(){
     return `<div class="v3row"><span>${esc(opsRoute(x.k) || x.k)}（${why}）</span><b class="${pc > 0 ? "pos" : pc < 0 ? "neg" : ""}">${pc > 0 ? "+" : pc < 0 ? "−" : "±"}${Math.abs(pc)}%</b></div>`; }).join("");
   return `<div class="v3box morning"><div class="mhd"><small>${d.getMonth() + 1}月${d.getDate()}日（${wd}）のまとめ</small><button class="linkbtn2" id="morningClose">閉じる</button></div>
     <div class="satnum"><div><small>きのうのもうけ</small><br><b>${m.profit == null ? "—" : sg(+m.profit)}</b>${diff != null ? ` <small>前の日より ${sg(diff)}</small>` : ""}</div></div>
-    ${opsStats([["欠航", +m.cancelled || 0, "便"], ["対応が必要", +m.open || 0, "件"], ["満足度", m.sat == null ? "—" : fmtNum(+m.sat, 1), sd != null && Math.abs(sd) >= 0.05 ? `（${sd > 0 ? "+" : "−"}${fmtNum(Math.abs(sd), 1)}）` : ""]])}
+    ${+m.legs_done ? `<p class="hint" style="margin:0 0 6px">きのう決まった便 ${m.legs_done}便のうち、遅れ ${m.delayed}便・欠航 ${m.cxl_legs}便（本物の便の運航情報から）。</p>` : ""}
+    ${opsStats([["欠航", +m.cxl_legs || +m.cancelled || 0, "便"], ["対応が必要", +m.open || 0, "件"], ["満足度", m.sat == null ? "—" : fmtNum(+m.sat, 1), sd != null && Math.abs(sd) >= 0.05 ? `（${sd > 0 ? "+" : "−"}${fmtNum(Math.abs(sd), 1)}）` : ""]])}
     ${skyRows ? `<small class="lbl" style="margin-top:6px">実際の空（きのう）</small>${skyRows}` : ""}
     ${+m.god ? `<div class="v3row"><span>よい出来事</span><b class="pos">神対応で話題に（評判 +15）</b></div>` : ""}
     ${+m.open ? `<p class="hint" style="margin:8px 0 0">下の「対応してください」から、きょうの13時までに対応できます。</p>` : ""}</div>`;
@@ -4716,35 +4717,37 @@ document.addEventListener("click", e => {
   try{ localStorage.setItem(MORNING_KEY, String(CO.morning.day)); }catch(err){}
   renderV3();
 });
-// トラブル（1日まとめ：前の日の本物の欠航から、毎朝7時に決まる。6時間以内に対応、はじめの1時間に合うカードで神対応）
+// トラブル（便ごと：出発の3時間前に本物の便の欠航・遅れから決まる。前の1日まとめの行も出す。6時間以内に対応、はじめの1時間に合うカードで神対応）
 const TR_CARDS = [["transfer", "振替の手配", 0.20, "自社の後の便や、ほかの便に振り替える"], ["hotel", "ホテルの手配", 0.30, "夜の欠航や台風での足止めに"], ["snack", "軽食とおわび", 0.10, "2時間以上の遅れに"]];
 let TR_SEL = {};
 function troubleHtml(){
   const T = CO.troubles || []; if(!T.length) return "";
   const now = Date.now(), open = T.filter(t => !t.result && Date.parse(t.deadline) > now), past = T.filter(t => !open.includes(t));
   const mins = ms => ms >= 36e5 ? `${Math.floor(ms / 36e5)}時間${Math.round(ms % 36e5 / 6e4)}分` : `${Math.max(1, Math.round(ms / 6e4))}分`;
-  const card = t => { const sel = TR_SEL[t.id] || "transfer", god = Date.parse(t.god_until) - now, left = Date.parse(t.deadline) - now, gs = Date.parse(t.god_until) - Date.parse(t.created_at);
+  const card = t => { const sel = TR_SEL[t.id] || ((t.fits || [])[0]) || "transfer", god = Date.parse(t.god_until) - now, left = Date.parse(t.deadline) - now, gs = Date.parse(t.god_until) - Date.parse(t.created_at);
     const pct = god > 0 ? Math.max(0, Math.min(100, (1 - god / gs) * 100)) : 100, rName2 = opsRoute(t.k) || t.k, day = String(t.day).slice(5).replace("-", "/");
-    return `<div class="trb"><div class="trh"><em class="tag warn">欠航</em><em class="tag ghost">本物の欠航から（理由は分かりません）</em></div>
-      <b class="trt">${esc(rName2)}</b>
-      <small>${esc(day)}（きのう） 自社 ${t.flights}便のうち ${t.cancelled}便が欠航 ・ 本物の便は ${t.real_n + t.real_cxl}便のうち ${t.real_cxl}便が欠航</small>
+    const isLeg = t.leg != null, dl = t.kind === "delay", dt = t.dep_at ? new Date(t.dep_at) : null, dhm = dt ? `${String((dt.getUTCHours() + 9) % 24).padStart(2, "0")}:${String(dt.getUTCMinutes()).padStart(2, "0")}` : "";
+    return `<div class="trb"><div class="trh"><em class="tag warn">${dl ? `遅れ 約${t.delay_min}分` : "欠航"}</em><em class="tag ghost">${dl ? "本物の便の遅れから" : "本物の欠航から"}（理由は分かりません）</em></div>
+      <b class="trt">${isLeg ? `${esc(dhm)}発 ${esc(apNm(t.dep))} → ${esc(apNm(t.arr))}` : esc(rName2)}</b>
+      <small>${isLeg ? (dl ? `前後の本物の便が遅れています（前の便からの遅れも含む）・ 1便の収益の10%が減ります` : `同じ時間の本物の便 ${t.real_n}便のうち ${t.real_cxl}便が欠航 ・ この便の収益は0です`)
+        : `${esc(day)}（きのう） 自社 ${t.flights}便のうち ${t.cancelled}便が欠航 ・ 本物の便は ${t.real_n + t.real_cxl}便のうち ${t.real_cxl}便が欠航`}</small>
       <div class="trbar"><i><u style="width:${pct}%"></u></i><span>${god > 0 ? `神対応まで あと${mins(god)}` : `対応できるのは あと${mins(left)}`}</span></div>
       <small class="dim">対応できるのは6時間。はじめの1時間に合うカードを使うと「神対応」</small></div>
-      <div class="trcards" role="radiogroup" aria-label="対応カード">${TR_CARDS.map(([k, l, r, note]) => { const fit = k === "transfer", c = Math.ceil(r * +t.rev_flight * t.cancelled);
-        return `<button class="trcard${sel === k ? " on" : ""}" role="radio" aria-checked="${sel === k}" data-trsel="${t.id}" data-card="${k}"><span class="r1"><b>${l}</b>${fit ? `<em class="tag green">この欠航に合う</em>` : `<em class="tag">ふつうの対応になる</em>`}</span><small>${note} ・ 費用 その便の収益の${Math.round(r * 100)}%（約${fmtKm(c)}）</small></button>`; }).join("")}</div>
+      <div class="trcards" role="radiogroup" aria-label="対応カード">${TR_CARDS.map(([k, l, r, note]) => { const fit = (t.fits || (t.kind === "delay" ? [] : ["transfer"])).includes(k), c = Math.ceil(r * +t.rev_flight * Math.max(1, +t.cancelled));
+        return `<button class="trcard${sel === k ? " on" : ""}" role="radio" aria-checked="${sel === k}" data-trsel="${t.id}" data-card="${k}"><span class="r1"><b>${l}</b>${fit ? `<em class="tag green">${t.kind === "delay" ? "この遅れに合う" : "この欠航に合う"}</em>` : `<em class="tag">ふつうの対応になる</em>`}</span><small>${note} ・ 費用 その便の収益の${Math.round(r * 100)}%（約${fmtKm(c)}）</small></button>`; }).join("")}</div>
       <div class="v3box" style="margin-bottom:8px"><small>神対応になると</small><br><b>満足度 +8 ・ 評判 +15</b></div>
       <button class="btn2 trgo" data-trgo="${t.id}" style="width:100%">${TR_CARDS.find(x => x[0] === sel)[1]}を使う</button>`; };
   const resJa = {god:"神対応", normal:"ふつうの対応", none:"対応なし"};
   return `<h2>対応してください</h2>${open.map(card).join("")}
     ${open.length ? "" : `<p class="hint">いま対応が必要なトラブルはありません。</p>`}
     <label class="trauto"><input type="checkbox" id="trAuto"${CO.autoTrouble ? " checked" : ""}> 次から自動で対応する（振替の手配で、ふつうの対応になる）</label>
-    ${past.length ? `<div class="v3box"><h3>前の7日のトラブル</h3>${past.map(t => `<div class="v3row"><span>${esc(String(t.day).slice(5).replace("-", "/"))} ${esc(opsRoute(t.k) || t.k)} ・ 欠航 ${t.cancelled}便${t.auto ? "（自動）" : ""}</span><b class="${t.result === "god" ? "pos" : t.result === "none" ? "neg" : ""}">${resJa[t.result] || ""}</b></div>`).join("")}</div>` : ""}`;
+    ${past.length ? `<div class="v3box"><h3>前の7日のトラブル</h3>${past.map(t => `<div class="v3row"><span>${esc(String(t.day).slice(5).replace("-", "/"))} ${esc(opsRoute(t.k) || t.k)} ・ ${t.kind === "delay" ? `遅れ ${t.delay_min}分` : t.leg != null ? "欠航" : `欠航 ${t.cancelled}便`}${t.auto ? "（自動）" : ""}</span><b class="${t.result === "god" ? "pos" : t.result === "none" ? "neg" : ""}">${resJa[t.result] || ""}</b></div>`).join("")}</div>` : ""}`;
 }
 document.addEventListener("click", async e => {
   const s1 = e.target.closest("[data-trsel]");
   if(s1){ TR_SEL[s1.dataset.trsel] = s1.dataset.card; renderV3(); return; }
   const go = e.target.closest("[data-trgo]"); if(!go) return;
-  const id = +go.dataset.trgo, card = TR_SEL[id] || "transfer"; go.disabled = true;
+  const id = +go.dataset.trgo, tt = (CO.troubles || []).find(x => x.id === id), card = TR_SEL[id] || ((tt && tt.fits || [])[0]) || "transfer"; go.disabled = true;
   const r = await coRpc("co3_trouble_respond", {p_id:id, p_card:card});
   if(r){ const t = (CO.troubles || []).find(x => x.id === id); coMsg(t && t.result === "god" ? "神対応！ 満足度 +8・評判 +15" : "ふつうの対応をしました。"); }
 });
