@@ -1914,7 +1914,8 @@ nav.tabs{transition:transform .3s cubic-bezier(.2,.8,.2,1),opacity .2s}
   <section class="view" id="v-fleet" aria-label="路線と機体">
     <div id="coOps" hidden></div>
     <h2>自社路線</h2>
-    <p class="hint">実際に飛んだ区間（国際線は便名を入れた記録）が、あなたの会社の路線になります。機体を入れると機体の倍率に、機体がないと収益は半分です。路線を押すと計算の内わけが見られます。空港の大きさは、1日の発着便数で5段階（超大規模・拠点・大規模・中規模・小規模）。大型ジェットは拠点以上どうし、中型ジェットは大規模以上どうしの路線に入れられます。</p>
+    <p class="hint" id="coRouteHintV3" hidden>実際に飛んだ区間（国際線は便名を入れた記録）が、あなたの会社の路線になります。路線のお客さんを、同じ路線の会社で取り合います（運賃・便数・満足度・地元の応援で取り分が決まります）。機体を入れた路線だけが飛びます。路線を押すと、お客さんと収益の内わけ、1日の便数が見られます。</p>
+    <p class="hint" id="coRouteHint">実際に飛んだ区間（国際線は便名を入れた記録）が、あなたの会社の路線になります。機体を入れると機体の倍率に、機体がないと収益は半分です。路線を押すと計算の内わけが見られます。空港の大きさは、1日の発着便数で5段階（超大規模・拠点・大規模・中規模・小規模）。大型ジェットは拠点以上どうし、中型ジェットは大規模以上どうしの路線に入れられます。</p>
     <div id="coRoutes"></div>
     <h2>機体</h2>
     <p class="hint">あなたが乗った機体だけを、会社の機体として買えます。登録記号は、便名を入れたフライトの毎日の記録（機体の位置・adsb.lol）から。分からないときは、時刻表の機種で「名前のない機体」を1機買えます。国際線に入れられるのは、国際線で乗った機体だけです。</p>
@@ -4329,7 +4330,7 @@ function coFromServer(j){
       rodeOn:x.rode_on, flight:x.flight, boughtAt:Date.parse(x.bought_at), kind:x.kind || null})),
     sky:j.sky || {}, repPoints:+j.rep_points || 0, stars:+j.stars || 1, bought:+j.bought || 0, value:+j.value || 0,
     friendCode:j.friend_code || "", hideRank:!!j.hide_rank, friends:+j.friends || 0,
-    v3:!!j.v3, policy:j.policy || "fsc", premium:+j.premium || 0, sat:j.satisfaction == null ? 40 : +j.satisfaction, satMult:+j.sat_mult || 1, satParts:j.sat_parts || null, cargoRoutes:j.cargo_routes || [], cargo:j.cargo || [], pj:j.pj || [], jobs:j.jobs || [], subsidy:j.subsidy || [], small:j.small || [], plans:j.plans || {},
+    v3:!!j.v3, policy:j.policy || "fsc", premium:+j.premium || 0, sat:j.satisfaction == null ? 40 : +j.satisfaction, satMult:+j.sat_mult || 1, satParts:j.sat_parts || null, econ:j.econ || [], home:j.home == null ? null : +j.home, homeSince:j.home_since || null, cargoRoutes:j.cargo_routes || [], cargo:j.cargo || [], pj:j.pj || [], jobs:j.jobs || [], subsidy:j.subsidy || [], small:j.small || [], plans:j.plans || {},
     facilities:Object.fromEntries(Object.entries(j.facilities || {}).map(([k, v]) => [+k, +v]))}; }
 // 端末だけの版（お試し・サーバーなし）：同じ形の状態を、端末の記録から作る
 let CO_LOCAL = null;
@@ -4371,7 +4372,7 @@ const coMsg = (t, err) => { $("coMsg").textContent = t; $("coMsg").className = e
 async function coRpc(name, args){
   const { data, error } = await sb.rpc(name, args || {});
   if(error){ const m = String(error.message || "");
-    coMsg(m.includes("not enough") ? "資金が足りません。" : m.includes("not met") ? "まだ出会っていない守り神です。" : m.includes("invalid name") ? "会社名は1〜20文字で入れてください。" : m.includes("game not released") ? "エアライン経営は、まだ公開されていません。" : m.includes("not ridden") ? "乗った機体だけを買えます。" : m.includes("already owned") ? "もう持っている機体です。" : m.includes("no free slot") ? "評判の星の数までしか施設を建てられません。" : m.includes("not visited") ? "訪れた空港にだけ施設を建てられます。" : m.includes("too small") ? "この路線の空港には就航できない機体です。" : m.includes("not intl") ? "国際線には、国際線で乗った機体だけを入れられます。" : m.includes("seen limit per day") ? "見ただけの旅客機は1日3機までです。" : m.includes("too many seen") ? "見ただけの旅客機は、会社の機体の半分までです。" : m.includes("10 percent") ? "貨物機は機体の1割までです。" : m.includes("cannot own freighters") ? "この方針では貨物機を持てません。" : m.includes("not seen") ? "見た機体だけを買えます。" : m.includes("invalid policy") ? "その方針は選べません。" : m.includes("not a freighter") ? "貨物機だけを貨物の路線に入れられます。" : m.includes("too far") ? "この機体では遠すぎて飛べません。" : m.includes("invalid flights") ? "便数は往復の数（偶数）で決めてください。" : m.includes("not a small") ? "小型機だけを買えます。" : m.includes("code not found") ? "その合言葉の会社は見つかりません。" : m.includes("own code") ? "自分の合言葉です。" : m.includes("too many") ? "友だちは100社までです。" : "保存できませんでした。電波のよい場所でもう一度試してください。", true);
+    coMsg(m.includes("not enough") ? "資金が足りません。" : m.includes("not met") ? "まだ出会っていない守り神です。" : m.includes("invalid name") ? "会社名は1〜20文字で入れてください。" : m.includes("game not released") ? "エアライン経営は、まだ公開されていません。" : m.includes("not ridden") ? "乗った機体だけを買えます。" : m.includes("already owned") ? "もう持っている機体です。" : m.includes("no free slot") ? "評判の星の数までしか施設を建てられません。" : m.includes("not visited") ? "訪れた空港にだけ施設を建てられます。" : m.includes("too small") ? "この路線の空港には就航できない機体です。" : m.includes("not intl") ? "国際線には、国際線で乗った機体だけを入れられます。" : m.includes("seen limit per day") ? "見ただけの旅客機は1日3機までです。" : m.includes("too many seen") ? "見ただけの旅客機は、会社の機体の半分までです。" : m.includes("10 percent") ? "貨物機は機体の1割までです。" : m.includes("cannot own freighters") ? "この方針では貨物機を持てません。" : m.includes("not seen") ? "見た機体だけを買えます。" : m.includes("invalid policy") ? "その方針は選べません。" : m.includes("premium not allowed") ? "この方針では、その割合の上級席は選べません。" : m.includes("not a freighter") ? "貨物機だけを貨物の路線に入れられます。" : m.includes("too far") ? "この機体では遠すぎて飛べません。" : m.includes("invalid flights") ? "便数は往復の数（偶数）で決めてください。" : m.includes("not a small") ? "小型機だけを買えます。" : m.includes("code not found") ? "その合言葉の会社は見つかりません。" : m.includes("own code") ? "自分の合言葉です。" : m.includes("too many") ? "友だちは100社までです。" : "保存できませんでした。電波のよい場所でもう一度試してください。", true);
     return false; }
   if(data && typeof data === "object" && "cash" in data){ CO = coFromServer(data); HANGAR = null; renderCompany(); }
   return data || true;
@@ -4425,7 +4426,12 @@ function renderFleet(){
   renderCoPolicy();
   const rs = coRoutes(), fl = CO.fleet || [];
   // 路線（収益の多い順）。押すと計算の内わけ
-  $("coRoutes").innerHTML = rs.length ? [...rs].sort((x, y) => routeInc(y) - routeInc(x)).map(r => {
+  const E3 = CO.server && CO.v3 && ["fsc", "mcc", "lcc"].includes(CO.policy) ? Object.fromEntries((CO.econ || []).map(e => [e.k, e])) : null;
+  const pf3 = r => E3 && E3[r.k] ? +E3[r.k].profit || 0 : -1e9;
+  if($("coRouteHint")){ $("coRouteHint").hidden = !!E3; $("coRouteHintV3").hidden = !E3; }
+  const openK = [...document.querySelectorAll("#coRoutes details[open][data-k]")].map(d => d.dataset.k);
+  $("coRoutes").innerHTML = rs.length ? [...rs].sort((x, y) => E3 ? pf3(y) - pf3(x) : routeInc(y) - routeInc(x)).map(r => {
+    if(E3 && E3[r.k]) return routeV3Html(r, E3[r.k], fl.find(a => a.id === r.acId));
     const inc = routeInc(r), max = r.lv >= ECON.maxLevel, ac = fl.find(a => a.id === r.acId), st = skyText(r), sp = Math.round((r.sky - 1) * 100);
     const parts = [[`基本（${fmtKm(r.km)}km・${r.sa ? `${SIZE_LABEL(r.sa)}と${SIZE_LABEL(r.sb)}` : "空港の大きさ"}）`, fmtKm(r.base)], [`増便 ${r.lv}段`, `×${ECON.levelMul(r.lv).toFixed(2)}`],
       [ac ? `機体 ${esc(ac.reg || "名前のない機体")}（${ACB[ac.type].name}）` : "機体なし", `×${(ac ? ACB[ac.type].mult : ECON.noAircraft).toFixed(2)}`],
@@ -4440,6 +4446,7 @@ function renderFleet(){
       ${s ? `<p class="hint">実際の空（${esc(String(s.day).slice(5).replace("-", "/"))}）：飛んだ便 ${s.n}便${s.avg4 ? `（いつもの同じ曜日は ${Math.round(s.avg4)}便）` : ""}・欠航 ${s.cxl}便。合わせて ±20%まで。</p>` : r.intl ? `<p class="hint">国際線は実際の空で変わりません。海外の空港は大きな空港として数えます。</p>` : `<p class="hint">この路線の便の記録がまだないので、実際の空は ±0%です。</p>`}
       <div class="rbtn">${max ? `<span class="rm">増便は最大です</span>` : `<button class="btn2" data-up="${r.k}"${CO.cash < r.cost ? " disabled" : ""}>増便（${r.lv}→${r.lv + 1}段）${yen(r.cost)}</button>`}</div></div></details>`; }).join("")
     : `<p class="none">まだ路線がありません。出発と到着の空港でチェックインすると、最初の路線が開設されます。</p>`;
+  for(const k of openK){ const d = document.querySelector(`#coRoutes details[data-k="${CSS.escape(k)}"]`); if(d) d.open = true; }
   // 機体
   const H = HANGAR, tabs = [["have", `持っている ${fl.length}`], ["buy", `買える${H ? " " + H.filter(x => !x.owned).length : ""}`],
     ...(CO.server && CO.v3 ? [["seen", `見た機体${SEEN ? " " + SEEN.filter(x => !x.owned).length : ""}`]] : [])];
@@ -4577,6 +4584,7 @@ function renderV3(){
     <div class="v3box"><h3>${d.name}</h3><div class="v3stats">${d.stats.map(([k, v]) => `<div><small>${k}</small><b>${v}</b></div>`).join("")}</div>
       <ul>${d.points.map(t => `<li>${t}</li>`).join("")}</ul>
       ${sel === CO.policy ? `<button class="btn2" disabled style="width:100%">今の方針です</button>` : `<button class="btn2" data-setpol="${sel}" style="width:100%">${d.name}にする</button>`}</div>
+    ${v3HomeHtml()}
     <h2>満足度</h2>
     <div class="v3box"><div class="satnum"><div><small>いまの満足度</small><br><b>${fmtNum(sat, 1)}</b> <small>/ 100</small></div>${tgt == null ? "" : `<div style="text-align:right"><small>目標値</small><br><b style="font-size:26px">${fmtNum(tgt, 0)}</b></div>`}</div>
       <div class="satbar"><i style="width:${Math.max(0, Math.min(100, sat))}%"></i>${tgt == null ? "" : `<u style="left:${Math.max(0, Math.min(100, tgt))}%"></u>`}</div>
@@ -4585,6 +4593,49 @@ function renderV3(){
     ${tgt == null ? "" : `<div class="v3box"><h3>目標値の中身</h3><div class="v3row"><span>基本</span><b>${fmtNum(+sp.base || 50, 0)}</b></div>
       ${part("新しい機体（会社に入れて90日まで）の割合 ×6", +sp.new_share)}${part("機体の古さ", +sp.aging)}${part("席を詰める", +sp.packed)}${part("方針の補正", +sp.policy_adj)}</div>`}
     <p class="hint">始まりは40です。機内食・定時率・トラブルの対応は、その機能ができたら目標値に入ります。</p>`;
+}
+// 本拠地（チェックインした空港から）と上級席の割合（FSC 0・10・20・30%、ミドルコスト 0・10%）
+function v3HomeHtml(){
+  const vis = [...visited().keys()].map(id => A.find(a => a.id === id)).filter(Boolean).sort((x, y) => x.name.localeCompare(y.name, "ja"));
+  const home = CO.home == null ? null : A.find(a => a.id === CO.home), days = CO.homeSince ? Math.floor((Date.now() - Date.parse(CO.homeSince)) / 864e5) : 0;
+  const opts = CO.policy === "fsc" ? [0, 10, 20, 30] : CO.policy === "mcc" ? [0, 10] : null;
+  return `<h2>本拠地</h2><div class="v3box">
+      <div class="satnum"><div><small>いまの本拠地</small><br><b style="font-size:26px">${home ? esc(home.name) : "まだ決めていません"}</b></div>${home && days < 30 ? `<div style="text-align:right"><small>地元の応援まで</small><br><b style="font-size:26px">${30 - days}</b> <small>日</small></div>` : ""}</div>
+      <p style="margin:0 0 8px">本拠地の空港の路線は、自社のお客さんが増えます（地元の応援 ×3〜×5、空港が小さいほど大きい）。変えると、新しい本拠地の応援は30日たってから効きます。</p>
+      <select id="v3Home" aria-label="本拠地"><option value="">選ぶ（チェックインした空港）</option>${vis.map(a => `<option value="${a.id}"${CO.home === a.id ? " selected" : ""}>${esc(a.name)}</option>`).join("")}</select></div>
+    ${opts ? `<h2>上級席</h2><div class="v3box"><p style="margin:0 0 8px">座席のうち上級席にする割合です。上級席1席は普通席2席分（大型機は3席分）の場所を使い、仕事の客の多い路線で稼げます。</p>
+      <div class="pillrow" role="group" aria-label="上級席の割合">${opts.map(n => `<button class="cotab${CO.premium === n ? " on" : ""}" data-prem="${n}" aria-pressed="${CO.premium === n}">${n}%</button>`).join("")}</div></div>` : ""}`;
+}
+document.addEventListener("change", async e => {
+  if(e.target.id !== "v3Home" || !e.target.value) return;
+  const sel = e.target; sel.disabled = true; const a = A.find(x => x.id === +sel.value);
+  if(await coRpc("co3_set_home", {p_airport:+sel.value}) && a) coMsg(`本拠地を${a.name}にしました。地元の応援は30日たってから効きます。`);
+  sel.disabled = false;
+});
+document.addEventListener("click", async e => {
+  const b = e.target.closest("[data-prem]"); if(!b) return;
+  b.disabled = true; if(await coRpc("co3_set_premium", {p_pct:+b.dataset.prem})) coMsg(`上級席を${b.dataset.prem}%にしました。`);
+});
+// v3 の旅客の路線（お客さん・取り合い・便数・もうけ）
+const KIND_JA = {resort:"リゾート", intl:"国際線", big:"大きい空港どうし", local:"地方"};
+function routeV3Html(r, e, ac){
+  const plan = CO.plans ? CO.plans[r.k] : undefined, pf = +e.profit || 0, load = +e.seats ? Math.round(+e.carried / +e.seats * 100) : 0;
+  const share = +e.demand ? Math.round(+e.carried / +e.demand * 100) : 0;
+  const row = (k, v, cls) => `<div><span>${k}</span><b${cls ? ` class="${cls}"` : ""}>${v}</b></div>`;
+  return `<details class="route2" data-k="${esc(r.k)}"><summary><div class="rt">${esc(rName(r))}${r.intl ? `<span class="badge">国際線</span>` : ""}</div>
+      <div class="rm">${ac ? esc(acLabel(ac)) : "機体なし（飛ばない）"}${ac ? `・1日${+e.flights}便・搭乗率 ${load}%` : ""}</div>
+      <div class="rv"><b>${pf >= 0 ? "+" : "−"}${fmtKm(Math.round(Math.abs(pf)))}</b></div></summary>
+      <div class="rcalc">
+        <div class="v3stats"><div><small>この路線のお客さん</small><b>${fmtKm(Math.round(+e.demand))}<i>人/日</i></b></div><div><small>自社に乗った人</small><b>${fmtKm(Math.round(+e.carried))}<i>人</i></b></div><div><small>取り合い</small><b>${+e.n || 1}<i>社</i></b></div></div>
+        ${row(`路線の種類`, KIND_JA[e.kind] || "")}${row("本物の便（前の28日の1日あたり）", e.real == null ? "なし" : `${fmtNum(+e.real, 1)}便`)}
+        ${row("自社の取り分", `${share}%`)}${+e.p_seats ? row(`上級席（${fmtKm(Math.round(+e.p_seats))}席）`, `${fmtKm(Math.round(+e.p_pax))}人`) : ""}
+        ${row("収益", fmtKm(Math.round(+e.revenue)))}${row("運航の費用", `−${fmtKm(Math.round(+e.cost))}`, "neg")}${row("着陸料", `−${fmtKm(Math.round(+e.landing))}`, "neg")}${+e.congestion ? row("混雑料", `−${fmtKm(Math.round(+e.congestion))}`, "neg") : ""}
+        ${row("もうけ", `${pf >= 0 ? "+" : "−"}${fmtKm(Math.round(Math.abs(pf)))}`, pf >= 0 ? "pos" : "neg")}
+        ${ac ? `<small class="lbl" style="margin-top:8px">1日の便数（往復の数）</small><div class="pillrow" role="group" aria-label="1日の便数">${[[0, "おまかせ"], [2, "2便"], [4, "4便"], [6, "6便"], [8, "8便"], [10, "10便"]].map(([n, l]) => { const on = n ? plan === n : plan == null;
+            return `<button class="cotab${on ? " on" : ""}" data-pjfl="${esc(r.k)}" data-n="${n}" aria-pressed="${on}">${l}</button>`; }).join("")}</div>
+          <p class="hint">${plan == null ? `おまかせ：この距離で飛べるいちばん多い便数（いま ${+e.flights}便）です。` : +e.flights < plan ? `この距離・発着枠では${+e.flights}便までです。` : "便数を減らすと費用は減りますが、取り分も下がります。"}</p>`
+          : `<p class="hint">機体を入れると飛べます。v3 では、機体のない路線は飛びません。</p>`}
+        <p class="hint">数字はゲームの中の計算です。本物の便の乗客数ではありません。</p></div></details>`;
 }
 const fmtNum = (v, d) => (Math.round(v * 10 ** d) / 10 ** d).toFixed(d);
 document.addEventListener("click", async e => {
