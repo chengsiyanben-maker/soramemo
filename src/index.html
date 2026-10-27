@@ -381,6 +381,7 @@ dialog::backdrop{background:rgba(15,22,38,.55)}
 .polcard{text-align:left;border:2px solid transparent;background:var(--paper);border-radius:14px;padding:10px 12px;min-height:84px;font:inherit;color:var(--ink);display:flex;flex-direction:column;gap:3px}
 .polcard.on{border-color:var(--ink)}.polcard b{font-size:15px}.polcard span{font-size:11.5px;color:var(--sumi);line-height:1.5}.polcard em{font-style:normal;font-size:11px;font-weight:700;color:var(--sumi)}
 .polcard em.now{color:var(--ink)}
+.pillrow{display:flex;gap:6px;margin:0 0 10px}
 .v3box{background:var(--paper);border-radius:14px;padding:14px;margin-bottom:10px;font-size:13px}
 .v3box h3{margin:0 0 8px;font-size:15px}
 .v3stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin:8px 0}
@@ -4550,7 +4551,7 @@ const POLICIES = {
   regional:{name:"地域航空", short:"遊覧・チャーター・離島の定期便", where:"小型機・プロペラ機", stats:[["遊覧", "3.8×席"], ["チャーター", "4.3×席"], ["小型機", "いつでも"]],
     points:["小型機6機種は見ていなくても買える", "路線に入れていない機体は、遊覧・チャーターに自動で入る", "定期便は自治体の補助（地方は搭乗率保証60%、離島は赤字の補填）"]}
 };
-let POL_SEL = null, SEEN = null;
+let POL_SEL = null, SEEN = null, SEEN_TAB = "all";
 function renderV3(){
   const box = $("coV3"); if(!box) return;
   if(!CO || !CO.server || !CO.v3){ box.hidden = true; box.innerHTML = ""; return; }
@@ -4578,6 +4579,7 @@ document.addEventListener("click", async e => {
   const pb = e.target.closest("[data-pol]"); if(pb){ POL_SEL = pb.dataset.pol; renderV3(); return; }
   const sb2 = e.target.closest("[data-setpol]");
   if(sb2){ sb2.disabled = true; const k = sb2.dataset.setpol; if(await coRpc("co3_set_policy", {p_policy:k})){ POL_SEL = null; SEEN = null; coMsg(`方針を${POLICIES[k].name}にしました。`); } return; }
+  const st = e.target.closest("[data-seentab]"); if(st){ SEEN_TAB = st.dataset.seentab; renderSeen(); return; }
   const bs = e.target.closest("[data-buyseen]");
   if(bs){ bs.disabled = true; const reg = bs.dataset.buyseen; if(await coRpc("co3_buy_seen", {p_reg:reg})){ SEEN = null; coMsg(`${reg}を会社に入れました。`); } return; }
 });
@@ -4589,12 +4591,13 @@ async function loadSeen(){
 }
 function renderSeen(){
   if(!SEEN){ $("coFleet").innerHTML = `<p class="none">見た機体を調べています…</p>`; loadSeen().then(() => { if(currentView() === "fleet") renderFleet(); }); return; }
-  const list = SEEN.filter(x => !x.owned);
-  $("coFleet").innerHTML = list.length ? list.map(x => { const t = new Date(x.seenAt), hm = `${String(t.getMonth() + 1)}/${t.getDate()} ${String(t.getHours()).padStart(2, "0")}:${String(t.getMinutes()).padStart(2, "0")}`;
+  const all = SEEN.filter(x => !x.owned), list = all.filter(x => SEEN_TAB === "all" || (SEEN_TAB === "freighter" ? x.kind === "freighter" : x.kind !== "freighter"));
+  const tabs = all.some(x => x.kind === "freighter") ? `<div class="pillrow" role="group" aria-label="見た機体の種類">${[["all", "すべて"], ["pax", "旅客機"], ["freighter", "貨物機"]].map(([k, l]) => `<button class="cotab${SEEN_TAB === k ? " on" : ""}" data-seentab="${k}" aria-pressed="${SEEN_TAB === k}">${l}</button>`).join("")}</div>` : "";
+  $("coFleet").innerHTML = tabs + (list.length ? list.map(x => { const t = new Date(x.seenAt), hm = `${String(t.getMonth() + 1)}/${t.getDate()} ${String(t.getHours()).padStart(2, "0")}:${String(t.getMinutes()).padStart(2, "0")}`;
     return `<div class="ride"><div class="rd" style="grid-column:1/3"><b>${esc(x.reg)}</b><span>${esc(x.name)}${x.kind === "freighter" ? "（貨物機）" : x.kind === "bizjet" ? "（ビジネスジェット）" : ""}</span>
       <small>${esc(hm)} ${esc(x.airport)}で見た・${esc(x.dep || "")}→${esc(x.arr || "")}${x.asRidden ? "・乗ったのと同じ扱い" : "・見ただけ（値段1.3倍・維持費+30%・稼ぎ0.85、30日ごとに+0.05。この機体に乗ると差はなくなります）"}</small></div>
       <button class="btn2" data-buyseen="${esc(x.reg)}"${CO.cash < x.price ? " disabled" : ""}>買う ${yen(x.price)}</button></div>`; }).join("")
-    : `<p class="none">まだ見た機体はありません。空港でチェックインすると、その前後45分にその空港を発着した機体が分かります。</p>`;
+    : `<p class="none">${all.length ? "この種類の見た機体はありません。" : "まだ見た機体はありません。空港でチェックインすると、その前後45分にその空港を発着した機体が分かります。"}</p>`);
 }
 function renderCompany(){
   if(!CO) coLoad();
