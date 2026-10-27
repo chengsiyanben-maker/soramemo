@@ -376,6 +376,20 @@ dialog::backdrop{background:rgba(15,22,38,.55)}
 .costars{font-size:13px;color:var(--sumi);margin-top:2px}
 .costars b{color:var(--gold-text);letter-spacing:.06em;font-size:15px}
 .repbox{background:var(--paper);border-radius:12px;padding:12px 14px;font-size:13px;color:var(--sumi)}
+/* co-v3（運営のスイッチ co_v3 がオンのとき）：方針・満足度・見た機体 */
+.polgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:6px 0 10px}
+.polcard{text-align:left;border:2px solid transparent;background:var(--paper);border-radius:14px;padding:10px 12px;min-height:84px;font:inherit;color:var(--ink);display:flex;flex-direction:column;gap:3px}
+.polcard.on{border-color:var(--ink)}.polcard b{font-size:15px}.polcard span{font-size:11.5px;color:var(--sumi);line-height:1.5}.polcard em{font-style:normal;font-size:11px;font-weight:700;color:var(--sumi)}
+.polcard em.now{color:var(--ink)}
+.v3box{background:var(--paper);border-radius:14px;padding:14px;margin-bottom:10px;font-size:13px}
+.v3box h3{margin:0 0 8px;font-size:15px}
+.v3stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin:8px 0}
+.v3stats>div{background:var(--sky);border-radius:10px;padding:8px 10px}.v3stats small{display:block;font-size:11px;color:var(--sumi)}.v3stats b{font-size:17px}
+.v3box ul{margin:6px 0;padding-left:18px;line-height:1.7}
+.v3row{display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-bottom:1px solid var(--line)}.v3row:last-child{border-bottom:0}
+.satbar{position:relative;height:10px;border-radius:5px;background:var(--line);margin:10px 0}
+.satbar i{position:absolute;left:0;top:0;height:10px;border-radius:5px;background:var(--ink)}.satbar u{position:absolute;top:-4px;width:2px;height:18px;background:var(--ink)}
+.satnum{display:flex;justify-content:space-between;align-items:flex-end}.satnum b{font-size:40px;line-height:1}.satnum small{font-size:12px;color:var(--sumi)}
 .repbox .rp{display:grid;grid-template-columns:repeat(3,1fr);gap:4px 10px;margin:6px 0}
 .repbox .rp b{color:var(--ink)}
 .repbox .bar{height:6px;border-radius:3px;background:var(--line);overflow:hidden;margin-top:6px}
@@ -1873,6 +1887,7 @@ nav.tabs{transition:transform .3s cubic-bezier(.2,.8,.2,1),opacity .2s}
       <button class="cta" id="coCollect">収益を受け取る</button>
       <p class="msg" id="coMsg" role="status" aria-live="polite"></p>
     </div>
+    <div id="coV3" hidden></div>
     <h2>役職</h2>
     <p class="hint">守り神を役職に就けると、すべての路線の収益が上がります。守り神の階級（その空港でチェックインした日の数）が高いほど、ボーナスも増えます。</p>
     <div class="roles" id="coRoles"></div>
@@ -4302,6 +4317,7 @@ function coFromServer(j){
       rodeOn:x.rode_on, flight:x.flight, boughtAt:Date.parse(x.bought_at)})),
     sky:j.sky || {}, repPoints:+j.rep_points || 0, stars:+j.stars || 1, bought:+j.bought || 0, value:+j.value || 0,
     friendCode:j.friend_code || "", hideRank:!!j.hide_rank, friends:+j.friends || 0,
+    v3:!!j.v3, policy:j.policy || "fsc", premium:+j.premium || 0, sat:j.satisfaction == null ? 40 : +j.satisfaction, satMult:+j.sat_mult || 1, satParts:j.sat_parts || null,
     facilities:Object.fromEntries(Object.entries(j.facilities || {}).map(([k, v]) => [+k, +v]))}; }
 // 端末だけの版（お試し・サーバーなし）：同じ形の状態を、端末の記録から作る
 let CO_LOCAL = null;
@@ -4343,7 +4359,7 @@ const coMsg = (t, err) => { $("coMsg").textContent = t; $("coMsg").className = e
 async function coRpc(name, args){
   const { data, error } = await sb.rpc(name, args || {});
   if(error){ const m = String(error.message || "");
-    coMsg(m.includes("not enough") ? "資金が足りません。" : m.includes("not met") ? "まだ出会っていない守り神です。" : m.includes("invalid name") ? "会社名は1〜20文字で入れてください。" : m.includes("game not released") ? "エアライン経営は、まだ公開されていません。" : m.includes("not ridden") ? "乗った機体だけを買えます。" : m.includes("already owned") ? "もう持っている機体です。" : m.includes("no free slot") ? "評判の星の数までしか施設を建てられません。" : m.includes("not visited") ? "訪れた空港にだけ施設を建てられます。" : m.includes("too small") ? "この路線の空港には就航できない機体です。" : m.includes("not intl") ? "国際線には、国際線で乗った機体だけを入れられます。" : m.includes("code not found") ? "その合言葉の会社は見つかりません。" : m.includes("own code") ? "自分の合言葉です。" : m.includes("too many") ? "友だちは100社までです。" : "保存できませんでした。電波のよい場所でもう一度試してください。", true);
+    coMsg(m.includes("not enough") ? "資金が足りません。" : m.includes("not met") ? "まだ出会っていない守り神です。" : m.includes("invalid name") ? "会社名は1〜20文字で入れてください。" : m.includes("game not released") ? "エアライン経営は、まだ公開されていません。" : m.includes("not ridden") ? "乗った機体だけを買えます。" : m.includes("already owned") ? "もう持っている機体です。" : m.includes("no free slot") ? "評判の星の数までしか施設を建てられません。" : m.includes("not visited") ? "訪れた空港にだけ施設を建てられます。" : m.includes("too small") ? "この路線の空港には就航できない機体です。" : m.includes("not intl") ? "国際線には、国際線で乗った機体だけを入れられます。" : m.includes("seen limit per day") ? "見ただけの旅客機は1日3機までです。" : m.includes("too many seen") ? "見ただけの旅客機は、会社の機体の半分までです。" : m.includes("10 percent") ? "貨物機は機体の1割までです。" : m.includes("cannot own freighters") ? "この方針では貨物機を持てません。" : m.includes("not seen") ? "見た機体だけを買えます。" : m.includes("invalid policy") ? "その方針は選べません。" : m.includes("code not found") ? "その合言葉の会社は見つかりません。" : m.includes("own code") ? "自分の合言葉です。" : m.includes("too many") ? "友だちは100社までです。" : "保存できませんでした。電波のよい場所でもう一度試してください。", true);
     return false; }
   if(data && typeof data === "object" && "cash" in data){ CO = coFromServer(data); HANGAR = null; renderCompany(); }
   return data || true;
@@ -4412,7 +4428,8 @@ function renderFleet(){
       <div class="rbtn">${max ? `<span class="rm">増便は最大です</span>` : `<button class="btn2" data-up="${r.k}"${CO.cash < r.cost ? " disabled" : ""}>増便（${r.lv}→${r.lv + 1}段）${yen(r.cost)}</button>`}</div></div></details>`; }).join("")
     : `<p class="none">まだ路線がありません。出発と到着の空港でチェックインすると、最初の路線が開設されます。</p>`;
   // 機体
-  const H = HANGAR, tabs = [["have", `持っている ${fl.length}`], ["buy", `買える${H ? " " + H.filter(x => !x.owned).length : ""}`]];
+  const H = HANGAR, tabs = [["have", `持っている ${fl.length}`], ["buy", `買える${H ? " " + H.filter(x => !x.owned).length : ""}`],
+    ...(CO.server && CO.v3 ? [["seen", `見た機体${SEEN ? " " + SEEN.filter(x => !x.owned).length : ""}`]] : [])];
   $("coTabs").innerHTML = tabs.map(([k, l]) => `<button class="cotab${CO_TAB === k ? " on" : ""}" data-cotab="${k}">${l}</button>`).join("");
   if(CO_TAB === "have"){
     $("coFleet").innerHTML = fl.length ? fl.map(a => { const ok = rs.filter(r => r.minSize >= ACB[a.type].minSize && (!r.intl || a.intl)), liv = a.reg && LIVERY_NAMES[a.reg];
@@ -4421,6 +4438,7 @@ function renderFleet(){
         <select data-assign="${a.id}" aria-label="${esc(a.reg || "名前のない機体")}の路線"><option value="">路線に入れない</option>${ok.map(r => `<option value="${r.k}"${a.route === r.k ? " selected" : ""}>${esc(rName(r))}${r.acId && r.acId !== a.id ? "（交代）" : ""}</option>`).join("")}</select>
         <button class="linkbtn2" data-sell="${a.id}">売る（${yen(a.sell)}）</button></div>`; }).join("")
       : `<p class="none">まだ機体がありません。「買える」から、乗った機体を選びましょう。${CO.bought ? "" : "最初の1機は半額です。"}</p>`;
+  } else if(CO_TAB === "seen" && CO.server && CO.v3){ renderSeen();
   } else {
     if(!H){ $("coFleet").innerHTML = `<p class="none">乗った機体を調べています…</p>`; loadHangar().then(() => { if(currentView() === "fleet") renderFleet(); }); return; }
     const list = H.filter(x => !x.owned);
@@ -4517,6 +4535,67 @@ document.addEventListener("click", async e => {
   const u = e.target.closest("[data-unfriend]"); if(u){ if(await coRpc("co_remove_friend", {p_code:u.dataset.unfriend})){ RK = null; renderRank(); } }
 });
 document.addEventListener("change", async e => { if(e.target.id !== "rkHide") return; if(await coRpc("co_set_hide", {p_hide:e.target.checked})){ RK = null; renderRank(); } });
+// ---------- co-v3（運営のスイッチ co_v3 がオンのときだけ）：方針・満足度・見た機体 ----------
+const POLICIES = {
+  fsc:{name:"FSC", short:"大きい空港どうし・長い路線・国際線", where:"旅客", stats:[["運賃", "1.00倍"], ["赤字の線", "50%"], ["上級席", "0〜30%"]],
+    points:["上級席を多めにすると、仕事の客の多い路線で稼げる", "満足度の補正 −5（期待が高い）", "機体の1割まで貨物機を持てる"]},
+  mcc:{name:"ミドルコスト", short:"地方⇄大きい空港", where:"旅客", stats:[["運賃", "0.85倍"], ["赤字の線", "45%"], ["上級席", "0・10%"]],
+    points:["仕事の客も旅行の客も少し多く集まる", "満足度の補正 0", "機体の1割まで貨物機を持てる"]},
+  lcc:{name:"LCC", short:"小さい空港・離島・観光地", where:"旅客", stats:[["運賃", "0.72倍"], ["赤字の線", "40%"], ["席", "×1.12"]],
+    points:["旅行の客が1.7倍集まり、安い運賃で多く取る", "席を詰める（満足度 −4）、上級席なし", "満足度の補正 +5（期待が低い）"]},
+  cargo:{name:"貨物", short:"見た貨物機の区間で稼ぐ", where:"貨物だけ", stats:[["1トン", "2.5席分"], ["国際線", "4席分"], ["赤字の線", "35%"]],
+    points:["空港で見た貨物機の区間を、乗らなくても貨物の路線にできる", "貨物の量は国の統計の本物の数字", "旅客は運ばない"]},
+  pj:{name:"プライベートジェット", short:"全席 VIP の貸し切り", where:"ビジネスジェット", stats:[["VIP 席", "25席分"], ["赤字の線", "45%"], ["リゾート", "90%まで"]],
+    points:["リゾート・国際線ほど VIP の客が多い", "見たビジネスジェットは乗ったのと同じ扱い", "便数は、決めなければいちばんもうかる数"]},
+  regional:{name:"地域航空", short:"遊覧・チャーター・離島の定期便", where:"小型機・プロペラ機", stats:[["遊覧", "3.8×席"], ["チャーター", "4.3×席"], ["小型機", "いつでも"]],
+    points:["小型機6機種は見ていなくても買える", "路線に入れていない機体は、遊覧・チャーターに自動で入る", "定期便は自治体の補助（地方は搭乗率保証60%、離島は赤字の補填）"]}
+};
+let POL_SEL = null, SEEN = null;
+function renderV3(){
+  const box = $("coV3"); if(!box) return;
+  if(!CO || !CO.server || !CO.v3){ box.hidden = true; box.innerHTML = ""; return; }
+  box.hidden = false;
+  const sel = POL_SEL || CO.policy, d = POLICIES[sel] || POLICIES.fsc, sp = CO.satParts || {};
+  const sat = CO.sat, tgt = sp.target == null ? null : +sp.target, eff = Math.round((CO.satMult - 1) * 100);
+  const step = tgt == null ? 0 : Math.max(-3, Math.min(3, (tgt - sat) * 0.1));
+  const part = (k, v) => v ? `<div class="v3row"><span>${k}</span><b>${v > 0 ? "+" : "−"}${Math.abs(+v)}</b></div>` : "";
+  box.innerHTML = `<h2>方針</h2><p class="hint">稼ぎ方が変わります。変えるとその日から新しい方針で数えます。</p>
+    <div class="polgrid">${Object.entries(POLICIES).map(([k, p]) => `<button class="polcard${sel === k ? " on" : ""}" data-pol="${k}" aria-pressed="${sel === k}"><b>${p.name}</b><span>${p.short}</span><em class="${CO.policy === k ? "now" : ""}">${CO.policy === k ? "今の方針" : p.where}</em></button>`).join("")}</div>
+    <div class="v3box"><h3>${d.name}</h3><div class="v3stats">${d.stats.map(([k, v]) => `<div><small>${k}</small><b>${v}</b></div>`).join("")}</div>
+      <ul>${d.points.map(t => `<li>${t}</li>`).join("")}</ul>
+      ${sel === CO.policy ? `<button class="btn2" disabled style="width:100%">今の方針です</button>` : `<button class="btn2" data-setpol="${sel}" style="width:100%">${d.name}にする</button>`}</div>
+    <h2>満足度</h2>
+    <div class="v3box"><div class="satnum"><div><small>いまの満足度</small><br><b>${fmtNum(sat, 1)}</b> <small>/ 100</small></div>${tgt == null ? "" : `<div style="text-align:right"><small>目標値</small><br><b style="font-size:26px">${fmtNum(tgt, 0)}</b></div>`}</div>
+      <div class="satbar"><i style="width:${Math.max(0, Math.min(100, sat))}%"></i>${tgt == null ? "" : `<u style="left:${Math.max(0, Math.min(100, tgt))}%"></u>`}</div>
+      <p style="margin:0 0 8px">毎日 深夜3時に、目標値へ少しずつ近づきます（あしたは <b>${step >= 0 ? "+" : "−"}${fmtNum(Math.abs(step), 1)}</b>）。</p>
+      <div class="v3row"><span>お客さんへの効き目（60から5離れるごとに ±1%）</span><b>${eff > 0 ? "+" : eff < 0 ? "−" : "±"}${Math.abs(eff)}%</b></div></div>
+    ${tgt == null ? "" : `<div class="v3box"><h3>目標値の中身</h3><div class="v3row"><span>基本</span><b>${fmtNum(+sp.base || 50, 0)}</b></div>
+      ${part("新しい機体（会社に入れて90日まで）の割合 ×6", +sp.new_share)}${part("機体の古さ", +sp.aging)}${part("席を詰める", +sp.packed)}${part("方針の補正", +sp.policy_adj)}</div>`}
+    <p class="hint">始まりは40です。機内食・定時率・トラブルの対応は、その機能ができたら目標値に入ります。</p>`;
+}
+const fmtNum = (v, d) => (Math.round(v * 10 ** d) / 10 ** d).toFixed(d);
+document.addEventListener("click", async e => {
+  const pb = e.target.closest("[data-pol]"); if(pb){ POL_SEL = pb.dataset.pol; renderV3(); return; }
+  const sb2 = e.target.closest("[data-setpol]");
+  if(sb2){ sb2.disabled = true; const k = sb2.dataset.setpol; if(await coRpc("co3_set_policy", {p_policy:k})){ POL_SEL = null; SEEN = null; coMsg(`方針を${POLICIES[k].name}にしました。`); } return; }
+  const bs = e.target.closest("[data-buyseen]");
+  if(bs){ bs.disabled = true; const reg = bs.dataset.buyseen; if(await coRpc("co3_buy_seen", {p_reg:reg})){ SEEN = null; coMsg(`${reg}を会社に入れました。`); } return; }
+});
+// 見た機体の一覧（co3_seen_list）
+async function loadSeen(){
+  try{ const { data, error } = await sb.rpc("co3_seen_list"); if(!error && Array.isArray(data))
+    SEEN = data.map(x => ({reg:x.reg, code:x.code, name:x.name, kind:x.kind, airport:x.airport, seenAt:Date.parse(x.seen_at), flight:x.flight, dep:x.dep, arr:x.arr, owned:x.owned, price:+x.price, asRidden:!!x.as_ridden})); }catch(e){}
+  if(!SEEN) SEEN = [];
+}
+function renderSeen(){
+  if(!SEEN){ $("coFleet").innerHTML = `<p class="none">見た機体を調べています…</p>`; loadSeen().then(() => { if(currentView() === "fleet") renderFleet(); }); return; }
+  const list = SEEN.filter(x => !x.owned);
+  $("coFleet").innerHTML = list.length ? list.map(x => { const t = new Date(x.seenAt), hm = `${String(t.getMonth() + 1)}/${t.getDate()} ${String(t.getHours()).padStart(2, "0")}:${String(t.getMinutes()).padStart(2, "0")}`;
+    return `<div class="ride"><div class="rd" style="grid-column:1/3"><b>${esc(x.reg)}</b><span>${esc(x.name)}${x.kind === "freighter" ? "（貨物機）" : x.kind === "bizjet" ? "（ビジネスジェット）" : ""}</span>
+      <small>${esc(hm)} ${esc(x.airport)}で見た・${esc(x.dep || "")}→${esc(x.arr || "")}${x.asRidden ? "・乗ったのと同じ扱い" : "・見ただけ（値段1.3倍・維持費+30%・稼ぎ0.85、30日ごとに+0.05。この機体に乗ると差はなくなります）"}</small></div>
+      <button class="btn2" data-buyseen="${esc(x.reg)}"${CO.cash < x.price ? " disabled" : ""}>買う ${yen(x.price)}</button></div>`; }).join("")
+    : `<p class="none">まだ見た機体はありません。空港でチェックインすると、その前後45分にその空港を発着した機体が分かります。</p>`;
+}
 function renderCompany(){
   if(!CO) coLoad();
   if(!CO.server && CO_LOCAL) CO = coLocalState();
@@ -4536,7 +4615,7 @@ function renderCompany(){
     return `<div class="role"><div class="rn">${label}</div>${g ? godSVG(g) : `<svg viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="50" fill="none" stroke="var(--line)" stroke-width="3" stroke-dasharray="4 6"/></svg>`}
       <div class="rb">${g ? `+${Math.round((pct + ECON.rankBonus * tierOf(vd.get(g.id))) * 100)}%` : `+${Math.round(pct*100)}%〜`}</div>
       <select data-role="${id}" aria-label="${label}"><option value="">${met.length ? "選ぶ" : "仲間がいません"}</option>${met.map(a => `<option value="${a.id}"${g && g.id === a.id ? " selected" : ""}>${godName(a)}</option>`).join("")}</select></div>`; }).join("");
-  renderFleet(); renderRep(); renderRank();
+  renderFleet(); renderRep(); renderRank(); renderV3();
   $("coGods").innerHTML = met.length ? met.map(a => { const t = tierOf(vd.get(a.id) || 0), role = ECON.roles.find(([id]) => CO.roles[id] === a.id);
     return `<button class="god" data-god="${a.id}">${godSVG(a, {ring:true})}<div class="gn">${godName(a)}</div><div class="gr">${role ? role[1] + "・" : ""}${t ? RANKS[t] : "見習い"}</div></button>`; }).join("")
     : `<p class="none">まだ守り神に出会っていません。空港でチェックインしてみましょう。</p>`;
