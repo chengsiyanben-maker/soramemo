@@ -33,16 +33,19 @@ async def main():
           Object.assign(F[2], { from_airport:h, to_airport:o, airline:'NH', flight_no:'NH463', fare:'ANA:E_STD', price:null }); }""")
         await pg.evaluate('__fake.login()'); await pg.wait_for_timeout(1000)
         check('修行：下のタブは ホーム・修行・フライト・成績:', await pg.evaluate(TABS) == 'home,sg,log,stats')
-        # きょうの予定（往復）。行きは時刻表で30分遅れ
-        await pg.evaluate("""() => { const h = A.find(a => a.iata === 'HND').id, o = A.find(a => a.iata === 'OKA').id, d = sgToday();
-          sgGet().car = 'ANA'; sgGet().plans = [{ id:'p1', d, hm:'23:50', from:h, to:o, car:'ANA', fare:'ANA:E_FLEX', no:'NH469' }, { id:'p2', d, hm:'23:55', from:o, to:h, car:'ANA', fare:'ANA:E_FLEX', no:'NH470' }];
+        # きょうの予定：羽田→那覇（もう記録した便＝乗った）、那覇→石垣（NH469・時刻表で30分遅れ）、石垣→羽田
+        await pg.evaluate("""() => { const h = A.find(a => a.iata === 'HND').id, o = A.find(a => a.iata === 'OKA').id, i = A.find(a => a.iata === 'ISG').id, d = sgToday();
+          sgGet().car = 'ANA'; sgGet().plans = [{ id:'p0', d, hm:'06:00', from:h, to:o, car:'ANA', fare:'ANA:E_FLEX', no:'NH461' }, { id:'p1', d, hm:'23:40', from:o, to:i, car:'ANA', fare:'ANA:E_FLEX', no:'NH469' }, { id:'p2', d, hm:'23:55', from:i, to:h, car:'ANA', fare:'ANA:E_FLEX', no:'NH470' }];
           goTab('home'); renderPersonaCard(); }""")
         await pg.wait_for_timeout(800)
         t = await pg.inner_text('#personaCard'); print('CARD', t.replace('\n', ' | ')[:500])
-        check('ホーム：ポイントと目標:', 'PP' in t and '目標' in t and ('予定の便を乗ると' in t or '届く見込み' in t))
+        check('記録した便と同じ日・同じ区間の予定は予定から外れる:', await pg.evaluate("sgFuture().map(p => p.id).join()") == 'p1,p2')
+        actual = await pg.evaluate("fmtKm(sgYear().ANA.pts)"); print('実績', actual)
+        check('ホーム：実績は記録した便だけ（予定を足した数字を出さない）:', '実績' in t and actual + ' PP' in t.replace('\n', ' ') and '予定の便を乗ると' not in t and '記録した便だけ' in t)
+        check('ホーム：予定は別のかたまり（2便・予定の分・結論）:', '予定' in t and '2便' in t and '予定の分' in t and ('届く見込み' in t or '届きません' in t))
         check('ホーム：次に乗る便（きょう・便名・この便で）:', '次に乗る便' in t and 'きょう' in t and 'NH 469' in t and 'この便で' in t)
         check('ホーム：運航の状況と機材（航空会社の運航情報）:', '30分遅れ' in t and 'B789' in t and '運航情報' in t)
-        check('ホーム：その日の行程と合計:', 'の行程' in t and 'この日の合計' in t and '2回' in t)
+        check('ホーム：その日の行程と合計（乗った便は入れない）:', 'の行程' in t and 'この日の合計' in t and '2回' in t and '那覇 → 石垣' in t)
         await pg.locator('#personaCard').screenshot(path=os.path.join(WORK, 't73_home.png'))
         # 計画を作る → 修行のタブ（窓は開かない）
         await pg.click('#personaCard [data-sg-open="planner"]'); await pg.wait_for_timeout(400)
@@ -54,8 +57,19 @@ async def main():
         await pg.click('nav.tabs button[data-v="sg"]'); await pg.wait_for_timeout(300)
         check('開いているときに修行のタブを押すとまとめに戻る:', await pg.evaluate("SG_PAGE") == 'main')
         await pg.click('#v-sg [data-sg-set="car"][data-v="JAL"]'); await pg.wait_for_timeout(300)
-        check('タブの中で航空会社を切り替えられる:', await pg.evaluate("sgGet().car") == 'JAL' and 'FOP' in await pg.inner_text('#v-sg'))
+        t = await pg.inner_text('#v-sg')
+        check('タブの中で航空会社を切り替えられる:', await pg.evaluate("sgGet().car") == 'JAL' and 'FOP' in t)
+        check('JAL の搭乗回数は記録した便だけ:', '搭乗 0回' in t)
         await pg.click('#v-sg [data-sg-set="car"][data-v="ANA"]'); await pg.wait_for_timeout(300)
+        t = await pg.inner_text('#v-sg')
+        check('修行のタブ：実績と予定のかたまりが分かれている:', '実績' in t and 'これから乗る便' in t and '予定の分' in t and '点線は予定' not in t)
+        await pg.evaluate("sgGo('budget')"); await pg.wait_for_timeout(200)
+        await pg.fill('#sgBudget', '100000'); await pg.dispatch_event('#sgBudget', 'change'); await pg.wait_for_timeout(300)
+        t = await pg.inner_text('#v-sg'); print('BUDGET', t[:300].replace('\n', ' | '))
+        check('お金：のこりは使った金額だけを引く（100,000 − 28,700）:', '71,300' in t and '予定の金額' in t)
+        await pg.evaluate("sgGo('plan')"); await pg.wait_for_timeout(200)
+        check('計画：累計（実績＋予定）を出さない:', '累計' not in await pg.inner_text('#v-sg'))
+        await pg.evaluate("sgGo('main')"); await pg.wait_for_timeout(200)
         await pg.screenshot(path=os.path.join(WORK, 't73_tab.png'), full_page=True)
         check('窓の中身は空（id が重ならない）:', await pg.evaluate("$('dShugyoBody').innerHTML") == '')
         # フライトの見方「修行」
@@ -74,6 +88,7 @@ async def main():
         await pg.click('nav.tabs button[data-v="stats"]'); await pg.wait_for_timeout(500)
         t = await pg.inner_text('#sgSum'); print('SUM', t.replace('\n', ' | ')[:300])
         check('成績：修行のまとめ（月ごと・払った・1PPあたり・路線ごと）:', '月ごとのプレミアムポイント' in t and '払った' in t and '1PPあたり' in t and '路線ごと' in t)
+        check('成績：グラフは実績だけ、予定は「これからの月」に分ける:', await pg.locator('#sgSum .bars i.p').count() == 0 and 'これからの月' in t and '2便' in t)
         check('成績：まとめがパスポートより上:', await pg.evaluate("""() => { const a = document.querySelector('.lo[data-lo="stats:sgsum"]'), b = document.querySelector('.lo[data-lo="stats:passport"]'); return !!(a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING); }"""))
         await pg.locator('#sgSum').screenshot(path=os.path.join(WORK, 't73_stats.png'))
         # 気軽にでは、修行のまとめは隠し、修行のタブもない。修行の画面は窓で開く
