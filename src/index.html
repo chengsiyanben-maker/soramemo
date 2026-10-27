@@ -1892,6 +1892,10 @@ nav.tabs{transition:transform .3s cubic-bezier(.2,.8,.2,1),opacity .2s}
 #v-log .ltally span{font-size:11px;color:var(--lg-mute);margin-left:3px}
 #v-log .lsegrow{display:flex;align-items:center;gap:6px;margin:14px 0 12px}
 #v-log .lseg{display:flex;gap:6px;align-items:center;overflow-x:auto;scrollbar-width:none;min-width:0}
+/* 「気軽に」のまま（表示を自分で変えていない）とき：フライトは一覧だけ（年ごと・記録帳の切り替えを隠す）、ホームの地図は凡例を隠す（出典は残す） */
+:root[data-light="1"] #v-log .lseg:not(.away){display:none}
+:root[data-light="1"] #v-log .lsegrow{justify-content:flex-end}
+:root[data-light="1"] #homeSheet .maplegend>span:not(.mcred){display:none}
 #v-log .lseg button{flex:none;border:0;border-radius:999px;padding:8px 15px;font:700 12.5px var(--gothic);background:var(--lg-pill);color:var(--lg-mute);box-shadow:0 4px 12px -8px rgba(15,23,42,.35)}
 #v-log .lseg button[aria-selected="true"]{background:var(--lg-ink);color:var(--lg-card)}
 #v-log .lshare{flex:none;margin-left:auto;border:0;background:none;color:var(--lg-mute);font:700 12.5px var(--gothic);text-decoration:underline;text-underline-offset:3px;padding:8px 4px}
@@ -3498,7 +3502,9 @@ function vwEditBtn(el, k){
 }
 const VIEW_RENDER = {};
 // 切り替えを描いたら、選んでいるボタンが見えるところまで横に送る
-function setViewsw(id, k){ const el = $(id); if(!el) return; el.innerHTML = viewswHTML(k); vwEditBtn(el, k); const b = el.querySelector('[aria-selected="true"]'); if(b) el.scrollLeft = Math.max(0, b.offsetLeft - el.offsetLeft - 24); }
+function setViewsw(id, k){ const el = $(id); if(!el) return; el.innerHTML = viewswHTML(k); vwEditBtn(el, k);
+  el.parentElement.hidden = viewsShown(k).length < 2;   // 見方が1つだけなら、切り替える物がないので列ごと出さない（表示の編集はマイページから）
+  const b = el.querySelector('[aria-selected="true"]'); if(b) el.scrollLeft = Math.max(0, b.offsetLeft - el.offsetLeft - 24); }
 document.addEventListener("click", e => {
   const b = e.target.closest("[data-vw]"); if(!b) return;
   const [k, id] = b.dataset.vw.split(":"); if(VIEW[k] === id) return;
@@ -3595,6 +3601,7 @@ function setLogSeg(s){
   LOG_SEG = s;
   document.querySelectorAll("#v-log [data-lseg]").forEach(b => b.setAttribute("aria-selected", String(b.dataset.lseg === s)));
   $("lsList").hidden = s !== "list"; $("lsYear").hidden = s !== "year"; $("lsBook").hidden = s !== "book";
+  const sg = document.querySelector("#v-log .lseg"); if(sg) sg.classList.toggle("away", s !== "list");   // 「気軽に」は一覧のときだけ切り替えを隠す（記録帳に来たら一覧へ戻れるように出す）
 }
 document.querySelectorAll("#v-log [data-lseg]").forEach(b => b.onclick = () => setLogSeg(b.dataset.lseg));
 $("flAdd").onclick = () => { setLogSeg("book"); $("logSheet").sheetGo && $("logSheet").sheetGo("full"); const m = $("mFrom"); if(m){ m.scrollIntoView({ block:"center" }); m.focus({ preventScroll:true }); } };
@@ -3974,8 +3981,9 @@ function setMode(m, go = true){
    タブの並びと数、ホームのいちばん上に出すもの、各画面のはじめの見方を変える。記録は変えない。
    使い方（運用の画面を同じ空港で長く開く・短い間にたくさん乗る・修行の計画を使う）から、合いそうな構成を1回だけ勧める */
 const PERSONAS = {
-  casual: { name:"気軽に好きな人", short:"気軽に", tabs:["home", "book", "log", "ops", "stats"], views:{ book:"tiles" }, off:{ stats:["sgsum"] },
-    note:"チェックインと図鑑を中心にした、はじめの構成です。" },
+  casual: { name:"気軽に好きな人", short:"気軽に", tabs:["home", "book", "log"], views:{ book:"tiles", log:"pass" },
+    off:{ home:["ride"], book:["map", "signs", "chron", "region"], log:["sg", "board", "map", "cal", "month", "alt", "text", "route"], stats:["sgsum"] },
+    note:"チェックインと図鑑だけの、いちばん軽い構成です。成績と運用はマイページから開けます。" },
   spot: { name:"撮影する人", short:"撮影", tabs:["ops", "home", "book", "log"], views:{ ops:"photo" }, off:{ stats:["sgsum"] },
     note:"1つの空港で長く撮る人向け。運用をいちばん左に、ホームには運用・これから来る大きな機体・今日いた時間を出します。成績はマイページから開けます。" },
   shugyo: { name:"修行する人", short:"修行", tabs:["home", "sg", "log", "stats"], views:{ log:"sg" },
@@ -3994,6 +4002,7 @@ function applyPersonaTabs(){
   box.querySelectorAll('button[data-mode="game"]').forEach(b => box.appendChild(b));
   document.querySelectorAll("nav.tabs button").forEach(b => b.hidden = b.dataset.mode !== MODE || (b.dataset.mode === "rally" && b.dataset.pOff === "1"));
   document.documentElement.dataset.persona = PERSONA;
+  document.documentElement.dataset.light = PERSONA === "casual" && !loCustom() ? "1" : "";   // 「気軽に」のまま（表示を自分で変えていない）ときだけ、さらに減らす
 }
 function setPersona(p, how){
   if(!PERSONAS[p]) return;

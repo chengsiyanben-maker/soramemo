@@ -32,7 +32,7 @@ async def main():
     async with async_playwright() as p:
         b = await p.chromium.launch(); errs = []
         c = await ctx(b); pg = await page(c, errs)
-        check('はじめは気軽に（5つのタブ）:', await pg.evaluate(TABS) == 'home,book,log,ops,stats' and await pg.is_hidden('#personaCard'))
+        check('はじめは気軽に（ホーム・図鑑・フライトの3つのタブ）:', await pg.evaluate(TABS) == 'home,book,log' and await pg.is_hidden('#personaCard'))
         # 撮影
         await pg.evaluate("$('dSettings').showModal()"); await pg.click('[data-persona="spot"]'); await pg.wait_for_timeout(1200)
         check('撮影：タブ:', await pg.evaluate(TABS) == 'ops,home,book,log')
