@@ -392,6 +392,7 @@ dialog::backdrop{background:rgba(15,22,38,.55)}
 .wv .wt{position:relative;height:14px;border-radius:7px;background:#F4F5F7}.wv .wt i{position:absolute;top:2px;height:10px;border-radius:5px}
 .wv .wt i.o,.wlg i.o{background:#8FB0E3}.wv .wt i.d,.wlg i.d{background:#FFB547}.wv .wt i.x,.wlg i.x{background:#fff;border:2px solid #C8432B;box-sizing:border-box}.wv .wt i.g{background:transparent;border:1px dashed #B9BEC6;box-sizing:border-box}
 .wlg{display:flex;gap:12px;font-size:11px;color:#5F6672;margin-left:64px}.wlg i{display:inline-block;width:14px;height:8px;border-radius:4px;margin-right:4px;vertical-align:middle}
+.v3stats.rt{grid-template-columns:repeat(4,minmax(0,1fr))}
 .v3box.morning .mhd{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}.v3box.morning .mhd small{font-size:12px;color:#5F6672}
 .trb{background:#1F2329;color:#fff;border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:8px;margin-bottom:10px}
 .trb .trh{display:flex;gap:6px;flex-wrap:wrap}.trb .trt{font-size:20px;font-weight:900}.trb small{font-size:12px;opacity:.85}.trb small.dim{opacity:.65;font-size:11px}
@@ -4350,7 +4351,7 @@ function coFromServer(j){
       rodeOn:x.rode_on, flight:x.flight, boughtAt:Date.parse(x.bought_at), kind:x.kind || null})),
     sky:j.sky || {}, repPoints:+j.rep_points || 0, stars:+j.stars || 1, bought:+j.bought || 0, value:+j.value || 0,
     friendCode:j.friend_code || "", hideRank:!!j.hide_rank, friends:+j.friends || 0,
-    v3:!!j.v3, policy:j.policy || "fsc", premium:+j.premium || 0, sat:j.satisfaction == null ? 40 : +j.satisfaction, satMult:+j.sat_mult || 1, satParts:j.sat_parts || null, econ:j.econ || [], fares:j.fares || {}, meal:j.meal || "none", bag:j.bag || "free", troubles:j.troubles || [], autoTrouble:!!j.auto_trouble, morning:j.morning || null, legs:j.legs || {}, home:j.home == null ? null : +j.home, homeSince:j.home_since || null, cargoRoutes:j.cargo_routes || [], cargo:j.cargo || [], pj:j.pj || [], jobs:j.jobs || [], subsidy:j.subsidy || [], small:j.small || [], plans:j.plans || {},
+    v3:!!j.v3, policy:j.policy || "fsc", premium:+j.premium || 0, sat:j.satisfaction == null ? 40 : +j.satisfaction, satMult:+j.sat_mult || 1, satParts:j.sat_parts || null, econ:j.econ || [], fares:j.fares || {}, meal:j.meal || "none", bag:j.bag || "free", troubles:j.troubles || [], autoTrouble:!!j.auto_trouble, morning:j.morning || null, legs:j.legs || {}, rating:j.rating == null ? null : +j.rating, ratingHave:j.rating_have || null, home:j.home == null ? null : +j.home, homeSince:j.home_since || null, cargoRoutes:j.cargo_routes || [], cargo:j.cargo || [], pj:j.pj || [], jobs:j.jobs || [], subsidy:j.subsidy || [], small:j.small || [], plans:j.plans || {},
     facilities:Object.fromEntries(Object.entries(j.facilities || {}).map(([k, v]) => [+k, +v]))}; }
 // 端末だけの版（お試し・サーバーなし）：同じ形の状態を、端末の記録から作る
 let CO_LOCAL = null;
@@ -4392,7 +4393,7 @@ const coMsg = (t, err) => { $("coMsg").textContent = t; $("coMsg").className = e
 async function coRpc(name, args){
   const { data, error } = await sb.rpc(name, args || {});
   if(error){ const m = String(error.message || "");
-    coMsg(m.includes("not enough") ? "資金が足りません。" : m.includes("not met") ? "まだ出会っていない守り神です。" : m.includes("invalid name") ? "会社名は1〜20文字で入れてください。" : m.includes("game not released") ? "エアライン経営は、まだ公開されていません。" : m.includes("not ridden") ? "乗った機体だけを買えます。" : m.includes("already owned") ? "もう持っている機体です。" : m.includes("no free slot") ? "評判の星の数までしか施設を建てられません。" : m.includes("not visited") ? "訪れた空港にだけ施設を建てられます。" : m.includes("too small") ? "この路線の空港には就航できない機体です。" : m.includes("not intl") ? "国際線には、国際線で乗った機体だけを入れられます。" : m.includes("seen limit per day") ? "見ただけの旅客機は1日3機までです。" : m.includes("too many seen") ? "見ただけの旅客機は、会社の機体の半分までです。" : m.includes("10 percent") ? "貨物機は機体の1割までです。" : m.includes("cannot own freighters") ? "この方針では貨物機を持てません。" : m.includes("not seen") ? "見た機体だけを買えます。" : m.includes("invalid policy") ? "その方針は選べません。" : m.includes("premium not allowed") ? "この方針では、その割合の上級席は選べません。" : m.includes("too late") ? "対応できる6時間を過ぎました。" : m.includes("already done") ? "このトラブルにはもう対応しました。" : m.includes("trouble not found") ? "そのトラブルは見つかりません。" : m.includes("invalid service") ? "そのサービスは選べません。" : m.includes("fare once a day") ? "運賃を変えられるのは1日1回です。" : m.includes("invalid fare") ? "その運賃は選べません。" : m.includes("not a freighter") ? "貨物機だけを貨物の路線に入れられます。" : m.includes("too far") ? "この機体では遠すぎて飛べません。" : m.includes("invalid flights") ? "便数は往復の数（偶数）で決めてください。" : m.includes("not a small") ? "小型機だけを買えます。" : m.includes("code not found") ? "その合言葉の会社は見つかりません。" : m.includes("own code") ? "自分の合言葉です。" : m.includes("too many") ? "友だちは100社までです。" : "保存できませんでした。電波のよい場所でもう一度試してください。", true);
+    coMsg(m.includes("not enough") ? "資金が足りません。" : m.includes("not met") ? "まだ出会っていない守り神です。" : m.includes("invalid name") ? "会社名は1〜20文字で入れてください。" : m.includes("game not released") ? "エアライン経営は、まだ公開されていません。" : m.includes("not ridden") ? "乗った機体だけを買えます。" : m.includes("already owned") ? "もう持っている機体です。" : m.includes("no free slot") ? "評判の星の数までしか施設を建てられません。" : m.includes("not visited") ? "訪れた空港にだけ施設を建てられます。" : m.includes("too small") ? "この路線の空港には就航できない機体です。" : m.includes("not intl") ? "国際線には、国際線で乗った機体だけを入れられます。" : m.includes("seen limit per day") ? "見ただけの旅客機は1日3機までです。" : m.includes("too many seen") ? "見ただけの旅客機は、会社の機体の半分までです。" : m.includes("10 percent") ? "貨物機は機体の1割までです。" : m.includes("cannot own freighters") ? "この方針では貨物機を持てません。" : m.includes("not seen") ? "見た機体だけを買えます。" : m.includes("invalid policy") ? "その方針は選べません。" : m.includes("premium not allowed") ? "この方針では、その割合の上級席は選べません。" : m.includes("rating required") ? `格付け${m.replace(/.*rating required (\d).*/, "$1")}から使えます。` : m.includes("too late") ? "対応できる6時間を過ぎました。" : m.includes("already done") ? "このトラブルにはもう対応しました。" : m.includes("trouble not found") ? "そのトラブルは見つかりません。" : m.includes("invalid service") ? "そのサービスは選べません。" : m.includes("fare once a day") ? "運賃を変えられるのは1日1回です。" : m.includes("invalid fare") ? "その運賃は選べません。" : m.includes("not a freighter") ? "貨物機だけを貨物の路線に入れられます。" : m.includes("too far") ? "この機体では遠すぎて飛べません。" : m.includes("invalid flights") ? "便数は往復の数（偶数）で決めてください。" : m.includes("not a small") ? "小型機だけを買えます。" : m.includes("code not found") ? "その合言葉の会社は見つかりません。" : m.includes("own code") ? "自分の合言葉です。" : m.includes("too many") ? "友だちは100社までです。" : "保存できませんでした。電波のよい場所でもう一度試してください。", true);
     return false; }
   if(data && typeof data === "object" && "cash" in data){ CO = coFromServer(data); HANGAR = null; renderCompany(); }
   return data || true;
@@ -4599,7 +4600,7 @@ function renderV3(){
   const sat = CO.sat, tgt = sp.target == null ? null : +sp.target, eff = Math.round((CO.satMult - 1) * 100);
   const step = tgt == null ? 0 : Math.max(-3, Math.min(3, (tgt - sat) * 0.1));
   const part = (k, v) => v ? `<div class="v3row"><span>${k}</span><b>${v > 0 ? "+" : "−"}${Math.abs(+v)}</b></div>` : "";
-  box.innerHTML = `${morningHtml()}${troubleHtml()}<h2>方針</h2><p class="hint">稼ぎ方が変わります。変えるとその日から新しい方針で数えます。</p>
+  box.innerHTML = `${morningHtml()}${troubleHtml()}${ratingHtml()}<h2>方針</h2><p class="hint">稼ぎ方が変わります。変えるとその日から新しい方針で数えます。</p>
     <div class="polgrid">${Object.entries(POLICIES).map(([k, p]) => `<button class="polcard${sel === k ? " on" : ""}" data-pol="${k}" aria-pressed="${sel === k}"><b>${p.name}</b><span>${p.short}</span><em class="${CO.policy === k ? "now" : ""}">${CO.policy === k ? "今の方針" : p.where}</em></button>`).join("")}</div>
     <div class="v3box"><h3>${d.name}</h3><div class="v3stats">${d.stats.map(([k, v]) => `<div><small>${k}</small><b>${v}</b></div>`).join("")}</div>
       <ul>${d.points.map(t => `<li>${t}</li>`).join("")}</ul>
@@ -4623,15 +4624,15 @@ function v3HomeHtml(){
       <div class="satnum"><div><small>いまの本拠地</small><br><b style="font-size:26px">${home ? esc(home.name) : "まだ決めていません"}</b></div>${home && days < 30 ? `<div style="text-align:right"><small>地元の応援まで</small><br><b style="font-size:26px">${30 - days}</b> <small>日</small></div>` : ""}</div>
       <p style="margin:0 0 8px">本拠地の空港の路線は、自社のお客さんが増えます（地元の応援 ×3〜×5、空港が小さいほど大きい）。変えると、新しい本拠地の応援は30日たってから効きます。</p>
       <select id="v3Home" aria-label="本拠地"><option value="">選ぶ（チェックインした空港）</option>${vis.map(a => `<option value="${a.id}"${CO.home === a.id ? " selected" : ""}>${esc(a.name)}</option>`).join("")}</select></div>
-    ${CO.policy === "cargo" ? "" : `<h2>サービス</h2><div class="v3box">
+    ${CO.policy === "cargo" ? "" : `<h2>サービス</h2><div class="v3box">${ratingOk(2) ? "" : ratingLock(2)}
       <small class="lbl">機内食・飲み物</small>
-      <div class="pillrow" role="group" aria-label="機内食">${[["free", "無料"], ["paid", "有料"], ["none", "なし"]].map(([k, l]) => `<button class="cotab${CO.meal === k ? " on" : ""}" data-svc="meal" data-v="${k}" aria-pressed="${CO.meal === k}">${l}</button>`).join("")}</div>
+      <div class="pillrow" role="group" aria-label="機内食">${[["free", "無料"], ["paid", "有料"], ["none", "なし"]].map(([k, l]) => `<button class="cotab${CO.meal === k ? " on" : ""}" data-svc="meal" data-v="${k}" aria-pressed="${CO.meal === k}"${ratingOk(2) ? "" : " disabled"}>${l}</button>`).join("")}</div>
       <p class="hint" style="margin:0 0 10px">${{free:"満足度 +8。運航の費用が少し増えます（+2ポイント）。", paid:"満足度 −3。収益 +3%。", none:"満足度 −8。費用も収益も変わりません。"}[CO.meal] || ""}</p>
       <small class="lbl">預ける荷物</small>
-      <div class="pillrow" role="group" aria-label="預ける荷物">${[["free", "無料"], ["paid", "有料"]].map(([k, l]) => `<button class="cotab${CO.bag === k ? " on" : ""}" data-svc="bag" data-v="${k}" aria-pressed="${CO.bag === k}">${l}</button>`).join("")}</div>
+      <div class="pillrow" role="group" aria-label="預ける荷物">${[["free", "無料"], ["paid", "有料"]].map(([k, l]) => `<button class="cotab${CO.bag === k ? " on" : ""}" data-svc="bag" data-v="${k}" aria-pressed="${CO.bag === k}"${ratingOk(2) ? "" : " disabled"}>${l}</button>`).join("")}</div>
       <p class="hint" style="margin:0">${CO.bag === "paid" ? `満足度 −4。収益 +${CO.policy === "lcc" ? 6 : 4}%、旅行の客 −5%。` : "満足度も収益も変わりません。"}</p></div>`}
-    ${opts ? `<h2>上級席</h2><div class="v3box"><p style="margin:0 0 8px">座席のうち上級席にする割合です。上級席1席は普通席2席分（大型機は3席分）の場所を使い、仕事の客の多い路線で稼げます。</p>
-      <div class="pillrow" role="group" aria-label="上級席の割合">${opts.map(n => `<button class="cotab${CO.premium === n ? " on" : ""}" data-prem="${n}" aria-pressed="${CO.premium === n}">${n}%</button>`).join("")}</div></div>` : ""}`;
+    ${opts ? `<h2>上級席</h2><div class="v3box">${ratingOk(4) ? "" : ratingLock(4).replace("から使えます。", "から変えられます（いまは方針のはじめの割合）。")}<p style="margin:0 0 8px">座席のうち上級席にする割合です。上級席1席は普通席2席分（大型機は3席分）の場所を使い、仕事の客の多い路線で稼げます。</p>
+      <div class="pillrow" role="group" aria-label="上級席の割合">${opts.map(n => `<button class="cotab${CO.premium === n ? " on" : ""}" data-prem="${n}" aria-pressed="${CO.premium === n}"${ratingOk(4) ? "" : " disabled"}>${n}%</button>`).join("")}</div></div>` : ""}`;
 }
 document.addEventListener("change", async e => {
   if(e.target.id !== "v3Home" || !e.target.value) return;
@@ -4646,7 +4647,7 @@ document.addEventListener("click", async e => {
   b.disabled = true; if(await coRpc("co3_set_service", {p_meal:meal, p_bag:bag})) coMsg(b.dataset.svc === "meal" ? `機内食を「${b.textContent}」にしました。満足度は毎日少しずつ動きます。` : `預ける荷物を「${b.textContent}」にしました。`);
 });
 document.addEventListener("click", async e => {
-  const b = e.target.closest("[data-prem]"); if(!b) return;
+  const b = e.target.closest("[data-prem]"); if(!b || b.disabled) return;
   b.disabled = true; if(await coRpc("co3_set_premium", {p_pct:+b.dataset.prem})) coMsg(`上級席を${b.dataset.prem}%にしました。`);
 });
 // v3 の旅客の路線（お客さん・取り合い・便数・もうけ）
@@ -4666,11 +4667,11 @@ function legsHtml(k){
 // 運賃の5段階（路線ごと、1日1回）。ほかの会社の段も見える（会社名は出さない）
 const FARE_LV = [[-2, "とても安い", "×0.7"], [-1, "安い", "×0.85"], [0, "普通", "×1.0"], [1, "高い", "×1.2"], [2, "とても高い", "×1.4"]];
 function fareHtml(k){
-  const f = (CO.fares || {})[k] || {level:0, others:[]}, lv = +f.level || 0, locked = f.set_on && String(f.set_on).slice(0, 10) === jstToday();
+  const f = (CO.fares || {})[k] || {level:0, others:[]}, lv = +f.level || 0, rlock = !ratingOk(2), locked = rlock || (f.set_on && String(f.set_on).slice(0, 10) === jstToday());
   const name = v => (FARE_LV.find(x => x[0] === +v) || FARE_LV[2])[1];
   return `<small class="lbl" style="margin-top:8px">運賃（変えられるのは1日1回）</small>
     <div class="pillrow fares" role="group" aria-label="運賃">${FARE_LV.map(([v, l, m]) => `<button class="cotab${lv === v ? " on" : ""}" data-fare="${esc(k)}" data-lv="${v}" aria-pressed="${lv === v}"${locked && lv !== v ? " disabled" : ""}>${l}<small>${m}</small></button>`).join("")}</div>
-    <p class="hint" style="margin:0 0 6px">${f.others && f.others.length ? `同じ路線のほかの会社：${f.others.map(name).join("・")}` : "同じ路線に、ほかの会社はいません"}。安くすると旅行の客を多く取れますが、1人あたりの収益は下がります。${locked ? "きょうはもう変えました（あしたの0時から変えられます）。" : ""}</p>`;
+    ${rlock ? ratingLock(2) : ""}<p class="hint" style="margin:0 0 6px">${f.others && f.others.length ? `同じ路線のほかの会社：${f.others.map(name).join("・")}` : "同じ路線に、ほかの会社はいません"}。安くすると旅行の客を多く取れますが、1人あたりの収益は下がります。${locked && !rlock ? "きょうはもう変えました（あしたの0時から変えられます）。" : ""}</p>`;
 }
 document.addEventListener("click", async e => {
   const b = e.target.closest("[data-fare]"); if(!b || b.disabled) return;
@@ -4716,6 +4717,25 @@ function waveHtml(W){
     <div class="wave"><div class="wax"><span>6時</span><span>12時</span><span>18時</span><span>24時</span></div>${rows}
       <div class="wlg"><span><i class="o"></i>定時</span><span><i class="d"></i>遅れ</span><span><i class="x"></i>欠航</span></div></div>
     ${notes.length ? `<p class="hint" style="margin:4px 0 6px">${notes.join("<br>")}</p>` : ""}`;
+}
+// 格付け（1〜5）。条件を満たすと上がり、下がらない。上がると使える仕組みが増える
+const RATINGS = [
+  {n:1, name:"地域航空会社", need:null, open:"路線・機体の購入・おまかせのスケジュール・天気の欠航とその対応"},
+  {n:2, name:"国内線の航空会社", need:{routes:5, fleet:3}, open:"運賃の5段階・機内食と荷物の料金（このあと：自分で組むスケジュール・役職を3つ・中古機）"},
+  {n:3, name:"国内大手", need:{routes:12, fleet:8, stars:3, days:30}, open:"機体の故障と予備機・A点検・発着枠の申し込み・ラウンジ・マイル制度など"},
+  {n:4, name:"国際航空会社", need:{intl:1, routes:25, fleet:20, stars:4}, alt:"国際線がなければ 路線30・機体25・★4", open:"上級席の割合・C点検・機内Wi-Fi・子会社など"},
+  {n:5, name:"世界の航空会社", need:{intl:5, routes:40, fleet:35, stars:5}, open:"称号と特別な会社の印"}];
+const ratingOk = n => CO && CO.v3 && (CO.rating || 1) >= n;
+const ratingLock = n => `<p class="hint" style="margin:0 0 6px">格付け${n}「${RATINGS[n - 1].name}」から使えます。</p>`;
+function ratingHtml(){
+  if(!CO || !CO.v3 || CO.rating == null) return "";
+  const r = RATINGS[CO.rating - 1], nx = RATINGS[CO.rating], h = CO.ratingHave || {};
+  const lab = {routes:"路線", fleet:"機体", stars:"評判", days:"始めてから", intl:"国際線"}, unit = {routes:"本", fleet:"機", stars:"", days:"日", intl:"本"};
+  const items = nx ? Object.entries(nx.need).map(([k, v]) => { const have = +h[k] || 0, ok = have >= v;
+    return `<div><small>${lab[k]}</small><b class="${ok ? "pos" : ""}">${k === "stars" ? "★" : ""}${Math.min(have, 999)}<i>/${k === "stars" ? "★" : ""}${v}${unit[k]}</i></b></div>`; }).join("") : "";
+  return `<h2>格付け</h2><div class="v3box"><div class="satnum"><div><small>いまの格付け</small><br><b>${r.n}</b> <small>${r.name}</small></div>${nx ? `<div style="text-align:right"><small>次は</small><br><b style="font-size:16px">「${nx.name}」</b></div>` : ""}</div>
+    ${nx ? `<div class="v3stats rt">${items}</div>${nx.alt ? `<p class="hint" style="margin:0 0 6px">（${nx.alt} でもよい）</p>` : ""}<p style="margin:0">上がると使える：${nx.open}</p>` : `<p style="margin:0">いちばん上の格付けです。</p>`}
+    <p class="hint" style="margin:6px 0 0">いま使える：${RATINGS.slice(0, CO.rating).map(x => x.open.replace(/（このあと.*）/, "")).join("・")}。格付けは下がりません。</p></div>`;
 }
 // 朝のまとめ（前の日の記録・欠航・神対応・実際の空）。閉じるとその日は出さない（この端末だけ）
 const MORNING_KEY = "soramemo.co3.morning";

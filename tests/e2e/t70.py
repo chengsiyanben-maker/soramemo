@@ -9,7 +9,7 @@ def check(label, ok):
     if not ok: fails.append(label)
 INIT = "localStorage.setItem('soramemo.onboarded','1'); localStorage.setItem('soramemo.install.later','1'); Object.defineProperty(window, 'SORAMEMO_CONFIG', { configurable:true, get(){ return this.__cfg; }, set(v){ this.__cfg = Object.assign({}, v, { gameReleased: true }); } });"
 V3 = """window.__co = {name:'そらメモ航空', cash:100000, last:new Date().toISOString(), roles:{}, daily:300, gross:300, upkeep:0, bonus:0, routes:[], fleet:[], sky:{}, total_km:0, rep_points:0, stars:1, facilities:{}, bought:1, value:100000, friend_code:'ABCD1234', hide_rank:false, friends:0,
-  v3:true, policy:'fsc', premium:20, satisfaction:41.2, sat_mult:0.97, sat_parts:{base:50, packed:0, new_share:3, aging:-2, policy_adj:-5, target:46}};
+  v3:true, rating:5, rating_have:{routes:40, intl:5, fleet:35, stars:5, days:99}, policy:'fsc', premium:20, satisfaction:41.2, sat_mult:0.97, sat_parts:{base:50, packed:0, new_share:3, aging:-2, policy_adj:-5, target:46}};
 window.__seen = [{reg:'JA861J', code:'B789', name:'B787-9', kind:'pax', airport:'成田', seen_at:new Date(Date.now()-864e5).toISOString(), flight:'JL4', dep:'NRT', arr:'JFK', price:55380, as_ridden:false},
   {reg:'JA11KZ', code:'B748F', name:'B747-8F', kind:'freighter', airport:'成田', seen_at:new Date(Date.now()-864e5).toISOString(), flight:'KZ110', dep:'NRT', arr:'ANC', price:72450, as_ridden:true}];"""
 async def open_page(b, init_extra):

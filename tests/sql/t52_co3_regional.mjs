@@ -32,6 +32,7 @@ await db.exec(`insert into checkins (user_id, airport_id, lat, lon, accuracy_m, 
     ('${A}', ${ids.OKA}, 26.2, 127.6, 10, now() - interval '2 day', now() - interval '2 day')`);
 await as(A, `select public.co_state()`);
 await db.exec(`update companies set cash = 100000, satisfaction = 60 where user_id = '${A}'`);
+await db.exec(`update companies set rating = 5`).catch(() => {});
 let s = await as(A, `select public.co3_set_policy('regional')`);
 check('方針を地域航空にできる・上級席は0%', s.policy === 'regional' && s.premium === 0, { p: s.policy, pr: s.premium });
 check('地域航空は上級席を選べない', String(await as(A, `select public.co3_set_premium(10)`)).includes('premium not allowed'), null);

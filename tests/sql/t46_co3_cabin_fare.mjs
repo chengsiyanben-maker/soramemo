@@ -38,6 +38,7 @@ await db.exec(`insert into flights (user_id, from_airport, to_airport, dep_at, a
     (((now() - interval '1 day') at time zone 'Asia/Tokyo')::date, 'JL601', 'HND', 'CTS', now() - interval '1 day', now() - interval '1 day' + interval '90 minutes', 'A359', 'JA01XJ', '359')`);
 await as(A, `select public.co_state()`);
 await db.exec(`update companies set cash = 500000 where user_id = '${A}'`);
+await db.exec(`update companies set rating = 5`).catch(() => {});   // 格付けの鍵は t63 で試す。ここでは解放ずみの形で
 // 手計算は満足度の倍率なし（満足度60）で確かめる。満足度は t47
 await db.exec(`update companies set satisfaction = 60`).catch(() => {});
 let s = await as(A, `select public.co_buy('r:JA01XJ')`);

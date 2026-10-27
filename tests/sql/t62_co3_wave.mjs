@@ -41,6 +41,7 @@ await db.exec(`insert into flights (user_id, from_airport, to_airport, dep_at, a
   insert into checkins (user_id, airport_id, lat, lon, accuracy_m, position_at) values ('${A}', ${ids.HND}, 35.55, 139.78, 10, now());`);
 await as(A, `select public.co_state()`);
 await db.exec(`update companies set cash = 500000 where user_id = '${A}'`);
+await db.exec(`update companies set rating = 5`).catch(() => {});   // 格付けの鍵は t63 で試す。ここでは解放ずみの形で
 // 手計算は満足度の倍率なし（満足度60）で確かめる。満足度は t47
 await db.exec(`update companies set satisfaction = 60`).catch(() => {});
 let s = await as(A, `select public.co_buy('r:JA01XJ')`);
