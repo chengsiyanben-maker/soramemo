@@ -9,6 +9,7 @@
 //        ga:{ airports:["HND","NRT"], kinds:["plane","cluster","wind","cloud","ts"], quiet:true, gap:3 } を付けると、ゴーアラウンドの知らせ（推定）
 //   POST /functions/v1/push-subscribe  { endpoint, remove:true }                              → 取り消し
 import { createClient } from "npm:@supabase/supabase-js@2.117.2";
+import { FAM_KEYS } from "../_shared/spot_push.ts";
 
 const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, { auth: { persistSession: false } });
 const CORS = { "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Headers": "authorization, apikey, content-type", "Access-Control-Allow-Methods": "GET, POST, OPTIONS" };
@@ -29,6 +30,9 @@ function spotOf(v: unknown) {
     spot_lead: o.lead === 3 || o.lead === 10 ? o.lead : 5,
     spot_regs: arr(o.regs, /^JA[0-9A-Z]{3,5}$/, 10),
     spot_flights: arr(o.flights, /^[A-Z0-9]{2}\d{1,4}[A-Z]?@\d{4}-\d{2}-\d{2}$/, 10),
+    // 表示する機体と同じ選び方で知らせるとき：機種のまとまりと、1機ずつ選んだ特別塗装機の名前
+    spot_fams: Array.isArray(o.fams) ? [...new Set(o.fams.filter((k) => typeof k === "string" && FAM_KEYS.includes(k)))] as string[] : [],
+    spot_livs: Array.isArray(o.livs) ? [...new Set(o.livs.filter((k) => typeof k === "string" && k.trim().length > 0 && k.length <= 60))].slice(0, 30) as string[] : [],
   };
 }
 
@@ -61,13 +65,13 @@ Deno.serve(async (req) => {
   const flights = Array.isArray(b.flights) ? [...new Set(b.flights.filter((x) => typeof x === "string" && /^[A-Z0-9]{2}\d{1,4}[A-Z]?@\d{4}-\d{2}-\d{2}$/.test(x)))].slice(0, 5) as string[] : [];
   const sp_airports = Array.isArray(b.sp_airports) ? [...new Set(b.sp_airports.filter((x) => typeof x === "string" && /^[A-Z]{3}$/.test(x)))].slice(0, 14) as string[] : [];
   const sp_regs = Array.isArray(b.sp_regs) ? [...new Set(b.sp_regs.filter((x) => typeof x === "string" && /^[A-Z0-9-]{2,10}$/.test(x)))].slice(0, 20) as string[] : [];
-  const spot = spotOf(b.spot), hasSpot = !!spot.spot_iata && (spot.spot_kinds.length > 0 || spot.spot_flights.length > 0);
+  const spot = spotOf(b.spot), hasSpot = !!spot.spot_iata && (spot.spot_kinds.length > 0 || spot.spot_flights.length > 0 || spot.spot_fams.length > 0 || spot.spot_livs.length > 0);
   const ga = gaOf(b.ga), hasGa = ga.ga_airports.length > 0 && ga.ga_kinds.length > 0;
   if (!airports.length && !flights.length && !sp_airports.length && !sp_regs.length && !hasSpot && !hasGa) {   // 何も選ばれていなければ取り消し
     await admin.from("push_subs").delete().eq("endpoint", endpoint);
     return res({ ok: true, removed: true });
   }
-  const row = { endpoint, p256dh, auth, airports, flights, sp_airports, sp_regs, ...(hasSpot ? spot : { spot_iata: null, spot_kinds: [] as string[], spot_lead: 5, spot_regs: [] as string[], spot_flights: [] as string[] }), ...(hasGa ? ga : { ga_airports: [] as string[], ga_kinds: [] as string[], ga_quiet: false, ga_gap: 3 }) };
+  const row = { endpoint, p256dh, auth, airports, flights, sp_airports, sp_regs, ...(hasSpot ? spot : { spot_iata: null, spot_kinds: [] as string[], spot_lead: 5, spot_regs: [] as string[], spot_flights: [] as string[], spot_fams: [] as string[], spot_livs: [] as string[] }), ...(hasGa ? ga : { ga_airports: [] as string[], ga_kinds: [] as string[], ga_quiet: false, ga_gap: 3 }) };
   const { error } = await admin.from("push_subs").upsert(row, { onConflict: "endpoint" });
   if (error) { console.error(error); return res({ error: "save failed" }, 500); }
   return res({ ok: true, airports, flights, sp_airports, sp_regs, spot: hasSpot ? spot : null, ga: hasGa ? ga : null });

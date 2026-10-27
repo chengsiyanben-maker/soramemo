@@ -207,7 +207,7 @@ async function notifyLivery(v: any) {
 }
 
 // ---- 撮影の知らせ（いつもの空港に、選んだ種類の機体が着陸の数分前になったら。同じ機体は1日1回） ----
-const SPOT_COLS = "id, endpoint, p256dh, auth, spot_iata, spot_kinds, spot_lead, spot_regs, spot_flights";
+const SPOT_COLS = "id, endpoint, p256dh, auth, spot_iata, spot_kinds, spot_lead, spot_regs, spot_flights, spot_fams, spot_livs";
 async function sendOne(s: { id: number; endpoint: string; p256dh: string; auth: string }, payload: Record<string, string>, ttl = 900) {
   try { await webpush.sendNotification({ endpoint: s.endpoint, keys: { p256dh: s.p256dh, auth: s.auth } }, JSON.stringify(payload), { TTL: ttl }); return true; }
   catch (e) { const code = (e as { statusCode?: number }).statusCode; if (code === 404 || code === 410) await admin.from("push_subs").delete().eq("id", s.id); return false; }

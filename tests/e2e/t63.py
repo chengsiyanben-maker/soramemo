@@ -1,6 +1,6 @@
 import os, sys
 HERE=os.path.dirname(os.path.abspath(__file__)); WEB=os.path.abspath(os.path.join(HERE,'..','..','web')); WORK=os.environ.get('SORAMEMO_TEST_WORK','/tmp/soramemo-e2e'); os.makedirs(WORK, exist_ok=True)
-# 撮る人の見方：注目の機体・機体のくわしく・撮影条件と天気・近づいたら知らせる
+# 撮る人の見方：注目の機体・機体のくわしく・撮影条件と天気・近づいたら知らせる・表示する機体を選ぶ・登録記号と決め方の札
 import asyncio, json
 from datetime import datetime, timedelta, timezone
 from playwright.async_api import async_playwright
@@ -11,6 +11,8 @@ HRS = [{'h': h, 'flights': [0,0,0,0,0,2,30,48,52,50,44,46,48,44,42,46,48,50,52,4
 BOARD = {'iata': 'HND', 'now': iso(0), 'hours': HRS,
   'next_arr': [{'flight': 'JL500', 'other': 'ITM', 'sched': iso(5), 't': iso(5), 'aircraft': 'B738'}, {'flight': 'NH212', 'other': 'LHR', 'sched': iso(25), 't': iso(25), 'intl': True, 'aircraft': 'B789'}],
   'next_dep': [{'flight': 'NH106', 'other': 'LAX', 'sched': iso(15), 't': iso(15), 'intl': True, 'aircraft': 'B77W'}, {'flight': 'JL903', 'other': 'OKA', 'sched': iso(30), 'est': iso(48), 't': iso(48), 'aircraft': 'A359'}, {'flight': 'BC101', 'other': 'UKB', 'sched': iso(40), 't': iso(40), 'aircraft': 'B738'}]}
+# 登録記号と決め方（サーバーの spot_regs の作り物）
+REGS = [{'flight': 'NH212', 'dir': 'arr', 'reg': 'JA830A', 'src': 'prev', 'via': 'NH211', 'share': 0.62}, {'flight': 'NH106', 'dir': 'dep', 'reg': 'JA791A', 'src': 'live', 'via': None, 'share': None}]
 fails = []
 def check(label, ok):
     print(label, ok)
@@ -22,7 +24,8 @@ async def main():
         await c.route('https://cdn.jsdelivr.net/npm/@supabase/**', lambda r: r.fulfill(path=os.path.join(HERE,'fake_sb.js'), content_type='application/javascript'))
         async def rpc(r):
             name = r.request.url.rsplit('/', 1)[-1]
-            await r.fulfill(status=200, body=json.dumps(BOARD if name == 'airport_board' else []), content_type='application/json', headers={'Access-Control-Allow-Origin':'*'})
+            body = BOARD if name == 'airport_board' else REGS if name == 'spot_regs' else []
+            await r.fulfill(status=200, body=json.dumps(body), content_type='application/json', headers={'Access-Control-Allow-Origin':'*'})
         await c.route('https://fake.supabase.co/rest/v1/rpc/**', rpc)
         FG = {'planes': [{'flight': 'TG660', 'airline': 'TG', 'other': 'BKK', 'kind': 'arr', 'status': 'approach', 'km': 40, 'alt_ft': 6000, 'type': 'A359'}]}
         await c.route('https://fake.supabase.co/functions/v1/airport-foreign**', lambda r: r.fulfill(status=200, body=json.dumps(FG), content_type='application/json', headers={'Access-Control-Allow-Origin':'*'}))
@@ -65,8 +68,22 @@ async def main():
         check('学習した使い分けで絞る（8割以上・30機以上だけ）:', ln[0] == {'rws': ['01R'], 'side': False, 'learn': 93} and ln[1]['rws'] == ['01L', '01R'])
         check('来た方面で滑走路を絞る:', rws[0] == {'rws': ['34L'], 'side': True} and rws[1]['rws'] == ['34R'] and rws[2] == {'rws': ['34L', '34R'], 'side': False} and rws[3] == {'rws': ['05'], 'side': True} and rws[6]['rws'] == ['16L'] and rws[7]['rws'] == ['16R'] and rws[8] == {'rws': ['05', '34R'], 'side': False} and rws[4]['rws'] == ['22'] and rws[5]['rws'] == ['16R'])
         check('天気の札:', '雲底 1,800ft' in t and 'ベイパー 出やすい' in t)
-        await pg.click('[data-spfilter="all"]'); await pg.wait_for_timeout(200)
+        check('登録記号と決め方の札:', 'JA830A' in t and '前の便から' in t and 'JA791A' in t and '確認' in t)
+        check('表示する機体の1行:', '注目（はじめの選び方）' in t and '隠しています' in t)
+        await pg.click('#opsPhoto [data-spsel]'); await pg.wait_for_timeout(300)
+        check('表示する機体のシート:', await pg.evaluate("$('dSpotSel').open") and '737' in await pg.inner_text('#dSpotSel'))
+        await pg.screenshot(path=os.path.join(WORK, 't63_sel.png'), full_page=True)
+        await pg.click('#dSpotSel [data-sppre="all"]'); await pg.wait_for_timeout(200)
         check('すべてで B738 も出る:', 'JL500' in await pg.inner_text('#opsPhoto'))
+        await pg.click('#dSpotSel [data-sppre="none"]'); await pg.wait_for_timeout(200)
+        await pg.click('#dSpotSel [data-spfam="737"]'); await pg.wait_for_timeout(200)
+        t3 = await pg.inner_text('#opsPhoto .splist2'); print('737', t3.replace('\n', ' | '))
+        check('737 だけ選ぶ（撮影地から見えるものだけ）:', 'JL500' in t3 and 'NH212' not in t3 and 'TG660' not in t3 and await pg.evaluate("SP_ITEMS.filter(x => spMatch(x, spSel())).map(x => x.fl).sort().join()") == 'BC101,JL500')
+        check('選び方は空港ごとに残す:', json.loads(await pg.evaluate("localStorage.getItem('soramemo.photoSel.HND')"))['fams'] == ['737'])
+        await pg.click('#dSpotSel [data-spex="intl"]'); await pg.wait_for_timeout(200)
+        t4 = await pg.inner_text('#opsPhoto .splist2'); check('国際線を足す（海外は出ない）:', 'NH212' in t4 and 'NH106' in t4 and 'TG660' not in t4)
+        await pg.click('#dSpotSel [data-sppre="all"]'); await pg.wait_for_timeout(200)
+        await pg.click('#dSpotSel [data-close]'); await pg.wait_for_timeout(200)
         await pg.click('[data-spfilter="dep"]'); await pg.wait_for_timeout(200)
         t2 = await pg.inner_text('#opsPhoto .splist2'); check('離陸だけ:', 'NH106' in t2 and 'NH212' not in t2)
         await pg.locator('#opsPhoto .sprow').first.click(); await pg.wait_for_timeout(300)
@@ -99,7 +116,8 @@ async def main():
         await pg.click('[data-spsave]'); await pg.wait_for_timeout(300)
         sp = await pg.evaluate('window.__spot'); print('SPOT', sp)
         check('保存した中身:', sp and sp['iata'] == 'HND' and sp['kinds'] == ['special', 'reg'] and sp['regs'] == ['JA01XJ', 'JA873A'] and sp['lead'] == 10)
-        await pg.click('[data-spfilter="pick"]'); await pg.wait_for_timeout(200)
+        await pg.click('#opsPhoto [data-spsel]'); await pg.wait_for_timeout(200); await pg.click('#dSpotSel [data-sppre="pick"]'); await pg.wait_for_timeout(200); await pg.click('#dSpotSel [data-close]')
+        await pg.click('[data-spfilter="all"]'); await pg.wait_for_timeout(200)
         n = pg.locator('#opsPhoto .spnote'); check('10分前に知らせるボタン:', '10分前' in await n.inner_text())
         await n.click(); await pg.wait_for_timeout(300)
         sp = await pg.evaluate('window.__spot'); print('SPOT2', sp)
@@ -107,5 +125,23 @@ async def main():
         check('取り消しに変わる:', '取り消す' in await pg.locator('#opsPhoto .spnote').inner_text())
         await pg.click('[data-sppush]'); await pg.wait_for_timeout(200); await pg.click('[data-spoff]'); await pg.wait_for_timeout(300)
         check('すべてやめる:', (await pg.evaluate('window.__spot'))['iata'] is None)
+        # 表示する機体と同じ選び方で知らせる
+        await pg.click('#opsPhoto [data-spsel]'); await pg.wait_for_timeout(200)
+        await pg.click('#dSpotSel [data-spselnotify]'); await pg.wait_for_timeout(400)
+        sp = await pg.evaluate('window.__spot'); print('SPOT3', sp)
+        check('選び方で知らせる（機種と特別塗装機と海外）:', sp and sp['iata'] == 'HND' and sp['sel'] and '787' in sp['fams'] and '737' not in sp['fams'] and sp['kinds'] == ['special', 'foreign'])
+        await pg.click('#dSpotSel [data-spfam="737"]'); await pg.wait_for_timeout(1200)
+        check('選び方を変えると知らせも合わせる:', '737' in (await pg.evaluate('window.__spot'))['fams'])
+        await pg.click('#dSpotSel [data-spselnotify]'); await pg.wait_for_timeout(400)
+        sp = await pg.evaluate('window.__spot'); check('選び方で知らせるのをやめる:', not sp['sel'] and sp['fams'] == [])
+        await pg.click('#dSpotSel [data-close]'); await pg.wait_for_timeout(200)
+        # 機体のくわしく：決め方の説明
+        await pg.click('#opsPhoto [data-spsel]'); await pg.wait_for_timeout(200); await pg.click('#dSpotSel [data-sppre="all"]'); await pg.click('#dSpotSel [data-close]'); await pg.wait_for_timeout(200)
+        i = await pg.evaluate("SP_ITEMS.findIndex(x => x.fl === 'NH212')"); await pg.evaluate(f"document.querySelector('[data-spfl=\"{i}\"]').click()"); await pg.wait_for_timeout(300)
+        td2 = await pg.inner_text('#dSpotFl'); print('DETAIL', td2[:200].replace('\n', ' | '))
+        check('くわしく：前の便からの説明:', 'JA830A' in td2 and 'NH211' in td2 and '62%' in td2)
+        await pg.screenshot(path=os.path.join(WORK, 't63_detail_reg.png'))
+        await pg.click('#dSpotFl .spx'); await pg.wait_for_timeout(200)
+        await pg.screenshot(path=os.path.join(WORK, 't63_list.png'), full_page=True)
         print('errors', errs, 'fails', fails); await b.close()
 asyncio.run(main())
