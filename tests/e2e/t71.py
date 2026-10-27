@@ -57,7 +57,7 @@ async def main():
         # 地域航空
         c, pg = await open_page(b, REG, errs)
         t = await pg.inner_text('#coOps'); print('REG', t.replace('\n', ' | ')[:400])
-        check('地域航空：仕事・補助・小型機:', '地域航空の仕事' in t and '石垣で遊覧' in t and '遊覧' in t and '+51' in t and '+22' in t and '離島' in t and '38%' in t and 'セスナ208 キャラバン' in t)
+        check('地域航空：仕事・補助・小型機:', '地域航空の仕事' in t and '石垣で遊覧' in t and '遊覧' in t and '+51' in t and '+22' in t and '離島' in t and '38%' in t and 'セスナ208 キャラバン' in t and '宿泊旅行統計調査' in t)
         await pg.click('[data-buysmall=C208]'); await pg.wait_for_timeout(400)
         check('地域航空：小型機を買う（co3_buy_small）:', await pg.evaluate('window.__buySmall.p_code === "C208"') and await pg.evaluate('CO.cash') == 98000 and 'セスナ208 キャラバンを会社に入れました' in await pg.inner_text('#coMsg'))
         await pg.screenshot(path=os.path.join(WORK, 't71_regional.png'), full_page=True)

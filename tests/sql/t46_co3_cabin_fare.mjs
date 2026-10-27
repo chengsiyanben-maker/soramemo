@@ -50,9 +50,10 @@ let e = s.econ.find((x) => x.k === hc);
 //   普通席 ＝ min(1,118.6 − 85.68, 213席×6便×0.85 ＝ 1,086.3) ＝ 1,032.9人
 //   収益 ＝（1,020 ＋ 85.68 × 5.6）× 運賃 0.496 × はじめの上乗せ 1.5
 const fare = 0.25 + 820 * 0.0003, pp = 1190 * 0.6 * 0.12, ep = Math.min(1190 * 0.94 - pp, 213 * 6 * 0.85);
-const rev = (ep + pp * 5.6) * fare * 1.5, cost = 6 * 369 * 0.5 * fare, land = 6 * (((ep + pp) / 6) * 0.027 + 1.0);
+// 仕事の客の運賃 +20%（10/27）：上級席の客は全員、普通席は仕事の客 714人 − 上級席 85.68人 ＝ 628.32人の分
+const rev = (ep + 0.2 * (1190 * 0.6 - pp) + pp * 5.6 * 1.2) * fare * 1.5, cost = 6 * 369 * 0.5 * fare, land = 6 * (((ep + pp) / 6) * 0.027 + 1.0);
 check('上級席52席・上級席の客 85.7人・普通席の客 1,032.9人', near(Number(e.p_pax), pp, 0.1) && near(Number(e.e_pax), ep, 0.1) && Number(e.p_seats) === 52, e);
-check('収益 ＝（普通席 ＋ 上級席 × 5.6）× 運賃 × 1.5', near(Number(e.revenue), rev, 0.05), { got: e.revenue, want: rev });
+check('収益 ＝（普通席 ＋ 上級席 × 5.6）× 運賃 × 1.5、仕事の客は +20%', near(Number(e.revenue), rev, 0.05), { got: e.revenue, want: rev });
 check('1日の収益 ＝ 手計算のもうけ', Number(s.gross) === Math.round(rev - cost - land), { got: s.gross, want: Math.round(rev - cost - land) });
 const g20 = Number(s.gross);
 s = await as(A, `select public.co3_set_premium(0)`);

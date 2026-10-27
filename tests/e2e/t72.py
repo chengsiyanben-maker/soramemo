@@ -46,7 +46,7 @@ async def main():
         await pg.click('#coRoutes details summary'); await pg.wait_for_timeout(200)
         t = await pg.inner_text('#coRoutes')
         check('路線：お客さん・取り合い・取り分:', '18,500' in t and '3,110' in t and '3' in t and '17%' in t and '大きい空港どうし' in t)
-        check('路線：費用・着陸料・混雑料・上級席:', '−1,420' in t and '−84' in t and '−35' in t and '420人' in t)
+        check('路線：費用・着陸料・混雑料・上級席:', '−1,420' in t and '−84' in t and '−35' in t and '420人' in t and '仕事の客の運賃' in t and '+20%' in t)
         await pg.click('[data-pjfl="5-6"][data-n="6"]'); await pg.wait_for_timeout(400)
         check('路線：便数を決める（co3_set_flights）:', await pg.evaluate('window.__setFl.p_route === "5-6" && window.__setFl.p_flights === 6'))
         check('路線：決めたあとも開いたまま:', await pg.evaluate('document.querySelector("#coRoutes details").open'))
@@ -57,6 +57,8 @@ async def main():
         c, pg = await open_page(b, V3 + "window.__co.policy = 'lcc'; window.__co.premium = 0;", errs)
         await pg.evaluate("goTab('co')"); await pg.wait_for_timeout(400)
         check('LCC：上級席は出さない:', await pg.locator('[data-prem]').count() == 0)
+        await pg.evaluate("goTab('fleet')"); await pg.wait_for_timeout(300); await pg.click('#coRoutes details summary'); await pg.wait_for_timeout(200)
+        check('LCC：仕事の客の運賃は上げない（行を出さない）:', '仕事の客の運賃' not in await pg.inner_text('#coRoutes'))
         await c.close()
         # スイッチがオフ：前の路線の画面のまま
         c, pg = await open_page(b, '', errs)

@@ -61,10 +61,11 @@ const e = s.econ.find((x) => x.k === hc);
 //   運賃 0.25＋820×0.0003 ＝ 0.496、はじめの上乗せ 1.5 → 収益 832.3
 //   費用 6便 × 369席 × 0.5 × 0.496 ＝ 549.0。着陸料 1便の客 186.4人 × 0.027 ＋ 大きいジェット 1.0 ＝ 6.03 × 6 ＝ 36.2
 const pax = 1190 * (0.6 * 1.0 + 0.4 * 0.85), fare = 0.25 + 820 * 0.0003;
-const rev = pax * fare * 1.5, cost = 6 * 369 * 0.5 * fare, land = 6 * ((pax / 6) * 0.027 + 1.0);
+// 仕事の客の運賃（10/27）：大きい空港どうしの FSC は +20%。自社の仕事の客 1,190×0.6 ＝ 714人の分だけ上がる
+const rev = (pax + 0.2 * 1190 * 0.6) * fare * 1.5, cost = 6 * 369 * 0.5 * fare, land = 6 * ((pax / 6) * 0.027 + 1.0);
 check('路線の客：1,190人 → 方針で 1,118.6人', Number(e.demand) === 1190 && near(Number(e.own), pax, 0.1), e);
 check('1日6便・A350-900 369席（機種の表）・全員運べる', e.flights === 6 && Number(e.seats) === 369 && near(Number(e.carried), pax, 0.1), e);
-check('収益（運賃 × はじめの上乗せ 1.5）', near(Number(e.revenue), rev, 0.05), { got: e.revenue, want: rev });
+check('収益（運賃 × はじめの上乗せ 1.5、仕事の客は +20%）', near(Number(e.revenue), rev, 0.05), { got: e.revenue, want: rev });
 check('運航の費用', near(Number(e.cost), cost, 0.05), { got: e.cost, want: cost });
 check('着陸料', near(Number(e.landing), land, 0.05), { got: e.landing, want: land });
 check('混雑料金：羽田の申し込みが枠に収まるので0', Number(e.congestion) === 0, e);

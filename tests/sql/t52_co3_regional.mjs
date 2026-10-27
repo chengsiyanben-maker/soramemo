@@ -17,8 +17,14 @@ const q1 = async (sql) => Object.values((await db.query(sql)).rows[0] ?? {})[0];
 const near = (a, b, tol) => Math.abs(a - b) <= tol;
 const ids = Object.fromEntries((await db.query(`select iata, id from airports where iata in ('ISG','OKA','HND','GAJ')`)).rows.map((r) => [r.iata, r.id]));
 
-check('観光地の度合い：石垣（リゾート）1.5・奄美ではない離島 1.3・羽田 1.0',
-  Number(await q1(`select public.co3_degree('ISG')`)) === 1.5 && Number(await q1(`select public.co3_degree('OKI')`)) === 1.3 && Number(await q1(`select public.co3_degree('HND')`)) === 1, null);
+// 観光地の度合い（10/27 から国の統計）：県の 延べ宿泊者数 ÷ 人口 の順位で 0.5〜1.5、離島は +0.2（1.5まで）
+const dg = async (c) => Number(await q1(`select public.co3_degree('${c}')`));
+check('観光地の度合い：石垣（沖縄 1.5、離島でも1.5まで）・隠岐（島根 1.11 ＋ 離島 0.2）・羽田（東京 1.35）・山形 0.98・茨城 0.52',
+  await dg('ISG') === 1.5 && await dg('OKI') === 1.31 && await dg('HND') === 1.35 && await dg('GAJ') === 0.98 && await dg('IBR') === 0.52,
+  { ISG: await dg('ISG'), OKI: await dg('OKI'), HND: await dg('HND'), GAJ: await dg('GAJ'), IBR: await dg('IBR') });
+check('観光地の度合い：IATA のある空港はすべて表にある・0.5〜1.5',
+  Number(await q1(`select count(*) from airports a where a.iata ~ '^[A-Z]{3}$' and not exists (select 1 from co3_tourism t where t.iata = a.iata)`)) === 0
+  && Number(await q1(`select count(*) from co3_tourism where degree < 0.5 or degree > 1.5`)) === 0, null);
 
 // A は石垣と那覇でチェックイン（前の7日に2空港）
 await db.exec(`insert into checkins (user_id, airport_id, lat, lon, accuracy_m, position_at, created_at) values
