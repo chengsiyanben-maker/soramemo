@@ -1,6 +1,6 @@
 import os, sys
 HERE=os.path.dirname(os.path.abspath(__file__)); WEB=os.path.abspath(os.path.join(HERE,'..','..','web')); WORK=os.environ.get('SORAMEMO_TEST_WORK','/tmp/soramemo-e2e'); os.makedirs(WORK, exist_ok=True)
-# 修行の画面：成績から開く、この路線に乗ったら（会員情報のボーナス・支払いのマイル）、会員情報の保存、計画を作って予定に入れる、路線の運航状況、予算、フライトの金額
+# 修行の画面（窓で開く。下のタブに修行がない構成＝気軽に）：成績から開く、この路線に乗ったら（会員情報のボーナス・支払いのマイル）、会員情報の保存、計画を作って予定に入れる、路線の運航状況、予算、フライトの金額
 import asyncio, json
 from datetime import datetime, timedelta, timezone
 from playwright.async_api import async_playwright
@@ -19,7 +19,7 @@ def check(label, ok):
 async def main():
     async with async_playwright() as p:
         b=await p.chromium.launch(); c=await b.new_context(viewport={'width':400,'height':860}, timezone_id='Asia/Tokyo')
-        await c.add_init_script("localStorage.setItem('soramemo.onboarded','1'); localStorage.setItem('soramemo.install.later','1'); localStorage.setItem('soramemo.persona','shugyo')")
+        await c.add_init_script("localStorage.setItem('soramemo.onboarded','1'); localStorage.setItem('soramemo.install.later','1'); localStorage.setItem('soramemo.persona','casual')")
         await c.route('https://cdn.jsdelivr.net/npm/@supabase/**', lambda r: r.fulfill(path=os.path.join(HERE,'fake_sb.js'), content_type='application/javascript'))
         RT = [{'flight': 'NH461', 'std': iso(-300), 'sta': iso(-140), 'atd': iso(-298), 'ata': iso(-150), 'cancelled': False, 'aircraft': 'B789'},
               {'flight': 'NH463', 'std': iso(-60), 'sta': iso(100), 'etd': iso(-30), 'atd': iso(-30), 'cancelled': False},

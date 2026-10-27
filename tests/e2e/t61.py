@@ -40,7 +40,7 @@ async def main():
         await pg.evaluate("document.querySelectorAll('dialog[open]').forEach(d => d.close())")
         # フライト
         await pg.evaluate("goTab('log')"); await pg.wait_for_timeout(400)
-        check('フライトの見方が8つ:', await pg.locator('#logViews [data-vw]').count() == 8)
+        check('フライトの見方が9つ（修行を足した）:', await pg.locator('#logViews [data-vw]').count() == 9)
         for v, sel in [('board', '.lgboard'), ('cal', '.lgcal'), ('month', '.lgsum'), ('alt', '.lgalt'), ('text', '.lgtext'), ('route', '.lgroute'), ('map', '#flights .lgrows'), ('pass', '#flights .pass')]:
             await pg.click(f'[data-vw="log:{v}"]'); await pg.wait_for_timeout(250)
             check(f'フライト {v}:', await pg.locator(f'#flights {sel}' if not sel.startswith('#') else sel).count() > 0)
