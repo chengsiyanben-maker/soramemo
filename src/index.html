@@ -384,6 +384,7 @@ dialog::backdrop{background:rgba(15,22,38,.55)}
 .pillrow{display:flex;gap:6px;margin:0 0 10px;flex-wrap:wrap}
 .pillrow.fares{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:4px}.pillrow.fares .cotab{min-width:0;padding:6px 0;font-size:11px;line-height:1.3;white-space:nowrap;border-radius:14px}
 .pillrow.fares .cotab small{display:block;font-size:10px;color:#8A909A;font-weight:500}.pillrow.fares .cotab.on small{color:inherit;opacity:.75}
+.v3box.morning .mhd{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}.v3box.morning .mhd small{font-size:12px;color:#5F6672}
 .trb{background:#1F2329;color:#fff;border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:8px;margin-bottom:10px}
 .trb .trh{display:flex;gap:6px;flex-wrap:wrap}.trb .trt{font-size:20px;font-weight:900}.trb small{font-size:12px;opacity:.85}.trb small.dim{opacity:.65;font-size:11px}
 .tag.warn{background:#FFB547;color:#1F2329}.tag.ghost{background:transparent;color:#fff;border:1px solid rgba(255,255,255,.35)}
@@ -4341,7 +4342,7 @@ function coFromServer(j){
       rodeOn:x.rode_on, flight:x.flight, boughtAt:Date.parse(x.bought_at), kind:x.kind || null})),
     sky:j.sky || {}, repPoints:+j.rep_points || 0, stars:+j.stars || 1, bought:+j.bought || 0, value:+j.value || 0,
     friendCode:j.friend_code || "", hideRank:!!j.hide_rank, friends:+j.friends || 0,
-    v3:!!j.v3, policy:j.policy || "fsc", premium:+j.premium || 0, sat:j.satisfaction == null ? 40 : +j.satisfaction, satMult:+j.sat_mult || 1, satParts:j.sat_parts || null, econ:j.econ || [], fares:j.fares || {}, meal:j.meal || "none", bag:j.bag || "free", troubles:j.troubles || [], autoTrouble:!!j.auto_trouble, home:j.home == null ? null : +j.home, homeSince:j.home_since || null, cargoRoutes:j.cargo_routes || [], cargo:j.cargo || [], pj:j.pj || [], jobs:j.jobs || [], subsidy:j.subsidy || [], small:j.small || [], plans:j.plans || {},
+    v3:!!j.v3, policy:j.policy || "fsc", premium:+j.premium || 0, sat:j.satisfaction == null ? 40 : +j.satisfaction, satMult:+j.sat_mult || 1, satParts:j.sat_parts || null, econ:j.econ || [], fares:j.fares || {}, meal:j.meal || "none", bag:j.bag || "free", troubles:j.troubles || [], autoTrouble:!!j.auto_trouble, morning:j.morning || null, home:j.home == null ? null : +j.home, homeSince:j.home_since || null, cargoRoutes:j.cargo_routes || [], cargo:j.cargo || [], pj:j.pj || [], jobs:j.jobs || [], subsidy:j.subsidy || [], small:j.small || [], plans:j.plans || {},
     facilities:Object.fromEntries(Object.entries(j.facilities || {}).map(([k, v]) => [+k, +v]))}; }
 // 端末だけの版（お試し・サーバーなし）：同じ形の状態を、端末の記録から作る
 let CO_LOCAL = null;
@@ -4590,7 +4591,7 @@ function renderV3(){
   const sat = CO.sat, tgt = sp.target == null ? null : +sp.target, eff = Math.round((CO.satMult - 1) * 100);
   const step = tgt == null ? 0 : Math.max(-3, Math.min(3, (tgt - sat) * 0.1));
   const part = (k, v) => v ? `<div class="v3row"><span>${k}</span><b>${v > 0 ? "+" : "−"}${Math.abs(+v)}</b></div>` : "";
-  box.innerHTML = `${troubleHtml()}<h2>方針</h2><p class="hint">稼ぎ方が変わります。変えるとその日から新しい方針で数えます。</p>
+  box.innerHTML = `${morningHtml()}${troubleHtml()}<h2>方針</h2><p class="hint">稼ぎ方が変わります。変えるとその日から新しい方針で数えます。</p>
     <div class="polgrid">${Object.entries(POLICIES).map(([k, p]) => `<button class="polcard${sel === k ? " on" : ""}" data-pol="${k}" aria-pressed="${sel === k}"><b>${p.name}</b><span>${p.short}</span><em class="${CO.policy === k ? "now" : ""}">${CO.policy === k ? "今の方針" : p.where}</em></button>`).join("")}</div>
     <div class="v3box"><h3>${d.name}</h3><div class="v3stats">${d.stats.map(([k, v]) => `<div><small>${k}</small><b>${v}</b></div>`).join("")}</div>
       <ul>${d.points.map(t => `<li>${t}</li>`).join("")}</ul>
@@ -4677,6 +4678,28 @@ function routeV3Html(r, e, ac){
           : `<p class="hint">機体を入れると飛べます。v3 では、機体のない路線は飛びません。</p>`}
         <p class="hint">数字はゲームの中の計算です。本物の便の乗客数ではありません。</p></div></details>`;
 }
+// 朝のまとめ（前の日の記録・欠航・神対応・実際の空）。閉じるとその日は出さない（この端末だけ）
+const MORNING_KEY = "soramemo.co3.morning";
+function morningHtml(){
+  const m = CO.morning; if(!m || (m.profit == null && !+m.cancelled && !+m.god)) return "";
+  let shut = null; try{ shut = localStorage.getItem(MORNING_KEY); }catch(e){}
+  if(shut === String(m.day)) return "";
+  const d = new Date(String(m.day) + "T00:00:00+09:00"), wd = "日月火水木金土"[d.getDay()], sg = v => `${v >= 0 ? "+" : "−"}${fmtKm(Math.round(Math.abs(v)))}`;
+  const diff = m.profit != null && m.prev_profit != null ? +m.profit - +m.prev_profit : null, sd = m.sat != null && m.prev_sat != null ? +m.sat - +m.prev_sat : null;
+  const skyRows = (m.sky || []).slice(0, 3).map(x => { const pc = Math.round((+x.mult - 1) * 100), why = +x.cxl ? `欠航 ${x.cxl}便` : x.avg4 && +x.n > +x.avg4 ? "便が多い" : "便が少ない";
+    return `<div class="v3row"><span>${esc(opsRoute(x.k) || x.k)}（${why}）</span><b class="${pc > 0 ? "pos" : pc < 0 ? "neg" : ""}">${pc > 0 ? "+" : pc < 0 ? "−" : "±"}${Math.abs(pc)}%</b></div>`; }).join("");
+  return `<div class="v3box morning"><div class="mhd"><small>${d.getMonth() + 1}月${d.getDate()}日（${wd}）のまとめ</small><button class="linkbtn2" id="morningClose">閉じる</button></div>
+    <div class="satnum"><div><small>きのうのもうけ</small><br><b>${m.profit == null ? "—" : sg(+m.profit)}</b>${diff != null ? ` <small>前の日より ${sg(diff)}</small>` : ""}</div></div>
+    ${opsStats([["欠航", +m.cancelled || 0, "便"], ["対応が必要", +m.open || 0, "件"], ["満足度", m.sat == null ? "—" : fmtNum(+m.sat, 1), sd != null && Math.abs(sd) >= 0.05 ? `（${sd > 0 ? "+" : "−"}${fmtNum(Math.abs(sd), 1)}）` : ""]])}
+    ${skyRows ? `<small class="lbl" style="margin-top:6px">実際の空（きのう）</small>${skyRows}` : ""}
+    ${+m.god ? `<div class="v3row"><span>よい出来事</span><b class="pos">神対応で話題に（評判 +15）</b></div>` : ""}
+    ${+m.open ? `<p class="hint" style="margin:8px 0 0">下の「対応してください」から、きょうの13時までに対応できます。</p>` : ""}</div>`;
+}
+document.addEventListener("click", e => {
+  if(e.target.id !== "morningClose" || !CO || !CO.morning) return;
+  try{ localStorage.setItem(MORNING_KEY, String(CO.morning.day)); }catch(err){}
+  renderV3();
+});
 // トラブル（1日まとめ：前の日の本物の欠航から、毎朝7時に決まる。6時間以内に対応、はじめの1時間に合うカードで神対応）
 const TR_CARDS = [["transfer", "振替の手配", 0.20, "自社の後の便や、ほかの便に振り替える"], ["hotel", "ホテルの手配", 0.30, "夜の欠航や台風での足止めに"], ["snack", "軽食とおわび", 0.10, "2時間以上の遅れに"]];
 let TR_SEL = {};
