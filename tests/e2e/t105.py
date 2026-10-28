@@ -21,7 +21,7 @@ async def open_page(b, extra, errs):
     await pg.goto('file://'+os.path.join(WORK,'index_server_test.html')); await pg.wait_for_load_state('load'); await pg.wait_for_function('typeof render === "function"'); await pg.wait_for_timeout(600)
     await pg.evaluate('__fake.login()'); await pg.wait_for_timeout(800)
     return c, pg
-WX = "window.__co.wx = {prep:[{iata:'CTS', kind:'deice', level:1}], wind:'none', cat3_airports:['NRT'], typhoon:[{day:'2026-09-11', iata:'CTS', k:'5-6', cancel:null}]}; window.__co.fleet[0].cat3_cost = 800;"
+WX = "window.__co.wx = {prep:[{iata:'CTS', kind:'deice', level:1}], wind:'none', cat3_airports:['NRT'], typhoon:[{day:'2026-09-11', iata:'CTS', src:'jma', k:'5-6', cancel:null}]}; window.__co.fleet[0].cat3_cost = 800;"
 async def main():
     async with async_playwright() as p:
         b = await p.chromium.launch(); errs = []
@@ -29,6 +29,7 @@ async def main():
         await pg.evaluate("goTab('co')"); await pg.wait_for_timeout(400)
         t = await pg.inner_text('#coV3')
         check('台風：9月11日 新千歳・まだ決めていない:', '台風が近づきそうです' in t and '9月11日' in t and 'まだ決めていない' in t)
+        check('台風：出典は気象庁ホームページ・ゲームが計算（加工）:', '出典：気象庁ホームページ（台風解析・予報情報）' in t and '加工したもの' in t and '運営が入れています' not in t)
         await pg.click('[data-typh="5-6"][data-v="1"]'); await pg.wait_for_timeout(400)
         check('計画欠航する（co3_typhoon_decide）:', await pg.evaluate('window.__typh.p_route === "5-6" && window.__typh.p_cancel === true') and '計画欠航にしました' in await pg.inner_text('#coMsg'))
         check('天気の備え：新千歳 防除氷1段:', '新千歳 ・ 防除氷の設備' in await pg.inner_text('#coV3') and await pg.locator('.lvb[aria-label="3段のうち1段"]').count() == 1)

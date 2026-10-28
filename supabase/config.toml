@@ -466,3 +466,7 @@ verify_jwt = false
 verify_jwt = false
 [functions.timetable-sync]
 verify_jwt = false
+[functions.co3-weather]
+verify_jwt = false
+[functions.co3-typhoon]
+verify_jwt = false
