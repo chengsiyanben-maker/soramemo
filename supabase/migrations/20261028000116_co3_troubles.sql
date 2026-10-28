@@ -164,9 +164,21 @@ declare src text;
 begin
   select pg_get_functiondef('public.co_rep_points(uuid)'::regprocedure) into src;
   if position('co3_trouble_rep' in src) = 0 then
-    if position('* 10' || chr(10) || '$function$' in src) = 0 then raise exception 'co_rep_points の形が変わっていて、トラブルの評判を入れられない'; end if;
-    src := replace(src, '* 10' || chr(10) || '$function$', '* 10' || chr(10) || '       + co3_trouble_rep(p_uid)' || chr(10) || '$function$');
-    execute src;
+    -- 本番の関数の文は、改行の文字などが手元と違うことがある（10/29 の反映で止まった）ので、終わりの形を広く見る
+    if src ~ '\* 10\s*\$function\$' then
+      src := regexp_replace(src, '\* 10\s*\$function\$', '* 10' || chr(10) || '       + co3_trouble_rep(p_uid)' || chr(10) || '$function$');
+      execute src;
+    else
+      -- それでも合わなければ、もとの関数を co_rep_points_base に残し、その上に足す形で作り直す
+      execute 'alter function public.co_rep_points(uuid) rename to co_rep_points_base';
+      execute $f$create function public.co_rep_points(p_uid uuid) returns bigint
+language sql stable security definer set search_path = public as $b$
+  select co_rep_points_base(p_uid)
+       + co3_trouble_rep(p_uid)
+$b$$f$;
+      execute 'revoke all on function public.co_rep_points_base(uuid) from public, anon, authenticated';
+      execute 'revoke all on function public.co_rep_points(uuid) from public, anon, authenticated';
+    end if;
   end if;
 end
 $do$;

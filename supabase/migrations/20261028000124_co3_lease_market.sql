@@ -43,8 +43,9 @@ declare src text;
 begin
   select pg_get_functiondef('public.ac_price(uuid,text)'::regprocedure) into src;
   if position('not lease' in src) = 0 then
-    if position('(select count(*) from aircraft where user_id = p_uid)' in src) = 0 then raise exception 'ac_price の形が変わっていて、リースを入れられない'; end if;
-    src := replace(src, '(select count(*) from aircraft where user_id = p_uid)', '(select count(*) from aircraft where user_id = p_uid and not lease)');
+    -- 本番の関数の文は空白や改行が手元と違うことがあるので、空白をゆるく見る
+    if src !~ '\(select\s+count\(\*\)\s+from\s+aircraft\s+where\s+user_id\s*=\s*p_uid\)' then raise exception 'ac_price の形が変わっていて、リースを入れられない'; end if;
+    src := regexp_replace(src, '\(select\s+count\(\*\)\s+from\s+aircraft\s+where\s+user_id\s*=\s*p_uid\)', '(select count(*) from aircraft where user_id = p_uid and not lease)', 'g');
     execute src;
   end if;
   select pg_get_functiondef('public.co_value(uuid)'::regprocedure) into src;
