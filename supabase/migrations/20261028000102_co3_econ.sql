@@ -302,7 +302,7 @@ $$;
 revoke all on function public.co3_gross(uuid) from public, anon, authenticated;
 
 -- ---------- 切り替え：1日の収益 ----------
---   スイッチがオフなら co-v2 の式（20261028000098_co_v2.sql と同じ）
+--   スイッチがオフなら co-v2 の式（20261028000099_co_v2.sql と同じ）
 create or replace function public.co_gross(p_uid uuid) returns bigint
 language sql stable security definer set search_path = public, ops as $$
   select case when coalesce((ops.flag('co_v3'))::boolean, false) then co3_gross(p_uid)
@@ -358,7 +358,7 @@ begin
 end;
 $$;
 
--- ---------- 会社の状態（20261028000099_co_airport_size.sql の co_state に 'v3' と 'econ' を足す）----------
+-- ---------- 会社の状態（20261028000100_co_airport_size.sql の co_state に 'v3' と 'econ' を足す）----------
 create or replace function public.co_state() returns jsonb
 language plpgsql security definer set search_path = public, ops as $$
 declare

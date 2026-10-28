@@ -111,7 +111,7 @@ update public.aircraft a set route_key = null
  where a.route_key is not null and a.type = 'lg'
    and not exists (select 1 from public.co_routes(a.user_id) r where r.route_key = a.route_key and r.min_size >= 4.5);
 
--- 会社の状態に、路線の両端の大きさを足す（ほかは 20261028000098_co_v2.sql と同じ）
+-- 会社の状態に、路線の両端の大きさを足す（ほかは 20261028000099_co_v2.sql と同じ）
 create or replace function public.co_state() returns jsonb
 language plpgsql security definer set search_path = public, ops as $$
 declare
