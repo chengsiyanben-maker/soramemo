@@ -1,4 +1,4 @@
-# 明朝体（Shippori Mincho）とドット文字（DotGothic16）から、アプリに出てくる文字だけを抜き出した小さなフォントを作る（どちらも SIL Open Font License 1.1）
+# 明朝体（Shippori Mincho）・ドット文字（DotGothic16）・標識の書体（Barlow Condensed）から、アプリに出てくる文字だけを抜き出した小さなフォントを作る（どちらも SIL Open Font License 1.1）
 #   python3 tools/build_font.py <文字の一覧のファイル> <出力フォルダ> [mincho|dot]
 # 文字を「英数字・かな・記号」と「漢字（文字コードの順に約100字ずつ）」の小分けのファイルに分ける。
 # 出力は1行に1ファイル「ファイル名<TAB>unicode-range」。ブラウザは、画面に実際に出た文字を含むファイルだけを取りに行く。
@@ -8,6 +8,8 @@ from fontTools import subset
 FONTS = {
     "mincho": ("ShipporiMincho-ExtraBold.ttf", "https://github.com/google/fonts/raw/main/ofl/shipporimincho/ShipporiMincho-ExtraBold.ttf"),
     "dot": ("DotGothic16-Regular.ttf", "https://github.com/google/fonts/raw/main/ofl/dotgothic16/DotGothic16-Regular.ttf"),
+    # 案内標識のような細長い書体（3レターコードと大きな数字だけに使う）。英数字と記号だけを抜き出す
+    "sign": ("BarlowCondensed-Bold.ttf", "https://github.com/google/fonts/raw/main/ofl/barlowcondensed/BarlowCondensed-Bold.ttf"),
 }
 # ブラウザが標準で使う組版の機能だけ残す（縦書きなどは使わない）
 FEATURES = ["kern", "liga", "clig", "calt", "ccmp", "locl", "mark", "mkmk", "palt", "tnum"]
@@ -34,6 +36,7 @@ def main():
     if not os.path.exists(src):
         os.makedirs(os.path.dirname(src), exist_ok=True); urllib.request.urlretrieve(url, src)
     text = sorted(set(open(chars_file, encoding="utf-8").read()))
+    if kind == "sign": text = [c for c in text if 0x20 <= ord(c) < 0x7f]   # 英数字と記号だけ（日本語の文字はゴシックのまま）
     kanji = [c for c in text if is_kanji(c)]
     groups = [[c for c in text if not is_kanji(c)]] + [kanji[i:i + CHUNK] for i in range(0, len(kanji), CHUNK)]
     os.makedirs(out_dir, exist_ok=True)
@@ -47,7 +50,7 @@ def main():
         data = open(tmp, "rb").read(); name = f"{kind}{i}-{hashlib.sha256(data).hexdigest()[:10]}.woff2"
         os.replace(tmp, os.path.join(out_dir, name))
         rng = ranges([ord(c) for c in g])
-        if i == 0: rng = "U+0-7F," + rng if not rng.startswith("U+20-7E") else "U+0-7F" + rng[len("U+20-7E"):]
+        if i == 0 and kind != "sign": rng = "U+0-7F," + rng if not rng.startswith("U+20-7E") else "U+0-7F" + rng[len("U+20-7E"):]
         made.append((name, rng))
     keep = {n for n, _ in made}
     for f in os.listdir(out_dir):   # 古い版は消す
