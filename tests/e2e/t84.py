@@ -30,7 +30,7 @@ async def main():
         t = await pg.inner_text('#coFleet')
         check('C点検中・予備機なし:', 'C点検中（11/06まで' in t and '計画した運休' in t)
         await pg.click('[data-wifi="1"]'); await pg.wait_for_timeout(400)
-        check('Wi-Fi を付ける（co3_set_wifi）:', await pg.evaluate('window.__wifi.p_aircraft === 1 && window.__wifi.p_on === true') and '機内Wi-Fi あり（外す）' in await pg.inner_text('#coFleet'))
+        check('Wi-Fi を付ける（co3_set_wifi）:', await pg.evaluate('window.__wifi.p_aircraft === 1 && window.__wifi.p_on === true') and '機内Wi-Fi（付いています）' in await pg.inner_text('#coFleet'))
         await c.close()
         c, pg = await open_page(b, V3 + SP + "window.__co.heavy = [{ac_id:1, kind:'heavy', start:'2026-10-28', end:'2026-11-17', spare_reg:'JA02ZZ', cost:10400}];", errs)
         await pg.evaluate("goTab('fleet')"); await pg.wait_for_timeout(300)

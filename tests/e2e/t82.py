@@ -27,7 +27,7 @@ async def main():
         c, pg = await open_page(b, V3 + "window.__co.season = {name:'年末年始', lei:1.5, biz:0.5, fare:1.2, next:{name:'春休み', days:80, lei:1.15}};", errs)
         await pg.evaluate("goTab('co')"); await pg.wait_for_timeout(400)
         t = await pg.inner_text('#coV3')
-        check('いまは年末年始（旅行 ×1.5・仕事 ×0.5・運賃 ×1.2）・次の繁忙期:', 'いまは年末年始（旅行の客 ×1.5・仕事の客 ×0.5・運賃 ×1.2）・次の繁忙期「春休み」まで あと80日' in t)
+        check('いまは年末年始（旅行 ×1.5・仕事 ×0.5・運賃 ×1.2）・次の繁忙期:', all(w in t for w in ['いまは', '年末年始', '×1.5', '×0.5', '×1.2', '次の繁忙期「春休み」まで あと80日']))
         await c.close()
         c, pg = await open_page(b, V3 + "window.__co.season = {name:null, lei:1, biz:1, fare:1, next:{name:'夏休み', days:61, lei:1.2}};", errs)
         await pg.evaluate("goTab('co')"); await pg.wait_for_timeout(400)

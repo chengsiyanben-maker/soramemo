@@ -28,7 +28,7 @@ async def main():
         await pg.evaluate("goTab('fleet')"); await pg.wait_for_timeout(300)
         await pg.click('[data-cotab=order]'); await pg.wait_for_timeout(500)
         t = await pg.inner_text('#coFleet')
-        check('発注できる機種：A350-900・納入まで30日:', 'A350-900' in t and '納入まで 30日' in t and await pg.locator('[data-order=A359]').count() == 1)
+        check('発注できる機種：A350-900・納入まで30日:', 'A350-900' in t and '大型 30日' in t and await pg.locator('[data-order=A359]').count() == 1)
         await pg.click('[data-order=A359]'); await pg.wait_for_timeout(600)
         t = await pg.inner_text('#coFleet')
         check('発注（co3_order）・発注中に出る:', await pg.evaluate('window.__order.p_code === "A359"') and 'SM-A001（A350-900）' in t and '11/27 納入' in t)

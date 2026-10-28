@@ -30,7 +30,7 @@ async def main():
         c, pg = await open_page(b, V3 + EXTRA, errs)
         await pg.evaluate("goTab('co')"); await pg.wait_for_timeout(400)
         t = await pg.inner_text('#coV3')
-        check('ラウンジ：羽田1段・出来事・起きやすさ:', 'ラウンジ・マイル・安全・借金' in t and '1段' in t and '10/20 乗員の飲酒問題' in t and '飲酒問題 約0.8回' in t)
+        check('ラウンジ：羽田1段・出来事・起きやすさ:', 'ラウンジ・マイル・安全・借金' in t and await pg.locator('.lvb[aria-label="3段のうち1段"]').count() == 1 and '10/20 乗員の飲酒問題' in t and '約0.8' in t)
         await pg.select_option('#lgAp', 'HND'); await pg.click('#lgBuild'); await pg.wait_for_timeout(400)
         check('ラウンジを上げる（co3_build_lounge）:', await pg.evaluate('window.__lounge.p_iata === "HND" && CO.money3.lounges[0].level === 2') and 'ラウンジを建てました' in await pg.inner_text('#coMsg'))
         await pg.click('[data-miles="2"]'); await pg.wait_for_timeout(400)

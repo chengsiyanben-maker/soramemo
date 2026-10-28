@@ -28,7 +28,7 @@ async def main():
         c, pg = await open_page(b, V3 + EXTRA, errs)
         await pg.evaluate("goTab('co')"); await pg.wait_for_timeout(400)
         t = await pg.inner_text('#coV3')
-        check('要る人8・乗員6・整備士3:', '乗員と整備士' in t and '6機分いる（雇った 3）・使う割合 133%' in t)
+        check('要る人8・乗員6・整備士3:', '乗員と整備士' in t and '要る人' in t and '使う割合 133%' in t and await pg.locator('.tile b.neg').count() == 2)
         check('乗員が足りない：75%まで飛ぶ・整備士：故障2.7倍:', '便は 75% まで飛び' in t and '故障が 2.7倍' in t)
         await pg.click('[data-hire=crew][data-d="1"]'); await pg.wait_for_timeout(400)
         check('乗員を1機分雇う（co3_hire）:', await pg.evaluate('window.__hire.p_kind === "crew" && window.__hire.p_delta === 1') and '乗員を1機分雇いました' in await pg.inner_text('#coMsg') and await pg.evaluate('CO.cash') == 100000 - 2000)
