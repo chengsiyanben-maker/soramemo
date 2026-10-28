@@ -439,7 +439,7 @@ small.lbl{display:block;font-size:12px;color:#5F6672;margin-bottom:6px}
 .irow{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 0;border-top:1px solid #EEF0F2}.irow:first-child{border-top:0}.irow>div:first-child{min-width:0}.irow b{font-size:14px}.irow b.neg{color:#A3531F}.irow small{display:block;font-size:11.5px;color:#5F6672;line-height:1.5}.irow.col{flex-direction:column;align-items:stretch;gap:4px}
 .irow>div:last-child:not(:first-child){white-space:nowrap}.irows{margin-top:6px}.okmark{font-size:12px;font-weight:700;color:#0F7A4A}.ckbox{margin:6px 0}.ckbox small.dim,.ride .rd small.dim{display:block;font-size:11.5px;color:#5F6672}
 .subbox{background:#F4F5F7;border-radius:14px;padding:12px;margin:8px 0;display:flex;flex-direction:column;gap:4px}.subbox .cseg{background:#E6E8EC}
-.darkcard{background:#1F2329;color:#fff;border-radius:20px;padding:18px;margin:0 0 12px}.darkcard h3{margin:4px 0 8px;font-size:20px;font-weight:900}.darkcard p{font-size:11.5px;opacity:.78;line-height:1.6;margin:8px 0 0}.dkrow b{display:block;font-size:14px}.dkrow small{font-size:12.5px;opacity:.8}
+.darkcard{background:#1F2329;color:#fff;border-radius:20px;padding:18px;margin:0 0 12px}.darkcard h3{margin:4px 0 8px;font-size:20px;font-weight:900}.darkcard p{font-size:11.5px;opacity:.78;line-height:1.6;margin:8px 0 0}.darkcard p.dksrc{font-size:10.5px;opacity:.6}.dkrow b{display:block;font-size:14px}.dkrow small{font-size:12.5px;opacity:.8}
 .dkbtns{display:flex;gap:8px;margin:8px 0}.dkbtns button{flex:1;min-height:44px;border-radius:22px;border:1px solid rgba(255,255,255,.45);background:transparent;color:#fff;font:700 14px/1.2 var(--sans)}.dkbtns button.on{background:#fff;color:#1F2329;border-color:#fff}
 .dkbtns.light button{border-color:#D9DCE1;color:#1F2329;background:#fff}.dkbtns.light button.on{background:#1F2329;color:#fff;border-color:#1F2329}.dkbtns button:disabled{opacity:.45}
 .form2{display:flex;flex-direction:column;gap:6px;margin-top:10px;padding-top:10px;border-top:1px solid #EEF0F2}.form2 label{font-size:12px;color:#5F6672}.form2 input{min-height:44px;border-radius:22px;border:1px solid #D9DCE1;padding:0 16px;font:14px var(--sans)}
@@ -5588,7 +5588,8 @@ function typhoonHtml(){
     ${W.typhoon.map(x => { const r = (CO.routes || []).find(r => r.k === x.k);
       return `<div class="dkrow"><b>${md(x.day)} ${esc(apNm(x.iata))} ・ ${esc(r ? rName(r) : x.k)}</b><small>${x.cancel === true ? "計画欠航" : x.cancel === false ? "飛ばす" : "まだ決めていない"}</small></div>
         <div class="dkbtns" role="group" aria-label="計画欠航するか">${[[true, "計画欠航する"], [false, "飛ばす"]].map(([v, l]) => `<button class="${x.cancel === v ? "on" : ""}" data-typh="${esc(x.k)}" data-v="${v ? 1 : 0}" aria-pressed="${x.cancel === v}">${l}</button>`).join("")}</div>`; }).join("")}
-    <p>計画欠航：その日の便は出さず、評判は下がりません。飛ばして台風が来ると、その日の収益は0・次の日も半分（避難の備えがあれば足止めなし）・評判 −10。それたら収益 +30%。決めなければ飛ばします。予報はゲームの運営が入れています。</p></div>`;
+    <p>計画欠航：その日の便は出さず、評判は下がりません。飛ばして台風が来ると、その日の収益は0・次の日も半分（避難の備えがあれば足止めなし）・評判 −10。それたら収益 +30%。決めなければ飛ばします。</p>
+    <p class="dksrc">${W.typhoon.every(x => x.src === "admin") ? "予報はゲームの運営が入れています。" : "出典：気象庁ホームページ（台風解析・予報情報）。予報の進路が明日その空港から300km以内を通るかを、ゲームが計算しています（加工したもの）。本当の天気や運航は、気象庁や航空会社の情報で確かめてください。"}</p></div>`;
 }
 // 天気の備え（防除氷・横風の訓練・雷・台風の避難。CAT III は機体ごと）
 function wxHtml(){
