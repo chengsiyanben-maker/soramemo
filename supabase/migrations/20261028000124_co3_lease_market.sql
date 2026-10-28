@@ -170,7 +170,7 @@ grant execute on function public.co3_market_cancel(bigint) to authenticated;
 
 create or replace function public.co3_market_buy(p_listing bigint) returns jsonb
 language plpgsql security definer set search_path = public, ops as $$
-declare uid uuid := auth.uid(); m co3_market; ac aircraft; today_start timestamptz := ((now() at time zone 'Asia/Tokyo')::date) at time zone 'Asia/Tokyo';
+declare uid uuid := auth.uid(); m co3_market; ac aircraft; today_start timestamptz := ((now() at time zone 'Asia/Tokyo')::date)::timestamp at time zone 'Asia/Tokyo';   -- 日本時間のきょうの0時（date のままだと接続の時間帯で18時になる）
 begin
   perform co_check(uid);
   perform co_settle(uid);
