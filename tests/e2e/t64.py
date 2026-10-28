@@ -42,7 +42,7 @@ async def main():
         await pg.wait_for_timeout(500)
         t = await pg.inner_text('#dShugyo'); check('路線の運航状況（今日の便・遅れ・欠航）:', '今日 4便' in t and '遅れ 1便' in t and '欠航 1便' in t)
         # この路線に乗ったら（羽田→那覇・JAL）
-        await pg.click('#dShugyo .sg-search'); await pg.wait_for_timeout(300)
+        await pg.click('#dShugyo [data-sg-go="quick"]'); await pg.wait_for_timeout(300)
         t = await pg.inner_text('#dShugyo'); check('この路線：JAL のいちばん貯まる運賃 3,352 FOP:', '3,352' in t and '984マイル' in t)
         check('スカイメイトの行がある:', 'スカイメイト' in t)
         # 会員情報（サファイア・CLUB-A・ショッピングマイル・プレミアム・JALカードで払う）
