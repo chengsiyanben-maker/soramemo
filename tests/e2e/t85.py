@@ -32,7 +32,7 @@ async def main():
         await pg.click('[data-typh="5-6"][data-v="1"]'); await pg.wait_for_timeout(400)
         check('計画欠航する（co3_typhoon_decide）:', await pg.evaluate('window.__typh.p_route === "5-6" && window.__typh.p_cancel === true') and '計画欠航にしました' in await pg.inner_text('#coMsg'))
         check('天気の備え：新千歳 防除氷1段:', '新千歳 ・ 防除氷の設備' in await pg.inner_text('#coV3') and await pg.locator('.lvb[aria-label="3段のうち1段"]').count() == 1)
-        await pg.select_option('#wxAp', 'CTS'); await pg.select_option('#wxKind', 'deice'); await pg.click('#wxBuild'); await pg.wait_for_timeout(400)
+        await pg.click('#wxOpen'); await pg.wait_for_timeout(200); await pg.click('[data-wxk=deice]'); await pg.click('[data-wxap=CTS]'); await pg.wait_for_timeout(200); await pg.click('#wxBuild'); await pg.wait_for_timeout(400)
         check('防除氷を上げる（co3_build_prep）:', await pg.evaluate('window.__prep.p_kind === "deice" && window.__prep.p_iata === "CTS" && CO.wx.prep[0].level === 2'))
         await pg.click('[data-wind=high]'); await pg.wait_for_timeout(400)
         check('横風の訓練：手厚い:', await pg.evaluate('window.__wind.p_level === "high"') and '−40%' in await pg.inner_text('#coV3'))

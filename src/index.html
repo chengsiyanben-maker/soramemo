@@ -1958,6 +1958,7 @@ nav.tabs{transition:transform .3s cubic-bezier(.2,.8,.2,1),opacity .2s}
     <div id="coFacs"></div>
     <h2>会社の価値のランキング</h2>
     <div id="coRank"></div>
+    <div id="coPartners" hidden></div>
     <p class="hint">ゲームの中のお金で、本物のお金ではありません。</p>
   </section>
 
@@ -4624,7 +4625,7 @@ function investHtml(){
   const rows = (I.list || []).map(x => `<div class="irow"><div><b>${x.role === "out" ? `${esc(x.partner)} に出資` : `${esc(x.partner)} から出資`} ${yen(+x.amount)}${x.pct != null ? `（${pc(x.pct)}）` : ""}</b><small>${x.status === "offer" ? "認め待ち" : `${x.role === "out" ? "受け取り" : "渡す"} ${fmtKm(+x.daily)}/日${x.role === "out" ? ` ・ 引き上げは ${md(x.unlock)} から` : ""}`}</small></div>
       ${x.status === "offer" && x.role === "in" ? `<div class="pills"><button class="on" data-invok="${x.id}">認める</button><button data-invno="${x.id}">断る</button></div>`
         : x.role === "out" ? `<button class="pillbtn" data-invwd="${x.id}"${x.status === "active" && Date.parse(x.unlock) > Date.now() ? " disabled" : ""}>${x.status === "offer" ? "取り消す" : "引き上げる"}</button>` : ""}</div>`).join("");
-  return `<h2>出資</h2><div class="v3box">
+  return `<h2>出資</h2><div class="v3box"><b style="font-size:14px">出資</b>
     ${tiles([["受け渡し", sgnK(I.flow), " /日"], ["受けている出資", pc(I.taken), " / 49%"]])}
     ${rows || `<p class="hint" style="margin:0 0 6px">まだ出資はありません。</p>`}
     <div class="form2"><label for="invCode">相手の合言葉</label><input id="invCode" maxlength="8" autocomplete="off" autocapitalize="characters" placeholder="例 TSUBASA1">
@@ -4733,13 +4734,15 @@ const POLICIES = {
 let POL_SEL = null, SEEN = null, SEEN_TAB = "all";
 function renderV3(){
   const box = $("coV3"); if(!box) return;
-  if(!CO || !CO.server || !CO.v3){ box.hidden = true; box.innerHTML = ""; return; }
+  const pb = $("coPartners");
+  if(!CO || !CO.server || !CO.v3){ box.hidden = true; box.innerHTML = ""; if(pb){ pb.hidden = true; pb.innerHTML = ""; } return; }
   box.hidden = false;
+  if(pb){ const ph = csHtml() + investHtml(); pb.hidden = !ph; pb.innerHTML = ph ? `<h2>ほかの会社と組む</h2>${ph.replace("<h2>共同運航</h2>", "").replace("<h2>出資</h2>", "")}` : ""; }
   const sel = POL_SEL || CO.policy, d = POLICIES[sel] || POLICIES.fsc, sp = CO.satParts || {};
   const sat = CO.sat, tgt = sp.target == null ? null : +sp.target, eff = Math.round((CO.satMult - 1) * 100);
   const step = tgt == null ? 0 : Math.max(-3, Math.min(3, (tgt - sat) * 0.1));
   const part = (k, v) => v ? `<div class="v3row"><span>${k}</span><b>${v > 0 ? "+" : "−"}${Math.abs(+v)}</b></div>` : "";
-  box.innerHTML = `${seasonHtml()}${typhoonHtml()}${morningHtml()}${troubleHtml()}${ratingHtml()}${peopleHtml()}${moneyHtml()}${csHtml()}${investHtml()}${wxHtml()}<h2>方針</h2><p class="hint">稼ぎ方が変わります。変えるとその日から新しい方針で数えます。</p>
+  box.innerHTML = `${seasonHtml()}${typhoonHtml()}${morningHtml()}${troubleHtml()}${ratingHtml()}${peopleHtml()}${moneyHtml()}${wxHtml()}<h2>方針</h2><p class="hint">稼ぎ方が変わります。変えるとその日から新しい方針で数えます。</p>
     <div class="polgrid">${Object.entries(POLICIES).map(([k, p]) => `<button class="polcard${sel === k ? " on" : ""}" data-pol="${k}" aria-pressed="${sel === k}"><b>${p.name}</b><span>${p.short}</span><em class="${CO.policy === k ? "now" : ""}">${CO.policy === k ? "今の方針" : p.where}</em></button>`).join("")}</div>
     <div class="v3box"><h3>${d.name}</h3><div class="v3stats">${d.stats.map(([k, v]) => `<div><small>${k}</small><b>${v}</b></div>`).join("")}</div>
       <ul>${d.points.map(t => `<li>${t}</li>`).join("")}</ul>
@@ -4924,10 +4927,18 @@ function wxHtml(){
   const W = CO.wx; if(!W) return "";
   const aps = [...new Map((CO.routes || []).flatMap(r => [r.a, r.b]).filter(a => a && a.iata).map(a => [a.iata, a])).values()];
   const K = [["deice", "防除氷の設備", 3, [5000, 12000, 30000], ["雪の欠航 −30%・雪の遅れは半分", "雪の欠航 −50%・雪の遅れは半分", "雪の欠航 −70%・雪の遅れは半分"]], ["thunder", "雷の作業の備え", 1, [8000], ["雷の遅れが半分"]], ["typhoon", "台風の避難の備え", 2, [20000, 60000], ["台風のあとの足止めがなくなる（小型・中型）", "台風のあとの足止めがなくなる（大型も）"]]];
+  const lvOf = (ia, k) => +((W.prep || []).find(p => p.iata === ia && p.kind === k) || {level:0}).level;
   const have = (W.prep || []).map(p => { const k = K.find(x => x[0] === p.kind); return `<div class="irow"><div><b>${esc(apNm(p.iata))} ・ ${k[1]}</b><small>${k[4][Math.min(k[4].length, p.level) - 1]}</small></div>${lvbar(+p.level, k[2])}</div>`; }).join("");
   return `<h2>天気の備え</h2><div class="v3box">
     ${have || `<p class="hint" style="margin:0 0 6px">まだありません。</p>`}
-    <div class="mkl"><select id="wxAp" aria-label="備えを入れる空港">${aps.map(a => `<option value="${esc(a.iata)}">${esc(apNm(a.iata))}</option>`).join("")}</select><select id="wxKind" aria-label="備えの種類">${K.map(k => `<option value="${k[0]}">${k[1]}</option>`).join("")}</select><button class="pillbtn" id="wxBuild"${aps.length ? "" : " disabled"}>建てる・上げる</button></div>
+    ${(() => { const P = PICK.wx; if(!P) return `<button class="bigbtn sub" id="wxOpen"${aps.length ? "" : " disabled"}>空港と備えを選んで建てる</button>`;
+      const k = K.find(x => x[0] === P.k), cur = P.ap ? lvOf(P.ap, P.k) : 0, max = cur >= k[2];
+      return `<div class="subbox"><b style="font-size:13px">備え</b>
+        <div class="pills" role="group" aria-label="備えの種類">${K.map(x => `<button class="${P.k === x[0] ? "on" : ""}" data-wxk="${x[0]}" aria-pressed="${P.k === x[0]}">${x[1]}</button>`).join("")}</div>
+        <b style="font-size:13px">空港</b>
+        <div class="pills" role="group" aria-label="備えを入れる空港">${aps.map(a => { const l = lvOf(a.iata, P.k); return `<button class="${P.ap === a.iata ? "on" : ""}" data-wxap="${esc(a.iata)}" aria-pressed="${P.ap === a.iata}"${l >= k[2] ? " disabled" : ""}>${esc(apNm(a.iata))}${l ? `（${l}段）` : ""}</button>`; }).join("")}</div>
+        ${P.ap && !max ? `<button class="bigbtn" id="wxBuild"${CO.cash >= k[3][cur] ? "" : " disabled"}>${esc(apNm(P.ap))}の${k[1]}を${cur + 1}段にする（${yen(k[3][cur])}）</button><p class="hint" style="margin:0">${k[4][cur]}</p>` : `<p class="hint" style="margin:0">空港を選んでください。</p>`}
+        <button class="linkbtn2" id="wxClose">やめる</button></div>`; })()}
     <p class="hint" style="margin:4px 0 10px">${K.map(k => `${k[1]} ${k[3].map(fmtKm).join("・")}`).join(" ／ ")}</p>
     <small class="lbl">横風・強風の訓練</small>
     ${seg([["none", "なし"], ["normal", "普通"], ["high", "手厚い"]], W.wind, "data-wind", "横風・強風の訓練")}
@@ -4935,12 +4946,14 @@ function wxHtml(){
 }
 document.addEventListener("click", async e => {
   const b = e.target.closest("#wxBuild,[data-wind],[data-cat3],[data-typh]"); if(!b || b.disabled) return; b.disabled = true; const d = b.dataset;
-  if(b.id === "wxBuild"){ const ap = $("wxAp").value, k = $("wxKind").value; if(await coRpc("co3_build_prep", {p_kind:k, p_iata:ap})) coMsg(`${apNm(ap)}に備えを入れました。`); }
+  if(b.id === "wxBuild"){ const ap = PICK.wx.ap, k = PICK.wx.k; if(await coRpc("co3_build_prep", {p_kind:k, p_iata:ap})){ PICK.wx = null; coMsg(`${apNm(ap)}に備えを入れました。`); } }
   else if(d.wind){ if(d.wind !== CO.wx.wind && await coRpc("co3_set_wind_training", {p_level:d.wind})) coMsg("横風・強風の訓練を変えました。"); }
   else if(d.cat3){ if(await coRpc("co3_set_cat3", {p_aircraft:+d.cat3})) coMsg("低い視界での運航を付けました。"); }
   else if(d.typh){ if(await coRpc("co3_typhoon_decide", {p_route:d.typh, p_cancel:d.v === "1"})) coMsg(d.v === "1" ? "計画欠航にしました。" : "飛ばすことにしました。"); }
   b.disabled = false;
 });
+// 空港を選んで建てる（ラウンジ・天気の備え）
+let PICK = {lg:null, wx:null};
 // 画面案（10/28）の部品：切り替え・数字のタイル・段の目盛り・知らせ・大きいボタン
 const seg = (items, cur, attr, label, dis) => `<div class="cseg" role="group" aria-label="${label}">${items.map(([k, l]) => `<button class="${String(cur) === String(k) ? "on" : ""}" ${attr}="${k}" aria-pressed="${String(cur) === String(k)}"${dis && dis(k) ? " disabled" : ""}>${l}</button>`).join("")}</div>`;
 const tiles = (items, n) => `<div class="tiles${n === 3 ? " t3" : ""}">${items.map(([k, v, u, cls]) => `<div class="tile"><small>${k}</small><b${cls ? ` class="${cls}"` : ""}>${v}</b>${u ? `<i>${u}</i>` : ""}</div>`).join("")}</div>`;
@@ -4967,7 +4980,11 @@ function moneyHtml(){
   return `<h2>ラウンジ・マイル・安全・借金</h2>
     <div class="v3box"><div class="satnum"><b style="font-size:14px">ラウンジ</b><small>1段 ${yen(40000)} ・ 3段まで</small></div>
       ${(M.lounges || []).length ? M.lounges.map(l => `<div class="irow"><b>${esc(apNm(l.iata))}</b>${lvbar(+l.level, 3)}</div>`).join("") : `<p class="hint" style="margin:6px 0">まだありません。</p>`}
-      <div class="mkl"><select id="lgAp" aria-label="ラウンジを建てる空港">${aps.map(a => `<option value="${esc(a.iata)}"${(lv[a.iata] || 0) >= 3 ? " disabled" : ""}>${esc(apNm(a.iata))}${lv[a.iata] ? `（${lv[a.iata]}段）` : ""}</option>`).join("")}</select><button class="pillbtn" id="lgBuild"${aps.length && CO.cash >= 40000 ? "" : " disabled"}>建てる・上げる</button></div>
+      ${PICK.lg ? `<div class="subbox"><b style="font-size:13px">建てる空港</b>
+          <div class="pills" role="group" aria-label="ラウンジを建てる空港">${aps.map(a => `<button class="${PICK.lg === a.iata ? "on" : ""}" data-lgap="${esc(a.iata)}" aria-pressed="${PICK.lg === a.iata}"${(lv[a.iata] || 0) >= 3 ? " disabled" : ""}>${esc(apNm(a.iata))}${lv[a.iata] ? `（${lv[a.iata]}段）` : ""}</button>`).join("")}</div>
+          ${PICK.lg !== true ? `<button class="bigbtn" id="lgBuild"${CO.cash >= 40000 ? "" : " disabled"}>${esc(apNm(PICK.lg))}のラウンジを${(lv[PICK.lg] || 0) + 1}段にする（${yen(40000)}）</button>` : `<p class="hint" style="margin:0">空港を選んでください。</p>`}
+          <button class="linkbtn2" id="lgClose">やめる</button></div>`
+        : `<button class="bigbtn sub" id="lgOpen"${aps.length ? "" : " disabled"}>空港を選んで建てる・上げる</button>`}
       <p class="hint" style="margin:4px 0 0">その空港の路線で仕事の客 +5%/段（LCC は半分）・満足度 +2/段（最大 +6）</p></div>
     <div class="v3box"><b style="font-size:14px">マイル制度</b>
       ${seg([[0, "なし"], [1, "1段"], [2, "2段"], [3, "3段"]], +M.miles, "data-miles", "マイル制度")}
@@ -4985,8 +5002,13 @@ function moneyHtml(){
       <p class="hint" style="margin:0">会社の価値（借金を引いたもの）の半分まで。利息は30日ごとに借金の3%${M.debt_next ? `（次は ${md(String(M.debt_next).slice(0, 10))}）` : ""}。いつでも返せます。</p></div>`;
 }
 document.addEventListener("click", async e => {
+  const pk = e.target.closest("#lgOpen,#lgClose,[data-lgap],#wxOpen,#wxClose,[data-wxap],[data-wxk]");
+  if(pk && !pk.disabled){ const d = pk.dataset;
+    if(pk.id === "lgOpen") PICK.lg = true; else if(pk.id === "lgClose") PICK.lg = null; else if(d.lgap) PICK.lg = d.lgap;
+    else if(pk.id === "wxOpen") PICK.wx = {ap:null, k:"deice"}; else if(pk.id === "wxClose") PICK.wx = null; else if(d.wxap) PICK.wx.ap = d.wxap; else if(d.wxk) PICK.wx.k = d.wxk;
+    renderV3(); return; }
   const b = e.target.closest("#lgBuild,[data-miles],[data-safety],[data-borrow]"); if(!b || b.disabled) return; b.disabled = true; const d = b.dataset;
-  if(b.id === "lgBuild"){ const ap = $("lgAp").value; if(await coRpc("co3_build_lounge", {p_iata:ap})) coMsg(`${apNm(ap)}にラウンジを建てました。`); }
+  if(b.id === "lgBuild"){ const ap = PICK.lg; if(await coRpc("co3_build_lounge", {p_iata:ap})){ PICK.lg = null; coMsg(`${apNm(ap)}にラウンジを建てました。`); } }
   else if(d.miles != null){ if(+d.miles !== +CO.money3.miles && await coRpc("co3_set_miles", {p_level:+d.miles})) coMsg(+d.miles ? `マイル制度を${d.miles}段にしました。` : "マイル制度をやめました。"); }
   else if(d.safety){ if(d.safety !== CO.money3.safety && await coRpc("co3_set_safety", {p_level:d.safety})) coMsg("安全への投資を変えました。"); }
   else if(d.borrow){ const n = +d.borrow; if(await coRpc("co3_borrow", {p_amount:n})) coMsg(n > 0 ? `${yen(n)}借りました。` : `${yen(-n)}返しました。`); }

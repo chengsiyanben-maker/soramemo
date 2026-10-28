@@ -27,7 +27,7 @@ async def main():
         b = await p.chromium.launch(); errs = []
         c, pg = await open_page(b, V3 + IV, errs)
         await pg.evaluate("goTab('co')"); await pg.wait_for_timeout(500)
-        t = await pg.inner_text('#coV3')
+        t = await pg.inner_text('#coPartners')
         check('出資：受けている申し込み・出している出資（受け取り 45/日）:', 'ひこうき雲エア から出資' in t and '認め待ち' in t and '北の大地航空 に出資' in t and '受け取り 45/日' in t)
         check('30日たつまで引き上げられない:', await pg.is_disabled('[data-invwd="29"]'))
         await pg.click('[data-invok="30"]'); await pg.wait_for_timeout(400)
