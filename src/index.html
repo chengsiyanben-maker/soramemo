@@ -2158,17 +2158,9 @@ nav.tabs{transition:transform .3s cubic-bezier(.2,.8,.2,1),opacity .2s}
 #v-ops .spspotlist button[aria-pressed="true"]{color:var(--op-ink);font-weight:900}
 #v-ops .spspotlist small{flex:none;font-size:11.5px;font-weight:500;color:var(--op-mute)}#v-ops .spspotlist button:disabled{opacity:.45}
 #v-ops .spsees{margin:7px 6px 0;font-size:11.5px;color:var(--op-mute)}
-#v-ops .sphero{margin-top:14px;background:#1F2329;color:#F2F3F5;border-radius:26px;padding:16px 18px 18px;box-shadow:0 20px 34px -20px rgba(17,24,39,.6)}
-#v-ops .sphero .top{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:11.5px;color:#9AA1AB;min-height:30px}
 .spbell{display:inline-flex;align-items:center;gap:5px;border:0;border-radius:999px;background:#2E333B;color:#F2F3F5;padding:7px 13px;font:700 12px var(--gothic)}
 .spbell svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2;stroke-linejoin:round}
 .spbell[aria-pressed="true"]{background:#F2F3F5;color:#1F2329}
-#v-ops .sphero .spheromain{display:block;width:100%;border:0;background:none;color:inherit;text-align:left;padding:0;margin-top:4px;font-family:var(--gothic)}
-#v-ops .sphero .big{display:flex;align-items:baseline}
-#v-ops .sphero .big b{font-size:56px;font-weight:900;line-height:1;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
-#v-ops .sphero .big small{font-size:15px;color:#9AA1AB;margin-left:4px}#v-ops .sphero .big em{font-style:normal;font-size:12.5px;color:#9AA1AB;margin-left:12px}
-#v-ops .sphero .fl{display:block;font-size:19px;font-weight:900;margin-top:10px}
-#v-ops .sphero .sub{display:block;font-size:12px;color:#B8BEC7;margin-top:4px}
 .spdot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:5px;vertical-align:1px}
 .spdot.live{background:currentColor}.spdot.prev{background:linear-gradient(90deg,currentColor 50%,transparent 50%);box-shadow:inset 0 0 0 1.3px currentColor}.spdot.pred{box-shadow:inset 0 0 0 1.3px currentColor}
 .spmine{margin-left:6px;color:#9A7420;font-weight:800}
@@ -2196,12 +2188,6 @@ nav.tabs{transition:transform .3s cubic-bezier(.2,.8,.2,1),opacity .2s}
 .pcard .phd{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
 .pcard .phd .v{font-size:26px;font-weight:900}.pcard .phd .st{font-size:12px;color:var(--sumi)}.pcard .phd .st b{color:var(--ink);font-variant-numeric:tabular-nums}
 .pcard .pwx{margin:2px 0 12px;font-size:12px;color:var(--sumi)}.pcard .pwx b{color:var(--ink)}
-.pcard .sphero.mini{background:#1F2329;color:#F2F3F5;border-radius:20px;padding:12px 15px 14px}
-.pcard .sphero .top{display:flex;justify-content:space-between;font-size:11px;color:#9AA1AB}
-.pcard .sphero .mrow{display:flex;justify-content:space-between;align-items:flex-end;gap:10px;margin-top:4px}
-.pcard .sphero .l{min-width:0}.pcard .sphero .fl{display:block;font-size:16px;font-weight:900}
-.pcard .sphero .sub{display:block;font-size:11.5px;color:#B8BEC7;margin-top:3px}
-.pcard .sphero .big{flex:none}.pcard .sphero .big b{font-size:36px;font-weight:900;line-height:1;font-variant-numeric:tabular-nums}.pcard .sphero .big small{font-size:12px;color:#9AA1AB;margin-left:3px}
 .pcard .ptl{list-style:none;margin:12px 0 0;padding:0}
 .pcard .ptl li{display:flex;align-items:center;gap:8px;padding:6px 2px}
 .pcard .ptl li>i{flex:none;width:7px;height:7px;border-radius:50%;background:var(--dot)}
@@ -2218,6 +2204,45 @@ nav.tabs{transition:transform .3s cubic-bezier(.2,.8,.2,1),opacity .2s}
 #v-ops .sprow .t{width:66px}#v-ops .sprow .t b{font-size:17px;font-weight:800;font-variant-numeric:tabular-nums}
 #v-ops .sprow .n b{font-size:14.5px;font-weight:800}#v-ops .sprow .n b .ty{font-weight:500}
 #v-ops .sprow .n small{margin-top:3px;font-size:11.5px}
+
+/* ---- 撮る人：フライトストリップ（10-29）。帯の色が着陸（紺）・離陸（薄い紺）を表す。区画は隙間で分け、線や中黒は使わない ---- */
+:root{--strip-arr:var(--hero);--strip-dep:#8C9AAE}
+#v-ops .spfacts span+span,.pcard .pwx span+span{margin-left:14px}
+#v-ops .spcnt span{margin-right:12px}
+.spsw{display:inline-block;width:12px;height:4px;border-radius:2px;margin-right:6px;vertical-align:3px;background:var(--strip-arr)}.spsw.dep{background:var(--strip-dep)}
+#v-ops .spsees span+span{margin-left:16px}
+#v-ops .sphero.spstrip{display:grid;grid-template-columns:10px minmax(0,1fr);background:var(--op-pill);color:var(--op-ink);padding:0;gap:0;border-radius:22px;overflow:hidden;box-shadow:var(--op-shadow)}
+.spstrip .band{grid-row:1 / span 2;background:var(--strip-arr)}.spstrip.dep .band{background:var(--strip-dep)}
+#v-ops .spstrip .spheromain{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:0 2px;margin:0;padding:0;background:var(--op-pill)}
+.spstrip .c1,.spstrip .c2{background:var(--paper);padding:14px 16px;min-width:0}
+.spstrip .c2{display:flex;flex-direction:column;align-items:flex-end;justify-content:space-between;text-align:right}
+.spstrip .lbl{display:block;font-size:11.5px;font-weight:700;color:var(--op-mute,var(--sumi))}
+.spstrip .est{margin-left:6px;font-weight:500;opacity:.8}
+.spstrip .fl{font-family:var(--sign);font-size:32px;font-weight:700;letter-spacing:.02em;line-height:1.05;margin-top:6px;display:inline-block}
+.spstrip .flr{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.spstrip .ty{font-size:14px;font-weight:600;margin-left:10px;color:var(--op-ink,var(--ink))}
+.spstrip .sub{display:flex;flex-wrap:wrap;gap:2px 12px;margin-top:6px;font-size:12px;color:var(--op-mute,var(--sumi))}
+.spstrip .big{display:flex;align-items:baseline}
+.spstrip .big b{font-family:var(--sign);font-size:64px;font-weight:700;line-height:.9;font-variant-numeric:tabular-nums}
+.spstrip .big small{font-size:14px;font-weight:700;margin-left:3px;color:var(--op-mute,var(--sumi))}
+.spstrip .at{font-size:12px;color:var(--op-mute,var(--sumi));margin-top:6px}
+#v-ops .spstrip .spbell{display:flex;align-items:center;gap:7px;border:0;border-radius:0;margin:2px 0 0;padding:12px 16px;background:var(--paper);color:var(--op-ink);font:700 12.5px var(--gothic);text-align:left}
+#v-ops .spstrip .spbell[aria-pressed="true"]{background:var(--hero);color:#fff}
+#v-ops .spfseg .spsw{margin-right:5px}
+#v-ops .sprow{padding:12px 18px 12px 14px}
+#v-ops .sprow .band{flex:none;align-self:stretch;width:4px;border-radius:2px;background:var(--strip-arr)}#v-ops .sprow.dep .band{background:var(--strip-dep)}
+#v-ops .sprow .t{width:58px}#v-ops .sprow .t b{font-family:var(--sign);font-size:21px;font-weight:700;letter-spacing:.01em}
+#v-ops .sprow .n b{font-family:var(--sign);font-size:18px;font-weight:700;letter-spacing:.02em}
+#v-ops .sprow .n b .ty{font-family:var(--gothic);font-size:13px;font-weight:600;margin-left:8px;letter-spacing:0}
+#v-ops .sprow .n small .pt+.pt{margin-left:10px}
+.pcard .sphero.spstrip.mini{display:grid;grid-template-columns:8px minmax(0,1fr) auto;gap:0 2px;padding:0;border-radius:18px;overflow:hidden;background:var(--sky);color:var(--ink)}
+.pcard .spstrip.mini .band{grid-row:auto}
+.pcard .spstrip.mini .c1,.pcard .spstrip.mini .c2{padding:11px 14px}
+.pcard .spstrip.mini .fl{font-size:24px;margin-top:3px}.pcard .spstrip.mini .ty{font-size:12.5px;margin-left:8px}
+.pcard .spstrip.mini .big b{font-size:44px}
+.pcard .ptl li>i.band{width:4px;height:24px;border-radius:2px;background:var(--strip-arr)}.pcard .ptl li.dep>i.band{background:var(--strip-dep)}
+.pcard .ptl .t{font-family:var(--sign);font-size:17px;font-weight:700;width:46px}
+.pcard .ptl .n b{font-family:var(--sign);font-size:15px;letter-spacing:.02em}.pcard .ptl .n small .pt+.pt{margin-left:8px}
 </style>
 </head>
 <body>
@@ -4413,18 +4438,20 @@ function spHomeHTML(ap, def, d){
     let name = null; try{ name = localStorage.getItem("soramemo.photoSpot." + ap); }catch(e){}
     const sp = spots.find(x => x.name === name) || spots[0] || null, li = sp && sp.li;
     const dur = t => { const m = Math.max(1, Math.round((t - now) / 60000)); return m >= 60 ? `${Math.floor(m / 60)}時間${m % 60 ? m % 60 + "分" : ""}` : `${m}分`; };
-    wx = [esc(op.label), sp && li ? `${esc(sp.name.replace(/^第(\d)ターミナル /, "第$1T "))}は${LIGHT[li.cur]}${li.cur === "back" && li.until ? ` <b>あと${dur(li.until)}</b>` : ""}` : ""].filter(Boolean).join(" ・ ");
+    wx = [esc(op.label), sp && li ? `${esc(sp.name.replace(/^第(\d)ターミナル /, "第$1T "))}は${LIGHT[li.cur]}${li.cur === "back" && li.until ? ` <b>あと${dur(li.until)}</b>` : ""}` : ""].filter(Boolean).map(t => `<span>${t}</span>`).join("");
   }else if(def){
     const sd = sunDay(now, def.center[0], def.center[1]);
     wx = sd.rise && now < sd.rise ? `日の出 <b>${spHM(sd.rise)}</b>` : sd.set && now < sd.set ? `日の入り <b>${spHM(sd.set)}</b>` : "日の入り後";
   }
   const when = x => x.dir === "arr" ? "着陸" : "離陸";
   const rare = x => x.liv ? `<span class="sprare gold">特別塗装</span>` : x.foreign ? `<span class="sprare">海外</span>` : x.intl ? `<span class="sprare">国際</span>` : "";
-  const heroHTML = hero ? `<div class="sphero mini"><div class="top"><span>${when(hero)}</span><span>${spHM(hero.t)}ごろ</span></div>
-      <div class="mrow"><span class="l"><b class="fl">${esc(hero.fl)}　${esc(hero.type || "")}</b><small class="sub">${[hero.reg && esc(hero.reg), hero.liv && `「${esc(hero.liv)}」`, esc(placeAny(hero.other)) + (hero.dir === "arr" ? "から" : "へ")].filter(Boolean).join(" ・ ")}</small>${spGateLine(hero) ? `<small class="sub">${spGateLine(hero)}</small>` : ""}</span>
-        <span class="big"><b>${Math.max(0, Math.round((hero.t - now) / 60000))}</b><small>分</small></span></div></div>`
+  const parts = a => a.filter(Boolean).map(t => `<span class="pt">${t}</span>`).join("");
+  const heroHTML = hero ? `<div class="sphero spstrip mini ${hero.dir}"><span class="band" aria-hidden="true"></span>
+      <span class="c1"><small class="lbl">${when(hero)}</small><span class="flr"><b class="fl">${esc(hero.fl)}</b><span class="ty">${esc(hero.type || "")}</span></span>
+        <small class="sub">${parts([hero.reg && esc(hero.reg), hero.liv && `「${esc(hero.liv)}」`, esc(placeAny(hero.other)) + (hero.dir === "arr" ? "から" : "へ")])}</small>${spGateLine(hero) ? `<small class="sub">${spGateLine(hero)}</small>` : ""}</span>
+      <span class="c2"><span class="big"><b>${Math.max(0, Math.round((hero.t - now) / 60000))}</b><small>分</small></span><small class="at">${spHM(hero.t)}ごろ</small></span></div>`
     : `<p class="hint" style="margin:8px 0">${d ? "この3時間に、選んだ機体は来ません。運用タブで表示する機体を変えられます。" : "いまは読み込めません。"}</p>`;
-  const rows = rest.map(x => `<li><i aria-hidden="true"></i><b class="t">${spHM(x.t)}</b><span class="k">${x.dir === "arr" ? "↓" : "↑"}<span class="vh">${when(x)}</span></span><span class="n"><b>${esc(x.fl)}</b><small>${[esc(x.type || ""), x.reg && esc(x.reg), esc(placeAny(x.other)) + (x.dir === "arr" ? "から" : "へ")].filter(Boolean).join(" ・ ")}</small></span>${rare(x)}</li>`).join("");
+  const rows = rest.map(x => `<li class="${x.dir}"><i class="band" aria-hidden="true"></i><b class="t">${spHM(x.t)}</b><span class="vh">${when(x)}</span><span class="n"><b>${esc(x.fl)}</b><small>${parts([esc(x.type || ""), x.reg && esc(x.reg), esc(placeAny(x.other)) + (x.dir === "arr" ? "から" : "へ")])}</small></span>${rare(x)}</li>`).join("");
   return `${wx ? `<p class="pwx">${wx}</p>` : ""}${heroHTML}${rows ? `<ul class="ptl">${rows}</ul>` : ""}
     <p class="pnote">表示する機体：${esc(spSelLabel(sel))}。機材は時刻表の予定、登録記号・滑走路・離陸の時刻は推定です。${ODPT_CREDIT}</p>`;
 }
@@ -8874,7 +8901,7 @@ function renderPhoto(d){
   const DIRJ = { arr:"着陸", dep:"離陸" };
   const rwShort = x => { const r = spRwsOf(x, op); return r.rws.join("/"); };
   // 撮影地：1つのピル。押すと一覧が開く。下に見える滑走路を薄い文字で
-  const seesLine = sp => { const g = d2 => [...new Set(sp.sees.filter(s => s.dir === d2).map(s => s.rw))].join("・"); return [g("arr") && `${esc(g("arr"))} 着陸`, g("dep") && `${esc(g("dep"))} 離陸`].filter(Boolean).join("　／　"); };
+  const seesLine = sp => { const g = d2 => [...new Set(sp.sees.filter(s => s.dir === d2).map(s => s.rw))].join(" "); return [g("arr") && `<span class="arr"><i class="spsw arr" aria-hidden="true"></i>${esc(g("arr"))} 着陸</span>`, g("dep") && `<span class="dep"><i class="spsw dep" aria-hidden="true"></i>${esc(g("dep"))} 離陸</span>`].filter(Boolean).join(""); };
   const spotHTML = SPOTS.length ? `<details class="spspotd"><summary class="sppill" aria-label="撮影地を選ぶ"><span>${esc(spot ? spot.name : "撮影地を選ぶ")}</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></summary>
       <div class="spspotlist" role="group" aria-label="撮影地">${SPOTS.map(s => `<button data-spspot="${esc(s.name)}" aria-pressed="${spot === s}" ${s.sees.length ? "" : "disabled"}><span>${esc(s.name)}</span><small>${s.sees.length ? `${cnt(s)}機${s.li ? `・${LIGHT[s.li.cur]}` : ""}` : "いまは見えない"}</small></button>`).join("")}</div></details>
     ${spot ? `<p class="spsees"><span class="vh">見える：</span>${seesLine(spot)}</p>` : ""}` : "";
@@ -8882,23 +8909,28 @@ function renderPhoto(d){
   const regLine = x => x.reg ? `<span class="spdot ${SP_RSRC[x.regSrc] ? x.regSrc : "pred"}" aria-hidden="true"></span>${esc(x.reg)}<span class="vh">（${SP_RSRC[x.regSrc] || "予想"}）</span>${(ps.regs || []).includes(x.reg) ? `<span class="spmine">指定</span>` : ""}` : "";
   // 珍しさの文字：特別塗装（金）・海外・国際だけ。大型は機種で分かるので出さない
   const rare = x => x.liv ? `<span class="sprare gold">特別塗装</span>` : x.foreign ? `<span class="sprare">海外</span>` : x.intl ? `<span class="sprare">国際</span>` : "";
+  // つぎに来る機体：フライトストリップ（左の帯は着陸＝紺・離陸＝薄い紺。区画で分け、中黒でつながない）
+  const parts = a => a.filter(Boolean).map(t => `<span class="pt">${t}</span>`).join("");
   const heroHTML = hero ? (() => { const m = Math.max(0, Math.round((hero.t - now) / 60000)), i = SP_ITEMS.indexOf(hero), key = spKey(hero), on = ps.flights.includes(key), rw = rwShort(hero);
-    const sub = [regLine(hero), hero.liv ? `「${esc(hero.liv)}」` : "", esc(placeAny(hero.other)) + (hero.dir === "arr" ? "から" : "へ"), hero.foreign ? "海外" : hero.intl ? "国際" : ""].filter(Boolean).join(" ・ ");
-    return `<div class="sphero"><div class="top"><span>${DIRJ[hero.dir]}${rw ? ` ・ ${esc(rw)}（推定）` : ""}</span>
-        ${SERVER && key && !(hero.foreign && hero.dir === "dep") ? `<button class="spbell" data-spnote="${esc(key)}" data-spdir="${hero.dir}" aria-pressed="${on}" aria-label="${on ? "知らせを取り消す" : `${DIRJ[hero.dir]}の${lead}分前に知らせる`}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15zM10 20a2 2 0 0 0 4 0"/></svg>${on ? "取り消す" : `${lead}分前`}</button>` : ""}</div>
-      <button class="spheromain" data-spfl="${i}" aria-label="${esc(hero.fl)}のくわしく"><span class="big"><b>${m}</b><small>分</small><em>${spHM(hero.t)}ごろ</em></span>
-        <b class="fl">${esc(hero.fl)}　${esc(hero.type || "機材不明")}</b><small class="sub">${sub}</small>${spGateLine(hero) ? `<small class="sub">${spGateLine(hero)}</small>` : ""}</button></div>`; })()
+    return `<div class="sphero spstrip ${hero.dir}"><span class="band" aria-hidden="true"></span>
+      <button class="spheromain" data-spfl="${i}" aria-label="${esc(hero.fl)}のくわしく">
+        <span class="c1"><small class="lbl">${DIRJ[hero.dir]}${rw ? `　${esc(rw)}` : ""}${rw ? `<span class="est">推定</span>` : ""}</small>
+          <span class="flr"><b class="fl">${esc(hero.fl)}</b><span class="ty">${esc(hero.type || "機材不明")}</span></span>
+          <small class="sub">${parts([regLine(hero), hero.liv && `「${esc(hero.liv)}」`, esc(placeAny(hero.other)) + (hero.dir === "arr" ? "から" : "へ"), hero.foreign ? "海外" : hero.intl ? "国際" : ""])}</small>
+          ${spGateLine(hero) ? `<small class="sub">${spGateLine(hero)}</small>` : ""}</span>
+        <span class="c2"><small class="lbl">${DIRJ[hero.dir]}まで</small><span class="big"><b>${m}</b><small>分</small></span><small class="at">${spHM(hero.t)}ごろ</small></span></button>
+      ${SERVER && key && !(hero.foreign && hero.dir === "dep") ? `<button class="spbell" data-spnote="${esc(key)}" data-spdir="${hero.dir}" aria-pressed="${on}" aria-label="${on ? "知らせを取り消す" : `${DIRJ[hero.dir]}の${lead}分前に知らせる`}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15zM10 20a2 2 0 0 0 4 0"/></svg>${on ? "取り消す" : `${lead}分前に知らせる`}</button>` : ""}</div>`; })()
     : `<p class="hint">${SP_ITEMS.length ? "この3時間に、選んだ機体は来ません。右上のボタンで表示する機体を変えられます。" : "この3時間に来る便は、まだ読み込めていません。"}</p>`;
   const F = [["all", "すべて"], ["arr", "着陸"], ["dep", "離陸"]], custom = spSelKey(sel) !== spSelKey(SP_SEL_PICK());
   const rows = list.map(x => { const i = SP_ITEMS.indexOf(x), lv = x.live, where = lv && lv.alt_ft != null ? `いま ${spFt(lv.alt_ft)}ft` : x.foreign && x.status === "ground" ? "いま地上" : x.foreign && x.alt != null ? `いま ${spFt(x.alt)}ft` : "";
     const rw = spOf(x) ? rwShort(x) : "";
-    return `<li><button class="sprow" data-spfl="${i}"><span class="t"><b>${x.t != null ? spHM(x.t) : "—"}</b><small>${x.dir === "arr" ? "↓ 着陸" : "↑ 離陸"}${x.tkActual ? "・見つけた" : ""}</small>${x.dir === "dep" && x.gate && !x.tkActual ? `<small>出発 ${spHM(x.gate)}</small>` : ""}</span>
-      <span class="n"><b>${esc(x.fl)}　<span class="ty">${esc(x.type || "")}</span></b><small>${[regLine(x), x.liv ? esc(x.liv) : "", esc(placeAny(x.other)) + (x.dir === "arr" ? "から" : "へ"), rw && esc(rw), where].filter(Boolean).join(" ・ ")}</small></span>${rare(x)}</button></li>`; }).join("");
+    return `<li><button class="sprow ${x.dir}" data-spfl="${i}"><span class="band" aria-hidden="true"></span><span class="t"><b>${x.t != null ? spHM(x.t) : "—"}</b><small>${DIRJ[x.dir]}${x.tkActual ? "　見つけた" : ""}</small>${x.dir === "dep" && x.gate && !x.tkActual ? `<small>出発 ${spHM(x.gate)}</small>` : ""}</span>
+      <span class="n"><b>${esc(x.fl)}<span class="ty">${esc(x.type || "")}</span></b><small>${parts([regLine(x), x.liv && esc(x.liv), esc(placeAny(x.other)) + (x.dir === "arr" ? "から" : "へ"), rw && esc(rw), where])}</small></span>${rare(x)}</button></li>`; }).join("");
   box.hidden = false;
-  box.innerHTML = `${facts.length ? `<button class="spfacts" data-spcond type="button">${facts.join('<i aria-hidden="true">・</i>')}</button>` : ""}${spotHTML}${heroHTML}
-    <div class="spfbar"><div class="spfseg" role="group" aria-label="着陸・離陸の絞り込み">${F.map(([k, l]) => `<button data-spfilter="${k}" aria-pressed="${SP_FILTER === k}">${l}</button>`).join("")}</div>
+  box.innerHTML = `${facts.length ? `<button class="spfacts" data-spcond type="button">${facts.map(f => `<span>${f}</span>`).join("")}</button>` : ""}${spotHTML}${heroHTML}
+    <div class="spfbar"><div class="spfseg" role="group" aria-label="着陸・離陸の絞り込み">${F.map(([k, l]) => `<button data-spfilter="${k}" aria-pressed="${SP_FILTER === k}">${k === "all" ? "" : `<i class="spsw ${k}" aria-hidden="true"></i>`}${l}</button>`).join("")}</div>
       <button class="spselbtn${custom ? " on" : ""}" data-spsel type="button" aria-label="表示する機体を選ぶ（いま：${esc(spSelLabel(sel))}）"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg></button></div>
-    <p class="spcnt">${esc(spSelLabel(sel))} ・ この3時間に <b>${shown}</b>機${hidden ? `（ほかの機体 ${hidden}機は隠しています）` : ""}</p>
+    <p class="spcnt"><span>${esc(spSelLabel(sel))}</span>この3時間に <b>${shown}</b>機${hidden ? `（ほかの機体 ${hidden}機は隠しています）` : ""}</p>
     ${rows ? `<ul class="splist2">${rows}</ul>` : `<p class="hint">${spot ? `${esc(spot.name)}から見える` : "この3時間に、"}選んだ機体はありません。右上のボタンで表示する機体を変えられます。</p>`}
     ${spot && other ? `<p class="hint spother">ほかの撮影地から見える機体 ${other}機（撮影地を変えると出ます）</p>` : ""}
     <div class="spflinks"><button data-spcond>撮影条件と天気</button><button data-trend>空港の傾向</button><button data-plane="">機体を探す</button>${atcHas(OPS_AP) ? `<button data-atcfeed>管制の交信</button><button data-atc>いま聞く周波数</button>` : ""}${SERVER ? `<button data-sppush>近づいたら知らせる</button>` : ""}</div>
