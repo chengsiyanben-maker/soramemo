@@ -36,21 +36,27 @@ async def main():
         # P3 案をくらべる
         await pg.evaluate("openShugyo('compare')"); await pg.wait_for_timeout(500)
         t = await pg.inner_text('#v-sg'); print('CMP', t[:700].replace('\n', ' | '))
-        check('くらべる：2つの案を表で（案A 8区間・案B 2区間）:', '2つの案' in t and '案A' in t and '案B' in t and '+18,944' in t and '+4,736' in t)
+        check('くらべる：2つの案を表で（案A 8区間・案B 2区間）:', '案A' in t and '案B' in t and '+18,944' in t and '+4,736' in t)
         check('くらべる：計画の印と「まだ予定ではありません」:', '計画' in t and 'まだ予定ではありません' in t)
         check('効き：実績と予定に案Aを足すと届く・案Bでは届かない:', f"に届く" in t and '年内は届かない' in t)
         r = await pg.evaluate("(() => { const Y = sgYear(), g = sgGoal('ANA', Y); return [sgReachWith(g, Y, sgDraftItems(sgDrafts('ANA')[0])).d, sgReachWith(g, Y, []).d || null]; })()")
         check('案Aを足すと、案Aの日に届く（予定だけでは届かない）:', r == [D2, None])
         check('くらべても実績・予定は変わらない:', await pg.evaluate("[sgYear().ANA.pts, sgFuture().length, sgPlanSum('ANA', sgYear()).pts]") == before)
-        await pg.locator('#v-sg .sgcmp').screenshot(path=os.path.join(WORK, 't76_compare.png'))
+        await pg.locator('#v-sg .sgdc').first.screenshot(path=os.path.join(WORK, 't76_compare.png'))
         # P4 年末までの道のり
         await pg.evaluate("sgGo('road')"); await pg.wait_for_timeout(400)
+        async def month(d):   # 道のりのカレンダーは1か月ずつ（月のピルで切り替える）
+            await pg.evaluate(f"SG_RM = {int(d[5:7]) - 1}; sgKeep(() => {{}})"); await pg.wait_for_timeout(200)
+        async def has(d, cls):
+            await month(d); return await pg.locator(f'#v-sg [data-sg-day="{d}"].{cls}').count() == 1
+        await month(D1)
         t = await pg.inner_text('#v-sg'); print('ROAD', t[-600:].replace('\n', ' | '))
-        check('道のり：実績（記録だけ）・予定・案を別々に:', 'きょうまで' in t and '記録した便だけ' in t and '予定だけなら' in t and '予定に案Aも足すと' in t and '予定に案Bも足すと' in t)
-        check('道のり：予定の日と案の日がカレンダーに:', await pg.locator(f'#v-sg [data-sg-day="{D1}"].pp').count() == 1 and await pg.locator(f'#v-sg [data-sg-day="{D2}"].pd').count() == 1 and await pg.locator(f'#v-sg [data-sg-day="{D4}"].fr').count() == 1)
+        check('道のり：実績（記録だけ）・予定・案を別々に:', '年末まで' in t and '記録した便だけ' in t and '予定だけなら' in t and '予定に案Aも足すと' in t and '予定に案Bも足すと' in t)
+        check('道のり：予定の日と案の日がカレンダーに:', await has(D1, 'pp') and await has(D2, 'pd') and await has(D4, 'fr'))
+        await month(D1); t = await pg.inner_text('#v-sg')
         check('道のり：予定の行（羽田⇄那覇 2往復 +9,472）:', '羽田⇄那覇 2往復' in t and '+9,472' in t)
         await pg.screenshot(path=os.path.join(WORK, 't76_road.png'), full_page=True)
-        d5 = J(16)
+        d5 = J(16); await month(d5)
         await pg.click(f'#v-sg [data-sg-day="{d5}"]'); await pg.wait_for_timeout(300)
         check('日付を押すと乗れる日になる:', d5 in await pg.evaluate("sgGet().days"))
         await pg.click('#v-sg [data-sg-roadfind]'); await pg.wait_for_timeout(400)

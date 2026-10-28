@@ -35,7 +35,7 @@ async def main():
         check('乗り継ぎの決まり（ANA 羽田35・伊丹25・那覇30・ほか20、JAL 羽田30・那覇30・ほか20、またぐと成田50・ほか30）:', m == [35, 25, 30, 20, 30, 30, 20, 50, 30])
         before = await pg.evaluate("[sgYear().ANA.pts, sgFuture().length]")
         # 計画を作る（修行のタブ）
-        await pg.evaluate(f"sgGet().car = 'ANA'; sgGet().pq = {{ d:'{D}', home:'HND', start:'05:30', end:'22:00', mode:'pts', fare:{{ ANA:'ANA:E_FLEX' }} }}; openShugyo('find')"); await pg.wait_for_timeout(800)
+        await pg.evaluate(f"sgGet().car = 'ANA'; sgGet().pq = {{ d:'{D}', home:'HND', start:'05:30', end:'22:00', mode:'pts', fare:{{ ANA:'ANA:E_FLEX' }} }}; SG_FOPEN = true; openShugyo('find')"); await pg.wait_for_timeout(800)
         t = await pg.inner_text('#v-sg'); print('FIND', t[:700].replace('\n', ' | '))
         check('計画を作るは時刻表から探す画面:', await pg.evaluate("SG_PAGE") == 'find' and 'この日に組める行程' in t and 'plan_timetable' in calls)
         check('いちばんたまるのは 羽田⇄那覇 2往復 +9,472:', '羽田⇄那覇 2往復' in t and '+9,472' in t and 'いちばんたまる' in t)

@@ -49,7 +49,7 @@ async def main():
         check('記録した便を開くと、その座席（クラスJ）とセイバー:', await pg.locator('#fFareSeat [data-fseat="クラスJ"][aria-pressed="true"]').count() == 1 and await pg.evaluate("$('fFare').value") == 'JAL:J_SAVER')
         await pg.evaluate("$('dFlight').close()")
         # 計画を作る：運賃の座席を変える（同じ名前の区分を引き継ぐ）
-        await pg.evaluate(f"sgGet().car = 'ANA'; sgGet().pq = {{ d:'{D}', home:'HND', start:'05:30', end:'22:00', mode:'pts', fare:{{ ANA:'ANA:E_FLEX' }} }}; openShugyo('find')"); await pg.wait_for_timeout(800)
+        await pg.evaluate(f"sgGet().car = 'ANA'; sgGet().pq = {{ d:'{D}', home:'HND', start:'05:30', end:'22:00', mode:'pts', fare:{{ ANA:'ANA:E_FLEX' }} }}; SG_FOPEN = true; openShugyo('find')"); await pg.wait_for_timeout(800)
         await pg.click('#v-sg [data-ftarget="#sgPqF"][data-fseat="プレミアムクラス"]'); await pg.wait_for_timeout(500)
         check('計画の運賃：プレミアムクラスに変えると同じ名前の区分（フレックス）:', await pg.evaluate("sgGet().pq.fare.ANA") == 'ANA:F_FLEX')
         await pg.click('#v-sg [data-ftarget="#sgPqF"][data-fseat="エコノミー"]'); await pg.wait_for_timeout(500)
