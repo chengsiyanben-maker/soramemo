@@ -10,7 +10,10 @@ iso = lambda m: (now + timedelta(minutes=m)).isoformat()
 HRS = [{'h': h, 'flights': [0,0,0,0,0,2,30,48,52,50,44,46,48,44,42,46,48,50,52,48,40,30,20,6][h], 'late': (h % 5 == 0) * 2, 'cancel': 0, 'ref': 1} for h in range(24)]
 BOARD = {'iata': 'HND', 'now': iso(0), 'hours': HRS,
   'next_arr': [{'flight': 'JL500', 'other': 'ITM', 'sched': iso(5), 't': iso(5), 'aircraft': 'B738'}, {'flight': 'NH212', 'other': 'LHR', 'sched': iso(25), 't': iso(25), 'intl': True, 'aircraft': 'B789'}],
-  'next_dep': [{'flight': 'NH106', 'other': 'LAX', 'sched': iso(15), 't': iso(15), 'intl': True, 'aircraft': 'B77W'}, {'flight': 'JL903', 'other': 'OKA', 'sched': iso(30), 'est': iso(48), 't': iso(48), 'aircraft': 'A359'}, {'flight': 'BC101', 'other': 'UKB', 'sched': iso(40), 't': iso(40), 'aircraft': 'B738'}]}
+  'next_dep': [{'flight': 'NH106', 'other': 'LAX', 'sched': iso(15), 't': iso(15), 'intl': True, 'aircraft': 'B77W', 'takeoff': iso(31), 'takeoff_src': 'calc', 'taxi': 16},
+               {'flight': 'JL903', 'other': 'OKA', 'sched': iso(30), 'est': iso(48), 't': iso(48), 'aircraft': 'A359', 'takeoff': iso(64), 'takeoff_src': 'calc', 'taxi': 16},
+               {'flight': 'BC101', 'other': 'UKB', 'sched': iso(40), 't': iso(40), 'aircraft': 'B738', 'takeoff': iso(56), 'takeoff_src': 'calc', 'taxi': 16},
+               {'flight': 'NH50', 'other': 'CTS', 'sched': iso(-15), 'actual': iso(-8), 't': iso(-8), 'aircraft': 'B772', 'takeoff': iso(8), 'takeoff_src': 'calc', 'taxi': 16}]}
 # 登録記号と決め方（サーバーの spot_regs の作り物）
 REGS = [{'flight': 'NH212', 'dir': 'arr', 'reg': 'JA830A', 'src': 'prev', 'via': 'NH211', 'share': 0.62}, {'flight': 'NH106', 'dir': 'dep', 'reg': 'JA791A', 'src': 'live', 'via': None, 'share': None}]
 fails = []
@@ -86,8 +89,17 @@ async def main():
         await pg.click('#dSpotSel [data-close]'); await pg.wait_for_timeout(200)
         await pg.click('[data-spfilter="dep"]'); await pg.wait_for_timeout(200)
         t2 = await pg.inner_text('#opsPhoto .splist2'); check('離陸だけ:', 'NH106' in t2 and 'NH212' not in t2)
+        hm = lambda m: (now + timedelta(minutes=m)).astimezone(timezone(timedelta(hours=9))).strftime('%H:%M')
+        print('DEP', t2.replace('\n', ' | '))
+        await pg.locator('#opsPhoto .sphero').scroll_into_view_if_needed(); await pg.screenshot(path=os.path.join(WORK, 't63_dep.png'), full_page=True)
+        check('離陸は離陸の時刻、下に出発の時刻:', f'{hm(31)}\n離陸\n出発 {hm(15)}' in t2)
+        check('出発してまだ離陸していない便も出る:', 'NH50' in t2 and f'出発 {hm(-8)}' in t2)
+        check('離陸の時刻の順:', t2.index('NH50') < t2.index('NH106') and [x.split('@')[0] for x in await pg.evaluate("SP_ITEMS.filter(x => x.dir === 'dep').map(x => x.fl + '@')")] == ['NH50', 'NH106', 'BC101', 'JL903'])
         await pg.locator('#opsPhoto .sprow').first.click(); await pg.wait_for_timeout(300)
         check('機体のくわしく:', await pg.evaluate("$('dSpotFl').open") and '離陸' in await pg.inner_text('#dSpotFl'))
+        tdd = await pg.inner_text('#dSpotFl'); print('DEPDETAIL', tdd[:300].replace('\n', ' | '))
+        check('くわしく：離陸の時刻と地上走行:', '地上走行' in tdd and '約16分' in tdd and '出発（搭乗口）' in tdd and '（実際）' in tdd)
+        check('くわしく：離陸の便も知らせられる:', '離陸の5分前に知らせる' in tdd)
         td = await pg.inner_text('#dSpotFl'); check('管制の場面（離陸する機体はグランドから）:', 'いまの管制の場面' in td and '東京グランド' in td and '121.70' in td)
         await pg.screenshot(path=os.path.join(WORK, 't63_detail.png'))
         await pg.click('#dSpotFl [data-atc]'); await pg.wait_for_timeout(200)
@@ -111,17 +123,17 @@ async def main():
         await pg.evaluate("window.pushOK = () => true; syncPush = async (a, f, s, spot) => { window.__spot = spot; localStorage.setItem('soramemo.pushSpot', JSON.stringify(spot)); return true; }")
         await pg.click('#opsPhoto [data-sppush]'); await pg.wait_for_timeout(300)
         check('知らせの設定:', await pg.evaluate("$('dSpotPush').open"))
-        await pg.click('[data-spkind="special"]'); await pg.click('[data-spkind="reg"]'); await pg.wait_for_timeout(100)
+        await pg.click('[data-spkind="special"]'); await pg.click('[data-spkind="reg"]'); await pg.click('[data-spkind="dep"]'); await pg.wait_for_timeout(100)
         await pg.fill('#spRegs', 'ja01xj, bad JA873A'); await pg.click('[data-splead="10"]'); await pg.wait_for_timeout(100)
         await pg.click('[data-spsave]'); await pg.wait_for_timeout(300)
         sp = await pg.evaluate('window.__spot'); print('SPOT', sp)
-        check('保存した中身:', sp and sp['iata'] == 'HND' and sp['kinds'] == ['special', 'reg'] and sp['regs'] == ['JA01XJ', 'JA873A'] and sp['lead'] == 10)
+        check('保存した中身（離陸も知らせる）:', sp and sp['iata'] == 'HND' and sp['kinds'] == ['special', 'reg', 'dep'] and sp['regs'] == ['JA01XJ', 'JA873A'] and sp['lead'] == 10)
         await pg.click('#opsPhoto [data-spsel]'); await pg.wait_for_timeout(200); await pg.click('#dSpotSel [data-sppre="pick"]'); await pg.wait_for_timeout(200); await pg.click('#dSpotSel [data-close]')
         await pg.click('[data-spfilter="all"]'); await pg.wait_for_timeout(200)
         n = pg.locator('#opsPhoto .spnote'); check('10分前に知らせるボタン:', '10分前' in await n.inner_text())
         await n.click(); await pg.wait_for_timeout(300)
         sp = await pg.evaluate('window.__spot'); print('SPOT2', sp)
-        check('便を知らせに足す:', len(sp['flights']) == 1 and sp['kinds'] == ['special', 'reg'])
+        check('便を知らせに足す:', len(sp['flights']) == 1 and sp['kinds'] == ['special', 'reg', 'dep'])
         check('取り消しに変わる:', '取り消す' in await pg.locator('#opsPhoto .spnote').inner_text())
         await pg.click('[data-sppush]'); await pg.wait_for_timeout(200); await pg.click('[data-spoff]'); await pg.wait_for_timeout(300)
         check('すべてやめる:', (await pg.evaluate('window.__spot'))['iata'] is None)
@@ -129,7 +141,7 @@ async def main():
         await pg.click('#opsPhoto [data-spsel]'); await pg.wait_for_timeout(200)
         await pg.click('#dSpotSel [data-spselnotify]'); await pg.wait_for_timeout(400)
         sp = await pg.evaluate('window.__spot'); print('SPOT3', sp)
-        check('選び方で知らせる（機種と特別塗装機と海外）:', sp and sp['iata'] == 'HND' and sp['sel'] and '787' in sp['fams'] and '737' not in sp['fams'] and sp['kinds'] == ['special', 'foreign'])
+        check('選び方で知らせる（機種と特別塗装機と海外）:', sp and sp['iata'] == 'HND' and sp['sel'] and '787' in sp['fams'] and '737' not in sp['fams'] and sorted(sp['kinds']) == ['foreign', 'special'])
         await pg.click('#dSpotSel [data-spfam="737"]'); await pg.wait_for_timeout(1200)
         check('選び方を変えると知らせも合わせる:', '737' in (await pg.evaluate('window.__spot'))['fams'])
         await pg.click('#dSpotSel [data-spselnotify]'); await pg.wait_for_timeout(400)

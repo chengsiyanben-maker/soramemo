@@ -1743,6 +1743,8 @@ dialog.psheet .btn1,dialog.psheet .btn2{display:block;width:100%;margin-top:10px
 .spreg .rs.pred{background:transparent;color:#545B66;box-shadow:inset 0 0 0 1px #C9CED6}.spreg .rs.mine{background:#F6EBD3;color:#7A5A12}
 #v-ops .sphero .spreg b{font-size:14px;color:#fff}#v-ops .sphero .spreg .rs.pred{color:#E5E5E5;box-shadow:inset 0 0 0 1px #5A5A5A}
 #v-ops .sprow .noreg{margin-top:2px}
+#v-ops .sprow .t{width:62px}#v-ops .sprow .t small{white-space:nowrap}#v-ops .sprow .t .tk{display:block;font-style:normal;font-size:10px;font-weight:700;color:#1F5C35}
+#v-ops .sphero .spgate{display:block;font-size:11.5px;color:#C9C9C9;margin-top:8px}
 .spdreg{margin:4px 0 2px}.spdreg .spreg b{font-size:18px}
 .spcs{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
 .spc{border:1px solid #D6D6D6;background:var(--s-card);color:var(--s-ink);border-radius:999px;padding:7px 12px;font:700 12.5px var(--gothic)}
@@ -7555,7 +7557,7 @@ function spSelHTML(){
 function openSpSel(){ track("spot", "sel"); $("dSpotSelBody").innerHTML = spSelHTML(); if(!$("dSpotSel").open) $("dSpotSel").showModal(); }
 // 選び方で知らせる：機種のまとまり・1機ずつ選んだ塗装機・特別塗装機すべて・海外（便ごと・登録記号・運用の知らせはそのまま）
 function spSelToSpot(s, base){
-  const keep = (base.iata === OPS_AP ? base.kinds : base.kinds.filter(k => k === "reg")).filter(k => k === "reg" || k === "ops");
+  const keep = (base.iata === OPS_AP ? base.kinds : base.kinds.filter(k => k === "reg")).filter(k => k === "reg" || k === "ops" || k === "dep");
   return { ...base, iata:OPS_AP, flights:base.iata === OPS_AP ? base.flights : [], kinds:[...keep, ...(s.sp ? ["special"] : []), ...(s.foreign ? ["foreign"] : [])],
     fams:s.fams.filter(f => SP_FAM_NAME[f]), livs:s.sp ? [] : s.livs.slice(0, 30), sel:true };
 }
@@ -7592,6 +7594,12 @@ document.addEventListener("click", async e => {
   }
 });
 
+// 便の知らせの鍵（便名@日付）。離陸の便は定刻の日付（運航日）、着陸の便は着く日
+const spKey = x => x.t == null ? "" : `${x.fl}@${spJstDate(x.dir === "dep" && x.sched ? x.sched : x.t)}`;
+const SP_GATE = { actual:"実際", est:"見込み", sched:"定刻" };
+// 出発の時刻と地上走行（離陸の便）
+const spGateLine = x => x.dir === "dep" && x.gate && !x.tkActual ? `出発 ${spHM(x.gate)}（${SP_GATE[x.gateSrc]}）${x.taxi != null ? `＋地上走行 約${x.taxi}分` : ""}` : "";
+
 // これから来る機体の一覧（JAL・ANA の便＋海外の航空会社の便）
 function spItems(d){
   const now = Date.now(), tOf = f => Date.parse(f.actual || f.est || f.inferred || f.predicted || f.sched);
@@ -7599,11 +7607,16 @@ function spItems(d){
   const spBy = new Map(); for(const x of SPECIAL.values()){ const f = spFl(x.callsign); if(f && x.kind !== "alliance") spBy.set(f, x); }
   const out = [];
   for(const [list, dir] of [[d.next_arr || [], "arr"], [d.next_dep || [], "dep"]]) for(const f of list){
-    const t = tOf(f); if(!(t >= now - 2 * 60000) || (f.actual && t < now)) continue;
+    // 離陸：サーバーの離陸の時刻（離陸を見つけた時刻、なければ出発＋地上走行）。古いサーバーの返事なら出発の時刻のまま
+    const tko = dir === "dep" && f.takeoff ? Date.parse(f.takeoff) : null, tkActual = tko != null && f.takeoff_src === "actual";
+    const t = tko != null ? tko : tOf(f);
+    if(tko != null ? t < now - 2 * 60000 : (!(t >= now - 2 * 60000) || (f.actual && t < now))) continue;
+    const gate = tko != null ? Date.parse(f.actual || f.est || f.sched) : null, gateSrc = f.actual ? "actual" : f.est ? "est" : "sched";
     const fl = spNorm(f.flight), sp = spBy.get(fl), liv = (sp && sp.name) || plans.get(fl) || null, type = String(f.aircraft || "").trim();
     const live = spLive(fl), rg = sp && sp.reg ? { reg:sp.reg, src:"live" } : live && live.reg ? { reg:live.reg, src:"live" } : SP_REGS.get(`${fl}|${dir}`) || null;
     out.push({ fl, dir, t, sched:Date.parse(f.sched), est:!!(f.est || f.inferred || f.predicted), other:f.other, type, reg:rg ? rg.reg : null, regSrc:rg ? rg.src : null, regVia:rg ? rg.via : null, regShare:rg ? rg.share : null, liv,
-      intl:!!f.intl, kind:liv ? "special" : f.intl ? "intl" : SP_WIDE.test(type) ? "big" : "", live });
+      intl:!!f.intl, kind:liv ? "special" : f.intl ? "intl" : SP_WIDE.test(type) ? "big" : "", live,
+      gate, gateSrc, taxi:tko != null && f.taxi != null ? Number(f.taxi) : null, tkActual });
   }
   const fg = FOREIGN_AP === OPS_AP && FOREIGN ? FOREIGN.planes || [] : [];
   for(const p of fg){
@@ -7745,17 +7758,18 @@ function renderPhoto(d){
     <div class="spspots2" role="group" aria-label="撮影地">${SPOTS.map(s => `<button data-spspot="${esc(s.name)}" aria-pressed="${spot === s}" ${s.sees.length ? "" : "disabled"}><span><b>${esc(s.name.replace(/ターミナル 展望デッキ$/, "展望デッキ"))}</b><b class="n">${s.sees.length ? cnt(s) : "—"}</b></span><small class="${s.li ? s.li.cur : ""}">${s.sees.length ? (s.li ? LIGHT[s.li.cur] : "") : "いまは見えない"}</small></button>`).join("")}</div>
     ${spot ? `<div class="spsel"><div class="h"><span><small>いま選んでいる撮影地</small><b>${esc(spot.name)}</b></span>${spot.li ? `<span class="pill ${spot.li.cur}">${LIGHT[spot.li.cur]}</span>` : ""}</div>
       <div class="sees">${spot.sees.map(s => `<span class="${s.dir}">見える：${esc(s.rw)} ${DIRJ[s.dir]}</span>`).join("")}</div></div>` : ""}` : "";
-  const heroHTML = hero ? (() => { const m = Math.max(0, Math.round((hero.t - now) / 60000)), i = SP_ITEMS.indexOf(hero), key = `${hero.fl}@${spJstDate(hero.t)}`, on = ps.flights.includes(key);
+  const heroHTML = hero ? (() => { const m = Math.max(0, Math.round((hero.t - now) / 60000)), i = SP_ITEMS.indexOf(hero), key = spKey(hero), on = ps.flights.includes(key);
     return `<div class="sphero"><button class="spheromain" data-spfl="${i}" aria-label="${esc(hero.fl)}のくわしく">
       <span class="h"><span>${hero.kind ? "つぎに来る注目の機体" : "つぎに来る機体"}</span><span>${hero.dir === "arr" ? "着陸まで" : "離陸まで"}</span></span>
       <span class="m"><span class="l"><b>${esc(hero.fl)}　${esc(hero.type || "機材不明")}</b>${hero.reg ? spRegHTML(hero.reg, hero.regSrc) : ""}<small>${[hero.liv && `特別塗装「${esc(hero.liv)}」`, esc(placeAny(hero.other)) + (hero.dir === "arr" ? "から" : "へ")].filter(Boolean).join("・")}</small></span>
         <span class="r"><b>${m}<small>分</small></b><small>${spHM(hero.t)}ごろ</small></span></span>
       <span class="tags">${tag(hero.kind)}${rwOf(hero) ? `<i>${esc(rwOf(hero))}${hero.dir === "arr" ? "に着陸" : "から離陸"}（推定${spRwsOf(hero, op).side ? (hero.dir === "arr" ? "・来た方面から" : "・行き先の方面から") : spRwsOf(hero, op).learn ? "・学習から" : ""}）</i>` : ""}</span></button>
-      ${hero.dir === "arr" && SERVER ? `<button class="spnote" data-spnote="${esc(key)}" aria-pressed="${on}">${on ? "知らせを取り消す" : `${lead}分前に知らせる`}</button>` : ""}</div>`; })()
+      ${spGateLine(hero) ? `<small class="spgate">${spGateLine(hero)}</small>` : ""}
+      ${SERVER && key && !(hero.foreign && hero.dir === "dep") ? `<button class="spnote" data-spnote="${esc(key)}" data-spdir="${hero.dir}" aria-pressed="${on}">${on ? "知らせを取り消す" : `${lead}分前に知らせる`}</button>` : ""}</div>`; })()
     : `<p class="hint">${SP_ITEMS.length ? "この3時間に、選んだ機体は来ません。「選ぶ」で表示する機体を変えられます。" : "この3時間に来る便は、まだ読み込めていません。"}</p>`;
   const F = [["all", "すべて"], ["arr", "着陸"], ["dep", "離陸"]];
   const rows = list.map(x => { const i = SP_ITEMS.indexOf(x), lv = x.live, where = lv && lv.alt_ft != null ? `いま高度 ${spFt(lv.alt_ft)}ft` : x.foreign && x.status === "ground" ? "いま地上" : x.foreign && x.alt != null ? `いま高度 ${spFt(x.alt)}ft` : "";
-    return `<li><button class="sprow" data-spfl="${i}"><span class="t"><b>${x.t != null ? spHM(x.t) : "—"}</b><small>${x.dir === "arr" ? "着陸" : "離陸"}</small></span>
+    return `<li><button class="sprow" data-spfl="${i}"><span class="t"><b>${x.t != null ? spHM(x.t) : "—"}</b><small>${x.dir === "arr" ? "着陸" : "離陸"}${x.tkActual ? `<i class="tk">見つけた</i>` : ""}</small>${x.dir === "dep" && x.gate && !x.tkActual ? `<small>出発 ${spHM(x.gate)}</small>` : ""}</span>
       <span class="n"><b>${esc(x.fl)}　${esc(x.type || "")}</b>${x.reg ? spRegHTML(x.reg, x.regSrc) : `<small class="noreg">機体は分かっていません</small>`}<small>${[esc(placeAny(x.other)) + (x.dir === "arr" ? "から" : "へ"), spOf(x) && `${esc(spRwsOf(x, op).rws.join("/"))}${spRwsOf(x, op).side ? (x.dir === "arr" ? "（来た方面から）" : "（行き先の方面から）") : spRwsOf(x, op).learn ? "（学習から）" : ""}・${kmS(spOf(x).km)}`, where].filter(Boolean).join("・")}</small></span>${tag(x.kind)}<span class="go" aria-hidden="true">›</span></button></li>`; }).join("");
   box.hidden = false;
   box.innerHTML = `${chips ? `<div class="spchips">${chips}</div>` : ""}${spotHTML}${heroHTML}
@@ -7775,7 +7789,7 @@ document.addEventListener("click", e => { const b = e.target.closest("[data-spsp
 function spDetailHTML(x){
   const now = Date.now(), cur = OPS_CUR, op = cur && cur.op, lv = x.live || spLive(x.fl);
   const late = x.sched && x.t ? Math.round((x.t - x.sched) / 60000) : 0;
-  const ps = pushSpot(), key = x.t ? `${x.fl}@${spJstDate(x.t)}` : "", on = key && ps.flights.includes(key);
+  const ps = pushSpot(), key = spKey(x), on = key && ps.flights.includes(key);
   const rwi = spRwsOf(x, op), rw = rwi.rws.join(x.dir === "arr" && !rwi.side ? " か " : "・");
   let where = "";
   if(lv){ const k = spKm(lv); where = `${lv.alt_ft != null ? `高度 ${spFt(lv.alt_ft)}ft・` : ""}空港まで約${Math.round(k)}km${lv.kt ? `・${lv.kt}ノット` : ""}`; }
@@ -7787,13 +7801,15 @@ function spDetailHTML(x){
     <div class="spdh"><div><small>${esc(placeAny(x.other))}${x.dir === "arr" ? "から・" + esc(opsDef().name) + "に着陸" : "へ・" + esc(opsDef().name) + "から離陸"}</small><h3>${esc(x.fl)}</h3></div>${kd ? `<em style="background:${kd[1]}">${kd[0]}</em>` : ""}</div>
     <div class="spcard soft"><small>機体</small>${x.reg ? `<div class="spdreg">${spRegHTML(x.reg, x.regSrc)}</div>` : ""}<b>${x.type ? esc(x.type) : x.reg ? "" : "機体は分かっていません"}</b>
       ${x.liv ? `<span>特別塗装「${esc(x.liv)}」</span>` : ""}${x.reg ? `<small>${spRegWhy(x)}</small>` : ""}<small>${x.foreign ? `${esc(FOREIGN_JA[x.airline] || x.airline || "")}の便。機種は機体の位置のデータから` : "機種は時刻表の予定"}</small></div>
-    <div class="spgrid"><div class="spcard"><small>${x.dir === "arr" ? "着陸" : "離陸"}</small><b>${x.t ? spHM(x.t) + "ごろ" : "—"}</b><small>${x.sched ? `定刻 ${spHM(x.sched)}${late >= 5 ? `・${late}分遅れ` : ""}` : "推定"}${x.est ? "・見込み" : ""}</small></div>
+    ${x.dir === "dep" && x.gate ? `<div class="spgrid"><div class="spcard"><small>離陸</small><b>${spHM(x.t)}${x.tkActual ? "" : "ごろ"}</b><small>${x.tkActual ? "機体の位置で見つけた離陸" : `出発 ${spHM(x.gate)}（${SP_GATE[x.gateSrc]}）`}</small></div>
+      <div class="spcard"><small>地上走行</small><b>${x.taxi != null ? `約${x.taxi}分` : "—"}</b><small>出発から離陸まで。空港ごとの目安を、毎晩、記録から決め直します</small></div></div>` : ""}
+    <div class="spgrid">${x.dir === "dep" && x.gate ? `<div class="spcard"><small>出発（搭乗口）</small><b>${spHM(x.gate)}</b><small>${x.sched ? `定刻 ${spHM(x.sched)}${Math.round((x.gate - x.sched) / 60000) >= 5 ? `・${Math.round((x.gate - x.sched) / 60000)}分遅れ` : ""}` : ""}</small></div>` : `<div class="spcard"><small>${x.dir === "arr" ? "着陸" : "離陸"}</small><b>${x.t ? spHM(x.t) + "ごろ" : "—"}</b><small>${x.sched ? `定刻 ${spHM(x.sched)}${late >= 5 ? `・${late}分遅れ` : ""}` : "推定"}${x.est ? "・見込み" : ""}</small></div>`}
       <div class="spcard"><small>滑走路</small><b>${rw ? esc(rw) : "—"}</b><small>${rw ? (rwi.side ? (x.dir === "arr" ? "運用と来た方面からの推定" : "運用と行き先の方面からの推定") : rwi.learn ? `この30日の記録で${x.dir === "arr" ? "着陸" : "離陸"}の${rwi.learn}%がこの滑走路` : "いまの運用からの推定") : "向きが分かりません"}</small></div></div>
     ${where ? `<div class="spcard"><small>いまどこ</small><b class="m">${esc(where)}</b>${lv || x.km ? `<span class="bar"><i style="width:${Math.max(4, Math.min(100, 100 - (lv ? spKm(lv) : x.km) / 2))}%"></i></span>` : ""}</div>` : ""}
     ${(() => { const r = x.reg || (lv && lv.reg); return r ? `<div class="spcard"><small>この機体の運用（推定）</small><b>${esc(r)}</b><button class="linkbtn2" data-sp-pred="${esc(r)}" aria-expanded="false" type="button">この先の便を見る</button><button class="linkbtn2" data-plane="${esc(r)}" type="button">この機体の1日</button><div data-sp-pred-out="${esc(r)}" hidden></div></div>` : ""; })()}
     ${atcSceneHTML(x)}
     ${spots ? `<div class="spcard"><small>どこから撮る</small><ul class="spwhere">${spots}</ul></div>` : ""}
-    ${x.dir === "arr" && SERVER && key ? `<button class="spnote big" data-spnote="${esc(key)}" aria-pressed="${on}">${on ? "知らせを取り消す" : `着陸の${ps.lead || 5}分前に知らせる`}</button>` : ""}
+    ${SERVER && key && !(x.foreign && x.dir === "dep") ? `<button class="spnote big" data-spnote="${esc(key)}" data-spdir="${x.dir}" aria-pressed="${on}">${on ? "知らせを取り消す" : `${x.dir === "arr" ? "着陸" : "離陸"}の${ps.lead || 5}分前に知らせる`}</button>` : ""}
     <p class="fwnote">${x.foreign ? "時刻表がない便のため、時刻・機種は機体の位置（adsb.lol）と経路のデータ（adsb.im）からの推定です。" : `時刻は JAL・ANA の時刻表と運航情報。${ODPT_CREDIT}`}滑走路と順光・逆光は推定です。</p>`;
 }
 document.addEventListener("click", e => { const b = e.target.closest("[data-spfl]"); if(!b) return; const x = SP_ITEMS[+b.dataset.spfl]; if(!x) return;
@@ -8155,7 +8171,7 @@ document.addEventListener("change", e => { if(e.target && (e.target.id === "atcA
 $("dAtcJoin").addEventListener("close", () => { ATC_JOIN.token = null; if(ATC_RX.on) atcRxStop(); });
 
 // ---- 近づいたら知らせる（設定） ----
-const SP_KINDS = [["special", "特別塗装機", "JAL・ANA などの特別塗装機（推定）"], ["big", "大きな機体", "B777・B787・A350 など"], ["foreign", "海外の航空会社", "いま近くにいる便（推定）"], ["reg", "指定した機体", "登録記号で選ぶ（例 JA01XJ）"], ["ops", "運用が変わったとき", "北風 ⇄ 南風など"]];
+const SP_KINDS = [["special", "特別塗装機", "JAL・ANA などの特別塗装機（推定）"], ["big", "大きな機体", "B777・B787・A350 など"], ["foreign", "海外の航空会社", "いま近くにいる便（推定）"], ["reg", "指定した機体", "登録記号で選ぶ（例 JA01XJ）"], ["ops", "運用が変わったとき", "北風 ⇄ 南風など"], ["dep", "離陸も知らせる", "選んだ機体が離陸する数分前にも（出発の時刻と地上走行からの推定）"]];
 let SP_DRAFT = null;
 function spSetHTML(){
   const s = SP_DRAFT, name = opsDef().name, saved = pushSpot();
@@ -8166,7 +8182,7 @@ function spSetHTML(){
     <div class="spcard"><small>いつ知らせる</small><div class="spseg">${[3, 5, 10].map(n => `<button data-splead="${n}" aria-pressed="${s.lead === n}">${n}分前</button>`).join("")}</div>
       <small style="margin-top:12px">どの空港で</small><div class="spseg"><button aria-pressed="true">${esc(name)}</button></div>
       ${saved.iata && saved.iata !== OPS_AP && spotActive(saved) ? `<p class="hint">いまは${esc((OPS_AIRPORTS[saved.iata] || {}).name || saved.iata)}で知らせています。保存すると${esc(name)}に変わります（知らせる空港は1つだけです）。</p>` : ""}
-      <p class="hint">着陸に向かう機体が、この空港に「知らせる時間」まで近づいたら知らせます。時間は機体の位置と速さからの推定で、早まったり遅れたりします。同じ機体は1日1回までです。</p></div>
+      <p class="hint">着陸に向かう機体が、この空港に「知らせる時間」まで近づいたら知らせます。「離陸も知らせる」を入れると、離陸する数分前にも知らせます（出発の時刻と、空港ごとの地上走行の時間からの推定）。時間は機体の位置と速さからの推定で、早まったり遅れたりします。同じ機体は1日1回までです。</p></div>
     ${s.sel && ((s.fams || []).length || (s.livs || []).length) ? `<p class="hint">いまは「表示する機体」と同じ選び方（機種・特別塗装機）でも知らせています。やめるときは「表示する機体」の「選ぶ」から切り替えます。</p>` : ""}
     ${s.flights.length ? `<div class="spcard"><small>知らせる便</small><ul class="spfls">${s.flights.map(k => `<li><b>${esc(k.split("@")[0])}</b><small>${esc(k.split("@")[1])}</small><button class="linkbtn2" data-spunflight="${esc(k)}">やめる</button></li>`).join("")}</ul></div>` : ""}
     <p class="msg" id="spPushMsg" role="status" aria-live="polite"></p>
@@ -8197,8 +8213,8 @@ document.addEventListener("click", async e => {
     const key = n.dataset.spnote, s = pushSpot(), base = s.iata === OPS_AP ? s : { ...s, iata:OPS_AP, flights:[] }, on = base.flights.includes(key);
     const next = { ...base, flights:on ? base.flights.filter(x => x !== key) : [...base.flights, key].slice(-10) };
     n.disabled = true;
-    if(await saveSpot(next, on ? `${key.split("@")[0]} の知らせを取り消しました。` : `${key.split("@")[0]} が着陸の${next.lead || 5}分前になったら知らせます（推定）。${s.iata && s.iata !== OPS_AP && spotActive(s) ? `知らせる空港を${opsDef().name}に変えました。` : ""}`)){
-      if($("dSpotFl").open){ const x = SP_ITEMS.find(y => key === `${y.fl}@${spJstDate(y.t || 0)}`); if(x) $("dSpotFlBody").innerHTML = spDetailHTML(x); }
+    if(await saveSpot(next, on ? `${key.split("@")[0]} の知らせを取り消しました。` : `${key.split("@")[0]} が${n.dataset.spdir === "dep" ? "離陸" : "着陸"}の${next.lead || 5}分前になったら知らせます（推定）。${s.iata && s.iata !== OPS_AP && spotActive(s) ? `知らせる空港を${opsDef().name}に変えました。` : ""}`)){
+      if($("dSpotFl").open){ const x = SP_ITEMS.find(y => key === spKey(y)); if(x) $("dSpotFlBody").innerHTML = spDetailHTML(x); }
       if(BOARD) renderPhoto(BOARD); }
     n.disabled = false;
   }
