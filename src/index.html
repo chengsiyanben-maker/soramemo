@@ -1678,6 +1678,17 @@ details.dev summary{cursor:pointer;color:var(--sumi);font-size:14px;padding:6px 
 .pcard .pnx .src{font-size:10.5px;color:var(--sumi);margin:8px 0 0;line-height:1.6}
 .pcard .pl li>b.g{flex:none;font-size:13px}
 .pcard .pb{display:flex;gap:8px}
+.pcard .phome .pwx{margin:2px 0 8px;font-size:12px;font-weight:700;color:var(--sumi)}
+.pcard .phero{background:var(--sky);border-radius:16px;padding:10px 12px}
+.pcard .phero .h{display:flex;justify-content:space-between;font-size:11px;color:var(--sumi)}
+.pcard .phero .m{display:flex;justify-content:space-between;align-items:flex-end;gap:10px;margin-top:4px}
+.pcard .phero .l{min-width:0}.pcard .phero .l>b{display:block;font-size:16px;font-weight:900}
+.pcard .phero .l>small{display:block;font-size:11.5px;color:var(--sumi);margin-top:2px}
+.pcard .phero .r{flex:none;text-align:right}.pcard .phero .r b{display:block;font-size:28px;font-weight:900;line-height:1}
+.pcard .phero .r b small{font-size:12px}.pcard .phero .r>small{font-size:11px;color:var(--sumi)}
+.pcard .phome li b.t{width:44px;flex:none;font-size:14px}.pcard .phome li b.t small{display:block;font-size:10.5px;font-weight:500;color:var(--sumi)}
+.pcard .phome li span small{display:block;font-size:11px;color:var(--sumi);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pcard .phome li em{flex:none;font-style:normal;border-radius:7px;padding:3px 7px;font-size:10.5px;font-weight:800;color:#fff}
 .pcard .pb button{flex:1;min-height:44px;border-radius:14px;border:1px solid var(--line);background:var(--paper);color:var(--ink);font:700 13px var(--gothic)}
 dialog.psheet{margin:auto auto 0;width:100%;max-width:560px;border:0;border-radius:28px 28px 0 0;padding:0}
 dialog.psheet .dlg{padding:18px 20px calc(24px + env(safe-area-inset-bottom,0px))}
@@ -4186,7 +4197,6 @@ function loDragEnd(){
 }
 document.addEventListener("pointerup", loDragEnd); document.addEventListener("pointercancel", loDragEnd);
 // ホームのいちばん上のカード（撮影・修行のとき）
-const isBig = a => /^(B?7[4678]|A3[3-8])/i.test(String(a || "").trim());
 async function renderPersonaCard(){
   const box = $("personaCard"); if(!box) return;
   if(PERSONA === "casual" || MODE !== "rally"){ box.hidden = true; box.innerHTML = ""; return; }
@@ -4198,14 +4208,42 @@ async function renderPersonaCard(){
   const since = mine.length ? mine[0].t : null;
   const head = `<div class="ph"><div class="l"><span>いつもの空港</span><span>${since ? `今日は ${hm(since)} から・${Math.floor((now - since) / 36e5)}時間${Math.round((now - since) / 6e4) % 60}分` : "今日はまだチェックインしていません"}</span></div>
       <div class="v">${esc(def ? def.name : ap)}</div><div class="s"><span>運用時間 ${def ? opsHours(def) : ""}${def ? (opsOpen(def) ? "・いまは運用中" : "・いまは時間外") : ""}</span></div></div>`;
-  const pb = `<div class="pb"><button data-pgo="ops">運用を見る</button></div>`;
-  box.hidden = false; box.innerHTML = head + `<div class="pl"><h4>これから来る大きな機体</h4><p class="hint" style="margin:4px 0">読み込んでいます…</p></div>` + pb;
+  const pb = `<div class="pb"><button data-pgo="ops">運用を見る</button><button data-spsel type="button">選ぶ</button></div>`;
+  box.hidden = false; box.innerHTML = head + `<div class="pl"><p class="hint" style="margin:4px 0">読み込んでいます…</p></div>` + pb;
   const d = SERVER ? await Promise.resolve().then(() => apSummary(ap)).catch(() => null) : null; if(PERSONA !== "spot") return;
   if(SERVER) await spLoadRegs(ap).catch(() => false);
-  const rg = f => SP_REGS_AP === ap ? SP_REGS.get(`${spNorm(f.flight)}|${f.dir}`) : null;
-  const all = d ? [...(d.next_arr || []).map(f => ({ ...f, dir:"arr" })), ...(d.next_dep || []).map(f => ({ ...f, dir:"dep" }))].filter(f => Date.parse(f.t) >= now - 5 * 6e4 && isBig(f.aircraft)).sort((x, y) => Date.parse(x.t) - Date.parse(y.t)).slice(0, 4) : [];
-  box.innerHTML = head + `<div class="pl"><h4>これから来る大きな機体（JAL・ANA）</h4>${all.length ? `<ul>${all.map(f => `<li><b class="t">${hm(f.t)}</b><span><b>${esc(f.flight)}　${esc(f.aircraft)}</b>${rg(f) ? spRegHTML(rg(f).reg, rg(f).src) : ""}<small>${esc(placeAny(f.other))}${f.dir === "arr" ? "から・着陸" : "へ・離陸"}</small></span><em>${f.intl ? "国際" : "大型"}</em></li>`).join("")}</ul>`
-      : `<p class="hint" style="margin:4px 0">${d ? "この3時間はありません。" : "いまは読み込めません。"}</p>`}<p class="hint" style="margin:6px 0 0;font-size:10.5px">機材は時刻表の予定。${ODPT_CREDIT}</p></div>` + pb;
+  if(PERSONA !== "spot") return;
+  box.innerHTML = head + spHomeHTML(ap, def, d) + pb;
+}
+// ホームの撮影カードの中身：運用タブと同じ「表示する機体」の選び方で、つぎに来る1機を大きく・そのあと3機。いまの運用といつもの撮影地の光を1行
+function spHomeHTML(ap, def, d){
+  const now = Date.now(), sel = spSel(ap);
+  const items = d && ap === OPS_AP ? spItems(d) : [];
+  if(items.length && !SP_ITEMS.length) SP_ITEMS = items;   // 「選ぶ」のシートの数に使う（運用タブを開くまで）
+  const list = items.filter(x => x.t != null && x.t >= now - 60000 && spMatch(x, sel)), hero = list[0] || null, rest = list.slice(1, 4);
+  // いまの運用と光（運用タブで運用が分かっているとき）。分からなければ日の出・日の入り
+  let wx = "";
+  const cur = OPS_CUR && OPS_CUR.def && OPS_CUR.def.iata === ap ? OPS_CUR : null, op = cur && cur.op;
+  if(op && op.arr.length + op.dep.length){
+    const spots = spSees(cur.def, op, cur.rw).filter(x => x.sees.length);
+    let name = null; try{ name = localStorage.getItem("soramemo.photoSpot." + ap); }catch(e){}
+    const sp = spots.find(x => x.name === name) || spots[0] || null, li = sp && sp.li;
+    const dur = t => { const m = Math.max(1, Math.round((t - now) / 60000)); return m >= 60 ? `${Math.floor(m / 60)}時間${m % 60 ? m % 60 + "分" : ""}` : `${m}分`; };
+    wx = [esc(op.label), sp && li ? `${esc(sp.name)}は${LIGHT[li.cur]}${li.cur === "back" && li.until ? ` あと${dur(li.until)}` : ""}` : ""].filter(Boolean).join("・");
+  }else if(def){
+    const sd = sunDay(now, def.center[0], def.center[1]);
+    wx = sd.rise && now < sd.rise ? `日の出 ${spHM(sd.rise)}` : sd.set && now < sd.set ? `日の入り ${spHM(sd.set)}` : "日の入り後";
+  }
+  const tag = k => k && SP_KIND[k] ? `<em style="background:${SP_KIND[k][1]}">${SP_KIND[k][0]}</em>` : "";
+  const when = x => x.dir === "arr" ? "着陸" : "離陸";
+  const heroHTML = hero ? `<div class="phero"><div class="h"><span>つぎに来る機体</span><span>${when(hero)}まで</span></div>
+      <div class="m"><span class="l"><b>${esc(hero.fl)}　${esc(hero.type || "")}</b>${hero.reg ? spRegHTML(hero.reg, hero.regSrc) : ""}<small>${[hero.liv && `特別塗装「${esc(hero.liv)}」`, esc(placeAny(hero.other)) + (hero.dir === "arr" ? "から" : "へ")].filter(Boolean).join("・")}</small>${spGateLine(hero) ? `<small>${spGateLine(hero)}</small>` : ""}</span>
+        <span class="r"><b>${Math.max(0, Math.round((hero.t - now) / 60000))}<small>分</small></b><small>${spHM(hero.t)}ごろ</small></span></div></div>`
+    : `<p class="hint" style="margin:6px 0">${d ? "この3時間に、選んだ機体は来ません。「選ぶ」で表示する機体を変えられます。" : "いまは読み込めません。"}</p>`;
+  const rows = rest.map(x => `<li><b class="t">${spHM(x.t)}<small>${when(x)}</small></b><span><b>${esc(x.fl)}　${esc(x.type || "")}</b><small>${[x.reg && esc(x.reg), x.liv && esc(x.liv), esc(placeAny(x.other)) + (x.dir === "arr" ? "から" : "へ"), x.dir === "dep" && x.gate && !x.tkActual && `出発 ${spHM(x.gate)}`].filter(Boolean).join("・")}</small></span>${tag(x.kind)}</li>`).join("");
+  return `<div class="pl phome">${wx ? `<p class="pwx">${wx}</p>` : ""}${heroHTML}${rows ? `<ul>${rows}</ul>` : ""}
+    <p class="hint" style="margin:8px 0 0">表示する機体：${esc(spSelLabel(sel))}</p>
+    <p class="hint" style="margin:4px 0 0;font-size:10.5px">機材は時刻表の予定。登録記号・滑走路・離陸の時刻は推定です。${ODPT_CREDIT}</p></div>`;
 }
 
 // 修行のホームのカード：ポイントの進み・予定の便を乗るといくつ、次に乗る便（あと何日・この便で何ポイント・運航の状況）、その日の行程
@@ -7569,6 +7607,7 @@ function spSelSync(s){
 }
 function spSelApply(s){
   spSelSave(s); $("dSpotSelBody").innerHTML = spSelHTML(); if(BOARD) renderPhoto(BOARD);
+  if(PERSONA === "spot") renderPersonaCard();
   if(s.notify && pushSpot().sel) spSelSync(s);
 }
 document.addEventListener("click", async e => {
