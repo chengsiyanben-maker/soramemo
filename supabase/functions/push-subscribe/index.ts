@@ -4,7 +4,7 @@
 //        → 申し込み（同じ endpoint は上書き）。flights は「この便に乗る」で選んだ便（5便まで）
 //        sp_airports:["HND", ...] を付けると、その空港に特別塗装機が着陸に向かってきたときも知らせる
 //        sp_regs:["JA339J", ...] を付けると、その特別塗装機が新しい便で飛び始めたときに知らせる（どの空港でも。20機まで）
-//        spot:{ iata:"HND", kinds:["special","big","foreign","reg","ops"], lead:5, regs:["JA01XJ"], flights:["JL123@2026-10-21"] } を付けると、
+//        spot:{ iata:"HND", kinds:["special","big","foreign","reg","ops","dep"], lead:5, regs:["JA01XJ"], flights:["JL123@2026-10-21"] } を付けると、
 //        撮影の知らせ（その空港に、選んだ種類の機体が着陸の lead 分前になったら。運用が変わったときも）。spot:null で撮影の知らせをやめる
 //        ga:{ airports:["HND","NRT"], kinds:["plane","cluster","wind","cloud","ts"], quiet:true, gap:3 } を付けると、ゴーアラウンドの知らせ（推定）
 //   POST /functions/v1/push-subscribe  { endpoint, remove:true }                              → 取り消し
@@ -20,7 +20,7 @@ const res = (o: unknown, status = 200) => new Response(JSON.stringify(o), { stat
 const PUSH_HOSTS = /^https:\/\/([a-z0-9-]+\.)*(fcm\.googleapis\.com|push\.services\.mozilla\.com|notify\.windows\.com|push\.apple\.com|web\.push\.apple\.com)\//;
 
 // 撮影の知らせの設定を、決まった形だけに絞る
-const KINDS = new Set(["special", "big", "foreign", "reg", "ops"]);
+const KINDS = new Set(["special", "big", "foreign", "reg", "ops", "dep"]);
 function spotOf(v: unknown) {
   const o = (v && typeof v === "object" ? v : {}) as Record<string, unknown>;
   const arr = (x: unknown, re: RegExp, max: number) => Array.isArray(x) ? [...new Set(x.filter((y) => typeof y === "string" && re.test(y)))].slice(0, max) as string[] : [];

@@ -14,7 +14,7 @@ import { type ArrWatch, arrStep } from "../_shared/rwy_learn.ts";
 import { liveryMap } from "../_shared/liveries.ts";
 import { notifyRegFly as notifyRegFlyWith, wantsRegFly } from "../_shared/livery_push.ts";
 import { normCallsign } from "../_shared/flight_watch.ts";
-import { dueNow, etaMin, jstDate, opsChanged, spotMessage, spotReason, type SpotPlane, type SpotSub } from "../_shared/spot_push.ts";
+import { depEtaMin, dueNow, etaMin, jstDate, opsChanged, spotDepMessage, spotDepReason, spotMessage, spotReason, type SpotDep, type SpotPlane, type SpotSub } from "../_shared/spot_push.ts";
 import webpush from "npm:web-push@3.6.7";
 
 const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, { auth: { persistSession: false } });
@@ -239,6 +239,28 @@ async function notifySpot(bodies: Map<string, string>) {
   }
   return sent;
 }
+// 離陸の知らせ：「離陸も知らせる」を選んだ人と、離陸する便を選んだ人に、離陸の数分前（出発の時刻＋地上走行からの推定）。同じ便は1日1回
+async function notifySpotDep() {
+  const pub = Deno.env.get("VAPID_PUBLIC_KEY"), priv = Deno.env.get("VAPID_PRIVATE_KEY");
+  if (!pub || !priv) return 0;
+  const { data: subs } = await admin.from("push_subs").select(SPOT_COLS).not("spot_iata", "is", null);
+  const want = ((subs ?? []) as (SpotSub & { endpoint: string; p256dh: string; auth: string })[])
+    .filter((s) => (s.spot_kinds ?? []).includes("dep") || (s.spot_flights ?? []).length > 0);
+  if (!want.length) return 0;
+  const { data: deps, error } = await admin.rpc("spot_departures", { p_iatas: [...new Set(want.map((s) => s.spot_iata!))] });
+  if (error || !Array.isArray(deps) || !deps.length) return 0;
+  webpush.setVapidDetails(Deno.env.get("VAPID_SUBJECT") || "https://soramemo.jp", pub, priv);
+  let sent = 0;
+  for (const s of want) for (const f of deps as SpotDep[]) {
+    const r = spotDepReason(f, s); if (!r) continue;
+    const eta = depEtaMin(f); if (!dueNow(eta, s.spot_lead)) continue;
+    if (!(await firstTime(s.id, `${f.flight}@dep@${f.svc_date}`))) continue;
+    // deno-lint-ignore no-explicit-any
+    const name = (OPS_AIRPORTS as any)[f.dep]?.name ?? f.dep, m = spotDepMessage(f, r, name, eta);
+    if (await sendOne(s, { ...m, tag: `spotdep-${f.flight}`, url: `./#ops-${f.dep}` })) sent++;
+  }
+  return sent;
+}
 // 運用が変わったら、「運用が変わったとき」を選んでいる人に知らせる（ops_log の新しい4回から。同じ変化は1時間に1回）
 async function notifyOpsChange(iatas: string[]) {
   const pub = Deno.env.get("VAPID_PUBLIC_KEY"), priv = Deno.env.get("VAPID_PRIVATE_KEY");
@@ -410,6 +432,7 @@ Deno.serve(async (req) => {
     // 撮影の知らせ（着陸の数分前）と、運用の変化の知らせ（運用を記録したあと）
     let spot = 0;
     try { spot = await notifySpot(bodies); } catch (e) { console.error("spot push", e); }
+    try { spot += await notifySpotDep(); } catch (e) { console.error("spot dep push", e); }
     if (logged) { try { spot += await notifyOpsChange([...bodies.keys()]); } catch (e) { console.error("ops push", e); } }
     // 知らせた記録は2日で消す（30分に1回）
     if (new Date().getUTCMinutes() % 30 === 0 && first) { try { await admin.from("spot_notified").delete().lt("notified_at", new Date(Date.now() - 2 * 864e5).toISOString()); } catch { /* 次の回に */ } }

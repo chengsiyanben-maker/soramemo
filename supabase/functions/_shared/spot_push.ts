@@ -3,7 +3,7 @@
 //   機体は airport-traffic の空港ごとの機体（着陸・離陸の見分け付き）。着陸までの時間は、空港までの距離と対地速度からの推定
 import { callsignsFor, flightOfCallsign, foreignFlightOf, normCallsign } from "./flight_watch.ts";
 
-export type SpotKind = "special" | "big" | "foreign" | "reg" | "ops";
+export type SpotKind = "special" | "big" | "foreign" | "reg" | "ops" | "dep";
 export type SpotSub = { id: number; spot_iata: string | null; spot_kinds: string[]; spot_lead: number; spot_regs: string[]; spot_flights: string[];
   spot_fams?: string[] | null; spot_livs?: string[] | null };
 export type SpotPlane = { callsign: string | null; reg: string | null; type: string | null; phase: string; dist_km: number; kt: number | null; alt_ft: number | null };
@@ -24,6 +24,7 @@ export const famOf = (type: string | null | undefined): string | null => {
   const f = FAMS.find(([, , re]) => re.test(t)); return f ? f[0] : "other";
 };
 export const FAM_KEYS = [...FAMS.map(([k]) => k), "other"];
+export const BIG_FAMS = ["777", "787", "767", "747", "A350", "A330", "A380"];
 
 // 着陸までの分（推定）：まっすぐの距離より少し長く飛ぶ（1.15倍）として、いまの対地速度で割る。速度が分からなければ180ノット
 export function etaMin(p: Pick<SpotPlane, "dist_km" | "kt">): number {
@@ -69,4 +70,27 @@ export function opsChanged(rows: { obs_mode: string | null; obs_mixed?: boolean 
   const m = rows.slice(0, 4).map((r) => r.obs_mixed ? null : r.obs_mode);
   if (m.length < 4 || m.some((x) => !x)) return null;
   return m[0] === m[1] && m[2] === m[3] && m[0] !== m[2] ? { from: m[2]!, to: m[0]! } : null;
+}
+
+// ---- 離陸の知らせ（「離陸も知らせる」dep を選んだ人と、離陸する便を選んだ人）----
+//   便はサーバーの spot_departures（時刻表の便。離陸の時刻＝出発の時刻＋空港の地上走行の分。まだ離陸していないもの）
+export type SpotDep = { flight: string; dep: string; arr: string; svc_date: string; aircraft: string | null; reg: string | null; livery: string | null; gate_actual: boolean; takeoff: string };
+export function spotDepReason(f: SpotDep, sub: SpotSub): { why: "flight" | "reg" | "special" | "big" | "fam"; label: string } | null {
+  if (f.dep !== sub.spot_iata) return null;
+  if (sub.spot_flights.includes(`${f.flight}@${f.svc_date}`)) return { why: "flight", label: "知らせを選んだ便" };
+  const k = new Set(sub.spot_kinds); if (!k.has("dep")) return null;
+  if (f.reg && k.has("reg") && sub.spot_regs.includes(f.reg)) return { why: "reg", label: `指定した機体 ${f.reg}` };
+  if (f.livery && (k.has("special") || (sub.spot_livs ?? []).includes(f.livery))) return { why: "special", label: `特別塗装機「${f.livery}」` };
+  const fam = famOf(f.aircraft);
+  // 時刻表の機種は「789」「77W」のようにも書くので、大きな機体はまとまりで見る
+  if (fam && BIG_FAMS.includes(fam) && k.has("big")) return { why: "big", label: "大きな機体" };
+  if (fam && (sub.spot_fams ?? []).includes(fam)) { const x = FAMS.find(([key]) => key === fam); return { why: "fam", label: x ? x[1] : "選んだ機種" }; }
+  return null;
+}
+// 離陸までの分（推定）
+export const depEtaMin = (f: Pick<SpotDep, "takeoff">, now = Date.now()) => (Date.parse(f.takeoff) - now) / 60_000;
+export function spotDepMessage(f: SpotDep, reason: { label: string }, apName: string, eta: number): { title: string; body: string } {
+  const min = Math.max(1, Math.round(eta)), type = f.aircraft ? `（${f.aircraft}${f.reg ? "・" + f.reg : ""}）` : f.reg ? `（${f.reg}）` : "";
+  return { title: `そらメモ：${f.flight} があと約${min}分で離陸`,
+    body: `${reason.label}の ${f.flight}${type}が、${apName}からあと約${min}分で離陸しそうです（${f.gate_actual ? "出発した時刻" : "出発の見込み"}と地上走行の時間からの推定）。` };
 }
