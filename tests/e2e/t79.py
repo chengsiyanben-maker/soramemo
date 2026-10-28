@@ -2,7 +2,7 @@ import os, sys
 HERE=os.path.dirname(os.path.abspath(__file__)); WEB=os.path.abspath(os.path.join(HERE,'..','..','web')); WORK=os.environ.get('SORAMEMO_TEST_WORK','/tmp/soramemo-e2e'); os.makedirs(WORK, exist_ok=True)
 # 「気軽に」はいちばん軽い構成：タブはホーム・図鑑・フライト、図鑑はタイル・フライトは搭乗券だけ（見方の列は出さない）、
 # フライトの年ごと・記録帳と、ホームの地図の凡例は隠す（出典は残す）。＋で記録帳に来たら一覧へ戻れる。成績・運用はマイページから。
-# 撮影・修行の構成は今までどおり
+# 撮影・修行の構成は今までどおり（ホームの地図の凡例だけは、航路を描かなくなったのでどの構成でも出さない）
 import asyncio, threading, http.server, socketserver, functools
 from playwright.async_api import async_playwright
 fails = []
@@ -42,7 +42,7 @@ async def main():
                 more = await pg.evaluate("[...document.querySelectorAll('#personaMore [data-persona-open]')].map(b => b.dataset.personaOpen)")
                 check(f'気軽に：成績と運用はマイページから開ける（{more}）:', 'stats' in more and 'ops' in more)
             else:
-                check(f'{per}：地図の凡例は今までどおり:', leg and cred)
+                check(f'{per}：ホームの地図は航路を描かないので凡例はなく、出典は残す:', not leg and cred)
                 check(f'{per}：フライトの年ごと・記録帳は今までどおり:', seg)
                 if per == 'shugyo': check('修行：フライトの見方の列は今までどおり:', lrow)
             await c.close()
