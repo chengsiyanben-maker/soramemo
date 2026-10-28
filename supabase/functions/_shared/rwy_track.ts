@@ -105,14 +105,34 @@ export function samplesOf(callsign: string, pts: Pt[], aps: Record<string, Ap>, 
 
 // 空の道すじ用：1つの機体の航跡のうち、空港から80km 以内の部分（出発・到着した空港ごとに1本）
 export type TrackRow = { iata: string; day: string; callsign: string; at: string; dep_here: 0 | 1; pts: string };
-export function tracksOf(callsign: string, pts: Pt[], aps: Record<string, Ap>): TrackRow[] {
+// 空港の近くの判定：最初（出発）・最後（到着）の点が空港から22km 以内。
+// 地上の近くで電波が届きにくい空港（成田など）では、離陸した機体が最初に見えるのが22km より先になることがあるので、
+// 45km 以内でも「6,000ft 以下で、上りながら空港から離れていく（到着は、下りながら近づいてくる）」ときは数える。いちばん近い空港のときだけ
+const TRK_NEAR = 22, TRK_LOOSE = 45, TRK_LOW = 60;
+function nearestAp(p: Pt, aps: Record<string, Ap>): string | null {
+  let best: string | null = null, bd = Infinity;
+  for (const [iata, ap] of Object.entries(aps)) { const d = km(ap.center, ll(p)); if (d < bd) { bd = d; best = iata; } }
+  return best;
+}
+// win：読んだ時間の幅（秒）。幅の端から20分以内に始まる・終わる航跡は、まだ途中かもしれないので入れない
+//   （3時間ごとに、前後が重なる幅で読むので、途中で切れた航跡は次か前の回にまるごと入る）
+export const TRK_EDGE = 20 * 60;
+export function tracksOf(callsign: string, pts: Pt[], aps: Record<string, Ap>, win?: { from: number; to: number }): TrackRow[] {
   if (!/^[A-Z]{3}\d{1,4}[A-Z]?$/.test(callsign)) return [];
   const out: TrackRow[] = [];
   for (const tr of splitTracks(pts)) {
     if (tr.length < 3) continue;
-    const first = tr[0], last = tr[tr.length - 1];
+    if (win && (tr[0][0] < win.from + TRK_EDGE || tr[tr.length - 1][0] > win.to - TRK_EDGE)) continue;
+    const first = tr[0], last = tr[tr.length - 1], first3 = tr[Math.min(tr.length - 1, 3)], last3 = tr[Math.max(0, tr.length - 4)];
+    let nf: string | null | undefined, nl: string | null | undefined;
     for (const [iata, ap] of Object.entries(aps)) {
-      const arr = km(ap.center, ll(last)) <= 22, dep = !arr && km(ap.center, ll(first)) <= 22;
+      const dl = km(ap.center, ll(last)), df = km(ap.center, ll(first));
+      // 高さの変わり方（百フィート）。離陸してから空港の上へ戻ってくる出発（成田の西行きなど）は、最後の点も空港の近くになるので、
+      // 全体で2,000ft より上っていれば到着にしない。下っていれば出発にしない
+      const climb = (last[3] ?? 0) - (first[3] ?? 0);
+      const arrGeo = dl <= TRK_NEAR || (dl <= TRK_LOOSE && last[3] <= TRK_LOW && last3[3] > last[3] && km(ap.center, ll(last3)) > dl && (nl ??= nearestAp(last, aps)) === iata);
+      const arr = arrGeo && climb <= 20;
+      const dep = !arr && climb >= -20 && (df <= TRK_NEAR || (df <= TRK_LOOSE && first[3] <= TRK_LOW && first3[3] > first[3] && km(ap.center, ll(first3)) > df && (nf ??= nearestAp(first, aps)) === iata));
       if (!arr && !dep) continue;
       const near = tr.filter((p) => km(ap.center, ll(p)) <= 80); if (near.length < 2) continue;
       const t = arr ? last[0] : first[0];

@@ -12,7 +12,7 @@ async def main():
           const fs=[{id:'a1',from:id('HND'),to:id('CTS'),dep:T('2026-06-01T08:00:00+09:00'),arr:T('2026-06-01T09:35:00+09:00'),km:km(BY[id('HND')],BY[id('CTS')]),airline:'JL',no:'JL501',fare:null,seat:null},
                     {id:'a2',from:id('HND'),to:id('OKA'),dep:T('2026-07-01T08:00:00+09:00'),arr:T('2026-07-01T11:00:00+09:00'),km:km(BY[id('HND')],BY[id('OKA')]),airline:'NH',no:'NH995',fare:'ANA:E_STD',seat:'12A'},
                     {id:'a3',from:id('HND'),to:id('FUK'),dep:T('2026-03-01T08:00:00+09:00'),arr:T('2026-03-01T10:00:00+09:00'),km:km(BY[id('HND')],BY[id('FUK')]),airline:'NH',no:'NH241',fare:null,seat:null}];
-          localStorage.setItem('soramemo.v1', JSON.stringify(packS({checkins:[], flights:fs, manual:[{from:id('ITM'),to:id('CTS'),d:'2026-02-02',airline:'JL',fare:'JAL:Y_FLEX'}], demoClock:null}))); }""")
+          localStorage.setItem('soramemo.layout', JSON.stringify({tabs:['home','book','log','ops','stats'], off:{home:[],book:[],log:[],ops:[],stats:['sgsum']}})); localStorage.setItem('soramemo.v1', JSON.stringify(packS({checkins:[], flights:fs, manual:[{from:id('ITM'),to:id('CTS'),d:'2026-02-02',airline:'JL',fare:'JAL:Y_FLEX'}], demoClock:null}))); }""")
         await pg.wait_for_timeout(300); await pg.reload(); await pg.wait_for_load_state('load'); await pg.wait_for_timeout(500)
         print('読み込み:', await pg.evaluate("JSON.stringify([S.flights.map(f=>[f.no,f.fare,f.seat]), S.manual.map(m=>[m.airline,m.fare])])"))
         r = await pg.evaluate("""() => { const s = statusSummary(2026), rows = statusRows().map(r => { const f = fareOf(r, r.t); return [BY[r.from].iata+'-'+BY[r.to].iata, Math.round(kmToMile(r.km)), f && f.table, f && f.id, f && f.rate, f && f.bonus]; }); return {s, rows}; }""")
@@ -23,7 +23,8 @@ async def main():
         # フライトの画面で運賃を選ぶ
         await pg.click('#flights .flight.tap >> nth=2'); await pg.wait_for_timeout(200)
         print('運賃の選択肢:', await pg.locator('#fFare option').count(), '| 選択中:', await pg.evaluate("$('fFare').value"), '| 座席:', await pg.inner_text('#fSeat'))
-        await pg.select_option('#fFare', 'JAL:Y_FLEX'); await pg.click('#fSave'); await pg.wait_for_timeout(200)
+        await pg.click('#dFlight [data-flv="JAL:Y_FLEX"]');   # 運賃は座席と区分に分けて、区分を札で選ぶ
+        await pg.click('#fSave'); await pg.wait_for_timeout(200)
         print('選んだ後:', await pg.evaluate("JSON.stringify(statusSummary(2026).jal)"))
         await pg.screenshot(path=os.path.join(WORK,'status.png'), full_page=False)
         print(errs); await b.close()

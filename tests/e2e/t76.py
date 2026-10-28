@@ -1,58 +1,66 @@
 import os, sys
 HERE=os.path.dirname(os.path.abspath(__file__)); WEB=os.path.abspath(os.path.join(HERE,'..','..','web')); WORK=os.environ.get('SORAMEMO_TEST_WORK','/tmp/soramemo-e2e'); os.makedirs(WORK, exist_ok=True)
-# エアライン経営 v3 の自分で組むスケジュール：便を足す・ずらす・折り返しの色・最後は最初の空港へ・保存・おまかせに戻す
-import asyncio
+# 案をくらべる（P3）・年末までの道のり（P4）：案は計画として別に出し、実績・予定とまぜない。案を足したときの届く日。案を予定に入れる。乗れる日
+import asyncio, json
+from datetime import datetime, timedelta, timezone
 from playwright.async_api import async_playwright
+J = lambda n: (datetime.now(timezone.utc) + timedelta(hours=9) + timedelta(days=n)).strftime('%Y-%m-%d')
+D1, D2, D3, D4 = J(7), J(10), J(12), J(14)
 fails = []
 def check(label, ok):
     print(label, ok)
     if not ok: fails.append(label)
-INIT = "localStorage.setItem('soramemo.onboarded','1'); localStorage.setItem('soramemo.install.later','1'); Object.defineProperty(window, 'SORAMEMO_CONFIG', { configurable:true, get(){ return this.__cfg; }, set(v){ this.__cfg = Object.assign({}, v, { gameReleased: true }); } });"
-V3 = """window.__co = {name:'そらメモ航空', cash:100000, last:new Date().toISOString(), roles:{}, daily:300, gross:300, upkeep:0, bonus:0,
-  routes:[{k:'5-6', a:'HND', b:'CTS', km:820, base:344, level:1, cost:10320, mult:.5, hub:1, sky:1, min_size:4.5, sa:6, sb:4.5, ac_id:1, intl:false}],
-  fleet:[{id:1, type:'lg', reg:'JA01XJ', icao:'A359', kind:'pax', route:'5-6', paid:40000, age:1, value:40000, sell:12000, upkeep:80, bought_at:new Date().toISOString()}],
-  sky:{}, total_km:820, rep_points:0, stars:1, facilities:{}, bought:1, value:100000, friend_code:'ABCD1234', hide_rank:false, friends:0,
-  v3:true, rating:5, rating_have:{routes:40, intl:5, fleet:35, stars:5, days:99}, policy:'fsc', premium:20, satisfaction:41.2, sat_mult:0.97, sat_parts:{base:50, meal:-8, bag:0, target:37}, meal:'none', bag:'free', home:null, home_since:null, plans:{}, legs:{'5-6':[{n:1,t:390,ta:490,f:'HND',to:'CTS',seats:369,biz:300,lei:30},{n:2,t:570,ta:670,f:'CTS',to:'HND',seats:369,biz:120,lei:160},{n:3,t:750,ta:850,f:'HND',to:'CTS',seats:369,biz:60,lei:140}]}, fares:{'5-6':{level:0, set_on:null, others:[-1, 0]}},
-  econ:[{k:'5-6', kind:'big', real:52.4, demand:18500, n:3, own:1200, flights:12, seats:3888, carried:3110, revenue:2300, cost:1420, landing:84, congestion:35, profit:761, p_seats:466, p_pax:420, e_pax:2690}]};"""
-async def open_page(b, extra, errs):
-    c = await b.new_context(viewport={'width':400,'height':860}); await c.add_init_script(INIT + extra)
-    await c.route('https://cdn.jsdelivr.net/npm/@supabase/**', lambda r: r.fulfill(path=os.path.join(HERE,'fake_sb.js'), content_type='application/javascript'))
-    pg = await c.new_page(); pg.on('pageerror', lambda e: errs.append(str(e)))
-    await pg.goto('file://'+os.path.join(WORK,'index_server_test.html')); await pg.wait_for_load_state('load'); await pg.wait_for_function('typeof render === "function"'); await pg.wait_for_timeout(600)
-    await pg.evaluate('__fake.login()'); await pg.wait_for_timeout(800)
-    return c, pg
 async def main():
     async with async_playwright() as p:
-        b = await p.chromium.launch(); errs = []
-        c, pg = await open_page(b, V3 + "window.__co.rating = 2; window.__co.home = 5;", errs)
-        await pg.evaluate("goTab('fleet')"); await pg.wait_for_timeout(400)
-        check('機体にスケジュールを組むボタン:', await pg.locator('[data-sched="1"]').count() == 1)
-        await pg.click('[data-sched="1"]'); await pg.wait_for_timeout(300)
-        t = await pg.inner_text('#coFleet'); print('S', t.replace('\n', ' | ')[:300])
-        check('スケジュールの画面：まだ便がない:', 'JA01XJ のスケジュール' in t and 'まだ便がありません' in t)
-        await pg.click('#schedAdd'); await pg.wait_for_timeout(200)
-        t = await pg.inner_text('#coFleet')
-        check('便を足す：本拠地（羽田）から出る便・7:00発:', '羽田）から出る便（07:00発）' in t or ('から出る便（07:00発）' in t and '新千歳' in t))
-        await pg.click('[data-sadd="CTS"]'); await pg.wait_for_timeout(200)
-        t = await pg.inner_text('#coFleet')
-        check('1便目：07:00 羽田→新千歳・到着は 距離÷820＋20分:', '07:00' in t and '08:20着' in t and '最初の便が出る' in t)
-        await pg.click('#schedAdd'); await pg.wait_for_timeout(200); await pg.click('[data-sadd="HND"]'); await pg.wait_for_timeout(200)
-        t = await pg.inner_text('#coFleet')
-        check('2便目：折り返し最短（大型は60分）で 09:20 発・ぎりぎりの色:', '09:20' in t and '最短ぎりぎり' in t and await pg.locator('.schip.red').count() == 1)
-        await pg.click('[data-sshift="1"][data-d="10"]'); await pg.click('[data-sshift="1"][data-d="10"]'); await pg.wait_for_timeout(200)
-        t = await pg.inner_text('#coFleet')
-        check('2便目を20分ずらす：余裕 +20分（緑）:', '09:40' in t and '余裕 +20分' in t and await pg.locator('.schip.grn').count() == 1)
-        await pg.screenshot(path=os.path.join(WORK, 't76_sched.png'), full_page=True)
-        await pg.click('#schedSave'); await pg.wait_for_timeout(400)
-        check('このスケジュールで飛ぶ（co3_set_schedule）:', await pg.evaluate('window.__setSched.p_aircraft === 1 && window.__setSched.p_legs.length === 2 && window.__setSched.p_legs[1].t === 580') and 'スケジュールを決めました' in await pg.inner_text('#coMsg'))
-        await pg.click('#schedBack'); await pg.wait_for_timeout(200)
-        check('一覧に「自分で組んだスケジュール（2便）」:', '自分で組んだスケジュール（2便）を見る' in await pg.inner_text('#coFleet'))
-        await pg.click('[data-sched="1"]'); await pg.wait_for_timeout(200); await pg.click('#schedAuto'); await pg.wait_for_timeout(400)
-        check('おまかせに戻す（co3_clear_schedule）:', await pg.evaluate('window.__clearSched.p_aircraft === 1') and 'スケジュールを自分で組む' in await pg.inner_text('#coFleet'))
-        await c.close()
-        c, pg = await open_page(b, V3 + "window.__co.rating = 1;", errs)
-        await pg.evaluate("goTab('fleet')"); await pg.wait_for_timeout(300); await pg.click('[data-sched="1"]'); await pg.wait_for_timeout(200)
-        check('格付け1：便を足せない:', await pg.is_disabled('#schedAdd') and '格付け2' in await pg.inner_text('#coFleet'))
-        await c.close(); await b.close()
-        print('errors', errs + fails)
+        b=await p.chromium.launch(); c=await b.new_context(viewport={'width':400,'height':860}, timezone_id='Asia/Tokyo')
+        await c.add_init_script("localStorage.setItem('soramemo.onboarded','1'); localStorage.setItem('soramemo.install.later','1'); localStorage.setItem('soramemo.persona','shugyo')")
+        await c.route('https://cdn.jsdelivr.net/npm/@supabase/**', lambda r: r.fulfill(path=os.path.join(HERE,'fake_sb.js'), content_type='application/javascript'))
+        await c.route('https://fake.supabase.co/rest/v1/rpc/**', lambda r: r.fulfill(status=200, body='[]', content_type='application/json', headers={'Access-Control-Allow-Origin':'*'}))
+        await c.route('https://fake.supabase.co/functions/v1/**', lambda r: r.fulfill(status=200, body='{}', content_type='application/json', headers={'Access-Control-Allow-Origin':'*'}))
+        pg=await c.new_page(); errs=[]; pg.on('pageerror', lambda e: errs.append(str(e) + ' @ ' + (e.stack or '')[:300]))
+        await pg.goto('file://'+os.path.join(WORK,'index_server_test.html')); await pg.wait_for_load_state('load'); await pg.wait_for_timeout(600)
+        # 記録：羽田→那覇・那覇→羽田・羽田→那覇（ANA フレックス、今年）
+        await pg.evaluate("""() => { const h = A.find(a => a.iata === 'HND').id, o = A.find(a => a.iata === 'OKA').id, F = __fake.db.flights, t = Date.now() - 20 * 864e5;
+          [[h, o], [o, h], [h, o]].forEach(([a, b], i) => Object.assign(F[i], { from_airport:a, to_airport:b, airline:'NH', flight_no:'NH46' + i, fare:'ANA:E_FLEX', price:i ? null : 30000,
+            dep_at:new Date(t + i * 864e5).toISOString(), arr_at:new Date(t + i * 864e5 + 9e6).toISOString() })); }""")
+        await pg.evaluate('__fake.login()'); await pg.wait_for_timeout(1000)
+        leg = lambda no, dep, arr, d, a: f"{{ no:'{no}', dep:'{dep}', arr:'{arr}', d:{d}, a:{a}, ac:null }}"
+        rt = lambda n, start: ', '.join(leg(f'NH{900+i}', 'HND' if i % 2 == 0 else 'OKA', 'OKA' if i % 2 == 0 else 'HND', start + i * 170, start + i * 170 + 150) for i in range(n))
+        await pg.evaluate(f"""() => {{ const g = sgGet(), h = A.find(a => a.iata === 'HND').id, o = A.find(a => a.iata === 'OKA').id; g.car = 'ANA'; g.goal.ANA = 30000;
+          g.plans = [0, 1, 2, 3].map(i => ({{ id:'p' + i, d:'{D1}', hm:(6 + i * 3) + ':00', from:i % 2 ? o : h, to:i % 2 ? h : o, car:'ANA', fare:'ANA:E_FLEX', no:'NH' + (500 + i) }}));
+          g.drafts = [{{ id:'dA', d:'{D2}', car:'ANA', fare:'ANA:E_FLEX', home:'HND', start:'05:00', end:'23:59', legs:[{rt(8, 300)}], pts:0 }},
+                      {{ id:'dB', d:'{D3}', car:'ANA', fare:'ANA:E_FLEX', home:'HND', start:'05:00', end:'23:59', legs:[{rt(2, 400)}], pts:0 }}];
+          g.days = ['{D4}']; }}""")
+        before = await pg.evaluate("[sgYear().ANA.pts, sgFuture().length, sgPlanSum('ANA', sgYear()).pts]")
+        print('実績・予定の数', before)
+        # P3 案をくらべる
+        await pg.evaluate("openShugyo('compare')"); await pg.wait_for_timeout(500)
+        t = await pg.inner_text('#v-sg'); print('CMP', t[:700].replace('\n', ' | '))
+        check('くらべる：2つの案を表で（案A 8区間・案B 2区間）:', '2つの案' in t and '案A' in t and '案B' in t and '+18,944' in t and '+4,736' in t)
+        check('くらべる：計画の印と「まだ予定ではありません」:', '計画' in t and 'まだ予定ではありません' in t)
+        check('効き：実績と予定に案Aを足すと届く・案Bでは届かない:', f"に届く" in t and '年内は届かない' in t)
+        r = await pg.evaluate("(() => { const Y = sgYear(), g = sgGoal('ANA', Y); return [sgReachWith(g, Y, sgDraftItems(sgDrafts('ANA')[0])).d, sgReachWith(g, Y, []).d || null]; })()")
+        check('案Aを足すと、案Aの日に届く（予定だけでは届かない）:', r == [D2, None])
+        check('くらべても実績・予定は変わらない:', await pg.evaluate("[sgYear().ANA.pts, sgFuture().length, sgPlanSum('ANA', sgYear()).pts]") == before)
+        await pg.locator('#v-sg .sgcmp').screenshot(path=os.path.join(WORK, 't76_compare.png'))
+        # P4 年末までの道のり
+        await pg.evaluate("sgGo('road')"); await pg.wait_for_timeout(400)
+        t = await pg.inner_text('#v-sg'); print('ROAD', t[-600:].replace('\n', ' | '))
+        check('道のり：実績（記録だけ）・予定・案を別々に:', 'きょうまで' in t and '記録した便だけ' in t and '予定だけなら' in t and '予定に案Aも足すと' in t and '予定に案Bも足すと' in t)
+        check('道のり：予定の日と案の日がカレンダーに:', await pg.locator(f'#v-sg [data-sg-day="{D1}"].pp').count() == 1 and await pg.locator(f'#v-sg [data-sg-day="{D2}"].pd').count() == 1 and await pg.locator(f'#v-sg [data-sg-day="{D4}"].fr').count() == 1)
+        check('道のり：予定の行（羽田⇄那覇 2往復 +9,472）:', '羽田⇄那覇 2往復' in t and '+9,472' in t)
+        await pg.screenshot(path=os.path.join(WORK, 't76_road.png'), full_page=True)
+        d5 = J(16)
+        await pg.click(f'#v-sg [data-sg-day="{d5}"]'); await pg.wait_for_timeout(300)
+        check('日付を押すと乗れる日になる:', d5 in await pg.evaluate("sgGet().days"))
+        await pg.click('#v-sg [data-sg-roadfind]'); await pg.wait_for_timeout(400)
+        check('乗れる日の案を作る → 探す画面（その日）:', await pg.evaluate("SG_PAGE") == 'find' and await pg.evaluate("sgGet().pq.d") == D4)
+        # 案Aを予定に入れる
+        await pg.evaluate("sgGo('compare')"); await pg.wait_for_timeout(300)
+        await pg.click('#v-sg [data-sg-d2plan="dA"]'); await pg.wait_for_timeout(400)
+        d = await pg.evaluate("__fake.db.shugyo_prefs[0].data")
+        check('案Aを予定に入れると、予定に8便・案から消える:', len([x for x in d['plans'] if x['d'] == D2]) == 8 and [x['id'] for x in d['drafts']] == ['dB'] and bool(d['plans'][-1]['hm']) and '翌' not in d['plans'][-1]['hm'])
+        check('予定に入れたあとの結論（予定だけで届く）:', await pg.evaluate("(() => { const Y = sgYear(); return sgReachWith(sgGoal('ANA', Y), Y, []).d; })()") == D2)
+        print('errors', errs, 'fails', fails); await b.close()
+        sys.exit(1 if fails or errs else 0)
 asyncio.run(main())

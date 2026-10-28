@@ -1,73 +1,111 @@
 import os, sys
 HERE=os.path.dirname(os.path.abspath(__file__)); WEB=os.path.abspath(os.path.join(HERE,'..','..','web')); WORK=os.environ.get('SORAMEMO_TEST_WORK','/tmp/soramemo-e2e'); os.makedirs(WORK, exist_ok=True)
-# エアライン経営 v3 の方針ごとの画面：貨物の路線・プライベートジェット・地域航空の仕事（スイッチ co_v3 がオンのときだけ）
-import asyncio
+# 表示の編集：下のタブ（出す・並び）、見方（隠す）、運用の空港（よく見る空港だけ）、運用の下・ホーム・成績のかたまり（出す・並び）。
+# この端末だけに保存し、開き直しても残る。はじめに戻す・ひな形を選ぶと戻る。
+# 読み込み直しを確かめるため、ファイルとしてではなく小さなサーバーから開く（file:// だと最初の読み込み直しで保存が消えることがある）
+import asyncio, json, threading, http.server, socketserver, functools
+from datetime import datetime, timedelta, timezone
 from playwright.async_api import async_playwright
+now = datetime.now(timezone.utc)
+iso = lambda m: (now + timedelta(minutes=m)).isoformat()
+BOARD = {'iata': 'HND', 'now': iso(0), 'hours': [{'h': h, 'flights': 10, 'late': 0, 'cancel': 0, 'ref': 0} for h in range(24)],
+         'next_arr': [{'flight': 'NH212', 'other': 'LHR', 'sched': iso(25), 't': iso(25), 'intl': True, 'aircraft': 'B789'}],
+         'next_dep': [{'flight': 'JL903', 'other': 'OKA', 'sched': iso(30), 't': iso(30), 'aircraft': 'A359'}]}
 fails = []
 def check(label, ok):
     print(label, ok)
     if not ok: fails.append(label)
-INIT = "localStorage.setItem('soramemo.onboarded','1'); localStorage.setItem('soramemo.install.later','1'); Object.defineProperty(window, 'SORAMEMO_CONFIG', { configurable:true, get(){ return this.__cfg; }, set(v){ this.__cfg = Object.assign({}, v, { gameReleased: true }); } });"
-BASE = "{name:'そらメモ航空', cash:100000, last:new Date().toISOString(), roles:{}, daily:300, gross:300, upkeep:0, bonus:0, routes:[{k:'5-6', a:'HND', b:'CTS', km:820, base:344, level:1, cost:10320, mult:.5, hub:1, sky:1, min_size:4.5, sa:6, sb:4.5, ac_id:null, intl:false}], sky:{}, total_km:820, rep_points:0, stars:1, facilities:{}, bought:1, value:100000, friend_code:'ABCD1234', hide_rank:false, friends:0, v3:true, rating:5, rating_have:{routes:40, intl:5, fleet:35, stars:5, days:99}, premium:0, satisfaction:50, sat_mult:0.98, sat_parts:{base:50, target:50}, plans:{}"
-CARGO = "window.__co = Object.assign(" + BASE + "}, {policy:'cargo', fleet:[{id:1, type:'lg', reg:'JA11KZ', icao:'B748', kind:'freighter', route:null, paid:70000, age:1, value:70000, sell:21000, upkeep:48, bought_at:new Date().toISOString()}],\
-  cargo_routes:[{k:'ANC-NRT', a:'ANC', b:'NRT', intl:true, km:5330, seen:true}, {k:'5-6', a:'HND', b:'CTS', intl:false, km:820, seen:false}],\
-  cargo:[{k:'ANC-NRT', a:'ANC', b:'NRT', km:5330, intl:true, tons:391.2, n:3, flights:0, payload:0, carried:0, revenue:0, cost:0, landing:0, congestion:0, profit:0, ac_id:null}, {k:'5-6', a:'HND', b:'CTS', km:820, intl:false, tons:120.5, n:1, flights:0, payload:0, carried:0, revenue:0, cost:0, landing:0, congestion:0, profit:0, ac_id:null}]});"
-PJ = "window.__co = Object.assign(" + BASE + "}, {policy:'pj', fleet:[{id:1, type:'rj', reg:'JA500G', icao:'GLF6', kind:'bizjet', route:'5-6', paid:50000, age:1, value:50000, sell:15000, upkeep:30, bought_at:new Date().toISOString()}],\
-  pj:[{k:'5-6', a:'HND', b:'OKA', km:1560, intl:false, kind:'resort', vip:238, n:1, flights:4, seats:14, fill:0.9, revenue:905, cost:452, landing:4, congestion:0, profit:449, ac_id:1}]});"
-REG = "window.__co = Object.assign(" + BASE + "}, {policy:'regional', fleet:[{id:1, type:'prop', reg:'SM-1A2F', icao:'C208', kind:'light', route:null, paid:1600, age:1, value:1600, sell:480, upkeep:2, bought_at:new Date().toISOString()}],\
-  jobs:[{ac_id:1, job:'sightseeing', airport:'ISG', seats:9, earn:51.3}], subsidy:[{k:'5-6', kind:'island', load:0.38, subsidy:22}],\
-  small:[{code:'C172', name:'セスナ172', kind:'small', seats:3, range:1200, price:625}, {code:'C208', name:'セスナ208 キャラバン', kind:'small', seats:9, range:1700, price:2000}]});"
-async def open_page(b, extra, errs):
-    c = await b.new_context(viewport={'width':400,'height':860}); await c.add_init_script(INIT + extra)
-    await c.route('https://cdn.jsdelivr.net/npm/@supabase/**', lambda r: r.fulfill(path=os.path.join(HERE,'fake_sb.js'), content_type='application/javascript'))
-    pg = await c.new_page(); pg.on('pageerror', lambda e: errs.append(str(e)))
-    await pg.goto('file://'+os.path.join(WORK,'index_server_test.html')); await pg.wait_for_load_state('load'); await pg.wait_for_function('typeof render === "function"'); await pg.wait_for_timeout(600)
-    await pg.evaluate('__fake.login()'); await pg.wait_for_timeout(800)
-    await pg.evaluate("goTab('fleet')"); await pg.wait_for_timeout(400)
-    return c, pg
+class Quiet(http.server.SimpleHTTPRequestHandler):
+    def log_message(self, *a): pass
+srv = socketserver.TCPServer(('127.0.0.1', 0), functools.partial(Quiet, directory=WORK)); PORT = srv.server_address[1]
+threading.Thread(target=srv.serve_forever, daemon=True).start()
+URL = f'http://127.0.0.1:{PORT}/index_server_test.html'
+TABS = "[...document.querySelectorAll('nav.tabs button')].filter(b => !b.hidden).map(b => b.dataset.v).join(',')"
+LS = "JSON.parse(localStorage.getItem('soramemo.layout') || 'null')"
 async def main():
     async with async_playwright() as p:
         b = await p.chromium.launch(); errs = []
-        # 貨物
-        c, pg = await open_page(b, CARGO, errs)
-        t = await pg.inner_text('#coOps'); print('CARGO', t.replace('\n', ' | ')[:400])
-        check('貨物：画面が出る:', '貨物の路線' in t and 'ANC ⇄ NRT' in t and '見た貨物機の区間' in t and '飛んだ区間' in t)
-        check('貨物：機体なしは貨物の量を出す:', '391.2' in t and '機体なし' in t)
-        await pg.select_option('[data-cargoassign="ANC-NRT"]', '1'); await pg.wait_for_timeout(500)
-        check('貨物：貨物機を入れる（co3_cargo_assign）:', await pg.evaluate('window.__cargoAssign.p_aircraft === 1 && window.__cargoAssign.p_route === "ANC-NRT"'))
-        t = await pg.inner_text('#coOps')
-        check('貨物：内わけ（運んだ量・積み込み・もうけ）:', '227.8' in t and '85' in t and '+952' in t and '3社で分ける' in t)
-        await pg.screenshot(path=os.path.join(WORK, 't71_cargo.png'), full_page=True)
-        await pg.select_option('[data-cargoassign="ANC-NRT"]', ''); await pg.wait_for_timeout(500)
-        check('貨物：外す（路線なしで呼ぶ）:', await pg.evaluate('window.__cargoAssign.p_route === null'))
-        await c.close()
-        # プライベートジェット
-        c, pg = await open_page(b, PJ, errs)
-        t = await pg.inner_text('#coOps'); print('PJ', t.replace('\n', ' | ')[:400])
-        check('PJ：画面が出る:', 'プライベートジェット' in t and 'リゾート' in t and '238' in t and '90' in t and '+449' in t)
-        check('PJ：おまかせ:', 'おまかせ：いちばんもうかる4便' in t and await pg.get_attribute('[data-pjfl="5-6"][data-n="0"]', 'aria-pressed') == 'true')
-        await pg.click('[data-pjfl="5-6"][data-n="2"]'); await pg.wait_for_timeout(400)
-        check('PJ：2便に決める（co3_set_flights）:', await pg.evaluate('window.__setFl.p_flights === 2') and await pg.get_attribute('[data-pjfl="5-6"][data-n="2"]', 'aria-pressed') == 'true')
-        await pg.click('[data-pjfl="5-6"][data-n="8"]'); await pg.wait_for_timeout(400)
-        check('PJ：上限を超えると何便までか出す:', '4便までです' in await pg.inner_text('#coOps'))
-        await pg.click('[data-pjfl="5-6"][data-n="0"]'); await pg.wait_for_timeout(400)
-        check('PJ：おまかせに戻す（null）:', await pg.evaluate('window.__setFl.p_flights === null'))
-        await pg.screenshot(path=os.path.join(WORK, 't71_pj.png'), full_page=True)
-        await c.close()
-        # 地域航空
-        c, pg = await open_page(b, REG, errs)
-        t = await pg.inner_text('#coOps'); print('REG', t.replace('\n', ' | ')[:400])
-        check('地域航空：仕事・補助・小型機:', '地域航空の仕事' in t and '石垣で遊覧' in t and '遊覧' in t and '+51' in t and '+22' in t and '離島' in t and '38%' in t and 'セスナ208 キャラバン' in t and '宿泊旅行統計調査' in t)
-        await pg.click('[data-buysmall=C208]'); await pg.wait_for_timeout(400)
-        check('地域航空：小型機を買う（co3_buy_small）:', await pg.evaluate('window.__buySmall.p_code === "C208"') and await pg.evaluate('CO.cash') == 98000 and 'セスナ208 キャラバンを会社に入れました' in await pg.inner_text('#coMsg'))
-        await pg.screenshot(path=os.path.join(WORK, 't71_regional.png'), full_page=True)
-        await c.close()
-        # FSC・スイッチがオフ：出ない
-        c, pg = await open_page(b, "window.__co = Object.assign(" + BASE + "}, {policy:'fsc', fleet:[]});", errs)
-        check('FSC：方針ごとの画面は出ない:', await pg.evaluate("$('coOps').hidden"))
-        await c.close()
-        c, pg = await open_page(b, '', errs)
-        check('オフ：出ない:', await pg.evaluate("$('coOps').hidden && !$('coOps').innerHTML"))
-        await c.close(); await b.close()
-        print('errors', errs + fails)
+        c = await b.new_context(viewport={'width':400,'height':860}, timezone_id='Asia/Tokyo')
+        await c.add_init_script("localStorage.setItem('soramemo.onboarded','1'); localStorage.setItem('soramemo.install.later','1');")
+        await c.route('https://cdn.jsdelivr.net/npm/@supabase/**', lambda r: r.fulfill(path=os.path.join(HERE,'fake_sb.js'), content_type='application/javascript'))
+        async def rpc(r):
+            name = r.request.url.rsplit('/', 1)[-1]
+            await r.fulfill(status=200, body=json.dumps(BOARD if name == 'airport_board' else []), content_type='application/json', headers={'Access-Control-Allow-Origin':'*'})
+        await c.route('https://fake.supabase.co/rest/v1/rpc/**', rpc)
+        await c.route('https://fake.supabase.co/functions/v1/**', lambda r: r.fulfill(status=200, body='{"planes":[]}', content_type='application/json', headers={'Access-Control-Allow-Origin':'*'}))
+        pg = await c.new_page(); pg.on('pageerror', lambda e: errs.append(str(e)))
+        async def load():
+            await pg.goto(URL); await pg.wait_for_load_state('load'); await pg.wait_for_timeout(600)
+            await pg.evaluate('__fake.login()'); await pg.wait_for_timeout(800)
+        await load()
+        check('はじめは何も変えていない（「気軽に」はホーム・図鑑・フライト）:', await pg.evaluate(LS) is None and await pg.evaluate(TABS) == 'home,book,log')
+        check('マイページに入口:', await pg.locator('#dSettings [data-lo-open="top"]').count() == 1)
+
+        # 運用：見方の右端の鉛筆から、その画面の編集へ
+        await pg.evaluate("goTab('ops')"); await pg.wait_for_timeout(1200)
+        check('見方の右端に鉛筆:', await pg.locator('[data-lo-open="ops"]').count() == 1 and await pg.locator('#opsViews [data-vw]').count() == 7)
+        await pg.click('[data-lo-open="ops"]'); await pg.wait_for_timeout(300)
+        check('鉛筆で運用の編集が開く:', await pg.evaluate("$('dLayout').open && LO_PAGE === 'ops'"))
+        for v in ['day', 'ontime', 'art']: await pg.click(f'[data-lo-view="ops:{v}"]')
+        check('見方を隠す:', await pg.locator('#opsViews [data-vw]').count() == 4 and await pg.locator('#opsViews [data-vw="ops:day"]').count() == 0)
+        for v in ['board', 'strip', 'photo']: await pg.click(f'[data-lo-view="ops:{v}"]')
+        check('最後の1つは隠せない:', await pg.locator('[data-lo-view="ops:runway"]').is_disabled() and await pg.locator('#opsViews [data-vw]').count() == 1)
+        for v in ['board', 'strip', 'photo']: await pg.click(f'[data-lo-view="ops:{v}"]')
+        # 空港
+        for a in ['HND', 'HIJ']: await pg.click(f'[data-lo-ap="{a}"]')
+        aps = await pg.eval_on_selector_all('#opsAps .aplist [data-ops-ap]', 'e => e.map(x => x.dataset.opsAp)')
+        check('よく見る空港が、空港を選ぶ画面のいちばん上に並ぶ:', aps == ['HND', 'HIJ'] and await pg.locator('#opsAps .apgrid [data-ops-ap]').count() == 14)
+        # 運用の下：地図を隠す・特別塗装機を上へ
+        await pg.click('[data-lo-blk="opsb:map"]'); await pg.click('[data-lo-drag="opsb:special"]'); await pg.click('[data-lo-mv="opsb:special:-99"]')
+        check('地図を隠す:', await pg.evaluate("$('opsBlocks').querySelector('[data-lo=\"opsb:map\"]').classList.contains('lo-off')"))
+        check('特別塗装機がいちばん上:', await pg.evaluate("$('opsBlocks').firstElementChild.dataset.lo") == 'opsb:special')
+        # 全体：隠れている運用のタブを出して、左へ（成績は隠れたまま）
+        await pg.click('[data-lo-page="top"]'); await pg.wait_for_timeout(200)
+        await pg.click('[data-lo-tab="ops"]')
+        # ≡ を押すと動かし方のメニュー。「いちばん上へ」で運用を左端へ
+        await pg.click('[data-lo-drag="tabs:ops"]'); check('≡ を押すと動かし方のメニュー:', await pg.locator('#dLayout .lomenu button').count() == 4)
+        await pg.click('[data-lo-mv="tabs:ops:-99"]')
+        check('タブ：運用を出して左に（成績は隠れたまま）:', await pg.evaluate(TABS) == 'ops,home,book,log')
+        check('隠したタブはマイページから開ける:', '成績を開く' in (await pg.inner_text('#personaMore')))
+        await pg.click('[data-lo-tab="book"]'); await pg.click('[data-lo-tab="log"]')
+        check('タブは2つより減らせない:', await pg.evaluate(TABS) == 'ops,home' and await pg.locator('[data-lo-tab="ops"]').is_disabled())
+        await pg.click('[data-lo-tab="book"]'); await pg.click('[data-lo-tab="log"]')
+        # ホーム・成績
+        await pg.click('[data-lo-page="home"]'); await pg.click('[data-lo-blk="home:recent"]')
+        await pg.click('[data-lo-page="top"]'); await pg.click('[data-lo-page="stats"]')
+        # ≡ をつまんで動かす：ステータスの目安をいちばん上へ
+        h = pg.locator('[data-lo-drag="stats:status"]'); top = pg.locator('[data-lo-row="stats:passport"]')
+        hb = await h.bounding_box(); tb = await top.bounding_box()
+        await pg.mouse.move(hb['x'] + hb['width'] / 2, hb['y'] + hb['height'] / 2); await pg.mouse.down()
+        for k in range(1, 9): await pg.mouse.move(hb['x'] + hb['width'] / 2, hb['y'] + hb['height'] / 2 + (tb['y'] + 4 - hb['y']) * k / 8)
+        await pg.mouse.up(); await pg.wait_for_timeout(300)
+        check('ホーム：最近の印を隠す:', await pg.evaluate("document.querySelector('[data-lo=\"home:recent\"]').classList.contains('lo-off')"))
+        check('成績：ステータスの目安がいちばん上:', await pg.evaluate("$('v-stats').querySelector('.lo').dataset.lo") == 'stats:status')
+        # フライト・図鑑の見方
+        await pg.click('[data-lo-page="top"]'); await pg.click('[data-lo-page="log"]'); await pg.click('[data-lo-view="log:alt"]')
+        check('フライトの隠れていた見方を出す:', 'alt' not in (await pg.evaluate(LS))['off']['log'] and 'cal' in (await pg.evaluate(LS))['off']['log'])
+        await pg.click('#dLayout [data-lo-page="top"]'); await pg.click('#dLayout [data-close]')
+
+        # 開き直しても残る
+        await pg.wait_for_timeout(500); await load()
+        check('開き直してもタブが残る:', await pg.evaluate(TABS) == 'ops,home,book,log')
+        await pg.evaluate("goTab('ops')"); await pg.wait_for_timeout(1000)
+        check('開き直しても見方が残る:', await pg.locator('#opsViews [data-vw]').count() == 4)
+        check('開き直しても順番が残る:', await pg.evaluate("$('opsBlocks').firstElementChild.dataset.lo") == 'opsb:special' and await pg.evaluate("$('v-stats').querySelector('.lo').dataset.lo") == 'stats:status')
+        await pg.click('#opsApBtn'); await pg.fill('#opsApQ', 'oka'); await pg.wait_for_timeout(200)
+        check('空港を3レターで探せる:', await pg.eval_on_selector_all('#opsAps [data-ops-ap]', 'e => e.map(x => x.dataset.opsAp)') == ['OKA'])
+        await pg.click('#opsAps [data-ops-ap="OKA"]'); await pg.wait_for_timeout(600)
+        check('選ぶと閉じて、その空港の運用:', not await pg.evaluate("$('dOpsAp').open") and await pg.evaluate("OPS_AP") == 'OKA')
+        await pg.evaluate("setOpsAirport('HND')"); await pg.wait_for_timeout(400)
+
+        # はじめに戻す
+        await pg.evaluate("openLayout('top', 'settings')"); await pg.click('[data-lo-reset]'); await pg.wait_for_timeout(300)
+        check('はじめに戻す:', await pg.evaluate(LS) is None and await pg.evaluate(TABS) == 'home,book,log' and await pg.locator('#opsViews [data-vw]').count() == 7
+              and await pg.evaluate("$('opsBlocks').firstElementChild.dataset.lo") == 'opsb:alerts' and not await pg.evaluate("document.querySelector('[data-lo=\"home:recent\"]').classList.contains('lo-off')"))
+        # ひな形を選ぶと、その形になり、自分で変えた表示は戻る
+        await pg.click('[data-lo-tab="ops"]')
+        await pg.click('[data-lo-persona="spot"]'); await pg.wait_for_timeout(500)
+        check('ひな形「撮影」を選ぶ:', await pg.evaluate(TABS) == 'ops,home,book,log' and await pg.evaluate(LS) is None and await pg.evaluate("PERSONA") == 'spot')
+        check('使い方からの勧めは、自分で変えたら出さない:', await pg.evaluate("(() => { LAYOUT = { tabs:['home','ops'] }; const r = loCustom(); LAYOUT = null; return r; })()"))
+        print('errors', errs + fails); srv.shutdown(); await b.close()
 asyncio.run(main())

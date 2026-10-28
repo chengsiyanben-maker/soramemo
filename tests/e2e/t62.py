@@ -32,7 +32,7 @@ async def main():
     async with async_playwright() as p:
         b = await p.chromium.launch(); errs = []
         c = await ctx(b); pg = await page(c, errs)
-        check('はじめは気軽に（5つのタブ）:', await pg.evaluate(TABS) == 'home,book,log,ops,stats' and await pg.is_hidden('#personaCard'))
+        check('はじめは気軽に（ホーム・図鑑・フライトの3つのタブ）:', await pg.evaluate(TABS) == 'home,book,log' and await pg.is_hidden('#personaCard'))
         # 撮影
         await pg.evaluate("$('dSettings').showModal()"); await pg.click('[data-persona="spot"]'); await pg.wait_for_timeout(1200)
         check('撮影：タブ:', await pg.evaluate(TABS) == 'ops,home,book,log')
@@ -44,12 +44,12 @@ async def main():
         await pg.locator('#homeSheet .sbody').screenshot(path=os.path.join(WORK, 't62_spot.png'))
         # 修行
         await pg.evaluate("$('dSettings').showModal()"); await pg.click('[data-persona="shugyo"]'); await pg.wait_for_timeout(800)
-        check('修行：タブ:', await pg.evaluate(TABS) == 'home,log,stats,ops' and await pg.evaluate("VIEW.log") == 'month')
+        check('修行：タブ:', await pg.evaluate(TABS) == 'home,sg,log,stats' and await pg.evaluate("VIEW.log") == 'sg')
         t = await pg.inner_text('#personaCard')
         check('修行：ホームのカード:', 'PP' in t or 'FOP' in t)
         await pg.locator('#homeSheet .sbody').screenshot(path=os.path.join(WORK, 't62_shugyo.png'))
         await pg.reload(); await pg.wait_for_timeout(800); await pg.evaluate('__fake.login()'); await pg.wait_for_timeout(800)
-        check('修行：開き直しても覚えている:', await pg.evaluate(TABS) == 'home,log,stats,ops')
+        check('修行：開き直しても覚えている:', await pg.evaluate(TABS) == 'home,sg,log,stats')
         await c.close()
         # 使い方から勧める（運用を羽田で3日・30分以上）
         d = lambda k: (now + timedelta(hours=9) - timedelta(days=k)).strftime('%Y-%m-%d')
@@ -69,7 +69,7 @@ async def main():
             await pg.wait_for_timeout(200)
         await pg.click('[data-persona-no]'); await pg.wait_for_timeout(300)
         check('今のままにする:', await pg.evaluate("PERSONA") == 'casual' and await pg.evaluate("!!usageGet().declined"))
-        await pg.reload(); await pg.wait_for_timeout(800); await pg.evaluate('__fake.login()'); await pg.wait_for_timeout(2000)
+        await pg.wait_for_timeout(1500); await pg.reload(); await pg.wait_for_timeout(800); await pg.evaluate('__fake.login()'); await pg.wait_for_timeout(2000)
         check('断ったらしばらく聞かない:', not await pg.evaluate("$('dPersona').open"))
         await c.close()
         print('errors', errs + fails); await b.close()

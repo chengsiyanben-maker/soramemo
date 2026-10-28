@@ -1,6 +1,6 @@
 import os, sys
 HERE=os.path.dirname(os.path.abspath(__file__)); WEB=os.path.abspath(os.path.join(HERE,'..','..','web')); WORK=os.environ.get('SORAMEMO_TEST_WORK','/tmp/soramemo-e2e'); os.makedirs(WORK, exist_ok=True)
-# 修行の画面：成績から開く、この路線に乗ったら（会員情報のボーナス・支払いのマイル）、会員情報の保存、計画を作って予定に入れる、路線の運航状況、予算、フライトの金額
+# 修行の画面（窓で開く。下のタブに修行がない構成＝気軽に）：成績から開く、この路線に乗ったら（会員情報のボーナス・支払いのマイル）、会員情報の保存、計画を作って予定に入れる、路線の運航状況、予算、フライトの金額
 import asyncio, json
 from datetime import datetime, timedelta, timezone
 from playwright.async_api import async_playwright
@@ -19,7 +19,7 @@ def check(label, ok):
 async def main():
     async with async_playwright() as p:
         b=await p.chromium.launch(); c=await b.new_context(viewport={'width':400,'height':860}, timezone_id='Asia/Tokyo')
-        await c.add_init_script("localStorage.setItem('soramemo.onboarded','1'); localStorage.setItem('soramemo.install.later','1'); localStorage.setItem('soramemo.persona','shugyo')")
+        await c.add_init_script("localStorage.setItem('soramemo.onboarded','1'); localStorage.setItem('soramemo.install.later','1'); localStorage.setItem('soramemo.persona','casual')")
         await c.route('https://cdn.jsdelivr.net/npm/@supabase/**', lambda r: r.fulfill(path=os.path.join(HERE,'fake_sb.js'), content_type='application/javascript'))
         RT = [{'flight': 'NH461', 'std': iso(-300), 'sta': iso(-140), 'atd': iso(-298), 'ata': iso(-150), 'cancelled': False, 'aircraft': 'B789'},
               {'flight': 'NH463', 'std': iso(-60), 'sta': iso(100), 'etd': iso(-30), 'atd': iso(-30), 'cancelled': False},
@@ -52,12 +52,13 @@ async def main():
         d = await pg.evaluate("__fake.db.shugyo_prefs[0] && __fake.db.shugyo_prefs[0].data")
         check('会員情報がサーバーに保存される:', d and d['jal']['status'] == 'sapphire' and d['jal']['card'] == 'cluba' and d['jal']['pay'] is True)
         await pg.click('#dShugyo .sg-back'); await pg.wait_for_timeout(200)
+        await pg.click('#dShugyo [data-ftarget="#sgQmf"][data-fseat="クラスJ"]'); await pg.wait_for_timeout(200)   # 座席を選んでから区分
         await pg.select_option('#sgQmf', 'JAL:J_FLEX'); await pg.fill('#sgQmp', '52000'); await pg.dispatch_event('#sgQmp', 'change'); await pg.wait_for_timeout(300)
-        t = await pg.inner_text('#dShugyo .sg-card.bred'); print('MINE', t.replace('\n', ' | '))
+        t = await pg.inner_text('#dShugyo .sg-res.rj'); print('MINE', t.replace('\n', ' | '))
         check('あなたの場合：1,082 ＋ サファイア105% 1,136 ＋ 支払い 1,040 ＝ 3,258:', '1,082' in t and '+1,136' in t and '+1,040' in t and '3,258' in t and '2,564' in t)
         # 計画に入れる → 予定に入れる
         await pg.click('[data-sg-q2trip]'); await pg.wait_for_timeout(300)
-        check('計画の画面へ:', '修行の計画を作る' in await pg.inner_text('#dShugyo'))
+        check('計画の画面へ:', '自分で区間を入れて計算する' in await pg.inner_text('#dShugyo'))
         await pg.fill('#sgTripD', '2026-12-05'); await pg.dispatch_event('#sgTripD', 'change'); await pg.wait_for_timeout(200)
         await pg.click('[data-sg-addtrip]'); await pg.wait_for_timeout(300)
         d = await pg.evaluate("__fake.db.shugyo_prefs[0].data")

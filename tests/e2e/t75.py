@@ -1,47 +1,85 @@
 import os, sys
 HERE=os.path.dirname(os.path.abspath(__file__)); WEB=os.path.abspath(os.path.join(HERE,'..','..','web')); WORK=os.environ.get('SORAMEMO_TEST_WORK','/tmp/soramemo-e2e'); os.makedirs(WORK, exist_ok=True)
-# エアライン経営 v3 の機体の故障と予備機：機体の画面の運休・トラブルの原因・遅れの波・満足度の定時率
-import asyncio
+# 計画を作る：時刻表から行程を探す（乗り継ぎは各社の決まりを守る）・組む・案として残す・予定に入れる。計画は実績・予定にまぜない
+import asyncio, json
+from datetime import datetime, timedelta, timezone
 from playwright.async_api import async_playwright
+D = (datetime.now(timezone.utc) + timedelta(hours=9) + timedelta(days=7)).strftime('%Y-%m-%d')
+F = lambda no, dep, arr, t1, t2, ac=None: [no, dep, arr, t1, t2, 0, ac]
+TT = [F('NH991', 'HND', 'OKA', '06:15', '09:00', '788'), F('NH461', 'HND', 'OKA', '07:30', '10:15'), F('NH469', 'HND', 'OKA', '13:15', '16:00', '772'), F('NH471', 'HND', 'OKA', '15:00', '17:45'),
+      F('NH994', 'OKA', 'HND', '10:05', '12:20', '789'), F('NH468', 'OKA', 'HND', '16:20', '18:40'), F('NH472', 'OKA', 'HND', '16:35', '18:55'), F('NH470', 'OKA', 'HND', '16:50', '19:15', '789'),
+      F('NH476', 'OKA', 'HND', '17:55', '20:20'), F('NH1763', 'OKA', 'ISG', '11:00', '12:00'), F('NH1765', 'OKA', 'ISG', '17:20', '18:20'), F('NH92', 'ISG', 'HND', '17:40', '20:50'),
+      F('NH15', 'HND', 'ITM', '06:30', '07:40'), F('NH21', 'HND', 'ITM', '09:00', '10:10'), F('NH16', 'ITM', 'HND', '08:30', '09:40'), F('NH24', 'ITM', 'HND', '11:00', '12:10')]
 fails = []
 def check(label, ok):
     print(label, ok)
     if not ok: fails.append(label)
-INIT = "localStorage.setItem('soramemo.onboarded','1'); localStorage.setItem('soramemo.install.later','1'); Object.defineProperty(window, 'SORAMEMO_CONFIG', { configurable:true, get(){ return this.__cfg; }, set(v){ this.__cfg = Object.assign({}, v, { gameReleased: true }); } });"
-V3 = """(() => { const now = Date.now(), iso = t => new Date(t).toISOString(), y = new Date(now - 864e5 + 9 * 36e5).toISOString().slice(0, 10), y3 = new Date(now - 3 * 864e5 + 9 * 36e5).toISOString().slice(0, 10);
-window.__co = {name:'そらメモ航空', cash:100000, last:iso(now), roles:{}, daily:300, gross:300, upkeep:0, bonus:0,
-  routes:[{k:'5-6', a:'HND', b:'CTS', km:820, base:344, level:1, cost:10320, mult:.5, hub:1, sky:1, min_size:4.5, sa:6, sb:4.5, ac_id:1, intl:false}],
-  fleet:[{id:1, type:'lg', reg:'JA01XJ', icao:'A359', kind:'pax', route:'5-6', paid:40000, age:1, value:40000, sell:12000, upkeep:80, bought_at:iso(now)}],
-  sky:{}, total_km:820, rep_points:0, stars:1, facilities:{}, bought:1, value:100000, friend_code:'ABCD1234', hide_rank:false, friends:0,
-  v3:true, rating:5, rating_have:{routes:40, intl:5, fleet:35, stars:5, days:99}, policy:'fsc', premium:20, satisfaction:41.2, sat_mult:0.97, sat_parts:{base:50, meal:-8, bag:0, response:0, target:37}, meal:'none', bag:'free', home:null, home_since:null, plans:{}, fares:{}, auto_trouble:false, morning:{day:y, profit:1240, prev_profit:1100, gross:1500, upkeep:260, sat:41.2, prev_sat:40.9, cancelled:1, open:1, god:0, legs_done:6, delayed:2, cxl_legs:1, wave:[{k:'5-6', reg:'JA01XJ', legs:[{n:1,f:'HND',to:'CTS',t:390,blk:100,s:'ok',d:0,c:0},{n:2,f:'CTS',to:'HND',t:570,blk:100,s:'delay',d:70,c:0},{n:3,f:'HND',to:'CTS',t:750,blk:100,s:'delay',d:30,c:30},{n:4,f:'CTS',to:'HND',t:930,blk:100,s:'ok',d:0,c:0},{n:5,f:'HND',to:'CTS',t:1110,blk:100,s:'cxl',d:0,c:0},{n:6,f:'CTS',to:'HND',t:1290,blk:100,s:'ok',d:0,c:0}]}], sky:[{k:'5-6', mult:0.9, n:18, cxl:2, avg4:20}]},
-  econ:[{k:'5-6', kind:'big', real:20, demand:1190, n:1, own:1118, flights:6, seats:369, carried:1118, revenue:938, cost:556, landing:36, congestion:0, profit:346, p_seats:0, p_pax:0, e_pax:1118}],
-  troubles:[{id:11, k:'5-6', day:y, flights:6, cancelled:1, real_n:18, real_cxl:2, rev_flight:156.4, created_at:iso(now - 18 * 6e4), god_until:iso(now + 42 * 6e4), deadline:iso(now + 342 * 6e4), card:null, cost:null, result:null, auto:false, done_at:null},
-            {id:12, k:'5-6', day:y, leg:5, kind:'delay', delay_min:150, dep_at:iso(now + 3 * 36e5), dep:'HND', arr:'CTS', fits:['snack'], flights:6, cancelled:0, real_n:2, real_cxl:0, rev_flight:156.4, created_at:iso(now - 5 * 6e4), god_until:iso(now + 55 * 6e4), deadline:iso(now + 355 * 6e4), card:null, cost:null, result:null, auto:false, done_at:null},
-            {id:9, k:'5-6', day:y3, flights:6, cancelled:2, real_n:10, real_cxl:5, rev_flight:156.4, created_at:iso(now - 3 * 864e5), god_until:iso(now - 3 * 864e5 + 36e5), deadline:iso(now - 3 * 864e5 + 6 * 36e5), card:null, cost:null, result:'none', auto:false, done_at:null}]}; })();"""
-async def open_page(b, extra, errs):
-    c = await b.new_context(viewport={'width':400,'height':860}); await c.add_init_script(INIT + extra)
-    await c.route('https://cdn.jsdelivr.net/npm/@supabase/**', lambda r: r.fulfill(path=os.path.join(HERE,'fake_sb.js'), content_type='application/javascript'))
-    pg = await c.new_page(); pg.on('pageerror', lambda e: errs.append(str(e)))
-    await pg.goto('file://'+os.path.join(WORK,'index_server_test.html')); await pg.wait_for_load_state('load'); await pg.wait_for_function('typeof render === "function"'); await pg.wait_for_timeout(600)
-    await pg.evaluate('__fake.login()'); await pg.wait_for_timeout(800)
-    await pg.evaluate("goTab('co')"); await pg.wait_for_timeout(400)
-    return c, pg
-EXTRA = """(() => { const y = new Date(Date.now() - 864e5 + 9 * 36e5).toISOString().slice(0, 10), y2 = new Date(Date.now() + 864e5 + 9 * 36e5).toISOString().slice(0, 10);
- window.__co.breakdowns = [{id:1, ac_id:1, reg:'JA01XJ', k:'5-6', start:y, end:y2, days:3, spare_id:null, spare_reg:null}];
- window.__co.troubles = [{id:21, k:'5-6', day:y, leg:2, kind:'cxl', cause:'breakdown', delay_min:0, dep_at:new Date(Date.now() + 2 * 36e5).toISOString(), dep:'CTS', arr:'HND', fits:['transfer'], flights:6, cancelled:1, real_n:0, real_cxl:0, rev_flight:156.4, created_at:new Date().toISOString(), god_until:new Date(Date.now() + 36e5).toISOString(), deadline:new Date(Date.now() + 6 * 36e5).toISOString(), card:null, cost:null, result:null, auto:false, done_at:null}];
- window.__co.morning.wave = [{k:'5-6', reg:'JA01XJ', legs:[{n:1,f:'HND',to:'CTS',t:390,blk:100,s:'ok',d:0,c:0},{n:2,f:'CTS',to:'HND',t:570,blk:100,s:'cxl',d:0,c:0,why:'breakdown'},{n:3,f:'HND',to:'CTS',t:750,blk:100,s:'cxl',d:0,c:0,why:'breakdown'}]}];
- window.__co.sat_parts = Object.assign({}, window.__co.sat_parts, {ontime:-15, own_cxl:-2, ontime_rate:0.33}); })();"""
 async def main():
     async with async_playwright() as p:
-        b = await p.chromium.launch(); errs = []
-        c, pg = await open_page(b, V3 + EXTRA, errs)
-        v = await pg.inner_text('#coV3'); print('V3', v.replace('\n', ' | ')[:300])
-        check('トラブル：機体の故障（会社のせい）:', '機体の故障（会社のせい）' in v and '予備機もないため欠航' in v)
-        check('遅れの波：故障で2便が欠航（予備機があれば飛べた）:', '機体の故障で 2便が欠航（予備機があれば飛べた）' in v and await pg.locator('.wv .wt i.x.b').count() == 2)
-        check('満足度：定時率 33% −15・自分のせいの欠航 −2:', '定時率（前の30日、会社のせいの欠航だけ） 33%' in v and '−15' in v and '自分のせいの欠航（故障）' in v)
-        await pg.evaluate("goTab('fleet')"); await pg.wait_for_timeout(400)
-        t = await pg.inner_text('#coFleet')
-        check('機体の画面：故障で運休中・予備機なし:', '故障で運休中' in t and '予備機がないので、この路線は欠航' in t)
-        await c.close(); await b.close()
-        print('errors', errs + fails)
+        b=await p.chromium.launch(); c=await b.new_context(viewport={'width':400,'height':860}, timezone_id='Asia/Tokyo')
+        await c.add_init_script("localStorage.setItem('soramemo.onboarded','1'); localStorage.setItem('soramemo.install.later','1'); localStorage.setItem('soramemo.persona','shugyo')")
+        await c.route('https://cdn.jsdelivr.net/npm/@supabase/**', lambda r: r.fulfill(path=os.path.join(HERE,'fake_sb.js'), content_type='application/javascript'))
+        calls = []
+        async def rpc(r):
+            name = r.request.url.rsplit('/', 1)[-1]; body = json.loads(r.request.post_data or '{}'); calls.append(name)
+            data = {'date': D, 'operator': 'ANA', 'until': '2027-03-27', 'f': TT} if name == 'plan_timetable' and body.get('p_operator') == 'ANA' and body.get('p_date') == D else \
+                   {'date': body.get('p_date'), 'operator': body.get('p_operator'), 'until': '2027-03-27', 'f': []} if name == 'plan_timetable' else []
+            await r.fulfill(status=200, body=json.dumps(data), content_type='application/json', headers={'Access-Control-Allow-Origin':'*'})
+        await c.route('https://fake.supabase.co/rest/v1/rpc/**', rpc)
+        await c.route('https://fake.supabase.co/functions/v1/**', lambda r: r.fulfill(status=200, body='{}', content_type='application/json', headers={'Access-Control-Allow-Origin':'*'}))
+        pg=await c.new_page(); errs=[]; pg.on('pageerror', lambda e: errs.append(str(e) + ' @ ' + (e.stack or '')[:300]))
+        await pg.goto('file://'+os.path.join(WORK,'index_server_test.html')); await pg.wait_for_load_state('load'); await pg.wait_for_timeout(600)
+        await pg.evaluate('__fake.login()'); await pg.wait_for_timeout(900)
+        # 乗り継ぎの決まり
+        m = await pg.evaluate("[sgMct('ANA','ANA','HND'), sgMct('ANA','ANA','ITM'), sgMct('ANA','ANA','OKA'), sgMct('ANA','ANA','FUK'), sgMct('JAL','JAL','HND'), sgMct('JAL','JAL','OKA'), sgMct('JAL','JAL','CTS'), sgMct('ANA','JAL','NRT'), sgMct('JAL','ANA','FUK')]")
+        check('乗り継ぎの決まり（ANA 羽田35・伊丹25・那覇30・ほか20、JAL 羽田30・那覇30・ほか20、またぐと成田50・ほか30）:', m == [35, 25, 30, 20, 30, 30, 20, 50, 30])
+        before = await pg.evaluate("[sgYear().ANA.pts, sgFuture().length]")
+        # 計画を作る（修行のタブ）
+        await pg.evaluate(f"sgGet().car = 'ANA'; sgGet().pq = {{ d:'{D}', home:'HND', start:'05:30', end:'22:00', mode:'pts', fare:{{ ANA:'ANA:E_FLEX' }} }}; openShugyo('find')"); await pg.wait_for_timeout(800)
+        t = await pg.inner_text('#v-sg'); print('FIND', t[:700].replace('\n', ' | '))
+        check('計画を作るは時刻表から探す画面:', await pg.evaluate("SG_PAGE") == 'find' and 'この日に組める行程' in t and 'plan_timetable' in calls)
+        check('いちばんたまるのは 羽田⇄那覇 2往復 +9,472:', '羽田⇄那覇 2往復' in t and '+9,472' in t and 'いちばんたまる' in t)
+        legs = await pg.evaluate("SG_FIND.R.list[0].legs.map(f => f.no).join()")
+        check('決まりより短い乗り継ぎ（那覇で20分の NH468）は組まない:', legs == 'NH991,NH994,NH469,NH472' and all('NH468' not in ','.join(x) for x in await pg.evaluate("SG_FIND.R.list.map(r => r.legs.map(f => f.no))")))
+        check('羽田の乗り継ぎは35分以上（12:20着 → 13:15発）:', await pg.evaluate("SG_FIND.R.list.every(r => r.legs.slice(1).every((f, i) => f.d - r.legs[i].a >= sgMct('ANA', 'ANA', f.dep)))"))
+        check('帰っていたい時刻までに羽田へ戻る:', await pg.evaluate("SG_FIND.R.list.every(r => r.legs[r.legs.length - 1].arr === 'HND' && r.back <= 22 * 60)"))
+        await pg.locator('#v-sg #sgFindRes').screenshot(path=os.path.join(WORK, 't74_find.png'))
+        # ねらいを回数に
+        await pg.click('#v-sg [data-sg-set="pmode"][data-v="count"]'); await pg.wait_for_timeout(500)
+        check('ねらいを変えると並びが変わる（回数）:', await pg.evaluate("sgGet().pq.mode") == 'count' and await pg.evaluate("SG_FIND.R.list[0].n") == await pg.evaluate("SG_FIND.R.maxN"))
+        await pg.click('#v-sg [data-sg-set="pmode"][data-v="pts"]'); await pg.wait_for_timeout(500)
+        # 行程を開いて組む
+        await pg.click('#v-sg [data-sg-res="0"]'); await pg.wait_for_timeout(500)
+        t = await pg.inner_text('#v-sg')
+        check('組む画面：4区間・乗り継ぎと決まり・羽田に戻る:', await pg.evaluate("SG_PAGE") == 'build' and '那覇で乗り継ぎ 1時間05分（ANA の決まり 30分以上）' in t and '羽田で乗り継ぎ 55分（ANA の決まり 35分以上）' in t and '18:55に羽田着' in t)
+        await pg.click('#v-sg [data-sg-pop]'); await pg.wait_for_timeout(300)
+        t = await pg.inner_text('#v-sg'); print('BUILD', t[:900].replace('\n', ' | '))
+        check('次の便は16:30から（那覇の決まり30分）:', '4区間目：那覇から' in t and '16:30から乗れます（決まり 30分）' in t)
+        check('決まりより短い便は出さず、理由を一行で:', '1便は、乗り継ぎが決まり（30分）より短いので出していません' in t and '16:20発 NH 468' in t and await pg.locator('#v-sg [data-sg-add^="NH468|"]').count() == 0)
+        check('その日に羽田へ帰れない便に印:', 'その日に羽田へ帰る便はありません' in t)
+        await pg.click('#v-sg [data-sg-bf="home"]'); await pg.wait_for_timeout(300)
+        check('羽田へ帰る便だけにできる:', await pg.locator('#v-sg [data-sg-add^="NH1765|"]').count() == 0 and await pg.locator('#v-sg [data-sg-add^="NH470|"]').count() == 1)
+        await pg.click('#v-sg [data-sg-add^="NH470|"]'); await pg.wait_for_timeout(300)
+        t = await pg.inner_text('#v-sg .sgbar')
+        check('計画のかたまり：この行程の分 +9,472・19:15に羽田着:', '計画' in t and '+9,472' in t and '19:15に羽田着' in t)
+        await pg.screenshot(path=os.path.join(WORK, 't74_build.png'), full_page=True)
+        # 案として残す
+        await pg.click('#v-sg [data-sg-savedraft]'); await pg.wait_for_timeout(400)
+        d = await pg.evaluate("__fake.db.shugyo_prefs[0] && __fake.db.shugyo_prefs[0].data")
+        check('案として残すと保存される（予定には入らない）:', d and len(d.get('drafts', [])) == 1 and d['drafts'][0]['pts'] == 9472 and len(d.get('plans', [])) == 0)
+        check('計画は実績・予定にまざらない:', await pg.evaluate("[sgYear().ANA.pts, sgFuture().length]") == before)
+        # 予定に入れる
+        await pg.click('#v-sg [data-sg-buildplan]'); await pg.wait_for_timeout(400)
+        d = await pg.evaluate("__fake.db.shugyo_prefs[0].data")
+        check('予定に入れる：4便・便名と出発時刻つき:', len(d['plans']) == 4 and d['plans'][0]['no'] == 'NH991' and d['plans'][0]['hm'] == '6:15' and d['plans'][3]['no'] == 'NH470')
+        # 残した案を開く
+        await pg.click('#v-sg .sg-back'); await pg.wait_for_timeout(600)
+        check('探す画面の下に残した案:', '残した案' in await pg.inner_text('#v-sg'))
+        await pg.click('#v-sg [data-sg-draft]'); await pg.wait_for_timeout(500)
+        check('残した案を開くと組む画面に戻る:', await pg.evaluate("SG_PAGE") == 'build' and await pg.evaluate("SG_BUILD.legs.length") == 4)
+        # 時刻表の出ていない先の日
+        await pg.evaluate("sgGet().pq.d = '2027-05-01'; sgGo('find')"); await pg.wait_for_timeout(600)
+        check('時刻表がまだ出ていない日は、そう出す:', 'まだ出ていません' in await pg.inner_text('#v-sg'))
+        print('errors', errs, 'fails', fails); await b.close()
+        sys.exit(1 if fails or errs else 0)
 asyncio.run(main())

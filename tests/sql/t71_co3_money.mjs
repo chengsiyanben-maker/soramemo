@@ -50,7 +50,7 @@ const ac = s.fleet[0];
 const hc = `${Math.min(ids.HND, ids.CTS)}-${Math.max(ids.HND, ids.CTS)}`;
 s = await as(A, `select public.co_assign(${ac.id}, '${hc}')`);
 // この手計算は上級席なしで確かめる（上級席は t46）
-if (fs.existsSync(dir + '20261026000092_co3_cabin_fare.sql')) s = await as(A, `select public.co3_set_premium(0)`);
+if (fs.existsSync(dir + '20261028000102_co3_cabin_fare.sql')) s = await as(A, `select public.co3_set_premium(0)`);
 const v2gross = Number(s.gross);
 check('スイッチがオフ：co-v2 の収益のまま・econ なし', s.v3 === false && s.econ === null && v2gross > 0, { v3: s.v3, g: v2gross });
 

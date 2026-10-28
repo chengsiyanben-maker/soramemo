@@ -11,11 +11,13 @@ for (const f of fs.readdirSync(dir).sort()) await db.exec(fs.readFileSync(dir + 
 await db.exec(`set co3.season_day = '2026-05-20'`);   // 季節の需要のない日で手計算する（季節は t72）
 let bad = 0; const check = (label, ok, v) => { console.log((ok ? 'OK ' : 'NG ') + label, ok ? '' : JSON.stringify(v)); if (!ok) bad++; };
 const q = async (sql) => (await db.query(sql)).rows[0];
-await db.query(`select public.reg_legs_touch($1::jsonb)`, [JSON.stringify([{ reg: 'JA801A', cs: 'ANA21', type: 'B788', at: new Date(Date.now() - 3600e3).toISOString() }, { reg: 'JA801A', cs: 'ANA21', type: null, at: new Date(Date.now() - 1800e3).toISOString() },
+// 日本時間で日付が変わった直後は、「1時間前」と「30分前」が別の日になる。そのときは前の日の夜の時刻で作る
+const jstMin = Math.floor((Date.now() + 9 * 3600e3) % 864e5 / 60e3), base = Date.now() - (jstMin < 70 ? (jstMin + 10) * 60e3 : 0);
+await db.query(`select public.reg_legs_touch($1::jsonb)`, [JSON.stringify([{ reg: 'JA801A', cs: 'ANA21', type: 'B788', at: new Date(base - 3600e3).toISOString() }, { reg: 'JA801A', cs: 'ANA21', type: null, at: new Date(base - 1800e3).toISOString() },
   { reg: 'JA4123', cs: 'JA4123', type: 'C172', at: new Date().toISOString() }])]);
 const l = await q(`select count(*)::int as n, min(type) as type, max(last_at) - min(first_at) as span from public.reg_legs`);
 check('便を足す（自家用機は残さない・最初と最後の時刻）', l.n === 1 && l.type === 'B788', l);
-await db.query(`select public.reg_legs_route($1::jsonb)`, [JSON.stringify([{ cs: 'ANA21', dir: 'dep', iata: 'HND', at: new Date(Date.now() - 3700e3).toISOString() }, { cs: 'ANA21', dir: 'arr', iata: 'ITM', at: new Date(Date.now() - 1700e3).toISOString() }])]);
+await db.query(`select public.reg_legs_route($1::jsonb)`, [JSON.stringify([{ cs: 'ANA21', dir: 'dep', iata: 'HND', at: new Date(base - 3700e3).toISOString() }, { cs: 'ANA21', dir: 'arr', iata: 'ITM', at: new Date(base - 1700e3).toISOString() }])]);
 const r = await q(`select dep, arr from public.reg_legs where reg = 'JA801A'`);
 check('出発と到着の空港', r.dep === 'HND' && r.arr === 'ITM', r);
 // 前の日々：ANA21 のあとに ANA30 が4回、ANA99 が1回
@@ -30,6 +32,10 @@ check('この先の便の予想（よく続く便）', p.known.callsign === 'ANA
 await db.exec(`insert into public.airport_tracks_all (iata, day, callsign, at, dep_here, pts) values ('KMJ', (now() at time zone 'Asia/Tokyo')::date - 1, 'SNJ51', now() - interval '1 day', 0, 'abc')`);
 await db.exec('set role anon'); const a = (await db.query(`select public.airport_tracks('KMJ', (now() at time zone 'Asia/Tokyo')::date - 1) as a`)).rows[0].a; await db.exec('reset role');
 check('空の道すじは全機の航跡', Array.isArray(a) && a.length === 1 && a[0].p === 'abc', a);
+check('線ごとに日本時間の「時」も返す', Number.isInteger(a?.[0]?.h) && a[0].h >= 0 && a[0].h <= 23, a);
+await db.exec(`insert into public.airport_tracks_all (iata, day, callsign, at, dep_here, pts) values ('KMJ', (now() at time zone 'Asia/Tokyo')::date, 'SNJ53', now(), 1, 'def')`);
+await db.exec('set role anon'); const td = (await db.query(`select public.airport_tracks('KMJ', (now() at time zone 'Asia/Tokyo')::date) as a`)).rows[0].a; await db.exec('reset role');
+check('今日の分も、まとめた所まで返す（3時間ごと）', Array.isArray(td) && td.length === 1 && td[0].p === 'def', td);
 let denied = false; await db.exec('set role anon'); try { await db.query(`select public.reg_legs_touch('[]'::jsonb)`); } catch { denied = true; } await db.exec('reset role');
 check('記録を足せるのは運営だけ', denied);
 if (bad) process.exit(1);

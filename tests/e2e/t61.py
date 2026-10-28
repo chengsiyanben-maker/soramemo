@@ -1,5 +1,6 @@
 import os, sys
 HERE=os.path.dirname(os.path.abspath(__file__)); WEB=os.path.abspath(os.path.join(HERE,'..','..','web')); WORK=os.environ.get('SORAMEMO_TEST_WORK','/tmp/soramemo-e2e'); os.makedirs(WORK, exist_ok=True)
+# （「気軽に」の構成は画面を減らしたので、このテストは前の構成どおり、タブと見方をすべて出した表示で試す）
 # 見方の切り替え：図鑑（5つ）・フライト（8つ）・運用（7つ・ものさしと空港をめくるはなくした）。選んだ見方は覚える
 import asyncio, json
 from datetime import datetime, timedelta, timezone
@@ -18,7 +19,7 @@ def check(label, ok):
 async def main():
     async with async_playwright() as p:
         b=await p.chromium.launch(); c=await b.new_context(viewport={'width':400,'height':860}, timezone_id='Asia/Tokyo')
-        await c.add_init_script("localStorage.setItem('soramemo.onboarded','1'); localStorage.setItem('soramemo.install.later','1')")
+        await c.add_init_script("localStorage.setItem('soramemo.onboarded','1'); localStorage.setItem('soramemo.layout', JSON.stringify({tabs:['home','book','log','ops','stats'], off:{home:[],book:[],log:[],ops:[],stats:['sgsum']}})); localStorage.setItem('soramemo.install.later','1')")
         await c.route('https://cdn.jsdelivr.net/npm/@supabase/**', lambda r: r.fulfill(path=os.path.join(HERE,'fake_sb.js'), content_type='application/javascript'))
         async def rpc(r):
             name = r.request.url.rsplit('/', 1)[-1]
@@ -40,7 +41,7 @@ async def main():
         await pg.evaluate("document.querySelectorAll('dialog[open]').forEach(d => d.close())")
         # フライト
         await pg.evaluate("goTab('log')"); await pg.wait_for_timeout(400)
-        check('フライトの見方が8つ:', await pg.locator('#logViews [data-vw]').count() == 8)
+        check('フライトの見方が9つ（修行を足した）:', await pg.locator('#logViews [data-vw]').count() == 9)
         for v, sel in [('board', '.lgboard'), ('cal', '.lgcal'), ('month', '.lgsum'), ('alt', '.lgalt'), ('text', '.lgtext'), ('route', '.lgroute'), ('map', '#flights .lgrows'), ('pass', '#flights .pass')]:
             await pg.click(f'[data-vw="log:{v}"]'); await pg.wait_for_timeout(250)
             check(f'フライト {v}:', await pg.locator(f'#flights {sel}' if not sel.startswith('#') else sel).count() > 0)

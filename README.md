@@ -308,7 +308,7 @@ SQL は `supabase/migrations/` を番号順に SQL Editor で流す。checkin �
 | 種類 | 実行方法 | 中身 |
 | --- | --- | --- |
 | 判定・照合のルール | `deno test --allow-read supabase/tests/` | チェックイン判定（羽田の実測地点、6空港のターミナル、保留分）、便の照合。結果を確かめる形のテスト |
-| ブラウザでの動作 | `pip install playwright && playwright install chromium` のあと `python3 tests/e2e/run_all.py` | アプリの主な流れ（案内、チェックイン、印、共有画像、配色、航空会社、実績、会社経営、そらメモ＋、書き出し、アカウント削除、運営画面など）。サーバー版は偽のサーバーで動かす |
+| ブラウザでの動作 | `pip install playwright && playwright install chromium` のあと `python3 tests/e2e/run_all.py` | アプリの主な流れ（案内、チェックイン、印、共有画像、配色、航空会社、実績、会社経営、そらメモ＋、書き出し、アカウント削除、表示の編集、運営画面など）。サーバー版は偽のサーバーで動かす |
 | 誰でも使えるか（アクセシビリティ） | `cd tests/a11y && npm install axe-core@4 && cd ../..` のあと `python3 tests/a11y/check.py`（配色を変えるときは `beni` `ai` を付ける） | 全タブ・印の画面・設定を、明るい・暗いの両方で WCAG 2.1 AA の基準で調べる。2026年10月の時点で、3つの配色×明るい・暗いのすべてで違反0件 |
 | データベース | `cd tests/sql && npm install && npm test` | 各SQLを順に流し、権限・計算・削除の結果を表示する。「ERROR: permission denied」「admin only」「plus required」などは、断るべき操作を断れていることを示す期待どおりの結果 |
 
@@ -334,3 +334,11 @@ node tools/build.mjs
 ```
 
 配る用は、原本から説明文や空白を省く。明朝体（Shippori Mincho、SIL Open Font License 1.1。`web/fonts/OFL.txt`）は Google Fonts を使わず、このアプリに出てくる文字（約840字）と英数字・記号だけを抜き出したフォント（`web/fonts/mincho-….woff2`、約160KB）を作って自前で配る。文字が増えても作り直すだけでよい。サービスワーカー（`web/sw.js`）の版の番号も中身から自動で付く。フォントを作るには `pip install fonttools brotli` が必要。2026年10月の見直しで、フォントの通信量は約1,060KBから約300KBに、アプリのファイルは圧縮配信で58KBから53KBになった。
+
+## データベースのSQLの番号
+
+`supabase/migrations/` のファイル名の順に本番へ流れます。番号は「日付8桁＋通し番号6桁」です。
+
+- 新しいSQLを作るとき：`node tools/migrations.mjs next 名前` で次のファイル名を出す
+- ブランチを反映する前：`node tools/migrations.mjs rebase origin/main` で、ブランチで足したSQLの番号を本番側の最新の後ろに付け直す
+- テストで `node tools/migrations.mjs check` が番号の重なりを調べる。反映では `supabase db push --include-all` を使うので、付け直しを忘れても止まらない

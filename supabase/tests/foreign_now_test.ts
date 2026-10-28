@@ -40,5 +40,6 @@ Deno.test("この空港に着く便・出た便に分ける", () => {
     { callsign: "EVA197", _airport_codes_iata: "TPE-NRT", plausible: 1 }]);
   const c = classifyForeign(near, rt, "HND");
   assertEquals(c.map((x) => `${x.flight}:${x.kind}:${x.other}:${x.status}`).sort(), ["CX501:dep:HKG:departed", "KE2707:arr:GMP:approach", "UA838:dep:SFO:ground"]);
+  assertEquals(c.find((x) => x.flight === "KE2707")?.reg, "HL7789");   // 登録記号も返す（撮る人の一覧で「確認」に使う）
   // 地上で空港から遠い機体（成田にいる THA661）と、ほかの空港の便（EVA197 は成田行き）は入れない
 });

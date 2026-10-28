@@ -12,6 +12,7 @@ async def main():
           localStorage.setItem('soramemo.v1', JSON.stringify({checkins:[{a:id('HND'),t:t0,acc:20,term:'HND-T1'},{a:id('CTS'),t:t0+7.2e6,acc:20,term:null}],
             flights:[{id:'a1',from:id('HND'),to:id('CTS'),dep:t0,arr:t0+7.2e6,km:819.6,airline:'JL',no:'JL501'}], manual:[{from:id('ITM'),to:id('OKA'),d:'2025-03-03',airline:'NH'},{from:id('ITM'),to:A.find(a=>a.name.startsWith('新島')).id,d:'2025-04-04',airline:null}]})); }""")
         await pg.wait_for_timeout(400); await pg.reload(); await pg.wait_for_load_state('load'); await pg.wait_for_timeout(400)
+        await pg.wait_for_function('typeof S !== "undefined" && S.flights.length > 0')   # 記録を読み込み終えてから書き出す（重いと間に合わないことがあった）
         await pg.click('#openSettings')
         async with pg.expect_download() as d: await pg.click('[data-export=json]')
         dl = await d.value; path = await dl.path(); j = json.load(open(path)); print('json:', dl.suggested_filename, len(j['checkins']), len(j['flights']), len(j['manual']), j['flights'][0]['flight_no'])

@@ -80,7 +80,34 @@ export async function loadCalib(read: () => PromiseLike<{ data: unknown }>) {
   if (Date.now() - CALIB_AT < 10 * 60_000) return; CALIB_AT = Date.now();
   try { const { data } = await read(); if (Array.isArray(data)) setCalib(data as { iata: string; taxi: number | null; extra: number | null }[]); } catch { /* 前の値のまま */ }
 }
-export const arrExtra = (iata: string | null | undefined, nm: number) => (CALIB[iata ?? ""]?.extra ?? ARR_EXTRA[iata ?? ""] ?? 0) * Math.max(0, Math.min(1, nm / 60));
+// 滑走路の使い方ごとの寄り道（eta_calib_mode。いまは羽田）と、いまの使い方（運用の記録 ops_log の新しいもの）。
+// 使い方が分からない・その使い方をまだ学んでいないときは、空港全体の寄り道を使う
+let CALIB_MODE: Record<string, Record<string, number>> = {}, MODE_NOW: Record<string, string> = {};
+export function setModeCalib(rows: { iata: string; mode: string; extra: number }[] | null | undefined, now: { iata: string; mode: string | null }[] | null | undefined) {
+  if (rows) { CALIB_MODE = {}; for (const r of rows) if (/^[A-Z]{3}$/.test(r.iata) && typeof r.extra === "number") (CALIB_MODE[r.iata] ??= {})[r.mode] = r.extra; }
+  if (now) MODE_NOW = Object.fromEntries(now.filter((r) => r.mode).map((r) => [r.iata, r.mode as string]));
+}
+// 使い方ごとの寄り道は10分に1回、いまの使い方は2分に1回だけ読み直す（読めなければ前の値のまま）
+let MODE_CALIB_AT = 0, MODE_NOW_AT = 0;
+export async function loadModeCalib(readRows: () => PromiseLike<{ data: unknown }>, readNow: (iatas: string[]) => PromiseLike<{ data: unknown }>) {
+  try {
+    if (Date.now() - MODE_CALIB_AT >= 10 * 60_000) { MODE_CALIB_AT = Date.now(); const { data } = await readRows(); if (Array.isArray(data)) setModeCalib(data as { iata: string; mode: string; extra: number }[], null); }
+    const iatas = Object.keys(CALIB_MODE);
+    if (iatas.length && Date.now() - MODE_NOW_AT >= 2 * 60_000) {
+      MODE_NOW_AT = Date.now(); const { data } = await readNow(iatas);
+      if (Array.isArray(data)) {   // 空港ごとにいちばん新しい記録（20分より古ければ使わない）
+        const out: { iata: string; mode: string | null }[] = [], seen = new Set<string>();
+        for (const r of data as { iata: string; at: string; obs_mode: string | null; est_mode: string | null }[]) {
+          if (seen.has(r.iata)) continue; seen.add(r.iata);
+          if (Date.now() - Date.parse(r.at) <= 20 * 60_000) out.push({ iata: r.iata, mode: r.obs_mode ?? r.est_mode });
+        }
+        MODE_NOW = {}; setModeCalib(null, out);
+      }
+    }
+  } catch { /* 前の値のまま */ }
+}
+export const modeExtra = (iata: string) => { const m = MODE_NOW[iata]; return m != null ? CALIB_MODE[iata]?.[m] : undefined; };
+export const arrExtra = (iata: string | null | undefined, nm: number) => (modeExtra(iata ?? "") ?? CALIB[iata ?? ""]?.extra ?? ARR_EXTRA[iata ?? ""] ?? 0) * Math.max(0, Math.min(1, nm / 60));
 export const taxiIn = (iata?: string | null) => Math.round(CALIB[iata ?? ""]?.taxi ?? TAXI_IN[iata ?? ""] ?? 4);
 // 降りる途中で見えなくなった機体の着陸の時刻（推定）：最後に見た位置から、残りを進入の速度で飛んだとみなす（predictEta と同じ考え方）。
 // 最後に見た時刻より前にはしない

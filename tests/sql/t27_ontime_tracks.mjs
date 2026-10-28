@@ -43,7 +43,7 @@ check('ほかの空港の便が2000便を超えても、その空港の航跡は
 r = await as('anon', `select public.airport_tracks('HND', ${y} - 40)`);
 check('31日より前の日も返す（記録はずっと残す）', Array.isArray(r) && r.length === 1, r);
 r = await as('anon', `select public.airport_tracks('HND', (now() at time zone 'Asia/Tokyo')::date)`);
-check('今日の分はまだ返さない', Array.isArray(r) && r.length === 0, r);
+check('今日の分は、全機の航跡がなければ返さない（JAL・ANA の便の航跡は前の日まで）', Array.isArray(r) && r.length === 0, r);
 r = await as('anon', `select count(*) from public.archive_user_flights(${y})`);
 check('利用者のフライトの対象は、匿名では呼べない', String(r).startsWith('ERROR'), r);
 await db.exec(`insert into auth.users (id) values ('00000000-0000-0000-0000-000000000001');
