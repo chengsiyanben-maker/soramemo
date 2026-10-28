@@ -69,7 +69,7 @@ async def main():
             await pg.wait_for_timeout(200)
         await pg.click('[data-persona-no]'); await pg.wait_for_timeout(300)
         check('今のままにする:', await pg.evaluate("PERSONA") == 'casual' and await pg.evaluate("!!usageGet().declined"))
-        await pg.reload(); await pg.wait_for_timeout(800); await pg.evaluate('__fake.login()'); await pg.wait_for_timeout(2000)
+        await pg.wait_for_timeout(1500); await pg.reload(); await pg.wait_for_timeout(800); await pg.evaluate('__fake.login()'); await pg.wait_for_timeout(2000)
         check('断ったらしばらく聞かない:', not await pg.evaluate("$('dPersona').open"))
         await c.close()
         print('errors', errs + fails); await b.close()

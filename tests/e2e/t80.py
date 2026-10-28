@@ -32,6 +32,8 @@ async def main():
         await pg.evaluate('__fake.login()'); await pg.wait_for_timeout(900)
         m = await pg.evaluate("[sgXfer('HND','NRT'), sgXfer('NRT','HND'), sgXfer('ITM','KIX'), sgXfer('ITM','UKB'), sgXfer('KIX','UKB'), sgXfer('CTS','OKD'), sgXfer('HND','ITM')]")
         check('空港を移る決まり（羽田⇔成田180・伊丹⇔関西180・伊丹⇔神戸170・関西⇔神戸190・新千歳⇔丘珠150）:', m == [180, 180, 180, 170, 190, 150, None])
+        df = await pg.evaluate("[sgDefFare('ANA'), sgDefFare('JAL'), sgDefFare('ANA', Date.parse('2026-04-01')), (() => { sgGet().pq = { d:null }; return sgFareNow('ANA'); })()]")
+        check('はじめの運賃は普通席（エコノミー）のフレックス:', df[:3] == ['ANA:E_FLEX', 'JAL:Y_FLEX', 'ANAO:FLEX'] and df[3] == 'ANA:E_FLEX')
         await pg.evaluate(f"sgGet().car = 'ANA'; sgGet().pq = {{ d:'{D}', home:'HND', start:'05:30', end:'23:00', mode:'count', fare:{{ ANA:'ANA:E_FLEX' }} }}; openShugyo('find')"); await pg.wait_for_timeout(900)
         legs = await pg.evaluate("SG_FIND.R.list.map(r => r.legs.map(f => f.no).join())")
         print('行程', legs)

@@ -1,6 +1,6 @@
 // 計画の画面の時刻表：ODPT のフライト時刻表を、曜日をまとめた行にするテスト
 import { assertEquals } from "jsr:@std/assert@1";
-import { calendarDays, isJpAirport, timetableRows } from "../functions/_shared/timetable.ts";
+import { calendarDays, isJpAirport, pickNo, timetableRows } from "../functions/_shared/timetable.ts";
 
 const item = (cal: string, dep: string, arr: string, objs: unknown[]) => ({ "odpt:calendar": `odpt.Calendar:${cal}`, "odpt:operator": "odpt.Operator:ANA",
   "odpt:originAirport": `odpt.Airport:${dep}`, "odpt:destinationAirport": `odpt.Airport:${arr}`, "odpt:flightScheduleObject": objs });
@@ -29,4 +29,14 @@ Deno.test("国際線・変な便名や時刻・期間の逆転は入れない。
     item("Monday", "HND", "CTS", [obj("9時", "10:30"), obj("08:00", "09:30", "ANA"), obj("08:00", "09:30", "NH51", "2027-01-01", "2026-12-01"), obj("23:50", "01:20", "NH99")])], "ANA", isJpAirport);
   assertEquals(rows.length, 1);
   assertEquals(rows[0].flight, "NH99"); assertEquals(rows[0].arr_day, 1);
+});
+
+Deno.test("共同運航の便は、ANA は NH・JAL は JL の番号を使う（なければ先頭）", () => {
+  assertEquals(pickNo(["6J81", "NH4781"], "ANA"), "NH4781");
+  assertEquals(pickNo(["NU101", "JL3601"], "JAL"), "JL3601");
+  assertEquals(pickNo(["HD13"], "ANA"), "HD13");
+  assertEquals(pickNo(null, "ANA"), "");
+  const rows = timetableRows([{ "odpt:originAirport": "odpt.Airport:HND", "odpt:destinationAirport": "odpt.Airport:OKA", "odpt:calendar": "odpt.Calendar:Monday",
+    "odpt:flightScheduleObject": [{ "odpt:flightNumber": ["6J81", "NH4781"], "odpt:originTime": "07:00", "odpt:destinationTime": "09:40" }] }], "ANA", () => true);
+  assertEquals(rows.map((r) => r.flight), ["NH4781"]);
 });

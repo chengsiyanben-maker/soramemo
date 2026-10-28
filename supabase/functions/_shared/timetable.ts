@@ -22,6 +22,14 @@ export function calendarDays(cal: unknown): number {
   return 0;
 }
 
+// 共同運航の便は番号がいくつも付く。ANA は NH、JAL は JL の番号を先に使う（なければ先頭）
+const OWN: Record<string, string> = { ANA: "NH", JAL: "JL" };
+export function pickNo(nos: unknown, operator: string): string {
+  const list = Array.isArray(nos) ? nos.map((x) => String(x ?? "")).filter(Boolean) : [];
+  const own = OWN[operator];
+  return (own && list.find((x) => x.startsWith(own))) || list[0] || "";
+}
+
 // deno-lint-ignore no-explicit-any
 export function timetableRows(items: any[], operator: string, isDomestic: (iata: string) => boolean): TimetableRow[] {
   const out = new Map<string, TimetableRow>();
@@ -29,7 +37,7 @@ export function timetableRows(items: any[], operator: string, isDomestic: (iata:
     const dep = apt(it?.["odpt:originAirport"]), arr = apt(it?.["odpt:destinationAirport"]), days = calendarDays(it?.["odpt:calendar"]);
     if (!dep || !arr || dep === arr || !days || !isDomestic(dep) || !isDomestic(arr)) continue;
     for (const f of Array.isArray(it["odpt:flightScheduleObject"]) ? it["odpt:flightScheduleObject"] : []) {
-      const no = Array.isArray(f?.["odpt:flightNumber"]) ? String(f["odpt:flightNumber"][0] ?? "") : "";
+      const no = pickNo(f?.["odpt:flightNumber"], operator);
       const t1 = hm(f?.["odpt:originTime"]), t2 = hm(f?.["odpt:destinationTime"]);
       const from = day(f?.["odpt:isValidFrom"]) ?? "2000-01-01", to = day(f?.["odpt:isValidTo"]) ?? "2099-12-31";
       if (!/^[A-Z0-9]{2}\d{1,4}[A-Z]?$/.test(no) || !t1 || !t2 || from > to) continue;

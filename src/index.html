@@ -8292,6 +8292,8 @@ function sgLeg(car, fromId, toId, fare, t, price, g = sgGet()){
 }
 const sgFareKey = (car, t) => car === "JAL" ? "JAL" : (t || Date.now()) >= ANA_NEW_FROM ? "ANA" : "ANAO";
 const sgCode = (car, id, t) => `${sgFareKey(car, t)}:${id}`;
+// はじめの運賃は普通席（エコノミー）のフレックス。上の席は利用者が選んだときだけ
+const sgDefFare = (car, t) => { const k = sgFareKey(car, t); return `${k}:${k === "JAL" ? "Y_FLEX" : k === "ANAO" ? "FLEX" : "E_FLEX"}`; };
 // JAL の FLY ON ステイタス（FOP だけ、または回数＋FOP）
 const sgJalTiers = y => [{ k:"crystal", name:"クリスタル", fop:30000, n:30, nf:10000 }, { k:"sapphire", name:"サファイア", fop:50000, n:50, nf:15000 },
   { k:"jgcp", name:y >= 2027 ? "JMBプレミア" : "JGCプレミア", fop:80000, n:80, nf:25000, jgc:y < 2027 }, { k:"diamond", name:"ダイヤモンド", fop:100000, n:120, nf:35000 }];
@@ -8368,7 +8370,7 @@ const SG_TRIPS = [["HND", "OKA", "HND"], ["HND", "OKA", "ISG", "HND"], ["HND", "
 function sgTrip(car){
   const g = sgGet();
   if(g.trip && g.trip.car === car && Array.isArray(g.trip.legs) && g.trip.legs.length) return g.trip;
-  const fav = favoriteRoute(car), fare = fav.fare && fav.fare.startsWith(sgFareKey(car) + ":") ? fav.fare : sgCode(car, car === "JAL" ? "J_FLEX" : "F_FLEX");
+  const fav = favoriteRoute(car), fare = fav.fare && fav.fare.startsWith(sgFareKey(car) + ":") ? fav.fare : sgDefFare(car);
   g.trip = { car, d:null, legs:[{ from:fav.from, to:fav.to, fare }, { from:fav.to, to:fav.from, fare }] }; g.trip.legs.forEach(l => l.price = sgPriceFor(car, l.from, l.to, l.fare.split(":")[1]));
   return g.trip;
 }
@@ -8701,7 +8703,7 @@ function sgQuick(){
     const goal = sgGoal(car, Y), cur = Y[car].pts, unit = car === "JAL" ? "FOP" : "PP";
     return `<div class="sg-card ${car === "ANA" ? "dark" : "red"}"><b>${car}</b><small>${esc(b.r[1].split("：").pop())}</small><small class="m">マイル</small><b class="xl">${fmtKm(b.L.fm * x2)}</b><small class="m">${car === "JAL" ? "FLY ON ポイント" : "プレミアムポイント"}</small><b class="xl gold">${fmtKm(b.L.pts * x2)}</b>
       <small>${car === "JAL" ? `回数 +${x2}・Life Status +${5 * x2}<br>` : ""}${esc(goal.name)}まで あと ${fmtKm(Math.max(0, goal.pts - cur))} → <b>${fmtKm(Math.max(0, goal.pts - cur - b.L.pts * x2))}</b></small></div>`; };
-  const mc = SG_QCAR, mine = g.qm && g.qm.car === mc ? g.qm : { car:mc, fare:sgCode(mc, mc === "JAL" ? "J_FLEX" : "F_FLEX", t), price:null };
+  const mc = SG_QCAR, mine = g.qm && g.qm.car === mc ? g.qm : { car:mc, fare:sgDefFare(mc, t), price:null };
   const ML = sgLeg(mc, q.from, q.to, mine.fare, t, mine.price), prof = mc === "JAL" ? [SG_JST[g.jal.status] !== "なし" && `JMB${SG_JST[g.jal.status]}`, g.jal.jgc && "JGC", g.jal.card !== "none" && "JALカード " + SG_JCARD[g.jal.card], g.jal.smp && "ショッピングマイル・プレミアム", g.jal.pay && "JALカードで払う"]
     : [g.ana.status !== "none" && SG_AST[g.ana.status] + (g.ana.status !== "sfc" ? `（${g.ana.yr >= 2 ? "2年以上" : "1年目"}）` : ""), g.ana.card !== "none" && "ANAカード " + SG_ACARD[g.ana.card], g.ana.pay && "ANAカードで払う"];
   const F = { all:() => true, mate:r => /スカイメイト|シニア|ユース|U25/.test(r[1]), kabu:r => /株主/.test(r[1]), saver:r => /セイバー|スタンダード|シンプル|VALUE/.test(r[1]) };
@@ -8907,7 +8909,7 @@ function sgBuild(){
       <div class="sg-chips">${[["all", "すべて"], ["home", `${placeShort(B.home)}へ帰る`], ["other", "ほかの空港へ"]].map(([k, l]) => `<button type="button" data-sg-bf="${k}" aria-pressed="${SG_BF === k}">${esc(l)}</button>`).join("")}</div>
       <div class="sg-card list">${cand}</div>
       ${hidden.length ? `<p class="sg-note">${hidden.length}便は、乗り継ぎが決まり（${sgMct(car, car, ap)}分）より短いので出していません（${esc(hidden.slice(0, 2).map(f => `${sgHM(f.d)}発 ${f.no.slice(0, 2)} ${f.no.slice(2)}`).join("・"))}）。</p>` : ""}`
-      : `<p class="sg-note">時刻表を読んでいます…</p>`}
+      : `<p class="sg-note">${SERVER ? "時刻表を読んでいます…" : "時刻表から組むのは、サーバー版で使えます。"}</p>`}
     <div class="sgbar"><div class="sg-sp2"><span class="hh">${SG_TAG_C}<b>この行程の分</b></span><small>${legs.length}区間・${!legs.length ? "まだ区間がありません" : atHome ? `${sgHM(last.a)}に${esc(placeShort(B.home))}着` : "帰りがまだ"}</small></div>
       <div class="sg-sp2"><b class="pts">+${fmtKm(pts)}<small> ${unit}</small></b><small>${yen ? `${fmtKm(yen)}円・1${unit} ${Math.round(yen / pts * 10) / 10}円` : legs.length ? (priced ? `金額は${priced}区間ぶん（全部入れると1${unit}あたりを出します）` : "区間ごとに金額を入れると、1" + unit + "あたりを出します") : ""}</small></div>
       <div class="sg-2b"><button class="sg-btn ghost" data-sg-savedraft type="button" ${legs.length ? "" : "disabled"}>案として残す</button><button class="sg-btn" data-sg-buildplan type="button" ${legs.length ? "" : "disabled"}>予定に入れる</button></div>
@@ -9168,7 +9170,7 @@ document.addEventListener("click", async e => {
   if(t.closest("[data-sg-swap]")){ const q = g.q || {}; g.q = { from:q.to, to:q.from }; sgKeep(() => {}); return; }
   const rc = t.closest("[data-sg-recent]"); if(rc){ const [a, b] = rc.dataset.sgRecent.split("-").map(Number); g.q = { from:a, to:b }; sgKeep(() => {}); return; }
   const qf = t.closest("[data-sg-qf]"); if(qf){ SG_QF = qf.dataset.sgQf; sgKeep(() => {}); return; }
-  if(t.closest("[data-sg-q2trip]") || t.closest("[data-sg-q2plan]")){ const q = g.q, car = SG_QCAR, fare = g.qm && g.qm.car === car ? g.qm.fare : sgCode(car, car === "JAL" ? "J_FLEX" : "F_FLEX"), price = g.qm && g.qm.car === car ? g.qm.price : null;
+  if(t.closest("[data-sg-q2trip]") || t.closest("[data-sg-q2plan]")){ const q = g.q, car = SG_QCAR, fare = g.qm && g.qm.car === car ? g.qm.fare : sgDefFare(car), price = g.qm && g.qm.car === car ? g.qm.price : null;
     const legs = [{ from:q.from, to:q.to, fare, price }]; if(SG_QSIDE === "round") legs.push({ from:q.to, to:q.from, fare, price:sgPriceFor(car, q.to, q.from, fare.split(":")[1]) || price });
     g.car = car; g.trip = { car, d:null, legs }; SG_LEG = 0; await sgSave(); sgGo("planner"); return; }
   const pk = t.closest("[data-sg-pick]"); if(pk){ const [o, k] = pk.dataset.sgPick.split("."); g[o][k] = k === "yr" ? +pk.dataset.v : k === "conv" ? Number(pk.dataset.v) : pk.dataset.v; sgKeep(() => {}); return; }
