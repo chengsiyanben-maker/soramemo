@@ -49,7 +49,7 @@ async def main():
         check('撮影地のボタンが並ぶ:', n_spots >= 3)
         sel = await pg.inner_text('#opsPhoto .spsees'); print('SEL', sel.replace('\n', ' | '))
         check('選んでいる撮影地と見える線:', '見える：' in sel and '着陸' in sel)
-        check('黒い面は1つだけ・黒い札はない:', await pg.evaluate("[...document.querySelectorAll('#opsPhoto *')].filter(e => { const c = getComputedStyle(e).backgroundColor.match(/\\d+/g); return c && c.length >= 3 && (c.length < 4 || +c[3] > 0) && +c[0] < 60 && +c[1] < 60 && +c[2] < 60 && e.offsetWidth > 120; }).length") == 1 and await pg.locator('#opsPhoto .sprow em').count() == 0)
+        check('ストリップ・黒い面と黒い札と中黒はない:', await pg.evaluate("[...document.querySelectorAll('#opsPhoto *')].filter(e => { const c = getComputedStyle(e).backgroundColor.match(/\\d+/g); return c && c.length >= 3 && (c.length < 4 || +c[3] > 0) && +c[0] < 60 && +c[1] < 60 && +c[2] < 60 && e.offsetWidth > 120; }).length") == 0 and await pg.locator('#opsPhoto .spstrip').count() == 1 and await pg.locator('#opsPhoto .sprow em').count() == 0 and '・' not in t)
         before = await pg.locator('#opsPhoto .sprow').count()
         btns = pg.locator('#opsPhoto [data-spspot]:not([disabled])')
         names = [await btns.nth(i).get_attribute('data-spspot') for i in range(await btns.count())]
@@ -93,7 +93,7 @@ async def main():
         hm = lambda m: (now + timedelta(minutes=m)).astimezone(timezone(timedelta(hours=9))).strftime('%H:%M')
         print('DEP', t2.replace('\n', ' | '))
         await pg.locator('#opsPhoto .sphero').scroll_into_view_if_needed(); await pg.screenshot(path=os.path.join(WORK, 't63_dep.png'), full_page=True)
-        check('離陸は離陸の時刻、下に出発の時刻:', f'{hm(31)}\n↑ 離陸\n出発 {hm(15)}' in t2)
+        check('離陸は離陸の時刻、下に出発の時刻:', f'{hm(31)}\n離陸\n出発 {hm(15)}' in t2)
         check('出発してまだ離陸していない便も出る:', 'NH50' in t2 and f'出発 {hm(-8)}' in t2)
         check('離陸の時刻の順:', t2.index('NH50') < t2.index('NH106') and [x.split('@')[0] for x in await pg.evaluate("SP_ITEMS.filter(x => x.dir === 'dep').map(x => x.fl + '@')")] == ['NH50', 'NH106', 'BC101', 'JL903'])
         await pg.locator('#opsPhoto .sprow').first.click(); await pg.wait_for_timeout(300)
