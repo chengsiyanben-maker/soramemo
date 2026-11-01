@@ -69,6 +69,7 @@ export const LIVERIES: Livery[] = [
   { reg: "A7-BEG", name: "F1塗装（777-300ER）", airline: "カタール航空", src: "https://www.aviationwire.jp/archives/334196" },
   { reg: "A7-BED", name: "UEFAチャンピオンズリーグ塗装（777-300ER）", airline: "カタール航空", src: "https://www.planespotters.net/photo/news/archive/2025/05" },
   { reg: "D-AIXL", name: "100周年記念塗装（A350-900）", airline: "ルフトハンザ", src: "https://newsroom.lufthansagroup.com/en/lufthansa-anniversary-fleet-grows-now-also-includes-a320-and-a350-with-xxl-crane/" },
+  { reg: "D-ABYN", name: "100周年記念塗装（747-8）", airline: "ルフトハンザ", src: "https://newsroom.lufthansagroup.com/en/queen-of-the-skies-now-also-features-xxl-crane-for-100th-founding-anniversary/" },   // 2026-11-01 に足した
   { reg: "A6-EUH", name: "テニス4大大会塗装（A380）", airline: "エミレーツ航空", src: "https://www.aviationwire.jp/archives/336511" },
   { reg: "A6-EXR", name: "This Flag Will Always Fly（A350）", airline: "エミレーツ航空", src: "https://www.planespotters.net/photo/news/archive/2026/06" },
   { reg: "A6-EOE", name: "アーセナル優勝塗装（A380）", airline: "エミレーツ航空", src: "https://www.planespotters.net/photo/news/archive/2026/05" },
