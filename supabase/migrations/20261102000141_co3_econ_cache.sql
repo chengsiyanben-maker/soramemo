@@ -50,3 +50,37 @@ $b$$f$, fn, res, replace(sp, 'search_path=', ''), 'co3.cache_' || fn, fn || '_ca
   end loop;
 end
 $do$;
+
+-- 混雑空港の申し込みの合計（co3_slot_totals）も同じように使い回す（路線ごと・便数の案ごとに呼ばれ、1回の表示で300回を超えていた）
+do $do$
+declare res text; cols text; sp text;
+begin
+  if to_regprocedure('public.co3_slot_totals_calc()') is null then
+    execute 'alter function public.co3_slot_totals() rename to co3_slot_totals_calc';
+  end if;
+  select pg_get_function_result('public.co3_slot_totals_calc()'::regprocedure),
+         coalesce((select array_to_string(p.proconfig, ',') from pg_proc p where p.oid = 'public.co3_slot_totals_calc()'::regprocedure), 'search_path=public')
+    into res, sp;
+  cols := substring(res from '^TABLE\((.*)\)$');
+  if cols is null then raise exception 'co3_slot_totals の形が違う: %', res; end if;
+  execute format($f$
+create or replace function public.co3_slot_totals() returns %1$s
+language plpgsql stable security definer set search_path = %2$s as $b$
+declare
+  k text := pg_backend_pid() || '|' || now()::text || '|' || coalesce(current_setting('co3.season_day', true), '') || '|' || co3.xact_writes();
+  c text := current_setting('co3.cache_slot_totals', true);
+  j jsonb;
+begin
+  if c is not null and c <> '' and split_part(c, chr(1), 1) = k then
+    j := split_part(c, chr(1), 2)::jsonb;
+  else
+    select coalesce(jsonb_agg(to_jsonb(t) order by t.ordinality), '[]'::jsonb) into j from public.co3_slot_totals_calc() with ordinality t;
+    perform set_config('co3.cache_slot_totals', k || chr(1) || j::text, true);
+  end if;
+  return query select * from jsonb_to_recordset(j) as x(%3$s);
+end;
+$b$$f$, res, replace(sp, 'search_path=', ''), cols);
+  execute 'revoke all on function public.co3_slot_totals() from public, anon, authenticated';
+  execute 'revoke all on function public.co3_slot_totals_calc() from public, anon, authenticated';
+end
+$do$;

@@ -20,8 +20,13 @@
 #playMenu button.danger{color:#A3321F;border-color:#EBC9C2}
 #playMenu p{margin:0;color:#5F6672;font-size:12px;line-height:1.6}
 #playMenu .row{display:flex;gap:8px}#playMenu .row button{flex:1}
+#playBusy{position:fixed;left:50%;transform:translateX(-50%);top:calc(env(safe-area-inset-top,0px) + 10px);z-index:999;display:flex;align-items:center;gap:8px;padding:7px 14px;border-radius:999px;background:#13213D;color:#fff;font-family:var(--gothic,system-ui,sans-serif);font-size:12px;font-weight:700;box-shadow:0 8px 24px -8px rgba(6,12,24,.5);pointer-events:none}
+#playBusy span{width:12px;height:12px;border-radius:50%;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;animation:playSpin .8s linear infinite}
+@keyframes playSpin{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){#playBusy span{animation:none}}
 </style>
 <div id="playLoad" role="status" aria-live="polite"><b>SORAMEMO</b><i aria-hidden="true"></i><p>試遊版を準備しています</p></div>
+<div id="playBusy" role="status" aria-live="polite" hidden><span aria-hidden="true"></span>計算しています</div>
 <div id="playBar" role="region" aria-label="試遊版の操作">
   <span class="pd"><small>試遊版</small><b id="playDay">0日目</b></span>
   <button type="button" id="playAdv1">1日進める</button>
