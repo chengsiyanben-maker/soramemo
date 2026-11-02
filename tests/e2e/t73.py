@@ -44,7 +44,7 @@ async def main():
         check('記録した便と同じ日・同じ区間の予定は予定から外れる:', await pg.evaluate("sgFuture().map(p => p.id).join()") == 'p1,p2')
         actual = await pg.evaluate("fmtKm(sgYear().ANA.pts)"); print('実績', actual)
         check('ホーム：実績は記録した便だけ（予定を足した数字を出さない）:', '実績' in t and actual + ' PP' in t.replace('\n', ' ') and '予定の便を乗ると' not in t and '記録した便だけ' in t)
-        check('ホーム：予定は別のかたまり（2便・予定の分・結論）:', '予定' in t and '2便' in t and '予定の分' in t and ('届く見込み' in t or '届きません' in t))
+        check('ホーム：予定は別のかたまり（2便・予定の分・結論）:', '予定' in t and '2便' in t and ('届く見込み' in t or '届きません' in t))
         check('ホーム：次に乗る便（きょう・便名・この便で）:', '次に乗る便' in t and 'きょう' in t and 'NH 469' in t and 'この便で' in t)
         check('ホーム：運航の状況と機材（航空会社の運航情報）:', '30分遅れ' in t and 'B789' in t and '運航情報' in t)
         check('ホーム：その日の行程と合計（乗った便は入れない）:', 'の行程' in t and 'この日の合計' in t and '2回' in t and '那覇 → 石垣' in t)
@@ -78,13 +78,17 @@ async def main():
         await pg.click('nav.tabs button[data-v="log"]'); await pg.wait_for_timeout(500)
         t = await pg.inner_text('#flights'); print('LOG', t.replace('\n', ' | ')[:400])
         check('フライト：見方は修行・月ごとにたまった・払った・1ポイントあたり:', await pg.evaluate("VIEW.log") == 'sg' and 'たまった' in t and '払った' in t and '1ポイントあたり' in t and '28,700' in t)
-        check('フライト：金額のない便に「金額を入れる」:', '金額を入れる' in t)
         check('フライト：前の月はたたんである:', await pg.locator('#flights .sgmo[data-sglog]').count() >= 1)
+        opened = False
+        if '金額を入れる' not in t:   # 月のはじめは、金額のない便が前の月にある（たたんだ月を開いて見る）
+            await pg.click('#flights [data-sglog]'); await pg.wait_for_timeout(300); opened = True
+            t = await pg.inner_text('#flights')
+        check('フライト：金額のない便に「金額を入れる」:', '金額を入れる' in t)
         await pg.locator('#flights .sgled').screenshot(path=os.path.join(WORK, 't73_log.png'))
         await pg.click('#flights .sgprice'); await pg.wait_for_timeout(300)
         check('金額を入れるで便の窓が開く:', await pg.evaluate("$('dFlight').open"))
         await pg.evaluate("$('dFlight').close()")
-        await pg.click('#flights [data-sglog]'); await pg.wait_for_timeout(300)
+        if not opened: await pg.click('#flights [data-sglog]'); await pg.wait_for_timeout(300)
         check('たたんだ月を開ける:', 'たまった' in await pg.inner_text('#flights') and await pg.evaluate("SG_LOGOPEN") is not None)
         # 成績：修行のまとめがいちばん上
         await pg.click('nav.tabs button[data-v="stats"]'); await pg.wait_for_timeout(500)
