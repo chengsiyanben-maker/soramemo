@@ -1,0 +1,60 @@
+<!-- 試遊版だけ：読み込み中の幕と、時間を進める帯 -->
+<style>
+#playLoad{position:fixed;inset:0;z-index:999;background:#13213D;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:24px max(24px,env(safe-area-inset-right,0px)) 24px max(24px,env(safe-area-inset-left,0px));text-align:center;font-family:var(--gothic,system-ui,sans-serif)}
+#playLoad b{font-family:var(--sign,system-ui);font-size:40px;letter-spacing:.06em}
+#playLoad p{margin:0;font-size:14px;opacity:.8;line-height:1.7;max-width:22em}
+#playLoad i{width:120px;height:4px;border-radius:2px;background:rgba(255,255,255,.18);overflow:hidden;position:relative}
+#playLoad i::after{content:"";position:absolute;inset:0;width:40%;background:#fff;border-radius:2px;animation:playBar 1.2s ease-in-out infinite alternate}
+@keyframes playBar{from{transform:translateX(-10%)}to{transform:translateX(160%)}}
+@media (prefers-reduced-motion:reduce){#playLoad i::after{animation:none}}
+#playBar{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom,0px) + 96px);z-index:998;display:flex;align-items:center;gap:6px;padding:5px 6px 5px 12px;border-radius:999px;background:#13213D;color:#fff;box-shadow:0 8px 24px -8px rgba(6,12,24,.5);font-family:var(--gothic,system-ui,sans-serif);font-size:12px;max-width:calc(100vw - 24px);white-space:nowrap}
+#playBar .pd{display:flex;flex-direction:column;line-height:1.15;margin-right:4px}
+#playBar .pd small{font-size:10px;opacity:.7}
+#playBar .pd b{font-family:var(--sign,system-ui);font-size:15px;font-variant-numeric:tabular-nums}
+#playBar button{font:inherit;font-size:12px;font-weight:700;height:30px;padding:0 11px;border-radius:15px;border:0;background:#fff;color:#13213D;cursor:pointer}
+#playBar button.ghost{background:rgba(255,255,255,.14);color:#fff}
+#playBar button:focus-visible{outline:2px solid #8FB4FF;outline-offset:2px}
+#playBar button[disabled]{opacity:.5;cursor:default}
+#playMenu{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom,0px) + 140px);z-index:998;width:min(340px,calc(100vw - 32px));background:#fff;color:#2A2F38;border-radius:18px;box-shadow:0 18px 40px -12px rgba(6,12,24,.35);padding:14px;display:flex;flex-direction:column;gap:8px;font-family:var(--gothic,system-ui,sans-serif);font-size:13px}
+#playMenu button{font:inherit;font-weight:700;height:40px;border-radius:20px;border:1px solid #D9DCE1;background:#fff;color:#13213D;cursor:pointer}
+#playMenu button.danger{color:#A3321F;border-color:#EBC9C2}
+#playMenu p{margin:0;color:#5F6672;font-size:12px;line-height:1.6}
+#playMenu .row{display:flex;gap:8px}#playMenu .row button{flex:1}
+</style>
+<div id="playLoad" role="status" aria-live="polite"><b>SORAMEMO</b><i aria-hidden="true"></i><p>試遊版を準備しています</p></div>
+<div id="playBar" role="region" aria-label="試遊版の操作">
+  <span class="pd"><small>試遊版</small><b id="playDay">0日目</b></span>
+  <button type="button" id="playAdv1">1日進める</button>
+  <button type="button" class="ghost" id="playMore" aria-expanded="false" aria-controls="playMenu">ほか</button>
+</div>
+<div id="playMenu" hidden>
+  <button type="button" id="playAdv7">7日進める（1分半ほどかかります）</button>
+  <button type="button" id="playCash">資金を10億円足す（試遊用）</button>
+  <p>試遊版は、本番と同じ計算をこの端末の中で動かしています。便の記録は本物に似せた見本で、本番のデータとは別です。1日進めるたびに、本番の毎日の処理（満足度・トラブル・故障・ランキングなど）も流れます。チェックインと地図の背景は使えません。</p>
+  <button type="button" class="danger" id="playReset">はじめから（見本の会社に戻す）</button>
+  <p id="playResetNote" hidden>もう一度押すと、進めた日と買った機体がすべて消えます。</p>
+</div>
+<script>
+(function(){
+  const $p = (id) => document.getElementById(id);
+  const busy = (on, label) => { ["playAdv1","playMore","playAdv7","playCash","playReset"].forEach(id => $p(id).disabled = on); if(label) $p("playAdv1").textContent = label; };
+  async function refresh(){
+    try{ const i = await window.play.info(); $p("playDay").textContent = i.d + "日目"; }catch(e){}
+    try{ if(typeof reload === "function") await reload(); }catch(e){}
+    try{ if(typeof loadCompanyServer === "function"){ await loadCompanyServer(); DIRTY.game = true; renderVisible(); } }catch(e){}
+  }
+  async function adv(n){
+    $p("playMenu").hidden = true; $p("playMore").setAttribute("aria-expanded", "false");
+    busy(true, n === 1 ? "進めています" : n + "日ぶん進めています");
+    try{ await window.play.advance(n); await refresh(); }catch(e){ console.error(e); $p("playDay").textContent = "進められませんでした"; }
+    busy(false, "1日進める");
+  }
+  window.addEventListener("play-ready", refresh);
+  $p("playAdv1").onclick = () => adv(1);
+  $p("playAdv7").onclick = () => adv(7);
+  $p("playMore").onclick = () => { const m = $p("playMenu"); m.hidden = !m.hidden; $p("playMore").setAttribute("aria-expanded", String(!m.hidden)); };
+  $p("playCash").onclick = async () => { busy(true); try{ await window.play.addCash(100000); await refresh(); }finally{ busy(false); } };
+  let armed = false;
+  $p("playReset").onclick = () => { if(!armed){ armed = true; $p("playResetNote").hidden = false; $p("playReset").textContent = "本当にはじめからにする"; return; } window.play.reset(); };
+})();
+</script>
