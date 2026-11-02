@@ -93,6 +93,7 @@ $$;
 
 -- 1日進める：その日の終わりの記録 → すべての日時を1日前へずらす（＝時間が1日進む） → 新しい日の便 → 毎日の処理（本番の毎日の処理と同じ順）
 create table play.state (k text primary key, v text);
+create table play.job_errors (at timestamptz default now(), job text, err text);   -- 毎日の処理で止まったもの（調べるとき用）
 insert into play.state values ('day', '0');
 
 create or replace function play.shift_all(p_days int) returns void
@@ -129,7 +130,7 @@ begin
     'select public.co3_month_close() where extract(day from (now() at time zone ''Asia/Tokyo'')) = 1',
     'select public.co3_trouble_detect()', 'select public.co3_trouble_expire()', 'select public.co3_legs_check()']
   loop
-    begin execute j; exception when others then raise notice '% : %', j, sqlerrm; end;
+    begin execute j; exception when others then raise notice '% : %', j, sqlerrm; insert into play.job_errors (job, err) values (j, sqlerrm); end;
   end loop;
 end;
 $$;
@@ -139,7 +140,7 @@ language plpgsql as $$
 declare i int; today date;
 begin
   for i in 1..greatest(1, least(p_days, 31)) loop
-    begin perform public.co3_daily_record(); exception when others then raise notice 'daily_record: %', sqlerrm; end;
+    begin perform public.co3_daily_record(); exception when others then raise notice 'daily_record: %', sqlerrm; insert into play.job_errors (job, err) values ('co3_daily_record', sqlerrm); end;
     perform play.shift_all(1);
     today := (now() at time zone 'Asia/Tokyo')::date;
     perform play.make_day(today);

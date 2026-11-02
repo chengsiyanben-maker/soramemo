@@ -87,4 +87,9 @@ await db.exec(`update ops.flags set value = 'false' where key = 'co_v3'`);
 const up2 = Number((await as(A, `select public.co_state()`)).upkeep);
 check('維持費：オンなら機種の表（48＋30＋B787-8 の25×1.3＝32.5 → 111）・オフなら co-v2', up3 === 111 && up2 !== up3, { up3, up2 });
 
+// 乗ったことのある機体は、見た機体の一覧に出さない（「買える」から乗った機体として買う）。11/02 の一通りの確かめで見つけた
+await db.exec(`insert into flights (user_id, from_airport, to_airport, dep_at, arr_at, distance_km, flight_no, airline)
+    select '${A}', ${ids.NRT}, ${ids.HND}, h.std, h.std + interval '1 hour', 60, 'JL3', 'JL' from flight_history h where h.reg = 'JA731J'`);
+check('乗った機体（JA731J）は見た機体の一覧から外れる', !(await as(A, `select public.co3_seen_list()`)).some((x) => x.reg === 'JA731J'), null);
+
 if (bad) { console.log(`NG ${bad}`); process.exit(1); } else console.log('すべて OK');
