@@ -30,6 +30,9 @@ async def main():
             body = BOARD if name == 'airport_board' else REGS if name == 'spot_regs' else []
             await r.fulfill(status=200, body=json.dumps(body), content_type='application/json', headers={'Access-Control-Allow-Origin':'*'})
         await c.route('https://fake.supabase.co/rest/v1/rpc/**', rpc)
+        INFO = [{'iata': 'HND', 'name': '第1ターミナル 展望デッキ', 'open_kind': 'hours', 'open_from': '06:30:00', 'open_to': '22:00:00', 'open_note': '6階の展望デッキ（南・北）と屋上', 'access': '京急線・東京モノレールの第1ターミナルの駅から、ターミナルの6階へ', 'parking': '空港の有料駐車場', 'rules': ['個人の趣味の撮影は申請なしでできます'], 'contact': '羽田空港ターミナルインフォメーション 03-5757-8111', 'sources': [{'title': '羽田空港 展望デッキ', 'url': 'https://tokyo-haneda.com/text/service/facilities/observation_deck.html'}], 'checked_on': '2026-11-02'},
+                {'iata': 'HND', 'name': '京浜島つばさ公園', 'open_kind': 'always', 'open_from': None, 'open_to': None, 'open_note': '24時間・無料', 'access': None, 'parking': '有料駐車場あり', 'rules': [], 'contact': '大井ふ頭中央海浜公園 管理事務所 03-3790-2378', 'sources': [], 'checked_on': '2026-11-02'}]
+        await c.route('https://fake.supabase.co/rest/v1/spot_info**', lambda r: r.fulfill(status=200, body=json.dumps(INFO), content_type='application/json', headers={'Access-Control-Allow-Origin':'*'}))
         FG = {'planes': [{'flight': 'TG660', 'airline': 'TG', 'other': 'BKK', 'kind': 'arr', 'status': 'approach', 'km': 40, 'alt_ft': 6000, 'type': 'A359'}]}
         await c.route('https://fake.supabase.co/functions/v1/airport-foreign**', lambda r: r.fulfill(status=200, body=json.dumps(FG), content_type='application/json', headers={'Access-Control-Allow-Origin':'*'}))
         NOWD = {'weather': {'time': iso(-10), 'wdir': 340, 'wspd': 12, 'wgst': None, 'vis_m': 10000, 'vis_plus': True, 'sky': '晴れ', 'ceil_ft': None, 'temp': 16, 'dewp': 14, 'low_ft': 1800, 'layers': [{'cover': 'FEW', 'base': 1800}, {'cover': 'SCT', 'base': 4500}]},
@@ -47,6 +50,19 @@ async def main():
         # 撮影地ごとの絞り込み
         n_spots = await pg.locator('#opsPhoto [data-spspot]').count()
         check('撮影地のボタンが並ぶ:', n_spots >= 3)
+        # 撮影地の情報：シート・電話・出典・記載がないもの・閉まっている時間
+        await pg.click('#opsPhoto [data-spinfo]'); await pg.wait_for_timeout(300)
+        ti = await pg.inner_text('#dSpotInfo'); print('INFO', ti.replace('\n', ' | ')[:400])
+        check('撮影地の情報のシート:', await pg.evaluate("$('dSpotInfo').open") and 'いま開いています' in ti and '22:00まで' in ti and '京急線' in ti and '2026年11月2日' in ti and '羽田空港 展望デッキ' in ti)
+        check('問い合わせは電話のリンク:', await pg.locator('#dSpotInfo a[href="tel:0357578111"]').count() == 1)
+        await pg.screenshot(path=os.path.join(WORK, 't63_info.png'))
+        await pg.click('#dSpotInfo [data-close]'); await pg.wait_for_timeout(200)
+        oc = await pg.evaluate("""() => { const t = Date.parse('2026-11-02T14:00:00Z');   // 日本時間 23:00
+          return [spOpenState('HND', '第1ターミナル 展望デッキ', t), spOpenState('HND', '京浜島つばさ公園', t), spOpenState('HND', '城南島海浜公園', t)]; }""")
+        print('OPEN', oc)
+        check('夜は閉まっている・24時間・分からない:', oc[0]['open'] is False and oc[0]['from'] == '6:30' and oc[1]['open'] is True and oc[2]['open'] is None)
+        nh = await pg.evaluate("(() => { const x = spInfoOf('HND', '京浜島つばさ公園'); return spInfoHTML('HND', '京浜島つばさ公園'); })()")
+        check('記載がない項目は「公式の案内に記載がありません」:', '公式の案内に記載がありません' in nh and '24時間' in nh)
         sel = await pg.inner_text('#opsPhoto .spsees'); print('SEL', sel.replace('\n', ' | '))
         check('選んでいる撮影地と見える線:', '見える：' in sel and '着陸' in sel)
         check('ストリップ・黒い面と黒い札と中黒はない:', await pg.evaluate("[...document.querySelectorAll('#opsPhoto *')].filter(e => { const c = getComputedStyle(e).backgroundColor.match(/\\d+/g); return c && c.length >= 3 && (c.length < 4 || +c[3] > 0) && +c[0] < 60 && +c[1] < 60 && +c[2] < 60 && e.offsetWidth > 120; }).length") == 0 and await pg.locator('#opsPhoto .spstrip').count() == 1 and await pg.locator('#opsPhoto .sprow em').count() == 0 and '・' not in t)

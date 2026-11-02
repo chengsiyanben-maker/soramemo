@@ -2355,6 +2355,23 @@ nav.tabs{transition:transform .3s cubic-bezier(.2,.8,.2,1),opacity .2s}
 .pcard .ptl li>i.band{width:4px;height:24px;border-radius:2px;background:var(--strip-arr)}.pcard .ptl li.dep>i.band{background:var(--strip-dep)}
 .pcard .ptl .t{font-family:var(--sign);font-size:17px;font-weight:700;width:46px}
 .pcard .ptl .n b{font-family:var(--sign);font-size:15px;letter-spacing:.02em}.pcard .ptl .n small .pt+.pt{margin-left:8px}
+
+/* 撮影地の情報（11-02） */
+#v-ops .spinfolink{display:block;border:0;background:none;padding:6px 6px 0;font:700 12px var(--gothic);color:var(--op-ink);text-decoration:underline;text-underline-offset:3px}
+.spinfo h4{margin:2px 0 0;font-size:18px;font-weight:900}
+.spinfo .state{display:flex;align-items:baseline;gap:10px;margin:8px 0 0}
+.spinfo .st{display:inline-flex;align-items:center;gap:7px;font-weight:800;font-size:14px}.spinfo .st i{width:8px;height:8px;border-radius:50%;background:#9AA1AB}
+.spinfo .st.on i{background:#2F8F5B}.spinfo .st.off i{background:#B4483E}
+.spinfo .sub{font-size:12px;color:var(--s-mute)}
+.spinfo .note{margin:4px 0 0;font-size:12px;color:var(--s-mute);line-height:1.6}
+.spinfo dl{display:grid;grid-template-columns:76px minmax(0,1fr);margin:14px 0 0}
+.spinfo dt,.spinfo dd{margin:0;padding:11px 0;font-size:13px;line-height:1.6}
+.spinfo dt{color:var(--s-mute);font-size:12px}
+.spinfo dt:not(:first-of-type),.spinfo dt:not(:first-of-type)+dd{box-shadow:inset 0 1px 0 var(--s-line)}
+.spinfo dd ul{margin:0;padding-left:18px}.spinfo dd li+li{margin-top:3px}
+.spinfo dd a{color:var(--s-ink);font-weight:800}.spinfo dd small{display:block;font-size:11.5px;color:var(--s-mute)}
+.spinfo .none{color:var(--s-mute)}
+.spinfo .src{margin:12px 0 0;font-size:11.5px;color:var(--s-mute);line-height:1.6}.spinfo .src a{display:block;margin-top:6px;color:var(--s-ink)}
 </style>
 </head>
 <body>
@@ -2745,6 +2762,7 @@ nav.tabs{transition:transform .3s cubic-bezier(.2,.8,.2,1),opacity .2s}
 <dialog id="dPersona" class="psheet" aria-labelledby="pTitle"><div class="dlg" id="dPersonaBody"></div></dialog>
 <dialog id="dSpotFl" class="spsheet" aria-label="来る機体のくわしく"><div class="dlg" id="dSpotFlBody"></div></dialog>
 <dialog id="dSpotCond" class="spfull" aria-label="撮影条件と天気"><div class="dlg" id="dSpotCondBody"></div></dialog>
+<dialog id="dSpotInfo" class="spfull" aria-label="撮影地の情報"><div class="dlg" id="dSpotInfoBody"></div></dialog>
 <dialog id="dAtc" class="spfull" aria-label="いま聞く周波数"><div class="dlg" id="dAtcBody"></div></dialog>
 <dialog id="dAtcFeed" class="spfull" aria-label="管制の交信"><div class="dlg" id="dAtcFeedBody"></div></dialog>
 <dialog id="dAtcTaxi" class="spfull" aria-label="誘導路の指示"><div class="dlg" id="dAtcTaxiBody"></div></dialog>
@@ -8854,6 +8872,53 @@ document.addEventListener("click", async e => {
   }
 });
 
+// ---- 撮影地の情報（サーバーの spot_info。公式の案内で確かめたもの）。空港ごとに1時間ためる ----
+const SP_INFO = new Map();   // iata → { at, rows:Map(name → row) }
+async function spLoadInfo(ap){
+  if(!SERVER) return false;
+  const c = SP_INFO.get(ap); if(c && Date.now() - c.at < 3600_000) return false;
+  SP_INFO.set(ap, { at:Date.now(), rows:c ? c.rows : new Map() });
+  try{ const r = await fetch(SORAMEMO_CONFIG.supabaseUrl.replace(/\/$/, "") + "/rest/v1/spot_info?select=*&iata=eq." + encodeURIComponent(ap),
+      { headers:{ apikey:SORAMEMO_CONFIG.supabaseAnonKey, Authorization:"Bearer " + SORAMEMO_CONFIG.supabaseAnonKey } });
+    if(!r.ok) return false; const d = await r.json(); if(!Array.isArray(d)) return false;
+    SP_INFO.set(ap, { at:Date.now(), rows:new Map(d.map(x => [x.name, x])) }); return true; }catch(e){ return false; }
+}
+const spInfoOf = (ap, name) => { const c = SP_INFO.get(ap); return c ? c.rows.get(name) || null : null; };
+// いま開いているか（日本時間）。open：true/false/null（分からない）、until/from：「22:00まで」「6:30から」
+const spHMs = t => String(t || "").slice(0, 5).replace(/^0/, "");
+function spOpenState(ap, name, now = Date.now()){
+  const x = spInfoOf(ap, name); if(!x) return { open:null };
+  if(x.open_kind === "always") return { open:true, always:true };
+  if(x.open_kind !== "hours" || !x.open_from || !x.open_to) return { open:null };
+  const jst = new Date(now + 9 * 36e5), m = jst.getUTCHours() * 60 + jst.getUTCMinutes();
+  const mm = t => { const [h, mi] = String(t).split(":").map(Number); return h * 60 + mi; }, a = mm(x.open_from), b = mm(x.open_to);
+  const open = a <= b ? m >= a && m < b : m >= a || m < b;
+  return { open, until:spHMs(x.open_to), from:spHMs(x.open_from) };
+}
+function spInfoHTML(ap, name){
+  const x = spInfoOf(ap, name); if(!x) return "";
+  const st = spOpenState(ap, name), none = `<span class="none">公式の案内に記載がありません</span>`;
+  const head = st.open === true ? `<span class="st on"><i></i>いま開いています</span><span class="sub">${st.always ? "24時間" : `${st.until}まで`}</span>`
+    : st.open === false ? `<span class="st off"><i></i>いまは閉まっています</span><span class="sub">${st.from}から</span>`
+    : `<span class="st"><i></i>開いている時間は分かりません</span>`;
+  const hours = x.open_kind === "hours" ? `${spHMs(x.open_from)}〜${spHMs(x.open_to)}` : x.open_kind === "always" ? "24時間" : "";
+  const tel = (x.contact || "").match(/0\d{1,4}-\d{1,4}-\d{3,4}/);
+  const contact = x.contact ? (tel ? `<a href="tel:${tel[0].replace(/-/g, "")}">${esc(tel[0])}</a><small>${esc(x.contact.replace(tel[0], "").trim())}</small>` : esc(x.contact)) : none;
+  const d = x.checked_on ? x.checked_on.split("-").map(Number) : null;
+  const src = (Array.isArray(x.sources) ? x.sources : []).filter(s => s && /^https:\/\//.test(s.url || "")).map(s => `<a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.title || s.url)} ›</a>`).join("");
+  return `<div class="spctop"><button class="mp-back" data-close type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>運用</button><h3>撮影地の情報</h3><span class="sp" aria-hidden="true"></span></div>
+    <div class="spcard spinfo"><h4>${esc(name)}</h4><p class="state">${head}</p>${hours || x.open_note ? `<p class="note">${[hours, x.open_note && esc(x.open_note)].filter(Boolean).join("。")}</p>` : ""}
+      <dl>
+        <dt>行き方</dt><dd>${x.access ? esc(x.access) : none}</dd>
+        <dt>駐車場</dt><dd>${x.parking ? esc(x.parking) : none}</dd>
+        <dt>決まり</dt><dd>${(x.rules || []).length ? `<ul>${x.rules.map(r => `<li>${esc(r)}</li>`).join("")}</ul>` : none}</dd>
+        <dt>問い合わせ</dt><dd>${contact}</dd>
+      </dl>
+      <p class="src">${d ? `${d[0]}年${d[1]}月${d[2]}日に公式の案内で確認しました。変わっていることがあるので、出かける前に確かめてください。` : ""}${src}</p></div>`;
+}
+document.addEventListener("click", e => { const b = e.target.closest("[data-spinfo]"); if(!b) return; track("spot", "info");
+  $("dSpotInfoBody").innerHTML = spInfoHTML(OPS_AP, b.dataset.spinfo); if(!$("dSpotInfo").open) $("dSpotInfo").showModal(); });
+
 // 便の知らせの鍵（便名@日付）。離陸の便は定刻の日付（運航日）、着陸の便は着く日
 const spKey = x => x.t == null ? "" : `${x.fl}@${spJstDate(x.dir === "dep" && x.sched ? x.sched : x.t)}`;
 const SP_GATE = { actual:"実際", est:"見込み", sched:"定刻" };
@@ -8984,6 +9049,7 @@ function renderPhoto(d){
   const box = $("opsPhoto"); if(!box) return;
   if(!SP_LEARN.has(OPS_AP)){ const ap = OPS_AP; spLoadLearn(ap).then(x => { if(x && ap === OPS_AP && VIEW.ops === "photo" && BOARD) renderPhoto(BOARD); }); }
   { const ap = OPS_AP; spLoadRegs(ap).then(x => { if(x && ap === OPS_AP && VIEW.ops === "photo" && BOARD) renderPhoto(BOARD); }); }
+  { const ap = OPS_AP; spLoadInfo(ap).then(x => { if(x && ap === OPS_AP && VIEW.ops === "photo" && BOARD) renderPhoto(BOARD); }); }
   SP_ITEMS = spItems(d);
   const now = Date.now(), cur = OPS_CUR, op = cur && cur.op;
   // 撮影地を選ぶと、そこから見える機体だけに絞る（運用の向きが分からないときは絞らない）
@@ -9016,8 +9082,9 @@ function renderPhoto(d){
   // 撮影地：1つのピル。押すと一覧が開く。下に見える滑走路を薄い文字で
   const seesLine = sp => { const g = d2 => [...new Set(sp.sees.filter(s => s.dir === d2).map(s => s.rw))].join(" "); return [g("arr") && `<span class="arr"><i class="spsw arr" aria-hidden="true"></i>${esc(g("arr"))} 着陸</span>`, g("dep") && `<span class="dep"><i class="spsw dep" aria-hidden="true"></i>${esc(g("dep"))} 離陸</span>`].filter(Boolean).join(""); };
   const spotHTML = SPOTS.length ? `<details class="spspotd"><summary class="sppill" aria-label="撮影地を選ぶ"><span>${esc(spot ? spot.name : "撮影地を選ぶ")}</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></summary>
-      <div class="spspotlist" role="group" aria-label="撮影地">${SPOTS.map(s => `<button data-spspot="${esc(s.name)}" aria-pressed="${spot === s}" ${s.sees.length ? "" : "disabled"}><span>${esc(s.name)}</span><small>${s.sees.length ? `${cnt(s)}機${s.li ? `・${LIGHT[s.li.cur]}` : ""}` : "いまは見えない"}</small></button>`).join("")}</div></details>
-    ${spot ? `<p class="spsees"><span class="vh">見える：</span>${seesLine(spot)}</p>` : ""}` : "";
+      <div class="spspotlist" role="group" aria-label="撮影地">${SPOTS.map(s => `<button data-spspot="${esc(s.name)}" aria-pressed="${spot === s}" ${s.sees.length ? "" : "disabled"}><span>${esc(s.name)}</span><small>${spOpenState(OPS_AP, s.name).open === false ? "いまは閉まっています" : s.sees.length ? `${cnt(s)}機　${s.li ? LIGHT[s.li.cur] : ""}` : "いまは見えない"}</small></button>`).join("")}</div></details>
+    ${spot ? `<p class="spsees"><span class="vh">見える：</span>${seesLine(spot)}</p>` : ""}
+    ${spot && spInfoOf(OPS_AP, spot.name) ? `<button class="spinfolink" data-spinfo="${esc(spot.name)}" type="button">${spOpenState(OPS_AP, spot.name).open === false ? "いまは閉まっています　" : ""}この撮影地の情報 ›</button>` : ""}` : "";
   // 登録記号：点の形で決め方（●確認・◐前の便から・○予想）。読み上げ用に文字も持つ
   const regLine = x => x.reg ? `<span class="spdot ${SP_RSRC[x.regSrc] ? x.regSrc : "pred"}" aria-hidden="true"></span>${esc(x.reg)}<span class="vh">（${SP_RSRC[x.regSrc] || "予想"}）</span>${(ps.regs || []).includes(x.reg) ? `<span class="spmine">指定</span>` : ""}` : "";
   // 珍しさの文字：特別塗装（金）・海外・国際だけ。大型は機種で分かるので出さない
