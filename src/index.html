@@ -441,7 +441,10 @@ small.lbl{display:block;font-size:12px;color:#5F6672;margin-bottom:6px}
 .irow{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 0;border-top:1px solid #EEF0F2}.irow:first-child{border-top:0}.irow>div:first-child{min-width:0}.irow b{font-size:14px}.irow b.neg{color:#A3531F}.irow small{display:block;font-size:11.5px;color:#5F6672;line-height:1.5}.irow.col{flex-direction:column;align-items:stretch;gap:4px}
 .irow>div:last-child:not(:first-child){white-space:nowrap}.irows{margin-top:6px}.okmark{font-size:12px;font-weight:700;color:#0F7A4A}.ckbox{margin:6px 0}.ckbox small.dim,.ride .rd small.dim{display:block;font-size:11.5px;color:#5F6672}
 .subbox{background:#F4F5F7;border-radius:14px;padding:12px;margin:8px 0;display:flex;flex-direction:column;gap:4px}.subbox .cseg{background:#E6E8EC}
-.darkcard{background:#1F2329;color:#fff;border-radius:20px;padding:18px;margin:0 0 12px}.darkcard h3{margin:4px 0 8px;font-size:20px;font-weight:900}.darkcard p{font-size:11.5px;opacity:.78;line-height:1.6;margin:8px 0 0}.darkcard p.dksrc{font-size:10.5px;opacity:.6}.dkrow b{display:block;font-size:14px}.dkrow small{font-size:12.5px;opacity:.8}
+.darkcard{background:#1F2329;color:#fff;border-radius:20px;padding:18px;margin:0 0 12px}.darkcard h3{margin:4px 0 8px;font-size:20px;font-weight:900}.darkcard p{font-size:11.5px;opacity:.78;line-height:1.6;margin:8px 0 0}.darkcard p.dksrc{font-size:10.5px;opacity:.6}
+.hrow{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}.hchip{font-size:11px;font-weight:700;padding:2px 8px;border-radius:10px;background:var(--sky);color:var(--sumi)}.hchip.warn{background:#FFF3DD;color:#8A5A00}.hchip.bad{background:#FDE8E8;color:#A31F1F}
+.sched .ssec{display:flex;justify-content:space-between;align-items:baseline;font-size:13px;margin:16px 2px 6px;letter-spacing:.04em}.sched .ssec small{font-size:11px;font-weight:400;color:var(--sumi)}.sched .sac{background:var(--paper);border-radius:16px;padding:12px 14px}.sched .sac p{margin:0 0 8px;font-size:12px;color:var(--sumi)}
+.sched .scard.out{box-shadow:inset 0 0 0 2px #E7A3A3}.sched .swarn{margin:0 0 4px;font-size:11.5px;font-weight:700;color:#A31F1F}.trcard.off{opacity:.65;border-style:dashed}.trcard .r2{display:block;font-size:11.5px;color:var(--sumi);margin-top:2px}.trcard .r2.ng{color:#A31F1F;font-weight:700}.dkrow b{display:block;font-size:14px}.dkrow small{font-size:12.5px;opacity:.8}
 .dkbtns{display:flex;gap:8px;margin:8px 0}.dkbtns button{flex:1;min-height:44px;border-radius:22px;border:1px solid rgba(255,255,255,.45);background:transparent;color:#fff;font:700 14px/1.2 var(--sans)}.dkbtns button.on{background:#fff;color:#1F2329;border-color:#fff}
 .dkbtns.light button{border-color:#D9DCE1;color:#1F2329;background:#fff}.dkbtns.light button.on{background:#1F2329;color:#fff;border-color:#1F2329}.dkbtns button:disabled{opacity:.45}
 .form2{display:flex;flex-direction:column;gap:6px;margin-top:10px;padding-top:10px;border-top:1px solid #EEF0F2}.form2 label{font-size:12px;color:#5F6672}.form2 input{min-height:44px;border-radius:22px;border:1px solid #D9DCE1;padding:0 16px;font:14px var(--sans)}
@@ -2533,13 +2536,16 @@ nav.tabs{transition:transform .3s cubic-bezier(.2,.8,.2,1),opacity .2s}
   </section>
 
   <!-- GAME: ROUTES & FLEET -->
-  <section class="view" id="v-fleet" aria-label="路線と機体">
+  <section class="view" id="v-routes" aria-label="路線">
     <div id="coOps" hidden></div>
     <h2>自社路線</h2>
     <p class="hint" id="coRouteHintV3" hidden>実際に飛んだ区間（国際線は便名を入れた記録）が、あなたの会社の路線になります。路線のお客さんを、同じ路線の会社で取り合います（運賃・便数・満足度・地元の応援で取り分が決まります）。機体を入れた路線だけが飛びます。路線を押すと、お客さんと収益の内わけ、1日の便数が見られます。</p>
     <p class="hint" id="coRouteHint">実際に飛んだ区間（国際線は便名を入れた記録）が、あなたの会社の路線になります。機体を入れると機体の倍率に、機体がないと収益は半分です。路線を押すと計算の内わけが見られます。空港の大きさは、1日の発着便数で5段階（超大規模・拠点・大規模・中規模・小規模）。大型ジェットは拠点以上どうし、中型ジェットは大規模以上どうしの路線に入れられます。</p>
     <div class="pillrow" id="coRouteTabs" hidden></div>
     <div id="coRoutes"></div>
+    <p class="hint" id="coHoursNote" hidden>空港の運用時間は国土交通省「空港一覧」（令和8年9月1日現在）の利用時間。成田・中部・関西・伊丹は航空路誌（AIP）。便は、出る空港も着く空港も開いている時間だけ飛べます。</p>
+  </section>
+  <section class="view" id="v-fleet" aria-label="機体">
     <h2>機体</h2>
     <p class="hint">あなたが乗った機体だけを、会社の機体として買えます。登録記号は、便名を入れたフライトの毎日の記録（機体の位置・adsb.lol）から。分からないときは、時刻表の機種で「名前のない機体」を1機買えます。国際線に入れられるのは、国際線で乗った機体だけです。</p>
     <div class="cotabs" id="coTabs"></div>
@@ -2701,7 +2707,8 @@ nav.tabs{transition:transform .3s cubic-bezier(.2,.8,.2,1),opacity .2s}
   <button data-v="sg" data-mode="rally"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 19.5h5v-5h5v-5h5v-5"/><path d="M15.5 4.5h3v3"/></svg><span>修行</span></button>
   <button data-v="stats" data-mode="rally"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h16"/><path d="M7 16v-4"/><path d="M12 16V8"/><path d="M17 16v-6"/></svg><span>成績</span></button>
   <button data-v="co" data-mode="game" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V8l6-3v15"/><path d="M10 20V10l10 3v7"/><path d="M3 20h18"/></svg><span>会社</span></button>
-  <button data-v="fleet" data-mode="game" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="17" r="2"/><circle cx="18" cy="7" r="2"/><path d="M8 17h4a3 3 0 0 0 3-3v-4a3 3 0 0 1 3-3"/></svg><span>路線・機体</span></button>
+  <button data-v="routes" data-mode="game" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="17" r="2"/><circle cx="18" cy="7" r="2"/><path d="M8 17h4a3 3 0 0 0 3-3v-4a3 3 0 0 1 3-3"/></svg><span>路線</span></button>
+  <button data-v="fleet" data-mode="game" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15.5v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V8.5l-8 5v2l8-2.5V18l-2 1.5V21l3.5-1 3.5 1v-1.5L13 18v-5z"/></svg><span>機体</span></button>
   <button data-v="gods" data-mode="game" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5 14.4 9l5.6.4-4.3 3.6 1.4 5.5L12 15.6l-5.1 2.9 1.4-5.5L4 9.4 9.6 9Z"/></svg><span>守り神</span></button>
 </div></nav>
 
@@ -3707,7 +3714,7 @@ function dedupFlights(){ const seen=new Set(), out=[]; for(const f of focusFligh
 
 /* ---------- render ---------- */
 // 描き直し：ホーム（軽い集計）は毎回、ほかの画面は開いたときだけ作る
-const VIEW_GROUP = {home:"home", book:"book", log:"log", stats:"stats", co:"game", fleet:"game", gods:"game"};
+const VIEW_GROUP = {home:"home", book:"book", log:"log", stats:"stats", co:"game", routes:"game", fleet:"game", gods:"game"};
 const DIRTY = {book:true, log:true, stats:true, ach:true, game:true, sg:true};
 var SG_FORCE = false;   // 修行のタブを開くとき、選んだ画面のまま開く
 function currentView(){ const sec = document.querySelector("section.view.on"); return sec ? sec.id.slice(2) : "home"; }
@@ -5368,6 +5375,8 @@ async function loadHangar(){
 }
 function renderFleet(){
   renderCoPolicy();
+  if(CO.server && !AP_HOURS) loadApHours();
+  if($("coHoursNote")) $("coHoursNote").hidden = !AP_HOURS;
   const rs = coRoutes(), fl = CO.fleet || [];
   // 路線（収益の多い順）。押すと計算の内わけ
   const E3 = CO.server && CO.v3 && ["fsc", "mcc", "lcc"].includes(CO.policy) ? Object.fromEntries((CO.econ || []).map(e => [e.k, e])) : null;
@@ -5387,7 +5396,7 @@ function renderFleet(){
       ["役職と評判", `×${(1 + coBonus() + coRepBonus()).toFixed(2)}`]];
     const s = CO.sky && CO.sky[r.k];
     return `<details class="route2"><summary><div class="rt">${esc(rName(r))}${r.intl ? `<span class="badge">国際線</span>` : ""}<span class="lv" role="img" aria-label="便数レベル${r.lv}">${Array.from({length:ECON.maxLevel}, (_, i) => `<i class="${i < r.lv ? "on" : ""}"></i>`).join("")}</span></div>
-      <div class="rm">${ac ? esc(acLabel(ac)) : `機体なし（×${ECON.noAircraft}）`}</div>
+      <div class="rm">${ac ? esc(acLabel(ac)) : `機体なし（×${ECON.noAircraft}）`}</div>${routeHoursHtml(r, ac)}
       <div class="rv"><b>${sgn(inc)}</b>${st ? `<span class="sk ${sp > 0 ? "up" : sp < 0 ? "dn" : ""}">${st}</span>` : ""}</div></summary>
       <div class="rcalc">${parts.map(([k, v]) => `<div><span>${k}</span><b>${v}</b></div>`).join("")}
       ${s ? `<p class="hint">実際の空（${esc(String(s.day).slice(5).replace("-", "/"))}）：飛んだ便 ${s.n}便${s.avg4 ? `（いつもの同じ曜日は ${Math.round(s.avg4)}便）` : ""}・欠航 ${s.cxl}便。合わせて ±20%まで。</p>` : r.intl ? `<p class="hint">国際線は実際の空で変わりません。海外の空港は大きな空港として数えます。</p>` : `<p class="hint">この路線の便の記録がまだないので、実際の空は ±0%です。</p>`}
@@ -5712,11 +5721,11 @@ document.addEventListener("click", async e => {
 });
 const BIZ_SHARE = {big:0.60, resort:0.12, local:0.45};   // 路線の客のうち仕事の客の割合（サーバーの co3_route_econ と同じ）
 function routeV3Html(r, e, ac){
-  const plan = CO.plans ? CO.plans[r.k] : undefined, pf = +e.profit || 0, load = +e.seats ? Math.round(+e.carried / +e.seats * 100) : 0;
+  const plan = CO.plans ? CO.plans[r.k] : undefined, pf = +e.profit || 0, load = +e.seats && +e.flights ? Math.round(+e.carried / (+e.seats * +e.flights) * 100) : 0;   // seats はサーバーの1便あたりの席
   const share = +e.demand ? Math.round(+e.carried / +e.demand * 100) : 0;
   const row = (k, v, cls) => `<div><span>${k}</span><b${cls ? ` class="${cls}"` : ""}>${v}</b></div>`;
   return `<details class="route2" data-k="${esc(r.k)}"><summary><div class="rt">${esc(rName(r))}${r.intl ? `<span class="badge">国際線</span>` : ""}</div>
-      <div class="rm">${ac ? esc(acLabel(ac)) : "機体なし（飛ばない）"}${ac ? `・1日${+e.flights}便・搭乗率 ${load}%` : ""}</div>
+      <div class="rm">${ac ? esc(acLabel(ac)) : "機体なし（飛ばない）"}${ac ? `・1日${+e.flights}便・搭乗率 ${load}%` : ""}</div>${routeHoursHtml(r, ac)}
       <div class="rv"><b>${pf >= 0 ? "+" : "−"}${fmtKm(Math.round(Math.abs(pf)))}</b></div></summary>
       <div class="rcalc">
         <div class="v3stats"><div><small>この路線のお客さん</small><b>${fmtKm(Math.round(+e.demand))}<i>人/日</i></b></div><div><small>自社に乗った人</small><b>${fmtKm(Math.round(+e.carried))}<i>人</i></b></div><div><small>取り合い</small><b>${+e.n || 1}<i>社</i></b></div></div>
@@ -6011,7 +6020,23 @@ document.addEventListener("click", async e => {
 let SCHED_EDIT = null;
 const SPEED = t => t === "prop" ? 450 : t === "rj" ? 750 : 820;
 const TURN = (t, pol) => t === "prop" ? 20 : (t === "wb" || t === "lg") ? 60 : pol === "lcc" ? 25 : 35;
-const AP_OPEN = i => ({HND:0, KIX:0, NRT:360, ITM:420, FUK:420})[i] ?? 480, AP_CLOSE = i => ({HND:1440, KIX:1440, NRT:1440, ITM:1260, FUK:1320})[i] ?? 1200;
+// 空港の運用時間（サーバーの co3_ap_hours。国土交通省 空港一覧・AIP）。読めないあいだは24時間として扱い、確かめはサーバーがする
+let AP_HOURS = null;
+async function loadApHours(){ if(AP_HOURS || !SERVER || !sb) return; try{ const { data, error } = await sb.from("co3_ap_hours").select("iata,open_min,close_min,winter_close_min,closed"); if(!error && data){ AP_HOURS = Object.fromEntries(data.map(x => [x.iata, x])); DIRTY.game = true; renderVisible(); } }catch(e){} }
+const apH = i => (AP_HOURS || {})[i] || null;
+const AP_OPEN = i => { const h = apH(i); return h ? (h.closed ? 0 : +h.open_min) : 0; };
+const AP_CLOSE = i => { const h = apH(i); if(!h) return 1440; if(h.closed) return 0; const m = +jstToday().slice(5, 7); return h.winter_close_min != null && (m < 4 || m > 9) ? +h.winter_close_min : +h.close_min; };
+const hhmmH = m => m >= 1440 ? "24:00" : hhmm(m);
+const apHoursText = i => { const h = apH(i); if(!h) return ""; if(h.closed) return "休止中"; const o = AP_OPEN(i), c = AP_CLOSE(i); return c - o >= 1440 ? "24時間" : `${hhmm(o)}〜${hhmmH(c)}`; };
+// 両方の空港が開いている時間で、おまかせの機体が飛べる1日の便（サーバーの co3.hours_legs と同じ）。しぼらないときは null
+function hoursLegs(r, type){ const a = r.a.iata, b = r.b.iata; if(!apH(a) && !apH(b)) return null;
+  const o = Math.max(AP_OPEN(a), AP_OPEN(b)), c = Math.min(AP_CLOSE(a), AP_CLOSE(b)), t = type || "nb", blk = Math.round(r.km / SPEED(t) * 60) + 20, tn = TURN(t, CO.policy);
+  if(c - o >= 1440) return null; if(c - o < blk) return 0; return Math.floor(Math.floor((c - o + tn) / (blk + tn)) / 2) * 2; }
+function routeHoursHtml(r, ac){
+  if(!AP_HOURS) return "";
+  const cap = hoursLegs(r, ac && ac.type), chip = t => `<span class="hchip">${esc(t)}</span>`;
+  return `<div class="hrow">${chip(`${apNm(r.a.iata)} ${apHoursText(r.a.iata)}`)}${chip(`${apNm(r.b.iata)} ${apHoursText(r.b.iata)}`)}${cap === 0 ? `<span class="hchip bad">運用時間の中では飛べない</span>` : cap != null && cap < 8 ? `<span class="hchip warn">運用時間で1日${cap}便まで</span>` : ""}</div>`;
+}
 const schedRoute = (a, b) => coRoutes().find(r => (r.a.iata === a && r.b.iata === b) || (r.a.iata === b && r.b.iata === a));
 const schedBlock = (ac, a, b) => { const r = schedRoute(a, b); return r ? Math.round(r.km / SPEED(ac.type) * 60) + 20 : 0; };
 function schedOpen(acId){
@@ -6031,19 +6056,34 @@ function renderSchedEdit(){
   const end = L.length && L[L.length - 1].arr !== L[0].dep;
   const opts = coRoutes().filter(r => (r.a.iata === here || r.b.iata === here) && r.minSize >= ACB[ac.type].minSize && (!r.intl || ac.intl));
   const nextT = L.length ? L[L.length - 1].t + L[L.length - 1].blk + turn : Math.max(AP_OPEN(here), 420);
+  // 運用時間の外にはみ出す便の知らせ（サーバーと同じ決まり：出る空港が開いているうちに出て、着く空港が開いているうちに着く）
+  const warnOf = (dep, arr, t, blk) => { const ta = t + blk;
+    if(t < AP_OPEN(dep)) return `${apNm(dep)}は ${hhmm(AP_OPEN(dep))} から。出るのが早すぎます`;
+    if(t >= AP_CLOSE(dep)) return `${apNm(dep)}は ${hhmmH(AP_CLOSE(dep))} まで。出るのが遅すぎます`;
+    if(ta > 1440) return "着くのが日をまたぎます";
+    if(ta < AP_OPEN(arr)) return `${apNm(arr)}は ${hhmm(AP_OPEN(arr))} から。着くのが ${hhmm(ta)} で早すぎます`;
+    if(ta > AP_CLOSE(arr)) return `${apNm(arr)}は ${hhmmH(AP_CLOSE(arr))} まで。着くのが ${hhmm(ta)} で間に合いません`;
+    return ""; };
+  const bad = L.some(l => warnOf(l.dep, l.arr, l.t, l.blk));
+  const night = L.length ? L[L.length - 1].arr : null;
   $("coFleet").innerHTML = `<div class="sched">
-    <div class="shd"><button class="linkbtn2" id="schedBack">← 機体の一覧</button><b>${esc(ac.reg || "名前のない機体")} のスケジュール</b><small>${esc(acTypeName(ac.icao) || ACB[ac.type].name)} ・ ${L.length ? `夜は${esc(apNm(L[L.length - 1].arr))}に泊まる` : "まだ便がありません"}</small></div>
+    <div class="shd"><button class="linkbtn2" id="schedBack">← 機体の一覧</button><b>${esc(ac.reg || "名前のない機体")} のスケジュール</b></div>
     ${lock ? ratingLock(2) : ""}
-    <div class="v3stats"><div><small>便</small><b>${L.length}<i>便</i></b></div><div><small>飛ぶ時間</small><b>${Math.floor(fly / 60)}<i>時間</i>${fly % 60}<i>分</i></b></div><div><small>遅れの起きやすさ</small><b style="color:${risk[1]}">${L.length > 1 ? risk[0] : "—"}</b></div></div>
+    <h3 class="ssec">この機体<small>機体のこと</small></h3>
+    <div class="sac"><p>${esc(acTypeName(ac.icao) || ACB[ac.type].name)}（${ACB[ac.type].name}）・折り返しは最短 ${turn}分${ac.intl ? "・国際線" : ""}</p>
+      <div class="v3stats"><div><small>飛ぶ時間</small><b>${Math.floor(fly / 60)}<i>時間</i>${fly % 60}<i>分</i></b></div><div><small>夜に泊まる</small><b>${night ? esc(apNm(night)) : "—"}</b></div><div><small>遅れの起きやすさ</small><b style="color:${risk[1]}">${L.length > 1 ? risk[0] : "—"}</b></div></div></div>
+    <h3 class="ssec">便の並び<small>路線のこと・${L.length}便</small></h3>
     <div class="slegs">${L.map((l, i) => `${i ? chip(i) : ""}<div class="sleg"><div class="stm"><b>${hhmm(l.t)}</b><small>${hhmm(l.t + l.blk)}着</small></div>
-      <div class="scard"><div class="r1"><b>${esc(apNm(l.dep))} → ${esc(apNm(l.arr))}</b>${paxOf(l) != null && !E.dirty ? `<span>予想 ${paxOf(l)}人</span>` : ""}</div>
+      <div class="scard${warnOf(l.dep, l.arr, l.t, l.blk) ? " out" : ""}">${warnOf(l.dep, l.arr, l.t, l.blk) ? `<p class="swarn">${esc(warnOf(l.dep, l.arr, l.t, l.blk))}</p>` : ""}<div class="r1"><b>${esc(apNm(l.dep))} → ${esc(apNm(l.arr))}</b>${paxOf(l) != null && !E.dirty ? `<span>予想 ${paxOf(l)}人</span>` : ""}</div>
         <div class="sbtn"><button class="cotab" data-sshift="${i}" data-d="-10"${lock ? " disabled" : ""}>−10分</button><button class="cotab" data-sshift="${i}" data-d="10"${lock ? " disabled" : ""}>＋10分</button>${i === L.length - 1 ? `<button class="cotab" data-sdel="${i}"${lock ? " disabled" : ""}>この便を消す</button>` : ""}</div></div></div>`).join("")}</div>
     ${end ? `<p class="hint" style="color:#A31F1F">1日の最後は、最初の便が出る${esc(apNm(L[0].dep))}に戻ってください（そこに泊まります）。</p>` : ""}
-    ${E.pick ? `<div class="v3box"><h3>${esc(apNm(here))}から出る便（${hhmm(nextT)}発）</h3>${opts.length ? opts.map(r => { const to = r.a.iata === here ? r.b.iata : r.a.iata;
-        return `<button class="trcard" data-sadd="${esc(to)}" data-t="${nextT}"><span class="r1"><b>${esc(apNm(here))} → ${esc(apNm(to))}</b><small>${fmtKm(Math.round(r.km))}km・${schedBlock(ac, here, to)}分</small></span></button>`; }).join("") : `<p class="none" style="margin:0">${esc(apNm(here))}から出る自社の路線がありません。</p>`}</div>` : ""}
+    ${E.pick ? (() => { const t0 = Math.max(nextT, AP_OPEN(here));
+      return `<div class="v3box"><h3>${esc(apNm(here))}から出る便を足す（${hhmm(t0)}発から）</h3>${opts.length ? opts.map(r => { const to = r.a.iata === here ? r.b.iata : r.a.iata, blk = schedBlock(ac, here, to), t = Math.max(t0, AP_OPEN(to) - blk), w = warnOf(here, to, t, blk);
+        return `<button class="trcard${w ? " off" : ""}" data-sadd="${esc(to)}" data-t="${t}"${w || lock ? " disabled" : ""}><span class="r1"><b>${esc(apNm(here))} → ${esc(apNm(to))}</b><small>${hhmm(t)}発 ${hhmm(t + blk)}着</small></span><span class="r2${w ? " ng" : ""}">${w ? esc(w) : `${esc(apNm(to))} ${esc(apHoursText(to) || "")}・${fmtKm(Math.round(r.km))}km・${blk}分`}</span></button>`; }).join("") : `<p class="none" style="margin:0">${esc(apNm(here))}から出る自社の路線がありません。</p>`}</div>`; })() : ""}
     <div class="sfoot"><button class="btn2" id="schedAuto">おまかせに戻す</button><button class="btn2 trgo" id="schedAdd"${lock || L.length >= 16 ? " disabled" : ""}>＋ 便を足す</button></div>
-    ${E.dirty ? `<button class="btn2 trgo" id="schedSave" style="width:100%;margin-top:8px"${lock || !L.length || end ? " disabled" : ""}>このスケジュールで飛ぶ</button>` : ""}
-    <p class="hint">飛ぶ時間 ＝ 距離 ÷ ${SPEED(ac.type)}km/h ＋ 20分、折り返しは最短${turn}分。空港の運用時間（羽田・関西は24時間、成田 6〜24時、伊丹 7〜21時、福岡 7〜22時、ほかは 8〜20時）の中で飛びます。自分で組んだ機体は、おまかせの路線から外れます。</p></div>`;
+    ${E.dirty ? `<button class="btn2 trgo" id="schedSave" style="width:100%;margin-top:8px"${lock || !L.length || end || bad ? " disabled" : ""}>このスケジュールで飛ぶ</button>` : ""}
+    ${bad ? `<p class="hint" style="color:#A31F1F">赤い便が空港の運用時間の外にはみ出しています。時刻をずらすか、消してください。</p>` : ""}
+    <p class="hint">飛ぶ時間 ＝ 距離 ÷ ${SPEED(ac.type)}km/h ＋ 20分、折り返しは最短${turn}分。便は、出る空港が開いているうちに出て、着く空港が開いているうちに着く時刻だけ組めます（空港の運用時間は国土交通省「空港一覧」令和8年9月1日現在の利用時間。成田・中部・関西・伊丹は航空路誌）。自分で組んだ機体は、おまかせの路線から外れます。</p></div>`;
 }
 document.addEventListener("click", async e => {
   const o = e.target.closest("[data-sched]"); if(o){ schedOpen(+o.dataset.sched); renderFleet(); return; }

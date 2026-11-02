@@ -71,7 +71,7 @@ check('格付け1：自分で組めない', String(await set(L4)).includes('rati
 await db.exec(`update companies set rating = 2 where user_id = '${A}'`);
 check('つながっていない', String(await set([L4[0], L4[2]])).includes('not connected'), null);
 check('折り返しが短い（B737 は35分）', String(await set([L4[0], { ...L4[1], t: L4[1].t - 1 }])).includes('turn too short'), null);
-check('運用時間の外（ほかの空港は8時から）', String(await set([{ dep: 'CTS', arr: 'HND', t: 450 }, { dep: 'HND', arr: 'CTS', t: 700 }])).includes('outside hours'), null);
+check('運用時間の外（日をまたいで着く便。新千歳・羽田は24時間なので、時間の決まりは t84）', String(await set([{ dep: 'CTS', arr: 'HND', t: 450 }, { dep: 'HND', arr: 'CTS', t: 1400 }])).includes('outside hours'), null);
 check('1日の最後は最初の空港へ', String(await set([L4[0]])).includes('must end at HND'), null);
 check('自社の路線でない区間は入れられない', String(await set([{ dep: 'HND', arr: 'OKA', t: 600 }])).includes('route not found'), null);
 s = await set(L4);

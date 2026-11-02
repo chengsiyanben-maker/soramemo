@@ -40,6 +40,7 @@ async def main():
         check('遅れの波：故障で2便が欠航（予備機があれば飛べた）:', '機体の故障で 2便が欠航（予備機があれば飛べた）' in v and await pg.locator('.wv .wt i.x.b').count() == 2)
         check('満足度：定時率 33% −15・自分のせいの欠航 −2:', '定時率（前の30日、会社のせいの欠航だけ） 33%' in v and '−15' in v and '自分のせいの欠航（故障）' in v)
         await pg.evaluate("goTab('fleet')"); await pg.wait_for_timeout(400)
+        await pg.evaluate("goTab('fleet')"); await pg.wait_for_timeout(150)
         t = await pg.inner_text('#coFleet')
         check('機体の画面：故障で運休中・予備機なし:', '故障で運休中' in t and '予備機がないので、この路線は欠航' in t)
         await c.close(); await b.close()

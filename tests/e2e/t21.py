@@ -32,9 +32,9 @@ async def main():
         await pg.evaluate('goTab("co")')
         await pg.select_option('[data-role=crew]', str(hnd)); print('roles:', await pg.evaluate('JSON.stringify(CO.roles)'))
         # 増便
-        await pg.evaluate('goTab("fleet")')
+        await pg.evaluate('goTab("routes")')
         btn = pg.locator('[data-up]:not([disabled]) >> nth=0')
-        await pg.evaluate('goTab("fleet")')
+        await pg.evaluate('goTab("routes")')
         await pg.evaluate("document.querySelectorAll('#coRoutes details').forEach(d => d.open = true)")
         if await btn.count(): await btn.click(); print('upgrade:', await pg.inner_text('#coMsg'), '| cash', await pg.inner_text('#coCash'))
         # 10日放置は7日で上限

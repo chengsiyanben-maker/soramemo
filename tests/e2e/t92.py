@@ -13,7 +13,7 @@ V3 = """window.__co = {name:'そらメモ航空', cash:100000, last:new Date().t
   fleet:[{id:1, type:'lg', reg:'JA01XJ', icao:'A359', kind:'pax', route:'5-6', paid:40000, age:1, value:40000, sell:12000, upkeep:80, bought_at:new Date().toISOString()}],
   sky:{}, total_km:820, rep_points:0, stars:1, facilities:{}, bought:1, value:100000, friend_code:'ABCD1234', hide_rank:false, friends:0,
   v3:true, rating:5, rating_have:{routes:40, intl:5, fleet:35, stars:5, days:99}, policy:'fsc', premium:20, satisfaction:41.2, sat_mult:0.97, sat_parts:{base:50, meal:-8, bag:0, target:37}, meal:'none', bag:'free', home:null, home_since:null, plans:{}, legs:{'5-6':[{n:1,t:390,ta:490,f:'HND',to:'CTS',seats:369,biz:300,lei:30},{n:2,t:570,ta:670,f:'CTS',to:'HND',seats:369,biz:120,lei:160},{n:3,t:750,ta:850,f:'HND',to:'CTS',seats:369,biz:60,lei:140}]}, fares:{'5-6':{level:0, set_on:null, others:[-1, 0]}},
-  econ:[{k:'5-6', kind:'big', real:52.4, demand:18500, n:3, own:1200, flights:12, seats:3888, carried:3110, revenue:2300, cost:1420, landing:84, congestion:35, profit:761, p_seats:466, p_pax:420, e_pax:2690}]};"""
+  econ:[{k:'5-6', kind:'big', real:52.4, demand:18500, n:3, own:1200, flights:12, seats:324, carried:3110, revenue:2300, cost:1420, landing:84, congestion:35, profit:761, p_seats:466, p_pax:420, e_pax:2690}]};"""
 async def open_page(b, extra, errs):
     c = await b.new_context(viewport={'width':400,'height':860}); await c.add_init_script(INIT + extra)
     await c.route('https://cdn.jsdelivr.net/npm/@supabase/**', lambda r: r.fulfill(path=os.path.join(HERE,'fake_sb.js'), content_type='application/javascript'))
@@ -46,16 +46,21 @@ async def main():
         await pg.screenshot(path=os.path.join(WORK, 't72_home.png'), full_page=True)
         # 路線（v3 の内わけ）
         await pg.evaluate("goTab('fleet')"); await pg.wait_for_timeout(400)
+        await pg.evaluate("goTab('routes')"); await pg.wait_for_timeout(150)
         t = await pg.inner_text('#coRoutes'); print('ROUTE', t.replace('\n', ' | ')[:300])
         check('路線：もうけと便数・搭乗率:', '+761' in t and '1日12便' in t and '搭乗率 80%' in t)
+        await pg.evaluate("goTab('routes')"); await pg.wait_for_timeout(150)
         check('路線：増便の段は出さない:', await pg.locator('#coRoutes [data-up]').count() == 0)
+        await pg.evaluate("goTab('routes')"); await pg.wait_for_timeout(150)
         await pg.click('#coRoutes details summary'); await pg.wait_for_timeout(200)
+        await pg.evaluate("goTab('routes')"); await pg.wait_for_timeout(150)
         t = await pg.inner_text('#coRoutes')
         check('路線：お客さん・取り合い・取り分:', '18,500' in t and '3,110' in t and '3' in t and '17%' in t and '大きい空港どうし' in t)
         check('路線：費用・着陸料・混雑料・上級席:', '−1,420' in t and '−84' in t and '−35' in t and '420人' in t and '仕事の客の運賃' in t and '+20%' in t)
         check('便ごとの搭乗率:', '便ごとの搭乗率（1日3便・平均 73%）' in t and '06:30' in t and '89%' in t and 'いちばん空いているのは 12:30 の便（54%）' in t)
         check('運賃：5段階・ほかの会社の段:', await pg.locator('[data-fare]').count() == 5 and 'ほかの会社：安い・普通' in t and await pg.get_attribute('[data-fare="5-6"][data-lv="0"]', 'aria-pressed') == 'true')
         await pg.click('[data-fare="5-6"][data-lv="-1"]'); await pg.wait_for_timeout(400)
+        await pg.evaluate("goTab('routes')"); await pg.wait_for_timeout(150)
         t = await pg.inner_text('#coRoutes')
         check('運賃を安いに（co3_set_fare）・きょうはほかの段を押せない:', await pg.evaluate('window.__setFare.p_level') == -1 and 'きょうはもう変えました' in t and await pg.is_disabled('[data-fare="5-6"][data-lv="1"]'))
         await pg.click('[data-pjfl="5-6"][data-n="6"]'); await pg.wait_for_timeout(400)
@@ -68,12 +73,15 @@ async def main():
         c, pg = await open_page(b, V3 + "window.__co.policy = 'lcc'; window.__co.premium = 0;", errs)
         await pg.evaluate("goTab('co')"); await pg.wait_for_timeout(400)
         check('LCC：上級席は出さない:', await pg.locator('[data-prem]').count() == 0)
-        await pg.evaluate("goTab('fleet')"); await pg.wait_for_timeout(300); await pg.click('#coRoutes details summary'); await pg.wait_for_timeout(200)
+        await pg.evaluate("goTab('routes')"); await pg.wait_for_timeout(150)
+        await pg.evaluate("goTab('routes')"); await pg.wait_for_timeout(300); await pg.click('#coRoutes details summary'); await pg.wait_for_timeout(200)
+        await pg.evaluate("goTab('routes')"); await pg.wait_for_timeout(150)
         check('LCC：仕事の客の運賃は上げない（行を出さない）:', '仕事の客の運賃' not in await pg.inner_text('#coRoutes'))
         await c.close()
         # スイッチがオフ：前の路線の画面のまま
         c, pg = await open_page(b, '', errs)
         await pg.evaluate("goTab('fleet')"); await pg.wait_for_timeout(400)
+        await pg.evaluate("goTab('routes')"); await pg.wait_for_timeout(150)
         check('オフ：増便の段のまま:', await pg.locator('#coRoutes [data-up]').count() == 1)
         await c.close(); await b.close()
         print('errors', errs + fails)
