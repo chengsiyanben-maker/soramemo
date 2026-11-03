@@ -7935,8 +7935,8 @@ function specialHTML(){
 /* ---------- 特別塗装機の画面：一覧（いま飛んでいる・今日飛んだ・この30日・しばらく見ていない）と、機体ごとの今日の足あと ----------
    足あとは機体ごとの便の記録（livery_board。主な空港のまわりで見えた分）。発着がまだ分からない便は航空会社の時刻表で埋める */
 let SPB = null, SPB_AT = 0, SPB_TAB = "all", SPB_REG = null, SPB_MAP = null;
-const SPB_DOM = new Set(["JAL", "JTA", "ANA", "スカイマーク", "AIRDO", "ソラシドエア", "ZIPAIR", "IBEX", "天草エアライン", "FDA"]);
-const spbGroup = air => air === "JAL" || air === "JTA" ? "jal" : air === "ANA" ? "ana" : air === "FDA" ? "fda" : SPB_DOM.has(air) ? "dom" : "intl";
+const SPB_DOM = new Set(["JAL", "JTA", "J-AIR", "ANA", "スカイマーク", "AIRDO", "ソラシドエア", "ZIPAIR", "IBEX", "天草エアライン", "FDA"]);
+const spbGroup = air => air === "JAL" || air === "JTA" || air === "J-AIR" ? "jal" : air === "ANA" ? "ana" : air === "FDA" ? "fda" : SPB_DOM.has(air) ? "dom" : "intl";
 const SPB_TABS = [["all", "すべて"], ["jal", "JAL"], ["ana", "ANA"], ["fda", "FDA"], ["dom", "ほかの国内"], ["intl", "海外"]];
 const pushSpRegs = () => { try{ return JSON.parse(localStorage.getItem("soramemo.pushSpRegs") || "[]"); }catch(e){ return []; } };
 async function loadSpb(force){
