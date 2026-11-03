@@ -24,7 +24,9 @@ async def open_page(b, extra, errs):
 FLEET = """window.__co.fleet = [
   {id:1, type:'lg', reg:'JA01XJ', ride:'r:JA01XJ', icao:'A359', kind:'pax', route:'5-6', paid:40000, age:1, value:40000, sell:12000, upkeep:80, bought_at:new Date().toISOString()},
   {id:2, type:'nb', reg:'JA301J', icao:'B738', kind:'pax', route:null, paid:12000, age:1, value:12000, sell:3600, upkeep:25, bought_at:new Date().toISOString()},
-  {id:3, type:'nb', reg:'JA302J', icao:'B738', kind:'pax', route:null, paid:12000, age:1, value:12000, sell:3600, upkeep:25, bought_at:new Date().toISOString()}];"""
+  {id:3, type:'nb', reg:'JA302J', icao:'B738', kind:'pax', route:null, paid:12000, age:1, value:12000, sell:3600, upkeep:25, bought_at:new Date().toISOString()}];
+window.__hangar = [{ride:'r:JA831A', reg:'JA831A', icao:'B789', cls:'wb', intl:false, rode_on:'2026-10-20', flight:'NH1', n:1}, {ride:'r:JA832A', reg:'JA832A', icao:'B789', cls:'wb', intl:false, rode_on:'2026-10-21', flight:'NH3', n:1},
+  {ride:'r:JA303J', reg:'JA303J', icao:'B738', cls:'nb', intl:false, rode_on:'2026-10-19', flight:'JL5', n:1}];"""
 async def main():
     async with async_playwright() as p:
         b = await p.chromium.launch(); errs = []
@@ -47,8 +49,29 @@ async def main():
         check('買う：買い方は 乗った・見た・中古・発注:', pills == ['乗った', '見た', '中古', '発注'])
         t = await pg.inner_text('#coFleet')
         check('買う：持っている機体は出ない:', 'JA01XJ' not in t and await pg.locator('#coFleet .ride.have').count() == 0)
+        await pg.click('[data-tsel]:nth-child(2)'); await pg.wait_for_timeout(200)
+        sel = await pg.evaluate("(document.querySelector('[data-tsel].on') || {}).textContent")
+        await pg.click('#coFleet [data-buy]'); await pg.wait_for_timeout(600)
+        sel2 = await pg.evaluate("(document.querySelector('[data-tsel].on') || {}).textContent")
+        print('sel', sel, '->', sel2)
+        check('買ったあとも選んだ機種のまま（すべてに戻らない）:', sel and sel2 and sel.split(' ')[0] == sel2.split(' ')[0] and not sel2.startswith('すべて'))
         await pg.click('[data-fmode=have]'); await pg.wait_for_timeout(200)
         check('持っているに戻ると選んだ機種のまま:', await pg.locator('#coFleet .ride.have').count() == 2)
+        # 自分で組むスケジュール：1便目を出す空港を選べる
+        await pg.evaluate("window.__co.rating = 2; CO.rating = 2"); await pg.click('[data-fmode=have]'); await pg.wait_for_timeout(150)
+        await pg.click('[data-tsel=""]'); await pg.wait_for_timeout(150)
+        await pg.click('[data-sched="1"]'); await pg.wait_for_timeout(300)
+        st = await pg.evaluate("[...document.querySelectorAll('[data-sstart]')].map(b => b.textContent.trim() + (b.classList.contains('on') ? '*' : ''))")
+        print('starts', st)
+        check('スケジュール：1便目を出す空港を選べる（羽田・新千歳）:', len(st) == 2 and any('*' in x for x in st))
+        await pg.click('[data-sstart="CTS"]'); await pg.wait_for_timeout(200)
+        t = await pg.inner_text('#coFleet')
+        check('新千歳を選ぶと新千歳から出る便を足せる:', '新千歳から出る便を足す' in t and '新千歳 → 羽田' in t)
+        await pg.click('[data-sadd="HND"]'); await pg.wait_for_timeout(200)
+        t = await pg.inner_text('#coFleet')
+        check('1便目は新千歳から・出発の空港を変えるボタン:', '新千歳から出発' in t and await pg.locator('#schedRestart').count() == 1)
+        await pg.click('#schedRestart'); await pg.wait_for_timeout(200)
+        check('出発の空港を変えると便が消えて選び直せる:', await pg.locator('[data-sstart]').count() == 2 and await pg.locator('.sleg').count() == 0)
         print('errors', errs + fails)
         await b.close()
         sys.exit(1 if errs or fails else 0)
