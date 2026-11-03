@@ -442,6 +442,7 @@ small.lbl{display:block;font-size:12px;color:#5F6672;margin-bottom:6px}
 .irow>div:last-child:not(:first-child){white-space:nowrap}.irows{margin-top:6px}.okmark{font-size:12px;font-weight:700;color:#0F7A4A}.ckbox{margin:6px 0}.ckbox small.dim,.ride .rd small.dim{display:block;font-size:11.5px;color:#5F6672}
 .subbox{background:#F4F5F7;border-radius:14px;padding:12px;margin:8px 0;display:flex;flex-direction:column;gap:4px}.subbox .cseg{background:#E6E8EC}
 .darkcard{background:#1F2329;color:#fff;border-radius:20px;padding:18px;margin:0 0 12px}.darkcard h3{margin:4px 0 8px;font-size:20px;font-weight:900}.darkcard p{font-size:11.5px;opacity:.78;line-height:1.6;margin:8px 0 0}.darkcard p.dksrc{font-size:10.5px;opacity:.6}
+#coTabs{display:flex;flex-direction:column;align-items:stretch;gap:0;flex-wrap:nowrap;overflow:visible}#coTabs .pillrow{margin:2px 0 6px}.cseg.fmode button{min-height:42px;font-size:14px}.tsel{display:flex;flex-direction:column;gap:6px;margin:4px 0 10px}.tsel small{font-size:11px;color:var(--sumi)}.tsel>div{display:flex;flex-wrap:wrap;gap:6px}.tsel button{min-height:32px;padding:0 12px;border-radius:16px;border:1px solid var(--line);background:var(--paper);color:var(--ink);font:500 12.5px/1 var(--sans)}.tsel button i{font-style:normal;opacity:.65}.tsel button.on{background:#1C4FA0;border-color:#1C4FA0;color:#fff;font-weight:700}
 .hrow{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}.hchip{font-size:11px;font-weight:700;padding:2px 8px;border-radius:10px;background:var(--sky);color:var(--sumi)}.hchip.warn{background:#FFF3DD;color:#8A5A00}.hchip.bad{background:#FDE8E8;color:#A31F1F}
 .sched .ssec{display:flex;justify-content:space-between;align-items:baseline;font-size:13px;margin:16px 2px 6px;letter-spacing:.04em}.sched .ssec small{font-size:11px;font-weight:400;color:var(--sumi)}.sched .sac{background:var(--paper);border-radius:16px;padding:12px 14px}.sched .sac p{margin:0 0 8px;font-size:12px;color:var(--sumi)}
 .sched .scard.out{box-shadow:inset 0 0 0 2px #E7A3A3}.sched .swarn{margin:0 0 4px;font-size:11.5px;font-weight:700;color:#A31F1F}.trcard.off{opacity:.65;border-style:dashed}.trcard .r2{display:block;font-size:11.5px;color:var(--sumi);margin-top:2px}.trcard .r2.ng{color:#A31F1F;font-weight:700}.dkrow b{display:block;font-size:14px}.dkrow small{font-size:12.5px;opacity:.8}
@@ -5264,6 +5265,10 @@ const SIZE_LABEL = s => s >= 6 ? "超大規模" : s >= 4.5 ? "拠点" : s >= 3 ?
 const SIZE_RULE = m => m >= 4.5 ? "拠点以上どうし" : m >= 3 ? "大規模以上どうし" : m >= 2 ? "中規模以上どうし" : "どの空港も可";
 const coKey = () => demo ? "soramemo.company.demo" : (SERVER && user ? "soramemo.company." + user.id : "soramemo.company");
 let CO = null, HANGAR = null, CO_TAB = "have", RK = null, RK_SCOPE = "all";
+// 機体の画面：機種で選ぶ（画面ごと）・最後に開いた買い方
+let TSEL = {}, LAST_BUY_TAB = "buy";
+const fleetTypeOf = a => (a.icao && acTypeName(a.icao)) || (ACB[a.type] || {}).name || "機種不明";
+const hangarTypeOf = x => (x.icao && acTypeName(x.icao)) || (ACB[x.cls] || {}).name || "機種不明";
 // チェックインした日（日本時間）の数を、空港ごとに（守り神の階級・役職のボーナスに使う）
 function visitDays(){ const m = new Map(); for(const c of S.checkins){ if(!m.has(c.a)) m.set(c.a, new Set()); m.get(c.a).add(jstDay(c.t)); }
   return new Map([...m].map(([k, v]) => [k, v.size])); }
@@ -5406,10 +5411,18 @@ function renderFleet(){
   // 機体
   const H = HANGAR, tabs = [["have", `持っている ${fl.length}`], ["buy", `買える${H ? " " + H.filter(x => !x.owned).length : ""}`],
     ...(CO.server && CO.v3 ? [["seen", `見た機体${SEEN ? " " + SEEN.filter(x => !x.owned).length : ""}`], ["used", `中古機 ${(CO.market || []).length}`], ["order", `発注${(CO.orders || []).length ? " " + CO.orders.length : ""}`]] : [])];
-  $("coTabs").innerHTML = tabs.map(([k, l]) => `<button class="cotab${CO_TAB === k ? " on" : ""}" data-cotab="${k}">${l}</button>`).join("");
+  // 持っている機体と買う機体を分ける（上の2つの切り替え）。買うときは買い方（乗った・見た・中古・発注）を選び、どちらも機種で選べる
+  const buying = CO_TAB !== "have", buyTabs = tabs.filter(([k]) => k !== "have").map(([k, l]) => [k, l.replace(/^買える/, "乗った").replace(/^見た機体/, "見た").replace(/^中古機/, "中古")]);
+  const tPool = CO_TAB === "have" ? fl.map(fleetTypeOf) : CO_TAB === "buy" ? (H || []).filter(x => !x.owned).map(hangarTypeOf) : CO_TAB === "seen" ? (SEEN || []).filter(x => !x.owned).map(x => x.name || x.code) : CO_TAB === "used" ? (CO.market || []).map(x => x.name || x.code) : [];
+  const tCount = tPool.reduce((m, t) => (m.set(t, (m.get(t) || 0) + 1), m), new Map());
+  if(TSEL[CO_TAB] && !tCount.has(TSEL[CO_TAB])) TSEL[CO_TAB] = null;
+  $("coTabs").innerHTML = `<div class="cseg fmode" role="group" aria-label="持っている機体と買う機体">${[["have", `持っている ${fl.length}`], ["buy", "買う"]].map(([k, l]) => `<button class="${(k === "buy") === buying ? "on" : ""}" data-fmode="${k}" aria-pressed="${(k === "buy") === buying}">${l}</button>`).join("")}</div>`
+    + (buying && buyTabs.length > 1 ? `<div class="pillrow" role="group" aria-label="買い方">${buyTabs.map(([k, l]) => `<button class="cotab${CO_TAB === k ? " on" : ""}" data-cotab="${k}" aria-pressed="${CO_TAB === k}">${l}</button>`).join("")}</div>` : "")
+    + (tCount.size > 1 ? `<div class="tsel" role="group" aria-label="機種で選ぶ"><small>機種で選ぶ</small><div>${[[null, "すべて", tPool.length], ...[...tCount].sort((a, b) => b[1] - a[1]).map(([t, n]) => [t, t, n])].map(([k, l, n]) => `<button class="${(TSEL[CO_TAB] || null) === k ? "on" : ""}" data-tsel="${esc(k || "")}" aria-pressed="${(TSEL[CO_TAB] || null) === k}">${esc(l)} <i>${n}</i></button>`).join("")}</div></div>` : "");
+  const tOk = t => !TSEL[CO_TAB] || t === TSEL[CO_TAB], flShow = CO_TAB === "have" ? fl.filter(a => tOk(fleetTypeOf(a))) : fl;
   if(CO_TAB === "have" && SCHED_EDIT && fl.some(a => a.id === SCHED_EDIT.ac)){ renderSchedEdit();
   } else if(CO_TAB === "have"){
-    $("coFleet").innerHTML = (fl.length ? checkModeHtml() : "") + (fl.length ? fl.map(a => { const ok = rs.filter(r => r.minSize >= ACB[a.type].minSize && (!r.intl || a.intl)), liv = a.reg && LIVERY_NAMES[a.reg];
+    $("coFleet").innerHTML = (fl.length ? checkModeHtml() : "") + (flShow.length ? flShow.map(a => { const ok = rs.filter(r => r.minSize >= ACB[a.type].minSize && (!r.intl || a.intl)), liv = a.reg && LIVERY_NAMES[a.reg];
       return `<div class="ride have${liv ? " liv" : ""}">${acSVG(a.type)}<div class="rd"><b>${esc(a.reg || "名前のない機体")}</b><span>${esc(acTypeName(a.icao) || "")}（${ACB[a.type].name}）${a.intl ? "・国際線" : ""}</span>${liv ? `<em>★ ${esc(liv)}</em>` : ""}
         ${(() => { const today = jstToday(), b = (CO.breakdowns || []).find(x => x.ac_id === a.id && String(x.start) <= today && String(x.end) >= today), sp = (CO.breakdowns || []).find(x => x.spare_id === a.id && String(x.end) >= today);
           return b ? `<em class="brk">故障で運休中（${esc(String(b.end).slice(5).replace("-", "/"))}まで）・${b.spare_reg ? `予備機 ${esc(b.spare_reg)} が代わりに飛んでいます` : "予備機がないので、この路線は欠航"}</em>` : sp ? `<em class="brk sp">予備機として ${esc(sp.reg || "")} の代わりに飛んでいます</em>` : ""; })()}
@@ -5427,7 +5440,7 @@ function renderFleet(){
   } else if(CO_TAB === "order" && CO.server && CO.v3){ renderOrder();
   } else {
     if(!H){ $("coFleet").innerHTML = `<p class="none">乗った機体を調べています…</p>`; loadHangar().then(() => { if(currentView() === "fleet") renderFleet(); }); return; }
-    const list = H.filter(x => !x.owned);
+    const list = H.filter(x => !x.owned && (!TSEL.buy || hangarTypeOf(x) === TSEL.buy));
     $("coFleet").innerHTML = list.length ? list.map(x => { const sp = ACB[x.cls], liv = x.reg && LIVERY_NAMES[x.reg];
       return `<div class="ride${liv ? " liv" : ""}">${acSVG(x.cls)}<div class="rd"><b>${esc(x.reg || acTypeName(x.icao) || sp.name)}</b><span>${x.reg ? esc(acTypeName(x.icao)) : "名前のない機体"}（${sp.name}・×${sp.mult}）${x.intl ? "・国際線" : ""}</span>${liv ? `<em>★ ${esc(liv)}</em>` : ""}
         <small>${x.rodeOn ? `${esc(String(x.rodeOn).slice(5).replace("-", "/"))} ${esc(x.flight || "")} で乗った${x.n > 1 ? `・${x.n}回` : ""}` : ""}${x.reg ? "" : "（登録記号は分からず）"}・${SIZE_RULE(sp.minSize)}・維持費 −${fmtKm(x.upkeep)}/日</small></div>
@@ -5436,7 +5449,9 @@ function renderFleet(){
   }
 }
 document.addEventListener("click", async e => {
-  const t = e.target.closest("[data-cotab]"); if(t){ CO_TAB = t.dataset.cotab; renderFleet(); return; }
+  const t = e.target.closest("[data-cotab]"); if(t){ CO_TAB = t.dataset.cotab; if(CO_TAB !== "have") LAST_BUY_TAB = CO_TAB; renderFleet(); return; }
+  const fm = e.target.closest("[data-fmode]"); if(fm){ if(fm.dataset.fmode === "have") CO_TAB = "have"; else if(CO_TAB === "have") CO_TAB = LAST_BUY_TAB; SCHED_EDIT = null; renderFleet(); return; }
+  const ts = e.target.closest("[data-tsel]"); if(ts){ TSEL[CO_TAB] = ts.dataset.tsel || null; renderFleet(); return; }
   const b = e.target.closest("[data-buy]");
   if(b){ const x = (HANGAR || []).find(h => h.ride === b.dataset.buy); if(!x) return; const name = x.reg || "名前のない機体";
     if(CO.server){ b.disabled = true; if(await coRpc("co_buy", {p_ride:x.ride})) coMsg(`${name}を会社に入れました。`); return; }
@@ -5997,7 +6012,7 @@ document.addEventListener("click", async e => {
 });
 // 中古機の売り場（格付け2から）。その機種に乗った（見た）会社だけ買える。1日1機、同じ相手とは30日に1回
 function renderUsed(){
-  const M = CO.market || [];
+  const M = (CO.market || []).filter(x => !TSEL.used || (x.name || x.code) === TSEL.used);
   $("coFleet").innerHTML = `${ratingOk(2) ? "" : ratingLock(2)}${M.length ? M.map(x => `<div class="ride"><div class="rd" style="grid-column:1/3"><b>${esc(x.reg || "名前のない機体")}</b><span>${esc(x.name || x.code || "")}（${ACB[x.type] ? ACB[x.type].name : ""}）</span>
       <small>${esc(x.seller || "")} が売りに出し中・古さ −${Math.round((1 - (+x.age || 1)) * 100)}%・いまの値段 ${yen(+x.value)}・${new Date(x.expires).getMonth() + 1}/${new Date(x.expires).getDate()}まで</small>
       ${x.can_buy ? "" : `<small>この機種に乗る（見る）と買えます</small>`}</div>
@@ -6233,7 +6248,7 @@ async function loadSeen(){
 }
 function renderSeen(){
   if(!SEEN){ $("coFleet").innerHTML = `<p class="none">見た機体を調べています…</p>`; loadSeen().then(() => { if(currentView() === "fleet") renderFleet(); }); return; }
-  const all = SEEN.filter(x => !x.owned), list = all.filter(x => SEEN_TAB === "all" || (SEEN_TAB === "freighter" ? x.kind === "freighter" : x.kind !== "freighter"));
+  const all = SEEN.filter(x => !x.owned && (!TSEL.seen || (x.name || x.code) === TSEL.seen)), list = all.filter(x => SEEN_TAB === "all" || (SEEN_TAB === "freighter" ? x.kind === "freighter" : x.kind !== "freighter"));
   const tabs = all.some(x => x.kind === "freighter") ? `<div class="pillrow" role="group" aria-label="見た機体の種類">${[["all", "すべて"], ["pax", "旅客機"], ["freighter", "貨物機"]].map(([k, l]) => `<button class="cotab${SEEN_TAB === k ? " on" : ""}" data-seentab="${k}" aria-pressed="${SEEN_TAB === k}">${l}</button>`).join("")}</div>` : "";
   $("coFleet").innerHTML = tabs + (list.length ? list.map(x => { const t = new Date(x.seenAt), hm = `${String(t.getMonth() + 1)}/${t.getDate()} ${String(t.getHours()).padStart(2, "0")}:${String(t.getMinutes()).padStart(2, "0")}`;
     return `<div class="ride"><div class="rd" style="grid-column:1/3"><b>${esc(x.reg)}</b><span>${esc(x.name)}${x.kind === "freighter" ? "（貨物機）" : x.kind === "bizjet" ? "（ビジネスジェット）" : ""}</span>
