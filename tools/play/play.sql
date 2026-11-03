@@ -147,6 +147,8 @@ begin
     delete from flight_history where svc_date < today - 60 and not exists (select 1 from flights f where (f.dep_at at time zone 'Asia/Tokyo')::date = flight_history.svc_date);
     perform play.run_daily();
     update play.state set v = (v::int + 1)::text where k = 'day';
+    update play.state set v = (v::date + 1)::text where k = 'season_day';
+    perform play.apply();
   end loop;
   return jsonb_build_object('day', (select v::int from play.state where k = 'day'));
 end;
@@ -158,6 +160,7 @@ create or replace function play.catch_up() returns int
 language plpgsql as $$
 declare last date; today date := (now() at time zone 'Asia/Tokyo')::date; d date; n int := 0;
 begin
+  perform play.apply();
   select max(svc_date) into last from flight_history;
   if last is null or last >= today then return 0; end if;
   for d in select generate_series(last + 1, today, interval '1 day')::date loop
@@ -166,4 +169,109 @@ begin
   perform play.run_daily();
   return n;
 end;
+$$;
+
+-- ---------- チート（試遊版の帯の「ほか」から呼ぶ）----------
+-- 季節：選んだ日付を「今日」として扱う（co3.today）。1日進めるたびに1日進む。開き直したら play.apply() で戻す
+create or replace function play.apply() returns void
+language plpgsql as $$
+begin
+  perform set_config('co3.season_day', coalesce((select v from play.state where k = 'season_day'), ''), false);
+end;
+$$;
+create or replace function play.set_season(p_day date) returns text
+language plpgsql as $$
+begin
+  if p_day is null then delete from play.state where k = 'season_day';
+  else insert into play.state values ('season_day', p_day::text) on conflict (k) do update set v = excluded.v; end if;
+  perform play.apply();
+  return coalesce(p_day::text, '今日');
+end;
+$$;
+
+-- 会社の数字
+create or replace function play.set_company(p_uid uuid, p_rating int default null, p_sat numeric default null, p_cash bigint default null) returns void
+language plpgsql as $$
+begin
+  -- greatest/least は null を無視するので、渡していないものは case で今のままにする
+  update companies set rating = case when p_rating is null then rating else least(5, greatest(1, p_rating)) end,
+                       satisfaction = case when p_sat is null then satisfaction else least(100, greatest(0, p_sat)) end,
+                       cash = cash + coalesce(p_cash, 0)
+   where user_id = p_uid;
+end;
+$$;
+
+-- 好きな区間と機種で、きのう乗ったことにする（その区間が路線になり、その機体が「乗った」で買えるようになる）
+create or replace function play.add_flight(p_uid uuid, p_from text, p_to text, p_code text) returns text
+language plpgsql as $$
+declare d date := (now() at time zone 'Asia/Tokyo')::date - 1; a airports; b airports; v_reg text; fno text; t0 timestamptz; km numeric; c1 bigint; c2 bigint; al text;
+begin
+  select * into a from airports where iata = upper(p_from); select * into b from airports where iata = upper(p_to);
+  if a.id is null or b.id is null or a.id = b.id then raise exception '空港を選び直してください'; end if;
+  if not exists (select 1 from co3_types where code = p_code) then raise exception 'その機種はありません'; end if;
+  km := round((6371 * acos(least(1, sin(radians(a.lat)) * sin(radians(b.lat)) + cos(radians(a.lat)) * cos(radians(b.lat)) * cos(radians(b.lon - a.lon)))))::numeric, 1);
+  al := case when random() < 0.5 then 'JL' else 'NH' end;
+  loop
+    v_reg := 'JA' || (100 + floor(random() * 900))::int || chr(65 + floor(random() * 26)::int);
+    exit when not exists (select 1 from flight_history where flight_history.reg = v_reg) and not exists (select 1 from aircraft x where x.reg = v_reg);
+  end loop;
+  fno := al || (3000 + floor(random() * 6000))::int;
+  t0 := (d::timestamp + interval '12 hours' + make_interval(mins => floor(random() * 300)::int)) at time zone 'Asia/Tokyo';
+  insert into flight_history (svc_date, flight, dep, arr, std, sta, atd, ata, cancelled, aircraft, type, reg)
+    values (d, fno, a.iata, b.iata, t0, t0 + make_interval(mins => (70 + km / 8)::int), t0, t0 + make_interval(mins => (70 + km / 8)::int), false, p_code, p_code, v_reg);
+  insert into checkins (user_id, airport_id, lat, lon, accuracy_m, position_at, created_at) values (p_uid, a.id, a.lat, a.lon, 12, t0 - interval '50 minutes', t0 - interval '50 minutes') returning id into c1;
+  insert into checkins (user_id, airport_id, lat, lon, accuracy_m, position_at, created_at) values (p_uid, b.id, b.lat, b.lon, 12, t0 + make_interval(mins => (80 + km / 8)::int), t0 + make_interval(mins => (80 + km / 8)::int)) returning id into c2;
+  insert into flights (user_id, from_airport, to_airport, dep_checkin, arr_checkin, dep_at, arr_at, distance_km, status, flight_no, airline)
+    values (p_uid, a.id, b.id, c1, c2, t0, t0 + make_interval(mins => (70 + km / 8)::int), greatest(km, 1), 'verified', substr(fno, 3), al);
+  perform co3_route_real_refresh();
+  return v_reg;
+end;
+$$;
+
+-- 空港でいまチェックインして、前後に発着した機体を「見た」にする（その空港を出る機体を3機つくる）
+create or replace function play.add_seen(p_uid uuid, p_iata text, p_codes text[]) returns int
+language plpgsql as $$
+declare a airports; c text; i int := 0; v_reg text; t0 timestamptz;
+begin
+  select * into a from airports where iata = upper(p_iata);
+  if a.id is null then raise exception '空港を選び直してください'; end if;
+  insert into checkins (user_id, airport_id, lat, lon, accuracy_m, position_at, created_at) values (p_uid, a.id, a.lat, a.lon, 12, now() - interval '5 minutes', now() - interval '5 minutes');
+  foreach c in array p_codes loop
+    i := i + 1;
+    loop
+      v_reg := 'JA' || (100 + floor(random() * 900))::int || chr(65 + floor(random() * 26)::int);
+      exit when not exists (select 1 from flight_history where flight_history.reg = v_reg);
+    end loop;
+    t0 := now() - make_interval(mins => 30 - i * 10);
+    insert into flight_history (svc_date, flight, dep, arr, std, sta, atd, cancelled, aircraft, type, reg)
+      values ((t0 at time zone 'Asia/Tokyo')::date, 'JL' || (8000 + floor(random() * 1999))::int, a.iata, case when a.iata = 'HND' then 'CTS' else 'HND' end,
+              t0, t0 + interval '90 minutes', t0, false, c, c, v_reg) on conflict do nothing;
+  end loop;
+  return i;
+end;
+$$;
+
+-- 空の出来事
+create or replace function play.typhoon(p_iata text) returns void
+language sql as $$
+  insert into co3_typhoon_fcst (iata, day, note, source) values (upper(p_iata), co3.today() + 1, '試遊版で起こした台風', 'admin')
+    on conflict (iata, day) do update set note = excluded.note
+$$;
+create or replace function play.weather(p_iata text, p_kind text) returns int
+language sql as $$
+  insert into co3_wx (iata, at, snow, wind, fog, ts, raw)
+  select upper(p_iata), ((now() at time zone 'Asia/Tokyo')::date::timestamp + make_interval(hours => h)) at time zone 'Asia/Tokyo',
+         p_kind = 'snow', p_kind = 'wind', p_kind = 'fog', p_kind = 'ts', '試遊版で起こした天気'
+    from generate_series(0, 23) h
+  on conflict (iata, at) do update set snow = excluded.snow or co3_wx.snow, wind = excluded.wind or co3_wx.wind, fog = excluded.fog or co3_wx.fog, ts = excluded.ts or co3_wx.ts;
+  select 24
+$$;
+-- 今日の本物そっくりの便を、その区間だけ欠航させる（割合）
+create or replace function play.cancel(p_a text, p_b text, p_ratio numeric) returns int
+language sql as $$
+  with u as (
+    update flight_history set cancelled = random() < p_ratio, atd = null, ata = null
+     where svc_date = co3.today() and ((dep = upper(p_a) and arr = upper(p_b)) or (dep = upper(p_b) and arr = upper(p_a)))
+    returning cancelled)
+  select count(*) filter (where cancelled)::int from u
 $$;

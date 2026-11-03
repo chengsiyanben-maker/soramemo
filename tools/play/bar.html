@@ -24,6 +24,14 @@
 #playBusy span{width:12px;height:12px;border-radius:50%;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;animation:playSpin .8s linear infinite}
 @keyframes playSpin{to{transform:rotate(360deg)}}
 @media (prefers-reduced-motion:reduce){#playBusy span{animation:none}}
+#playMenu{max-height:min(70vh,560px);overflow:auto}
+#playMenu h4{margin:6px 0 0;font-size:12px;color:#13213D;letter-spacing:.06em}
+#playMenu .pm-row{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+#playMenu .pm-row>span,#playMenu .pm-row>label{font-size:12px;color:#5F6672;min-width:3.5em}
+#playMenu .pm-row button{height:34px;padding:0 12px;border-radius:17px;font-size:12px}
+#playMenu .pm-row select,#playMenu .pm-row input{height:34px;border-radius:17px;border:1px solid #D9DCE1;padding:0 10px;font:inherit;font-size:12px;background:#fff;color:#2A2F38;max-width:100%;min-width:0;flex:1}
+#playMenu #pmSat{flex:0 0 70px}
+#pmMsg{color:#0F7A4A !important;font-weight:700;min-height:1em}
 </style>
 <div id="playLoad" role="status" aria-live="polite"><b>SORAMEMO</b><i aria-hidden="true"></i><p>試遊版を準備しています</p></div>
 <div id="playBusy" role="status" aria-live="polite" hidden><span aria-hidden="true"></span>計算しています</div>
@@ -33,16 +41,30 @@
   <button type="button" class="ghost" id="playMore" aria-expanded="false" aria-controls="playMenu">ほか</button>
 </div>
 <div id="playMenu" hidden>
-  <button type="button" id="playAdv7">7日進める（1分半ほどかかります）</button>
-  <button type="button" id="playCash">資金を10億円足す（試遊用）</button>
-  <p>試遊版は、本番と同じ計算をこの端末の中で動かしています。便の記録は本物に似せた見本で、本番のデータとは別です。1日進めるたびに、本番の毎日の処理（満足度・トラブル・故障・ランキングなど）も流れます。チェックインと地図の背景は使えません。</p>
+  <div class="pm-row"><button type="button" id="playAdv7">7日進める（1分半ほど）</button></div>
+  <h4>会社</h4>
+  <div class="pm-row" role="group" aria-label="格付け"><span>格付け</span><button type="button" data-pm="rating" data-v="1">1</button><button type="button" data-pm="rating" data-v="2">2</button><button type="button" data-pm="rating" data-v="3">3</button><button type="button" data-pm="rating" data-v="4">4</button><button type="button" data-pm="rating" data-v="5">5</button></div>
+  <div class="pm-row"><label for="pmSat">満足度</label><input id="pmSat" type="number" min="0" max="100" step="1" value="60"><button type="button" data-pm="sat">決める</button></div>
+  <div class="pm-row"><span>資金</span><button type="button" data-pm="cash" data-v="10000">＋1億円</button><button type="button" data-pm="cash" data-v="100000">＋10億円</button><button type="button" data-pm="cash" data-v="1000000">＋100億円</button></div>
+  <h4>乗る・見る</h4>
+  <div class="pm-row"><select id="pmFrom" aria-label="出発の空港"></select><span>→</span><select id="pmTo" aria-label="到着の空港"></select></div>
+  <div class="pm-row"><select id="pmType" aria-label="機種"></select><button type="button" data-pm="fly">きのう乗ったことにする</button></div>
+  <div class="pm-row"><select id="pmSeenAp" aria-label="見る空港"></select><button type="button" data-pm="seen">この機種を見たことにする</button></div>
+  <h4>空と季節</h4>
+  <div class="pm-row"><select id="pmWxAp" aria-label="天気を起こす空港"></select></div>
+  <div class="pm-row"><button type="button" data-pm="typhoon">あした台風</button><button type="button" data-pm="wx" data-v="snow">雪</button><button type="button" data-pm="wx" data-v="fog">霧</button><button type="button" data-pm="wx" data-v="wind">強風</button><button type="button" data-pm="wx" data-v="ts">雷</button></div>
+  <div class="pm-row"><select id="pmRoute" aria-label="欠航させる路線"></select><button type="button" data-pm="cxl" data-v="0.3">今日3割欠航</button><button type="button" data-pm="cxl" data-v="1">全便欠航</button></div>
+  <div class="pm-row"><span>季節</span><button type="button" data-pm="season" data-v="12-30">年末年始</button><button type="button" data-pm="season" data-v="08-12">お盆</button><button type="button" data-pm="season" data-v="03-25">春休み</button><button type="button" data-pm="season" data-v="">今日に戻す</button></div>
+  <div class="pm-row"><input id="pmDay" type="date" aria-label="日付"><button type="button" data-pm="seasonDay">この日にする</button></div>
+  <p id="pmMsg" role="status" aria-live="polite"></p>
+  <p>試遊版は、本番と同じ計算をこの端末の中で動かしています。便の記録は本物に似せた見本で、本番のデータとは別です。チートで変えたものも、この端末の中だけです。</p>
   <button type="button" class="danger" id="playReset">はじめから（見本の会社に戻す）</button>
   <p id="playResetNote" hidden>もう一度押すと、進めた日と買った機体がすべて消えます。</p>
 </div>
 <script>
 (function(){
   const $p = (id) => document.getElementById(id);
-  const busy = (on, label) => { ["playAdv1","playMore","playAdv7","playCash","playReset"].forEach(id => $p(id).disabled = on); if(label) $p("playAdv1").textContent = label; };
+  const busy = (on, label) => { ["playAdv1","playMore","playAdv7","playReset"].forEach(id => $p(id).disabled = on); if(label) $p("playAdv1").textContent = label; };
   async function refresh(){
     try{ const i = await window.play.info(); $p("playDay").textContent = i.d + "日目"; }catch(e){}
     try{ if(typeof reload === "function") await reload(); }catch(e){}
@@ -57,8 +79,42 @@
   window.addEventListener("play-ready", refresh);
   $p("playAdv1").onclick = () => adv(1);
   $p("playAdv7").onclick = () => adv(7);
-  $p("playMore").onclick = () => { const m = $p("playMenu"); m.hidden = !m.hidden; $p("playMore").setAttribute("aria-expanded", String(!m.hidden)); };
-  $p("playCash").onclick = async () => { busy(true); try{ await window.play.addCash(100000); await refresh(); }finally{ busy(false); } };
+  $p("playMore").onclick = () => { const m = $p("playMenu"); m.hidden = !m.hidden; $p("playMore").setAttribute("aria-expanded", String(!m.hidden)); if(!m.hidden){ fillLists(); fillRoutes(); } };
+
+  // チート
+  const msg = (t, bad) => { const m = $p("pmMsg"); m.textContent = t; m.style.color = bad ? "#A3321F" : ""; };
+  let listsDone = false;
+  async function fillLists(){
+    if(listsDone) return; listsDone = true;
+    const aps = (typeof A !== "undefined" ? A : []).filter(a => a.iata).sort((x, y) => x.iata.localeCompare(y.iata));
+    const opt = (v, l, sel) => `<option value="${v}"${sel ? " selected" : ""}>${l}</option>`;
+    const apOpts = d => aps.map(a => opt(a.iata, `${a.iata} ${typeof apNm === "function" ? apNm(a.iata) : a.name}`, a.iata === d)).join("");
+    $p("pmFrom").innerHTML = apOpts("HND"); $p("pmTo").innerHTML = apOpts("ISG"); $p("pmSeenAp").innerHTML = apOpts("NRT"); $p("pmWxAp").innerHTML = apOpts("CTS");
+    try{ const t = await window.play.sql(`select code, name from co3_types where kind in ('pax', 'small') order by name`); $p("pmType").innerHTML = t.map(x => opt(x.code, x.name, x.code === "B789")).join(""); }catch(e){}
+  }
+  function fillRoutes(){ const rs = (typeof coRoutes === "function" && CO) ? coRoutes() : []; $p("pmRoute").innerHTML = rs.map(r => `<option value="${r.a.iata}-${r.b.iata}">${apNm(r.a.iata)} ⇄ ${apNm(r.b.iata)}</option>`).join(""); }
+  const U = () => window.play.uid;
+  async function cheat(b){
+    const k = b.dataset.pm, v = b.dataset.v;
+    const md = s => { const t = new Date(Date.now() + 9 * 36e5); let y = t.getUTCFullYear(); const d = `${y}-${s}`; return d < t.toISOString().slice(0, 10) ? `${y + 1}-${s}` : d; };
+    const run = {
+      rating: () => window.play.sql(`select play.set_company($1, $2::int)`, [U(), v]).then(() => `格付けを${v}にしました`),
+      sat: () => window.play.sql(`select play.set_company($1, null, $2::numeric)`, [U(), $p("pmSat").value]).then(() => `満足度を${$p("pmSat").value}にしました`),
+      cash: () => window.play.sql(`select play.set_company($1, null, null, $2::bigint)`, [U(), v]).then(() => `資金を足しました`),
+      fly: () => window.play.sql(`select play.add_flight($1, $2, $3, $4) v`, [U(), $p("pmFrom").value, $p("pmTo").value, $p("pmType").value]).then(r => { if(typeof HANGAR !== "undefined") HANGAR = null; return `${$p("pmFrom").value}→${$p("pmTo").value} に ${r[0].v} で乗ったことにしました（機体の「買う」→「乗った」に出ます）`; }),
+      seen: () => window.play.sql(`select play.add_seen($1, $2, array[$3]) v`, [U(), $p("pmSeenAp").value, $p("pmType").value]).then(() => { if(typeof SEEN !== "undefined") SEEN = null; return `${$p("pmSeenAp").value}で見たことにしました（機体の「買う」→「見た」に出ます）`; }),
+      typhoon: () => window.play.sql(`select play.typhoon($1)`, [$p("pmWxAp").value]).then(() => `あした${$p("pmWxAp").value}に台風が近づく予報にしました`),
+      wx: () => window.play.sql(`select play.weather($1, $2)`, [$p("pmWxAp").value, v]).then(() => `今日の${$p("pmWxAp").value}を${b.textContent}にしました`),
+      cxl: () => { const [a, c] = $p("pmRoute").value.split("-"); return window.play.sql(`select play.cancel($1, $2, $3::numeric) v`, [a, c, v]).then(r => `今日の${a}⇄${c}の本物そっくりの便を ${r[0].v}便 欠航にしました`); },
+      season: () => window.play.sql(`select play.set_season($1::date)`, [v ? md(v) : null]).then(() => v ? `今日を ${md(v)} として扱います` : "今日に戻しました"),
+      seasonDay: () => window.play.sql(`select play.set_season($1::date)`, [$p("pmDay").value || null]).then(() => `今日を ${$p("pmDay").value} として扱います`),
+    }[k];
+    if(!run) return;
+    b.disabled = true;
+    try{ msg(await run()); await refresh(); fillRoutes(); }catch(e){ msg("できませんでした：" + String(e.message || e).split("\n")[0], true); }
+    b.disabled = false;
+  }
+  document.addEventListener("click", e => { const b = e.target.closest("#playMenu [data-pm]"); if(b) cheat(b); });
   let armed = false;
   $p("playReset").onclick = () => { if(!armed){ armed = true; $p("playResetNote").hidden = false; $p("playReset").textContent = "本当にはじめからにする"; return; } window.play.reset(); };
 })();

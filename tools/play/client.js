@@ -183,6 +183,7 @@ onmessage = async (e) => { const { id, m } = e.data; try { postMessage({ id, ok:
     ready,
     async advance(n) { const [r] = await run([{ sql: `select play.advance(${Math.max(1, Math.min(31, n | 0))}) v` }], false); return r.rows[0].v; },
     async addCash(n) { await run([{ sql: `update public.companies set cash = cash + $1 where user_id = $2`, params: [n, UID] }], false); },
+    uid: UID,
     busy() { return busyN; },
     async sql(q, params) { const [r] = await run([{ sql: q, params: params || [] }], false); return r.rows; },   // 調べるとき用（このブラウザの中のデータベースだけ）
     async info() { const [r] = await run([{ sql: `select (select v from play.state where k = 'day')::int d, (now() at time zone 'Asia/Tokyo')::date::text today, (select cash from public.companies where user_id = $1) cash`, params: [UID] }], false); return r.rows[0]; },
