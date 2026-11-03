@@ -24,3 +24,10 @@ Deno.test("まだ始まっていない塗装（from）は出さず、終わる�
   assertEquals(m.get("N375HA")?.name.startsWith("ワンワールド塗装"), true);
   assertEquals(m.has("JA731A") || m.has("9V-SRI") || m.has("JA604J"), false);   // 退役・塗り替えで消したもの
 });
+
+Deno.test("2026-11 に足した塗装：GREEN×EXPO は就航日が出るまで出さない、J-AIR 30周年は 2027/3/31 まで", () => {
+  const m = liveryMap(new Date("2026-11-03"));
+  assertEquals(m.has("JA344J"), false);   // 11月就航予定（日は未発表）
+  assertEquals(m.get("JA228J")?.name, "J-AIR 創立30周年記念機");
+  assertEquals(liveryMap(new Date("2027-04-01")).has("JA228J"), false);
+});
