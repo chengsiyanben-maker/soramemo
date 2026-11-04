@@ -15,7 +15,7 @@ def check(label, ok):
 async def main():
     async with async_playwright() as p:
         b=await p.chromium.launch(); c=await b.new_context(viewport={'width':400,'height':860}, timezone_id='Asia/Tokyo')
-        await c.add_init_script("localStorage.setItem('soramemo.onboarded','1'); localStorage.setItem('soramemo.install.later','1'); localStorage.setItem('soramemo.persona','shugyo')")
+        await c.add_init_script("localStorage.setItem('soramemo.onboarded','1'); localStorage.setItem('soramemo.sgmoney','1'); localStorage.setItem('soramemo.install.later','1'); localStorage.setItem('soramemo.persona','shugyo')")
         await c.route('https://cdn.jsdelivr.net/npm/@supabase/**', lambda r: r.fulfill(path=os.path.join(HERE,'fake_sb.js'), content_type='application/javascript'))
         RT = [{'flight': 'NH469', 'std': iso(90), 'sta': iso(250), 'etd': iso(120), 'cancelled': False, 'aircraft': 'B789'}]
         async def rpc(r):
