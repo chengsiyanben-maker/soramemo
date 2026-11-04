@@ -85,7 +85,10 @@ for (const def of Object.values(OPS_AIRPORTS)) {
     ok(tag > 0, "地図の名札に特別塗装機の★が出る");
   }
   if (def.iata === "NRT") {
-    // 成田：出発経路の方向での絞り込み（34運用は方向が3つ以上ある）
+    // 成田：出発経路の方向での絞り込み（34運用は方向が3つ以上ある）。経路の線は「経路の全体」のときに出す
+    ok(await p.locator('#opsSidDir [data-sid-dir]').count() === 0, "成田：空港のまわりでは出発経路の方向の切り替えを出さない");
+    await p.locator('[data-scope="wide"]').click(); await p.waitForTimeout(1000);
+    const lines = await p.locator("#opsMap path.leaflet-interactive").count();
     const n0 = await p.locator('#opsSidDir [data-sid-dir]').count();
     ok(n0 >= 4, `成田：出発経路の方向の切り替えが出る（${n0}個）`);
     if (n0) { const all = lines; await p.locator('#opsSidDir [data-sid-dir="西へ"]').click(); await p.waitForTimeout(800);

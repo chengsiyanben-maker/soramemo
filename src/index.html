@@ -2417,6 +2417,18 @@ nav.tabs{transition:transform .3s cubic-bezier(.2,.8,.2,1),opacity .2s}
 .spinfo dd a{color:var(--s-ink);font-weight:800}.spinfo dd small{display:block;font-size:11.5px;color:var(--s-mute)}
 .spinfo .none{color:var(--s-mute)}
 .spinfo .src{margin:12px 0 0;font-size:11.5px;color:var(--s-mute);line-height:1.6}.spinfo .src a{display:block;margin-top:6px;color:var(--s-ink)}
+
+/* 滑走路の見方の地図（11-04）：撮影地の名札・着陸と離陸の向き・現在地 */
+.spotlbl{background:none;border:0}
+.spotlbl i{position:absolute;left:0;top:0;width:12px;height:12px;border-radius:50%;background:#fff;box-shadow:0 0 0 2px #0F1B2D}
+.spotlbl span{position:absolute;left:14px;top:-5px;white-space:nowrap;background:#fff;color:#2B2F36;border-radius:999px;padding:3px 9px;font:700 11px/1.3 var(--gothic);box-shadow:0 2px 8px rgba(15,27,45,.18),0 0 0 1px rgba(15,27,45,.08);cursor:pointer}
+.spotlbl span b{margin-right:4px;font-weight:700;color:#0F1B2D}
+.spotlbl.l span{left:auto;right:14px}.spotlbl.d span{top:12px}.spotlbl.x span{display:none}
+.spotlbl.on i{background:#0F1B2D;box-shadow:0 0 0 2px #fff,0 0 0 3px #0F1B2D}.spotlbl.on span{background:#0F1B2D;color:#fff}.spotlbl.on span b{color:#fff}
+.rwyarrow{background:none;border:0}.rwyarrow i{display:block;width:0;height:0;margin:0 auto;border-left:7px solid transparent;border-right:7px solid transparent;border-bottom:14px solid #0F1B2D;transform-origin:50% 60%}
+.rwyarrow.dep i{border-bottom-color:#8C9AAE}
+.locdot{background:none;border:0}.locdot i{display:block;width:14px;height:14px;margin:2px;border-radius:50%;background:#2B6CB0;box-shadow:0 0 0 3px #fff,0 2px 8px rgba(0,0,0,.3)}
+#v-ops .opsscope{margin-bottom:4px}
 </style>
 </head>
 <body>
@@ -2713,8 +2725,9 @@ nav.tabs{transition:transform .3s cubic-bezier(.2,.8,.2,1),opacity .2s}
     <div class="fwbox" id="opsAlerts" hidden data-ov="runway board"></div>
   </div>
   <div class="lo" data-lo="opsb:map">
+    <div class="opslayers opsscope" role="group" aria-label="地図の範囲" data-ov="runway"><button class="chip" data-scope="near" aria-pressed="true">空港のまわり</button><button class="chip" data-scope="wide" aria-pressed="false">経路の全体</button></div>
     <div class="opslayers" role="group" aria-label="地図に出すもの" data-ov="runway">
-      <button class="chip" data-layer="traffic" aria-pressed="true">機体</button><button class="chip" data-layer="star" aria-pressed="true">到着経路</button><button class="chip" data-layer="app" aria-pressed="true">進入経路</button><button class="chip" data-layer="sid" aria-pressed="true">出発経路</button><button class="chip" data-layer="spots" aria-pressed="true">見る場所</button><button class="chip" id="opsFitAll">全体を見る</button>
+      <button class="chip" data-layer="traffic" aria-pressed="true">機体</button><button class="chip" data-layer="star" aria-pressed="true">到着経路</button><button class="chip" data-layer="app" aria-pressed="true">進入経路</button><button class="chip" data-layer="sid" aria-pressed="true">出発経路</button><button class="chip" data-layer="spots" aria-pressed="true">見る場所</button><button class="chip" id="opsLocBtn" hidden>現在地</button>
     </div>
     <div class="opslayers opssiddir" id="opsSidDir" role="group" aria-label="出発経路の行き先の方向" hidden data-ov="runway"></div>
     <div class="opsmap" id="opsMap" role="region" aria-label="羽田空港の滑走路と、進入・出発・到着の経路、今飛んでいる機体の地図" data-ov="runway"></div>
@@ -7606,7 +7619,6 @@ function renderOps(){
     </div>
     <div class="otiles">${windTile}${visTile}<div class="otile"><small>運用時間</small><b>${opsHours(def)}</b><span>${opsHours(def) === "24時間" ? "AIP JAPAN" : opsOpen(def) ? "いまは運用中" : "いまは時間外"}</span></div>${SERVER ? `<div class="otile" id="opsDelayTile">${delayTileHTML(FW.get(OPS_AP))}</div>` : W ? "" : `<div class="otile"><small>気象通報</small><b>—</b><span>読み込めません</span></div>`}</div>
     ${nr ? `<p class="opsnight">夜間：${esc(nr.text)}${nr.closed ? "。下は、朝の最初の便が使いそうな向き（風から推定）です" : ""}（AIP JAPAN）</p>` : ""}
-    ${hndDiagram(op, rw, mode, est.good, def)}
     <div class="opsrows">
       <div><span class="lbl">着陸</span>${op.arr.map(r => { const k = appKey(mode, est.good, r); return `<span class="rw arr">${r}</span><small>${k ? keyName(k) : appName(mode, est.good, r)}</small>`; }).join(" ")}</div>
       <div><span class="lbl">離陸</span>${op.dep.map(r => `<span class="rw dep">${r}</span>${op.depNote && op.depNote[r] ? `<small>${op.depNote[r]}</small>` : ""}`).join(" ")}</div>
@@ -7614,7 +7626,7 @@ function renderOps(){
     <details class="opswhy"><summary>くわしく</summary><p>${why ? why + "<br>" : ""}${op.note}${mode === "north" && est.northNew && OPS_MODE === "auto" ? "　この時間帯は、C滑走路（34R）から北へ離陸して荒川沿いを上昇する新しいルートが使われることがあります。" : ""}</p></details>`;
   $("opsLegend").textContent = !def.detail && def.app ? `${def.name}は、滑走路の位置（AIP JAPAN 2026年10月1日版の AD 2.12）と、風・実際の機体から「どちら向きに使っているか」を出しています。太い点線は、その向きで使う ILS の進入経路、白い点はその上のフィックスです。細かい点線は、その進入につながる標準到着経路（RNAV STAR）で、入口のフィックスの名前を付けています。経路は、AIP JAPAN（2026年10月1日版）の進入・到着チャートの座標をもとに そらメモ が作ったもので、国が作ったものではなく、最新でない場合があります。実際は管制の指示で途中を短くすることが多く、線はおおよそです。${def.sid ? `青の点線は、標準出発経路（RNAV SID。行き先の方向ごと）です。${def.rwy.length > 1 ? `${def.name}は、どちらの滑走路から離陸するかを管制がその都度決めるため、両方の滑走路からの経路を出しています（主な方向のものだけ）。` : ""}` : "出発経路はまだ入れていません（滑走路の向きに短い線だけ）。"}${def.noObs ? "伊丹の14運用は、32Lの進入で近づいて空港の西側を回り14Rに降りる「周回進入」で、回る部分の線は そらメモ が滑走路の位置から作ったおおよその線です。14運用でも着陸機は32Lの進入の線を通るため、伊丹は、着陸機の線では向きを見分けられないため、離陸した機体を最初に見た位置が空港のどちら側か（8km以内・まだ低い機体）で判定し、そろわないときは風から推定しています。" : ""}航空機の運航には使えません。` : !def.detail ? `${def.name}は、滑走路の位置（AIP JAPAN 2026年10月1日版の AD 2.12）と、風・実際の機体から「どちら向きに使っているか」を出しています。太い点線は、今の向きの最終進入（滑走路の延長線、約10海里）で、実際の経路ではありません。平行な滑走路は、どちらも着陸・離陸に使う前提の表示です。進入・出発・到着の経路は、空港ごとに AIP から足していきます。航空機の運航には使えません。` : "太い点線は、いまの運用と天気で使うと推定した進入の経路、白い点はその上のフィックスです。経路は、AIP JAPAN（2026年10月1日版）の進入チャートの座標をもとに そらメモ が作ったもので、国が作ったものではなく、最新でない場合があります。実際は管制の指示で途中を短くすることが多く、LDA の最後の曲がる部分は目で見て飛ぶため、線はおおよそです。航空機の運航には使えません。青の点線は、その運用で使う主な標準出発経路（RNAV SID。AIP の同じ版から作成）で、行き先の方向ごとに分かれます。時間帯によって経路が変わるもの（ROVER・BEKLA）は、いまの時刻のものを出しています。細かい点線は、その進入につながる標準到着経路（RNAV STAR）で、入口の名前を付けています（深夜早朝の経路は出していません）。";
   OPS_CUR = { def, op, rw };
-  drawOpsMap(rw, op, plus, mode, est.good); opsLegendKey(); renderSpots(def, op, rw); applyOpsView();
+  opsScopeChips(); drawOpsMap(rw, op, plus, mode, est.good); opsLegendKey(); renderSpots(def, op, rw); if(LOC_LAST && OPS_MAP) opsLocDraw(); applyOpsView(); if(VIEW.ops === "runway" && LOC_WATCH == null) opsLocStart();
 }
 // 地図が見えているか（見方の切り替えで隠れているときに位置を合わせると、大きさが0で計算できない）
 const opsMapShown = () => { const m = $("opsMap"); return !!m && m.offsetWidth > 0 && m.offsetHeight > 0; };
@@ -7625,7 +7637,7 @@ function applyOpsView(){
   document.querySelectorAll("#v-ops [data-ov]").forEach(el => el.classList.toggle("ovoff", !el.dataset.ov.split(" ").includes(v)));
   if(["day", "strip", "photo"].includes(v) && BOARD && BOARD_AP === OPS_AP) renderOpsDerived(BOARD);
 }
-VIEW_RENDER.ops = () => { if(VIEW.ops === "runway"){ renderOps(); if(OPS_MAP) setTimeout(() => { if(opsMapShown()){ OPS_MAP.invalidateSize(); OPS_MAP.setView(opsDef().center, 10, { animate:false }); } }, 30); } else applyOpsView(); };
+VIEW_RENDER.ops = () => { if(VIEW.ops === "runway"){ renderOps(); if(OPS_MAP) setTimeout(() => { opsFit(); opsLocStart(); }, 30); } else applyOpsView(); };
 const OPS_CREDIT_S = () => `<p class="fwnote">時刻は JAL・ANA の時刻表と運航情報。${ODPT_CREDIT}</p>`;
 function renderOpsDerived(d){
   if(!d || BOARD_AP !== OPS_AP) return;
@@ -7683,9 +7695,24 @@ function drawOpsMap(rw, op, plus, mode, good){
   const def = opsDef();
   for(const [a, , , , b, , , , name] of def.rwy){
     const r1 = rw[a], r2 = rw[b];
-    L.polyline([r1.end, r2.end], { color:"#1C2B4A", weight:5, opacity:.85 }).bindTooltip(`${name}（${a}/${b}）`).addTo(OPS_LAYER);
+    const useA = op.arr.includes(a) || op.arr.includes(b), useD = op.dep.includes(a) || op.dep.includes(b);
+    L.polyline([r1.end, r2.end], { color:useA ? "#0F1B2D" : useD ? "#8C9AAE" : "#C9CED6", weight:useA || useD ? 7 : 5, opacity:1, className:useA ? "rwy-arr" : useD ? "rwy-dep" : "rwy-off" })
+      .bindTooltip(`${name}（${a}/${b}）${useA ? "・着陸に使っている" : useD ? "・離陸に使っている" : ""}`).addTo(OPS_LAYER);
     for(const r of [r1, r2]) L.marker(dest(r.end, (r.hdg + 180) % 360, 0.35), { icon: L.divIcon({ className:"rwylabel", html:r.id, iconSize:[30, 14] }) }).addTo(OPS_LAYER);
   }
+  // 空港のまわり：着陸の向き（最終進入の6km）と離陸の向き（3km）だけを短い線で。経路の線は「経路の全体」で
+  if(OPS_SCOPE !== "wide"){
+    for(const id of op.arr){ const r = rw[id]; if(!r) continue; const far = dest(r.thr, (r.hdg + 180) % 360, 6);
+      L.polyline([far, r.thr], { color:"#0F1B2D", weight:2.5, dashArray:"6 6", opacity:.9 }).bindTooltip(`${id} に着陸（最終進入）`).addTo(OPS_LAYER);
+      L.marker(dest(r.thr, (r.hdg + 180) % 360, 1.1), { icon:L.divIcon({ className:"rwyarrow arr", html:`<i style="transform:rotate(${r.hdg}deg)"></i>`, iconSize:[16, 16] }), keyboard:false, interactive:false }).addTo(OPS_LAYER); }
+    for(const id of op.dep){ const r = rw[id]; if(!r) continue;
+      L.polyline([r.opp, dest(r.opp, r.hdg, 3)], { color:"#8C9AAE", weight:2.5, dashArray:"6 6", opacity:.95 }).bindTooltip(`${id} から離陸`).addTo(OPS_LAYER);
+      L.marker(dest(r.opp, r.hdg, 1.2), { icon:L.divIcon({ className:"rwyarrow dep", html:`<i style="transform:rotate(${r.hdg}deg)"></i>`, iconSize:[16, 16] }), keyboard:false, interactive:false }).addTo(OPS_LAYER); }
+    $("opsSidDir").hidden = true;
+    if(OPS_MAP._opsFitAp !== OPS_AP){ OPS_MAP._opsFitAp = OPS_AP; setTimeout(opsFit, 30); }
+    return;
+  }
+  OPS_MAP._opsFitAp = null;
   // 進入・離陸の線（いまは全員に見せる。10月13日に そらメモ＋ の制限を外した）
   if(OPS_SHOW.app) for(const id of op.arr){
     const key = appKey(mode, good, id), a = key && (def.app || {})[key];
@@ -7766,8 +7793,52 @@ document.querySelectorAll("[data-layer]").forEach(b => {
     if(k === "traffic"){ if(TRAFFIC_LAYER && OPS_MAP){ OPS_SHOW.traffic ? TRAFFIC_LAYER.addTo(OPS_MAP) : TRAFFIC_LAYER.remove(); } opsLegendKey(); }
     else renderOps(); };
 });
-$("opsFitAll").onclick = () => { if(!OPS_MAP) return; const ls = [...(OPS_LAYER ? OPS_LAYER.getLayers() : []), ...(TRAFFIC_LAYER && OPS_SHOW.traffic ? TRAFFIC_LAYER.getLayers() : [])].filter(l => l instanceof L.Polyline);
-  const bd = L.featureGroup(ls).getBounds(); if(bd.isValid() && opsMapShown()) OPS_MAP.fitBounds(bd, { padding:[16, 16] }); };
+// ---- 現在地：滑走路のどれかから1.5km以内（空港の敷地のあたり）にいるときだけ、地図に出す。位置は端末の中だけで使い、送らない ----
+let LOC_WATCH = null, LOC_LAYER = null, LOC_LAST = null;
+function opsInPremises(lat, lon, def = opsDef()){
+  const rw = hndRunways(); return def.rwy.some(([a, , , , b]) => nmToLine([lat, lon], [rw[a].end, rw[b].end]) * 1.852 <= 1.5);
+}
+function opsLocDraw(){
+  if(LOC_LAYER){ LOC_LAYER.remove(); LOC_LAYER = null; }
+  const p = LOC_LAST; if(!p || !OPS_MAP || !opsInPremises(p.lat, p.lon)) return;
+  LOC_LAYER = L.layerGroup([L.circle([p.lat, p.lon], { radius:Math.min(p.acc || 30, 300), color:"#2B6CB0", weight:1, fillColor:"#2B6CB0", fillOpacity:.12, interactive:false }),
+    L.marker([p.lat, p.lon], { icon:L.divIcon({ className:"locdot", html:"<i></i>", iconSize:[18, 18], iconAnchor:[9, 9] }), keyboard:false, title:"いまいる場所", zIndexOffset:900 })]).addTo(OPS_MAP);
+}
+function opsLocStop(){ if(LOC_WATCH != null){ try{ navigator.geolocation.clearWatch(LOC_WATCH); }catch(e){} LOC_WATCH = null; } }
+function opsLocWatch(){
+  if(LOC_WATCH != null || !navigator.geolocation) return;
+  LOC_WATCH = navigator.geolocation.watchPosition(x => {
+    if(!opsOn() || VIEW.ops !== "runway"){ opsLocStop(); if(LOC_LAYER){ LOC_LAYER.remove(); LOC_LAYER = null; } return; }
+    LOC_LAST = { lat:x.coords.latitude, lon:x.coords.longitude, acc:x.coords.accuracy }; opsLocDraw();
+  }, () => opsLocStop(), { enableHighAccuracy:true, maximumAge:15000, timeout:20000 });
+}
+// 位置の許可がもうあるなら黙って見る。まだなら「現在地」のピルを出し、押したときだけ聞く
+async function opsLocStart(){
+  const btn = $("opsLocBtn"); if(!btn || !navigator.geolocation) return;
+  let st = "prompt"; try{ st = (await navigator.permissions.query({ name:"geolocation" })).state; }catch(e){}
+  btn.hidden = st !== "prompt";
+  if(st === "granted") opsLocWatch(); else if(LOC_LAST) opsLocDraw();
+}
+document.addEventListener("click", e => { if(!e.target.closest("#opsLocBtn")) return; track("ops", "loc"); $("opsLocBtn").hidden = true; opsLocWatch(); });
+
+// 地図の範囲：空港のまわり（滑走路と撮影地。経路の線は出さない）／経路の全体（進入・到着・出発の経路）
+let OPS_SCOPE = (() => { try{ return localStorage.getItem("soramemo.opsScope") === "wide" ? "wide" : "near"; }catch(e){ return "near"; } })();
+function opsScopeChips(){
+  document.querySelectorAll("[data-scope]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.scope === OPS_SCOPE)));
+  document.querySelectorAll('[data-layer="star"],[data-layer="app"],[data-layer="sid"]').forEach(b => { b.hidden = OPS_SCOPE !== "wide"; });
+}
+document.addEventListener("click", e => { const b = e.target.closest("[data-scope]"); if(!b) return; OPS_SCOPE = b.dataset.scope;
+  try{ localStorage.setItem("soramemo.opsScope", OPS_SCOPE); }catch(_){} track("ops", "scope_" + OPS_SCOPE); TRAFFIC_FIT = false; renderOps(); opsFit(); });
+// 空港のまわりの範囲（滑走路と撮影地）／経路の全体（描いた線と機体）に合わせる
+function opsFit(){
+  if(!OPS_MAP || !opsMapShown()) return;
+  OPS_MAP.invalidateSize();
+  if(OPS_SCOPE === "near"){ const def = opsDef(), rw = hndRunways(), pts = def.rwy.flatMap(([a, , , , b]) => [rw[a].end, rw[b].end]);
+    for(const [, la, lo] of OPS_SPOTS[def.iata] || []) if(km({ lat:la, lon:lo }, { lat:def.center[0], lon:def.center[1] }) <= 4) pts.push([la, lo]);
+    if(pts.length) OPS_MAP.fitBounds(L.latLngBounds(pts), { padding:[18, 18], maxZoom:15, animate:false }); setTimeout(spotDeclutter, 0); return; }
+  const ls = [...(OPS_LAYER ? OPS_LAYER.getLayers() : []), ...(TRAFFIC_LAYER && OPS_SHOW.traffic ? TRAFFIC_LAYER.getLayers() : [])].filter(l => l instanceof L.Polyline && !l.options.noFit);
+  const bd = L.featureGroup(ls).getBounds(); if(bd.isValid()) OPS_MAP.fitBounds(bd, { padding:[16, 16], animate:false });
+}
 /* 今飛んでいる機体と、通ってきた線（OpenSky。10〜20秒遅れ）。地図を開いているあいだ、30秒ごとに読み直す */
 let TRAFFIC_LAYER = null, TRAFFIC_TIMER = null, TRAFFIC_FIT = false;
 const TRAFFIC_COL = { arr:"#A3166B", dep:"#2B6CB0", other:"#5C6B7A" };
@@ -7801,7 +7872,7 @@ async function loadTraffic(){
     { const el = mk.getElement(); if(el) el.setAttribute("aria-label", `${p.callsign || "便名不明"}（${p.phase === "arr" ? "到着" : "出発"}${p.alt_ft != null ? "・" + p.alt_ft.toLocaleString("ja-JP") + "フィート" : ""}）`); }
   }
   // はじめて読み込んだときだけ、着陸に向かう機体の線が入るように地図を合わせる
-  if(!TRAFFIC_FIT && arr.length){ TRAFFIC_FIT = true;
+  if(!TRAFFIC_FIT && arr.length && OPS_SCOPE === "wide"){ TRAFFIC_FIT = true;
     const pts = arr.flatMap(p => [...(p.trail || []), [p.lat, p.lon]]).concat([opsDef().center]);
     setTimeout(() => { if(!opsMapShown()) return; OPS_MAP.invalidateSize(); OPS_MAP.stop(); OPS_MAP.fitBounds(L.latLngBounds(pts), { padding:[20, 20], maxZoom:11, animate:false }); }, 400); }
   if(!OPS_MAP._declutter){ OPS_MAP._declutter = true; OPS_MAP.on("zoomend", declutterLabels); }
@@ -8815,9 +8886,25 @@ function renderSpots(def, op, rw){
       return `<li><button class="spot" type="button" data-spot="${x.lat},${x.lon}"><span class="mk">${x.mk}</span>${esc(x.name)}${li ? `<span class="lt ${li.cur}">${LIGHT[li.cur]}${li.low ? "・低い太陽" : ""}</span>` : ""}${known ? `<small>${[x.a != null && `着陸機の線まで${f(x.a)}`, x.d != null && `離陸機の線まで${f(x.d)}`].filter(Boolean).join("・")}${li && li.until ? `・${hm(li.until)}ごろから${LIGHT[lightAt(li.until, [x.lat, x.lon], x.view)]}` : ""}</small>` : ""}</button></li>`; }).join("")}</ol>
     <p class="hint">着陸機の線は滑走路の手前8km、離陸機の線は滑走路の先6kmまで。◎ 線まで1km以内　○ 2.5km以内　△ 遠め。滑走路の向きと距離だけで出した目安です（建物などで見えないこともあります）。順光・逆光は、太陽の向きと、その場所から線のいちばん近い所を見る向きだけでくらべた目安です（雲・建物の影は考えていません）。開いている時間・立ち入りは各施設で確かめてください。位置：© OpenStreetMap contributors</p>`;
   if(window.L && OPS_MAP && OPS_SHOW.spots){
-    SPOT_LAYER = L.layerGroup(rows.map(x => L.marker([x.lat, x.lon], { icon:L.divIcon({ className:"spotpin", html:`<span>${x.mk === "・" ? "" : x.mk}</span>`, iconSize:[18, 18] }), keyboard:false })
-      .bindTooltip(esc(x.name), { direction:"top", offset:[0, -8] }))).addTo(OPS_MAP);
+    let sel = SP_SPOT; if(sel == null){ try{ sel = localStorage.getItem("soramemo.photoSpot." + def.iata); }catch(e){} }
+    const short = n => n.replace(/^第(\d)ターミナル 展望デッキ$/, "第$1T 展望デッキ").replace(/^(国内線)?ターミナル 展望デッキ$/, "展望デッキ");
+    SPOT_LAYER = L.layerGroup(rows.map(x => L.marker([x.lat, x.lon], { icon:L.divIcon({ className:"spotlbl" + (x.name === sel ? " on" : ""),
+        html:`<i aria-hidden="true"></i><span>${x.mk === "・" ? "" : `<b>${x.mk}</b>`}${esc(short(x.name))}</span>`, iconSize:[12, 12], iconAnchor:[6, 6] }), keyboard:true, title:x.name, zIndexOffset:x.name === sel ? 500 : 0 })
+      .on("click", () => { track("ops_spot", "map");
+        if(spInfoOf(def.iata, x.name)){ $("dSpotInfoBody").innerHTML = spInfoHTML(def.iata, x.name); if(!$("dSpotInfo").open) $("dSpotInfo").showModal(); }
+        else OPS_MAP.setView([x.lat, x.lon], 15); }))).addTo(OPS_MAP);
+    if(!OPS_MAP._spotDeclutter){ OPS_MAP._spotDeclutter = true; OPS_MAP.on("zoomend moveend", spotDeclutter); }
+    setTimeout(spotDeclutter, 0);
+    if(!SP_INFO.has(def.iata)) spLoadInfo(def.iata).then(ok => { if(ok && def.iata === OPS_AP && OPS_CUR) renderSpots(OPS_CUR.def, OPS_CUR.op, OPS_CUR.rw); });
   }
+}
+// 撮影地の名札が重ならないように：選んでいる撮影地を先に置き、重なったら左・下に動かし、それでも重なれば名前を隠す
+function spotDeclutter(){
+  const els = [...document.querySelectorAll("#opsMap .spotlbl")].sort((a, b) => b.classList.contains("on") - a.classList.contains("on")), placed = [];
+  const hit = r => placed.some(q => r.left < q.right + 2 && r.right > q.left - 2 && r.top < q.bottom + 2 && r.bottom > q.top - 2);
+  for(const el of els){ el.classList.remove("l", "d", "x"); const sp = el.querySelector("span"); if(!sp) continue;
+    let ok = false; for(const c of ["", "l", "d", "ld"]){ el.classList.remove("l", "d"); if(c) c.split("").forEach(k => el.classList.add(k)); const r = sp.getBoundingClientRect(); if(!hit(r)){ placed.push(r); ok = true; break; } }
+    if(!ok){ el.classList.remove("l", "d"); el.classList.add("x"); } }
 }
 document.addEventListener("click", e => { const b = e.target.closest("[data-spot]"); if(!b || !OPS_MAP) return;
   const [la, lo] = b.dataset.spot.split(",").map(Number); track("ops_spot", OPS_AP); OPS_MAP.setView([la, lo], 14);
