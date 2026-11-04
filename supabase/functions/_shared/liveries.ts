@@ -13,6 +13,8 @@ export const LIVERIES: Livery[] = [
   { reg: "JA381A", name: "FLYING HONU（青）", airline: "ANA", src: "https://www.aviationwire.jp/archives/208555" },
   { reg: "JA382A", name: "FLYING HONU（緑）", airline: "ANA", src: "https://www.aviationwire.jp/archives/208555" },
   { reg: "JA383A", name: "FLYING HONU（オレンジ）", airline: "ANA", src: "https://www.aviationwire.jp/archives/208555" },
+  { reg: "JA344J", name: "GREEN×EXPO 2027 特別塗装機", airline: "JAL", src: "https://www.aviationwire.jp/archives/349777", from: "9999-12-31" },   // 11月就航予定（日は未発表）。登録記号は https://sky-budget.com/2026/11/02/jal-reveals-the-process-behind-the-creation-of-its-greenxexpo-2027-decal-adorned-aircraft-set-to-enter-service-in-november/
+  { reg: "JA228J", name: "J-AIR 創立30周年記念機", airline: "J-AIR", src: "https://www.jair.co.jp/news/2026/j-air_30thanniversary/", from: "2026-04-01", until: "2027-03-31" },   // 公式は登録記号「決まり次第」。JA228J は https://jlspcolormuseum.aikotoba.jp/JA228J30th.html の写真で確認
   { reg: "JA339J", name: "JAL Jubilee Express", airline: "JAL", src: "https://press.jal.co.jp/ja/release/202604/009482.html", until: "2027-04-30" },
   { reg: "JA01XJ", name: "A350 1号機（赤のロゴ）", airline: "JAL", src: "https://www.aviationwire.jp/archives/173663" },
   { reg: "JA02XJ", name: "A350 2号機（銀のロゴ）", airline: "JAL", src: "https://www.aviationwire.jp/archives/308931" },   // 2024-09 の記事でも銀のロゴ
