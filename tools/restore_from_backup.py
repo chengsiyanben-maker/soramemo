@@ -6,6 +6,7 @@
 import json, sys
 
 TABLES = [  # 戻す順番（参照される側が先）、重なりの判定に使う列、番号を自動で振る列があるか
+    ("public.profiles",       "(user_id)",                 False),
     ("public.checkins",       "(id)",                      True),
     ("public.flights",        "(id)",                      True),
     ("public.manual_flights", "(id)",                      True),
