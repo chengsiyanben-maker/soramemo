@@ -834,6 +834,7 @@ div.viewsw>button[aria-selected="true"]{background:none;border-color:var(--vw-in
 .fwb{font-size:12px;font-weight:900;padding:3px 8px;border-radius:8px;background:#FDE7E7;color:#B42318}.fwb.bad{background:#B42318;color:#fff}
 .fwc .r2{display:flex;align-items:center;gap:8px}.fwc .r2 svg{width:18px;height:11px;fill:none;stroke:#9CA3AF;stroke-width:1.8;flex:none}
 .fwap{display:flex;flex-direction:column;line-height:1.15}.fwap b{font:700 17px ui-monospace,"SFMono-Regular",Menlo,monospace}.fwap small{font-size:11px;color:var(--op-mute,var(--sumi))}
+.fwtms{margin-left:auto;display:flex;flex-direction:column;align-items:flex-end;gap:2px}.fwtms .fwtm{margin-left:0}.fwtm small{font-family:var(--gothic);font-size:10.5px;color:var(--fw-mute,var(--op-mute,var(--sumi)))}
 .fwtm{margin-left:auto;display:flex;align-items:baseline;gap:6px;font-family:ui-monospace,"SFMono-Regular",Menlo,monospace}.fwtm s{font-size:13px;color:var(--op-mute,var(--sumi))}.fwtm b{font-size:18px;color:#B42318}
 .fwc .r3{display:flex;align-items:center;gap:6px;flex-wrap:wrap}.fwtag{font-size:11px;padding:2px 8px;border-radius:6px;background:var(--op-card,#fff);color:var(--op-ink,var(--ink))}
 .fwraw{margin-left:auto}.fwraw summary{list-style:none;cursor:pointer;font-size:12px;color:#1C4FA0;padding:6px 0;min-height:32px;display:flex;align-items:center}.fwraw summary::-webkit-details-marker{display:none}
@@ -7940,24 +7941,38 @@ function fwParse(a){
   const m = String(a.message || ""), mins = /約?(\d{1,3})分(?:の)?(?:遅|以上)/.exec(m), tm = /定刻\s*(\d{1,2}:\d{2})\s*→\s*[^\d（）]*?(\d{1,2}:\d{2})/.exec(m);
   return { mins:mins ? Number(mins[1]) : null, from:tm ? tm[1] : null, to:tm ? tm[2] : null, official:/航空会社の運航情報/.test(m), tags:FW_REASON.filter(([re]) => re.test(m)).map(([, t]) => t).slice(0, 2) };
 }
-function fwCard(a){
-  const p = fwParse(a), k = a.kind, bad = k === "cancel" || k === "divert" || k === "divert_landed" || k === "return";
-  const badge = k === "cancel" ? "欠航" : k === "divert" ? "ダイバート？" : k === "divert_landed" ? "ダイバート" : k === "return" ? "引き返し" : k === "no_takeoff" ? "離陸を確認できず" : p.mins != null ? `+${p.mins}分` : (FW_KIND[k] || "お知らせ");
-  const dir = k === "delay_arr" || k === "divert" || k === "divert_landed" ? "到着" : k === "cancel" ? "" : "出発";
+// 同じ便のお知らせを1枚にまとめる：出発の遅れと到着の遅れ、見込みと実際、何度も届いた同じ欠航は、便ごとに新しいものだけ残す
+const FW_RANK = { cancel:0, divert_landed:1, divert:2, return:3, no_takeoff:4, delay_dep:5, delay_arr:6 };
+function fwMerge(list){
+  const g = new Map(), t = a => Date.parse(a.at) || 0;
+  for(const a of list || []){ const k = `${a.flight}|${a.dep || ""}|${a.arr || ""}`; if(!g.has(k)) g.set(k, []); g.get(k).push(a); }
+  return [...g.values()].map(xs => { const last = kind => xs.filter(a => a.kind === kind).sort((p, q) => t(q) - t(p))[0] || null;
+    const main = xs.slice().sort((p, q) => (FW_RANK[p.kind] ?? 9) - (FW_RANK[q.kind] ?? 9) || t(q) - t(p))[0];
+    return { main, dep:last("delay_dep"), arr:last("delay_arr"), at:Math.max(...xs.map(t)), n:xs.length }; }).sort((p, q) => q.at - p.at);
+}
+function fwCard(G){
+  const a = G.main, k = a.kind, bad = k === "cancel" || k === "divert" || k === "divert_landed" || k === "return", delay = k === "delay_dep" || k === "delay_arr";
+  const pd = G.dep && fwParse(G.dep), pa = G.arr && fwParse(G.arr), p = fwParse(a), mins = pd && pd.mins != null ? pd.mins : pa && pa.mins != null ? pa.mins : p.mins;
+  const badge = k === "cancel" ? "欠航" : k === "divert" ? "ダイバート？" : k === "divert_landed" ? "ダイバート" : k === "return" ? "引き返し" : k === "no_takeoff" ? "離陸を確認できず" : mins != null ? `+${mins}分` : (FW_KIND[k] || "お知らせ");
+  const official = [a, G.dep, G.arr].some(x => x && fwParse(x).official);
   const al = (ALBY[String(a.flight || "").slice(0, 2)] || {}).group || "OTHER";
   const ap = c => c ? `<span class="fwap"><b>${esc(c)}</b><small>${esc(placeShort(c))}</small></span>` : "";
-  return `<li class="fwc fw-${esc(k)} al-${al}"><div class="r1"><span class="fwb${bad ? " bad" : ""}">${esc(badge)}</span><b class="fn">${esc(a.flight)}</b><span class="fwt">${dir ? dir + "・" : ""}${p.official ? "航空会社" : "推定"}・${jstHM(a.at)}</span></div>
-    ${a.dep || a.arr ? `<div class="r2">${ap(a.dep)}<svg viewBox="0 0 20 12" aria-hidden="true"><path d="M1 6h16M13 2l4 4-4 4"/></svg>${ap(a.arr)}${p.from && p.to ? `<span class="fwtm"><s>${p.from}</s><b>${p.to}</b></span>` : ""}</div>` : ""}
-    <div class="r3">${p.tags.map(t => `<span class="fwtag">${t}</span>`).join("")}<details class="fwraw"><summary>原文</summary><p>${esc(a.message)}</p></details></div></li>`;
+  const tm = (label, q) => q && q.from && q.to ? `<span class="fwtm"><small>${label}</small><s>${q.from}</s><b>${q.to}</b></span>` : "";
+  const times = delay || k === "no_takeoff" ? [tm("出発", pd), tm("到着", pa)].filter(Boolean) : [tm("", p)].filter(Boolean);
+  const msgs = [...new Set([G.dep, G.arr, delay ? null : a].filter(Boolean).map(x => x.message))];
+  const tags = [...new Set([a, G.dep, G.arr].filter(Boolean).flatMap(x => fwParse(x).tags))].slice(0, 2);
+  return `<li class="fwc fw-${esc(k)} al-${al}"><div class="r1"><span class="fwb${bad ? " bad" : ""}">${esc(badge)}</span><b class="fn">${esc(a.flight)}</b><span class="fwt">${official ? "航空会社" : "推定"}・${jstHM(new Date(G.at).toISOString())}</span></div>
+    ${a.dep || a.arr ? `<div class="r2">${ap(a.dep)}<svg viewBox="0 0 20 12" aria-hidden="true"><path d="M1 6h16M13 2l4 4-4 4"/></svg>${ap(a.arr)}${times.length ? `<span class="fwtms">${times.join("")}</span>` : ""}</div>` : ""}
+    <div class="r3">${tags.map(t => `<span class="fwtag">${t}</span>`).join("")}<details class="fwraw"><summary>原文</summary>${msgs.map(m => `<p>${esc(m)}</p>`).join("")}</details></div></li>`;
 }
 // 計器のタイル：この12時間の遅れ・欠航のお知らせの数（押すと下のお知らせへ）
 function delayTileHTML(list){
   if(!list) return `<small>遅れ・欠航</small><b>…</b><span>読み込み中</span>`;
-  const c = list.filter(a => a.kind === "cancel").length, d = list.length - c;
+  list = fwMerge(list); const c = list.filter(G => G.main.kind === "cancel").length, d = list.length - c;
   return `<small>遅れ・欠航（12時間）</small><b class="${list.length ? "warn" : ""}">${list.length ? `${d}<small>件</small>${c ? ` <i>欠航${c}</i>` : ""}` : "なし"}</b>${list.length ? `<a href="#opsAlerts" class="tl">お知らせを見る</a>` : `<span>いまはお知らせなし</span>`}`;
 }
 function fwHTML(list, iata, withPush){
-  const push = withPush ? pushButtonHTML(iata) : "";
+  const push = withPush ? pushButtonHTML(iata) : ""; list = list && fwMerge(list);
   if(!list || !list.length) return push ? `<div class="fwlist"><div class="opshead"><b>遅れ・欠航・ダイバート</b></div><p class="hint" style="margin:4px 0 0">いまは、お知らせはありません。</p>${push}</div>` : "";
   return `<div class="fwlist"><div class="opshead"><b>遅れ・欠航・ダイバート</b><span>${list.length > 8 ? `新しい8件／${list.length}件` : `${list.length}件`}</span></div><ul class="fwcards">${list.slice(0, 8).map(fwCard).join("")}</ul>
     <p class="fwnote">${ODPT_CREDIT}</p>
