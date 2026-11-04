@@ -2431,6 +2431,21 @@ nav.tabs{transition:transform .3s cubic-bezier(.2,.8,.2,1),opacity .2s}
 .rwyarrow.dep i{border-bottom-color:#8C9AAE}
 .locdot{background:none;border:0}.locdot i{display:block;width:14px;height:14px;margin:2px;border-radius:50%;background:#2B6CB0;box-shadow:0 0 0 3px #fff,0 2px 8px rgba(0,0,0,.3)}
 #v-ops .opsscope{margin-bottom:4px}
+
+/* 見えるかの精度（11-04） */
+#v-ops .spsees{display:grid;gap:4px}
+#v-ops .spsees .sl{display:flex;align-items:baseline;gap:10px;margin:0}#v-ops .spsees span+span{margin-left:0}
+#v-ops .spsees .sl b{font-weight:700;color:var(--op-ink);min-width:62px}#v-ops .spsees .sl em{font-style:normal;font-variant-numeric:tabular-nums}
+.spgeo{list-style:none;padding:0;margin:8px 0 0}
+.spcard .spgeo li.big,.spgeo li.big{display:block}.spgeo li.big>*{min-width:0}
+.spgeo li.big .hd{display:flex;justify-content:space-between;align-items:baseline}.spgeo li.big .hd b{font-size:15px}.spgeo li.big .hd small{color:var(--s-mute)}
+.spgeo .g3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:2px;margin-top:8px;border-radius:14px;overflow:hidden;background:var(--s-line)}
+.spgeo .g3>div{background:var(--s-card);padding:9px 10px}.spgeo .g3 small{display:block;font-size:10.5px;color:var(--s-mute)}
+.spgeo .g3 b{display:block;font-family:var(--sign);font-size:26px;font-weight:700;line-height:1.1;font-variant-numeric:tabular-nums}.spgeo .g3 b small{display:inline;font-family:var(--gothic);font-size:12px;margin-left:2px}
+.spgeo .l3{display:flex;gap:4px;margin-top:6px}.spgeo .l3 span{flex:1;border-radius:10px;padding:6px 8px;background:var(--s-bg);font-size:10.5px;color:var(--s-mute)}
+.spgeo .l3 span b{display:block;font-size:12px;color:var(--s-ink)}.spgeo .l3 span.back{background:#F6EBD3}.spgeo .l3 span.back b{color:#7A5A12}
+.spgeo .nt{margin:6px 0 0;font-size:10.5px;color:var(--s-mute);line-height:1.5}
+.spgeo li.sm{display:flex;justify-content:space-between;gap:8px;margin-top:10px;padding-top:10px;box-shadow:inset 0 1px 0 var(--s-line);font-size:12px}.spgeo li.sm span{color:var(--s-mute);white-space:nowrap}
 </style>
 </head>
 <body>
@@ -9202,10 +9217,41 @@ function spSees(def, op, rw){
   const lines = [...op.arr.filter(id => rw[id]).map(id => { const r = rw[id]; return { rw:id, dir:"arr", ln:[dest(r.thr, (r.hdg + 180) % 360, 8), r.thr] }; }),
                  ...op.dep.filter(id => rw[id]).map(id => { const r = rw[id]; return { rw:id, dir:"dep", ln:[r.opp, dest(r.opp, r.hdg, 6)] }; })];
   return (OPS_SPOTS[def.iata] || []).map(([name, lat, lon]) => {
-    const sees = lines.map(l => ({ rw:l.rw, dir:l.dir, km:nmToLine([lat, lon], l.ln) * 1.852, view:nearestOn([lat, lon], l.ln) })).filter(x => x.km <= SP_SEE_KM).sort((a, b) => a.km - b.km);
+    const sees = lines.map(l => ({ rw:l.rw, dir:l.dir, ln:l.ln, km:nmToLine([lat, lon], l.ln) * 1.852, view:nearestOn([lat, lon], l.ln) })).filter(x => x.km <= SP_SEE_KM).sort((a, b) => a.km - b.km);
     return { name, lat, lon, sees, li:sees.length ? lightInfo([lat, lon], sees[0].view) : null };
   });
 }
+// ---- 見えるかの精度（11-04）：撮影地からいちばん近くを通るときの高さ・見上げる角度・焦点距離の目安・区間ごとの光 ----
+//   高さ：着陸は 3° の降下（滑走路の端で約15m）、離陸は 8% の上昇（滑走路の端で約10m）。どれも推定で、風や機体の重さで変わる
+//   焦点距離：機体の長さが画面の横の7割に入る長さ（フルサイズ換算）＝ 36mm × 距離 ÷（長さ ÷ 0.7）
+const SP_LEN = { B738:39.5, B38M:39.5, B737:33.6, B739:42.1, B39M:42.2, B763:54.9, B764:61.4, B772:63.7, B773:73.9, B77W:73.9, B788:56.7, B789:62.8, B78X:68.3,
+  B744:70.7, B748:76.3, A319:33.8, A320:37.6, A20N:37.6, A321:44.5, A21N:44.5, A332:58.8, A333:63.7, A339:63.7, A359:66.8, A35K:73.8, A388:72.7,
+  E170:29.9, E75L:31.7, E190:36.2, E195:38.7, DH8D:32.8, AT76:27.2, AT46:22.7, SF34:19.7, CRJ7:32.5 };
+function spLenOf(type){
+  let t = String(type || "").trim().toUpperCase(); if(!t) return null;
+  if(/^Q4/.test(t)) t = "DH8D"; else if(/^7\w\w$/.test(t)) t = "B" + t; else if(/^3\w\w$/.test(t)) t = "A" + t; else if(/^B7[3-8]\d-/.test(t)) t = t.replace(/^B(7\d)(\d).*/, "B$1$2");
+  if(t === "B77L") t = "B772"; if(t === "B78J") t = "B78X";
+  return SP_LEN[t] ? { code:t, m:SP_LEN[t] } : null;
+}
+// 線の上の点の高さ（m）：着陸は線の終わり（滑走路の端）から、離陸は線の始まり（滑走路の端）からの距離で
+function spHeightAt(see, pt){
+  return see.dir === "arr" ? km({ lat:pt[0], lon:pt[1] }, { lat:see.ln[1][0], lon:see.ln[1][1] }) * 1000 * Math.tan(3 * D2R) + 15
+    : 10 + km({ lat:see.ln[0][0], lon:see.ln[0][1] }, { lat:pt[0], lon:pt[1] }) * 1000 * 0.08;
+}
+function spGeom(spotPt, see, type, now = Date.now()){
+  if(!see || !see.view) return null;
+  const P = see.view, dh = km({ lat:spotPt[0], lon:spotPt[1] }, { lat:P[0], lon:P[1] }) * 1000, h = spHeightAt(see, P);
+  const slant = Math.hypot(h, dh), elev = Math.atan2(h, Math.max(dh, 1)) / D2R, len = spLenOf(type);
+  const focal = len ? Math.max(10, Math.round(36 * slant / (len.m / 0.7) / 10) * 10) : null;
+  // 見える区間（線まで2.5km以内）の、はじめ・いちばん近く・おわりの光
+  const at = t => [see.ln[0][0] + t * (see.ln[1][0] - see.ln[0][0]), see.ln[0][1] + t * (see.ln[1][1] - see.ln[0][1])], vis = [];
+  for(let k = 0; k <= 50; k++){ const q = at(k / 50); if(km({ lat:spotPt[0], lon:spotPt[1] }, { lat:q[0], lon:q[1] }) <= SP_SEE_KM) vis.push(q); }
+  const names = see.dir === "arr" ? ["進入の遠く", "いちばん近く", "接地の近く"] : ["離陸の直後", "いちばん近く", "上昇して遠く"];
+  const light = vis.length ? [vis[0], P, vis[vis.length - 1]].map((q, i) => ({ at:names[i], cur:lightAt(now, spotPt, q) })) : [];
+  return { h:Math.round(h), elev:Math.round(elev), dist:Math.round(slant), focal, len, light };
+}
+const spRound10 = n => n >= 100 ? Math.round(n / 10) * 10 : Math.round(n);
+
 // 羽田の着陸：2本のどちらに降りるかを、来た方面（空港から見た方角）で決める（JAL・ANA の航跡971機で約9割合った目安）
 //   北・東から来る機体 → 34R・23・16R、南・西から来る機体 → 34L・22・16L
 //   方角は、いま空港から60〜150kmにいればその位置、ほかは出発した空港の位置から
@@ -9286,7 +9332,8 @@ function renderPhoto(d){
   const DIRJ = { arr:"着陸", dep:"離陸" };
   const rwShort = x => { const r = spRwsOf(x, op); return r.rws.join("/"); };
   // 撮影地：1つのピル。押すと一覧が開く。下に見える滑走路を薄い文字で
-  const seesLine = sp => { const g = d2 => [...new Set(sp.sees.filter(s => s.dir === d2).map(s => s.rw))].join(" "); return [g("arr") && `<span class="arr"><i class="spsw arr" aria-hidden="true"></i>${esc(g("arr"))} 着陸</span>`, g("dep") && `<span class="dep"><i class="spsw dep" aria-hidden="true"></i>${esc(g("dep"))} 離陸</span>`].filter(Boolean).join(""); };
+  const seesLine = sp => sp.sees.map(s => { const g = spGeom([sp.lat, sp.lon], s, null);
+    return `<span class="sl ${s.dir}"><i class="spsw ${s.dir}" aria-hidden="true"></i><b>${esc(s.rw)} ${s.dir === "arr" ? "着陸" : "離陸"}</b>${g ? `<em>高さ 約${spRound10(g.h)}m</em><em>見上げ ${g.elev}°</em>` : ""}</span>`; }).join("");
   const spotHTML = SPOTS.length ? `<details class="spspotd"><summary class="sppill" aria-label="撮影地を選ぶ"><span>${esc(spot ? spot.name : "撮影地を選ぶ")}</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></summary>
       <div class="spspotlist" role="group" aria-label="撮影地">${SPOTS.map(s => `<button data-spspot="${esc(s.name)}" aria-pressed="${spot === s}" ${s.sees.length ? "" : "disabled"}><span>${esc(s.name)}</span><small>${spOpenState(OPS_AP, s.name).open === false ? "いまは閉まっています" : s.sees.length ? `${cnt(s)}機　${s.li ? LIGHT[s.li.cur] : ""}` : "いまは見えない"}</small></button>`).join("")}</div></details>
     ${spot ? `<p class="spsees"><span class="vh">見える：</span>${seesLine(spot)}</p>` : ""}
@@ -9335,8 +9382,19 @@ function spDetailHTML(x){
   let where = "";
   if(lv){ const k = spKm(lv); where = `${lv.alt_ft != null ? `高度 ${spFt(lv.alt_ft)}ft・` : ""}空港まで約${Math.round(k)}km${lv.kt ? `・${lv.kt}ノット` : ""}`; }
   else if(x.foreign) where = x.status === "ground" ? "空港の地上（出発前）" : `${x.alt != null ? `高度 ${spFt(x.alt)}ft・` : ""}空港まで約${x.km}km`;
-  const spots = cur && (op.arr.length || op.dep.length) ? spotRank(cur.def, op, cur.rw).slice(0, 3).map(s => { const l = lightInfo([s.lat, s.lon], s.view);
-    return `<li><b>${esc(s.name)}</b><span class="lt ${l ? l.cur : ""}">${l ? LIGHT[l.cur] : ""}</span></li>`; }).join("") : "";
+  // どこから撮る：この機体が見える撮影地（選んでいる撮影地を先に）。高さ・見上げる角度・焦点距離・区間ごとの光
+  const spots = (() => { if(!cur || !(op.arr.length || op.dep.length)) return "";
+    const ss = spSees(cur.def, op, cur.rw).map(sp => ({ sp, see:spSeeOf(sp, x, op) })).filter(o => o.see).sort((a, b) => (b.sp.name === SP_SPOT) - (a.sp.name === SP_SPOT) || a.see.km - b.see.km).slice(0, 3);
+    if(!ss.length) return "";
+    const ty = x.type || (lv && lv.type) || "";
+    return ss.map(({ sp, see }, k) => { const g = spGeom([sp.lat, sp.lon], see, ty); if(!g) return "";
+      const rwn = `${esc(see.rw)} ${see.dir === "arr" ? "着陸" : "離陸"}`;
+      if(k) return `<li class="sm"><b>${esc(sp.name)}</b><span>高さ ${spRound10(g.h)}m　見上げ ${g.elev}°${g.focal ? `　${g.focal}mm` : ""}</span></li>`;
+      return `<li class="big"><div class="hd"><b>${esc(sp.name)}</b><small>${rwn}</small></div>
+        <div class="g3"><div><small>高さ</small><b>${spRound10(g.h)}<small>m</small></b></div><div><small>見上げる角度</small><b>${g.elev}<small>°</small></b></div>
+          <div><small>${g.len ? `${esc(g.len.code)} が横7割` : "焦点距離"}</small><b>${g.focal ? `${g.focal}<small>mm</small>` : "—"}</b></div></div>
+        ${g.light.length ? `<div class="l3">${g.light.map(l => `<span class="${l.cur}">${l.at}<b>${LIGHT[l.cur]}</b></span>`).join("")}</div>` : ""}
+        <p class="nt">${g.len ? `焦点距離はフルサイズ換算。機体の長さ ${g.len.m}m と、撮影地からの距離 約${spRound10(g.dist)}m から。` : "機種が分からないため、焦点距離は出せません。"}高さは着陸を3°、離陸を8%として出した推定です。</p></li>`; }).join(""); })();
   const kd = x.kind && SP_KIND[x.kind];
   return `<div class="sph"><span class="grab" aria-hidden="true"></span><button class="spx" data-close type="button" aria-label="閉じる">×</button></div>
     <div class="spdh"><div><small>${esc(placeAny(x.other))}${x.dir === "arr" ? "から・" + esc(opsDef().name) + "に着陸" : "へ・" + esc(opsDef().name) + "から離陸"}</small><h3>${esc(x.fl)}</h3></div>${kd ? `<em style="background:${kd[1]}">${kd[0]}</em>` : ""}</div>
@@ -9349,7 +9407,7 @@ function spDetailHTML(x){
     ${where ? `<div class="spcard"><small>いまどこ</small><b class="m">${esc(where)}</b>${lv || x.km ? `<span class="bar"><i style="width:${Math.max(4, Math.min(100, 100 - (lv ? spKm(lv) : x.km) / 2))}%"></i></span>` : ""}</div>` : ""}
     ${(() => { const r = x.reg || (lv && lv.reg); return r ? `<div class="spcard"><small>この機体の運用（推定）</small><b>${esc(r)}</b><button class="linkbtn2" data-sp-pred="${esc(r)}" aria-expanded="false" type="button">この先の便を見る</button><button class="linkbtn2" data-plane="${esc(r)}" type="button">この機体の1日</button><div data-sp-pred-out="${esc(r)}" hidden></div></div>` : ""; })()}
     ${atcSceneHTML(x)}
-    ${spots ? `<div class="spcard"><small>どこから撮る</small><ul class="spwhere">${spots}</ul></div>` : ""}
+    ${spots ? `<div class="spcard"><small>どこから撮る</small><ul class="spwhere spgeo">${spots}</ul></div>` : ""}
     ${SERVER && key && !(x.foreign && x.dir === "dep") ? `<button class="spnote big" data-spnote="${esc(key)}" data-spdir="${x.dir}" aria-pressed="${on}">${on ? "知らせを取り消す" : `${x.dir === "arr" ? "着陸" : "離陸"}の${ps.lead || 5}分前に知らせる`}</button>` : ""}
     <p class="fwnote">${x.foreign ? "時刻表がない便のため、時刻・機種は機体の位置（adsb.lol）と経路のデータ（adsb.im）からの推定です。" : `時刻は JAL・ANA の時刻表と運航情報。${ODPT_CREDIT}`}滑走路と順光・逆光は推定です。</p>`;
 }

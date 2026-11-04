@@ -117,6 +117,15 @@ async def main():
         tdd = await pg.inner_text('#dSpotFl'); print('DEPDETAIL', tdd[:300].replace('\n', ' | '))
         check('くわしく：離陸の時刻と地上走行:', '地上走行' in tdd and '約16分' in tdd and '出発（搭乗口）' in tdd and '（実際）' in tdd)
         check('くわしく：離陸の便も知らせられる:', '離陸の5分前に知らせる' in tdd)
+        check('くわしく：どこから撮る（高さ・見上げる角度・焦点距離・区間の光）:', '見上げる角度' in tdd and 'mm' in tdd and '離陸の直後' in tdd and '8%' in tdd)
+        geo = await pg.evaluate("""() => { const thr = [35.55, 139.78], far = dest(thr, 180, 8), p2 = dest(thr, 180, 2), spot = dest(p2, 90, 1);
+          const a = spGeom(spot, { dir:'arr', ln:[far, thr], view:p2 }, '789');
+          const opp = [35.55, 139.78], end = dest(opp, 0, 6), p1 = dest(opp, 0, 1), s2 = dest(p1, 270, 0.5);
+          const d = spGeom(s2, { dir:'dep', ln:[opp, end], view:p1 }, 'Q4A');
+          return { a:[a.h, a.elev, a.focal, a.len.code, a.light.length], d:[d.h, d.elev, d.len.code], u:spGeom(spot, { dir:'arr', ln:[far, thr], view:p2 }, '').focal, l:[spLenOf('77W').m, spLenOf('B38M').m] }; }""")
+        print('GEO', geo)
+        check('計算：着陸は3°（2km手前で約120m・横1kmで7°・B789 で約400mm）:', geo['a'][0] == 120 and geo['a'][1] == 7 and geo['a'][2] == 400 and geo['a'][3] == 'B789' and geo['a'][4] == 3)
+        check('計算：離陸は8%（1km先で90m・横500mで10°）・時刻表の書き方の機種:', geo['d'] == [90, 10, 'DH8D'] and geo['u'] is None and geo['l'] == [73.9, 39.5])
         td = await pg.inner_text('#dSpotFl'); check('管制の場面（離陸する機体はグランドから）:', 'いまの管制の場面' in td and '東京グランド' in td and '121.70' in td)
         await pg.screenshot(path=os.path.join(WORK, 't63_detail.png'))
         await pg.click('#dSpotFl [data-atc]'); await pg.wait_for_timeout(200)
