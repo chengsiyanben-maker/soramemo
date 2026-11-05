@@ -17,7 +17,7 @@
 - 1つ目で答えが出れば2つ目は呼ばない。時刻表のない会社・見張っていない便は2つ目。
 - 弱いところ：古い日も新しい日も同じ重さ（ダイヤが変わるとしばらく外れる）、機体の型を見ない、その機体自身のくせを見ない、特別塗装機の予定の便を使わない、日をまたぐ予想はしない。
 
-## 2. 案：学ぶ予想（`supabase/migrations/20261105000147_rotation_predict.sql`）
+## 2. 案：学ぶ予想（`supabase/migrations/20261105000152_rotation_predict.sql`）
 
 毎晩（日本時間 4:55、pg_cron `rot-learn`）reg_legs から「機体のつながり」`rot_pairs` を作り、次の順で1便ずつ決めます。
 
@@ -32,7 +32,7 @@
 - 予想は表に残さず関数で出す（実績とまざらない）。画面向けは `predict_rotation_v2(登録記号)`：返す形は今と同じで、`estimate: true`（「予想」と出す）と便ごとの出どころ `src`（livery／learn／base）を足した。**まだ画面にはつないでいない。**
 - 毎晩、前の日を「前の日の夜の時点の記録だけで予想した」として採点し、`rot_eval` に残す（今の仕組みと案の両方）。反映後は SQL を貼らなくても当たり具合を見られる。
 - 新しい表は2つとも RLS 有効・利用者からは読めない。reg_legs・rotation_obs・flight_history は読むだけで消さない。
-- テスト `tests/sql/t85_rotation_predict.mjs`（28項目）を足した。既存のものも含め、SQL のテスト93本がすべて通った（模擬のデータベース）。
+- テスト `tests/sql/t90_rotation_predict.mjs`（28項目）を足した。既存のものも含め、SQL のテスト93本がすべて通った（模擬のデータベース）。
 
 ## 3. 比べ方（`docs/pm/rotation-backtest.sql`、読むだけ）
 
@@ -66,3 +66,9 @@
 ## 7. チェックイン担当への依頼文（反映後）
 
 > 運用の予想を `predict_rotation_v2(p_reg)` に切り替えてください。返す形は `predict_rotation_reg` と同じで、`estimate: true` と便ごとの `src` が増えています。画面では「予想」と出し、`src` が `livery` の便には「特別塗装機の予定の便から」と小さく添えてください。JAL・ANA の時刻表つきの予想（`predict_rotation`）を先に呼ぶ順はそのままで構いません。作る前にデザイン案を見せてください。
+
+## 追記（11/5 夜）：反映に向けた番号の付け直し
+- main（17b584e）を取り込み、移行を `20261105000147_rotation_predict.sql` → `20261105000152_rotation_predict.sql` に付け直した（`node tools/migrations.mjs rebase`）。main の `147_co3_leave` とのぶつかりはなくなった
+- テストを `t85_rotation_predict.mjs` → `t90_rotation_predict.mjs` に改名（main の t85_user_profiles と重ならない）
+- 確かめた結果：`node tools/migrations.mjs check` で SQL 150件・番号の重なりなし。SQL のテスト98本すべて通過（t90 は28項目）
+- 本人に決めてほしいこと（変わらず）：`docs/pm/rotation-backtest.sql` を SQL Editor で流して結果を PR #6 か帳面に貼ってほしい。結果を見て予想の重みを直してから反映を判断する
