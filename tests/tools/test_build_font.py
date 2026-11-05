@@ -30,7 +30,7 @@ class FetchTest(unittest.TestCase):
 
     def test_2_504_は待ってから取り直す(self):
         op, url = self.run_fetch([err(504), err(502), b"FONT"])
-        self.assertEqual(len(op.urls), 3); self.assertEqual(self.waits, [5, 15])
+        self.assertEqual(len(op.urls), 3); self.assertEqual(self.waits, [10, 30])
         self.assertIn("raw.githubusercontent.com", url)
 
     def test_3_raw_が続けてだめなら_github_com_へ切り替える(self):
@@ -51,6 +51,11 @@ class FetchTest(unittest.TestCase):
             self.run_fetch([err(504)] * (bf.TRIES * len(bf.MIRRORS)))
         self.assertIn("504", str(c.exception))
         self.assertFalse(os.path.exists(self.dest)); self.assertFalse(os.path.exists(self.dest + ".part"))
+
+    def test_8_1か所で試すのは3回まで(self):
+        op, url = self.run_fetch([err(504)] * 3 + [b"FONT"])
+        self.assertEqual(op.urls[:3], [bf.MIRRORS[0] + "ofl/x/X.ttf"] * 3)
+        self.assertEqual(op.urls[3], bf.MIRRORS[1] + "ofl/x/X.ttf")
 
     def test_7_取得先の場所が正しい形(self):
         for fname, path in bf.FONTS.values():

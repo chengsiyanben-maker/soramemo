@@ -14,8 +14,8 @@ FONTS = {
 }
 # 取りに行く先（上から順に試す）。パスは Google Fonts のリポジトリの中の場所
 MIRRORS = ["https://raw.githubusercontent.com/google/fonts/main/", "https://github.com/google/fonts/raw/main/"]
-TRIES = 4            # 1つの取得先で試す回数
-WAITS = [5, 15, 30]  # 取り直す前に待つ秒数（回を重ねるほど長く）
+TRIES = 3          # 1つの取得先で試す回数（最初の1回＋取り直し2回）
+WAITS = [10, 30]   # 取り直す前に待つ秒数（回を重ねるほど長く）
 # ブラウザが標準で使う組版の機能だけ残す（縦書きなどは使わない）
 FEATURES = ["kern", "liga", "clig", "calt", "ccmp", "locl", "mark", "mkmk", "palt", "tnum"]
 CHUNK = 100
