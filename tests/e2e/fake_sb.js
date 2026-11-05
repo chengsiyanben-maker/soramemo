@@ -14,7 +14,7 @@
   window.supabase = { createClient(){ return {
     auth:{ getSession: async()=>({data:{session}}), onAuthStateChange(f){ listeners.push(f); },
       signInWithOtp: async(o)=>{ window.__otp = o; window.__otps = (window.__otps||[]).concat([o]); if(o.options && o.options.shouldCreateUser === false && window.__noUser) return {error:{code:'otp_disabled', status:422, message:'Signups not allowed for otp'}}; return {error:null}; },
-      verifyOtp: async(o)=>{ window.__verify = o; if(o.token !== '12345678') return {error:{message:'invalid'}}; session = {user:{id:'u1', email:o.email, created_at: window.__userCreatedAt || new Date().toISOString()}}; listeners.forEach(f=>f('SIGNED_IN', session)); return {data:{session}, error:null}; }, signOut: async()=>{ session=null; return {error:null}; } },
+      verifyOtp: async(o)=>{ window.__verify = o; if(o.token !== (window.__otpCode || '12345678')) return {error:{message:'invalid'}}; session = {user:{id:'u1', email:o.email, created_at: window.__userCreatedAt || new Date().toISOString()}}; listeners.forEach(f=>f('SIGNED_IN', session)); return {data:{session}, error:null}; }, signOut: async()=>{ session=null; return {error:null}; } },
     from: q,
     rpc: async (name, a) => { window.__rpcs = (window.__rpcs||[]).concat([name]);
       const C = window.__co = window.__co || {name:'そらメモ航空', cash:500000, last:new Date(Date.now()-2*864e5).toISOString(), roles:{}, daily:344, gross:344, upkeep:0, bonus:0, routes:[{k:'5-6', a:'HND', b:'CTS', km:820, base:344, level:1, cost:10320, mult:.5, hub:1, sky:1, min_size:4.5, sa:6, sb:4.5, ac_id:null, intl:false}], fleet:[], sky:{}, total_km:820, rep_points:80, stars:1, facilities:{}, bought:0, value:510320, friend_code:'ABCD1234', hide_rank:false, friends:0};
