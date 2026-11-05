@@ -11,3 +11,10 @@
 - 航路と機体の記録は消さない／退会では本人の記録を消し、全機の記録は残す
 - 外部データは規約の範囲を確かめてから。鍵は直書きしない
 - あなたは本番のデータベースにつなげない。本番の数字が要るときは、本人が流す読むだけの SQL を書く
+
+## PM から積んだ次の仕事（11/5、運用予想の強化のあと）
+- 経営担当からの依頼（ブランチ co/leave-handling の 20261105000147_co3_leave.sql が前提。報告 docs/pm/report-co-leave.md の4）
+  1. delete-account で deleteUser の前に co3_leave_settle(p_uid) を呼ぶ。失敗したら削除を止める
+  2. co3_news_kind_check に 'partner' を足す移行（RLS はそのまま）
+  3. co3_codeshares に paid_amount bigint を足す移行（RLS はそのまま）
+- 広告担当からの依頼：毎日の登録数を運営コンソールで見られるようにする（読むだけ）
