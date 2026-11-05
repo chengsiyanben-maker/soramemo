@@ -81,3 +81,22 @@ PM が挙げた Tailwind FlightLog は、公開の情報で確かめられるペ
 - [Design Critique: Pokémon GO（Pratt IxD）](https://ixd.prattsi.org/2026/09/design-critique-pokemon-go/)
 - [Flightradar24 の情報パネルの更新（公式ブログ）](https://www.flightradar24.com/blog/inside-flightradar24/an-overview-of-the-updated-flight-information-panel-on-flightradar24-com/)
 - [Yahoo!カーナビ 10周年の改修（LINEヤフー）](https://www.lycorp.co.jp/ja/story/20241015/yahoocarnavi.html)
+
+---
+
+## 2版（2026-11-05 夜・改善担当の指摘1回目を受けて）
+### 作ったもの
+- 指摘10項目を全部直した2版：docs/design/improve-1106/ の 01-home（最初の位置）・01b-home-open（引き上げた位置）・02-mypage・03-ops（風が届いていない）・03b-ops-wind（風が届いた）。一覧 index.html は「今・1版・2版」を並べた。1版の PNG は png/v1-plan-*.png に残した
+- 指摘ごとの直し方：docs/design/improve-1106/answer-1.md
+- 測り直し：13px 未満の字 0・色の濃さ 4.5:1 未満 0・44px 未満の押せる所はシートのつまみだけ。地図は最初の位置で約440px（今 約350）
+- 主な変更：上の段「印集め／エアライン経営」＋「マイページ」、止まり位置を2段、デモの終了をマイページへ、運用は「時間帯から／風からの予想」の出し分けと「保証するものではありません」を画面に、マイページに「下のタブにない画面」
+
+### 迷った点
+- 最初の位置で「最近の印まで見せる」と「地図を広く」は両立しないので、地図を優先して最近の印は引き上げた位置にした
+- ロゴをホームの上から外した（幅を空けるため）
+- 運用の滑走路の向きを決定事項の「運用予想」と同じ扱い（「予想」・保証しない）にした
+
+### 本人に決めてほしいこと（2版で増えたもの）
+5. ホームの最初の位置は「地図を広く（最近の印は引き上げて見る）」でよいか
+6. ホームの上からロゴ「そらメモ」を外してよいか
+7. 運用の滑走路の向きも「予想」と書き、保証しないと画面に出す扱いでよいか（決定事項の運用予想に入れるか）

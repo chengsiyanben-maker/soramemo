@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>一覧｜そらメモ 改善案 11/06</title>
+<title>2版 一覧｜そらメモ 改善案 11/06</title>
 <style>
 :root{
   --gothic:"Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic UI","Yu Gothic","Meiryo","Noto Sans JP","Noto Sans CJK JP",system-ui,sans-serif;
@@ -55,18 +55,22 @@ h1{font-size:26px;color:var(--strong);margin:0}
 .lead{color:var(--sub);font-size:14px;margin:10px 0 0}
 .pair{margin-top:40px}.pair h2{font-size:17px;color:var(--strong);margin:0}.d{font-size:13px;color:var(--sub);margin:2px 0 14px}
 .two{display:flex;gap:24px;flex-wrap:wrap}
-figure{margin:0;width:300px}figcaption{font-size:12px;font-weight:700;color:var(--mute);margin:0 0 6px 4px}
+.ix{max-width:1320px !important}
+.fix{font-size:13px;color:var(--sub);margin:12px 0 0;padding-left:1.2em}
+figure{margin:0;width:300px}figcaption{font-size:13px;font-weight:700;color:var(--sub);margin:0 0 6px 4px}
 figure img{display:block;width:300px;height:649px;object-fit:cover;object-position:top;border-radius:30px;box-shadow:var(--shadow)}
 .frame{width:300px;height:649px;border-radius:30px;overflow:hidden;box-shadow:var(--shadow);background:var(--bg)}
 .frame iframe{width:390px;height:844px;border:0;transform:scale(.7692);transform-origin:0 0}
-figure a{display:inline-block;margin-top:8px;font-size:12px;font-weight:700;color:var(--sub)}</style>
+figure a{display:inline-block;margin-top:8px;font-size:13px;font-weight:700;color:var(--sub)}</style>
 </head>
 <body>
 <main class="ix">
-<p class="eyebrow">画面案 ・ アプリにはまだ入っていません</p>
-<h1>そらメモ 改善案（上位3つ）</h1>
-<p class="lead">左が今の本番（デモモードで撮影、スマホ幅390）、右が案。案は端末の暗い表示にも合わせてあります（png/plan-*-dark.png）。直す案10個の表は docs/pm/report-design-improve-1106.md にあります。</p>
-<section class="pair"><h2>1. ホーム（地図とシート）</h2><p class="d">上を1段にまとめて地図を広く。シートの最初に「いま」の答え</p><div class="two"><figure><figcaption>いま（本番・デモ）</figcaption><img src="png/now-home.png" alt="いまの1. ホーム（地図とシート）" width="300"></figure><figure><figcaption>案</figcaption><div class="frame"><iframe src="01-home.html" title="案：1. ホーム（地図とシート）" loading="lazy"></iframe></div><a href="01-home.html">この案だけ開く</a></figure></div></section><section class="pair"><h2>2. マイページ（タイル）</h2><p class="d">縦の段をタイルに。今の値を大きく、説明は押したあと</p><div class="two"><figure><figcaption>いま（本番・デモ）</figcaption><img src="png/now-mypage.png" alt="いまの2. マイページ（タイル）" width="300"></figure><figure><figcaption>案</figcaption><div class="frame"><iframe src="02-mypage.html" title="案：2. マイページ（タイル）" loading="lazy"></iframe></div><a href="02-mypage.html">この案だけ開く</a></figure></div></section><section class="pair"><h2>3. 運用（空の情報）</h2><p class="d">最初の1枚で答える。推定をはっきり、値のないカードは1行に</p><div class="two"><figure><figcaption>いま（本番・デモ）</figcaption><img src="png/now-ops.png" alt="いまの3. 運用（空の情報）" width="300"></figure><figure><figcaption>案</figcaption><div class="frame"><iframe src="03-ops.html" title="案：3. 運用（空の情報）" loading="lazy"></iframe></div><a href="03-ops.html">この案だけ開く</a></figure></div></section>
+<p class="eyebrow">画面案 2版 ・ アプリにはまだ入っていません</p>
+<h1>そらメモ 改善案（上位3つ）2版</h1>
+<p class="lead">改善担当の指摘1回目（review-1.md）の10項目を直した版です。左から、今の本番・1版・2版。2版は端末の暗い表示にも合わせてあります（png/plan-*-dark.png）。指摘ごとの直し方は answer-1.md にあります。</p>
+<section class="pair"><h2>1. ホーム（地図とシート）</h2><p class="d">止まり位置を2段に。上の段は「印集め／エアライン経営」と「マイページ」</p><div class="two"><figure><figcaption>いま（本番・デモ）</figcaption><img src="png/now-home.png" alt="いま（本番・デモ）" width="300"></figure><figure><figcaption>1版</figcaption><img src="png/v1-plan-home.png" alt="1版" width="300"></figure><figure><figcaption>2版・最初の位置</figcaption><div class="frame"><iframe src="01-home.html" title="2版・最初の位置"></iframe></div><a href="01-home.html">この案だけ開く</a></figure><figure><figcaption>2版・引き上げた位置</figcaption><div class="frame"><iframe src="01b-home-open.html" title="2版・引き上げた位置"></iframe></div><a href="01b-home-open.html">この案だけ開く</a></figure></div><ul class="fix"><li>指摘4：「デ」「印／経営」をやめ、人の図＋「マイページ」、「印集め／エアライン経営」（どちらも高さ44px・濃いグレー）</li><li>指摘6：最初の位置で地図は上の段の下から約440px（今 約350・1版 約330）</li><li>指摘1：最初の位置は半券と今日の数字1列まで。最近の印は引き上げた位置でタブ帯の上に全部見える</li><li>指摘10：デモは白地の「デモ中」だけ。終了はマイページへ</li><li>指摘5：字13px（単位12px）・押せる所44px・補足 #5F6878。地図のラベルは HND 羽田</li></ul></section>
+<section class="pair"><h2>2. マイページ（タイル）</h2><p class="d">大きい字はいつも今の値。下のタブにない画面と使い方の一覧を足した</p><div class="two"><figure><figcaption>いま（本番・デモ）</figcaption><img src="png/now-mypage.png" alt="いま（本番・デモ）" width="300"></figure><figure><figcaption>1版</figcaption><img src="png/v1-plan-mypage.png" alt="1版" width="300"></figure><figure><figcaption>2版</figcaption><div class="frame"><iframe src="02-mypage.html" title="2版"></iframe></div><a href="02-mypage.html">この案だけ開く</a></figure></div><ul class="fix"><li>指摘3：「下のタブにない画面」に修行・運用・成績。「構成」の2行目を「タブの並びを変える」に</li><li>指摘7：アカウント「デモ中」、データ「11/5 最後の書き出し」。使い方と規約は一覧の2行</li><li>指摘10：「デモを終える」はここ（押すと確かめる画面）</li></ul></section>
+<section class="pair"><h2>3. 運用（空の情報）</h2><p class="d">推定のもとを出し分け、「予想」と保証しないを画面に</p><div class="two"><figure><figcaption>いま（本番・デモ）</figcaption><img src="png/now-ops.png" alt="いま（本番・デモ）" width="300"></figure><figure><figcaption>1版</figcaption><img src="png/v1-plan-ops.png" alt="1版" width="300"></figure><figure><figcaption>2版・風が届いていない</figcaption><div class="frame"><iframe src="03-ops.html" title="2版・風が届いていない"></iframe></div><a href="03-ops.html">この案だけ開く</a></figure><figure><figcaption>2版・風が届いた</figcaption><div class="frame"><iframe src="03b-ops-wind.html" title="2版・風が届いた"></iframe></div><a href="03b-ops-wind.html">この案だけ開く</a></figure></div><ul class="fix"><li>指摘2：風がなければ「時間帯からの予想」、あれば「風からの予想」。定時は遅れと欠航がそろってから</li><li>指摘9：「予想で、保証するものではありません」を紺のカードの中に13pxで</li><li>指摘8：予想のピルを押すとほかの向きを選べる。並べ替え ✎ は右端に固定</li></ul></section>
 </main>
 </body>
 </html>
