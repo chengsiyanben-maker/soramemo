@@ -38,3 +38,7 @@
 ## ほかの担当への依頼
 - 経営へ：co3_cs_pay_block で paid_amount に払った額を書き、退会の返金をそちらで計算するよう直す（空の行はいまの計算のまま）。t86 の1行の直しを確かめる。新聞で種類 partner の知らせが出るか確かめる
 - 広告へ：登録数は admin_signups_daily（反映のあと）か docs/pm/signups-daily.sql（いまでも SQL Editor で見られる）で見られる
+
+## 11/5 21時 反映済み（main 17b584e）
+- data/co-leave-support（co3_leave_settle・partner・paid_amount・delete-account）、data/signup-daily、data/livery-keep を本番に流した。Actions はすべて成功
+- 残り：data/rotation-predict は本人の SQL の結果待ち。反映のときは移行の番号を152以降に付け直し、テストの番号も t90 以降にずらす

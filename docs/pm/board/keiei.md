@@ -16,3 +16,7 @@
 ## 11/5 本人の決定
 - 出資は「出した額と、いまの会社の価値×割合の大きいほう」を返す。そのほかの扱いも案のとおりでよい
 - co/leave-handling の反映は、データ担当が delete-account から co3_leave_settle を呼ぶ形を作ってから、まとめて行う
+
+## 11/5 21時 反映済み
+- 退会の精算（co3_leave_settle）は data/co-leave-support に入って本番に流れた。delete-account から呼ばれる
+- 次にやること：落ちている経営の画面のテスト t99・t105 を直す。経営側で使うなら、ブロック買い取りの返金を paid_amount から計算するよう直す

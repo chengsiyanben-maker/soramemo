@@ -36,3 +36,6 @@
 ## 11/5 17:45 反映済み
 - 本人の「反映して」で feat/signup を main に入れた（main 7daa277）。Actions はテスト・データベース・アプリともに成功。本番で登録の入口・otpLength 6・TERMS_VER を確認
 - （11/5 済み・#8）次の仕事（PM から）：tools/build_font.py のフォントの取得が github.com の一時的な 504 で反映を2回止めた。取り直し（数回・待ちつき）と raw.githubusercontent.com の URL への切り替えを入れる
+
+## 11/5 21時 反映済み
+- fix/font-fetch を本番に流した（取り直しとキャッシュ）。fix/font-fetch-retry は使わない（同じ中身の前の版）
