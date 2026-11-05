@@ -28,7 +28,7 @@
 
 ## 3. 作ったもの
 - `supabase/migrations/20261105000147_co3_leave.sql`：関数だけ（`co3_leave_settle`・`co3_leave_news`・`co3.month_left_ratio`）。**表・外部キー・RLS は変えていない**。アプリ（authenticated）からは呼べず、service_role だけ
-- `tests/sql/t86_co3_leave.mjs`：31項目すべて通過。既存の SQL のテスト（95本）もすべて通過
+- `tests/sql/t86_co3_leave.mjs`：28項目すべて通過。既存の SQL のテスト（95本）もすべて通過
 - `docs/design/co-leave/index.html`：画面案（本人の確認待ち）。知らせはいまの新聞の部品のままで画面の変更なし。退会の確認に「経営で相手に起きること」を出す案はマイページ側なので作っていない
 - `delete-account` とチェックインのコードは触っていない
 
