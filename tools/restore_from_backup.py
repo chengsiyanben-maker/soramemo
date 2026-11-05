@@ -6,6 +6,7 @@
 import json, sys
 
 TABLES = [  # 戻す順番（参照される側が先）、重なりの判定に使う列、番号を自動で振る列があるか
+    ("public.user_profiles",  "(user_id)",                 False),
     ("public.checkins",       "(id)",                      True),
     ("public.flights",        "(id)",                      True),
     ("public.manual_flights", "(id)",                      True),
@@ -33,6 +34,10 @@ def main():
         assert "$soramemo$" not in data
         over = " overriding system value" if identity else ""
         out.append(f"-- {table}：{len(rows)}行")
+        if table == "public.user_profiles":
+            # アカウントを作り直すと、空のプロフィール（表示名なし・同意なし・未回答）が自動でできている。それだけはバックアップの行で置きかえる
+            out.append(f"delete from public.user_profiles p using jsonb_populate_recordset(null::public.user_profiles, $soramemo${data}$soramemo$::jsonb) r "
+                       "where p.user_id = r.user_id and p.display_name is null and p.agreed_at is null and p.persona = 'unanswered';")
         out.append(f"insert into {table}{over} select * from jsonb_populate_recordset(null::{table}, $soramemo${data}$soramemo$::jsonb) r "
                    f"where exists (select 1 from auth.users u where u.id = r.user_id) on conflict {key} do nothing;")
         if identity:

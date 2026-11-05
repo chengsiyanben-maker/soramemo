@@ -1,7 +1,9 @@
 // 利用者のプロフィール：登録で自動に作られる・いまいる人の分も作られる・本人だけが読める・直せるのは表示名と使い方の答えだけ・
-// 同意はサーバーの時刻で入る・答えた日時は答えが変わったときだけ・アカウント削除で消える
+// 同意はサーバーの時刻で入る・答えた日時は答えが変わったときだけ・アカウント削除で消える・
+// 規約の版の表（だれでも読める・一覧にある版だけ同意できる・アプリの定数と同じ版が入っている）・バックアップと戻し
 import { PGlite } from '@electric-sql/pglite';
 import fs from 'fs';
+import { execFileSync } from 'child_process';
 const db = new PGlite(); const dir = new URL('../../supabase/migrations/', import.meta.url).pathname;
 await db.exec(`create role anon nologin; create role authenticated nologin; create role service_role nologin; create schema auth;
 create table auth.users (id uuid primary key, email text, created_at timestamptz default now());
@@ -61,8 +63,49 @@ check('同意の記録：版と日時が入る', ag.terms_version === '2026-10-1
 check('版の形が違うと断る', await as(A, () => fails(`select public.agree_terms('v1', '2026-10-21')`)));
 check('ログインしていないと同意できない', await fails(`set role anon; select public.agree_terms('2026-10-15', '2026-10-21'); reset role`)); await db.exec('reset role');
 
+
+// 規約の版の表
+const vers = (await db.query(`select kind, version from public.terms_versions order by kind, version`)).rows.map((r) => r.kind + ':' + r.version);
+check('規約とプライバシーポリシーの版が入っている', vers.includes('terms:2026-10-15') && vers.includes('privacy:2026-10-21'), vers);
+const src = new URL('../../src/index.html', import.meta.url).pathname;
+const m = fs.existsSync(src) && fs.readFileSync(src, 'utf8').match(/const TERMS_VER = "([\d-]+)", PRIVACY_VER = "([\d-]+)"/);
+if (m) check('アプリの定数（TERMS_VER・PRIVACY_VER）の版が表にある', vers.includes('terms:' + m[1]) && vers.includes('privacy:' + m[2]), [m[1], m[2], vers]);
+await db.exec('set role anon'); const anonN = (await db.query(`select count(*)::int n from public.terms_versions`)).rows[0].n; await db.exec('reset role');
+check('ログインしていなくても版の一覧は読める', anonN === vers.length, anonN);
+check('利用者は版を足せない・直せない', await as(A, () => fails(`insert into public.terms_versions values ('terms', '2099-01-01', '2099-01-01', 'https://soramemo.jp/terms.html')`))
+  && await as(A, () => fails(`update public.terms_versions set url = 'https://example.com/'`)) && await fails(`set role anon; delete from public.terms_versions`)); await db.exec('reset role');
+const cur = await as(A, async () => (await db.query(`select public.terms_current() as v`)).rows[0].v);
+check('いま有効な版がわかる', cur.terms === '2026-10-15' && cur.privacy === '2026-10-21', cur);
+check('一覧にない規約の版では同意できない', await as(A, () => fails(`select public.agree_terms('2020-01-01', '2026-10-21')`)));
+check('一覧にないプライバシーの版では同意できない', await as(A, () => fails(`select public.agree_terms('2026-10-15', '2026-10-15')`)));
+await db.exec(`insert into public.terms_versions values ('terms', '2099-01-01', '2099-01-01', 'https://soramemo.jp/terms.html')`);
+const cur2 = (await db.query(`select public.terms_current() as v`)).rows[0].v;
+check('先に足した改定（有効になる前）は、いま有効な版にならない', cur2.terms === '2026-10-15', cur2);
+const ag2 = await as(A, async () => (await db.query(`select public.agree_terms('2026-10-15', '2026-10-21') as r`)).rows[0].r);
+check('改定の版を先に足しても、今の定数のままで同意できる', ag2.terms_version === '2026-10-15', ag2);
+await db.exec(`delete from public.terms_versions where version = '2099-01-01'`);
+
+// バックアップに入る
+check('バックアップに入る（関数の中身）', /'user_profiles'/.test((await db.query(`select prosrc from pg_proc where proname = 'admin_backup'`)).rows[0].prosrc));
+
 // アカウント削除で消える（ほかの人の行は残る）
 await db.exec(`delete from auth.users where id = '${A}'`);
 const left = (await db.query(`select user_id from public.user_profiles order by user_id`)).rows.map((r) => r.user_id);
 check('削除した人の行だけ消える', !left.includes(A) && left.includes(B) && left.includes(OLD), left);
+
+// バックアップから戻す（tools/restore_from_backup.py）：自動でできた空の行は置きかえる・中身のある行は上書きしない・アカウントのない人は戻さない
+await as(B, () => db.exec(`update public.user_profiles set display_name = 'びー'`));
+const C = '33333333-3333-3333-3333-333333333333';
+const backup = { app: 'soramemo', created_at: '2026-11-05T00:00:00Z', user_profiles: [
+  { user_id: OLD, display_name: 'むかし', created_at: '2026-10-10T01:00:00Z', terms_version: '2026-10-15', privacy_version: '2026-10-21', agreed_at: '2026-10-20T01:00:00Z', persona: 'spot', persona_answered_at: '2026-10-20T01:01:00Z', updated_at: '2026-10-20T01:01:00Z' },
+  { user_id: B, display_name: 'ふるい', created_at: '2026-10-10T01:00:00Z', terms_version: null, privacy_version: null, agreed_at: null, persona: 'unanswered', persona_answered_at: null, updated_at: '2026-10-20T01:01:00Z' },
+  { user_id: C, display_name: 'いない', created_at: '2026-10-10T01:00:00Z', terms_version: null, privacy_version: null, agreed_at: null, persona: 'unanswered', persona_answered_at: null, updated_at: '2026-10-20T01:01:00Z' }] };
+const tmp = fs.mkdtempSync('/tmp/t85-'); fs.writeFileSync(tmp + '/b.json', JSON.stringify(backup));
+const sql = execFileSync('python3', [new URL('../../tools/restore_from_backup.py', import.meta.url).pathname, tmp + '/b.json'], { encoding: 'utf8' });
+await db.exec(sql);
+const rs = Object.fromEntries((await db.query(`select user_id, display_name, persona, agreed_at, persona_answered_at from public.user_profiles`)).rows.map((r) => [r.user_id, r]));
+check('戻す：空だった行はバックアップの中身（日時もそのまま）になる', rs[OLD]?.display_name === 'むかし' && rs[OLD].persona === 'spot'
+  && rs[OLD].agreed_at?.toISOString() === '2026-10-20T01:00:00.000Z' && rs[OLD].persona_answered_at?.toISOString() === '2026-10-20T01:01:00.000Z', rs[OLD]);
+check('戻す：中身のある行は上書きしない', rs[B]?.display_name === 'びー', rs[B]);
+check('戻す：アカウントのない人の行は戻さない', !rs[C], Object.keys(rs));
 if (bad) process.exit(1);
