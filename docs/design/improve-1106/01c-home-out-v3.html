@@ -96,7 +96,9 @@ body{background:var(--bg);color:var(--ink);font-family:var(--gothic);font-size:1
 .pass .s{position:relative}
 .pass .s .vv{display:flex;align-items:center;gap:6px}
 .pass .s .arr{font-size:20px;line-height:1;font-weight:800}
-.cred b{color:var(--strong);font-weight:800;margin-right:6px}
+.logo{position:absolute;top:60px;left:14px;width:36px;height:36px;border-radius:11px;box-shadow:var(--shadow);z-index:5;overflow:hidden}
+.logo svg{width:36px;height:36px;display:block}
+.demo{left:58px !important;top:63px !important}
 .pass .s.off{background:var(--off-bg);color:var(--off-ink);border-left-color:var(--line)}
 .dot-off{color:var(--hero-sub) !important}
 .gate{margin-top:8px;padding:12px 14px 12px 16px}
@@ -125,10 +127,10 @@ body{background:var(--bg);color:var(--ink);font-family:var(--gothic);font-size:1
 <path d="M62 150 L176 278" stroke="var(--chart-apt)" stroke-width="1.6" stroke-dasharray="2 5" opacity=".7"/><circle cx="62" cy="150" r="7" fill="#2F6FE4" stroke="#fff" stroke-width="3"/><text x="74" y="140" font-size="13" font-weight="700" fill="var(--strong)" font-family="var(--gothic)" style="stroke:var(--chart-land)">いまここ</text>
 </g>
 </svg></div>
-<div class="top"><span class="msw" role="tablist" aria-label="スタンプラリーとエアライン経営の切り替え"><span class="on" role="tab" aria-selected="true">スタンプラリー</span><span role="tab">エアライン経営</span></span>
+<span class="logo" role="img" aria-label="そらメモ"><svg viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="18" fill="var(--card)"/><circle cx="32" cy="32" r="20" fill="none" stroke="var(--chart-apt)" stroke-width="2.5" stroke-dasharray="3 4"/><path d="M20 38 L44 24" stroke="var(--strong)" stroke-width="3" stroke-linecap="round"/><path d="M38 22 l7 1.5 -2.5 6.5" fill="none" stroke="var(--strong)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><circle cx="20" cy="38" r="3.5" fill="var(--jal)"/></svg></span><div class="top"><span class="msw" role="tablist" aria-label="スタンプラリーとエアライン経営の切り替え"><span class="on" role="tab" aria-selected="true">スタンプラリー</span><span role="tab">エアライン経営</span></span>
 <span class="mp" aria-label="マイページ"><svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="8.5" r="3.8"/><path d="M4.5 20c.9-3.8 4-5.8 7.5-5.8s6.6 2 7.5 5.8"/></svg>マイページ</span></div>
 <div class="demo" aria-label="デモモード中">デモ中</div>
-<div class="mtools"><span class="ic" aria-label="大きく">＋</span><span class="ic" aria-label="小さく">−</span></div><span class="cred"><b>そらメモ</b>地図：国土地理院</span>
+<div class="mtools"><span class="ic" aria-label="大きく">＋</span><span class="ic" aria-label="小さく">−</span></div><span class="cred">地図：国土地理院</span>
 <section class="sheet" aria-label="シート（最初の止まり位置）">
 <span class="grab" aria-label="引き上げる"></span>
 <div class="pass"><div class="m"><div class="lab">いちばん近い空港</div><div class="flap" aria-label="HND"><i>H</i><i>N</i><i>D</i></div>

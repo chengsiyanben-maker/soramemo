@@ -91,6 +91,9 @@ body{background:var(--bg);color:var(--ink);font-family:var(--gothic);font-size:1
 
 .back{height:44px;display:flex;align-items:center;font-size:14px;font-weight:800;color:var(--strong);background:var(--card);box-shadow:var(--shadow);border-radius:999px;padding:0 14px 0 12px;flex:none}
 .hero .cond{margin:6px 0 0;font-size:13px;color:var(--hero-sub)}
+.hero h2.combo{font-size:20px;font-weight:800;margin:8px 0 2px;display:flex;align-items:baseline;gap:6px}
+.hero h2.combo b{font-family:var(--sign);font-size:46px;line-height:1;margin-right:4px}
+.hero h2.combo i{font-style:normal;color:var(--hero-sub);margin:0 4px}
 .rw.big b{font-size:48px}
 .rw.big span{display:block;margin:2px 0 0}
 .wait{flex-direction:column;gap:6px}
@@ -110,8 +113,7 @@ body{background:var(--bg);color:var(--ink);font-family:var(--gothic);font-size:1
 <div class="bar"><span class="back">‹ マイページ</span><span class="ap"><i>HND</i>羽田 ▾</span><span class="ic" style="margin-left:auto" aria-label="くわしい説明">i</span><span class="ic" aria-label="共有"><svg viewBox="0 0 24 24"><path d="M12 15V4"/><path d="m7.5 8.5 4.5-4.5 4.5 4.5"/><path d="M5 13v5.5c0 .8.7 1.5 1.5 1.5h11c.8 0 1.5-.7 1.5-1.5V13"/></svg></span></div>
 <section class="hero" aria-label="いまの運用">
 <div class="top"><span class="lab">いまの使い方（推定）</span><span class="est" aria-label="時間帯からの推定。押すとほかの向きを選べる">時間帯からの推定<svg class="ico" viewBox="0 0 24 24" style="width:16px;height:16px"><path d="m6 9 6 6 6-6"/></svg></span></div>
-<div class="when" style="margin-top:6px">22:41 時点 ・ 深夜の時間帯によく使う組み合わせ</div>
-<div class="rw big"><div><small>着陸</small><b>34R</b><span>ILS Z</span></div><div><small>離陸</small><b>05</b></div></div>
+<h2 class="combo">着陸<b>34R</b><i>・</i>離陸<b>05</b></h2><div class="when">22:41 時点 ・ 深夜の時間帯によく使う組み合わせ ・ 着陸は ILS Z</div>
 <p class="cond">北風か南風かは、風の情報が届いてから出します。</p>
 </section>
 <p class="est1">推定です。実際の運用と違うことがあります。</p>
@@ -128,8 +130,8 @@ body{background:var(--bg);color:var(--ink);font-family:var(--gothic);font-size:1
 </div>
 <nav class="tabs" aria-label="画面の切り替え"><b class=""><svg viewBox="0 0 24 24"><path d="M3.5 10.5 12 4l8.5 6.5"/><path d="M5.5 9v10h4.5v-5.5h4V19h4.5V9"/></svg>ホーム</b><b class=""><svg viewBox="0 0 24 24"><path d="M4 5.5C4 4.7 4.7 4 5.5 4H11v15H5.5c-.8 0-1.5.5-1.5 1.2V5.5Z"/><path d="M20 5.5c0-.8-.7-1.5-1.5-1.5H13v15h5.5c.8 0 1.5.5 1.5 1.2V5.5Z"/></svg>図鑑</b><b class=""><svg viewBox="0 0 24 24"><path d="M10.5 13.5 4 11l1.4-1.4 7 1.1 3.9-3.9c.8-.8 2.1-.8 2.9 0s.8 2.1 0 2.9l-3.9 3.9 1.1 7L15 22l-2.5-6.5-3 3v2.5L8 22.5l-1.3-3.2L3.5 18 5 16.5h2.5Z"/></svg>フライト</b></nav>
 </main>
-<aside class="ann"><b>3版のメモ（本番には出ません）</b><ul><li><b>北風と言い切らない</b>（2回目の指摘1）：風が届いていないときは見出しを「いまの使い方（推定）」にし、大きく出すのは着陸 34R・離陸 05 の組み合わせだけ（48px）。「北風運用」の言葉は風が届いた 03b だけで使う。カードの中に「北風か南風かは、風の情報が届いてから出します。」</li>
-<li><b>タブの数</b>（2回目の指摘2）：運用はマイページの「下のタブにない画面」から開くので、タブ帯はホームと同じ3つのまま（どれも選ばれていない）。上の左に「‹ マイページ」の戻るピル</li>
+<aside class="ann"><b>3版のメモ（本番には出ません）</b><ul><li><b>北風と言い切らない</b>（2回目の指摘1）：風が届いていないときは見出しを「いまの使い方（推定）」にし、大見出しは滑走路の組み合わせ「着陸34R・離陸05」（数字46px）。「北風運用」の言葉は風が届いた 03b だけで使う。カードの中に「北風か南風かは、風の情報が届いてから出します。」</li>
+<li><b>タブの数</b>（2回目の指摘2・PM の判断）：タブの数は構成ごとに違ってよいが、同じ構成の中ではそろえる。この見本は全部「気軽に」。運用はマイページの「下のタブにない画面」から開くので、タブ帯はホームと同じ3つのまま（どれも選ばれていない）。上の左に「‹ マイページ」の戻るピル</li>
 <li><b>届いていないものの行</b>（2回目の指摘5）：「読み込み中：遅れと欠航・今日の定時率」と「いまは出ていない：風の情報」を分けた。「気象通報」の言葉はやめた</li>
 <li><b>見に行く</b>（2回目の指摘6）：右の大きい数字は「ここからの距離」に決めて、場所ごとに違う値（見本）。◎○ はやめ、1つ目に「おすすめ」の小さなピル。表の上に「場所／ここからの距離」の1行</li>
 <li><b>✎</b>（2回目の指摘9）：ピル列の外、見出し「この空港で」の右へ。4つ目のピル「短冊」は半分ほど見える位置で切れる</li>
