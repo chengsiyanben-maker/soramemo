@@ -1,8 +1,11 @@
 # チェックイン担当の帳面
 
 ## いま持っている仕事
-- 新規登録（ブランチ feat/signup、下書きのプルリクエストあり）。画面とデータの仕上げ（data/signup-profile）は取り込み済み。報告：docs/pm/report-checkin-signup.md
-- 確認コードを6けたに固定（11/5 済み）：web/config.js に otpLength: 6、6けたの確かめは t114 の「9」。報告は report-checkin-signup.md に追記
+- フォントの取得の取り直し（ブランチ fix/font-fetch-retry、下書きのプルリクエスト #7）。報告：docs/pm/report-checkin-font-fetch.md
+  - tools/build_font.py：raw.githubusercontent.com を先に、だめなら github.com。5xx・429・つながらないは 5・15・30秒待って1か所4回まで。.part に落としてから置き換え
+  - テスト tests/tools/test_build_font.py（7件、python3 -m unittest discover -s tests/tools）。本物の取得で build.mjs も通った
+  - 本人の決めごと待ち：反映するか／このテストを deploy.yml のテストの段に足すか／Actions のキャッシュで元のフォントを残すか（どちらも持ち場の外）
+- 新規登録（feat/signup）は 11/5 17:45 に反映済み（下の記録）
 
 ## 本人の決定（11/5）
 - 表示名は空で始める／今いる利用者には次に開いたとき一度だけ同意／「デモで試す」は残す
@@ -10,7 +13,8 @@
 - 確認コードは6けた。メールは Gmail、Supabase の送信上限は1時間100通
 
 ## 次にやること
-- 本人の「反映して」待ち。反映のときはデータ担当の移行を先に流す
+- #7 の本人の「反映して」待ち
+- PM から積んだ広告担当の依頼（下の1〜3）。1 は表の変更をデータ担当へ依頼、3 はデザイン担当の画面案待ち。2 から手を付けられる
 - 元から落ちているブラウザのテスト t27・t48・t57 の原因を調べる（本人の了解が出たら。変更前の feat/signup でも落ちる）
 - t31・t61・t62 は時間しだいで揺れる。待ち方を直す候補
 
@@ -29,4 +33,4 @@
 
 ## 11/5 17:45 反映済み
 - 本人の「反映して」で feat/signup を main に入れた（main 7daa277）。Actions はテスト・データベース・アプリともに成功。本番で登録の入口・otpLength 6・TERMS_VER を確認
-- 次の仕事（PM から）：tools/build_font.py のフォントの取得が github.com の一時的な 504 で反映を2回止めた。取り直し（数回・待ちつき）と raw.githubusercontent.com の URL への切り替えを入れる
+- （11/5 済み・#7）次の仕事（PM から）：tools/build_font.py のフォントの取得が github.com の一時的な 504 で反映を2回止めた。取り直し（数回・待ちつき）と raw.githubusercontent.com の URL への切り替えを入れる
