@@ -100,6 +100,7 @@ check('毎晩の仕事は rot-pairs と rot-eval の2つ（前の rot-learn は�
 check('どちらにも statement_timeout と lock_timeout', jobs.every(j => /set statement_timeout = '\d+min'/.test(j.cmd) && /set lock_timeout = '\d+s'/.test(j.cmd)), jobs);
 const others = new Set(); for (const f of files) if (!f.endsWith('_rotation_predict.sql')) for (const m of fs.readFileSync(dir + f, 'utf8').matchAll(/cron\.schedule\('[a-z0-9-]+', '([^']+)'/g)) others.add(m[1]);
 check('ほかの毎晩の処理と同じ時刻にしない', jobs.every(j => !others.has(j.when)), { jobs: jobs.map(j => j.when), others: [...others] });
+check('関数の設定の statement_timeout には頼らない（効かないため。上限は仕事の文で付ける）', !/language plpgsql[^\n]*set statement_timeout|returns [^\n]*set statement_timeout/i.test(mig));
 check('移行では、これまでの日をまとめて作らない', !/for d in select distinct day from public\.reg_legs/.test(mig));
 
 // 7. 権限：新しい表と関数は運営だけ

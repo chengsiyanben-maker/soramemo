@@ -312,6 +312,7 @@ revoke all on function public.rot_nightly() from public, anon, authenticated;
 
 -- 毎晩：日本時間 6:33 につながり、6:48 に採点（rwy-learn の 6:15 のあと。daily-archive 4:50・cold-archive 6:10・経営の毎晩の処理とは重ねない）
 --   それぞれ別の仕事なので、片方が止まってもほかの処理は止めない。statement_timeout で長引いたら打ち切り、lock_timeout で待ち続けない
+--   上限は仕事の文の先頭で付ける。関数の設定（create function ... set statement_timeout）は、呼ばれた時点で時計がもう決まっているので効かない（本物の Postgres 16 で確かめた）
 do $outer$
 begin
   if not exists (select 1 from pg_extension where extname = 'pg_cron') then return; end if;
