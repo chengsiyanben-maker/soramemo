@@ -1229,6 +1229,99 @@ dialog.sgd .dlg{padding:14px 16px 36px;max-width:480px;margin:0 auto;max-height:
 .sg-card.ga-x{border:2px solid #FDE7E7}.sg-card.ga-l{border:2px solid #FDF1E1}
 .sg-hero .ga3>span{background:#2A2A2A;color:#fff}.sg-hero .ga3 small{color:#BDBDBD}
 .sgd .ga2>div{background:var(--sg-bg);border-radius:14px;padding:10px 12px}
+/* ---------- 新規登録・ログイン・同意の全画面（画面案 docs/design/signup。色と形は画面案の値） ---------- */
+dialog.auth{--a-bg:#F4F5F7;--a-card:#FFFFFF;--a-ink:#374151;--a-strong:#1F2937;--a-sub:#6B7280;--a-mute:#9CA3AF;--a-track:#EEF0F3;--a-pill:rgba(17,24,39,.05);
+  --a-shadow:0 1px 2px rgba(17,24,39,.04),0 10px 30px -8px rgba(17,24,39,.10),inset 0 0 0 1px rgba(17,24,39,.07);--a-jal:#C8102E;--a-ana:#1C4FA0;--a-wash:#EEF3FB;
+  --a-cta:#1F2937;--a-cta-text:#FFFFFF;--c-bg:#F7F9F4;--c-land:#E9EFE4;--c-coast:#9FB3A4;--c-apt:#1F4E79;
+  inset:0;width:100vw;height:100dvh;max-width:100vw;max-height:100dvh;margin:0;border-radius:0;background:var(--a-bg);color:var(--a-ink);font-family:var(--gothic);font-size:16px;line-height:1.7;overflow-y:auto;overscroll-behavior:contain}
+dialog.auth::backdrop{background:var(--a-bg)}
+.auth .phone{max-width:420px;min-height:100%;margin:0 auto;padding:calc(20px + env(safe-area-inset-top,0px)) 24px calc(32px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column}
+.auth #auStep{flex:1;display:flex;flex-direction:column}
+.auth .top{display:flex;align-items:center;justify-content:space-between;min-height:44px}
+.auth .back{width:40px;height:40px;border-radius:999px;border:0;background:var(--a-pill);color:var(--a-strong);font-size:18px;display:grid;place-items:center;cursor:pointer}
+.auth .skip{border:0;background:var(--a-pill);color:var(--a-sub);font-family:inherit;font-style:normal;font-size:13px;font-weight:700;padding:8px 14px;border-radius:999px;cursor:pointer}
+.auth .steps{display:flex;gap:6px;align-items:center}
+.auth .steps i{display:block;width:18px;height:6px;border-radius:999px;background:var(--a-track)}
+.auth .steps i.on{background:var(--a-ana);width:28px}
+.auth .steps i.done{background:var(--a-strong);opacity:.35}
+.auth .hero{margin-top:48px}
+.auth .eyebrow{font-size:12px;font-weight:700;color:var(--a-sub);letter-spacing:.08em;margin:0 0 10px}
+.auth h1{font-family:var(--gothic);font-size:28px;line-height:1.35;color:var(--a-strong);margin:0;font-weight:800;letter-spacing:-.01em}
+.auth .lead{color:var(--a-sub);font-size:14px;margin:14px 0 0}
+.auth .lead b{color:var(--a-strong);word-break:break-all}
+.auth .card{background:var(--a-card);border-radius:22px;box-shadow:var(--a-shadow);padding:20px}
+.auth .field{margin-top:36px}
+.auth .label{display:block;font-size:12px;font-weight:700;color:var(--a-sub);margin:0 0 8px 4px}
+.auth .input{width:100%;font-family:inherit;font-style:normal;font-size:18px;color:var(--a-strong);background:var(--a-card);border:0;border-radius:18px;padding:16px 18px;box-shadow:var(--a-shadow);outline:none;box-sizing:border-box}
+.auth .input:focus{box-shadow:var(--a-shadow),0 0 0 2px var(--a-ana)}
+.auth .input::placeholder{color:var(--a-mute)}
+.auth .note{font-size:12px;color:var(--a-mute);margin:10px 4px 0}
+.auth .spacer{flex:1;min-height:24px}
+.auth .cta{display:block;width:100%;border:0;border-radius:999px;background:var(--a-cta);color:var(--a-cta-text);font-family:inherit;font-style:normal;font-size:16px;font-weight:800;padding:17px 20px;text-align:center;box-shadow:0 10px 24px -12px rgba(15,23,42,.5);cursor:pointer}
+.auth .cta[disabled]{opacity:.35;box-shadow:none;cursor:default}
+.auth .ghost{display:block;width:100%;border:0;background:transparent;color:var(--a-sub);font-family:inherit;font-style:normal;font-size:14px;font-weight:700;padding:14px;text-align:center;cursor:pointer}
+.auth .pill2{display:inline-block;border:0;border-radius:999px;background:var(--a-pill);color:var(--a-strong);font-family:inherit;font-style:normal;font-size:15px;font-weight:700;padding:13px 26px;cursor:pointer}
+.auth .pill2 b{color:var(--a-ana)}
+.auth .linkish{border:0;background:none;padding:0;font-family:inherit;font-style:normal;color:var(--a-sub);text-decoration:underline;cursor:pointer}
+.auth .amsg{font-size:13px;margin:12px 4px 0;color:var(--a-sub);min-height:0}
+.auth .amsg.err{color:var(--a-jal)}
+.auth .amsg:empty{display:none}
+.auth .captcha{margin:0 0 12px}
+.auth .captcha:empty{display:none}
+.auth .logo{display:inline-block;border-radius:18px;box-shadow:var(--a-shadow)}
+.auth .otp{position:relative;display:flex;gap:8px;margin-top:36px}
+.auth .otp span{flex:1;aspect-ratio:3/4;max-width:56px;border-radius:16px;background:var(--a-card);box-shadow:var(--a-shadow);display:grid;place-items:center;font-size:30px;font-weight:800;color:var(--a-strong);font-variant-numeric:tabular-nums}
+.auth .otp span.cur{box-shadow:var(--a-shadow),0 0 0 2px var(--a-ana)}
+.auth .otp span.empty{color:var(--a-mute)}
+.auth .otp input{position:absolute;inset:0;width:100%;height:100%;opacity:0;font-size:16px;border:0;caret-color:transparent}
+.auth .resend{display:flex;justify-content:space-between;align-items:center;margin-top:22px;font-size:13px;color:var(--a-sub)}
+.auth .resend b{font-size:20px;color:var(--a-strong);font-variant-numeric:tabular-nums;margin-right:2px}
+.auth .resend small{color:var(--a-mute)}
+.auth .prev{display:flex;align-items:center;gap:14px;margin-top:20px}
+.auth .av{width:52px;height:52px;flex:none;border-radius:999px;background:var(--a-wash);color:var(--a-ana);display:grid;place-items:center;font-size:22px;font-weight:800}
+.auth .prev b{display:block;font-size:17px;color:var(--a-strong);word-break:break-all}
+.auth .prev small{font-size:12px;color:var(--a-mute)}
+.auth .count{float:right;font-size:12px;color:var(--a-mute);margin-right:4px}
+.auth .count b{color:var(--a-strong);font-size:14px}
+.auth .opts{display:flex;flex-direction:column;align-items:flex-start;gap:10px;margin-top:36px}
+.auth .opt{border:0;font-family:inherit;font-style:normal;font-size:15px;font-weight:700;color:var(--a-strong);background:var(--a-card);box-shadow:var(--a-shadow);border-radius:999px;padding:13px 18px;display:inline-flex;align-items:center;gap:8px;white-space:nowrap;cursor:pointer}
+.auth .opt svg{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.auth .opt[aria-checked="true"]{background:var(--a-wash);color:var(--a-ana);box-shadow:inset 0 0 0 2px var(--a-ana)}
+.auth .opt.later{background:var(--a-pill);box-shadow:none;color:var(--a-sub)}
+.auth .opt.later[aria-checked="true"]{box-shadow:inset 0 0 0 2px var(--a-sub)}
+.auth .why{margin-top:28px;font-size:12px;color:var(--a-mute);display:flex;gap:8px}
+.auth .why i{font-style:normal;width:18px;height:18px;flex:none;border-radius:999px;background:var(--a-pill);display:grid;place-items:center;font-size:11px;font-weight:800;color:var(--a-sub)}
+.auth .badge{border:0;margin:0;vertical-align:baseline;line-height:1.5;display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:800;color:var(--a-jal);background:color-mix(in srgb,var(--a-jal) 9%,transparent);padding:6px 12px;border-radius:999px}
+.auth .badge::before{content:"";width:6px;height:6px;border-radius:999px;background:var(--a-jal)}
+.auth .pts{margin:0;padding:0;list-style:none;display:grid;gap:14px}
+.auth .pts li{display:flex;gap:12px;font-size:14px;color:var(--a-ink)}
+.auth .pts li i{font-style:normal;flex:none;width:26px;height:26px;border-radius:999px;background:var(--a-pill);display:grid;place-items:center;font-size:13px;font-weight:800;color:var(--a-strong)}
+.auth .pts li small{display:block;font-size:12px;color:var(--a-mute);line-height:1.5}
+.auth .docs{display:flex;gap:8px;margin-top:16px}
+.auth .docs a{flex:1;text-align:center;text-decoration:none;font-size:13px;font-weight:700;color:var(--a-strong);background:var(--a-card);box-shadow:var(--a-shadow);border-radius:999px;padding:11px 8px}
+.auth .agree{display:flex;gap:12px;align-items:flex-start;margin-top:22px;font-size:14px;color:var(--a-strong);font-weight:700;cursor:pointer;position:relative}
+.auth .agree input{position:absolute;opacity:0;width:26px;height:26px;margin:0}
+.auth .agree .box{flex:none;width:26px;height:26px;border-radius:9px;background:var(--a-card);box-shadow:inset 0 0 0 2px var(--a-mute);color:transparent;display:grid;place-items:center;font-size:15px}
+.auth .agree input:checked + .box{background:var(--a-strong);box-shadow:none;color:var(--a-card)}
+.auth .agree input:focus-visible + .box{outline:2px solid var(--a-ana);outline-offset:2px}
+.auth .agree small{display:block;font-weight:400;font-size:12px;color:var(--a-mute)}
+.auth .ill{margin:40px auto 0;width:100%;max-width:300px;border-radius:26px;overflow:hidden;box-shadow:var(--a-shadow)}
+.auth .ill svg{display:block}
+.auth .rows{display:grid;gap:12px;margin-top:28px}
+.auth .row{display:flex;gap:14px;align-items:flex-start}
+.auth .row i{font-style:normal;flex:none;width:34px;height:34px;border-radius:999px;background:var(--a-wash);color:var(--a-ana);display:grid;place-items:center;font-size:15px;font-weight:800}
+.auth .row b{display:block;font-size:15px;color:var(--a-strong)}
+.auth .row small{display:block;font-size:12px;color:var(--a-mute);line-height:1.55}
+/* ホーム：登録した直後だけの「ようこそ」カード */
+.welcome-card{display:flex;gap:12px;align-items:center;background:#EEF3FB;border-radius:20px;padding:14px 16px;margin:0 0 12px;font-family:var(--gothic)}
+.welcome-card[hidden]{display:none}
+.welcome-card b{display:block;color:#1F2937;font-size:15px}
+.welcome-card small{display:block;color:#6B7280;font-size:12px;line-height:1.5}
+.welcome-card .x{margin-left:auto;flex:none;width:30px;height:30px;border-radius:999px;border:0;background:#FFFFFF;color:#6B7280;font-size:15px;cursor:pointer}
+.login .signup-row{display:flex;flex-direction:column;align-items:center;gap:6px;margin-top:12px}
+.login .signup-row .pill2{border:0;border-radius:999px;background:rgba(17,24,39,.05);color:#1F2937;font-family:inherit;font-style:normal;font-size:14px;font-weight:700;padding:11px 22px;cursor:pointer}
+.login .signup-row .pill2 b{color:#1C4FA0}
+.login .signup-row .linkish{border:0;background:none;padding:0;font-family:inherit;font-style:normal;font-size:12px;color:#6B7280;text-decoration:underline;cursor:pointer}
 dialog.mypage{--mp-bg:#F4F5F7;--mp-card:#FFFFFF;--mp-ink:#374151;--mp-sub:#9CA3AF;--mp-mute:#6B7280;--mp-shadow:0 12px 26px -18px rgba(15,23,42,.3),inset 0 0 0 1px rgba(17,24,39,.07);
   max-width:min(460px,100vw);width:100%;max-height:100dvh;height:100dvh;margin:0 auto;border-radius:0;background:var(--mp-bg);color:var(--mp-ink)}
 [data-palette="board"] dialog.mypage{--mp-bg:#0B0D10;--mp-card:#16191F;--mp-ink:#E5E7EB;--mp-sub:#8B95A3;--mp-mute:#A7B0BC;--mp-shadow:0 12px 26px -16px rgba(0,0,0,.7)}
@@ -2476,6 +2569,7 @@ nav.tabs{transition:transform .3s cubic-bezier(.2,.8,.2,1),opacity .2s}
     <p class="maplegend"><span><i class="lg" style="background:var(--jal)"></i>JAL</span><span><i class="lg" style="background:var(--ana)"></i>ANA</span><span><i class="lg" style="background:#8B95A3"></i>そのほか</span><span><i class="lg dash"></i>航路なし</span><span class="mcred">地図：国土地理院</span></p>
     <div class="grabzone"><button class="grab" type="button" aria-label="シートの大きさを変える"></button></div>
     <div class="sbody">
+    <div class="welcome-card" id="welcomeCard" hidden role="status"></div>
     <div class="pcard lo" data-lo="home:persona" id="personaCard" hidden aria-live="polite"></div>
     <div class="bpass" id="bpass">
       <div class="bp-main">
@@ -2504,6 +2598,7 @@ nav.tabs{transition:transform .3s cubic-bezier(.2,.8,.2,1),opacity .2s}
         <button class="btn1" id="verifyCode" style="width:100%;margin-top:8px">ログイン</button>
       </div>
       <p class="msg" id="loginMsg" role="status" aria-live="polite"></p>
+      <div class="signup-row"><button class="pill2" type="button" id="toSignup">はじめての方は<b>新規登録</b></button><button class="linkish" type="button" id="loginDemo">登録しないでデモで試す</button></div>
     </div>
     <div class="notice-slot" id="noticeSlot" hidden>
     <div class="queuebar" id="queueBar" hidden></div>
@@ -2786,6 +2881,7 @@ nav.tabs{transition:transform .3s cubic-bezier(.2,.8,.2,1),opacity .2s}
 
 <dialog id="dStamp"><div class="dlg" id="dStampBody"></div></dialog>
 <dialog id="dAirport" aria-label="空港"><div class="dlg" id="dAirportBody"></div></dialog>
+<dialog id="dAuth" class="auth" aria-label="ログイン・新規登録"><main class="phone"><div id="auStep"></div><div id="auCap" class="captcha"></div><div id="auFoot"></div></main></dialog>
 <dialog id="dGuide" aria-label="使い方"><div class="dlg">
   <div class="ob-step on">
     <svg viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="50" fill="none" stroke="var(--shu)" stroke-width="4"/><circle cx="60" cy="60" r="43" fill="none" stroke="var(--shu)" stroke-width="1.2"/><text x="60" y="72" text-anchor="middle" font-family="var(--mincho)" font-weight="800" font-size="32" fill="var(--shu)">HND</text></svg>
@@ -2869,6 +2965,7 @@ nav.tabs{transition:transform .3s cubic-bezier(.2,.8,.2,1),opacity .2s}
   </div>
   <section class="mp-sec" aria-labelledby="mpAcct"><h4 id="mpAcct">アカウント</h4>
     <div class="set-row" id="loginRow"><div>ログイン<small>記録をサーバーに保存します。メールアドレスに届くコードでログインできます。</small></div><button class="btn2" id="mpLogin">ログインする</button></div>
+    <div class="set-row" id="nameRow" hidden><div>表示名<small id="nameNow"></small></div><button class="btn2" id="nameEdit">変える</button></div>
     <div class="set-row" id="acctRow" hidden><div>ログイン中<small id="acctEmail"></small></div><button class="btn2" id="logout">ログアウト</button></div>
     <div class="set-row" id="delRow" hidden><div>アカウントを削除<small>アカウントとすべての記録を消します。そらメモ＋に加入中なら解約されます。元に戻せません。</small></div><button class="btn2 danger" id="delAcct">削除</button></div>
   </section>
@@ -3407,6 +3504,7 @@ async function loadServer(){
 async function reload(){
   if(SERVER && !demo){ if(user) await loadServer(); else S = blank(); } else load();
   render(); updateAuthUI(); applyPlan(); renderRide();
+  if(SERVER && user && !demo) authAfterLoad(); else renderWelcome();
 }
 function updateAuthUI(){
   const needLogin = SERVER && !user && !demo;
@@ -3421,6 +3519,7 @@ function updateAuthUI(){
   $("acctEmail").textContent = user ? user.email || "" : "";
   $("wipeRow").hidden = SERVER;
   $("delRow").hidden = !(SERVER && user);
+  $("nameRow").hidden = !(SERVER && user && !demo); $("nameNow").textContent = myName() || "まだ決めていません";
 }
 // 同じスクリプトを同時に2回読み込まないよう、読み込み中・読み込み済みの約束を使い回す
 // （地図の部品 Leaflet が2回読まれると、別々の部品どうしで線が描けず止まっていた）
@@ -4482,7 +4581,9 @@ function setPersona(p, how){
   track("persona", `${p}:${how || "set"}`);
   applyLayout(); renderPersonaSettings();
   for(const k in DIRTY) DIRTY[k] = true;
-  if(how !== "layout") goTab(PERSONAS[p].tabs[0]); else goTab(currentView()); renderPersonaCard();
+  if(how === "server"){ if(!loTabs().includes(currentView())) goTab(loTabs()[0]); else goTab(currentView()); }   // サーバーの答えに合わせるときは、開いている画面を動かさない
+  else if(how !== "layout") goTab(PERSONAS[p].tabs[0]); else goTab(currentView());
+  renderPersonaCard(); if(how !== "server") syncPersonaUp(p);
 }
 function renderPersonaSettings(){
   document.querySelectorAll("button[data-persona]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.persona === PERSONA)));
@@ -5014,8 +5115,9 @@ $("openSettings").onclick = () => { renderBaseSel(); renderMyPage(); $("dSetting
 // マイページのいちばん上のタイル：アカウント・称号・記録の保存先
 function renderMyPage(){
   const mail = SERVER && user ? (user.email || "") : "", tn = titleName();
-  $("mpAv").textContent = mail ? mail[0].toUpperCase() : "そ";
-  $("mpName").textContent = mail ? mail.split("@")[0] : demo ? "デモモード" : SERVER ? "ログインしていません" : "この端末の記録";
+  $("mpAv").textContent = mail ? (myName() ? [...myName()][0] : mail[0].toUpperCase()) : "そ";
+  if($("nameNow")) $("nameNow").textContent = myName() || "まだ決めていません";
+  $("mpName").textContent = mail ? (myName() || mail.split("@")[0]) : demo ? "デモモード" : SERVER ? "ログインしていません" : "この端末の記録";
   $("mpMail").textContent = mail;
   const chip = (t, k) => `<span class="mp-chip${k ? " " + k : ""}">${esc(t)}</span>`;
   $("mpChips").innerHTML = (SERVER && user ? chip("ログイン中", "ok") + chip("記録はサーバーに保存") : demo ? chip("デモ・記録は別") : chip("記録はこの端末に保存"))
@@ -6813,7 +6915,8 @@ $("delAcct").onclick = async () => {
   const uid = user.id;
   try{ ["soramemo.company." + uid, "soramemo.queue." + uid].forEach(k => localStorage.removeItem(k)); }catch(e){}
   try{ await sb.auth.signOut(); }catch(e){}
-  user = null; CO = null; PLUS = false; $("dSettings").close(); await reload();
+  try{ localStorage.removeItem("soramemo.welcome"); localStorage.removeItem("soramemo.signupPending"); }catch(e){}
+  user = null; CO = null; PLUS = false; PROFILE = null; PROFILE_UID = null; $("dSettings").close(); await reload();
   say("アカウントとすべての記録を削除しました。ご利用ありがとうございました。");
 };
 
@@ -11057,7 +11160,8 @@ let obIdx = 0;
 function obShow(i){ obIdx = i; document.querySelectorAll(".ob-step").forEach((el,k)=>el.classList.toggle("on", k===i));
   document.querySelectorAll(".ob-dots i").forEach((el,k)=>el.classList.toggle("on", k===i));
   $("obNext").textContent = i === 2 ? "はじめる" : "次へ"; }
-function obDone(){ try{ localStorage.setItem("soramemo.onboarded","1"); }catch(e){} $("dGuide").close(); }
+function obDone(){ try{ localStorage.setItem("soramemo.onboarded","1"); }catch(e){} $("dGuide").close();
+  if(SERVER && sb && !user && !demo) authOpen("login"); }   // サーバー版で、まだログインしていなければ、続けてログインの画面を出す
 $("obNext").onclick = () => { if(obIdx < 2) obShow(obIdx+1); else { track("guide", "done"); obDone(); } };
 $("obSkip").onclick = () => { track("guide", "skip"); obDone(); };
 $("openGuide").onclick = () => { $("dSettings").close(); obShow(0); $("dGuide").showModal(); };
@@ -11265,10 +11369,11 @@ $("sendLink").onclick = async () => {
   if(!sb){ m.textContent = "サーバーにつながっていません。開き直してください。"; m.className = "msg err"; return; }
   if(captchaOn() && !CAPTCHA.token){ m.textContent = "確認の表示が出ていれば、それを済ませてからもう一度押してください。"; m.className = "msg err"; initCaptcha(); return; }
   $("sendLink").disabled = true;
-  const { error } = await sb.auth.signInWithOtp({ email, options:{ emailRedirectTo: location.origin + location.pathname, ...(captchaOn() ? { captchaToken: CAPTCHA.token } : {}) } });
+  const { error } = await sb.auth.signInWithOtp({ email, options:{ shouldCreateUser:false, emailRedirectTo: location.origin + location.pathname, ...(captchaOn() ? { captchaToken: CAPTCHA.token } : {}) } });   // 新しいアカウントは新規登録の画面だけで作る
   $("sendLink").disabled = false;
   resetCaptcha();          // 確認の合図は1回ごとに使い捨て
-  if(error){ m.textContent = "送れませんでした。少し待ってからもう一度試してください。"; m.className = "msg err"; return; }
+  if(error){ if(auNoUser(error)){ track("login", "nouser"); AU.email = email; authOpen("login", "nouser"); m.textContent = ""; return; }
+    m.textContent = auSendErr(error); m.className = "msg err"; return; }
   LOGIN_GUARD.set("sentAt", Date.now());
   $("codeBox").hidden = false; $("loginCode").focus();
   m.textContent = "メールに届いたコードを入れてください。メールのリンクを押してもログインできます（ホーム画面に追加したアプリでは、コードを使ってください）。"; m.className = "msg";
@@ -11288,7 +11393,319 @@ $("verifyCode").onclick = async () => {
   LOGIN_GUARD.set("codeFail", { n:0, until:0 });
   $("codeBox").hidden = true; $("loginCode").value = ""; m.textContent = ""; track("login", "code");
 };
-$("logout").onclick = async () => { if(sb) await sb.auth.signOut(); user = null; CO = null; PLUS = false; $("dSettings").close(); await reload(); };
+$("logout").onclick = async () => { if(sb) await sb.auth.signOut(); user = null; CO = null; PLUS = false; PROFILE = null; PROFILE_UID = null; $("dSettings").close(); await reload(); };
+/* ---------- 新規登録・ログイン・同意（全画面 dAuth）。画面案 docs/design/signup（ブランチ design/signup） ----------
+   流れ：ログイン →「はじめての方は新規登録」→ メール → コード → 表示名 → 使い方のアンケート → 同意 → 位置情報の説明 → ホーム
+   ・プロフィールは user_profiles（表示名・使い方の答え）。同意は agree_terms(規約の版, プライバシーポリシーの版) で記録する
+   ・今いる利用者は同意が空なので、次に開いたときに一度だけ同意の画面を出す（版が変わったときも出す）
+   ・表が読めないとき（まだ移行していないサーバー）は、これまでどおり使えるようにする（画面で止めない） */
+const TERMS_VER = "2026-10-15", PRIVACY_VER = "2026-10-21";   // 利用規約・プライバシーポリシーの改定日（terms.html・privacy.html の改定日と同じにする）
+// コードのけた数：config.js の otpLength（Supabase の Email OTP Length と同じ値）。書いていなければ、今のログインと同じく6〜10けたを受け付ける
+const OTP_LEN = (() => { const n = +((typeof SORAMEMO_CONFIG !== "undefined" && SORAMEMO_CONFIG.otpLength) || 0); return n >= 6 && n <= 10 ? n : 0; })();
+const AU_STEPS = ["email", "code", "name", "survey", "terms", "location"];
+const AU = { flow:"login", step:"login", email:"", code:"", name:"", persona:null, started:0, msg:"", err:false, busy:false, agree:false, back:null };
+var PROFILE = null, PROFILE_UID = null;   // var：起動の途中（この下の定義より前）に updateAuthUI から読まれるため
+const PROFILE_COLS = "display_name,persona,terms_version,privacy_version,agreed_at";
+const auPending = () => { try{ return localStorage.getItem("soramemo.signupPending") || ""; }catch(e){ return ""; } };
+const auSetPending = uid => { try{ uid ? localStorage.setItem("soramemo.signupPending", uid) : localStorage.removeItem("soramemo.signupPending"); }catch(e){} };
+const needsConsent = p => !!p && (!p.agreed_at || p.terms_version !== TERMS_VER || p.privacy_version !== PRIVACY_VER);
+const nameOk = v => { const t = String(v || "").trim(); return t.length >= 1 && [...t].length <= 20 && !/[\u0000-\u001F\u007F]/.test(t) && !/@/.test(t); };
+function myName(){ return PROFILE && PROFILE.display_name ? PROFILE.display_name : ""; }
+async function loadProfile(force){
+  if(!SERVER || !sb || !user || demo) { PROFILE = null; PROFILE_UID = null; return null; }
+  if(!force && PROFILE_UID === user.id) return PROFILE;
+  try{ const { data, error } = await sb.from("user_profiles").select(PROFILE_COLS).maybeSingle();
+    PROFILE = error ? null : (data || null); }catch(e){ PROFILE = null; }
+  PROFILE_UID = user.id; return PROFILE;
+}
+async function saveProfile(patch){
+  if(!sb || !user) return false;
+  try{ const { error } = await sb.from("user_profiles").update(patch).eq("user_id", user.id); if(error) return false; }catch(e){ return false; }
+  PROFILE = Object.assign({}, PROFILE || {}, patch); return true;
+}
+// マイページなどで構成を変えたら、サーバーの答えも変える（ほかの端末でも同じ構成で始まるように）
+function syncPersonaUp(p){ if(!SERVER || !user || demo || !PERSONAS[p] || (PROFILE && PROFILE.persona === p)) return; saveProfile({ persona:p }); }
+// ログインしたあと・開いたとき：構成を合わせ、同意がまだなら同意の画面を出す
+async function authAfterLoad(){
+  if(!SERVER || !user || demo) return;
+  const uid = user.id, p = await loadProfile(); if(!user || user.id !== uid || !p) return;
+  if($("dAuth").open && AU.flow === "signup") return;   // 登録の途中は、登録の画面が決める
+  if(p.persona && p.persona !== "unanswered"){ if(p.persona !== PERSONA || !personaChosen()) setPersona(p.persona, "server"); }
+  else if(personaChosen()) saveProfile({ persona:PERSONA });   // この端末で選んでいた構成を、サーバーに移す
+  if(auPending() === uid && !p.display_name){ authOpen("signup", "name"); return; }   // 登録の途中で閉じた人は、表示名から続ける
+  if(needsConsent(p) && !$("dAuth").open){ authOpen("gate", "terms"); }
+  renderWelcome(); if($("dSettings").open) renderMyPage();
+}
+function authOpen(flow, step){
+  Object.assign(AU, { flow, step: step || (flow === "signup" ? "email" : flow === "gate" ? "terms" : "login"), msg:"", err:false, busy:false, agree:false, code:"" });
+  if(flow === "signup" && step === "name"){ AU.name = myName(); }
+  if(flow === "rename"){ AU.name = myName(); AU.step = "name"; }
+  if($("dSettings").open && flow !== "rename") $("dSettings").close();
+  if(!$("dAuth").open) $("dAuth").showModal();
+  authRender(); track("auth_open", flow + ":" + AU.step);
+}
+function authClose(){ if($("dAuth").open) $("dAuth").close(); $("auCap").innerHTML = ""; AU_CAP.widget = null; AU_CAP.token = null; }
+// 登録の途中や同意の画面は、Esc で閉じない（閉じても次に開いたときにまた出る）
+$("dAuth").addEventListener("cancel", e => { if(AU.flow === "gate" || (AU.flow === "signup" && !["email", "code"].includes(AU.step))) e.preventDefault(); });
+const AU_ICON = {
+  spot:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.6"/></svg>',
+  shugyo:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 13.5l19-7-5 13-3.4-5.2z"/><path d="M13.1 14.3L21.5 6.5"/></svg>',
+  casual:'<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M8.5 14.2c1.8 2.2 5.2 2.2 7 0"/><path d="M9 9.6h.01M15 9.6h.01"/></svg>'
+};
+function auTop(back, right){
+  const i = AU_STEPS.indexOf(AU.step), bars = AU.flow === "signup" && i >= 0
+    ? `<div class="steps" aria-label="6つのうち${i + 1}つ目">${AU_STEPS.map((s, k) => `<i class="${k < i ? "done" : k === i ? "on" : ""}"></i>`).join("")}</div>` : "<span></span>";
+  return `<div class="top">${back ? `<button class="back" type="button" data-au="${back}" aria-label="戻る">←</button>` : '<span style="width:40px"></span>'}${bars}${right || '<span style="width:40px"></span>'}</div>`;
+}
+const auMsg = () => `<p class="amsg${AU.err ? " err" : ""}" id="auMsg" role="status" aria-live="polite">${esc(AU.msg)}</p>`;
+function auWait(){ const last = LOGIN_GUARD.get("sentAt") || 0; return Math.max(0, Math.ceil((60000 - (Date.now() - last)) / 1000)); }
+let AU_TICK = null;
+function authRender(){
+  const st = $("auStep"), ft = $("auFoot"), s = AU.step, F = AU.flow; let top = "", foot = "";
+  clearInterval(AU_TICK); AU_TICK = null;
+  const capOn = (s === "login" || s === "email" || s === "code") && captchaOn();   // コードの画面にも置く（送り直しに使う）
+  $("auCap").hidden = !capOn; if(capOn) initAuthCaptcha();
+  if(s === "login"){
+    top = `<div class="top" style="justify-content:flex-end"><button class="skip" type="button" data-au="close">あとで</button></div>
+      <div class="hero" style="margin-top:32px;text-align:center">
+        <div class="logo"><svg viewBox="0 0 64 64" width="64" height="64" aria-hidden="true"><rect width="64" height="64" rx="18" fill="var(--a-card)"/><circle cx="32" cy="32" r="20" fill="none" stroke="var(--c-apt)" stroke-width="2.5" stroke-dasharray="3 4"/><path d="M20 38 L44 24" stroke="var(--a-strong)" stroke-width="3" stroke-linecap="round"/><path d="M38 22 l7 1.5 -2.5 6.5" fill="none" stroke="var(--a-strong)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><circle cx="20" cy="38" r="3.5" fill="var(--a-jal)"/></svg></div>
+        <h1 style="margin-top:22px;font-size:32px">そらメモ</h1>
+        <p class="lead" style="margin-top:8px">空港にチェックインして、印を集める。</p>
+      </div>
+      <div class="field" style="margin-top:56px">
+        <label class="label" for="auEmail">ログイン</label>
+        <input class="input" id="auEmail" type="email" placeholder="メールアドレス" autocomplete="email" inputmode="email" value="${esc(AU.email)}">
+        <p class="note">メールに届く数字のコードでログインします。パスワードはありません。</p>${auMsg()}
+      </div><div class="spacer"></div>`;
+    foot = `<button class="cta" type="button" data-au="login-send"${AU.busy ? " disabled" : ""}>ログイン用のコードを送る</button>
+      <div style="margin-top:14px;text-align:center"><button class="pill2" type="button" data-au="to-signup">はじめての方は<b>新規登録</b></button></div>
+      <p class="note" style="text-align:center;margin-top:18px">登録しなくても<button class="linkish" type="button" data-au="demo">デモで試す</button>ことができます</p>`;
+  } else if(s === "nouser"){
+    top = `${auTop("to-login")}<div class="hero"><p class="eyebrow">ログイン</p><h1>このメールアドレスは<br>まだ登録されていません</h1>
+      <p class="lead"><b>${esc(AU.email)}</b><br>はじめての方は、新規登録から始めてください。</p></div><div class="spacer"></div>`;
+    foot = `<button class="cta" type="button" data-au="to-signup">新規登録へ進む</button><button class="ghost" type="button" data-au="to-login">アドレスを直す</button>`;
+  } else if(s === "email"){
+    top = `${auTop("to-login")}<div class="hero"><p class="eyebrow">新規登録</p><h1>メールアドレスを<br>入れてください</h1>
+      <p class="lead">確認のコードを送ります。パスワードは使いません。</p></div>
+      <div class="field"><label class="label" for="auEmail">メールアドレス</label>
+        <input class="input" id="auEmail" type="email" autocomplete="email" inputmode="email" placeholder="メールアドレス" value="${esc(AU.email)}">
+        <p class="note">記録をサーバーに保存し、機種変更しても引き継ぐために使います。お知らせのメールは送りません。</p>${auMsg()}</div><div class="spacer"></div>`;
+    foot = `<button class="cta" type="button" data-au="signup-send"${AU.busy ? " disabled" : ""}>コードを送る</button><button class="ghost" type="button" data-au="to-login">すでに登録済みの方はログイン</button>`;
+  } else if(s === "code"){
+    const n = Math.min(OTP_LEN || 10, Math.max(OTP_LEN || 6, AU.code.length + 1)), w = auWait();
+    top = `${auTop(F === "signup" ? "to-email" : "to-login")}<div class="hero"><p class="eyebrow">${F === "signup" ? "新規登録" : "ログイン"}</p><h1>届いたコードを<br>入れてください</h1>
+      <p class="lead"><b>${esc(AU.email)}</b> に送りました。<br>迷惑メールのフォルダも見てください。</p></div>
+      <label class="otp" aria-label="メールに届いた数字のコード">${Array.from({length:n}, (_, k) => k < AU.code.length ? `<span>${esc(AU.code[k])}</span>` : k === AU.code.length ? '<span class="cur">｜</span>' : '<span class="empty">·</span>').join("")}
+        <input id="auCode" inputmode="numeric" autocomplete="one-time-code" maxlength="${OTP_LEN || 10}" pattern="[0-9]*" value="${esc(AU.code)}" aria-label="メールに届いた数字のコード"></label>
+      <div class="resend"><button class="linkish" type="button" data-au="${F === "signup" ? "to-email" : "to-login"}">アドレスを直す</button>
+        <span id="auResend">${w > 0 ? `<b>${w}</b><small>秒後に送り直せます</small>` : `<button class="linkish" type="button" data-au="resend">コードを送り直す</button>`}</span></div>${auMsg()}<div class="spacer"></div>`;
+    foot = `<button class="cta" type="button" data-au="verify"${AU.busy || AU.code.length < (OTP_LEN || 6) ? " disabled" : ""}>確かめる</button>`;
+    if(w > 0) AU_TICK = setInterval(() => { const r = $("auResend"), v = auWait(); if(!r || AU.step !== "code"){ clearInterval(AU_TICK); return; }
+      r.innerHTML = v > 0 ? `<b>${v}</b><small>秒後に送り直せます</small>` : `<button class="linkish" type="button" data-au="resend">コードを送り直す</button>`; if(v <= 0) clearInterval(AU_TICK); }, 1000);
+  } else if(s === "exists"){
+    top = `${auTop("")}<div class="hero"><p class="eyebrow">新規登録</p><h1>このメールアドレスは<br>登録済みです</h1>
+      <p class="lead"><b>${esc(AU.email)}</b><br>新しいアカウントは作らずに、今のアカウントでログインしました。これまでの記録をそのまま使えます。</p></div><div class="spacer"></div>`;
+    foot = `<button class="cta" type="button" data-au="exists-go">ログインして続ける</button>`;
+  } else if(s === "name"){
+    const v = AU.name, len = [...v.trim()].length, ok = nameOk(v), R = F === "rename";
+    top = `${auTop(R ? "close" : "")}<div class="hero"><p class="eyebrow">${R ? "マイページ" : "新規登録"}</p><h1>${R ? "表示名を<br>変える" : "なんと呼べば<br>いいですか？"}</h1>
+      <p class="lead">マイページやランキングに出る名前です。${R ? "" : "あとで変えられます。"}</p></div>
+      <div class="field"><label class="label" for="auName">表示名 <span class="count"><b id="auNameN">${len}</b> / 20</span></label>
+        <input class="input" id="auName" maxlength="40" autocomplete="nickname" placeholder="例：そらのたび人" value="${esc(v)}">
+        <p class="note">本名やメールアドレスは入れないでください。</p>${auMsg()}</div>
+      <div class="card prev"><div class="av" id="auAv">${esc(v.trim() ? [...v.trim()][0] : "そ")}</div><div><b id="auPrev">${esc(v.trim() || "（まだ入っていません）")}</b><small>ほかの人からはこう見えます</small></div></div><div class="spacer"></div>`;
+    foot = `<button class="cta" type="button" data-au="name-next"${ok && !AU.busy ? "" : " disabled"}>${R ? "保存する" : "次へ"}</button>${R ? '<button class="ghost" type="button" data-au="close">やめる</button>' : ""}`;
+  } else if(s === "survey"){
+    const o = (k, label, ic) => `<button class="opt${k === "unanswered" ? " later" : ""}" type="button" role="radio" aria-checked="${AU.persona === k}" data-au-persona="${k}">${ic || ""}${label}</button>`;
+    top = `${auTop("to-name", '<button class="skip" type="button" data-au="survey-skip">あとで</button>')}<div class="hero"><p class="eyebrow">ひとつだけ質問 <span style="color:var(--a-mute);font-weight:400">・飛ばしてもOK</span></p><h1>そらメモを<br>どう使いたいですか？</h1>
+      <p class="lead">近いものをひとつ選んでください。</p></div>
+      <div class="opts" role="radiogroup" aria-label="使い方">${o("spot", "飛行機を撮りたい", AU_ICON.spot)}${o("shugyo", "修行（マイル・ステータス）に使いたい", AU_ICON.shugyo)}${o("casual", "気軽に楽しみたい", AU_ICON.casual)}${o("unanswered", "あとで決める")}</div>
+      <p class="why"><i>?</i><span>答えに合わせて、下のタブの並びとホームに出すものを変えます。ほかの機能が使えなくなることはありません。マイページからいつでも変えられます。</span></p>${auMsg()}<div class="spacer"></div>`;
+    foot = `<button class="cta" type="button" data-au="survey-next"${AU.busy ? " disabled" : ""}>次へ</button><button class="ghost" type="button" data-au="survey-skip">答えずに進む</button>`;
+  } else if(s === "terms"){
+    const G = F === "gate", again = G && PROFILE && PROFILE.agreed_at;
+    top = `${auTop(G ? "" : "to-survey")}<div class="hero" style="margin-top:36px"><span class="badge">非公式アプリです</span>
+      <h1 style="margin-top:14px">${G ? (again ? "利用規約などが<br>改定されました" : "続ける前に<br>確認してください") : "はじめる前に<br>確認してください"}</h1>
+      ${G ? `<p class="lead">${again ? "新しい内容を読んで、同意をお願いします。" : "そらメモを続けて使うために、一度だけ同意をお願いしています。"}</p>` : ""}</div>
+      <div class="card" style="margin-top:26px"><ul class="pts">
+        <li><i>1</i><div>航空会社・空港・行政機関とは関係のない、個人が作った非公式のアプリです<small>表示する航空会社名・空港名は、記録を示すためだけに使っています。</small></div></li>
+        <li><i>2</i><div>空港では係員と航空会社の指示に従ってください<small>歩きながらの操作や、立入禁止の場所への立ち入りはしないでください。</small></div></li>
+        <li><i>3</i><div>記録はサーバーに保存し、いつでも消せます<small>マイページの「アカウントを削除」から、すべての記録を消せます。</small></div></li>
+      </ul></div>
+      <div class="docs"><a href="terms.html" target="_blank" rel="noopener">利用規約を読む</a><a href="privacy.html" target="_blank" rel="noopener">プライバシーを読む</a></div>
+      <label class="agree"><input type="checkbox" id="auAgree"${AU.agree ? " checked" : ""}><span class="box" aria-hidden="true">✓</span><span>利用規約とプライバシーポリシーに同意する<small>ご本人が同意したことを記録します。</small></span></label>${auMsg()}<div class="spacer"></div>`;
+    foot = `<button class="cta" type="button" data-au="agree"${AU.agree && !AU.busy ? "" : " disabled"}>${G ? "同意して続ける" : "同意してはじめる"}</button><button class="ghost" type="button" data-au="disagree">同意しないでログアウト</button>`;
+  } else if(s === "location"){
+    top = `${auTop("")}<div class="ill"><svg viewBox="0 0 300 150" width="100%" role="img" aria-label="空港の円の中に自分がいる図">
+      <rect width="300" height="150" fill="var(--c-bg)"/><path d="M0 110 C60 96 90 120 150 104 S250 84 300 96 V150 H0Z" fill="var(--c-land)" stroke="var(--c-coast)" stroke-width="1.2"/>
+      <circle cx="150" cy="70" r="46" fill="none" stroke="var(--c-apt)" stroke-width="1.4" stroke-dasharray="4 4"/><path d="M128 82 L172 58" stroke="var(--c-apt)" stroke-width="5" stroke-linecap="round" opacity=".55"/>
+      <text x="150" y="132" text-anchor="middle" font-size="11" font-weight="700" fill="var(--c-apt)">HND</text>
+      <circle cx="164" cy="74" r="12" fill="var(--a-ana)" opacity=".18"/><circle cx="164" cy="74" r="5.5" fill="var(--a-ana)" stroke="#fff" stroke-width="2"/></svg></div>
+      <div class="hero" style="margin-top:30px"><h1 style="font-size:26px">チェックインのときだけ<br>位置を使います</h1></div>
+      <div class="rows">
+        <div class="row"><i>1</i><div><b>押したときだけ測ります</b><small>半券を切ってチェックインした一瞬だけ。いつも追いかけることはしません。</small></div></div>
+        <div class="row"><i>2</i><div><b>空港にいるかを確かめるため</b><small>空港の範囲の中にいるときに、その空港の印が押せます。</small></div></div>
+        <div class="row"><i>3</i><div><b>あとからでも許可できます</b><small>いま断っても、地図を見たり記録帳に書いたりはできます。</small></div></div>
+      </div>${auMsg()}<div class="spacer"></div>`;
+    foot = `<button class="cta" type="button" data-au="loc-allow"${AU.busy ? " disabled" : ""}>位置情報を許可する</button><button class="ghost" type="button" data-au="loc-later">あとで</button>`;
+  }
+  st.innerHTML = top; ft.innerHTML = foot;
+  const f = st.querySelector("#auCode, #auName, #auEmail"); if(f) setTimeout(() => { try{ f.focus({ preventScroll:true }); }catch(e){} }, 30);
+}
+function auSay(t, err){ AU.msg = t; AU.err = !!err; const m = $("auMsg"); if(m){ m.textContent = t; m.className = "amsg" + (err ? " err" : ""); } }
+// 送れなかったときの言い方：上限に当たったときは「混み合っています」
+const auSendErr = e => (e && (e.status === 429 || /rate limit|too many/i.test(e.message || ""))) ? "いま登録が混み合っています。1時間ほどあとで試してください。" : "送れませんでした。少し待ってからもう一度試してください。";
+// 登録していないメールでログインしようとしたとき（Supabase は shouldCreateUser:false のとき、この形で断る）
+const auNoUser = e => !!e && (e.code === "otp_disabled" || e.code === "user_not_found" || /signups? not allowed|user not found/i.test(e.message || ""));
+async function auSend(create){
+  const email = String(($("auEmail") && $("auEmail").value) || AU.email).trim(); AU.email = email;
+  const w = auWait(); if(w > 0){ auSay(`コードは1分に1回まで送れます。あと${w}秒待ってください。`, true); return; }
+  if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){ auSay("メールアドレスを確かめてください。", true); return; }
+  if(!sb){ auSay("サーバーにつながっていません。開き直してください。", true); return; }
+  if(captchaOn() && !AU_CAP.token){ auSay("確認の表示が出ていれば、それを済ませてからもう一度押してください。", true); initAuthCaptcha(); return; }
+  AU.busy = true; const b = document.querySelector('#auFoot .cta'); if(b) b.disabled = true;
+  let error = null;
+  try{ ({ error } = await sb.auth.signInWithOtp({ email, options:{ shouldCreateUser: !!create, emailRedirectTo: location.origin + location.pathname, ...(captchaOn() ? { captchaToken: AU_CAP.token } : {}) } })); }catch(e){ error = e; }
+  AU.busy = false; resetAuthCaptcha();
+  if(error){
+    if(!create && auNoUser(error)){ track("login", "nouser"); AU.step = "nouser"; AU.msg = ""; authRender(); return; }
+    if(b) b.disabled = false; auSay(auSendErr(error), true); return; }
+  LOGIN_GUARD.set("sentAt", Date.now());
+  if(create) AU.started = Date.now();
+  track(create ? "signup" : "login", "sent");
+  AU.step = "code"; AU.code = ""; AU.msg = ""; authRender();
+}
+async function auVerify(){
+  const token = AU.code.trim();
+  if(!/^\d{6,10}$/.test(token) || (OTP_LEN && token.length !== OTP_LEN)){ auSay("メールに届いた数字のコードを入れてください。", true); return; }
+  const fail = LOGIN_GUARD.get("codeFail") || { n:0, until:0 };
+  if(fail.until > Date.now()){ auSay(`コードの入力が続けて違ったため、少し休みます（あと${Math.ceil((fail.until - Date.now()) / 60000)}分）。`, true); return; }
+  AU.busy = true; authRender();
+  let res = null; try{ res = await sb.auth.verifyOtp({ email:AU.email, token, type:"email", ...(captchaOn() && AU_CAP.token ? { options:{ captchaToken: AU_CAP.token } } : {}) }); }catch(e){ res = { error:e }; }
+  AU.busy = false;
+  if(!res || res.error){
+    const n = fail.until > 0 && fail.until <= Date.now() ? 1 : fail.n + 1;
+    LOGIN_GUARD.set("codeFail", n >= 5 ? { n:0, until: Date.now() + 10 * 60000 } : { n, until:0 });
+    AU.code = ""; authRender(); auSay("コードが違うか、期限が切れています。もう一度コードを送ってください。", true); return; }
+  LOGIN_GUARD.set("codeFail", { n:0, until:0 });
+  const u = (res.data && (res.data.user || (res.data.session && res.data.session.user))) || user;
+  if(u && (!user || user.id !== u.id)){ user = u; CO = null; await reload(); flushQueue(true); }   // ふつうはログインの知らせ（onAuthStateChange）が先に来て読み込む
+  try{ localStorage.setItem("soramemo.onboarded", "1"); }catch(e){}
+  const p = await loadProfile(true);
+  if(AU.flow === "signup"){
+    const made = Date.parse((u && u.created_at) || ""), old = (made && made < AU.started - 120000) || !!(p && (p.agreed_at || p.display_name));
+    track("signup", old ? "exists" : "verified");
+    if(old){ AU.step = "exists"; authRender(); return; }
+    if(u) auSetPending(u.id); AU.name = ""; AU.step = "name"; authRender(); return; }
+  track("login", "code");
+  if(needsConsent(p)){ AU.flow = "gate"; AU.step = "terms"; AU.agree = false; authRender(); return; }
+  authClose(); authAfterLoad();
+}
+async function auFinish(){
+  auSetPending(""); authClose();
+  try{ localStorage.setItem("soramemo.onboarded", "1"); localStorage.setItem("soramemo.welcome", user ? user.id : "1"); }catch(e){}
+  track("signup", "done:" + (PROFILE && PROFILE.persona || "unanswered"));
+  if(currentView() !== "home") goTab("home");
+  renderWelcome(); renderPersonaCard(); updateAuthUI();
+}
+document.addEventListener("input", e => {
+  if(!$("dAuth").open) return;
+  if(e.target.id === "auCode"){ const v = e.target.value.replace(/\D/g, "").slice(0, OTP_LEN || 10); AU.code = v;
+    const pos = v.length; authRender(); const i = $("auCode"); if(i){ i.focus(); try{ i.setSelectionRange(pos, pos); }catch(_){} }
+    if(OTP_LEN && v.length === OTP_LEN && !AU.busy) auVerify(); return; }   // けた数が決まっているときは、全部入れたら自動で確かめる
+  if(e.target.id === "auName"){ AU.name = e.target.value; const t = AU.name.trim(), ok = nameOk(AU.name);
+    $("auNameN").textContent = [...t].length; $("auPrev").textContent = t || "（まだ入っていません）"; $("auAv").textContent = t ? [...t][0] : "そ";
+    const b = document.querySelector('#auFoot .cta'); if(b) b.disabled = !ok;
+    auSay(/@/.test(t) ? "メールアドレスは入れないでください。" : [...t].length > 20 ? "20文字までにしてください。" : "", !!t && !ok); return; }
+  if(e.target.id === "auEmail") AU.email = e.target.value;
+});
+document.addEventListener("change", e => { if(e.target.id === "auAgree"){ AU.agree = e.target.checked; const b = document.querySelector('#auFoot .cta'); if(b) b.disabled = !AU.agree; if(AU.agree) auSay(""); } });
+document.addEventListener("keydown", e => { if(e.key !== "Enter" || !$("dAuth").open) return; const id = e.target.id;
+  if(id === "auEmail"){ e.preventDefault(); auSend(AU.step === "email"); } else if(id === "auCode"){ e.preventDefault(); auVerify(); }
+  else if(id === "auName"){ e.preventDefault(); const b = document.querySelector('#auFoot .cta'); if(b && !b.disabled) b.click(); } });
+document.addEventListener("click", async e => {
+  const pb = e.target.closest("[data-au-persona]"); if(pb){ AU.persona = pb.dataset.auPersona; document.querySelectorAll("[data-au-persona]").forEach(x => x.setAttribute("aria-checked", String(x === pb))); return; }
+  const b = e.target.closest("[data-au]"); if(!b || !$("dAuth").contains(b)) return;
+  const a = b.dataset.au;
+  if(a === "close"){ track("auth_close", AU.flow + ":" + AU.step); authClose(); return; }
+  if(a === "to-signup"){ AU.flow = "signup"; AU.step = "email"; AU.msg = ""; authRender(); return; }
+  if(a === "to-login"){ AU.flow = "login"; AU.step = "login"; AU.msg = ""; authRender(); return; }
+  if(a === "to-email"){ AU.step = "email"; AU.msg = ""; authRender(); return; }
+  if(a === "to-name"){ AU.step = "name"; AU.msg = ""; authRender(); return; }
+  if(a === "to-survey"){ AU.step = "survey"; AU.msg = ""; authRender(); return; }
+  if(a === "demo"){ track("auth_demo", AU.step); authClose(); try{ localStorage.setItem("soramemo.onboarded", "1"); }catch(_){} if(!demo) $("toggleDemo").click(); return; }
+  if(a === "login-send") return auSend(false);
+  if(a === "signup-send") return auSend(true);
+  if(a === "resend") return auSend(AU.flow === "signup");
+  if(a === "verify") return auVerify();
+  if(a === "exists-go"){ if(needsConsent(PROFILE)){ AU.flow = "gate"; AU.step = "terms"; AU.agree = false; authRender(); } else { authClose(); authAfterLoad(); } return; }
+  if(a === "name-next"){
+    if(!nameOk(AU.name)) return;
+    if(AU.flow === "rename"){ AU.busy = true; authRender(); const ok = await saveProfile({ display_name:AU.name.trim() }); AU.busy = false;
+      if(!ok){ authRender(); auSay("保存できませんでした。電波のよい場所でもう一度試してください。", true); return; }
+      track("profile", "rename"); authClose(); renderMyPage(); renderWelcome(); return; }
+    AU.step = "survey"; AU.msg = ""; authRender(); return; }
+  if(a === "survey-next" || a === "survey-skip"){
+    const p = a === "survey-skip" || !AU.persona ? "unanswered" : AU.persona; AU.persona = p;
+    AU.busy = true; authRender();
+    const ok = await saveProfile({ display_name:AU.name.trim(), persona:p }); AU.busy = false;
+    if(!ok){ authRender(); auSay("保存できませんでした。電波のよい場所でもう一度試してください。", true); return; }
+    // 答えで最初の構成を決める。「あとで決める」は気軽の構成で始める（端末にも「選んだ」と残さない＝あとで合う構成を勧められる）
+    if(p !== "unanswered") setPersona(p, "server"); else if(PERSONA !== "casual"){ setPersona("casual", "server"); try{ localStorage.removeItem(PERSONA_KEY); }catch(_){} }
+    track("signup", "persona:" + p);
+    AU.step = "terms"; AU.agree = false; AU.msg = ""; authRender(); return; }
+  if(a === "agree"){
+    const cb = $("auAgree"); if(!cb || !cb.checked){ auSay("同意するには、チェックを入れてください。", true); return; }
+    AU.busy = true; authRender();
+    let r = null; try{ r = await sb.rpc("agree_terms", { p_terms_version:TERMS_VER, p_privacy_version:PRIVACY_VER }); }catch(err){ r = { error:err }; }
+    AU.busy = false;
+    if(!r || r.error){ authRender(); auSay("記録できませんでした。電波のよい場所でもう一度試してください。", true); return; }
+    PROFILE = Object.assign({}, PROFILE || {}, { terms_version:TERMS_VER, privacy_version:PRIVACY_VER, agreed_at:(r.data && r.data.agreed_at) || new Date().toISOString() });
+    track("terms", AU.flow === "gate" ? "agree_again" : "agree");
+    if(AU.flow === "signup"){ AU.step = "location"; AU.msg = ""; authRender(); return; }
+    authClose(); renderWelcome(); return; }
+  if(a === "disagree"){
+    track("terms", "disagree:" + AU.flow); auSetPending("");
+    try{ await sb.auth.signOut(); }catch(_){}
+    user = null; CO = null; PLUS = false; PROFILE = null; PROFILE_UID = null; await reload();
+    AU.flow = "login"; AU.step = "login"; authRender();
+    auSay("同意いただけなかったため、ログアウトしました。同意するまでは記録をサーバーに保存できません。登録しなくてもデモで試せます。", true); return; }
+  if(a === "loc-allow"){
+    track("signup", "loc_allow");
+    if(navigator.geolocation){ AU.busy = true; authRender();
+      await new Promise(res => { let done = false; const fin = () => { if(!done){ done = true; res(); } };
+        try{ navigator.geolocation.getCurrentPosition(fin, fin, { enableHighAccuracy:false, timeout:15000, maximumAge:600000 }); }catch(_){ fin(); } setTimeout(fin, 16000); });
+      AU.busy = false; }
+    return auFinish(); }
+  if(a === "loc-later"){ track("signup", "loc_later"); return auFinish(); }
+});
+// ロボット除け：登録の画面にも1つ置く（ホームのログイン欄とは別の確認）
+const AU_CAP = { token:null, widget:null };
+async function initAuthCaptcha(){
+  if(!captchaOn() || AU_CAP.widget !== null) return;
+  try{ await loadScript(TURNSTILE_JS); }catch(e){ return; }
+  if(!window.turnstile || AU_CAP.widget !== null || !$("dAuth").open) return;
+  AU_CAP.widget = window.turnstile.render("#auCap", { sitekey: SORAMEMO_CONFIG.turnstileSiteKey, language:"ja", appearance:"interaction-only",
+    callback: t => { AU_CAP.token = t; }, "expired-callback": () => { AU_CAP.token = null; }, "error-callback": () => { AU_CAP.token = null; } });
+}
+function resetAuthCaptcha(){ AU_CAP.token = null; try{ if(window.turnstile && AU_CAP.widget !== null) window.turnstile.reset(AU_CAP.widget); }catch(e){} }
+// ホーム：登録した直後だけの「ようこそ」カード（答えた使い方に合わせて、最初にすることを1つだけ）
+function renderWelcome(){
+  const box = $("welcomeCard"); if(!box) return;
+  let w = ""; try{ w = localStorage.getItem("soramemo.welcome") || ""; }catch(e){}
+  if(!w || !SERVER || !user || demo || (w !== "1" && w !== user.id)){ box.hidden = true; return; }
+  const nm = myName(), P = PROFILE && PROFILE.persona;
+  const tip = P === "spot" ? "運用のタブで、いま使っている滑走路と、これから来る機体が見られます。空港の範囲の中で半券を切ると、印も押せます。"
+    : P === "shugyo" ? "修行のタブで、今年のポイントの進みが見られます。空港の範囲の中で半券を切ると、最初の印が押せます。"
+    : "空港の範囲の中で搭乗券の半券を切ると、最初の印が押せます。";
+  box.innerHTML = `<div><b>ようこそ${nm ? "、" + esc(nm) + "さん" : ""}</b><small>${tip}</small></div><button class="x" type="button" id="welcomeX" aria-label="閉じる">×</button>`;
+  box.hidden = false;
+}
+document.addEventListener("click", e => { if(e.target.closest("#welcomeX")){ try{ localStorage.removeItem("soramemo.welcome"); }catch(_){} $("welcomeCard").hidden = true; track("welcome", "close"); } });
+$("toSignup").onclick = () => { AU.email = $("email").value.trim(); authOpen("signup", "email"); };
+$("loginDemo").onclick = () => { if(!demo) $("toggleDemo").click(); };
+$("nameEdit").onclick = () => authOpen("rename", "name");
+
 /* ---------- オフライン用の仕組みと、新しい版のお知らせ ---------- */
 $("appVer").textContent = "版 " + APP_VERSION;
 if("serviceWorker" in navigator && window.isSecureContext && location.protocol !== "file:" && window.top === window.self){
@@ -11330,7 +11747,7 @@ function syncNotices(){
 }
 const noticeObs = new MutationObserver(syncNotices); NOTICES.forEach(id => noticeObs.observe($(id), { attributes:true, attributeFilter:["hidden"] }));
 syncNotices();
-$("mpLogin").onclick = () => { $("dSettings").close(); goTab("home"); $("loginBox").hidden = false; $("loginBox").scrollIntoView({ block:"center" }); $("email").focus(); };
+$("mpLogin").onclick = () => { $("dSettings").close(); authOpen("login"); };
 </script>
 </body>
 </html>
