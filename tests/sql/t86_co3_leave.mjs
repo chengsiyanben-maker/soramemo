@@ -78,7 +78,9 @@ check('ブロック買い取り：今月の残りを返す', r.refund === expect
 check('B の資金：それまでの稼ぎ＋返金', Math.abs((await cash(B)) - c0.B - expectRefund - pendB) <= 3, { d: (await cash(B)) - c0.B, expectRefund, pendB });
 const nB = (await db.query(`select kind, title, meta from co3_news where user_id = '${B}' and ref = 'leave-cs-${csB}'`)).rows[0];
 check('B に知らせる（相手の名前は書かない）', nB && nB.title.includes('共同運航が終わりました') && nB.meta.includes(String(expectRefund)) && !nB.title.includes('Airline'), nB);
-check('ニュースの種類：表の決まりに partner が足されるまでは event', nB && nB.kind === 'event', nB);
+// データ担当の移行（co3_news_kind_check に 'partner'）が入っていれば partner、入っていなければ event
+const hasPartner = String(await q1(`select pg_get_constraintdef(oid) from pg_constraint where conname = 'co3_news_kind_check'`)).includes("'partner'");
+check('ニュースの種類：表の決まりに partner があれば partner、なければ event', nB && nB.kind === (hasPartner ? 'partner' : 'event'), nB);
 check('D（運航会社）にも知らせる', Number(await q1(`select count(*) from co3_news where user_id = '${D}' and title like '%共同運航が終わりました%'`)) === 1, null);
 check('保留の申し込みは知らせない', Number(await q1(`select count(*) from co3_news where user_id = '${E}'`)) === 0, null);
 

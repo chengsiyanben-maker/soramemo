@@ -1,6 +1,6 @@
 // POST /functions/v1/delete-account  body: { confirm: "削除" }
 // 本人のアカウントと、すべての記録（チェックイン・フライト・記録帳・会社・機材・施設・加入情報）を消す。
-// そらメモ＋に加入中なら、Stripe の定期支払いを先に止める。各表は auth.users を on delete cascade で参照している。
+// まずエアライン経営の精算（co3_leave_settle）をし、失敗したら消さない。そらメモ＋に加入中なら、次に Stripe の定期支払いを止める。各表は auth.users を on delete cascade で参照している。
 import { admin, CORS, json, rateOk, STRIPE_READY, stripe, userFrom } from "../_shared/plus.ts";
 
 Deno.serve(async (req) => {
@@ -14,6 +14,11 @@ Deno.serve(async (req) => {
   if (body.confirm !== "削除") return json({ error: "確認の文字が違います。" }, 400);
 
   try {
+    // エアライン経営の相手（出資・共同運航・アライアンスの仲間）が損をしないように、消す前に精算する（2回目は何もしない）。
+    // 定期支払いを止めるより先にする：精算で失敗したときに、支払いだけ止まってアカウントが残ることがないように
+    // 失敗したら削除を止める（精算のあとに auth.users の on delete cascade で経営の表が消えるのが正しい順番）
+    const { error: settleError } = await admin.rpc("co3_leave_settle", { p_uid: user.id });
+    if (settleError) throw settleError;
     const { data: sub } = await admin.from("subscriptions").select("status, provider_subscription").eq("user_id", user.id).maybeSingle();
     if (sub?.provider_subscription && ["active", "trialing", "past_due", "unpaid", "incomplete"].includes(sub.status)) {
       if (!STRIPE_READY) return json({ error: "定期支払いを止められませんでした。時間をおいて試してください。" }, 500);
