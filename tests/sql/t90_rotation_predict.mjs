@@ -83,12 +83,27 @@ check('特別塗装機の予定の便を先に（出発の空港が合うとき�
 await db.exec('set role anon'); const v2 = (await q(`select public.predict_rotation_v2('JA73S9') as p`)).p; await db.exec('reset role');
 check('画面向け：予想の印と出どころ', v2.estimate === true && v2.known.callsign === 'SKY1' && v2.next[0]?.callsign === 'SKY2' && v2.next[0].src === 'learn', v2);
 
+// しきい値を上げた学ぶ予想（learn_hi）：2回しか見ていない便は、learn は出し、learn_hi は出さない（今の予想も3回未満なので出さない）
+await db.exec(`insert into public.reg_legs (reg, callsign, day, type, first_at, last_at, dep, arr) values
+  ('JA02NW', 'NEW1', ${T} - 2, 'DH8D', ${at(2, '09:00')}, ${at(2, '10:00')}, 'OKD', 'MMB'), ('JA02NW', 'NEW2', ${T} - 2, 'DH8D', ${at(2, '11:00')}, ${at(2, '12:00')}, 'MMB', 'OKD'),
+  ('JA02NW', 'NEW1', ${T} - 3, 'DH8D', ${at(3, '09:00')}, ${at(3, '10:00')}, 'OKD', 'MMB'), ('JA02NW', 'NEW2', ${T} - 3, 'DH8D', ${at(3, '11:00')}, ${at(3, '12:00')}, 'MMB', 'OKD')`);
+for (const off of [2, 3]) await db.query(`select public.rot_pairs_build(${T} - ${off})`);
+const lo = (await q(`select public.rot_predict('learn', 'JA02NW', ${T}, 'NEW1', 'MMB', '09:00', 1) as p`)).p;
+const hi = (await q(`select public.rot_predict('learn_hi', 'JA02NW', ${T}, 'NEW1', 'MMB', '09:00', 1) as p`)).p;
+const hiS = (await q(`select public.rot_predict('learn_hi', 'JA73S9', ${T}, 'SKY1', 'FUK', '07:00') as p`)).p;
+const lrS = (await q(`select public.rot_predict('learn', 'JA73S9', ${T}, 'SKY1', 'FUK', '07:00') as p`)).p;
+const bad1 = (await q(`select public.rot_predict('nope', 'JA73S9', ${T}, 'SKY1', 'FUK', '07:00') as p`)).p;
+check('learn_hi：2回だけの便は出さない・よく見る便は learn と同じ・知らない方式は空', lo[0]?.callsign === 'NEW2' && lo[0].src === 'learn' && hi.length === 0
+  && JSON.stringify(hiS) === JSON.stringify(lrS) && bad1.length === 0, { lo, hi, hiS, lrS, bad1 });
+
 // 毎晩の採点と、読むだけの SQL が同じ数になる（特別塗装機の機体も前の日に飛んだことにする）
 await db.exec(`insert into public.reg_legs (reg, callsign, day, type, first_at, last_at, dep, arr) values
   ('JA8088', 'JAL400', ${T} - 1, 'B738', ${at(1, '08:00')}, ${at(1, '09:10')}, 'ITM', 'HND'), ('JA8088', 'JAL500', ${T} - 1, 'B738', ${at(1, '12:00')}, ${at(1, '14:30')}, 'HND', 'OKA')`);
 for (let off = 1; off <= 7; off++) await db.query(`select public.rot_eval_day(${T} - ${off})`);
 const ev = (await db.query(`select method, k, sum(n)::int as n, sum(predicted)::int as predicted, sum(hit)::int as hit from public.rot_eval group by 1, 2 order by 1, 2`)).rows;
 const learn1 = ev.find(r => r.method === 'learn' && r.k === 1), base1 = ev.find(r => r.method === 'base' && r.k === 1);
+const hi1 = ev.find(r => r.method === 'learn_hi' && r.k === 1);
+check('採点：learn_hi も同じ基準の数で採点し、出す数は learn 以下', hi1 && learn1 && hi1.n === learn1.n && hi1.predicted <= learn1.predicted, ev);
 check('採点：学ぶ予想は今の予想より当たる（この作り物のデータで）', learn1 && base1 && learn1.hit > base1.hit && learn1.n === base1.n, ev);
 
 const bt = fs.readFileSync(new URL('../../docs/pm/rotation-backtest.sql', import.meta.url), 'utf8');
@@ -114,6 +129,18 @@ const lvr = out.find(r => r['方式'] === 'learn' && r['区分'] === '出どこ�
 check('特別塗装機の予定の便も測れる', lvr && Number(lvr['当たり']) === 1, lvr);
 const kinds = new Set(out.map(r => r['区分']));
 check('区分：全体・会社・機種・羽田発着・出どころ', ['全体', '会社', '機種', '羽田発着', '出どころ'].every(k => kinds.has(k)), [...kinds]);
+
+// 採点を見る読むだけの SQL
+const vw = fs.readFileSync(new URL('../../docs/pm/rotation-eval-view.sql', import.meta.url), 'utf8');
+const vcode = vw.replace(/--.*$/gm, '');
+check('採点を見る SQL：書き込み・表や関数の作成をしない', !/\b(insert|update|delete|create|alter|drop|truncate|grant|revoke|merge|copy)\b/i.test(vcode) && vcode.trim().split(';').filter(s => s.trim()).length === 1);
+await db.exec('begin transaction read only'); const vo = (await db.query(vw)).rows; await db.exec('commit');
+const vall = vo.filter(r => r['区分'] === '全体' && r['何便先'] === 1);
+const vsame = ['base', 'learn', 'learn_hi'].every(m => { const a = vall.find(r => r['方式'] === m), e = ev.find(r => r.method === m && r.k === 1);
+  return a && e && Number(a['基準の数']) === e.n && Number(a['予想を出した数']) === e.predicted && Number(a['当たり']) === e.hit; });
+check('採点を見る SQL：3つの方式が rot_eval と同じ数', vsame && Number(vall[0]['日数']) === 7, vall);
+const vj = await db.query(vw.replace("null::text as carrier", "'JAL'::text as carrier"));
+check('採点を見る SQL：会社で絞れる', vj.rows.length > 0 && vj.rows.filter(r => r['区分'] === '会社').every(r => r['値'] === 'JAL'), vj.rows.filter(r => r['区分'] === '会社'));
 
 // 権限：記録と採点は運営だけ
 const rls = (await db.query(`select relname, relrowsecurity from pg_class where relname in ('rot_pairs', 'rot_eval')`)).rows;

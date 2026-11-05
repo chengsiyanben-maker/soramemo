@@ -13,6 +13,8 @@
 --
 --   予想は実績と分けて持つ（rot_pairs は reg_legs から作り直せる控え、予想そのものは表に残さず関数で出す）。
 --   rot_eval：毎晩、前の日の分を「前の日の夜の時点の記録だけで予想した」として採点した数（今の予想と学ぶ予想）。
+--     あわせて learn_hi（学ぶ予想のうち、学んだ便を出すしきい値だけを「3回以上・4割以上」に上げたもの）も採点し、
+--     しきい値を上げると「出したうちの当たり率」が戻るかを見られるようにする（画面には使わない）。
 --   rot_pairs は adsb.lol（ODbL）由来だけで作る。ODPT（時刻表・特別塗装機の予定）は予想を出すときに見るだけで、表には混ぜない。
 --   reg_legs・rotation_obs・flight_history は読むだけで、消さない。
 
@@ -38,7 +40,7 @@ revoke all on public.rot_pairs from public, anon, authenticated;
 
 create table if not exists public.rot_eval (
   day       date not null,
-  method    text not null check (method in ('base', 'learn')),   -- base＝今の予想、learn＝学ぶ予想
+  method    text not null check (method in ('base', 'learn', 'learn_hi')),   -- base＝今の予想、learn＝学ぶ予想、learn_hi＝学ぶ予想でしきい値を上げたもの
   k         smallint not null check (k between 1 and 4),         -- 何便先
   carrier   text not null check (length(carrier) <= 3),          -- 呼び出し符号の頭3文字（JAL・ANA・SKY など）
   rtype     text not null check (length(rtype) <= 8),            -- 機体の型（分からないときは '?'）
@@ -104,7 +106,7 @@ $$;
 revoke all on function public.rot_tt_ok(date, text, text) from public, anon, authenticated;
 
 -- 予想の本体。p_day の前の日までの記録だけを使う（過去の日を渡せば、その日の前の夜の時点の予想になる）
---   p_mode：'base'＝今の予想と同じ決め方、'learn'＝学ぶ予想
+--   p_mode：'base'＝今の予想と同じ決め方、'learn'＝学ぶ予想、'learn_hi'＝学ぶ予想で、学んだ便を出すのを3回以上・4割以上に上げたもの（採点用）
 --   返す：[{callsign, dep, arr, time, seen, share, src}]（4便先まで）
 create or replace function public.rot_predict(p_mode text, p_reg text, p_day date, p_cs text, p_arr text, p_tod time, p_steps int default 4)
 returns jsonb language plpgsql stable security definer set search_path = public as $$
@@ -112,15 +114,16 @@ declare
   steps jsonb := '[]'::jsonb; seen text[] := array[p_cs]; prev text := p_cs; a text := p_arr; t time := p_tod;
   rt text; dw int := extract(dow from p_day)::int; i int := 0; lim int := least(greatest(coalesce(p_steps, 4), 1), 4);
   v_cs text; v_dep text; v_arr text; v_tod time; v_n int; v_share numeric; v_src text;
+  min_n int := case when p_mode = 'learn_hi' then 3 else 2 end; min_share numeric := case when p_mode = 'learn_hi' then 0.4 else 0.3 end;
 begin
-  if p_mode not in ('base', 'learn') or p_cs is null then return steps; end if;
-  if p_mode = 'learn' then
+  if p_mode is null or p_mode not in ('base', 'learn', 'learn_hi') or p_cs is null then return steps; end if;
+  if p_mode <> 'base' then
     select mode() within group (order by type) into rt from public.reg_legs
     where reg = p_reg and day between p_day - 42 and p_day and type is not null;
   end if;
   while i < lim loop
     v_cs := null; v_src := null;
-    if p_mode = 'learn' then
+    if p_mode <> 'base' then
       -- 1. 特別塗装機の予定の便
       select case left(lp.flight, 2) when 'JL' then 'JAL' else 'ANA' end || ltrim(substr(lp.flight, 3), '0'), lp.dep, lp.arr,
              (lp.std at time zone 'Asia/Tokyo')::time, null::int, null::numeric
@@ -149,7 +152,7 @@ begin
             and public.rot_type_ok(p_day, c.cs, rt) and public.rot_tt_ok(p_day, c.cs, a)
         ) z
         order by z.score desc, z.cs limit 1;
-        if v_cs is not null and (v_n < 2 or v_share < 0.3) then v_cs := null; end if;
+        if v_cs is not null and (v_n < min_n or v_share < min_share) then v_cs := null; end if;
         if v_cs is not null then v_src := 'learn'; end if;
       end if;
     end if;
@@ -214,7 +217,7 @@ begin
     where a.pick <= greatest(coalesce(p_max, 1500), 1)
   ), pred as materialized (
     select a.reg, a.i, a.cs, a.rt, m.method, public.rot_predict(m.method, a.reg, p_day, a.cs, a.arr, a.tod, 4) as pj
-    from anc a cross join (values ('base'), ('learn')) m(method)
+    from anc a cross join (values ('base'), ('learn'), ('learn_hi')) m(method)
   ), sc as (
     select p.method, k.k, left(p.cs, 3) as carrier, coalesce(p.rt, '?') as rtype, (b.dep = 'HND' or b.arr = 'HND') is true as hnd,
            coalesce(p.pj -> (k.k - 1) ->> 'src', 'none') as src, p.pj -> (k.k - 1) ->> 'callsign' as guess, b.cs as truth
@@ -230,13 +233,14 @@ end $$;
 revoke all on function public.rot_eval_day(date, int) from public, anon, authenticated;
 
 -- 毎晩：前の日と前の前の日のつながりを作り直し（空港は rwy-learn があとから入れるため）、前の日を採点する
+--   本番は小さいプランなので、採点は1日500便まで（3通りの予想で1,500回）。どれも索引で引く形で、一時ファイルを使う大きな並べ替えはしない
 create or replace function public.rot_nightly() returns jsonb
 language plpgsql security definer set search_path = public as $$
 declare d date := (now() at time zone 'Asia/Tokyo')::date - 1; a int; b int; e int;
 begin
   a := public.rot_pairs_build(d - 1);
   b := public.rot_pairs_build(d);
-  e := public.rot_eval_day(d, 1500);
+  e := public.rot_eval_day(d, 500);
   return jsonb_build_object('day', d, 'pairs_prev', a, 'pairs', b, 'eval_rows', e);
 end $$;
 revoke all on function public.rot_nightly() from public, anon, authenticated;
