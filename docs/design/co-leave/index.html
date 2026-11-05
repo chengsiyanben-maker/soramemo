@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>退会のときの経営｜そらメモの画面案</title>
+<style>
+:root{
+  --gothic:"Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic UI","Yu Gothic","Meiryo","Noto Sans JP","Noto Sans CJK JP",system-ui,sans-serif;
+  --bg:#F4F5F7; --card:#FFFFFF; --ink:#374151; --ink-strong:#1F2937; --sub:#6B7280; --mute:#9CA3AF;
+  --track:#EEF0F3; --pill:rgba(17,24,39,.05);
+  --shadow:0 1px 2px rgba(17,24,39,.04),0 10px 30px -8px rgba(17,24,39,.10),inset 0 0 0 1px rgba(17,24,39,.07);
+  --jal:#C8102E; --ana:#1C4FA0; --ana-wash:#EEF3FB; --cta:#1F2937; --cta-text:#FFFFFF;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){
+  --bg:#0B0D10; --card:#16191F; --ink:#E5E7EB; --ink-strong:#F3F4F6; --sub:#A7B0BC; --mute:#8B95A3;
+  --track:#2A2F37; --pill:rgba(255,255,255,.07);
+  --shadow:0 12px 26px -16px rgba(0,0,0,.7),inset 0 0 0 1px rgba(255,255,255,.06);
+  --jal:#FF5A6E; --ana:#6EA0FF; --ana-wash:rgba(110,160,255,.12); --cta:#F3F4F6; --cta-text:#0B0D10;
+}}
+:root[data-theme=dark]{
+  --bg:#0B0D10; --card:#16191F; --ink:#E5E7EB; --ink-strong:#F3F4F6; --sub:#A7B0BC; --mute:#8B95A3;
+  --track:#2A2F37; --pill:rgba(255,255,255,.07);
+  --shadow:0 12px 26px -16px rgba(0,0,0,.7),inset 0 0 0 1px rgba(255,255,255,.06);
+  --jal:#FF5A6E; --ana:#6EA0FF; --ana-wash:rgba(110,160,255,.12); --cta:#F3F4F6; --cta-text:#0B0D10;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--gothic);font-size:16px;line-height:1.7}
+.wrap{max-width:900px;margin:0 auto;padding:32px 16px 64px}
+h1{font-size:24px;color:var(--ink-strong);margin:0 0 6px;font-weight:800}
+.lead{color:var(--sub);font-size:14px;margin:0 0 32px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:28px}
+.phone{background:var(--bg);border-radius:32px;box-shadow:var(--shadow);padding:22px 18px 26px}
+.tag{display:inline-block;font-size:12px;font-weight:700;color:var(--sub);background:var(--pill);border-radius:999px;padding:4px 12px;margin-bottom:12px}
+.tag.new{color:var(--ana);background:var(--ana-wash)}
+h2{font-size:18px;color:var(--ink-strong);margin:0 0 4px;font-weight:800}
+.hint{font-size:12px;color:var(--mute);margin:4px 0 16px}
+.card{background:var(--card);border-radius:20px;box-shadow:var(--shadow);padding:16px 18px;margin-bottom:14px}
+.nhd{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px}
+.nhd b{color:var(--ink-strong)} .nhd small{color:var(--mute);font-size:11px}
+.nit{padding:10px 0}
+.nit b{display:block;font-size:14px;color:var(--ink-strong);font-weight:700;line-height:1.5}
+.nit small{color:var(--mute);font-size:12px}
+.row{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:8px 0}
+.row span{font-size:14px}
+.row b{font-size:22px;font-weight:800;color:var(--ink-strong);white-space:nowrap}
+.row b small{font-size:12px;font-weight:600;color:var(--mute);margin-left:2px}
+.lst{margin:0;padding:0;list-style:none}
+.lst li{font-size:14px;padding:6px 0 6px 18px;position:relative}
+.lst li::before{content:"";position:absolute;left:2px;top:15px;width:6px;height:6px;border-radius:999px;background:var(--ana)}
+.cta{display:block;width:100%;border:0;border-radius:999px;background:var(--jal);color:#fff;font:inherit;font-size:15px;font-weight:800;padding:15px;margin-top:6px}
+.ghost{display:block;width:100%;border:0;background:var(--pill);border-radius:999px;color:var(--sub);font:inherit;font-size:14px;font-weight:700;padding:13px;margin-top:10px}
+.memo{font-size:13px;color:var(--sub);margin-top:28px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>退会した人がいたときの経営の画面案</h1>
+  <p class="lead">本人の確認待ち。まだアプリには入れていません。左はいまの「会社の新聞」の部品のまま（画面の変更なし）、右は退会の確認に足す案です。</p>
+  <div class="grid">
+
+    <section class="phone" aria-label="残った人に届く知らせ">
+      <span class="tag">変更なし・見本</span>
+      <h2>残った人に届く知らせ</h2>
+      <p class="hint">会社の新聞にいつもの1行として出ます。退会した人の会社名は書きません。</p>
+      <div class="card">
+        <div class="nhd"><b>みなみ航空 新聞</b><small>ゲームの中の出来事</small></div>
+        <div class="nit"><b>共同運航の相手の会社が退会し、羽田⇄新千歳の共同運航が終わりました</b><small>11月5日 ・ 今月のブロック買い取りの残り 3,595 を返金</small></div>
+        <div class="nit"><b>出資していた会社が退会し、出資を引き上げました</b><small>11月5日 ・ 戻ったお金 54,013</small></div>
+        <div class="nit"><b>アライアンス「みなみの空連合」のリーダーを引き継ぎました</b><small>11月5日 ・ 前のリーダーの会社が退会したため</small></div>
+      </div>
+    </section>
+
+    <section class="phone" aria-label="退会の確認に足す案">
+      <span class="tag new">案・確認待ち</span>
+      <h2>アカウントを削除する前に</h2>
+      <p class="hint">経営の会社があって、ほかの人とつながっているときだけ出します。</p>
+      <div class="card">
+        <div class="row"><span>共同運航</span><b>3<small>件</small></b></div>
+        <div class="row"><span>出資（出している・受けている）</span><b>2<small>件</small></b></div>
+        <div class="row"><span>アライアンス</span><b style="font-size:16px">リーダー</b></div>
+      </div>
+      <div class="card">
+        <ul class="lst">
+          <li>共同運航はすべて終わり、相手に知らせます。今月分を前払いした相手には残りを返します</li>
+          <li>あなたの会社に出資した人には、出したお金が戻ります</li>
+          <li>アライアンスのリーダーは、会社の価値がいちばん高い仲間が引き継ぎます</li>
+        </ul>
+      </div>
+      <button class="cta" type="button">削除に進む</button>
+      <button class="ghost" type="button">やめる</button>
+    </section>
+  </div>
+  <p class="memo">右の画面はマイページ（アカウントの削除）の中にあるため、作るのは画面の担当。経営からは件数を返す関数（co_state の cs・invest・ally をそのまま使える）を出すだけで足ります。</p>
+</div>
+</body>
+</html>
