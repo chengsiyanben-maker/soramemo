@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>一覧｜共有画像の「非公式アプリ」案</title>
+<style>
+:root{
+  --gothic:"Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic UI","Yu Gothic","Meiryo","Noto Sans JP","Noto Sans CJK JP",system-ui,sans-serif;
+  --bg:#F4F5F7; --card:#FFFFFF; --ink:#374151; --ink-strong:#1F2937; --sub:#6B7280; --mute:#9CA3AF;
+  --pill:rgba(17,24,39,.05); --on:#1F2937; --on-text:#FFFFFF;
+  --shadow:0 1px 2px rgba(17,24,39,.04),0 10px 30px -8px rgba(17,24,39,.10),inset 0 0 0 1px rgba(17,24,39,.07);
+  --jal:#C8102E; --ana:#1C4FA0;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){
+  --bg:#0B0D10; --card:#16191F; --ink:#E5E7EB; --ink-strong:#F3F4F6; --sub:#A7B0BC; --mute:#8B95A3;
+  --pill:rgba(255,255,255,.07); --on:#F3F4F6; --on-text:#0B0D10;
+  --shadow:0 12px 26px -16px rgba(0,0,0,.7),inset 0 0 0 1px rgba(255,255,255,.06);
+  --jal:#FF5A6E; --ana:#6EA0FF;
+}}
+:root[data-theme=dark]{
+  --bg:#0B0D10; --card:#16191F; --ink:#E5E7EB; --ink-strong:#F3F4F6; --sub:#A7B0BC; --mute:#8B95A3;
+  --pill:rgba(255,255,255,.07); --on:#F3F4F6; --on-text:#0B0D10;
+  --shadow:0 12px 26px -16px rgba(0,0,0,.7),inset 0 0 0 1px rgba(255,255,255,.06);
+  --jal:#FF5A6E; --ana:#6EA0FF;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--gothic);font-size:16px;line-height:1.7;-webkit-text-size-adjust:100%}
+.phone{max-width:420px;margin:0 auto;padding:28px 20px 36px}
+.eyebrow{font-size:12px;font-weight:700;color:var(--sub);letter-spacing:.08em;margin:0 0 8px}
+h1{font-size:26px;line-height:1.35;color:var(--ink-strong);margin:0;font-weight:800}
+.lead{color:var(--sub);font-size:14px;margin:10px 0 0}
+.bar{display:flex;flex-wrap:wrap;gap:8px;margin-top:22px}
+.bar small{width:100%;font-size:11px;color:var(--mute);font-weight:700;margin:0 0 -2px 4px}
+.pl{border:0;border-radius:999px;background:var(--pill);color:var(--ink-strong);font:inherit;font-size:13px;font-weight:700;padding:8px 15px;cursor:pointer}
+.pl[aria-pressed=true]{background:var(--on);color:var(--on-text)}
+.card{background:var(--card);border-radius:22px;box-shadow:var(--shadow);padding:14px;margin-top:20px}
+.card img{display:block;width:100%;border-radius:12px}
+.cap{font-size:12px;color:var(--mute);margin:10px 4px 0}
+.cap b{color:var(--ink-strong);font-size:13px}
+.ann{margin:22px 0 0;font-size:12px;line-height:1.65;background:#FFF8D6;color:#5A4A12;padding:12px 14px;border-radius:16px}
+.ann b{display:block;font-size:11px}
+.ann ul{margin:4px 0 0;padding-left:1.2em}
+.phone{max-width:none;padding:32px 24px}
+.grid{display:flex;gap:28px;overflow-x:auto;padding:8px 4px 24px;scroll-snap-type:x mandatory}
+.it{flex:none;width:300px;scroll-snap-align:start}
+.it h2{font-size:15px;color:var(--ink-strong);margin:0;font-weight:800}
+.it p{font-size:12px;color:var(--mute);margin:2px 0 10px}
+.frame{width:300px;height:612px;border-radius:34px;overflow:hidden;box-shadow:var(--shadow);background:var(--bg)}
+.frame iframe{width:375px;height:765px;border:0;transform:scale(.8);transform-origin:0 0}
+.it a{font-size:12px;color:var(--sub);font-weight:700}
+.sum{max-width:640px}</style>
+</head>
+<body>
+<main class="phone">
+<p class="eyebrow">画面案 ・ アプリにはまだ入っていません</p>
+<h1>共有画像に「非公式アプリ」を入れる案</h1>
+<p class="lead sum">利用者が共有した画像が、そのまま告知の代わりにもなるように。どの共有画像にも、アプリ名の横に小さく「非公式アプリ」、下に soramemo.jp を入れます（案A）。横にスクロールして見られます。各画面の「いま／案A」で見比べられます。</p>
+<div class="grid" style="margin-top:28px"><div class="it"><h2>印</h2><p>いちばん多く共有される</p><div class="frame"><iframe src="01-stamp.html" title="印" loading="lazy"></iframe></div><p style="margin-top:8px"><a href="01-stamp.html">この画面だけ開く</a></p></div><div class="it"><h2>記章と称号つきの印</h2><p>称号とぶつからないか</p><div class="frame"><iframe src="02-stamp-rank.html" title="記章と称号つきの印" loading="lazy"></iframe></div><p style="margin-top:8px"><a href="02-stamp-rank.html">この画面だけ開く</a></p></div><div class="it"><h2>地図</h2><p>マイページから</p><div class="frame"><iframe src="03-map.html" title="地図" loading="lazy"></iframe></div><p style="margin-top:8px"><a href="03-map.html">この画面だけ開く</a></p></div><div class="it"><h2>写真に押した印</h2><p>左上を小さなピルに</p><div class="frame"><iframe src="04-photo.html" title="写真に押した印" loading="lazy"></iframe></div><p style="margin-top:8px"><a href="04-photo.html">この画面だけ開く</a></p></div><div class="it"><h2>1年のまとめ など</h2><p>#そらメモ の横に URL</p><div class="frame"><iframe src="05-year.html" title="1年のまとめ など" loading="lazy"></iframe></div><p style="margin-top:8px"><a href="05-year.html">この画面だけ開く</a></p></div><div class="it"><h2>共有の画面と送る文</h2><p>文にも非公式と URL</p><div class="frame"><iframe src="06-sheet.html" title="共有の画面と送る文" loading="lazy"></iframe></div><p style="margin-top:8px"><a href="06-sheet.html">この画面だけ開く</a></p></div><div class="it"><h2>置き場所の比べ</h2><p>案A と案B</p><div class="frame"><iframe src="07-compare.html" title="置き場所の比べ" loading="lazy"></iframe></div><p style="margin-top:8px"><a href="07-compare.html">この画面だけ開く</a></p></div></div>
+</main>
+</body>
+</html>
