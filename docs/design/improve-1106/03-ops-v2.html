@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>運用（風が届いたとき）｜そらメモ 改善案 2版</title>
+<title>運用（風がまだ届いていないとき）｜そらメモ 改善案 2版</title>
 <style>
 :root{
   --gothic:"Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic UI","Yu Gothic","Meiryo","Noto Sans JP","Noto Sans CJK JP",system-ui,sans-serif;
@@ -85,6 +85,7 @@ body{background:var(--bg);color:var(--ink);font-family:var(--gothic);font-size:1
 .it small{display:block;font-size:13px;color:var(--sub);line-height:1.45}
 .it .km{margin-left:auto;text-align:right;font-weight:800;color:var(--strong);font-size:20px;flex:none}
 .it .km small{display:inline;font-size:12px;font-weight:600;color:var(--mute);margin-left:2px}
+.est1{margin:8px 4px 0;font-size:14px;font-weight:700;color:var(--ink)}
 .note{font-size:13px;color:var(--sub);margin:12px 4px 0;line-height:1.55}
 
 </style>
@@ -93,13 +94,13 @@ body{background:var(--bg);color:var(--ink);font-family:var(--gothic);font-size:1
 <main class="phone"><div class="wrap">
 <div class="bar"><span class="ap"><i>HND</i>羽田 ▾</span><span class="ic" style="margin-left:auto" aria-label="くわしい説明">i</span><span class="ic" aria-label="共有"><svg viewBox="0 0 24 24"><path d="M12 15V4"/><path d="m7.5 8.5 4.5-4.5 4.5 4.5"/><path d="M5 13v5.5c0 .8.7 1.5 1.5 1.5h11c.8 0 1.5-.7 1.5-1.5V13"/></svg></span></div>
 <section class="hero" aria-label="いまの運用">
-<div class="top"><span class="lab">いまの運用</span><span class="est" aria-label="風からの予想。押すとほかの向きを選べる">風からの予想<svg class="ico" viewBox="0 0 24 24" style="width:16px;height:16px"><path d="m6 9 6 6 6-6"/></svg></span></div>
-<h2>北風運用</h2><div class="when">22:41 時点 ・ 北の風 12ノット</div>
+<div class="top"><span class="lab">いまの運用</span><span class="est" aria-label="時間帯からの推定。押すとほかの向きを選べる">時間帯からの推定<svg class="ico" viewBox="0 0 24 24" style="width:16px;height:16px"><path d="m6 9 6 6 6-6"/></svg></span></div>
+<h2>北風運用</h2><div class="when">22:41 時点 ・ 深夜の時間帯の向き</div>
 <div class="rw"><div><small>着陸</small><b>34R</b><span>ILS Z</span></div><div><small>離陸</small><b>05</b></div></div>
-<p class="warn">予想で、保証するものではありません。違うときは上のピルで向きを選べます。</p>
 </section>
-<div class="mini"><div class="card"><div class="lab">運用時間</div><div class="num">24<span class="u">時間</span></div></div><div class="card"><div class="lab">今日の定時</div><div class="num">87<span class="u">%</span></div></div></div>
-
+<p class="est1">推定です。実際の運用と違うことがあります。</p>
+<div class="mini one"><div class="card"><div class="lab">運用時間</div><div class="num">24<span class="u">時間</span></div></div></div>
+<div class="card wait"><span class="dotl"></span><div><b>まだ届いていない</b><br>風（気象通報なし）・遅れと欠航・今日の定時（読み込み中）</div></div>
 <div class="subw"><div class="sub"><span class="on">見に行く</span><span>空の道すじ</span><span>定時</span><span>短冊</span><span>撮る</span></div><span class="ic ed" aria-label="並べ替え">✎</span></div>
 <div class="card list">
 <div class="it"><span class="mk">◎</span><div><b>第2ターミナル 展望デッキ</b><small>着陸機の線まで約2km<br>日の入り後</small></div><div class="km">2<small>km</small></div></div>
@@ -110,9 +111,11 @@ body{background:var(--bg);color:var(--ink);font-family:var(--gothic);font-size:1
 </div>
 <nav class="tabs" aria-label="画面の切り替え"><b class=""><svg viewBox="0 0 24 24"><path d="M3.5 10.5 12 4l8.5 6.5"/><path d="M5.5 9v10h4.5v-5.5h4V19h4.5V9"/></svg>ホーム</b><b class=""><svg viewBox="0 0 24 24"><path d="M4 5.5C4 4.7 4.7 4 5.5 4H11v15H5.5c-.8 0-1.5.5-1.5 1.2V5.5Z"/><path d="M20 5.5c0-.8-.7-1.5-1.5-1.5H13v15h5.5c.8 0 1.5.5 1.5 1.2V5.5Z"/></svg>図鑑</b><b class=""><svg viewBox="0 0 24 24"><path d="M10.5 13.5 4 11l1.4-1.4 7 1.1 3.9-3.9c.8-.8 2.1-.8 2.9 0s.8 2.1 0 2.9l-3.9 3.9 1.1 7L15 22l-2.5-6.5-3 3v2.5L8 22.5l-1.3-3.2L3.5 18 5 16.5h2.5Z"/></svg>フライト</b><b class="on"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.5"/><path d="M12 12 18 6"/></svg>運用</b></nav>
 </main>
-<aside class="ann"><b>2版のメモ（本番には出ません）</b><ul><li>風・遅れ・欠航がそろったときの見え方。ピルが「風からの予想」に変わり、風の向きと強さを時刻の横に出す</li>
-<li>今日の定時は、遅れと欠航がそろってから出す。「まだ届いていない」の行は、届いていないものがないときは出さない</li>
-<li>見本の数字（北の風 12ノット・87%）は今の画面にある値の形で、新しいデータは使わない</li></ul></ul></aside>
+<aside class="ann"><b>2版のメモ（本番には出ません）</b><ul><li><b>食い違いをなくした</b>（指摘2）：風が届いていないので、推定のもとを「時間帯からの推定」と出す。今日の定時は遅れと欠航がそろうまで出さず、「まだ届いていない」の行に入れた</li>
+<li><b>推定と断る1行</b>（指摘9・PM の答え）：紺のカードのすぐ下に「推定です。実際の運用と違うことがあります。」を14px・濃いグレー（地の色の上で 9:1 くらい）で出す。i の中にはしまわない</li>
+<li><b>ほかの向き</b>（指摘8）：推定のピルを押すと向き（北風・南風）を選べる。ボタンは増やしていない。切り替えの並べ替え ✎ は右端に固定で残した</li>
+<li>値のないカードは並べない（1版の考えのまま）。今日の定時は届いてからカードになる（03b）</li>
+<li>字は13px（単位だけ12px）、押せる所は44px。下の1行の注意書きは、タブ帯の高さ＋余白の上で止まる（指摘1）</li></ul></ul></aside>
 <script>if(window!==window.top){var a=document.querySelector('.ann');if(a)a.remove()}</script>
 </body>
 </html>

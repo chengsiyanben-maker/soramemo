@@ -3,118 +3,109 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>運用（風がまだ届いていないとき）｜そらメモ 改善案 2版</title>
+<title>運用（空の情報）｜そらメモ 改善案 11/06</title>
 <style>
 :root{
   --gothic:"Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic UI","Yu Gothic","Meiryo","Noto Sans JP","Noto Sans CJK JP",system-ui,sans-serif;
   --sign:"Barlow Condensed","Arial Narrow",var(--gothic);
-  --bg:#EEF1F5; --card:#FFFFFF; --ink:#374151; --strong:#1F2937; --sub:#5F6878; --mute:#6B7280; --line:#9CA3AF;
-  --pill:rgba(17,24,39,.06); --hero:#0F1B2D; --on-hero:#F3F4F6; --hero-sub:#A7B0BC; --hero-pill:rgba(255,255,255,.10);
+  --bg:#EEF1F5; --card:#FFFFFF; --ink:#374151; --strong:#1F2937; --sub:#6B7280; --mute:#9CA3AF;
+  --pill:rgba(17,24,39,.05); --hero:#0F1B2D; --on-hero:#F3F4F6; --hero-sub:#A7B0BC;
   --shadow:0 1px 2px rgba(17,24,39,.04),0 10px 30px -8px rgba(17,24,39,.10),inset 0 0 0 1px rgba(17,24,39,.07);
-  --jal:#C8102E; --ana:#1C4FA0; --stub:#E7C873; --ok:#7EE2A8;
+  --jal:#C8102E; --ana:#1C4FA0; --gold:#A9822E; --stub:#E7C873;
   --chart-sea:#DCEAF3; --chart-land:#F4F2EA; --chart-coast:#A9B9AE; --chart-apt:#7A1F5C; --chart-grid:rgba(31,78,121,.10);
-  --tabs:rgba(255,255,255,.94); --demo-bg:#FFFFFF; --demo-ink:#374151;
+  --tabs:rgba(255,255,255,.92);
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme=light]){
-  --bg:#0B0D10; --card:#16191F; --ink:#D1D5DB; --strong:#F3F4F6; --sub:#A7B0BC; --mute:#9AA3B0; --line:#4B5563;
-  --pill:rgba(255,255,255,.08); --hero:#16233A; --on-hero:#F3F4F6; --hero-sub:#A7B0BC; --hero-pill:rgba(255,255,255,.10);
+  --bg:#0B0D10; --card:#16191F; --ink:#D1D5DB; --strong:#F3F4F6; --sub:#A7B0BC; --mute:#8B95A3;
+  --pill:rgba(255,255,255,.07); --hero:#16233A; --on-hero:#F3F4F6; --hero-sub:#A7B0BC;
   --shadow:0 12px 26px -16px rgba(0,0,0,.7),inset 0 0 0 1px rgba(255,255,255,.06);
-  --jal:#FF5A6E; --ana:#6EA0FF; --stub:#D9B95E; --ok:#7EE2A8;
+  --jal:#FF5A6E; --ana:#6EA0FF; --gold:#E0B85C;
   --chart-sea:#0F1A24; --chart-land:#1A1F24; --chart-coast:#3A4A42; --chart-apt:#E07AB5; --chart-grid:rgba(127,166,217,.10);
-  --tabs:rgba(22,25,31,.94); --demo-bg:#262B33; --demo-ink:#D1D5DB;}}
+  --tabs:rgba(22,25,31,.92);
+}}
 :root[data-theme=dark]{
-  --bg:#0B0D10; --card:#16191F; --ink:#D1D5DB; --strong:#F3F4F6; --sub:#A7B0BC; --mute:#9AA3B0; --line:#4B5563;
-  --pill:rgba(255,255,255,.08); --hero:#16233A; --on-hero:#F3F4F6; --hero-sub:#A7B0BC; --hero-pill:rgba(255,255,255,.10);
+  --bg:#0B0D10; --card:#16191F; --ink:#D1D5DB; --strong:#F3F4F6; --sub:#A7B0BC; --mute:#8B95A3;
+  --pill:rgba(255,255,255,.07); --hero:#16233A; --on-hero:#F3F4F6; --hero-sub:#A7B0BC;
   --shadow:0 12px 26px -16px rgba(0,0,0,.7),inset 0 0 0 1px rgba(255,255,255,.06);
-  --jal:#FF5A6E; --ana:#6EA0FF; --stub:#D9B95E; --ok:#7EE2A8;
+  --jal:#FF5A6E; --ana:#6EA0FF; --gold:#E0B85C;
   --chart-sea:#0F1A24; --chart-land:#1A1F24; --chart-coast:#3A4A42; --chart-apt:#E07AB5; --chart-grid:rgba(127,166,217,.10);
-  --tabs:rgba(22,25,31,.94); --demo-bg:#262B33; --demo-ink:#D1D5DB;}
+  --tabs:rgba(22,25,31,.92);
+}
 *{box-sizing:border-box}
 html,body{margin:0}
 body{background:var(--bg);color:var(--ink);font-family:var(--gothic);font-size:15px;line-height:1.6;-webkit-text-size-adjust:100%}
 .phone{position:relative;max-width:420px;min-height:100vh;min-height:100svh;margin:0 auto;overflow:hidden}
+button{font:inherit;color:inherit}
+.pl{border:0;border-radius:999px;background:var(--pill);color:var(--strong);font-size:13px;font-weight:700;padding:8px 14px}
 .card{background:var(--card);border-radius:22px;box-shadow:var(--shadow)}
-.lab{font-size:13px;font-weight:700;color:var(--sub);letter-spacing:.02em}
+.lab{font-size:12px;font-weight:700;color:var(--sub);letter-spacing:.02em}
 .num{font-weight:800;color:var(--strong);letter-spacing:-.01em;line-height:1.1}
 .u{font-size:12px;font-weight:600;color:var(--mute);margin-left:2px}
-.hit{min-height:44px;min-width:44px}
-.ic{width:44px;height:44px;border-radius:999px;background:var(--card);box-shadow:var(--shadow);display:grid;place-items:center;color:var(--strong);font-weight:800;flex:none}
-.ic svg,.ico{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-.tabs{position:fixed;left:50%;transform:translateX(-50%);bottom:14px;width:calc(min(420px,100vw) - 28px);height:64px;border-radius:999px;background:var(--tabs);box-shadow:var(--shadow);display:flex;align-items:stretch;padding:0 8px;backdrop-filter:blur(12px);z-index:30}
-.tabs b{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:13px;font-weight:700;color:var(--sub)}
+.tabs{position:fixed;left:50%;transform:translateX(-50%);bottom:14px;width:calc(min(420px,100vw) - 28px);height:64px;border-radius:999px;background:var(--tabs);box-shadow:var(--shadow);display:flex;align-items:center;justify-content:space-around;backdrop-filter:blur(12px);z-index:30}
+.tabs b{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11px;font-weight:700;color:var(--mute)}
 .tabs b.on{color:var(--strong)}
 .tabs svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
-.ann{position:relative;z-index:40;max-width:392px;margin:16px auto 120px;font-size:13px;line-height:1.7;background:#FFF8D6;color:#5A4A12;padding:12px 14px;border-radius:16px}
-.ann b{display:block;font-size:13px}
+.ann{position:relative;z-index:40;max-width:392px;margin:16px auto 120px;font-size:12px;line-height:1.65;background:#FFF8D6;color:#5A4A12;padding:12px 14px;border-radius:16px}
+.ann b{display:block;font-size:11px}
 .ann ul{margin:4px 0 0;padding-left:1.2em}
 
-.wrap{padding:14px 16px 130px}
+.wrap{padding:16px 16px 120px}
 .bar{display:flex;align-items:center;gap:8px}
-.ap{height:44px;display:flex;align-items:center;gap:8px;background:var(--card);box-shadow:var(--shadow);border-radius:999px;padding:0 16px 0 8px;font-weight:800;color:var(--strong)}
-.ap i{font-style:normal;background:var(--strong);color:var(--card);border-radius:999px;padding:2px 9px;font-size:13px}
-.hero{margin-top:14px;background:var(--hero);color:var(--on-hero);border-radius:26px;padding:18px 20px 16px}
-.hero .top{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.ap{display:flex;align-items:center;gap:8px;background:var(--card);box-shadow:var(--shadow);border-radius:999px;padding:6px 14px 6px 6px;font-weight:800;color:var(--strong)}
+.ap i{font-style:normal;background:var(--strong);color:var(--card);border-radius:999px;padding:3px 8px;font-size:12px}
+.ic{width:38px;height:38px;border-radius:999px;background:var(--card);box-shadow:var(--shadow);display:grid;place-items:center;color:var(--sub);font-weight:800}
+.hero{margin-top:16px;background:var(--hero);color:var(--on-hero);border-radius:26px;padding:20px}
+.hero .top{display:flex;justify-content:space-between;align-items:center}
 .hero .lab{color:var(--hero-sub)}
-.est{height:44px;display:flex;align-items:center;gap:6px;font-size:13px;font-weight:700;color:var(--on-hero);background:var(--hero-pill);border-radius:999px;padding:0 14px;margin:-6px -6px -6px 0}
-.hero h2{margin:4px 0 0;font-size:30px;line-height:1.2}
-.hero .when{font-size:13px;color:var(--hero-sub)}
-.rw{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
-.rw div{background:rgba(255,255,255,.06);border-radius:18px;padding:10px 14px}
-.rw small{display:block;font-size:13px;font-weight:700;color:var(--hero-sub)}
+.est{font-size:11px;font-weight:700;color:var(--hero-sub);background:rgba(255,255,255,.08);border-radius:999px;padding:3px 10px}
+.hero h2{margin:8px 0 2px;font-size:30px;line-height:1.2}
+.hero .when{font-size:12px;color:var(--hero-sub)}
+.rw{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:18px}
+.rw div{background:rgba(255,255,255,.06);border-radius:18px;padding:12px 14px}
+.rw small{display:block;font-size:11px;font-weight:700;color:var(--hero-sub)}
 .rw b{font-family:var(--sign);font-size:40px;line-height:1.05;letter-spacing:.02em}
-.rw span{font-size:13px;color:var(--hero-sub);margin-left:6px}
-.hero .warn{margin:12px 0 0;font-size:13px;color:var(--hero-sub);line-height:1.5}
+.rw span{font-size:11px;color:var(--hero-sub);margin-left:6px}
 .mini{margin-top:12px;display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.mini .card{padding:12px 16px}
-.mini .num{font-size:26px;margin-top:2px}
-.mini.one{grid-template-columns:1fr}
-.wait{margin-top:12px;padding:12px 16px;display:flex;align-items:flex-start;gap:10px;font-size:13px;color:var(--sub);line-height:1.55}
-.wait b{color:var(--strong);font-size:14px}
-.dotl{width:8px;height:8px;border-radius:999px;background:var(--line);flex:none;margin-top:7px}
-.subw{position:relative;margin:20px -16px 0;display:flex;align-items:center}
-.sub{flex:1;display:flex;gap:8px;overflow:hidden;padding:0 0 0 16px;position:relative}
-.sub span{flex:none;height:44px;display:flex;align-items:center;font-size:14px;font-weight:700;color:var(--sub);background:var(--pill);border-radius:999px;padding:0 16px}
+.mini .card{padding:14px 16px}
+.mini .num{font-size:26px;margin-top:4px}
+.wait{margin-top:12px;padding:12px 16px;display:flex;align-items:center;gap:10px;font-size:12px;color:var(--sub)}
+.wait b{color:var(--strong);font-size:13px}
+.dotl{width:8px;height:8px;border-radius:999px;background:var(--mute);opacity:.6;flex:none}
+.sub{position:relative;margin:22px -16px 0;padding:0 16px;display:flex;gap:8px;overflow:hidden}
+.sub::after{content:"";position:absolute;right:0;top:0;bottom:0;width:48px;background:linear-gradient(90deg,transparent,var(--bg))}
+.sub span{flex:none;font-size:13px;font-weight:700;color:var(--sub);background:var(--pill);border-radius:999px;padding:8px 14px}
 .sub span.on{background:var(--strong);color:var(--card)}
-.subw::after{content:"";position:absolute;right:68px;top:0;bottom:0;width:40px;background:linear-gradient(90deg,transparent,var(--bg));pointer-events:none}
-.subw .ed{margin:0 16px 0 8px}
-.list{margin-top:12px;padding:4px 16px}
-.it{display:flex;align-items:center;gap:12px;padding:12px 0;min-height:64px}
+.list{margin-top:12px;padding:6px 16px}
+.it{display:flex;align-items:center;gap:12px;padding:12px 0}
 .it+.it{box-shadow:0 -1px 0 var(--pill)}
-.it .mk{width:36px;height:36px;border-radius:12px;background:var(--pill);display:grid;place-items:center;font-weight:800;color:var(--strong);flex:none}
-.it b{display:block;color:var(--strong);font-size:15px;line-height:1.4}
-.it small{display:block;font-size:13px;color:var(--sub);line-height:1.45}
-.it .km{margin-left:auto;text-align:right;font-weight:800;color:var(--strong);font-size:20px;flex:none}
-.it .km small{display:inline;font-size:12px;font-weight:600;color:var(--mute);margin-left:2px}
-.note{font-size:13px;color:var(--sub);margin:12px 4px 0;line-height:1.55}
-
+.it .mk{width:34px;height:34px;border-radius:12px;background:var(--pill);display:grid;place-items:center;font-weight:800;color:var(--strong);flex:none}
+.it b{display:block;color:var(--strong);font-size:14px}
+.it small{font-size:12px;color:var(--mute)}
+.it .km{margin-left:auto;text-align:right;font-weight:800;color:var(--strong);font-size:18px}
+.it .km small{font-size:11px;font-weight:600;color:var(--mute);margin-left:2px}
+.note{font-size:12px;color:var(--mute);margin:10px 4px 0}
 </style>
 </head>
 <body>
 <main class="phone"><div class="wrap">
-<div class="bar"><span class="ap"><i>HND</i>羽田 ▾</span><span class="ic" style="margin-left:auto" aria-label="くわしい説明">i</span><span class="ic" aria-label="共有"><svg viewBox="0 0 24 24"><path d="M12 15V4"/><path d="m7.5 8.5 4.5-4.5 4.5 4.5"/><path d="M5 13v5.5c0 .8.7 1.5 1.5 1.5h11c.8 0 1.5-.7 1.5-1.5V13"/></svg></span></div>
+<div class="bar"><span class="ap"><i>HND</i>羽田 ▾</span><span class="ic" style="margin-left:auto">i</span><span class="ic">↑</span></div>
 <section class="hero" aria-label="いまの運用">
-<div class="top"><span class="lab">いまの運用</span><span class="est" aria-label="時間帯からの予想。押すとほかの向きを選べる">時間帯からの予想<svg class="ico" viewBox="0 0 24 24" style="width:16px;height:16px"><path d="m6 9 6 6 6-6"/></svg></span></div>
-<h2>北風運用</h2><div class="when">22:41 時点 ・ 深夜の時間帯の向き</div>
+<div class="top"><span class="lab">いまの運用</span><span class="est">風からの推定</span></div>
+<h2>北風運用</h2><div class="when">深夜の時間帯 ・ 22:41 時点</div>
 <div class="rw"><div><small>着陸</small><b>34R</b><span>ILS Z</span></div><div><small>離陸</small><b>05</b></div></div>
-<p class="warn">予想で、保証するものではありません。違うときは上のピルで向きを選べます。</p>
 </section>
-<div class="mini one"><div class="card"><div class="lab">運用時間</div><div class="num">24<span class="u">時間</span></div></div></div>
-<div class="card wait"><span class="dotl"></span><div><b>まだ届いていない</b><br>風（気象通報なし）・遅れと欠航・今日の定時（読み込み中）</div></div>
-<div class="subw"><div class="sub"><span class="on">見に行く</span><span>空の道すじ</span><span>定時</span><span>短冊</span><span>撮る</span></div><span class="ic ed" aria-label="並べ替え">✎</span></div>
+<div class="mini"><div class="card"><div class="lab">運用時間</div><div class="num">24<span class="u">時間</span></div></div><div class="card"><div class="lab">今日の定時</div><div class="num">87<span class="u">%</span></div></div></div>
+<div class="card wait"><span class="dotl"></span><div><b>まだ届いていない</b><br>風（気象通報なし）・遅れと欠航（読み込み中）</div></div>
+<div class="sub"><span class="on">見に行く</span><span>空の道すじ</span><span>定時</span><span>短冊</span><span>撮る</span></div>
 <div class="card list">
-<div class="it"><span class="mk">◎</span><div><b>第2ターミナル 展望デッキ</b><small>着陸機の線まで約2km<br>日の入り後</small></div><div class="km">2<small>km</small></div></div>
-<div class="it"><span class="mk">○</span><div><b>第1ターミナル 展望デッキ</b><small>着陸機の線まで約2km<br>日の入り後</small></div><div class="km">2<small>km</small></div></div>
-<div class="it"><span class="mk">○</span><div><b>浮島町公園</b><small>着陸機の線まで約2km<br>21:12 ごろから逆光</small></div><div class="km">2<small>km</small></div></div>
+<div class="it"><span class="mk">◎</span><div><b>第2ターミナル 展望デッキ</b><small>着陸機の線まで約2km ・ 日の入り後</small></div><div class="km">2<small>km</small></div></div>
+<div class="it"><span class="mk">○</span><div><b>第1ターミナル 展望デッキ</b><small>着陸機の線まで約2km ・ 日の入り後</small></div><div class="km">2<small>km</small></div></div>
+<div class="it"><span class="mk">○</span><div><b>浮島町公園</b><small>着陸機の線まで約2km ・ 21:12 ごろから逆光</small></div><div class="km">2<small>km</small></div></div>
 </div>
-<p class="note">見に行く場所は、滑走路の向きと距離での目安です。</p>
+<p class="note">滑走路の向きと距離だけで出した目安です。くわしくは右上の i に。</p>
 </div>
-<nav class="tabs" aria-label="画面の切り替え"><b class=""><svg viewBox="0 0 24 24"><path d="M3.5 10.5 12 4l8.5 6.5"/><path d="M5.5 9v10h4.5v-5.5h4V19h4.5V9"/></svg>ホーム</b><b class=""><svg viewBox="0 0 24 24"><path d="M4 5.5C4 4.7 4.7 4 5.5 4H11v15H5.5c-.8 0-1.5.5-1.5 1.2V5.5Z"/><path d="M20 5.5c0-.8-.7-1.5-1.5-1.5H13v15h5.5c.8 0 1.5.5 1.5 1.2V5.5Z"/></svg>図鑑</b><b class=""><svg viewBox="0 0 24 24"><path d="M10.5 13.5 4 11l1.4-1.4 7 1.1 3.9-3.9c.8-.8 2.1-.8 2.9 0s.8 2.1 0 2.9l-3.9 3.9 1.1 7L15 22l-2.5-6.5-3 3v2.5L8 22.5l-1.3-3.2L3.5 18 5 16.5h2.5Z"/></svg>フライト</b><b class="on"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.5"/><path d="M12 12 18 6"/></svg>運用</b></nav>
-</main>
-<aside class="ann"><b>2版のメモ（本番には出ません）</b><ul><li><b>食い違いをなくした</b>（指摘2）：風が届いていないので、推定のもとを「時間帯からの予想」と出す。今日の定時は遅れと欠航がそろうまで出さず、「まだ届いていない」の行に入れた</li>
-<li><b>予想と保証しない</b>（指摘9）：決定事項（予想は「予想」と出し、保証しないと書く）に合わせ、ピルを「予想」、紺のカードの下に1行で「保証するものではありません」を13pxで置いた。i の中には隠さない。滑走路の向きがこの決定に入るかは PM に確認したい</li>
-<li><b>ほかの向き</b>（指摘8）：予想のピルを押すと向き（北風・南風）を選べる。ボタンは増やしていない。切り替えの並べ替え ✎ は右端に固定で残した</li>
-<li>値のないカードは並べない（1版の考えのまま）。今日の定時は届いてからカードになる（03b）</li>
-<li>字は13px（単位だけ12px）、押せる所は44px。下の1行の注意書きは、タブ帯の高さ＋余白の上で止まる（指摘1）</li></ul></ul></aside>
+<nav class="tabs" aria-label="画面の切り替え"><b class=""><svg viewBox="0 0 24 24"><path d="M3.5 10.5 12 4l8.5 6.5"/><path d="M5.5 9v10h4.5v-5.5h4V19h4.5V9"/></svg>ホーム</b><b class=""><svg viewBox="0 0 24 24"><path d="M4 5.5C4 4.7 4.7 4 5.5 4H11v15H5.5c-.8 0-1.5.5-1.5 1.2V5.5Z"/><path d="M20 5.5c0-.8-.7-1.5-1.5-1.5H13v15h5.5c.8 0 1.5.5 1.5 1.2V5.5Z"/></svg>図鑑</b><b class=""><svg viewBox="0 0 24 24"><path d="M10.5 13.5 4 11l1.4-1.4 7 1.1 3.9-3.9c.8-.8 2.1-.8 2.9 0s.8 2.1 0 2.9l-3.9 3.9 1.1 7L15 22l-2.5-6.5-3 3v2.5L8 22.5l-1.3-3.2L3.5 18 5 16.5h2.5Z"/></svg>フライト</b><b class="on"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.5"/><path d="M12 12 18 6"/></svg>運用</b></nav></main>
+<aside class="ann"><b>案のメモ（本番には出ません）</b><ul><li><b>最初の1枚で答える</b>：空港・いまの運用・着陸と離陸の滑走路を1枚の濃い紺のカードに。滑走路の番号は案内標識の細長い数字で大きく</li><li><b>「推定」をはっきり</b>：右上に「風からの推定」。保証しないことは i の中に今の文のまま</li><li><b>値がないカードを並べない</b>：今は「風 ー」「遅れ・欠航 …読み込み中」が1枚ずつ場所を取る。届いていないものは1行にまとめる</li><li><b>下の切り替え</b>：今は「滑走路・定時・空の道すじ・短冊・撮る」の文字が右で切れる。ピルにして右端を薄くし、続きがあると分かるようにする</li><li>長い注意書き（逆光・見え方の目安など）は i に移し、画面には1行だけ。運用を集める印やバッジは作らない（却下済み）</li></ul></aside>
 <script>if(window!==window.top){var a=document.querySelector('.ann');if(a)a.remove()}</script>
 </body>
 </html>

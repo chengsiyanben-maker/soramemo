@@ -51,12 +51,12 @@ body{background:var(--bg);color:var(--ink);font-family:var(--gothic);font-size:1
 .map{position:absolute;inset:0 0 auto 0;height:300px;background:var(--chart-sea);overflow:hidden}
 .map svg{width:100%;height:100%;display:block}
 .map text{paint-order:stroke;stroke:var(--chart-sea);stroke-width:4px;stroke-linejoin:round}
-.top{position:absolute;top:14px;left:14px;right:14px;display:flex;align-items:center;gap:8px;z-index:5}
+.top{position:absolute;top:10px;left:14px;right:14px;display:flex;align-items:center;gap:8px;z-index:5}
 .msw{display:flex;background:var(--card);box-shadow:var(--shadow);border-radius:999px;padding:3px}
-.msw span{height:38px;display:flex;align-items:center;font-size:13px;font-weight:700;color:var(--sub);padding:0 15px;border-radius:999px}
+.msw span{height:38px;display:flex;align-items:center;font-size:13px;font-weight:700;color:var(--sub);padding:0 12px;border-radius:999px}
 .msw span.on{background:var(--strong);color:var(--card)}
-.mp{margin-left:auto;height:44px;display:flex;align-items:center;gap:6px;background:var(--card);box-shadow:var(--shadow);border-radius:999px;padding:0 15px 0 12px;font-size:13px;font-weight:800;color:var(--strong)}
-.demo{position:absolute;top:68px;left:14px;z-index:5;height:30px;display:flex;align-items:center;gap:6px;background:var(--demo-bg);color:var(--demo-ink);border-radius:999px;padding:0 12px;font-size:13px;font-weight:700;box-shadow:var(--shadow)}
+.mp{margin-left:auto;height:44px;display:flex;align-items:center;gap:6px;background:var(--card);box-shadow:var(--shadow);border-radius:999px;padding:0 13px 0 10px;font-size:13px;font-weight:800;color:var(--strong);flex:none}
+.demo{position:absolute;top:62px;left:14px;z-index:5;height:30px;display:flex;align-items:center;gap:6px;background:var(--demo-bg);color:var(--demo-ink);border-radius:999px;padding:0 12px;font-size:13px;font-weight:700;box-shadow:var(--shadow)}
 .demo::before{content:"";width:7px;height:7px;border-radius:999px;background:var(--mute)}
 .mtools{position:absolute;right:14px;top:150px;display:flex;flex-direction:column;gap:8px;z-index:5}
 .cred{position:absolute;left:14px;top:246px;font-size:13px;color:var(--sub);background:var(--card);border-radius:999px;padding:1px 10px;z-index:5;opacity:.92}
@@ -64,18 +64,18 @@ body{background:var(--bg);color:var(--ink);font-family:var(--gothic);font-size:1
 .grab{display:block;width:100%;height:24px;margin-top:-4px;position:relative}
 .grab::before{content:"";position:absolute;left:50%;top:6px;width:40px;height:5px;margin-left:-20px;border-radius:999px;background:var(--line);opacity:.6}
 .pass{display:flex;border-radius:24px;overflow:hidden;box-shadow:var(--shadow)}
-.pass .m{flex:1;background:var(--hero);color:var(--on-hero);padding:14px 18px 14px}
+.pass .m{flex:1;background:var(--hero);color:var(--on-hero);padding:10px 18px 10px}
 .pass .m .lab{color:var(--hero-sub)}
-.flap{display:flex;gap:5px;margin:6px 0 8px}
-.flap i{font-style:normal;width:38px;height:48px;border-radius:6px;background:#1C2027;color:#FFB547;font-family:ui-monospace,monospace;font-size:30px;font-weight:700;line-height:48px;text-align:center;position:relative}
-.flap i::after{content:"";position:absolute;left:0;right:0;top:23px;height:2px;background:#0B0D10}
+.flap{display:flex;gap:5px;margin:4px 0 6px}
+.flap i{font-style:normal;width:34px;height:40px;border-radius:6px;background:#1C2027;color:#FFB547;font-family:ui-monospace,monospace;font-size:27px;font-weight:700;line-height:40px;text-align:center;position:relative}
+.flap i::after{content:"";position:absolute;left:0;right:0;top:19px;height:2px;background:#0B0D10}
 .pass .nm{font-weight:800;font-size:16px;line-height:1.35}
 .pass .st{font-size:13px;color:var(--hero-sub);margin-top:2px}
 .pass .st b{color:var(--ok)}
 .pass .s{width:100px;padding:12px 6px !important;background:var(--stub);color:#3A2E0C;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;font-weight:800;border-left:2px dashed rgba(15,27,45,.35);padding:0 6px}
 .pass .s .v{writing-mode:vertical-rl;letter-spacing:.06em;font-size:16px;line-height:1}
 .pass .s small{font-size:13px;font-weight:700;line-height:1.35;text-align:center}
-.strip{margin-top:12px;display:flex;align-items:center;padding:0 6px 0 16px;height:56px}
+.strip{margin-top:8px;display:flex;align-items:center;padding:0 6px 0 16px;height:48px}
 .strip div{flex:1;display:flex;align-items:baseline;gap:6px}
 .strip .lab{font-size:13px}
 .strip .num{font-size:22px}
@@ -113,7 +113,7 @@ body{background:var(--bg);color:var(--ink);font-family:var(--gothic);font-size:1
 <circle cx="180" cy="318" r="7" fill="#2F6FE4" stroke="#fff" stroke-width="3"/>
 </g>
 </svg></div>
-<div class="top"><span class="msw" role="tablist" aria-label="印集めとエアライン経営の切り替え"><span class="on" role="tab" aria-selected="true">印集め</span><span role="tab">エアライン経営</span></span>
+<div class="top"><span class="msw" role="tablist" aria-label="スタンプラリーとエアライン経営の切り替え"><span class="on" role="tab" aria-selected="true">スタンプラリー</span><span role="tab">エアライン経営</span></span>
 <span class="mp" aria-label="マイページ"><svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="8.5" r="3.8"/><path d="M4.5 20c.9-3.8 4-5.8 7.5-5.8s6.6 2 7.5 5.8"/></svg>マイページ</span></div>
 <div class="demo" aria-label="デモモード中">デモ中</div>
 <div class="mtools"><span class="ic" aria-label="大きく">＋</span><span class="ic" aria-label="小さく">−</span></div><span class="cred">地図：国土地理院</span>
