@@ -15,6 +15,12 @@
 --   rot_eval：毎晩、前の日の分を「前の日の夜の時点の記録だけで予想した」として採点した数（今の予想と学ぶ予想）。
 --     あわせて learn_hi（学ぶ予想のうち、学んだ便を出すしきい値だけを「3回以上・4割以上」に上げたもの）も採点し、
 --     しきい値を上げると「出したうちの当たり率」が戻るかを見られるようにする（画面には使わない）。
+--   軽くする工夫（本番は小さいプランで一時ファイルの余裕がないため）：
+--     ・rot_pairs は毎晩まるごと作り直さず、前の日の分だけ足す（まだない古い日は、時間の上限の中で少しずつ足す）。古い日の重みは読むときに計算する
+--     ・「次の便」は1日分を並べ替えず、便ごとに索引（reg_legs の主キー：登録記号・日）で引く
+--     ・採点は前の日の300便まで。予想は便ごとに索引で引く。大きな中間の表・自己結合・大きな並べ替えを作らない
+--     ・毎晩の処理は「つながり」と「採点」で別の pg_cron の仕事にし、それぞれに statement_timeout と lock_timeout を付ける。
+--       失敗してもその仕事だけが止まり、ほかの毎晩の処理（daily-archive など）は止めない。時刻もほかの重い処理と重ねない
 --   rot_pairs は adsb.lol（ODbL）由来だけで作る。ODPT（時刻表・特別塗装機の予定）は予想を出すときに見るだけで、表には混ぜない。
 --   reg_legs・rotation_obs・flight_history は読むだけで、消さない。
 
@@ -55,26 +61,35 @@ create table if not exists public.rot_eval (
 alter table public.rot_eval enable row level security;
 revoke all on public.rot_eval from public, anon, authenticated;
 
+-- つながりを作り終えた日（足し忘れた日をあとで見つけるため。日ごとに1行）
+create table if not exists public.rot_pairs_days (
+  day      date primary key,
+  pairs    integer not null,
+  built_at timestamptz not null default now()
+);
+alter table public.rot_pairs_days enable row level security;
+revoke all on public.rot_pairs_days from public, anon, authenticated;
+
 -- その日の機体のつながりを作る（何度流しても同じになる）
+--   1日分をまとめて並べ替えず、その日の便ごとに「同じ機体の、その日の次の便」を主キー（登録記号・日）で1件だけ引く
 create or replace function public.rot_pairs_build(p_day date) returns int
 language plpgsql security definer set search_path = public as $$
 declare n int;
 begin
-  with l as (
-    select reg, callsign, arr, last_at,
-           lead(callsign) over w as nx, lead(dep) over w as ndep, lead(arr) over w as narr,
-           lead(type) over w as ntype, lead(first_at) over w as nfirst
-    from public.reg_legs where day = p_day
-    window w as (partition by reg order by first_at, callsign)
-  )
   insert into public.rot_pairs (day, reg, prev_cs, next_cs, prev_arr, next_dep, next_arr, next_type, next_tod, gap_min, ok)
-  select p_day, reg, callsign, nx, arr, ndep, narr, ntype, (nfirst at time zone 'Asia/Tokyo')::time,
-         round(extract(epoch from (nfirst - last_at)) / 60)::int,
-         (arr is null or ndep is null or arr = ndep) and nfirst - last_at < interval '10 hours' and nfirst - last_at > interval '-30 minutes'
-  from l where nx is not null
+  select p_day, a.reg, a.callsign, nl.callsign, a.arr, nl.dep, nl.arr, nl.type, (nl.first_at at time zone 'Asia/Tokyo')::time,
+         round(extract(epoch from (nl.first_at - a.last_at)) / 60)::int,
+         (a.arr is null or nl.dep is null or a.arr = nl.dep) and nl.first_at - a.last_at < interval '10 hours' and nl.first_at - a.last_at > interval '-30 minutes'
+  from public.reg_legs a
+  cross join lateral (select b.callsign, b.dep, b.arr, b.type, b.first_at from public.reg_legs b
+                      where b.reg = a.reg and b.day = a.day and (b.first_at, b.callsign) > (a.first_at, a.callsign)
+                      order by b.first_at, b.callsign limit 1) nl
+  where a.day = p_day
   on conflict (day, reg, prev_cs) do update set next_cs = excluded.next_cs, prev_arr = excluded.prev_arr, next_dep = excluded.next_dep,
     next_arr = excluded.next_arr, next_type = excluded.next_type, next_tod = excluded.next_tod, gap_min = excluded.gap_min, ok = excluded.ok, built_at = now();
   get diagnostics n = row_count;
+  insert into public.rot_pairs_days (day, pairs) values (p_day, n)
+  on conflict (day) do update set pairs = excluded.pairs, built_at = now();
   return n;
 end $$;
 revoke all on function public.rot_pairs_build(date) from public, anon, authenticated;
@@ -199,66 +214,109 @@ revoke all on function public.predict_rotation_v2(text) from public;
 grant execute on function public.predict_rotation_v2(text) to anon, authenticated;
 
 -- その日を採点する：その日の機体の便を1つずつ「いまの便」とみなし、前の日までの記録だけで予想して、その日の実際の次の便と比べる。
---   1日に p_max 件まで（登録記号と便から決まる順で選ぶので、何度流しても同じ）
-create or replace function public.rot_eval_day(p_day date, p_max int default 1500) returns int
+--   1日に p_max 件まで（登録記号と便から決まる順で選ぶので、何度流しても同じ）。毎晩は300件（rot_eval_nightly の定数）
+--   軽くする工夫：測る便は「登録記号・便名」だけを上位 p_max 件残す並べ替え（小さな山）で選ぶ。そのあとは1便ずつ、
+--   機体の型・実際の次の4便・3通りの予想を索引で引き、数を rot_eval に足していく（大きな中間の表を持たない）。
+--   p_budget を過ぎたら、そこまでの数を残して止める（全部の方式を同じ便で採点しているので、比べるのには困らない）
+create or replace function public.rot_eval_day(p_day date, p_max int default 300, p_budget interval default interval '4 minutes') returns int
 language plpgsql security definer set search_path = public as $$
-declare n int;
+declare vcnt int; lim int := least(greatest(coalesce(p_max, 300), 1), 3000); t0 timestamptz := clock_timestamp();
+  a record; vrt text; tr jsonb; pj jsonb; vm text; ki int; vg text; vh boolean; v_arr text; v_first timestamptz;
 begin
   delete from public.rot_eval where day = p_day;   -- 採点の数だけを作り直す（記録そのものは消さない）
-  with legs as (
-    select reg, callsign as cs, type, dep, arr, (first_at at time zone 'Asia/Tokyo')::time as tod,
-           row_number() over (partition by reg order by first_at, callsign) as i
-    from public.reg_legs where day = p_day
-  ), anc as (
-    select a.*, (select mode() within group (order by l.type) from public.reg_legs l
-                 where l.reg = a.reg and l.day between p_day - 42 and p_day and l.type is not null) as rt
-    from (select a.*, row_number() over (order by md5(a.reg || ':' || a.cs)) as pick
-          from legs a join legs b on b.reg = a.reg and b.i = a.i + 1) a
-    where a.pick <= greatest(coalesce(p_max, 1500), 1)
-  ), pred as materialized (
-    select a.reg, a.i, a.cs, a.rt, m.method, public.rot_predict(m.method, a.reg, p_day, a.cs, a.arr, a.tod, 4) as pj
-    from anc a cross join (values ('base'), ('learn'), ('learn_hi')) m(method)
-  ), sc as (
-    select p.method, k.k, left(p.cs, 3) as carrier, coalesce(p.rt, '?') as rtype, (b.dep = 'HND' or b.arr = 'HND') is true as hnd,
-           coalesce(p.pj -> (k.k - 1) ->> 'src', 'none') as src, p.pj -> (k.k - 1) ->> 'callsign' as guess, b.cs as truth
-    from pred p cross join generate_series(1, 4) k(k)
-    join legs b on b.reg = p.reg and b.i = p.i + k.k
-  )
-  insert into public.rot_eval (day, method, k, carrier, rtype, hnd, src, n, predicted, hit)
-  select p_day, method, k, carrier, rtype, hnd, src, count(*), count(guess), count(*) filter (where guess = truth)
-  from sc group by method, k, carrier, rtype, hnd, src;
-  get diagnostics n = row_count;
-  return n;
+  for a in
+    select x.reg, x.callsign as cs from public.reg_legs x
+    cross join lateral (select 1 from public.reg_legs b where b.reg = x.reg and b.day = x.day and (b.first_at, b.callsign) > (x.first_at, x.callsign) limit 1) nb
+    where x.day = p_day
+    order by md5(x.reg || ':' || x.callsign)
+    limit lim
+  loop
+    exit when clock_timestamp() - t0 >= coalesce(p_budget, interval '4 minutes');
+    begin
+      select l.arr, l.first_at into v_arr, v_first from public.reg_legs l where l.reg = a.reg and l.day = p_day and l.callsign = a.cs;
+      select mode() within group (order by l.type) into vrt from public.reg_legs l
+      where l.reg = a.reg and l.day between p_day - 42 and p_day and l.type is not null;
+      select jsonb_agg(jsonb_build_array(l.callsign, (l.dep = 'HND' or l.arr = 'HND') is true) order by l.first_at, l.callsign) into tr
+      from (select l.callsign, l.dep, l.arr, l.first_at from public.reg_legs l
+            where l.reg = a.reg and l.day = p_day and (l.first_at, l.callsign) > (v_first, a.cs)
+            order by l.first_at, l.callsign limit 4) l;
+      foreach vm in array array['base', 'learn', 'learn_hi'] loop
+        pj := public.rot_predict(vm, a.reg, p_day, a.cs, v_arr, (v_first at time zone 'Asia/Tokyo')::time, 4);
+        for ki in 1 .. jsonb_array_length(tr) loop
+          vg := pj -> (ki - 1) ->> 'callsign'; vh := (tr -> (ki - 1) ->> 1)::boolean;
+          insert into public.rot_eval (day, method, k, carrier, rtype, hnd, src, n, predicted, hit)
+          values (p_day, vm, ki, left(a.cs, 3), coalesce(vrt, '?'), vh, coalesce(pj -> (ki - 1) ->> 'src', 'none'), 1,
+                  (vg is not null)::int, (vg is not distinct from (tr -> (ki - 1) ->> 0) and vg is not null)::int)
+          on conflict (day, method, k, carrier, rtype, hnd, src) do update
+            set n = rot_eval.n + 1, predicted = rot_eval.predicted + excluded.predicted, hit = rot_eval.hit + excluded.hit, made_at = now();
+        end loop;
+      end loop;
+    exception when query_canceled then exit;   -- 時間切れ（statement_timeout）でも、そこまでの便の数は残す
+    end;
+  end loop;
+  select count(*) into vcnt from public.rot_eval where day = p_day;
+  return vcnt;
 end $$;
-revoke all on function public.rot_eval_day(date, int) from public, anon, authenticated;
+revoke all on function public.rot_eval_day(date, int, interval) from public, anon, authenticated;
 
--- 毎晩：前の日と前の前の日のつながりを作り直し（空港は rwy-learn があとから入れるため）、前の日を採点する
---   本番は小さいプランなので、採点は1日500便まで（3通りの予想で1,500回）。どれも索引で引く形で、一時ファイルを使う大きな並べ替えはしない
+-- 毎晩その1（つながり）：前の日の分を足す。そのあと、前の60日のうちまだ作っていない日を、新しい日から順に時間の上限まで足す
+--   （反映した最初の夜に、これまでの日をここで少しずつ埋める。1日ずつ別の区切りにするので、途中で時間切れになっても前の日の分は残る）
+create or replace function public.rot_pairs_nightly(p_budget interval default interval '60 seconds', p_days int default 60) returns jsonb
+language plpgsql security definer set search_path = public as $$
+declare d date := (now() at time zone 'Asia/Tokyo')::date - 1; t0 timestamptz := clock_timestamp(); n int; g date;
+  filled date[] := '{}'; stopped text := null; left_n int;
+begin
+  n := public.rot_pairs_build(d);
+  for g in select x::date from generate_series(d - 1, d - least(greatest(coalesce(p_days, 60), 0), 60), interval '-1 day') x loop
+    if clock_timestamp() - t0 >= p_budget then stopped := 'budget'; exit; end if;
+    continue when exists (select 1 from public.rot_pairs_days r where r.day = g)
+               or not exists (select 1 from public.reg_legs l where l.day = g);
+    begin
+      perform public.rot_pairs_build(g);
+      filled := filled || g;
+    exception when query_canceled then stopped := 'timeout'; exit;
+    end;
+  end loop;
+  select count(*) into left_n from generate_series(d - 1, d - 60, interval '-1 day') x
+  where not exists (select 1 from public.rot_pairs_days r where r.day = x::date) and exists (select 1 from public.reg_legs l where l.day = x::date);
+  return jsonb_build_object('day', d, 'pairs', n, 'filled', to_jsonb(filled), 'left', left_n, 'stopped', stopped,
+                            'ms', round(extract(epoch from clock_timestamp() - t0) * 1000));
+end $$;
+revoke all on function public.rot_pairs_nightly(interval, int) from public, anon, authenticated;
+
+-- 毎晩その2（採点）：前の日を、今の予想・学ぶ予想（2回以上・3割以上）・学ぶ予想の厳しい版（3回以上・4割以上）の3通りで採点する
+create or replace function public.rot_eval_nightly(p_max int default 300) returns jsonb
+language plpgsql security definer set search_path = public as $$
+declare d date := (now() at time zone 'Asia/Tokyo')::date - 1; t0 timestamptz := clock_timestamp(); e int;
+begin
+  e := public.rot_eval_day(d, p_max, interval '4 minutes');
+  return jsonb_build_object('day', d, 'eval_rows', e, 'max', p_max,
+    'legs', (select coalesce(sum(n), 0) from public.rot_eval where day = d and method = 'base' and k = 1),
+    'ms', round(extract(epoch from clock_timestamp() - t0) * 1000));
+end $$;
+revoke all on function public.rot_eval_nightly(int) from public, anon, authenticated;
+
+-- 手で流すとき用：その1とその2を続けて流す。片方が失敗しても、もう片方は流す（失敗したことは返す）
 create or replace function public.rot_nightly() returns jsonb
 language plpgsql security definer set search_path = public as $$
-declare d date := (now() at time zone 'Asia/Tokyo')::date - 1; a int; b int; e int;
+declare a jsonb; b jsonb;
 begin
-  a := public.rot_pairs_build(d - 1);
-  b := public.rot_pairs_build(d);
-  e := public.rot_eval_day(d, 500);
-  return jsonb_build_object('day', d, 'pairs_prev', a, 'pairs', b, 'eval_rows', e);
+  begin a := public.rot_pairs_nightly(); exception when others then a := jsonb_build_object('error', sqlerrm); end;
+  begin b := public.rot_eval_nightly(); exception when others then b := jsonb_build_object('error', sqlerrm); end;
+  return jsonb_build_object('day', coalesce(a ->> 'day', b ->> 'day'), 'pairs', (a ->> 'pairs')::int, 'eval_rows', (b ->> 'eval_rows')::int,
+                            'pairs_job', a, 'eval_job', b);
 end $$;
 revoke all on function public.rot_nightly() from public, anon, authenticated;
 
--- これまでの日のつながりを作る（1回だけ）
-do $$
-declare d date;
-begin
-  for d in select distinct day from public.reg_legs order by 1 loop
-    perform public.rot_pairs_build(d);
-  end loop;
-end $$;
+-- これまでの日のつながりは、移行では作らない（移行を軽くするため）。反映した最初の夜から rot_pairs_nightly が時間の上限の中で埋める
 
--- 毎晩 日本時間 4:55（rwy-learn の 3:15 のあと、daily-archive と同じころ）
+-- 毎晩：日本時間 6:33 につながり、6:48 に採点（rwy-learn の 6:15 のあと。daily-archive 4:50・cold-archive 6:10・経営の毎晩の処理とは重ねない）
+--   それぞれ別の仕事なので、片方が止まってもほかの処理は止めない。statement_timeout で長引いたら打ち切り、lock_timeout で待ち続けない
 do $outer$
 begin
   if not exists (select 1 from pg_extension where extname = 'pg_cron') then return; end if;
-  perform cron.unschedule('rot-learn') where exists (select 1 from cron.job where jobname = 'rot-learn');
-  execute $q$ select cron.schedule('rot-learn', '55 19 * * *', $job$ select public.rot_nightly() $job$) $q$;
+  perform cron.unschedule(jobname) from cron.job where jobname in ('rot-learn', 'rot-pairs', 'rot-eval');
+  execute $q$ select cron.schedule('rot-pairs', '33 21 * * *', $job$ set statement_timeout = '3min'; set lock_timeout = '5s'; select public.rot_pairs_nightly(interval '60 seconds', 60) $job$) $q$;
+  execute $q$ select cron.schedule('rot-eval', '48 21 * * *', $job$ set statement_timeout = '5min'; set lock_timeout = '5s'; select public.rot_eval_nightly(300) $job$) $q$;
 end
 $outer$;
