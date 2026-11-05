@@ -1,6 +1,9 @@
 # データ担当の帳面
 
 ## いま持っている仕事
+- 11/5 21時ごろ main に入った：data/co-leave-support（147 経営の精算・148・149・delete-account の精算）、data/signup-daily（150）、data/livery-keep（151）。#10・#11 は閉じた。#9 は co/leave-handling 向けのまま開いているが、中身は main に入り済み
+  - 本番に流れたか（Actions のデータベースの段階）はまだ確かめていない。次の回に確かめる
+  - 運用予想の強化（data/rotation-predict）の移行 147 は main の 147_co3_leave と番号がぶつかる。反映のときは rebase で 152 以降に付け直す
 - 特別塗装機の予定の便を残す（ブランチ data/livery-keep → main 向けの下書き PR #11）：11/6 済み。報告 docs/pm/report-livery-keep.md
   - 移行151 で livery_plans → flight_schedule の外部キー（cascade）を外し、livery_plans_upcoming を left join に。flight_schedule は今のまま14日で消す。RLS はいまのまま
   - t89（17項目）と SQL のテスト94本すべて通過。チェックインは返す形が同じで影響なし
