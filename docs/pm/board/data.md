@@ -22,3 +22,8 @@
 ## 11/5 17:45 反映済み
 - 20261104000146_user_profiles.sql は本番に流れた（Actions のデータベースの段階で成功）
 - 本人の決定：規約を改定するときは「terms_versions に1行足す → アプリの定数を変える」の順
+
+## 11/5 運用予想の強化（data/rotation-predict）の結果と次
+- 学ぶ予想（rot_pairs・rot_eval・predict_rotation_v2・pg_cron rot-learn）と読むだけの SQL（docs/pm/rotation-backtest.sql）を作った。本人が SQL を流して結果を貼り返すのを待っている
+- 反映の前に直すこと：移行の番号 20261105000147 が co/leave-handling の 20261105000147_co3_leave.sql とぶつかる。テストの名前 t85_rotation_predict も、main に入った t85_user_profiles と番号がかぶる。反映のときに `node tools/migrations.mjs rebase` で付け直し、テストの番号もずらす
+- 次の仕事の候補：livery_plans が flight_schedule と一緒に14日で消える作り。「記録は消さない」に合わせて残し方を直す（本人の了解のあと）
