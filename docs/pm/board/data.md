@@ -18,3 +18,7 @@
   2. co3_news_kind_check に 'partner' を足す移行（RLS はそのまま）
   3. co3_codeshares に paid_amount bigint を足す移行（RLS はそのまま）
 - 広告担当からの依頼：毎日の登録数を運営コンソールで見られるようにする（読むだけ）
+
+## 11/5 17:45 反映済み
+- 20261104000146_user_profiles.sql は本番に流れた（Actions のデータベースの段階で成功）
+- 本人の決定：規約を改定するときは「terms_versions に1行足す → アプリの定数を変える」の順
