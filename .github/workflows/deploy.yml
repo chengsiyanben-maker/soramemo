@@ -111,6 +111,13 @@ jobs:
         run: |
           pip install fonttools brotli
           cd tools && npm install --no-audit --no-fund
+      # 元のフォント（約10MB）を毎回 GitHub から取らないよう、Actions のキャッシュに残す。
+      # 取得先やフォントを変えたら build_font.py が変わるので、キャッシュも作り直される
+      - name: 元のフォントをキャッシュから戻す
+        uses: actions/cache@v4
+        with:
+          path: tools/fonts/*.ttf
+          key: font-src-${{ hashFiles('tools/build_font.py') }}
       - name: 配る用を作る（縮める・フォントを作る・版の番号を付ける）
         run: node tools/build.mjs
       - uses: actions/configure-pages@v5

@@ -145,6 +145,8 @@ OpenSky の無料枠は1日4,000クレジットで、1回の問い合わせは4�
 
 運営コンソール（`ops-console/index.html`）を開くと、利用者数などの数字と、印の付いたチェックイン（不可能な速さ・誤差大・電波なしで保留）の一覧が見られる。「問題なし」で印を外し、「取り消す」でそのチェックインと、それを使ったフライトを消す。操作は `admin_actions` 表に理由つきで残る。
 
+毎日の新規登録の数は `admin_signups_daily(日数)`（運営者だけ・数だけ）で取れる。日本時間の日ごとに、登録・同意・使い方の答え（撮る・修行・気軽・未回答）の内訳を返す。SQL Editor で見るときは `docs/pm/signups-daily.sql`。
+
 1. `ops-console/config.js` に、アプリと同じ値を入れる
 2. 自分のメールアドレスでアプリに一度ログインしてから、SQL Editor で運営者として登録する
    `insert into ops.admins (user_id) select id from auth.users where email = '<運営者のメールアドレス>';`

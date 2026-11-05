@@ -12,6 +12,7 @@ async def run(scheme):
         await pg.screenshot(path=os.path.join(WORK,f'u_guide_{scheme}.png'))
         for _ in range(3): await pg.click('#obNext'); await pg.wait_for_timeout(150)
         print('guide closed:', not await pg.is_visible('#dGuide'))
+        if await pg.is_visible('#dAuth'): await pg.click('#dAuth [data-au=close]')   # サーバー版で未ログインなら、案内のあとにログインの画面が出る（「あとで」で閉じる）
         await pg.screenshot(path=os.path.join(WORK,f'u_home_{scheme}.png'))
         await pg.click('#openSettings'); await pg.click('#toggleDemo')
         cts = await pg.evaluate("'a:'+A.find(a=>a.iata=='CTS').id"); oka = await pg.evaluate("'a:'+A.find(a=>a.iata=='ISG').id")
