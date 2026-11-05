@@ -32,7 +32,7 @@
 - 予想は表に残さず関数で出す（実績とまざらない）。画面向けは `predict_rotation_v2(登録記号)`：返す形は今と同じで、`estimate: true`（「予想」と出す）と便ごとの出どころ `src`（livery／learn／base）を足した。**まだ画面にはつないでいない。**
 - 毎晩、前の日を「前の日の夜の時点の記録だけで予想した」として採点し、`rot_eval` に残す（今の仕組みと案の両方）。反映後は SQL を貼らなくても当たり具合を見られる。
 - 新しい表は2つとも RLS 有効・利用者からは読めない。reg_legs・rotation_obs・flight_history は読むだけで消さない。
-- テスト `tests/sql/t85_rotation_predict.mjs`（28項目）を足した。既存の SQL のテストも流した（結果は下）。
+- テスト `tests/sql/t85_rotation_predict.mjs`（28項目）を足した。既存のものも含め、SQL のテスト93本がすべて通った（模擬のデータベース）。
 
 ## 3. 比べ方（`docs/pm/rotation-backtest.sql`、読むだけ）
 
