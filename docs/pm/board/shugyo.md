@@ -17,6 +17,7 @@
 - リモートに古い `shugyo` ブランチ（10/21）があるので、`shugyo/<名前>` は push できない（ref がぶつかる）。`shugyo-<名前>` で作る
 
 ## いま持っている仕事
+- PM の指示（11/6 22時）：「次にやること」1・2 → 同じ日の最初の回で済んでいた（PR #26）。t62 の原因はテストの土台なので、指示どおり checkin.md の「下の担当からの依頼」に書いて止まった。shugyo/fix-t62 は作らない
 - 棚卸し（11/6）：ブランチ shugyo-inventory、下書き PR #26、報告 docs/pm/report-shugyo-inventory.md。コードの変更なし。時刻表を確かめる SQL は docs/pm/shugyo-timetable-check.sql
   - 修行のテスト t62・t64・t73・t75・t76・t77・t78・t80 は main で 8/8 成功
   - t62 は main で 4/10。原因は file:// の reload で localStorage が落ちること。PR #20（checkin/test-waits）の t62 で 10/10。修行側で直すものはないので fix-t62 は作らない
