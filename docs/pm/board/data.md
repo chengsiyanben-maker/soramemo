@@ -58,3 +58,7 @@
 4. ブランチ maint/<日付> に移行（RLS もセット）とテストを置く。main と本番には入れない
 5. 報告は docs/pm/maint/<日付>-report.md：先週と比べた大きさ・遅い処理・直す案（効き目と危なさ）・本人に流してほしい SQL
 6. Supabase の無料枠・今のプランの上限まで、あとどのくらいで届くかの見込みも毎回書く
+
+## 11/6 10:20 反映済み（main 15b2174）
+- data/rotation-predict（移行 152：rot_pairs・rot_pairs_days・rot_eval、毎晩の rot-pairs 6:33・rot-eval 6:48、日本時間）を本番に流した。Actions はすべて成功。画面は変わらない
+- 次：11/7 の朝に本人が cron.job_run_details を見る SQL を流して貼る → 初めの夜が動いたか確かめる。11/13 ごろに docs/pm/rotation-eval-view.sql で7日分を比べ、画面に learn・learn_hi・今のままのどれを使うか決める
