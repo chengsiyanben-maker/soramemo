@@ -1,0 +1,56 @@
+<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ストアに出すときの画面案｜そらメモ</title><style>
+:root{
+  --gothic:"Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic UI","Yu Gothic","Meiryo","Noto Sans JP","Noto Sans CJK JP",system-ui,sans-serif;
+  --sign:"Barlow Condensed","Arial Narrow",var(--gothic);
+  --bg:#EEF1F5; --card:#FFFFFF; --ink:#374151; --strong:#1F2937; --sub:#5F6878; --mute:#6B7280; --line:#9CA3AF;
+  --pill:rgba(17,24,39,.06); --hero:#0F1B2D; --on-hero:#F3F4F6; --hero-sub:#A7B0BC; --hero-pill:rgba(255,255,255,.10);
+  --shadow:0 1px 2px rgba(17,24,39,.04),0 10px 30px -8px rgba(17,24,39,.10),inset 0 0 0 1px rgba(17,24,39,.07);
+  --jal:#C8102E; --ana:#1C4FA0; --stub:#E7C873; --ok:#7EE2A8;
+  --chart-sea:#DCEAF3; --chart-land:#F4F2EA; --chart-coast:#A9B9AE; --chart-apt:#7A1F5C; --chart-grid:rgba(31,78,121,.10);
+  --tabs:rgba(255,255,255,.94); --demo-bg:#FFFFFF; --demo-ink:#374151;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){
+  --bg:#0B0D10; --card:#16191F; --ink:#D1D5DB; --strong:#F3F4F6; --sub:#A7B0BC; --mute:#9AA3B0; --line:#4B5563;
+  --pill:rgba(255,255,255,.08); --hero:#16233A; --on-hero:#F3F4F6; --hero-sub:#A7B0BC; --hero-pill:rgba(255,255,255,.10);
+  --shadow:0 12px 26px -16px rgba(0,0,0,.7),inset 0 0 0 1px rgba(255,255,255,.06);
+  --jal:#FF5A6E; --ana:#6EA0FF; --stub:#D9B95E; --ok:#7EE2A8;
+  --chart-sea:#0F1A24; --chart-land:#1A1F24; --chart-coast:#3A4A42; --chart-apt:#E07AB5; --chart-grid:rgba(127,166,217,.10);
+  --tabs:rgba(22,25,31,.94); --demo-bg:#262B33; --demo-ink:#D1D5DB;}}
+:root[data-theme=dark]{
+  --bg:#0B0D10; --card:#16191F; --ink:#D1D5DB; --strong:#F3F4F6; --sub:#A7B0BC; --mute:#9AA3B0; --line:#4B5563;
+  --pill:rgba(255,255,255,.08); --hero:#16233A; --on-hero:#F3F4F6; --hero-sub:#A7B0BC; --hero-pill:rgba(255,255,255,.10);
+  --shadow:0 12px 26px -16px rgba(0,0,0,.7),inset 0 0 0 1px rgba(255,255,255,.06);
+  --jal:#FF5A6E; --ana:#6EA0FF; --stub:#D9B95E; --ok:#7EE2A8;
+  --chart-sea:#0F1A24; --chart-land:#1A1F24; --chart-coast:#3A4A42; --chart-apt:#E07AB5; --chart-grid:rgba(127,166,217,.10);
+  --tabs:rgba(22,25,31,.94); --demo-bg:#262B33; --demo-ink:#D1D5DB;}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--gothic);font-size:15px;line-height:1.6;-webkit-text-size-adjust:100%}
+.phone{position:relative;max-width:420px;min-height:100vh;min-height:100svh;margin:0 auto;overflow:hidden}
+.card{background:var(--card);border-radius:22px;box-shadow:var(--shadow)}
+.lab{font-size:13px;font-weight:700;color:var(--sub);letter-spacing:.02em}
+.num{font-weight:800;color:var(--strong);letter-spacing:-.01em;line-height:1.1}
+.u{font-size:12px;font-weight:600;color:var(--mute);margin-left:2px}
+.hit{min-height:44px;min-width:44px}
+.ic{width:44px;height:44px;border-radius:999px;background:var(--card);box-shadow:var(--shadow);display:grid;place-items:center;color:var(--strong);font-weight:800;flex:none}
+.ic svg,.ico{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.tabs{position:fixed;left:50%;transform:translateX(-50%);bottom:14px;width:calc(min(420px,100vw) - 28px);height:64px;border-radius:999px;background:var(--tabs);box-shadow:var(--shadow);display:flex;align-items:stretch;padding:0 8px;backdrop-filter:blur(12px);z-index:30}
+.tabs b{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:13px;font-weight:700;color:var(--sub)}
+.tabs b.on{color:var(--strong)}
+.tabs svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.ann{position:relative;z-index:40;max-width:392px;margin:16px auto 120px;font-size:13px;line-height:1.7;background:#FFF8D6;color:#5A4A12;padding:12px 14px;border-radius:16px}
+.ann b{display:block;font-size:13px}
+.ann ul{margin:4px 0 0;padding-left:1.2em}
+
+.ixw{max-width:1180px;margin:0 auto;padding:24px 16px 60px}
+.ixw h1{font-size:22px;color:var(--strong);margin:0}
+.ixw h2{font-size:17px;color:var(--strong);margin:28px 0 0}
+.ixw p{font-size:14px;color:var(--sub);margin:6px 0 0}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;margin-top:14px}
+.ix{display:block;padding:10px;text-decoration:none}
+.ix img{width:100%;border-radius:14px;display:block;background:var(--bg)}
+.ix b{display:block;color:var(--strong);font-size:15px;margin-top:8px}
+.ix small{display:block;color:var(--sub);font-size:13px}
+</style></head><body><div class="ixw"><h1>ストアに出すときの画面案（11/6）</h1><p>1月のストア公開に足すアプリの機能：位置情報・通知・電波がないとき・アカウントの削除・データの出典と、ストアの紹介画像5枚。明るい表示だけ。報告は docs/pm/report-store-v1.md。</p>
+<h2>アプリの中</h2><div class="grid"><a class="card ix" href="01-location.html"><img src="png/01-location.png" alt="位置情報を使う理由"><b>位置情報を使う理由</b><small>OS の許可の前に出す説明・使っている間だけ</small></a><a class="card ix" href="01b-location-os.html"><img src="png/01b-location-os.png" alt="端末の許可の窓（見本）"><b>端末の許可の窓（見本）</b><small>説明の文の長さを確かめる</small></a><a class="card ix" href="01c-location-off.html"><img src="png/01c-location-off.png" alt="位置が使えないとき"><b>位置が使えないとき</b><small>許可しない・おおよその位置のとき</small></a><a class="card ix" href="02-notify.html"><img src="png/02-notify.png" alt="通知を申し込むとき"><b>通知を申し込むとき</b><small>ボタンを押したときだけ・届くものを先に</small></a><a class="card ix" href="02b-notify-settings.html"><img src="png/02b-notify-settings.png" alt="通知の設定"><b>通知の設定</b><small>申し込んだものの一覧・端末でオフのとき</small></a><a class="card ix" href="03-offline-home.html"><img src="png/03-offline-home.png" alt="電波がないときのホーム"><b>電波がないときのホーム</b><small>送信待ちの印・最後に読み込んだ時刻</small></a><a class="card ix" href="03b-offline-flights.html"><img src="png/03b-offline-flights.png" alt="電波がないときの記録"><b>電波がないときの記録</b><small>最後に読み込んだ記録・できないこと</small></a><a class="card ix" href="04-delete-info.html"><img src="png/04-delete-info.png" alt="アカウントの削除（説明）"><b>アカウントの削除（説明）</b><small>消えるもの・残るもの・書き出し</small></a><a class="card ix" href="04b-delete-confirm.html"><img src="png/04b-delete-confirm.png" alt="アカウントの削除（確かめ）"><b>アカウントの削除（確かめ）</b><small>「削除」と入力・押しまちがいを防ぐ</small></a><a class="card ix" href="04c-delete-done.html"><img src="png/04c-delete-done.png" alt="アカウントの削除（済み）"><b>アカウントの削除（済み）</b><small>済んだあと・アプリそのものは残る</small></a><a class="card ix" href="05-sources.html"><img src="png/05-sources.png" alt="データの出典"><b>データの出典</b><small>マイページ › このアプリについて（データ担当の依頼）</small></a></div>
+<h2>ストアの紹介画像（1290×2796）</h2><div class="grid"><a class="card ix" href="S1-store.html"><img src="png/S1-store.png" alt="紹介画像 1：印をもらう"><b>紹介画像 1：印をもらう</b><small>1枚目：印集め</small></a><a class="card ix" href="S2-store.html"><img src="png/S2-store.png" alt="紹介画像 2：乗った便が路線図に"><b>紹介画像 2：乗った便が路線図に</b><small>2枚目：フライト</small></a><a class="card ix" href="S3-store.html"><img src="png/S3-store.png" alt="紹介画像 3：特別塗装機の図鑑"><b>紹介画像 3：特別塗装機の図鑑</b><small>3枚目：図鑑</small></a><a class="card ix" href="S4-store.html"><img src="png/S4-store.png" alt="紹介画像 4：エアライン経営"><b>紹介画像 4：エアライン経営</b><small>4枚目：経営</small></a><a class="card ix" href="S5-store.html"><img src="png/S5-store.png" alt="紹介画像 5：いまの空港の使い方"><b>紹介画像 5：いまの空港の使い方</b><small>5枚目：運用</small></a></div></div></body></html>
