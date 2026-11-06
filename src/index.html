@@ -6270,7 +6270,7 @@ document.addEventListener("click", async e => {
 // 台風の計画欠航（明日、台風が近づきそうな空港を結ぶ路線）
 function typhoonHtml(){
   const W = CO.wx; if(!W || !(W.typhoon || []).length) return "";
-  const md = d => { const x = new Date(String(d) + "T00:00:00+09:00"); return `${x.getMonth() + 1}月${x.getDate()}日`; };
+  const md = d => { const [, m, dd] = String(d).slice(0, 10).split("-").map(Number); return `${m}月${dd}日`; };   // 日本時間の日付をそのまま読む（端末の時間帯に左右されない）
   return `<div class="darkcard"><div class="pills"><em class="tag2 amber">台風</em></div><h3>台風が近づきそうです</h3>
     ${W.typhoon.map(x => { const r = (CO.routes || []).find(r => r.k === x.k);
       return `<div class="dkrow"><b>${md(x.day)} ${esc(apNm(x.iata))} ・ ${esc(r ? rName(r) : x.k)}</b><small>${x.cancel === true ? "計画欠航" : x.cancel === false ? "飛ばす" : "まだ決めていない"}</small></div>
@@ -6401,7 +6401,7 @@ const SLOT_AP = {HND:"羽田", NRT:"成田", KIX:"関西", ITM:"伊丹", FUK:"�
 const slotName = x => `${SLOT_AP[x.iata]}${x.pool === "regional" ? "（地方の枠）" : ""}`;
 function slotsHtml(){
   const S = CO.slots, L = S.list || [], mon = d => +String(d).slice(5, 7), self = !S.auto && ratingOk(3);
-  const last = new Date(String(S.next) + "T00:00:00+09:00"); last.setDate(last.getDate() - 1);
+  const [ny, nm] = String(S.next).slice(0, 10).split("-").map(Number), last = new Date(Date.UTC(ny, nm - 1, 0));   // 申し込みの締め切り＝来月1日の前の日（日本時間の日付で計算し、端末の時間帯に左右されない）
   const now = L.filter(x => x.granted != null);
   const nowHtml = S.decided ? (now.length ? now.map(x => { const pct = x.applied ? Math.round(x.granted / x.applied * 100) : 100, cut = Math.max(0, x.use - x.granted);
       return `<div class="v3box"><div class="satnum"><div><small>${esc(slotName(x))}</small><br><b>${x.granted}</b> <small>/ 申し込み ${x.applied}便（${pct}%）</small></div></div>
@@ -6414,7 +6414,7 @@ function slotsHtml(){
       <div class="sv"><button data-slot="${key}" data-v="${Math.max(0, v - 2)}" aria-label="${esc(slotName(x))}の申し込みを2便へらす"${self && v > 0 ? "" : " disabled"}>−</button><b>${v}<small>便</small></b><button data-slot="${key}" data-v="${v + 2}" aria-label="${esc(slotName(x))}の申し込みを2便ふやす"${self ? "" : " disabled"}>＋</button></div></div>`; }).join("");
   return `<p class="hint">枠があるのは混雑空港の5つ（羽田・成田・関西・伊丹・福岡）だけです。ほかの空港は、混む時間帯に遅れやすくなるだけです。</p>
     <small class="lbl">${mon(S.month)}月に使えている枠（1日の便数）</small>${nowHtml}
-    <small class="lbl" style="margin-top:10px">${mon(S.next)}月の申し込み（${last.getMonth() + 1}月${last.getDate()}日まで）</small>
+    <small class="lbl" style="margin-top:10px">${mon(S.next)}月の申し込み（${last.getUTCMonth() + 1}月${last.getUTCDate()}日まで）</small>
     <div class="v3box">${ratingOk(3) ? `<label class="trauto" style="margin:0 0 6px"><input type="checkbox" id="slotAuto"${S.auto ? " checked" : ""}> おまかせで申し込む（組んだスケジュールの便数をそのまま申し込みます）</label>` : ratingLock(3).replace("から使えます。", "から自分で申し込めます（いまはおまかせ）。")}
       ${rows}</div>
     <p class="hint">申し込みの合計が空港の枠を超えると、申し込んだ便数の割合で分けます。外れて全部止まることはなく、どの会社も最低1日4便は使えます。羽田の2割は「地方の枠」で、地方の空港と羽田を結ぶ路線だけで分けます。数字はゲームの中の計算です。</p>`;
