@@ -13,7 +13,7 @@
     return api; }
   window.supabase = { createClient(){ return {
     auth:{ getSession: async()=>({data:{session}}), onAuthStateChange(f){ listeners.push(f); },
-      signInWithOtp: async(o)=>{ window.__otp = o; window.__otps = (window.__otps||[]).concat([o]); if(o.options && o.options.shouldCreateUser === false && window.__noUser) return {error:{code:'otp_disabled', status:422, message:'Signups not allowed for otp'}}; return {error:null}; },
+      signInWithOtp: async(o)=>{ window.__otp = o; window.__otps = (window.__otps||[]).concat([o]); if(window.__otpErr) return {error:window.__otpErr}; if(o.options && o.options.shouldCreateUser === false && window.__noUser) return {error:{code:'otp_disabled', status:422, message:'Signups not allowed for otp'}}; return {error:null}; },
       verifyOtp: async(o)=>{ window.__verify = o; if(o.token !== (window.__otpCode || '12345678')) return {error:{message:'invalid'}}; session = {user:{id:'u1', email:o.email, created_at: window.__userCreatedAt || new Date().toISOString()}}; listeners.forEach(f=>f('SIGNED_IN', session)); return {data:{session}, error:null}; }, signOut: async()=>{ session=null; return {error:null}; } },
     from: q,
     rpc: async (name, a) => { window.__rpcs = (window.__rpcs||[]).concat([name]);
