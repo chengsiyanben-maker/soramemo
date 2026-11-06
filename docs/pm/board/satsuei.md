@@ -17,6 +17,7 @@
   - 候補の元：36時間より前は airport_tracks_all＋reg_legs、36時間以内は track_points＋reg_legs（airport_tracks_all は毎晩作られるため）。31日より前は断る（cold_done で外へ移るため）。14空港だけ
   - photo_log は auth.users を on delete cascade で参照（退会で消える）、本人だけ読む・足す・消す、update なし
   - 依頼文（デザイン担当 9-1・データ担当 9-2）は仕様の最後。PM が各担当へ渡す
+  - PM の指示（11/6 22時）はブランチ名を satsuei/spec-photo-log としていたが、同じ仕事が先の回で satsuei/photo-log-spec（PR #24）として済んでいたので、同じものを二重に作らず PR #24 を使う
   - 本人に決めてほしいこと：撮った機体の一覧の置き場所（今のタブ帯に「記録」タブはない）／帯を入れた画像を最初の版に入れるか／1回に選べる写真の数（20枚）
 
 ## 次にやること
