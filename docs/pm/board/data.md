@@ -1,6 +1,11 @@
 # データ担当の帳面
 
 ## いま持っている仕事
+- 撮影記録の表と関数（11/6 22時45分 PM の指示・撮る人用担当の依頼 9-2）：ブランチ data/photo-log → main 向けの下書き PR #32。報告 docs/pm/report-photo-log.md
+  - 移行 154（photo_log と RLS：本人だけ select・insert・delete、update なし、auth.users を cascade、unique (user_id, reg, taken_at)、トリガーで分に丸め・未来を断る・1日200行（足した日・日本時間）、created_at は今に固定／photo_candidates(p_iata, p_at)：authenticated だけ、airport_tracks_all＋reg_legs、36時間以内は track_points からも作る（22km 以内のいちばん近い点・6,000ft より下・高さで arr／dep・全機の航跡と30分以内で重なれば外す）、前後20分・20件・登録記号なしは返さない、断る文は not recorded／too old／future／login required／admin_backup に photo_log を1行）
+  - テスト t94（38項目）通過。t31・t33・t36・t39・t40・t41・t43・t47・t85 も通過。番号は151件で重なりなし
+  - 本人待ち：「反映して」・1日200行を足した日で数えてよいか。仕様との違いは「36時間の境目で両方を見る」だけ（撮る人用担当に伝える）
+- 修行担当の依頼（checkin.md の依頼欄）：ANA の時刻表が12月以降も入っているか。timetable-sync を読んだ：日付で絞らず ODPT の期間をそのまま毎日入れる。誤りは前のまま残し result に ANA_error、1,000件ちょうどなら ANA_truncated。判定の表と、短い読むだけの SQL は report-photo-log.md の 4。本人が shugyo-timetable-check.sql（PR #26）を流した結果が来たら、その表で判定して修行担当に返す
 - ストアに出す前の外部データの利用条件の見直し（11/6 PM の指示）：ブランチ data/store-terms → 下書き PR #22。文書 docs/pm/store-terms.md（コードは変えていない）
   - 判定：ODPT よい（dc:date の表示がまだ）／adsb.lol よい（作者への連絡が要る。送る文の案あり）／**OpenSky はストアの前に要対応**（研究・非商用向け。おすすめは毎晩の照合を adsb.lol の reg_legs・flight_history に置き換え）／地理院よい（その場で読み込むなら申請不要。地図をアプリに入れたり端末に保存したりしない。配色を変えた旨・淡色地図ズーム5〜8の海岸線の出所を足す）／aviationweather.gov・気象庁よい／AIP はたぶんよい（SWIM のサービス説明書は未読）／特別塗装機よい（planespotters の規約は開けず）
   - 読めなかったページ：ODPT の規約（スクリプトで描くページ）・OpenSky の利用規約・SWIM ポータル・planespotters の規約。ODPT は 11/4 の記録で判定
@@ -46,7 +51,7 @@
 - 本人の決定：規約を改定するときは「terms_versions に1行足す → アプリの定数を変える」の順
 
 ## 移行とテストの番号
-- main の最新は 152（rotation_predict。11/6 反映済み）。maint/2026-11-06 は 153・テスト t93。次に新しく作るものは 154 以降・テストは t94 以降
+- main の最新は 152（rotation_predict。11/6 反映済み）。maint/2026-11-06 は 153・テスト t93、data/photo-log は 154・テスト t94。次に新しく作るものは 155 以降・テストは t95 以降
 - main に別の移行が先に入ったら、反映の前にもう一度 `node tools/migrations.mjs rebase`
 - 本番は小さいプランで一時ファイルの余裕がない。本人に流してもらう SQL は、大きな中間の表・自己結合・大きな並べ替えを避け、索引で引く形にする
 - SQL のテストは全部で約35分かかる（手元で流すときは裏で流してログを見る。t92 だけで約4分。同じログに2回流すと混ざるので、ログの名前を分ける）
@@ -57,10 +62,13 @@
 2. 7日分たまったら rotation-eval-view.sql の結果を読み（「記録がそろった日数」を見て、そろった日だけで比べる）、learn と learn_hi のどちらを画面に使うかの案を PM に出す。決まったらチェックイン担当への依頼文（報告の7節）を、使う方式に合わせて直す
 3. PR #6 の CI とレビューに答える（11/6 2時の回で確認：CI の実行もレビューもコメントもまだない）
 4. 定期の手入れ（PR #18）：本人の点検の結果（docs/pm/maint/2026-11-06-result.csv か貼ったもの）が来たら読む。所要時間を見て上限を直すか決める・経営の処理の上限の案（最長の3倍・最小30秒）を作って経営担当への依頼文に入れる・無料枠／プランまでの見込みを出す。CI とレビューに答える
-5. 管制の交信（PR #27）：本人が案を選んだら、移行 154 以降・テスト t94 以降で作る（migrations.mjs rebase を忘れない）。atc-retention-check.sql の結果が来たら読む
-6. それ以外は PM の指示を待つ（勝手に新しい機能は始めない）。毎週月曜の昼の回は、下の「定期の仕事」（次の候補：cold_candidates を一時ファイルを使わない形に・点検で死んだ行や使われていない索引が見つかればその整理）
+5. 撮影記録（PR #32）：CI とレビューに答える。「反映して」が出たら番号を rebase。撮る人用担当の画面が photo_candidates の断る文を使うか確かめる
+6. 時刻表：shugyo-timetable-check.sql の結果が来たら report-photo-log.md の 4 の表で判定（ANA_truncated があれば問い合わせを分ける直しを作る）
+7. 管制の交信（PR #27）：本人が案を選んだら、移行 154 以降・テスト t94 以降で作る（migrations.mjs rebase を忘れない）。atc-retention-check.sql の結果が来たら読む
+8. それ以外は PM の指示を待つ（勝手に新しい機能は始めない）。毎週月曜の昼の回は、下の「定期の仕事」（次の候補：cold_candidates を一時ファイルを使わない形に・点検で死んだ行や使われていない索引が見つかればその整理）
 
 ## ほかの担当への依頼
+- 撮る人用へ（11/6 撮影記録・PR #32）：photo_log と photo_candidates ができた（未反映）。候補は上の3件を出し、「ほかの機体」は最大20件。断る文は 'not recorded'（14空港の外）・'too old'（31日より前）・'future'・'login required'。登録記号のない便は返さないので、どれでもないときは手で入れる。仕様との違いは「36時間の境目で両方の元を見る」だけ
 - 撮る人用へ（11/6 管制の見直し）：report-atc-review.md をまとめるとき、docs/pm/report-atc-data-review.md（PR #27）の中身を「データの節」として入れてほしい。案 A1 を入れるなら、画面に「同意を取り直す」案内（atc-ingest が 403 reconsent を返したとき）が要る
 - チェックインへ（11/6 ストアの見直し）：ODPT のデータを出す所に dc:date を出す（ストアの前に）／地図の出典を全部の地図で地理院タイル一覧へのリンクにそろえ、「配色を変えて表示」を足す
 - デザインへ（11/6 ストアの見直し）：アプリの中の「データの出典」の一覧の画面案（文はデータ担当が用意）
