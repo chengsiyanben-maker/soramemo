@@ -64,7 +64,6 @@
 [data-palette="board"] .tally .n{font-family:var(--dotfont);font-weight:400;color:var(--shu);letter-spacing:.04em}
 [data-palette="board"] .flight .route,[data-palette="board"] .flight .km{font-family:var(--dotfont);font-weight:400}
 [data-palette="board"] .flight .route{color:#fff}
-[data-palette="board"] .login input{background:var(--shu-wash)}
 [data-palette="board"] :is(.seg button,.yrtabs button,.nowtabs button,.nowterms button,.chip)[aria-pressed="true"],[data-palette="board"] .modesw button[aria-selected="true"]{background:var(--shu);color:var(--on-shu);border-color:var(--shu)}
 [data-palette="board"] .yrgrid{background:var(--paper)}
 [data-palette="board"] .yrgrid>*{box-shadow:0 0 0 .5px var(--line)}
@@ -1318,10 +1317,6 @@ dialog.auth::backdrop{background:var(--a-bg)}
 .welcome-card b{display:block;color:#1F2937;font-size:15px}
 .welcome-card small{display:block;color:#6B7280;font-size:12px;line-height:1.5}
 .welcome-card .x{margin-left:auto;flex:none;width:30px;height:30px;border-radius:999px;border:0;background:#FFFFFF;color:#6B7280;font-size:15px;cursor:pointer}
-.login .signup-row{display:flex;flex-direction:column;align-items:center;gap:6px;margin-top:12px}
-.login .signup-row .pill2{border:0;border-radius:999px;background:rgba(17,24,39,.05);color:#1F2937;font-family:inherit;font-style:normal;font-size:14px;font-weight:700;padding:11px 22px;cursor:pointer}
-.login .signup-row .pill2 b{color:#1C4FA0}
-.login .signup-row .linkish{border:0;background:none;padding:0;font-family:inherit;font-style:normal;font-size:12px;color:#6B7280;text-decoration:underline;cursor:pointer}
 dialog.mypage{--mp-bg:#F4F5F7;--mp-card:#FFFFFF;--mp-ink:#374151;--mp-sub:#9CA3AF;--mp-mute:#6B7280;--mp-shadow:0 12px 26px -18px rgba(15,23,42,.3),inset 0 0 0 1px rgba(17,24,39,.07);
   max-width:min(460px,100vw);width:100%;max-height:100dvh;height:100dvh;margin:0 auto;border-radius:0;background:var(--mp-bg);color:var(--mp-ink)}
 [data-palette="board"] dialog.mypage{--mp-bg:#0B0D10;--mp-card:#16191F;--mp-ink:#E5E7EB;--mp-sub:#8B95A3;--mp-mute:#A7B0BC;--mp-shadow:0 12px 26px -16px rgba(0,0,0,.7)}
@@ -1789,8 +1784,6 @@ details.dev summary{cursor:pointer;color:var(--sumi);font-size:14px;padding:6px 
 .set-row:last-of-type{border-bottom:none}
 .set-row small{display:block;color:var(--sumi);font-size:13px;line-height:1.5}
 .danger{color:var(--shu-text);border-color:var(--shu)}
-.login{margin:18px 0 0;padding:16px;background:var(--paper);border-radius:12px}
-.login input{width:100%;padding:12px;border:1px solid var(--line);border-radius:10px;background:var(--sky)}
 [hidden]{display:none !important}
 
 /* ---------- 図鑑：全国制覇のカード、地方のタイル、開いた地方の印、最近押した印 ---------- */
@@ -2722,18 +2715,6 @@ dialog.ckconfirm button.go{background:#E9C46A;color:#111827}
       <label for="demoAirport">いる空港（デモ）</label>
       <select id="demoAirport"></select>
     </div>
-    <div class="login" id="loginBox" hidden>
-      <p class="hint">記録をサーバーに保存するため、メールアドレスでログインします。メールに届く数字のコードを入れるとログインできます。</p>
-      <input type="email" id="email" placeholder="メールアドレス" autocomplete="email" inputmode="email">
-      <div id="captcha" class="captcha"></div>
-      <button class="btn2" id="sendLink" style="width:100%;margin-top:10px">ログイン用のコードを送る</button>
-      <div id="codeBox" hidden style="margin-top:10px">
-        <input id="loginCode" inputmode="numeric" autocomplete="one-time-code" maxlength="10" placeholder="メールに届いたコード">
-        <button class="btn1" id="verifyCode" style="width:100%;margin-top:8px">ログイン</button>
-      </div>
-      <p class="msg" id="loginMsg" role="status" aria-live="polite"></p>
-      <div class="signup-row"><button class="pill2" type="button" id="toSignup">はじめての方は<b>新規登録</b></button><button class="linkish" type="button" id="loginDemo">登録しないでデモで試す</button></div>
-    </div>
     <div class="notice-slot" id="noticeSlot" hidden>
     <div class="queuebar" id="queueBar" hidden></div>
     <div class="queuebar" id="migrateBar" hidden></div>
@@ -3646,8 +3627,6 @@ async function reload(){
 function updateAuthUI(){
   const needLogin = SERVER && !user && !demo;
   const paused = SERVER && !demo && typeof APP_STATUS !== "undefined" && (APP_STATUS.maintenance || !APP_STATUS.checkin_enabled);
-  $("loginBox").hidden = !needLogin;
-  if(needLogin) initCaptcha();
   $("checkin").disabled = !!paused;   // ログインしていないときは止めない（押すとログインの案内）
   homeState();
   $("acctRow").hidden = !(SERVER && user);
@@ -7178,15 +7157,7 @@ $("delAcct").onclick = async () => {
 
 /* ---------- ロボット除け（Cloudflare Turnstile）。config.js に turnstileSiteKey があるときだけ使う ---------- */
 const TURNSTILE_JS = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
-let CAPTCHA = { token:null, widget:null };
 const captchaOn = () => !!(SORAMEMO_CONFIG.turnstileSiteKey);
-async function initCaptcha(){
-  if(!captchaOn() || CAPTCHA.widget !== null) return;
-  try{ if(!window.turnstile) await loadScript(TURNSTILE_JS); }catch(e){ $("loginMsg").textContent = "確認の部品を読み込めませんでした。電波のよい場所で開き直してください。"; $("loginMsg").className = "msg err"; return; }
-  CAPTCHA.widget = window.turnstile.render("#captcha", { sitekey: SORAMEMO_CONFIG.turnstileSiteKey, language:"ja", appearance:"interaction-only",
-    callback: t => { CAPTCHA.token = t; }, "expired-callback": () => { CAPTCHA.token = null; }, "error-callback": () => { CAPTCHA.token = null; } });
-}
-function resetCaptcha(){ CAPTCHA.token = null; try{ if(window.turnstile && CAPTCHA.widget !== null) window.turnstile.reset(CAPTCHA.widget); }catch(e){} }
 
 
 /* ---------- ログイン前（端末の中だけ）の記録を、アカウントの記録帳に引き継ぐ ---------- */
@@ -11616,38 +11587,6 @@ const LOGIN_GUARD = {
   get(k){ try{ return JSON.parse(localStorage.getItem("soramemo." + k) || "null"); }catch(e){ return null; } },
   set(k, v){ try{ localStorage.setItem("soramemo." + k, JSON.stringify(v)); }catch(e){} }
 };
-$("sendLink").onclick = async () => {
-  const email = $("email").value.trim(), m = $("loginMsg");
-  const last = LOGIN_GUARD.get("sentAt") || 0;
-  if(Date.now() - last < 60000){ m.textContent = `コードは1分に1回まで送れます。あと${Math.ceil((60000 - (Date.now() - last)) / 1000)}秒待ってください。`; m.className = "msg err"; return; }
-  if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){ m.textContent = "メールアドレスを確かめてください。"; m.className = "msg err"; return; }
-  if(!sb){ m.textContent = "サーバーにつながっていません。開き直してください。"; m.className = "msg err"; return; }
-  if(captchaOn() && !CAPTCHA.token){ m.textContent = "確認の表示が出ていれば、それを済ませてからもう一度押してください。"; m.className = "msg err"; initCaptcha(); return; }
-  $("sendLink").disabled = true;
-  const { error } = await sb.auth.signInWithOtp({ email, options:{ shouldCreateUser:false, emailRedirectTo: location.origin + location.pathname, ...(captchaOn() ? { captchaToken: CAPTCHA.token } : {}) } });   // 新しいアカウントは新規登録の画面だけで作る
-  $("sendLink").disabled = false;
-  resetCaptcha();          // 確認の合図は1回ごとに使い捨て
-  if(error){ if(auNoUser(error)){ track("login", "nouser"); AU.email = email; authOpen("login", "nouser"); m.textContent = ""; return; }
-    m.textContent = auSendErr(error); m.className = "msg err"; return; }
-  LOGIN_GUARD.set("sentAt", Date.now());
-  $("codeBox").hidden = false; $("loginCode").focus();
-  m.textContent = "メールに届いたコードを入れてください。メールのリンクを押してもログインできます（ホーム画面に追加したアプリでは、コードを使ってください）。"; m.className = "msg";
-};
-$("verifyCode").onclick = async () => {
-  const email = $("email").value.trim(), token = $("loginCode").value.trim(), m = $("loginMsg");
-  if(!/^\d{6,10}$/.test(token)){ m.textContent = "メールに届いた数字のコードを入れてください。"; m.className = "msg err"; return; }
-  const fail = LOGIN_GUARD.get("codeFail") || { n:0, until:0 };
-  if(fail.until > Date.now()){ m.textContent = `コードの入力が続けて違ったため、少し休みます（あと${Math.ceil((fail.until - Date.now()) / 60000)}分）。`; m.className = "msg err"; return; }
-  $("verifyCode").disabled = true;
-  const { error } = await sb.auth.verifyOtp({ email, token, type:"email", ...(captchaOn() && CAPTCHA.token ? { options:{ captchaToken: CAPTCHA.token } } : {}) });
-  $("verifyCode").disabled = false; resetCaptcha();
-  if(error){
-    const n = fail.until > 0 && fail.until <= Date.now() ? 1 : fail.n + 1;   // 休みが終わったら数え直す
-    LOGIN_GUARD.set("codeFail", n >= 5 ? { n:0, until: Date.now() + 10 * 60000 } : { n, until:0 });
-    m.textContent = "コードが違うか、期限が切れています。もう一度コードを送ってください。"; m.className = "msg err"; return; }
-  LOGIN_GUARD.set("codeFail", { n:0, until:0 });
-  $("codeBox").hidden = true; $("loginCode").value = ""; m.textContent = ""; track("login", "code");
-};
 $("logout").onclick = async () => { if(sb) await sb.auth.signOut(); user = null; CO = null; PLUS = false; PROFILE = null; PROFILE_UID = null; $("dSettings").close(); await reload(); };
 /* ---------- 新規登録・ログイン・同意（全画面 dAuth）。画面案 docs/design/signup（ブランチ design/signup） ----------
    流れ：ログイン →「はじめての方は新規登録」→ メール → コード → 表示名 → 使い方のアンケート → 同意 → 位置情報の説明 → ホーム
@@ -11957,8 +11896,6 @@ function renderWelcome(){
   box.hidden = false;
 }
 document.addEventListener("click", e => { if(e.target.closest("#welcomeX")){ try{ localStorage.removeItem("soramemo.welcome"); }catch(_){} $("welcomeCard").hidden = true; track("welcome", "close"); } });
-$("toSignup").onclick = () => { AU.email = $("email").value.trim(); authOpen("signup", "email"); };
-$("loginDemo").onclick = () => { if(!demo) $("toggleDemo").click(); };
 $("nameEdit").onclick = () => authOpen("rename", "name");
 
 /* ---------- オフライン用の仕組みと、新しい版のお知らせ ---------- */

@@ -94,10 +94,16 @@ async def main():
         await pg.click('#dAuth [data-au=to-signup]'); await pg.wait_for_timeout(100)
         check('新規登録へ進むとメールが入っている', await step(pg) == 'email' and await pg.input_value('#auEmail') == 'new@example.jp')
         await pg.evaluate('authClose(); LOGIN_GUARD.set("sentAt", 0)')
-        await pg.fill('#email', 'new2@example.jp'); await pg.click('#sendLink'); await pg.wait_for_timeout(300)
-        check('ホームのログイン欄からも新規登録へ案内', await step(pg) == 'nouser' and 'new2@example.jp' in await pg.inner_text('#auStep'))
-        await pg.evaluate('authClose()'); await pg.click('#toSignup'); await pg.wait_for_timeout(100)
-        check('ホームの「はじめての方は新規登録」', await step(pg) == 'email')
+        # ホームのメールのログイン欄はなくした（11/6）。右上の「ログイン」とシートの「ログイン・登録」から開く
+        check('ホームにメールのログイン欄がない', await pg.locator('#loginBox, #sendLink, #email, #toSignup').count() == 0)
+        await pg.click('#openSettings'); await pg.wait_for_timeout(200)
+        check('右上の「ログイン」でログインの画面', await step(pg) == 'login')
+        await pg.fill('#auEmail', 'new2@example.jp'); await pg.click('#dAuth [data-au=login-send]'); await pg.wait_for_timeout(300)
+        check('右上から開いたログインでも新規登録へ案内', await step(pg) == 'nouser' and 'new2@example.jp' in await pg.inner_text('#auStep'))
+        await pg.evaluate('authClose()'); await pg.click('#gateLogin'); await pg.wait_for_timeout(200)
+        check('シートの「ログイン・登録」でログインの画面', await step(pg) == 'login')
+        await pg.click('#dAuth [data-au=to-signup]'); await pg.wait_for_timeout(100)
+        check('ログインの画面の「はじめての方は新規登録」', await step(pg) == 'email')
         check('未登録：エラーなし', not errs, errs); await c.close()
 
         # 4. 同意しない人：同意しないとログアウトし、同意の記録は作らない
