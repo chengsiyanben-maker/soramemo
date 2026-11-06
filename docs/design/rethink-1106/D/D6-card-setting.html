@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>1枚のカードの設定｜そらメモ 見直しの方向の案 D（選べるホーム）</title>
+<style>
+
+:root{
+  --gothic:"Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic UI","Yu Gothic","Meiryo","Noto Sans JP","Noto Sans CJK JP",system-ui,sans-serif;
+  --sign:"Barlow Condensed","Arial Narrow",var(--gothic);
+  --bg:#EEF1F5; --card:#FFFFFF; --ink:#374151; --strong:#1F2937; --sub:#5F6878; --mute:#6B7280; --line:#9CA3AF;
+  --pill:rgba(17,24,39,.06); --hero:#0F1B2D; --on-hero:#F3F4F6; --hero-sub:#A7B0BC; --hero-pill:rgba(255,255,255,.10);
+  --shadow:0 1px 2px rgba(17,24,39,.04),0 10px 30px -8px rgba(17,24,39,.10),inset 0 0 0 1px rgba(17,24,39,.07);
+  --jal:#C8102E; --ana:#1C4FA0; --stub:#E7C873; --ok:#1F8A5B; --gold:#8A6A1F; --plan:#E8EEF8;
+  --chart-sea:#DCEAF3; --chart-land:#F4F2EA; --chart-coast:#A9B9AE; --chart-apt:#7A1F5C; --chart-grid:rgba(31,78,121,.10);
+  --tabs:rgba(255,255,255,.94);
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--gothic);font-size:15px;line-height:1.6;-webkit-text-size-adjust:100%}
+.phone{position:relative;max-width:420px;min-height:100vh;min-height:100svh;margin:0 auto;overflow:hidden;background:var(--bg)}
+.wrap{padding:14px 16px 120px}
+.card{background:var(--card);border-radius:22px;box-shadow:var(--shadow)}
+.pad{padding:14px 16px}
+.lab{font-size:13px;font-weight:700;color:var(--sub);letter-spacing:.02em}
+.num{font-weight:800;color:var(--strong);letter-spacing:-.01em;line-height:1.1}
+.u{font-size:12px;font-weight:600;color:var(--mute);margin-left:2px}
+.s{font-size:13px;color:var(--sub);line-height:1.5}
+.ttl{font-size:22px;font-weight:800;color:var(--strong);margin:0;line-height:1.3}
+.h3{display:flex;align-items:center;justify-content:space-between;margin:22px 4px 8px}
+.h3 b{font-size:15px;color:var(--strong)}
+.h3 span{font-size:13px;color:var(--sub);font-weight:700}
+.row{display:flex;align-items:center;gap:10px}
+.gap{height:12px}
+.pl{height:44px;display:inline-flex;align-items:center;justify-content:center;gap:6px;border-radius:999px;padding:0 16px;font-size:14px;font-weight:800;color:var(--strong);background:var(--pill);white-space:nowrap}
+.pl.dark{background:var(--strong);color:#fff}
+.pl.white{background:var(--card);box-shadow:var(--shadow)}
+.pl.sm{font-size:13px;padding:0 14px}
+.chip{display:inline-flex;align-items:center;height:26px;border-radius:999px;padding:0 10px;font-size:13px;font-weight:700;color:var(--sub);background:var(--pill)}
+.chip.est{background:#FFF4D6;color:#6B4E0E}
+.chip.gold{background:#F6EBCB;color:#5E4710}
+.ic{width:44px;height:44px;border-radius:999px;background:var(--card);box-shadow:var(--shadow);display:grid;place-items:center;color:var(--strong);font-weight:800;flex:none}
+.ico{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.tabs{position:fixed;left:50%;transform:translateX(-50%);bottom:14px;width:calc(min(420px,100vw) - 28px);height:64px;border-radius:999px;background:var(--tabs);box-shadow:var(--shadow);display:flex;align-items:stretch;padding:0 8px;backdrop-filter:blur(12px);z-index:30}
+.tabs b{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:13px;font-weight:700;color:var(--sub)}
+.tabs b.on{color:var(--strong)}
+.tabs b.on::after{content:"";width:5px;height:5px;border-radius:9px;background:var(--strong);margin-top:1px}
+.tabs b.mid{flex:none;width:76px;margin:-14px 2px 0}
+.tabs b.mid i{width:62px;height:62px;border-radius:999px;background:var(--strong);color:#fff;display:grid;place-items:center;font-style:normal;box-shadow:0 10px 24px -10px rgba(15,27,45,.6)}
+.tabs svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.ann{position:relative;z-index:40;max-width:392px;margin:16px auto 120px;font-size:13px;line-height:1.7;background:#FFF8D6;color:#5A4A12;padding:12px 14px;border-radius:16px}
+.ann b{display:block;font-size:13px}
+.ann ul{margin:4px 0 0;padding-left:1.2em}
+.flap{display:flex;gap:6px}
+.flap i{font-style:normal;width:40px;height:50px;border-radius:8px;background:#1B2638;color:#F5B83D;font-family:var(--sign);font-size:34px;font-weight:800;display:grid;place-items:center;position:relative}
+.flap i::after{content:"";position:absolute;left:0;right:0;top:50%;height:2px;background:#0F1B2D}
+.hero{background:var(--hero);color:var(--on-hero);border-radius:24px}
+.hero .lab{color:var(--hero-sub)}
+.hero .s{color:var(--hero-sub)}
+.pass{display:flex;border-radius:24px;overflow:hidden;box-shadow:var(--shadow)}
+.pass .m{flex:1;background:var(--hero);color:var(--on-hero);padding:16px 18px}
+.pass .m .lab{color:var(--hero-sub)}
+.pass .nm{font-size:17px;font-weight:800;margin-top:8px}
+.pass .st{font-size:13px;color:var(--hero-sub)}
+.pass .sb{width:96px;background:var(--stub);color:#3A2E0C;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;font-weight:800;border-left:2px dashed rgba(15,27,45,.35)}
+.pass .sb .v{writing-mode:vertical-rl;letter-spacing:.06em;font-size:16px}
+.pass .sb small{font-size:13px;line-height:1.3;text-align:center}
+.steps{display:flex;gap:6px;align-items:center}
+.steps span{height:30px;display:flex;align-items:center;padding:0 11px;border-radius:999px;font-size:13px;font-weight:800;color:var(--sub);background:var(--pill)}
+.steps span.on{background:var(--strong);color:#fff}
+.steps em{font-style:normal;color:var(--sub);font-size:13px}
+.li{display:flex;align-items:center;gap:12px;padding:12px 0;min-height:60px}
+.li+.li{box-shadow:0 -1px 0 var(--pill)}
+.li .t{font-family:var(--sign);font-size:26px;font-weight:800;color:var(--strong);min-width:62px;line-height:1}
+.li b{display:block;color:var(--strong);font-size:15px;line-height:1.35}
+.li small{display:block;font-size:13px;color:var(--sub);line-height:1.4}
+.li .r{margin-left:auto;flex:none}
+.bar2{height:8px;border-radius:9px;background:var(--pill);overflow:hidden}
+.bar2 i{display:block;height:100%;background:var(--strong);border-radius:9px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.tile{padding:14px 16px;min-height:112px;display:flex;flex-direction:column;justify-content:space-between}
+.tile .num{font-size:30px}
+.stamp{width:58px;height:58px;border-radius:999px;border:3px solid var(--strong);display:grid;place-items:center;font-weight:800;font-size:16px;color:var(--strong);flex:none;box-shadow:inset 0 0 0 4px var(--card),inset 0 0 0 5px var(--strong)}
+.stamp.big{width:150px;height:150px;font-size:44px;border-width:6px;box-shadow:inset 0 0 0 9px var(--card),inset 0 0 0 11px var(--strong);transform:rotate(-8deg)}
+.stamp.off{border-color:#B8BFC9;color:#5F6878;box-shadow:none;border-style:dashed}
+.board{background:#121A26;border-radius:18px;padding:12px 14px;color:#F5B83D;font-family:var(--sign);font-size:20px;font-weight:700;letter-spacing:.04em}
+.board div{display:flex;justify-content:space-between;padding:3px 0}
+.board span{color:#C9D2DE;font-family:var(--gothic);font-size:13px;font-weight:700;letter-spacing:0}
+.map{position:relative;height:330px;background:var(--chart-sea);overflow:hidden}
+.map svg{width:100%;height:100%;display:block}
+.map text{paint-order:stroke;stroke:var(--chart-sea);stroke-width:4px;stroke-linejoin:round}
+.sheet{position:relative;margin-top:-26px;background:var(--bg);border-radius:26px 26px 0 0;padding:10px 16px 120px;box-shadow:0 -10px 30px -18px rgba(15,27,45,.35)}
+.grab{display:block;width:44px;height:5px;border-radius:9px;background:#C9CED6;margin:0 auto 12px}
+.top{position:absolute;top:12px;left:14px;right:14px;display:flex;align-items:center;gap:8px;z-index:5}
+.strip{display:flex;border-radius:16px;overflow:hidden;background:var(--card);box-shadow:var(--shadow);min-height:64px}
+.strip+.strip{margin-top:10px}
+.strip .k{width:8px;background:var(--hero)}
+.strip .k.dep{background:#8C9AAE}
+.strip .c{flex:1;display:flex;align-items:center;gap:12px;padding:10px 14px}
+.strip .t{font-family:var(--sign);font-size:26px;font-weight:800;color:var(--strong);min-width:58px}
+.strip b{display:block;font-size:15px;color:var(--strong);line-height:1.3}
+.strip small{display:block;font-size:13px;color:var(--sub)}
+.note{font-size:13px;color:var(--sub);margin:10px 4px 0;line-height:1.55}
+.arrow{color:var(--line)}
+
+/* 2版で足したもの */
+.wrap{padding-bottom:136px}.sheet{padding-bottom:136px}
+.steps{gap:4px}
+.steps span{height:auto;padding:0 2px;background:none;font-size:13px;font-weight:700;color:var(--mute)}
+.steps span.on{background:none;color:var(--strong);font-weight:800}
+.steps span.on::before{content:"● ";color:var(--strong)}
+.steps em{color:var(--line)}
+.auto{display:flex;align-items:center;gap:10px;background:#FFF4D6;color:#5A4A12;border-radius:18px;padding:10px 10px 10px 14px;font-size:13px;font-weight:700;line-height:1.45}
+.auto .pl{margin-left:auto;background:#fff;color:#5A4A12;flex:none}
+.pl.on{background:var(--strong);color:#fff}
+.mini{display:flex;align-items:center;gap:8px;background:var(--card);border-radius:16px;box-shadow:var(--shadow);padding:8px 12px;font-size:13px;color:var(--sub);font-weight:700}
+.mini b{font-family:var(--sign);font-size:20px;color:var(--strong)}
+
+.tabs b.mid i.out{background:var(--card);color:var(--strong);box-shadow:var(--shadow),0 10px 24px -12px rgba(15,27,45,.45)}
+.ask{border-radius:22px;background:var(--card);box-shadow:var(--shadow);padding:16px 18px}
+.ask .q{font-size:17px;font-weight:800;color:var(--strong);margin-top:4px}
+
+
+/* D（選べるホーム）で足したもの */
+.cd{background:var(--card);border-radius:22px;box-shadow:var(--shadow);padding:14px 16px;margin-top:12px;position:relative}
+.cd .hd{display:flex;align-items:center;gap:8px;min-height:26px}
+.cd .hd .lab{flex:1}
+.cd .hd .go{color:var(--line);font-weight:800;font-size:18px;line-height:1}
+.cd.l{min-height:200px}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
+.pair .cd{margin-top:0;min-height:118px;display:flex;flex-direction:column;justify-content:space-between}
+.pair .cd .num{font-size:28px}
+.nums3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px}
+.nums3 .num{font-size:28px}
+.nums3 .s{margin-top:2px}
+.chip.plan{background:var(--plan);color:#1F3F73}
+.bars{display:grid;gap:8px;margin-top:8px}
+.bars .bl{display:flex;justify-content:space-between;font-size:13px;color:var(--sub);font-weight:700}
+.bars .bl b{color:var(--strong)}
+.foot{display:flex;flex-direction:column;align-items:center;gap:6px;margin-top:22px}
+.foot .s{text-align:center}
+.minimap{border-radius:16px;overflow:hidden;margin-top:10px;background:var(--chart-sea)}
+.minimap svg{display:block;width:100%;height:auto}
+.bigt{font-family:var(--sign);font-size:44px;font-weight:800;color:var(--strong);line-height:1}
+.pass2 .sb{width:92px}
+/* 編集・足す・設定の画面 */
+.topb{display:flex;align-items:center;gap:8px;padding:14px 16px 0}
+.topb h1{margin:0;font-size:20px;color:var(--strong);flex:1}
+.ed{display:flex;align-items:flex-start;gap:8px;background:var(--card);border-radius:20px;box-shadow:var(--shadow);padding:8px 8px 8px 4px;margin-top:10px;min-height:72px}
+.ed .hdl{width:44px;height:44px;align-self:center;display:grid;place-items:center;color:var(--mute);flex:none}
+.ed .hdl svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round}
+.ed .nm{flex:1;min-width:0}
+.ed .nm b{display:block;font-size:15px;color:var(--strong);line-height:1.35}
+.ed .nm small{display:block;font-size:13px;color:var(--sub);line-height:1.4}
+.ed.lock{background:#F7F8FA;align-items:center}
+.ed .rm{align-self:center}
+.ed.lift{transform:rotate(-1.2deg) translateY(-4px);box-shadow:0 24px 40px -18px rgba(15,27,45,.45),inset 0 0 0 2px var(--strong)}
+.slot{height:72px;border-radius:20px;border:2px dashed #C3C9D2;margin-top:10px;display:grid;place-items:center;font-size:13px;color:var(--sub);font-weight:700}
+.seg{display:flex;background:var(--pill);border-radius:999px;padding:2px;flex:none}
+.seg span{min-width:44px;height:44px;display:grid;place-items:center;border-radius:999px;font-size:13px;font-weight:800;color:var(--sub)}
+.seg span.on{background:var(--card);color:var(--strong);box-shadow:0 1px 3px rgba(17,24,39,.15)}
+.seg span.no{color:#B8BFC9}
+.rm{width:44px;height:44px;border-radius:999px;display:grid;place-items:center;background:var(--pill);color:var(--strong);font-weight:800;font-size:20px;flex:none}
+.lk{font-size:13px;font-weight:700;color:var(--sub);padding:0 10px;flex:none}
+.tpl{display:flex;align-items:center;gap:10px;margin-top:14px;padding:12px 14px}
+.tpl .s{flex:1}
+.addb{width:100%;margin-top:16px;height:52px;font-size:15px}
+.tabsel{display:flex;gap:8px;margin:14px 0 0}
+.grp{margin:22px 4px 6px;font-size:14px;font-weight:800;color:var(--strong)}
+.ad{display:flex;align-items:center;gap:12px;background:var(--card);border-radius:20px;box-shadow:var(--shadow);padding:12px 12px 12px 16px;margin-top:10px}
+.ad .nm{flex:1;min-width:0}
+.ad .nm b{display:block;font-size:15px;color:var(--strong);line-height:1.35}
+.ad .nm small{display:block;font-size:13px;color:var(--sub);line-height:1.45}
+.ad .sz{font-size:13px;color:var(--mute);font-weight:700;margin-top:2px}
+.ad .in{font-size:13px;font-weight:800;color:var(--sub);padding:0 8px;flex:none}
+.opt{display:flex;align-items:center;gap:12px;min-height:56px;padding:8px 14px;border-radius:18px}
+.opt.on{background:var(--pill)}
+.opt b{display:block;color:var(--strong);font-size:15px}
+.opt small{display:block;color:var(--sub);font-size:13px;line-height:1.45}
+.rad{width:22px;height:22px;border-radius:999px;box-shadow:inset 0 0 0 2px var(--line);flex:none}
+.opt.on .rad{box-shadow:inset 0 0 0 7px var(--strong)}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.chips .pl{background:var(--pill)}
+.chips .pl.on{background:var(--strong);color:#fff}
+.inp{height:48px;border-radius:999px;background:var(--bg);box-shadow:inset 0 0 0 1.5px #C3C9D2;display:flex;align-items:center;padding:0 16px;font-size:15px;color:var(--mute);flex:1}
+.sec{padding:14px 12px;margin-top:12px}
+.sec>.lab{padding:0 4px}
+.prev{margin-top:12px;border-radius:20px;background:var(--bg);padding:12px}
+.wrapf{padding:0 16px 40px}
+
+</style>
+</head>
+<body>
+<main class="phone">
+<div class="topb"><span class="ic" aria-label="戻る">‹</span><h1>次に来る特別塗装機</h1></div><div class="wrapf"><div class="card sec"><div class="lab">どの空港</div><div class="opt on"><span class="rad"></span><div><b>いる空港・近い空港に合わせる</b><small>いまは羽田。旅先では、着いた空港に変わる</small></div></div><div class="opt"><span class="rad"></span><div style="flex:1"><b>決めた空港</b><small>いつも同じ空港を出す</small></div><span class="pl sm">羽田 ▾</span></div></div><div class="card sec"><div class="lab">どの機体</div><div class="opt"><span class="rad"></span><div><b>すべての特別塗装機</b><small>この空港に来る予想のもの全部</small></div></div><div class="opt on"><span class="rad"></span><div><b>機種で選ぶ</b><small>選んだ機種の特別塗装機だけ</small></div></div><div class="chips" style="padding:0 14px"><span class="pl on">B787</span><span class="pl on">B767</span><span class="pl">A350</span><span class="pl">B777</span><span class="pl">B737</span><span class="pl">A321</span></div><div class="opt" style="margin-top:8px"><span class="rad"></span><div><b>登録記号で選ぶ</b><small>図鑑に入っている機体から、または入れる</small></div></div><div class="row" style="padding:0 14px 6px"><span class="inp">JA で始まる登録記号</span><span class="pl sm">足す</span></div></div><div class="card sec"><div class="lab">大きさ</div><div class="row" style="padding:8px 4px 0"><span class="seg"><span>小</span><span>中</span><span class="on">大</span></span><span class="s">大は3機まで</span></div><div class="prev"><div class="cd" style="margin-top:0"><div class="hd"><span class="lab">次に来る特別塗装機</span><span class="chip est">予想</span></div><div class="li"><span class="t">13:05</span><div><b>B767 特別塗装（見本）</b><small>着陸34R の予想</small></div></div><div class="li"><span class="t">14:40</span><div><b>B787 特別塗装（見本）</b><small>着陸34R の予想</small></div></div></div><p class="note" style="margin-bottom:0">予想です。保証しません。</p></div></div><div class="foot" style="margin-top:18px"><span class="pl dark" style="width:100%;height:52px">これで出す</span><span class="pl" style="width:100%">このカードを外す</span></div></div>
+
+</main>
+<aside class="ann"><b>メモ（本番には出ません）</b><ul><li><b>入り方</b>：編集の画面（D4）でカードの名前を押す。設定のあるカードだけ › が付く</li><li>例は「次に来る特別塗装機」：どの空港（いる空港に合わせる／決めた空港）・どの機体（全部／機種で／登録記号で）・大きさ</li><li>図鑑は特別塗装機だけの決まりなので、このカードも特別塗装機だけ。ふつうの機体を追うのは「機体の運用」のカード</li><li>下に今の設定でのカードの見え方（予想の札と1行も）</li><li>ほかに設定があるカード：機体の運用（登録記号・機種）、撮影地と光（空港）、遅れと欠航（空港・乗る便だけ）、今日の数字（出す数字3つ）</li></ul></aside>
+<script>if(window!==window.top){var a=document.querySelector('.ann');if(a)a.remove()}</script>
+</body>
+</html>
