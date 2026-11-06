@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>B：印をもらう｜そらメモ 見直しの方向の案 2版</title>
+<style>
+:root{
+  --gothic:"Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic UI","Yu Gothic","Meiryo","Noto Sans JP","Noto Sans CJK JP",system-ui,sans-serif;
+  --sign:"Barlow Condensed","Arial Narrow",var(--gothic);
+  --bg:#EEF1F5; --card:#FFFFFF; --ink:#374151; --strong:#1F2937; --sub:#5F6878; --mute:#6B7280; --line:#9CA3AF;
+  --pill:rgba(17,24,39,.06); --hero:#0F1B2D; --on-hero:#F3F4F6; --hero-sub:#A7B0BC; --hero-pill:rgba(255,255,255,.10);
+  --shadow:0 1px 2px rgba(17,24,39,.04),0 10px 30px -8px rgba(17,24,39,.10),inset 0 0 0 1px rgba(17,24,39,.07);
+  --jal:#C8102E; --ana:#1C4FA0; --stub:#E7C873; --ok:#1F8A5B; --gold:#8A6A1F; --plan:#E8EEF8;
+  --chart-sea:#DCEAF3; --chart-land:#F4F2EA; --chart-coast:#A9B9AE; --chart-apt:#7A1F5C; --chart-grid:rgba(31,78,121,.10);
+  --tabs:rgba(255,255,255,.94);
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--gothic);font-size:15px;line-height:1.6;-webkit-text-size-adjust:100%}
+.phone{position:relative;max-width:420px;min-height:100vh;min-height:100svh;margin:0 auto;overflow:hidden;background:var(--bg)}
+.wrap{padding:14px 16px 120px}
+.card{background:var(--card);border-radius:22px;box-shadow:var(--shadow)}
+.pad{padding:14px 16px}
+.lab{font-size:13px;font-weight:700;color:var(--sub);letter-spacing:.02em}
+.num{font-weight:800;color:var(--strong);letter-spacing:-.01em;line-height:1.1}
+.u{font-size:12px;font-weight:600;color:var(--mute);margin-left:2px}
+.s{font-size:13px;color:var(--sub);line-height:1.5}
+.ttl{font-size:22px;font-weight:800;color:var(--strong);margin:0;line-height:1.3}
+.h3{display:flex;align-items:center;justify-content:space-between;margin:22px 4px 8px}
+.h3 b{font-size:15px;color:var(--strong)}
+.h3 span{font-size:13px;color:var(--sub);font-weight:700}
+.row{display:flex;align-items:center;gap:10px}
+.gap{height:12px}
+.pl{height:44px;display:inline-flex;align-items:center;justify-content:center;gap:6px;border-radius:999px;padding:0 16px;font-size:14px;font-weight:800;color:var(--strong);background:var(--pill);white-space:nowrap}
+.pl.dark{background:var(--strong);color:#fff}
+.pl.white{background:var(--card);box-shadow:var(--shadow)}
+.pl.sm{font-size:13px;padding:0 14px}
+.chip{display:inline-flex;align-items:center;height:26px;border-radius:999px;padding:0 10px;font-size:13px;font-weight:700;color:var(--sub);background:var(--pill)}
+.chip.est{background:#FFF4D6;color:#6B4E0E}
+.chip.gold{background:#F6EBCB;color:#5E4710}
+.ic{width:44px;height:44px;border-radius:999px;background:var(--card);box-shadow:var(--shadow);display:grid;place-items:center;color:var(--strong);font-weight:800;flex:none}
+.ico{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.tabs{position:fixed;left:50%;transform:translateX(-50%);bottom:14px;width:calc(min(420px,100vw) - 28px);height:64px;border-radius:999px;background:var(--tabs);box-shadow:var(--shadow);display:flex;align-items:stretch;padding:0 8px;backdrop-filter:blur(12px);z-index:30}
+.tabs b{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:13px;font-weight:700;color:var(--sub)}
+.tabs b.on{color:var(--strong)}
+.tabs b.on::after{content:"";width:5px;height:5px;border-radius:9px;background:var(--strong);margin-top:1px}
+.tabs b.mid{flex:none;width:76px;margin:-14px 2px 0}
+.tabs b.mid i{width:62px;height:62px;border-radius:999px;background:var(--strong);color:#fff;display:grid;place-items:center;font-style:normal;box-shadow:0 10px 24px -10px rgba(15,27,45,.6)}
+.tabs svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.ann{position:relative;z-index:40;max-width:392px;margin:16px auto 120px;font-size:13px;line-height:1.7;background:#FFF8D6;color:#5A4A12;padding:12px 14px;border-radius:16px}
+.ann b{display:block;font-size:13px}
+.ann ul{margin:4px 0 0;padding-left:1.2em}
+.flap{display:flex;gap:6px}
+.flap i{font-style:normal;width:40px;height:50px;border-radius:8px;background:#1B2638;color:#F5B83D;font-family:var(--sign);font-size:34px;font-weight:800;display:grid;place-items:center;position:relative}
+.flap i::after{content:"";position:absolute;left:0;right:0;top:50%;height:2px;background:#0F1B2D}
+.hero{background:var(--hero);color:var(--on-hero);border-radius:24px}
+.hero .lab{color:var(--hero-sub)}
+.hero .s{color:var(--hero-sub)}
+.pass{display:flex;border-radius:24px;overflow:hidden;box-shadow:var(--shadow)}
+.pass .m{flex:1;background:var(--hero);color:var(--on-hero);padding:16px 18px}
+.pass .m .lab{color:var(--hero-sub)}
+.pass .nm{font-size:17px;font-weight:800;margin-top:8px}
+.pass .st{font-size:13px;color:var(--hero-sub)}
+.pass .sb{width:96px;background:var(--stub);color:#3A2E0C;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;font-weight:800;border-left:2px dashed rgba(15,27,45,.35)}
+.pass .sb .v{writing-mode:vertical-rl;letter-spacing:.06em;font-size:16px}
+.pass .sb small{font-size:13px;line-height:1.3;text-align:center}
+.steps{display:flex;gap:6px;align-items:center}
+.steps span{height:30px;display:flex;align-items:center;padding:0 11px;border-radius:999px;font-size:13px;font-weight:800;color:var(--sub);background:var(--pill)}
+.steps span.on{background:var(--strong);color:#fff}
+.steps em{font-style:normal;color:var(--sub);font-size:13px}
+.li{display:flex;align-items:center;gap:12px;padding:12px 0;min-height:60px}
+.li+.li{box-shadow:0 -1px 0 var(--pill)}
+.li .t{font-family:var(--sign);font-size:26px;font-weight:800;color:var(--strong);min-width:62px;line-height:1}
+.li b{display:block;color:var(--strong);font-size:15px;line-height:1.35}
+.li small{display:block;font-size:13px;color:var(--sub);line-height:1.4}
+.li .r{margin-left:auto;flex:none}
+.bar2{height:8px;border-radius:9px;background:var(--pill);overflow:hidden}
+.bar2 i{display:block;height:100%;background:var(--strong);border-radius:9px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.tile{padding:14px 16px;min-height:112px;display:flex;flex-direction:column;justify-content:space-between}
+.tile .num{font-size:30px}
+.stamp{width:58px;height:58px;border-radius:999px;border:3px solid var(--strong);display:grid;place-items:center;font-weight:800;font-size:16px;color:var(--strong);flex:none;box-shadow:inset 0 0 0 4px var(--card),inset 0 0 0 5px var(--strong)}
+.stamp.big{width:150px;height:150px;font-size:44px;border-width:6px;box-shadow:inset 0 0 0 9px var(--card),inset 0 0 0 11px var(--strong);transform:rotate(-8deg)}
+.stamp.off{border-color:#B8BFC9;color:#5F6878;box-shadow:none;border-style:dashed}
+.board{background:#121A26;border-radius:18px;padding:12px 14px;color:#F5B83D;font-family:var(--sign);font-size:20px;font-weight:700;letter-spacing:.04em}
+.board div{display:flex;justify-content:space-between;padding:3px 0}
+.board span{color:#C9D2DE;font-family:var(--gothic);font-size:13px;font-weight:700;letter-spacing:0}
+.map{position:relative;height:330px;background:var(--chart-sea);overflow:hidden}
+.map svg{width:100%;height:100%;display:block}
+.map text{paint-order:stroke;stroke:var(--chart-sea);stroke-width:4px;stroke-linejoin:round}
+.sheet{position:relative;margin-top:-26px;background:var(--bg);border-radius:26px 26px 0 0;padding:10px 16px 120px;box-shadow:0 -10px 30px -18px rgba(15,27,45,.35)}
+.grab{display:block;width:44px;height:5px;border-radius:9px;background:#C9CED6;margin:0 auto 12px}
+.top{position:absolute;top:12px;left:14px;right:14px;display:flex;align-items:center;gap:8px;z-index:5}
+.strip{display:flex;border-radius:16px;overflow:hidden;background:var(--card);box-shadow:var(--shadow);min-height:64px}
+.strip+.strip{margin-top:10px}
+.strip .k{width:8px;background:var(--hero)}
+.strip .k.dep{background:#8C9AAE}
+.strip .c{flex:1;display:flex;align-items:center;gap:12px;padding:10px 14px}
+.strip .t{font-family:var(--sign);font-size:26px;font-weight:800;color:var(--strong);min-width:58px}
+.strip b{display:block;font-size:15px;color:var(--strong);line-height:1.3}
+.strip small{display:block;font-size:13px;color:var(--sub)}
+.note{font-size:13px;color:var(--sub);margin:10px 4px 0;line-height:1.55}
+.arrow{color:var(--line)}
+
+/* 2版で足したもの */
+.wrap{padding-bottom:136px}.sheet{padding-bottom:136px}
+.steps{gap:4px}
+.steps span{height:auto;padding:0 2px;background:none;font-size:13px;font-weight:700;color:var(--mute)}
+.steps span.on{background:none;color:var(--strong);font-weight:800}
+.steps span.on::before{content:"● ";color:var(--strong)}
+.steps em{color:var(--line)}
+.auto{display:flex;align-items:center;gap:10px;background:#FFF4D6;color:#5A4A12;border-radius:18px;padding:10px 10px 10px 14px;font-size:13px;font-weight:700;line-height:1.45}
+.auto .pl{margin-left:auto;background:#fff;color:#5A4A12;flex:none}
+.pl.on{background:var(--strong);color:#fff}
+.mini{display:flex;align-items:center;gap:8px;background:var(--card);border-radius:16px;box-shadow:var(--shadow);padding:8px 12px;font-size:13px;color:var(--sub);font-weight:700}
+.mini b{font-family:var(--sign);font-size:20px;color:var(--strong)}
+</style>
+</head>
+<body>
+<main class="phone">
+<div class="map" style="height:230px"><svg viewBox="0 0 390 230" preserveAspectRatio="xMidYMid slice" aria-label="航空図風の地図（見本）">
+<defs><pattern id="g" width="48" height="48" patternUnits="userSpaceOnUse"><path d="M48 0H0V48" fill="none" stroke="var(--chart-grid)" stroke-width="1"/></pattern></defs>
+<rect width="390" height="400" fill="var(--chart-sea)"/>
+<path d="M0 -10H390V60C340 80 300 60 270 100C250 130 210 120 190 160C175 190 120 180 90 210C60 240 30 230 0 250Z" fill="var(--chart-land)" stroke="var(--chart-coast)" stroke-width="1.2"/>
+<path d="M240 230C270 220 300 240 330 230C360 222 380 240 390 250V600H250C240 400 230 270 240 230Z" fill="var(--chart-land)" stroke="var(--chart-coast)" stroke-width="1.2"/>
+<rect width="390" height="400" fill="url(#g)"/>
+<circle cx="220" cy="170" r="86" fill="none" stroke="var(--chart-apt)" stroke-width="1.4" stroke-dasharray="5 5" opacity=".75"/><g transform="translate(220 170) rotate(-28)" stroke="var(--chart-apt)" stroke-width="5" stroke-linecap="round" opacity=".85"><path d="M-40 -6H40"/><path d="M-30 18H34"/></g><circle cx="220" cy="170" r="16" fill="none" stroke="var(--chart-apt)" stroke-width="2"/>
+<text x="250" y="132" font-size="14" font-weight="800" fill="var(--chart-apt)">HND 羽田 ✓</text>
+<circle cx="330" cy="70" r="6" fill="var(--chart-apt)" stroke="#fff" stroke-width="2"/><text x="300" y="56" font-size="13" font-weight="800" fill="var(--chart-apt)">NRT</text>
+<circle cx="60" cy="40" r="5" fill="#fff" stroke="var(--chart-apt)" stroke-width="2"/>
+<circle cx="186" cy="150" r="7" fill="#2F6FE4" stroke="#fff" stroke-width="3"/><text x="172" y="155" text-anchor="end" font-size="13" font-weight="700" fill="var(--strong)">いまここ（範囲の中）</text></svg></div>
+<section class="sheet"><span class="grab"></span>
+<div class="pass"><div class="m"><div class="lab">いま いる空港</div><div class="flap" style="margin-top:8px"><i>H</i><i>N</i><i>D</i></div><div class="nm">東京国際空港（羽田）</div><div class="st">第1ターミナル ・ 判定範囲の中</div></div>
+<div class="sb"><span class="v">チェックイン</span><small>→ 右へ引いて<br>印をもらう</small></div></div>
+<div class="card" style="margin-top:12px;padding:16px;text-align:center"><div class="lab">切ると、帳面のここに押されます</div>
+<div class="row" style="justify-content:center;gap:14px;margin-top:12px"><span class="stamp">NRT</span><span class="stamp" style="width:70px;height:70px;font-size:18px">HND</span><span class="stamp off">IBR</span></div>
+<p class="s" style="margin:10px 0 0">印のページ・関東 ／ 羽田で印をもらうのは2日目<br>（エアライン経営の守り神が育ちます）</p></div>
+<div class="h3"><b>これから乗る便は？</b><span>あとでも選べる</span></div>
+<div class="card pad" style="padding-top:4px;padding-bottom:4px">
+<div class="li"><span class="t">10:50</span><div><b>JL 917　那覇行き</b><small>B767 ・ 9番搭乗口</small></div><span class="pl sm r">乗る</span></div>
+<div class="li"><span class="t">11:05</span><div><b>NH 469　那覇行き</b><small>B787 ・ 62番搭乗口</small></div><span class="pl sm r">乗る</span></div></div>
+<p class="note">選んだ便は、着いた空港で印をもらったときに「路線」になります。機体はそのとき「この機体でしたか？」で確かめます。乗らない日は選ばなくてかまいません。</p>
+</section>
+<nav class="tabs" aria-label="画面の切り替え"><b class="on"><svg viewBox="0 0 24 24"><path d="M4 5.5C4 4.7 4.7 4 5.5 4H11v15H5.5c-.8 0-1.5.5-1.5 1.2V5.5Z"/><path d="M20 5.5c0-.8-.7-1.5-1.5-1.5H13v15h5.5c.8 0 1.5.5 1.5 1.2V5.5Z"/></svg>帳面</b><b class=""><svg viewBox="0 0 24 24"><path d="M10.5 13.5 4 11l1.4-1.4 7 1.1 3.9-3.9c.8-.8 2.1-.8 2.9 0s.8 2.1 0 2.9l-3.9 3.9 1.1 7L15 22l-2.5-6.5-3 3v2.5L8 22.5l-1.3-3.2L3.5 18 5 16.5h2.5Z"/></svg>空</b><b class=""><svg viewBox="0 0 24 24"><path d="M4 20V8l6-3v15"/><path d="M10 20V10l10 3v7"/><path d="M3 20h18"/></svg>会社</b><b class=""><svg viewBox="0 0 24 24"><circle cx="12" cy="8.5" r="3.8"/><path d="M4.5 20c.9-3.8 4-5.8 7.5-5.8s6.6 2 7.5 5.8"/></svg>マイページ</b></nav>
+</main>
+<aside class="ann"><b>案のメモ（本番には出ません・数字は見本）・2版</b><ul><li><b>判定範囲に入ったときだけ</b>、ホームのシートのいちばん上が半券に替わる（A の良いところを入れた）。下のタブに丸はない</li><li>見本の印を同じ地方（NRT・HND・IBR）にし、「2日目」に主語を付けた。守り神は「エアライン経営の」と書く</li><li>着いたら A4 と同じ1枚（印・「この機体でしたか？」・会社に入ったもの）。予想の機体が確かめなしに乗った機体にならない</li></ul></aside>
+<script>if(window!==window.top){var a=document.querySelector('.ann');if(a)a.remove()}</script>
+</body>
+</html>
