@@ -2,17 +2,18 @@ import os, sys
 HERE=os.path.dirname(os.path.abspath(__file__)); WEB=os.path.abspath(os.path.join(HERE,'..','..','web')); WORK=os.environ.get('SORAMEMO_TEST_WORK','/tmp/soramemo-e2e'); os.makedirs(WORK, exist_ok=True)
 import asyncio, base64
 from playwright.async_api import async_playwright
+sys.path.insert(0, HERE); from keepls import reload_keep, goto_http   # 読み込み直すテストは http で開く（file:// だと localStorage が落ちることがある）
 async def main():
     async with async_playwright() as p:
         b=await p.chromium.launch(); c=await b.new_context(viewport={'width':400,'height':860}, device_scale_factor=2); await c.route('**/web/config.js', lambda r: r.fulfill(body='window.SORAMEMO_CONFIG = {};', content_type='application/javascript'))
         await c.add_init_script("localStorage.setItem('soramemo.onboarded','1'); Object.defineProperty(window, 'SORAMEMO_CONFIG', { configurable:true, get(){ return this.__cfg; }, set(v){ this.__cfg = Object.assign({}, v, { gameReleased: true }); } });")
         pg=await c.new_page(); errs=[]; pg.on('pageerror', lambda e: errs.append(str(e)))
-        await pg.goto('file://'+os.path.join(WEB,'index.html')); await pg.wait_for_load_state('load'); await pg.wait_for_function('document.readyState === "complete" && typeof render === "function"'); await pg.wait_for_timeout(500)
+        await goto_http(pg, os.path.join(WEB,'index.html')); await pg.wait_for_load_state('load'); await pg.wait_for_function('document.readyState === "complete" && typeof render === "function"'); await pg.wait_for_timeout(500)
         # 訪問回数 3/5/20/50 の空港を用意
         await pg.evaluate("""() => { const id = i => A.find(a => a.iata === i).id, cs = []; let t = Date.parse('2026-01-01T12:00:00+09:00');
           for(const [i,n] of [['WKJ',3],['KUH',5],['HKD',20],['CTS',49],['AKJ',1]]) for(let k=0;k<n;k++) cs.push({a:id(i), t:(t+=36e5*5), acc:20, term:null});
           localStorage.setItem('soramemo.v1', JSON.stringify({checkins:cs, flights:[], manual:[]})); }""")
-        await pg.wait_for_timeout(400); await pg.reload(); await pg.wait_for_load_state('load'); await pg.wait_for_timeout(500)
+        await pg.wait_for_timeout(400); await reload_keep(pg); await pg.wait_for_timeout(500)
         await pg.click('nav.tabs button[data-v=book]'); await pg.wait_for_timeout(200); await pg.screenshot(path=os.path.join(WORK,'w_book.png'))
         for i in range(4):
             await pg.click(f'#book .cell.got >> nth={i}'); await pg.wait_for_timeout(250)

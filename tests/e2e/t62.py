@@ -4,6 +4,7 @@ HERE=os.path.dirname(os.path.abspath(__file__)); WEB=os.path.abspath(os.path.joi
 import asyncio, json
 from datetime import datetime, timedelta, timezone
 from playwright.async_api import async_playwright
+sys.path.insert(0, HERE); from keepls import reload_keep, goto_http   # 読み込み直すテストは http で開く（file:// だと localStorage が落ちることがある）
 now = datetime.now(timezone.utc)
 iso = lambda m: (now + timedelta(minutes=m)).isoformat()
 BOARD = {'iata': 'HND', 'now': iso(0), 'hours': [{'h': h, 'flights': 10, 'late': 0, 'cancel': 0, 'ref': 0} for h in range(24)], 'next_arr': [{'flight': 'NH212', 'other': 'LHR', 'sched': iso(25), 't': iso(25), 'intl': True, 'aircraft': 'B789'}],
@@ -14,7 +15,7 @@ def check(label, ok):
     if not ok: fails.append(label)
 async def page(c, errs):
     pg = await c.new_page(); pg.on('pageerror', lambda e: errs.append(str(e)))
-    await pg.goto('file://'+os.path.join(WORK,'index_server_test.html')); await pg.wait_for_load_state('load'); await pg.wait_for_timeout(600)
+    await goto_http(pg, os.path.join(WORK,'index_server_test.html')); await pg.wait_for_load_state('load'); await pg.wait_for_timeout(600)
     await pg.evaluate('__fake.login()'); await pg.wait_for_timeout(800)
     return pg
 async def ctx(b, extra=''):
@@ -48,7 +49,7 @@ async def main():
         t = await pg.inner_text('#personaCard')
         check('修行：ホームのカード:', 'PP' in t or 'FOP' in t)
         await pg.locator('#homeSheet .sbody').screenshot(path=os.path.join(WORK, 't62_shugyo.png'))
-        await pg.reload(); await pg.wait_for_timeout(800); await pg.evaluate('__fake.login()'); await pg.wait_for_timeout(800)
+        await reload_keep(pg); await pg.wait_for_timeout(800); await pg.evaluate('__fake.login()'); await pg.wait_for_timeout(800)
         check('修行：開き直しても覚えている:', await pg.evaluate(TABS) == 'home,sg,log,stats')
         await c.close()
         # 使い方から勧める（運用を羽田で3日・30分以上）
@@ -69,7 +70,7 @@ async def main():
             await pg.wait_for_timeout(200)
         await pg.click('[data-persona-no]'); await pg.wait_for_timeout(300)
         check('今のままにする:', await pg.evaluate("PERSONA") == 'casual' and await pg.evaluate("!!usageGet().declined"))
-        await pg.wait_for_timeout(1500); await pg.reload(); await pg.wait_for_timeout(800); await pg.evaluate('__fake.login()'); await pg.wait_for_timeout(2000)
+        await pg.wait_for_timeout(1500); await reload_keep(pg); await pg.wait_for_timeout(800); await pg.evaluate('__fake.login()'); await pg.wait_for_timeout(2000)
         check('断ったらしばらく聞かない:', not await pg.evaluate("$('dPersona').open"))
         await c.close()
         print('errors', errs + fails); await b.close()

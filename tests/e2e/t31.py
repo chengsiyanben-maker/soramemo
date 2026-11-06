@@ -2,16 +2,17 @@ import os, sys
 HERE=os.path.dirname(os.path.abspath(__file__)); WEB=os.path.abspath(os.path.join(HERE,'..','..','web')); WORK=os.environ.get('SORAMEMO_TEST_WORK','/tmp/soramemo-e2e'); os.makedirs(WORK, exist_ok=True)
 import asyncio, json
 from playwright.async_api import async_playwright
+sys.path.insert(0, HERE); from keepls import reload_keep, goto_http   # 読み込み直すテストは http で開く（file:// だと localStorage が落ちることがある）
 async def main():
     async with async_playwright() as p:
         b=await p.chromium.launch()
         c=await b.new_context(viewport={'width':400,'height':860}, accept_downloads=True); await c.route('**/web/config.js', lambda r: r.fulfill(body='window.SORAMEMO_CONFIG = {};', content_type='application/javascript')); await c.add_init_script("localStorage.setItem('soramemo.onboarded','1'); Object.defineProperty(window, 'SORAMEMO_CONFIG', { configurable:true, get(){ return this.__cfg; }, set(v){ this.__cfg = Object.assign({}, v, { gameReleased: true }); } });")
         pg=await c.new_page(); errs=[]; pg.on('pageerror', lambda e: errs.append(str(e)))
-        await pg.goto('file://'+os.path.join(WEB,'index.html')); await pg.wait_for_load_state('load'); await pg.wait_for_function('document.readyState === "complete" && typeof render === "function"'); await pg.wait_for_timeout(400)
+        await goto_http(pg, os.path.join(WEB,'index.html')); await pg.wait_for_load_state('load'); await pg.wait_for_function('document.readyState === "complete" && typeof render === "function"'); await pg.wait_for_timeout(400)
         await pg.evaluate("""() => { const id=i=>A.find(a=>a.iata===i).id, t0=Date.parse('2026-02-01T08:00:00+09:00');
           localStorage.setItem('soramemo.v1', JSON.stringify({checkins:[{a:id('HND'),t:t0,acc:20,term:'HND-T1'},{a:id('CTS'),t:t0+7.2e6,acc:20,term:null}],
             flights:[{id:'a1',from:id('HND'),to:id('CTS'),dep:t0,arr:t0+7.2e6,km:819.6,airline:'JL',no:'JL501'}], manual:[{from:id('ITM'),to:id('OKA'),d:'2025-03-03',airline:'NH'},{from:id('ITM'),to:A.find(a=>a.name.startsWith('新島')).id,d:'2025-04-04',airline:null}]})); }""")
-        await pg.wait_for_timeout(400); await pg.reload(); await pg.wait_for_load_state('load'); await pg.wait_for_timeout(400)
+        await pg.wait_for_timeout(400); await reload_keep(pg); await pg.wait_for_timeout(400)
         await pg.wait_for_function('typeof S !== "undefined" && S.flights.length > 0')   # 記録を読み込み終えてから書き出す（重いと間に合わないことがあった）
         await pg.click('#openSettings')
         async with pg.expect_download() as d: await pg.click('[data-export=json]')
@@ -30,7 +31,7 @@ async def main():
         pg=await c.new_page(); errs=[]; pg.on('pageerror', lambda e: errs.append(str(e)))
         answers = iter(['けす', '削除'])
         pg.on('dialog', lambda dg: asyncio.ensure_future(dg.accept(next(answers, '')) if dg.type == 'prompt' else dg.accept()))
-        await pg.goto('file://'+os.path.join(WORK,'index_server_test.html')); await pg.wait_for_load_state('load'); await pg.wait_for_function('document.readyState === "complete" && typeof render === "function"'); await pg.wait_for_timeout(500)
+        await goto_http(pg, os.path.join(WORK,'index_server_test.html')); await pg.wait_for_load_state('load'); await pg.wait_for_function('document.readyState === "complete" && typeof render === "function"'); await pg.wait_for_timeout(500)
         await pg.evaluate('__fake.login()'); await pg.wait_for_timeout(500)
         await pg.click('#openSettings'); print('del row visible:', await pg.is_visible('#delRow'))
         await pg.click('#delAcct'); await pg.wait_for_timeout(300); print('wrong word -> called:', await pg.evaluate('!!window.__deleted'))

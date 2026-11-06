@@ -3,13 +3,14 @@ HERE=os.path.dirname(os.path.abspath(__file__)); WEB=os.path.abspath(os.path.joi
 # 6桁のコードでのログインと、ログイン前の記録の引き継ぎ
 import asyncio, json
 from playwright.async_api import async_playwright
+sys.path.insert(0, HERE); from keepls import reload_keep, goto_http   # 読み込み直すテストは http で開く（file:// だと localStorage が落ちることがある）
 async def main():
     async with async_playwright() as p:
         b=await p.chromium.launch(); c=await b.new_context(viewport={'width':400,'height':860})
         await c.add_init_script("localStorage.setItem('soramemo.onboarded','1'); Object.defineProperty(window, 'SORAMEMO_CONFIG', { configurable:true, get(){ return this.__cfg; }, set(v){ this.__cfg = Object.assign({}, v, { gameReleased: true }); } });")
         await c.route('https://cdn.jsdelivr.net/npm/@supabase/**', lambda r: r.fulfill(path=os.path.join(HERE,'fake_sb.js'), content_type='application/javascript'))
         pg=await c.new_page(); errs=[]; pg.on('pageerror', lambda e: errs.append(str(e)))
-        await pg.goto('file://'+os.path.join(WORK,'index_server_test.html')); await pg.wait_for_load_state('load'); await pg.wait_for_timeout(500)
+        await goto_http(pg, os.path.join(WORK,'index_server_test.html')); await pg.wait_for_load_state('load'); await pg.wait_for_timeout(500)
         # ログイン前の端末の記録（フライト3件・記録帳2件、うち1件はサーバーの記録帳と重複）
         await pg.evaluate("""() => { const id=i=>A.find(a=>a.iata===i).id, t=Date.parse('2026-03-01T09:00:00+09:00');
           localStorage.setItem('soramemo.v1', JSON.stringify({checkins:[{a:id('HND'),t,acc:20,term:null},{a:id('CTS'),t:t+7e6,acc:20,term:null}],
@@ -27,7 +28,7 @@ async def main():
         rows = await pg.evaluate("JSON.stringify(__fake.db.manual_flights.map(r=>[r.from_airport,r.to_airport,r.flown_on,r.airline]))")
         print('サーバーの記録帳:', rows, '| 印はサーバーに増えない:', await pg.evaluate('__fake.db.checkins.length'))
         print('案内は消える:', await pg.is_hidden('#migrateBar'))
-        await pg.reload(); await pg.wait_for_load_state('load'); await pg.wait_for_timeout(800); await pg.evaluate('__fake.login()'); await pg.wait_for_timeout(500)
+        await reload_keep(pg); await pg.wait_for_timeout(800); await pg.evaluate('__fake.login()'); await pg.wait_for_timeout(500)
         print('読み込み直しても出ない:', await pg.is_hidden('#migrateBar'))
         print(errs); await b.close()
 asyncio.run(main())
