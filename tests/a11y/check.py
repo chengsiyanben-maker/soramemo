@@ -14,7 +14,7 @@ async def main():
         for scheme in ['light','dark']:
             c=await b.new_context(viewport={'width':400,'height':860}, color_scheme=scheme, bypass_csp=True); await c.add_init_script("localStorage.setItem('soramemo.onboarded','1'); localStorage.setItem('soramemo.palette','" + PAL + "')")
             pg=await c.new_page(); await pg.goto(URL); await pg.wait_for_load_state('load'); await pg.wait_for_timeout(800)
-            await pg.click('#openSettings'); await pg.click('#toggleDemo'); await pg.wait_for_timeout(200)
+            await pg.evaluate('openMyPage()'); await pg.click('#toggleDemo'); await pg.wait_for_timeout(200)
             cts = await pg.evaluate("'a:'+A.find(a=>a.iata=='CTS').id")
             for v in ['t:HND-T1', cts]:
                 await pg.select_option('#demoAirport', v); await pg.press('#checkin','Enter'); await pg.wait_for_timeout(600)

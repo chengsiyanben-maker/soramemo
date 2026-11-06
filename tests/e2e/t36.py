@@ -11,7 +11,7 @@ async def main():
             await pg.goto('file://'+os.path.join(WEB,'index.html')); await pg.wait_for_load_state('load'); await pg.wait_for_function('document.readyState === "complete" && typeof render === "function"'); await pg.wait_for_timeout(500)
             vis = lambda: pg.evaluate("[...document.querySelectorAll('nav.tabs button')].filter(b=>!b.hidden).map(b=>b.textContent)")
             print(scheme, 'rally tabs:', await vis(), '| mode', await pg.evaluate('MODE'))
-            await pg.click('#openSettings'); await pg.click('#toggleDemo'); await pg.evaluate('S = blank(); save(); render()')   # 見本の記録を消して、空の状態から試す
+            await pg.evaluate('openMyPage()'); await pg.click('#toggleDemo'); await pg.evaluate('S = blank(); save(); render()')   # 見本の記録を消して、空の状態から試す
             cts = await pg.evaluate("'a:'+A.find(a=>a.iata=='CTS').id")
             for v in ['t:HND-T1', cts]:
                 await pg.select_option('#demoAirport', v); await pg.press('#checkin','Enter'); await pg.wait_for_timeout(600)
@@ -29,7 +29,7 @@ async def main():
             # 経営をオフ
             await pg.click('[data-mode=game]'); await pg.click('#openSettings'); await pg.click('#gameToggle'); await pg.click('#dSettings .mp-back')
             print('  game off: mode', await pg.evaluate('MODE'), '| switch hidden', await pg.is_hidden('#modeSw'), '| tabs', await vis())
-            await pg.click('#openSettings'); await pg.click('#toggleDemo'); await pg.evaluate('S = blank(); save(); render()')   # 見本の記録を消して、空の状態から試す
+            await pg.evaluate('openMyPage()'); await pg.click('#toggleDemo'); await pg.evaluate('S = blank(); save(); render()')   # 見本の記録を消して、空の状態から試す
             await pg.select_option('#demoAirport', 't:HND-T1'); await pg.press('#checkin','Enter'); await pg.wait_for_timeout(600)
             print('  meet when off:', await pg.locator('#dStamp .meet').count())
             if scheme=='light': await pg.click('#dStamp .row2 .btn2'); await pg.screenshot(path=os.path.join(WORK,'m_rally_off.png'))

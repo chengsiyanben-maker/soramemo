@@ -14,7 +14,7 @@ async def run(scheme):
         print('guide closed:', not await pg.is_visible('#dGuide'))
         if await pg.is_visible('#dAuth'): await pg.click('#dAuth [data-au=close]')   # サーバー版で未ログインなら、案内のあとにログインの画面が出る（「あとで」で閉じる）
         await pg.screenshot(path=os.path.join(WORK,f'u_home_{scheme}.png'))
-        await pg.click('#openSettings'); await pg.click('#toggleDemo')
+        await pg.evaluate('openMyPage()'); await pg.click('#toggleDemo')
         cts = await pg.evaluate("'a:'+A.find(a=>a.iata=='CTS').id"); oka = await pg.evaluate("'a:'+A.find(a=>a.iata=='ISG').id")
         for v in ['t:HND-T2', cts, oka]:
             await pg.select_option('#demoAirport', v); await pg.press('#checkin','Enter'); await pg.wait_for_timeout(900)

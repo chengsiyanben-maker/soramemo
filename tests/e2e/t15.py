@@ -8,7 +8,7 @@ async def main():
         await c.add_init_script("localStorage.setItem('soramemo.onboarded','1'); Object.defineProperty(window, 'SORAMEMO_CONFIG', { configurable:true, get(){ return this.__cfg; }, set(v){ this.__cfg = Object.assign({}, v, { gameReleased: true }); } });")
         pg=await c.new_page(); errs=[]; pg.on('pageerror', lambda e: errs.append(str(e)))
         await pg.goto('file://'+os.path.join(WEB,'index.html')); await pg.wait_for_load_state('load'); await pg.wait_for_function('document.readyState === "complete" && typeof render === "function"'); await pg.wait_for_timeout(700)
-        await pg.click('#openSettings'); await pg.click('#toggleDemo')
+        await pg.evaluate('openMyPage()'); await pg.click('#toggleDemo')
         cts = await pg.evaluate("'a:'+A.find(a=>a.iata=='CTS').id"); isg = await pg.evaluate("'a:'+A.find(a=>a.iata=='ISG').id")
         seq = ['t:HND-T1', cts]*5 + ['t:HND-T2','t:HND-T3', isg]
         for i,v in enumerate(seq):
