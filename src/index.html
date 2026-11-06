@@ -11373,7 +11373,7 @@ $("sendLink").onclick = async () => {
   $("sendLink").disabled = false;
   resetCaptcha();          // 確認の合図は1回ごとに使い捨て
   if(error){ if(auNoUser(error)){ track("login", "nouser"); AU.email = email; authOpen("login", "nouser"); m.textContent = ""; return; }
-    m.textContent = auSendErr(error); m.className = "msg err"; return; }
+    m.textContent = auSendErr(error, true); m.className = "msg err"; return; }
   LOGIN_GUARD.set("sentAt", Date.now());
   $("codeBox").hidden = false; $("loginCode").focus();
   m.textContent = "メールに届いたコードを入れてください。メールのリンクを押してもログインできます（ホーム画面に追加したアプリでは、コードを使ってください）。"; m.className = "msg";
@@ -11553,8 +11553,15 @@ function authRender(){
   const f = st.querySelector("#auCode, #auName, #auEmail"); if(f) setTimeout(() => { try{ f.focus({ preventScroll:true }); }catch(e){} }, 30);
 }
 function auSay(t, err){ AU.msg = t; AU.err = !!err; const m = $("auMsg"); if(m){ m.textContent = t; m.className = "amsg" + (err ? " err" : ""); } }
-// 送れなかったときの言い方：上限に当たったときは「混み合っています」
-const auSendErr = e => (e && (e.status === 429 || /rate limit|too many/i.test(e.message || ""))) ? "いま登録が混み合っています。1時間ほどあとで試してください。" : "送れませんでした。少し待ってからもう一度試してください。";
+// 送れなかったときの言い方
+//   同じアドレスへの送り直しが早すぎた（Supabase は「after 42 seconds」と返す）→ あと何秒
+//   全体の送信の上限（1時間100通）や送りすぎ（429）→「混み合っています」（ログインのときは「登録が」を付けない）
+const auSendErr = (e, login) => {
+  const t = String((e && e.message) || ""), s = t.match(/after\s+(\d+)\s*seconds?/i);
+  if(s) return `コードは1分に1回まで送れます。あと${s[1]}秒待ってください。`;
+  if(e && (e.status === 429 || /^over_(email_send|request)_rate_limit$/.test(e.code || "") || /rate limit|too many/i.test(t))) return login ? "いまコードの送信が混み合っています。1時間ほどあとで試してください。" : "いま登録が混み合っています。1時間ほどあとで試してください。";
+  return "送れませんでした。少し待ってからもう一度試してください。";
+};
 // 登録していないメールでログインしようとしたとき（Supabase は shouldCreateUser:false のとき、この形で断る）
 const auNoUser = e => !!e && (e.code === "otp_disabled" || e.code === "user_not_found" || /signups? not allowed|user not found/i.test(e.message || ""));
 async function auSend(create){
@@ -11569,7 +11576,7 @@ async function auSend(create){
   AU.busy = false; resetAuthCaptcha();
   if(error){
     if(!create && auNoUser(error)){ track("login", "nouser"); AU.step = "nouser"; AU.msg = ""; authRender(); return; }
-    if(b) b.disabled = false; auSay(auSendErr(error), true); return; }
+    if(b) b.disabled = false; auSay(auSendErr(error, !create), true); return; }
   LOGIN_GUARD.set("sentAt", Date.now());
   if(create) AU.started = Date.now();
   track(create ? "signup" : "login", "sent");
