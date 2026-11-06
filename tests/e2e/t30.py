@@ -16,9 +16,9 @@ async def main():
         print('local locked:', await pg.locator('#yrPlus .locked').count() == 1)
         await pg.click('nav.tabs button[data-v=log]')
         await pg.evaluate("goTab('log')"); await pg.click('#flAdd'); await pg.wait_for_timeout(450); await pg.evaluate('document.getElementById("importBox").hidden = false'); await pg.click('#importBox summary'); await pg.click('#impCheck'); print('local import:', await pg.inner_text('#impPreview'))
-        await pg.click('#openSettings'); print('settings:', await pg.inner_text('#plusInfo')); await pg.click('#dSettings .mp-back')
+        await pg.evaluate('openMyPage()'); print('settings:', await pg.inner_text('#plusInfo')); await pg.click('#dSettings .mp-back')
         # 2) デモ（お試し）
-        await pg.click('#openSettings'); await pg.click('#toggleDemo'); await pg.click('nav.tabs button[data-v=home]')
+        await pg.evaluate('openMyPage()'); await pg.click('#toggleDemo'); await pg.click('nav.tabs button[data-v=home]')
         cts = await pg.evaluate("'a:'+A.find(a=>a.iata=='CTS').id")
         for v in ['t:HND-T1', cts]:
             await pg.select_option('#demoAirport', v); await pg.press('#checkin','Enter'); await pg.wait_for_timeout(600); await pg.click('#dStamp .row2 .btn2')
