@@ -10,7 +10,7 @@ async def main():
         print('件数: 民間', await pg.evaluate('A.length'), '| 番外編', await pg.evaluate("JSON.stringify({mil:XA.filter(a=>a.kind=='mil').length, glider:XA.filter(a=>a.kind=='glider').length, field:XA.filter(a=>a.kind=='field').length})"), '| 実績', await pg.evaluate('ACH.length'))
         # 判定：新千歳の範囲内で千歳基地のほうが近い地点、範囲外で千歳基地の範囲内の地点
         print('新千歳の範囲内:', await pg.evaluate("nearest({lat:42.7855, lon:141.6770}).a.name"), '| 千歳基地の範囲:', await pg.evaluate("nearest({lat:42.8050, lon:141.6550}).a.name"), '| 入間のフェンス外:', await pg.evaluate("nearest({lat:35.8580, lon:139.4100}).a.name"))
-        await pg.click('#openSettings'); await pg.click('#toggleDemo'); await pg.wait_for_timeout(200)
+        await pg.evaluate('openMyPage()'); await pg.click('#toggleDemo'); await pg.wait_for_timeout(200)
         # 羽田 → 入間基地 → 妻沼滑空場 → 羽田 の順にデモでチェックイン
         for v in ['t:HND-T1', 'a:1010', 'a:2017', 'a:3002', 'a:89', 'a:5']:
             await pg.select_option('#demoAirport', v); await pg.press('#checkin','Enter'); await pg.wait_for_timeout(700)

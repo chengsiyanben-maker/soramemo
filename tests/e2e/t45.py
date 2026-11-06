@@ -11,11 +11,11 @@ async def main():
         pg=await c.new_page(); errs=[]; pg.on('pageerror', lambda e: errs.append(str(e)))
         await pg.goto('file://'+os.path.join(WEB,'index.html')); await pg.wait_for_load_state('load'); await pg.wait_for_timeout(500)
         print('公開前：切り替え', await pg.is_visible('#modeSw'), '| 設定の経営', await pg.is_visible('#gameRow') if await pg.locator('#gameRow').count() else None)
-        await pg.click('#openSettings'); print('  設定の経営（ダイアログ内）', await pg.is_visible('#gameRow')); await pg.click('#toggleDemo'); await pg.wait_for_timeout(300)
+        await pg.evaluate('openMyPage()'); print('  設定の経営（ダイアログ内）', await pg.is_visible('#gameRow')); await pg.click('#toggleDemo'); await pg.wait_for_timeout(300)
         print('デモ：切り替え', await pg.is_visible('#modeSw'))
         await pg.select_option('#demoAirport','t:HND-T1'); await pg.press('#checkin','Enter'); await pg.wait_for_timeout(700)
         print('  デモの守り神', await pg.locator('#dStamp .meet').count()); await pg.click('#dStamp [data-close]')
-        await pg.click('#openSettings'); await pg.click('#toggleDemo'); await pg.wait_for_timeout(300)
+        await pg.evaluate('openMyPage()'); await pg.click('#toggleDemo'); await pg.wait_for_timeout(300)
         print('デモ終了：切り替え', await pg.is_visible('#modeSw'), '| 表示中', await pg.evaluate('MODE'))
         print('errors', errs); await c.close()
         # 2) サーバー版：公開前 → 公開

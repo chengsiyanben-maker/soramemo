@@ -7,7 +7,7 @@ async def main():
         b=await p.chromium.launch(); c=await b.new_context(viewport={'width':400,'height':860}, timezone_id='Asia/Tokyo'); await c.add_init_script("localStorage.setItem('soramemo.onboarded','1')")
         pg=await c.new_page(); errs=[]; pg.on('pageerror', lambda e: errs.append(str(e)))
         await pg.goto('file://'+os.path.join(WEB,'index.html')); await pg.wait_for_load_state('load'); await pg.wait_for_timeout(400)
-        await pg.click('#openSettings'); await pg.click('#toggleDemo'); await pg.wait_for_timeout(200)
+        await pg.evaluate('openMyPage()'); await pg.click('#toggleDemo'); await pg.wait_for_timeout(200)
         cts = await pg.evaluate("'a:'+A.find(a=>a.iata=='CTS').id")
         for v in ['t:HND-T1', cts]:
             await pg.select_option('#demoAirport', v); await pg.press('#checkin','Enter'); await pg.wait_for_timeout(700)
