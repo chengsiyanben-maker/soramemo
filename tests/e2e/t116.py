@@ -104,6 +104,11 @@ async def main():
         await pg.mouse.move(195, g + 10); await pg.mouse.down(); await pg.mouse.move(195, g + 300, steps=8); await pg.mouse.up(); await pg.wait_for_timeout(600)
         t2 = await pg.evaluate('$("homeSheet").getBoundingClientRect().top')
         check(f'送ってからつまみを引き下げても最初の位置（{round(t2)}）', abs(t2 - top0) < 2)
+        await pg.click('nav.tabs button[data-v="book"]'); await pg.wait_for_timeout(400)
+        await pg.click('nav.tabs button[data-v="home"]'); await pg.wait_for_timeout(600)
+        t3 = await pg.evaluate('$("homeSheet").getBoundingClientRect().top')
+        check(f'図鑑へ行って戻っても最初の位置（{round(t3)}）', abs(t3 - top0) < 2)
+        check('タブ帯の後ろに上の線がない', await pg.evaluate('getComputedStyle(document.querySelector("nav.tabs")).borderTopStyle') == 'none')
         check('範囲の中：エラーなし', not errs, errs); await c.close()
 
         # 2. 範囲の外（ログイン中・羽田から約10km）

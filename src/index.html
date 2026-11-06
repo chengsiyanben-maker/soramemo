@@ -2650,6 +2650,8 @@ nav.tabs{transition:transform .3s cubic-bezier(.2,.8,.2,1),opacity .2s}
 #v-home #homeBlocks>[data-lo="home:recent"] .boardzone{margin-top:16px}
 /* 引く所の字は選ばせない（マウスで引いたときに青く選ばれないように） */
 #v-home .bpass,#homeSheet .grabzone,:root[data-view="home"] .topzone{-webkit-user-select:none;user-select:none}
+/* タブ帯の後ろの帯に上の線を付けない（組み立てのときの CSS の圧縮で規則がまとめられ、前の「上に線」が残っていたので、ここで消す） */
+:root nav.tabs{border-top:0}
 /* 押したときの確かめ */
 dialog.ckconfirm{border:0;border-radius:24px;padding:20px 18px 16px;width:min(340px,calc(100vw - 32px));background:var(--h3-card);color:var(--h3-ink);font-family:var(--gothic);box-shadow:0 24px 60px -20px rgba(15,23,42,.45)}
 dialog.ckconfirm::backdrop{background:rgba(15,23,42,.35)}
