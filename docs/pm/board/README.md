@@ -20,4 +20,4 @@
 | デザイン | design.md | trig_01LzUZTUWpH6f4raJUsYyVgJ |
 | 改善 | kaizen.md | trig_01Hc9YswK9LkseujQEdAoHNN |
 | 広告 | ads.md | trig_01Ts6mony3Q9ZySJoySJMsxD |
-| 受信機 | jushinki.md | （作成中） |
+| 受信機 | jushinki.md | trig_01WPZoJgQnWAbcXrDjqSSCK9 |
