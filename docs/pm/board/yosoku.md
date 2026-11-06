@@ -10,15 +10,21 @@
 - 運航予想と運用予想は実績と分けて持ち、画面では「予想」と出し、保証しないと書く
 - 登録記号の点の形（● 確認 ◐ 前の便から ○ 予想）は撮る人の画面の決めごとに合わせる
 
-## いま持っている状況（11/6 時点）
-- データ担当の data/rotation-predict（移行 152）は11/6に main に入った。毎晩 base・learn・learn_hi の3通りを rot_eval に採点している
-- 11/4 の確かめ（300便・21日）：learn は当たり率で base より上、出したうちの当たり率では下
-- 11/13 に7日分の採点を見て、画面に使う方式（base／learn／learn_hi）を本人が決める
+## いま持っている状況（11/6 夜）
+- データ担当の移行 152 は11/6に main・本番に入った。毎晩 base・learn・learn_hi の3通りを rot_eval に採点している。画面はまだ変わらない
+- 11/5 の確かめ（300便・21日）：learn は当たり率で base より上、出したうちの当たり率では下
+- 11/6 棚卸し（PR #25 下書き・ブランチ yosoku/inventory・報告 docs/pm/report-yosoku-inventory.md）：
+  - 予想の部品は loadPrediction（8720）・predictionHTML（8727）。呼ぶ所は specialHTML（8369）・spDetailHTML（9735）・openPlane／planeHTML／drawPlaneMap（8562〜）。撮る人の一覧の ● ◐ ○ は spot_regs（regLine 9700・spRegWhy 9383）
+  - loadPrediction は predict_rotation（JAL・ANA の時刻表の作り・しきい値なし）→ 空なら predict_rotation_reg。採点されているのは predict_rotation_reg と同じ決め方（base）だけ。predict_rotation と spot_regs は採点外
+  - predict_rotation_v2（learn）はどこからも呼ばれていない。そのままつなぐと src＝livery の便が「0%（null回）」になる
+  - 画面の言い方は「推定」が多く、「保証しない」の文がない
+- 11/13 の案：docs/pm/report-yosoku-1113.md（方式ごとの画面の違い・直す関数・デザイン担当への依頼文・当たり具合の1行の案）
 
 ## 次にやること
-1. 今の画面で予想がどこにどう出ているか（関数・画面・テスト）を調べ、docs/pm/report-yosoku-inventory.md に書く（コードは変えない）
-2. 11/13 の決定に向けて、方式ごとに画面がどう変わるか（出る便の数・「予想」の出し方・当たり具合を見せるか）を短い案にする。画面が変わるならデザイン担当への依頼文も
-3. 11/13 に本人が決めたら、その方式を使う直しをブランチ yosoku/use-method で作り、下書き PR
+1. PR #25 の CI・レビューに答える
+2. 11/13 に本人が決めるのを待つ（方式・predict_rotation を先に呼ぶのを続けるか・当たり具合を見せるか）。決まる前に画面は変えない
+3. 決まったら：画面が変わるならデザイン担当に依頼文（report-yosoku-1113.md にある）を渡して案を待つ → ブランチ yosoku/use-method で loadPrediction・predictionHTML・planeHTML を直し、e2e に src＝livery／learn の形のテストを足し、スマホ幅で撮って下書き PR
+4. それまでに PM の指示があればそちらを先に
 
 ## ほかの担当への依頼
-- （なし）
+- データ担当へ（11/6、data.md に書いた）：predict_rotation の採点を足すか・predict_rotation_v2 に方式の引数・当たり具合を返す読む関数。どれも 11/13 の本人の決定しだい

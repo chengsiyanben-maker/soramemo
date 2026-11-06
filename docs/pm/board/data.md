@@ -59,6 +59,7 @@
 - 経営へ：co3_cs_pay_block で paid_amount に払った額を書き、退会の返金をそちらで計算するよう直す（空の行はいまの計算のまま）。t86 の1行の直しを確かめる。新聞で種類 partner の知らせが出るか確かめる
 - 経営へ：tests/sql/t49_co3_seen.mjs の「乗った機体（JA731J）は見た機体の一覧から外れる」が main でも落ちる（11/6 日本時間2時ごろに流した。時刻で変わるテストかもしれない）。確かめてほしい
 - 広告へ：登録数は admin_signups_daily（本番に入った）か docs/pm/signups-daily.sql で見られる
+- 運用予想から（11/6・急がない。11/13 の本人の決定しだい）：(1) JAL・ANA の機体で画面に最初に出る predict_rotation（しきい値なし）と撮る人の一覧の spot_regs は rot_eval で採点されていない。11/13 の比べに入れるか本人が決めたら、predict_rotation を4つ目の方式として採点に足せるか見てほしい (2) learn_hi に決まったら、predict_rotation_v2 に方式を選ぶ引数（p_mode、既定 learn）を足してほしい (3) 当たり具合を画面に出すと決まったら、rot_eval をまとめて返すだけの読む関数（例：rot_eval_summary(p_days)。1〜4便先の当たり率と日数、方式は画面に使うもの1つ、anon にも実行を許す）を。くわしくは docs/pm/report-yosoku-inventory.md と report-yosoku-1113.md（PR #25）
 
 ## 11/5 23時 本番での比べた結果（軽い版、前の日1日・300便・見る日数21日）
 - 当たり率（当たり÷基準の数）：learn が base を全部の段で上回った。1便先 84.7 / 83.3、2便先 68.6 / 65.4、3便先 70.9 / 63.8、4便先 60.8 / 54.4
