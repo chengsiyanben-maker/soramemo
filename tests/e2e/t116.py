@@ -51,6 +51,12 @@ async def measure(pg, name):
     check(name + '：最後の行がタブ帯にもぐらない', not m['under'])
     return m
 # 地図の上で、自分と空港の両方が見える所（上の段の下・シートの上）にあるか
+RATIO_OF = """(sel => { const e = document.querySelector(sel), cs = getComputedStyle(e);
+  const rgb = c => c.match(/[\\d.]+/g).map(Number), mix = (f, b) => { const a = f[3] == null ? 1 : f[3]; return [0, 1, 2].map(i => f[i] * a + b[i] * (1 - a)); };
+  let bg = [255, 255, 255]; const chain = []; for(let x = e; x; x = x.parentElement){ const c = getComputedStyle(x).backgroundColor; if(!/rgba\\(0, 0, 0, 0\\)|transparent/.test(c)) chain.push(rgb(c)); }
+  for(const c of chain.reverse()) bg = mix(c, bg);
+  const L = v => { const f = x => { x /= 255; return x <= .03928 ? x / 12.92 : ((x + .055) / 1.055) ** 2.4; }; return .2126 * f(v[0]) + .7152 * f(v[1]) + .0722 * f(v[2]); };
+  const a = L(mix(rgb(cs.color), bg)), b = L(bg); return (Math.max(a, b) + .05) / (Math.min(a, b) + .05); })"""
 INVIEW = """(() => { const box = $('homeMap').getBoundingClientRect(), top = document.querySelector('.topzone').getBoundingClientRect().bottom, bot = $('homeSheet').getBoundingClientRect().top;
   const pt = ll => HOME_MAP.latLngToContainerPoint(ll), ok = p => p.x >= 0 && p.x <= box.width && p.y >= top && p.y <= bot;
   return { ap: ok(pt([HOME_NEAR.a.lat, HOME_NEAR.a.lon])), me: ok(pt([HOME_POS.lat, HOME_POS.lon])), edge: !!$('homeEdge') && !$('homeEdge').hidden }; })()"""
@@ -78,9 +84,26 @@ async def main():
         check('引き上げ：シートは2段の上の位置', await pg.evaluate('$("homeSheet").dataset.snap') == 'full')
         check('引き上げ：数字は3枚のカード', await pg.evaluate("getComputedStyle($('homeStrip')).display") == 'grid')
         check('引き上げ：最近の印の見出しに図鑑へのピル', await pg.is_visible('#recentBook'))
+        o = await pg.evaluate('''(() => { const st = $("homeStrip").getBoundingClientRect(), rc = document.querySelector('[data-lo="home:recent"]').getBoundingClientRect(); return { strip: st.bottom, recent: rc.top }; })()''')
+        check('引き上げ：最近の印は3枚の数字のすぐ下', 0 <= o['recent'] - o['strip'] <= 40, o)
+        rb = await pg.evaluate(RATIO_OF + "('#recentBook')")
+        check(f'引き上げ：「図鑑 ›」の色の濃さ4.5:1 以上（{rb:.2f}）', rb >= 4.5)
         await pg.screenshot(path=os.path.join(SHOTS, '02-home-open.png'))
         await pg.click('#homeSheet .grab'); await pg.wait_for_timeout(500)
         check('つまみを押すと最初の位置へ（2段だけ）', await pg.evaluate('$("homeSheet").dataset.snap') == 'half')
+        top0 = await pg.evaluate('$("homeSheet").getBoundingClientRect().top')
+        # 引き上げ → 中をいちばん下まで送る → つまみで下げる：最初の位置に戻り、半券が見える（前は送った量だけ下へずれて消えた）
+        await pg.click('#hsUp'); await pg.wait_for_timeout(500)
+        await pg.evaluate('(b => { b.scrollTop = b.scrollHeight; })(document.querySelector("#homeSheet .sbody"))'); await pg.wait_for_timeout(200)
+        await pg.click('#homeSheet .grab'); await pg.wait_for_timeout(600)
+        t1 = await pg.evaluate('$("homeSheet").getBoundingClientRect().top'); ck = await pg.evaluate('$("checkin").getBoundingClientRect().bottom')
+        check(f'送ってから下げても最初の位置（{round(top0)} → {round(t1)}）で、半券が見える', abs(t1 - top0) < 2 and ck < 844, ck)
+        await pg.click('#hsUp'); await pg.wait_for_timeout(500)
+        await pg.evaluate('(b => { b.scrollTop = 400; })(document.querySelector("#homeSheet .sbody"))')
+        g = await pg.evaluate('document.querySelector("#homeSheet .grab").getBoundingClientRect().top')
+        await pg.mouse.move(195, g + 10); await pg.mouse.down(); await pg.mouse.move(195, g + 300, steps=8); await pg.mouse.up(); await pg.wait_for_timeout(600)
+        t2 = await pg.evaluate('$("homeSheet").getBoundingClientRect().top')
+        check(f'送ってからつまみを引き下げても最初の位置（{round(t2)}）', abs(t2 - top0) < 2)
         check('範囲の中：エラーなし', not errs, errs); await c.close()
 
         # 2. 範囲の外（ログイン中・羽田から約10km）
