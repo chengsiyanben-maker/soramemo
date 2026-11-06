@@ -20,18 +20,19 @@
 - 置く時期：機材がそろいしだい（11/6 PM の判断で前倒し可）
 
 ## 終わった仕事
-- （11/6）機材の案と置き場所 → ブランチ jushinki/receiver-parts、下書き PR #28、docs/pm/receiver-parts.md・report-receiver-parts.md
-  - おすすめは案B（屋外アンテナ＋フィルター入りの装置＋Raspberry Pi 4 2GB、約3.5万円＋送料）。窓際で試す案A、手持ちのパソコンの案C も併記
-  - 国内通販（Amazon.co.jp など）の値段は未確認
+- （11/6 夜・PM の指示）機材の案と置き場所 → ブランチ jushinki/parts、下書き PR #31、docs/pm/report-receiver-parts.md
+  - 日本で買える品を優先。案A 窓際 約3.1万円／案B 屋外 約4.7万円（おすすめ）／案C 手持ちのパソコン 約1.4〜3万円
+  - パソコンは秋月の「ラズパイ4スターターキット 2GB版」¥17,400（11/6 在庫あり）が別々に買うより安い
+  - ケーブルはモノタロウの 5D-FB 5m（N型防水プラグ⇔SMA）¥8,688
+  - フィルター入りの受信の装置（Pro Stick Plus・FlightStick）は Amazon.co.jp にあるが、ページを自動で開けず値段は未確認
   - adsb.lol は「将来 API に鍵が要り、送っている人はもらえる」と書いている（github.com/adsblol/api、11/6 読む）
+- （11/6）前の版：PR #28（jushinki/receiver-parts、外国のお店中心）。#31 で置きかえ。閉じてよい
 
-## 進め方（11/6 本人）
-- 受信機の話は、本人が別のセッションで直接進める。PM からは指示を出さない。別のセッションでも、この帳面と PR #28 を引き継ぎに使う
-
-## 本人の答え待ち（report-receiver-parts.md の3つ）
+## 本人の答え待ち（report-receiver-parts.md の「本人に決めてほしいこと」）
 - アンテナを置ける場所と向き（屋根・ベランダ・窓際／南西か東か）
 - 案A・B・C のどれにするか
-- Raspberry Pi 4 を買うか、家のパソコンで動かすか
+- Amazon.co.jp での受信の装置・AirNav のセットの値段と発送元
+- 秋月のキットを買うか、家のパソコンで動かすか
 
 ## 次にやること
 1. 受信ソフト（readsb など）の設定と、adsb.lol・Flightradar24 への送り方の手順（本人が画面を見ながら打てる形）
