@@ -2,6 +2,7 @@ import os, sys
 HERE=os.path.dirname(os.path.abspath(__file__)); WEB=os.path.abspath(os.path.join(HERE,'..','..','web')); WORK=os.environ.get('SORAMEMO_TEST_WORK','/tmp/soramemo-e2e'); os.makedirs(WORK, exist_ok=True)
 import asyncio, base64
 from playwright.async_api import async_playwright
+sys.path.insert(0, HERE); from keepls import reload_keep, goto_http   # 読み込み直すテストは http で開く（file:// だと localStorage が落ちることがある）
 CSV = "日付,出発,到着,航空会社\n2025-08-01,HND,CTS,JAL\n2025/08/03,新千歳,羽田,ANA\n2025-09-10,伊丹,那覇\n2025-09-11,OKA,OKA\n2025-13-01,HND,FUK\n2025-10-01,HND,XXX\n2025-10-02,福岡,羽田,ほげ航空\n2099-01-01,HND,CTS"
 async def main():
     async with async_playwright() as p:
@@ -9,10 +10,10 @@ async def main():
         # 1) 端末版（未加入）
         c=await b.new_context(viewport={'width':400,'height':860}, device_scale_factor=2); await c.add_init_script("localStorage.setItem('soramemo.onboarded','1'); Object.defineProperty(window, 'SORAMEMO_CONFIG', { configurable:true, get(){ return this.__cfg; }, set(v){ this.__cfg = Object.assign({}, v, { gameReleased: true }); } });")
         pg=await c.new_page(); errs=[]; pg.on('pageerror', lambda e: errs.append(str(e)))
-        await pg.goto('file://'+os.path.join(WEB,'index.html')); await pg.wait_for_load_state('load'); await pg.wait_for_function('document.readyState === "complete" && typeof render === "function"'); await pg.wait_for_timeout(400)
+        await goto_http(pg, os.path.join(WEB,'index.html')); await pg.wait_for_load_state('load'); await pg.wait_for_function('document.readyState === "complete" && typeof render === "function"'); await pg.wait_for_timeout(400)
         await pg.evaluate("""() => { const id=i=>A.find(a=>a.iata===i).id, t0=Date.parse('2026-02-01T08:00:00+09:00');
           localStorage.setItem('soramemo.v1', JSON.stringify({checkins:[{a:id('HND'),t:t0,acc:20,term:null},{a:id('CTS'),t:t0+7.2e6,acc:20,term:null}], flights:[{id:'a1',from:id('HND'),to:id('CTS'),dep:t0,arr:t0+7.2e6,km:820,airline:'JL',no:null}], manual:[]})); }""")
-        await pg.wait_for_timeout(400); await pg.reload(); await pg.wait_for_load_state('load'); await pg.wait_for_timeout(400); await pg.click('nav.tabs button[data-v=log]')
+        await pg.wait_for_timeout(400); await reload_keep(pg); await pg.wait_for_timeout(400); await pg.click('nav.tabs button[data-v=log]')
         print('local locked:', await pg.locator('#yrPlus .locked').count() == 1)
         await pg.click('nav.tabs button[data-v=log]')
         await pg.evaluate("goTab('log')"); await pg.click('#flAdd'); await pg.wait_for_timeout(450); await pg.evaluate('document.getElementById("importBox").hidden = false'); await pg.click('#importBox summary'); await pg.click('#impCheck'); print('local import:', await pg.inner_text('#impPreview'))
@@ -37,7 +38,7 @@ async def main():
         c=await b.new_context(viewport={'width':400,'height':860}); await c.add_init_script("localStorage.setItem('soramemo.onboarded','1'); Object.defineProperty(window, 'SORAMEMO_CONFIG', { configurable:true, get(){ return this.__cfg; }, set(v){ this.__cfg = Object.assign({}, v, { gameReleased: true }); } });")
         await c.route('https://cdn.jsdelivr.net/npm/@supabase/**', lambda r: r.fulfill(path=os.path.join(HERE,'fake_sb.js'), content_type='application/javascript'))
         pg=await c.new_page(); errs=[]; pg.on('pageerror', lambda e: errs.append(str(e)))
-        await pg.goto('file://'+os.path.join(WORK,'index_server_test.html')); await pg.wait_for_load_state('load'); await pg.wait_for_function('document.readyState === "complete" && typeof render === "function"'); await pg.wait_for_timeout(500)
+        await goto_http(pg, os.path.join(WORK,'index_server_test.html')); await pg.wait_for_load_state('load'); await pg.wait_for_function('document.readyState === "complete" && typeof render === "function"'); await pg.wait_for_timeout(500)
         await pg.evaluate('__fake.login()'); await pg.wait_for_timeout(600)
         await pg.click('#openSettings'); print('server not plus:', await pg.inner_text('#plusInfo'), '|', await pg.inner_text('#plusBtn')); await pg.click('#dSettings .mp-back')
         await pg.click('nav.tabs button[data-v=log]'); print('server locked:', await pg.locator('#yrPlus .locked').count() == 1)

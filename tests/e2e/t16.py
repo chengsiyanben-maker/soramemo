@@ -2,12 +2,13 @@ import os, sys
 HERE=os.path.dirname(os.path.abspath(__file__)); WEB=os.path.abspath(os.path.join(HERE,'..','..','web')); WORK=os.environ.get('SORAMEMO_TEST_WORK','/tmp/soramemo-e2e'); os.makedirs(WORK, exist_ok=True)
 import asyncio, json
 from playwright.async_api import async_playwright
+sys.path.insert(0, HERE); from keepls import reload_keep, goto_http   # 読み込み直すテストは http で開く（file:// だと localStorage が落ちることがある）
 async def main():
     async with async_playwright() as p:
         b=await p.chromium.launch(); c=await b.new_context(viewport={'width':400,'height':860}, device_scale_factor=2); await c.route('**/web/config.js', lambda r: r.fulfill(body='window.SORAMEMO_CONFIG = {};', content_type='application/javascript'))
         await c.add_init_script("localStorage.setItem('soramemo.onboarded','1'); Object.defineProperty(window, 'SORAMEMO_CONFIG', { configurable:true, get(){ return this.__cfg; }, set(v){ this.__cfg = Object.assign({}, v, { gameReleased: true }); } });")
         pg=await c.new_page(); errs=[]; pg.on('pageerror', lambda e: errs.append(str(e)))
-        await pg.goto('file://'+os.path.join(WEB,'index.html')); await pg.wait_for_load_state('load'); await pg.wait_for_function('document.readyState === "complete" && typeof render === "function"'); await pg.wait_for_timeout(600)
+        await goto_http(pg, os.path.join(WEB,'index.html')); await pg.wait_for_load_state('load'); await pg.wait_for_function('document.readyState === "complete" && typeof render === "function"'); await pg.wait_for_timeout(600)
         # 本番記録に直接データを作る：沖縄の全空港に10回ずつ、北海道の全空港に1回、新千歳だけ100回
         await pg.evaluate("""() => {
           const ok = A.filter(a => a.pref === '沖縄県'), hk = A.filter(a => a.pref === '北海道');
@@ -17,7 +18,7 @@ async def main():
           const cts = A.find(a=>a.iata==='CTS'); for(let i=0;i<99;i++) cs.push({a:cts.id, t:(t+=36e5), acc:20, term:null});
           localStorage.setItem('soramemo.v1', JSON.stringify({checkins:cs, flights:[], manual:[]}));
         }""")
-        await pg.wait_for_timeout(400); await pg.reload(); await pg.wait_for_load_state('load'); await pg.wait_for_timeout(600)
+        await pg.wait_for_timeout(400); await reload_keep(pg); await pg.wait_for_timeout(600)
         st = await pg.evaluate("(() => { const s = achState(); return {n:ACH.length, done:[...s.done.keys()].filter(k=>/^(lap|rg)/.test(k)), okinawa10: s.value(ACH.find(x=>x.id==='rg10_沖縄')), hk10: s.value(ACH.find(x=>x.id==='rg10_北海道')), all10: s.value(ACH.find(x=>x.id==='lapall10'))}; })()")
         print(json.dumps(st, ensure_ascii=False))
         await pg.evaluate("goTab('ach')"); await pg.wait_for_timeout(200)
