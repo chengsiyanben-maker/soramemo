@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>B：ホーム（地図とシート）｜そらメモ 見直しの方向の案 2版</title>
+<title>B'：範囲の中（半券）｜そらメモ 見直しの方向の案 2版</title>
 <style>
 :root{
   --gothic:"Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic UI","Yu Gothic","Meiryo","Noto Sans JP","Noto Sans CJK JP",system-ui,sans-serif;
@@ -115,11 +115,15 @@ body{background:var(--bg);color:var(--ink);font-family:var(--gothic);font-size:1
 .pl.on{background:var(--strong);color:#fff}
 .mini{display:flex;align-items:center;gap:8px;background:var(--card);border-radius:16px;box-shadow:var(--shadow);padding:8px 12px;font-size:13px;color:var(--sub);font-weight:700}
 .mini b{font-family:var(--sign);font-size:20px;color:var(--strong)}
+
+.tabs b.mid i.out{background:var(--card);color:var(--strong);box-shadow:var(--shadow),0 10px 24px -12px rgba(15,27,45,.45)}
+.ask{border-radius:22px;background:var(--card);box-shadow:var(--shadow);padding:16px 18px}
+.ask .q{font-size:17px;font-weight:800;color:var(--strong);margin-top:4px}
 </style>
 </head>
 <body>
 <main class="phone">
-<div class="map" style="height:250px"><svg viewBox="0 0 390 250" preserveAspectRatio="xMidYMid slice" aria-label="航空図風の地図（見本）">
+<div class="map" style="height:230px"><svg viewBox="0 0 390 230" preserveAspectRatio="xMidYMid slice" aria-label="航空図風の地図（見本）">
 <defs><pattern id="g" width="48" height="48" patternUnits="userSpaceOnUse"><path d="M48 0H0V48" fill="none" stroke="var(--chart-grid)" stroke-width="1"/></pattern></defs>
 <rect width="390" height="400" fill="var(--chart-sea)"/>
 <path d="M0 -10H390V60C340 80 300 60 270 100C250 130 210 120 190 160C175 190 120 180 90 210C60 240 30 230 0 250Z" fill="var(--chart-land)" stroke="var(--chart-coast)" stroke-width="1.2"/>
@@ -129,31 +133,21 @@ body{background:var(--bg);color:var(--ink);font-family:var(--gothic);font-size:1
 <text x="250" y="132" font-size="14" font-weight="800" fill="var(--chart-apt)">HND 羽田 ✓</text>
 <circle cx="330" cy="70" r="6" fill="var(--chart-apt)" stroke="#fff" stroke-width="2"/><text x="300" y="56" font-size="13" font-weight="800" fill="var(--chart-apt)">NRT</text>
 <circle cx="60" cy="40" r="5" fill="#fff" stroke="var(--chart-apt)" stroke-width="2"/>
-<path d="M70 70 L206 160" stroke="var(--chart-apt)" stroke-width="1.6" stroke-dasharray="2 5" opacity=".7"/><circle cx="70" cy="70" r="7" fill="#2F6FE4" stroke="#fff" stroke-width="3"/><text x="82" y="96" font-size="13" font-weight="700" fill="var(--strong)">いまここ</text></svg></div>
-<div class="top"><span class="ic" style="margin-left:auto" aria-label="地図を広げる"><svg class="ico" viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></span></div>
+<circle cx="186" cy="150" r="7" fill="#2F6FE4" stroke="#fff" stroke-width="3"/><text x="172" y="155" text-anchor="end" font-size="13" font-weight="700" fill="var(--strong)">いまここ（範囲の中）</text></svg></div>
 <section class="sheet"><span class="grab"></span>
-<div class="card pad"><div class="row"><div><div class="lab">いちばん近い空港</div><div class="flap" style="margin-top:6px"><i>H</i><i>N</i><i>D</i></div></div>
-<div style="margin-left:auto;text-align:right"><div class="num" style="font-size:34px">12.4<span class="u">km</span></div><div class="s">判定範囲まで</div></div></div>
-<p class="s" style="margin:10px 0 0">範囲に入ると、ここに半券が出ます。</p></div>
-<div class="card" style="margin-top:12px;padding:18px 18px 16px"><div class="row" style="align-items:flex-end;gap:18px">
-<div><div class="num" style="font-size:48px">16<span class="u" style="font-size:16px">/86</span></div><div class="lab">空港</div></div>
-<div><div class="num" style="font-size:30px">30</div><div class="lab">フライト</div></div>
-<div><div class="num" style="font-size:30px">24,088<span class="u">km</span></div><div class="lab">飛んだ距離</div></div></div>
-<div class="bar2" style="margin-top:14px"><i style="width:19%"></i></div></div>
-<div class="card tile" style="background:var(--hero);color:var(--on-hero);min-height:96px;margin-top:12px"><span class="lab" style="color:var(--hero-sub)">会社のページ（エアライン経営）</span><div><div class="num" style="font-size:26px;color:#fff">そらメモ航空</div><div class="s" style="color:var(--hero-sub)">帳面のページから育つ ・ 今日の収益 +3,803万円</div></div></div>
+<div class="pass"><div class="m"><div class="lab">いま いる空港</div><div class="flap" style="margin-top:8px"><i>H</i><i>N</i><i>D</i></div><div class="nm">東京国際空港（羽田）</div><div class="st">第1ターミナル ・ 判定範囲の中</div></div>
+<div class="sb"><span class="v">チェックイン</span><small>→ 右へ引いて<br>印をもらう</small></div></div>
+<div class="h3"><b>これから乗る予定の便は？</b><span>あとでも選べる</span></div>
+<div class="card pad" style="padding-top:4px;padding-bottom:4px">
+<div class="li"><span class="t">10:50</span><div><b>JL 917　那覇行き</b><small>B767 ・ 9番搭乗口</small></div><span class="pl sm r">乗る</span></div>
+<div class="li"><span class="t">11:05</span><div><b>NH 469　那覇行き</b><small>B787 ・ 62番搭乗口</small></div><span class="pl sm r">乗る</span></div></div>
+<p class="note">選んだ便は予定として残ります。着いた空港で印をもらったあと「乗りましたか？」に答えるとフライトになります。乗らない日は選ばなくてかまいません。</p>
 <div class="h3"><b>最近の印</b></div>
 <div class="board" aria-label="最近の印"><div>OIT<span>大分 ・ 5/19</span></div><div>HIJ<span>広島 ・ 5/8</span></div><div>MMY<span>宮古 ・ 4/26</span></div></div>
-<div class="h3"><b>帳面のページ</b></div>
-<div class="grid2" style="margin-top:12px">
-<div class="card tile"><span class="lab">印</span><div><div class="num">3</div><div class="s">番外編の印</div></div></div>
-<div class="card tile"><span class="lab">路線の地図</span><div><div class="num">16<span class="u">本</span></div><div class="s">いちばん長い 1,687km</div></div></div>
-<div class="card tile"><span class="lab">乗った機体</span><div><div class="num">12<span class="u">機</span></div><div class="s">登録記号ごと</div></div></div>
-<div class="card tile"><span class="lab">特別塗装機</span><div><div class="num">3<span class="u">/92</span></div><div class="s">見た・乗った</div></div></div>
-</div>
 </section>
-<nav class="tabs" aria-label="画面の切り替え"><b class="on"><svg viewBox="0 0 24 24"><path d="M4 5.5C4 4.7 4.7 4 5.5 4H11v15H5.5c-.8 0-1.5.5-1.5 1.2V5.5Z"/><path d="M20 5.5c0-.8-.7-1.5-1.5-1.5H13v15h5.5c.8 0 1.5.5 1.5 1.2V5.5Z"/></svg>帳面</b><b class=""><svg viewBox="0 0 24 24"><path d="M10.5 13.5 4 11l1.4-1.4 7 1.1 3.9-3.9c.8-.8 2.1-.8 2.9 0s.8 2.1 0 2.9l-3.9 3.9 1.1 7L15 22l-2.5-6.5-3 3v2.5L8 22.5l-1.3-3.2L3.5 18 5 16.5h2.5Z"/></svg>空</b><b class=""><svg viewBox="0 0 24 24"><path d="M4 20V8l6-3v15"/><path d="M10 20V10l10 3v7"/><path d="M3 20h18"/></svg>会社</b><b class=""><svg viewBox="0 0 24 24"><circle cx="12" cy="8.5" r="3.8"/><path d="M4.5 20c.9-3.8 4-5.8 7.5-5.8s6.6 2 7.5 5.8"/></svg>マイページ</b></nav>
+<nav class="tabs" aria-label="画面の切り替え"><b class="on"><svg viewBox="0 0 24 24"><path d="M4 11 12 4l8 7v9h-5v-6H9v6H4Z"/></svg>ホーム</b><b class=""><svg viewBox="0 0 24 24"><path d="M4 5.5C4 4.7 4.7 4 5.5 4H11v15H5.5c-.8 0-1.5.5-1.5 1.2V5.5Z"/><path d="M20 5.5c0-.8-.7-1.5-1.5-1.5H13v15h5.5c.8 0 1.5.5 1.5 1.2V5.5Z"/></svg>帳面</b><b class=""><svg viewBox="0 0 24 24"><path d="M4 20V8l6-3v15"/><path d="M10 20V10l10 3v7"/><path d="M3 20h18"/></svg>会社</b><b class=""><svg viewBox="0 0 24 24"><circle cx="12" cy="8.5" r="3.8"/><path d="M4.5 20c.9-3.8 4-5.8 7.5-5.8s6.6 2 7.5 5.8"/></svg>マイページ</b></nav>
 </main>
-<aside class="ann"><b>案のメモ（本番には出ません・数字は見本）・2版</b><ul><li><b>ホーム＝地図とシート</b>（決まりを変えない形）。上に航空図風の地図、シートに帳面の表紙。地図はこの1つだけ（印をもらった空港は ✓・色の点）</li><li><b>下のタブは4つ</b>（帳面・空・会社・マイページ）。1版のまん中の丸「印をもらう」はやめた（空港の外の大半の時間は押せなかった）</li><li>空港の外では、シートのいちばん上が「いちばん近い空港 12.4km」。範囲に入るとここが半券に替わる（B3）</li><li>経営の入口「会社のページ」は大きな数字のすぐ下へ上げた（1版は最後で、最初の画面ではタブ帯の下だった）</li><li>目次の「印」は上の大きな数字と重ならない「番外編の印」を出す。1版の「並び：気軽に」はマイページの「使い方」へ、「押すと開く」は消した</li><li>使い方による違いはシートの並びだけ：撮る人は「特別塗装機」を上、修行する人は大きな数字を「今年のポイント・回数」に</li></ul></aside>
+<aside class="ann"><b>案のメモ（本番には出ません・数字は見本）・2版</b><ul><li><b>A の流れ</b>：判定範囲に入ると、シートのいちばん上が半券に替わる。右へ引いて印（押すだけでも確かめ1回で切れる）</li><li>続けて「これから乗る予定の便は？」。「乗る」は<b>予定</b>として残すだけ。実績にするのは着いたあとの「乗りましたか？」（B'4）</li><li>季節の札（今の本番の「春の訪問」）は出さない（却下済みの季節のスタンプに近い）</li></ul></aside>
 <script>if(window!==window.top){var a=document.querySelector('.ann');if(a)a.remove()}</script>
 </body>
 </html>

@@ -115,30 +115,39 @@ body{background:var(--bg);color:var(--ink);font-family:var(--gothic);font-size:1
 .pl.on{background:var(--strong);color:#fff}
 .mini{display:flex;align-items:center;gap:8px;background:var(--card);border-radius:16px;box-shadow:var(--shadow);padding:8px 12px;font-size:13px;color:var(--sub);font-weight:700}
 .mini b{font-family:var(--sign);font-size:20px;color:var(--strong)}
+
+.tabs b.mid i.out{background:var(--card);color:var(--strong);box-shadow:var(--shadow),0 10px 24px -12px rgba(15,27,45,.45)}
+.ask{border-radius:22px;background:var(--card);box-shadow:var(--shadow);padding:16px 18px}
+.ask .q{font-size:17px;font-weight:800;color:var(--strong);margin-top:4px}
 </style>
 </head>
 <body>
 <main class="phone">
 <div class="wrap"><div class="steps" aria-label="いまの状態（押せません）"><span class="">空港の外</span><em>›</em><span class="">空港で</span><em>›</em><span class="">機内</span><em>›</em><span class="on">着いた</span></div>
 <div class="gap"></div>
-<div class="card" style="padding:22px 18px;text-align:center"><div class="lab">はじめての印</div>
-<div style="display:grid;place-items:center;margin:14px 0 10px"><span class="stamp big">OKA</span></div>
+<div class="card" style="padding:18px;text-align:center"><div class="lab">はじめての印</div>
+<div style="display:grid;place-items:center;margin:12px 0 8px"><span class="stamp big" style="width:120px;height:120px;font-size:36px">OKA</span></div>
 <div class="ttl">那覇空港</div><p class="s" style="margin:2px 0 0">沖縄県 ・ 17 空港目</p></div>
 <div class="gap"></div>
-<div class="card pad"><div class="row"><span class="lab">この機体でしたか？</span><span class="chip est" style="margin-left:auto">予想</span></div>
-<div class="num" style="font-size:28px;margin-top:6px">JA614J</div><div class="s">B767 ・ JL 917 の予想の機体</div>
-<div class="row" style="margin-top:12px;gap:10px"><span class="pl dark" style="flex:1">この機体だった</span><span class="pl" style="flex:1">ちがう・わからない</span></div>
-<p class="s" style="margin:10px 0 0">選んだ機体だけが「乗った機体」になります。わからないときは、機種（B767）の代わりの機体にします。</p></div>
+<div class="ask"><div class="row"><span class="lab">予定の便</span><span class="chip" style="margin-left:auto">まだ記録していません</span></div>
+<div class="q">JL 917　羽田 → 那覇 に乗りましたか？</div>
+<div class="s">羽田と那覇の印がそろいました。乗ったと答えた便だけがフライトになり、会社の路線になります。</div>
+<div class="row" style="margin-top:12px;gap:10px"><span class="pl dark" style="flex:1">乗った</span><span class="pl" style="flex:1">乗らなかった</span></div></div>
 <div class="gap"></div>
-<div class="card pad"><div class="lab">この旅で会社に入ったもの</div>
-<div class="li"><div><b>路線　羽田–那覇</b><small>1,687km ・ 会社の16本目</small></div><span class="r num" style="font-size:20px">＋1</span></div>
-<div class="li"><div><b>機体</b><small>上で確かめると入ります</small></div><span class="r chip">確かめ待ち</span></div>
+<div class="ask"><div class="row"><span class="lab">乗った機体</span><span class="chip est" style="margin-left:auto">予想</span></div>
+<div class="q">JA614J（B767）でしたか？</div>
+<div class="s">選んだ機体だけが「乗った機体」になります。わからないときは、機種（B767）の代わりの機体にします。</div>
+<div class="row" style="margin-top:12px;gap:10px"><span class="pl dark" style="flex:1">この機体だった</span><span class="pl" style="flex:1">ちがう・わからない</span></div></div>
+<div class="gap"></div>
+<div class="card pad"><div class="lab">答えたあとに会社に入るもの</div>
+<div class="li"><div><b>路線　羽田–那覇</b><small>「乗った」と答えたら ・ 会社の16本目</small></div><span class="r chip">答え待ち</span></div>
+<div class="li"><div><b>機体</b><small>機体を答えたら</small></div><span class="r chip">答え待ち</span></div>
 <div class="li"><div><b>会社の守り神　那覇</b><small>那覇で印をもらった日 1日目</small></div><span class="r num" style="font-size:20px">＋1</span></div></div>
 <div class="row" style="margin-top:14px;gap:10px"><span class="pl white" style="flex:1">画像で共有</span><span class="pl dark" style="flex:1">会社を見る</span></div>
 </div>
 <nav class="tabs" aria-label="画面の切り替え"><b class="on"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7v5l3 2"/></svg>いま</b><b class=""><svg viewBox="0 0 24 24"><path d="M4 5.5C4 4.7 4.7 4 5.5 4H11v15H5.5c-.8 0-1.5.5-1.5 1.2V5.5Z"/><path d="M20 5.5c0-.8-.7-1.5-1.5-1.5H13v15h5.5c.8 0 1.5.5 1.5 1.2V5.5Z"/></svg>帳面</b><b class=""><svg viewBox="0 0 24 24"><path d="M4 20V8l6-3v15"/><path d="M10 20V10l10 3v7"/><path d="M3 20h18"/></svg>会社</b><b class=""><svg viewBox="0 0 24 24"><circle cx="12" cy="8.5" r="3.8"/><path d="M4.5 20c.9-3.8 4-5.8 7.5-5.8s6.6 2 7.5 5.8"/></svg>マイページ</b></nav>
 </main>
-<aside class="ann"><b>案のメモ（本番には出ません・数字は見本）・2版</b><ul><li><b>着いた</b>＝選んだ便の到着空港で<b>印をもらったとき</b>だけ（時刻だけでは着いたにしない）</li><li><b>「この機体でしたか？」</b>：予想の機体を本人が選んだときだけ「乗った機体」にする。「ちがう・わからない」なら機種の代わりの機体（決まりどおり）。登録記号を打ち込んで直すこともできる</li><li>機体は確かめるまで「確かめ待ち」で、会社には入れない</li><li>路線の数は B4 とそろえた（この旅で16本目）</li></ul></aside>
+<aside class="ann"><b>案のメモ（本番には出ません・数字は見本）・2版</b><ul><li><b>「乗る」で選んだ便は予定のまま</b>。着いた空港で印をもらったとき（または2つの空港の印がそろったとき）に「乗りましたか？」と聞き、「乗った」と答えた便だけをフライト・路線にする</li><li><b>機体</b>：予想の登録記号を「〜でしたか？」で本人が選んだものだけ乗った機体に。わからなければ機種の代わりの機体（決まりどおり）</li><li>答えるまで、路線と機体は「答え待ち」で会社に入らない。「乗らなかった」なら予定は消え、2つの印は今までどおり印として残る</li><li>着いたは「着いた空港で印をもらったとき」だけ。時刻だけでは着いたにしない</li><li>路線の数は B4 とそろえた（答えたら16本目）</li></ul></aside>
 <script>if(window!==window.top){var a=document.querySelector('.ann');if(a)a.remove()}</script>
 </body>
 </html>
