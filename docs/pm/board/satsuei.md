@@ -13,13 +13,18 @@
 - 機体図鑑は特別塗装機だけ。予想は「予想」と出し、保証しない
 
 ## いま持っている仕事
-- （11/6 PM）最初の回：E（撮影記録）の準備（下の「次にやること」1・2）
+- E（撮影記録）の仕様（11/6 定時の回）：ブランチ satsuei/photo-log-spec、下書き PR #24、仕様 docs/pm/spec-photo-log.md、報告 docs/pm/report-photo-log-spec.md。コードの変更なし
+  - 候補の元：36時間より前は airport_tracks_all＋reg_legs、36時間以内は track_points＋reg_legs（airport_tracks_all は毎晩作られるため）。31日より前は断る（cold_done で外へ移るため）。14空港だけ
+  - photo_log は auth.users を on delete cascade で参照（退会で消える）、本人だけ読む・足す・消す、update なし
+  - 依頼文（デザイン担当 9-1・データ担当 9-2）は仕様の最後。PM が各担当へ渡す
+  - 本人に決めてほしいこと：撮った機体の一覧の置き場所（今のタブ帯に「記録」タブはない）／帯を入れた画像を最初の版に入れるか／1回に選べる写真の数（20枚）
 
 ## 次にやること
-1. E（撮影記録）の仕様を短く書く（目的・画面・データ・完了の条件）→ docs/pm/spec-photo-log.md。コードは変えない
-2. 画面が絡むので、デザイン担当への画面案の依頼文と、データ担当への表 photo_log（本人だけ読み書き・移行と RLS をセット）の依頼文を、仕様と同じファイルの最後に書く
+1. （済み・PR #24）E の仕様と依頼文
+2. デザイン担当の画面案と、データ担当の photo_log・photo_candidates、本人の決定（置き場所など3つ）を待つ。そろったら satsuei/photo-log で作る（EXIF は JPEG の APP1 だけ読む小さな関数を自分で書く。テストは EXIF 入りの小さな JPEG を手元で作る）
 3. feat/ops-v3 が main に入ったら、撮る人の見方が崩れていないかを tests/e2e/t63.py・t113.py で確かめる
 4. 撮影地の情報（spot_info）の毎月の見直しは12月はじめ（checked_on の更新）
 
 ## ほかの担当への依頼
-- （なし）
+- デザイン担当：撮影記録の画面案（spec-photo-log.md の 9-1）。PM 経由で渡してもらう
+- データ担当：表 photo_log と関数 photo_candidates（spec-photo-log.md の 9-2）。PM 経由で渡してもらう
