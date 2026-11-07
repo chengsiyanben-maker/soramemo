@@ -86,3 +86,34 @@ export function planesFromAdsb(ac: unknown, apt: [number, number], maxFt = 14000
   const regs = new Map(ac.map((a) => [String((a as Record<string, unknown>)?.hex), typeof (a as Record<string, unknown>)?.r === "string" ? (a as Record<string, unknown>).r as string : null]));
   return planesFrom(states, apt, maxFt, others).map((p) => ({ ...p, type: types.get(p.id) ?? null, reg: regs.get(p.id) ?? null }));
 }
+
+// 記録の処理（30秒ごと）が live_positions に残した日本中の機体の位置を、adsb.lol の ac と同じ形に戻す。
+//   見る人の呼び出しでは adsb.lol に問い合わせず、これを使う（adsb.lol への問い合わせを、見る人の数によらず30秒に3回に保つ）。
+//   live_positions は便名のある機体だけなので、便名のない機体（自家用機の一部など）は出ない。maxAgeMs より古い位置は使わない
+export type LiveRow = { callsign: string; hex: string | null; lat: number; lon: number; alt_ft: number | null; ground: boolean; fpm: number | null; kt: number | null; trk?: number | null; type: string | null; reg: string | null; seen_at: string };
+export function acFromLive(rows: LiveRow[], now: number, maxAgeMs = 75_000): Record<string, unknown>[] {
+  const out: Record<string, unknown>[] = [];
+  for (const r of rows ?? []) {
+    const t = Date.parse(r.seen_at); if (!Number.isFinite(t) || now - t > maxAgeMs) continue;
+    out.push({ hex: r.hex ?? `cs-${r.callsign}`, flight: r.callsign, t: r.type ?? undefined, r: r.reg ?? undefined, lat: r.lat, lon: r.lon,
+      alt_baro: r.ground ? "ground" : r.alt_ft, gs: r.kt, track: r.trk ?? null, baro_rate: r.fpm });
+  }
+  return out;
+}
+
+// 429（回数の上限）・420 のときに待つ時間。Retry-After（秒）があればそれ、なければ既定。長く待ちすぎない（maxMs まで）
+export function retryAfterMs(h: string | null, def = 3000, maxMs = 5000): number {
+  const s = Number(h); if (h != null && h.trim() !== "" && Number.isFinite(s) && s >= 0) return Math.min(maxMs, Math.round(s * 1000));
+  return Math.min(maxMs, def);
+}
+
+// 記録の処理（30秒ごと）で、どの円の機体を航跡の点（track_points）と機体ごとの便の記録（reg_legs）に残すか。
+//   slot：その回を始めた時刻の30秒の番号（Math.floor(始めた時刻 / 30000)）。偶数＝毎分の前半の回
+//   東・西の円は毎回取るので、航跡は前半の回だけ（1分に1回）、便の記録は2分に1回。
+//   北（新千歳）は前半の回だけ、南（那覇）は後半の回だけ取るので、航跡は取った回すべて（1分に1回）、便の記録は北が2分に1回・南も2分に1回（後半の回）。
+//   （11/7 まで：時刻の偶数・奇数だけで決めていたので、後半の回にしか取らない南の円（沖縄・奄美・宮古・石垣）は、航跡の点も便の記録も残っていなかった）
+export function recordPlan(key: string, slot: number): { track: boolean; legs: boolean } {
+  if (key === "SOUTH") return { track: true, legs: slot % 4 === 1 };
+  if (key === "NORTH") return { track: true, legs: slot % 4 === 0 };
+  return { track: slot % 2 === 0, legs: slot % 4 === 0 };
+}
