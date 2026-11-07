@@ -3,10 +3,11 @@
 //   GET /functions/v1/airport-traffic?iata=RECORD   （記録用。14空港の線を足すだけ）
 // 位置は adsb.lol（有志の受信機による ADS-B のオープンデータ）。実際より数秒〜十数秒遅れる。ログインは不要。
 // OpenSky は Supabase のサーバーから届かないため使わない。
-// 配信元に負担をかけないよう、20秒ためて全員で使い回す。
+// 配信元に負担をかけないよう、adsb.lol に問い合わせるのは記録の処理（30秒ごとに3回）だけにする（11/7）。
+// 見る人の呼び出しは、記録の処理が live_positions に残した位置（75秒以内）から作る。記録が止まっているときだけ adsb.lol に問い合わせる。
 // 通ってきた線は、位置をデータベース（traffic_trails）に足していって作る（関数の呼び出しをまたいで残すため）。
 import { createClient } from "npm:@supabase/supabase-js@2.117.2";
-import { planesFromAdsb, type Trails, updateTrails } from "../_shared/traffic.ts";
+import { acFromLive, type LiveRow, planesFromAdsb, recordPlan, retryAfterMs, type Trails, updateTrails } from "../_shared/traffic.ts";
 import { fetchMetars } from "../_shared/metar.ts";
 import { OPS_AIRPORTS, observeOps, runwaysOf } from "../_shared/ops_core.js";
 import { gaStep, guessRwy, quietNow, type Watch, wxRisk } from "../_shared/go_around.ts";
@@ -79,23 +80,48 @@ const REGIONS: Record<string, { at: [number, number]; nm: number }> = {
 const REGION_OF: Record<string, string> = { HND: "EAST", NRT: "EAST", NGO: "EAST", ITM: "EAST", KIX: "EAST", SDJ: "EAST",
   FUK: "WEST", KMJ: "WEST", NGS: "WEST", KOJ: "WEST", HIJ: "WEST", MYJ: "WEST", CTS: "NORTH", OKA: "SOUTH" };
 const regionCache = new Map<string, { at: number; j: { now?: number; ac?: unknown[] } }>();
-async function fetchArea(iata: string) {
+async function fetchArea(iata: string, retry = false) {
   const key = REGION_OF[iata] ?? iata, area = REGIONS[key] ?? AIRPORTS[iata];
   const hit = regionCache.get(key);
   if (hit && Date.now() - hit.at < TTL) return hit.j;
-  const r = await fetch(`https://api.adsb.lol/v2/lat/${area.at[0]}/lon/${area.at[1]}/dist/${area.nm}`,
+  const get = () => fetch(`https://api.adsb.lol/v2/lat/${area.at[0]}/lon/${area.at[1]}/dist/${area.nm}`,
     { headers: { "User-Agent": "soramemo (airport-traffic)" }, signal: AbortSignal.timeout(area.nm > 100 ? 20000 : 10000) });   // 広い円は返事が大きいので長めに待つ
-  if (!r.ok) throw new Error("adsb.lol " + r.status);
+  let r = await get();
+  // 記録の処理では、回数の上限（429・420）なら1回だけ待って取り直す（Retry-After があればそれ、最長5秒）
+  if (retry && (r.status === 429 || r.status === 420)) {
+    await r.body?.cancel();
+    await new Promise((ok) => setTimeout(ok, retryAfterMs(r.headers.get("retry-after"))));
+    r = await get();
+    if (r.ok) console.log("adsb.lol retry ok", key);
+  }
+  if (!r.ok) { await r.body?.cancel(); throw new Error("adsb.lol " + r.status); }
   const j = await r.json();
   regionCache.set(key, { at: Date.now(), j });
   return j;
 }
 
-async function snapshot(iata: string): Promise<string> {
+// 見る人の呼び出し用：記録の処理が残した位置（live_positions）から、空港の半径を囲む四角の中の機体を読む。
+// 記録が止まっている（75秒以内の位置が日本中に1つもない）ときは null（adsb.lol に問い合わせる）
+async function fromLive(iata: string): Promise<{ now?: number; ac?: unknown[] } | null> {
+  const a = AIRPORTS[iata], dLat = a.nm / 60, dLon = a.nm / (60 * Math.cos(a.at[0] * Math.PI / 180)), now = Date.now();
+  const since = new Date(now - 75_000).toISOString();
+  const { data, error } = await admin.from("live_positions").select("callsign, hex, lat, lon, alt_ft, ground, fpm, kt, trk, type, reg, seen_at")
+    .gt("seen_at", since).gte("lat", a.at[0] - dLat).lte("lat", a.at[0] + dLat).gte("lon", a.at[1] - dLon).lte("lon", a.at[1] + dLon).limit(2000);
+  if (error) return null;
+  if (!data?.length) {
+    const { data: any1 } = await admin.from("live_positions").select("seen_at").gt("seen_at", since).limit(1);
+    if (!any1?.length) return null;
+  }
+  const rows = (data ?? []) as LiveRow[];
+  const newest = rows.reduce((m, r) => Math.max(m, Date.parse(r.seen_at) || 0), 0);
+  return { now: newest || now, ac: acFromLive(rows, now) };
+}
+
+async function snapshot(iata: string, view = false): Promise<string> {
   const hit = cache.get(iata);
   if (hit && Date.now() - hit.at < TTL) return hit.body;
   const a = AIRPORTS[iata];
-  const j = await fetchArea(iata);
+  const j = (view ? await fromLive(iata).catch(() => null) : null) ?? await fetchArea(iata, !view);
   // まとめて取った円から、この空港の半径の中だけを使う
   const planes = planesFromAdsb(j?.ac, a.at, 14000, NEARBY.filter((o) => o !== a.at)).filter((p) => p.dist_km <= a.nm * 1.852);
   const tr = await syncTrails(iata, planes);
@@ -108,30 +134,38 @@ async function snapshot(iata: string): Promise<string> {
 }
 
 // 今回取った円の機体（便名のあるもの）の位置を live_positions に残す
-async function recordPositions(bodies: Map<string, string>) {
+async function recordPositions(bodies: Map<string, string>, slot: number) {
   const keys = new Set([...bodies.keys()].map((k) => REGION_OF[k] ?? k)), rows = new Map<string, Record<string, unknown>>(), track = new Map<string, Record<string, unknown>>();
+  const legCs = new Set<string>();   // 便の記録に残す機体（この回に便の記録を残す円の機体）
   for (const k of keys) {
     const c = regionCache.get(k); if (!c || Date.now() - c.at > TTL) continue;
-    const t = typeof c.j.now === "number" ? c.j.now : Date.now();
+    const t = typeof c.j.now === "number" ? c.j.now : Date.now(), plan = recordPlan(k, slot);
     for (const a of (c.j.ac ?? []) as Record<string, unknown>[]) {
       if (typeof a.flight !== "string" || !a.flight.trim() || typeof a.lat !== "number" || typeof a.lon !== "number") continue;
       const cs = normCallsign(a.flight).slice(0, 10), at = t - (typeof a.seen_pos === "number" ? a.seen_pos * 1000 : 0);
       rows.set(cs, { callsign: cs, hex: typeof a.hex === "string" ? a.hex : null, lat: a.lat, lon: a.lon,
         alt_ft: typeof a.alt_baro === "number" ? Math.round(a.alt_baro) : null, ground: a.alt_baro === "ground",
         fpm: typeof a.baro_rate === "number" ? Math.round(a.baro_rate) : typeof a.geom_rate === "number" ? Math.round(a.geom_rate) : null,
-        kt: typeof a.gs === "number" ? Math.round(a.gs) : null, type: typeof a.t === "string" ? a.t.slice(0, 8) : null,
+        kt: typeof a.gs === "number" ? Math.round(a.gs) : null, trk: typeof a.track === "number" ? Math.round(a.track) % 360 : null,
+        type: typeof a.t === "string" ? a.t.slice(0, 8) : null,
         reg: typeof a.r === "string" && /^[A-Z0-9-]{2,10}$/.test(a.r) ? a.r : null,
         seen_at: new Date(at).toISOString() });
+      if (plan.legs) legCs.add(cs);
       // 航跡の点（毎日の記録用）：上昇・降下中（15,000ft 未満）の機体を、1分に1回だけ残す（36時間で消す）
-      if (typeof a.alt_baro === "number" && a.alt_baro < 15000 && Math.floor(t / 30_000) % 2 === 0)
+      if (plan.track && typeof a.alt_baro === "number" && a.alt_baro < 15000)
         track.set(cs, { callsign: cs, t: new Date(at).toISOString(), lat: Math.round(a.lat * 1e4) / 1e4, lon: Math.round(a.lon * 1e4) / 1e4, alt: Math.round(a.alt_baro / 100) });
     }
   }
   const all = [...rows.values()];
-  for (let i = 0; i < all.length; i += 500) { const { error } = await admin.from("live_positions").upsert(all.slice(i, i + 500)); if (error) throw error; }
-  // 機体（登録記号）ごとの便の記録：2分に1回（航空会社の便だけ。自家用機などは残さない）
-  if (Math.floor(Date.now() / 30_000) % 4 === 0) {
-    const legs = all.filter((r) => typeof r.reg === "string" && /^[A-Z]{3}\d{1,4}[A-Z]?$/.test(String(r.callsign)))
+  for (let i = 0; i < all.length; i += 500) {
+    let { error } = await admin.from("live_positions").upsert(all.slice(i, i + 500));
+    // 移行 156（trk の列）より先に関数が入ったときも、位置は残す
+    if (error && /trk/.test(error.message)) ({ error } = await admin.from("live_positions").upsert(all.slice(i, i + 500).map(({ trk: _t, ...x }) => x)));
+    if (error) throw error;
+  }
+  // 機体（登録記号）ごとの便の記録：円ごとに2分に1回（航空会社の便だけ。自家用機などは残さない）
+  if (legCs.size) {
+    const legs = all.filter((r) => legCs.has(String(r.callsign)) && typeof r.reg === "string" && /^[A-Z]{3}\d{1,4}[A-Z]?$/.test(String(r.callsign)))
       .map((r) => ({ reg: r.reg, cs: r.callsign, type: r.type, at: r.seen_at }));
     for (let i = 0; i < legs.length; i += 1000) { const { error } = await admin.rpc("reg_legs_touch", { p_rows: legs.slice(i, i + 1000) }); if (error) { console.error("reg_legs", error.message); break; } }
   }
@@ -401,7 +435,7 @@ Deno.serve(async (req) => {
   const iata = (new URL(req.url).searchParams.get("iata") || "").toUpperCase();
   // 記録用（pg_cron が30秒ごとに呼ぶ）：東・西の円の12空港は毎回、新千歳は毎分の前半、那覇は後半に線を足す
   if (iata === "RECORD") {
-    const first = new Date().getUTCSeconds() < 30;
+    const started = Date.now(), slot = Math.floor(started / 30_000), first = slot % 2 === 0;   // first：毎分の前半の回
     // 問い合わせは1回に3つまで：東の円・西の円と、新千歳か那覇
     const list = [...Object.keys(REGION_OF).filter((k) => k !== "CTS" && k !== "OKA"), first ? "CTS" : "OKA"];
     const done: Record<string, string> = {}, bodies = new Map<string, string>();
@@ -412,7 +446,7 @@ Deno.serve(async (req) => {
       try { bodies.set(k, await snapshot(k)); done[k] = "ok"; } catch (e) { done[k] = e instanceof Error ? e.message.slice(0, 40) : "error"; }
     }
     // 日本中の機体の最新の位置を残す（便の見張り用）
-    try { await recordPositions(bodies); } catch (e) { console.error("positions", e); }
+    try { await recordPositions(bodies, slot); } catch (e) { console.error("positions", e); }
     // 特別塗装機：今回取った円の中に、一覧の登録記号の機体がいれば残す
     let liveries = 0;
     try { liveries = await recordLiveries(bodies); } catch (e) { console.error("livery", e); }
@@ -440,7 +474,7 @@ Deno.serve(async (req) => {
   }
   if (!AIRPORTS[iata]) return new Response(JSON.stringify({ error: "unsupported airport" }), { status: 404, headers: JSON_HEADERS });
   try {
-    return new Response(await snapshot(iata), { headers: { ...JSON_HEADERS, "Cache-Control": "max-age=10" } });
+    return new Response(await snapshot(iata, true), { headers: { ...JSON_HEADERS, "Cache-Control": "max-age=10" } });
   } catch (e) {
     console.error(e);
     const hit = cache.get(iata);
