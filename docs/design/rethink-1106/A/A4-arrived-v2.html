@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>A：着いた｜そらメモ 見直しの方向の案 2版</title>
+<style>
+:root{
+  --gothic:"Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic UI","Yu Gothic","Meiryo","Noto Sans JP","Noto Sans CJK JP",system-ui,sans-serif;
+  --sign:"Barlow Condensed","Arial Narrow",var(--gothic);
+  --bg:#EEF1F5; --card:#FFFFFF; --ink:#374151; --strong:#1F2937; --sub:#5F6878; --mute:#6B7280; --line:#9CA3AF;
+  --pill:rgba(17,24,39,.06); --hero:#0F1B2D; --on-hero:#F3F4F6; --hero-sub:#A7B0BC; --hero-pill:rgba(255,255,255,.10);
+  --shadow:0 1px 2px rgba(17,24,39,.04),0 10px 30px -8px rgba(17,24,39,.10),inset 0 0 0 1px rgba(17,24,39,.07);
+  --jal:#C8102E; --ana:#1C4FA0; --stub:#E7C873; --ok:#1F8A5B; --gold:#8A6A1F; --plan:#E8EEF8;
+  --chart-sea:#DCEAF3; --chart-land:#F4F2EA; --chart-coast:#A9B9AE; --chart-apt:#7A1F5C; --chart-grid:rgba(31,78,121,.10);
+  --tabs:rgba(255,255,255,.94);
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--gothic);font-size:15px;line-height:1.6;-webkit-text-size-adjust:100%}
+.phone{position:relative;max-width:420px;min-height:100vh;min-height:100svh;margin:0 auto;overflow:hidden;background:var(--bg)}
+.wrap{padding:14px 16px 120px}
+.card{background:var(--card);border-radius:22px;box-shadow:var(--shadow)}
+.pad{padding:14px 16px}
+.lab{font-size:13px;font-weight:700;color:var(--sub);letter-spacing:.02em}
+.num{font-weight:800;color:var(--strong);letter-spacing:-.01em;line-height:1.1}
+.u{font-size:12px;font-weight:600;color:var(--mute);margin-left:2px}
+.s{font-size:13px;color:var(--sub);line-height:1.5}
+.ttl{font-size:22px;font-weight:800;color:var(--strong);margin:0;line-height:1.3}
+.h3{display:flex;align-items:center;justify-content:space-between;margin:22px 4px 8px}
+.h3 b{font-size:15px;color:var(--strong)}
+.h3 span{font-size:13px;color:var(--sub);font-weight:700}
+.row{display:flex;align-items:center;gap:10px}
+.gap{height:12px}
+.pl{height:44px;display:inline-flex;align-items:center;justify-content:center;gap:6px;border-radius:999px;padding:0 16px;font-size:14px;font-weight:800;color:var(--strong);background:var(--pill);white-space:nowrap}
+.pl.dark{background:var(--strong);color:#fff}
+.pl.white{background:var(--card);box-shadow:var(--shadow)}
+.pl.sm{font-size:13px;padding:0 14px}
+.chip{display:inline-flex;align-items:center;height:26px;border-radius:999px;padding:0 10px;font-size:13px;font-weight:700;color:var(--sub);background:var(--pill)}
+.chip.est{background:#FFF4D6;color:#6B4E0E}
+.chip.gold{background:#F6EBCB;color:#5E4710}
+.ic{width:44px;height:44px;border-radius:999px;background:var(--card);box-shadow:var(--shadow);display:grid;place-items:center;color:var(--strong);font-weight:800;flex:none}
+.ico{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.tabs{position:fixed;left:50%;transform:translateX(-50%);bottom:14px;width:calc(min(420px,100vw) - 28px);height:64px;border-radius:999px;background:var(--tabs);box-shadow:var(--shadow);display:flex;align-items:stretch;padding:0 8px;backdrop-filter:blur(12px);z-index:30}
+.tabs b{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:13px;font-weight:700;color:var(--sub)}
+.tabs b.on{color:var(--strong)}
+.tabs b.on::after{content:"";width:5px;height:5px;border-radius:9px;background:var(--strong);margin-top:1px}
+.tabs b.mid{flex:none;width:76px;margin:-14px 2px 0}
+.tabs b.mid i{width:62px;height:62px;border-radius:999px;background:var(--strong);color:#fff;display:grid;place-items:center;font-style:normal;box-shadow:0 10px 24px -10px rgba(15,27,45,.6)}
+.tabs svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.ann{position:relative;z-index:40;max-width:392px;margin:16px auto 120px;font-size:13px;line-height:1.7;background:#FFF8D6;color:#5A4A12;padding:12px 14px;border-radius:16px}
+.ann b{display:block;font-size:13px}
+.ann ul{margin:4px 0 0;padding-left:1.2em}
+.flap{display:flex;gap:6px}
+.flap i{font-style:normal;width:40px;height:50px;border-radius:8px;background:#1B2638;color:#F5B83D;font-family:var(--sign);font-size:34px;font-weight:800;display:grid;place-items:center;position:relative}
+.flap i::after{content:"";position:absolute;left:0;right:0;top:50%;height:2px;background:#0F1B2D}
+.hero{background:var(--hero);color:var(--on-hero);border-radius:24px}
+.hero .lab{color:var(--hero-sub)}
+.hero .s{color:var(--hero-sub)}
+.pass{display:flex;border-radius:24px;overflow:hidden;box-shadow:var(--shadow)}
+.pass .m{flex:1;background:var(--hero);color:var(--on-hero);padding:16px 18px}
+.pass .m .lab{color:var(--hero-sub)}
+.pass .nm{font-size:17px;font-weight:800;margin-top:8px}
+.pass .st{font-size:13px;color:var(--hero-sub)}
+.pass .sb{width:96px;background:var(--stub);color:#3A2E0C;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;font-weight:800;border-left:2px dashed rgba(15,27,45,.35)}
+.pass .sb .v{writing-mode:vertical-rl;letter-spacing:.06em;font-size:16px}
+.pass .sb small{font-size:13px;line-height:1.3;text-align:center}
+.steps{display:flex;gap:6px;align-items:center}
+.steps span{height:30px;display:flex;align-items:center;padding:0 11px;border-radius:999px;font-size:13px;font-weight:800;color:var(--sub);background:var(--pill)}
+.steps span.on{background:var(--strong);color:#fff}
+.steps em{font-style:normal;color:var(--sub);font-size:13px}
+.li{display:flex;align-items:center;gap:12px;padding:12px 0;min-height:60px}
+.li+.li{box-shadow:0 -1px 0 var(--pill)}
+.li .t{font-family:var(--sign);font-size:26px;font-weight:800;color:var(--strong);min-width:62px;line-height:1}
+.li b{display:block;color:var(--strong);font-size:15px;line-height:1.35}
+.li small{display:block;font-size:13px;color:var(--sub);line-height:1.4}
+.li .r{margin-left:auto;flex:none}
+.bar2{height:8px;border-radius:9px;background:var(--pill);overflow:hidden}
+.bar2 i{display:block;height:100%;background:var(--strong);border-radius:9px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.tile{padding:14px 16px;min-height:112px;display:flex;flex-direction:column;justify-content:space-between}
+.tile .num{font-size:30px}
+.stamp{width:58px;height:58px;border-radius:999px;border:3px solid var(--strong);display:grid;place-items:center;font-weight:800;font-size:16px;color:var(--strong);flex:none;box-shadow:inset 0 0 0 4px var(--card),inset 0 0 0 5px var(--strong)}
+.stamp.big{width:150px;height:150px;font-size:44px;border-width:6px;box-shadow:inset 0 0 0 9px var(--card),inset 0 0 0 11px var(--strong);transform:rotate(-8deg)}
+.stamp.off{border-color:#B8BFC9;color:#5F6878;box-shadow:none;border-style:dashed}
+.board{background:#121A26;border-radius:18px;padding:12px 14px;color:#F5B83D;font-family:var(--sign);font-size:20px;font-weight:700;letter-spacing:.04em}
+.board div{display:flex;justify-content:space-between;padding:3px 0}
+.board span{color:#C9D2DE;font-family:var(--gothic);font-size:13px;font-weight:700;letter-spacing:0}
+.map{position:relative;height:330px;background:var(--chart-sea);overflow:hidden}
+.map svg{width:100%;height:100%;display:block}
+.map text{paint-order:stroke;stroke:var(--chart-sea);stroke-width:4px;stroke-linejoin:round}
+.sheet{position:relative;margin-top:-26px;background:var(--bg);border-radius:26px 26px 0 0;padding:10px 16px 120px;box-shadow:0 -10px 30px -18px rgba(15,27,45,.35)}
+.grab{display:block;width:44px;height:5px;border-radius:9px;background:#C9CED6;margin:0 auto 12px}
+.top{position:absolute;top:12px;left:14px;right:14px;display:flex;align-items:center;gap:8px;z-index:5}
+.strip{display:flex;border-radius:16px;overflow:hidden;background:var(--card);box-shadow:var(--shadow);min-height:64px}
+.strip+.strip{margin-top:10px}
+.strip .k{width:8px;background:var(--hero)}
+.strip .k.dep{background:#8C9AAE}
+.strip .c{flex:1;display:flex;align-items:center;gap:12px;padding:10px 14px}
+.strip .t{font-family:var(--sign);font-size:26px;font-weight:800;color:var(--strong);min-width:58px}
+.strip b{display:block;font-size:15px;color:var(--strong);line-height:1.3}
+.strip small{display:block;font-size:13px;color:var(--sub)}
+.note{font-size:13px;color:var(--sub);margin:10px 4px 0;line-height:1.55}
+.arrow{color:var(--line)}
+
+/* 2版で足したもの */
+.wrap{padding-bottom:136px}.sheet{padding-bottom:136px}
+.steps{gap:4px}
+.steps span{height:auto;padding:0 2px;background:none;font-size:13px;font-weight:700;color:var(--mute)}
+.steps span.on{background:none;color:var(--strong);font-weight:800}
+.steps span.on::before{content:"● ";color:var(--strong)}
+.steps em{color:var(--line)}
+.auto{display:flex;align-items:center;gap:10px;background:#FFF4D6;color:#5A4A12;border-radius:18px;padding:10px 10px 10px 14px;font-size:13px;font-weight:700;line-height:1.45}
+.auto .pl{margin-left:auto;background:#fff;color:#5A4A12;flex:none}
+.pl.on{background:var(--strong);color:#fff}
+.mini{display:flex;align-items:center;gap:8px;background:var(--card);border-radius:16px;box-shadow:var(--shadow);padding:8px 12px;font-size:13px;color:var(--sub);font-weight:700}
+.mini b{font-family:var(--sign);font-size:20px;color:var(--strong)}
+
+.tabs b.mid i.out{background:var(--card);color:var(--strong);box-shadow:var(--shadow),0 10px 24px -12px rgba(15,27,45,.45)}
+.ask{border-radius:22px;background:var(--card);box-shadow:var(--shadow);padding:16px 18px}
+.ask .q{font-size:17px;font-weight:800;color:var(--strong);margin-top:4px}
+</style>
+</head>
+<body>
+<main class="phone">
+<div class="wrap"><div class="steps" aria-label="いまの状態（押せません）"><span class="">空港の外</span><em>›</em><span class="">空港で</span><em>›</em><span class="">機内</span><em>›</em><span class="on">着いた</span></div>
+<div class="gap"></div>
+<div class="card" style="padding:18px;text-align:center"><div class="lab">はじめての印</div>
+<div style="display:grid;place-items:center;margin:12px 0 8px"><span class="stamp big" style="width:120px;height:120px;font-size:36px">OKA</span></div>
+<div class="ttl">那覇空港</div><p class="s" style="margin:2px 0 0">沖縄県 ・ 17 空港目</p></div>
+<div class="gap"></div>
+<div class="ask"><div class="row"><span class="lab">予定の便</span><span class="chip" style="margin-left:auto">まだ記録していません</span></div>
+<div class="q">JL 917　羽田 → 那覇 に乗りましたか？</div>
+<div class="s">羽田と那覇の印がそろいました。乗ったと答えた便だけがフライトになり、会社の路線になります。</div>
+<div class="row" style="margin-top:12px;gap:10px"><span class="pl dark" style="flex:1">乗った</span><span class="pl" style="flex:1">乗らなかった</span></div></div>
+<div class="gap"></div>
+<div class="ask"><div class="row"><span class="lab">乗った機体</span><span class="chip est" style="margin-left:auto">予想</span></div>
+<div class="q">JA614J（B767）でしたか？</div>
+<div class="s">選んだ機体だけが「乗った機体」になります。わからないときは、機種（B767）の代わりの機体にします。</div>
+<div class="row" style="margin-top:12px;gap:10px"><span class="pl dark" style="flex:1">この機体だった</span><span class="pl" style="flex:1">ちがう・わからない</span></div></div>
+<div class="gap"></div>
+<div class="card pad"><div class="lab">答えたあとに会社に入るもの</div>
+<div class="li"><div><b>路線　羽田–那覇</b><small>「乗った」と答えたら ・ 会社の16本目</small></div><span class="r chip">答え待ち</span></div>
+<div class="li"><div><b>機体</b><small>機体を答えたら</small></div><span class="r chip">答え待ち</span></div>
+<div class="li"><div><b>会社の守り神　那覇</b><small>那覇で印をもらった日 1日目</small></div><span class="r num" style="font-size:20px">＋1</span></div></div>
+<div class="row" style="margin-top:14px;gap:10px"><span class="pl white" style="flex:1">画像で共有</span><span class="pl dark" style="flex:1">会社を見る</span></div>
+</div>
+<nav class="tabs" aria-label="画面の切り替え"><b class="on"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7v5l3 2"/></svg>いま</b><b class=""><svg viewBox="0 0 24 24"><path d="M4 5.5C4 4.7 4.7 4 5.5 4H11v15H5.5c-.8 0-1.5.5-1.5 1.2V5.5Z"/><path d="M20 5.5c0-.8-.7-1.5-1.5-1.5H13v15h5.5c.8 0 1.5.5 1.5 1.2V5.5Z"/></svg>帳面</b><b class=""><svg viewBox="0 0 24 24"><path d="M4 20V8l6-3v15"/><path d="M10 20V10l10 3v7"/><path d="M3 20h18"/></svg>会社</b><b class=""><svg viewBox="0 0 24 24"><circle cx="12" cy="8.5" r="3.8"/><path d="M4.5 20c.9-3.8 4-5.8 7.5-5.8s6.6 2 7.5 5.8"/></svg>マイページ</b></nav>
+</main>
+<aside class="ann"><b>案のメモ（本番には出ません・数字は見本）・2版</b><ul><li><b>「乗る」で選んだ便は予定のまま</b>。着いた空港で印をもらったとき（または2つの空港の印がそろったとき）に「乗りましたか？」と聞き、「乗った」と答えた便だけをフライト・路線にする</li><li><b>機体</b>：予想の登録記号を「〜でしたか？」で本人が選んだものだけ乗った機体に。わからなければ機種の代わりの機体（決まりどおり）</li><li>答えるまで、路線と機体は「答え待ち」で会社に入らない。「乗らなかった」なら予定は消え、2つの印は今までどおり印として残る</li><li>着いたは「着いた空港で印をもらったとき」だけ。時刻だけでは着いたにしない</li><li>路線の数は B4 とそろえた（答えたら16本目）</li></ul></aside>
+<script>if(window!==window.top){var a=document.querySelector('.ann');if(a)a.remove()}</script>
+</body>
+</html>

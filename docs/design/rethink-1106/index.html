@@ -1,0 +1,130 @@
+<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>一覧｜そらメモ 見直しの方向の案</title><style>
+:root{
+  --gothic:"Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic UI","Yu Gothic","Meiryo","Noto Sans JP","Noto Sans CJK JP",system-ui,sans-serif;
+  --sign:"Barlow Condensed","Arial Narrow",var(--gothic);
+  --bg:#EEF1F5; --card:#FFFFFF; --ink:#374151; --strong:#1F2937; --sub:#5F6878; --mute:#6B7280; --line:#9CA3AF;
+  --pill:rgba(17,24,39,.06); --hero:#0F1B2D; --on-hero:#F3F4F6; --hero-sub:#A7B0BC; --hero-pill:rgba(255,255,255,.10);
+  --shadow:0 1px 2px rgba(17,24,39,.04),0 10px 30px -8px rgba(17,24,39,.10),inset 0 0 0 1px rgba(17,24,39,.07);
+  --jal:#C8102E; --ana:#1C4FA0; --stub:#E7C873; --ok:#1F8A5B; --gold:#8A6A1F; --plan:#E8EEF8;
+  --chart-sea:#DCEAF3; --chart-land:#F4F2EA; --chart-coast:#A9B9AE; --chart-apt:#7A1F5C; --chart-grid:rgba(31,78,121,.10);
+  --tabs:rgba(255,255,255,.94);
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--gothic);font-size:15px;line-height:1.6;-webkit-text-size-adjust:100%}
+.phone{position:relative;max-width:420px;min-height:100vh;min-height:100svh;margin:0 auto;overflow:hidden;background:var(--bg)}
+.wrap{padding:14px 16px 120px}
+.card{background:var(--card);border-radius:22px;box-shadow:var(--shadow)}
+.pad{padding:14px 16px}
+.lab{font-size:13px;font-weight:700;color:var(--sub);letter-spacing:.02em}
+.num{font-weight:800;color:var(--strong);letter-spacing:-.01em;line-height:1.1}
+.u{font-size:12px;font-weight:600;color:var(--mute);margin-left:2px}
+.s{font-size:13px;color:var(--sub);line-height:1.5}
+.ttl{font-size:22px;font-weight:800;color:var(--strong);margin:0;line-height:1.3}
+.h3{display:flex;align-items:center;justify-content:space-between;margin:22px 4px 8px}
+.h3 b{font-size:15px;color:var(--strong)}
+.h3 span{font-size:13px;color:var(--sub);font-weight:700}
+.row{display:flex;align-items:center;gap:10px}
+.gap{height:12px}
+.pl{height:44px;display:inline-flex;align-items:center;justify-content:center;gap:6px;border-radius:999px;padding:0 16px;font-size:14px;font-weight:800;color:var(--strong);background:var(--pill);white-space:nowrap}
+.pl.dark{background:var(--strong);color:#fff}
+.pl.white{background:var(--card);box-shadow:var(--shadow)}
+.pl.sm{font-size:13px;padding:0 14px}
+.chip{display:inline-flex;align-items:center;height:26px;border-radius:999px;padding:0 10px;font-size:13px;font-weight:700;color:var(--sub);background:var(--pill)}
+.chip.est{background:#FFF4D6;color:#6B4E0E}
+.chip.gold{background:#F6EBCB;color:#5E4710}
+.ic{width:44px;height:44px;border-radius:999px;background:var(--card);box-shadow:var(--shadow);display:grid;place-items:center;color:var(--strong);font-weight:800;flex:none}
+.ico{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.tabs{position:fixed;left:50%;transform:translateX(-50%);bottom:14px;width:calc(min(420px,100vw) - 28px);height:64px;border-radius:999px;background:var(--tabs);box-shadow:var(--shadow);display:flex;align-items:stretch;padding:0 8px;backdrop-filter:blur(12px);z-index:30}
+.tabs b{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:13px;font-weight:700;color:var(--sub)}
+.tabs b.on{color:var(--strong)}
+.tabs b.on::after{content:"";width:5px;height:5px;border-radius:9px;background:var(--strong);margin-top:1px}
+.tabs b.mid{flex:none;width:76px;margin:-14px 2px 0}
+.tabs b.mid i{width:62px;height:62px;border-radius:999px;background:var(--strong);color:#fff;display:grid;place-items:center;font-style:normal;box-shadow:0 10px 24px -10px rgba(15,27,45,.6)}
+.tabs svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.ann{position:relative;z-index:40;max-width:392px;margin:16px auto 120px;font-size:13px;line-height:1.7;background:#FFF8D6;color:#5A4A12;padding:12px 14px;border-radius:16px}
+.ann b{display:block;font-size:13px}
+.ann ul{margin:4px 0 0;padding-left:1.2em}
+.flap{display:flex;gap:6px}
+.flap i{font-style:normal;width:40px;height:50px;border-radius:8px;background:#1B2638;color:#F5B83D;font-family:var(--sign);font-size:34px;font-weight:800;display:grid;place-items:center;position:relative}
+.flap i::after{content:"";position:absolute;left:0;right:0;top:50%;height:2px;background:#0F1B2D}
+.hero{background:var(--hero);color:var(--on-hero);border-radius:24px}
+.hero .lab{color:var(--hero-sub)}
+.hero .s{color:var(--hero-sub)}
+.pass{display:flex;border-radius:24px;overflow:hidden;box-shadow:var(--shadow)}
+.pass .m{flex:1;background:var(--hero);color:var(--on-hero);padding:16px 18px}
+.pass .m .lab{color:var(--hero-sub)}
+.pass .nm{font-size:17px;font-weight:800;margin-top:8px}
+.pass .st{font-size:13px;color:var(--hero-sub)}
+.pass .sb{width:96px;background:var(--stub);color:#3A2E0C;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;font-weight:800;border-left:2px dashed rgba(15,27,45,.35)}
+.pass .sb .v{writing-mode:vertical-rl;letter-spacing:.06em;font-size:16px}
+.pass .sb small{font-size:13px;line-height:1.3;text-align:center}
+.steps{display:flex;gap:6px;align-items:center}
+.steps span{height:30px;display:flex;align-items:center;padding:0 11px;border-radius:999px;font-size:13px;font-weight:800;color:var(--sub);background:var(--pill)}
+.steps span.on{background:var(--strong);color:#fff}
+.steps em{font-style:normal;color:var(--sub);font-size:13px}
+.li{display:flex;align-items:center;gap:12px;padding:12px 0;min-height:60px}
+.li+.li{box-shadow:0 -1px 0 var(--pill)}
+.li .t{font-family:var(--sign);font-size:26px;font-weight:800;color:var(--strong);min-width:62px;line-height:1}
+.li b{display:block;color:var(--strong);font-size:15px;line-height:1.35}
+.li small{display:block;font-size:13px;color:var(--sub);line-height:1.4}
+.li .r{margin-left:auto;flex:none}
+.bar2{height:8px;border-radius:9px;background:var(--pill);overflow:hidden}
+.bar2 i{display:block;height:100%;background:var(--strong);border-radius:9px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.tile{padding:14px 16px;min-height:112px;display:flex;flex-direction:column;justify-content:space-between}
+.tile .num{font-size:30px}
+.stamp{width:58px;height:58px;border-radius:999px;border:3px solid var(--strong);display:grid;place-items:center;font-weight:800;font-size:16px;color:var(--strong);flex:none;box-shadow:inset 0 0 0 4px var(--card),inset 0 0 0 5px var(--strong)}
+.stamp.big{width:150px;height:150px;font-size:44px;border-width:6px;box-shadow:inset 0 0 0 9px var(--card),inset 0 0 0 11px var(--strong);transform:rotate(-8deg)}
+.stamp.off{border-color:#B8BFC9;color:#5F6878;box-shadow:none;border-style:dashed}
+.board{background:#121A26;border-radius:18px;padding:12px 14px;color:#F5B83D;font-family:var(--sign);font-size:20px;font-weight:700;letter-spacing:.04em}
+.board div{display:flex;justify-content:space-between;padding:3px 0}
+.board span{color:#C9D2DE;font-family:var(--gothic);font-size:13px;font-weight:700;letter-spacing:0}
+.map{position:relative;height:330px;background:var(--chart-sea);overflow:hidden}
+.map svg{width:100%;height:100%;display:block}
+.map text{paint-order:stroke;stroke:var(--chart-sea);stroke-width:4px;stroke-linejoin:round}
+.sheet{position:relative;margin-top:-26px;background:var(--bg);border-radius:26px 26px 0 0;padding:10px 16px 120px;box-shadow:0 -10px 30px -18px rgba(15,27,45,.35)}
+.grab{display:block;width:44px;height:5px;border-radius:9px;background:#C9CED6;margin:0 auto 12px}
+.top{position:absolute;top:12px;left:14px;right:14px;display:flex;align-items:center;gap:8px;z-index:5}
+.strip{display:flex;border-radius:16px;overflow:hidden;background:var(--card);box-shadow:var(--shadow);min-height:64px}
+.strip+.strip{margin-top:10px}
+.strip .k{width:8px;background:var(--hero)}
+.strip .k.dep{background:#8C9AAE}
+.strip .c{flex:1;display:flex;align-items:center;gap:12px;padding:10px 14px}
+.strip .t{font-family:var(--sign);font-size:26px;font-weight:800;color:var(--strong);min-width:58px}
+.strip b{display:block;font-size:15px;color:var(--strong);line-height:1.3}
+.strip small{display:block;font-size:13px;color:var(--sub)}
+.note{font-size:13px;color:var(--sub);margin:10px 4px 0;line-height:1.55}
+.arrow{color:var(--line)}
+
+.idx{max-width:1320px;margin:0 auto;padding:28px 20px 60px}
+.idx h1{font-size:28px;color:var(--strong);margin:0}
+.idx .lead{font-size:15px;color:var(--sub);max-width:760px}
+.cols{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px;margin-top:20px}
+@media (max-width:1000px){.cols{grid-template-columns:1fr}}
+.pc{background:var(--card);border-radius:26px;box-shadow:var(--shadow);padding:18px}
+.pc h2{margin:0;font-size:19px;color:var(--strong)}
+.idea{margin:8px 0 12px;padding-left:1.2em;font-size:14px;color:var(--ink)}
+.shots{display:flex;gap:12px;overflow-x:auto;padding:4px 2px 12px}
+.shots figure{margin:0;flex:none;width:236px}
+.shots figcaption{font-size:13px;font-weight:800;color:var(--strong);margin-bottom:6px}
+.frame{width:236px;height:480px;border-radius:26px;overflow:hidden;box-shadow:var(--shadow);background:var(--bg)}
+.frame iframe{width:390px;height:794px;border:0;transform:scale(.605);transform-origin:0 0}
+.shots a{font-size:13px;color:var(--sub);font-weight:700}
+dl{margin:6px 0 0;font-size:14px} dt{font-size:13px;font-weight:800;color:var(--sub);margin-top:10px} dd{margin:2px 0 0;color:var(--ink)} dd ul{margin:0;padding-left:1.1em}
+.rec{margin-top:22px;padding:18px 20px}
+.nowrow{display:flex;gap:10px;overflow-x:auto;padding:6px 0} .nowrow img{width:150px;border-radius:14px;box-shadow:var(--shadow)}
+.cols{grid-template-columns:repeat(2,minmax(0,1fr))}.chg{font-size:13px;color:#5A4A12;background:#FFF8D6;border-radius:14px;padding:8px 12px;margin:8px 0}
+</style></head><body><main class="idx">
+<p class="lab">デザイン担当 ・ 2026-11-06 ・ 2版（改善担当の指摘1回目と PM の指示で直した）・ アプリにはまだ入っていません</p>
+<h1>そらメモを根本から見直す：方向の案（2版）</h1>
+<p class="lead">何がホームか・下のタブ・チェックインのやり方・スタンプラリーと経営のつながりから考え直した案です。2版で、地図とシートを守る形 B' を足しました。直し方は answer-1.md、使う人の目的と今の遠回りは 00-goals.md。数字は見本です。1版は <a href="index-v1.html">index-v1.html</a>。</p>
+<div class="card rec"><b style="color:var(--strong)">3つの案に共通：「乗る」で選んだ便は予定として残します。着いた空港で印をもらったあと（または2つの空港の印がそろったとき）、「乗りましたか？」に「乗った」と答えたら実績にします。機体も「この機体でしたか？」で答えたものだけを会社の機体にします。予想は黄色の「予想」の札で、各画面に1回「保証しません」と書きます。季節の札（今の本番の「春の訪問」）は出しません。</b>
+<p class="s" style="margin:6px 0 0">デザイン担当のおすすめ：決まりを変えずに進めるなら B'、帳面を主役にするなら B。C の空の窓は撮る人の「空」の中身にします。上の「スタンプラリー／エアライン経営」の切り替えをなくすかどうかは、本人が 11/6 に「名前はそのまま」と決めたので本人に聞きます。残す場合は、経営側の下のタブを「会社」1つにまとめます。</p></div>
+<div class="cols"><section class="pc"><h2>A　旅の時間で変わる1画面</h2><ul class="idea"><li>ホームを「いま」の1画面にする</li><li>位置と時刻で、空港の外・空港で・機内・着いたが自分で切り替わる</li></ul><div class="chg">2版で直したこと：道しるべは押せない見た目に。自分で機内にしたときだけ「ちがう」の1行。選んだ便は予定のまま、着いて印をもらったあと「乗りましたか？」「この機体でしたか？」で答えたものだけ実績に</div><div class="shots"><figure><figcaption>つながりの図</figcaption><div class="frame"><iframe src="A/A0-flow-v2.html" title="つながりの図"></iframe></div><a href="A/A0-flow-v2.html">この画面だけ開く</a> ・ <a href="png/full-A0-flow-v2.png">最後まで送った画面</a></figure><figure><figcaption>空港の外</figcaption><div class="frame"><iframe src="A/A1-outside-v2.html" title="空港の外"></iframe></div><a href="A/A1-outside-v2.html">この画面だけ開く</a> ・ <a href="png/full-A1-outside-v2.png">最後まで送った画面</a></figure><figure><figcaption>空港で</figcaption><div class="frame"><iframe src="A/A2-airport-v2.html" title="空港で"></iframe></div><a href="A/A2-airport-v2.html">この画面だけ開く</a> ・ <a href="png/full-A2-airport-v2.png">最後まで送った画面</a></figure><figure><figcaption>機内</figcaption><div class="frame"><iframe src="A/A3-inflight-v2.html" title="機内"></iframe></div><a href="A/A3-inflight-v2.html">この画面だけ開く</a> ・ <a href="png/full-A3-inflight-v2.png">最後まで送った画面</a></figure><figure><figcaption>着いた</figcaption><div class="frame"><iframe src="A/A4-arrived-v2.html" title="着いた"></iframe></div><a href="A/A4-arrived-v2.html">この画面だけ開く</a> ・ <a href="png/full-A4-arrived-v2.png">最後まで送った画面</a></figure></div><dl><dt>下のタブ</dt><dd>いま・帳面・会社・マイページ（4つ）</dd><dt>作る手間</dt><dd><b>大</b></dd><dt>変える決定事項</dt><dd>ホームは地図とシート → 空港の外のときだけ</dd></dl></section><section class="pc"><h2>B　集める帳面が主役（5つのタブ）</h2><ul class="idea"><li>図鑑・印・路線・機体・会社をひとつの帳面に。地図は帳面の1ページ</li><li>まん中の丸からどこでも1回で半券</li></ul><div class="chg">2版で直したこと：まん中の丸は空港の外でも押せる（「あと12.4km」で近い空港の地図）。会社のカードを最初の画面へ。数字の重なり・「並び：気軽に」・見本の印・「2日目」の主語・会社のタブとページの二重を直した。乗る便は予定</div><div class="shots"><figure><figcaption>つながりの図</figcaption><div class="frame"><iframe src="B/B0-flow-v2.html" title="つながりの図"></iframe></div><a href="B/B0-flow-v2.html">この画面だけ開く</a> ・ <a href="png/full-B0-flow-v2.png">最後まで送った画面</a></figure><figure><figcaption>帳面の表紙</figcaption><div class="frame"><iframe src="B/B1-cover-v2.html" title="帳面の表紙"></iframe></div><a href="B/B1-cover-v2.html">この画面だけ開く</a> ・ <a href="png/full-B1-cover-v2.png">最後まで送った画面</a></figure><figure><figcaption>印のページ</figcaption><div class="frame"><iframe src="B/B2-stamps-v2.html" title="印のページ"></iframe></div><a href="B/B2-stamps-v2.html">この画面だけ開く</a> ・ <a href="png/full-B2-stamps-v2.png">最後まで送った画面</a></figure><figure><figcaption>印をもらう</figcaption><div class="frame"><iframe src="B/B3-checkin-v2.html" title="印をもらう"></iframe></div><a href="B/B3-checkin-v2.html">この画面だけ開く</a> ・ <a href="png/full-B3-checkin-v2.png">最後まで送った画面</a></figure><figure><figcaption>会社</figcaption><div class="frame"><iframe src="B/B4-company-v2.html" title="会社"></iframe></div><a href="B/B4-company-v2.html">この画面だけ開く</a> ・ <a href="png/full-B4-company-v2.png">最後まで送った画面</a></figure></div><dl><dt>下のタブ</dt><dd>帳面・空・◎丸・会社・マイページ（5つ）</dd><dt>作る手間</dt><dd><b>中</b></dd><dt>変える決定事項</dt><dd>ホームは地図とシート → 帳面の表紙</dd></dl></section><section class="pc"><h2>B'　帳面をタブの1つにする（地図とシートを守る形）</h2><ul class="idea"><li>ホームは今の地図とシートのまま</li><li>帳面はタブの1つ。チェックインは A の「範囲に入ったら半券が前に出て、予定の便を選ぶ」</li></ul><div class="chg">2版で直したこと：2版で新しく足した形（PM の指示）。タブ4つ、まん中の丸なし。帳面に「答え待ち」の予定の便</div><div class="shots"><figure><figcaption>つながりの図</figcaption><div class="frame"><iframe src="B2/B20-flow-v2.html" title="つながりの図"></iframe></div><a href="B2/B20-flow-v2.html">この画面だけ開く</a> ・ <a href="png/full-B20-flow-v2.png">最後まで送った画面</a></figure><figure><figcaption>ホーム（空港の外）</figcaption><div class="frame"><iframe src="B2/B21-home-v2.html" title="ホーム（空港の外）"></iframe></div><a href="B2/B21-home-v2.html">この画面だけ開く</a> ・ <a href="png/full-B21-home-v2.png">最後まで送った画面</a></figure><figure><figcaption>範囲の中＝半券</figcaption><div class="frame"><iframe src="B2/B22-checkin-v2.html" title="範囲の中＝半券"></iframe></div><a href="B2/B22-checkin-v2.html">この画面だけ開く</a> ・ <a href="png/full-B22-checkin-v2.png">最後まで送った画面</a></figure><figure><figcaption>帳面</figcaption><div class="frame"><iframe src="B2/B23-book-v2.html" title="帳面"></iframe></div><a href="B2/B23-book-v2.html">この画面だけ開く</a> ・ <a href="png/full-B23-book-v2.png">最後まで送った画面</a></figure><figure><figcaption>着いた（乗りましたか）</figcaption><div class="frame"><iframe src="B2/B24-arrived-v2.html" title="着いた（乗りましたか）"></iframe></div><a href="B2/B24-arrived-v2.html">この画面だけ開く</a> ・ <a href="png/full-B24-arrived-v2.png">最後まで送った画面</a></figure></div><dl><dt>下のタブ</dt><dd>ホーム・帳面・会社・マイページ（4つ）</dd><dt>作る手間</dt><dd><b>中</b>（今のホームを残すので B より少ない見込み）</dd><dt>変える決定事項</dt><dd>「ホームは地図とシート」は変えない。使い方ごとのタブ構成 → シートの並びだけ</dd><dt>弱いところ</dt><dd>「空」タブがないので、撮る人には運用が B より1回遠い</dd></dl></section><section class="pc"><h2>C　空を見る窓が主役</h2><ul class="idea"><li>いまの空（運用・近くの機体・次に来る機体）を入口にする</li><li>おすすめでは、撮る人の「空」タブの中身にとどめる</li></ul><div class="chg">2版で直したこと：「予想」の札にそろえた。機体のページの「乗った便にする」を外した。予想のない空港は今日の便を上に。修行の人の空にも上に小さく空港の使い方</div><div class="shots"><figure><figcaption>空の窓（羽田）</figcaption><div class="frame"><iframe src="C/C1-sky-v2.html" title="空の窓（羽田）"></iframe></div><a href="C/C1-sky-v2.html">この画面だけ開く</a> ・ <a href="png/full-C1-sky-v2.png">最後まで送った画面</a></figure><figure><figcaption>機体を押した</figcaption><div class="frame"><iframe src="C/C2-plane-v2.html" title="機体を押した"></iframe></div><a href="C/C2-plane-v2.html">この画面だけ開く</a> ・ <a href="png/full-C2-plane-v2.png">最後まで送った画面</a></figure><figure><figcaption>予想のない空港</figcaption><div class="frame"><iframe src="C/C3-small-airport-v2.html" title="予想のない空港"></iframe></div><a href="C/C3-small-airport-v2.html">この画面だけ開く</a> ・ <a href="png/full-C3-small-airport-v2.png">最後まで送った画面</a></figure><figure><figcaption>修行する人の空</figcaption><div class="frame"><iframe src="C/C4-shugyo-v2.html" title="修行する人の空"></iframe></div><a href="C/C4-shugyo-v2.html">この画面だけ開く</a> ・ <a href="png/full-C4-shugyo-v2.png">最後まで送った画面</a></figure></div><dl><dt>下のタブ</dt><dd>空・帳面・会社・マイページ（4つ）</dd><dt>作る手間</dt><dd><b>中〜大</b></dd></dl></section></div>
+<div class="cols"><section class="pc"><h2>D 2版　選べるホーム（改善担当の指摘1回目を直した）</h2><ul class="idea"><li>開いたときの位置（地図を広く、半券と2枚目の1行）を3つのひな形ぶん足した。撮るの2枚目は「次に来る特別塗装機」</li><li>外すと「元に戻す」のピル。はじめに戻すは確かめを1回。ホームでの長押しはやめ、並べ替えは ≡ のメニュー</li><li>カードをまとめた案（17→13枚・<b>11/6 本人が13枚に決定</b>。並べ方はサーバーに保存・作るのは1月のストア公開のあと。今日の数字の大に進み具合、「この空港のいま」に使い方・運用時間・遅れと欠航・ゴーアラウンド）</li></ul><div class="chg">指摘への答えは <a href="D/answer-1.md">D/answer-1.md</a>、カードの一覧は <a href="D/cards.md">D/cards.md</a>（下に2版）</div><div class="shots"><figure><figcaption>開いたとき（気軽に）</figcaption><div class="frame"><iframe src="D/D1b-open-casual-v2.html" title="開いたとき（気軽に）"></iframe></div><a href="D/D1b-open-casual-v2.html">この画面だけ開く</a> ・ <a href="D/png/full-D1b-open-casual-v2.png">最後まで送った画面</a></figure><figure><figcaption>開いたとき（撮る）</figcaption><div class="frame"><iframe src="D/D2b-open-spot-v2.html" title="開いたとき（撮る）"></iframe></div><a href="D/D2b-open-spot-v2.html">この画面だけ開く</a> ・ <a href="D/png/full-D2b-open-spot-v2.png">最後まで送った画面</a></figure><figure><figcaption>開いたとき（修行）</figcaption><div class="frame"><iframe src="D/D3b-open-shugyo-v2.html" title="開いたとき（修行）"></iframe></div><a href="D/D3b-open-shugyo-v2.html">この画面だけ開く</a> ・ <a href="D/png/full-D3b-open-shugyo-v2.png">最後まで送った画面</a></figure><figure><figcaption>引き上げた位置（気軽に）</figcaption><div class="frame"><iframe src="D/D1-home-casual-v2.html" title="引き上げた位置（気軽に）"></iframe></div><a href="D/D1-home-casual-v2.html">この画面だけ開く</a> ・ <a href="D/png/full-D1-home-casual-v2.png">最後まで送った画面</a></figure><figure><figcaption>引き上げた位置（撮る）</figcaption><div class="frame"><iframe src="D/D2-home-spot-v2.html" title="引き上げた位置（撮る）"></iframe></div><a href="D/D2-home-spot-v2.html">この画面だけ開く</a> ・ <a href="D/png/full-D2-home-spot-v2.png">最後まで送った画面</a></figure><figure><figcaption>引き上げた位置（修行）</figcaption><div class="frame"><iframe src="D/D3-home-shugyo-v2.html" title="引き上げた位置（修行）"></iframe></div><a href="D/D3-home-shugyo-v2.html">この画面だけ開く</a> ・ <a href="D/png/full-D3-home-shugyo-v2.png">最後まで送った画面</a></figure><figure><figcaption>編集・並べ替えのメニュー</figcaption><div class="frame"><iframe src="D/D4-edit-v2.html" title="編集・並べ替えのメニュー"></iframe></div><a href="D/D4-edit-v2.html">この画面だけ開く</a> ・ <a href="D/png/full-D4-edit-v2.png">最後まで送った画面</a></figure><figure><figcaption>外した直後（元に戻す）</figcaption><div class="frame"><iframe src="D/D4b-removed-v2.html" title="外した直後（元に戻す）"></iframe></div><a href="D/D4b-removed-v2.html">この画面だけ開く</a> ・ <a href="D/png/full-D4b-removed-v2.png">最後まで送った画面</a></figure><figure><figcaption>はじめに戻すの確かめ</figcaption><div class="frame"><iframe src="D/D7-reset-confirm-v2.html" title="はじめに戻すの確かめ"></iframe></div><a href="D/D7-reset-confirm-v2.html">この画面だけ開く</a> ・ <a href="D/png/full-D7-reset-confirm-v2.png">最後まで送った画面</a></figure><figure><figcaption>カードを足す（13枚）</figcaption><div class="frame"><iframe src="D/D5-add-v2.html" title="カードを足す（13枚）"></iframe></div><a href="D/D5-add-v2.html">この画面だけ開く</a> ・ <a href="D/png/full-D5-add-v2.png">最後まで送った画面</a></figure><figure><figcaption>この空港のいま の設定</figcaption><div class="frame"><iframe src="D/D6b-airport-now-v2.html" title="この空港のいま の設定"></iframe></div><a href="D/D6b-airport-now-v2.html">この画面だけ開く</a> ・ <a href="D/png/full-D6b-airport-now-v2.png">最後まで送った画面</a></figure><figure><figcaption>特別塗装機 の設定</figcaption><div class="frame"><iframe src="D/D6-card-setting-v2.html" title="特別塗装機 の設定"></iframe></div><a href="D/D6-card-setting-v2.html">この画面だけ開く</a> ・ <a href="D/png/full-D6-card-setting-v2.png">最後まで送った画面</a></figure></div></section></div>
+<div class="cols"><section class="pc"><h2>D 1版　選べるホーム（B' の続き・11/6 本人の言葉から）</h2><ul class="idea"><li>ホームは B' の地図とシート。シートの中身をカードにして、足す・外す・長押しで並べ替え・大きさ（小・中・大）を選ぶ</li><li>3つの使い方（気軽に・撮る・修行）は、はじめのカードの組み合わせ（ひな形）。新規登録のアンケートで選ぶ</li><li>半券（近い空港と半券）は外せない・いちばん上</li></ul><div class="chg">カードの一覧（17枚・中身・データの出どころ・大きさ・ひな形）は <a href="D/cards.md">D/cards.md</a>。今の本番の「表示を編集（タブ・見方・出すもの）」を広げる形</div><div class="shots"><figure><figcaption>ホーム（気軽に）</figcaption><div class="frame"><iframe src="D/D1-home-casual.html" title="ホーム（気軽に）"></iframe></div><a href="D/D1-home-casual.html">この画面だけ開く</a> ・ <a href="D/png/full-D1-home-casual.png">最後まで送った画面</a></figure><figure><figcaption>ホーム（撮る）</figcaption><div class="frame"><iframe src="D/D2-home-spot.html" title="ホーム（撮る）"></iframe></div><a href="D/D2-home-spot.html">この画面だけ開く</a> ・ <a href="D/png/full-D2-home-spot.png">最後まで送った画面</a></figure><figure><figcaption>ホーム（修行）</figcaption><div class="frame"><iframe src="D/D3-home-shugyo.html" title="ホーム（修行）"></iframe></div><a href="D/D3-home-shugyo.html">この画面だけ開く</a> ・ <a href="D/png/full-D3-home-shugyo.png">最後まで送った画面</a></figure><figure><figcaption>カードを編集</figcaption><div class="frame"><iframe src="D/D4-edit.html" title="カードを編集"></iframe></div><a href="D/D4-edit.html">この画面だけ開く</a> ・ <a href="D/png/full-D4-edit.png">最後まで送った画面</a></figure><figure><figcaption>カードを足す</figcaption><div class="frame"><iframe src="D/D5-add.html" title="カードを足す"></iframe></div><a href="D/D5-add.html">この画面だけ開く</a> ・ <a href="D/png/full-D5-add.png">最後まで送った画面</a></figure><figure><figcaption>1枚の設定</figcaption><div class="frame"><iframe src="D/D6-card-setting.html" title="1枚の設定"></iframe></div><a href="D/D6-card-setting.html">この画面だけ開く</a> ・ <a href="D/png/full-D6-card-setting.png">最後まで送った画面</a></figure></div><dl><dt>下のタブ</dt><dd>ホーム・帳面・会社・マイページ（4つ・B' と同じ）</dd><dt>作る手間</dt><dd><b>中</b>（B' に、カードの部品と編集の画面を足す）</dd><dt>保存先</dt><dd>いまは端末。機種を変えても残す案はサーバーの表（データ担当へ依頼）</dd></dl></section></div>
+<h2 style="margin:30px 0 4px;font-size:18px;color:var(--strong)">今の本番（main の web/ をデモで触って撮った）</h2>
+<div class="nowrow"><img src="now/1-first-guide.png" alt="1-first-guide"><img src="now/2-demo-login-again.png" alt="2-demo-login-again"><img src="now/3-home.png" alt="3-home"><img src="now/4-checkin.png" alt="4-checkin"><img src="now/5-book.png" alt="5-book"><img src="now/6-flight.png" alt="6-flight"><img src="now/7-mypage.png" alt="7-mypage"><img src="now/8-game.png" alt="8-game"></div>
+</main></body></html>
