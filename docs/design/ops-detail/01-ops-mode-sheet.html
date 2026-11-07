@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>推定のピルを押したあと｜そらメモ 運用の細かい版</title>
+<style>
+:root{
+  --gothic:"Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic UI","Yu Gothic","Meiryo","Noto Sans JP","Noto Sans CJK JP",system-ui,sans-serif;
+  --sign:"Barlow Condensed","Arial Narrow",var(--gothic);
+  --bg:#EEF1F5; --card:#FFFFFF; --ink:#374151; --strong:#1F2937; --sub:#5F6878; --mute:#6B7280; --line:#9CA3AF;
+  --pill:rgba(17,24,39,.06); --hero:#0F1B2D; --on-hero:#F3F4F6; --hero-sub:#A7B0BC; --hero-pill:rgba(255,255,255,.10);
+  --shadow:0 1px 2px rgba(17,24,39,.04),0 10px 30px -8px rgba(17,24,39,.10),inset 0 0 0 1px rgba(17,24,39,.07);
+  --jal:#C8102E; --ana:#1C4FA0; --stub:#E7C873; --ok:#7EE2A8;
+  --chart-sea:#DCEAF3; --chart-land:#F4F2EA; --chart-coast:#A9B9AE; --chart-apt:#7A1F5C; --chart-grid:rgba(31,78,121,.10);
+  --tabs:rgba(255,255,255,.94); --demo-bg:#FFFFFF; --demo-ink:#374151;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){
+  --bg:#0B0D10; --card:#16191F; --ink:#D1D5DB; --strong:#F3F4F6; --sub:#A7B0BC; --mute:#9AA3B0; --line:#4B5563;
+  --pill:rgba(255,255,255,.08); --hero:#16233A; --on-hero:#F3F4F6; --hero-sub:#A7B0BC; --hero-pill:rgba(255,255,255,.10);
+  --shadow:0 12px 26px -16px rgba(0,0,0,.7),inset 0 0 0 1px rgba(255,255,255,.06);
+  --jal:#FF5A6E; --ana:#6EA0FF; --stub:#D9B95E; --ok:#7EE2A8;
+  --chart-sea:#0F1A24; --chart-land:#1A1F24; --chart-coast:#3A4A42; --chart-apt:#E07AB5; --chart-grid:rgba(127,166,217,.10);
+  --tabs:rgba(22,25,31,.94); --demo-bg:#262B33; --demo-ink:#D1D5DB;}}
+:root[data-theme=dark]{
+  --bg:#0B0D10; --card:#16191F; --ink:#D1D5DB; --strong:#F3F4F6; --sub:#A7B0BC; --mute:#9AA3B0; --line:#4B5563;
+  --pill:rgba(255,255,255,.08); --hero:#16233A; --on-hero:#F3F4F6; --hero-sub:#A7B0BC; --hero-pill:rgba(255,255,255,.10);
+  --shadow:0 12px 26px -16px rgba(0,0,0,.7),inset 0 0 0 1px rgba(255,255,255,.06);
+  --jal:#FF5A6E; --ana:#6EA0FF; --stub:#D9B95E; --ok:#7EE2A8;
+  --chart-sea:#0F1A24; --chart-land:#1A1F24; --chart-coast:#3A4A42; --chart-apt:#E07AB5; --chart-grid:rgba(127,166,217,.10);
+  --tabs:rgba(22,25,31,.94); --demo-bg:#262B33; --demo-ink:#D1D5DB;}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--gothic);font-size:15px;line-height:1.6;-webkit-text-size-adjust:100%}
+.phone{position:relative;max-width:420px;min-height:100vh;min-height:100svh;margin:0 auto;overflow:hidden}
+.card{background:var(--card);border-radius:22px;box-shadow:var(--shadow)}
+.lab{font-size:13px;font-weight:700;color:var(--sub);letter-spacing:.02em}
+.num{font-weight:800;color:var(--strong);letter-spacing:-.01em;line-height:1.1}
+.u{font-size:12px;font-weight:600;color:var(--mute);margin-left:2px}
+.hit{min-height:44px;min-width:44px}
+.ic{width:44px;height:44px;border-radius:999px;background:var(--card);box-shadow:var(--shadow);display:grid;place-items:center;color:var(--strong);font-weight:800;flex:none}
+.ic svg,.ico{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.tabs{position:fixed;left:50%;transform:translateX(-50%);bottom:14px;width:calc(min(420px,100vw) - 28px);height:64px;border-radius:999px;background:var(--tabs);box-shadow:var(--shadow);display:flex;align-items:stretch;padding:0 8px;backdrop-filter:blur(12px);z-index:30}
+.tabs b{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:13px;font-weight:700;color:var(--sub)}
+.tabs b.on{color:var(--strong)}
+.tabs svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.ann{position:relative;z-index:40;max-width:392px;margin:16px auto 120px;font-size:13px;line-height:1.7;background:#FFF8D6;color:#5A4A12;padding:12px 14px;border-radius:16px}
+.ann b{display:block;font-size:13px}
+.ann ul{margin:4px 0 0;padding-left:1.2em}
+
+.wrap{padding:14px 16px 130px}
+.bar{display:flex;align-items:center;gap:8px}
+.ap{height:44px;display:flex;align-items:center;gap:8px;background:var(--card);box-shadow:var(--shadow);border-radius:999px;padding:0 16px 0 8px;font-weight:800;color:var(--strong)}
+.ap i{font-style:normal;background:var(--strong);color:var(--card);border-radius:999px;padding:2px 9px;font-size:13px}
+.hero{margin-top:14px;background:var(--hero);color:var(--on-hero);border-radius:26px;padding:18px 20px 16px}
+.hero .top{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.hero .lab{color:var(--hero-sub)}
+.est{height:44px;display:flex;align-items:center;gap:6px;font-size:13px;font-weight:700;color:var(--on-hero);background:var(--hero-pill);border-radius:999px;padding:0 14px;margin:-6px -6px -6px 0}
+.hero h2{margin:4px 0 0;font-size:30px;line-height:1.2}
+.hero .when{font-size:13px;color:var(--hero-sub)}
+.rw{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
+.rw div{background:rgba(255,255,255,.06);border-radius:18px;padding:10px 14px}
+.rw small{display:block;font-size:13px;font-weight:700;color:var(--hero-sub)}
+.rw b{font-family:var(--sign);font-size:40px;line-height:1.05;letter-spacing:.02em}
+.rw span{font-size:13px;color:var(--hero-sub);margin-left:6px}
+.hero .warn{margin:12px 0 0;font-size:13px;color:var(--hero-sub);line-height:1.5}
+.mini{margin-top:12px;display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.mini .card{padding:12px 16px}
+.mini .num{font-size:26px;margin-top:2px}
+.mini.one{grid-template-columns:1fr}
+.wait{margin-top:12px;padding:12px 16px;display:flex;align-items:flex-start;gap:10px;font-size:13px;color:var(--sub);line-height:1.55}
+.wait b{color:var(--strong);font-size:14px}
+.dotl{width:8px;height:8px;border-radius:999px;background:var(--line);flex:none;margin-top:7px}
+.subw{position:relative;margin:20px -16px 0;display:flex;align-items:center}
+.sub{flex:1;display:flex;gap:8px;overflow:hidden;padding:0 0 0 16px;position:relative}
+.sub span{flex:none;height:44px;display:flex;align-items:center;font-size:14px;font-weight:700;color:var(--sub);background:var(--pill);border-radius:999px;padding:0 16px}
+.sub span.on{background:var(--strong);color:var(--card)}
+.subw::after{content:"";position:absolute;right:68px;top:0;bottom:0;width:40px;background:linear-gradient(90deg,transparent,var(--bg));pointer-events:none}
+.subw .ed{margin:0 16px 0 8px}
+.list{margin-top:12px;padding:4px 16px}
+.it{display:flex;align-items:center;gap:12px;padding:12px 0;min-height:64px}
+.it+.it{box-shadow:0 -1px 0 var(--pill)}
+.it .mk{width:36px;height:36px;border-radius:12px;background:var(--pill);display:grid;place-items:center;font-weight:800;color:var(--strong);flex:none}
+.it b{display:block;color:var(--strong);font-size:15px;line-height:1.4}
+.it small{display:block;font-size:13px;color:var(--sub);line-height:1.45}
+.it .km{margin-left:auto;text-align:right;font-weight:800;color:var(--strong);font-size:20px;flex:none}
+.it .km small{display:inline;font-size:12px;font-weight:600;color:var(--mute);margin-left:2px}
+.est1{margin:8px 4px 0;font-size:14px;font-weight:700;color:var(--ink)}
+.note{font-size:13px;color:var(--sub);margin:12px 4px 0;line-height:1.55}
+
+
+.back{height:44px;display:flex;align-items:center;font-size:14px;font-weight:800;color:var(--strong);background:var(--card);box-shadow:var(--shadow);border-radius:999px;padding:0 14px 0 12px;flex:none}
+.hero .cond{margin:6px 0 0;font-size:13px;color:var(--hero-sub)}
+.hero h2.combo{font-size:20px;font-weight:800;margin:8px 0 2px;display:flex;align-items:baseline;gap:6px}
+.hero h2.combo b{font-family:var(--sign);font-size:46px;line-height:1;margin-right:4px}
+.hero h2.combo i{font-style:normal;color:var(--hero-sub);margin:0 4px}
+.rw.big b{font-size:48px}
+.rw.big span{display:block;margin:2px 0 0}
+.wait{flex-direction:column;gap:6px}
+.wait .ln{display:flex;align-items:baseline;gap:10px}
+.wait .k{flex:none;min-width:8.6em;font-size:13px;font-weight:800;color:var(--strong)}
+.hd2{display:flex;align-items:center;justify-content:space-between;margin:20px 0 0 4px}
+.hd2 h3{margin:0;font-size:15px;color:var(--strong)}
+.subw{margin-top:10px}
+.subw::after{right:0}
+.osu{display:inline-block;margin-left:6px;font-size:13px;font-weight:800;color:var(--strong);background:var(--pill);border-radius:999px;padding:0 8px;vertical-align:2px;line-height:20px}
+.listh{display:flex;justify-content:space-between;font-size:13px;color:var(--sub);padding:10px 0 0}
+.mini .s{font-size:13px;color:var(--sub);margin-top:2px}
+
+
+.dim{position:fixed;inset:0;background:rgba(15,27,45,.38);z-index:50}
+.sheet{position:fixed;left:50%;transform:translateX(-50%);bottom:0;width:min(420px,100vw);background:var(--card);border-radius:28px 28px 0 0;box-shadow:0 -10px 40px -10px rgba(17,24,39,.25);z-index:60;padding:10px 16px 28px}
+.grip{width:44px;height:5px;border-radius:999px;background:var(--line);opacity:.6;margin:0 auto 12px}
+.sh{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.sh h3{margin:0;font-size:18px;color:var(--strong)}
+.x{width:44px;height:44px;border-radius:999px;background:var(--pill);display:grid;place-items:center;font-size:18px;font-weight:800;color:var(--strong);flex:none}
+.opt{display:flex;align-items:center;gap:12px;min-height:56px;padding:8px 14px;border-radius:18px;margin-top:6px}
+.opt.on{background:var(--pill)}
+.opt b{display:block;color:var(--strong);font-size:15px}
+.opt small{display:block;color:var(--sub);font-size:13px;line-height:1.45}
+.opt .rwy{margin-left:auto;font-family:var(--sign);font-size:22px;font-weight:700;color:var(--strong);flex:none;text-align:right;line-height:1.1}
+.opt .rwy small{font-family:var(--gothic);font-size:13px;color:var(--mute);font-weight:600}
+.rad{width:22px;height:22px;border-radius:999px;box-shadow:inset 0 0 0 2px var(--line);flex:none}
+.opt.on .rad{box-shadow:inset 0 0 0 7px var(--strong)}
+.cap{font-size:13px;color:var(--sub);margin:10px 4px 0;line-height:1.55}
+.btn{height:48px;border-radius:999px;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;padding:0 20px}
+.btn.pri{background:var(--strong);color:var(--card)}
+.btn.sec{background:var(--pill);color:var(--strong)}
+.btns{display:flex;gap:10px;margin-top:14px}.btns .btn{flex:1}
+.chart{border-radius:20px;overflow:hidden;margin-top:12px;background:var(--chart-sea)}
+.chart svg{display:block;width:100%;height:auto}
+.facts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.facts>div{background:var(--bg);border-radius:16px;padding:10px 14px}
+.facts .num{font-size:22px}
+.st{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:800;color:var(--strong)}
+.st i{width:8px;height:8px;border-radius:999px;background:#1F9D5C}
+.st.off i{background:var(--line)}
+.ok{display:flex;align-items:center;gap:8px}
+.err{margin-top:12px;padding:14px 16px}
+.err .lnx{display:flex;align-items:baseline;gap:10px;font-size:13px;color:var(--sub)}
+.err .k{flex:none;min-width:8.6em;font-weight:800;color:var(--strong)}
+.err .btn{margin-top:12px;height:44px}
+.closed{margin-top:14px;background:var(--hero);color:var(--on-hero);border-radius:26px;padding:18px 20px 18px}
+.closed h2{margin:6px 0 0;font-size:30px;line-height:1.2}
+.closed .big{font-weight:800;font-size:40px;line-height:1.1;margin-top:10px}
+.closed .big small{font-size:14px;color:var(--hero-sub);font-weight:700;margin-left:4px}
+.empty{margin-top:12px;padding:22px 18px;text-align:left}
+.empty b{display:block;color:var(--strong);font-size:16px}
+.empty p{margin:6px 0 0;font-size:13px;color:var(--sub);line-height:1.6}
+.it .km.off{color:var(--sub);font-size:13px;font-weight:700}
+.it.dimrow b{color:var(--sub)}
+.tapmark{position:absolute;width:44px;height:44px;border-radius:999px;box-shadow:0 0 0 3px #E7C873,0 0 0 9px rgba(231,200,115,.35);pointer-events:none;z-index:45}
+.rwx div{position:relative}
+
+</style>
+</head>
+<body>
+<main class="phone"><div class="wrap">
+<div class="bar"><span class="back">‹ マイページ</span><span class="ap"><i>HND</i>羽田 ▾</span><span class="ic" style="margin-left:auto" aria-label="くわしい説明">i</span><span class="ic" aria-label="共有"><svg viewBox="0 0 24 24"><path d="M12 15V4"/><path d="m7.5 8.5 4.5-4.5 4.5 4.5"/><path d="M5 13v5.5c0 .8.7 1.5 1.5 1.5h11c.8 0 1.5-.7 1.5-1.5V13"/></svg></span></div><section class="hero" aria-label="いまの使い方">
+<div class="top"><span class="lab">いまの使い方</span><span class="est">風からの推定<svg class="ico" viewBox="0 0 24 24" style="width:16px;height:16px"><path d="m6 9 6 6 6-6"/></svg></span></div>
+<h2>北風運用</h2><div class="when">22:41 時点 ・ 北の風 12ノット</div>
+<div class="rw"><div><small>着陸</small><b>34R</b><span>ILS Z</span></div><div><small>離陸</small><b>05</b></div></div>
+</section><p class="est1">推定です。実際の運用と違うことがあります。</p><div class="mini"><div class="card"><div class="lab">運用時間</div><div class="num">24<span class="u">時間</span></div><div class="s">空港が開いている</div></div><div class="card"><div class="lab">今日の定時率</div><div class="num">87<span class="u">%</span></div><div class="s">時間どおりに出た便</div></div></div><div class="hd2"><h3>この空港で</h3><span class="ic" aria-label="並べ替え">✎</span></div><div class="subw"><div class="sub"><span class="on">見に行く</span><span class="">空の道すじ</span><span class="">定時率の移り変わり</span><span class="">短冊</span><span class="">撮る</span></div></div><div class="card list">
+<div class="listh"><span>場所（近い順）</span><span>ここからの距離</span></div>
+<div class="it"><div><b>第1ターミナル 展望デッキ</b><small>着陸機の線まで約1.6km<br>日の入り後・照明あり</small></div><div class="km">0.2<small>km</small></div></div>
+<div class="it"><div><b>第2ターミナル 展望デッキ<span class="osu">おすすめ</span></b><small>いまの着陸34R が正面に見える<br>日の入り後・照明あり</small></div><div class="km">1.4<small>km</small></div></div>
+<div class="it"><div><b>浮島町公園</b><small>着陸機の線まで約0.6km<br>日の入り後・園内は暗い</small></div><div class="km">4.8<small>km</small></div></div>
+</div><p class="note">見に行く場所は、滑走路の向きと距離での目安です。</p>
+</div>
+<nav class="tabs" aria-label="画面の切り替え"><b><svg viewBox="0 0 24 24"><path d="M3.5 10.5 12 4l8.5 6.5"/><path d="M5.5 9v10h4.5v-5.5h4V19h4.5V9"/></svg>ホーム</b><b><svg viewBox="0 0 24 24"><path d="M4 5.5C4 4.7 4.7 4 5.5 4H11v15H5.5c-.8 0-1.5.5-1.5 1.2V5.5Z"/><path d="M20 5.5c0-.8-.7-1.5-1.5-1.5H13v15h5.5c.8 0 1.5.5 1.5 1.2V5.5Z"/></svg>図鑑</b><b><svg viewBox="0 0 24 24"><path d="M10.5 13.5 4 11l1.4-1.4 7 1.1 3.9-3.9c.8-.8 2.1-.8 2.9 0s.8 2.1 0 2.9l-3.9 3.9 1.1 7L15 22l-2.5-6.5-3 3v2.5L8 22.5l-1.3-3.2L3.5 18 5 16.5h2.5Z"/></svg>フライト</b></nav>
+<div class="dim"></div><div class="sheet" role="dialog" aria-label="向きを選ぶ"><div class="grip"></div><div class="sh"><h3>向きを選ぶ</h3><span class="x" aria-label="閉じる">×</span></div><div class="opt on"><span class="rad"></span><div><b>風から決める（おすすめ）</b><small>いまの風で自動で選ぶ。風が届かないときは時間帯から</small></div><div class="rwy">34R<br><small>着陸</small></div></div><div class="opt"><span class="rad"></span><div><b>北風運用</b><small>北寄りの風のとき</small></div><div class="rwy">34L・34R<br><small>着陸</small></div></div><div class="opt"><span class="rad"></span><div><b>南風運用</b><small>南寄りの風のとき</small></div><div class="rwy">22・23<br><small>着陸</small></div></div><div class="opt"><span class="rad"></span><div><b>南風運用（都心ルート）</b><small>15時〜19時の南風のとき</small></div><div class="rwy">16L・16R<br><small>着陸</small></div></div><div class="opt"><span class="rad"></span><div><b>深夜・北風運用</b><small>23時〜6時</small></div><div class="rwy">34R<br><small>着陸</small></div></div><div class="opt"><span class="rad"></span><div><b>深夜・南風運用</b><small>23時〜6時</small></div><div class="rwy">23<br><small>着陸</small></div></div><p class="cap">自分で選ぶと、見に行く場所のおすすめもその向きで出します。</p></div>
+</main>
+<aside class="ann"><b>メモ（本番には出ません）</b><ul><li><b>押したあと</b>：大きいカード右上のピル「風からの推定 ⌄」を押すと、下から向きを選ぶシート。今の本番の「ほかの向き」（北風・南風・都心ルート・深夜）と同じ6つ</li><li>右の数字は<b>着陸</b>の滑走路だけ（離陸は選んだあと大きいカードに出る）。押せる行は高さ56px</li><li>自分で選んだときは、ピルが「自分で選んだ ⌄」に変わり、下の1行は「自分で選んだ向きです。実際の運用と違うことがあります。」</li><li>選んだ向きはこの画面だけで使い、ホームや記録には残さない（予想を実績と分ける決まりのため）</li><li>閉じ方：× ・暗い所を押す・下へ引く</li></ul></aside>
+<script>if(window!==window.top){var a=document.querySelector('.ann');if(a)a.remove()}</script>
+</body>
+</html>
