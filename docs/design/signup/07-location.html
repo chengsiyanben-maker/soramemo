@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>位置情報を使う理由｜そらメモ新規登録の画面案</title>
+<style>
+:root{
+  --gothic:"Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic UI","Yu Gothic","Meiryo","Noto Sans JP","Noto Sans CJK JP",system-ui,sans-serif;
+  --bg:#F4F5F7; --card:#FFFFFF; --ink:#374151; --ink-strong:#1F2937; --sub:#6B7280; --mute:#9CA3AF;
+  --track:#EEF0F3; --pill:rgba(17,24,39,.05);
+  --shadow:0 1px 2px rgba(17,24,39,.04),0 10px 30px -8px rgba(17,24,39,.10),inset 0 0 0 1px rgba(17,24,39,.07);
+  --jal:#C8102E; --ana:#1C4FA0; --ana-wash:#EEF3FB;
+  --cta:#1F2937; --cta-text:#FFFFFF;
+  --chart-bg:#F7F9F4; --chart-land:#E9EFE4; --chart-coast:#9FB3A4; --chart-apt:#1F4E79; --chart-route:#A3166B;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){
+  --bg:#0B0D10; --card:#16191F; --ink:#E5E7EB; --ink-strong:#F3F4F6; --sub:#A7B0BC; --mute:#8B95A3;
+  --track:#2A2F37; --pill:rgba(255,255,255,.07);
+  --shadow:0 12px 26px -16px rgba(0,0,0,.7),inset 0 0 0 1px rgba(255,255,255,.06);
+  --jal:#FF5A6E; --ana:#6EA0FF; --ana-wash:rgba(110,160,255,.12);
+  --cta:#F3F4F6; --cta-text:#0B0D10;
+  --chart-bg:#12161B; --chart-land:#1A2026; --chart-coast:#3A4A42; --chart-apt:#7FA6D9; --chart-route:#E07AB5;
+}}
+:root[data-theme=dark]{
+  --bg:#0B0D10; --card:#16191F; --ink:#E5E7EB; --ink-strong:#F3F4F6; --sub:#A7B0BC; --mute:#8B95A3;
+  --track:#2A2F37; --pill:rgba(255,255,255,.07);
+  --shadow:0 12px 26px -16px rgba(0,0,0,.7),inset 0 0 0 1px rgba(255,255,255,.06);
+  --jal:#FF5A6E; --ana:#6EA0FF; --ana-wash:rgba(110,160,255,.12);
+  --cta:#F3F4F6; --cta-text:#0B0D10;
+  --chart-bg:#12161B; --chart-land:#1A2026; --chart-coast:#3A4A42; --chart-apt:#7FA6D9; --chart-route:#E07AB5;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--gothic);font-size:16px;line-height:1.7;-webkit-text-size-adjust:100%}
+.phone{max-width:420px;min-height:100vh;min-height:100svh;margin:0 auto;padding:20px 24px 32px;display:flex;flex-direction:column}
+.top{display:flex;align-items:center;justify-content:space-between;height:44px}
+.back{width:40px;height:40px;border-radius:999px;border:0;background:var(--pill);color:var(--ink-strong);font-size:18px;display:grid;place-items:center}
+.skip{border:0;background:var(--pill);color:var(--sub);font:inherit;font-size:13px;font-weight:700;padding:8px 14px;border-radius:999px}
+.steps{display:flex;gap:6px;align-items:center}
+.steps i{display:block;width:18px;height:6px;border-radius:999px;background:var(--track)}
+.steps i.on{background:var(--ana);width:28px}
+.steps i.done{background:var(--ink-strong);opacity:.35}
+.stepno{font-size:12px;color:var(--mute);font-weight:700;letter-spacing:.04em}
+.stepno b{font-size:15px;color:var(--ink-strong)}
+.hero{margin-top:48px}
+.eyebrow{font-size:12px;font-weight:700;color:var(--sub);letter-spacing:.08em;margin:0 0 10px}
+h1{font-size:28px;line-height:1.35;color:var(--ink-strong);margin:0;font-weight:800;letter-spacing:-.01em}
+.lead{color:var(--sub);font-size:14px;margin:14px 0 0}
+.card{background:var(--card);border-radius:22px;box-shadow:var(--shadow);padding:20px}
+.field{margin-top:36px}
+.label{display:block;font-size:12px;font-weight:700;color:var(--sub);margin:0 0 8px 4px}
+.input{width:100%;font:inherit;font-size:18px;color:var(--ink-strong);background:var(--card);border:0;border-radius:18px;padding:16px 18px;box-shadow:var(--shadow);outline:none}
+.input.focus{box-shadow:var(--shadow),0 0 0 2px var(--ana)}
+.input::placeholder{color:var(--mute)}
+.note{font-size:12px;color:var(--mute);margin:10px 4px 0}
+.spacer{flex:1;min-height:24px}
+.cta{display:block;width:100%;border:0;border-radius:999px;background:var(--cta);color:var(--cta-text);font:inherit;font-size:16px;font-weight:800;padding:17px 20px;text-align:center;text-decoration:none;box-shadow:0 10px 24px -12px rgba(15,23,42,.5)}
+.cta[disabled]{opacity:.35;box-shadow:none}
+.ghost{display:block;width:100%;border:0;background:transparent;color:var(--sub);font:inherit;font-size:14px;font-weight:700;padding:14px;text-align:center;text-decoration:none}
+.pill2{display:block;width:100%;border:0;border-radius:999px;background:var(--pill);color:var(--ink-strong);font:inherit;font-size:15px;font-weight:700;padding:15px 20px;text-align:center;text-decoration:none}
+.ann{max-width:372px;margin:0 auto 32px;font-size:12px;line-height:1.6;background:#FFF8D6;color:#5A4A12;padding:12px 14px;border-radius:16px}
+.ann b{display:block;font-size:11px}
+@media print{.ann{display:none}}
+.ill{margin:40px auto 0;width:100%;max-width:300px;border-radius:26px;overflow:hidden;box-shadow:var(--shadow)}
+.rows{display:grid;gap:12px;margin-top:28px}
+.row{display:flex;gap:14px;align-items:flex-start}
+.row i{font-style:normal;flex:none;width:34px;height:34px;border-radius:999px;background:var(--ana-wash);color:var(--ana);display:grid;place-items:center;font-size:15px;font-weight:800}
+.row b{display:block;font-size:15px;color:var(--ink-strong)}
+.row small{display:block;font-size:12px;color:var(--mute);line-height:1.55}</style>
+</head>
+<body>
+<main class="phone">
+
+<div class="top"><a class="back" href="06-terms.html" aria-label="戻る">←</a><div class="steps" aria-label="6つのうち6つ目"><i class="done"></i><i class="done"></i><i class="done"></i><i class="done"></i><i class="done"></i><i class="on"></i></div><span style="width:40px"></span></div>
+<div class="ill">
+  <svg viewBox="0 0 300 150" width="100%" role="img" aria-label="空港の円の中に自分がいる図">
+    <rect width="300" height="150" fill="var(--chart-bg)"/>
+    <path d="M0 110 C60 96 90 120 150 104 S250 84 300 96 V150 H0Z" fill="var(--chart-land)" stroke="var(--chart-coast)" stroke-width="1.2"/>
+    <circle cx="150" cy="70" r="46" fill="none" stroke="var(--chart-apt)" stroke-width="1.4" stroke-dasharray="4 4"/>
+    <path d="M128 82 L172 58" stroke="var(--chart-apt)" stroke-width="5" stroke-linecap="round" opacity=".55"/>
+    <text x="150" y="132" text-anchor="middle" font-size="11" font-weight="700" fill="var(--chart-apt)" font-family="inherit">HND</text>
+    <circle cx="164" cy="74" r="12" fill="var(--ana)" opacity=".18"/>
+    <circle cx="164" cy="74" r="5.5" fill="var(--ana)" stroke="#fff" stroke-width="2"/>
+  </svg>
+</div>
+<div class="hero" style="margin-top:30px">
+  <h1 style="font-size:26px">チェックインのときだけ<br>位置を使います</h1>
+</div>
+<div class="rows">
+  <div class="row"><i>1</i><div><b>押したときだけ測ります</b><small>「チェックイン」か「位置だけ測る」を押した一瞬だけ。いつも追いかけることはしません。</small></div></div>
+  <div class="row"><i>2</i><div><b>空港にいるかを確かめるため</b><small>空港の範囲の中にいるときに、その空港の印が押せます。</small></div></div>
+  <div class="row"><i>3</i><div><b>あとからでも許可できます</b><small>いま断っても、地図を見たり記録帳に書いたりはできます。</small></div></div>
+</div>
+<div class="spacer"></div>
+<a class="cta" href="08-home.html">位置情報を許可する</a>
+<a class="ghost" href="08-home.html">あとで</a>
+
+</main>
+<aside class="ann"><b>画面案メモ</b>この画面のボタンを押してから、端末の許可の確認が出る流れ。いきなり端末の確認を出さない。図は航空図風。</aside>
+<script>if(window!==window.top){var a=document.querySelector('.ann');if(a)a.remove()}</script>
+</body>
+</html>

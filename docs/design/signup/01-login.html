@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>ログイン｜そらメモ新規登録の画面案</title>
+<style>
+:root{
+  --gothic:"Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic UI","Yu Gothic","Meiryo","Noto Sans JP","Noto Sans CJK JP",system-ui,sans-serif;
+  --bg:#F4F5F7; --card:#FFFFFF; --ink:#374151; --ink-strong:#1F2937; --sub:#6B7280; --mute:#9CA3AF;
+  --track:#EEF0F3; --pill:rgba(17,24,39,.05);
+  --shadow:0 1px 2px rgba(17,24,39,.04),0 10px 30px -8px rgba(17,24,39,.10),inset 0 0 0 1px rgba(17,24,39,.07);
+  --jal:#C8102E; --ana:#1C4FA0; --ana-wash:#EEF3FB;
+  --cta:#1F2937; --cta-text:#FFFFFF;
+  --chart-bg:#F7F9F4; --chart-land:#E9EFE4; --chart-coast:#9FB3A4; --chart-apt:#1F4E79; --chart-route:#A3166B;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){
+  --bg:#0B0D10; --card:#16191F; --ink:#E5E7EB; --ink-strong:#F3F4F6; --sub:#A7B0BC; --mute:#8B95A3;
+  --track:#2A2F37; --pill:rgba(255,255,255,.07);
+  --shadow:0 12px 26px -16px rgba(0,0,0,.7),inset 0 0 0 1px rgba(255,255,255,.06);
+  --jal:#FF5A6E; --ana:#6EA0FF; --ana-wash:rgba(110,160,255,.12);
+  --cta:#F3F4F6; --cta-text:#0B0D10;
+  --chart-bg:#12161B; --chart-land:#1A2026; --chart-coast:#3A4A42; --chart-apt:#7FA6D9; --chart-route:#E07AB5;
+}}
+:root[data-theme=dark]{
+  --bg:#0B0D10; --card:#16191F; --ink:#E5E7EB; --ink-strong:#F3F4F6; --sub:#A7B0BC; --mute:#8B95A3;
+  --track:#2A2F37; --pill:rgba(255,255,255,.07);
+  --shadow:0 12px 26px -16px rgba(0,0,0,.7),inset 0 0 0 1px rgba(255,255,255,.06);
+  --jal:#FF5A6E; --ana:#6EA0FF; --ana-wash:rgba(110,160,255,.12);
+  --cta:#F3F4F6; --cta-text:#0B0D10;
+  --chart-bg:#12161B; --chart-land:#1A2026; --chart-coast:#3A4A42; --chart-apt:#7FA6D9; --chart-route:#E07AB5;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--gothic);font-size:16px;line-height:1.7;-webkit-text-size-adjust:100%}
+.phone{max-width:420px;min-height:100vh;min-height:100svh;margin:0 auto;padding:20px 24px 32px;display:flex;flex-direction:column}
+.top{display:flex;align-items:center;justify-content:space-between;height:44px}
+.back{width:40px;height:40px;border-radius:999px;border:0;background:var(--pill);color:var(--ink-strong);font-size:18px;display:grid;place-items:center}
+.skip{border:0;background:var(--pill);color:var(--sub);font:inherit;font-size:13px;font-weight:700;padding:8px 14px;border-radius:999px}
+.steps{display:flex;gap:6px;align-items:center}
+.steps i{display:block;width:18px;height:6px;border-radius:999px;background:var(--track)}
+.steps i.on{background:var(--ana);width:28px}
+.steps i.done{background:var(--ink-strong);opacity:.35}
+.stepno{font-size:12px;color:var(--mute);font-weight:700;letter-spacing:.04em}
+.stepno b{font-size:15px;color:var(--ink-strong)}
+.hero{margin-top:48px}
+.eyebrow{font-size:12px;font-weight:700;color:var(--sub);letter-spacing:.08em;margin:0 0 10px}
+h1{font-size:28px;line-height:1.35;color:var(--ink-strong);margin:0;font-weight:800;letter-spacing:-.01em}
+.lead{color:var(--sub);font-size:14px;margin:14px 0 0}
+.card{background:var(--card);border-radius:22px;box-shadow:var(--shadow);padding:20px}
+.field{margin-top:36px}
+.label{display:block;font-size:12px;font-weight:700;color:var(--sub);margin:0 0 8px 4px}
+.input{width:100%;font:inherit;font-size:18px;color:var(--ink-strong);background:var(--card);border:0;border-radius:18px;padding:16px 18px;box-shadow:var(--shadow);outline:none}
+.input.focus{box-shadow:var(--shadow),0 0 0 2px var(--ana)}
+.input::placeholder{color:var(--mute)}
+.note{font-size:12px;color:var(--mute);margin:10px 4px 0}
+.spacer{flex:1;min-height:24px}
+.cta{display:block;width:100%;border:0;border-radius:999px;background:var(--cta);color:var(--cta-text);font:inherit;font-size:16px;font-weight:800;padding:17px 20px;text-align:center;text-decoration:none;box-shadow:0 10px 24px -12px rgba(15,23,42,.5)}
+.cta[disabled]{opacity:.35;box-shadow:none}
+.ghost{display:block;width:100%;border:0;background:transparent;color:var(--sub);font:inherit;font-size:14px;font-weight:700;padding:14px;text-align:center;text-decoration:none}
+.pill2{display:block;width:100%;border:0;border-radius:999px;background:var(--pill);color:var(--ink-strong);font:inherit;font-size:15px;font-weight:700;padding:15px 20px;text-align:center;text-decoration:none}
+.ann{max-width:372px;margin:0 auto 32px;font-size:12px;line-height:1.6;background:#FFF8D6;color:#5A4A12;padding:12px 14px;border-radius:16px}
+.ann b{display:block;font-size:11px}
+@media print{.ann{display:none}}
+</style>
+</head>
+<body>
+<main class="phone">
+
+<div class="hero" style="margin-top:72px;text-align:center">
+  <div style="display:inline-block;border-radius:18px;box-shadow:var(--shadow)"><svg viewBox="0 0 64 64" width="64" height="64" aria-hidden="true"><rect width="64" height="64" rx="18" fill="var(--card)"/><circle cx="32" cy="32" r="20" fill="none" stroke="var(--chart-apt)" stroke-width="2.5" stroke-dasharray="3 4"/><path d="M20 38 L44 24" stroke="var(--ink-strong)" stroke-width="3" stroke-linecap="round"/><path d="M38 22 l7 1.5 -2.5 6.5" fill="none" stroke="var(--ink-strong)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><circle cx="20" cy="38" r="3.5" fill="var(--jal)"/></svg></div>
+  <h1 style="margin-top:22px;font-size:32px">そらメモ</h1>
+  <p class="lead" style="margin-top:8px">空港にチェックインして、印を集める。</p>
+</div>
+<div class="field" style="margin-top:56px">
+  <label class="label" for="em">ログイン</label>
+  <input class="input" id="em" type="email" placeholder="メールアドレス" inputmode="email">
+  <p class="note">メールに届く数字のコードでログインします。パスワードはありません。</p>
+</div>
+<div class="spacer"></div>
+<a class="cta" href="03-code.html">ログイン用のコードを送る</a>
+<div style="margin-top:14px;text-align:center">
+  <a class="pill2" href="02-email.html" style="display:inline-block;width:auto;padding:13px 26px">はじめての方は<b style="color:var(--ana)">新規登録</b></a>
+</div>
+<p class="note" style="text-align:center;margin-top:18px">登録しなくても<a href="#" style="color:var(--sub)">デモで試す</a>ことができます</p>
+
+</main>
+<aside class="ann"><b>画面案メモ</b>新規登録はピル型の二番手ボタン。主役はログインの黒いボタンのまま。</aside>
+<script>if(window!==window.top){var a=document.querySelector('.ann');if(a)a.remove()}</script>
+</body>
+</html>
