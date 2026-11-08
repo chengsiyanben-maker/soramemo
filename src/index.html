@@ -834,7 +834,7 @@ nav.tabs button{user-select:none;-webkit-user-select:none;-webkit-touch-callout:
 .tpminus svg,.hex svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round}
 .tprow.away b small .tpmp{color:#4B5563;font-weight:700;white-space:nowrap}
 .heprev{background:#E3E7ED}.heprev .hetag{align-self:flex-start;margin:0 0 2px 4px;padding:3px 10px;border-radius:999px;background:#fff;font-size:12px;font-weight:800;color:#4B5563}
-.heundo-pad{height:64px}
+
 #tpTip{position:fixed;left:50%;z-index:6;transform:translateX(-50%);max-width:calc(100vw - 32px);padding:10px 16px;border-radius:16px;background:#111827;color:#fff;font:700 13.5px/1.5 var(--gothic);box-shadow:0 12px 30px -10px rgba(0,0,0,.45);pointer-events:none;white-space:nowrap}
 #tpTip::after{content:"";position:absolute;left:50%;bottom:-6px;margin-left:-6px;border:6px solid transparent;border-bottom:0;border-top-color:#111827}
 .tpmini{display:flex;height:52px;border-radius:999px;background:#fff;box-shadow:0 1px 2px rgba(17,24,39,.06),0 6px 18px -10px rgba(17,24,39,.25);padding:0 6px;margin-top:8px}
@@ -864,7 +864,7 @@ dialog.heed{--s-bg:#EEF1F5}
 .helink{display:block;margin:8px auto 4px;min-height:44px;padding:0 14px;border:0;background:none;color:#4B5563;font:700 13.5px var(--gothic);cursor:pointer}
 .lotile2{background:#F8F9FB}
 /* ON／OFF を試す（11/9 1時 本人「ON OFFにしてみて」）：タブを選ぶ・ホームに出すものの行のスイッチ。字の札 ON／OFF つき（色だけに頼らない）・押せる所は 44px 以上。昼と夜で同じ部品（色は変数だけ変える） */
-:root{--sw-on-bg:#16233A;--sw-on-ring:#16233A;--sw-on-ink:#FFFFFF;--sw-on-knob:#FFFFFF;--sw-off-bg:#E5E8EE;--sw-off-ring:#C7CDD6;--sw-off-ink:#4B5563;--sw-off-knob:#FFFFFF;--sw-off-knob-ring:#B8C0CB}
+:root{--sw-on-bg:#16233A;--sw-on-ring:#16233A;--sw-on-ink:#FFFFFF;--sw-on-knob:#FFFFFF;--sw-off-bg:#EEF1F5;--sw-off-ring:#8A94A3;--sw-off-ink:#4B5563;--sw-off-knob:#FFFFFF;--sw-off-knob-ring:#8A94A3}
 /* 夜（アプリに夜の画面が入ったら data-night="on"）：色の変数は design/night の 07-tabs-v3-onoff と同じ。琥珀と緑は使わない */
 :root[data-night="on"]{--sw-on-bg:rgba(220,227,234,.16);--sw-on-ring:rgba(220,227,234,.72);--sw-on-ink:#DCE3EA;--sw-on-knob:#DCE3EA;--sw-off-bg:transparent;--sw-off-ring:rgba(150,170,195,.30);--sw-off-ink:#8996A7;--sw-off-knob:#3A4654;--sw-off-knob-ring:rgba(150,170,195,.35)}
 .losw{flex:none;min-width:76px;min-height:44px;padding:0 4px;border:0;background:none;display:grid;place-items:center;cursor:pointer;-webkit-tap-highlight-color:transparent}
@@ -878,6 +878,18 @@ dialog.heed{--s-bg:#EEF1F5}
 @media (prefers-reduced-motion:reduce){.losw i,.losw i::before{transition:none}}
 .tprow.off{background:#fff;box-shadow:inset 0 0 0 1.5px #D9DEE6}.tprow.off .tpi{background:#F3F4F6;color:#6B7280}.tprow.off>b{color:#4B5563}
 .tprow.off b small .tpmp{color:#4B5563;font-weight:700;white-space:nowrap}
+/* review-c3（11/9 3時35分の PM の指示）：題・数・完了・説明文は上に固定し、送るのは一覧だけ。トーストと入れ替えはシートの下に固定。
+   OFF の縁とつまみの縁は白い地と 3:1 以上（#8A94A3。デザイン担当の design.md に値が出たら合わせる）。行の高さは ON と OFF で同じ */
+dialog.tpsheet .dlg{display:flex;flex-direction:column;overflow:hidden;padding-bottom:0}
+.tptop{flex:none;padding-bottom:4px}.tpscroll{flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;margin:0 -20px;padding:0 20px 24px}
+.tpbot{flex:none;padding:6px 0 16px}.tpbot .tpundo{margin-top:0}.tpbot .tpswap{margin-top:0}.tpbot .tpundo+.tpswap{margin-top:8px}
+.tpcnt{margin-left:auto;font-size:13px;color:#6B7280;white-space:nowrap}.tpcnt b{font-size:22px;font-weight:800;color:#1F2937}.tpcnt small{margin-left:6px;font-size:12px;color:#6B7280}
+.tphd .tpdone{margin-left:4px}
+.tprow{min-height:62px;gap:8px;padding:0 4px 0 10px}.tpn{width:20px}.tpi{width:34px;height:34px}.losw{min-width:72px}
+.tprow b{min-width:0}.tprow b small{font-size:11.5px;line-height:1.35}
+.tprow.off b small{white-space:nowrap}.tplist.full .tprow.off b small{white-space:normal}
+.hepc.fix{background:#F3F5F8;box-shadow:inset 0 0 0 1.5px #E3E7ED}
+.heed .heundo{position:static;margin:12px 0 0}
 .hepc.sw{padding-right:92px}.hepc .losw{position:absolute;right:6px;top:50%;transform:translateY(-50%)}
 .hepc.off{background:#F7F8FA;box-shadow:inset 0 0 0 1.5px #D9DEE6}.hepc.off b{color:#4B5563}
 
@@ -5069,27 +5081,32 @@ function tpOrder(){
 const loSw = (on, attr, label, dis) => `<button type="button" class="losw" role="switch" aria-checked="${on}" ${attr} aria-label="${label}"${dis ? " disabled" : ""}><i><b aria-hidden="true">${on ? "ON" : "OFF"}</b></i></button>`;
 function tpHTML(){
   const tabs = loTabs(), rest = tabs.filter(v => v !== "home"), order = tpOrder(), full = tabs.length >= LO_TAB_MAX, least = tabs.length <= LO_TAB_MIN;
-  const handle = v => `<button type="button" class="tph" data-tp-h="${v}" aria-label="${TAB_NAME[v]}を並べ替える（上下の矢印で動かします）"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 9h14M5 15h14"/></svg></button>`;
+  const handle = v => `<button type="button" class="tph" data-tp-h="${v}" aria-label="${TAB_NAME[v]}を並べ替える（上下の矢印で動かします）"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 7h14M5 12h14M5 17h14"/></svg></button>`;
   // ON の行は OFF で隠す（2つのときは押せない）。OFF の行は ON で出す（5つのときは入れ替えを聞く）
   const row = v => { const on = rest.includes(v);
     return on ? `<li class="tprow" data-tp="${v}"><span class="tpn">${rest.indexOf(v) + 2}</span><span class="tpi">${tpIcon(v)}</span><b>${TAB_NAME[v]}</b>
       ${loSw(true, `data-tp-off="${v}"`, `${TAB_NAME[v]}をタブに出す`, least)}${handle(v)}</li>`
-    : `<li class="tprow off" data-tp="${v}"><span class="tpn" aria-hidden="true"></span><span class="tpi">${tpIcon(v)}</span><b>${TAB_NAME[v]}<small>${TP_SUB[v]}・<span class="tpmp">マイページのタイルから</span></small></b>
+    : `<li class="tprow off" data-tp="${v}"><span class="tpn" aria-hidden="true"></span><span class="tpi">${tpIcon(v)}</span><b>${TAB_NAME[v]}<small>${full ? "ON にすると外すタブを選びます" : "マイページから開けます"}</small></b>
       ${loSw(false, `data-tp-on="${v}"`, `${TAB_NAME[v]}をタブに出す${full ? `（${LO_TAB_MAX}つまでなので入れ替えます）` : ""}`)}${handle(v)}</li>`; };
   const swap = TP.swap ? `<div class="tpswap" role="group" aria-label="入れ替えるタブ"><p>タブは${LO_TAB_MAX}つまでです。「${TAB_NAME[TP.swap]}」とどれを入れ替えますか？</p>
       <div class="lochips">${rest.map(v => `<button type="button" class="lochip" data-tp-swap="${v}">${TAB_NAME[v]}</button>`).join("")}<button type="button" class="lochip" data-tp-swap="">やめる</button></div></div>` : "";
   const undo = TP.undo ? `<div class="loundo tpundo" role="status"><span>${esc(TP.undo.text)}</span><button type="button" data-tp-undo>元に戻す</button></div>` : "";
   const msg = TP.msg ? `<p class="tpmsg" role="status">${esc(TP.msg)}</p>` : least ? `<p class="tpmsg tpleast">タブは${LO_TAB_MIN}つより減らせません。</p>` : "";
-  return `<div class="tphd"><h3 id="tpTitle">タブを選ぶ</h3><button type="button" class="tpdone" data-close>完了</button></div>
-    <p class="tplead">OFF にすると隠れます。「≡」を持って並べ替えます。${LO_TAB_MAX}つまで。隠した画面はマイページから開けます。</p>${msg}
-    <ol class="tplist" aria-label="タブに出せる画面">
+  return `<div class="tptop"><div class="tphd"><h3 id="tpTitle">タブを選ぶ</h3><span class="tpcnt" aria-label="タブ ${tabs.length}つ（${LO_TAB_MAX}つまで）"><b>${tabs.length}</b>/${LO_TAB_MAX}<small>${LO_TAB_MAX}つまで</small></span><button type="button" class="tpdone" data-close>完了</button></div>
+    <p class="tplead">OFF で隠れます。≡ で並べ替え。</p>${msg}</div>
+    <div class="tpscroll"><ol class="tplist${full ? " full" : ""}" aria-label="タブに出せる画面">
       <li class="tprow lock"><span class="tpn">1</span><span class="tpi">${tpIcon("home")}</span><b>ホーム</b><span class="tplk">いつも</span></li>
       ${order.map(row).join("")}</ol>
-    ${undo}${swap}
     <div class="tpmore"><button type="button" class="lotext" data-he-open>ホームに出すもの ›</button><button type="button" class="lotext" data-tp-reset${loAllOn() ? " disabled" : ""}>全部乗せに戻す</button></div>
-    <p class="hsl tpnow">いまのタブ帯</p><div class="tpbar">${tpMini(tabs)}</div>`;
+    <p class="hsl tpnow">いまのタブ帯</p><div class="tpbar">${tpMini(tabs)}</div></div>
+    ${undo || swap ? `<div class="tpbot">${undo}${swap}</div>` : ""}`;
 }
-function tpRender(){ const d = $("dTabs"); if(!d || !d.open) return; const y = d.querySelector(".dlg").scrollTop; $("dTabsBody").innerHTML = tpHTML(); d.querySelector(".dlg").scrollTop = y; }
+// 描き直しても一覧の送り位置はそのまま（題と完了は上に固定・トーストは下に固定。review-c3 の1）
+function tpRender(){ const d = $("dTabs"); if(!d || !d.open) return; const sc = d.querySelector(".tpscroll"), y = sc ? sc.scrollTop : 0; $("dTabsBody").innerHTML = tpHTML(); const n = d.querySelector(".tpscroll"); if(n) n.scrollTop = y; }
+// 押した行が下のトーストや入れ替えの陰に入ったら、一覧だけを送って見せる
+function tpKeep(v){ const sc = document.querySelector("#dTabs .tpscroll"), r = v && document.querySelector(`#dTabs .tprow[data-tp="${v}"]`); if(!sc || !r) return;
+  const a = sc.getBoundingClientRect(), b = r.getBoundingClientRect();
+  if(b.bottom > a.bottom - 4) sc.scrollTop += b.bottom - a.bottom + 8; else if(b.top < a.top + 4) sc.scrollTop -= a.top - b.top + 8; }
 function openTabPicker(from){
   TP = { undo:null, swap:null, from:from || "screen", msg:"", order:null };
   $("dTabsBody").innerHTML = tpHTML();
@@ -5112,8 +5129,8 @@ function tpSet(list, what, text){
   if(!t.includes(currentView()) && TAB_ALL.includes(currentView())) goTab("home");
   loChanged(what);
   TP.undo = text ? { text, snap } : null; tpRender();
-  // ON／OFF で行が全部並ぶので、高さ667 では元に戻すが下にかくれる。出したときだけ見える所まで送る（行は動かさない）
-  if(text){ const u = document.querySelector("#dTabs .tpundo"); if(u) u.scrollIntoView({ block:"nearest" }); }
+  // トーストはシートの下に固定（送らない。review-c3 の1）。押した行が陰に入ったときだけ一覧を送る
+  const k = (what.match(/^tab_(\w+)_(on|off)$/) || [])[1] || (what === "tab_swap" ? TP.last : ""); if(k) tpKeep(k);
   return true;
 }
 // ホームに出すもの（C2）
@@ -5124,7 +5141,7 @@ function heHTML(){
   const off = loOff("home"), on = loOrder("home").filter(id => !off.has(id)), out = LO_BLOCKS.home.filter(b => !b[3] && off.has(b[0]));
   const name = id => (LO_BLOCKS.home.find(b => b[0] === id) || [])[1] || id;
   const back = `<button class="mp-back" type="button" data-close><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>戻る</button>`;
-  const fixed = HE_FIXED.map(([k, n, s], i) => `<li class="hepc${i ? "" : " hero"}"><div><b>${n}</b><small>${s}</small></div><span class="helk">いつも</span></li>`).join("");
+  const fixed = HE_FIXED.map(([k, n, s]) => `<li class="hepc fix"><div><b>${n}</b><small>${s}</small></div><span class="helk">いつも</span></li>`).join("");
   // OFF にしたかたまりも見本の中のその場に残す（11/9 1時 PM の1）
   const rows = loOrder("home").map(id => { const v = !off.has(id);
     return `<li class="hepc sw${v ? "" : " off"}"><div><b>${esc(name(id))}</b>${HE_SUB[id] ? `<small>${HE_SUB[id]}</small>` : ""}</div>${loSw(v, `data-he-${v ? "off" : "on"}="${id}"`, `「${esc(name(id))}」をホームに出す`)}</li>`; }).join("");
@@ -5132,9 +5149,9 @@ function heHTML(){
   const undo = HE.undo ? `<div class="heundo" role="status"><span>${esc(HE.undo.text)}</span><button type="button" data-he-undo>元に戻す</button></div>` : "";
   return `<div class="spctop">${back}<span class="sp" aria-hidden="true"></span></div>
     <h3 class="heh" id="heTitle">ホームに出すもの</h3><p class="helead">ホームのシートの見本です（並びは本物と同じ）。OFF にすると隠れます。</p>
-    <ul class="heprev" aria-label="ホームに出しているもの（見本）"><li class="hetag" aria-hidden="true">見本</li>${fixed}${rows}</ul>${tray}
+    <ul class="heprev" aria-label="ホームに出しているもの（見本）"><li class="hetag" aria-hidden="true">見本</li>${fixed}${rows}</ul>${tray}${undo}
     <div class="locard heres"><div class="t"><b>ホームを全部出す</b><small>外したものを全部ホームに戻します。タブはそのまま</small></div><button type="button" class="hereset" data-he-all${out.length ? "" : " disabled"}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.3-5.6"/><path d="M4 4v4h4"/></svg>全部出す</button></div>
-    <p class="losave">タブまで全部乗せに戻すときは、マイページの「表示の編集」か、タブを選ぶのいちばん下から。見方は、それぞれの画面の見方の帯の鉛筆から選べます。</p>${undo}${undo ? `<div class="heundo-pad" aria-hidden="true"></div>` : ""}`;
+    <p class="losave">タブまで全部乗せに戻すときは、マイページの「表示の編集」か、タブを選ぶのいちばん下から。見方は、それぞれの画面の見方の帯の鉛筆から選べます。</p>`;
 }
 function heRender(){ const d = $("dHomeEd"); if(!d || !d.open) return; const y = d.scrollTop; $("dHomeEdBody").innerHTML = heHTML(); d.scrollTop = y; }
 function openHomeEd(from){
@@ -5149,8 +5166,11 @@ function heSet(id, hide){
   L.off.home = [...set]; if(!L.off.home.length) delete L.off.home;
   const n = (LO_BLOCKS.home.find(b => b[0] === id) || [])[1] || id;
   loChanged("blk_home");
-  HE.undo = { text:`「${n}」を${hide ? "外しました" : "戻しました"}`, snap }; heRender();
+  HE.undo = { text:`「${n}」を${hide ? "外しました" : "戻しました"}`, snap }; heRender(); heKeep(id);
 }
+// トーストは見本のすぐ下に出す（下に貼りつけると文や行に重なった。review-c3 の5）。画面の外なら、押した行が隠れない範囲で見える所まで送る
+function heKeep(id){ const d = $("dHomeEd"), t = d && d.querySelector(".heundo"), r = d && d.querySelector(`[data-he-on="${id}"],[data-he-off="${id}"]`); if(!t || !r) return;
+  const a = t.getBoundingClientRect(), b = r.closest(".hepc").getBoundingClientRect(), over = a.bottom + 16 - innerHeight; if(over > 0) d.scrollTop += Math.min(over, Math.max(0, b.top - 16)); }
 // 全部乗せに戻す（C3）：戻る数を見せてから
 function rsHTML(){
   const c = loCount(), tabs = loTabs(), back = LO_ALL_TABS().filter(v => !tabs.includes(v)), moved = !back.length && tabs.join() !== LO_ALL_TABS().join();
@@ -5180,9 +5200,9 @@ document.addEventListener("click", e => {
   if((b = q("[data-he-undo]"))){ if(HE.undo){ loRestore(HE.undo.snap); loChanged("undo"); HE.undo = null; heRender(); } return; }
   if((b = q("[data-tp-off]"))){ const v = b.dataset.tpOff; tpSet(loTabs().filter(x => x !== v), "tab_" + v + "_off", tpOffText(v)); return; }
   if((b = q("[data-tp-on]"))){ const v = b.dataset.tpOn, t = loTabs();
-    if(t.length >= LO_TAB_MAX){ TP.swap = v; TP.msg = ""; tpRender(); return; }
+    if(t.length >= LO_TAB_MAX){ TP.swap = v; TP.msg = ""; TP.undo = null; tpRender(); tpKeep(v); return; }
     tpSet(tpOrder().filter(x => x === v || t.includes(x)), "tab_" + v + "_on", `「${TAB_NAME[v]}」をタブに出しました`); return; }
-  if((b = q("[data-tp-swap]"))){ const out = b.dataset.tpSwap, v = TP.swap; if(!out || !v){ TP.swap = null; tpRender(); return; }
+  if((b = q("[data-tp-swap]"))){ const out = b.dataset.tpSwap, v = TP.swap; if(!out || !v){ TP.swap = null; tpRender(); return; } TP.last = v;
     const now = loTabs().filter(x => x !== out); tpSet(tpOrder().filter(x => x === v || now.includes(x)), "tab_swap", `「${TAB_NAME[v]}」を出しました。「${TAB_NAME[out]}」は${tpWhere(out)}`); return; }
   if((b = q("[data-he-all]"))){ if(b.disabled) return; const snap = loSnap(), L = loEdit(), n = (L.off.home || []).length; if(!n) return;
     delete L.off.home; loChanged("blk_home_all"); HE.undo = { text:`かたまり${n}つをホームに戻しました`, snap }; heRender(); return; }

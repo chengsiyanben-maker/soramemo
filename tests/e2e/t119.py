@@ -59,7 +59,18 @@ async def main():
         check('並べる行は5つ（ON 4つ・OFF は成績）:', await pg.locator('#dTabs .tprow[data-tp]').count() == 5 and await pg.locator('#dTabs [data-tp-on]').count() == 1 and await pg.locator('#dTabs .tprow.off [data-tp-on="stats"]').count() == 1)
         sw = await pg.evaluate("""[...document.querySelectorAll('#dTabs .losw')].map(b => { const r = b.getBoundingClientRect(); return [b.getAttribute('role'), b.getAttribute('aria-checked'), b.innerText.trim(), Math.round(r.width), Math.round(r.height)]; })""")
         check('各行は ON／OFF のスイッチ（role=switch・字の札・44px 以上）:', len(sw) == 5 and all(x[0] == 'switch' and x[3] >= 44 and x[4] >= 44 for x in sw) and [x[1] for x in sw].count('true') == 4 and all((x[1] == 'true') == (x[2] == 'ON') and x[2] in ('ON', 'OFF') for x in sw), sw)
-        check('はじめの文は「OFF にすると隠れます」:', 'OFF にすると隠れます' in await pg.inner_text('#dTabs .tplead'))
+        check('はじめの文は1行の「OFF で隠れます。≡ で並べ替え。」:', (await pg.inner_text('#dTabs .tplead')).strip() == 'OFF で隠れます。≡ で並べ替え。' and await pg.evaluate("document.querySelector('#dTabs .tplead').getBoundingClientRect().height < 30"))
+        check('題の横に数 5/5 と「5つまで」:', (await pg.inner_text('#dTabs .tpcnt')).replace('\n', '').replace(' ', '') == '5/55つまで', await pg.inner_text('#dTabs .tpcnt'))
+        hs = await pg.evaluate("[...document.querySelectorAll('#dTabs .tprow')].map(r => Math.round(r.getBoundingClientRect().height))")
+        check('ON と OFF の行は同じ高さ（OFF の補足は1行）:', len(set(hs)) == 1, hs)
+        check('5/5 のとき OFF の行の補足は「ON にすると外すタブを選びます」:', 'ON にすると外すタブを選びます' in await pg.inner_text('#dTabs .tprow.off'))
+        ring = await pg.evaluate("""(() => { const L = c => { const m = c.match(/[\\d.]+/g).map(Number).slice(0, 3).map(v => { v /= 255; return v <= .03928 ? v / 12.92 : ((v + .055) / 1.055) ** 2.4; }); return .2126 * m[0] + .7152 * m[1] + .0722 * m[2]; };
+          const cs = getComputedStyle(document.querySelector('#dTabs .tprow.off .losw i')), row = getComputedStyle(document.querySelector('#dTabs .tprow.off')).backgroundColor;
+          const ringC = cs.boxShadow.match(/rgba?\\([^)]*\\)/)[0], knob = getComputedStyle(document.querySelector('#dTabs .tprow.off .losw i'), '::before').boxShadow.match(/rgba?\\([^)]*\\)/)[0];
+          const cr = (a, b) => { const x = L(a), y = L(b); return (Math.max(x, y) + .05) / (Math.min(x, y) + .05); };
+          return [cr(ringC, row), cr(knob, getComputedStyle(document.querySelector('#dTabs .tprow.off .losw i'), '::before').backgroundColor)]; })()""")
+        check('OFF のスイッチの縁とつまみの縁は 3:1 以上:', ring[0] >= 3 and ring[1] >= 3, ring)
+        check('≡ は3本線（等号に見えない）:', (await pg.get_attribute('[data-tp-h="book"] path', 'd')).count('h14') == 3)
         await pg.screenshot(path=os.path.join(SHOTS, '01-c1-pick.png'))
         await drag(pg, '[data-tp-h="sg"]', '[data-tp-h="book"]')
         check('≡ を持って並べ替える（修行を図鑑の前へ）:', await pg.evaluate(TABS) == 'home,sg,book,log,ops', await pg.evaluate(TABS))
@@ -71,7 +82,7 @@ async def main():
         await swipe(pg, '.tprow[data-tp="ops"]')
         check('左へはらうとタブから外れる（行はその場で OFF）:', 'ops' not in await pg.evaluate(TABS) and await pg.locator('#dTabs .tprow.off [data-tp-on="ops"]').count() == 1 and await pg.evaluate("[...document.querySelectorAll('#dTabs .tprow[data-tp]')].map(r => r.dataset.tp).join(',')") == rows0, rows0)
         u = await pg.inner_text('#dTabs .tpundo'); check('外したら「元に戻す」と行き先（マイページの運用のタイル）:', '「運用」を外しました。マイページの「運用」のタイルから開けます' in u.replace('\n', ''), u)
-        check('タブにないものの行に「マイページのタイルから」:', 'マイページのタイルから' in (await pg.inner_text('#dTabs .tprow.off:has([data-tp-on="ops"])')).replace('\n', ''))
+        check('4/5 のとき OFF の行の補足は「マイページから開けます」の1行:', (await pg.inner_text('#dTabs .tprow.off:has([data-tp-on="ops"]) small')).strip() == 'マイページから開けます' and await pg.evaluate("document.querySelector('#dTabs .tprow.off:has([data-tp-on=\"ops\"]) small').getClientRects().length === 1"))
         check('OFF の行のスイッチは OFF（札と aria-checked）:', await pg.get_attribute('#dTabs [data-tp-on="ops"]', 'aria-checked') == 'false' and (await pg.inner_text('#dTabs [data-tp-on="ops"]')).strip() == 'OFF')
         await pg.screenshot(path=os.path.join(SHOTS, '02-c1-removed.png'))
         await pg.click('#dTabs [data-tp-undo]'); await pg.wait_for_timeout(200)
@@ -125,6 +136,12 @@ async def main():
         check('OFF にしてもその場に残る（行は4つのまま・OFF が2つ・「外したもの」の列はない）:', await pg.locator('#dHomeEd .hepc.sw').count() == 4 and await pg.locator('#dHomeEd .hepc.off [data-he-on]').count() == 2 and await pg.locator('#dHomeEd .hesec').count() == 0)
         check('ホームでも隠れる:', await pg.evaluate("document.querySelector('[data-lo=\"home:event\"]').classList.contains('lo-off')"))
         check('「元に戻す」:', 'イベントのお知らせ」を外しました' in await pg.inner_text('#dHomeEd .heundo'))
+        check('半券と今日の数字は同じ薄い地（濃い塗りでない）:', await pg.evaluate("(() => { const a = [...document.querySelectorAll('#dHomeEd .hepc.fix')].map(e => getComputedStyle(e).backgroundColor); return a.length === 2 && a[0] === a[1] && a[0] !== 'rgb(17, 24, 39)'; })()"))
+        nov = "(() => { const t = document.querySelector('#dHomeEd .heundo').getBoundingClientRect(); return [...document.querySelectorAll('#dHomeEd .hepc, #dHomeEd .losave, #dHomeEd .heres')].every(e => { const r = e.getBoundingClientRect(); return r.bottom <= t.top || r.top >= t.bottom; }); })()"
+        check('844：トーストは見本のすぐ下で、行や文に重ならない（送らないまま）:', await pg.evaluate(nov) and await pg.evaluate("document.querySelector('#dHomeEd .heundo').getBoundingClientRect().bottom <= innerHeight"))
+        await pg.evaluate("$('dHomeEd').scrollTop = 99999"); await pg.wait_for_timeout(100)
+        check('844：いちばん下まで送っても、トーストは下の説明の文に重ならない:', await pg.evaluate(nov))
+        await pg.evaluate("$('dHomeEd').scrollTop = 0")
         await pg.screenshot(path=os.path.join(SHOTS, '04-c2-home.png'))
         await pg.click('#dHomeEd [data-he-undo]'); await pg.wait_for_timeout(200)
         check('元に戻すとイベントが戻る:', await pg.locator('#dHomeEd [data-he-on]').count() == 1)
@@ -153,13 +170,30 @@ async def main():
         await longpress(pg, 'nav.tabs button[data-v="book"]')
         check('667：完了と修行の行が見える:', await pg.locator('#dTabs .tpdone').is_visible() and await pg.evaluate("document.querySelector('.tprow[data-tp=\"sg\"]').getBoundingClientRect().bottom < innerHeight"))
         await pg.click('#dTabs [data-tp-off="ops"]'); await pg.wait_for_timeout(250)
-        ov = await pg.evaluate("""(() => { const t = document.querySelector('#dTabs .tpundo').getBoundingClientRect();
-          const hit = [...document.querySelectorAll('#dTabs .tprow, #dTabs .tpdone, #dTabs [data-tp-on]')].filter(e => { const r = e.getBoundingClientRect(); return r.height && r.bottom > t.top + 1 && r.top < t.bottom - 1 && r.right > t.left && r.left < t.right; });
+        top = await pg.evaluate("""(() => { const d = document.querySelector('#dTabs .tpdone').getBoundingClientRect(), h = document.getElementById('tpTitle').getBoundingClientRect(), l = document.querySelector('#dTabs .tplead').getBoundingClientRect(), sh = document.getElementById('dTabs').getBoundingClientRect();
+          return d.top >= sh.top && h.top >= sh.top && l.top >= sh.top && d.bottom <= innerHeight; })()""")
+        check('667：OFF にしたあとも題・完了・説明文が見える（上に固定）:', top)
+        check('667：押した運用の行も見えている:', await pg.evaluate("""(() => { const r = document.querySelector('#dTabs .tprow[data-tp="ops"]').getBoundingClientRect(), a = document.querySelector('#dTabs .tpscroll').getBoundingClientRect(); return r.top >= a.top - 1 && r.bottom <= a.bottom + 1; })()"""))
+        ov = await pg.evaluate("""(() => { const t = document.querySelector('#dTabs .tpundo').getBoundingClientRect(), a = document.querySelector('#dTabs .tpscroll').getBoundingClientRect();
+          const hit = [...document.querySelectorAll('#dTabs .tprow, #dTabs .tpdone, #dTabs [data-tp-on]')].filter(e => { const r0 = e.getBoundingClientRect(), r = e.closest('.tpscroll') ? { top:Math.max(r0.top, a.top), bottom:Math.min(r0.bottom, a.bottom), left:r0.left, right:r0.right, height:r0.height } : r0; return r.height && r.bottom > t.top + 1 && r.top < t.bottom - 1 && r.right > t.left && r.left < t.right; });
           return { inView: t.bottom <= innerHeight && t.top >= 0, hit: hit.map(e => e.className + ':' + (e.dataset.tp || e.dataset.tpOn || '')) }; })()""")
         check('667：外した直後のトーストが画面の中・行やボタンに重ならない:', ov['inView'] and not ov['hit'], ov)
         await pg.screenshot(path=os.path.join(SHOTS, '07-c1-667.png'))
+        await pg.click('#dTabs [data-tp-undo]'); await pg.wait_for_timeout(200)
+        await pg.click('#dTabs [data-tp-on="stats"]'); await pg.wait_for_timeout(250)
+        sv = await pg.evaluate("""(() => { const s = document.querySelector('#dTabs .tpswap').getBoundingClientRect(), d = document.querySelector('#dTabs .tpdone').getBoundingClientRect(); return s.top >= 0 && s.bottom <= innerHeight && d.top >= 0; })()""")
+        check('667：5/5 で ON にすると入れ替えの質問が見える所（下）に出る・完了も見える:', sv)
+        await pg.screenshot(path=os.path.join(SHOTS, '21-onoff-swap-667.png'))
+        await pg.click('#dTabs [data-tp-swap=""]'); await pg.wait_for_timeout(200)
+        check('やめるとスイッチは OFF のまま:', await pg.get_attribute('#dTabs [data-tp-on="stats"]', 'aria-checked') == 'false' and await pg.locator('#dTabs .tpswap').count() == 0)
         await pg.evaluate("$('dTabs').close(); openHomeEd('screen')"); await pg.wait_for_timeout(200); await pg.click('#dHomeEd [data-he-off="event"]'); await pg.wait_for_timeout(200)
         check('667：ホームに出すもののスイッチが見える:', await pg.locator('#dHomeEd [data-he-on="event"]').is_visible())
+        await pg.click('#dHomeEd [data-he-off="recent"]'); await pg.wait_for_timeout(250)
+        hv = await pg.evaluate("""(() => { const t = document.querySelector('#dHomeEd .heundo').getBoundingClientRect(), r = document.querySelector('#dHomeEd [data-he-on="recent"]').closest('.hepc').getBoundingClientRect(); return r.bottom <= t.top && r.top >= 0; })()""")
+        check('667：いちばん下の行を OFF にしても、その行とトーストが見え、重ならない:', hv and await pg.evaluate("document.querySelector('#dHomeEd .heundo').getBoundingClientRect().bottom <= innerHeight"))
+        await pg.evaluate("$('dHomeEd').scrollTop = 99999"); await pg.wait_for_timeout(100)
+        hv = await pg.evaluate("""(() => { const t = document.querySelector('#dHomeEd .heundo').getBoundingClientRect(); return [...document.querySelectorAll('#dHomeEd .hepc, #dHomeEd .losave, #dHomeEd .heres')].every(e => { const r = e.getBoundingClientRect(); return r.bottom <= t.top || r.top >= t.bottom; }); })()""")
+        check('667：いちばん下まで送ると、トーストは文や行に重ならない:', hv)
         await pg.screenshot(path=os.path.join(SHOTS, '14-c2-667.png'))
         await c.close()
         # 3. エアライン経営のときは長押しで開かない
