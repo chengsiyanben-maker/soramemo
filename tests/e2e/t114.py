@@ -24,7 +24,7 @@ async def main():
     async with async_playwright() as p:
         b = await p.chromium.launch()
         # 1. 新しい人：使い方の案内 → ログイン → 新規登録 → メール → コード → 表示名 → アンケート → 同意 → 位置情報 → ホーム
-        c, pg, errs = await page(b, f"window.__profiles = {NEW};", onboarded=False, shots=True)
+        c, pg, errs = await page(b, f"window.__profiles = {NEW}; window.__viewPrefs = [];", onboarded=False, shots=True)
         check('はじめて開くと使い方の案内', await pg.is_visible('#dGuide'))
         for _ in range(3): await pg.click('#obNext'); await pg.wait_for_timeout(120)
         check('案内のあとにログインの画面', await step(pg) == 'login'); await shot(pg, '01-login')
@@ -53,7 +53,8 @@ async def main():
         await pg.click('#dAuth [data-au=survey-next]'); await pg.wait_for_timeout(300)
         prof = await pg.evaluate('JSON.stringify(__fake.db.user_profiles[0])')
         check('表示名と答えをプロフィールに保存', '"display_name":"そらのたび人"' in prof and '"persona":"spot"' in prof, prof)
-        check('撮る → 撮影の構成（タブの並び）', await pg.evaluate('PERSONA') == 'spot' and await pg.evaluate('loTabs()[0]') == 'ops')
+        check('撮る → 構成は変えず全部乗せのまま（11/8）', await pg.evaluate('PERSONA') == 'all' and await pg.evaluate('loTabs().join()') == 'home,book,log,ops,sg')
+        check('提案を出してよいかをサーバーに聞いた（1回だけ）', await pg.evaluate("!!__fake.db.user_view_prefs[0].suggest_shown_at"))
         check('アンケート → 同意', await step(pg) == 'terms')
         check('チェックを入れるまでボタンは押せない', await pg.is_disabled('#dAuth [data-au=agree]')); await shot(pg, '06-terms')
         await pg.click('#dAuth .agree'); await pg.wait_for_timeout(50)
@@ -64,6 +65,9 @@ async def main():
         check('同意 → 位置情報の説明', await step(pg) == 'location'); await shot(pg, '07-location')
         await pg.click('#dAuth [data-au=loc-allow]'); await pg.wait_for_timeout(800)
         check('位置情報 → ホーム', await step(pg) == 'closed' and await pg.evaluate('currentView()') == 'home')
+        check('答え（撮る）から「これを隠しますか？」', await pg.evaluate("$('dPersona').open") and '飛行機を撮りたい' in await pg.inner_text('#dPersona')); await shot(pg, '07b-hide-suggest')
+        await pg.click('#dPersona [data-hs-no]'); await pg.wait_for_timeout(200)
+        check('全部のまま使う → はじめの1枚', await pg.is_visible('#allinCard') and await pg.evaluate('PERSONA') == 'all')
         check('ようこそカード（表示名つき）', await pg.is_visible('#welcomeCard') and 'そらのたび人' in await pg.inner_text('#welcomeCard'))
         check('ホームの使い方の案内は出ない', not await pg.is_visible('#dGuide'))
         await shot(pg, '08-home')
@@ -71,8 +75,7 @@ async def main():
         await pg.click('#openSettings'); await pg.wait_for_timeout(200)
         check('マイページの名前は表示名', await pg.inner_text('#mpName') == 'そらのたび人')
         check('マイページにアカウント削除の入口', await pg.is_visible('#delAcct'))
-        await pg.click('button[data-persona=shugyo]'); await pg.wait_for_timeout(300)
-        check('マイページで構成を変えるとプロフィールも変わる', await pg.evaluate('__fake.db.user_profiles[0].persona') == 'shugyo')
+        check('マイページに表示の編集の入口（ひな形の選ぶ所はない）', await pg.is_visible('#dSettings .lotile') and await pg.locator('button[data-persona]').count() == 0)
         check('新しい人：エラーなし', not errs, errs); await c.close()
 
         # 2. 登録済みのメールで新規登録 → ログインへ案内（新しく作らない）

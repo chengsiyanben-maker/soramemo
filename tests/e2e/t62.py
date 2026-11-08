@@ -34,16 +34,16 @@ async def main():
         c = await ctx(b); pg = await page(c, errs)
         check('はじめは気軽に（ホーム・図鑑・フライトの3つのタブ）:', await pg.evaluate(TABS) == 'home,book,log' and await pg.is_hidden('#personaCard'))
         # 撮影
-        await pg.evaluate("$('dSettings').showModal()"); await pg.click('[data-persona="spot"]'); await pg.wait_for_timeout(1200)
+        await pg.evaluate("setPersona('spot', 'test')"); await pg.wait_for_timeout(1200)   # 11/8 からマイページでひな形は選ばない（前からの人の構成はそのまま動く）
         check('撮影：タブ:', await pg.evaluate(TABS) == 'ops,home,book,log')
         check('撮影：運用から・撮る人:', await pg.evaluate("currentView()") == 'ops' and await pg.evaluate("VIEW.ops") == 'photo')
-        check('撮影：成績はマイページから:', '成績を開く' in (await pg.inner_text('#personaMore')))
+        await pg.evaluate("renderPersonaSettings()"); check('撮影：成績はマイページから:', await pg.locator('#personaMore [data-persona-open="stats"]').count() == 1)
         await pg.evaluate("goTab('home')"); await pg.wait_for_timeout(1200)
         t = await pg.inner_text('#personaCard')
         check('撮影：ホームのカード:', '羽田' in t and 'NH212' in t and 'A359' in t and 'BC101' not in t)
         await pg.locator('#homeSheet .sbody').screenshot(path=os.path.join(WORK, 't62_spot.png'))
         # 修行
-        await pg.evaluate("$('dSettings').showModal()"); await pg.click('[data-persona="shugyo"]'); await pg.wait_for_timeout(800)
+        await pg.evaluate("setPersona('shugyo', 'test')"); await pg.wait_for_timeout(800)
         check('修行：タブ:', await pg.evaluate(TABS) == 'home,sg,log,stats' and await pg.evaluate("VIEW.log") == 'sg')
         t = await pg.inner_text('#personaCard')
         check('修行：ホームのカード:', 'PP' in t or 'FOP' in t)
