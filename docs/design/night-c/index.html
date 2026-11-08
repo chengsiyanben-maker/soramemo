@@ -1,0 +1,24 @@
+<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>夜の画面｜そらメモ 画面案</title>
+<style>*{box-sizing:border-box}body{margin:0;background:#05080D;color:#D3DBE4;font:15px/1.7 "Hiragino Sans","Noto Sans CJK JP",sans-serif}
+main{max-width:1180px;margin:0 auto;padding:24px 16px 60px}h1{font-size:26px;color:#E6ECF2;margin:0}h2{font-size:18px;color:#E6ECF2;margin:32px 0 10px}
+p,li{color:#B7C2CE}.note{background:#0D131B;border-radius:16px;box-shadow:inset 0 0 0 1px #232E3B;padding:14px 18px}
+.g{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px}
+.c{display:block;text-decoration:none;color:#D3DBE4;background:#0D131B;border-radius:16px;box-shadow:inset 0 0 0 1px #232E3B;padding:10px}
+.c img{width:100%;border-radius:10px;display:block}.c b{display:block;margin-top:8px;color:#E6ECF2}.c span{font-size:13px;color:#93A0B0}
+.sw{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}.s{background:#0D131B;border-radius:12px;box-shadow:inset 0 0 0 1px #232E3B;padding:10px}
+.s i{display:block;height:36px;border-radius:8px;box-shadow:inset 0 0 0 1px #3A4654}.s b{display:block;font-family:ui-monospace,monospace;margin-top:6px;color:#E6ECF2}.s span{font-size:13px;color:#93A0B0}
+a{color:#5EDB94}</style></head><body><main>
+<h1>夜の画面（画面案・3つ目の回・比べる用）</h1><p>本命は design/night（PR #49）。同じ指示を3つの回が同時に作ったうちの1つ。</p>
+<p>11/8 23時の本人の決定：決まりなしの実験の案B「夜の操縦席」を、夜だけのアプリ全体の見た目にする。いる場所の日の入り〜日の出は自動で夜、マイページで「自動／いつも昼／いつも夜」。1月の公開に入れる。アプリのコードは変えていない。</p>
+<div class="note"><b>案B から直したこと</b><ul>
+<li>本文・見出し・ボタンの字はふだんのゴシック体。等幅の計器の字は<b>数字だけ</b>、光らせる（うっすら光の影）のも数字だけ</li>
+<li>光る色は<b>緑と琥珀の2つ</b>（案B は4色）。緑＝計器の数字・選んでいるもの・実績・特別塗装機、琥珀＝押してほしい所・判定範囲・予定・閉まる時刻</li>
+<li>字と地の差はどれも 4.5:1 以上。本文は真っ白にしない（#D3DBE4）。広い明るい面・塗りつぶしの明るいボタンを置かない</li>
+<li>画面の組み立て（ホームは地図とシート・マイページはタイル・タブ5つ・見方の帯）は昼と同じ。出発案内板風は昼と同じ2か所（近い空港のコード・最近の印）だけ</li>
+<li>形は今の決まり（角丸のカード・ピルのボタン）に戻した。黒の上では影が見えないので、影のかわりに1px の内側のふち</li></ul></div>
+<h2>画面（幅390）</h2><div class="g"><a class="c" href="N1-home.html"><img src="png/N1-home.png" alt="N1 ホーム" loading="lazy"><b>N1 ホーム</b><span>地図とシート・夜の航空図・距離の輪</span></a><a class="c" href="N1b-home-switched.html"><img src="png/N1b-home-switched.png" alt="N1b 自動で夜になった直後" loading="lazy"><b>N1b 自動で夜になった直後</b><span>日の入りを過ぎたとき1回だけの知らせ</span></a><a class="c" href="N2-zukan.html"><img src="png/N2-zukan.png" alt="N2 図鑑" loading="lazy"><b>N2 図鑑</b><span>特別塗装機だけ・集めた＝緑</span></a><a class="c" href="N3-flight.html"><img src="png/N3-flight.png" alt="N3 フライト" loading="lazy"><b>N3 フライト</b><span>見方の帯・会社の色は細い線だけ</span></a><a class="c" href="N4-ops.html"><img src="png/N4-ops.png" alt="N4 運用" loading="lazy"><b>N4 運用</b><span>滑走路・使っている向きは緑・閉まる時刻は琥珀</span></a><a class="c" href="N4b-ops-photo.html"><img src="png/N4b-ops-photo.png" alt="N4b 運用・撮る人の見方" loading="lazy"><b>N4b 運用・撮る人の見方</b><span>つぎに来る注目の機体・撮影条件・撮影地</span></a><a class="c" href="N5-shugyo.html"><img src="png/N5-shugyo.png" alt="N5 修行" loading="lazy"><b>N5 修行</b><span>実績＝緑・予定＝琥珀の縞</span></a><a class="c" href="N6-mypage.html"><img src="png/N6-mypage.png" alt="N6 マイページ" loading="lazy"><b>N6 マイページ</b><span>タイル＋「画面の明るさ」の行</span></a><a class="c" href="N7-tab-pick.html"><img src="png/N7-tab-pick.png" alt="N7 タブを選ぶ" loading="lazy"><b>N7 タブを選ぶ</b><span>C1-v2 を夜の色で</span></a><a class="c" href="N8-login.html"><img src="png/N8-login.png" alt="N8 ログイン" loading="lazy"><b>N8 ログイン</b><span>確認コード6けた・押すのは琥珀のふち</span></a><a class="c" href="N9-theme.html"><img src="png/N9-theme.png" alt="N9 画面の明るさ" loading="lazy"><b>N9 画面の明るさ</b><span>自動／いつも昼／いつも夜</span></a></div>
+<h2>色（くわしくは tokens.md・そのまま使える CSS は tokens.css）</h2><div class="sw"><div class="s"><i style="background:#05080D"></i><b>#05080D</b><span>地 --n-bg</span></div><div class="s"><i style="background:#0D131B"></i><b>#0D131B</b><span>カード --n-panel</span></div><div class="s"><i style="background:#141C26"></i><b>#141C26</b><span>ボタン --n-panel2</span></div><div class="s"><i style="background:#232E3B"></i><b>#232E3B</b><span>ふち --n-bezel</span></div><div class="s"><i style="background:#D3DBE4"></i><b>#D3DBE4</b><span>本文 --n-ink</span></div><div class="s"><i style="background:#93A0B0"></i><b>#93A0B0</b><span>補足 --n-sub</span></div><div class="s"><i style="background:#5EDB94"></i><b>#5EDB94</b><span>光る色1 緑 --n-g</span></div><div class="s"><i style="background:#F0AE4E"></i><b>#F0AE4E</b><span>光る色2 琥珀 --n-a</span></div></div>
+<h2>測った値</h2><div class="note">幅390・高さ844と667 の11画面：13px 未満の字 0／字と地の差 4.5:1 未満 0／押せる所 44px 未満 0／横のはみ出し 0。<br>タブ帯と重なる字は、844 ではホーム・図鑑など10画面で 0（撮る人の見方はいちばん下の撮影地と注意書きが帯の下に入る＝送って見る所）。667 では一覧の続きが帯の下に入る（送って見る）。</div>
+<p style="font-size:13px;color:#93A0B0">各画面の HTML の下に黄色のメモ（本番には出ません）。機体の名前・FOP・時刻・展望デッキの時間は見本。非公式アプリ。</p>
+</main></body></html>

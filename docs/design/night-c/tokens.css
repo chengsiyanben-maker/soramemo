@@ -1,0 +1,72 @@
+/* そらメモ 夜の画面の色（画面案 design/night）
+   使い方：アプリの CSS のいちばん最後に読み込み、夜のときだけ <html data-night="1"> を付ける。
+   :not(#_) は、今の [data-palette=board][data-focus=JAL] などより強くするためのもの（中身は変えない）。
+   光る色は 緑（--n-g）と 琥珀（--n-a）の2つだけ。光らせる（text-shadow）のは数字だけ。 */
+
+:root[data-night="1"]:not(#_){
+  /* ── 夜の画面の元の色（新しく足す変数） ── */
+  --n-bg:#05080D;        /* 画面の地 */
+  --n-panel:#0D131B;     /* カード（計器の枠） */
+  --n-panel2:#141C26;    /* 押しボタン・入力欄・シート */
+  --n-bezel:#232E3B;     /* 枠のふち（1px・内側） */
+  --n-ink:#D3DBE4;       /* 本文（真っ白にしない） */
+  --n-strong:#E6ECF2;    /* 見出し */
+  --n-sub:#93A0B0;       /* 補足・単位 */
+  --n-g:#5EDB94;         /* 光る色1 緑：計器の数字・いま選んでいるもの・実績 */
+  --n-a:#F0AE4E;         /* 光る色2 琥珀：押してほしい所・判定範囲・予定・注意 */
+  --n-a-wash:#1D1810;    /* 琥珀の薄い地 */
+  --n-jal:#E37A86;       /* 会社の印（光らせない・細い線だけ） */
+  --n-ana:#86A8E6;
+  --n-stop:#E37A86;      /* 欠航（字と一緒にだけ使う） */
+  --n-glow:0 0 7px rgba(94,219,148,.32);   /* 数字の光り */
+  --n-glow-a:0 0 7px rgba(240,174,78,.30);
+  --n-frame:inset 0 0 0 1px var(--n-bezel);
+  --n-key:linear-gradient(#18212C,#10171F);
+  --num:ui-monospace,"SF Mono","Menlo","Roboto Mono","DejaVu Sans Mono",monospace;
+
+  /* ── 今の変数に重ねる（web/index.html の :root と同じ名前） ── */
+  --sky:var(--n-bg); --paper:var(--n-panel); --ink:var(--n-ink); --sumi:var(--n-sub);
+  --line:var(--n-bezel); --hero:var(--n-panel);
+  --shu:var(--n-a); --shu-text:var(--n-a); --shu-wash:var(--n-a-wash); --on-shu:var(--n-bg);
+  --gold:var(--n-a); --gold-text:var(--n-a); --gold-badge:var(--n-a); --on-gold:var(--n-bg);
+  --dot:#3A4654; --go:var(--n-g); --stop:var(--n-stop);
+  --mil:#93A0B0; --glider:#93A0B0; --field:#93A0B0; --secret:#93A0B0;
+  --jal:var(--n-jal); --ana:var(--n-ana);
+
+  --h3-bg:var(--n-bg); --h3-card:var(--n-panel); --h3-strong:var(--n-strong); --h3-ink:var(--n-ink);
+  --h3-sub:var(--n-sub); --h3-mute:var(--n-sub); --h3-pill:rgba(255,255,255,.06);
+  --h3-hero:var(--n-panel); --h3-hero-sub:var(--n-sub); --h3-ok:var(--n-g);
+  --h3-off-bg:var(--n-panel2); --h3-off-ink:#B7C2CE; --h3-shadow:var(--n-frame);
+
+  --hm-ink:var(--n-ink); --hm-sub:var(--n-sub); --hm-mute:var(--n-sub); --hm-card:var(--n-panel);
+  --hm-tint:var(--n-panel2); --hm-pill:rgba(255,255,255,.06); --hm-shadow:var(--n-frame);
+
+  --a-bg:var(--n-bg); --a-card:var(--n-panel); --a-ink:var(--n-ink); --a-strong:var(--n-strong);
+  --a-sub:var(--n-sub); --a-mute:var(--n-sub); --a-track:var(--n-panel2); --a-wash:var(--n-panel2);
+  --a-pill:rgba(255,255,255,.06); --a-shadow:var(--n-frame); --a-jal:var(--n-jal); --a-ana:var(--n-ana);
+  --a-cta:var(--n-panel2); --a-cta-text:var(--n-a);
+
+  --bk-card:var(--n-panel); --bk-ink:var(--n-ink); --bk-sub:var(--n-sub); --bk-mute:var(--n-sub);
+  --bk-pill:var(--n-panel2); --bk-track:var(--n-panel2); --bk-shadow:var(--n-frame);
+
+  /* 押してほしいボタン：塗りつぶさず、暗い地に琥珀の字と枠（まぶしくしない） */
+  --cta-hi:#18212C; --cta-lo:#10171F; --cta-text:var(--n-a); --cta-glow:transparent;
+  --cta-ring:rgba(240,174,78,.9); --cta-ring2:transparent;
+
+  /* タブ帯：選んでいるタブは緑 */
+  --nav-acc:var(--n-g); --nav-glass:rgba(5,8,13,.94); --nav-edge:var(--n-bezel);
+  --nav-ink:var(--n-sub); --nav-on:var(--n-g); --nav-shadow:none;
+  --gamebar:#05080D; --gamebar-line:var(--n-bezel);
+
+  /* 半券（範囲に入ったら引く所） */
+  --stub:var(--n-a-wash); --stub-text:var(--n-a); --stub-sub:#CDB58C; --stub-hi:var(--n-a);
+
+  /* 航空図風の地図（夜の航空図） */
+  --c-bg:#070C12; --c-land:#0C1219; --c-coast:#2C3846; --c-apt:var(--n-g);
+  --chart-bg:#070C12; --chart-land:#0C1219; --chart-coast:#2C3846; --chart-apt:var(--n-g);
+  --chart-route:var(--n-a); --chart-off:#3A4654; --chart-grid:rgba(147,160,176,.07);
+  --strip-arr:var(--n-panel); --strip-dep:var(--n-sub);
+
+  --av-hi:var(--n-a); --av-lo:#9A6A22;
+  color-scheme:dark;
+}
