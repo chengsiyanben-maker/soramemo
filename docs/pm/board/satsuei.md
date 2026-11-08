@@ -13,6 +13,7 @@
 - 機体図鑑は特別塗装機だけ。予想は「予想」と出し、保証しない
 
 ## いま持っている仕事
+- 決まりなしの案（11/8 20時15分の PM の指示・済み）：ブランチ design/no-rules-1108 の docs/design/no-rules-1108/ideas-satsuei.md。撮る人の目で14案と前の8案への一言。おすすめは 2 真昼の高コントラスト・3 夜の赤い画面・8 巨大カウントダウン、撮る人らしさは 4 横から見た進入・6 画角の扇。入れるかは本人
 - E（撮影記録）の仕様（11/6 定時の回）：ブランチ satsuei/photo-log-spec、下書き PR #24、仕様 docs/pm/spec-photo-log.md、報告 docs/pm/report-photo-log-spec.md。コードの変更なし
   - 候補の元：36時間より前は airport_tracks_all＋reg_legs、36時間以内は track_points＋reg_legs（airport_tracks_all は毎晩作られるため）。31日より前は断る（cold_done で外へ移るため）。14空港だけ
   - photo_log は auth.users を on delete cascade で参照（退会で消える）、本人だけ読む・足す・消す、update なし
