@@ -5056,7 +5056,7 @@ function tpHTML(){
       <li class="tprow lock"><span class="tpn">1</span><span class="tpi">${tpIcon("home")}</span><b>ホーム</b><span class="tplk">いつも</span></li>
       ${rest.map(row).join("")}</ol>
     ${swap}
-    ${away.length ? `<h4 class="tpsec">タブにないもの</h4><ul class="tplist tpaway">${away.map(v => `<li class="tprow away"><span class="tpi">${tpIcon(v)}</span><b>${TAB_NAME[v]}<small>${TP_SUB[v]}・<span class="tpmp">マイページから</span></small></b>
+    ${away.length ? `<h4 class="tpsec">タブにないもの</h4><ul class="tplist tpaway">${away.map(v => `<li class="tprow away"><span class="tpi">${tpIcon(v)}</span><b>${TAB_NAME[v]}<small>${TP_SUB[v]}・<span class="tpmp">マイページのタイルから</span></small></b>
         <button type="button" class="heon tpadd" data-tp-on="${v}" aria-label="${TAB_NAME[v]}をタブに出す${full ? `（${LO_TAB_MAX}つまでなので入れ替えます）` : ""}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>出す</button></li>`).join("")}</ul>` : ""}
     <div class="tpmore"><button type="button" class="lotext" data-he-open>ホームに出すもの ›</button><button type="button" class="lotext" data-tp-reset${loAllOn() ? " disabled" : ""}>全部乗せに戻す</button></div>
     ${undo}<p class="hsl tpnow">いまのタブ帯</p><div class="tpbar">${tpMini(tabs)}</div>`;
@@ -5070,7 +5070,9 @@ function openTabPicker(from){
   const h = $("tpTitle"); if(h){ h.tabIndex = -1; h.style.outline = "none"; h.focus(); }
 }
 // 外した直後に行き先を言う（改善担当 review-c1 の2）。いま開いていた画面なら、ホームへ移ったことも言う
-const tpOffText = v => currentView() === v ? `「${TAB_NAME[v]}」を外してホームへ移りました。マイページから開けます` : `「${TAB_NAME[v]}」を外しました。マイページから開けます`;
+// 行き先は「マイページの『○○』のタイル」と場所まで言う（PM 11/8 22時45分）
+const tpWhere = v => `マイページの「${TAB_NAME[v]}」のタイルから開けます`;
+const tpOffText = v => currentView() === v ? `「${TAB_NAME[v]}」を外してホームへ移りました。${tpWhere(v)}` : `「${TAB_NAME[v]}」を外しました。${tpWhere(v)}`;
 // タブを変える（ホームはいつも1番目・2〜5つ）。変えたら保存して画面に当てる
 function tpSet(list, what, text){
   const snap = loSnap(), t = ["home", ...list.filter(v => v !== "home" && TAB_ALL.includes(v))];
@@ -5147,7 +5149,7 @@ document.addEventListener("click", e => {
     if(t.length >= LO_TAB_MAX){ TP.swap = v; TP.msg = ""; tpRender(); return; }
     tpSet([...t, v], "tab_" + v + "_on", `「${TAB_NAME[v]}」をタブに出しました`); return; }
   if((b = q("[data-tp-swap]"))){ const out = b.dataset.tpSwap, v = TP.swap; if(!out || !v){ TP.swap = null; tpRender(); return; }
-    tpSet(loTabs().map(x => x === out ? v : x), "tab_swap", `「${TAB_NAME[v]}」を出しました。「${TAB_NAME[out]}」はマイページから開けます`); return; }
+    tpSet(loTabs().map(x => x === out ? v : x), "tab_swap", `「${TAB_NAME[v]}」を出しました。「${TAB_NAME[out]}」は${tpWhere(out)}`); return; }
   if((b = q("[data-he-all]"))){ if(b.disabled) return; const snap = loSnap(), L = loEdit(), n = (L.off.home || []).length; if(!n) return;
     delete L.off.home; loChanged("blk_home_all"); HE.undo = { text:`${n}こをホームに戻しました`, snap }; heRender(); return; }
   if((b = q("[data-he-off]"))){ heSet(b.dataset.heOff, true); return; }
