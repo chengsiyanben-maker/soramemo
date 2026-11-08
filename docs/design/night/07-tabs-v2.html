@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="ja" data-night="on"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>タブを選ぶ（夜・2版）｜そらメモ 夜の画面（2版）</title>
+<style>:root{
+  --n-bg:#05070B; --n-panel:#0D1218; --n-panel-2:#141B24; --n-ring:rgba(150,170,195,.10);
+  --n-ink:#BCC6D1; --n-strong:#DCE3EA; --n-sub:#8996A7; --n-mute:#7D8A9B;
+  --n-sel-ring:rgba(220,227,234,.72);  /* 2版：選んでいるピル・主でないボタンの細い縁（色は使わない） */
+  --n-glow-1:#5FD993;   /* 光る色1 緑：主役の数字 */
+  --n-glow-2:#F0AC4E;   /* 光る色2 琥珀：「いま・次」だけ（いまの場所・いちばん近い時刻）と、主ボタンの字と縁 */
+  --n-glow-1-halo:0 0 6px rgba(95,217,147,.45); --n-glow-2-halo:0 0 6px rgba(240,172,78,.40);
+  --n-sea:#060A0F; --n-land:#0F151C; --n-coast:#2B3746; --n-ring-map:#2A3646;
+  --n-shadow:0 14px 30px -18px rgba(0,0,0,.9),inset 0 0 0 1px var(--n-ring);
+  --n-num:ui-monospace,"SF Mono","Menlo","Roboto Mono","DejaVu Sans Mono",monospace;
+}
+:root{--gothic:"Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic UI","Yu Gothic","Meiryo","Noto Sans JP","Noto Sans CJK JP",system-ui,sans-serif;--sign:"Barlow Condensed","Arial Narrow",var(--gothic);color-scheme:dark}
+*{box-sizing:border-box}html,body{margin:0}
+body{background:var(--n-bg);color:var(--n-ink);font-family:var(--gothic);font-size:15px;line-height:1.6;-webkit-text-size-adjust:100%}
+.phone{position:relative;max-width:420px;min-height:100vh;min-height:100svh;margin:0 auto;overflow:hidden;background:var(--n-bg)}
+.wrap{padding:14px 16px 132px}
+.card{background:var(--n-panel);border-radius:20px;box-shadow:var(--n-shadow)}
+.lab{font-size:13px;font-weight:700;color:var(--n-sub)}
+.num{font-family:var(--n-num);font-variant-numeric:tabular-nums;font-weight:700;color:var(--n-strong);line-height:1.1;letter-spacing:-.02em}
+.lit{color:var(--n-glow-1);text-shadow:var(--n-glow-1-halo)}
+.here{color:var(--n-glow-2);text-shadow:var(--n-glow-2-halo)}
+.u{font-family:var(--gothic);font-size:12px;font-weight:600;color:var(--n-mute);margin-left:4px;letter-spacing:0;text-shadow:none}
+.code{font-family:var(--sign);font-weight:700;letter-spacing:.04em;color:var(--n-strong)}
+h1.t{font-size:24px;line-height:1.3;color:var(--n-strong);margin:16px 4px 0}
+.grp-h{font-size:13px;font-weight:700;color:var(--n-sub);margin:22px 6px 0}
+.note{font-size:13px;color:var(--n-sub);margin:10px 4px 0;line-height:1.6}
+.bar{display:flex;align-items:center;gap:8px;justify-content:space-between}
+.back,.pill{height:44px;display:inline-flex;align-items:center;gap:6px;font-size:14px;font-weight:700;color:var(--n-strong);background:var(--n-panel);box-shadow:var(--n-shadow);border-radius:999px;padding:0 16px;flex:none}
+/* 2版：選んでいるピルは色を使わず、強い字＋細い縁。選んでいないピルは地を抜いて補足の字 */
+.pill.on{background:var(--n-panel-2);color:var(--n-strong);box-shadow:inset 0 0 0 1.5px var(--n-sel-ring)}
+.pill.ghost{background:transparent;box-shadow:inset 0 0 0 1px rgba(150,170,195,.16);color:var(--n-sub)}
+.band{display:flex;gap:6px;overflow:hidden;margin:14px -16px 0;padding:0 16px}
+svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.tabs{position:fixed;left:50%;transform:translateX(-50%);bottom:14px;width:calc(min(420px,100vw) - 28px);height:64px;border-radius:999px;background:rgba(13,18,24,.94);box-shadow:0 10px 30px -6px rgba(0,0,0,.8),inset 0 0 0 1px var(--n-ring);display:flex;padding:0 8px;z-index:30}
+.tabs b{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;font-size:13px;font-weight:700;color:var(--n-sub);position:relative}
+/* 2版：いまのタブも色を使わない（強い字＋下の小さな点。昼の青い点と同じ位置） */
+.tabs b.on{color:var(--n-strong)}
+.tabs b.on::after{content:"";position:absolute;bottom:5px;width:5px;height:5px;border-radius:50%;background:var(--n-strong)}
+.tabs svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.tabs.edit{box-shadow:0 10px 30px -6px rgba(0,0,0,.8),inset 0 0 0 2px var(--n-sel-ring)}
+.row{display:flex;align-items:center;gap:12px;min-height:56px;padding:8px 16px}
+.row+.row{box-shadow:0 -1px 0 rgba(150,170,195,.06)}
+.row .tx{flex:1;min-width:0}.row .tx b{display:block;color:var(--n-strong);font-size:15px;line-height:1.4}.row .tx small{display:block;color:var(--n-sub);font-size:13px;line-height:1.5}
+.ar{color:var(--n-sub);font-size:18px;font-weight:700}
+.dim{position:fixed;inset:0;background:rgba(0,0,0,.62);z-index:50}
+.sheet{position:fixed;left:50%;transform:translateX(-50%);bottom:0;width:min(420px,100vw);background:var(--n-panel);border-radius:28px 28px 0 0;box-shadow:0 -10px 40px -10px rgba(0,0,0,.9),inset 0 1px 0 var(--n-ring);z-index:60;padding:10px 16px 28px}
+.grab{width:40px;height:5px;border-radius:3px;background:#2E3946;margin:2px auto 10px}
+/* 2版：主ボタンは塗らず、地に琥珀の字と縁（まぶしい面をなくす）。ふつうのボタンは強い字と薄い縁 */
+.btn{height:52px;border-radius:999px;display:flex;align-items:center;justify-content:center;gap:8px;font-size:16px;font-weight:800}
+.btn.pri{background:var(--n-panel-2);color:var(--n-glow-2);box-shadow:inset 0 0 0 1.5px var(--n-glow-2)}
+.btn.sec{background:var(--n-panel-2);color:var(--n-strong);box-shadow:inset 0 0 0 1px rgba(150,170,195,.22)}
+.ann{position:relative;z-index:40;max-width:392px;margin:16px auto 120px;font:13px/1.7 var(--gothic);background:#FFF8D6;color:#5A4A12;padding:12px 14px;border-radius:16px}
+.ann b{display:block}.ann ul{margin:4px 0 0;padding-left:1.2em}
+.foot{font-size:13px;color:var(--n-sub);margin:18px 6px 0}
+
+.lead2{font-size:14px;color:var(--n-ink);margin:8px 2px 0}
+.cap{display:flex;align-items:baseline;justify-content:space-between;margin:16px 2px 8px}.cap b{font-size:14px;color:var(--n-strong)}
+.cap .num{font-size:20px}
+.ts{display:flex;align-items:center;gap:10px;height:56px;border-radius:18px;background:var(--n-panel-2);padding:0 6px 0 14px;margin-top:8px}
+.ts .n{width:18px;font-family:var(--n-num);font-weight:700;font-size:18px;color:var(--n-sub);text-align:center}
+.ts .ii{width:36px;height:36px;border-radius:999px;background:#1D2631;display:grid;place-items:center;color:var(--n-strong)}
+.ts .ii svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.ts b{flex:1;font-size:15px;color:var(--n-strong)}.ts b small{display:block;font-size:13px;font-weight:500;color:var(--n-sub);line-height:1.4}
+.ts .lockt{font-size:13px;font-weight:700;color:var(--n-sub);padding-right:12px}
+.ts .h,.ts .mb{width:44px;height:44px;display:grid;place-items:center;color:var(--n-sub)}
+.ts .h svg{width:20px;height:20px;stroke:currentColor;stroke-width:2;fill:none;stroke-linecap:round}
+.ts .mb i{width:28px;height:28px;border-radius:999px;box-shadow:inset 0 0 0 1.5px #7D8A9B;display:grid;place-items:center;font-style:normal;font-size:18px;font-weight:700;color:var(--n-strong)}
+.ts.out2{background:transparent;box-shadow:inset 0 0 0 1.5px #232D39;height:64px}
+.addb{height:44px;display:inline-flex;align-items:center;gap:4px;padding:0 14px;border-radius:999px;box-shadow:inset 0 0 0 1.5px var(--n-sel-ring);font-size:14px;font-weight:800;color:var(--n-strong)}
+.wbtn{margin-top:14px;height:52px;border-radius:999px;background:var(--n-panel-2);box-shadow:inset 0 0 0 1px rgba(150,170,195,.22);display:flex;align-items:center;justify-content:center;gap:8px;font-size:16px;font-weight:800;color:var(--n-strong)}
+.wsub{text-align:center;font-size:13px;color:var(--n-sub);margin:6px 0 0}
+.done{height:44px;display:inline-flex;align-items:center;padding:0 18px;border-radius:999px;background:var(--n-panel-2);box-shadow:inset 0 0 0 1px rgba(150,170,195,.22);font-size:15px;font-weight:800;color:var(--n-strong)}
+</style></head><body>
+<main class="phone"><div class="wrap" style="height:100vh"></div><nav class="tabs edit" aria-label="画面の切り替え"><b class="on"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11l8-6 8 6v8a1 1 0 0 1-1 1h-4v-5H9v5H5a1 1 0 0 1-1-1z"/></svg>ホーム</b><b class=""><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h6v14H4zM14 5h6v14h-6z"/></svg>図鑑</b><b class=""><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 14l7-2 4-7 2 1-2 6 5 1 2-2h1l-1 4-14 1z"/></svg>フライト</b><b class=""><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 21l1.5-9h3L15 21"/><path d="M7 8h10l-1.5 4h-7Z"/><path d="M12 8V4"/></svg>運用</b><b class=""><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="14" r="6"/><path d="M12 11v3l2 1M10 3h4"/></svg>修行</b></nav></main><div class="dim"></div><div class="sheet" style="padding-bottom:100px;max-height:calc(100svh - 60px);overflow:auto"><div class="grab"></div><div class="bar"><h3 style="margin:0;font-size:22px;color:var(--n-strong)">タブを選ぶ</h3><span class="done">完了</span></div><p class="lead2">≡ で並べ替え、− でタブから外します。</p><div class="cap"><b>タブ</b><span><span class="num lit">5</span><span class="u">/ 5</span></span></div><div class="ts"><span class="n">1</span><span class="ii"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11l8-6 8 6v8a1 1 0 0 1-1 1h-4v-5H9v5H5a1 1 0 0 1-1-1z"/></svg></span><b>ホーム</b><span class="lockt">いつも</span></div><div class="ts"><span class="n">2</span><span class="ii"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h6v14H4zM14 5h6v14h-6z"/></svg></span><b>図鑑</b><span class="h" aria-label="図鑑を並べ替え"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 10h12M6 14h12"/></svg></span><span class="mb" aria-label="図鑑をタブから外す"><i>−</i></span></div><div class="ts"><span class="n">3</span><span class="ii"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 14l7-2 4-7 2 1-2 6 5 1 2-2h1l-1 4-14 1z"/></svg></span><b>フライト</b><span class="h" aria-label="フライトを並べ替え"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 10h12M6 14h12"/></svg></span><span class="mb" aria-label="フライトをタブから外す"><i>−</i></span></div><div class="ts"><span class="n">4</span><span class="ii"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 21l1.5-9h3L15 21"/><path d="M7 8h10l-1.5 4h-7Z"/><path d="M12 8V4"/></svg></span><b>運用</b><span class="h" aria-label="運用を並べ替え"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 10h12M6 14h12"/></svg></span><span class="mb" aria-label="運用をタブから外す"><i>−</i></span></div><div class="ts"><span class="n">5</span><span class="ii"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="14" r="6"/><path d="M12 11v3l2 1M10 3h4"/></svg></span><b>修行</b><span class="h" aria-label="修行を並べ替え"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 10h12M6 14h12"/></svg></span><span class="mb" aria-label="修行をタブから外す"><i>−</i></span></div><div class="cap"><b>タブにないもの</b></div><div class="ts out2"><span class="n"></span><span class="ii"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 19V11M10 19V7M14 19v-6M18 19V9"/></svg></span><b>成績<small>マイページから開けます</small></b><span class="addb">＋ 出す</span></div><div class="wbtn">↺ 全部乗せに戻す</div><p class="wsub">タブ・見方・ホームを全部出します</p></div><style>.dim~.sheet{z-index:60}.tabs{z-index:70}</style>
+<aside class="ann"><b>メモ（本番には出ません）</b><ul><li><b>2版（review-1 の 2）</b>：昼の 2版（all-in-tabs の C1-v2）と同じ部品のまま、色だけ夜にした。外すのは丸い「−」、戻すのは「＋ 出す」、≡ で並べ替え。夜だけの入／切はやめた</li><li>ホームの行は「−」を出さず「いつも」の札だけ（昼と同じ）</li><li>編集中の下のタブ帯の縁は、昼の金の縁の代わりに強い字の色の細い縁（琥珀は「いま・次」だけなので使わない）</li><li>光るのは「5 / 5」の 5 だけ</li></ul></aside>
+<script>if(window!==window.top){var a=document.querySelector('.ann');if(a)a.remove()}</script>
+</body></html>

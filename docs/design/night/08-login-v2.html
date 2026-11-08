@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="ja" data-night="on"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>ログイン（夜・2版）｜そらメモ 夜の画面（2版）</title>
+<style>:root{
+  --n-bg:#05070B; --n-panel:#0D1218; --n-panel-2:#141B24; --n-ring:rgba(150,170,195,.10);
+  --n-ink:#BCC6D1; --n-strong:#DCE3EA; --n-sub:#8996A7; --n-mute:#7D8A9B;
+  --n-sel-ring:rgba(220,227,234,.72);  /* 2版：選んでいるピル・主でないボタンの細い縁（色は使わない） */
+  --n-glow-1:#5FD993;   /* 光る色1 緑：主役の数字 */
+  --n-glow-2:#F0AC4E;   /* 光る色2 琥珀：「いま・次」だけ（いまの場所・いちばん近い時刻）と、主ボタンの字と縁 */
+  --n-glow-1-halo:0 0 6px rgba(95,217,147,.45); --n-glow-2-halo:0 0 6px rgba(240,172,78,.40);
+  --n-sea:#060A0F; --n-land:#0F151C; --n-coast:#2B3746; --n-ring-map:#2A3646;
+  --n-shadow:0 14px 30px -18px rgba(0,0,0,.9),inset 0 0 0 1px var(--n-ring);
+  --n-num:ui-monospace,"SF Mono","Menlo","Roboto Mono","DejaVu Sans Mono",monospace;
+}
+:root{--gothic:"Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic UI","Yu Gothic","Meiryo","Noto Sans JP","Noto Sans CJK JP",system-ui,sans-serif;--sign:"Barlow Condensed","Arial Narrow",var(--gothic);color-scheme:dark}
+*{box-sizing:border-box}html,body{margin:0}
+body{background:var(--n-bg);color:var(--n-ink);font-family:var(--gothic);font-size:15px;line-height:1.6;-webkit-text-size-adjust:100%}
+.phone{position:relative;max-width:420px;min-height:100vh;min-height:100svh;margin:0 auto;overflow:hidden;background:var(--n-bg)}
+.wrap{padding:14px 16px 132px}
+.card{background:var(--n-panel);border-radius:20px;box-shadow:var(--n-shadow)}
+.lab{font-size:13px;font-weight:700;color:var(--n-sub)}
+.num{font-family:var(--n-num);font-variant-numeric:tabular-nums;font-weight:700;color:var(--n-strong);line-height:1.1;letter-spacing:-.02em}
+.lit{color:var(--n-glow-1);text-shadow:var(--n-glow-1-halo)}
+.here{color:var(--n-glow-2);text-shadow:var(--n-glow-2-halo)}
+.u{font-family:var(--gothic);font-size:12px;font-weight:600;color:var(--n-mute);margin-left:4px;letter-spacing:0;text-shadow:none}
+.code{font-family:var(--sign);font-weight:700;letter-spacing:.04em;color:var(--n-strong)}
+h1.t{font-size:24px;line-height:1.3;color:var(--n-strong);margin:16px 4px 0}
+.grp-h{font-size:13px;font-weight:700;color:var(--n-sub);margin:22px 6px 0}
+.note{font-size:13px;color:var(--n-sub);margin:10px 4px 0;line-height:1.6}
+.bar{display:flex;align-items:center;gap:8px;justify-content:space-between}
+.back,.pill{height:44px;display:inline-flex;align-items:center;gap:6px;font-size:14px;font-weight:700;color:var(--n-strong);background:var(--n-panel);box-shadow:var(--n-shadow);border-radius:999px;padding:0 16px;flex:none}
+/* 2版：選んでいるピルは色を使わず、強い字＋細い縁。選んでいないピルは地を抜いて補足の字 */
+.pill.on{background:var(--n-panel-2);color:var(--n-strong);box-shadow:inset 0 0 0 1.5px var(--n-sel-ring)}
+.pill.ghost{background:transparent;box-shadow:inset 0 0 0 1px rgba(150,170,195,.16);color:var(--n-sub)}
+.band{display:flex;gap:6px;overflow:hidden;margin:14px -16px 0;padding:0 16px}
+svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.tabs{position:fixed;left:50%;transform:translateX(-50%);bottom:14px;width:calc(min(420px,100vw) - 28px);height:64px;border-radius:999px;background:rgba(13,18,24,.94);box-shadow:0 10px 30px -6px rgba(0,0,0,.8),inset 0 0 0 1px var(--n-ring);display:flex;padding:0 8px;z-index:30}
+.tabs b{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;font-size:13px;font-weight:700;color:var(--n-sub);position:relative}
+/* 2版：いまのタブも色を使わない（強い字＋下の小さな点。昼の青い点と同じ位置） */
+.tabs b.on{color:var(--n-strong)}
+.tabs b.on::after{content:"";position:absolute;bottom:5px;width:5px;height:5px;border-radius:50%;background:var(--n-strong)}
+.tabs svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.tabs.edit{box-shadow:0 10px 30px -6px rgba(0,0,0,.8),inset 0 0 0 2px var(--n-sel-ring)}
+.row{display:flex;align-items:center;gap:12px;min-height:56px;padding:8px 16px}
+.row+.row{box-shadow:0 -1px 0 rgba(150,170,195,.06)}
+.row .tx{flex:1;min-width:0}.row .tx b{display:block;color:var(--n-strong);font-size:15px;line-height:1.4}.row .tx small{display:block;color:var(--n-sub);font-size:13px;line-height:1.5}
+.ar{color:var(--n-sub);font-size:18px;font-weight:700}
+.dim{position:fixed;inset:0;background:rgba(0,0,0,.62);z-index:50}
+.sheet{position:fixed;left:50%;transform:translateX(-50%);bottom:0;width:min(420px,100vw);background:var(--n-panel);border-radius:28px 28px 0 0;box-shadow:0 -10px 40px -10px rgba(0,0,0,.9),inset 0 1px 0 var(--n-ring);z-index:60;padding:10px 16px 28px}
+.grab{width:40px;height:5px;border-radius:3px;background:#2E3946;margin:2px auto 10px}
+/* 2版：主ボタンは塗らず、地に琥珀の字と縁（まぶしい面をなくす）。ふつうのボタンは強い字と薄い縁 */
+.btn{height:52px;border-radius:999px;display:flex;align-items:center;justify-content:center;gap:8px;font-size:16px;font-weight:800}
+.btn.pri{background:var(--n-panel-2);color:var(--n-glow-2);box-shadow:inset 0 0 0 1.5px var(--n-glow-2)}
+.btn.sec{background:var(--n-panel-2);color:var(--n-strong);box-shadow:inset 0 0 0 1px rgba(150,170,195,.22)}
+.ann{position:relative;z-index:40;max-width:392px;margin:16px auto 120px;font:13px/1.7 var(--gothic);background:#FFF8D6;color:#5A4A12;padding:12px 14px;border-radius:16px}
+.ann b{display:block}.ann ul{margin:4px 0 0;padding-left:1.2em}
+.foot{font-size:13px;color:var(--n-sub);margin:18px 6px 0}
+
+.logo{margin:44px 4px 0}.logo b{display:block;font-size:24px;line-height:1.35;color:var(--n-strong);word-break:keep-all}.logo small{font-size:14px;color:var(--n-sub)}
+.code6{display:flex;gap:8px;margin-top:20px}.code6 i{font-style:normal;flex:1;height:60px;border-radius:14px;background:var(--n-panel);box-shadow:var(--n-shadow);display:grid;place-items:center;font-family:var(--n-num);font-size:30px;font-weight:700;color:var(--n-strong)}
+.code6 i.cur{box-shadow:inset 0 0 0 2px var(--n-glow-2)}.code6 i.e{color:transparent}
+.code6 i.cur::after{content:"";width:2px;height:28px;background:var(--n-glow-2)}
+.mail{margin-top:10px;font-size:14px;color:var(--n-ink)}
+.lnk{display:inline-flex;min-height:44px;align-items:center;font-size:14px;font-weight:700;color:var(--n-strong);text-decoration:underline;text-underline-offset:4px}
+</style></head><body>
+<main class="phone"><div class="wrap"><div class="bar"><span class="back">‹ 戻る</span></div><div class="logo"><b>確認コードを<wbr>入れてください</b><small>メールに届いた6けたの数字</small></div><p class="mail">送った先：sora••••@gmail.com</p><div class="code6" role="group" aria-label="確認コード6けた"><i>4</i><i>8</i><i>2</i><i>0</i><i class="cur e"></i><i class="e">0</i></div><p class="note">届かないときは迷惑メールのフォルダも見てください。</p><span class="lnk">コードをもう一度送る</span><div class="btn pri" style="margin-top:22px">ログイン</div><div class="btn sec" style="margin-top:10px">デモで試す</div><p class="foot">非公式アプリです。航空会社・空港とは関係ありません。</p></div></main>
+<aside class="ann"><b>メモ（本番には出ません）</b><ul><li><b>2版（review-1 の 10・5）</b>：確認コードの数字は光らせない（強い字の等幅）。光る数字の上限3つを超えないように。いま入れる枠だけ琥珀の縁（いま）</li><li>「ログイン」は塗らずに、地に琥珀の字と縁。1版の全幅の琥珀の面（いちばんまぶしい所）をなくした</li><li>見出しは「確認コードを／入れてください」の切れ目で折り返す（「い」だけ次の行にならない）</li><li>「デモで試す」は残す（決まり）</li></ul></aside>
+<script>if(window!==window.top){var a=document.querySelector('.ann');if(a)a.remove()}</script>
+</body></html>
