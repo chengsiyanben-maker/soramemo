@@ -7,6 +7,7 @@
   - 確かめた結果：t97（38項目）・t01・t31・t33・t85・t87・t89・t96 通過、番号の重なりなし
   - 本人待ち：「反映して」（画面の OK のあとでよい）・admin_backup に足すか・上限 16KB でよいか
 - 全体のデバッグ（11/7 22時20分 PM の指示）：ブランチ data/debug-1107 → PR #34。報告 docs/pm/report-debug-1107.md。**main に入った（bb23fc5「反映：全体のデバッグ 11/7」、11/8 の回で確認）**。本番の動きは health-check.sql の結果で確かめる
+  - **反映は失敗（11/8 16:32）**：Actions run 42457112995 はテストを全部通ったが「プロジェクトにつなぐ」で Supabase の SUPABASE_ACCESS_TOKEN が Invalid access token。移行156・関数・アプリは本番に入っていない（本番は前のまま）。本人が Supabase で鍵を作り直し、GitHub の Secrets を差し替えて Re-run する（11/8 16:44 に知らせた）。次の回は Re-run の結果を Actions で確かめる
   - adsb.lol の 429：見る人の airport-traffic は live_positions（75秒以内）から作る（移行 156：live_positions に trk を足す。列だけ・RLS 今のまま）。記録の処理は 429・420 で1回だけ待って取り直す（最長5秒）
   - 見つけた抜け：航跡の点と reg_legs を「偶数の30秒の回」だけで残していたので、後半の回にしか取らない南の円（沖縄・奄美・宮古・石垣）がほとんど残っていない見込み → recordPlan（_shared/traffic.ts）で円ごとに決める。本番の数は health-check.sql の「3」で確かめる
   - airport-now：待つ上限（ODPT 8秒・天気5秒・気象庁4秒）・Server-Timing・wx_obs からの代わり。遅さの主な原因は aviationweather.gov の「ためた答えがない1回目が 4〜20秒、ときどき 504」（外から測った）
