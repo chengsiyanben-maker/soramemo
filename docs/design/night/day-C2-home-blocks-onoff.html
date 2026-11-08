@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="ja" data-theme="day"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>ホームに出すもの（昼・ON／OFF）｜そらメモ ON／OFF の試し</title>
+<style>:root{
+  --bg:#EEF1F5; --card:#FFFFFF; --card2:#F4F6F9; --ink:#374151; --strong:#1F2937; --sub:#5F6878; --mute:#6B7280;
+  --ring:rgba(17,24,39,.08); --shadow:0 1px 2px rgba(17,24,39,.04),0 10px 30px -8px rgba(17,24,39,.10),inset 0 0 0 1px rgba(17,24,39,.07);
+  --tabs:rgba(255,255,255,.94); --dim:rgba(17,24,39,.38); --grab:#D1D5DB; --edge:#9FB3CF;
+  /* スイッチ：ON＝紺の地に白い字、OFF＝灰色の地に濃いグレーの字。つまみの位置と字の札でも分かる */
+  --sw-on-bg:#16233A; --sw-on-ring:#16233A; --sw-on-ink:#FFFFFF; --sw-on-knob:#FFFFFF;
+  --sw-off-bg:#E5E8EE; --sw-off-ring:#C7CDD6; --sw-off-ink:#4B5563; --sw-off-knob:#FFFFFF; --sw-off-knob-ring:#B8C0CB;
+  --lit:var(--strong); --lit-halo:none; --num:"Barlow Condensed","Arial Narrow",var(--gothic);
+  --prev:#E3E7ED; --prev-row:rgba(255,255,255,.78); --prev-hero:#2A3546; --prev-hero-ink:#F3F4F6; --prev-hero-sub:#C9D0DA;
+  color-scheme:light;
+}
+:root{--gothic:"Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic UI","Yu Gothic","Meiryo","Noto Sans JP","Noto Sans CJK JP",system-ui,sans-serif;}
+*{box-sizing:border-box}html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--gothic);font-size:15px;line-height:1.6;-webkit-text-size-adjust:100%}
+.phone{position:relative;max-width:420px;min-height:100vh;min-height:100svh;margin:0 auto;overflow:hidden;background:var(--bg)}
+.wrap{padding:14px 16px 150px}
+.num{font-family:var(--num);font-variant-numeric:tabular-nums;font-weight:700;color:var(--strong);line-height:1.1}
+.lit{color:var(--lit);text-shadow:var(--lit-halo)}
+.u{font-size:12px;font-weight:600;color:var(--mute);margin-left:4px}
+.tabs{position:fixed;left:50%;transform:translateX(-50%);bottom:14px;width:calc(min(420px,100vw) - 28px);height:64px;border-radius:999px;background:var(--tabs);box-shadow:0 10px 30px -6px rgba(0,0,0,.35),inset 0 0 0 1px var(--ring);display:flex;padding:0 8px;z-index:70}
+.tabs.edit{box-shadow:0 10px 30px -6px rgba(0,0,0,.35),inset 0 0 0 2px var(--edge)}
+.tabs b{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;font-size:13px;font-weight:700;color:var(--sub);position:relative}
+.tabs b.on{color:var(--strong)}
+.tabs b.on::after{content:"";position:absolute;bottom:5px;width:5px;height:5px;border-radius:50%;background:var(--strong)}
+.tabs svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.dim{position:fixed;inset:0;background:var(--dim);z-index:50}
+.sheet{position:fixed;left:50%;transform:translateX(-50%);bottom:0;width:min(420px,100vw);background:var(--card);border-radius:28px 28px 0 0;box-shadow:0 -10px 40px -10px rgba(0,0,0,.4);z-index:60;padding:10px 16px 100px;max-height:calc(100svh - 56px);overflow:auto}
+.grab{width:40px;height:5px;border-radius:3px;background:var(--grab);margin:2px auto 10px}
+.bar{display:flex;align-items:center;justify-content:space-between;gap:8px}
+h3{margin:0;font-size:22px;color:var(--strong)}
+h1{font-size:26px;line-height:1.3;color:var(--strong);margin:18px 4px 0}
+.done,.back{height:44px;display:inline-flex;align-items:center;padding:0 18px;border-radius:999px;background:var(--card2);box-shadow:inset 0 0 0 1px var(--ring);font-size:15px;font-weight:800;color:var(--strong)}
+.back{background:var(--card);box-shadow:var(--shadow);font-size:14px;padding:0 16px}
+.lead{font-size:14px;color:var(--ink);margin:8px 2px 0;line-height:1.65}
+.cap{display:flex;align-items:baseline;justify-content:space-between;margin:16px 2px 8px}.cap b{font-size:14px;color:var(--strong)}
+.cap .num{font-size:20px}
+/* 行 */
+.ts{display:flex;align-items:center;gap:10px;min-height:60px;border-radius:18px;background:var(--card2);padding:0 4px 0 12px;margin-top:8px}
+.ts .n{width:16px;font-family:var(--num);font-weight:700;font-size:18px;color:var(--sub);text-align:center;flex:none}
+.ts .ii{width:36px;height:36px;border-radius:999px;background:var(--card);display:grid;place-items:center;color:var(--strong);flex:none}
+.ts .ii svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.ts b{flex:1;min-width:0;font-size:15px;color:var(--strong);line-height:1.4}.ts b small{display:block;font-size:13px;font-weight:500;color:var(--sub);line-height:1.4}
+.ts .lockt{font-size:13px;font-weight:700;color:var(--sub);padding-right:14px;white-space:nowrap}
+.ts .h{width:40px;height:44px;display:grid;place-items:center;color:var(--sub);flex:none}
+.ts .h svg{width:20px;height:20px;stroke:currentColor;stroke-width:2;fill:none;stroke-linecap:round}
+.ts.off{background:transparent;box-shadow:inset 0 0 0 1.5px var(--sw-off-ring)}
+.ts.off b{color:var(--sub)}
+.ts.off .ii{color:var(--sub);background:var(--card2)}
+/* ON／OFF のスイッチ（昼と夜で同じ部品。色だけ変数で変わる） */
+.sw{width:76px;height:44px;display:grid;place-items:center;flex:none}
+.sw i{position:relative;display:block;width:68px;height:34px;border-radius:999px;font-style:normal;font-size:13px;font-weight:800;line-height:34px;letter-spacing:.04em}
+.sw i::after{content:"";position:absolute;top:4px;width:26px;height:26px;border-radius:50%}
+.sw.on i{background:var(--sw-on-bg);box-shadow:inset 0 0 0 1.5px var(--sw-on-ring);color:var(--sw-on-ink);padding-left:11px;text-align:left}
+.sw.on i::after{right:4px;background:var(--sw-on-knob)}
+.sw.off i{background:var(--sw-off-bg);box-shadow:inset 0 0 0 1.5px var(--sw-off-ring);color:var(--sw-off-ink);padding-right:9px;text-align:right}
+.sw.off i::after{left:4px;background:var(--sw-off-knob);box-shadow:inset 0 0 0 1.5px var(--sw-off-knob-ring)}
+.wbtn{margin-top:18px;height:52px;border-radius:999px;background:var(--card2);box-shadow:inset 0 0 0 1px var(--ring);display:flex;align-items:center;justify-content:center;gap:8px;font-size:16px;font-weight:800;color:var(--strong)}
+.wsub{text-align:center;font-size:13px;color:var(--sub);margin:6px 0 0}
+/* ホームに出すもの：見本の枠 */
+.prev{position:relative;border-radius:26px;background:var(--prev);padding:42px 10px 10px;margin-top:14px;box-shadow:inset 0 0 0 1px var(--ring)}
+.prev .tag{position:absolute;left:14px;top:10px;height:24px;display:inline-flex;align-items:center;padding:0 10px;border-radius:999px;background:var(--card);color:var(--sub);font-size:13px;font-weight:800}
+.prev .ts{background:var(--prev-row);padding-left:14px}
+.prev .ts:first-of-type{margin-top:0}
+.prev .ts.hero{background:var(--prev-hero)}.prev .ts.hero b{color:var(--prev-hero-ink)}.prev .ts.hero .lockt{color:var(--prev-hero-sub)}
+.prev .ts.off{background:transparent}
+.ann{position:relative;z-index:40;max-width:392px;margin:16px auto 120px;font:13px/1.7 var(--gothic);background:#FFF8D6;color:#5A4A12;padding:12px 14px;border-radius:16px}
+.ann b{display:block}.ann ul{margin:4px 0 0;padding-left:1.2em}
+</style></head><body>
+<main class="phone"><div class="wrap"><span class="back">‹ 戻る</span><h1>ホームに出すもの</h1>
+<p class="lead">ON でホームに出し、OFF で隠します。下の枠はホームのシートの見本です。</p>
+<div class="prev"><span class="tag">見本</span><div class="ts hero"><b>半券と今日の数字</b><span class="lockt">いつも</span></div><div class="ts"><b>これから乗る便</b><span class="sw on" role="switch" aria-checked="true" aria-label="これから乗る便（ホームに出しています）"><i>ON</i></span></div><div class="ts off"><b>イベントのお知らせ</b><span class="sw off" role="switch" aria-checked="false" aria-label="イベントのお知らせ（隠しています）"><i>OFF</i></span></div><div class="ts"><b>これまでの記録</b><span class="sw on" role="switch" aria-checked="true" aria-label="これまでの記録（ホームに出しています）"><i>ON</i></span></div><div class="ts"><b>最近の印</b><span class="sw on" role="switch" aria-checked="true" aria-label="最近の印（ホームに出しています）"><i>ON</i></span></div></div>
+<p class="lead" style="color:var(--sub);font-size:13px">隠しているもの <span class="num" style="font-size:15px">1</span></p>
+<div class="wbtn">↺ ホームを全部出す</div><p class="wsub">ホームのかたまりだけ戻します（タブと見方はそのまま）</p></div><nav class="tabs" aria-label="画面の切り替え"><b class=""><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11l8-6 8 6v8a1 1 0 0 1-1 1h-4v-5H9v5H5a1 1 0 0 1-1-1z"/></svg>ホーム</b><b class=""><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h6v14H4zM14 5h6v14h-6z"/></svg>図鑑</b><b class=""><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 14l7-2 4-7 2 1-2 6 5 1 2-2h1l-1 4-14 1z"/></svg>フライト</b><b class=""><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 21l1.5-9h3L15 21"/><path d="M7 8h10l-1.5 4h-7Z"/><path d="M12 8V4"/></svg>運用</b><b class=""><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="14" r="6"/><path d="M12 11v3l2 1M10 3h4"/></svg>修行</b></nav></main>
+<aside class="ann"><b>メモ（本番には出ません）</b><ul><li><b>11/9 1時 本人「ON OFFにしてみて」</b>：all-in-tabs の C2-v2（ホームに出すもの）の「−」と「外したもの」のピルを、見本の各行の ON／OFF にした</li><li>並びは本番の LO_BLOCKS のまま。OFF にした行は見本の中の同じ場所に残し（縁だけの行・補足の字）、下の「外したもの」の置き場はやめて「隠しているもの 1」の1行だけにした</li><li>半券と今日の数字は「いつも」でスイッチなし</li><li>タブを選ぶと同じスイッチ。昼：ON＝紺・OFF＝灰色</li></ul></aside>
+<script>if(window!==window.top){var a=document.querySelector('.ann');if(a)a.remove()}</script>
+</body></html>
