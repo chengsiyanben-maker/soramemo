@@ -1,5 +1,5 @@
 // POST /functions/v1/delete-account  body: { confirm: "削除" }
-// 本人のアカウントと、すべての記録（チェックイン・フライト・記録帳・会社・機材・施設・加入情報）を消す。
+// 本人のアカウントと、すべての記録（チェックイン・フライト・記録帳・会社・機材・施設・加入情報・表示の設定 user_view_prefs）を消す。
 // まずエアライン経営の精算（co3_leave_settle）をし、失敗したら消さない。そらメモ＋に加入中なら、次に Stripe の定期支払いを止める。各表は auth.users を on delete cascade で参照している。
 import { admin, CORS, json, rateOk, STRIPE_READY, stripe, userFrom } from "../_shared/plus.ts";
 
