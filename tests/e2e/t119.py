@@ -2,7 +2,7 @@ import os, sys
 HERE=os.path.dirname(os.path.abspath(__file__)); WORK=os.environ.get('SORAMEMO_TEST_WORK','/tmp/soramemo-e2e'); os.makedirs(WORK, exist_ok=True)
 # 全部乗せ 案3「タブから選ぶ」（11/8 21時半 本人の決定。画面案 design/all-in-filter-alt の C1〜C4）
 #   C1 タブ帯の長押しで「タブを選ぶ」：≡ で並べ替え・左へはらって外す・5つまで（6つ目は入れ替え）・ホームはいつも1番目・2つより減らせない
-#   C2 ホームに出すもの：× で外し ＋ で戻す・元に戻す
+#   C2 ホームに出すもの：「−」で外し「＋」で戻す・元に戻す
 #   C3 全部乗せに戻す：戻る数を見せてから戻す
 #   保存：端末とサーバー（user_view_prefs）に並べた順も残る。偽のサーバー（fake_sb.js）を使い、小さなサーバーから開く
 import asyncio, threading, http.server, socketserver, functools
