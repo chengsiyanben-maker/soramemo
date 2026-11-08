@@ -864,9 +864,9 @@ dialog.heed{--s-bg:#EEF1F5}
 .helink{display:block;margin:8px auto 4px;min-height:44px;padding:0 14px;border:0;background:none;color:#4B5563;font:700 13.5px var(--gothic);cursor:pointer}
 .lotile2{background:#F8F9FB}
 /* ON／OFF を試す（11/9 1時 本人「ON OFFにしてみて」）：タブを選ぶ・ホームに出すものの行のスイッチ。字の札 ON／OFF つき（色だけに頼らない）・押せる所は 44px 以上。昼と夜で同じ部品（色は変数だけ変える） */
-:root{--sw-on-bg:#16233A;--sw-on-ring:#16233A;--sw-on-ink:#FFFFFF;--sw-on-knob:#FFFFFF;--sw-off-bg:#EEF1F5;--sw-off-ring:#8A94A3;--sw-off-ink:#4B5563;--sw-off-knob:#FFFFFF;--sw-off-knob-ring:#8A94A3}
+:root{--sw-on-bg:#16233A;--sw-on-ring:#16233A;--sw-on-ink:#FFFFFF;--sw-on-knob:#FFFFFF;--sw-off-bg:#E5E8EE;--sw-off-ring:#768090;--sw-off-ink:#4B5563;--sw-off-knob:#FFFFFF;--sw-off-knob-ring:#768090}
 /* 夜（アプリに夜の画面が入ったら data-night="on"）：色の変数は design/night の 07-tabs-v3-onoff と同じ。琥珀と緑は使わない */
-:root[data-night="on"]{--sw-on-bg:rgba(220,227,234,.16);--sw-on-ring:rgba(220,227,234,.72);--sw-on-ink:#DCE3EA;--sw-on-knob:#DCE3EA;--sw-off-bg:transparent;--sw-off-ring:rgba(150,170,195,.30);--sw-off-ink:#8996A7;--sw-off-knob:#3A4654;--sw-off-knob-ring:rgba(150,170,195,.35)}
+:root[data-night="on"]{--sw-on-bg:rgba(220,227,234,.16);--sw-on-ring:rgba(220,227,234,.72);--sw-on-ink:#DCE3EA;--sw-on-knob:#DCE3EA;--sw-off-bg:transparent;--sw-off-ring:#66778C;--sw-off-ink:#AEB9C6;--sw-off-knob:#3A4654;--sw-off-knob-ring:#66778C}
 .losw{flex:none;min-width:76px;min-height:44px;padding:0 4px;border:0;background:none;display:grid;place-items:center;cursor:pointer;-webkit-tap-highlight-color:transparent}
 .losw i{position:relative;display:flex;align-items:center;width:68px;height:34px;border-radius:999px;background:var(--sw-off-bg);box-shadow:inset 0 0 0 1.5px var(--sw-off-ring);transition:background .15s}
 .losw i::before{content:"";position:absolute;top:4px;left:4px;width:26px;height:26px;border-radius:999px;background:var(--sw-off-knob);box-shadow:inset 0 0 0 1.5px var(--sw-off-knob-ring);transition:left .15s}
@@ -879,7 +879,7 @@ dialog.heed{--s-bg:#EEF1F5}
 .tprow.off{background:#fff;box-shadow:inset 0 0 0 1.5px #D9DEE6}.tprow.off .tpi{background:#F3F4F6;color:#6B7280}.tprow.off>b{color:#4B5563}
 .tprow.off b small .tpmp{color:#4B5563;font-weight:700;white-space:nowrap}
 /* review-c3（11/9 3時35分の PM の指示）：題・数・完了・説明文は上に固定し、送るのは一覧だけ。トーストと入れ替えはシートの下に固定。
-   OFF の縁とつまみの縁は白い地と 3:1 以上（#8A94A3。デザイン担当の design.md に値が出たら合わせる）。行の高さは ON と OFF で同じ */
+   OFF の縁とつまみの縁は白い地と 3:1 以上（デザイン担当の 4版 design/night tokens.md の値。昼 #768090・夜 #66778C）。行の高さは ON と OFF で同じ */
 dialog.tpsheet .dlg{display:flex;flex-direction:column;overflow:hidden;padding-bottom:0}
 .tptop{flex:none;padding-bottom:4px}.tpscroll{flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;margin:0 -20px;padding:0 20px 24px}
 .tpbot{flex:none;padding:6px 0 16px}.tpbot .tpundo{margin-top:0}.tpbot .tpswap{margin-top:0}.tpbot .tpundo+.tpswap{margin-top:8px}
