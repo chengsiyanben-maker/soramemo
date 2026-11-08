@@ -1,0 +1,59 @@
+/* そらメモ 夜の画面のトークン（画面案 design/night・1版）
+   使い方：日の入り〜日の出（または「いつも夜」）のとき、<html data-night="on"> を付ける。
+   今の色の変数（--sky・--hm-*・--mp-* など）の上に重ねるだけで、各画面の CSS は書きかえない。
+   決まり：本文はふだんの書体（--gothic のまま）／光る計器の字は数字だけ（--n-num）／光る色は緑と琥珀の2色だけ */
+
+/* 1. 夜の元の色（ここだけ決めれば、下の読みかえはすべてこれを指す） */
+:root{
+  --n-bg:#05070B;        /* 画面の地（夜だけ黒にしてよい） */
+  --n-panel:#0D1218;     /* 計器の枠＝カード */
+  --n-panel-2:#141B24;   /* ピル・押しボタンの地、カードの中の段 */
+  --n-ring:rgba(150,170,195,.10);  /* 枠のふち（黒い線ではなく、薄い明るいふち） */
+  --n-ink:#BCC6D1;       /* 本文（真っ白にしない） */
+  --n-strong:#DCE3EA;    /* 見出し・大事な字 */
+  --n-sub:#8996A7;       /* 補足 */
+  --n-mute:#7D8A9B;      /* 単位（小さく薄く） */
+  --n-glow-1:#5FD993;    /* 光る色1 緑：主役の数字・「入」 */
+  --n-glow-2:#F0AC4E;    /* 光る色2 琥珀：いまの場所・選んでいるもの・注意 */
+  --n-glow-1-halo:0 0 6px rgba(95,217,147,.45);
+  --n-glow-2-halo:0 0 6px rgba(240,172,78,.40);
+  --n-on-glow:#05070B;   /* 琥珀の地の上の字 */
+  --n-sea:#060A0F; --n-land:#0F151C; --n-coast:#2B3746; --n-ring-map:#243040; --n-grid:rgba(95,217,147,.06);
+  --n-shadow:0 14px 30px -18px rgba(0,0,0,.9),inset 0 0 0 1px var(--n-ring);
+  --n-num:ui-monospace,"SF Mono","Menlo","Roboto Mono","DejaVu Sans Mono",monospace; /* 数字だけに使う */
+}
+
+/* 2. 今の変数への読みかえ（パレットの指定より強くするため [data-palette] も付ける） */
+:root[data-night="on"],:root[data-night="on"][data-palette]{
+  color-scheme:dark;
+  --sky:var(--n-bg); --paper:var(--n-panel); --ink:var(--n-ink); --sumi:var(--n-sub); --line:#222C38;
+  --shu:var(--n-glow-2); --shu-text:var(--n-glow-2); --shu-wash:var(--n-panel-2); --on-shu:var(--n-on-glow);
+  --gold:var(--n-glow-2); --gold-text:var(--n-glow-2); --gold-badge:var(--n-glow-2); --on-gold:var(--n-on-glow);
+  --dot:#2A3440; --hero:var(--n-panel);
+  --jal:var(--n-strong); --ana:var(--n-strong);   /* 夜は会社の色を使わず、名前の字で分ける */
+  --mil:var(--n-sub); --glider:var(--n-sub); --field:var(--n-sub); --secret:var(--n-sub); --go:var(--n-glow-1); --stop:var(--n-glow-2);
+  --nav-acc:var(--n-glow-2); --nav-glass:rgba(13,18,24,.92); --nav-edge:var(--n-ring); --nav-ink:var(--n-sub); --nav-on:var(--n-strong);
+  --nav-shadow:0 10px 30px -6px rgba(0,0,0,.8);
+  --hm-ink:var(--n-ink); --hm-sub:var(--n-sub); --hm-mute:var(--n-mute); --hm-card:var(--n-panel); --hm-tint:var(--n-panel-2); --hm-pill:var(--n-panel-2); --hm-shadow:var(--n-shadow);
+  --cta-hi:var(--n-glow-2); --cta-lo:var(--n-glow-2); --cta-text:var(--n-on-glow); --cta-glow:transparent; --cta-ring:transparent; --cta-ring2:transparent;
+  --a-bg:var(--n-bg); --a-card:var(--n-panel); --a-ink:var(--n-ink); --a-strong:var(--n-strong); --a-sub:var(--n-sub); --a-mute:var(--n-mute); --a-pill:var(--n-panel-2); --a-track:var(--n-panel-2); --a-wash:var(--n-panel-2); --a-shadow:var(--n-shadow); --a-cta:var(--n-glow-2); --a-cta-text:var(--n-on-glow); --a-jal:var(--n-strong); --a-ana:var(--n-strong);
+  --bk-card:var(--n-panel); --bk-ink:var(--n-ink); --bk-sub:var(--n-sub); --bk-mute:var(--n-mute); --bk-pill:var(--n-panel-2); --bk-track:var(--n-panel-2);
+  --lg-card:var(--n-panel); --lg-ink:var(--n-ink); --lg-sub:var(--n-sub); --lg-mute:var(--n-mute); --lg-pill:var(--n-panel-2); --lg-stub:var(--n-panel-2); --lg-track:var(--n-panel-2);
+  --op-card:var(--n-panel); --op-ink:var(--n-ink); --op-sub:var(--n-sub); --op-mute:var(--n-mute); --op-pill:var(--n-panel-2);
+  --h3-bg:var(--n-bg); --h3-card:var(--n-panel); --h3-ink:var(--n-ink); --h3-strong:var(--n-strong); --h3-sub:var(--n-sub); --h3-mute:var(--n-mute); --h3-pill:var(--n-panel-2); --h3-hero:var(--n-panel); --h3-hero-sub:var(--n-sub); --h3-off-bg:var(--n-panel-2); --h3-off-ink:var(--n-sub); --h3-ok:var(--n-glow-1);
+  --s-bg:var(--n-bg); --s-card:var(--n-panel); --s-ink:var(--n-ink); --s-mute:var(--n-sub); --s-line:#222C38;
+  --sg-bg:var(--n-bg); --sg-card:var(--n-panel); --sg-ink:var(--n-ink); --sg-faint:var(--n-mute); --sg-acc:var(--n-glow-2); --sg-line:#222C38;
+  --chart-bg:var(--n-sea); --chart-land:var(--n-land); --chart-coast:var(--n-coast); --chart-grid:var(--n-grid); --chart-apt:var(--n-strong); --chart-route:var(--n-glow-2); --chart-off:#3A4654;
+  --c-bg:var(--n-sea); --c-land:var(--n-land); --c-coast:var(--n-coast); --c-apt:var(--n-strong);
+  --av-hi:var(--n-glow-2); --av-lo:var(--n-glow-2); --gamebar:var(--n-panel);
+}
+/* 3. 要素に直接書いてある変数（今の src/index.html で見つけた所。ほかにもあれば足す） */
+:root[data-night="on"] dialog.mypage{--mp-bg:var(--n-bg);--mp-card:var(--n-panel);--mp-ink:var(--n-ink);--mp-sub:var(--n-sub);--mp-mute:var(--n-mute);--mp-shadow:var(--n-shadow)}
+:root[data-night="on"] .boardzone{--sky:var(--n-bg);--paper:var(--n-panel);--ink:var(--n-ink);--sumi:var(--n-sub);--shu:var(--n-glow-2);--shu-text:var(--n-glow-2)}
+:root[data-night="on"] #dSpecial,:root[data-night="on"] #dLayout{--s-mute:var(--n-sub)}
+:root[data-night="on"] .fwc{--fw-mute:var(--n-sub)}
+
+/* 4. 夜だけ足す小さな部品（数字を光らせる・入／切の札） */
+:root[data-night="on"] .n-num{font-family:var(--n-num);font-variant-numeric:tabular-nums}
+:root[data-night="on"] .n-lit{color:var(--n-glow-1);text-shadow:var(--n-glow-1-halo)}   /* 1画面に3つまで */
+:root[data-night="on"] .n-here{color:var(--n-glow-2);text-shadow:var(--n-glow-2-halo)}
