@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>案G 空のグラデーションと雲・表示の編集（7こ隠したとき）｜そらメモ 決まりを外した実験</title>
+<style>*{box-sizing:border-box}html,body{margin:0}.phone{position:relative;max-width:420px;min-height:100vh;min-height:100svh;margin:0 auto;overflow:hidden}
+.ann{position:relative;z-index:90;max-width:392px;margin:16px auto 40px;font:13px/1.7 "Noto Sans CJK JP",sans-serif;background:#FFF8D6;color:#5A4A12;padding:12px 14px;border-radius:12px}.ann ul{margin:4px 0 0;padding-left:1.2em}
+
+
+:root{--ink:#1E2747;--sub:#3E4868;--jp:"Noto Sans CJK JP",sans-serif}
+body{background:#7E8FC4;color:var(--ink);font-family:var(--jp);font-size:15px;line-height:1.6}
+.phone{background:linear-gradient(180deg,#A9BAE6 0%,#BCCAEE 34%,#E7C9D8 70%,#F6DCC4 100%)}
+.pg{padding:16px 18px 110px}
+.top{display:flex;justify-content:space-between;align-items:center}
+.top b{font-size:17px;font-weight:700;letter-spacing:.1em;color:var(--ink)}
+.top small{display:block;font-size:13px;color:var(--ink)}
+.mp{min-height:44px;display:flex;align-items:center;padding:0 16px;border-radius:999px;background:rgba(255,255,255,.85);color:var(--ink);font-weight:700;font-size:14px}
+.sun{text-align:center;margin-top:24px;color:var(--ink)}
+.sun small{display:block;font-size:14px;font-weight:700}
+.sun .c{font-size:92px;font-weight:200;letter-spacing:.12em;line-height:1}
+.sun .d{font-size:18px;font-weight:500}.sun .d b{font-size:40px;font-weight:300}
+.cl{position:relative;background:rgba(255,255,255,.93);border-radius:60px 70px 56px 64px;padding:18px 22px;box-shadow:0 18px 40px -18px rgba(44,53,80,.35)}
+.cl::before,.cl::after{content:"";position:absolute;background:rgba(255,255,255,.93);border-radius:50%;z-index:-0}
+.cl::before{width:110px;height:80px;top:-34px;left:34px}
+.cl::after{width:80px;height:60px;top:-22px;right:50px}
+.cl>*{position:relative;z-index:1}
+.puffs{display:flex;justify-content:space-between;gap:10px;margin-top:40px}
+.puffs div{flex:1;text-align:center;background:rgba(255,255,255,.88);border-radius:999px;padding:8px 4px}
+.puffs small{display:block;font-size:13px;color:var(--sub)}
+.puffs b{font-size:30px;font-weight:300;line-height:1.1}.puffs b i{font-style:normal;font-size:13px;color:var(--sub)}
+.first{margin-top:56px}
+.first b{display:block;font-size:18px;font-weight:700}
+.first p{margin:6px 0 0;font-size:14px}
+.bt{display:flex;gap:8px;margin-top:12px}
+.bt span{flex:1;min-height:48px;display:flex;align-items:center;justify-content:center;border-radius:999px;font-weight:700;font-size:15px;background:rgba(111,134,200,.16)}
+.bt span.k{background:#4E5FA0;color:#fff}
+.drift{margin-top:52px;display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.drift .cl{border-radius:40px;padding:14px 16px;min-height:86px}
+.drift .cl::before{width:60px;height:44px;top:-16px;left:18px}
+.drift .cl::after{width:44px;height:34px;top:-10px;right:20px}
+.drift b{display:block;font-size:15px}
+.drift small{display:block;font-size:13px;color:var(--sub);line-height:1.45}
+.unoff{font-size:13px;color:var(--ink);margin:24px 4px 0;text-align:center}
+.nav{position:fixed;left:50%;transform:translateX(-50%);bottom:12px;width:calc(min(420px,100vw) - 28px);background:rgba(255,255,255,.9);border-radius:999px;display:flex;z-index:30;padding:6px;box-shadow:0 14px 30px -14px rgba(44,53,80,.5)}
+.nav span{flex:1;min-height:48px;display:flex;align-items:center;justify-content:center;border-radius:999px;font-size:14px;font-weight:700;color:var(--sub)}
+.nav span.on{background:#4E5FA0;color:#fff}
+/* 編集 */
+.et{margin-top:28px;text-align:center;color:var(--ink)}
+.et b{display:block;font-size:24px;font-weight:500;letter-spacing:.1em}
+.et .n{font-size:64px;font-weight:200;line-height:1}.et .n i{font-style:normal;font-size:18px}
+.et small{display:block;font-size:14px;font-weight:700}
+.sky{margin-top:40px}
+.sky h3{margin:30px 6px 0;font-size:17px;font-weight:700;color:var(--ink);display:flex;justify-content:space-between}
+.sky h4{margin:12px 6px 0;font-size:13px;color:var(--ink)}
+.fl{display:flex;flex-wrap:wrap;gap:10px;margin-top:8px}
+.fl span{min-height:46px;display:flex;align-items:center;gap:6px;padding:0 18px;border-radius:999px;background:rgba(255,255,255,.95);font-weight:700;font-size:15px;box-shadow:0 10px 20px -12px rgba(44,53,80,.5)}
+.fl span.off{background:rgba(255,255,255,.55);color:var(--ink);font-weight:400;box-shadow:none;filter:blur(.3px);border:1.5px dashed rgba(255,255,255,.95)}
+.fl span.off::after{content:"霞";font-size:13px;color:var(--sub);background:rgba(255,255,255,.9);border-radius:999px;padding:0 6px}
+.fl span.lk::after{content:"いつも";font-size:13px;color:var(--sub)}
+.rs{margin-top:34px;min-height:50px;display:flex;align-items:center;justify-content:center;border-radius:999px;background:rgba(255,255,255,.93);font-weight:700;font-size:16px}
+
+</style></head><body>
+<main class="phone"><div class="pg" style="padding-bottom:40px">
+<div class="top"><span class="mp">‹ マイページ</span><small>押すたびに保存</small></div>
+<div class="et"><b>表示の編集</b><div class="n">33<i>/40</i></div><small>押すと霞む（隠す）・もう一度押すと晴れる（出す）</small></div>
+<div class="sky"><h3>タブ<span>3/4</span></h3><div class="fl"><span class="lk">ホーム</span><span class="">図鑑</span><span class="">フライト</span><span class="off">運用</span><span class="">修行</span></div><h3>見方<span>17/21</span></h3><h4>図鑑</h4><div class="fl"><span class="">地図</span><span class="">案内標</span><span class="">タイル</span><span class="off">年代記</span><span class="">地方</span></div><h4>フライト</h4><div class="fl"><span class="">修行</span><span class="">搭乗券</span><span class="">案内板</span><span class="">地図</span><span class="off">カレンダー</span><span class="">月ごと</span><span class="off">高度</span><span class="off">文字だけ</span><span class="">路線</span></div><h4>運用</h4><div class="fl"><span class="">案内板</span><span class="">1日の山</span><span class="">滑走路</span><span class="">定時</span><span class="">空の道すじ</span><span class="">短冊</span><span class="">撮る人</span></div><h3>かたまり<span>13/15</span></h3><h4>ホーム</h4><div class="fl"><span class="">これから乗る便</span><span class="off">イベントのお知らせ</span><span class="">これまでの記録</span><span class="">最近の印</span></div><h4>運用</h4><div class="fl"><span class="">遅れ・ダイバート</span><span class="">地図と近くの機体</span><span class="">特別塗装機</span><span class="">撮影地</span><span class="">門限のある時間</span><span class="">ゴーアラウンド（推定）</span></div><h4>成績</h4><div class="fl"><span class="">パスポート</span><span class="">乗った機体</span><span class="">航空会社別</span><span class="">ステータスの目安</span><span class="off">修行のまとめ</span></div></div><div class="rs">全部晴れにする（全部乗せに戻す・7）</div><p class="unoff">ログインしているので、ほかの端末でも同じ表示になります。</p></div></main>
+<aside class="ann"><b>メモ（本番には出ません・実験）</b><ul><li>案G 空のグラデーションと雲：表示の編集（7こ隠したとき）</li><li>外した決まり：白っぽい地と薄い影の決まりを外し、画面全体を夕方の空のグラデーションに／カードを雲の形（ふちのぼけた丸の集まり）に／数字は大きく太くの決まりを外し、細く大きく／JAL赤・ANA青を使わず、空の色だけ／表示の編集は、出す＝はっきりした雲、隠す＝霞んで小さくなった雲</li><li>良い点：いちばん柔らかく、毎日開いても疲れない。隠したものが「霞む」ので、消えたのではなく後ろにあると感じられる</li><li>困る点：時刻で空の色を変えたくなり、作る手間が増える。雲の形は字の量が増えると崩れ、細い数字は屋外で読みにくい</li><li>中身（全部乗せで始める・隠す・すぐ保存・戻す・提案は1回）はふだんの画面案（all-in-filter）と同じ</li></ul></aside>
+<script>if(window!==window.top){var a=document.querySelector('.ann');if(a)a.remove()}</script>
+</body></html>

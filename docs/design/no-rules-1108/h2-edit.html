@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>案H シールと積み木・表示の編集（7こ隠したとき）｜そらメモ 決まりを外した実験</title>
+<style>*{box-sizing:border-box}html,body{margin:0}.phone{position:relative;max-width:420px;min-height:100vh;min-height:100svh;margin:0 auto;overflow:hidden}
+.ann{position:relative;z-index:90;max-width:392px;margin:16px auto 40px;font:13px/1.7 "Noto Sans CJK JP",sans-serif;background:#FFF8D6;color:#5A4A12;padding:12px 14px;border-radius:12px}.ann ul{margin:4px 0 0;padding-left:1.2em}
+
+
+:root{--bg:#FFF6E6;--ink:#2A2A33;--sub:#55556A;--r:#C2352B;--b:#2A60BE;--y:#F6C343;--g:#24804F;--jp:"Noto Sans CJK JP",sans-serif}
+body{background:#F2E3C8;color:var(--ink);font-family:var(--jp);font-size:15px;line-height:1.55}
+.phone{background:var(--bg);background-image:linear-gradient(rgba(42,42,51,.05) 2px,transparent 2px),linear-gradient(90deg,rgba(42,42,51,.05) 2px,transparent 2px);background-size:28px 28px}
+.pg{padding:16px 16px 116px}
+.blk{border-radius:16px;box-shadow:0 6px 0 rgba(0,0,0,.28);position:relative}
+.top{display:flex;justify-content:space-between;align-items:center}
+.logo{display:flex;gap:4px}
+.logo span{width:34px;height:38px;display:grid;place-items:center;border-radius:10px;color:#fff;font-weight:900;font-size:18px;box-shadow:0 4px 0 rgba(0,0,0,.28)}
+.top small{display:block;font-size:13px;color:var(--sub);margin-top:6px}
+.mp{min-height:46px;display:flex;align-items:center;padding:0 16px;background:#fff;color:var(--ink);font-weight:900;font-size:14px;border:3px solid var(--ink);border-radius:14px;box-shadow:0 4px 0 var(--ink)}
+.big{margin-top:20px;background:var(--b);color:#fff;padding:16px 18px;display:flex;justify-content:space-between;align-items:flex-end}
+.big small{display:block;font-size:14px;font-weight:700}
+.big .c{font-size:64px;font-weight:900;letter-spacing:.06em;line-height:1}
+.big .d{font-size:16px;font-weight:700;text-align:right}.big .d b{display:block;font-size:40px;font-weight:900;line-height:1}
+.st{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:16px}
+.st div{padding:8px 10px;text-align:center;color:var(--ink)}
+.st small{display:block;font-size:13px;font-weight:800}
+.st b{font-size:32px;font-weight:900;line-height:1.1}.st b i{font-style:normal;font-size:13px}
+.stk{margin-top:22px;background:#fff;border:3px solid var(--ink);border-radius:18px;padding:14px 16px;transform:rotate(-1.5deg);box-shadow:4px 6px 0 var(--ink)}
+.stk .tag{position:absolute;top:-16px;right:14px;background:var(--y);border:3px solid var(--ink);border-radius:999px;padding:0 10px;font-weight:900;font-size:13px;transform:rotate(4deg)}
+.stk b{display:block;font-size:18px}
+.stk p{margin:4px 0 0;font-size:14px}
+.bt{display:flex;gap:10px;margin-top:12px}
+.bt span{flex:1;min-height:48px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:15px;border:3px solid var(--ink);border-radius:14px;box-shadow:0 4px 0 var(--ink);background:#fff}
+.bt span.k{background:var(--g);color:#fff}
+.sts{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:24px}
+.sts div{background:#fff;border:3px solid var(--ink);border-radius:16px;padding:10px 12px;min-height:84px}
+.sts div:nth-child(1){transform:rotate(1.5deg)}.sts div:nth-child(2){transform:rotate(-2deg)}.sts div:nth-child(3){transform:rotate(-1deg)}.sts div:nth-child(4){transform:rotate(2deg)}
+.sts b{display:block;font-size:15px}
+.sts small{display:block;font-size:13px;color:var(--sub);line-height:1.45}
+.unoff{font-size:13px;color:var(--sub);margin:20px 2px 0}
+.nav{position:fixed;left:50%;transform:translateX(-50%);bottom:10px;width:calc(min(420px,100vw) - 20px);display:flex;gap:6px;z-index:30}
+.nav span{flex:1;min-height:54px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:900;border-radius:14px;background:#fff;border:3px solid var(--ink);box-shadow:0 4px 0 var(--ink)}
+.nav span.on{background:var(--y);transform:translateY(3px);box-shadow:0 1px 0 var(--ink)}
+/* シール帳 */
+.bk{margin-top:18px;background:var(--r);color:#fff;padding:14px 18px;display:flex;justify-content:space-between;align-items:center}
+.bk b{font-size:24px}
+.bk small{display:block;font-size:13px;font-weight:700}
+.bk .n{font-size:44px;font-weight:900;line-height:1}.bk .n i{font-style:normal;font-size:16px}
+.sheet{margin-top:22px;background:#fff;border:3px solid var(--ink);border-radius:20px;padding:12px 12px 16px}
+.sheet h3{margin:0;font-size:18px;display:flex;justify-content:space-between}
+.sheet h3 small{font-size:15px}
+.sheet h4{margin:12px 0 0;font-size:13px;color:var(--sub)}
+.sg{display:flex;flex-wrap:wrap;gap:10px;margin-top:8px}
+.sg span{min-height:46px;display:flex;align-items:center;padding:0 14px;border-radius:12px;font-weight:900;font-size:15px;color:var(--ink);border:3px solid var(--ink);box-shadow:2px 3px 0 var(--ink)}
+.sg span:nth-child(4n+1){background:#CFE0FB;transform:rotate(-2deg)}.sg span:nth-child(4n+2){background:#FCE3A6;transform:rotate(1.5deg)}.sg span:nth-child(4n+3){background:#C9EBD7;transform:rotate(-1deg)}.sg span:nth-child(4n+4){background:#F9D2CE;transform:rotate(2deg)}
+.sg span.off{background:#fff!important;border:3px dashed #8A8AA0;box-shadow:none;color:var(--sub);font-weight:500;transform:none}
+.sg span.off::after{content:"はがした";font-size:13px;margin-left:6px}
+.sg span.lk::after{content:"固定";font-size:13px;margin-left:6px;font-weight:700}
+.rs{margin-top:24px;min-height:52px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:16px;border:3px solid var(--ink);border-radius:16px;background:var(--y);box-shadow:0 5px 0 var(--ink)}
+
+</style></head><body>
+<main class="phone"><div class="pg" style="padding-bottom:40px">
+<div class="top"><span class="mp">‹ マイページ</span><small>押すたびに保存</small></div>
+<div class="bk blk"><div><b>シール帳</b><small>表示の編集 ・ 押すとはがす／貼る</small></div><span class="n">33<i>/40</i></span></div>
+<div class="sheet"><h3>タブ<small>3/4</small></h3><div class="sg"><span class="lk">ホーム</span><span class="">図鑑</span><span class="">フライト</span><span class="off">運用</span><span class="">修行</span></div></div><div class="sheet"><h3>見方<small>17/21</small></h3><h4>図鑑</h4><div class="sg"><span class="">地図</span><span class="">案内標</span><span class="">タイル</span><span class="off">年代記</span><span class="">地方</span></div><h4>フライト</h4><div class="sg"><span class="">修行</span><span class="">搭乗券</span><span class="">案内板</span><span class="">地図</span><span class="off">カレンダー</span><span class="">月ごと</span><span class="off">高度</span><span class="off">文字だけ</span><span class="">路線</span></div><h4>運用</h4><div class="sg"><span class="">案内板</span><span class="">1日の山</span><span class="">滑走路</span><span class="">定時</span><span class="">空の道すじ</span><span class="">短冊</span><span class="">撮る人</span></div></div><div class="sheet"><h3>かたまり<small>13/15</small></h3><h4>ホーム</h4><div class="sg"><span class="">これから乗る便</span><span class="off">イベントのお知らせ</span><span class="">これまでの記録</span><span class="">最近の印</span></div><h4>運用</h4><div class="sg"><span class="">遅れ・ダイバート</span><span class="">地図と近くの機体</span><span class="">特別塗装機</span><span class="">撮影地</span><span class="">門限のある時間</span><span class="">ゴーアラウンド（推定）</span></div><h4>成績</h4><div class="sg"><span class="">パスポート</span><span class="">乗った機体</span><span class="">航空会社別</span><span class="">ステータスの目安</span><span class="off">修行のまとめ</span></div></div><div class="rs">全部貼りなおす（全部乗せに戻す・7）</div><p class="unoff">ログインしているので、ほかの端末でも同じ表示になります。</p></div></main>
+<aside class="ann"><b>メモ（本番には出ません・実験）</b><ul><li>案H シールと積み木：表示の編集（7こ隠したとき）</li><li>外した決まり：薄い影と控えめな色の決まりを外し、原色のぶ厚い積み木（下に濃い色の厚み）に／角丸カードを少し傾けたシールに／JAL赤・ANA青は控えめの決まりを外し、赤・青・黄・緑を全面に／表示の編集は「シール帳」：出す＝台紙に貼ったシール、隠す＝はがして白いふちだけ残した跡</li><li>良い点：手で触って並べる楽しさがあり、隠す・出すが「はがす・貼る」で体で分かる。並べ替え（公開のあと）にもそのままつながる</li><li>困る点：いちばん子どもっぽく、撮る人・修行の人には合わないおそれ。傾けたシールは字が多いと読みにくく、色が強いので長く見ると疲れる</li><li>中身（全部乗せで始める・隠す・すぐ保存・戻す・提案は1回）はふだんの画面案（all-in-filter）と同じ</li></ul></aside>
+<script>if(window!==window.top){var a=document.querySelector('.ann');if(a)a.remove()}</script>
+</body></html>

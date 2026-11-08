@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>案F 写真なしの旅行雑誌・表示の編集（7こ隠したとき）｜そらメモ 決まりを外した実験</title>
+<style>*{box-sizing:border-box}html,body{margin:0}.phone{position:relative;max-width:420px;min-height:100vh;min-height:100svh;margin:0 auto;overflow:hidden}
+.ann{position:relative;z-index:90;max-width:392px;margin:16px auto 40px;font:13px/1.7 "Noto Sans CJK JP",sans-serif;background:#FFF8D6;color:#5A4A12;padding:12px 14px;border-radius:12px}.ann ul{margin:4px 0 0;padding-left:1.2em}
+
+
+:root{--pp:#F5F1E8;--gr:#1F4D3E;--sun:#E9A23B;--ink:#2A2724;--sub:#5E5850;--jp:"Noto Sans CJK JP",sans-serif}
+body{background:#D8D2C4;color:var(--ink);font-family:var(--jp);font-size:15px;line-height:1.7}
+.phone{background:var(--pp)}
+.hd{display:flex;justify-content:space-between;align-items:center;padding:12px 16px 0}
+.hd b{font-size:15px;font-weight:900;letter-spacing:.3em}
+.hd small{font-size:13px;color:var(--sub)}
+.mp{min-height:44px;display:flex;align-items:center;font-weight:800;font-size:14px;border-bottom:2px solid var(--ink)}
+.spread{display:grid;grid-template-columns:96px 1fr;margin-top:10px;min-height:330px}
+.vt{background:var(--gr);color:var(--pp);writing-mode:vertical-rl;padding:18px 0;display:flex;align-items:center;font-weight:900;font-size:44px;letter-spacing:.12em;line-height:1.2}
+.vt small{font-size:15px;font-weight:700;letter-spacing:.3em;margin-top:14px;color:#D9E6DF}
+.lead{padding:16px 16px 0}
+.no{font-size:13px;font-weight:800;color:var(--gr);letter-spacing:.2em}
+.big{font-size:84px;font-weight:900;line-height:.95;letter-spacing:-.02em;margin-top:6px}
+.big i{font-style:normal;font-size:20px;font-weight:700;color:var(--sub);margin-left:4px}
+.lead p{font-size:14px;margin:8px 0 0;color:var(--ink)}
+.facts{display:flex;gap:16px;margin-top:12px}
+.facts div{font-size:13px;color:var(--sub)}
+.facts b{display:block;font-size:30px;font-weight:900;color:var(--ink);line-height:1.1}
+.facts b i{font-style:normal;font-size:13px;color:var(--sub)}
+.edn{margin:18px 16px 0;background:var(--sun);color:#2A1C05;padding:14px 16px}
+.edn .no{color:#4A3208}
+.edn b{display:block;font-size:19px;line-height:1.4;margin-top:4px}
+.edn p{margin:6px 0 0;font-size:14px}
+.edn .bt{display:flex;gap:16px;margin-top:8px}
+.edn .bt span{min-height:44px;display:flex;align-items:center;font-weight:900;font-size:15px;border-bottom:3px solid #2A1C05}
+.cols{column-count:2;column-gap:18px;padding:18px 16px 0}
+.cols div{break-inside:avoid;padding:0 0 12px}
+.cols .pn{font-size:13px;font-weight:900;color:var(--gr)}
+.cols b{display:block;font-size:16px;line-height:1.4}
+.cols small{display:block;font-size:13px;color:var(--sub);line-height:1.5}
+.unoff{font-size:13px;color:var(--sub);padding:6px 16px 0}
+.run{position:fixed;left:50%;transform:translateX(-50%);bottom:0;width:min(420px,100vw);background:var(--pp);display:flex;z-index:30;padding:0 8px 10px;box-shadow:0 -1px 0 rgba(42,39,36,.25)}
+.run span{flex:1;min-height:56px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:var(--sub)}
+.run span small{font-size:13px;font-weight:500}
+.run span.on{color:var(--gr);box-shadow:inset 0 3px 0 var(--gr)}
+.pg{padding-bottom:100px}
+/* 目次 */
+.toc{padding:0 16px 40px}
+.toch{display:grid;grid-template-columns:1fr auto;align-items:end;margin-top:14px;background:var(--gr);color:var(--pp);padding:16px}
+.toch b{font-size:40px;font-weight:900;letter-spacing:.1em;line-height:1}
+.toch small{display:block;font-size:14px;color:#D9E6DF;margin-top:6px}
+.toch .n{font-size:44px;font-weight:900;line-height:1}.toch .n i{font-style:normal;font-size:16px;color:#D9E6DF}
+.sec{margin-top:22px}
+.sec h3{margin:0;font-size:24px;font-weight:900;display:flex;justify-content:space-between;align-items:baseline}
+.sec h3 small{font-size:14px;color:var(--sub)}
+.sec h4{margin:10px 0 0;font-size:13px;color:var(--gr);letter-spacing:.2em}
+.en{display:flex;align-items:baseline;gap:8px;min-height:44px;padding-top:10px;font-size:16px;font-weight:700}
+.en .p{font-size:13px;color:var(--sub);width:26px;flex:none}
+.en .dots{flex:1;border-bottom:2px dotted rgba(42,39,36,.35);transform:translateY(-4px)}
+.en .s{font-size:14px;font-weight:900;color:var(--gr)}
+.en.off{color:var(--sub);font-weight:400}
+.en.off .s{color:#2A1C05;background:var(--sun);padding:0 8px}
+.en.lk .s{color:var(--sub)}
+.rs{margin-top:24px;min-height:50px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:16px;border:2px solid var(--gr);color:var(--gr)}
+
+</style></head><body>
+<main class="phone"><div class="hd"><span class="mp">‹ マイページ</span><small>押すたびに保存</small></div><div class="toc">
+<div class="toch"><div><b>目次</b><small>表示の編集 ・ 休載しても記録は消えません</small></div><div class="n">33<i>/40</i></div></div>
+<div class="sec"><h3>タブ<small>掲載 3/4</small></h3><div class="en lk"><span class="p">01</span><span>ホーム</span><span class="dots"></span><span class="s">いつも</span></div><div class="en "><span class="p">02</span><span>図鑑</span><span class="dots"></span><span class="s">掲載</span></div><div class="en "><span class="p">03</span><span>フライト</span><span class="dots"></span><span class="s">掲載</span></div><div class="en off"><span class="p">04</span><span>運用</span><span class="dots"></span><span class="s">休載</span></div><div class="en "><span class="p">05</span><span>修行</span><span class="dots"></span><span class="s">掲載</span></div></div><div class="sec"><h3>見方<small>掲載 17/21</small></h3><h4>図鑑</h4><div class="en "><span class="p">06</span><span>地図</span><span class="dots"></span><span class="s">掲載</span></div><div class="en "><span class="p">07</span><span>案内標</span><span class="dots"></span><span class="s">掲載</span></div><div class="en "><span class="p">08</span><span>タイル</span><span class="dots"></span><span class="s">掲載</span></div><div class="en off"><span class="p">09</span><span>年代記</span><span class="dots"></span><span class="s">休載</span></div><div class="en "><span class="p">10</span><span>地方</span><span class="dots"></span><span class="s">掲載</span></div><h4>フライト</h4><div class="en "><span class="p">11</span><span>修行</span><span class="dots"></span><span class="s">掲載</span></div><div class="en "><span class="p">12</span><span>搭乗券</span><span class="dots"></span><span class="s">掲載</span></div><div class="en "><span class="p">13</span><span>案内板</span><span class="dots"></span><span class="s">掲載</span></div><div class="en "><span class="p">14</span><span>地図</span><span class="dots"></span><span class="s">掲載</span></div><div class="en off"><span class="p">15</span><span>カレンダー</span><span class="dots"></span><span class="s">休載</span></div><div class="en "><span class="p">16</span><span>月ごと</span><span class="dots"></span><span class="s">掲載</span></div><div class="en off"><span class="p">17</span><span>高度</span><span class="dots"></span><span class="s">休載</span></div><div class="en off"><span class="p">18</span><span>文字だけ</span><span class="dots"></span><span class="s">休載</span></div><div class="en "><span class="p">19</span><span>路線</span><span class="dots"></span><span class="s">掲載</span></div><h4>運用</h4><div class="en "><span class="p">20</span><span>案内板</span><span class="dots"></span><span class="s">掲載</span></div><div class="en "><span class="p">21</span><span>1日の山</span><span class="dots"></span><span class="s">掲載</span></div><div class="en "><span class="p">22</span><span>滑走路</span><span class="dots"></span><span class="s">掲載</span></div><div class="en "><span class="p">23</span><span>定時</span><span class="dots"></span><span class="s">掲載</span></div><div class="en "><span class="p">24</span><span>空の道すじ</span><span class="dots"></span><span class="s">掲載</span></div><div class="en "><span class="p">25</span><span>短冊</span><span class="dots"></span><span class="s">掲載</span></div><div class="en "><span class="p">26</span><span>撮る人</span><span class="dots"></span><span class="s">掲載</span></div></div><div class="sec"><h3>かたまり<small>掲載 13/15</small></h3><h4>ホーム</h4><div class="en "><span class="p">27</span><span>これから乗る便</span><span class="dots"></span><span class="s">掲載</span></div><div class="en off"><span class="p">28</span><span>イベントのお知らせ</span><span class="dots"></span><span class="s">休載</span></div><div class="en "><span class="p">29</span><span>これまでの記録</span><span class="dots"></span><span class="s">掲載</span></div><div class="en "><span class="p">30</span><span>最近の印</span><span class="dots"></span><span class="s">掲載</span></div><h4>運用</h4><div class="en "><span class="p">31</span><span>遅れ・ダイバート</span><span class="dots"></span><span class="s">掲載</span></div><div class="en "><span class="p">32</span><span>地図と近くの機体</span><span class="dots"></span><span class="s">掲載</span></div><div class="en "><span class="p">33</span><span>特別塗装機</span><span class="dots"></span><span class="s">掲載</span></div><div class="en "><span class="p">34</span><span>撮影地</span><span class="dots"></span><span class="s">掲載</span></div><div class="en "><span class="p">35</span><span>門限のある時間</span><span class="dots"></span><span class="s">掲載</span></div><div class="en "><span class="p">36</span><span>ゴーアラウンド（推定）</span><span class="dots"></span><span class="s">掲載</span></div><h4>成績</h4><div class="en "><span class="p">37</span><span>パスポート</span><span class="dots"></span><span class="s">掲載</span></div><div class="en "><span class="p">38</span><span>乗った機体</span><span class="dots"></span><span class="s">掲載</span></div><div class="en "><span class="p">39</span><span>航空会社別</span><span class="dots"></span><span class="s">掲載</span></div><div class="en "><span class="p">40</span><span>ステータスの目安</span><span class="dots"></span><span class="s">掲載</span></div><div class="en off"><span class="p">41</span><span>修行のまとめ</span><span class="dots"></span><span class="s">休載</span></div></div><div class="rs">全部を掲載に戻す（7）</div><p class="unoff" style="padding:8px 0 0">ログインしているので、ほかの端末でも同じ表示になります。</p></div></main>
+<aside class="ann"><b>メモ（本番には出ません・実験）</b><ul><li>案F 写真なしの旅行雑誌：表示の編集（7こ隠したとき）</li><li>外した決まり：角丸カードと影をやめ、色の面と段組で区切る／横書きだけの決まりを外し、見出しを縦書きに／ホームの地図とシートをやめ、「特集 羽田」の見開き／タブ帯を誌面の柱（ページの端の見出し）に／表示の編集は「目次」：出す＝掲載、隠す＝休載</li><li>良い点：「掲載・休載」の言葉で、隠しても記録は消えないことが自然に伝わる。読み物としての落ち着きがあり、大人向けに見える</li><li>困る点：縦書きと段組は、字が増えると組むのが手間（空港ごと・言葉の長さで崩れやすい）。素早く印を押す画面としては情報まで遠い</li><li>中身（全部乗せで始める・隠す・すぐ保存・戻す・提案は1回）はふだんの画面案（all-in-filter）と同じ</li></ul></aside>
+<script>if(window!==window.top){var a=document.querySelector('.ann');if(a)a.remove()}</script>
+</body></html>

@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>案D 航法図が主役・表示の編集（7こ隠したとき）｜そらメモ 決まりを外した実験</title>
+<style>*{box-sizing:border-box}html,body{margin:0}.phone{position:relative;max-width:420px;min-height:100vh;min-height:100svh;margin:0 auto;overflow:hidden}
+.ann{position:relative;z-index:90;max-width:392px;margin:16px auto 40px;font:13px/1.7 "Noto Sans CJK JP",sans-serif;background:#FFF8D6;color:#5A4A12;padding:12px 14px;border-radius:12px}.ann ul{margin:4px 0 0;padding-left:1.2em}
+
+
+:root{--paper:#F3EBD8;--land:#EADFC4;--water:#CFE3E6;--mag:#9B1F6E;--teal:#0E5A63;--ink:#2B2620;--sub:#5C5346;--jp:"Noto Sans CJK JP",sans-serif}
+body{background:#CFC6B2;color:var(--ink);font-family:var(--jp);font-size:15px;line-height:1.55}
+.phone{background:var(--paper)}
+.chart{position:absolute;inset:0}
+.chart svg{width:100%;height:100%;display:block}
+.tl{position:absolute;left:12px;top:12px;right:12px;display:flex;justify-content:space-between;align-items:flex-start;z-index:3}
+.lbl{background:#FFFDF6;border:1.5px solid var(--ink);padding:6px 10px;font-size:13px;line-height:1.4}
+.lbl b{display:block;font-size:16px}
+.mp{min-height:44px;display:flex;align-items:center;padding:0 14px;background:#FFFDF6;border:1.5px solid var(--ink);font-weight:800;font-size:14px}
+.apt{position:absolute;left:186px;top:262px;z-index:3;background:#FFFDF6;border:2px solid var(--mag);padding:6px 10px 8px;min-width:150px}
+.apt .c{font-size:34px;font-weight:900;color:var(--mag);letter-spacing:.06em;line-height:1}
+.apt small{display:block;font-size:13px;color:var(--sub)}
+.apt .d{font-size:13px;font-weight:700;margin-top:2px;color:var(--ink)}
+.apt .d b{font-size:22px;font-weight:900}
+.stat{position:absolute;left:12px;top:96px;z-index:3;display:flex;flex-direction:column;gap:6px}
+.stat div{background:#FFFDF6;border:1.5px solid var(--teal);padding:3px 10px;font-size:13px;color:var(--teal);font-weight:700;min-width:92px}
+.stat b{font-size:24px;color:var(--ink);font-weight:900;margin-right:2px}
+.stat i{font-style:normal;font-size:13px;color:var(--sub)}
+.note{position:absolute;left:12px;right:12px;top:420px;z-index:4;background:#FFFDF6;border:2px solid var(--ink);padding:12px 14px}
+.note::before{content:"";position:absolute;left:220px;top:-56px;width:2px;height:56px;background:var(--ink)}
+.note .tag{font-size:13px;font-weight:800;color:var(--mag);letter-spacing:.08em}
+.note b{display:block;font-size:17px;margin-top:2px}
+.note p{margin:4px 0 0;font-size:14px}
+.btns{display:flex;gap:8px;margin-top:10px}
+.btns span{flex:1;min-height:46px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px;border:2px solid var(--ink)}
+.btns span.k{background:var(--ink);color:#FFFDF6}
+.wpts{position:absolute;left:12px;right:12px;top:612px;z-index:3;display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.wpts div{background:#FFFDF6;border:1.5px dashed var(--teal);padding:6px 9px;min-height:52px;font-size:13px;color:var(--sub);line-height:1.35}
+.wpts b{display:block;font-size:14px;color:var(--ink)}
+.unoff{position:absolute;left:12px;bottom:86px;z-index:3;font-size:13px;color:var(--sub);background:rgba(255,253,246,.92);padding:2px 6px}
+.legend{position:fixed;left:50%;transform:translateX(-50%);bottom:0;width:min(420px,100vw);background:#FFFDF6;border-top:2px solid var(--ink);display:flex;z-index:30;padding:0 6px 8px}
+.legend span{flex:1;min-height:60px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:13px;font-weight:700;color:var(--sub)}
+.legend span::before{content:"";width:16px;height:16px;border:2px solid currentColor;border-radius:50%}
+.legend span:nth-child(2)::before{border-radius:0}
+.legend span:nth-child(3)::before{border-radius:0;transform:rotate(45deg) scale(.85)}
+.legend span:nth-child(4)::before{border-radius:0;height:6px;width:20px}
+.legend span:nth-child(5)::before{clip-path:polygon(50% 0,100% 100%,0 100%);border-radius:0;background:currentColor;border:0}
+.legend span.on{color:var(--mag)}
+.legend span.on::after{content:"";width:28px;height:3px;background:var(--mag)}
+/* 編集 */
+.ep{position:relative;z-index:2;padding:14px 14px 40px}
+.eh{display:flex;justify-content:space-between;align-items:center}
+.ttl{margin-top:14px;background:#FFFDF6;border:2px solid var(--ink);padding:10px 14px;display:flex;justify-content:space-between;align-items:flex-end}
+.ttl .tag{font-size:13px;font-weight:800;color:var(--mag);letter-spacing:.08em}
+.ttl b{display:block;font-size:22px}
+.ttl .n{font-size:40px;font-weight:900;line-height:1}.ttl .n i{font-style:normal;font-size:16px;color:var(--sub)}
+.key{margin-top:10px;background:#FFFDF6;border:1.5px solid var(--ink);padding:8px 12px;font-size:13px;display:flex;gap:16px;color:var(--sub)}
+.key span{display:flex;align-items:center;gap:6px}
+.key span::before{content:"";width:22px;height:0;border-top:3px solid var(--mag)}
+.key span.h::before{border-top:3px dashed var(--sub)}
+.grp{margin-top:12px;background:#FFFDF6;border:1.5px solid var(--ink)}
+.grp h3{margin:0;padding:8px 12px;font-size:16px;display:flex;justify-content:space-between;background:var(--ink);color:#FFFDF6}
+.grp h3 small{font-size:14px}
+.grp h4{margin:0;padding:8px 12px 2px;font-size:13px;color:var(--teal);letter-spacing:.06em}
+.it{display:flex;align-items:center;gap:12px;min-height:46px;padding:0 12px;font-size:15px;font-weight:700}
+.it::before{content:"";width:30px;height:0;border-top:3px solid var(--mag);flex:none}
+.it .s{margin-left:auto;font-size:13px;color:var(--mag);font-weight:800}
+.it.off{color:var(--sub);font-weight:500}
+.it.off::before{border-top:3px dashed var(--sub)}
+.it.off .s{color:var(--sub)}
+.it.lk .s{color:var(--sub)}
+.reset{margin-top:14px;min-height:50px;display:flex;align-items:center;justify-content:center;border:2px solid var(--mag);color:var(--mag);background:#FFFDF6;font-weight:900;font-size:16px}
+.foot{font-size:13px;color:var(--sub);margin-top:10px;background:rgba(255,253,246,.92);padding:4px 8px}
+
+</style></head><body>
+<main class="phone"><div class="chart" style="opacity:.55"><svg viewBox="0 0 390 900" preserveAspectRatio="xMidYMin slice" aria-hidden="true">
+<rect width="390" height="900" fill="#EADFC4"/>
+<path d="M240 0 C260 120 300 170 290 260 C282 330 330 360 390 380 L390 900 L300 900 C280 760 230 700 250 600 C268 520 210 470 230 380 C246 300 200 240 210 130 C214 80 200 30 205 0Z" fill="#CFE3E6"/>
+<g stroke="rgba(14,90,99,.18)" stroke-width="1"><path d="M30 0V900"/><path d="M90 0V900"/><path d="M150 0V900"/><path d="M210 0V900"/><path d="M270 0V900"/><path d="M330 0V900"/><path d="M0 40H390"/><path d="M0 100H390"/><path d="M0 160H390"/><path d="M0 220H390"/><path d="M0 280H390"/><path d="M0 340H390"/><path d="M0 400H390"/><path d="M0 460H390"/><path d="M0 520H390"/><path d="M0 580H390"/><path d="M0 640H390"/><path d="M0 700H390"/><path d="M0 760H390"/><path d="M0 820H390"/><path d="M0 880H390"/></g>
+<g fill="none" stroke="#9B1F6E" stroke-width="2"><circle cx="262" cy="300" r="70" stroke-dasharray="8 6"/><circle cx="262" cy="300" r="140" stroke-width="1.5" opacity=".6"/></g>
+<g fill="none" stroke="#0E5A63" stroke-width="1.5" opacity=".7"><circle cx="90" cy="760" r="54"/><path d="M90 700v14M90 806v14M30 760h14M136 760h14"/></g>
+<path d="M0 520 L262 300 L390 210" fill="none" stroke="#0E5A63" stroke-width="2" stroke-dasharray="2 5"/>
+<g transform="translate(262 300)"><circle r="9" fill="#FFFDF6" stroke="#9B1F6E" stroke-width="3"/><path d="M-14 -4 L14 4M-4 14 L4 -14" stroke="#9B1F6E" stroke-width="3"/></g>
+<g fill="#5C5346" font-size="13" font-family="Noto Sans CJK JP"><text x="300" y="470">東京湾</text><text x="40" y="250">多摩川</text></g>
+<g transform="translate(118 412)"><path d="M0-10 L6 6 L0 2 L-6 6Z" fill="#2B2620"/></g>
+</svg></div><div class="ep">
+<div class="eh"><span class="mp">‹ マイページ</span><span class="lbl">押すたびに保存</span></div>
+<div class="ttl"><div><div class="tag">凡例</div><b>表示の編集</b></div><div class="n">33<i>/40</i></div></div>
+<div class="key"><span>実線＝図に出す</span><span class="h">破線＝隠す</span></div>
+<div class="grp"><h3>タブ<small>3/4</small></h3><div class="it lk"><span>ホーム</span><span class="s">いつも</span></div><div class="it "><span>図鑑</span><span class="s">出す</span></div><div class="it "><span>フライト</span><span class="s">出す</span></div><div class="it off"><span>運用</span><span class="s">隠す</span></div><div class="it "><span>修行</span><span class="s">出す</span></div></div><div class="grp"><h3>見方<small>17/21</small></h3><h4>図鑑</h4><div class="it "><span>地図</span><span class="s">出す</span></div><div class="it "><span>案内標</span><span class="s">出す</span></div><div class="it "><span>タイル</span><span class="s">出す</span></div><div class="it off"><span>年代記</span><span class="s">隠す</span></div><div class="it "><span>地方</span><span class="s">出す</span></div><h4>フライト</h4><div class="it "><span>修行</span><span class="s">出す</span></div><div class="it "><span>搭乗券</span><span class="s">出す</span></div><div class="it "><span>案内板</span><span class="s">出す</span></div><div class="it "><span>地図</span><span class="s">出す</span></div><div class="it off"><span>カレンダー</span><span class="s">隠す</span></div><div class="it "><span>月ごと</span><span class="s">出す</span></div><div class="it off"><span>高度</span><span class="s">隠す</span></div><div class="it off"><span>文字だけ</span><span class="s">隠す</span></div><div class="it "><span>路線</span><span class="s">出す</span></div><h4>運用</h4><div class="it "><span>案内板</span><span class="s">出す</span></div><div class="it "><span>1日の山</span><span class="s">出す</span></div><div class="it "><span>滑走路</span><span class="s">出す</span></div><div class="it "><span>定時</span><span class="s">出す</span></div><div class="it "><span>空の道すじ</span><span class="s">出す</span></div><div class="it "><span>短冊</span><span class="s">出す</span></div><div class="it "><span>撮る人</span><span class="s">出す</span></div></div><div class="grp"><h3>かたまり<small>13/15</small></h3><h4>ホーム</h4><div class="it "><span>これから乗る便</span><span class="s">出す</span></div><div class="it off"><span>イベントのお知らせ</span><span class="s">隠す</span></div><div class="it "><span>これまでの記録</span><span class="s">出す</span></div><div class="it "><span>最近の印</span><span class="s">出す</span></div><h4>運用</h4><div class="it "><span>遅れ・ダイバート</span><span class="s">出す</span></div><div class="it "><span>地図と近くの機体</span><span class="s">出す</span></div><div class="it "><span>特別塗装機</span><span class="s">出す</span></div><div class="it "><span>撮影地</span><span class="s">出す</span></div><div class="it "><span>門限のある時間</span><span class="s">出す</span></div><div class="it "><span>ゴーアラウンド（推定）</span><span class="s">出す</span></div><h4>成績</h4><div class="it "><span>パスポート</span><span class="s">出す</span></div><div class="it "><span>乗った機体</span><span class="s">出す</span></div><div class="it "><span>航空会社別</span><span class="s">出す</span></div><div class="it "><span>ステータスの目安</span><span class="s">出す</span></div><div class="it off"><span>修行のまとめ</span><span class="s">隠す</span></div></div><div class="reset">全部乗せに戻す（7）</div><p class="foot">ログインしているので、ほかの端末でも同じ表示になります。</p></div></main>
+<aside class="ann"><b>メモ（本番には出ません・実験）</b><ul><li>案D 航法図が主役：表示の編集（7こ隠したとき）</li><li>外した決まり：ホームの「地図とシート」のシートをなくし、画面全体を航法図にする／角丸カードと影をやめ、図の注記の四角と引き出し線で情報を置く／タブ帯を図の凡例の帯に／表示の編集は図の凡例（実線の記号＝出す、破線の記号＝隠す）／色は航法図の桃色・青緑・砂色</li><li>良い点：空港アプリらしさがいちばん強く、地図を開いたまま全部が読める。表示の編集の凡例は「図に出る・出ない」と結び付いて分かりやすい</li><li>困る点：地図の上に字を置くので、情報が増えると図がうるさくなる。注記の四角が多いと押せる所が見分けにくい</li><li>中身（全部乗せで始める・隠す・すぐ保存・戻す・提案は1回）はふだんの画面案（all-in-filter）と同じ</li></ul></aside>
+<script>if(window!==window.top){var a=document.querySelector('.ann');if(a)a.remove()}</script>
+</body></html>
