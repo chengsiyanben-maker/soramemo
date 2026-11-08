@@ -821,12 +821,22 @@ nav.tabs.tppick .in{box-shadow:0 0 0 3px #E9C46A,0 10px 30px -12px rgba(15,23,42
 .tprow.tpdrag{z-index:2;background:#fff;box-shadow:0 12px 28px -10px rgba(17,24,39,.35);transition:none}.tprow.tpdrag .tph{cursor:grabbing}
 .tprow.tpout{background:#FDECEC}
 .tprow.away{background:#fff;box-shadow:inset 0 0 0 1.5px #D1D5DB}.tprow.away .tpi{background:#F3F4F6}
-.tpadd{min-height:44px;padding:0 16px;border:0;border-radius:999px;background:#fff;color:#1F2937;font:800 14px var(--gothic);box-shadow:0 2px 10px -4px rgba(17,24,39,.3);white-space:nowrap;cursor:pointer}
+.tpadd{white-space:nowrap;flex:none}
 .tpsec{margin:18px 2px 0;font-size:14px;font-weight:800;color:#1F2937}
 .tpfoot{margin:10px 0 0;font-size:13px;color:#6B7280;text-align:center}
 .tpswap{margin:12px 0 0;padding:12px 14px;border-radius:18px;background:#FFF7E0}.tpswap p{margin:0;font-size:13.5px;line-height:1.6;color:#1F2937;font-weight:700}.tpswap .lochip{--s-card:#fff;--s-line:#E5E7EB;--s-ink:#1F2937;min-height:44px}
 .tpmore{display:flex;justify-content:space-between;gap:8px;margin-top:14px}.tpmore .lotext:disabled{color:#9CA3AF;cursor:default}
 .tpundo,.heundo{position:sticky;bottom:0;margin-top:14px}
+/* 改善担当 review-c1（11/8）：外すのは見える「−」、戻すのは「＋ 出す」のピル。見本は灰色の枠と札。長押しの吹き出し */
+nav.tabs button{user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+.tpminus,.hex{width:44px;height:44px;border:0;border-radius:999px;background:none;display:grid;place-items:center;color:#1F2937;cursor:pointer;flex:none}
+.tpminus i,.hex i{width:28px;height:28px;border-radius:999px;background:#fff;box-shadow:inset 0 0 0 1.5px #C5CBD5;display:grid;place-items:center}
+.tpminus svg,.hex svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round}
+.tprow.away b small .tpmp{color:#4B5563;font-weight:700}
+.heprev{background:#E3E7ED}.heprev .hetag{align-self:flex-start;margin:0 0 2px 4px;padding:3px 10px;border-radius:999px;background:#fff;font-size:12px;font-weight:800;color:#4B5563}
+.heundo-pad{height:64px}
+#tpTip{position:fixed;left:50%;z-index:6;transform:translateX(-50%);max-width:calc(100vw - 32px);padding:10px 16px;border-radius:16px;background:#111827;color:#fff;font:700 13.5px/1.5 var(--gothic);box-shadow:0 12px 30px -10px rgba(0,0,0,.45);pointer-events:none;white-space:nowrap}
+#tpTip::after{content:"";position:absolute;left:50%;bottom:-6px;margin-left:-6px;border:6px solid transparent;border-bottom:0;border-top-color:#111827}
 .tpmini{display:flex;height:52px;border-radius:999px;background:#fff;box-shadow:0 1px 2px rgba(17,24,39,.06),0 6px 18px -10px rgba(17,24,39,.25);padding:0 6px;margin-top:8px}
 .tpmini b{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;font-size:12.5px;font-weight:700;color:#4B5563}
 .tpmini b svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
@@ -843,13 +853,12 @@ dialog.heed{--s-bg:#EEF1F5}
 .hepc b{display:block;font-size:14px;color:#1F2937}.hepc small{display:block;font-size:12.5px;color:#6B7280;margin-top:1px}
 .hepc.hero{background:#111827}.hepc.hero b{color:#fff}.hepc.hero small{color:#9CA3AF}.hepc.hero .helk{color:#D1D5DB}
 .helk{position:absolute;right:16px;font-size:13px;font-weight:700;color:#6B7280}
-.hex{position:absolute;right:4px;top:50%;transform:translateY(-50%);width:44px;height:44px;border:0;border-radius:999px;background:none;display:grid;place-items:center;color:#1F2937;cursor:pointer}
-.hex i{width:28px;height:28px;border-radius:999px;background:#F3F4F6;display:grid;place-items:center}.hex svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round}
+.hepc .hex{position:absolute;right:4px;top:50%;transform:translateY(-50%)}
 .hesec{margin:18px 4px 0;font-size:14px;font-weight:800;color:#1F2937}
 .hetray{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
 .heon{display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:0 15px 0 11px;border:0;border-radius:999px;background:#fff;color:#1F2937;font:800 14px var(--gothic);box-shadow:inset 0 0 0 1.5px #C5CBD5;cursor:pointer}.heon svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round}
 .heres{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:18px}.heres .t b{display:block;font-size:15px;color:#1F2937}.heres .t small{display:block;font-size:12.5px;color:#6B7280;margin-top:2px}
-.hereset{display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:0 18px;border:0;border-radius:999px;background:#1F2937;color:#fff;font:800 14px var(--gothic);white-space:nowrap;cursor:pointer}.hereset svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}.hereset:disabled{opacity:.4;cursor:default}
+.hereset{display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:0 18px;border:0;border-radius:999px;background:#fff;color:#1F2937;box-shadow:inset 0 0 0 1.5px #C5CBD5;font:800 14px var(--gothic);white-space:nowrap;cursor:pointer}.hereset svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}.hereset:disabled{opacity:.4;cursor:default}
 .heundo{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:6px 6px 6px 18px;border-radius:999px;background:#111827;color:#fff;font-size:13.5px;line-height:1.4;box-shadow:0 12px 30px -10px rgba(0,0,0,.4)}
 .heundo button{min-height:44px;padding:0 16px;border:0;border-radius:999px;background:rgba(255,255,255,.14);color:#fff;font:700 14px var(--gothic);white-space:nowrap}
 .helink{display:block;margin:8px auto 4px;min-height:44px;padding:0 14px;border:0;background:none;color:#4B5563;font:700 13.5px var(--gothic);cursor:pointer}
@@ -3766,6 +3775,7 @@ async function reload(){
   render(); updateAuthUI(); applyPlan(); renderRide();
   if(SERVER && user && !demo) authAfterLoad(); else renderWelcome();
   try{ renderAllinCard(); }catch(e){}
+  setTimeout(() => { try{ tpTipMaybe(); }catch(e){} }, 1500);
 }
 function updateAuthUI(){
   const needLogin = SERVER && !user && !demo;
@@ -5032,21 +5042,22 @@ const tpMini = (tabs, gone) => `<div class="tpmini" aria-hidden="true">${tabs.ma
 function tpHTML(){
   const tabs = loTabs(), rest = tabs.filter(v => v !== "home"), away = TP_ITEMS.filter(v => !tabs.includes(v)), full = tabs.length >= LO_TAB_MAX;
   const handle = v => `<button type="button" class="tph" data-tp-h="${v}" aria-label="${TAB_NAME[v]}を並べ替える（上下の矢印で動かします）"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 9h14M5 15h14"/></svg></button>`;
+  // 外すのは見える「−」（改善担当 review-c1 の3）。2つのときは出さない（それより減らせない）。はらうのはおまけで残す
+  const minus = v => tabs.length > LO_TAB_MIN ? `<button type="button" class="tpminus" data-tp-off="${v}" aria-label="${TAB_NAME[v]}を外す"><i><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 12h12"/></svg></i></button>` : "";
   const row = (v, i) => `<li class="tprow" data-tp="${v}"><span class="tpn">${i + 2}</span><span class="tpi">${tpIcon(v)}</span><b>${TAB_NAME[v]}</b>
-      <button type="button" class="vh" data-tp-off="${v}">${TAB_NAME[v]}をタブから外す</button>${handle(v)}</li>`;
+      ${minus(v)}${handle(v)}</li>`;
   const swap = TP.swap ? `<div class="tpswap" role="group" aria-label="入れ替えるタブ"><p>タブは${LO_TAB_MAX}つまでです。「${TAB_NAME[TP.swap]}」とどれを入れ替えますか？</p>
       <div class="lochips">${rest.map(v => `<button type="button" class="lochip" data-tp-swap="${v}">${TAB_NAME[v]}</button>`).join("")}<button type="button" class="lochip" data-tp-swap="">やめる</button></div></div>` : "";
   const undo = TP.undo ? `<div class="loundo tpundo" role="status"><span>${esc(TP.undo.text)}</span><button type="button" data-tp-undo>元に戻す</button></div>` : "";
   const msg = TP.msg ? `<p class="tpmsg" role="status">${esc(TP.msg)}</p>` : "";
   return `<div class="tphd"><h3 id="tpTitle">タブを選ぶ</h3><button type="button" class="tpdone" data-close>完了</button></div>
-    <p class="tplead">≡ を持って並べ替え、左へはらうとタブから外します。${LO_TAB_MAX}つまで。</p>${msg}
+    <p class="tplead">「−」で外し、「≡」を持って並べ替えます。${LO_TAB_MAX}つまで。外した画面はマイページから開けます。</p>${msg}
     <ol class="tplist" aria-label="タブに出している画面">
       <li class="tprow lock"><span class="tpn">1</span><span class="tpi">${tpIcon("home")}</span><b>ホーム</b><span class="tplk">いつも</span></li>
       ${rest.map(row).join("")}</ol>
     ${swap}
-    ${away.length ? `<h4 class="tpsec">タブにないもの</h4><ul class="tplist tpaway">${away.map(v => `<li class="tprow away"><span class="tpi">${tpIcon(v)}</span><b>${TAB_NAME[v]}<small>${TP_SUB[v]}</small></b>
-        <button type="button" class="tpadd" data-tp-on="${v}" aria-label="${TAB_NAME[v]}をタブに出す${full ? `（${LO_TAB_MAX}つまでなので入れ替えます）` : ""}">＋ 出す</button></li>`).join("")}</ul>
-      <p class="tpfoot">外した画面はマイページから開けます</p>` : ""}
+    ${away.length ? `<h4 class="tpsec">タブにないもの</h4><ul class="tplist tpaway">${away.map(v => `<li class="tprow away"><span class="tpi">${tpIcon(v)}</span><b>${TAB_NAME[v]}<small>${TP_SUB[v]}・<span class="tpmp">マイページから</span></small></b>
+        <button type="button" class="heon tpadd" data-tp-on="${v}" aria-label="${TAB_NAME[v]}をタブに出す${full ? `（${LO_TAB_MAX}つまでなので入れ替えます）` : ""}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>出す</button></li>`).join("")}</ul>` : ""}
     <div class="tpmore"><button type="button" class="lotext" data-he-open>ホームに出すもの ›</button><button type="button" class="lotext" data-tp-reset${loAllOn() ? " disabled" : ""}>全部乗せに戻す</button></div>
     ${undo}<p class="hsl tpnow">いまのタブ帯</p><div class="tpbar">${tpMini(tabs)}</div>`;
 }
@@ -5058,6 +5069,8 @@ function openTabPicker(from){
   document.querySelector("nav.tabs").classList.add("tppick");
   const h = $("tpTitle"); if(h){ h.tabIndex = -1; h.style.outline = "none"; h.focus(); }
 }
+// 外した直後に行き先を言う（改善担当 review-c1 の2）。いま開いていた画面なら、ホームへ移ったことも言う
+const tpOffText = v => currentView() === v ? `「${TAB_NAME[v]}」を外してホームへ移りました。マイページから開けます` : `「${TAB_NAME[v]}」を外しました。マイページから開けます`;
 // タブを変える（ホームはいつも1番目・2〜5つ）。変えたら保存して画面に当てる
 function tpSet(list, what, text){
   const snap = loSnap(), t = ["home", ...list.filter(v => v !== "home" && TAB_ALL.includes(v))];
@@ -5076,16 +5089,16 @@ const HE_SUB = { ride:"便名を入れると機体を調べる", event:"開い�
 function heHTML(){
   const off = loOff("home"), on = loOrder("home").filter(id => !off.has(id)), out = LO_BLOCKS.home.filter(b => !b[3] && off.has(b[0]));
   const name = id => (LO_BLOCKS.home.find(b => b[0] === id) || [])[1] || id;
-  const back = `<button class="mp-back" type="button" data-close><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>${HE.from === "settings" ? "マイページ" : "閉じる"}</button>`;
+  const back = `<button class="mp-back" type="button" data-close><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>戻る</button>`;
   const fixed = HE_FIXED.map(([k, n, s], i) => `<li class="hepc${i ? "" : " hero"}"><div><b>${n}</b><small>${s}</small></div><span class="helk">いつも</span></li>`).join("");
-  const rows = on.map(id => `<li class="hepc"><div><b>${esc(name(id))}</b>${HE_SUB[id] ? `<small>${HE_SUB[id]}</small>` : ""}</div><button type="button" class="hex" data-he-off="${id}" aria-label="「${esc(name(id))}」をホームから外す"><i><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7l10 10M17 7 7 17"/></svg></i></button></li>`).join("");
+  const rows = on.map(id => `<li class="hepc"><div><b>${esc(name(id))}</b>${HE_SUB[id] ? `<small>${HE_SUB[id]}</small>` : ""}</div><button type="button" class="hex" data-he-off="${id}" aria-label="「${esc(name(id))}」を外す"><i><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 12h12"/></svg></i></button></li>`).join("");
   const tray = out.length ? `<h4 class="hesec">外したもの ${out.length}</h4><div class="hetray">${out.map(b => `<button type="button" class="heon" data-he-on="${b[0]}" aria-label="「${esc(b[1])}」をホームに戻す"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>${esc(b[1])}</button>`).join("")}</div>` : "";
   const undo = HE.undo ? `<div class="heundo" role="status"><span>${esc(HE.undo.text)}</span><button type="button" data-he-undo>元に戻す</button></div>` : "";
   return `<div class="spctop">${back}<span class="sp" aria-hidden="true"></span></div>
-    <h3 class="heh" id="heTitle">ホームに出すもの</h3><p class="helead">ホームのシートの見本です。× で外し、＋ で戻します。</p>
-    <ul class="heprev" aria-label="ホームに出しているもの">${fixed}${rows}</ul>${tray}
-    <div class="locard heres"><div class="t"><b>全部乗せに戻す</b><small>ホームとタブを全部出します</small></div><button type="button" class="hereset" data-tp-reset${loAllOn() ? " disabled" : ""}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.3-5.6"/><path d="M4 4v4h4"/></svg>戻す</button></div>
-    <p class="losave">見方は、それぞれの画面の見方の帯の鉛筆から選べます。</p>${undo}`;
+    <h3 class="heh" id="heTitle">ホームに出すもの</h3><p class="helead">ホームのシートの見本です（並びは本物と同じ）。「−」で外し、「＋」で戻します。</p>
+    <ul class="heprev" aria-label="ホームに出しているもの（見本）"><li class="hetag" aria-hidden="true">見本</li>${fixed}${rows}</ul>${tray}
+    <div class="locard heres"><div class="t"><b>ホームを全部出す</b><small>外したものを全部ホームに戻します。タブはそのまま</small></div><button type="button" class="hereset" data-he-all${out.length ? "" : " disabled"}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.3-5.6"/><path d="M4 4v4h4"/></svg>全部出す</button></div>
+    <p class="losave">タブまで全部乗せに戻すときは、マイページの「表示の編集」か、タブを選ぶのいちばん下から。見方は、それぞれの画面の見方の帯の鉛筆から選べます。</p>${undo}${undo ? `<div class="heundo-pad" aria-hidden="true"></div>` : ""}`;
 }
 function heRender(){ const d = $("dHomeEd"); if(!d || !d.open) return; const y = d.scrollTop; $("dHomeEdBody").innerHTML = heHTML(); d.scrollTop = y; }
 function openHomeEd(from){
@@ -5107,11 +5120,12 @@ function rsHTML(){
   const c = loCount(), tabs = loTabs(), back = LO_ALL_TABS().filter(v => !tabs.includes(v)), moved = !back.length && tabs.join() !== LO_ALL_TABS().join();
   const per = (kind, secs) => secs.map(([k, t]) => [t, c.off.filter(x => x.kind === kind && x.k === k).length]).filter(x => x[1]).map(([t, n]) => `${t} ${n}`).join("・") || "そのまま";
   const extra = tabs.filter(v => !LO_ALL_TABS().includes(v)), nm = l => l.map(v => TAB_NAME[v]).join("・");
-  const tabTxt = [back.length ? `${nm(back)}を戻す` : "", extra.length ? `${nm(extra)}を外す` : "", moved ? "並び順を戻す" : ""].filter(Boolean).join("・") || "そのまま";
+  const tabTxt = [back.length ? `${nm(back)}を戻す` : "", extra.length ? `${nm(extra)}を外す` : ""].filter(Boolean).join("・") || "そのまま";
+  const both = LO_ALL_TABS().filter(v => tabs.includes(v)), order = tabs.filter(v => LO_ALL_TABS().includes(v)).join() !== both.join() ? "元の順に" : "そのまま";   // 改善担当 review-c1 の5
   return `<div class="sph"><span class="grab" aria-hidden="true"></span></div><h3 id="rsTitle">全部乗せに戻しますか？</h3>
     <p class="rslead">タブを${LO_ALL_TABS().length}つ（${LO_ALL_TABS().map(v => TAB_NAME[v]).join("・")}）に戻し、外したものを全部また出します。記録はそのままです。</p>
     ${tpMini(LO_ALL_TABS())}
-    <div class="rsrows"><div class="rsrow"><b>タブ</b><span>${tabTxt}</span></div><div class="rsrow"><b>見方</b><span>${per("view", LO_VIEW_SEC)}</span></div><div class="rsrow"><b>かたまり</b><span>${per("blk", LO_BLK_SEC.map(([k, t]) => [k, t.replace(/（.*$/, "")]))}</span></div></div>
+    <div class="rsrows"><div class="rsrow"><b>タブ</b><span>${tabTxt}</span></div><div class="rsrow"><b>タブの順番</b><span>${order}</span></div><div class="rsrow"><b>見方</b><span>${per("view", LO_VIEW_SEC)}</span></div><div class="rsrow"><b>かたまり</b><span>${per("blk", LO_BLK_SEC.map(([k, t]) => [k, t.replace(/（.*$/, "")]))}</span></div></div>
     <button class="lobtn rsyes" type="button" data-rs-yes>全部出す</button><button class="lotext rsno" type="button" data-close>やめる</button>`;
 }
 function openReset(){ if(loAllOn()) return; $("dResetBody").innerHTML = rsHTML(); $("dReset").showModal(); const h = $("rsTitle"); if(h){ h.tabIndex = -1; h.style.outline = "none"; h.focus(); } }
@@ -5128,12 +5142,14 @@ document.addEventListener("click", e => {
     if($("dTabs").open){ TP.undo = u; tpRender(); } if($("dHomeEd").open){ HE.undo = u; heRender(); } track("layout", "reset_c3"); return; }
   if((b = q("[data-tp-undo]"))){ if(TP.undo){ loRestore(TP.undo.snap); loChanged("undo"); TP.undo = null; tpRender(); } return; }
   if((b = q("[data-he-undo]"))){ if(HE.undo){ loRestore(HE.undo.snap); loChanged("undo"); HE.undo = null; heRender(); } return; }
-  if((b = q("[data-tp-off]"))){ const v = b.dataset.tpOff; tpSet(loTabs().filter(x => x !== v), "tab_" + v + "_off", `「${TAB_NAME[v]}」をタブから外しました`); return; }
+  if((b = q("[data-tp-off]"))){ const v = b.dataset.tpOff; tpSet(loTabs().filter(x => x !== v), "tab_" + v + "_off", tpOffText(v)); return; }
   if((b = q("[data-tp-on]"))){ const v = b.dataset.tpOn, t = loTabs();
     if(t.length >= LO_TAB_MAX){ TP.swap = v; TP.msg = ""; tpRender(); return; }
     tpSet([...t, v], "tab_" + v + "_on", `「${TAB_NAME[v]}」をタブに出しました`); return; }
   if((b = q("[data-tp-swap]"))){ const out = b.dataset.tpSwap, v = TP.swap; if(!out || !v){ TP.swap = null; tpRender(); return; }
-    tpSet(loTabs().map(x => x === out ? v : x), "tab_swap", `「${TAB_NAME[out]}」と「${TAB_NAME[v]}」を入れ替えました`); return; }
+    tpSet(loTabs().map(x => x === out ? v : x), "tab_swap", `「${TAB_NAME[v]}」を出しました。「${TAB_NAME[out]}」はマイページから開けます`); return; }
+  if((b = q("[data-he-all]"))){ if(b.disabled) return; const snap = loSnap(), L = loEdit(), n = (L.off.home || []).length; if(!n) return;
+    delete L.off.home; loChanged("blk_home_all"); HE.undo = { text:`${n}こをホームに戻しました`, snap }; heRender(); return; }
   if((b = q("[data-he-off]"))){ heSet(b.dataset.heOff, true); return; }
   if((b = q("[data-he-on]"))){ heSet(b.dataset.heOn, false); return; }
 });
@@ -5175,7 +5191,7 @@ document.addEventListener("keydown", e => {
     if(!g || e.pointerId !== g.id) return;
     const s = g; g = null; s.row.style.transform = ""; s.row.classList.remove("tpdrag", "tpout");
     if(s.kind === "drag"){ if(s.moved){ const order = [...s.row.parentElement.querySelectorAll(".tprow[data-tp]")].map(r => r.dataset.tp); tpSet(order, "tab_order", ""); } return; }
-    if(e.type === "pointerup" && s.dx < -72) tpSet(loTabs().filter(x => x !== s.v), "tab_" + s.v + "_off", `「${TAB_NAME[s.v]}」をタブから外しました`);
+    if(e.type === "pointerup" && s.dx < -72) tpSet(loTabs().filter(x => x !== s.v), "tab_" + s.v + "_off", tpOffText(s.v));
   };
   document.addEventListener("pointerup", end); document.addEventListener("pointercancel", end);
 })();
@@ -5186,13 +5202,29 @@ document.addEventListener("keydown", e => {
   nav.addEventListener("pointerdown", e => {
     const b = e.target.closest('button[data-mode="rally"]'); if(!b || MODE !== "rally") return;
     fired = false; at = [e.clientX, e.clientY]; stop();
-    t = setTimeout(() => { t = null; fired = true; track("tab_pick", "longpress"); if(navigator.vibrate) try{ navigator.vibrate(10); }catch(_){} openTabPicker("longpress"); }, 550);
+    t = setTimeout(() => { t = null; fired = true; track("tab_pick", "longpress"); tpTipDone(); if(navigator.vibrate) try{ navigator.vibrate(10); }catch(_){} openTabPicker("longpress"); }, 550);
   });
   nav.addEventListener("pointermove", e => { if(t && at && Math.hypot(e.clientX - at[0], e.clientY - at[1]) > 10) stop(); });
   nav.addEventListener("pointerup", stop); nav.addEventListener("pointercancel", stop); nav.addEventListener("pointerleave", stop);
   nav.addEventListener("contextmenu", e => { if(e.target.closest('button[data-mode="rally"]')) e.preventDefault(); });
   document.addEventListener("click", e => { if(fired && e.target.closest("nav.tabs")){ e.stopPropagation(); e.preventDefault(); fired = false; } }, true);
 })();
+/* 長押しを、提案のない人にも1回だけ教える（改善担当 review-c1 の1）。はじめてスタンプラリーのタブ帯が見えたとき、タブ帯のすぐ上に吹き出し。
+   画面の操作はさえぎらない（押せるものは何もない）。どこかを触る・長押しで開く・12秒で消え、二度と出さない（端末に soramemo.tpTaught） */
+const tpTaught = () => { try{ return localStorage.getItem("soramemo.tpTaught") === "1"; }catch(e){ return true; } };
+function tpTipDone(){ try{ localStorage.setItem("soramemo.tpTaught", "1"); }catch(e){} const el = $("tpTip"); if(el) el.remove(); }
+function tpTipMaybe(){
+  if(tpTaught() || demo || MODE !== "rally" || $("tpTip") || document.querySelector("dialog[open]")) return false;
+  const nav = document.querySelector("nav.tabs .in"); if(!nav || !nav.offsetParent) return false;
+  const r = nav.getBoundingClientRect(); if(!r.height) return false;
+  const el = document.createElement("div"); el.id = "tpTip"; el.setAttribute("role", "status");
+  el.textContent = "長押しで、出すタブと順番を選べます"; el.style.bottom = (innerHeight - r.top + 10) + "px";
+  document.body.appendChild(el); try{ localStorage.setItem("soramemo.tpTaught", "1"); }catch(e){} track("tab_tip", "shown");
+  const off = () => { document.removeEventListener("pointerdown", off, true); const x = $("tpTip"); if(x) x.remove(); };
+  document.addEventListener("pointerdown", off, true); setTimeout(off, 12000); return true;
+}
+// はじめの案内や提案が開いていて出せなかったときは、閉じたあとにもう一度
+document.addEventListener("close", e => { if(e.target.tagName === "DIALOG" && !tpTaught()) setTimeout(() => { try{ tpTipMaybe(); }catch(_){} }, 700); }, true);
 /* ---------- 表示の設定をサーバーに保存する（表 user_view_prefs。データ担当の移行 157） ----------
    中身（fmt 2）：全部乗せのまま＝{}。それ以外＝{ base:構成, layout:表示の編集で変えたもの }。
    表がまだない（反映の前）・つながらないときは、この端末の保存だけで動く */
