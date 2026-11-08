@@ -864,20 +864,21 @@ dialog.heed{--s-bg:#EEF1F5}
 .helink{display:block;margin:8px auto 4px;min-height:44px;padding:0 14px;border:0;background:none;color:#4B5563;font:700 13.5px var(--gothic);cursor:pointer}
 .lotile2{background:#F8F9FB}
 /* ON／OFF を試す（11/9 1時 本人「ON OFFにしてみて」）：タブを選ぶ・ホームに出すものの行のスイッチ。字の札 ON／OFF つき（色だけに頼らない）・押せる所は 44px 以上。昼と夜で同じ部品（色は変数だけ変える） */
-:root{--sw-on:#1F3A68;--sw-on-ink:#fff;--sw-off:#E3E7ED;--sw-off-ink:#374151;--sw-knob:#fff;--sw-knob-shadow:0 1px 3px rgba(17,24,39,.3);--sw-ring:inset 0 0 0 1.5px #C5CBD5}
-:root[data-night="on"]{--sw-on:var(--n-strong,#DCE3EA);--sw-on-ink:var(--n-bg,#05070B);--sw-off:var(--n-panel-2,#141B24);--sw-off-ink:var(--n-sub,#8996A7);--sw-knob:var(--n-ink,#BCC6D1);--sw-knob-shadow:none;--sw-ring:inset 0 0 0 1px var(--n-ring,rgba(150,170,195,.10))}
-.losw{flex:none;min-width:72px;min-height:44px;padding:0 4px;border:0;background:none;display:grid;place-items:center;cursor:pointer;-webkit-tap-highlight-color:transparent}
-.losw i{position:relative;display:flex;align-items:center;width:66px;height:32px;border-radius:999px;background:var(--sw-off);box-shadow:var(--sw-ring);transition:background .15s}
-.losw i::before{content:"";position:absolute;top:3px;left:3px;width:26px;height:26px;border-radius:999px;background:var(--sw-knob);box-shadow:var(--sw-knob-shadow);transition:left .15s}
+:root{--sw-on-bg:#16233A;--sw-on-ring:#16233A;--sw-on-ink:#FFFFFF;--sw-on-knob:#FFFFFF;--sw-off-bg:#E5E8EE;--sw-off-ring:#C7CDD6;--sw-off-ink:#4B5563;--sw-off-knob:#FFFFFF;--sw-off-knob-ring:#B8C0CB}
+/* 夜（アプリに夜の画面が入ったら data-night="on"）：色の変数は design/night の 07-tabs-v3-onoff と同じ。琥珀と緑は使わない */
+:root[data-night="on"]{--sw-on-bg:rgba(220,227,234,.16);--sw-on-ring:rgba(220,227,234,.72);--sw-on-ink:#DCE3EA;--sw-on-knob:#DCE3EA;--sw-off-bg:transparent;--sw-off-ring:rgba(150,170,195,.30);--sw-off-ink:#8996A7;--sw-off-knob:#3A4654;--sw-off-knob-ring:rgba(150,170,195,.35)}
+.losw{flex:none;min-width:76px;min-height:44px;padding:0 4px;border:0;background:none;display:grid;place-items:center;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.losw i{position:relative;display:flex;align-items:center;width:68px;height:34px;border-radius:999px;background:var(--sw-off-bg);box-shadow:inset 0 0 0 1.5px var(--sw-off-ring);transition:background .15s}
+.losw i::before{content:"";position:absolute;top:4px;left:4px;width:26px;height:26px;border-radius:999px;background:var(--sw-off-knob);box-shadow:inset 0 0 0 1.5px var(--sw-off-knob-ring);transition:left .15s}
 .losw i b{flex:1;padding:0 9px 0 0;text-align:right;font:800 11.5px/1 var(--gothic);letter-spacing:.04em;color:var(--sw-off-ink)}
-.losw[aria-checked="true"] i{background:var(--sw-on);box-shadow:none}.losw[aria-checked="true"] i::before{left:37px}
+.losw[aria-checked="true"] i{background:var(--sw-on-bg);box-shadow:inset 0 0 0 1.5px var(--sw-on-ring)}.losw[aria-checked="true"] i::before{left:38px;background:var(--sw-on-knob);box-shadow:none}
 .losw[aria-checked="true"] i b{padding:0 0 0 11px;text-align:left;color:var(--sw-on-ink)}
 .losw:disabled{cursor:default}.losw:disabled i{opacity:.45}
 .losw:focus-visible{outline:none}.losw:focus-visible i{outline:3px solid #E9C46A;outline-offset:2px}
 @media (prefers-reduced-motion:reduce){.losw i,.losw i::before{transition:none}}
 .tprow.off{background:#fff;box-shadow:inset 0 0 0 1.5px #D9DEE6}.tprow.off .tpi{background:#F3F4F6;color:#6B7280}.tprow.off>b{color:#4B5563}
 .tprow.off b small .tpmp{color:#4B5563;font-weight:700;white-space:nowrap}
-.hepc.sw{padding-right:88px}.hepc .losw{position:absolute;right:6px;top:50%;transform:translateY(-50%)}
+.hepc.sw{padding-right:92px}.hepc .losw{position:absolute;right:6px;top:50%;transform:translateY(-50%)}
 .hepc.off{background:#F7F8FA;box-shadow:inset 0 0 0 1.5px #D9DEE6}.hepc.off b{color:#4B5563}
 
 /* ---------- 刷新（10/25）：運用の上の段・計器のタイル・遅れのカード・見方のタブ ---------- */
