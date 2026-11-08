@@ -1,7 +1,12 @@
 # データ担当の帳面
 
 ## いま持っている仕事
-- 全体のデバッグ（11/7 22時20分 PM の指示）：ブランチ data/debug-1107 → main 向けの下書き PR #34。報告 docs/pm/report-debug-1107.md
+- 表示の設定をサーバーに保存する表（11/8 16時15分 PM の指示・本人の決定「全部乗せ＋自分で隠す」）：ブランチ data/view-prefs → main 向けの下書き PR #37。報告 docs/pm/report-view-prefs.md
+  - 移行 157 user_view_prefs（1人1行・prefs は JSON のもの 16KB まで・fmt・suggest_shown_at・rev・updated_at。RLS は本人だけ select・insert・update・delete、書ける列は prefs・fmt だけ、rev と日時はトリガー、auth.users を cascade で退会で消える）／view_prefs_claim_suggest()（提案を1回だけ。別の端末でも。rev は変えない）
+  - delete-account は説明の行だけ（cascade で消える）。admin_backup には足していない（PR #32 の 154 も同じ関数を直すため）
+  - 確かめた結果：t97（38項目）・t01・t31・t33・t85・t87・t89・t96 通過、番号の重なりなし
+  - 本人待ち：「反映して」（画面の OK のあとでよい）・admin_backup に足すか・上限 16KB でよいか
+- 全体のデバッグ（11/7 22時20分 PM の指示）：ブランチ data/debug-1107 → PR #34。報告 docs/pm/report-debug-1107.md。**main に入った（bb23fc5「反映：全体のデバッグ 11/7」、11/8 の回で確認）**。本番の動きは health-check.sql の結果で確かめる
   - adsb.lol の 429：見る人の airport-traffic は live_positions（75秒以内）から作る（移行 156：live_positions に trk を足す。列だけ・RLS 今のまま）。記録の処理は 429・420 で1回だけ待って取り直す（最長5秒）
   - 見つけた抜け：航跡の点と reg_legs を「偶数の30秒の回」だけで残していたので、後半の回にしか取らない南の円（沖縄・奄美・宮古・石垣）がほとんど残っていない見込み → recordPlan（_shared/traffic.ts）で円ごとに決める。本番の数は health-check.sql の「3」で確かめる
   - airport-now：待つ上限（ODPT 8秒・天気5秒・気象庁4秒）・Server-Timing・wx_obs からの代わり。遅さの主な原因は aviationweather.gov の「ためた答えがない1回目が 4〜20秒、ときどき 504」（外から測った）
@@ -57,7 +62,7 @@
 - adsb.lol の作者には 11/6 22:24 に旅そらのアカウントから連絡済み。返事が来たら本人から渡す
 
 ## PM から積んだ次の仕事（11/8 16時15分）
-- 表示の設定をサーバーに保存する表（例 user_view_prefs：user_id・設定の JSON・更新時刻）。移行と RLS をセット（本人だけ読み書き）、退会で消える（delete-account に足す）、テスト。チェックイン担当の仕様（checkin.md の 11/8 16時15分）を読む。画面案の OK を待たずに下書き PR まで作ってよい
+- （済み・11/8 16時15分の回）表示の設定の表 → PR #37（上の節）
 
 ## 守る決定
 - 表を変えるときは移行と RLS をセット／本番への適用は本人の「反映して」のあと
@@ -67,12 +72,13 @@
 - 本人の決定：規約を改定するときは「terms_versions に1行足す → アプリの定数を変える」の順
 
 ## 移行とテストの番号
-- main の最新は 152（rotation_predict。11/6 反映済み）。maint/2026-11-06 は 153・テスト t93（fix/co-tests の経営の移行も 153 なので、反映の前に rebase）、data/photo-log は 154・テスト t94、maint/2026-11-07 は 155・テスト t95、data/debug-1107 は 156・テスト t96（関数のテストは supabase/tests/live_view_test.ts）。次に新しく作るものは 157 以降・テストは t97 以降
+- main の最新は 152（rotation_predict。11/6 反映済み）。maint/2026-11-06 は 153・テスト t93（fix/co-tests の経営の移行も 153 なので、反映の前に rebase）、data/photo-log は 154・テスト t94、maint/2026-11-07 は 155・テスト t95、data/debug-1107 は 156・テスト t96（関数のテストは supabase/tests/live_view_test.ts。main に反映済み）、data/view-prefs は 157・テスト t97。次に新しく作るものは 158 以降・テストは t98 以降
 - main に別の移行が先に入ったら、反映の前にもう一度 `node tools/migrations.mjs rebase`
 - 本番は小さいプランで一時ファイルの余裕がない。本人に流してもらう SQL は、大きな中間の表・自己結合・大きな並べ替えを避け、索引で引く形にする
 - SQL のテストは全部で約35分かかる（手元で流すときは裏で流してログを見る。t92 だけで約4分。同じログに2回流すと混ざるので、ログの名前を分ける）
 
 ## 次にやること
+000. 表示の設定（PR #37）：CI とレビューに答える。チェックイン担当が prefs の形を決めたら、fmt と上限が合うか見る。「反映して」が出たら migrations.mjs rebase。admin_backup に足すと決まったら PR #32 と順番をそろえて足す
 00. 全体のデバッグ（PR #34）：本人の health-check.sql の結果を読む（南の円の抜け・429 の回数・cron の失敗）。反映されたら、Server-Timing で airport-now のどこが遅いかを PM に測ってもらい、案A／案B を出し直す。adsb.lol の作者の返事が来たら、上限に合わせて記録の間隔を見直す。CI とレビューに答える
 0. ストアの見直し（PR #22）：本人が OpenSky を「置き換え」に決めたら、verify_io.ts の取り先を adsb.lol の記録に差し替える案（移行が要らない形）とテストを作る。SWIM のサービス説明書の文が来たら AIP の判定を書き直す。adsb.im の条件を読む
 1. 運用予想：本人の「反映して」を待つ（移行 152 だけ。画面はまだ）。反映されたら、次の朝に cron.job_run_details（rot-pairs・rot-eval）の結果をもらい、古い日がどこまで埋まったか・かかった時間を見る。時間がかかりすぎ（採点の legs が300に届かない）なら、rot_eval_nightly の便の数を 200 に下げる案を出す。bgw が on なら、仕事の文の set が効いているかも結果から確かめる
@@ -85,6 +91,7 @@
 8. それ以外は PM の指示を待つ（勝手に新しい機能は始めない）。毎週月曜の昼の回は、下の「定期の仕事」（次の候補：点検の結果が来たら、死んだ行や使われていない索引の整理・遅い処理。結果がないまま次の回が来たら、cold_rows の大きな日を jsonb にまとめるときの作業メモリと cold-archive の読み出し方を見る）
 
 ## ほかの担当への依頼
+- チェックインへ（11/8 表示の設定・PR #37）：user_view_prefs ができた（未反映）。読む＝select maybeSingle（行がない＝全部乗せ）、保存＝upsert({user_id, prefs, fmt})、ぶつかりを見るなら update … where rev = 前の値。提案は rpc('view_prefs_claim_suggest') が true のときだけ出す。「全部乗せに戻す」は行を消さず prefs = '{}' に（消すと提案がもう一度出る）。今ひな形を使っている人は、サーバーに行がなければ端末の見え方を1回だけ上げる案。くわしくは docs/pm/report-view-prefs.md
 - チェックインへ（11/7 全体のデバッグ・PR #34）：(1) 運用の画面で metar を待つときに上限（例 8秒）を付け、超えたら「いまは読めません」に切り替えて、ほかは先に出す（11/6 のデモで「気象通報を読み込んでいます…」のまま止まった件）。`stale: true` なら「◯分前の通報」 (2) 長崎・鹿児島など1時間ごと・夜は発表のない空港の出し方 (3) 本人が決めたら、airport-traffic の地図から便名のない機体が消える
 - 撮る人用・運用予想へ（11/7）：PR #34 が入ると reg_legs に南の円（那覇・宮古・石垣など）の機体が入り始める。予想の当たり率の比べ方が変わる可能性がある
 - 撮る人用へ（11/6 撮影記録・PR #32）：photo_log と photo_candidates ができた（未反映）。候補は上の3件を出し、「ほかの機体」は最大20件。断る文は 'not recorded'（14空港の外）・'too old'（31日より前）・'future'・'login required'。登録記号のない便は返さないので、どれでもないときは手で入れる。仕様との違いは「36時間の境目で両方の元を見る」だけ
