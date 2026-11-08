@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="ja" data-night="on"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>タブを選ぶ（夜）｜そらメモ 夜の画面（1版）</title>
+<style>:root{
+  --n-bg:#05070B;        /* 画面の地（夜だけ黒にしてよい） */
+  --n-panel:#0D1218;     /* 計器の枠＝カード */
+  --n-panel-2:#141B24;   /* ピル・押しボタンの地、カードの中の段 */
+  --n-ring:rgba(150,170,195,.10);  /* 枠のふち（黒い線ではなく、薄い明るいふち） */
+  --n-ink:#BCC6D1;       /* 本文（真っ白にしない） */
+  --n-strong:#DCE3EA;    /* 見出し・大事な字 */
+  --n-sub:#8996A7;       /* 補足 */
+  --n-mute:#7D8A9B;      /* 単位（小さく薄く） */
+  --n-glow-1:#5FD993;    /* 光る色1 緑：主役の数字・「入」 */
+  --n-glow-2:#F0AC4E;    /* 光る色2 琥珀：いまの場所・選んでいるもの・注意 */
+  --n-glow-1-halo:0 0 6px rgba(95,217,147,.45);
+  --n-glow-2-halo:0 0 6px rgba(240,172,78,.40);
+  --n-on-glow:#05070B;   /* 琥珀の地の上の字 */
+  --n-sea:#060A0F; --n-land:#0F151C; --n-coast:#2B3746; --n-ring-map:#243040; --n-grid:rgba(95,217,147,.06);
+  --n-shadow:0 14px 30px -18px rgba(0,0,0,.9),inset 0 0 0 1px var(--n-ring);
+  --n-num:ui-monospace,"SF Mono","Menlo","Roboto Mono","DejaVu Sans Mono",monospace; /* 数字だけに使う */
+}
+:root{--gothic:"Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic UI","Yu Gothic","Meiryo","Noto Sans JP","Noto Sans CJK JP",system-ui,sans-serif;--sign:"Barlow Condensed","Arial Narrow",var(--gothic);color-scheme:dark}
+*{box-sizing:border-box}html,body{margin:0}
+body{background:var(--n-bg);color:var(--n-ink);font-family:var(--gothic);font-size:15px;line-height:1.6;-webkit-text-size-adjust:100%}
+.phone{position:relative;max-width:420px;min-height:100vh;min-height:100svh;margin:0 auto;overflow:hidden;background:var(--n-bg)}
+.wrap{padding:14px 16px 132px}
+.card{background:var(--n-panel);border-radius:20px;box-shadow:var(--n-shadow)}
+.lab{font-size:13px;font-weight:700;color:var(--n-sub)}
+.num{font-family:var(--n-num);font-variant-numeric:tabular-nums;font-weight:700;color:var(--n-strong);line-height:1.1;letter-spacing:-.02em}
+.lit{color:var(--n-glow-1);text-shadow:var(--n-glow-1-halo)}
+.here{color:var(--n-glow-2);text-shadow:var(--n-glow-2-halo)}
+.u{font-family:var(--gothic);font-size:12px;font-weight:600;color:var(--n-mute);margin-left:3px;letter-spacing:0;text-shadow:none}
+.code{font-family:var(--sign);font-weight:700;letter-spacing:.04em;color:var(--n-strong)}
+h1.t{font-size:24px;line-height:1.3;color:var(--n-strong);margin:16px 4px 0}
+.grp-h{font-size:13px;font-weight:700;color:var(--n-sub);margin:22px 6px 0}
+.note{font-size:13px;color:var(--n-sub);margin:10px 4px 0;line-height:1.6}
+.bar{display:flex;align-items:center;gap:8px;justify-content:space-between}
+.back,.pill{height:44px;display:inline-flex;align-items:center;gap:6px;font-size:14px;font-weight:700;color:var(--n-strong);background:var(--n-panel);box-shadow:var(--n-shadow);border-radius:999px;padding:0 16px;flex:none}
+.pill.on{background:var(--n-glow-2);color:var(--n-on-glow);box-shadow:none}
+.pill.ghost{background:var(--n-panel-2);box-shadow:none;color:var(--n-ink)}
+.band{display:flex;gap:6px;overflow:hidden;margin:14px -16px 0;padding:0 16px}
+.band .pill{font-size:14px}
+.ic{width:44px;height:44px;border-radius:999px;background:var(--n-panel);box-shadow:var(--n-shadow);display:grid;place-items:center;color:var(--n-strong);flex:none}
+svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.tabs{position:fixed;left:50%;transform:translateX(-50%);bottom:14px;width:calc(min(420px,100vw) - 28px);height:64px;border-radius:999px;background:rgba(13,18,24,.94);box-shadow:0 10px 30px -6px rgba(0,0,0,.8),inset 0 0 0 1px var(--n-ring);display:flex;padding:0 8px;z-index:30}
+.tabs b{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;font-size:13px;font-weight:700;color:var(--n-sub);position:relative}
+.tabs b.on{color:var(--n-glow-2)}
+.tabs b.on::after{content:"";position:absolute;bottom:7px;width:18px;height:3px;border-radius:2px;background:var(--n-glow-2)}
+.tabs svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.row{display:flex;align-items:center;gap:12px;min-height:56px;padding:8px 16px}
+.row+.row{box-shadow:0 -1px 0 rgba(150,170,195,.06)}
+.row .tx{flex:1;min-width:0}.row .tx b{display:block;color:var(--n-strong);font-size:15px;line-height:1.4}.row .tx small{display:block;color:var(--n-sub);font-size:13px;line-height:1.5}
+.ar{color:var(--n-sub);font-size:18px;font-weight:700}
+.sw{min-width:64px;height:36px;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;letter-spacing:.1em;padding:0 12px;position:relative}
+.sw.in{background:rgba(95,217,147,.12);color:var(--n-glow-1);box-shadow:inset 0 0 0 1.5px var(--n-glow-1)}
+.sw.off{background:var(--n-panel-2);color:var(--n-sub);box-shadow:inset 0 0 0 1.5px #3A4655}
+.hit{min-height:44px;display:flex;align-items:center}
+.dim{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:50}
+.sheet{position:fixed;left:50%;transform:translateX(-50%);bottom:0;width:min(420px,100vw);background:var(--n-panel);border-radius:28px 28px 0 0;box-shadow:0 -10px 40px -10px rgba(0,0,0,.9),inset 0 1px 0 var(--n-ring);z-index:60;padding:10px 16px 28px}
+.grab{width:40px;height:5px;border-radius:3px;background:#2E3946;margin:2px auto 10px}
+.sh{display:flex;align-items:center;justify-content:space-between;gap:8px}.sh h3{margin:0;font-size:18px;color:var(--n-strong)}
+.x{width:44px;height:44px;border-radius:999px;background:var(--n-panel-2);display:grid;place-items:center;font-size:18px;font-weight:800;color:var(--n-strong)}
+.btn{height:52px;border-radius:999px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800}
+.btn.pri{background:var(--n-glow-2);color:var(--n-on-glow)}
+.btn.sec{background:var(--n-panel-2);color:var(--n-strong);box-shadow:inset 0 0 0 1px var(--n-ring)}
+.ann{position:relative;z-index:40;max-width:392px;margin:16px auto 120px;font:13px/1.7 var(--gothic);background:#FFF8D6;color:#5A4A12;padding:12px 14px;border-radius:16px}
+.ann b{display:block}.ann ul{margin:4px 0 0;padding-left:1.2em}
+.foot{font-size:13px;color:var(--n-sub);margin:18px 6px 0}
+.cntp{font-size:13px;font-weight:700;color:var(--n-sub)}</style></head><body>
+<main class="phone"><div class="wrap"><h1 class="t">ホーム</h1></div><nav class="tabs"><b class="on"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11l8-6 8 6v8a1 1 0 0 1-1 1h-4v-5H9v5H5a1 1 0 0 1-1-1z"/></svg>ホーム</b><b class=""><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><rect x="13" y="13" width="7" height="7" rx="2"/></svg>図鑑</b><b class=""><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 14l7-2 4-7 2 1-2 6 5 1 2-2h1l-1 4-14 1z"/></svg>フライト</b><b class=""><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 21l1.5-9h3L15 21"/><path d="M7 8h10l-1.5 4h-7Z"/><path d="M12 8V4"/></svg>運用</b><b class=""><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M12 7v5l3 2"/></svg>修行</b></nav></main>
+<div class="dim"></div><div class="sheet"><div class="grab"></div><div class="sh"><h3>タブを選ぶ</h3><span class="x" aria-label="閉じる">×</span></div>
+<p class="note" style="margin:4px 0 6px">タブは5つまで。<span class="num lit" style="font-size:15px">5</span><span class="u">/ 5</span></p>
+<div style="margin:0 -16px"><div class="row"><div class="tx"><b>ホーム</b><small>いつも出ます</small></div><span class="sw in">入</span></div><div class="row"><div class="tx"><b>図鑑</b></div><span class="sw in">入</span></div><div class="row"><div class="tx"><b>フライト</b></div><span class="sw in">入</span></div><div class="row"><div class="tx"><b>運用</b></div><span class="sw in">入</span></div><div class="row"><div class="tx"><b>修行</b></div><span class="sw in">入</span></div><div class="row"><div class="tx"><b>成績</b><small>マイページのタイルから開けます</small></div><span class="sw off">切</span></div></div>
+<div class="btn sec" style="margin-top:14px">全部乗せに戻す</div></div>
+<aside class="ann"><b>メモ（本番には出ません）</b><ul><li>タブを選ぶ（2版の C1-v2 と同じ中身）。夜は出す・隠すを、案B の押しボタンの「入／切」の札にした。入＝緑の枠と字、切＝灰色の枠と字。色だけでなく字でも分かる</li><li>光る数字は「5 / 5」だけ</li><li>C1-v2 の各行の「−」の代わりに入／切。並べ替えのつまみは 1版では省いた（昼の画面と同じ位置に入る）</li></ul></aside>
+<script>if(window!==window.top){var a=document.querySelector('.ann');if(a)a.remove()}</script>
+</body></html>
