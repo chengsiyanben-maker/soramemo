@@ -797,7 +797,7 @@ dialog.spfull .dlg{padding:16px 16px 32px;max-width:480px;margin:0 auto;max-heig
 .hsfoot{margin:10px 0 0;font-size:12.5px;line-height:1.6;color:#6B7280;text-align:center}
 #dPersona .lochip.lopill{--s-card:#fff;--s-line:#E5E7EB;--s-mute:#6B7280}
 /* ホームのはじめの1枚 */
-.allin-card{background:#EEF3FB;border-radius:20px;padding:14px 16px;margin:0 0 12px;font-family:var(--gothic)}.allin-card[hidden]{display:none}
+.allin-card{background:#EEF3FB;border-radius:20px;padding:14px 16px;margin:12px 0;font-family:var(--gothic)}.allin-card[hidden]{display:none}
 .allin-card .t b{display:block;color:#1F2937;font-size:15px}.allin-card .t small{display:block;color:#4B5563;font-size:12.5px;line-height:1.6;margin-top:2px}
 .allin-card .acts{display:flex;align-items:center;gap:8px;margin-top:10px}.allin-card .lobtn{width:auto;min-height:40px;margin:0;padding:0 18px;font-size:13.5px}
 .lotext{border:0;background:none;color:#1F3A68;font:700 13.5px var(--gothic);min-height:44px;padding:0 10px;cursor:pointer}
@@ -2083,7 +2083,19 @@ dialog.psheet .pchg{display:flex;gap:8px;margin-top:14px}
 dialog.psheet .pchg div{flex:1;border:1px solid var(--line);border-radius:14px;padding:9px 11px;font-size:12.5px;font-weight:800}
 dialog.psheet .pchg small{display:block;font-size:10.5px;font-weight:500;color:var(--sumi)}
 dialog.psheet .btn1,dialog.psheet .btn2{display:block;width:100%;margin-top:10px}
-.pmore{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.pmore{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;margin-top:8px}
+.pmore .btn2{width:100%}
+.mptile{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;min-height:68px;padding:12px 14px;border:0;border-radius:18px;background:#F3F4F6;color:#1F2937;text-align:left;font-family:var(--gothic);cursor:pointer}
+.mptile b{font-size:15px;font-weight:800}.mptile small{font-size:12px;color:#6B7280;margin-top:2px}
+.lo.lo-empty{display:none}
+.hfold{background:#fff;border-radius:20px;padding:0;margin:12px 0 0;box-shadow:0 1px 2px rgba(17,24,39,.04),0 6px 18px -10px rgba(17,24,39,.18);font-family:var(--gothic)}.hfold[hidden]{display:none}
+.hfold summary{list-style:none;display:flex;flex-direction:column;gap:2px;min-height:56px;justify-content:center;padding:12px 44px 12px 16px;position:relative;cursor:pointer}
+.hfold summary::-webkit-details-marker{display:none}
+.hfold summary::after{content:"";position:absolute;right:18px;top:50%;width:8px;height:8px;border-right:2px solid #6B7280;border-bottom:2px solid #6B7280;transform:translateY(-70%) rotate(45deg)}
+.hfold[open] summary::after{transform:translateY(-30%) rotate(-135deg)}
+.hfold summary span{font-size:15px;font-weight:800;color:#1F2937}.hfold summary b{color:#1F2937}.hfold summary small{font-size:12px;color:#6B7280}
+#homeFoldBody{padding:0 16px 14px}.hfrow{display:flex;justify-content:space-between;align-items:baseline;gap:8px;padding:10px 0}.hfrow b{font-size:14px;color:#374151}.hfrow small{font-size:12.5px;color:#6B7280}
+.hfnote{margin:6px 0 0;font-size:12px;color:#6B7280}
 #v-ops .viewsw{margin-top:4px}
 #v-ops .opsday .hb{display:flex;align-items:flex-end;gap:3px;height:150px;margin-top:12px}
 #v-ops .opsday .hb>span{flex:1;display:flex;flex-direction:column;justify-content:flex-end;height:100%}
@@ -2728,7 +2740,6 @@ dialog.ckconfirm button.go{background:#E9C46A;color:#111827}
     <div class="grabzone"><button class="grab" type="button" aria-label="シートの大きさを変える"></button></div>
     <div class="sbody">
     <div class="welcome-card" id="welcomeCard" hidden role="status"></div>
-    <div class="allin-card" id="allinCard" hidden role="status"></div>
     <div class="pcard lo" data-lo="home:persona" id="personaCard" hidden aria-live="polite"></div>
     <div class="bpass" id="bpass">
       <div class="bp-main">
@@ -2747,6 +2758,7 @@ dialog.ckconfirm button.go{background:#E9C46A;color:#111827}
       <div><span class="lab">フライト</span><b id="hsFl">0</b></div>
       <button class="up" type="button" id="hsUp" aria-label="引き上げて最近の印を見る"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 15 6-6 6 6"/></svg></button>
     </div>
+    <div class="allin-card" id="allinCard" hidden role="status"></div>   <!-- はじめの1枚：半券と今日の数字の下（高さ667でも数字が見えるように） -->
     <div class="hgate" id="homeGate" hidden>
       <p>空港で印を集めるには、ログインが要ります。</p>
       <div><button type="button" class="go" id="gateLogin">ログイン・登録</button><button type="button" id="gateDemo">デモで試す</button></div>
@@ -2801,6 +2813,7 @@ dialog.ckconfirm button.go{background:#E9C46A;color:#111827}
       </section>
     </div>
     </div>
+    <details class="hfold" id="homeFold" hidden><summary><span>まだ中身のないもの <b id="homeFoldN"></b></span><small>印をもらうと、ここから外に出ます</small></summary><div id="homeFoldBody"></div></details>
     <details class="dev" hidden><summary>検証用ツール</summary>
       <p class="hint">判定を確かめるための機能です。記録には残りません。</p>
       <button class="btn2" id="probe" style="width:100%">位置だけ測る（検証用・記録しない）</button>
@@ -3371,10 +3384,30 @@ const evMD = t => { const d = new Date(t); return `${d.getMonth() + 1}/${d.getDa
 async function loadEvents(){
   try{ const { data, error } = await sb.rpc("current_events"); if(error || !Array.isArray(data)) return; EVENTS = data; renderEventBar(); }catch(e){}
 }
+// 全部乗せの人のホーム：中身のないかたまり（これまでの記録・最近の印・イベントのお知らせ）は1枚に畳む（11/8）。
+//   ひな形の人は今までどおり。表示の編集で隠したものは数えない。印をもらうなどで中身が入ると外に出る
+const HOME_FOLD = [["tally", "これまでの記録", "空港・路線・距離"], ["recent", "最近の印", "まだありません"], ["event", "イベントのお知らせ", "いまはありません"]];
+function homeFoldEmpty(id){
+  if(id === "event") return !$("eventBar") || $("eventBar").hidden;
+  if(id === "recent") return !S.checkins.length;
+  return !S.checkins.length && !S.flights.length;
+}
+function homeFold(){
+  const box = $("homeFold"); if(!box) return;
+  const on = PERSONA === "all" && MODE === "rally", off = loOff("home"), list = [];
+  for(const [id, name, sub] of HOME_FOLD){
+    const el = document.querySelector(`.lo[data-lo="home:${id}"]`), empty = on && !off.has(id) && homeFoldEmpty(id);
+    if(el) el.classList.toggle("lo-empty", empty);
+    if(empty) list.push([name, sub]);
+  }
+  box.hidden = !list.length;
+  $("homeFoldN").textContent = list.length;
+  $("homeFoldBody").innerHTML = list.map(([n, t]) => `<div class="hfrow"><b>${esc(n)}</b><small>${esc(t)}</small></div>`).join("") + `<p class="hfnote">要らないものは、マイページの「表示の編集」で隠せます</p>`;
+}
 function renderEventBar(){
   const box = $("eventBar"); if(!box) return;
   const e = EVENTS.find(x => x.open) || EVENTS[0];
-  if(!e){ box.hidden = true; box.innerHTML = ""; return; }
+  if(!e){ box.hidden = true; box.innerHTML = ""; homeFold(); return; }
   const last = new Date(Date.parse(e.ends_at) - 1), soon = !e.open;
   box.hidden = false;
   box.innerHTML = `<b>${soon ? "まもなく　" : ""}${esc(e.name)}</b>${evMD(e.starts_at)}〜${evMD(last)}<br>空港でチェックインすると、エアライン経営の資金 +${yen(e.bonus)}（空港ごとに1回${Number(e.rare_mult) > 1 ? `・珍しい空港は${Number(e.rare_mult)}倍` : ""}）`
@@ -4132,7 +4165,7 @@ function renderHome(){
   const as = achState(), tn = titleName();
   $("titlePill").hidden = !tn; $("titlePill").textContent = tn ? `称号　${tn}` : "";
   $("streak").innerHTML = S.checkins.length ? `毎月の連続記録 <b>${as.curStreak}か月</b>（最長 ${as.bestStreak}か月）` : "";
-  renderPersonaCard(); setTimeout(maybeSuggestPersona, 1500);
+  renderPersonaCard(); setTimeout(maybeSuggestPersona, 1500); homeFold();
 }
 // 図鑑の地方の色（タイルと進み具合の線）
 const RG_COL = Object.fromEntries(["北海道", "東北", "関東", "中部", "近畿", "中国", "四国", "九州", "沖縄"].map(r => [r, "#0F1B2D"]));   // 地方ごとの色はやめて紺1色
@@ -4792,7 +4825,9 @@ function renderPersonaSettings(){
   if($("loTileN")) $("loTileN").innerHTML = `<b>${c.on}</b><small>/${c.all}</small>`;
   // タブにない画面（隠したタブ・成績）は、ここから開く
   const off = TAB_ALL.filter(v => !loTabs().includes(v)), L = { book:"図鑑を開く", stats:"成績を開く", log:"フライトを開く", ops:"運用を開く", sg:"修行を開く" };
-  if($("personaMore")) $("personaMore").innerHTML = off.map(v => `<button class="btn2" data-persona-open="${v}">${L[v] || v}</button>`).join("");
+  // タブにない画面（運用・修行・成績など）をタイルで出す。隠したタブへもここから行ける（改善担当の指摘2）。成績はタブにしないので、ふだんはここだけ
+  const TL = { book:"図鑑", log:"フライト", ops:"運用", sg:"修行", stats:"成績" }, TS = { book:"空港の印を見る", log:"乗った便を見る", ops:"滑走路と便を見る", sg:"ポイントの進み", stats:"空港・路線・距離" };
+  if($("personaMore")) $("personaMore").innerHTML = off.map(v => `<button class="mptile" type="button" data-persona-open="${v}" aria-label="${L[v] || v}"><b>${TL[v] || v}</b><small>${TS[v] || ""}</small></button>`).join("");
 }
 document.addEventListener("click", e => {
   const o = e.target.closest("[data-persona-open]"); if(o){ $("dSettings").close(); goTab(o.dataset.personaOpen); return; }
@@ -4882,6 +4917,7 @@ function loChanged(what, undo){
   if(v === "ops" && typeof OPS_CUR !== "undefined" && OPS_CUR) renderOps();
   else if(v === "book" || v === "log" || v === "stats") renderVisible();
   if(v === "home") renderPersonaCard();
+  homeFold();
   track("layout", what);
   viewPrefsPush();
   LO_UNDO = undo || null;
