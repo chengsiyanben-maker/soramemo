@@ -16,9 +16,9 @@ export function parseMetar(m: any): Metar {
 }
 
 // いくつかの空港をまとめて1回で取る
-export async function fetchMetars(ids: string[]): Promise<Map<string, Metar>> {
+export async function fetchMetars(ids: string[], timeoutMs = 15000): Promise<Map<string, Metar>> {   // timeoutMs：見る人の呼び出しでは短く
   const r = await fetch(`https://aviationweather.gov/api/data/metar?ids=${ids.join(",")}&format=json`,
-    { headers: { "User-Agent": "soramemo (metar relay)" }, signal: AbortSignal.timeout(15000) });
+    { headers: { "User-Agent": "soramemo (metar relay)" }, signal: AbortSignal.timeout(timeoutMs) });
   if (!r.ok) throw new Error("upstream " + r.status);
   const out = new Map<string, Metar>();
   // 同じ空港の通報が複数あれば、新しいものを使う
@@ -26,3 +26,11 @@ export async function fetchMetars(ids: string[]): Promise<Map<string, Metar>> {
   for (const m of (await r.json()) as any[]) { const p = parseMetar(m); const o = out.get(p.id); if (!o || o.time < p.time) out.set(p.id, p); }
   return out;
 }
+
+// 配信元が取れないときの代わり：天気の記録（wx_obs。wx-archive が1時間ごとに足す。なので最長で1時間あまり前の通報になる）の1行を、同じ形にする
+export function metarFromObs(r: { icao: string; at: string; raw: string; wdir: number | null; wspd: number | null; wgst: number | null; vis_m: number | null } | null | undefined): Metar | null {
+  if (!r || !r.raw) return null;
+  const raw = String(r.raw), plus = /\s(9999|CAVOK)(\s|$)/.test(raw);
+  return { id: r.icao, time: new Date(r.at).toISOString(), raw, wdir: r.wdir ?? null, wspd: r.wspd ?? null, wgst: r.wgst ?? null, vis_m: r.vis_m ?? null, vis_plus: plus };
+}
+
