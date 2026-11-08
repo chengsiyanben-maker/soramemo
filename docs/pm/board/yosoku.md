@@ -21,10 +21,10 @@
 - 11/13 の案：docs/pm/report-yosoku-1113.md（方式ごとの画面の違い・直す関数・デザイン担当への依頼文・当たり具合の1行の案）
 
 ## 次にやること
-1. PR #25（棚卸し・11/13 の案）と PR #35（塗装ごとの見積もり）の CI・レビューに答える（11/8 時点でどちらもコメントなし）
-2. 本人が docs/pm/yosoku-livery-coverage.sql（[1]〜[5]）を流した結果が来たら読み、報告 report-yosoku-livery-estimate.md の3節の見込み（上限は国内およそ39機）を本番の数に直す。[5] の「うち塗装機の予定の便から」が 0 なら、livery_sightings の件をデータ担当に重ねて伝える
+1. PR #25（棚卸し・11/13 の案）と PR #36（塗装ごとの見積もり。#35 は置き換えて閉じた）の CI・レビューに答える（11/8 時点でどちらもコメントなし）
+2. 本人が docs/pm/yosoku-livery-coverage.sql（[1]〜[5]）を流した結果が来たら読み、報告 report-livery-predict.md の3節の見込み（上限は国内およそ39機）を本番の数に直す。[5] の「うち塗装機の予定の便から」が 0 なら、livery_sightings の件をデータ担当に重ねて伝える
 3. 11/13 に本人が決めるのを待つ（方式・predict_rotation を先に呼ぶのを続けるか・当たり具合を見せるか・海外の塗装機に「予想できません」を出すか）。決まる前に画面は変えない
-4. 決まったら：デザイン担当の画面案（依頼文は report-yosoku-livery-estimate.md の4節。PM が回す）を待つ → ブランチ yosoku/use-method で loadPrediction・predictionHTML・planeHTML を直す → 続けて yosoku/livery-predict で塗装機ごとの「この先の便（予想）」の部品を作る（撮る人の画面に出す所は部品を渡して撮る人用担当が並べる）。e2e に src＝livery／learn の形のテストを足し、スマホ幅で撮って下書き PR
+4. 決まったら：デザイン担当の画面案（依頼文は report-livery-predict.md の4節。PM が回す）を待つ → ブランチ yosoku/use-method で loadPrediction・predictionHTML・planeHTML を直す → 続けて yosoku/livery-predict で塗装機ごとの「この先の便（予想）」の部品を作る（撮る人の画面に出す所は部品を渡して撮る人用担当が並べる）。e2e に src＝livery／learn の形のテストを足し、スマホ幅で撮って下書き PR
 5. それまでに PM の指示があればそちらを先に
 
 ## PM から積んだ次の仕事（11/8 16時、本人の依頼「塗装ごとの運用予想も出せるようにして」）
@@ -36,7 +36,7 @@
 - 進み具合：1（見積もり）と 2（依頼文）は 11/8 に済み（下）。3（作る）は 11/13 のあと
 
 ## 11/8 にしたこと（塗装ごとの運用予想 その1・その2）
-- ブランチ yosoku/livery-estimate・下書き PR #35・報告 docs/pm/report-yosoku-livery-estimate.md。src/index.html・移行は変えていない
+- ブランチ yosoku/livery-predict-plan・下書き PR #36・報告 docs/pm/report-livery-predict.md（PM の指示どおりの名前。先に出した yosoku/livery-estimate・PR #35 は閉じた）。src/index.html・移行は変えていない
 - docs/pm/yosoku-livery-coverage.sql（読むだけ、[1]〜[5]）：前の30日に飛んだ日・今の予想の部品（loadPrediction と同じ順）と学ぶ予想で何機に出るか・前の14日の振り返り（base・learn の出た数と当たった数、機体ごと）。元は .tpl.sql、tools/yosoku_livery_sql.mjs が liveries.ts の特別塗装機を書き込む（一覧が変わったら流し直す）。tests/sql/t97 13項目通過
 - 見込み：特別塗装機は95件、期間内93件（PM の「92件」と1件違い）。国内41・海外52。海外は reg_legs に日本に来た1便しか残らないので予想はほぼ出ない。ZIPAIR も同じ。JTA は南の円の記録が 11/7 からなので少ない。上限は国内およそ39機
 - 気づいたこと：rot_predict の塗装機の予定の便は livery_sightings に名前が入っている機体だけ効く（データ担当に伝えた）
