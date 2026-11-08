@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>2b 窓の向きの地図｜そらメモ 却下した案の見直し その2</title>
+<style>*{box-sizing:border-box}html,body{margin:0}
+:root{--gothic:"Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic UI","Noto Sans JP","Noto Sans CJK JP",system-ui,sans-serif;--num:ui-monospace,"SF Mono","Menlo","DejaVu Sans Mono",monospace;--bg:#EEF1F5;--card:#FFFFFF;--strong:#1F2937;--ink:#374151;--sub:#5F6878;--pill:rgba(17,24,39,.06);--hero:#0F1B2D;--jal:#C8102E;--ana:#1C4FA0;--gold:#856620;--shadow:0 1px 2px rgba(17,24,39,.04),0 10px 30px -8px rgba(17,24,39,.10),inset 0 0 0 1px rgba(17,24,39,.07)}
+body{background:var(--bg);color:var(--ink);font-family:var(--gothic);font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased}
+.phone{position:relative;max-width:420px;min-height:100vh;min-height:100svh;margin:0 auto;background:var(--bg);overflow:hidden}
+.pg{padding:16px 16px 120px}
+.back{display:inline-flex;align-items:center;min-height:44px;padding:0 16px 0 12px;border-radius:999px;background:var(--card);box-shadow:var(--shadow);font-weight:800;color:var(--strong);font-size:15px}
+h1{font-size:26px;font-weight:800;color:var(--strong);margin:14px 4px 2px;line-height:1.35}
+.lead{color:var(--sub);font-size:13px;margin:0 4px}
+.card{background:var(--card);border-radius:20px;box-shadow:var(--shadow);padding:16px}
+.card+.card{margin-top:12px}
+.lbl{font-size:13px;font-weight:700;color:var(--sub);margin:22px 4px 8px}
+.big{font-size:32px;font-weight:800;color:var(--strong);line-height:1.15;letter-spacing:-.01em}
+.u{font-size:13px;color:var(--sub);font-weight:600;margin-left:3px}
+.sub{font-size:13px;color:var(--sub)}
+.pill{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 18px;border-radius:999px;background:var(--card);box-shadow:var(--shadow);font-weight:700;color:var(--strong);font-size:15px;white-space:nowrap}
+.pill.dk{background:var(--strong);color:#fff;box-shadow:none}
+.tag{display:inline-flex;align-items:center;height:24px;padding:0 9px;border-radius:999px;font-size:13px;font-weight:700;color:var(--ink);background:var(--pill)}
+.tag.est{background:#FFF4C2;color:#5A4A12}
+.tag.me{background:var(--hero);color:#fff}
+.band{display:flex;gap:4px;padding:4px;background:var(--card);border-radius:999px;box-shadow:var(--shadow);margin:14px 0 4px}
+.band span{flex:1;min-height:44px;display:flex;align-items:center;justify-content:center;border-radius:999px;font-size:14px;font-weight:700;color:var(--sub)}
+.band span.on{background:var(--strong);color:#fff}
+.row{display:flex;align-items:center;gap:12px;min-height:56px}
+.row .t{flex:1;min-width:0}.row .t b{display:block;font-size:16px;color:var(--strong)}.row .t small{display:block;font-size:13px;color:var(--sub)}
+.foot{font-size:13px;color:var(--sub);margin:22px 4px 0}
+.ann{position:relative;z-index:90;max-width:392px;margin:16px auto 40px;font:13px/1.7 var(--gothic);background:#FFF8D6;color:#5A4A12;padding:12px 14px;border-radius:12px}.ann ul{margin:4px 0 0;padding-left:1.2em}
+nav.tabs{position:fixed;left:50%;transform:translateX(-50%);bottom:10px;width:calc(min(420px,100vw) - 20px);display:flex;padding:6px;background:rgba(255,255,255,.94);border-radius:999px;box-shadow:0 10px 30px -8px rgba(17,24,39,.22),0 2px 6px rgba(17,24,39,.06);z-index:30}
+nav.tabs span{flex:1;min-height:52px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#6B7280}
+nav.tabs span.on{color:var(--strong)}
+
+.wv{display:flex;align-items:center;gap:14px;margin-top:8px}
+.wv svg{flex:none;width:120px;height:120px}
+.wv .t b{display:block;font-size:20px;font-weight:800;color:var(--strong);line-height:1.35}
+.wv .t small{font-size:13px;color:var(--sub)}
+.why{margin:0;padding:0;list-style:none;counter-reset:w}
+.why li{counter-increment:w;position:relative;padding:10px 0 10px 40px;font-size:15px}
+.why li::before{content:counter(w);position:absolute;left:0;top:10px;width:28px;height:28px;border-radius:999px;background:var(--pill);color:var(--strong);font-weight:800;font-size:14px;display:flex;align-items:center;justify-content:center}
+.why li small{display:block;font-size:13px;color:var(--sub)}
+.map svg{width:100%;height:190px;display:block;border-radius:14px}
+</style></head><body>
+<main class="phone"><div class="pg">
+<span class="back">‹ NH 247</span>
+<h1>右の窓から見える理由</h1><p class="lead">羽田 05 から離陸したとき（推定）</p>
+<div class="card map" style="margin-top:12px;padding:8px"><svg viewBox="0 0 358 190" role="img" aria-label="羽田から西へ向かう経路と富士山の位置"><rect width="358" height="190" fill="#DCEAF3"/>
+<path d="M0 40C60 60 120 50 170 80C220 110 260 100 300 130L358 150V0H0Z" fill="#E9EFE4" stroke="#9FB3A4"/>
+<g stroke="rgba(31,78,121,.10)"><path d="M0 48H358M0 96H358M0 144H358M90 0V190M180 0V190M270 0V190"/></g>
+<path d="M316 134C280 150 230 158 170 150C120 144 70 140 10 146" fill="none" stroke="#1F2937" stroke-width="2.5" stroke-dasharray="7 5"/>
+<circle cx="316" cy="134" r="5" fill="#1F2937"/><text x="304" y="124" font-family="Hiragino Sans,Noto Sans CJK JP,sans-serif" font-size="13" font-weight="700" fill="#1F2937" text-anchor="end">羽田</text>
+<path d="M190 70l12 -20 12 20z" fill="#fff" stroke="#5F6878" stroke-width="1.5"/><text x="202" y="88" font-family="Hiragino Sans,Noto Sans CJK JP,sans-serif" font-size="13" font-weight="700" fill="#1F2937" text-anchor="middle">富士山</text>
+<path d="M200 100V140" stroke="#5F6878" stroke-width="1.2" stroke-dasharray="3 3"/>
+<text x="12" y="176" font-family="Hiragino Sans,Noto Sans CJK JP,sans-serif" font-size="13" fill="#5F6878">← 福岡へ（経路は推定）</text></svg></div>
+<div class="card"><b style="color:var(--strong)">進む向きの右に富士山</b><div class="sub" style="margin-top:4px">西へ進む間、富士山は経路の北（進む向きの右）に見えます。34R から離陸したときも、同じ右の窓です</div></div>
+<div class="card" style="padding:6px 16px"><div class="row"><div class="t"><b>反対の向き（南風の使い方）</b><small>離陸は 16L・22。右の窓は変わりません</small></div></div></div>
+<p class="foot">地図は航空図風の見本。経路は推定で、保証しません。</p>
+</div></main>
+<aside class="ann"><b>メモ（検討用・本番には出ません。却下を外したわけではありません）</b><ul><li>2a の「こう推し量りました」を押したあとの地図。航空図風（今の地図の色）</li><li>向きが変わっても答えが変わらない便は「変わりません」と書く。変わる便だけ当日に知らせればよい</li><li>経路と富士山の位置は見本の絵</li></ul></aside>
+<script>if(window!==window.top){var a=document.querySelector('.ann');if(a)a.remove()}</script>
+</body></html>
