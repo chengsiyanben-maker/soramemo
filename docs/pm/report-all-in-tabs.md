@@ -1,6 +1,6 @@
 # 全部乗せを案3「タブから選ぶ」に作り直す（チェックイン担当・2026-11-08 夜）
 
-PM の指示（11/8 21時半、本人が案3に決めた）。main に入った PR #39（全部乗せ＋フィルター）の上に、画面案 design/all-in-filter-alt の C1〜C4 の形を作った。ブランチ feat/all-in-tabs、下書きのプルリクエスト。main と本番には入れていない。
+PM の指示（11/8 21時半、本人が案3に決めた）。main に入った PR #39（全部乗せ＋フィルター）の上に、画面案 design/all-in-filter-alt の C1〜C4 の形を作った。ブランチ feat/all-in-tabs、下書きのプルリクエスト #48。main と本番には入れていない。
 
 - 変えたファイル：src/index.html（と配る用の web/index.html・web/sw.js）、tests/e2e/t118.py、tests/e2e/t119.py（新しく足した）、この報告、写真 docs/pm/shots-all-in-tabs/
 - 手順：今の「表示の編集」の仕組み（loTabs・loOff・loEdit・loChanged・保存の user_view_prefs）はそのまま使い、入口と見せ方だけ足した
