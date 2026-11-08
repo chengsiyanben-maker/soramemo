@@ -28,7 +28,7 @@
   - 8 ÷ 7 が低い → 登録しても空港に行く用事がない人が多い。旅の前の時期（年末年始）に向けた投稿を増やす
 - **保存とシェアは投稿どうしで比べる**。保存が多い形（例：使い方のカルーセル）を次の週も続ける
 - **500人に向けて**：週の登録数を足していき、4週目の終わりに何人まで来たかを見る。足りない分を、5週目からの投稿の回数ではなく中身（どの形が登録につながったか）で埋める
-- **登録が多すぎる日**：1日の登録が80人を超えたら、その日はリンクのスタンプを足さない（コードのメールの上限のため。[rules.md](rules.md)）
+- **登録が多すぎるとき**：投稿のあと1時間の登録が80人を超えたら、その日はリンクのスタンプを足さない（コードのメールの上限が1時間100通のため。[rules.md](rules.md)、SQL ④）
 
 ## 記録表（週に1行）
 
@@ -72,6 +72,15 @@ group by 1 order by 1;
 select (created_at at time zone 'Asia/Tokyo')::date as 日, count(*) as 登録
 from auth.users
 where created_at >= now() - interval '14 days'
+group by 1 order by 1;
+```
+
+④ 1時間ごとの登録数（投稿の日に、上限の1時間100通に近づいていないかを見る）
+
+```sql
+select date_trunc('hour', created_at at time zone 'Asia/Tokyo') as 時間, count(*) as 登録
+from auth.users
+where created_at >= now() - interval '2 days'
 group by 1 order by 1;
 ```
 

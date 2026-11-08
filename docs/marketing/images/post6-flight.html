@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>投稿6 フライトの残し方｜そらメモ Instagram 画像案</title>
+<style>
+:root{
+  --gothic:"Hiragino Sans","Hiragino Kaku Gothic ProN","Noto Sans CJK JP","Noto Sans JP","Yu Gothic UI","Yu Gothic","Meiryo",system-ui,sans-serif;
+  --mincho:"Hiragino Mincho ProN","Noto Serif CJK JP","Noto Serif JP","Yu Mincho",serif;
+  --bg:#EEF1F5; --card:#FFFFFF; --ink:#374151; --ink-strong:#1F2937; --sub:#6B7280; --mute:#9CA3AF;
+  --track:#E5E8EE; --pill:rgba(17,24,39,.06);
+  --shadow:0 1px 2px rgba(17,24,39,.04),0 10px 30px -8px rgba(17,24,39,.12),inset 0 0 0 1px rgba(17,24,39,.06);
+  --hero:#0F1B2D; --gold:#E8C46A; --gold-ink:#3B2E0A; --flap:#F2B544;
+  --jal:#C8102E; --ana:#1C4FA0; --ana-wash:#EAF0FA;
+  --chart-bg:#F3F4F1; --chart-land:#E7EAE3; --chart-coast:#A9B8C9; --chart-apt:#1F4E79;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:#D9DEE6;font-family:var(--gothic);color:var(--ink);-webkit-text-size-adjust:100%}
+.wrap{display:flex;flex-direction:column;align-items:center;gap:20px;padding:20px 16px 40px}
+.wrap>h1{font-size:15px;color:var(--ink-strong);margin:0;max-width:360px;width:100%}
+.wrap>p.how{font-size:12px;color:var(--sub);margin:-12px 0 0;max-width:360px;width:100%;line-height:1.6}
+.s{width:360px;height:450px;flex:none;position:relative;overflow:hidden;background:var(--bg);font-feature-settings:"palt";line-height:1.6}
+.s.story{height:640px}
+.pad{position:absolute;inset:0;padding:30px 26px 0}
+.eyebrow{font-size:11px;font-weight:700;color:var(--sub);letter-spacing:.1em;margin:0 0 8px}
+.ttl{font-size:25px;line-height:1.38;font-weight:800;color:var(--ink-strong);margin:0;letter-spacing:-.01em}
+.ttl small{display:block;font-size:13px;font-weight:700;color:var(--sub);margin-top:8px;letter-spacing:0;line-height:1.6}
+.foot{position:absolute;z-index:5;left:0;right:0;bottom:0;height:40px;background:var(--bg);display:flex;align-items:center;justify-content:space-between;padding:0 22px;font-size:10.5px;color:var(--mute);font-weight:700}
+.foot .logo{display:flex;align-items:center;gap:6px;color:var(--ink-strong);font-size:12px;letter-spacing:.18em}
+.foot .logo svg{width:15px;height:15px}
+.foot .np{background:var(--pill);color:var(--sub);padding:3px 10px;border-radius:999px;letter-spacing:.02em}
+.foot .no{font-variant-numeric:tabular-nums}
+.dark .foot .logo{color:#E8ECF1}.dark .foot .np{background:rgba(255,255,255,.1);color:#C9D1DC}.dark .foot{color:#8B95A3;background:var(--hero)}
+.card{background:var(--card);border-radius:20px;box-shadow:var(--shadow)}
+.pillrow{display:flex;gap:6px;flex-wrap:wrap}
+.pill{display:inline-block;font-size:11px;font-weight:700;padding:5px 11px;border-radius:999px;background:var(--card);color:var(--ink-strong);box-shadow:var(--shadow)}
+.pill.on{background:var(--ink-strong);color:#fff;box-shadow:none}
+.mock{font-size:9.5px;color:var(--mute);font-weight:700}
+/* 空港コード（パタパタ） */
+.flap{display:flex;gap:4px}
+.flap span{width:34px;height:44px;border-radius:6px;background:#1A2433;color:var(--flap);display:grid;place-items:center;font-size:26px;font-weight:800;position:relative;font-family:ui-monospace,"DejaVu Sans Mono",monospace;box-shadow:inset 0 0 0 1px rgba(255,255,255,.06)}
+.flap span::after{content:"";position:absolute;left:0;right:0;top:50%;height:1px;background:rgba(0,0,0,.6)}
+/* チェックインの券 */
+.ticket{display:flex;border-radius:20px;overflow:hidden;box-shadow:0 14px 30px -14px rgba(15,27,45,.55)}
+.ticket .l{flex:1;background:var(--hero);color:#E8ECF1;padding:14px 16px}
+.ticket .l small{display:block;font-size:10px;color:#9AA6B6;font-weight:700}
+.ticket .l b{display:block;font-size:16px;margin-top:8px}
+.ticket .l i{display:block;font-style:normal;font-size:10.5px;color:#9AA6B6}
+.ticket .l i em{font-style:normal;color:#7EE2A8;font-weight:700}
+.ticket .r{width:82px;background:var(--gold);color:var(--gold-ink);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;border-left:2px dashed rgba(59,46,10,.3);font-weight:800}
+.ticket .r .v{writing-mode:vertical-rl;font-size:15px;letter-spacing:.2em}
+.ticket .r small{font-size:9px;font-weight:700;opacity:.8}
+/* 印 */
+.stamp{width:100%;height:100%}
+.num{font-variant-numeric:tabular-nums;font-weight:800;color:var(--ink-strong)}
+.num u{text-decoration:none;font-size:.42em;color:var(--mute);font-weight:700;margin-left:3px}
+.step{display:flex;gap:10px;align-items:center}
+.step b{width:26px;height:26px;border-radius:999px;background:var(--ink-strong);color:#fff;display:grid;place-items:center;font-size:12px;flex:none}
+.field{background:var(--bg);border-radius:12px;padding:8px 12px;font-size:12px;color:var(--ink-strong);font-weight:700}
+.field small{display:block;font-size:9.5px;color:var(--mute);font-weight:700}
+</style>
+</head>
+<body>
+<main class="wrap">
+<h1>投稿6 フライトの残し方</h1>
+<p class="how">フィードのカルーセル5枚（4:5）。PNG は1080×1350で書き出し済み（png/post6-1.png〜）。画面は今のアプリを再現した見本で、数字・便名は実際の記録ではありません。</p>
+
+<!-- 1枚目：表紙 -->
+<section class="s" id="s1">
+  <div class="pad">
+    <p class="eyebrow">旅の前に保存</p>
+    <h2 class="ttl" style="font-size:28px">乗った便を、<br>見返せる形で残す。<small>そらメモのフライトの残し方、4つ。</small></h2>
+  </div>
+  <div style="position:absolute;left:26px;right:26px;top:186px;display:grid;gap:8px">
+    <div class="card step" style="padding:8px 14px"><b>1</b><span style="font-size:13px;font-weight:700;color:var(--ink-strong)">出発と到着で押す</span></div>
+    <div class="card step" style="padding:8px 14px"><b>2</b><span style="font-size:13px;font-weight:700;color:var(--ink-strong)">航空会社と便名を記録</span></div>
+    <div class="card step" style="padding:8px 14px"><b>3</b><span style="font-size:13px;font-weight:700;color:var(--ink-strong)">搭乗券を読み取る</span></div>
+    <div class="card step" style="padding:8px 14px"><b>4</b><span style="font-size:13px;font-weight:700;color:var(--ink-strong)">画像で共有</span></div>
+  </div>
+  <div class="foot"><span class="logo"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"/><path d="M7 13 17 7l-4 11-2-4z" fill="currentColor"/></svg>そらメモ</span><span class="np">非公式アプリ</span><span class="no">1/5</span></div>
+</section>
+
+<!-- 2枚目：出発と到着 -->
+<section class="s" id="s2">
+  <div class="pad">
+    <p class="eyebrow">1　出発と到着で押す</p>
+    <h2 class="ttl">2つの空港で<br>チェックインするだけ。<small>24時間以内なら、乗り継ぎでも大丈夫です。</small></h2>
+  </div>
+  <svg viewBox="0 0 360 170" style="position:absolute;left:0;top:178px;width:360px;height:170px" aria-hidden="true">
+    <rect width="360" height="170" fill="var(--chart-bg)"/>
+    <path d="M-10 120 C60 100 120 150 200 130 S310 90 370 110 V180 H-10Z" fill="var(--chart-land)" stroke="var(--chart-coast)" stroke-width="1.2"/>
+    <g stroke="var(--chart-coast)" stroke-width=".5" opacity=".5"><path d="M0 60 H360"/><path d="M120 0 V170"/><path d="M250 0 V170"/></g>
+    <path d="M60 120 Q180 10 300 80" fill="none" stroke="var(--ana)" stroke-width="2.2" stroke-dasharray="5 6" stroke-linecap="round" opacity=".75"/>
+    <circle cx="60" cy="120" r="24" fill="rgba(31,41,55,.05)" stroke="var(--ink-strong)" stroke-width="1.1" stroke-dasharray="4 4"/>
+    <circle cx="300" cy="80" r="24" fill="rgba(31,41,55,.05)" stroke="var(--ink-strong)" stroke-width="1.1" stroke-dasharray="4 4"/>
+    <circle cx="60" cy="120" r="6" fill="#fff" stroke="var(--ink-strong)" stroke-width="2.5"/>
+    <circle cx="300" cy="80" r="6" fill="#fff" stroke="var(--ink-strong)" stroke-width="2.5"/>
+    <rect x="22" y="146" width="76" height="19" rx="9.5" fill="var(--hero)"/><text x="60" y="159" text-anchor="middle" font-size="9" font-weight="700" fill="#fff" font-family="var(--gothic)">出発で押す</text>
+    <rect x="262" y="106" width="76" height="19" rx="9.5" fill="var(--hero)"/><text x="300" y="119" text-anchor="middle" font-size="9" font-weight="700" fill="#fff" font-family="var(--gothic)">到着で押す</text>
+  </svg>
+  <div class="card" style="position:absolute;left:26px;right:26px;top:362px;padding:10px 14px;font-size:11px;color:var(--sub);line-height:1.6">電波が届かないときは端末に保留して、つながったら送ります（24時間以内）。</div>
+  <div class="foot"><span class="logo"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"/><path d="M7 13 17 7l-4 11-2-4z" fill="currentColor"/></svg>そらメモ</span><span class="np">非公式アプリ・画面は見本</span><span class="no">2/5</span></div>
+</section>
+
+<!-- 3枚目：便を記録 -->
+<section class="s" id="s3">
+  <div class="pad">
+    <p class="eyebrow">2　乗った便を記録</p>
+    <h2 class="ttl">フライトを押して、<br>航空会社と便名を。<small>便名は任意です。あとから足しても大丈夫。</small></h2>
+    <div class="card" style="margin-top:16px;padding:14px 16px">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div><div class="num" style="font-size:26px;letter-spacing:.02em">CTS</div><small style="font-size:10px;color:var(--sub)">新千歳</small></div>
+        <div style="flex:1;border-top:2px dotted var(--track);position:relative;top:-6px"></div>
+        <div style="text-align:right"><div class="num" style="font-size:26px;letter-spacing:.02em">HND</div><small style="font-size:10px;color:var(--sub)">羽田</small></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px">
+        <div class="field"><small>航空会社</small>乗った会社を選ぶ</div>
+        <div class="field"><small>便名（任意）</small>＊＊＊</div>
+        <div class="field"><small>搭乗日</small>11/21</div>
+        <div class="field"><small>距離</small>823 km</div>
+      </div>
+    </div>
+    <div style="margin-top:12px;font-size:11px;color:var(--sub);line-height:1.6">航空会社の名前は、乗った便の記録としてだけ表示します。</div>
+  </div>
+  <div class="foot"><span class="logo"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"/><path d="M7 13 17 7l-4 11-2-4z" fill="currentColor"/></svg>そらメモ</span><span class="np">非公式アプリ・画面は見本</span><span class="no">3/5</span></div>
+</section>
+
+<!-- 4枚目：搭乗券 -->
+<section class="s" id="s4">
+  <div class="pad">
+    <p class="eyebrow">3　搭乗券を読み取る</p>
+    <h2 class="ttl">バーコードを読むと、<br>便名と座席が付く。<small>スクリーンショットからも読み取れます。</small></h2>
+  </div>
+  <div style="position:absolute;left:50px;right:50px;top:196px;height:150px;border-radius:20px;background:var(--hero);display:grid;place-items:center">
+    <div style="position:relative;width:150px;height:110px">
+      <svg viewBox="0 0 150 110" style="width:150px;height:110px" aria-hidden="true">
+        <g stroke="#fff" stroke-width="3" fill="none" stroke-linecap="round"><path d="M4 26V8h18M128 8h18v18M146 84v18h-18M22 102H4V84"/></g>
+        <g fill="#C9D1DC">
+          <rect x="30" y="30" width="4" height="50"/><rect x="38" y="30" width="2" height="50"/><rect x="44" y="30" width="6" height="50"/><rect x="54" y="30" width="2" height="50"/><rect x="60" y="30" width="3" height="50"/><rect x="67" y="30" width="5" height="50"/><rect x="76" y="30" width="2" height="50"/><rect x="82" y="30" width="4" height="50"/><rect x="90" y="30" width="2" height="50"/><rect x="96" y="30" width="6" height="50"/><rect x="106" y="30" width="3" height="50"/><rect x="113" y="30" width="5" height="50"/>
+        </g>
+        <path d="M14 55H136" stroke="#7EE2A8" stroke-width="2"/>
+      </svg>
+    </div>
+  </div>
+  <div class="pillrow" style="position:absolute;left:26px;right:26px;top:362px"><span class="pill">便名</span><span class="pill">航空会社</span><span class="pill">座席</span></div>
+  <div style="position:absolute;left:26px;right:26px;top:398px;font-size:11px;color:var(--sub)">名前と予約番号は保存しません。</div>
+  <div class="foot"><span class="logo"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"/><path d="M7 13 17 7l-4 11-2-4z" fill="currentColor"/></svg>そらメモ</span><span class="np">非公式アプリ・画面は見本</span><span class="no">4/5</span></div>
+</section>
+
+<!-- 5枚目：共有とまとめ -->
+<section class="s dark" id="s5" style="background:var(--hero);color:#E8ECF1">
+  <div class="pad">
+    <p class="eyebrow" style="color:#9AA6B6">4　画像で共有</p>
+    <h2 class="ttl" style="color:#F3F4F6">飛んだ路線を、<br>1枚の地図に。<small style="color:#9AA6B6">撮った写真に、その空港の印を押すこともできます。写真は端末の中だけで処理します。</small></h2>
+  </div>
+  <div style="position:absolute;left:26px;right:26px;top:226px;height:140px;border-radius:18px;background:#F4F1EA;overflow:hidden">
+    <svg viewBox="0 0 308 140" style="width:100%;height:100%" aria-hidden="true">
+      <path d="M232 10 l18 6 l10 14 l-6 10 l-14 -4 l-10 -12z M214 46 l10 4 l-4 22 l-14 22 l-22 12 l-30 8 l-24 0 l-6 -8 l18 -6 l22 -10 l20 -16 l14 -18z M118 108 l14 2 l-2 10 l-14 0z M96 104 l14 0 l2 12 l-10 6 l-10 -6z" fill="#FFFFFF" stroke="#CFC8BA" stroke-width="1"/>
+      <g fill="none" stroke="#C8553D" stroke-width="1.6" stroke-linecap="round">
+        <path d="M244 26 Q232 50 210 72"/><path d="M210 72 Q160 80 108 112"/><path d="M210 72 Q170 96 124 114"/>
+      </g>
+      <g fill="#C8553D"><circle cx="244" cy="26" r="3.2"/><circle cx="210" cy="72" r="3.2"/><circle cx="108" cy="112" r="3.2"/><circle cx="124" cy="114" r="3.2"/></g>
+      <g fill="#BDB6A8"><circle cx="190" cy="88" r="2"/><circle cx="160" cy="96" r="2"/><circle cx="226" cy="44" r="2"/><circle cx="140" cy="104" r="2"/></g>
+    </svg>
+  </div>
+  <p style="position:absolute;left:26px;right:26px;top:380px;font-size:10px;color:#8B95A3;margin:0;line-height:1.55">登録はプロフィールのリンク（soramemo.jp）から。そらメモは個人が作っている非公式アプリで、航空会社・空港の公式アプリではありません。</p>
+  <div class="foot"><span class="logo"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"/><path d="M7 13 17 7l-4 11-2-4z" fill="currentColor"/></svg>そらメモ</span><span class="np">soramemo.jp</span><span class="no">5/5</span></div>
+</section>
+</main>
+</body>
+</html>
