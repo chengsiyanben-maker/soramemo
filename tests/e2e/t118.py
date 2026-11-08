@@ -83,7 +83,7 @@ async def main():
         check('戻すときは戻る数を見せる（タブ1・見方1・かたまり1）:', [x.strip() for x in (await pg.locator('#dLayout .loback b').all_inner_texts())] == ['1', '1', '1'])
         await pg.screenshot(path=os.path.join(SHOTS, '03-reset.png'))
         await pg.click('#dLayout [data-lo-reset-yes]'); await pg.wait_for_timeout(200)
-        check('全部乗せに戻る:', await pg.evaluate(TABS) == 'home,book,log,ops,sg' and await pg.evaluate("localStorage.getItem('soramemo.layout')") is None and '3こをまた出しました' in await pg.inner_text('#dLayout .loundo'))
+        check('全部乗せに戻る:', await pg.evaluate(TABS) == 'home,book,log,ops,sg' and await pg.evaluate("localStorage.getItem('soramemo.layout')") is None and 'タブ1つ・見方1つ・かたまり1つをまた出しました' in await pg.inner_text('#dLayout .loundo'))
         await pg.evaluate("$('dLayout').close(); goTab('log')"); await pg.wait_for_timeout(600)
         await pg.click('[data-lo-open="log"]'); await pg.wait_for_timeout(300)
         check('フライトの鉛筆からはフライトの見方へ:', await pg.evaluate("$('dLayout').open && LO_PAGE === 'log'") and await pg.evaluate("(() => { const g = document.querySelector('#dLayout [data-lo-go=\"log\"]').getBoundingClientRect(); return g.top > 0 && g.top < 400; })()"))
