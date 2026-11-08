@@ -53,8 +53,8 @@ async def main():
         await pg.click('[data-plan-q="HND-OKA"]'); await pg.wait_for_timeout(800)
         pl = await pg.inner_text('#statusBox .plan')
         print('修行の計画:', '修行の計画' in pl and 'あと' in pl, '| 路線の定時率:', '定時 80%' in pl)
-        await pg.fill('#planPrice', '30000'); await pg.dispatch_event('#planPrice', 'change'); await pg.wait_for_timeout(300)
-        print('単価:', 'PP単価' in (await pg.inner_text('#statusBox .plan')))
+        # 金額の表示は最小限（11/4 本人の決定・SG_MONEY）。運賃の欄と単価は、ふだんは出ない（金額を出したときの単価は t64・t73・t80 で確かめる）
+        print('運賃の欄は隠れる:', await pg.is_hidden('#planPrice'), '| 単価は出ない:', 'PP単価' not in (await pg.inner_text('#statusBox .plan')))
         await pg.locator('#statusBox .plan').screenshot(path=os.path.join(WORK,'t57_plan.png'))
         # 4. 順光の目安（計算だけ確かめる：正午に、南の線を見る場所は逆光、北の線を見る場所は順光）
         lt = await pg.evaluate("""() => { const t = Date.parse('2026-10-19T12:00:00+09:00'), s = [35.55, 139.78];
