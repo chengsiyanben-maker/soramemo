@@ -1,7 +1,7 @@
 # データ担当の帳面
 
 ## いま持っている仕事
-- 表示の設定をサーバーに保存する表（11/8 16時15分 PM の指示・本人の決定「全部乗せ＋自分で隠す」）：ブランチ data/view-prefs → main 向けの下書き PR #37。報告 docs/pm/report-view-prefs.md
+- 表示の設定をサーバーに保存する表（11/8 16時15分 PM の指示・本人の決定「全部乗せ＋自分で隠す」）：ブランチ data/view-prefs → PR #37。報告 docs/pm/report-view-prefs.md。**11/8 18時34分 main に入った（本人がマージ）**。本番に流れたかは Actions で確かめる
   - 移行 157 user_view_prefs（1人1行・prefs は JSON のもの 16KB まで・fmt・suggest_shown_at・rev・updated_at。RLS は本人だけ select・insert・update・delete、書ける列は prefs・fmt だけ、rev と日時はトリガー、auth.users を cascade で退会で消える）／view_prefs_claim_suggest()（提案を1回だけ。別の端末でも。rev は変えない）
   - delete-account は説明の行だけ（cascade で消える）。admin_backup には足していない（PR #32 の 154 も同じ関数を直すため）
   - 確かめた結果：t97（38項目）・t01・t31・t33・t85・t87・t89・t96 通過、番号の重なりなし
@@ -79,7 +79,7 @@
 - SQL のテストは全部で約35分かかる（手元で流すときは裏で流してログを見る。t92 だけで約4分。同じログに2回流すと混ざるので、ログの名前を分ける）
 
 ## 次にやること
-000. 表示の設定（PR #37）：CI とレビューに答える。チェックイン担当が prefs の形を決めたら、fmt と上限が合うか見る。「反映して」が出たら migrations.mjs rebase。admin_backup に足すと決まったら PR #32 と順番をそろえて足す
+000. 表示の設定（PR #37・main に入った）：本番の Actions が成功したか確かめる。チェックイン担当が prefs の形を決めたら、fmt と上限が合うか見る。「反映して」が出たら migrations.mjs rebase。admin_backup に足すと決まったら PR #32 と順番をそろえて足す
 00. 全体のデバッグ（PR #34）：本人の health-check.sql の結果を読む（南の円の抜け・429 の回数・cron の失敗）。反映されたら、Server-Timing で airport-now のどこが遅いかを PM に測ってもらい、案A／案B を出し直す。adsb.lol の作者の返事が来たら、上限に合わせて記録の間隔を見直す。CI とレビューに答える
 0. ストアの見直し（PR #22）：本人が OpenSky を「置き換え」に決めたら、verify_io.ts の取り先を adsb.lol の記録に差し替える案（移行が要らない形）とテストを作る。SWIM のサービス説明書の文が来たら AIP の判定を書き直す。adsb.im の条件を読む
 1. 運用予想：本人の「反映して」を待つ（移行 152 だけ。画面はまだ）。反映されたら、次の朝に cron.job_run_details（rot-pairs・rot-eval）の結果をもらい、古い日がどこまで埋まったか・かかった時間を見る。時間がかかりすぎ（採点の legs が300に届かない）なら、rot_eval_nightly の便の数を 200 に下げる案を出す。bgw が on なら、仕事の文の set が効いているかも結果から確かめる
