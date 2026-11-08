@@ -1,7 +1,7 @@
 import os, sys
 HERE=os.path.dirname(os.path.abspath(__file__)); WEB=os.path.abspath(os.path.join(HERE,'..','..','web')); WORK=os.environ.get('SORAMEMO_TEST_WORK','/tmp/soramemo-e2e'); os.makedirs(WORK, exist_ok=True)
-# 表示の編集：下のタブ（出す・並び）、見方（隠す）、運用の空港（よく見る空港だけ）、運用の下・ホーム・成績のかたまり（出す・並び）。
-# この端末だけに保存し、開き直しても残る。はじめに戻す・ひな形を選ぶと戻る。
+# 表示の編集（11/8 全部乗せ＋フィルター）：下のタブ（出す・隠す、2〜5こ）、見方（隠す）、運用の空港（よく見る空港だけ）、運用の下・ホーム・成績のかたまり（出す・隠す）。
+# 開き直しても残る。全部乗せに戻すと全部出る。並べ替えは1月の公開のあと（いまの画面にはない）
 # 読み込み直しを確かめるため、ファイルとしてではなく小さなサーバーから開く（file:// だと最初の読み込み直しで保存が消えることがある）
 import asyncio, json, threading, http.server, socketserver, functools
 from datetime import datetime, timedelta, timezone
@@ -38,14 +38,14 @@ async def main():
             await pg.goto(URL); await pg.wait_for_load_state('load'); await pg.wait_for_timeout(600)
             await pg.evaluate('__fake.login()'); await pg.wait_for_timeout(800)
         await load()
-        check('はじめは何も変えていない（「気軽に」はホーム・図鑑・フライト）:', await pg.evaluate(LS) is None and await pg.evaluate(TABS) == 'home,book,log')
+        check('はじめは何も変えていない（前からの人は「気軽に」：ホーム・図鑑・フライト）:', await pg.evaluate(LS) is None and await pg.evaluate(TABS) == 'home,book,log')
         check('マイページに入口:', await pg.locator('#dSettings [data-lo-open="top"]').count() == 1)
 
-        # 運用：見方の右端の鉛筆から、その画面の編集へ
+        # 運用：見方の右端の鉛筆から、表示の編集（運用の見方の所）へ
         await pg.evaluate("goTab('ops')"); await pg.wait_for_timeout(1200)
         check('見方の右端に鉛筆:', await pg.locator('[data-lo-open="ops"]').count() == 1 and await pg.locator('#opsViews [data-vw]').count() == 7)
         await pg.click('[data-lo-open="ops"]'); await pg.wait_for_timeout(300)
-        check('鉛筆で運用の編集が開く:', await pg.evaluate("$('dLayout').open && LO_PAGE === 'ops'"))
+        check('鉛筆で表示の編集が開く:', await pg.evaluate("$('dLayout').open && LO_PAGE === 'ops'"))
         for v in ['day', 'ontime', 'art']: await pg.click(f'[data-lo-view="ops:{v}"]')
         check('見方を隠す:', await pg.locator('#opsViews [data-vw]').count() == 4 and await pg.locator('#opsViews [data-vw="ops:day"]').count() == 0)
         for v in ['board', 'strip', 'photo']: await pg.click(f'[data-lo-view="ops:{v}"]')
@@ -55,57 +55,43 @@ async def main():
         for a in ['HND', 'HIJ']: await pg.click(f'[data-lo-ap="{a}"]')
         aps = await pg.eval_on_selector_all('#opsAps .aplist [data-ops-ap]', 'e => e.map(x => x.dataset.opsAp)')
         check('よく見る空港が、空港を選ぶ画面のいちばん上に並ぶ:', aps == ['HND', 'HIJ'] and await pg.locator('#opsAps .apgrid [data-ops-ap]').count() == 14)
-        # 運用の下：地図を隠す・特別塗装機を上へ
-        await pg.click('[data-lo-blk="opsb:map"]'); await pg.click('[data-lo-drag="opsb:special"]'); await pg.click('[data-lo-mv="opsb:special:-99"]')
+        # 運用の下：地図を隠す
+        await pg.click('[data-lo-blk="opsb:map"]')
         check('地図を隠す:', await pg.evaluate("$('opsBlocks').querySelector('[data-lo=\"opsb:map\"]').classList.contains('lo-off')"))
-        check('特別塗装機がいちばん上:', await pg.evaluate("$('opsBlocks').firstElementChild.dataset.lo") == 'opsb:special')
-        # 全体：隠れている運用のタブを出して、左へ（成績は隠れたまま）
-        await pg.click('[data-lo-page="top"]'); await pg.wait_for_timeout(200)
+        # タブ：隠れている運用のタブを出す（成績は隠れたまま）
         await pg.click('[data-lo-tab="ops"]')
-        # ≡ を押すと動かし方のメニュー。「いちばん上へ」で運用を左端へ
-        await pg.click('[data-lo-drag="tabs:ops"]'); check('≡ を押すと動かし方のメニュー:', await pg.locator('#dLayout .lomenu button').count() == 4)
-        await pg.click('[data-lo-mv="tabs:ops:-99"]')
-        check('タブ：運用を出して左に（成績は隠れたまま）:', await pg.evaluate(TABS) == 'ops,home,book,log')
+        check('タブ：運用を出す（成績は隠れたまま）:', await pg.evaluate(TABS) == 'home,book,log,ops')
         check('隠したタブはマイページから開ける:', '成績を開く' in (await pg.inner_text('#personaMore')))
         await pg.click('[data-lo-tab="book"]'); await pg.click('[data-lo-tab="log"]')
-        check('タブは2つより減らせない:', await pg.evaluate(TABS) == 'ops,home' and await pg.locator('[data-lo-tab="ops"]').is_disabled())
-        await pg.click('[data-lo-tab="book"]'); await pg.click('[data-lo-tab="log"]')
-        # ホーム・成績
-        await pg.click('[data-lo-page="home"]'); await pg.click('[data-lo-blk="home:recent"]')
-        await pg.click('[data-lo-page="top"]'); await pg.click('[data-lo-page="stats"]')
-        # ≡ をつまんで動かす：ステータスの目安をいちばん上へ
-        h = pg.locator('[data-lo-drag="stats:status"]'); top = pg.locator('[data-lo-row="stats:passport"]')
-        hb = await h.bounding_box(); tb = await top.bounding_box()
-        await pg.mouse.move(hb['x'] + hb['width'] / 2, hb['y'] + hb['height'] / 2); await pg.mouse.down()
-        for k in range(1, 9): await pg.mouse.move(hb['x'] + hb['width'] / 2, hb['y'] + hb['height'] / 2 + (tb['y'] + 4 - hb['y']) * k / 8)
-        await pg.mouse.up(); await pg.wait_for_timeout(300)
+        check('タブは2つより減らせない:', await pg.evaluate(TABS) == 'home,ops' and await pg.locator('[data-lo-tab="ops"]').is_disabled())
+        await pg.click('[data-lo-tab="book"]'); await pg.click('[data-lo-tab="log"]'); await pg.click('[data-lo-tab="sg"]')
+        check('タブは5つまで出せる:', await pg.evaluate(TABS) == 'home,ops,book,log,sg' and await pg.locator('[data-lo-tab="sg"]').get_attribute('aria-pressed') == 'true')
+        await pg.click('[data-lo-tab="sg"]')
+        # ホーム・成績のかたまり
+        await pg.click('[data-lo-blk="home:recent"]'); await pg.click('[data-lo-blk="stats:status"]')
         check('ホーム：最近の印を隠す:', await pg.evaluate("document.querySelector('[data-lo=\"home:recent\"]').classList.contains('lo-off')"))
-        check('成績：ステータスの目安がいちばん上:', await pg.evaluate("$('v-stats').querySelector('.lo').dataset.lo") == 'stats:status')
-        # フライト・図鑑の見方
-        await pg.click('[data-lo-page="top"]'); await pg.click('[data-lo-page="log"]'); await pg.click('[data-lo-view="log:alt"]')
+        # フライトの隠れていた見方を出す
+        await pg.click('[data-lo-view="log:alt"]')
         check('フライトの隠れていた見方を出す:', 'alt' not in (await pg.evaluate(LS))['off']['log'] and 'cal' in (await pg.evaluate(LS))['off']['log'])
-        await pg.click('#dLayout [data-lo-page="top"]'); await pg.click('#dLayout [data-close]')
+        await pg.click('#dLayout [data-close]')
 
         # 開き直しても残る
         await pg.wait_for_timeout(500); await load()
-        check('開き直してもタブが残る:', await pg.evaluate(TABS) == 'ops,home,book,log')
+        check('開き直してもタブが残る:', await pg.evaluate(TABS) == 'home,ops,book,log')
         await pg.evaluate("goTab('ops')"); await pg.wait_for_timeout(1000)
         check('開き直しても見方が残る:', await pg.locator('#opsViews [data-vw]').count() == 4)
-        check('開き直しても順番が残る:', await pg.evaluate("$('opsBlocks').firstElementChild.dataset.lo") == 'opsb:special' and await pg.evaluate("$('v-stats').querySelector('.lo').dataset.lo") == 'stats:status')
+        check('開き直してもかたまりが残る:', await pg.evaluate("$('opsBlocks').querySelector('[data-lo=\"opsb:map\"]').classList.contains('lo-off')"))
         await pg.click('#opsApBtn'); await pg.fill('#opsApQ', 'oka'); await pg.wait_for_timeout(200)
         check('空港を3レターで探せる:', await pg.eval_on_selector_all('#opsAps [data-ops-ap]', 'e => e.map(x => x.dataset.opsAp)') == ['OKA'])
         await pg.click('#opsAps [data-ops-ap="OKA"]'); await pg.wait_for_timeout(600)
         check('選ぶと閉じて、その空港の運用:', not await pg.evaluate("$('dOpsAp').open") and await pg.evaluate("OPS_AP") == 'OKA')
         await pg.evaluate("setOpsAirport('HND')"); await pg.wait_for_timeout(400)
 
-        # はじめに戻す
-        await pg.evaluate("openLayout('top', 'settings')"); await pg.click('[data-lo-reset]'); await pg.wait_for_timeout(300)
-        check('はじめに戻す:', await pg.evaluate(LS) is None and await pg.evaluate(TABS) == 'home,book,log' and await pg.locator('#opsViews [data-vw]').count() == 7
-              and await pg.evaluate("$('opsBlocks').firstElementChild.dataset.lo") == 'opsb:alerts' and not await pg.evaluate("document.querySelector('[data-lo=\"home:recent\"]').classList.contains('lo-off')"))
-        # ひな形を選ぶと、その形になり、自分で変えた表示は戻る
-        await pg.click('[data-lo-tab="ops"]')
-        await pg.click('[data-lo-persona="spot"]'); await pg.wait_for_timeout(500)
-        check('ひな形「撮影」を選ぶ:', await pg.evaluate(TABS) == 'ops,home,book,log' and await pg.evaluate(LS) is None and await pg.evaluate("PERSONA") == 'spot')
+        # 全部乗せに戻す（11/8：ひな形に戻すのではなく、全部出す）
+        await pg.evaluate("openLayout('top', 'settings')"); await pg.click('[data-lo-reset]'); await pg.click('[data-lo-reset-yes]'); await pg.wait_for_timeout(300)
+        check('全部乗せに戻す:', await pg.evaluate(LS) is None and await pg.evaluate("PERSONA") == 'all' and await pg.evaluate(TABS) == 'home,book,log,ops,sg' and await pg.locator('#opsViews [data-vw]').count() == 7
+              and not await pg.evaluate("document.querySelector('[data-lo=\"home:recent\"]').classList.contains('lo-off')"))
+        check('ひな形を選ぶ所はない:', await pg.locator('#dLayout [data-lo-persona]').count() == 0 and await pg.locator('button[data-persona]').count() == 0)
         check('使い方からの勧めは、自分で変えたら出さない:', await pg.evaluate("(() => { LAYOUT = { tabs:['home','ops'] }; const r = loCustom(); LAYOUT = null; return r; })()"))
         print('errors', errs + fails); srv.shutdown(); await b.close()
 asyncio.run(main())
