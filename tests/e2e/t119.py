@@ -117,7 +117,10 @@ async def main():
         check('戻したあとのタブ帯を小さく見せる（5つ）:', await pg.locator('#dReset .tpmini b').count() == 5)
         await pg.screenshot(path=os.path.join(SHOTS, '03-c3-reset.png'))
         await pg.click('#dReset [data-rs-yes]'); await pg.wait_for_timeout(300)
-        check('全部乗せに戻る:', await pg.evaluate(TABS) == 'home,book,log,ops,sg' and await pg.evaluate('loAllOn()') and await pg.locator('#dTabs [data-tp-reset]').is_disabled())
+        check('全部乗せに戻る:', await pg.evaluate(TABS) == 'home,book,log,ops,sg' and await pg.evaluate('loAllOn()'))
+        # review-c4 の2：全部乗せのときは押せない薄い字のボタンを出さず、理由の字を出す（白と 4.5:1 以上）
+        an = await pg.evaluate("(() => { const e = document.querySelector('#dTabs [data-tp-allnow]'); return e ? [e.innerText, getComputedStyle(e).color] : null; })()")
+        check('全部乗せのときは「全部乗せに戻す」のボタンがなく「いまは全部乗せです」:', await pg.locator('#dTabs [data-tp-reset]').count() == 0 and an and an[0] == 'いまは全部乗せです' and an[1] == 'rgb(107, 114, 128)', an)
         u = await pg.inner_text('#dTabs .tpundo')
         check('戻したあと「元に戻す」が出る・数は種類ごと（タブ4つ・かたまり1つ）:', 'タブ4つ' in u and 'をまた出しました' in u and 'こを' not in u, u)
         await pg.screenshot(path=os.path.join(SHOTS, '13-c3-undo.png'))
@@ -178,12 +181,19 @@ async def main():
           const hit = [...document.querySelectorAll('#dTabs .tprow, #dTabs .tpdone, #dTabs [data-tp-on]')].filter(e => { const r0 = e.getBoundingClientRect(), r = e.closest('.tpscroll') ? { top:Math.max(r0.top, a.top), bottom:Math.min(r0.bottom, a.bottom), left:r0.left, right:r0.right, height:r0.height } : r0; return r.height && r.bottom > t.top + 1 && r.top < t.bottom - 1 && r.right > t.left && r.left < t.right; });
           return { inView: t.bottom <= innerHeight && t.top >= 0, hit: hit.map(e => e.className + ':' + (e.dataset.tp || e.dataset.tpOn || '')) }; })()""")
         check('667：外した直後のトーストが画面の中・行やボタンに重ならない:', ov['inView'] and not ov['hit'], ov)
+        # review-c4 の1：元に戻すの帯が出ても、最後の行（成績）が帯に隠れず見えている
+        lv = await pg.evaluate("""(() => { const a = document.querySelector('#dTabs .tpscroll').getBoundingClientRect(), r = document.querySelector('#dTabs .tprow[data-tp="stats"]').getBoundingClientRect(), o = document.querySelector('#dTabs .tprow[data-tp="ops"]').getBoundingClientRect(), t = document.querySelector('#dTabs .tpundo').getBoundingClientRect();
+          return { last: r.bottom <= a.bottom + 1 && r.bottom <= t.top, ops: o.top >= a.top - 1 && o.bottom <= a.bottom + 1 }; })()""")
+        check('667：元に戻すの帯が出ても最後の行（成績）と押した行（運用）が見える:', lv['last'] and lv['ops'], lv)
         await pg.screenshot(path=os.path.join(SHOTS, '07-c1-667.png'))
         await pg.click('#dTabs [data-tp-undo]'); await pg.wait_for_timeout(200)
         await pg.click('#dTabs [data-tp-on="stats"]'); await pg.wait_for_timeout(250)
         sv = await pg.evaluate("""(() => { const s = document.querySelector('#dTabs .tpswap').getBoundingClientRect(), d = document.querySelector('#dTabs .tpdone').getBoundingClientRect(); return s.top >= 0 && s.bottom <= innerHeight && d.top >= 0; })()""")
         check('667：5/5 で ON にすると入れ替えの質問が見える所（下）に出る・完了も見える:', sv)
         await pg.screenshot(path=os.path.join(SHOTS, '21-onoff-swap-667.png'))
+        # review-c4 の3：夜は入れ替えの帯に薄い黄色を使わず、縁だけ（design/night 07c と同じ値）
+        nt = await pg.evaluate("(() => { document.documentElement.dataset.night = 'on'; const e = document.querySelector('#dTabs .tpswap'), cs = getComputedStyle(e), r = [cs.backgroundColor, cs.boxShadow]; delete document.documentElement.dataset.night; return r.concat(getComputedStyle(e).backgroundColor); })()")
+        check('夜は入れ替えの帯が縁だけ（地は #141B24・縁 2px）・昼は今の薄い黄色:', nt[0] == 'rgb(20, 27, 36)' and '2px' in nt[1] and nt[2] == 'rgb(255, 247, 224)', nt)
         await pg.click('#dTabs [data-tp-swap=""]'); await pg.wait_for_timeout(200)
         check('やめるとスイッチは OFF のまま:', await pg.get_attribute('#dTabs [data-tp-on="stats"]', 'aria-checked') == 'false' and await pg.locator('#dTabs .tpswap').count() == 0)
         await pg.evaluate("$('dTabs').close(); openHomeEd('screen')"); await pg.wait_for_timeout(200); await pg.click('#dHomeEd [data-he-off="event"]'); await pg.wait_for_timeout(200)
