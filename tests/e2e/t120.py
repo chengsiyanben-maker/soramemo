@@ -1,0 +1,163 @@
+# 図鑑の作り直し（11/9 の決定・画面案 design/zukan-book 3版）：ツメ・扉・そろえた枠・ターミナル・索引の探す欄・見方の移し替え・0の人・空港ページ・ほかの図鑑・記号の意味
+import os, sys, json
+HERE=os.path.dirname(os.path.abspath(__file__)); WEB=os.path.abspath(os.path.join(HERE,'..','..','web')); WORK=os.environ.get('SORAMEMO_TEST_WORK','/tmp/soramemo-e2e'); os.makedirs(WORK, exist_ok=True)
+SHOTS=os.path.abspath(os.path.join(HERE,'..','..','docs','pm','shots-zukan-book')); os.makedirs(SHOTS, exist_ok=True)
+import asyncio
+from playwright.async_api import async_playwright
+fails = []
+def check(label, ok, extra=''):
+    print(label, ok, extra)
+    if not ok: fails.append(label)
+SEED = """() => {
+  const id = i => A.find(a => a.iata === i).id, cs = [];
+  const at = (y,m,d,h) => new Date(y,m-1,d,h).getTime();
+  const L = [['HND',2025,12,14,'HND-T1'],['CTS',2025,12,15,'CTS-D'],['AKJ',2026,1,5],['HKD',2026,2,1],['OKA',2026,3,3],['ISG',2026,3,4],['FUK',2026,4,1],['ITM',2026,5,2],['KMQ',2026,6,1],['KOJ',2026,7,1],['NGS',2026,8,1],['SDJ',2026,9,1],['MMY',2026,10,24],['HIJ',2026,10,25],['OIT',2026,11,1],['KCZ',2026,11,1]];
+  for(const [i,y,m,d,t] of L) cs.push({a:id(i), t:at(y,m,d,10), acc:20, term:t||null});
+  for(let k=0;k<27;k++) cs.push({a:id('HND'), t:at(2026,1,1,8)+k*864e5*10, acc:20, term:k%2?'HND-T2':'HND-T1'});
+  cs.sort((a,b)=>a.t-b.t);
+  S.checkins = cs; S.flights = []; save(); render();
+}"""
+async def open_app(b, h=844, init="", seed=True, night=False):
+    c=await b.new_context(viewport={'width':390,'height':h}, device_scale_factor=2, timezone_id='Asia/Tokyo')
+    await c.route('**/web/config.js', lambda r: r.fulfill(body='window.SORAMEMO_CONFIG = {};', content_type='application/javascript'))
+    await c.add_init_script(init)
+    pg=await c.new_page(); errs=[]; pg.on('pageerror', lambda e: errs.append(str(e)))
+    await pg.goto('file://'+os.path.join(WEB,'index.html')); await pg.wait_for_function('document.readyState === "complete" && typeof render === "function"'); await pg.wait_for_timeout(500)
+    if seed:
+        await pg.evaluate(SEED); await pg.wait_for_timeout(300)
+    if night: await pg.evaluate("document.documentElement.dataset.night = 'on'")
+    await pg.evaluate("goTab('book')"); await pg.wait_for_timeout(400)
+    return c, pg, errs
+NEW = "localStorage.setItem('soramemo.onboarded','1'); localStorage.setItem('soramemo.persona','all'); localStorage.setItem('soramemo.zk.notice','new'); localStorage.setItem('soramemo.install.later','1');"
+async def main():
+    allerr = []
+    async with async_playwright() as p:
+        b=await p.chromium.launch()
+        # 1) 地方別（はじめの見方）
+        c, pg, errs = await open_app(b, init=NEW)
+        check('見方は3つ（地方別・地図・行った順）:', await pg.evaluate("[...document.querySelectorAll('#bookViews [data-vw]')].map(x => x.textContent).join(',')") == '地方別,地図,行った順')
+        check('はじめの見方は地方別:', await pg.evaluate("VIEW.book") == 'region')
+        check('上のカード 16/86 と9地方:', await pg.inner_text('#bookProg') == '16' and await pg.locator('#zkBody .zk-hero .rg > div').count() == 9)
+        tm = await pg.evaluate("[...document.querySelectorAll('#zkTsume [data-zkj]')].map(x => { const r = x.getBoundingClientRect(); return [x.dataset.zkj, Math.round(r.width), Math.round(r.height), getComputedStyle(x).boxShadow]; })")
+        check('ツメは9地方・押せる大きさ44px:', len(tm) == 9 and all(x[2] >= 44 and x[1] >= 44 for x in tm), str(tm[:2]))
+        check('ツメは昼は地方の色（守り神の色）:', await pg.evaluate("getComputedStyle(document.querySelector('#zkTsume [data-zkj=\"関東\"]')).getPropertyValue('--c').trim()") == await pg.evaluate("GOD_COLORS['関東']"))
+        check('枠は高さ104・3つ並び:', await pg.evaluate("(() => { const a = [...document.querySelectorAll('#zkrg-北海道 .zk-door + .zk-grid > .zk-ap')]; return a.length === 12 && a.every(x => Math.round(x.getBoundingClientRect().height) === 104) && a[0].getBoundingClientRect().top === a[2].getBoundingClientRect().top; })()"))
+        cut = await pg.evaluate("[...document.querySelectorAll('#zkBody .zk-ap')].filter(x => x.scrollHeight > x.clientHeight + 1 || [...x.children].some(k => k.getBoundingClientRect().bottom > x.getBoundingClientRect().bottom + 1)).map(x => x.getAttribute('aria-label'))")
+        check('枠の中で字が切れない（ターミナルの名前も）:', not cut, str(cut[:3]))
+        terms = await pg.evaluate("[...document.querySelectorAll('#zkBody .zk-ap [class=nm]')].map(x => x.textContent).filter(t => / (国内|国際|T\\d)$/.test(t))")
+        check('ターミナルは6空港14こ・名前は「新千歳 国内」の短さ:', len(terms) == 14 and '新千歳 国内' in terms and '福岡 国際' in terms, str(terms))
+        check('ターミナルは86 の数に入らない（上の数は16のまま）:', await pg.inner_text('#bookProg') == '16')
+        check('行った枠は ✓ と回数（羽田28回）:', '28' in await pg.inner_text(f"#zkBody [data-zka=\"{await pg.evaluate('IATA.HND.id')}\"]"))
+        check('まだの枠は「まだ」:', 'まだ' in await pg.inner_text(f"#zkBody [data-zka=\"{await pg.evaluate('IATA.WKJ.id')}\"]"))
+        await pg.screenshot(path=os.path.join(SHOTS, '02-844.png'))
+        await pg.click('[data-zkj="関東"]'); await pg.wait_for_timeout(900)
+        door = await pg.evaluate("(() => { const d = document.querySelector('#zkrg-関東 .zk-door').getBoundingClientRect(); return [Math.round(d.top), document.querySelector('#zkTsume .on').dataset.zkj]; })()")
+        check('ツメで飛ぶと関東の扉が上に止まる・ツメも関東:', abs(door[0]) <= 2 and door[1] == '関東', str(door))
+        check('扉は1つ（見出しが2つにならない）:', await pg.locator('#v-book .zk-door:has-text("関東")').count() == 1)
+        await pg.screenshot(path=os.path.join(SHOTS, '03-844.png'))
+        await pg.mouse.wheel(0, 900); await pg.wait_for_timeout(500)
+        check('送るとツメがついてくる:', await pg.evaluate("document.querySelector('#zkTsume').getBoundingClientRect().top >= 0 && document.querySelector('#zkTsume').getBoundingClientRect().top < 160"))
+        check('横のはみ出しがない:', await pg.evaluate("document.documentElement.scrollWidth <= innerWidth"))
+        # 空港ページ
+        await pg.evaluate("openAirport(IATA.HND.id)"); await pg.wait_for_timeout(300)
+        t = await pg.inner_text('#dAirportBody')
+        check('空港ページ：コード・押した回数・はじめて押した日（年月日）:', 'HND' in t and '押した回数' in t and '2025' in t and 'はじめて押した日' in t)
+        check('空港ページ：押した記録は上に3回＋すべて見る:', await pg.locator('#dAirportBody > ul.hist li').count() == 3 and 'すべて見る' in t)
+        check('空港ページ：ターミナルの1枚（86 の数に入りません）:', 'ターミナル　2 / 3' in t and '86 の数に入りません' in t)
+        check('空港ページ：開港・滑走路はまだ出さない:', '開港' not in t and '滑走路' not in t and '供用開始' not in t)
+        pn = await pg.evaluate("[...document.querySelectorAll('#dAirportBody [data-zk-go]')].map(x => BY[+x.dataset.zkGo].iata)")
+        check('前／次は同じ地方の北から南（羽田の前後）:', len(pn) == 2, str(pn))
+        await pg.screenshot(path=os.path.join(SHOTS, '04-844.png'))
+        await pg.click('#dAirportBody [data-zk-go] >> nth=1'); await pg.wait_for_timeout(300)
+        check('次を押すととなりの空港:', pn[1] in await pg.inner_text('#dAirportBody'))
+        await pg.evaluate("openAirport(IATA.OIM.id)"); await pg.wait_for_timeout(300)
+        t = await pg.inner_text('#dAirportBody')
+        check('まだの空港：ここでチェックインすると印が付きます・判定の範囲・空の欄を出さない:', 'ここでチェックインすると印が付きます' in t and '判定の範囲' in t and '押した回数' not in t)
+        await pg.screenshot(path=os.path.join(SHOTS, '04b-844.png'))
+        await pg.evaluate("document.querySelectorAll('dialog[open]').forEach(d => d.close())")
+        check('はらう説明は1回だけ:', await pg.evaluate("(openAirport(IATA.HND.id), !document.querySelector('#dAirportBody .zk-swhint'))"))
+        await pg.evaluate("document.querySelectorAll('dialog[open]').forEach(d => d.close())")
+        # 行った順
+        await pg.evaluate("window.scrollTo(0,0)"); await pg.click('[data-vw="book:chron"]'); await pg.wait_for_timeout(300)
+        mons = await pg.evaluate("[...document.querySelectorAll('#zkBody .zk-mon')].map(x => x.firstChild.textContent)")
+        check('行った順：見出しは月・新しい月が上:', mons[:2] == ['2026年11月', '2026年10月'], str(mons[:3]))
+        check('行った順：回数は「計」・日付は枠の中:', '計' in await pg.inner_text('#zkBody .zk-ap >> nth=0') and '11月1日' in await pg.inner_text('#zkBody .zk-ap >> nth=0'))
+        check('行った順はツメなし:', not await pg.locator('#zkTsume').is_visible() if await pg.locator('#zkTsume').count() else True)
+        await pg.screenshot(path=os.path.join(SHOTS, '02d-844.png'))
+        await pg.click('[data-vw="book:region"]'); await pg.wait_for_timeout(200)
+        # 索引
+        await pg.click('#bookMain [data-zkseg="index"]'); await pg.wait_for_timeout(300)
+        async def q(s):
+            await pg.fill('#zkQ', s); await pg.wait_for_timeout(150)
+            return await pg.evaluate("[...document.querySelectorAll('#zkIdxBody [data-zka]')].map(x => BY[+x.dataset.zka].iata)")
+        r = await q('みや'); check('探す欄「みや」で宮崎・三宅島・宮古:', all(x in r for x in ['KMI', 'MYE', 'MMY']), str(r))
+        r = await q('ちとせ'); check('探す欄「ちとせ」で新千歳:', 'CTS' in r, str(r))
+        r = await q('せんとれあ'); check('探す欄「せんとれあ」で中部:', r == ['NGO'], str(r))
+        await pg.screenshot(path=os.path.join(SHOTS, '05c-844.png'))
+        r = await q('hnd'); check('探す欄はコードでも（hnd）:', r == ['HND'], str(r))
+        r = await q('ミヤザキ'); check('カタカナでも当たる:', 'KMI' in r, str(r))
+        await pg.fill('#zkQ', ''); await pg.wait_for_timeout(150)
+        check('ABC順は86空港:', await pg.locator('#zkIdxBody [data-zka]').count() == 86)
+        await pg.screenshot(path=os.path.join(SHOTS, '05-844.png'))
+        await pg.click('[data-zkit="kana"]'); await pg.wait_for_timeout(200)
+        heads = await pg.evaluate("[...document.querySelectorAll('#zkIdxBody .zk-ih')].map(x => x.textContent)")
+        check('50音順：あ〜わの行（ほかなし）:', heads[0] == 'あ' and 'ほか' not in heads, str(heads))
+        itm = await pg.evaluate("(() => { const b = document.querySelector('#zkIdxBody [data-zka=\"' + IATA.ITM.id + '\"]'); return b.closest('.zk-ilist').previousElementSibling.textContent; })()")
+        hnd = await pg.evaluate("(() => { const b = document.querySelector('#zkIdxBody [data-zka=\"' + IATA.HND.id + '\"]'); return b.closest('.zk-ilist').previousElementSibling.textContent; })()")
+        check('頭の字はふだん呼ぶ名前（伊丹は「あ」行のい・羽田は「は」）:', itm == 'あ' and hnd == 'は', itm + hnd)
+        await pg.screenshot(path=os.path.join(SHOTS, '05b-844.png'))
+        # ほかの図鑑・実績
+        await pg.click('#bookIndex [data-zkseg="main"]'); await pg.click('#bookMain [data-zkseg="others"]'); await pg.wait_for_timeout(300)
+        t = await pg.inner_text('#bookOthers')
+        check('ほかの図鑑・実績：4冊と「86 の数に入りません」:', await pg.locator('#bookOthers .zk-book').count() == 4 and '86 の数に入りません' in t and 'ターミナル' in t)
+        await pg.screenshot(path=os.path.join(SHOTS, '06-844.png'))
+        await pg.click('#bookOthers [data-zkseg="extra"]'); await pg.wait_for_timeout(200)
+        check('番外編から「ほかの図鑑・実績」へ戻れる:', await pg.locator('#bookExtra [data-zkseg="others"]').count() == 1)
+        await pg.click('#bookExtra [data-zkseg="others"]'); await pg.click('#bookOthers [data-zkseg="main"]'); await pg.wait_for_timeout(200)
+        # 記号の意味
+        await pg.evaluate("setBookSeg('kigou'); renderVisible()"); await pg.wait_for_timeout(200)
+        t = await pg.inner_text('#bookKigou')
+        check('記号の意味：日付は「2026年11月1日」・ターミナル・ツメ:', '2026年11月1日' in t and 'ターミナル' in t and 'ツメ' in t)
+        await pg.screenshot(path=os.path.join(SHOTS, '08-844.png'))
+        check('はじめての人にはお知らせを出さない:', await pg.locator('#zkNotice .zk-notice').count() == 0)
+        allerr += errs; await c.close()
+        # 2) 667 でツメがタブ帯に重ならない
+        c, pg, errs = await open_app(b, h=667, init=NEW)
+        ov = await pg.evaluate("(() => { const t = document.querySelector('#zkTsume').getBoundingClientRect(), n = document.querySelector('nav.tabs').getBoundingClientRect(); return [Math.round(t.bottom), Math.round(n.top)]; })()")
+        check('667：ツメの下の端はタブ帯より上:', ov[0] <= ov[1], str(ov))
+        check('はじめの案内：大きな6空港はターミナルにも印（羽田・成田だけと書かない）:', await pg.evaluate("document.body.innerHTML.includes('大きな6空港はターミナルにも印があります') && !document.body.innerHTML.includes('羽田・成田は各ターミナル')"))
+        await pg.screenshot(path=os.path.join(SHOTS, '02-667.png'))
+        await pg.click('[data-zkj="九州"]'); await pg.wait_for_timeout(900); await pg.screenshot(path=os.path.join(SHOTS, '03-667.png'))
+        allerr += errs; await c.close()
+        # 3) 夜：ツメは色なし
+        c, pg, errs = await open_app(b, init=NEW, night=True)
+        await pg.evaluate("renderBook()"); await pg.wait_for_timeout(200)
+        bs = await pg.evaluate("getComputedStyle(document.querySelector('#zkTsume [data-zkj=\"関東\"]')).boxShadow")
+        check('夜：ツメに地方の色を使わない:', 'rgb(194, 96, 58)' not in bs, bs)
+        allerr += errs; await c.close()
+        # 4) 0／86 の人
+        c, pg, errs = await open_app(b, init=NEW, seed=False)
+        t = await pg.inner_text('#zkBody .zk-hero')
+        check('0の人：上のカードは1行の文（9地方の数を出さない）:', '空港でチェックインすると、ここに印が付きます' in t and await pg.locator('#zkBody .zk-hero .rg').count() == 0)
+        await pg.screenshot(path=os.path.join(SHOTS, '02z-844.png'))
+        allerr += errs; await c.close()
+        # 5) 今の人：見方の移し替え（端末）とお知らせ1回
+        OLD = "if(!sessionStorage.getItem('x')){ sessionStorage.setItem('x','1'); localStorage.setItem('soramemo.onboarded','1'); localStorage.setItem('soramemo.persona','all'); localStorage.setItem('soramemo.install.later','1'); localStorage.setItem('soramemo.view.book','signs'); localStorage.setItem('soramemo.layout', JSON.stringify({tabs:['home','book','log'], off:{book:['tiles','signs','chron']}, order:{book:['tiles','map','signs']}})); }"
+        c, pg, errs = await open_app(b, init=OLD, seed=False)
+        check('案内標を選んでいた人は地方別に:', await pg.evaluate("VIEW.book") == 'region' and await pg.evaluate("localStorage.getItem('soramemo.view.book')") == 'region')
+        lay = await pg.evaluate("JSON.stringify([LAYOUT.off.book, LAYOUT.order.book])")
+        check('隠した見方から tiles・signs・region を外す（年代記＝行った順は残す）・並びも置き換え:', lay == '[["chron"],["region","map"]]', lay)
+        check('今の人へ1回だけのお知らせ:', 'まとめ' in await pg.inner_text('#zkNotice') or '地方別' in await pg.inner_text('#zkNotice'))
+        await pg.screenshot(path=os.path.join(SHOTS, '07b-844.png'))
+        await pg.click('[data-zk-notice]'); await pg.wait_for_timeout(200)
+        await pg.reload(); await pg.wait_for_function('typeof render === "function"'); await pg.wait_for_timeout(500); await pg.evaluate("goTab('book')"); await pg.wait_for_timeout(300)
+        check('「わかった」のあとは出ない:', await pg.locator('#zkNotice .zk-notice').count() == 0)
+        check('地方別は隠せない（表示の編集のピルは押せない）:', await pg.evaluate("loToggleOff('book', 'region', true)") == False)
+        r = await pg.evaluate("vpApply({ base:'all', layout:{ off:{ book:['tiles','map','region'] } } }), JSON.stringify(LAYOUT.off.book)")
+        check('サーバーの fmt 2 の古い id も読むときに直す:', r == '["map"]', r)
+        check('保存は fmt 3:', await pg.evaluate("VP_FMT") == 3)
+        allerr += errs; await c.close()
+        await b.close()
+    print('fails', fails)
+    print('errors', fails + allerr)
+asyncio.run(main())

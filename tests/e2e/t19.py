@@ -15,7 +15,7 @@ async def main():
         await pg.wait_for_timeout(400); await pg.reload(); await pg.wait_for_load_state('load'); await pg.wait_for_timeout(500)
         await pg.click('nav.tabs button[data-v=book]'); await pg.wait_for_timeout(200); await pg.screenshot(path=os.path.join(WORK,'w_book.png'))
         for i in range(4):
-            await pg.click(f'#book .cell.got >> nth={i}'); await pg.wait_for_timeout(250)
+            await pg.click(f'#zkBody .zk-ap:not(.no) >> nth={i}'); await pg.wait_for_timeout(250)
             print(i, (await pg.inner_text('#dAirportBody')).replace('\n',' ')[:120])
             await pg.screenshot(path=os.path.join(WORK,f'w_detail{i}.png')); 
             if i==0:

@@ -18,7 +18,7 @@ async def main():
             else: await pg.click('#dStamp .row2 .btn2')
         async def snap(mode):
             t = await pg.inner_text('.tally'); print(mode, 'tally:', t.replace('\n',' '), '| bar:', (await pg.inner_text('#focusBar')).replace('\n',' '))
-            await pg.click('nav.tabs button[data-v=book]'); print('  book:', await pg.inner_text('#bookProg'), '| dim:', await pg.locator('#book .cell.dim').count())
+            await pg.click('nav.tabs button[data-v=book]'); print('  book:', await pg.inner_text('#bookProg'), '| dim:', await pg.locator('#zkBody .zk-ap.dim').count())
             await pg.click('nav.tabs button[data-v=stats]'); print('  stats:', (await pg.inner_text('#airlineStats')).replace('\n',' | '))
             await pg.click('nav.tabs button[data-v=log]')
             print('  flights:', await pg.locator('#flights .flight').count(), '| map routes:', await pg.locator('#map path').count()-1)

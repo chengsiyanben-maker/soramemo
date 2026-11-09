@@ -23,7 +23,7 @@ async def main():
         st = await pg.evaluate("(() => { const s = achState(); return ['mil1','gl1','fd1','ap1','ap5'].map(id => id + ':' + s.done.has(id)); })()"); print('実績:', st)
         await pg.click('nav.tabs button[data-v=book]'); await pg.wait_for_timeout(300)
         print('図鑑の進み:', await pg.inner_text('#bookProg'))
-        await pg.click('#v-book [data-seg=extra]'); await pg.wait_for_timeout(200)
+        await pg.evaluate("setBookSeg('extra'); renderVisible()"); await pg.wait_for_timeout(200)
         print('番外編:', [t for t in (await pg.inner_text('#bookExtra')).split('\n') if '/' in t][-2:])
         await pg.locator('#bookExtra h2').scroll_into_view_if_needed(); await pg.screenshot(path=os.path.join(WORK,'x_book.png'))
         print(errs); await b.close()
