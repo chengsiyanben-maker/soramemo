@@ -1,13 +1,20 @@
 # データ担当の帳面
 
 ## いま持っている仕事
-- 表示の設定をサーバーに保存する表（11/8 16時15分 PM の指示・本人の決定「全部乗せ＋自分で隠す」）：ブランチ data/view-prefs → PR #37。報告 docs/pm/report-view-prefs.md。**11/8 18時34分 main に入った（本人がマージ）**。本番に流れたかは Actions で確かめる
+- 定期の手入れ 3回目（11/9 月、PM の指示なしの回）：ブランチ maint/2026-11-09 → main 向けの下書き PR #56。報告 docs/pm/maint/2026-11-09-report.md
+  - 移行 158（maint_1109）：cold_done は数えるだけ（新しい関数 cold_count、運営だけ）・消した数が控えと違えば全部取り消す／cold_rows は json で組み立てる（返す型 jsonb → json、中身は同じ）。表・索引・RLS・権限は変えない。チェックイン・経営への影響なし
+  - 確かめた結果：t98（10項目）・t41・SQL のテスト103本すべて通過、番号の重なりなし（153件）。本物の Postgres 16（全機の航跡1日2万行）で消す前の確かめ 207〜376ms → 18〜22ms・最大メモリ約 213〜242MB → 約 68MB、cold_rows は約 184MB に
+  - 実際に移しはじめるのは記録の始まりから400日後（2027年11月ごろ）。今回は先回り
+  - 読むだけの docs/pm/maint/cold-day-size.sql（前の日1日の大きさ。索引で引く）
+  - 案（入れていない）：全機の航跡のファイルを空港ごとに分ける（cold-tracks の読み出しと cold-archive の作業メモリが小さくなる。2027年11月までに）
+  - 本人待ち：「反映して」・案を作るか・cold-day-size.sql を流してもらう
+- 表示の設定をサーバーに保存する表（11/8 16時15分 PM の指示・本人の決定「全部乗せ＋自分で隠す」）：ブランチ data/view-prefs → PR #37。報告 docs/pm/report-view-prefs.md。**11/8 18時34分 main に入った（本人がマージ）。11/9 11時45分の「反映」の Re-run（run 42467712581 の4回目）が成功し、本番に入った**
   - 移行 157 user_view_prefs（1人1行・prefs は JSON のもの 16KB まで・fmt・suggest_shown_at・rev・updated_at。RLS は本人だけ select・insert・update・delete、書ける列は prefs・fmt だけ、rev と日時はトリガー、auth.users を cascade で退会で消える）／view_prefs_claim_suggest()（提案を1回だけ。別の端末でも。rev は変えない）
   - delete-account は説明の行だけ（cascade で消える）。admin_backup には足していない（PR #32 の 154 も同じ関数を直すため）
   - 確かめた結果：t97（38項目）・t01・t31・t33・t85・t87・t89・t96 通過、番号の重なりなし
   - 本人待ち：「反映して」（画面の OK のあとでよい）・admin_backup に足すか・上限 16KB でよいか
 - 全体のデバッグ（11/7 22時20分 PM の指示）：ブランチ data/debug-1107 → PR #34。報告 docs/pm/report-debug-1107.md。**main に入った（bb23fc5「反映：全体のデバッグ 11/7」、11/8 の回で確認）**。本番の動きは health-check.sql の結果で確かめる
-  - **反映は失敗（11/8 16:32）**：Actions run 42457112995 はテストを全部通ったが「プロジェクトにつなぐ」で Supabase の SUPABASE_ACCESS_TOKEN が Invalid access token。移行156・関数・アプリは本番に入っていない（本番は前のまま）。本人が Supabase で鍵を作り直し、GitHub の Secrets を差し替えて Re-run する（11/8 16:44 に知らせた）。次の回は Re-run の結果を Actions で確かめる
+  - **11/9 11時45分の Re-run（run 42467712581 の4回目、main b9fc432）で反映は成功。移行156・関数・アプリは本番に入った**（11/8 16:32 の1回目は SUPABASE_ACCESS_TOKEN の鍵が古くて失敗、本人が差し替えた）
   - adsb.lol の 429：見る人の airport-traffic は live_positions（75秒以内）から作る（移行 156：live_positions に trk を足す。列だけ・RLS 今のまま）。記録の処理は 429・420 で1回だけ待って取り直す（最長5秒）
   - 見つけた抜け：航跡の点と reg_legs を「偶数の30秒の回」だけで残していたので、後半の回にしか取らない南の円（沖縄・奄美・宮古・石垣）がほとんど残っていない見込み → recordPlan（_shared/traffic.ts）で円ごとに決める。本番の数は health-check.sql の「3」で確かめる
   - airport-now：待つ上限（ODPT 8秒・天気5秒・気象庁4秒）・Server-Timing・wx_obs からの代わり。遅さの主な原因は aviationweather.gov の「ためた答えがない1回目が 4〜20秒、ときどき 504」（外から測った）
@@ -73,23 +80,23 @@
 - 本人の決定：規約を改定するときは「terms_versions に1行足す → アプリの定数を変える」の順
 
 ## 移行とテストの番号
-- main の最新は 152（rotation_predict。11/6 反映済み）。maint/2026-11-06 は 153・テスト t93（fix/co-tests の経営の移行も 153 なので、反映の前に rebase）、data/photo-log は 154・テスト t94、maint/2026-11-07 は 155・テスト t95、data/debug-1107 は 156・テスト t96（関数のテストは supabase/tests/live_view_test.ts。main に反映済み）、data/view-prefs は 157・テスト t97。次に新しく作るものは 158 以降・テストは t98 以降
+- main の最新は 157（156・157 は 11/9 本番に入った）。maint/2026-11-06 は 153・テスト t93（fix/co-tests の経営の移行も 153 なので、反映の前に rebase）、data/photo-log は 154・テスト t94、maint/2026-11-07 は 155・テスト t95、data/debug-1107 は 156・テスト t96（関数のテストは supabase/tests/live_view_test.ts。main に反映済み）、data/view-prefs は 157・テスト t97、maint/2026-11-09 は 158・テスト t98。次に新しく作るものは 159 以降・テストは t99 以降
 - main に別の移行が先に入ったら、反映の前にもう一度 `node tools/migrations.mjs rebase`
 - 本番は小さいプランで一時ファイルの余裕がない。本人に流してもらう SQL は、大きな中間の表・自己結合・大きな並べ替えを避け、索引で引く形にする
 - SQL のテストは全部で約35分かかる（手元で流すときは裏で流してログを見る。t92 だけで約4分。同じログに2回流すと混ざるので、ログの名前を分ける）
 
 ## 次にやること
-000. 表示の設定（PR #37・main に入った）：本番の Actions が成功したか確かめる。チェックイン担当が prefs の形を決めたら、fmt と上限が合うか見る。「反映して」が出たら migrations.mjs rebase。admin_backup に足すと決まったら PR #32 と順番をそろえて足す
-00. 全体のデバッグ（PR #34）：本人の health-check.sql の結果を読む（南の円の抜け・429 の回数・cron の失敗）。反映されたら、Server-Timing で airport-now のどこが遅いかを PM に測ってもらい、案A／案B を出し直す。adsb.lol の作者の返事が来たら、上限に合わせて記録の間隔を見直す。CI とレビューに答える
+000. 表示の設定（PR #37・11/9 本番に入った）：チェックイン担当が prefs の形を決めたら、fmt と上限が合うか見る。「反映して」が出たら migrations.mjs rebase。admin_backup に足すと決まったら PR #32 と順番をそろえて足す
+00. 全体のデバッグ（PR #34・11/9 本番に入った）：本人の health-check.sql の結果を読む（南の円の抜け・429 の回数・cron の失敗）。反映されたら、Server-Timing で airport-now のどこが遅いかを PM に測ってもらい、案A／案B を出し直す。adsb.lol の作者の返事が来たら、上限に合わせて記録の間隔を見直す。CI とレビューに答える
 0. ストアの見直し（PR #22）：本人が OpenSky を「置き換え」に決めたら、verify_io.ts の取り先を adsb.lol の記録に差し替える案（移行が要らない形）とテストを作る。SWIM のサービス説明書の文が来たら AIP の判定を書き直す。adsb.im の条件を読む
 1. 運用予想：本人の「反映して」を待つ（移行 152 だけ。画面はまだ）。反映されたら、次の朝に cron.job_run_details（rot-pairs・rot-eval）の結果をもらい、古い日がどこまで埋まったか・かかった時間を見る。時間がかかりすぎ（採点の legs が300に届かない）なら、rot_eval_nightly の便の数を 200 に下げる案を出す。bgw が on なら、仕事の文の set が効いているかも結果から確かめる
 2. 7日分たまったら rotation-eval-view.sql の結果を読み（「記録がそろった日数」を見て、そろった日だけで比べる）、learn と learn_hi のどちらを画面に使うかの案を PM に出す。決まったらチェックイン担当への依頼文（報告の7節）を、使う方式に合わせて直す
 3. PR #6 の CI とレビューに答える（11/6 2時の回で確認：CI の実行もレビューもコメントもまだない）
-4. 定期の手入れ（PR #18・PR #33）：本人の点検の結果（docs/pm/maint/2026-11-06-result.csv か貼ったもの）が来たら読む。所要時間を見て上限を直すか決める・経営の処理の上限の案（最長の3倍・最小30秒）を作って経営担当への依頼文に入れる・無料枠／プランまでの見込みを出す。CI とレビューに答える
+4. 定期の手入れ（PR #18・PR #33・PR #56）：本人の点検の結果（docs/pm/maint/2026-11-06-result.csv か貼ったもの）が来たら読む。所要時間を見て上限を直すか決める・経営の処理の上限の案（最長の3倍・最小30秒）を作って経営担当への依頼文に入れる・無料枠／プランまでの見込みを出す。CI とレビューに答える
 5. 撮影記録（PR #32）：CI とレビューに答える。「反映して」が出たら番号を rebase。撮る人用担当の画面が photo_candidates の断る文を使うか確かめる
 6. 時刻表：shugyo-timetable-check.sql の結果が来たら report-photo-log.md の 4 の表で判定（ANA_truncated があれば問い合わせを分ける直しを作る）
 7. 管制の交信（PR #27）：本人が案を選んだら、移行 155 以降・テスト t95 以降で作る（migrations.mjs rebase を忘れない）。atc-retention-check.sql の結果が来たら読む
-8. それ以外は PM の指示を待つ（勝手に新しい機能は始めない）。毎週月曜の昼の回は、下の「定期の仕事」（次の候補：点検の結果が来たら、死んだ行や使われていない索引の整理・遅い処理。結果がないまま次の回が来たら、cold_rows の大きな日を jsonb にまとめるときの作業メモリと cold-archive の読み出し方を見る）
+8. それ以外は PM の指示を待つ（勝手に新しい機能は始めない）。毎週月曜の昼の回は、下の「定期の仕事」（次の候補：点検の結果が来たら、死んだ行や使われていない索引の整理・遅い処理。cold-day-size.sql の結果で全機の航跡の1日が 20MB を超えるなら、ファイルを空港ごとに分ける案を作る。結果がないまま次の回が来たら、毎晩の処理のうち rwy-learn と daily-archive の書き方（一時ファイル・索引）を見る）
 
 ## ほかの担当への依頼
 - チェックインへ（11/8 表示の設定・PR #37）：user_view_prefs ができた（未反映）。読む＝select maybeSingle（行がない＝全部乗せ）、保存＝upsert({user_id, prefs, fmt})、ぶつかりを見るなら update … where rev = 前の値。提案は rpc('view_prefs_claim_suggest') が true のときだけ出す。「全部乗せに戻す」は行を消さず prefs = '{}' に（消すと提案がもう一度出る）。今ひな形を使っている人は、サーバーに行がなければ端末の見え方を1回だけ上げる案。くわしくは docs/pm/report-view-prefs.md
