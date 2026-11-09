@@ -333,7 +333,7 @@ def p05():
     b += '<div class="row"><span class="ic"><span class="num" style="font-size:22px">HND</span></span><div class="tx"><b>3レターコード</b><small>コードのない空港は名前を同じ位置に</small></div></div>'
     b += '</section><div class="note">この図鑑は国内の86空港と羽田・成田のターミナルです。飛行場・番外編・特別塗装機・実績は「別冊」にあります。</div>'
     # 索引
-    b += '<div class="sec-h" style="margin-top:26px">索引<small>ABC順</small><span style="margin-left:auto;display:flex;gap:6px"><span class="pill on">ABC順</span><span class="pill">50音順</span></span></div>'
+    b += '<div class="sec-h" style="margin-top:26px">索引<small>ABC順</small><span style="margin-left:auto;display:flex;gap:6px"><span class="pill on">ABC順</span><a class="pill" href="05b-index-kana.html">50音順</a></span></div>'
     L = sorted([a for a in A if a['code'] != '—'], key=lambda a: a['code'])
     letters = sorted(set(a['code'][0] for a in L))
     b += '<div class="lt">' + ''.join('<a href="#L%s">%s</a>' % (l, l) for l in letters) + '</div>'
@@ -351,7 +351,7 @@ def p05():
     b += '</section>'
     b += ('<div class="ann"><b>05 凡例と索引</b><ul><li>図鑑の右上「索引」と、1空港の「見方」から開く1枚。上のピルで「見方」と「索引」へ飛ぶ</li>'
           '<li>見方：印・まだ・扉の地図・地方の色・コードの5つだけ。レア・ノルマの言い方はしない</li>'
-          '<li>索引：コードの ABC 順（頭の字のピルで飛ぶ）。50音順は名前の読みの表が要る（いまの本番にない）。行を押すとその空港の枠へ</li>'
+          '<li>索引：コードの ABC 順（頭の字のピルで飛ぶ）。50音順は 05b。名前の読みの表が要る（いまの本番にない）。行を押すとその空港の枠へ</li>'
           '<li>コードのない空港（新島・神津島・調布）は索引の最後にまとめる</li></ul></div></div>')
     b += tabs()
     page('05-legend-index.html', '凡例と索引', b, extra=ex)
@@ -436,6 +436,7 @@ items = [('01-now-problems', '01 今の図鑑の見にくい所', '今の本番�
          ('03-airport-grid', '03 空港の並び', '関東へ飛んだところ。どの空港も同じ枠、まだも同じ枠で薄く'),
          ('04-airport', '04 1空港の詳しい所（羽田）', 'データ欄4つ・大きさ比べ（同じ縮尺）・押した記録・‹ 前／次 ›'),
          ('05-legend-index', '05 凡例と索引', '見方5つと、コードの ABC 順の索引'),
+         ('05b-index-kana', '05b 索引（50音順）', '短い名前の読みで、あ〜わの行ごと'),
          ('06-bessatsu', '06 番外編と実績の置き場', '「別冊」の棚に4冊。空港の図鑑の数とは別'),
          ('07-views', '07 今の5つの見方をどうするか', '帯は「図鑑・地図・行った順」の3つ。タイル・地方・案内標はまとめる')]
 ix = '<div class="wrap"><div class="ttl"><h1 style="font-size:22px">図鑑を見やすく（画面案）</h1></div><div class="note">ブランチ design/zukan-book。11/9 12時10分の PM の指示（本人「図鑑が見にくいので、実際の図鑑を調べて参考に」）。アプリのコードは変えていない。幅390で見る。</div>'
@@ -452,3 +453,36 @@ ix += ('<div class="sec-h">07 の考え方（今→案）</div><section class="c
 ix += '<div class="note" style="margin:14px 2px 40px">PNG：png/ に各画面の 390×844 と 390×667（*-667.png）、長い画面は全体（*-full.png）。</div></div>'
 page('index.html', '一覧', ix)
 print('ok')
+
+# ---------- 05b 索引（50音順） ----------
+YOMI = dict(成田='なりた',中部='ちゅうぶ',関西='かんさい',伊丹='いたみ',羽田='はねだ',新千歳='しんちとせ',稚内='わっかない',釧路='くしろ',函館='はこだて',仙台='せんだい',新潟='にいがた',広島='ひろしま',高松='たかまつ',松山='まつやま',高知='こうち',福岡='ふくおか',北九州='きたきゅうしゅう',長崎='ながさき',熊本='くまもと',大分='おおいた',宮崎='みやざき',鹿児島='かごしま',那覇='なは',旭川='あさひかわ',帯広='おびひろ',秋田='あきた',山形='やまがた',山口宇部='やまぐちうべ',利尻='りしり',奥尻='おくしり',中標津='なかしべつ',紋別='もんべつ',女満別='めまんべつ',青森='あおもり',花巻='はなまき',大館能代='おおだてのしろ',庄内='しょうない',福島='ふくしま',大島='おおしま',新島='にいじま',神津島='こうづしま',三宅島='みやけじま',八丈島='はちじょうじま',佐渡='さど',富山='とやま',能登='のと',松本='まつもと',静岡='しずおか',神戸='こうべ',南紀白浜='なんきしらはま',鳥取='とっとり',隠岐='おき',出雲='いずも',石見='いわみ',岡山='おかやま',佐賀='さが',対馬='つしま',福江='ふくえ',壱岐='いき',種子島='たねがしま',屋久島='やくしま',奄美='あまみ',喜界='きかい',徳之島='とくのしま',沖永良部='おきのえらぶ',与論='よろん',粟国='あぐに',久米島='くめじま',南大東='みなみだいとう',北大東='きただいとう',宮古='みやこ',下地島='しもじしま',多良間='たらま',石垣='いしがき',与那国='よなぐに',調布='ちょうふ',小牧='こまき',但馬='たじま',天草='あまくさ',札幌丘珠='さっぽろおかだま',三沢='みさわ',茨城='いばらき',小松='こまつ',米子='よなご',岩国='いわくに',徳島='とくしま')
+GYO = [('あ','あいうえお'),('か','かきくけこがぎぐげご'),('さ','さしすせそざじずぜぞ'),('た','たちつてとだぢづでど'),('な','なにぬねの'),('は','はひふへほばびぶべぼぱぴぷぺぽ'),('ま','まみむめも'),('や','やゆよ'),('ら','らりるれろ'),('わ','わをん')]
+def p05b():
+    ex = ('.lt{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}.lt a{min-width:44px;height:44px;display:flex;align-items:center;justify-content:center;border-radius:999px;background:var(--card);box-shadow:var(--shadow);font-size:16px;font-weight:800;color:var(--strong);text-decoration:none}'
+          '.ix{margin-top:10px;padding:4px 0}.ix .lh{font-weight:800;font-size:18px;color:var(--strong);padding:12px 16px 2px}.ix .lh small{font-size:13px;color:var(--sub);font-weight:700;margin-left:8px}'
+          '.ix .row .tx small{font-size:13px}.ix .row .cd{font-family:var(--sign);font-weight:700;font-size:18px;width:46px;color:var(--strong);text-align:right}.ix .row.no .cd{color:#5F6875}.ix .row.no .tx b{color:var(--sub);font-weight:600}'
+          '.ix .st{font-size:13px;color:var(--sub);font-weight:700;width:36px;text-align:right}')
+    missing = [short(a) for a in A if short(a) not in YOMI]
+    assert not missing, missing
+    L = sorted(A, key=lambda a: YOMI[short(a)])
+    b = '<div class="wrap"><div class="top"><a class="pill" href="02-zukan-base.html">‹ 図鑑</a></div><div class="ttl" style="margin-top:6px"><h1>見方と索引</h1></div>'
+    b += '<div class="vband"><a class="pill" href="05-legend-index.html">見方</a><span class="pill on">索引</span></div>'
+    b += '<div class="sec-h" style="margin-top:18px">索引<small>50音順</small><span style="margin-left:auto;display:flex;gap:6px"><a class="pill" href="05-legend-index.html#LA">ABC順</a><span class="pill on">50音順</span></span></div>'
+    groups = []
+    for g, ks in GYO:
+        m = [a for a in L if YOMI[short(a)][0] in ks]
+        if m: groups.append((g, m))
+    b += '<div class="lt">' + ''.join('<a href="#K%s">%s</a>' % (g, g) for g, _ in groups) + '</div><section class="card ix">'
+    for g, m in groups:
+        b += '<div class="lh" id="K%s">%s行<small>%d空港</small></div>' % (g, g, len(m))
+        for a in m:
+            gt = GOT.get(a['code'])
+            b += '<div class="row%s"><div class="tx"><b>%s</b><small>%s</small></div><span class="chip" style="--tc:%s">%s</span><span class="cd">%s</span><span class="st">%s</span></div>' % (
+                '' if gt else ' no', short(a), YOMI[short(a)], tint(RC[a['reg']], .16), a['reg'], a['code'] if a['code'] != '—' else '—', ('%d回' % gt) if gt else 'まだ')
+    b += '</section>'
+    b += ('<div class="ann"><b>05b 索引（50音順）</b><ul><li>05 の「50音順」を押したところ。行（あ〜わ）のピルで飛ぶ</li>'
+          '<li>名前は図鑑の枠と同じ短い名前（羽田・伊丹・小牧など）で並べ、下に読みを出す。コードのない空港（新島・神津島・調布）もここでは混ぜて並ぶ</li>'
+          '<li>読みは画面案のために書いた。本番では空港の表に読みの列が要る（データ担当）</li></ul></div></div>')
+    b += tabs()
+    page('05b-index-kana.html', '索引（50音順）', b, extra=ex)
+p05b()
