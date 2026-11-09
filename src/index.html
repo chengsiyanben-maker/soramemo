@@ -2255,6 +2255,13 @@ dialog.psheet .btn1,dialog.psheet .btn2{display:block;width:100%;margin-top:10px
 #v-book .zk-door::before{content:"";position:absolute;left:0;top:0;bottom:0;width:6px;background:var(--c)}
 #v-book .zk-door h3{margin:0 6px 0 0;font:800 18px var(--gothic);color:var(--bk-ink);letter-spacing:.04em;line-height:1}
 #v-book .zk-door .num{font-size:22px}
+#v-book .zk-up{width:44px;height:44px;margin-right:-10px;flex:none;border:0;background:none;color:var(--bk-sub);display:flex;align-items:center;justify-content:center;border-radius:999px}
+#v-book .zk-up svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+#v-book .zk-ap:has(.sb){padding:8px 10px 6px}#v-book .zk-ap:has(.sb) .cd{font-size:24px}#v-book .zk-ap:has(.sb) .nm{margin-top:1px}#v-book .zk-ap:has(.sb) .ft b{font-size:16px}#v-book .zk-ap:has(.sb) .ft{line-height:1.3}#v-book .zk-ap .sb{line-height:1.25}
+#v-book .zk-ap.glow{outline:3px solid var(--c);outline-offset:2px}
+#v-book .zk-ap>span{flex-shrink:0}
+#v-book .zk-back-h{margin:22px 2px 0;font:700 13px var(--gothic);color:var(--bk-sub)}
+#v-book .zk-book.zk-home{padding-left:30px}#v-book .zk-home .gt{font-size:20px;color:var(--bk-sub);margin-left:4px}
 #v-book .zk-door .bar{flex:1;margin-left:8px;height:5px;border-radius:3px;background:var(--bk-track);overflow:hidden}
 #v-book .zk-door .bar i{display:block;height:100%;background:var(--c);border-radius:3px}
 /* そろえた枠（高さ104・3つ並び） */
@@ -2346,9 +2353,8 @@ dialog.psheet .btn1,dialog.psheet .btn2{display:block;width:100%;margin-top:10px
 #dAirportBody .u{font-size:12px;font-weight:600;color:#5F6875;margin:0 2px 0 2px}
 #dAirportBody .zk-yet{margin-top:12px;padding:14px 16px;border-radius:18px;background:var(--card,#fff);box-shadow:0 1px 2px rgba(17,24,39,.04),0 10px 26px -14px rgba(17,24,39,.22);text-align:left;font-size:13px;color:#4B5563;line-height:1.7}
 #dAirportBody .zk-yet>b{display:block;font-size:15px;color:var(--ink,#1F2937)}
-#dAirportBody .zk-yet .num{font-size:20px}
+#dAirportBody .zk-yet .num{font-size:20px}#dAirportBody .zk-yet>span{display:block}
 #dAirportBody .zk-more summary{min-height:44px;display:flex;align-items:center;font-weight:700;cursor:pointer}
-#v-book .zk-ap:has(.sb){height:120px}
 #dAirportBody .zk-pn{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px}
 #dAirportBody .zk-pn button{display:flex;align-items:center;gap:6px;min-height:52px;padding:0 14px;border:0;border-radius:999px;background:var(--card,#fff);box-shadow:0 1px 2px rgba(17,24,39,.04),0 10px 26px -14px rgba(17,24,39,.22);font:700 14px var(--gothic);color:var(--ink,#1F2937);min-width:0}
 #dAirportBody .zk-pn button:last-child{justify-content:flex-end}
@@ -4237,16 +4243,17 @@ const zkRegionList = rg => { const r = REGION.find(x => x[0] === rg); return r ?
 // 1つの枠：コード・短い名前・行った（✓ と回数）／まだ（点線の丸）
 function zkTile(a, o){
   const c = code(a), jp = /[^\x00-\x7f]/.test(c), n = o.n || 0, on = o.on;
-  const ft = on ? `${ZK_CHECK}${o.total ? "計" : ""}<b>${n}</b>回` : `${ZK_YET}まだ`;
+  const ft = on ? `${o.total ? "" : ZK_CHECK}${o.total ? "計" : ""}<b>${n}</b>回` : `${ZK_YET}まだ`;   // 行った順は行った空港だけなので ✓ の丸を出さない
   const lbl = `${a.name}、${on ? (o.total ? "計" : "") + n + "回" : "まだ"}`;
   return `<button class="zk-ap${on ? "" : " no"}${o.dim ? " dim" : ""}" type="button" data-zka="${a.id}" style="--c:${zkCol(regionOf(a))}" aria-label="${esc(lbl)}${o.sub ? "、" + esc(o.sub) : ""}">
     <span class="cd${jp ? " jp" : ""}">${esc(c)}</span><span class="nm">${esc(godShort(a))}${o.pend ? `<small class="pend">便が未記録</small>` : ""}</span>${o.sub ? `<span class="sb">${esc(o.sub)}</span>` : ""}<span class="ft">${ft}</span></button>`;
 }
-// ターミナルの枠（名前は「新千歳 国内」の短さ。86 の数には入らない）
+// ターミナルの枠（名前は「新千歳 国内」「羽田 第1」の短さ。86 の数には入らない）
+const zkTermName = t => t.short + " " + (/^T(\d)$/.test(t.tag) ? "第" + t.tag.slice(1) : t.tag);
 function zkTermTile(t, first, n){
   const a = BY[t.a];
   return `<button class="zk-ap${first ? "" : " no"}" type="button" ${first ? `data-zkt="${t.id}"` : `data-zka="${a.id}"`} style="--c:${zkCol(regionOf(a))}" aria-label="${esc(t.short + " " + t.name)}、${first ? n + "回" : "まだ"}">
-    <span class="cd">${esc(t.iata)}<small class="tg">${esc(t.tag)}</small></span><span class="nm">${esc(t.short + " " + t.tag)}</span><span class="ft">${first ? `${ZK_CHECK}<b>${n}</b>回` : `${ZK_YET}まだ`}</span></button>`;
+    <span class="cd">${esc(t.iata)}<small class="tg">${esc(t.tag)}</small></span><span class="nm">${esc(zkTermName(t))}</span><span class="ft">${first ? `${ZK_CHECK}<b>${n}</b>回` : `${ZK_YET}まだ`}</span></button>`;
 }
 function zkTermBlock(prefs){
   const vt = visitedTerms(), tc = new Map(); for(const c of S.checkins) if(c.term) tc.set(c.term, (tc.get(c.term) || 0) + 1);
@@ -4283,14 +4290,14 @@ function zkRegionHTML(v, vc, shown, fa, ua){
   if(!n){
     const near = HOME_POS ? A.map(a => [a, km(HOME_POS, a)]).sort((x, y) => x[1] - y[1])[0] : null;
     hero = `<div class="zk-hero first"><div class="ht"><span class="lab">集めた空港</span><b class="num">0</b><span class="u">/ ${A.length}</span></div>
-      <p class="fx">空港でチェックインすると、ここに印が付きます。</p>${near ? `<button class="zk-near" type="button" data-zka="${near[0].id}"><span>いちばん近い</span><b>${esc(godShort(near[0]))}</b><small>${fmtKm(near[1])}km</small><span aria-hidden="true">›</span></button>` : ""}</div>`;
+      <p class="fx">空港でチェックインすると、ここに印が付きます。</p>${near ? `<button class="zk-near" type="button" data-zk-near="${near[0].id}"><span>いちばん近い</span><b>${esc(godShort(near[0]))}</b><small>${fmtKm(near[1])}km</small><span aria-hidden="true">›</span></button>` : ""}</div>`;
   } else {
     hero = `<div class="zk-hero"><div class="ht"><span class="lab">${FOCUS === "ALL" ? "集めた空港" : FOCUS + "で集めた空港"}</span><b class="num" id="bookProg">${n}</b><span class="u">/ ${A.length}</span><span class="side">まだ ${A.length - n} 空港</span></div>
       <div class="rg">${rgs.map(r => `<div><span class="t"><span>${r.rg}</span><span>${r.got}<small>/${r.list.length}</small></span></span><span class="b"><i style="width:${Math.round(r.got / r.list.length * 100)}%;background:${zkCol(r.rg)}"></i></span></div>`).join("")}</div></div>`;
   }
   const note = FOCUS === "ALL" ? "" : `<p class="hint zk-note">薄い枠は、${FOCUS}グループのフライトで行っていない空港です。${[...ua].some(id => !fa.has(id)) ? `「便が未記録」の空港は、フライトの画面でそのフライトに航空会社を記録すると${FOCUS}の数に入ります。` : ""}</p>`;
   const body = rgs.map(r => `<section class="zk-rg" id="zkrg-${r.rg}" data-rg="${r.rg}" style="--c:${zkCol(r.rg)}">
-    <div class="zk-door"><h3>${r.rg}</h3><b class="num">${r.got}</b><span class="u">/ ${r.list.length}</span><span class="bar"><i style="width:${Math.round(r.got / r.list.length * 100)}%"></i></span></div>
+    <div class="zk-door"><h3>${r.rg}</h3><b class="num">${r.got}</b><span class="u">/ ${r.list.length}</span><span class="bar"><i style="width:${Math.round(r.got / r.list.length * 100)}%"></i></span><button class="zk-up" type="button" data-zk-up aria-label="図鑑の上へ"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 14l6-6 6 6"/></svg></button></div>
     <div class="zk-grid">${r.list.map(a => { const on = v.has(a.id), dim = on && FOCUS !== "ALL" && !fa.has(a.id) && !ua.has(a.id), pend = on && FOCUS !== "ALL" && !fa.has(a.id) && ua.has(a.id);
       return zkTile(a, { on, n:vc.get(a.id) || 0, dim, pend }); }).join("")}</div>${zkTermBlock(r.prefs)}</section>`).join("");
   const tsume = `<nav class="zk-tsume" id="zkTsume" aria-label="地方へ飛ぶ">${REGION.map(([rg]) => `<button type="button" data-zkj="${rg}" style="--c:${zkCol(rg)}" aria-label="${rg}へ"><span>${rg}</span></button>`).join("")}</nav>`;
@@ -4304,6 +4311,11 @@ function zkJump(rg, smooth = true){
   window.scrollTo({ top:Math.max(0, y), behavior: smooth && !matchMedia("(prefers-reduced-motion: reduce)").matches ? "smooth" : "auto" });
   zkTsumeSync(rg);
 }
+// はじめての人の「いちばん近い」：その地方の扉が上に止まる所まで飛び、その空港の枠を2秒ほど光らせる
+document.addEventListener("click", e => { const b = e.target.closest("[data-zk-near]"); if(!b) return; const a = BY[+b.dataset.zkNear]; if(!a) return;
+  track("zk_near", a.iata); zkJump(regionOf(a)); const t = document.querySelector(`#zkBody .zk-rg [data-zka="${a.id}"]`);
+  if(t){ t.classList.add("glow"); setTimeout(() => t.classList.remove("glow"), 2200); } });
+document.addEventListener("click", e => { if(e.target.closest("[data-zk-up]")) window.scrollTo({ top:0, behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" }); });
 document.addEventListener("click", e => { const b = e.target.closest("[data-zkj]"); if(!b) return; track("zk_jump", b.dataset.zkj); zkJump(b.dataset.zkj); });
 // いま上にある地方のツメを目立たせる・ツメの位置（上のカードより下、画面の上の端より下）
 function zkTsumeSync(force){
@@ -4420,8 +4432,8 @@ function renderZkOthers(){
     ${book("air", "var(--field,#3E7D52)", "飛行場・滑空場", "定期便のない飛行場とグライダーの滑空場", cnt(["field", "glider"]))}
     ${book("extra", "var(--mil,#2E4A6B)", "番外編", "自衛隊の飛行場と、一般の人が行けない飛行場", cnt(["mil", "secret"]))}
     ${book("liv", "#8A6A2F", "機体図鑑（特別塗装機）", "乗った・見た特別塗装機", liv)}
-    <div class="zk-plain"><p><span>空港の図鑑</span><b class="num">${visited().size}</b><span class="u">/ ${A.length}</span></p><p><span>ターミナル</span><b class="num">${TERMS.filter(t => vt.has(t.id)).length}</b><span class="u">/ ${TERMS.length}</span></p>
-    <p class="nt">国内86空港。大きな6空港はターミナルにも印があります（86 の数に入りません）。</p></div>`;
+    <h3 class="zk-back-h">もどる</h3>
+    <button class="zk-book zk-home" type="button" data-zkseg="main" style="--c:var(--bk-ink)"><span class="tx"><b>空港の図鑑</b><small>ターミナル ${TERMS.filter(t => vt.has(t.id)).length}/${TERMS.length}（86 の数に入りません）</small></span><span class="n"><b class="num">${visited().size}</b><span class="u">/ ${A.length}</span></span><span class="gt" aria-hidden="true">›</span></button>`;
 }
 /* ---------- 記号の意味 ---------- */
 function renderZkKigou(){
@@ -4430,7 +4442,7 @@ function renderZkKigou(){
   box.innerHTML = `${ZK_BACK_MAIN}<div class="book-head"><h2>記号の意味</h2></div>
     <div class="zk-kg"><div class="zk-ap" style="--c:${tc}"><span class="cd">${esc(code(hnd))}</span><span class="nm">${esc(godShort(hnd))}</span><span class="ft">${ZK_CHECK}<b>3</b>回</span></div><p><b>行った空港</b>✓ と、チェックインした回数。押すと空港のページを開きます。</p></div>
     <div class="zk-kg"><div class="zk-ap no" style="--c:${tc}"><span class="cd">${esc(code(oim))}</span><span class="nm">${esc(godShort(oim))}</span><span class="ft">${ZK_YET}まだ</span></div><p><b>まだの空港</b>点線の丸。名前は読めます。押すと、どこで押せるかが分かります。</p></div>
-    <div class="zk-kg"><div class="zk-ap" style="--c:${tc}"><span class="cd">${esc(t1.iata)}<small class="tg">${esc(t1.tag)}</small></span><span class="nm">${esc(t1.short + " " + t1.tag)}</span><span class="ft">${ZK_CHECK}<b>2</b>回</span></div><p><b>ターミナル</b>大きな6空港（${TERM_AIRPORTS.length}空港・${TERMS.length}こ）の印。86 の数に入りません。</p></div>
+    <div class="zk-kg"><div class="zk-ap" style="--c:${tc}"><span class="cd">${esc(t1.iata)}<small class="tg">${esc(t1.tag)}</small></span><span class="nm">${esc(zkTermName(t1))}</span><span class="ft">${ZK_CHECK}<b>2</b>回</span></div><p><b>ターミナル</b>大きな6空港（${TERM_AIRPORTS.length}空港・${TERMS.length}こ）の印。86 の数に入りません。</p></div>
     <div class="zk-kg"><div class="zk-tsm" style="--c:${tc}"><span>関東</span></div><p><b>右端のツメ</b>9つの地方。押すとその地方の扉へ飛びます。地方の色は空港の守り神の色です。</p></div>
     <div class="zk-kg"><div class="zk-ap dim" style="--c:${tc}"><span class="cd">${esc(code(hnd))}</span><span class="nm">${esc(godShort(hnd))}</span><span class="ft">${ZK_CHECK}<b>3</b>回</span></div><p><b>薄い枠</b>JAL・ANA だけを表示しているとき、そのグループの便で行っていない空港。</p></div>
     <p class="zk-lead">日付は「2026年11月1日」の形で書きます。</p>`;
@@ -5716,7 +5728,7 @@ function openAirport(id){
   ${rgl.length > 1 ? `<p class="zk-dots" aria-hidden="true">${rgl.map(x => `<i${x.id === a.id ? ` class="on"` : ""}></i>`).join("")}</p>` : ""}
   ${swHint ? `<p class="zk-swhint">印のカードをはらうと、となりの空港へ</p>` : ""}
   ${first ? `<div class="zk-dl"><div><span class="k">押した回数</span><span class="v"><b class="num">${times}</b><span class="u">回</span></span></div><div><span class="k">はじめて押した日</span><span class="v s">${(d => `<b class="num">${d.getFullYear()}</b><span class="u">年</span><b class="num">${d.getMonth() + 1}</b><span class="u">月</span><b class="num">${d.getDate()}</b><span class="u">日</span>`)(new Date(first))}</span></div></div>`
-    : `<div class="zk-yet"><b>ここでチェックインすると印が付きます</b><span>判定の範囲 <b class="num">${a.radius >= 1000 ? (a.radius / 1000).toFixed(a.radius % 1000 ? 1 : 0) : a.radius}</b><span class="u">${a.radius >= 1000 ? "km" : "m"}</span>（空港の中心から）</span></div>`}
+    : `<div class="zk-yet"><b>ここでチェックインすると印が付きます</b><span>判定の範囲 <b class="num">${a.radius >= 1000 ? (a.radius / 1000).toFixed(a.radius % 1000 ? 1 : 0) : a.radius}</b><span class="u">${a.radius >= 1000 ? "km" : "m"}</span>（空港の中心から）</span>${typeof HOME_POS !== "undefined" && HOME_POS ? `<span>いまの場所から <b class="num">${fmtKm(km(HOME_POS, a))}</b><span class="u">km</span></span>` : ""}</div>`}
   ${first ? `<p class="marks">${SEASONS.map((x,i) => `<span class="mark${ss.has(i) ? " on" : " off"}">${x}</span>`).join("")}${ss.size === 4 ? `<span class="mark gold">四季がそろった</span>` : ""}</p>
   <p>${visitTier(times) ? `<span class="rankbadge">${visitTier(times)}</span>` : ""}</p>
   <p class="hint">${dt < TOP ? `次の${RANKS[dt+1]}まであと${RANK_AT[dt+1] - times}回` : "最高の階級です"}</p>` : ""}
@@ -5724,7 +5736,7 @@ function openAirport(id){
   ${canNow(a) ? `<section class="apnow" id="apNow" aria-label="空港の今" hidden></section>` : ""}
   ${noticesHTML(a)}
   ${first && gameAvail() && !a.kind ? `<div class="meet">${godSVG(a)}<div><span class="gametag">エアライン経営</span><b>${godName(a)}と出会った</b><span class="hint">エアライン経営の「守り神」で会えます（仮の姿）</span></div></div>` : ""}
-  ${ts.length ? `<h3 class="sub">ターミナル　${got} / ${ts.length}</h3><p class="hint">ターミナルの印は、押した回数と別に数えます（86 の数に入りません）。</p><div class="aplist">${termList}</div>` : ""}
+  ${ts.length ? `<h3 class="sub">ターミナル　${got} / ${ts.length}</h3><p class="hint">ターミナルの印は空港の印と別に集めます（86 の数に入りません）。ターミナルで押した回も、空港で押した回に数えます。</p><div class="aplist">${termList}</div>` : ""}
   ${false && a.iata === "HND" ? `<button class="btn2 opsbtn" style="width:100%;margin-top:12px" data-ap-ops>羽田の今の運用（滑走路・進入）</button>` : ""}
   ${pv || nx ? `<div class="zk-pn">${pv ? `<button type="button" data-zk-go="${pv.id}"><span aria-hidden="true">‹</span><b>${esc(godShort(pv))}</b><small>${esc(code(pv))}</small></button>` : "<span></span>"}${nx ? `<button type="button" data-zk-go="${nx.id}"><b>${esc(godShort(nx))}</b><small>${esc(code(nx))}</small><span aria-hidden="true">›</span></button>` : "<span></span>"}</div>` : ""}
   <div class="row2"><button class="btn2" data-close>閉じる</button><button class="btn1" data-share-a="${a.id}" data-share-at="${first}">画像で共有</button></div>
