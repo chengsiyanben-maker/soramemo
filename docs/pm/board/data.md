@@ -1,6 +1,11 @@
 # データ担当の帳面
 
 ## いま持っている仕事
+- 開港（供用開始）と滑走路の表（11/10 1時 PM の指示・本人「すべてOK」）：ブランチ data/airport-facts → main 向けの下書き PR #59。報告 docs/pm/report-airport-facts.md
+  - 移行 160（airport_facts：airport_id・opened_year・runways の JSON［name・length_m・width_m・note］・source 'mlit_airport_list'・source_ref（PDF の URL と基準日）・updated_at。RLS は誰でも select、書くのは service_role だけ。airports を cascade）。影響はチェックイン（図鑑の1空港のデータ欄）だけ、経営なし
+  - 中身は国交省「空港一覧」（令和8年9月1日現在）の PDF 5つから82空港。年は「空港としての供用開始」の最初の年（滑走路・ターミナルだけの供用開始は数えない。年のない行は前の行の年）。null は羽田・三沢・岩国。行なしは成田・中部・関西・伊丹・千歳（id 91）・番外編
+  - 確かめた結果：t100（16項目）・t01・t08 通過、番号の重なりなし。PDF を別の読み方で取り直して92空港の滑走路が全部合った。SQL のテスト全部は報告の 4
+  - 本人待ち：「反映して」・羽田の年（案A null のまま／案B「開設 1931年」を別の列で）・国の一覧に載っている番外編の10空港（礼文・福井・小値賀・上五島・慶良間・伊江島・波照間・岡南・大分県央・八尾）を入れるか（10行の値は報告の 6 に書いた）
 - 定期の手入れ 4回目（11/10 月 1時、PM の指示なしの回）：ブランチ maint/2026-11-10 → main 向けの下書き PR #58。報告 docs/pm/maint/2026-11-10-report.md
   - 移行 161（maint_1110）：archive_airport_daily は ops_log をその日の範囲で引く（索引 ops_log_at。2日分 384ms → 19ms・1日 14,611 → 135 ページ）／airport_tracks_put は一時の表と総当たりをなくし1つの文に（入れ替え 7.6s → 2.5s・システムの表の書き込み 0）／rwy_learn_points は json で組み立てる（返す型 jsonb → json。36時間1回で 6.0s・約976MB → 3.3s・約370MB。いつもの5時間を8つに分けた回では効き目は小さい）。表・索引・RLS・権限は変えない。チェックイン・経営への影響なし
   - 確かめた結果：t101（11項目、前の作りと同じ行・値）・t23・t39・t43 通過、番号の重なりなし（153件）。SQL のテスト全部は報告の 3
@@ -95,13 +100,14 @@
 - 本人の決定：規約を改定するときは「terms_versions に1行足す → アプリの定数を変える」の順
 
 ## 移行とテストの番号
-- main の最新は 157（156・157 は 11/9 本番に入った）。data/zukan-yomi は 159・テスト t99。maint/2026-11-06 は 153・テスト t93（fix/co-tests の経営の移行も 153 なので、反映の前に rebase）、data/photo-log は 154・テスト t94、maint/2026-11-07 は 155・テスト t95、data/debug-1107 は 156・テスト t96（関数のテストは supabase/tests/live_view_test.ts。main に反映済み）、data/view-prefs は 157・テスト t97、maint/2026-11-09 は 158・テスト t98、maint/2026-11-10 は 161・テスト t101。開港と滑走路の表（data/airport-facts）は 160・t100 を使ってよい。そのほか次に新しく作るものは 162 以降・テストは t102 以降
+- main の最新は 157（156・157 は 11/9 本番に入った）。data/zukan-yomi は 159・テスト t99。maint/2026-11-06 は 153・テスト t93（fix/co-tests の経営の移行も 153 なので、反映の前に rebase）、data/photo-log は 154・テスト t94、maint/2026-11-07 は 155・テスト t95、data/debug-1107 は 156・テスト t96（関数のテストは supabase/tests/live_view_test.ts。main に反映済み）、data/view-prefs は 157・テスト t97、maint/2026-11-09 は 158・テスト t98、maint/2026-11-10 は 161・テスト t101。data/airport-facts は 160・テスト t100。そのほか次に新しく作るものは 162 以降・テストは t102 以降
 - main に別の移行が先に入ったら、反映の前にもう一度 `node tools/migrations.mjs rebase`
 - 本番は小さいプランで一時ファイルの余裕がない。本人に流してもらう SQL は、大きな中間の表・自己結合・大きな並べ替えを避け、索引で引く形にする
 - SQL のテストは全部で約35分かかる（手元で流すときは裏で流してログを見る。t92 だけで約4分。同じログに2回流すと混ざるので、ログの名前を分ける）
 
 ## 次にやること
-0000. 図鑑の表（PR #57）：本人が開港の年を出すと決めたら airport_facts（opened_year・runways の JSON・出典・基準日）を移行と RLS で作る。その前に国土数値情報の利用約款を読む（ヘリポート・飛行場の一覧は読んだ）。会社管理の4空港の公的な出典をさがす。zukan-view-prefs-check.sql の結果が来たら読む。CI とレビューに答える
+00000. 開港と滑走路の表（PR #59）：本人が羽田の年・番外編の10空港を決めたら直す。「反映して」が出たら migrations.mjs rebase（159 の PR #57 と順番をそろえる）。CI とレビューに答える
+0000. 図鑑の表（PR #57）：会社管理の4空港の公的な出典をさがす（国土数値情報の利用約款もまだ）。zukan-view-prefs-check.sql の結果が来たら読む。CI とレビューに答える
 000. 表示の設定（PR #37・11/9 本番に入った）：チェックイン担当が prefs の形を決めたら、fmt と上限が合うか見る。「反映して」が出たら migrations.mjs rebase。admin_backup に足すと決まったら PR #32 と順番をそろえて足す
 00. 全体のデバッグ（PR #34・11/9 本番に入った）：本人の health-check.sql の結果を読む（南の円の抜け・429 の回数・cron の失敗）。反映されたら、Server-Timing で airport-now のどこが遅いかを PM に測ってもらい、案A／案B を出し直す。adsb.lol の作者の返事が来たら、上限に合わせて記録の間隔を見直す。CI とレビューに答える
 0. ストアの見直し（PR #22）：本人が OpenSky を「置き換え」に決めたら、verify_io.ts の取り先を adsb.lol の記録に差し替える案（移行が要らない形）とテストを作る。SWIM のサービス説明書の文が来たら AIP の判定を書き直す。adsb.im の条件を読む
@@ -115,6 +121,7 @@
 8. それ以外は PM の指示を待つ（勝手に新しい機能は始めない）。毎週月曜の昼の回は、下の「定期の仕事」（次の候補：点検の結果が来たら、死んだ行や使われていない索引の整理・遅い処理。cold-day-size.sql の結果で全機の航跡の1日が 20MB を超えるなら、ファイルを空港ごとに分ける案を作る。rwy-learn と daily-archive は 11/10 に見た（PR #58）。結果がないまま次の回が来たら、毎晩の処理のうち eta-calib・taxi-out・flight-watch の関数の書き方（索引に乗らない日付の比べ方・一時の表・総当たり）を同じ目で見る）
 
 ## ほかの担当への依頼
+- チェックインへ（11/10 開港と滑走路の表・PR #59）：airport_facts ができた（未反映）。82行を select して手元に持ち、airport_id でつなぐ。年は「供用開始 1988年」と書く（「開港」とは書かない）。opened_year が null か行がない空港（成田・中部・関西・伊丹・千歳・番外編・羽田・三沢・岩国の年）は欄を出さない。滑走路は「A 3,000m×60m」、name が null なら記号なし、note があれば添える（福岡の C・D は奈多地区のヘリポート）。データ欄の下に「出典：国土交通省『空港一覧』を加工して作成」（source_ref の URL へのリンクにしてよい）。くわしくは docs/pm/report-airport-facts.md の 5
 - チェックインへ（11/9 図鑑の表・PR #57）：airport_yomi ができた（未反映）。182行を1回 select して手元に持ち、索引は index_yomi を localeCompare(…, "ja") で並べる。探す欄はカタカナをひらがなにしてから、yomi の部分一致・index_yomi と alt_yomi の前方一致。見方の帯は id を今のまま（region＝地方別・map＝地図・chron＝行った順）にし、読むとき off.book から tiles・signs・region を外し、選んでいる見方の tiles・signs は region に、構成 casual と「隠しますか」の提案も合わせる案。くわしくは docs/pm/report-zukan-data.md の 3
 - チェックインへ（11/8 表示の設定・PR #37）：user_view_prefs ができた（未反映）。読む＝select maybeSingle（行がない＝全部乗せ）、保存＝upsert({user_id, prefs, fmt})、ぶつかりを見るなら update … where rev = 前の値。提案は rpc('view_prefs_claim_suggest') が true のときだけ出す。「全部乗せに戻す」は行を消さず prefs = '{}' に（消すと提案がもう一度出る）。今ひな形を使っている人は、サーバーに行がなければ端末の見え方を1回だけ上げる案。くわしくは docs/pm/report-view-prefs.md
 - チェックインへ（11/7 全体のデバッグ・PR #34）：(1) 運用の画面で metar を待つときに上限（例 8秒）を付け、超えたら「いまは読めません」に切り替えて、ほかは先に出す（11/6 のデモで「気象通報を読み込んでいます…」のまま止まった件）。`stale: true` なら「◯分前の通報」 (2) 長崎・鹿児島など1時間ごと・夜は発表のない空港の出し方 (3) 本人が決めたら、airport-traffic の地図から便名のない機体が消える
@@ -163,6 +170,7 @@
 3. 11/8 の user_view_prefs で、見方の帯の ON／OFF（タイル・案内標・地方・年代記）を保存している人の設定を、新しい3つ（地方別・地図・行った順）へ移す方法の案（年代記→行った順、タイル・地方・案内標→地方別はいつもなので消す、など）。チェックイン担当が作るときに使う
 
 ## PM から積んだ次の仕事（11/10 1時、開港と滑走路の表）
+（済み・11/10 の回 → PR #59。上の節）
 本人「すべてOK」：開港と滑走路を出してよい（CLAUDE.md「図鑑のデータ」）。data/zukan-yomi とは別のブランチ data/airport-facts で
 - 表 airport_facts（airport_id・opened_year（供用開始の西暦）・runways の JSON（名前・長さ・幅）・source・source_ref（PDF の URL と基準日）・updated_at）を移行と RLS（誰でも select、書くのは service_role だけ）とセットで
 - 中身は国土交通省「空港一覧」（令和8年9月1日現在）の PDF から。和暦を西暦に。会社管理の4空港（成田・中部・関西・伊丹）と番外編は空欄（行を作らないか null）
