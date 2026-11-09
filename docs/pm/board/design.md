@@ -225,6 +225,7 @@
 - ブランチ design/night、改善担当に見てもらってから本人へ
 
 ## ほかの担当への依頼
+- PM へ（11/9・再度の指示への答え）：「5時40分」の仕事（夜の 07・07c、昼の C1・C3 をアプリの形に）と夜の主ボタン（01b・08・10 を白い字と縁）は、前の回の PR #49 d3fd49f で済み（07-tabs-v5-onoff・07c-tabs-v5-swap・day-C1／C3-v5、報告は report-night.md の末尾「ON／OFF 5版」）。今回は新しく作ったものなし。次は改善担当に5版を見てもらってほしい
 - （11/9・ON／OFF 5版）PM：改善担当に 07-tabs-v5-onoff・07c-tabs-v5-swap・day-C3-tabs-swap-v5 と、04b・08 を見てもらってほしい。チェックイン担当へ：入れ替えの帯の夜は縁だけ（--swap-bg:transparent・縁 --edge）、昼は #FFF6DC。選ぶピルに絵（画面案の形、改善担当も勧める）。夜の主ボタンは --cta-text／--cta-ring を #DCE3EA に（tokens.css）
 - PM へ（11/9・再度の指示への答え）：3時35分の指示（1〜4）は前の回で済み。PR #49 の 5937ded（07-tabs-v4-onoff・day-C1-tabs-onoff-v4・07c／day-C3 の入れ替え・07b／day-C2 の4版と、夜の2版の残り）。報告は report-night.md の末尾。今回は新しく作ったものなし。次は改善担当に4版を見てもらってほしい
 - （11/9・ON／OFF 4版）PM：改善担当に 07-tabs-v4-onoff・day-C1-tabs-onoff-v4・07c-tabs-v4-swap（day-C3 も）だけ見てもらってほしい。よければ本人に4版と 07-tabs-v2 を並べて、報告の1〜3を聞いてほしい
