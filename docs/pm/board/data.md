@@ -135,3 +135,6 @@
 ## 11/6 10:20 反映済み（main 15b2174）
 - data/rotation-predict（移行 152：rot_pairs・rot_pairs_days・rot_eval、毎晩の rot-pairs 6:33・rot-eval 6:48、日本時間）を本番に流した。Actions はすべて成功。画面は変わらない
 - 次：11/7 の朝に本人が cron.job_run_details を見る SQL を流して貼る → 初めの夜が動いたか確かめる。11/13 ごろに docs/pm/rotation-eval-view.sql で7日分を比べ、画面に learn・learn_hi・今のままのどれを使うか決める
+
+## PM から（11/9 15時40分）
+- #34 の航跡の直しは本番で確かめた：11:50〜15:37 の約227分で、点のある分は 北226・南225・東227・西227。沖縄と北海道の抜けは直った。来週月曜の health-check で 24時間の「3 抜け」が「よい」になるかをもう一度見る
