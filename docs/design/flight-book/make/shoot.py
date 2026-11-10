@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# 使い方：python3 shoot.py <画面案のフォルダ>
+# 使い方：python3 shoot.py <画面案のフォルダ> [ファイル名の型（例 *-v2）]
 # 各 HTML を幅390・高さ844（と667）で PNG にし、字の大きさ・押す所・はみ出し・枠の中の切れを測る
 import asyncio, sys, os, glob, json
 from playwright.async_api import async_playwright
@@ -37,7 +37,7 @@ async def main():
     res = {}
     async with async_playwright() as p:
         b = await p.chromium.launch()
-        for f in sorted(glob.glob(D + '/*.html')):
+        for f in sorted(glob.glob(D + '/' + (sys.argv[2] if len(sys.argv) > 2 else '*') + '.html')):
             n = os.path.basename(f)[:-5]
             if n == 'index': continue
             for h in (844, 667):

@@ -1,11 +1,17 @@
 # -*- coding: utf-8 -*-
 # 一覧ページ（index.html）を作る。使い方：python3 make_index.py flight|shugyo <出力先>
 import sys
-sys.path.insert(0, '/tmp/claude-0/gen')
+import os
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from common import CSS_DAY, CSS
 kind, OUT = sys.argv[1], sys.argv[2]
 D = {
  'flight': ('フライトの改善案', 'design/flight-book', [
+   ('2版（11/10）A 航空日誌＋糸の地図', [('A1-log-v2', 'A1 日誌（1画面・本命）'), ('A1s-log-sheet-v2', 'A1s 日誌（シートの版・比べる用）'), ('A2-flight-v2', 'A2 1便'), ('A2s-share-v2', 'A2s 共有：搭乗券の1枚'),
+     ('A3-year-v2', 'A3 年のまとめ'), ('M1-map-v2', 'M1 地図（太さ＝回数）'), ('M2-route-v2', 'M2 1区間を押したところ'), ('N1-log-night-v2', 'N1 夜の日誌'), ('N1m-map-night-v2', 'N1m 夜の地図'), ('N2-route-night-v2', 'N2 夜の1区間')],
+    '本人の決定「A に地図を入れる」の形。時間は「2時間20分」、出発の時刻を2行目に。上の段は図鑑と同じ。地図は今の地図の線の太さだけを回数にし、色は1色',
+    '決めてほしいこと：1画面（A1）かシート（A1s）か。地図の「航路なし」の点線をどう太さにするか（見本にはない）'),
+   ('ここから下は1版（記録）', [], '', ''),
    ('今', [('01-now-problems', '01 今の見にくい所')], '', ''),
    ('A 正攻法「航空日誌」', [('A1-log', 'A1 日誌（一覧）'), ('A2-flight', 'A2 1便の詳しい所'), ('A3-year', 'A3 年のまとめ')],
     '1便1行で 844 に5便・667 に2便。日付が左で月の見出しがあり「いつの便か」が追える。見方が3つに減り、決まりをどれも外さない',
