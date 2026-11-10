@@ -1,7 +1,7 @@
 # データ担当の帳面
 
 ## いま持っている仕事
-- 開港（供用開始）と滑走路の表（11/10 1時 PM の指示・本人「すべてOK」）：ブランチ data/airport-facts → main 向けの下書き PR #59。報告 docs/pm/report-airport-facts.md
+- 開港（供用開始）と滑走路の表（11/10 1時 PM の指示・本人「すべてOK」）：ブランチ data/airport-facts → PR #59。報告 docs/pm/report-airport-facts.md。**11/10 15時49分 本人が main に入れた（6eebfd4）。同じ時に PR #60（図鑑の作り直し・移行159 airport_yomi）も入り、反映の Actions が 159 → 160 の順に動いた**
   - 移行 160（airport_facts：airport_id・opened_year・runways の JSON［name・length_m・width_m・note］・source 'mlit_airport_list'・source_ref（PDF の URL と基準日）・updated_at。RLS は誰でも select、書くのは service_role だけ。airports を cascade）。影響はチェックイン（図鑑の1空港のデータ欄）だけ、経営なし
   - 中身は国交省「空港一覧」（令和8年9月1日現在）の PDF 5つから82空港。年は「空港としての供用開始」の最初の年（滑走路・ターミナルだけの供用開始は数えない。年のない行は前の行の年）。null は羽田・三沢・岩国。行なしは成田・中部・関西・伊丹・千歳（id 91）・番外編
   - 確かめた結果：t100（16項目）・t01・t08 通過、番号の重なりなし。PDF を別の読み方で取り直して92空港の滑走路が全部合った。SQL のテスト全部は報告の 4
@@ -106,7 +106,7 @@
 - SQL のテストは全部で約35分かかる（手元で流すときは裏で流してログを見る。t92 だけで約4分。同じログに2回流すと混ざるので、ログの名前を分ける）
 
 ## 次にやること
-00000. 開港と滑走路の表（PR #59）：本人が羽田の年・番外編の10空港を決めたら直す。「反映して」が出たら migrations.mjs rebase（159 の PR #57 と順番をそろえる）。CI とレビューに答える
+00000. 開港と滑走路の表（PR #59・main に入った）：反映の Actions（run 42771136800）の結果を確かめる。本人が羽田の年・番外編の10空港を決めたら、新しい移行（162 以降）で直す
 0000. 図鑑の表（PR #57）：会社管理の4空港の公的な出典をさがす（国土数値情報の利用約款もまだ）。zukan-view-prefs-check.sql の結果が来たら読む。CI とレビューに答える
 000. 表示の設定（PR #37・11/9 本番に入った）：チェックイン担当が prefs の形を決めたら、fmt と上限が合うか見る。「反映して」が出たら migrations.mjs rebase。admin_backup に足すと決まったら PR #32 と順番をそろえて足す
 00. 全体のデバッグ（PR #34・11/9 本番に入った）：本人の health-check.sql の結果を読む（南の円の抜け・429 の回数・cron の失敗）。反映されたら、Server-Timing で airport-now のどこが遅いかを PM に測ってもらい、案A／案B を出し直す。adsb.lol の作者の返事が来たら、上限に合わせて記録の間隔を見直す。CI とレビューに答える
