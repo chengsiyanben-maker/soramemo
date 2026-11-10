@@ -35,7 +35,7 @@ async def main():
         await pg.evaluate('__fake.login()'); await pg.wait_for_timeout(800)
         # 特別塗装機の図鑑
         await pg.evaluate("goTab('book')"); await pg.wait_for_timeout(500)
-        await pg.click('#v-book [data-seg="liv"]'); await pg.wait_for_timeout(600)
+        await pg.evaluate("setBookSeg('liv'); renderVisible()"); await pg.wait_for_timeout(600)
         t = await pg.inner_text('#bookLiv'); n = await pg.evaluate('Object.keys(LIVERY_NAMES).length'); print('LIV', t[:200].replace('\n', ' | '))
         check('特別塗装機の図鑑（全機と見た1機）:', n >= 30 and f'1 / {n}' in t and await pg.locator('#bookLiv .lvcard.got').count() == 1 and '見た・' in t)
         await pg.click('#bookLiv [data-livtab="seen"]'); await pg.wait_for_timeout(200)

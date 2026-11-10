@@ -1812,7 +1812,7 @@ ul.fc{margin:4px 0;padding-left:1.2em;line-height:1.9}
 .xgrp>summary h3::after{content:"　▾";color:var(--sumi)}
 .xgrp:not([open])>summary h3::after{content:"　▸"}
 /* 画面の外にある部分は、見えるまで配置の計算を後回しにする（記録が多いときの切り替えを軽く） */
-#book .grid,#ach .achgrp,#manualList .flight,#flights .flight{content-visibility:auto;contain-intrinsic-size:auto 360px}
+#ach .achgrp,#manualList .flight,#flights .flight{content-visibility:auto;contain-intrinsic-size:auto 360px}
 #manualList .flight,#flights .flight{contain-intrinsic-size:auto 112px}
 .xnote{background:var(--sky);border-radius:10px;padding:8px 12px;font-size:13px;line-height:1.7}
 details.dev{margin:36px 0 0;border-top:1px solid var(--line);padding-top:12px}
@@ -2212,84 +2212,157 @@ dialog.psheet .btn1,dialog.psheet .btn2{display:block;width:100%;margin-top:10px
 #v-book .bknear li:first-child{border-top:0}
 #v-book .bknear ul{list-style:none;margin:0;padding:0}
 /* 図鑑：案内標 */
-#v-book .bksigns{display:flex;flex-direction:column;gap:10px}
-#v-book .bksign{display:block;width:100%;text-align:center;border:0;border-radius:10px;overflow:hidden;background:var(--bk-card);color:var(--bk-ink);box-shadow:var(--bk-shadow);padding:0;font-family:var(--gothic)}
-#v-book .bksign .band{display:flex;justify-content:space-between;padding:5px 12px;font-size:11px;font-weight:800;letter-spacing:.1em;background:var(--bk-track);color:var(--bk-mute)}
-#v-book .bksign.on .band{background:var(--shu);color:var(--on-shu)}
-#v-book .bksign .nm{display:block;font-size:26px;font-weight:900;letter-spacing:.12em;padding:10px 8px 0;line-height:1.15}
-#v-book .bksign .sub{display:block;font-size:11px;color:var(--bk-mute);letter-spacing:.12em;margin-top:2px}
-#v-book .bksign .nb{display:flex;justify-content:space-between;padding:6px 12px 9px;font-size:11px;color:var(--bk-mute)}
-#v-book .bksign:not(.on) .nm{color:var(--bk-mute)}
 /* 図鑑：年代記 */
-#v-book .bktl{position:relative;padding-left:4px}
-#v-book .bktl::before{content:"";position:absolute;left:61px;top:8px;bottom:8px;width:2px;background:var(--bk-track)}
-#v-book .bktl .yr{font:800 18px var(--gothic);color:var(--shu-text);margin:14px 0 8px}
-#v-book .bktl .yr:first-child{margin-top:2px}
-#v-book .bktl button{display:flex;align-items:center;gap:12px;width:100%;border:0;background:none;padding:5px 0;text-align:left;font-family:var(--gothic);color:var(--bk-ink)}
-#v-book .bktl .md{width:44px;flex:none;text-align:right;font-size:11px;color:var(--bk-mute)}
-#v-book .bktl .pt{width:12px;height:12px;flex:none;border-radius:50%;border:2.5px solid var(--shu);background:var(--bk-card);position:relative;z-index:1;box-sizing:border-box}
-#v-book .bktl .cd{flex:1;display:flex;justify-content:space-between;align-items:center;background:var(--bk-card);border-radius:14px;padding:10px 14px;box-shadow:var(--bk-shadow)}
-#v-book .bktl .cd b{font-size:15px}
-#v-book .bktl .cd small{display:block;font-size:11px;color:var(--bk-mute);font-weight:500}
-#v-book .bktl .cd em{font-style:normal;font-size:16px;font-weight:900;color:var(--shu-text)}
 /* 図鑑：タイル */
-#v-book .bkbento{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
-#v-book .bkbento>div,#v-book .bkbento>button{border:0;border-radius:22px;padding:14px 16px;background:var(--bk-card);color:var(--bk-ink);box-shadow:var(--bk-shadow);text-align:left;font-family:var(--gothic);min-width:0}
-#v-book .bkbento .big{grid-column:1 / -1;background:var(--hero);color:#F9FAFB;display:flex;flex-direction:column;gap:6px;padding:18px 20px 20px}
-#v-book .bkbento .l{font-size:12px;font-weight:700;opacity:.85}
-#v-book .bkbento .n{font-size:72px;font-weight:700;line-height:.9;font-family:var(--sign);letter-spacing:.01em}
-#v-book .bkbento .n small{font-size:28px;font-weight:600;opacity:.55;margin-left:4px}
-#v-book .bkbento .c{font-size:28px;font-weight:900;line-height:1;margin-top:8px}
-#v-book .bkbento .s{font-size:12px;margin-top:4px;opacity:.85}
 /* 図鑑：地方（輪と棒） */
-#v-book #bkBars{margin-top:12px}
-#v-book .bkbars button{display:grid;grid-template-columns:56px 1fr 48px;gap:10px;align-items:center;width:100%;border:0;border-top:1px solid var(--bk-track);background:none;padding:11px 0;font-family:var(--gothic);color:var(--bk-ink);text-align:left}
-#v-book .bkbars button:first-child{border-top:0}
-#v-book .bkbars button[aria-pressed="true"] b{color:var(--shu-text)}
-#v-book .bkbars .tr{display:block;height:8px;border-radius:4px;background:var(--bk-track);overflow:hidden}
-#v-book .bkbars .tr i{display:block;height:8px;border-radius:4px}
-#v-book .bkbars .v{font-size:12px;font-weight:800;text-align:right}
-#v-book .bk-top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:2px 0 14px}
-#v-book .bk-top h2{margin:0;font-family:var(--gothic);font-weight:800;font-size:24px;letter-spacing:.04em;color:var(--bk-ink);flex:none}
-#v-book .seg{display:flex;gap:6px;border:0;border-radius:0;overflow-x:auto;margin:0;scrollbar-width:none;grid-template-columns:none}
-#v-book .seg::-webkit-scrollbar{display:none}
-#v-book .seg button,#v-book .seg button+button{flex:none;border:0;border-radius:999px;padding:7px 13px;font-size:12.5px;font-weight:700;background:var(--bk-pill);color:var(--bk-mute);box-shadow:0 4px 12px -8px rgba(15,23,42,.35)}
-#v-book .seg button[aria-pressed="true"]{background:var(--bk-ink);color:var(--bk-card)}
-#v-book .bk-hero{display:flex;align-items:center;gap:16px;background:var(--hero);color:#F9FAFB;border-radius:26px;padding:18px 20px;box-shadow:0 22px 40px -22px rgba(17,24,39,.7)}
-#v-book .bk-ring{position:relative;flex:none;width:92px;height:92px}
-#v-book .bk-ring b{position:absolute;inset:0;display:grid;place-items:center;font-size:14px;font-weight:800}
-#v-book .bk-txt{min-width:0}
-#v-book .bk-txt .l{font-size:11px;font-weight:700;letter-spacing:.1em;color:#9CA3AF}
-#v-book .bk-txt .n{font-size:30px;font-weight:800;line-height:1.15;font-variant-numeric:tabular-nums}
-#v-book .bk-txt .s{font-size:12px;color:#D1D5DB;margin-top:4px}
-#v-book #bookNote{margin:10px 4px 0}
-#v-book .bk-tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:12px}
-#v-book .bk-tile{display:flex;flex-direction:column;align-items:stretch;gap:6px;text-align:left;border:0;border-radius:20px;padding:12px 12px 11px;background:var(--bk-card);box-shadow:var(--bk-shadow);color:var(--bk-ink);font-family:var(--gothic);min-width:0}
-#v-book .bk-tile .h{display:flex;justify-content:space-between;align-items:center;font-size:13px}
-#v-book .bk-tile .n{font-size:26px;font-weight:700;line-height:1;font-family:var(--sign)}
-#v-book .bk-tile .n small{font-size:11px;font-weight:600;color:var(--bk-sub)}
-#v-book .bk-tile .dots{display:none}   /* 空港の数だけの点は出さない（数字と輪で足りる） */
-#v-book .bk-tile .dots i{width:7px;height:7px;border-radius:50%;background:var(--bk-track)}
-#v-book .bk-tile[aria-pressed="true"]{box-shadow:0 0 0 2px var(--bk-ink),var(--bk-shadow)}
-#v-book .bk-tile:focus-visible,#v-book .bk-close:focus-visible{outline:3px solid #2563EB;outline-offset:2px}
-#v-book .bk-panel{margin-top:12px;background:var(--bk-card);border-radius:22px;padding:14px 16px 16px;box-shadow:var(--bk-shadow);scroll-margin-top:16px}
-#v-book .bk-ph{display:flex;align-items:center;justify-content:space-between;gap:8px}
-#v-book .bk-ph h3{margin:0;font-size:16px;font-weight:800;color:var(--bk-ink);display:flex;align-items:baseline;gap:10px}
-#v-book .bk-ph .rgn{font-size:13px;font-weight:700;color:var(--bk-sub)}
-#v-book .bk-close{border:0;border-radius:999px;background:var(--bk-track);color:var(--bk-ink);font:700 12px var(--gothic);padding:6px 12px;min-height:32px}
-#v-book .bk-panel .rgbar{display:block;height:5px;border-radius:3px;background:var(--bk-track);overflow:hidden;margin:10px 0 14px}
-#v-book .bk-panel .rgbar i{display:block;height:100%;background:var(--rg)}
-#v-book .bk-panel .grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:12px 8px;border:0;padding:0;margin:0}
-#v-book .bk-panel .cell .nm{font-size:11px;color:var(--bk-sub)}
-#v-book .bk-panel .cell.got .nm{color:var(--bk-ink)}
-#v-book .bk-panel>h3{font-size:12px;font-weight:700;color:var(--bk-mute);margin:18px 0 10px}
-#v-book .bk-recent{margin-top:12px;background:var(--bk-card);border-radius:22px;padding:14px 16px 12px;box-shadow:var(--bk-shadow)}
-#v-book .bk-recent h3{margin:0 0 8px;font-size:13px;font-weight:800;color:var(--bk-ink)}
-#v-book .bk-recent .row{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}
-#v-book .bk-recent .cell .slot{aspect-ratio:1}
 #bookAir details.xgrp,#bookExtra details.xgrp,#v-book #ach .achgrp{background:var(--bk-card);border-radius:22px;padding:6px 16px;box-shadow:var(--bk-shadow);margin-top:12px}
 #v-book #ach .achgrp{padding:14px 16px}
 #v-book .book-head h2{font-family:var(--gothic);font-weight:800;font-size:18px;color:var(--bk-ink);margin:18px 0 8px}
+/* ---------- 図鑑（11/9 の決定・画面案 design/zukan-book 3版）：右端のツメ（9地方）＋地方の扉（上に止まる）＋そろえた枠（高さ104） ---------- */
+:root{--zk-safe:env(safe-area-inset-top,0px)}
+#v-book{--zk-wash:#F6F7F9;--zk-pale:#7A8390;--zk-line:#E3E6EB;--zk-sel:#16233A}
+[data-palette="board"] #v-book,[data-night="on"] #v-book{--zk-wash:#1B1F26;--zk-pale:#8B95A3;--zk-line:#2A2F37;--zk-sel:#E5E7EB}
+#v-book .num{font-family:var(--sign);font-weight:700;color:var(--bk-ink);line-height:1;letter-spacing:.01em}
+#v-book .u{font-size:12px;font-weight:600;color:var(--bk-sub);margin-left:3px}
+#v-book .zk-ttl{display:flex;align-items:center;gap:8px;margin:2px 0 10px}
+#v-book .zk-ttl h2{margin:0 auto 0 2px;font-family:var(--gothic);font-weight:800;font-size:24px;letter-spacing:.04em;color:var(--bk-ink)}
+#v-book .zk-pill{min-height:44px;display:inline-flex;align-items:center;justify-content:center;gap:6px;border:0;border-radius:999px;padding:0 14px;background:var(--bk-card);color:var(--bk-ink);box-shadow:var(--bk-shadow);font:700 14px var(--gothic);flex:none;cursor:pointer}
+#v-book .zk-pill svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+#v-book .zk-back{margin:2px 0 4px}
+#v-book .zk-link{border:0;background:none;color:var(--bk-sub);font:700 14px var(--gothic);text-decoration:underline;text-underline-offset:3px;min-height:44px;padding:0 6px}
+#v-book .zk-foot{text-align:center;margin:18px 0 0}
+#v-book .zk-lead{font-size:13px;color:var(--bk-sub);margin:8px 2px 0;line-height:1.6}
+#v-book .zk-note{margin:10px 2px 0}
+/* 地方別：右にツメのぶん空ける */
+:root[data-bkview="region"][data-bookseg="main"] #zkBody .zk-main,:root[data-bkview="region"][data-bookseg="main"] #bookMain .vwrow,:root[data-bkview="region"][data-bookseg="main"] #zkNotice{margin-right:44px}
+#v-book .zk-hero{margin-top:10px;background:var(--hero,#0F1B2D);color:#fff;border-radius:22px;padding:12px 16px 14px}
+#v-book .zk-hero .ht{display:flex;align-items:baseline;gap:6px}
+#v-book .zk-hero .lab{font-size:13px;color:#C9D2DE;font-weight:700;margin-right:4px}
+#v-book .zk-hero .num{color:#fff;font-size:34px}
+#v-book .zk-hero .u{color:#C9D2DE;font-size:13px}
+#v-book .zk-hero .side{margin-left:auto;font-size:13px;color:#C9D2DE;font-weight:600}
+#v-book .zk-hero .rg{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px 12px;margin-top:8px}
+#v-book .zk-hero .rg .t{display:flex;align-items:baseline;justify-content:space-between;font-size:13px;color:#C9D2DE;font-weight:700;line-height:18px;white-space:nowrap}
+#v-book .zk-hero .rg .t span:last-child{font-family:var(--sign);font-size:15px;color:#fff}
+#v-book .zk-hero .rg .t small{font-family:var(--gothic);font-size:12px;color:#C9D2DE;font-weight:600}
+#v-book .zk-hero .rg .b{display:block;height:3px;border-radius:2px;background:rgba(255,255,255,.18);margin-top:3px;overflow:hidden}
+#v-book .zk-hero .rg .b i{display:block;height:100%;border-radius:2px}
+#v-book .zk-hero .fx{margin:6px 0 0;font-size:14px;color:#E5EAF0;line-height:1.6}
+#v-book .zk-near{display:flex;align-items:center;gap:8px;width:100%;min-height:48px;margin-top:10px;border:0;border-radius:16px;background:rgba(255,255,255,.12);color:#fff;font:600 13px var(--gothic);padding:0 14px;text-align:left}
+#v-book .zk-near b{font-size:16px}#v-book .zk-near small{margin-left:auto;font-size:13px;color:#C9D2DE}
+/* 地方の扉：1行。送ると上に止まって見出しになる */
+#v-book .zk-door{position:sticky;top:var(--zk-safe);z-index:5;margin:12px 0 0;height:50px;padding:0 16px 0 20px;display:flex;align-items:center;gap:6px;background:var(--bk-card);border-radius:18px;box-shadow:var(--bk-shadow);overflow:hidden}
+#v-book .zk-door::before{content:"";position:absolute;left:0;top:0;bottom:0;width:6px;background:var(--c)}
+#v-book .zk-door h3{margin:0 6px 0 0;font:800 18px var(--gothic);color:var(--bk-ink);letter-spacing:.04em;line-height:1}
+#v-book .zk-door .num{font-size:22px}
+#v-book .zk-up{width:44px;height:44px;margin-right:-10px;flex:none;border:0;background:none;color:var(--bk-sub);display:flex;align-items:center;justify-content:center;border-radius:999px}
+#v-book .zk-up svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+#v-book .zk-ap:has(.sb){padding:8px 10px 6px}#v-book .zk-ap:has(.sb) .cd{font-size:24px}#v-book .zk-ap:has(.sb) .nm{margin-top:1px}#v-book .zk-ap:has(.sb) .ft b{font-size:16px}#v-book .zk-ap:has(.sb) .ft{line-height:1.3}#v-book .zk-ap .sb{line-height:1.25}
+#v-book .zk-ap.glow{outline:3px solid var(--c);outline-offset:2px}
+#v-book .zk-ap>span{flex-shrink:0}
+#v-book .zk-back-h{margin:22px 2px 0;font:700 13px var(--gothic);color:var(--bk-sub)}
+#v-book .zk-book.zk-home{padding-left:30px}#v-book .zk-home .gt{font-size:20px;color:var(--bk-sub);margin-left:4px}
+#v-book .zk-rg:last-of-type{min-height:calc(100dvh - var(--zk-safe,0px) - var(--zk-tabbar,84px))}
+#v-book .zk-door .bar{flex:1;margin-left:8px;height:5px;border-radius:3px;background:var(--bk-track);overflow:hidden}
+#v-book .zk-door .bar i{display:block;height:100%;background:var(--c);border-radius:3px}
+/* そろえた枠（高さ104・3つ並び） */
+#v-book .zk-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:8px}
+#v-book .zk-ap{position:relative;display:flex;flex-direction:column;align-items:stretch;text-align:left;height:104px;padding:10px 10px 8px;border:0;border-radius:18px;background:var(--bk-card);box-shadow:var(--bk-shadow);color:var(--bk-ink);font-family:var(--gothic);overflow:hidden;min-width:0;cursor:pointer}
+#v-book .zk-ap::before{content:"";position:absolute;left:10px;top:0;width:22px;height:4px;border-radius:0 0 3px 3px;background:var(--c)}
+#v-book .zk-ap .cd{font-family:var(--sign);font-weight:700;font-size:26px;line-height:1.05;color:var(--bk-ink);letter-spacing:.02em;white-space:nowrap}
+#v-book .zk-ap .cd.jp{font-family:var(--gothic);font-size:19px;line-height:1.3;font-weight:800;letter-spacing:0;overflow:hidden;text-overflow:clip}
+#v-book .zk-ap .nm.nc{color:var(--bk-sub);font-weight:600}
+#v-book .zk-ap .cd .tg{font-family:var(--gothic);font-size:13px;font-weight:700;color:var(--bk-sub);margin-left:4px}
+#v-book .zk-ap .nm{font-size:13px;font-weight:700;line-height:1.35;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#v-book .zk-ap .nm .pend{display:block;font-size:12px;font-weight:600;color:var(--bk-sub)}
+#v-book .zk-ap .sb{font-size:12px;color:var(--bk-sub);font-weight:600;line-height:1.3}
+#v-book .zk-ap .ft{margin-top:auto;display:flex;align-items:center;gap:5px;font-size:13px;color:var(--bk-sub);white-space:nowrap}
+#v-book .zk-ap .ft b{font-family:var(--sign);font-size:18px;color:var(--bk-ink);font-weight:700}
+#v-book .zk-stp{width:26px;height:26px;flex:none;fill:none;stroke:var(--bk-ink);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+#v-book .zk-stp.no{stroke:var(--zk-pale);stroke-width:1.6;stroke-dasharray:3 3}
+#v-book .zk-ap.no{background:var(--zk-wash);box-shadow:inset 0 0 0 1px var(--zk-line)}
+#v-book .zk-ap.no .cd{color:var(--zk-pale)}#v-book .zk-ap.no .nm{color:var(--bk-sub);font-weight:600}
+#v-book .zk-ap.dim{opacity:.5}
+#v-book .zk-ap:focus-visible,#v-book .zk-pill:focus-visible,#v-book .zk-tsume button:focus-visible{outline:3px solid #2563EB;outline-offset:2px}
+#v-book .zk-sec{display:flex;align-items:baseline;gap:4px;margin:16px 2px 0;font:800 15px var(--gothic);color:var(--bk-ink)}
+#v-book .zk-sec b{font-family:var(--sign);font-size:18px;margin-left:6px}#v-book .zk-sec small{font-size:12px;color:var(--bk-sub);font-weight:600}
+/* 右端のツメ：昼は地方の色、夜は色なし */
+#v-book .zk-tsume{position:fixed;right:max(0px,calc(50vw - 300px));top:120px;display:flex;flex-direction:column;gap:2px;z-index:20}
+:root:not([data-bkview="region"]) #v-book .zk-tsume,:root:not([data-bookseg="main"]) #v-book .zk-tsume{display:none}
+#v-book .zk-tsume button{width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:0;border-radius:14px 0 0 14px;padding:0;background:color-mix(in srgb,var(--c) 16%,var(--bk-card));color:var(--bk-ink);font:700 13px var(--gothic);writing-mode:vertical-rl;letter-spacing:0;line-height:1;box-shadow:inset 4px 0 0 var(--c);cursor:pointer}
+#v-book .zk-tsume button.on{width:52px;margin-left:-8px;background:var(--bk-card);box-shadow:inset 6px 0 0 var(--c),-6px 6px 18px -8px rgba(17,24,39,.35);font-weight:800}
+[data-night="on"] #v-book .zk-tsume button{background:var(--bk-card);box-shadow:inset 0 0 0 1px rgba(220,227,234,.35)}
+[data-night="on"] #v-book .zk-tsume button.on{box-shadow:inset 0 0 0 2px rgba(220,227,234,.85)}
+[data-night="on"] #v-book .zk-ap::before,[data-night="on"] #v-book .zk-door::before{background:transparent}
+/* 行った順 */
+#v-book .zk-mon{display:flex;align-items:baseline;gap:8px;margin:18px 2px 0;font:800 16px var(--gothic);color:var(--bk-ink)}
+#v-book .zk-mon small{font-size:13px;color:var(--bk-sub);font-weight:600}
+/* お知らせ（今の人へ1回） */
+#v-book .zk-notice{display:flex;align-items:center;gap:10px;margin:10px 0 0;padding:12px 14px;border-radius:18px;background:var(--bk-card);box-shadow:var(--bk-shadow)}
+#v-book .zk-notice p{margin:0;font-size:13px;line-height:1.6;color:var(--bk-ink)}#v-book .zk-notice b{display:block}
+/* 索引 */
+#v-book .zk-search{display:flex;align-items:center;gap:8px;height:52px;margin-top:6px;padding:0 16px;border-radius:999px;background:var(--bk-card);box-shadow:var(--bk-shadow)}
+#v-book .zk-search svg{width:20px;height:20px;fill:none;stroke:var(--bk-sub);stroke-width:2;stroke-linecap:round}
+#v-book .zk-search input{flex:1;min-width:0;border:0;background:transparent;font:500 16px var(--gothic);color:var(--bk-ink);outline:none}
+#v-book .zk-itabs{display:flex;gap:6px;margin-top:14px}
+#v-book .zk-itabs button{min-height:44px;border:0;border-radius:999px;padding:0 16px;background:transparent;color:var(--bk-sub);font:700 14px var(--gothic)}
+#v-book .zk-itabs button[aria-selected="true"]{background:var(--zk-sel);color:var(--bk-card)}
+#v-book .zk-ijump{display:flex;flex-wrap:wrap;gap:4px;margin-top:8px}
+#v-book .zk-ijump button{min-width:44px;min-height:44px;border:0;border-radius:12px;background:var(--bk-card);box-shadow:var(--bk-shadow);color:var(--bk-ink);font:700 14px var(--gothic)}
+#v-book .zk-ih{margin:16px 2px 6px;font:800 15px var(--gothic);color:var(--bk-ink);scroll-margin-top:12px}
+#v-book .zk-ilist{background:var(--bk-card);border-radius:18px;box-shadow:var(--bk-shadow);overflow:hidden}
+#v-book .zk-irow{display:flex;align-items:center;gap:12px;width:100%;min-height:56px;padding:6px 14px;border:0;background:none;text-align:left;font-family:var(--gothic);color:var(--bk-ink)}
+#v-book .zk-irow+.zk-irow{box-shadow:inset 0 1px 0 var(--bk-track)}
+#v-book .zk-irow .cd{width:44px;flex:none;font-family:var(--sign);font-weight:700;font-size:18px}
+#v-book .zk-irow .tx{flex:1;min-width:0}#v-book .zk-irow .tx b{display:block;font-size:15px;line-height:1.4}#v-book .zk-irow .tx small{display:block;font-size:13px;color:var(--bk-sub)}
+#v-book .zk-irow .st{display:flex;align-items:center;gap:4px;font-size:13px;color:var(--bk-sub);white-space:nowrap}
+#v-book .zk-irow .st .zk-stp{width:20px;height:20px}
+/* ほかの図鑑・実績 */
+#v-book .zk-book{display:flex;align-items:center;gap:12px;width:100%;min-height:76px;margin-top:10px;padding:12px 16px 12px 14px;border:0;border-radius:22px;background:var(--bk-card);box-shadow:var(--bk-shadow);text-align:left;font-family:var(--gothic);color:var(--bk-ink);position:relative;overflow:hidden}
+#v-book .zk-book::before{content:"";position:absolute;left:14px;top:14px;bottom:14px;width:4px;border-radius:2px;background:var(--c)}
+#v-book .zk-book .ic{width:40px;height:40px;margin-left:8px;flex:none;border-radius:12px;background:var(--zk-wash);display:flex;align-items:center;justify-content:center}
+#v-book .zk-book .ic svg{width:20px;height:20px;fill:none;stroke:var(--bk-ink);stroke-width:1.7;stroke-linejoin:round;stroke-linecap:round}
+#v-book .zk-book .tx{flex:1;min-width:0}#v-book .zk-book .tx b{display:block;font-size:16px}#v-book .zk-book .tx small{display:block;font-size:13px;color:var(--bk-sub);line-height:1.5}
+#v-book .zk-book .n .num{font-size:26px}
+#v-book .zk-plain{margin:20px 4px 0;font-size:13px;color:var(--bk-sub)}
+#v-book .zk-plain p{display:flex;align-items:baseline;gap:4px;margin:6px 0}#v-book .zk-plain p span:first-child{margin-right:auto;font-weight:700;color:var(--bk-ink);font-size:14px}
+#v-book .zk-plain .num{font-size:20px}#v-book .zk-plain .nt{display:block;line-height:1.6}
+/* 記号の意味 */
+#v-book .zk-kg{display:flex;align-items:center;gap:14px;margin-top:12px}
+#v-book .zk-kg .zk-ap{width:104px;flex:none;cursor:default}
+#v-book .zk-kg p{margin:0;font-size:13px;color:var(--bk-sub);line-height:1.6}#v-book .zk-kg p b{display:block;font-size:15px;color:var(--bk-ink)}
+#v-book .zk-tsm{width:104px;flex:none;display:flex;justify-content:flex-end}
+#v-book .zk-tsm span{width:44px;height:64px;display:flex;align-items:center;justify-content:center;border-radius:14px 0 0 14px;background:color-mix(in srgb,var(--c) 16%,var(--bk-card));box-shadow:inset 4px 0 0 var(--c);writing-mode:vertical-rl;font:700 13px var(--gothic);color:var(--bk-ink)}
+/* 空港ページ（図鑑の1空港の詳しい所） */
+#dAirportBody .zk-aph{display:flex;align-items:center;gap:14px;position:relative;padding:12px 14px 12px 20px;border-radius:22px;background:var(--card,#fff);box-shadow:0 1px 2px rgba(17,24,39,.04),0 10px 26px -14px rgba(17,24,39,.22);overflow:hidden;text-align:left;touch-action:pan-y}
+#dAirportBody ul.hist{list-style:none;padding-left:0}
+#dAirportBody .zk-aph::before{content:"";position:absolute;left:0;top:0;bottom:0;width:6px;background:var(--c)}
+#dAirportBody .zk-aph .stampbig{width:104px;flex:none;margin:0}
+#dAirportBody .zk-aph .stampbig.wide{width:120px}
+#dAirportBody .zk-aph .tx{min-width:0}
+#dAirportBody .zk-aph .cd{display:block;font-family:var(--sign);font-weight:700;font-size:44px;line-height:1;color:var(--ink,#1F2937)}
+#dAirportBody .zk-aph .cd.jp{font-family:var(--gothic);font-size:28px}
+#dAirportBody .zk-aph h3{margin:6px 0 0;font-size:16px;line-height:1.4;word-break:keep-all;overflow-wrap:anywhere}
+#dAirportBody .zk-aph p{margin:2px 0 0;font-size:13px;color:#4B5563}
+#dAirportBody .zk-dots{display:flex;justify-content:center;gap:6px;margin:10px 0 0}
+#dAirportBody .zk-dots i{width:6px;height:6px;border-radius:50%;background:#D5DAE1}#dAirportBody .zk-dots i.on{width:18px;border-radius:3px;background:#4B5563}
+#dAirportBody .zk-swhint{text-align:center;font-size:13px;color:#5F6875;margin:6px 0 0}
+#dAirportBody .zk-dl{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px;text-align:left}
+#dAirportBody .zk-dl>div{border-radius:18px;background:var(--card,#fff);box-shadow:0 1px 2px rgba(17,24,39,.04),0 10px 26px -14px rgba(17,24,39,.22);padding:12px 14px}
+#dAirportBody .zk-dl .k{display:block;font-size:13px;color:#4B5563;font-weight:700}
+#dAirportBody .zk-dl .v{display:block;margin-top:4px}
+#dAirportBody .num{font-family:var(--sign);font-weight:700;line-height:1;font-size:30px;color:var(--ink,#1F2937)}
+#dAirportBody .zk-dl .v.s .num{font-size:22px}
+#dAirportBody .u{font-size:12px;font-weight:600;color:#5F6875;margin:0 2px 0 2px}
+#dAirportBody .zk-yet{margin-top:12px;padding:14px 16px;border-radius:18px;background:var(--card,#fff);box-shadow:0 1px 2px rgba(17,24,39,.04),0 10px 26px -14px rgba(17,24,39,.22);text-align:left;font-size:13px;color:#4B5563;line-height:1.7}
+#dAirportBody .zk-yet>b{display:block;font-size:15px;color:var(--ink,#1F2937)}
+#dAirportBody .zk-yet .num{font-size:20px}#dAirportBody .zk-yet>span{display:block}
+#dAirportBody .zk-more summary{min-height:44px;display:flex;align-items:center;font-weight:700;cursor:pointer}
+#dAirportBody .zk-pn{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px}
+#dAirportBody .zk-pn button{display:flex;align-items:center;gap:6px;min-height:52px;padding:0 14px;border:0;border-radius:999px;background:var(--card,#fff);box-shadow:0 1px 2px rgba(17,24,39,.04),0 10px 26px -14px rgba(17,24,39,.22);font:700 14px var(--gothic);color:var(--ink,#1F2937);min-width:0}
+#dAirportBody .zk-pn button:last-child{justify-content:flex-end}
+#dAirportBody .zk-pn small{font-family:var(--sign);font-size:14px;color:#4B5563}
+#dAirportBody .zk-pn b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 /* ---------- フライト：上は飛んだ路線の地図、下からせり出すシートに搭乗券の一覧 ---------- */
 #v-log{--lg-ink:#1F2937;--lg-sub:#6B7280;--lg-mute:#5B6270;--lg-card:#FFFFFF;--lg-stub:#FAFAFB;--lg-pill:#FFFFFF;--lg-track:#EEF0F3;--lg-shadow:0 12px 26px -18px rgba(15,23,42,.3),inset 0 0 0 1px rgba(17,24,39,.07)}
 [data-palette="board"] #v-log{--lg-ink:#E5E7EB;--lg-sub:#8B95A3;--lg-mute:#A7B0BC;--lg-card:#16191F;--lg-stub:#1B1F26;--lg-pill:#232830;--lg-track:#2A2F37;--lg-shadow:0 12px 26px -16px rgba(0,0,0,.7)}
@@ -2827,27 +2900,17 @@ dialog.ckconfirm button.go{background:#E9C46A;color:#111827}
     <div class="row"><button value="no" type="submit">やめる</button><button value="yes" type="submit" class="go">印をもらう</button></div></form></dialog>
 
   <!-- BOOK -->
-  <!-- BOOK（86空港・番外編・実績を切り替える） -->
+  <!-- BOOK（11/9 の決定：右端のツメ＋地方の扉＋そろえた枠。索引・ほかの図鑑・実績・記号の意味は図鑑の中の別の面） -->
   <section class="view" id="v-book" aria-label="図鑑">
-    <div class="bk-top">
-      <h2>図鑑</h2>
-      <div class="seg" role="group" aria-label="図鑑の切り替え">
-        <button data-seg="main" aria-pressed="true">86空港</button>
-        <button data-seg="air" aria-pressed="false" aria-label="飛行場・滑空場">飛行場</button>
-        <button data-seg="extra" aria-pressed="false">番外編</button>
-        <button data-seg="liv" aria-pressed="false">特別塗装</button>
-        <button data-seg="ach" aria-pressed="false">実績</button>
-      </div>
-    </div>
     <div id="bookMain">
+      <div class="zk-ttl"><h2>図鑑</h2><button class="zk-pill" type="button" data-zkseg="index"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4"/></svg>索引</button><button class="zk-pill" type="button" data-zkseg="others">ほかの図鑑・実績</button></div>
       <div class="viewsw" id="bookViews" role="tablist" aria-label="図鑑の見方"></div>
-      <div id="bkAlt"></div>
-      <div class="bk-hero" id="bookHero"></div>
-      <p class="hint" id="bookNote" hidden></p>
-      <div class="bk-tiles" id="bookTiles" role="group" aria-label="地方"></div>
-      <div id="book"></div>
-      <div class="bk-recent" id="bookRecent" hidden></div>
+      <div id="zkNotice"></div>
+      <div id="zkBody"></div>
     </div>
+    <div id="bookIndex" hidden></div>
+    <div id="bookOthers" hidden></div>
+    <div id="bookKigou" hidden></div>
     <div id="bookAir" hidden>
       <div class="book-head"><h2>飛行場・滑空場</h2></div>
     </div>
@@ -2856,6 +2919,7 @@ dialog.ckconfirm button.go{background:#E9C46A;color:#111827}
     </div>
     <div id="bookLiv" hidden></div>
     <div id="bookAch" hidden>
+      <button class="zk-pill zk-back" type="button" data-zkseg="others"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>ほかの図鑑・実績</button>
       <div class="book-head"><h2>実績</h2><span class="p" id="achProg"></span></div>
       <p class="hint">空港の印や回数、路線、距離で達成します。表示（ノーマル・JAL・ANA）に関係なく、すべての記録で数えます。達成した実績を押すと、称号としてホームと共有画像に表示されます。</p>
       <div id="ach"></div>
@@ -3071,7 +3135,7 @@ dialog.ckconfirm button.go{background:#E9C46A;color:#111827}
   <div class="ob-step on">
     <svg viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="50" fill="none" stroke="var(--shu)" stroke-width="4"/><circle cx="60" cy="60" r="43" fill="none" stroke="var(--shu)" stroke-width="1.2"/><text x="60" y="72" text-anchor="middle" font-family="var(--mincho)" font-weight="800" font-size="32" fill="var(--shu)">HND</text></svg>
     <h3>空港で印を押す</h3>
-    <p>空港に着いたら「チェックイン」。国内86の空港と、羽田・成田は各ターミナルにも印があります。</p>
+    <p>空港に着いたら「チェックイン」。国内86の空港に印があります。大きな6空港はターミナルにも印があります。</p>
   </div>
   <div class="ob-step">
     <svg viewBox="0 0 120 120" aria-hidden="true"><circle cx="24" cy="88" r="7" fill="var(--shu)"/><circle cx="96" cy="30" r="7" fill="var(--shu)"/><path d="M24 88Q40 34 96 30" fill="none" stroke="var(--shu)" stroke-width="3" stroke-dasharray="5 6" stroke-linecap="round"/><path d="M62 40l14-5-5 12-3-4z" fill="var(--ink)"/></svg>
@@ -3811,13 +3875,6 @@ function visitedExtra(){ const s=new Map(); for(const c of S.checkins){ if(!s.ha
 function visitedTerms(){ const s=new Map(); for(const c of S.checkins){ if(c.term && !s.has(c.term)) s.set(c.term, c.t); } return s; }
 function placeName(a, t){ return t ? `${a.name} ${t.name}` : a.name; }
 function demoPlace(){ const v=$("demoAirport").value; return v.startsWith("t:") ? TBY[v.slice(2)] : BY[+v.slice(2)]; }
-function termGrid(prefs){
-  const vt = visitedTerms(), ids = TERM_AIRPORTS.filter(id => prefs.includes(BY[id].pref));
-  return ids.map(id => { const ts = TERMS.filter(t => t.a === id), got = ts.filter(t => vt.has(t.id)).length;
-  return `<h3>${godShort(BY[id])}のターミナル　${got} / ${ts.length}</h3><div class="grid">${ts.map(t => { const a = BY[t.a]; return vt.has(t.id)
-    ? `<button class="cell got" data-a="${a.id}" data-t="${t.id}"><div class="slot">${stampSVG(a, vt.get(t.id), {term:t})}</div><div class="nm">${t.short} ${t.name}</div></button>`
-    : `<div class="cell"><div class="slot">${emptySVG(a, t)}</div><div class="nm">${t.short} ${t.name}</div></div>`; }).join("")}</div>`; }).join("");
-}
 function vlog(kind, p, n){
   const d = new Date(), ts = d.toLocaleString("ja-JP",{month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit",second:"2-digit"});
   const terms = TERMS.filter(t => t.a === n.a.id).map(t => `${t.tag}:${Math.round(km(p,t)*1000)}m`).join(" ");
@@ -4112,14 +4169,20 @@ const VIEW_GROUP = {home:"home", book:"book", log:"log", stats:"stats", co:"game
 const DIRTY = {book:true, log:true, stats:true, ach:true, game:true, sg:true};
 var SG_FORCE = false;   // 修行のタブを開くとき、選んだ画面のまま開く
 function currentView(){ const sec = document.querySelector("section.view.on"); return sec ? sec.id.slice(2) : "home"; }
-// 図鑑の中の切り替え：86空港（main）・番外編（extra）・実績（ach）
+// 図鑑の中の面：空港の図鑑（main）・索引（index）・ほかの図鑑・実績（others）・記号の意味（kigou）
+//   ほかの図鑑・実績の中に、飛行場・滑空場（air）・番外編（extra）・機体図鑑（liv）・実績（ach）
 let BOOK_SEG = "main";
+const BOOK_SEGS = { main:"bookMain", index:"bookIndex", others:"bookOthers", kigou:"bookKigou", air:"bookAir", extra:"bookExtra", liv:"bookLiv", ach:"bookAch" };
 function setBookSeg(s){
+  if(!BOOK_SEGS[s]) s = "main";
   BOOK_SEG = s;
-  document.querySelectorAll("#v-book [data-seg]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.seg === s)));
-  $("bookMain").hidden = s !== "main"; $("bookAir").hidden = s !== "air"; $("bookExtra").hidden = s !== "extra"; $("bookAch").hidden = s !== "ach"; $("bookLiv").hidden = s !== "liv";
+  for(const [k, id] of Object.entries(BOOK_SEGS)) if($(id)) $(id).hidden = k !== s;
+  document.documentElement.dataset.bookseg = s;
 }
-document.querySelectorAll("#v-book [data-seg]").forEach(b => b.onclick = () => { setBookSeg(b.dataset.seg); renderVisible(); });
+document.documentElement.dataset.bookseg = "main";
+document.addEventListener("click", e => { const b = e.target.closest("[data-zkseg]"); if(!b) return;
+  setBookSeg(b.dataset.zkseg); DIRTY.book = true; renderVisible(); window.scrollTo(0, 0);
+  const h = document.querySelector(`#${BOOK_SEGS[BOOK_SEG]} h2`); if(h && b.dataset.zkseg !== "main"){ h.tabIndex = -1; h.focus({ preventScroll:true }); } });
 function renderVisible(){
   if(currentView() === "sg"){ if(DIRTY.sg){ DIRTY.sg = false; renderShugyo(); } return; }
   const g = VIEW_GROUP[currentView()];
@@ -4128,6 +4191,9 @@ function renderVisible(){
     // 実績は図鑑の中の一つの切り替え。開いたときだけ描く
     if(BOOK_SEG === "ach"){ if(DIRTY.ach){ DIRTY.ach = false; renderAch(); } }
     else if(BOOK_SEG === "liv") renderLivBook();
+    else if(BOOK_SEG === "index") renderZkIndex();
+    else if(BOOK_SEG === "others") renderZkOthers();
+    else if(BOOK_SEG === "kigou") renderZkKigou();
     else if(DIRTY.book){ DIRTY.book = false; renderBook(); }
     return;
   }
@@ -4167,60 +4233,230 @@ function renderHome(){
   $("streak").innerHTML = S.checkins.length ? `毎月の連続記録 <b>${as.curStreak}か月</b>（最長 ${as.bestStreak}か月）` : "";
   renderPersonaCard(); setTimeout(maybeSuggestPersona, 1500); homeFold();
 }
-// 図鑑の地方の色（タイルと進み具合の線）
-const RG_COL = Object.fromEntries(["北海道", "東北", "関東", "中部", "近畿", "中国", "四国", "九州", "沖縄"].map(r => [r, "#0F1B2D"]));   // 地方ごとの色はやめて紺1色
-function bkRing(p, s, w, col, track){
-  const r = s / 2 - w / 2, C = 2 * Math.PI * r, d = Math.max(p * C, 0.01);
-  return `<svg class="bkring" width="${s}" height="${s}" viewBox="0 0 ${s} ${s}" aria-hidden="true"><circle cx="${s/2}" cy="${s/2}" r="${r}" fill="none" stroke="${track}" stroke-width="${w}"/><circle cx="${s/2}" cy="${s/2}" r="${r}" fill="none" stroke="${col}" stroke-width="${w}" stroke-linecap="round" stroke-dasharray="${d.toFixed(1)} ${C.toFixed(1)}" transform="rotate(-90 ${s/2} ${s/2})"/></svg>`;
+// 図鑑の地方の色：ツメと扉と枠の上の小さな印（昼は守り神の色 GOD_COLORS、夜は色なし）
+const RG_COL = Object.fromEntries(REGION.map(([r]) => [r, "#0F1B2D"]));   // 進み具合の線などで使う紺1色（前からの呼び名）
+const zkCol = rg => (typeof GOD_COLORS !== "undefined" && GOD_COLORS[rg]) || "#0F1B2D";
+const zkYMD = t => { const d = new Date(t); return `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日`; };
+const ZK_BACK = `<button class="zk-pill zk-back" type="button" data-zkseg="others"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>ほかの図鑑・実績</button>`;
+const ZK_BACK_MAIN = `<button class="zk-pill zk-back" type="button" data-zkseg="main"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>図鑑</button>`;
+const ZK_CHECK = `<svg class="zk-stp" viewBox="0 0 26 26" aria-hidden="true"><circle cx="13" cy="13" r="11.5"/><path d="m8 13.5 3.3 3.3L18.5 9"/></svg>`;
+const ZK_YET = `<svg class="zk-stp no" viewBox="0 0 26 26" aria-hidden="true"><circle cx="13" cy="13" r="11.5"/></svg>`;
+// 地方の空港を北から南へ（扉の中の並び・前／次で使う）
+const zkRegionList = rg => { const r = REGION.find(x => x[0] === rg); return r ? A.filter(a => r[1].includes(a.pref)).sort((x, y) => y.lat - x.lat) : []; };
+// 1つの枠：コード・短い名前・行った（✓ と回数）／まだ（点線の丸）
+function zkTile(a, o){
+  const c = code(a), jp = /[^\x00-\x7f]/.test(c), n = o.n || 0, on = o.on;
+  const ft = on ? `${o.total ? "" : ZK_CHECK}${o.total ? "計" : ""}<b>${n}</b>回` : `${ZK_YET}まだ`;   // 行った順は行った空港だけなので ✓ の丸を出さない
+  const lbl = `${a.name}、${on ? (o.total ? "計" : "") + n + "回" : "まだ"}`;
+  return `<button class="zk-ap${on ? "" : " no"}${o.dim ? " dim" : ""}" type="button" data-zka="${a.id}" style="--c:${zkCol(regionOf(a))}" aria-label="${esc(lbl)}${o.sub ? "、" + esc(o.sub) : ""}">
+    <span class="cd${jp ? " jp" : ""}">${esc(jp ? godShort(a) : c)}</span><span class="nm${jp ? " nc" : ""}">${jp ? "コードなし" : esc(godShort(a))}${o.pend ? `<small class="pend">便が未記録</small>` : ""}</span>${o.sub ? `<span class="sb">${esc(o.sub)}</span>` : ""}<span class="ft">${ft}</span></button>`;
 }
-// 開いている地方（null はまだ選んでいない＝最後に印を押した地方を開く、"" は閉じた）
-let BK_RG = null;
+// ターミナルの枠（名前は「新千歳 国内」「羽田 第1」の短さ。86 の数には入らない）
+const zkTermName = t => t.short + " " + (/^T(\d)$/.test(t.tag) ? "第" + t.tag.slice(1) : t.tag);
+function zkTermTile(t, first, n){
+  const a = BY[t.a];
+  return `<button class="zk-ap${first ? "" : " no"}" type="button" ${first ? `data-zkt="${t.id}"` : `data-zka="${a.id}"`} style="--c:${zkCol(regionOf(a))}" aria-label="${esc(t.short + " " + t.name)}、${first ? n + "回" : "まだ"}">
+    <span class="cd">${esc(t.iata)}<small class="tg">${esc(t.tag)}</small></span><span class="nm">${esc(zkTermName(t))}</span><span class="ft">${first ? `${ZK_CHECK}<b>${n}</b>回` : `${ZK_YET}まだ`}</span></button>`;
+}
+function zkTermBlock(prefs){
+  const vt = visitedTerms(), tc = new Map(); for(const c of S.checkins) if(c.term) tc.set(c.term, (tc.get(c.term) || 0) + 1);
+  return TERM_AIRPORTS.filter(id => prefs.includes(BY[id].pref)).map(id => { const ts = TERMS.filter(t => t.a === id), got = ts.filter(t => vt.has(t.id)).length;
+    return `<h4 class="zk-sec">${esc(godShort(BY[id]))}のターミナル <b>${got}</b><small>/${ts.length}</small></h4><div class="zk-grid">${ts.map(t => zkTermTile(t, vt.get(t.id), tc.get(t.id) || 0)).join("")}</div>`; }).join("");
+}
+// 開いたままの面の状態
+let ZK_JUMP = null;
+// 空港の図鑑を描く（見方：地方別・地図・行った順）
 function renderBook(){
   const v = visited(), fa = focusAirports();
   const vc = new Map(); for(const c of S.checkins) vc.set(c.a, (vc.get(c.a) || 0) + 1);
   // 航空会社が未記録のフライトの空港は、表示を絞っていても薄くしない（記録すれば数に入る）
   const ua = new Set(); for(const f of S.flights){ if(!f.airline){ ua.add(f.from); ua.add(f.to); } }
-  const shown = FOCUS === "ALL" ? v : fa, n = FOCUS === "ALL" ? v.size : fa.size;
-  const last = [...S.checkins].reverse().find(c => !IS_EXTRA(c.a) && BY[c.a]);
-  const md = t => { const d = new Date(t); return `${d.getMonth() + 1}/${d.getDate()}`; };
-  $("bookHero").innerHTML = `<div class="bk-ring">${bkRing(n / A.length, 92, 9, "#7DD3FC", "rgba(255,255,255,.1)")}<b>${Math.round(n / A.length * 100)}%</b></div>
-    <div class="bk-txt"><div class="l">${FOCUS === "ALL" ? "全国制覇" : FOCUS + "で行った空港"}</div><div class="n" id="bookProg">${FOCUS === "ALL" ? `${v.size} / ${A.length}` : `${FOCUS}で ${fa.size} / ${A.length}`}</div>
-    <div class="s">${last ? `最後の印：${godShort(BY[last.a])}・${md(last.t)}` : "空港でチェックインすると、ここに印が集まります"}</div></div>`;
-  const pend = FOCUS === "ALL" ? 0 : [...ua].filter(id => !fa.has(id)).length;
-  $("bookNote").hidden = FOCUS === "ALL";
-  $("bookNote").textContent = FOCUS === "ALL" ? "" : `薄い印は、${FOCUS}グループのフライトで行っていない空港です。`
-    + (pend ? `「便が未記録」の空港は、フライトの画面でそのフライトに航空会社を記録すると${FOCUS}の数に入ります。` : "");
-  if(BK_RG === null) BK_RG = last ? regionOf(BY[last.a]) : "";
-  $("bookTiles").innerHTML = REGION.map(([rg, prefs]) => {
-    const list = A.filter(a => prefs.includes(a.pref)), got = list.filter(a => shown.has(a.id)).length;
-    return `<button class="bk-tile" data-rg="${rg}" aria-pressed="${BK_RG === rg}" aria-label="${rg} ${got} / ${list.length}"><span class="h"><b>${rg}</b>${bkRing(got / list.length, 26, 4, RG_COL[rg], "var(--bk-track)")}</span>
-      <span class="n">${got}<small> / ${list.length}</small></span><span class="dots" aria-hidden="true">${list.map(a => `<i${shown.has(a.id) ? ` style="background:${RG_COL[rg]}"` : ""}></i>`).join("")}</span></button>`;
-  }).join("");
-  const sel = REGION.find(([rg]) => rg === BK_RG);
-  $("book").innerHTML = !sel ? "" : (([rg, prefs]) => {
-    const list = A.filter(a => prefs.includes(a.pref)), got = list.filter(a => v.has(a.id)).length;
-    return `<div class="bk-panel" style="--rg:${RG_COL[rg]}"><div class="bk-ph"><h3>${rg}<span class="rgn">${got} / ${list.length}</span></h3><button class="bk-close" data-rg="${rg}" aria-label="${rg}を閉じる">閉じる</button></div>
-      <span class="rgbar"><i style="width:${Math.round(got / list.length * 100)}%"></i></span><div class="grid">${list.map(a => v.has(a.id)
-      ? `<button class="cell got${FOCUS !== "ALL" && !fa.has(a.id) && !ua.has(a.id) ? " dim" : ""}" data-a="${a.id}"><div class="slot">${stampSVG(a, v.get(a.id))}${(vc.get(a.id)||0) > 1 ? `<span class="vcount">×${vc.get(a.id)}</span>` : ""}</div><div class="nm">${stripesMini(tierOf(vc.get(a.id)||0))}${a.name}${FOCUS !== "ALL" && !fa.has(a.id) && ua.has(a.id) ? `<span class="pend">便が未記録</span>` : ""}</div></button>`
-      : `<div class="cell"><div class="slot">${emptySVG(a)}</div><div class="nm">${a.name}${a.rare?"（離島）":""}</div></div>`).join("")}</div>${termGrid(prefs)}</div>`;
-  })(sel);
-  // 最近押した印（新しい順に5つ。同じ空港は1つ）
-  const seen = new Set(), rec = [];
-  for(let i = S.checkins.length - 1; i >= 0 && rec.length < 5; i--){ const c = S.checkins[i]; if(IS_EXTRA(c.a) || !BY[c.a] || seen.has(c.a)) continue; seen.add(c.a); rec.push(c); }
-  $("bookRecent").hidden = !rec.length;
-  $("bookRecent").innerHTML = rec.length ? `<h3>最近押した印</h3><div class="row">${rec.map(c => `<button class="cell got" data-a="${c.a}" aria-label="${BY[c.a].name}"><div class="slot">${stampSVG(BY[c.a], v.get(c.a))}</div></button>`).join("")}</div>` : "";
-  renderBookView(v, vc, shown);
-  $("bookAir").innerHTML = `<div class="book-head"><h2>飛行場・滑空場</h2></div>` + extraBook(["field", "glider"], "定期便のない空港や小型機の飛行場、グライダーの滑空場です。86空港の全国制覇には数えず、別の実績があります。");
-  $("bookExtra").innerHTML = `<div class="book-head"><h2>番外編</h2></div>` + extraBook(["mil"], "自衛隊の飛行場です。86空港の全国制覇には数えず、別の実績があります。基地の中には入れないので、フェンスの外から押せる距離にしてあります。")
+  const shown = FOCUS === "ALL" ? v : fa;
+  setViewsw("bookViews", "book");
+  renderZkNotice();
+  const mode = VIEW.book, box = $("zkBody");
+  document.documentElement.dataset.bkview = mode;
+  if(mode === "map") box.innerHTML = zkMapHTML(v, vc, shown);
+  else if(mode === "chron") box.innerHTML = zkChronHTML(v, vc, shown);
+  else box.innerHTML = zkRegionHTML(v, vc, shown, fa, ua);
+  if(mode === "region") zkTsumeSync();
+  $("bookAir").innerHTML = ZK_BACK + `<div class="book-head"><h2>飛行場・滑空場</h2></div>` + extraBook(["field", "glider"], "定期便のない空港や小型機の飛行場、グライダーの滑空場です。86空港の全国制覇には数えず、別の実績があります。");
+  $("bookExtra").innerHTML = ZK_BACK + `<div class="book-head"><h2>番外編</h2></div>` + extraBook(["mil"], "自衛隊の飛行場です。86空港の全国制覇には数えず、別の実績があります。基地の中には入れないので、フェンスの外から押せる距離にしてあります。")
     + extraBook(["secret"], "一般の人が行けない飛行場です。全クリには数えません。押せた人だけの秘密の枠です。");
+  if(ZK_JUMP){ const rg = ZK_JUMP; ZK_JUMP = null; setTimeout(() => zkJump(rg, false), 0); }
+}
+// 地方別：上のカード（16／86 と9地方の数）・地方ごとの扉（上に止まる）・そろえた枠・ターミナル・右端のツメ
+function zkRegionHTML(v, vc, shown, fa, ua){
+  const n = shown.size;
+  const rgs = REGION.map(([rg, prefs]) => { const list = zkRegionList(rg); return { rg, prefs, list, got:list.filter(a => shown.has(a.id)).length }; });
+  let hero;
+  if(!n){
+    const near = HOME_POS ? A.map(a => [a, km(HOME_POS, a)]).sort((x, y) => x[1] - y[1])[0] : null;
+    hero = `<div class="zk-hero first"><div class="ht"><span class="lab">集めた空港</span><b class="num">0</b><span class="u">/ ${A.length}</span></div>
+      <p class="fx">空港でチェックインすると、ここに印が付きます。</p>${near ? `<button class="zk-near" type="button" data-zk-near="${near[0].id}"><span>いちばん近い</span><b>${esc(godShort(near[0]))}</b><small>${fmtKm(near[1])}km</small><span aria-hidden="true">›</span></button>` : ""}</div>`;
+  } else {
+    hero = `<div class="zk-hero"><div class="ht"><span class="lab">${FOCUS === "ALL" ? "集めた空港" : FOCUS + "で集めた空港"}</span><b class="num" id="bookProg">${n}</b><span class="u">/ ${A.length}</span><span class="side">まだ ${A.length - n} 空港</span></div>
+      <div class="rg">${rgs.map(r => `<div><span class="t"><span>${r.rg}</span><span>${r.got}<small>/${r.list.length}</small></span></span><span class="b"><i style="width:${Math.round(r.got / r.list.length * 100)}%;background:${zkCol(r.rg)}"></i></span></div>`).join("")}</div></div>`;
+  }
+  const note = FOCUS === "ALL" ? "" : `<p class="hint zk-note">薄い枠は、${FOCUS}グループのフライトで行っていない空港です。${[...ua].some(id => !fa.has(id)) ? `「便が未記録」の空港は、フライトの画面でそのフライトに航空会社を記録すると${FOCUS}の数に入ります。` : ""}</p>`;
+  const body = rgs.map(r => `<section class="zk-rg" id="zkrg-${r.rg}" data-rg="${r.rg}" style="--c:${zkCol(r.rg)}">
+    <div class="zk-door"><h3>${r.rg}</h3><b class="num">${r.got}</b><span class="u">/ ${r.list.length}</span><span class="bar"><i style="width:${Math.round(r.got / r.list.length * 100)}%"></i></span><button class="zk-up" type="button" data-zk-up aria-label="図鑑の上へ"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 14l6-6 6 6"/></svg></button></div>
+    <div class="zk-grid">${r.list.map(a => { const on = v.has(a.id), dim = on && FOCUS !== "ALL" && !fa.has(a.id) && !ua.has(a.id), pend = on && FOCUS !== "ALL" && !fa.has(a.id) && ua.has(a.id);
+      return zkTile(a, { on, n:vc.get(a.id) || 0, dim, pend }); }).join("")}</div>${zkTermBlock(r.prefs)}</section>`).join("");
+  const tsume = `<nav class="zk-tsume" id="zkTsume" aria-label="地方へ飛ぶ">${REGION.map(([rg]) => `<button type="button" data-zkj="${rg}" style="--c:${zkCol(rg)}" aria-label="${rg}へ"><span>${rg}</span></button>`).join("")}</nav>`;
+  return `<div class="zk-main">${hero}${note}${body}<p class="zk-foot"><button class="zk-link" type="button" data-zkseg="kigou">記号の意味</button></p></div>${tsume}`;
+}
+// ツメ：押すとその地方の扉が上に止まる所まで飛ぶ
+function zkJump(rg, smooth = true){
+  const sec = document.getElementById("zkrg-" + rg); if(!sec) return;
+  const safe = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--zk-safe")) || 0;
+  const y = sec.getBoundingClientRect().top + window.scrollY - safe;
+  window.scrollTo({ top:Math.max(0, y), behavior: smooth && !matchMedia("(prefers-reduced-motion: reduce)").matches ? "smooth" : "auto" });
+  zkTsumeSync(rg);
+}
+// はじめての人の「いちばん近い」：その地方の扉が上に止まる所まで飛び、その空港の枠を2秒ほど光らせる
+document.addEventListener("click", e => { const b = e.target.closest("[data-zk-near]"); if(!b) return; const a = BY[+b.dataset.zkNear]; if(!a) return;
+  track("zk_near", a.iata); zkJump(regionOf(a)); const t = document.querySelector(`#zkBody .zk-rg [data-zka="${a.id}"]`);
+  if(t){ t.classList.add("glow"); setTimeout(() => t.classList.remove("glow"), 2200); } });
+document.addEventListener("click", e => { if(e.target.closest("[data-zk-up]")) window.scrollTo({ top:0, behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" }); });
+document.addEventListener("click", e => { const b = e.target.closest("[data-zkj]"); if(!b) return; track("zk_jump", b.dataset.zkj); zkJump(b.dataset.zkj); });
+// いま上にある地方のツメを目立たせる・ツメの位置（上のカードより下、画面の上の端より下）
+function zkTsumeSync(force){
+  const ts = $("zkTsume"); if(!ts || currentView() !== "book" || BOOK_SEG !== "main") return;
+  const safe = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--zk-safe")) || 0;
+  let cur = force || null;
+  if(!cur){ for(const sec of document.querySelectorAll("#zkBody .zk-rg")){ if(sec.getBoundingClientRect().top <= safe + 60) cur = sec.dataset.rg; } }
+  if(!cur){ const f = document.querySelector("#zkBody .zk-rg"); cur = f && f.dataset.rg; }
+  ts.querySelectorAll("[data-zkj]").forEach(b => { const on = b.dataset.zkj === cur; b.classList.toggle("on", on); if(on) b.setAttribute("aria-current", "true"); else b.removeAttribute("aria-current"); });
+  const main = document.querySelector("#zkBody .zk-main"), top = main ? main.getBoundingClientRect().top : 120;
+  ts.style.top = Math.max(safe + 12, Math.min(top, 140)) + "px";
+}
+let ZK_RAF = 0;
+addEventListener("scroll", () => { if(ZK_RAF || currentView() !== "book") return; ZK_RAF = requestAnimationFrame(() => { ZK_RAF = 0; zkTsumeSync(); }); }, { passive:true });
+addEventListener("resize", () => { if(currentView() === "book") zkTsumeSync(); });
+// 地図：前からの見方（行った空港を点で）
+const BK_LAT = [45.8, 24.0], BK_LON = [122.6, 146.4];
+const bkXY = a => [((a.lon - BK_LON[0]) / (BK_LON[1] - BK_LON[0]) * 100).toFixed(2), ((BK_LAT[0] - a.lat) / (BK_LAT[0] - BK_LAT[1]) * 100).toFixed(2)];
+function zkMapHTML(v, vc, shown){
+  const home = [...vc.entries()].filter(([id]) => BY[id] && !IS_EXTRA(id)).sort((x, y) => y[1] - x[1])[0], h = home && BY[home[0]];
+  const near = h ? A.filter(a => !shown.has(a.id)).map(a => [a, km(h, a)]).sort((x, y) => x[1] - y[1]).slice(0, 3) : [];
+  return `<div class="vwcard"><div class="bkmap" role="group" aria-label="日本地図の上の空港。色のついた点が行った空港">${A.map(a => { const [x, y] = bkXY(a);
+      return shown.has(a.id) ? `<button data-zka="${a.id}" class="${(vc.get(a.id) || 0) >= 3 ? "many" : ""}" style="left:${x}%;top:${y}%" aria-label="${esc(a.name)}（${vc.get(a.id) || 1}回）"><b></b></button>`
+        : `<i style="left:${x}%;top:${y}%" aria-hidden="true"></i>`; }).join("")}</div>
+    <p class="bkleg"><span><i style="background:var(--shu)"></i>行った（大きい点は3回以上）</span><span><i style="background:var(--bk-track)"></i>まだ</span></p></div>`
+    + (near.length ? `<div class="vwcard bknear"><h3>${esc(godShort(h))}から近い、まだの空港</h3><ul>${near.map(([a, d]) => `<li><b>${esc(a.name)}</b><span>${fmtKm(d)}km</span></li>`).join("")}</ul></div>` : "");
+}
+// 行った順：はじめて押した日の新しい順。見出しは月、日付は枠の中。回数は「計」（その日の回数に読めないように）
+function zkChronHTML(v, vc, shown){
+  const first = [...v.entries()].filter(([id]) => shown.has(id) && BY[id]).sort((x, y) => y[1] - x[1]);
+  if(!first.length) return `<div class="vwcard"><p class="none" style="margin:0">まだ印はありません。空港でチェックインすると、はじめて押した日の順に並びます。</p></div>`;
+  const groups = []; for(const [id, t] of first){ const d = new Date(t), k = `${d.getFullYear()}年${d.getMonth() + 1}月`; if(!groups.length || groups[groups.length - 1][0] !== k) groups.push([k, []]); groups[groups.length - 1][1].push([id, t]); }
+  return `<p class="zk-lead">はじめて押した日の順。新しい日が上です。</p>` + groups.map(([k, list]) => `<h3 class="zk-mon">${k}<small>${list.length}空港</small></h3>
+    <div class="zk-grid">${list.map(([id, t]) => { const d = new Date(t); return zkTile(BY[id], { on:true, n:vc.get(id) || 1, total:true, sub:`${d.getMonth() + 1}月${d.getDate()}日` }); }).join("")}</div>`).join("");
+}
+// 今の人へ1回だけ：見方が3つになったお知らせ（前にタイル・案内標・年代記を使っていた人）
+function renderZkNotice(){
+  const box = $("zkNotice"); if(!box) return;
+  let seen = true; try{ seen = !!localStorage.getItem("soramemo.zk.notice"); }catch(e){}
+  box.innerHTML = ZK_OLD_VIEW && !seen ? `<div class="zk-notice" role="status"><p><b>図鑑の見方が3つになりました。</b>タイル・地方・案内標は「地方別」に、年代記は「行った順」になりました。</p><button class="zk-pill" type="button" data-zk-notice>わかった</button></div>` : "";
+}
+document.addEventListener("click", e => { if(!e.target.closest("[data-zk-notice]")) return; try{ localStorage.setItem("soramemo.zk.notice", "1"); }catch(_){} renderZkNotice(); });
+document.addEventListener("click", e => { const b = e.target.closest("[data-zka]"); if(b){ openAirport(+b.dataset.zka); return; }
+  const t = e.target.closest("[data-zkt]"); if(t){ const tt = TBY[t.dataset.zkt]; if(tt) openTermStamp(tt.a, tt.id); } });
+/* ---------- 索引：字で探す欄（名前・コード・読み）＋ABC順＋50音順 ----------
+   読みは data/zukan-yomi の airport_yomi（移行 159）。組み立てのときに移行の読みを入れ、表があればサーバーの読みで上書きする */
+const AIRPORT_YOMI = /*@AIRPORT_YOMI@*/{};
+let ZK_IDX = { q:"", tab:"abc" }, ZK_YOMI_LOADED = false;
+async function zkLoadYomi(){
+  if(ZK_YOMI_LOADED || !SERVER || !sb) return; ZK_YOMI_LOADED = true;
+  try{ const { data, error } = await sb.from("airport_yomi").select("airport_id,yomi,index_yomi,alt_yomi"); if(error || !data || !data.length) return;
+    for(const r of data) AIRPORT_YOMI[r.airport_id] = [r.yomi, r.index_yomi, r.alt_yomi || []];
+    if(BOOK_SEG === "index") renderZkIndex(); }catch(e){}
+}
+const zkKana = s => String(s || "").normalize("NFKC").toLowerCase().replace(/[ァ-ヶ]/g, c => String.fromCharCode(c.charCodeAt(0) - 0x60)).replace(/\s+/g, "");
+const zkYomi = a => AIRPORT_YOMI[a.id] || null;
+function zkMatch(a, q){
+  if(!q) return true;
+  const c = code(a).toLowerCase(), y = zkYomi(a);
+  if(c.startsWith(q) || zkKana(a.name).includes(q) || zkKana(godShort(a)).includes(q)) return true;
+  if(y && (y[0].includes(q) || y[1].startsWith(q) || (y[2] || []).some(x => x.startsWith(q)))) return true;
+  return false;
+}
+const ZK_ROWS = [["あ", "あいうえお"], ["か", "かきくけこがぎぐげご"], ["さ", "さしすせそざじずぜぞ"], ["た", "たちつてとだぢづでど"], ["な", "なにぬねの"], ["は", "はひふへほばびぶべぼぱぴぷぺぽ"], ["ま", "まみむめも"], ["や", "やゆよ"], ["ら", "らりるれろ"], ["わ", "わをん"]];
+const zkRowOf = y => { const h = (y || "")[0]; const r = ZK_ROWS.find(([, cs]) => cs.includes(h)); return r ? r[0] : "ほか"; };
+function zkIdxRow(a, v, vc){
+  const y = zkYomi(a), on = v.has(a.id);
+  return `<button class="zk-irow" type="button" data-zka="${a.id}"><span class="cd">${esc(code(a))}</span><span class="tx"><b>${esc(a.name)}</b>${y ? `<small>${esc(y[1])}・${esc(a.pref)}</small>` : `<small>${esc(a.pref)}</small>`}</span><span class="st${on ? " on" : ""}">${on ? `${ZK_CHECK}${vc.get(a.id) || 1}回` : "まだ"}</span></button>`;
+}
+function renderZkIndex(){
+  const box = $("bookIndex"); if(!box) return; zkLoadYomi();
+  const v = visited(), vc = new Map(); for(const c of S.checkins) vc.set(c.a, (vc.get(c.a) || 0) + 1);
+  const hasY = A.some(a => zkYomi(a));
+  box.innerHTML = `${ZK_BACK_MAIN}<div class="book-head"><h2>索引</h2></div>
+    <label class="zk-search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4"/></svg><input id="zkQ" type="search" enterkeyhint="search" autocomplete="off" placeholder="名前・コード・読みで探す" aria-label="空港を名前・コード・読みで探す" value="${esc(ZK_IDX.q)}"></label>
+    <div id="zkIdxBody"></div>`;
+  zkIdxBody(v, vc, hasY);
+  $("zkQ").oninput = e => { ZK_IDX.q = e.target.value; zkIdxBody(visited(), vc, hasY); };
+}
+function zkIdxBody(v, vc, hasY){
+  const el = $("zkIdxBody"); if(!el) return;
+  const q = zkKana(ZK_IDX.q);
+  if(q){ const hit = A.filter(a => zkMatch(a, q));
+    el.innerHTML = `<p class="zk-lead" role="status">「${esc(ZK_IDX.q)}」で ${hit.length} 空港</p>` + (hit.length ? `<div class="zk-ilist">${hit.map(a => zkIdxRow(a, v, vc)).join("")}</div>` : `<p class="none">見つかりませんでした。名前の一部・空港コード（HND など）・読み（ひらがな）で探せます。</p>`); return; }
+  const tabs = `<div class="zk-itabs" role="tablist" aria-label="索引の並べ方"><button role="tab" type="button" data-zkit="abc" aria-selected="${ZK_IDX.tab === "abc"}">ABC順（コード）</button><button role="tab" type="button" data-zkit="kana" aria-selected="${ZK_IDX.tab === "kana"}">50音順</button></div>`;
+  let groups;
+  if(ZK_IDX.tab === "kana"){
+    if(!hasY){ el.innerHTML = tabs + `<p class="none">読みを読み込めませんでした。ABC順か、探す欄をお使いください。</p>`; return; }
+    const list = [...A].sort((x, y) => ((zkYomi(x) || [, "ん"])[1]).localeCompare((zkYomi(y) || [, "ん"])[1], "ja"));
+    groups = [...ZK_ROWS.map(r => r[0]), "ほか"].map(r => [r, list.filter(a => zkRowOf((zkYomi(a) || [])[1]) === r)]).filter(g => g[1].length);
+  } else {
+    const list = [...A].sort((x, y) => code(x).localeCompare(code(y), "ja"));
+    const head = a => /^[A-Z]/.test(code(a)) ? code(a)[0] : "コードなし";
+    groups = []; for(const a of list){ const h = head(a); if(!groups.length || groups[groups.length - 1][0] !== h) groups.push([h, []]); groups[groups.length - 1][1].push(a); }
+  }
+  el.innerHTML = tabs + `<nav class="zk-ijump" aria-label="頭の字へ飛ぶ">${groups.map(([h]) => `<button type="button" data-zkih="${esc(h)}">${esc(h === "コードなし" ? "他" : h)}</button>`).join("")}</nav>`
+    + groups.map(([h, list]) => `<h3 class="zk-ih" id="zkih-${esc(h)}">${esc(h)}</h3><div class="zk-ilist">${list.map(a => zkIdxRow(a, v, vc)).join("")}</div>`).join("");
+}
+document.addEventListener("click", e => {
+  const t = e.target.closest("[data-zkit]"); if(t){ ZK_IDX.tab = t.dataset.zkit; renderZkIndex(); return; }
+  const h = e.target.closest("[data-zkih]"); if(h){ const el = document.getElementById("zkih-" + h.dataset.zkih); if(el) window.scrollTo({ top:el.getBoundingClientRect().top + scrollY - 12 }); }
+});
+/* ---------- ほかの図鑑・実績（86 の数には入らない） ---------- */
+function renderZkOthers(){
+  const box = $("bookOthers"); if(!box) return;
+  const st = achState(), main = ACH.filter(x => !x.secret), xv = visitedExtra();
+  const cnt = ks => { const l = XA.filter(a => ks.includes(a.kind)); return [l.filter(a => xv.has(a.id)).length, l.length]; };
+  let liv = [0, 0]; try{ const all = livBook(); liv = [all.filter(x => x.flown.length || x.seen.length).length, all.length]; }catch(e){}
+  const vt = visitedTerms();
+  const ic = { ach:'<path d="m12 3.5 2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z"/>', air:'<path d="M3 19h18M7 19l5-9 5 9M12 10V5"/>', extra:'<path d="M12 3 5 6v5c0 4.5 3 8 7 10 4-2 7-5.5 7-10V6z"/>', liv:'<path d="M2.5 16.5 21 9.5 19 7l-6.5 2.5L7 4.5l-2 .8 3.5 5.3-4 1.6L3 10.5l-1.2.5 1.7 3.4z"/>' };
+  const book = (seg, col, t, sub, [g, all]) => `<button class="zk-book" type="button" data-zkseg="${seg}" style="--c:${col}"><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true">${ic[seg]}</svg></span><span class="tx"><b>${t}</b><small>${sub}</small></span><span class="n"><b class="num">${g}</b><span class="u">/ ${all}</span></span></button>`;
+  box.innerHTML = `${ZK_BACK_MAIN}<div class="book-head"><h2>ほかの図鑑・実績</h2></div><p class="zk-lead">ここで集めても「集めた空港」の数は変わりません。</p>
+    ${book("ach", "var(--secret,#7A4FB0)", "実績", "空港の印や回数・路線・距離で達成するもの", [main.filter(x => st.done.has(x.id)).length, main.length])}
+    ${book("air", "var(--field,#3E7D52)", "飛行場・滑空場", "定期便のない飛行場とグライダーの滑空場", cnt(["field", "glider"]))}
+    ${book("extra", "var(--mil,#2E4A6B)", "番外編", "自衛隊の飛行場と、一般の人が行けない飛行場", cnt(["mil", "secret"]))}
+    ${book("liv", "#8A6A2F", "機体図鑑（特別塗装機）", "乗った・見た特別塗装機", liv)}
+    <h3 class="zk-back-h">もどる</h3>
+    <button class="zk-book zk-home" type="button" data-zkseg="main" style="--c:var(--bk-ink)"><span class="tx"><b>空港の図鑑</b><small>ターミナル ${TERMS.filter(t => vt.has(t.id)).length}/${TERMS.length}</small></span><span class="n"><b class="num">${visited().size}</b><span class="u">/ ${A.length}</span></span><span class="gt" aria-hidden="true">›</span></button>`;
+}
+/* ---------- 記号の意味 ---------- */
+function renderZkKigou(){
+  const box = $("bookKigou"); if(!box || box.dataset.done) return; box.dataset.done = "1";
+  const hnd = IATA.HND, oim = IATA.OIM || A[0], t1 = TERMS[0], tc = zkCol("関東");
+  box.innerHTML = `${ZK_BACK_MAIN}<div class="book-head"><h2>記号の意味</h2></div>
+    <div class="zk-kg"><div class="zk-ap" style="--c:${tc}"><span class="cd">${esc(code(hnd))}</span><span class="nm">${esc(godShort(hnd))}</span><span class="ft">${ZK_CHECK}<b>3</b>回</span></div><p><b>行った空港</b>✓ と、チェックインした回数。押すと空港のページを開きます。</p></div>
+    <div class="zk-kg"><div class="zk-ap no" style="--c:${tc}"><span class="cd">${esc(code(oim))}</span><span class="nm">${esc(godShort(oim))}</span><span class="ft">${ZK_YET}まだ</span></div><p><b>まだの空港</b>点線の丸。名前は読めます。押すと、どこで押せるかが分かります。</p></div>
+    <div class="zk-kg"><div class="zk-ap" style="--c:${tc}"><span class="cd">${esc(t1.iata)}<small class="tg">${esc(t1.tag)}</small></span><span class="nm">${esc(zkTermName(t1))}</span><span class="ft">${ZK_CHECK}<b>2</b>回</span></div><p><b>ターミナル</b>大きな6空港（${TERM_AIRPORTS.length}空港・${TERMS.length}こ）の印。86 の数に入りません。</p></div>
+    <div class="zk-kg"><div class="zk-tsm" style="--c:${tc}"><span>関東</span></div><p><b>右端のツメ</b>9つの地方。押すとその地方の扉へ飛びます。地方の色は空港の守り神の色です。</p></div>
+    <div class="zk-kg"><div class="zk-ap dim" style="--c:${tc}"><span class="cd">${esc(code(hnd))}</span><span class="nm">${esc(godShort(hnd))}</span><span class="ft">${ZK_CHECK}<b>3</b>回</span></div><p><b>薄い枠</b>JAL・ANA だけを表示しているとき、そのグループの便で行っていない空港。</p></div>
+    <p class="zk-lead">日付は「2026年11月1日」の形で書きます。</p>`;
 }
 /* ---------- 見方の切り替え（図鑑・フライト・運用）。選んだ見方は端末に覚える ---------- */
 const VIEWS = {
-  book: [["map", "地図"], ["signs", "案内標"], ["tiles", "タイル"], ["chron", "年代記"], ["region", "地方"]],
+  book: [["region", "地方別"], ["map", "地図"], ["chron", "行った順"]],   // 11/9 の決定：タイル・地方・案内標は地方別に、年代記は行った順に（id は今のまま）
   log: [["sg", "修行"], ["pass", "搭乗券"], ["board", "案内板"], ["map", "地図"], ["cal", "カレンダー"], ["month", "月ごと"], ["alt", "高度"], ["text", "文字だけ"], ["route", "路線"]],
   ops: [["board", "案内板"], ["day", "1日の山"], ["runway", "滑走路"], ["ontime", "定時"], ["art", "空の道すじ"], ["strip", "短冊"], ["photo", "撮る人"]],
 };
-const VIEW_DEF = { book:"tiles", log:"pass", ops:"runway" };
+const VIEW_DEF = { book:"region", log:"pass", ops:"runway" };
 /* ---------- 表示の編集：見たい表示だけにする（この端末だけに保存） ----------
    下のタブ（出す・並び）、各画面の見方（隠す）、運用の空港（よく見る空港だけ並べる）、
    ホーム・運用（滑走路の下）・成績のかたまり（出す・並び）。何も変えていなければ、構成（気軽に・撮影・修行）のまま */
@@ -4232,7 +4468,21 @@ const LO_BLOCKS = {
   stats: [["passport", "これまでのパスポート"], ["fleet", "乗った機体"], ["airline", "航空会社別"], ["status", "ステータスの目安"], ["sgsum", "修行のまとめ", "月ごとのポイント・1ポイントあたり・路線ごと"]],
 };
 const LO_ZONE = { home:"homeBlocks", opsb:"opsBlocks", stats:"v-stats" };   // opsb：運用の滑走路の下（見方の ops と分ける）
-let LAYOUT = (() => { try{ const o = JSON.parse(localStorage.getItem(LO_KEY) || "null"); return o && typeof o === "object" && !Array.isArray(o) ? o : null; }catch(e){ return null; } })();
+// 11/9 の決定：図鑑の見方を「地方別・地図・行った順」の3つに。id は今のまま（region・map・chron）。
+//   保存してある古い id（tiles・signs）は読むときに直し、次に保存するとき fmt 3 で書く（サーバーの行は書き換えない。古いアプリが fmt 2 で書いても読むたびに直る）
+const ZK_VIEW_MAP = { tiles:"region", signs:"region" };
+function zkFixLayout(L){
+  if(!L || typeof L !== "object" || Array.isArray(L)) return L;
+  if(L.off && Array.isArray(L.off.book)){ L.off.book = [...new Set(L.off.book.filter(id => id !== "tiles" && id !== "signs" && id !== "region"))]; }   // 地方別はいつも出す（空の配列も残す：消すと構成のはじめの値に戻ってしまう）
+  if(L.order && Array.isArray(L.order.book)) L.order.book = [...new Set(L.order.book.map(id => ZK_VIEW_MAP[id] || id))];
+  return L;
+}
+// 今の人へ1回だけのお知らせ（見方が3つになった）。はじめての人には出さない
+const ZK_OLD_VIEW = (() => { try{ if(localStorage.getItem("soramemo.zk.notice")) return false;
+  const old = !!(localStorage.getItem("soramemo.view.book") || localStorage.getItem(LO_KEY) || localStorage.getItem("soramemo.onboarded") || localStorage.getItem("soramemo.usage"));
+  if(!old) localStorage.setItem("soramemo.zk.notice", "new");
+  return old; }catch(e){ return false; } })();
+let LAYOUT = (() => { try{ const o = JSON.parse(localStorage.getItem(LO_KEY) || "null"); return o && typeof o === "object" && !Array.isArray(o) ? zkFixLayout(o) : null; }catch(e){ return null; } })();
 function loSave(){
   if(LAYOUT && !Object.keys(LAYOUT).length) LAYOUT = null;
   try{ if(LAYOUT) localStorage.setItem(LO_KEY, JSON.stringify(LAYOUT)); else localStorage.removeItem(LO_KEY); }catch(e){}
@@ -4263,6 +4513,7 @@ function loEdit(){
   if(!LAYOUT){ const P = PERSONAS[PERSONA]; LAYOUT = { off:JSON.parse(JSON.stringify(P.off || {})), order:JSON.parse(JSON.stringify(P.order || {})) }; }
   LAYOUT.off = LAYOUT.off || {}; LAYOUT.order = LAYOUT.order || {}; return LAYOUT; }
 function loToggleOff(k, id, hide){
+  if(hide && k === "book" && id === "region") return false;   // 図鑑の地方別はいつも出す
   const L = loEdit(), set = new Set(L.off[k] || []);
   if(hide) set.add(id); else set.delete(id);
   if(VIEWS[k] && set.size >= VIEWS[k].length) return false;   // 見方は1つ以上残す
@@ -4290,7 +4541,9 @@ function applyLayout(){
   }
   if(typeof applyPersonaTabs === "function") applyPersonaTabs();
 }
-function viewOf(k){ const sh = viewsShown(k); try{ const v = localStorage.getItem("soramemo.view." + k); if(sh.some(x => x[0] === v)) return v; }catch(e){} return sh.some(x => x[0] === VIEW_DEF[k]) ? VIEW_DEF[k] : sh[0][0]; }
+function viewOf(k){ const sh = viewsShown(k); try{ let v = localStorage.getItem("soramemo.view." + k);
+  if(k === "book" && ZK_VIEW_MAP[v]){ v = ZK_VIEW_MAP[v]; localStorage.setItem("soramemo.view.book", v); }   // タイル・案内標を選んでいた人は地方別に
+  if(sh.some(x => x[0] === v)) return v; }catch(e){} return sh.some(x => x[0] === VIEW_DEF[k]) ? VIEW_DEF[k] : sh[0][0]; }
 const VIEW = { book:viewOf("book"), log:viewOf("log"), ops:viewOf("ops") };
 const viewswHTML = k => viewsShown(k).map(([id, l]) => `<button role="tab" data-vw="${k}:${id}" aria-selected="${VIEW[k] === id}">${l}</button>`).join("");
 // 見方の切り替えの右に「表示を編集」の鉛筆を置く（切り替えの列の中には、タブ以外を入れない）
@@ -4313,55 +4566,7 @@ document.addEventListener("click", e => {
   if(VIEW_RENDER[k]) VIEW_RENDER[k]();
 });
 
-/* 図鑑の見方：地図（02）・案内標（04）・タイル（05）・年代記（07）・地方（10） */
-const BK_LAT = [45.8, 24.0], BK_LON = [122.6, 146.4];
-const bkXY = a => [((a.lon - BK_LON[0]) / (BK_LON[1] - BK_LON[0]) * 100).toFixed(2), ((BK_LAT[0] - a.lat) / (BK_LAT[0] - BK_LAT[1]) * 100).toFixed(2)];
-function renderBookView(v, vc, shown){
-  const mode = VIEW.book, box = $("bkAlt");
-  setViewsw("bookViews", "book");
-  $("bookHero").hidden = mode !== "region"; $("bookTiles").hidden = mode !== "tiles";
-  $("book").hidden = mode !== "tiles" && mode !== "region"; $("bookRecent").hidden = true;
-  const ymd = t => { const d = new Date(t); return `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日`; };
-  if(mode === "map"){
-    const home = [...vc.entries()].sort((x, y) => y[1] - x[1])[0], h = home && BY[home[0]];
-    const near = h ? A.filter(a => !shown.has(a.id)).map(a => [a, km(h, a)]).sort((x, y) => x[1] - y[1]).slice(0, 3) : [];
-    box.innerHTML = `<div class="vwcard"><div class="bkmap" role="group" aria-label="日本地図の上の空港。色のついた点が行った空港">${A.map(a => { const [x, y] = bkXY(a);
-        return shown.has(a.id) ? `<button data-bka="${a.id}" class="${(vc.get(a.id) || 0) >= 3 ? "many" : ""}" style="left:${x}%;top:${y}%" aria-label="${esc(a.name)}（${vc.get(a.id) || 1}回）"><b></b></button>`
-          : `<i style="left:${x}%;top:${y}%" aria-hidden="true"></i>`; }).join("")}</div>
-      <p class="bkleg"><span><i style="background:var(--shu)"></i>行った（大きい点は3回以上）</span><span><i style="background:var(--bk-track)"></i>まだ</span></p></div>`
-      + (near.length ? `<div class="vwcard bknear"><h3>${esc(godShort(h))}から近い、まだの空港</h3><ul>${near.map(([a, d]) => `<li><b>${esc(a.name)}</b><span>${fmtKm(d)}km</span></li>`).join("")}</ul></div>` : "");
-  } else if(mode === "signs"){
-    const list = [...A].sort((x, y) => y.lat - x.lat);
-    box.innerHTML = `<p class="bksec">北から順・${shown.size} / ${A.length}</p><div class="bksigns">${list.map((a, i) => { const on = shown.has(a.id), pv = list[i - 1], nx = list[i + 1];
-        const inner = `<span class="band"><span>${esc(code(a))}</span><span>${on ? `行った${(vc.get(a.id) || 0) > 1 ? "・" + vc.get(a.id) + "回" : ""}` : "まだ"}</span></span><span class="nm">${esc(godShort(a))}</span><span class="sub">${esc(a.pref)}${a.rare ? "・離島" : ""}</span>
-          <span class="nb"><span>‹ ${pv ? esc(godShort(pv)) : "—"}</span><span>${nx ? esc(godShort(nx)) : "—"} ›</span></span>`;
-        return on ? `<button class="bksign on" data-bka="${a.id}">${inner}</button>` : `<div class="bksign">${inner}</div>`; }).join("")}</div>`;
-  } else if(mode === "chron"){
-    const first = [...v.entries()].filter(([id]) => shown.has(id)).sort((x, y) => x[1] - y[1]);
-    let yr = null;
-    box.innerHTML = first.length ? `<p class="bksec">はじめて訪れた順・${first.length}空港</p><div class="bktl">${first.map(([id, t]) => { const d = new Date(t), y = d.getFullYear(), a = BY[id];
-        const head = y !== yr ? `<div class="yr">${y}年</div>` : ""; yr = y;
-        return head + `<button data-bka="${id}" aria-label="${esc(a.name)}、${ymd(t)}"><span class="md">${d.getMonth() + 1}/${d.getDate()}</span><span class="pt" aria-hidden="true"></span>
-          <span class="cd"><span><b>${esc(godShort(a))}</b><small>${esc(a.pref)}・${vc.get(id) || 1}回</small></span><em>${esc(code(a))}</em></span></button>`; }).join("")}</div>`
-      : `<div class="vwcard"><p class="none" style="margin:0">まだ印はありません。空港でチェックインすると、はじめて訪れた順に並びます。</p></div>`;
-  } else if(mode === "tiles"){
-    const n = shown.size, last = [...S.checkins].reverse().find(c => !IS_EXTRA(c.a) && BY[c.a]), top = [...vc.entries()].filter(([id]) => BY[id] && !IS_EXTRA(id)).sort((x, y) => y[1] - x[1])[0];
-    box.innerHTML = `<div class="bkbento"><div class="big"><span class="l">${FOCUS === "ALL" ? "行った空港" : FOCUS + "で行った空港"}</span><span class="n">${n}<small>/${A.length}</small></span><span class="s">全国の${Math.round(n / A.length * 100)}%</span></div></div>`;
-  } else {
-    box.innerHTML = "";
-    const bars = REGION.map(([rg, prefs]) => { const list = A.filter(a => prefs.includes(a.pref)), got = list.filter(a => shown.has(a.id)).length;
-      return `<button class="bk-bar" data-rg="${rg}" aria-pressed="${BK_RG === rg}" aria-label="${rg} ${got} / ${list.length}"><b>${rg}</b><span class="tr"><i style="width:${Math.max(got ? 4 : 0, Math.round(got / list.length * 100))}%;background:${RG_COL[rg]}"></i></span><span class="v">${got} / ${list.length}</span></button>`; }).join("");
-    let bb = $("bkBars"); if(!bb){ bb = document.createElement("div"); bb.id = "bkBars"; bb.className = "vwcard bkbars"; $("bookHero").after(bb); }
-    bb.innerHTML = bars;
-  }
-  if($("bkBars")) $("bkBars").hidden = mode !== "region";
-}
-VIEW_RENDER.book = () => renderBook();
-document.addEventListener("click", e => { const b = e.target.closest("[data-bka]"); if(b) openAirport(+b.dataset.bka); });
-// 地方のタイルを押すと、その地方の印を下に開く（もう一度押すと閉じる）
-document.addEventListener("click", e => { const b = e.target.closest(".bk-tile,.bk-close,.bk-bar"); if(!b) return;
-  BK_RG = b.classList.contains("bk-close") || BK_RG === b.dataset.rg ? "" : b.dataset.rg; renderBook();
-  if(BK_RG){ const p = $("book").firstElementChild; if(p && p.scrollIntoView) p.scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" }); } });
+VIEW_RENDER.book = () => { renderBook(); window.scrollTo(0, 0); };
 // 番外編の図鑑（自衛隊の飛行場、滑空場、飛行場）。全国制覇などには数えない
 function extraBook(kinds, note){
   const xv = visitedExtra(), vc = new Map(); for(const c of S.checkins) if(IS_EXTRA(c.a)) vc.set(c.a, (vc.get(c.a) || 0) + 1);
@@ -4780,8 +4985,8 @@ const PERSONAS = {
   // 11/8 本人の決定：はじめての人は全部乗せ（全部の機能を出す）で始め、要らないものを「表示の編集」で自分で隠す。成績はマイページのタイル
   all: { name:"全部の機能", short:"全部", tabs:["home", "book", "log", "ops", "sg"], views:{}, off:{},
     note:"全部の機能を出しています。使わないものは「表示の編集」で隠せます。隠しても記録は消えません。" },
-  casual: { name:"気軽に好きな人", short:"気軽に", tabs:["home", "book", "log"], views:{ book:"tiles", log:"pass" },
-    off:{ home:["ride"], book:["map", "signs", "chron", "region"], log:["sg", "board", "map", "cal", "month", "alt", "text", "route"], stats:["sgsum"] },
+  casual: { name:"気軽に好きな人", short:"気軽に", tabs:["home", "book", "log"], views:{ book:"region", log:"pass" },
+    off:{ home:["ride"], book:["map", "chron"], log:["sg", "board", "map", "cal", "month", "alt", "text", "route"], stats:["sgsum"] },
     note:"チェックインと図鑑だけの、いちばん軽い構成です。成績と運用はマイページから開けます。" },
   spot: { name:"撮影する人", short:"撮影", tabs:["ops", "home", "book", "log"], views:{ ops:"photo" }, off:{ stats:["sgsum"] },
     note:"1つの空港で長く撮る人向け。運用をいちばん左に、ホームには運用・これから来る大きな機体・今日いた時間を出します。成績はマイページから開けます。" },
@@ -4841,7 +5046,7 @@ const LO_TAB_ITEMS = ["book", "log", "ops", "sg"];   // ホームはいつも出
 const LO_VIEW_SEC = [["book", "図鑑"], ["log", "フライト"], ["ops", "運用"]];
 const LO_BLK_SEC = [["home", "ホーム", "チェックインの半券はいつも出す"], ["opsb", "運用（滑走路の見方の下）"], ["stats", "成績"]];
 const LO_TAB_MAX = 5, LO_TAB_MIN = 2;
-// 全部の項目と、いま出しているか（数え方は画面案と同じ：タブ4・見方21・かたまり15＝40こ）
+// 全部の項目と、いま出しているか（数え方は画面案と同じ：タブ4・見方19・かたまり15＝38こ（図鑑の見方は 11/9 に3つ））
 function loItems(){
   const tabs = loTabs(), out = [];
   for(const v of [...LO_TAB_ITEMS, ...(tabs.includes("stats") ? ["stats"] : [])]) out.push({ kind:"tab", k:"tabs", id:v, label:TAB_NAME[v], on:tabs.includes(v) });
@@ -4858,6 +5063,7 @@ function loPill(x){
   let dis = false;
   if(x.kind === "tab") dis = x.on ? tabs.length <= LO_TAB_MIN : tabs.length >= LO_TAB_MAX;
   if(x.kind === "view") dis = x.on && VIEWS[x.k].length - loOff(x.k).size <= 1;   // 見方は1つ以上残す
+  if(x.kind === "view" && x.k === "book" && x.id === "region") dis = true;   // 図鑑の地方別はいつも出す
   const attr = x.kind === "tab" ? `data-lo-tab="${x.id}"` : x.kind === "view" ? `data-lo-view="${x.k}:${x.id}"` : `data-lo-blk="${x.k}:${x.id}"`;
   return `<button type="button" class="lochip lopill" aria-pressed="${x.on}" ${attr}${dis ? " disabled" : ""} aria-label="${esc(x.label)}（${x.on ? "出しています" : "隠しています"}）">${x.on ? LO_CHECK : ""}<span>${esc(x.label)}</span></button>`;
 }
@@ -4958,7 +5164,7 @@ document.addEventListener("click", e => {
 /* ---------- 表示の設定をサーバーに保存する（表 user_view_prefs。データ担当の移行 157） ----------
    中身（fmt 2）：全部乗せのまま＝{}。それ以外＝{ base:構成, layout:表示の編集で変えたもの }。
    表がまだない（反映の前）・つながらないときは、この端末の保存だけで動く */
-const VP_FMT = 2, VP = { ok:null, hasRow:false, timer:null };
+const VP_FMT = 3, VP = { ok:null, hasRow:false, timer:null };
 const vpOn = () => !!(SERVER && sb && user && !demo);
 const vpPrefs = () => loAllOn() ? {} : { base:PERSONA, layout:LAYOUT || null };
 async function vpWrite(){
@@ -4975,7 +5181,7 @@ function viewPrefsPush(){ if(!vpOn() || VP.ok !== true) return; clearTimeout(VP.
 // サーバーの設定をこの端末に当てる
 function vpApply(pr){
   const base = pr && PERSONAS[pr.base] ? pr.base : "all";
-  const lay = pr && pr.layout && typeof pr.layout === "object" && !Array.isArray(pr.layout) && Object.keys(pr.layout).length ? pr.layout : null;
+  const lay = pr && pr.layout && typeof pr.layout === "object" && !Array.isArray(pr.layout) && Object.keys(pr.layout).length ? zkFixLayout(JSON.parse(JSON.stringify(pr.layout))) : null;   // fmt 2 の古い見方の id は読むときに直す
   if(base === PERSONA && JSON.stringify(lay) === JSON.stringify(LAYOUT)) return false;
   const newBase = base !== PERSONA;
   PERSONA = base; try{ localStorage.setItem(PERSONA_KEY, base); }catch(e){}
@@ -5005,7 +5211,7 @@ async function viewPrefsLoad(p){
 const HS = { casual:{ label:"気軽に楽しみたい", groups:[
     ["運用のタブ", [["tab", "tabs", "ops"]]], ["修行のタブ", [["tab", "tabs", "sg"]]],
     ["フライトの見方", VIEWS.log.filter(([id]) => id !== "pass").map(([id]) => ["view", "log", id])],
-    ["図鑑の見方", VIEWS.book.filter(([id]) => id !== "tiles").map(([id]) => ["view", "book", id])],
+    ["図鑑の見方", VIEWS.book.filter(([id]) => id !== "region").map(([id]) => ["view", "book", id])],
     ["修行のまとめ", [["blk", "stats", "sgsum"]]]] },
   spot:{ label:"飛行機を撮りたい", groups:[["修行のタブ", [["tab", "tabs", "sg"]]], ["フライトの見方「修行」", [["view", "log", "sg"]]], ["修行のまとめ", [["blk", "stats", "sgsum"]]]] },
   shugyo:{ label:"修行（マイル・ステータス）に使いたい", groups:[["運用のタブ", [["tab", "tabs", "ops"]]], ["運用の見方「撮る人」", [["view", "ops", "photo"]]], ["運用の「撮影地」", [["blk", "opsb", "spots"]]]] } };
@@ -5495,12 +5701,16 @@ document.addEventListener("click", e => {
   const c = e.target.closest(".cell.got"); if(!c) return;
   // 空港のマスは「空港ページ」へ、ターミナルのマスは従来どおり印の画面へ
   if(!c.dataset.t){ openAirport(+c.dataset.a); return; }
-  const a = BY[+c.dataset.a], t = TBY[c.dataset.t];
+  openTermStamp(+c.dataset.a, c.dataset.t);
+});
+// ターミナルの印の画面（図鑑のターミナルの枠・空港ページのターミナルから）
+function openTermStamp(aId, tId){
+  const a = BY[aId], t = TBY[tId];
   const first = visitedTerms().get(t.id), times = S.checkins.filter(x => x.term === t.id).length;
   $("dStampBody").innerHTML = `<div class="stampbig">${insigniaSVG(a, first, {big:true, term:t}, 0)}</div><h3>${placeName(a, t)}</h3><p>${a.pref}${a.rare?"・離島の空港":""}</p>
   <p>${first ? `はじめての訪問 ${fmtD(first)}　訪問 ${times}回` : "まだ行っていません"}</p><div class="row2"><button class="btn2" data-close>閉じる</button><button class="btn1" data-share-a="${a.id}" data-share-t="${t.id}" data-share-at="${first}">画像で共有</button></div>`;
   $("dStamp").showModal();
-});
+}
 // 空港ページ：印・記章・階級・四季・ターミナル・訪問の記録・守り神・羽田の運用・写真・共有
 function openAirport(id){
   const a = BY[id], b = $("dAirportBody");
@@ -5508,26 +5718,43 @@ function openAirport(id){
   const ss = achState().seasons.get(a.id) || new Set(), dt = tierOf(times), vt = visitedTerms();
   const ts = TERMS.filter(t => t.a === a.id), got = ts.filter(t => vt.has(t.id)).length;
   const termList = ts.map(t => vt.has(t.id)
-    ? `<div class="apitem got">${stampSVG(a, vt.get(t.id), {term:t})}<span>${t.short} ${t.name}<small>${fmtD(vt.get(t.id))}</small></span></div>`
-    : `<div class="apitem">${emptySVG(a, t)}<span>${t.short} ${t.name}<small>未訪問</small></span></div>`).join("");
+    ? `<div class="apitem got">${stampSVG(a, vt.get(t.id), {term:t})}<span>${esc(zkTermName(t))}<small>${zkYMD(vt.get(t.id))}</small></span></div>`
+    : `<div class="apitem">${emptySVG(a, t)}<span>${esc(zkTermName(t))}<small>まだ</small></span></div>`).join("");
   const hist = visits.slice().sort((x, y) => y.t - x.t).slice(0, 12)
-    .map(c => `<li>${fmtD(c.t)}　${c.term && TBY[c.term] ? TBY[c.term].name : "空港"}${c.wx ? `　<span class="wxtag">${WX_LABEL[c.wx]}${c.wind != null && c.wind >= STRONG_WIND ? "・強風" : ""}</span>` : ""}${c.ops ? `　<span class="wxtag" title="チェックインしたときの運用（推定）">${esc(c.ops)}</span>` : ""}</li>`).join("");
-  b.innerHTML = `<div class="stampbig${dt ? " wide" : ""}">${insigniaSVG(a, first, {big:true, term:null}, dt)}</div>
-  <h3>${a.name}</h3><p>${a.pref}${a.rare?"・離島の空港":""}${a.kind ? "・番外編" : ""}</p>
-  <p class="marks">${SEASONS.map((x,i) => `<span class="mark${ss.has(i) ? " on" : " off"}">${x}</span>`).join("")}${ss.size === 4 ? `<span class="mark gold">四季がそろった</span>` : ""}</p>
-  <p>${first ? `はじめての訪問 ${fmtD(first)}　訪問 ${times}回` : "まだ行っていません"}${visitTier(times) ? `　<span class="rankbadge">${visitTier(times)}</span>` : ""}</p>
-  <p class="hint">${dt < TOP ? `次の${RANKS[dt+1]}まであと${RANK_AT[dt+1] - times}回` : "最高の階級です"}</p>
+    .map(c => `<li>${zkYMD(c.t)}　${c.term && TBY[c.term] ? TBY[c.term].name : "空港"}${c.wx ? `　<span class="wxtag">${WX_LABEL[c.wx]}${c.wind != null && c.wind >= STRONG_WIND ? "・強風" : ""}</span>` : ""}${c.ops ? `　<span class="wxtag" title="チェックインしたときの運用（推定）">${esc(c.ops)}</span>` : ""}</li>`);   // 新しい3回を出し、残りは「すべて見る」
+  // 図鑑の前／次：同じ地方の北から南（86空港だけ）
+  const rgl = a.kind ? [] : zkRegionList(regionOf(a)), ri = rgl.findIndex(x => x.id === a.id), pv = ri > 0 ? rgl[ri - 1] : null, nx = ri >= 0 && ri < rgl.length - 1 ? rgl[ri + 1] : null;
+  let swHint = false; if(rgl.length > 1){ try{ swHint = !localStorage.getItem("soramemo.zk.swipe"); if(swHint) localStorage.setItem("soramemo.zk.swipe", "1"); }catch(e){} }
+  const rg = a.kind ? "" : regionOf(a), cd = code(a);
+  b.innerHTML = `<div class="zk-aph" style="--c:${a.kind ? "#2E4A6B" : zkCol(rg)}"${rgl.length > 1 ? ` data-zk-swipe="${a.id}"` : ""}><div class="stampbig${dt ? " wide" : ""}">${first ? insigniaSVG(a, first, {big:true, term:null}, dt) : emptySVG(a)}</div>
+    <div class="tx"><b class="cd${/[^\x00-\x7f]/.test(cd) ? " jp" : ""}">${esc(/[^\x00-\x7f]/.test(cd) ? godShort(a) : cd)}</b><h3>${esc(a.name).replace(/（/g, "<wbr>（")}</h3><p>${a.pref}${rg ? "・" + rg : ""}${a.rare?"・離島の空港":""}${a.kind ? "・番外編" : ""}</p></div></div>
+  ${rgl.length > 1 ? `<p class="zk-dots" aria-hidden="true">${rgl.map(x => `<i${x.id === a.id ? ` class="on"` : ""}></i>`).join("")}</p>` : ""}
+  ${swHint ? `<p class="zk-swhint">印のカードをはらうと、となりの空港へ</p>` : ""}
+  ${first ? `<div class="zk-dl"><div><span class="k">押した回数</span><span class="v"><b class="num">${times}</b><span class="u">回</span></span></div><div><span class="k">はじめて押した日</span><span class="v s">${(d => `<b class="num">${d.getFullYear()}</b><span class="u">年</span><b class="num">${d.getMonth() + 1}</b><span class="u">月</span><b class="num">${d.getDate()}</b><span class="u">日</span>`)(new Date(first))}</span></div></div>`
+    : `<div class="zk-yet"><b>ここでチェックインすると印が付きます</b><span>判定の範囲 <b class="num">${a.radius >= 1000 ? (a.radius / 1000).toFixed(a.radius % 1000 ? 1 : 0) : a.radius}</b><span class="u">${a.radius >= 1000 ? "km" : "m"}</span>（空港の中心から）</span>${typeof HOME_POS !== "undefined" && HOME_POS ? `<span>いまの場所から <b class="num">${fmtKm(km(HOME_POS, a))}</b><span class="u">km</span></span>` : ""}</div>`}
+  ${first ? `<p class="marks">${SEASONS.map((x,i) => `<span class="mark${ss.has(i) ? " on" : " off"}">${x}</span>`).join("")}${ss.size === 4 ? `<span class="mark gold">四季がそろった</span>` : ""}</p>
+  <p>${visitTier(times) ? `<span class="rankbadge">${visitTier(times)}</span>` : ""}</p>
+  <p class="hint">${dt < TOP ? `次の${RANKS[dt+1]}まであと${RANK_AT[dt+1] - times}回` : "最高の階級です"}</p>` : ""}
+  ${hist.length ? `<h3 class="sub">押した記録</h3><ul class="hist">${hist.slice(0, 3).join("")}</ul>${hist.length > 3 ? `<details class="zk-more"><summary>すべて見る（${times}回）</summary><ul class="hist">${hist.slice(3).join("")}</ul>${times > 12 ? `<p class="hint">新しい12回を出しています。</p>` : ""}</details>` : ""}` : ""}
   ${canNow(a) ? `<section class="apnow" id="apNow" aria-label="空港の今" hidden></section>` : ""}
   ${noticesHTML(a)}
   ${first && gameAvail() && !a.kind ? `<div class="meet">${godSVG(a)}<div><span class="gametag">エアライン経営</span><b>${godName(a)}と出会った</b><span class="hint">エアライン経営の「守り神」で会えます（仮の姿）</span></div></div>` : ""}
-  ${ts.length ? `<h3 class="sub">ターミナル　${got} / ${ts.length}</h3><div class="aplist">${termList}</div>` : ""}
+  ${ts.length ? `<h3 class="sub">ターミナル　${got} / ${ts.length}</h3><p class="hint">ターミナルの印は空港の印と別に集めます（86 の数に入りません）。ターミナルで押した回も、空港で押した回に数えます。</p><div class="aplist">${termList}</div>` : ""}
   ${false && a.iata === "HND" ? `<button class="btn2 opsbtn" style="width:100%;margin-top:12px" data-ap-ops>羽田の今の運用（滑走路・進入）</button>` : ""}
-  <h3 class="sub">訪問の記録</h3>${hist ? `<ul class="hist">${hist}</ul>` : "<p class=\"hint\">まだ訪問の記録がありません</p>"}
-  <div class="row2"><button class="btn2" data-close>閉じる</button><button class="btn1" data-share-a="${a.id}" data-share-at="${first}">画像で共有</button></div>
-  <button class="btn2" style="width:100%;margin-top:8px" data-photo-a="${a.id}" data-photo-at="${first}">写真に押す</button>`;
-  $("dAirport").showModal();
+  ${pv || nx ? `<div class="zk-pn">${pv ? `<button type="button" data-zk-go="${pv.id}"><span aria-hidden="true">‹</span><b>${esc(godShort(pv))}</b>${/[^\x00-\x7f]/.test(code(pv)) ? "" : `<small>${esc(code(pv))}</small>`}</button>` : "<span></span>"}${nx ? `<button type="button" data-zk-go="${nx.id}"><b>${esc(godShort(nx))}</b>${/[^\x00-\x7f]/.test(code(nx)) ? "" : `<small>${esc(code(nx))}</small>`}<span aria-hidden="true">›</span></button>` : "<span></span>"}</div>` : ""}
+  ${first ? `<div class="row2"><button class="btn2" data-close>閉じる</button><button class="btn1" data-share-a="${a.id}" data-share-at="${first}">画像で共有</button></div>
+  <button class="btn2" style="width:100%;margin-top:8px" data-photo-a="${a.id}" data-photo-at="${first}">写真に押す</button>` : `<button class="btn2" style="width:100%;margin-top:14px" data-close>閉じる</button>`}`;
+  if(!$("dAirport").open) $("dAirport").showModal();
   NOW = null; if(canNow(a)){ loadNow(a); renderNow(); }
 }
+// 前／次：ボタンと、印のカードを横にはらう（画面の端20pxは受けない。Safari の戻る動きとぶつけない）
+document.addEventListener("click", e => { const b = e.target.closest("[data-zk-go]"); if(!b) return; track("zk_pn", "btn"); openAirport(+b.dataset.zkGo); const d = $("dAirport"); if(d) d.scrollTop = 0; });
+{ let sx = null, sy = 0, sid = null;
+  document.addEventListener("touchstart", e => { const c = e.target.closest("[data-zk-swipe]"); const t = e.touches[0]; if(!c || !t || t.clientX < 20 || t.clientX > innerWidth - 20){ sx = null; return; } sx = t.clientX; sy = t.clientY; sid = +c.dataset.zkSwipe; }, { passive:true });
+  document.addEventListener("touchend", e => { if(sx === null) return; const t = e.changedTouches[0], dx = t.clientX - sx, dy = t.clientY - sy; sx = null;
+    if(Math.abs(dx) < 60 || Math.abs(dy) > Math.abs(dx) * 0.7) return;
+    const a = BY[sid]; if(!a) return; const l = zkRegionList(regionOf(a)), i = l.findIndex(x => x.id === sid), go = l[i + (dx < 0 ? 1 : -1)];
+    if(go){ track("zk_pn", "swipe"); openAirport(go.id); } }, { passive:true }); }
 document.addEventListener("click", e => { const b = e.target.closest("[data-ap-ops]"); if(!b) return;
   $("dAirport").close(); goTab("ops"); });
 $("probe").onclick = async () => {
@@ -8719,7 +8946,7 @@ function renderLivBook(){
     .sort((a, b) => last(b) - last(a) || a.air.localeCompare(b.air) || a.reg.localeCompare(b.reg));
   const live = [...SPECIAL.values()].filter(p => p && p.reg && LIVERY_NAMES[p.reg] && !got.some(g => g.reg === p.reg))[0];
   const T = [["all", "すべて"], ["flown", "乗った"], ["seen", "見た"], ["not", "まだ"]];
-  box.innerHTML = `<div class="book-head"><h2>特別塗装機</h2><span class="p">${got.length} / ${all.length}</span></div>
+  box.innerHTML = ZK_BACK + `<div class="book-head"><h2>機体図鑑（特別塗装機）</h2><span class="p">${got.length} / ${all.length}</span></div>
     <div class="lvhero"><div class="h"><span>集めた特別塗装機</span><span>乗った ${all.filter(x => x.flown.length).length}・見た ${all.filter(x => x.seen.length).length}</span></div>
       <div class="n">${got.length}<small>/ ${all.length} 機</small></div>
       <div class="lvstrip" aria-hidden="true">${all.slice().sort((a, b) => (b.flown.length + b.seen.length > 0) - (a.flown.length + a.seen.length > 0)).map(x => `<i class="${x.flown.length || x.seen.length ? "on" : ""}"></i>`).join("")}</div>

@@ -31,12 +31,12 @@ async def main():
         await pg.evaluate('__fake.login()'); await pg.wait_for_timeout(800)
         # 図鑑
         await pg.evaluate("goTab('book')"); await pg.wait_for_timeout(300)
-        check('図鑑の見方が5つ:', await pg.locator('#bookViews [data-vw]').count() == 5)
-        for v, sel in [('map', '#bkAlt .bkmap'), ('signs', '#bkAlt .bksign'), ('chron', '#bkAlt .bktl,#bkAlt .vwcard'), ('region', '#bkBars .bk-bar'), ('tiles', '#bkAlt .bkbento')]:
+        check('図鑑の見方が3つ（地方別・地図・行った順）:', await pg.locator('#bookViews [data-vw]').count() == 3)
+        for v, sel in [('map', '#zkBody .bkmap'), ('chron', '#zkBody .zk-mon,#zkBody .vwcard'), ('region', '#zkBody .zk-door')]:
             await pg.click(f'[data-vw="book:{v}"]'); await pg.wait_for_timeout(200)
             check(f'図鑑 {v}:', await pg.locator(sel).count() > 0)
         await pg.click('[data-vw="book:map"]'); await pg.wait_for_timeout(200)
-        await pg.locator('#bkAlt [data-bka]').first.click(); await pg.wait_for_timeout(400)
+        await pg.locator('#zkBody .bkmap [data-zka]').first.click(); await pg.wait_for_timeout(400)
         check('地図の点から空港ページ:', await pg.evaluate("$('dAirport').open"))
         await pg.evaluate("document.querySelectorAll('dialog[open]').forEach(d => d.close())")
         # フライト

@@ -36,7 +36,7 @@ async def main():
                 await pg.evaluate("setLogSeg('list'); 0"); await pg.wait_for_timeout(200)
                 check('気軽に：一覧に戻ると切り替えはまた隠れる:', not await pg.evaluate(f"({vis})('#v-log .lseg')"))
                 await pg.evaluate("goTab('book'); 0"); await pg.wait_for_timeout(500)
-                check('気軽に：図鑑はタイルだけで、見方の列を出さない:', await pg.evaluate("VIEW.book") == 'tiles' and not await pg.evaluate("[...document.querySelectorAll('#v-book .vwrow')].some(r => !r.hidden)"))
+                check('気軽に：図鑑は地方別だけで、見方の列を出さない:', await pg.evaluate("VIEW.book") == 'region' and not await pg.evaluate("[...document.querySelectorAll('#v-book .vwrow')].some(r => !r.hidden)"))
                 check('気軽に：ホームの「これから乗る便」は出さない:', await pg.evaluate("loOff('home').has('ride')"))
                 await pg.evaluate("$('openSettings').click(); 0"); await pg.wait_for_timeout(500)
                 more = await pg.evaluate("[...document.querySelectorAll('#personaMore [data-persona-open]')].map(b => b.dataset.personaOpen)")
