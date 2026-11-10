@@ -2,7 +2,7 @@
 # 修行の改善案（design/shugyo-book）を作る。使い方：python3 make_shugyo.py <出力先>
 # 数え方は Project の「修行の計算ルール（2026年10月に確認）」：FOP ＝ フライトマイル × 2 ＋ 搭乗ボーナス（見本はセイバー 75%・200）
 import sys, math, datetime
-sys.path.insert(0, '/tmp/claude-0/gen')
+sys.path.insert(0, __import__('os').path.dirname(__import__('os').path.abspath(__file__)))
 from common import *
 import make_flight_parts as MP
 OUT = sys.argv[1]

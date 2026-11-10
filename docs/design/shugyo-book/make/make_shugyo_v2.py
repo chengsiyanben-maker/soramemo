@@ -2,7 +2,7 @@
 # 修行の2版（本人「修行はおすすめで」＝ E＋G の月末の残り）。使い方：python3 make_shugyo_v2.py <出力先>
 # 見本の記録は common.py の26便（フライトの案と同じ表）。数え方は「修行の計算ルール（2026年10月に確認）」
 import sys
-sys.path.insert(0, '/tmp/claude-0/gen')
+sys.path.insert(0, __import__('os').path.dirname(__import__('os').path.abspath(__file__)))
 from common import *
 import make_shugyo as S
 from make_shugyo import CSS_S, head, JM, GOAL, LEFT, LEFT_N, YEARP, CNT_NOW
