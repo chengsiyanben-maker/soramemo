@@ -4,6 +4,7 @@
 import asyncio, sys, os, glob, json
 from playwright.async_api import async_playwright
 D = sys.argv[1]
+PAT = sys.argv[2] if len(sys.argv) > 2 else '*'   # 例：'*-v2' で2版だけ
 JS = r"""() => {
  const out = {small:[], tap:[], over:0, clip:[]};
  const W = document.documentElement.clientWidth;
@@ -27,7 +28,7 @@ JS = r"""() => {
   const h = e.classList.contains('sw') ? 34 : 44;
   if (r.height < h - .5 || (r.width < 44 - .5)) out.tap.push((e.className + ' ' + e.textContent.trim().slice(0,10)) + ' ' + r.width.toFixed(0) + 'x' + r.height.toFixed(0));
  });
- document.querySelectorAll('.lr .sb,.ap,.clipchk').forEach(e => { if (e.scrollHeight > e.clientHeight + 1 || e.scrollWidth > e.clientWidth + 1) out.clip.push(e.textContent.trim().slice(0,16)); });
+ document.querySelectorAll('.lr .sb,.ap,.clipchk,.two .card,.jgc,.yr12 > div,.rr,.est,.today').forEach(e => { if (e.scrollHeight > e.clientHeight + 1 || e.scrollWidth > e.clientWidth + 1) out.clip.push(e.textContent.trim().slice(0,16)); });
  // タブ帯と重なる字（最初の画面）
  const tb = document.querySelector('.tabs'); out.under = 0;
  return out;
@@ -37,7 +38,7 @@ async def main():
     res = {}
     async with async_playwright() as p:
         b = await p.chromium.launch()
-        for f in sorted(glob.glob(D + '/*.html')):
+        for f in sorted(glob.glob(D + '/' + PAT + '.html')):
             n = os.path.basename(f)[:-5]
             if n == 'index': continue
             for h in (844, 667):

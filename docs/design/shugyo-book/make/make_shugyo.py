@@ -302,5 +302,6 @@ def pN1():
     body = '<div class="wrap">' + eb(night=True) + '''<div class="ann"><b>夜の画面（E 道のりの1枚）</b><ul><li>光るのは実績の FOP（緑）と次に乗る便の FOP（琥珀＝「次」）だけ</li><li>予定と計画の帯は、夜はごく暗い金と紺の地に明るい字。会社の色は使わない</li></ul></div></div>''' + tabs('修行')
     page(OUT + '/N1-overview-night.html', 'N1 夜の画面' + T, body, night=True, extra_css=css)
 
-for fn in (p01, pE1, pE2, pE3, pF1, pF2, pG1, pG2, pH1, pH2, p07, pN1): fn()
-print('ok', FOP_NOW, CNT_NOW, LEFT, LEFT_N)
+if __name__ == '__main__':
+  for fn in (p01, pE1, pE2, pE3, pF1, pF2, pG1, pG2, pH1, pH2, p07, pN1): fn()
+  print('ok', FOP_NOW, CNT_NOW, LEFT, LEFT_N)
