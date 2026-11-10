@@ -1,7 +1,7 @@
 // 配る用のファイルを作る：src/ の読みやすい原本から、説明文や空白を省いて縮めた web/ の版を作る。
 //   cd tools && npm install terser@5 csso@5 && cd .. && node tools/build.mjs
 // 関数や変数の名前は変えない（テストや運営画面から呼ぶため。toplevel の名前は短くしない）。
-import { readFileSync, writeFileSync } from "node:fs";
+import { readFileSync, writeFileSync, readdirSync } from "node:fs";
 // まだ始まっていない塗装（from が今日より後）は入れない。普通の塗装で飛んでいる機体を、その名前で出さないため
 const notYet = (rest) => { const f = rest.match(/from:\s*"(\d{4}-\d{2}-\d{2})"/); return !!f && f[1] > new Date().toISOString().slice(0, 10); };
 // 特別塗装機の一覧（アライアンス塗装は除く）。期間が終わったものも、乗ったときの記録として名前は残す
@@ -14,6 +14,14 @@ function liveryNames() {
 function liveryAirlines() {
   const ts = readFileSync(new URL("../supabase/functions/_shared/liveries.ts", import.meta.url), "utf8"), m = {};
   for (const x of ts.matchAll(/\{\s*reg:\s*"([A-Z0-9-]+)",\s*name:\s*"[^"]+",\s*airline:\s*"([^"]+)"([^}]*)\}/g)) if (!/kind:\s*"alliance"/.test(x[3]) && !notYet(x[3])) m[x[1]] = x[2];
+  return JSON.stringify(m);
+}
+// 空港の名前の読み（図鑑の索引）。データ担当の移行 airport_yomi の読みをアプリに入れる（表があればアプリがサーバーの読みで上書きする）
+function airportYomi() {
+  const dir = new URL("../supabase/migrations/", import.meta.url), f = readdirSync(dir).filter(n => /_airport_yomi\.sql$/.test(n)).sort().pop();
+  if (!f) return "{}";
+  const sql = readFileSync(new URL(f, dir), "utf8"), m = {};
+  for (const x of sql.matchAll(/\((\d+),\s*'([ぁ-ゖー]+)',\s*'([ぁ-ゖー]+)',\s*(?:'\{\}'|array\[([^\]]*)\])\)/g)) m[x[1]] = [x[2], x[3], x[4] ? [...x[4].matchAll(/'([ぁ-ゖー]+)'/g)].map(y => y[1]) : []];
   return JSON.stringify(m);
 }
 import { gzipSync } from "node:zlib";
@@ -37,7 +45,8 @@ for (const f of files) {
   // 「空港のいま」には、アプリ本体と同じ運用の判定の中心を差し込む（判定の仕方がずれないように）
   let out = f === "now.html" ? src.replace("/*@OPS_CORE@*/", () => opsCoreParts().join("\n")) : src;
   out = out.replace("/*@LIVERIES@*/{}", () => liveryNames());   // 特別塗装機の一覧（登録記号 → 名前）を、サーバーの liveries.ts からアプリに入れる（乗った機体の図鑑の印）
-  out = out.replace("/*@LIVERY_AIR@*/{}", () => liveryAirlines());   // 特別塗装機の航空会社（特別塗装機の図鑑で分ける）
+  out = out.replace("/*@LIVERY_AIR@*/{}", () => liveryAirlines());
+  out = out.replace("/*@AIRPORT_YOMI@*/{}", () => airportYomi());   // 空港の名前の読み（図鑑の索引・探す欄）   // 特別塗装機の航空会社（特別塗装機の図鑑で分ける）
   // CSS
   out = out.replace(/<style>([\s\S]*?)<\/style>/g, (_, css) => `<style>${cssMinify(css).css}</style>`);
   // JS（<script src> 以外の、中身のある script）
