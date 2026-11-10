@@ -13,7 +13,7 @@
   - 案（入れていない）：rwy-learn の8つが同じ5時間を8回読んでいるのを1回にする（点検の結果で rwy-learn が遅ければ）
   - 本人待ち：「反映して」・点検の SQL（4回続けて未着）
   - この回では、PM が 11/10 1時に積んだ「開港と滑走路の表」（data/airport-facts）は始めていない（月曜の定期の回で、PM の指示が付いていなかったため。指示の回で作る）
-- 図鑑のための表（11/9 22時50分 PM の指示・本人の図鑑の形の決定）：ブランチ data/zukan-yomi → main 向けの下書き PR #57。報告 docs/pm/report-zukan-data.md
+- 図鑑のための表（11/9 22時50分 PM の指示・本人の図鑑の形の決定）：ブランチ data/zukan-yomi → PR #57。報告 docs/pm/report-zukan-data.md。**11/10 15時49分 main に入った（本人がマージ、550fbda「反映：図鑑の作り直し（PR #60）…索引と読みの表（移行159）」）。本番の Actions の結果はまだ見ていない**
   - 移行 159（airport_yomi：airports の全182行に yomi・index_yomi・alt_yomi・source（official／manual）・source_ref・updated_at。RLS は誰でも select、書くのは service_role だけ。ひらがなと長音だけの決まり、airports を cascade）。影響はチェックイン（図鑑の索引・探す欄）だけ、経営なし
   - 読みは全部手で付けた（国交省の空港一覧・国土数値情報に読みの欄がない）。索引の頭はふだん呼ぶ名前（羽田→は・伊丹→い・小牧→こ・丘珠→お）。公式キャラの名前を含む愛称は alt_yomi に入れない
   - 確かめた結果：t99（26項目）通過、t01・t48・t87・t89・t90・t97 通過、番号の重なりなし。SQL のテスト全部（103本）通過
@@ -100,7 +100,7 @@
 - 本人の決定：規約を改定するときは「terms_versions に1行足す → アプリの定数を変える」の順
 
 ## 移行とテストの番号
-- main の最新は 157（156・157 は 11/9 本番に入った）。data/zukan-yomi は 159・テスト t99。maint/2026-11-06 は 153・テスト t93（fix/co-tests の経営の移行も 153 なので、反映の前に rebase）、data/photo-log は 154・テスト t94、maint/2026-11-07 は 155・テスト t95、data/debug-1107 は 156・テスト t96（関数のテストは supabase/tests/live_view_test.ts。main に反映済み）、data/view-prefs は 157・テスト t97、maint/2026-11-09 は 158・テスト t98、maint/2026-11-10 は 161・テスト t101。data/airport-facts は 160・テスト t100。そのほか次に新しく作るものは 162 以降・テストは t102 以降
+- main の最新は 159（airport_yomi・11/10 main に入った）。156・157 は 11/9 本番に入った。**maint/2026-11-09 の 158 は main の 159 より前になったので、反映の前に migrations.mjs rebase が要る**。maint/2026-11-06 は 153・テスト t93（fix/co-tests の経営の移行も 153 なので、反映の前に rebase）、data/photo-log は 154・テスト t94、maint/2026-11-07 は 155・テスト t95、data/debug-1107 は 156・テスト t96（関数のテストは supabase/tests/live_view_test.ts。main に反映済み）、data/view-prefs は 157・テスト t97、maint/2026-11-09 は 158・テスト t98、maint/2026-11-10 は 161・テスト t101。data/airport-facts は 160・テスト t100。そのほか次に新しく作るものは 162 以降・テストは t102 以降
 - main に別の移行が先に入ったら、反映の前にもう一度 `node tools/migrations.mjs rebase`
 - 本番は小さいプランで一時ファイルの余裕がない。本人に流してもらう SQL は、大きな中間の表・自己結合・大きな並べ替えを避け、索引で引く形にする
 - SQL のテストは全部で約35分かかる（手元で流すときは裏で流してログを見る。t92 だけで約4分。同じログに2回流すと混ざるので、ログの名前を分ける）
