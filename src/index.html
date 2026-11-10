@@ -884,6 +884,10 @@ dialog.tpsheet .dlg{display:flex;flex-direction:column;overflow:hidden;padding-b
    1 下の帯（元に戻す・入れ替え）は一覧と重ならない（一覧が縮む）。帯が出て最後の行が見えなくなったら、押した行が隠れない範囲で一覧を送って最後の行も見せる（tpKeep）
    2 全部乗せのときの「全部乗せに戻す」は押せない薄い字をやめ、押せない理由の字「いまは全部乗せです」（白と 4.8:1）
    3 夜は入れ替えの帯の薄い黄色を使わず、縁だけ（design/night 07c の .swap と同じ値） */
+/* 見方だけの小さいシート（review-c5 の1）：行はタブを選ぶと同じ形で、番号・絵・≡ はなし */
+.vsrow{padding-left:16px}.vsrow.lock{min-height:62px}.vssheet .tpmore{justify-content:flex-start}
+/* マイページの「全部を見直す」の1枚：題と閉じるは上に固定（review-c5 の1） */
+#dLayout .spctop{position:sticky;top:0;z-index:3;margin:-16px -16px 12px;padding:16px 16px 8px;background:var(--s-bg)}
 .tpmore .tpallnow{display:inline-flex;align-items:center;min-height:44px;padding:0 10px;font-size:13px;font-weight:700;color:#6B7280}
 :root[data-night="on"] .tpswap{background:#141B24;box-shadow:inset 0 0 0 2px rgba(220,227,234,.72)}
 :root[data-night="on"] .tpswap p{color:#DCE3EA}
@@ -916,7 +920,7 @@ dialog.tpsheet .dlg{display:flex;flex-direction:column;overflow:hidden;padding-b
 div.viewsw{gap:20px;margin:0 0 12px;padding:0 2px;border-bottom:1px solid var(--vw-track)}
 div.viewsw>button{min-height:40px;border:0;border-bottom:3px solid transparent;border-radius:0;padding:8px 0 6px;background:none;color:color-mix(in srgb,var(--vw-mute) 70%,var(--vw-ink));font:600 14px var(--gothic);box-shadow:none}
 div.viewsw>button[aria-selected="true"]{background:none;border-color:var(--vw-ink);color:var(--vw-ink);font-weight:800;box-shadow:none}
-.vwrow .vwedit{border:0;background:none;width:36px;min-height:40px;margin-top:0;border-radius:10px}
+.vwrow .vwedit{border:0;background:none;width:44px;min-height:44px;margin:-2px -4px -2px 0;border-radius:12px}
 /* 計器のタイル */
 #v-ops .opsbox{background:none;box-shadow:none;padding:0}
 .opshero{background:var(--hero);color:#fff;border-radius:22px;padding:14px 16px;display:flex;flex-direction:column;gap:10px}
@@ -3293,6 +3297,7 @@ dialog.ckconfirm button.go{background:#E9C46A;color:#111827}
   <div class="opsaps" id="opsAps"></div></div></dialog>
 <dialog id="dLayout" class="spfull" aria-label="表示を編集"><div class="dlg" id="dLayoutBody"></div></dialog>
 <dialog id="dTabs" class="psheet tpsheet" aria-labelledby="tpTitle"><div class="dlg" id="dTabsBody"></div></dialog>
+<dialog id="dViews" class="psheet tpsheet vssheet" aria-labelledby="vsTitle"><div class="dlg" id="dViewsBody"></div></dialog>
 <dialog id="dHomeEd" class="spfull heed" aria-labelledby="heTitle"><div class="dlg" id="dHomeEdBody"></div></dialog>
 <dialog id="dReset" class="psheet rssheet" aria-labelledby="rsTitle"><div class="dlg" id="dResetBody"></div></dialog>
 <dialog id="dSpecial" class="spfull" aria-label="特別塗装機"><div class="dlg" id="dSpecialBody"></div></dialog>
@@ -4644,7 +4649,7 @@ const viewswHTML = k => viewsShown(k).map(([id, l]) => `<button role="tab" data-
 function vwEditBtn(el, k){
   if(el.parentElement && el.parentElement.classList.contains("vwrow")) return;
   const row = document.createElement("div"); row.className = "vwrow"; el.parentNode.insertBefore(row, el); row.appendChild(el);
-  row.insertAdjacentHTML("beforeend", `<button class="vwedit" type="button" data-lo-open="${k}" aria-label="${TAB_NAME[k]}の表示を編集"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="m13.5 6.5 4 4"/></svg></button>`);
+  row.insertAdjacentHTML("beforeend", `<button class="vwedit" type="button" data-vs-open="${k}" aria-label="${TAB_NAME[k]}の見方を編集"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="m13.5 6.5 4 4"/></svg></button>`);
 }
 const VIEW_RENDER = {};
 // 切り替えを描いたら、選んでいるボタンが見えるところまで横に送る
@@ -5259,6 +5264,40 @@ document.addEventListener("click", e => {
     loChanged("blk_" + k, { text:`「${l}」を${hide ? "隠しました" : "出しました"}`, snap }); return; }
   if((b = q("[data-lo-ap]"))){ const c = b.dataset.loAp, L = loEdit(), set = new Set(L.aps || []);
     if(set.has(c)) set.delete(c); else set.add(c); L.aps = [...set]; if(!L.aps.length) delete L.aps; loChanged("aps"); return; }
+});
+/* ---------- 見方だけの小さいシート（11/10 20時 PM の指示・改善担当 review-c5 の1） ----------
+   各画面の見方の帯の鉛筆で開く。その画面の見方だけを ON／OFF（タブを選ぶと同じ部品）。題・数・完了は上に固定し、送るのは一覧だけ。
+   図鑑の地方別は「いつも」・見方は1つ以上残す（今までと同じ loToggleOff）。全部を見直したいときは下の「表示の編集をすべて見る」から今の1枚へ */
+let VS = { k:null, undo:null };
+function vsHTML(){
+  const k = VS.k, off = loOff(k), list = VIEWS[k] || [], on = list.filter(([id]) => !off.has(id)).length;
+  const row = ([id, l]) => { const o = !off.has(id);
+    if(k === "book" && id === "region") return `<li class="tprow lock vsrow"><b>${esc(l)}</b><span class="tplk">いつも</span></li>`;
+    return `<li class="tprow vsrow${o ? "" : " off"}" data-vs="${id}"><b>${esc(l)}${o ? "" : "<small>見方の帯から隠しています</small>"}</b>${loSw(o, `data-vs-sw="${id}"`, `${esc(l)}を見方の帯に出す`, o && on <= 1)}</li>`; };
+  const undo = VS.undo ? `<div class="tpbot"><div class="loundo tpundo" role="status"><span>${esc(VS.undo.text)}</span><button type="button" data-vs-undo>元に戻す</button></div></div>` : "";
+  return `<div class="tptop"><div class="tphd"><h3 id="vsTitle">${TAB_NAME[k]}の見方</h3><span class="tpcnt" aria-label="出している見方 ${on}つ（${list.length}つのうち）"><b>${on}</b>/${list.length}</span><button type="button" class="tpdone" data-close>完了</button></div>
+    <p class="tplead">OFF で見方の帯から隠れます。1つ以上残します。</p>${on <= 1 ? `<p class="tpmsg tpleast">見方は1つより減らせません。</p>` : ""}</div>
+    <div class="tpscroll"><ul class="tplist" aria-label="${TAB_NAME[k]}の見方">${list.map(row).join("")}</ul>
+    <div class="tpmore"><button type="button" class="lotext" data-vs-all>表示の編集をすべて見る ›</button></div></div>${undo}`;
+}
+function vsRender(){ const d = $("dViews"); if(!d || !d.open) return; const sc = d.querySelector(".tpscroll"), y = sc ? sc.scrollTop : 0; $("dViewsBody").innerHTML = vsHTML(); const n = d.querySelector(".tpscroll"); if(n) n.scrollTop = y; }
+function openViewSheet(k){
+  if(!VIEWS[k]) return; VS = { k, undo:null };
+  $("dViewsBody").innerHTML = vsHTML();
+  if(!$("dViews").open){ $("dViews").showModal(); track("view_sheet_open", k); }
+  const h = $("vsTitle"); if(h){ h.tabIndex = -1; h.style.outline = "none"; h.focus(); }
+}
+$("dViews").addEventListener("close", () => { VS.undo = null; });
+document.addEventListener("click", e => {
+  const o = e.target.closest("[data-vs-open]"); if(o){ openViewSheet(o.dataset.vsOpen); return; }
+  if(!e.target.closest("#dViews")) return;
+  let b;
+  if((b = e.target.closest("[data-vs-all]"))){ const k = VS.k; $("dViews").close(); openLayout(k, "screen"); return; }
+  if((b = e.target.closest("[data-vs-undo]"))){ if(VS.undo){ loRestore(VS.undo.snap); VS.undo = null; loChanged("undo"); vsRender(); } return; }
+  if((b = e.target.closest("[data-vs-sw]"))){ if(b.disabled) return; const k = VS.k, id = b.dataset.vsSw, hide = !loOff(k).has(id), snap = loSnap();
+    if(!loToggleOff(k, id, hide)) return;
+    const l = (VIEWS[k].find(x => x[0] === id) || [])[1] || id;
+    loChanged("view_" + k, null); VS.undo = { text:`「${l}」を${hide ? "隠しました" : "出しました"}`, snap }; vsRender(); return; }
 });
 /* ---------- 案3「タブから選ぶ」（11/8 21時半 本人の決定。画面案 design/all-in-filter-alt の C1〜C4） ----------
    C1 タブを選ぶ：下のタブ帯の長押し（とマイページ）で出すシート。各行の ON／OFF で出す・隠す（OFF の行はその場に残る）。≡ を持って並べ替え。5つまで・ホームはいつも1番目

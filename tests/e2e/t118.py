@@ -85,8 +85,10 @@ async def main():
         await pg.click('#dLayout [data-lo-reset-yes]'); await pg.wait_for_timeout(200)
         check('全部乗せに戻る:', await pg.evaluate(TABS) == 'home,book,log,ops,sg' and await pg.evaluate("localStorage.getItem('soramemo.layout')") is None and 'タブ1つ・見方1つ・かたまり1つをまた出しました' in await pg.inner_text('#dLayout .loundo'))
         await pg.evaluate("$('dLayout').close(); goTab('log')"); await pg.wait_for_timeout(600)
-        await pg.click('[data-lo-open="log"]'); await pg.wait_for_timeout(300)
-        check('フライトの鉛筆からはフライトの見方へ:', await pg.evaluate("$('dLayout').open && LO_PAGE === 'log'") and await pg.evaluate("(() => { const g = document.querySelector('#dLayout [data-lo-go=\"log\"]').getBoundingClientRect(); return g.top > 0 && g.top < 400; })()"))
+        await pg.click('[data-vs-open="log"]'); await pg.wait_for_timeout(300)
+        check('フライトの鉛筆はフライトの見方だけのシート（review-c5 の1）:', await pg.evaluate("$('dViews').open && !$('dLayout').open && VS.k === 'log'") and await pg.locator('#dViews [data-vs-sw]').count() == 9)
+        await pg.click('#dViews [data-vs-all]'); await pg.wait_for_timeout(300)
+        check('「表示の編集をすべて見る」でフライトの見方の所へ:', await pg.evaluate("$('dLayout').open && !$('dViews').open && LO_PAGE === 'log'") and await pg.evaluate("(() => { const g = document.querySelector('#dLayout [data-lo-go=\"log\"]').getBoundingClientRect(); return g.top > 0 && g.top < 400; })()"))
         await c.close()
         # 4. サーバーに保存（表あり）：隠すとアカウントに残り、別の端末でも同じになる
         c = await ctx(b, "window.__viewPrefs = window.__viewPrefs || []; if(!localStorage.getItem('soramemo.onboarded')){ localStorage.setItem('soramemo.persona','all'); localStorage.setItem('soramemo.onboarded','1'); }"); pg = await page(c, errs, True)
