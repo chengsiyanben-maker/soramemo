@@ -2899,7 +2899,11 @@ dialog.ckconfirm button.go{background:#E9C46A;color:#111827}
 .sgd .sgb-k{display:inline-block;font:800 12px/1 var(--gothic);border-radius:999px;padding:5px 10px;margin-right:8px;background:#EEF1F5;color:#374151;vertical-align:1px}
 .sgd .sgb-k.p{background:#FBF3E0;color:#6E5418}.sgd .sgb-k.c{background:#E6EDF6;color:#23406A}
 .sgd .sgb-hero .h{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:13px;color:var(--sg-mute)}.sgd .sgb-hero .h b{color:var(--sg-ink)}
-.sgd .sgb-hero .big{display:flex;align-items:baseline;gap:6px;margin:6px 0 2px}.sgd .sgb-hero .big b{font-size:46px;font-weight:900;letter-spacing:-.01em;line-height:1.1;font-variant-numeric:tabular-nums}.sgd .sgb-hero .big small{display:inline;font-size:14px;font-weight:700}
+.sgd .sgb-hero .big{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px;margin:6px 0 2px}.sgd .sgb-hero .big>b{font-size:46px;font-weight:900;letter-spacing:-.01em;line-height:1.1;font-variant-numeric:tabular-nums}.sgd .sgb-hero .big>small{display:inline;font-size:14px;font-weight:700}
+/* 運賃を推定した便の数（大きな数字の横。入らないときは下へ回る） */
+.sgd .sgb-est{margin-left:auto;align-self:center;display:flex;align-items:center;gap:6px;border:0;background:#EEF1F5;color:var(--sg-ink);border-radius:16px;min-height:44px;padding:4px 6px 4px 10px;gap:2px;font-family:var(--gothic);text-align:left}.sgd .sgb-est>span{display:block}.sgd .sgb-card .sgb-est small{display:block;font-size:11px;font-weight:700;color:var(--sg-mute);line-height:1.3}.sgd .sgb-est b{display:block;font-size:17px;font-weight:900;line-height:1.2;font-variant-numeric:tabular-nums}.sgd .sgb-card .sgb-est b small{display:inline;font-size:12px;color:var(--sg-ink)}.sgd .sgb-est .cv{width:14px;height:14px;fill:none;stroke:var(--sg-mute);stroke-width:2;flex:none}
+/* 低い画面（667 など）：道のりの上を詰めて、2つの道の箱の数字まで見えるようにする */
+@media (max-height:700px){.sgd .sgb-hd{margin-bottom:6px}.sgd .sgb-views{margin-bottom:4px}.sgd .sgb-hero{padding:12px 16px}.sgd .sgb-hero .big{margin:2px 0 0}.sgd .sgb-hero .big>b{font-size:38px}.sgd .sgb-hero .sgb-bar{margin-top:6px;height:10px}.sgd .sgb-hero .sgb-bar.thin{margin-top:8px;height:6px}.sgd .sgb-hero .sgb-ax{margin-top:3px;font-size:12px}.sgd .sgb-verd{margin-top:8px;font-size:14px;line-height:1.5}.sgd .sgb-two .sgb-card{padding:10px 14px}.sgd .sgb-two p{margin:2px 0}.sgd .sgb-two p b{font-size:24px}}
 .sgd .sgb-bar{position:relative;height:12px;border-radius:6px;background:#E3E7ED;overflow:hidden;margin-top:10px}.sgd .sgb-bar i{position:absolute;left:0;top:0;bottom:0;background:var(--hero,#0F1B2D);border-radius:6px}
 .sgd .sgb-bar.thin{height:7px;margin-top:12px}.sgd .sgb-bar.thin i{background:#9AA3AF}.sgd .sgb-bar.ls{height:8px}.sgd .sgb-bar.ls i.e{background:#B8C0CC}.sgd .sgb-bar.ls i:not(.e){border-radius:0 6px 6px 0}.sgd .sgb-bar.ls i:only-child{border-radius:6px}
 .sgd .sgb-ax{display:flex;justify-content:space-between;font-size:13px;color:var(--sg-mute);margin-top:6px;font-weight:600}
@@ -2952,6 +2956,7 @@ dialog.ckconfirm button.go{background:#E9C46A;color:#111827}
 :is([data-night="on"],[data-palette="board"]) .sgd .sgb-sw button{background:#262B33;color:#A7B0BC}:is([data-night="on"],[data-palette="board"]) .sgd .sgb-sw button[aria-checked="true"]{background:#E5E7EB;color:#111}
 :is([data-night="on"],[data-palette="board"]) .sgd .sgb-hd .sg-seg button[aria-pressed="true"]{background:#262B33;color:#fff}
 :is([data-night="on"],[data-palette="board"]) .sgd .sg-btn.ghost{box-shadow:inset 0 0 0 1px #8B95A3}
+:is([data-night="on"],[data-palette="board"]) .sgd .sgb-est{background:none;color:inherit;box-shadow:inset 0 0 0 1px #8B95A3}:is([data-night="on"],[data-palette="board"]) .sgd .sgb-card .sgb-est b small{color:inherit}
 </style>
 </head>
 <body>
@@ -11168,19 +11173,19 @@ const sgAnaTiers = () => ANA_TIERS.map(([v, n]) => ({ k:n, name:n, pts:v }));
 const sgJalDone = (t, F, N) => F >= t.fop || (N >= t.n && F >= t.nf);
 // 今年の実績（records）と、予定の便（plans）を合わせた数字
 function sgYear(y = new Date().getFullYear()){
-  const out = { y, ANA:{ pts:0, n:0, mi:0, price:0, priced:0 }, JAL:{ pts:0, n:0, mi:0, price:0, priced:0 }, ls:0, months:Array.from({ length:12 }, () => ({ ANA:0, JAL:0, n:0, price:0 })), routes:new Map(), days:new Map(), longest:null, rows:[] };
+  const out = { y, ANA:{ pts:0, n:0, mi:0, price:0, priced:0, assumed:0 }, JAL:{ pts:0, n:0, mi:0, price:0, priced:0, assumed:0 }, ls:0, months:Array.from({ length:12 }, () => ({ ANA:0, JAL:0, n:0, price:0 })), routes:new Map(), days:new Map(), longest:null, rows:[] };
   const g = sgGet();
   for(const r of statusRows()){
     const fr = fareOf(r, r.t); if(!fr) continue; const car = fr.table === "JAL" ? "JAL" : "ANA";
     if(car === "JAL") out.ls += 5;
     const d = new Date(r.t); if(d.getFullYear() !== y) continue;
     const L = sgLeg(car, r.from, r.to, r.fare || sgCode(car, fr.id, r.t), r.t, r.price, g); if(!L) continue;
-    const o = out[car]; o.pts += L.pts; o.n++; o.mi += L.mi; if(r.price){ o.price += r.price; o.priced++; }
+    const o = out[car]; o.pts += L.pts; o.n++; o.mi += L.mi; if(r.price){ o.price += r.price; o.priced++; } if(fr.assumed) o.assumed++;
     const m = out.months[d.getMonth()]; m[car] += L.pts; m.n++; m.price += r.price || 0;
     const key = [BY[r.from].iata, BY[r.to].iata].sort().join("⇄"), rt = out.routes.get(key) || { key, n:0, ANA:0, JAL:0 }; rt.n++; rt[car] += L.pts; out.routes.set(key, rt);
     const dk = new Date(r.t + 9 * 36e5).toISOString().slice(0, 10), dd = out.days.get(dk) || { d:dk, n:0, pts:0, legs:[] }; dd.n++; dd.pts += L.pts; dd.legs.push(BY[r.from].iata, BY[r.to].iata); out.days.set(dk, dd);
     if(!out.longest || L.mi > out.longest.mi) out.longest = { mi:L.mi, from:r.from, to:r.to };
-    out.rows.push({ ...r, car, L });
+    out.rows.push({ ...r, car, L, assumed:fr.assumed });   // assumed：運賃が分からず、よく使われる運賃で数えた便（推定）
   }
   // 会社のサイトの数字に合わせたとき：その日の数字 ＋ そのあとに記録した便（記録だけの数字は rec に残す）
   for(const car of ["ANA", "JAL"]){ const s = g.sync && g.sync[car]; out[car].rec = { pts:out[car].pts, n:out[car].n };
@@ -11188,6 +11193,7 @@ function sgYear(y = new Date().getFullYear()){
     const after = out.rows.filter(r => r.car === car && sgJstDay(r.t) > s.at);
     out[car].pts = s.pts + after.reduce((x, r) => x + r.L.pts, 0);
     if(s.n != null) out[car].n = s.n + after.length;
+    out[car].assumed = after.filter(r => r.assumed).length;
     out[car].sync = { at:s.at, pts:s.pts }; }
   return out;
 }
@@ -11392,9 +11398,12 @@ function sgMain(){
 // E1 道のり
 function sgRoadView(){
   const D = sgRoadData(), { Y, car, goal, unit, cur, P, C, A0, A1, A2, yp } = D, sh = sgShow().show, next = sgFuture()[0];
+  // 運賃を推定した便（運賃が分からず、よく使われる運賃で数えた便）があるときは、大きな数字の横に数を出す。押すと1便ごと
+  const est = !cur.assumed ? "" : sgShow().views.flights ? `<button class="sgb-est" type="button" data-sg-view="flights" aria-label="運賃を推定した便 ${cur.assumed}便。1便ごとを見る"><span><small>運賃を推定した便</small><b>${cur.assumed}<small>便</small></b></span>${SG_CV}</button>`
+    : `<span class="sgb-est"><span><small>運賃を推定した便</small><b>${cur.assumed}<small>便</small></b></span></span>`;
   const pp = sgPct(cur.pts, goal.pts), src = cur.sync ? `${sgMD(cur.sync.at)}に合わせた数字＋そのあとの便` : `${Y.y}年・記録した便`;
   const hero = `<div class="sgb-card sgb-hero"><div class="h"><span><span class="sgb-k a">実績</span>${esc(src)}</span><span>目標 <b>${esc(goal.name)}</b></span></div>
-    <div class="big"><b class="sgb-act">${fmtKm(cur.pts)}</b><small>${unit}</small></div>
+    <div class="big"><b class="sgb-act">${fmtKm(cur.pts)}</b><small>${unit}</small>${est}</div>
     <div class="sgb-bar" role="img" aria-label="ポイント ${pp}%。${esc(goal.name)}は ${fmtKm(goal.pts)} ${unit}"><i style="width:${pp}%"></i></div><div class="sgb-ax"><span>ポイント ${pp}%</span><span>${sgMan(goal.pts)}</span></div>
     <div class="sgb-bar thin" role="img" aria-label="1年の ${yp.pct}% が過ぎました"><i style="width:${yp.pct}%"></i></div><div class="sgb-ax"><span>1年 ${yp.pct}%（今日 ${yp.md}）</span><span>12/31</span></div>
     <p class="sgb-verd">${sgVerdict(D)}</p></div>`;
@@ -11448,7 +11457,7 @@ function sgFlightsView(){
   return `<p class="sgb-src"><span class="sgb-k a">実績</span>${Y.y}年・記録した便　${rows.length}便</p>${by.map(({ m, rows: rs }) => `<div class="sgb-mh"><b>${m + 1}月</b><small>${rs.length}便・＋${fmtKm(rs.reduce((x, r) => x + r.L.pts, 0))} ${unit}</small></div>
     <div class="sgb-card list">${rs.map(r => { const d = new Date(r.t + 9 * 36e5), no = r.kind === "flight" && r.ref && r.ref.no ? lgNo(r.ref) : car;
       return `<button class="sgb-fl" type="button" data-sg-fl="${r.t}|${r.from}|${r.to}"><span class="d"><b>${d.getUTCDate()}</b><small>${"日月火水木金土"[d.getUTCDay()]}</small></span>
-        <span class="m"><b>${esc(placeShort(BY[r.from].iata))} → ${esc(placeShort(BY[r.to].iata))}</b><small>${esc(no)}・${esc(r.L.fr.label.split("：").pop().split("・")[0])}</small></span><b class="n">＋${fmtKm(r.L.pts)}</b>${SG_CV}</button>`; }).join("")}</div>`).join("")}
+        <span class="m"><b>${esc(placeShort(BY[r.from].iata))} → ${esc(placeShort(BY[r.to].iata))}</b><small>${esc(no)}・${esc(r.L.fr.label.split("：").pop().split("・")[0])}${r.assumed ? "（推定）" : ""}</small></span><b class="n">＋${fmtKm(r.L.pts)}</b>${SG_CV}</button>`; }).join("")}</div>`).join("")}
     <p class="sg-foot">運賃が分からない便は、よく使われる運賃で数えています。便を押すと数え方が見られます。</p>`;
 }
 // E2 1便の内訳

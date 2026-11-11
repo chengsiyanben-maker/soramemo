@@ -24,10 +24,10 @@ async def main():
         await c.route('https://fake.supabase.co/functions/v1/**', lambda r: r.fulfill(status=200, body='{}', content_type='application/json', headers={'Access-Control-Allow-Origin':'*'}))
         pg=await c.new_page(); errs=[]; pg.on('pageerror', lambda e: errs.append(str(e) + ' @ ' + (e.stack or '')[:300]))
         await pg.goto('file://'+os.path.join(WORK,'index_server_test.html')); await pg.wait_for_load_state('load'); await pg.wait_for_timeout(600)
-        # 記録：今年の JAL 羽田⇄那覇 セイバー 4便（1便 1,676 FOP）。1便目は前の年（Life Status だけに入る）
+        # 記録：今年の JAL 羽田⇄那覇 セイバー 4便（1便 1,676 FOP）。1便目は前の年（Life Status だけに入る）。最後の便は運賃なし（よく使われる運賃＝セイバーで数える・推定）
         await pg.evaluate(f"""() => {{ const h = A.find(a => a.iata === 'HND').id, o = A.find(a => a.iata === 'OKA').id, F = __fake.db.flights; F.length = 0;
           const ts = [Date.UTC({Y - 1}, 5, 1, 1), Date.UTC({Y}, 0, 10, 1), Date.UTC({Y}, 0, 11, 1), Date.UTC({Y}, 1, 3, 1), Date.now() - 3 * 864e5];
-          ts.forEach((t, i) => F.push({{ id:200 + i, from_airport:i % 2 ? h : o, to_airport:i % 2 ? o : h, airline:'JL', flight_no:'JL90' + i, fare:'JAL:Y_SAVER', price:null, status:'verified', distance_km:1500,
+          ts.forEach((t, i) => F.push({{ id:200 + i, from_airport:i % 2 ? h : o, to_airport:i % 2 ? o : h, airline:'JL', flight_no:'JL90' + i, fare:i === 4 ? null : 'JAL:Y_SAVER', price:null, status:'verified', distance_km:1500,
             dep_at:new Date(t).toISOString(), arr_at:new Date(t + 9e6).toISOString() }})); }}""")
         await pg.evaluate('__fake.login()'); await pg.wait_for_timeout(1000)
         await pg.evaluate(f"""() => {{ const g = sgGet(), h = A.find(a => a.iata === 'HND').id, o = A.find(a => a.iata === 'OKA').id; g.car = 'JAL'; g.goal.JAL = 'crystal';
@@ -37,7 +37,7 @@ async def main():
         t = await pg.inner_text('#v-sg'); print('E1', t[:900].replace('\n', ' | '))
         pts = await pg.evaluate("sgYear().JAL.pts"); n = await pg.evaluate("sgYear().JAL.n")
         check('実績は今年の記録した便だけ（4便・6,704 FOP）:', pts == 6704 and n == 4)
-        check('見方のピルは 道のり・1便ごと・月ごと:', await pg.evaluate("[...document.querySelectorAll('#v-sg [data-sg-view]')].map(b => b.textContent).join()") == '道のり,1便ごと,月ごと')
+        check('見方のピルは 道のり・1便ごと・月ごと:', await pg.evaluate("[...document.querySelectorAll('#v-sg .sgb-views [data-sg-view]')].map(b => b.textContent).join()") == '道のり,1便ごと,月ごと')
         check('題の行：修行・ANA｜JAL・会員情報:', '修行' in t and '会員情報' in t and await pg.locator('#v-sg .sgb-hd [data-sg-set="car"]').count() == 2)
         check('大きな数字と目標・1年の何割:', '6,704' in t and '目標 クリスタル' in t and re.search(r'1年 \d+%（今日 \d+/\d+）', t) is not None and 'ポイント 22%' in t)
         check('2つの道は「あと ○」（FOP だけで あと 23,296・30回のうち あと 26回）:', re.search(r'あと\s*23,296', t) is not None and re.search(r'あと\s*26\s*回', t) is not None)
@@ -47,6 +47,12 @@ async def main():
         await pg.wait_for_timeout(500)
         check('次に乗る便：この路線の今日（2便・欠航 1便）:', '2便・欠航 1便' in await pg.inner_text('#sgNxRt'))
         await pg.screenshot(path=os.path.join(WORK, 't125_road.png'), full_page=True)
+        # 運賃を推定した便（review-app-1 の2）：大きな数字の横に数・押すと1便ごと・1便の行は「セイバー（推定）」
+        check('運賃を推定した便 1（運賃なしの便だけ）:', await pg.evaluate("sgYear().JAL.assumed") == 1 and await pg.evaluate("document.querySelector('#v-sg .sgb-hero .big .sgb-est').textContent") == '運賃を推定した便1便')
+        await pg.click('#v-sg .sgb-est'); await pg.wait_for_timeout(300)
+        t = await pg.inner_text('#v-sg')
+        check('押すと1便ごと・推定の便は「セイバー（推定）」が1行:', await pg.evaluate("sgViewNow()") == 'flights' and t.count('セイバー（推定）') == 1 and t.count('セイバー') == 4)
+        await pg.click('#v-sg [data-sg-view="road"]'); await pg.wait_for_timeout(300)
         # Life Status：今の数を入れる（入れた日より前の便は二重に数えない）
         await pg.click('#v-sg [data-sg-lsedit="1"]'); await pg.wait_for_timeout(200)
         d0 = J(-10); await pg.fill('#sgLsV', '1240'); await pg.fill('#sgLsD', d0)
@@ -89,7 +95,7 @@ async def main():
         check('見方は1つは残る:', await pg.evaluate("Object.values(sgShow().views).filter(Boolean).length") == 1)
         await pg.click('#v-sg .sg-back'); await pg.wait_for_timeout(300)
         t = await pg.inner_text('#v-sg')
-        check('JGC を OFF にすると道のりに出ない・ピルは道のりだけ:', 'Life Status' not in t and await pg.evaluate("[...document.querySelectorAll('#v-sg [data-sg-view]')].map(b => b.textContent).join()") == '道のり')
+        check('JGC を OFF にすると道のりに出ない・ピルは道のりだけ:', 'Life Status' not in t and await pg.evaluate("[...document.querySelectorAll('#v-sg .sgb-views [data-sg-view]')].map(b => b.textContent).join()") == '道のり')
         # 予定も計画もない人：一文と「計画を作る」
         await pg.evaluate("(() => { const g = sgGet(); g.plans = []; g.drafts = []; sgKeep(() => {}); })()"); await pg.wait_for_timeout(200)
         t = await pg.inner_text('#v-sg')
@@ -102,6 +108,14 @@ async def main():
         await pg.evaluate("(() => { const g = sgGet(); g.car = 'JAL'; g.plans = [{ id:'p1', d:'" + J(5) + "', hm:'07:00', from:A.find(a => a.iata === 'HND').id, to:A.find(a => a.iata === 'OKA').id, car:'JAL', fare:'JAL:Y_SAVER', no:'JL903' }]; document.documentElement.dataset.night = 'on'; sgKeep(() => {}); })()"); await pg.wait_for_timeout(300)
         st = await pg.evaluate("(() => { const e = document.querySelector('#v-sg .sgb-next'), s = getComputedStyle(e); return [s.borderTopStyle, s.backgroundColor]; })()")
         check('夜：次に乗る便は点線の縁・金の地ではない:', st[0] == 'dashed' and st[1] != 'rgb(251, 246, 236)')
+        # 667：2つの道の箱の数字まで、下のタブ帯より上に見える（review-app-1 の3）
+        await pg.evaluate("delete document.documentElement.dataset.night")
+        await pg.set_viewport_size({'width':390, 'height':667}); await pg.evaluate("(() => { const g = sgGet(); g.show = { two:true, jgc:true, reach:true, next:true }; g.views = { road:true, flights:true, months:true }; SG_VIEW = 'road'; sgKeep(() => {}); scrollTo(0, 0); })()"); await pg.wait_for_timeout(400)
+        vis = await pg.evaluate("""(() => { const tb = document.querySelector('nav.tabs'), lim = tb && getComputedStyle(tb).display !== 'none' ? tb.getBoundingClientRect().top : innerHeight;
+          return [...document.querySelectorAll('#v-sg .sgb-two p')].map(e => Math.round(lim - e.getBoundingClientRect().bottom)); })()""")
+        print('667 の余り', vis)
+        check('667：2つの道の「あと ○」がタブ帯より上:', len(vis) == 2 and all(v >= 0 for v in vis))
+        await pg.screenshot(path=os.path.join(WORK, 't125_road_667.png'))
         print('errors', errs, 'fails', fails); await b.close()
         sys.exit(1 if fails or errs else 0)
 asyncio.run(main())
