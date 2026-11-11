@@ -2,7 +2,7 @@ import os, sys
 HERE=os.path.dirname(os.path.abspath(__file__)); WEB=os.path.abspath(os.path.join(HERE,'..','..','web')); WORK=os.environ.get('SORAMEMO_TEST_WORK','/tmp/soramemo-e2e'); os.makedirs(WORK, exist_ok=True)
 # 修行モード：下のタブに修行（運用の代わり）、ホームのカード（次に乗る便・運航の状況・その日の行程）、
 # 修行のタブの中の行き来、フライトの見方「修行」（月ごと・金額を入れる）、成績の「修行のまとめ」（いちばん上）、気軽にでは隠す
-import asyncio, json
+import asyncio, re, json
 from datetime import datetime, timedelta, timezone
 from playwright.async_api import async_playwright
 now = datetime.now(timezone.utc)
@@ -54,17 +54,17 @@ async def main():
         check('計画を作るは修行のタブで開く:', await pg.evaluate("currentView()") == 'sg' and not await pg.evaluate("$('dShugyo').open") and '計画を作る' in await pg.inner_text('#v-sg') and await pg.evaluate('SG_PAGE') == 'find')
         await pg.click('#v-sg .sg-back'); await pg.wait_for_timeout(300)
         t = await pg.inner_text('#v-sg')
-        check('戻るとまとめ（閉じるはなく、会員情報がある）:', '年の修行' in t and '会員情報' in t and '閉じる' not in t)
-        await pg.click('#v-sg [data-sg-go="year"]'); await pg.wait_for_timeout(200)
+        check('戻るとまとめ（閉じるはなく、会員情報がある）:', '修行' in t and '道のり' in t and '会員情報' in t and '閉じる' not in t)
+        await pg.click('#v-sg [data-sg-go="quick"]'); await pg.wait_for_timeout(200)
         await pg.click('nav.tabs button[data-v="sg"]'); await pg.wait_for_timeout(300)
         check('開いているときに修行のタブを押すとまとめに戻る:', await pg.evaluate("SG_PAGE") == 'main')
         await pg.click('#v-sg [data-sg-set="car"][data-v="JAL"]'); await pg.wait_for_timeout(300)
         t = await pg.inner_text('#v-sg')
         check('タブの中で航空会社を切り替えられる:', await pg.evaluate("sgGet().car") == 'JAL' and 'FOP' in t)
-        check('JAL の搭乗回数は記録した便だけ:', '搭乗\n0回' in t or '搭乗 0回' in t)
+        check('JAL の回数の道は記録した便だけ（30回のうち あと 30回）:', bool(re.search(r'あと\s*30\s*回', t)))
         await pg.click('#v-sg [data-sg-set="car"][data-v="ANA"]'); await pg.wait_for_timeout(300)
         t = await pg.inner_text('#v-sg')
-        check('修行のタブ：実績と予定のかたまりが分かれている:', '実績' in t and '記録した便だけ' in t and '予定' in t and 'これから乗る' in t and '計画' in t)
+        check('修行のタブ：実績と予定のかたまりが分かれている:', '実績' in t and '記録した便' in t and '予定の2便に乗ると' in t and '推定' in t)
         await pg.evaluate("sgGo('budget')"); await pg.wait_for_timeout(200)
         await pg.fill('#sgBudget', '100000'); await pg.dispatch_event('#sgBudget', 'change'); await pg.wait_for_timeout(300)
         t = await pg.inner_text('#v-sg'); print('BUDGET', t[:300].replace('\n', ' | '))
@@ -74,22 +74,18 @@ async def main():
         await pg.evaluate("sgGo('main')"); await pg.wait_for_timeout(200)
         await pg.screenshot(path=os.path.join(WORK, 't73_tab.png'), full_page=True)
         check('窓の中身は空（id が重ならない）:', await pg.evaluate("$('dShugyoBody').innerHTML") == '')
-        # フライトの見方「修行」
+        # フライトの見方「修行」はなくなった（PR #65・画面案 07）。1便ごとの記録は修行のタブの「1便ごと」で見る
         await pg.click('nav.tabs button[data-v="log"]'); await pg.wait_for_timeout(500)
-        t = await pg.inner_text('#flights'); print('LOG', t.replace('\n', ' | ')[:400])
-        check('フライト：見方は修行・月ごとにたまった・払った・1ポイントあたり:', await pg.evaluate("VIEW.log") == 'sg' and 'たまった' in t and '払った' in t and '1ポイントあたり' in t and '28,700' in t)
-        check('フライト：前の月はたたんである:', await pg.locator('#flights .sgmo[data-sglog]').count() >= 1)
-        opened = False
-        if '金額を入れる' not in t:   # 月のはじめは、金額のない便が前の月にある（たたんだ月を開いて見る）
-            await pg.click('#flights [data-sglog]'); await pg.wait_for_timeout(300); opened = True
-            t = await pg.inner_text('#flights')
-        check('フライト：金額のない便に「金額を入れる」:', '金額を入れる' in t)
-        await pg.locator('#flights .sgled').screenshot(path=os.path.join(WORK, 't73_log.png'))
-        await pg.click('#flights .sgprice'); await pg.wait_for_timeout(300)
-        check('金額を入れるで便の窓が開く:', await pg.evaluate("$('dFlight').open"))
+        check('フライト：見方「修行」はない（日誌などになる）:', await pg.evaluate("VIEW.log") != 'sg' and await pg.locator('#flights .sgled').count() == 0)
+        await pg.click('nav.tabs button[data-v="sg"]'); await pg.wait_for_timeout(300)
+        await pg.click('#v-sg [data-sg-view="flights"]'); await pg.wait_for_timeout(300)
+        n = await pg.evaluate("sgYear().ANA.n"); t = await pg.inner_text('#v-sg'); print('FLS', n, t.replace('\n', ' | ')[:300])
+        check('修行のタブの1便ごと：今年の記録した便が並ぶ（予定は入らない）:', n >= 1 and await pg.locator('#v-sg [data-sg-fl]').count() == n)
+        await pg.locator('#v-sg [data-sg-fl]').first.click(); await pg.wait_for_timeout(300)
+        await pg.click('#v-sg [data-flight]'); await pg.wait_for_timeout(300)
+        check('1便の内訳から便の窓を開ける（運賃を選び直す）:', await pg.evaluate("$('dFlight').open"))
         await pg.evaluate("$('dFlight').close()")
-        if not opened: await pg.click('#flights [data-sglog]'); await pg.wait_for_timeout(300)
-        check('たたんだ月を開ける:', 'たまった' in await pg.inner_text('#flights') and await pg.evaluate("SG_LOGOPEN") is not None)
+        await pg.evaluate("sgGo('main')"); await pg.wait_for_timeout(200)
         # 成績：修行のまとめがいちばん上
         await pg.click('nav.tabs button[data-v="stats"]'); await pg.wait_for_timeout(500)
         t = await pg.inner_text('#sgSum'); print('SUM', t.replace('\n', ' | ')[:300])
