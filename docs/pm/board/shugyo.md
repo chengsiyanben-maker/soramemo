@@ -55,6 +55,8 @@
 - 11/11 11時25分 PM：修行の見方の帯は、図鑑の鉛筆のシートと同じ部品（チェックイン担当の土台）を使う（CLAUDE.md「見方の設定」）
 - 11/11 夕：statusRows で isCar(f) の便を飛ばすようにした（PR #65・bb1d639）。statusRows を使う sgYear・sgDoneKeys・運賃の所はみな車などを数えなくなる。#65 が main に入ったら取り込んで t125 に「車などにした便は入らない」を足してほしい
 
+- 11/11 夜：見方の設定の土台を PR #68（feat/view-settings）で作った。消せない見方は案A（どの見方も OFF にでき、最後の1つだけ残る）。鉛筆のシートの行は loRowHTML({ label, desc, on, last, attr }) で、図鑑・フライト・運用と同じ形（説明1行・「最後の1つ」の札と理由）になる。表示の編集の1枚に修行のカードを出すには `LO_EXT.sg = { groups:() => [{ title:'見方', rows:[{ id, label, desc, on, last }] }, { title:'道のりに出すもの', sub:'道のりの画面に出すかたまり', rows:[...] }], toggle:id => { …変えて保存…; return true; } }` を足す（足すまで修行のカードは出ない。行を押すと toggle のあと元に戻すの帯が出る）。#68 が main に入ってから使ってほしい
+
 ## PM から積んだ次の仕事（11/11 13時、修行の反映の前の直し）
 改善担当 review-app-1（design/shugyo-book）：見せてよい。main に入れる前に直す（feat/shugyo-book）
 1. 車などの便を数えない → 済み（2ed0654。#65 の入った main を取り込み、t125 に足した）
