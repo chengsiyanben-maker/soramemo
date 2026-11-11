@@ -24,6 +24,16 @@ function airportYomi() {
   for (const x of sql.matchAll(/\((\d+),\s*'([ぁ-ゖー]+)',\s*'([ぁ-ゖー]+)',\s*(?:'\{\}'|array\[([^\]]*)\])\)/g)) m[x[1]] = [x[2], x[3], x[4] ? [...x[4].matchAll(/'([ぁ-ゖー]+)'/g)].map(y => y[1]) : []];
   return JSON.stringify(m);
 }
+// 図鑑の空港ページのデータ欄（供用開始の年・滑走路）。データ担当の移行 airport_facts の値をアプリに入れる（表があればアプリがサーバーの値で上書きする）
+// 形：{ 空港の番号: [年 または null, [[記号 または null, 長さm, 幅m, 補足?], …], 出典の PDF の番号] }
+function airportFacts() {
+  const dir = new URL("../supabase/migrations/", import.meta.url), f = readdirSync(dir).filter(n => /_airport_facts\.sql$/.test(n)).sort().pop();
+  if (!f) return "{}";
+  const sql = readFileSync(new URL(f, dir), "utf8"), m = {};
+  for (const x of sql.matchAll(/^\s*\((\d+),\s*(\d{4}|null),\s*'(\[[^']*\])',\s*'(\d+)'\)/gm))
+    m[x[1]] = [x[2] === "null" ? null : +x[2], JSON.parse(x[3]).map(r => r.note ? [r.name, r.length_m, r.width_m, r.note] : [r.name, r.length_m, r.width_m]), x[4]];
+  return JSON.stringify(m);
+}
 import { gzipSync } from "node:zlib";
 import { createHash } from "node:crypto";
 import { execFileSync } from "node:child_process";
@@ -46,6 +56,7 @@ for (const f of files) {
   let out = f === "now.html" ? src.replace("/*@OPS_CORE@*/", () => opsCoreParts().join("\n")) : src;
   out = out.replace("/*@LIVERIES@*/{}", () => liveryNames());   // 特別塗装機の一覧（登録記号 → 名前）を、サーバーの liveries.ts からアプリに入れる（乗った機体の図鑑の印）
   out = out.replace("/*@LIVERY_AIR@*/{}", () => liveryAirlines());
+  out = out.replace("/*@AIRPORT_FACTS@*/{}", () => airportFacts());   // 図鑑の空港ページの供用開始・滑走路（国土交通省「空港一覧」を加工）
   out = out.replace("/*@AIRPORT_YOMI@*/{}", () => airportYomi());   // 空港の名前の読み（図鑑の索引・探す欄）   // 特別塗装機の航空会社（特別塗装機の図鑑で分ける）
   // CSS
   out = out.replace(/<style>([\s\S]*?)<\/style>/g, (_, css) => `<style>${cssMinify(css).css}</style>`);

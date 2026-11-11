@@ -2326,6 +2326,9 @@ dialog.psheet .btn1,dialog.psheet .btn2{display:block;width:100%;margin-top:10px
 #v-book .zk-note{margin:10px 2px 0}
 /* 地方別：右にツメのぶん空ける */
 :root[data-bkview="region"][data-bookseg="main"] #zkBody .zk-main,:root[data-bkview="region"][data-bookseg="main"] #bookMain .vwrow,:root[data-bkview="region"][data-bookseg="main"] #zkNotice{margin-right:44px}
+/* 上の「索引」「ほかの図鑑・実績」もツメの左で止める（review-facts-1 の5）。狭い画面では余白を少し詰める */
+:root[data-bkview="region"][data-bookseg="main"] #v-book .zk-ttl{margin-right:44px}
+@media (max-width:380px){:root[data-bkview="region"][data-bookseg="main"] #v-book .zk-ttl{gap:6px}:root[data-bkview="region"][data-bookseg="main"] #v-book .zk-ttl .zk-pill{padding:0 11px}}
 #v-book .zk-hero{margin-top:10px;background:var(--hero,#0F1B2D);color:#fff;border-radius:22px;padding:12px 16px 14px}
 #v-book .zk-hero .ht{display:flex;align-items:baseline;gap:6px}
 #v-book .zk-hero .lab{font-size:13px;color:#C9D2DE;font-weight:700;margin-right:4px}
@@ -2448,6 +2451,19 @@ dialog.psheet .btn1,dialog.psheet .btn2{display:block;width:100%;margin-top:10px
 #dAirportBody .zk-yet{margin-top:12px;padding:14px 16px;border-radius:18px;background:var(--card,#fff);box-shadow:0 1px 2px rgba(17,24,39,.04),0 10px 26px -14px rgba(17,24,39,.22);text-align:left;font-size:13px;color:#4B5563;line-height:1.7}
 #dAirportBody .zk-yet>b{display:block;font-size:15px;color:var(--ink,#1F2937)}
 #dAirportBody .zk-yet .num{font-size:20px}#dAirportBody .zk-yet>span{display:block}
+/* 図鑑の空港ページのデータ欄（供用開始・滑走路）と出典の1行。値は国土交通省「空港一覧」を加工（移行 160 airport_facts） */
+#dAirportBody .zk-facts{margin-top:16px}
+#dAirportBody .zk-facts>div.w{grid-column:1/-1}
+#dAirportBody .zk-rw{list-style:none;margin:8px 0 0;padding:10px 14px;border-radius:18px;background:var(--card,#fff);box-shadow:0 1px 2px rgba(17,24,39,.04),0 10px 26px -14px rgba(17,24,39,.22);text-align:left}
+#dAirportBody .zk-rw li{display:flex;align-items:baseline;gap:8px;min-height:30px;font-size:14px;color:var(--ink,#1F2937)}
+#dAirportBody .zk-rw li .rk{min-width:1.4em;font-family:var(--sign);font-weight:700;color:#4B5563}
+#dAirportBody .zk-rw li .num{font-size:18px}
+#dAirportBody .zk-rw li small{font-size:13px;color:#5F6875}
+#dAirportBody .zk-rw li.sub{min-height:26px}#dAirportBody .zk-rw li.sub b{font-weight:700;color:#4B5563}
+#dAirportBody .zk-rw1{display:flex;align-items:baseline;gap:6px;margin-top:6px;font-size:13px;color:var(--ink,#1F2937)}
+#dAirportBody .zk-rw1 .num{font-size:16px}#dAirportBody .zk-rw1 .rk{font-family:var(--sign);font-weight:700;color:#4B5563}
+#dAirportBody .zk-src{margin:2px 2px 4px;font-size:13px;line-height:1.6;color:#5F6875;text-align:left}
+#dAirportBody .zk-src a{display:inline-block;padding:12px 0;margin:-12px 0;line-height:20px;color:inherit;text-decoration:underline;text-underline-offset:2px}
 #dAirportBody .zk-more summary{min-height:44px;display:flex;align-items:center;font-weight:700;cursor:pointer}
 #dAirportBody .zk-pn{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px}
 #dAirportBody .zk-pn button{display:flex;align-items:center;gap:6px;min-height:52px;padding:0 14px;border:0;border-radius:999px;background:var(--card,#fff);box-shadow:0 1px 2px rgba(17,24,39,.04),0 10px 26px -14px rgba(17,24,39,.22);font:700 14px var(--gothic);color:var(--ink,#1F2937);min-width:0}
@@ -4472,6 +4488,35 @@ async function zkLoadYomi(){
     for(const r of data) AIRPORT_YOMI[r.airport_id] = [r.yomi, r.index_yomi, r.alt_yomi || []];
     if(BOOK_SEG === "index") renderZkIndex(); }catch(e){}
 }
+/* ---------- 空港ページのデータ欄：供用開始の年と滑走路（データ担当の移行 160 airport_facts。11/10 本人「すべてOK」）
+   組み立てのときに移行の値を入れ、表があればサーバーの値で上書きする。形は {番号: [年|null, [[記号|null, 長さ, 幅, 補足?]…], PDF の番号]}
+   行がない空港（成田・中部・関西・伊丹・千歳・番外編）は欄ごと出さない。年が null（羽田・三沢・岩国）は年の欄を出さない。「開港」とは書かない */
+const AIRPORT_FACTS = /*@AIRPORT_FACTS@*/{};
+let ZK_FACTS_LOADED = false;
+async function zkLoadFacts(){
+  if(ZK_FACTS_LOADED || !SERVER || !sb) return; ZK_FACTS_LOADED = true;
+  try{ const { data, error } = await sb.from("airport_facts").select("airport_id,opened_year,runways,source_ref"); if(error || !data || !data.length) return;
+    for(const r of data){ const m = String(r.source_ref || "").match(/content\/(\d+)\.pdf/);
+      AIRPORT_FACTS[r.airport_id] = [r.opened_year == null ? null : +r.opened_year, (Array.isArray(r.runways) ? r.runways : []).filter(w => w && w.length_m && w.width_m).map(w => w.note ? [w.name ?? null, +w.length_m, +w.width_m, String(w.note)] : [w.name ?? null, +w.length_m, +w.width_m]), m ? m[1] : null]; }
+    const box = $("zkFacts"); if(box && $("dAirport").open) box.innerHTML = zkFactsHTML(+box.dataset.a); }catch(e){}
+}
+function zkFactsHTML(id){
+  const f = AIRPORT_FACTS[id]; if(!f) return "";
+  const [y, rws, pdf] = f, main = (rws || []).filter(r => !r[3]), sub = (rws || []).filter(r => r[3]);   // 補足つき（福岡の C・D は奈多地区のヘリポート）は本数に数えず、一覧の下に1行で
+  if(y == null && !rws.length) return "";
+  const n = x => Number(x).toLocaleString("ja-JP");
+  const lw = r => `<b class="num">${n(r[1])}</b><span class="u">m</span>×<b class="num">${n(r[2])}</b><span class="u">m</span>`;
+  // 1本だけの空港は「滑走路 1本」のカードの中に長さ×幅を小さく入れ、カードを1つ減らす（review-facts-1 の4）
+  const one = main.length === 1;
+  const cells = (y != null ? `<div><span class="k">供用開始</span><span class="v"><b class="num">${y}</b><span class="u">年</span></span></div>` : "")
+    + (main.length ? `<div${y == null ? ` class="w"` : ""}><span class="k">滑走路</span><span class="v"><b class="num">${main.length}</b><span class="u">本</span></span>${one ? `<span class="zk-rw1">${main[0][0] ? `<span class="rk">${esc(main[0][0])}</span>` : ""}<span>${lw(main[0])}</span></span>` : ""}</div>` : "");
+  // 補足ごとにまとめる：「奈多地区（ヘリポート）」×2 →「ほかにヘリポート 2（奈多地区）」
+  const subs = [...sub.reduce((m, r) => m.set(r[3], (m.get(r[3]) || 0) + 1), new Map())].map(([t, c]) => { const h = String(t).match(/^(.*)（ヘリポート）$/);
+    return h ? `ほかにヘリポート <b>${c}</b>（${esc(h[1])}）` : `ほかに <b>${c}</b>（${esc(t)}）`; });
+  const list = (main.length && !one) || subs.length ? `<ul class="zk-rw" aria-label="滑走路の長さと幅">${one ? "" : main.map(r => `<li>${r[0] ? `<span class="rk">${esc(r[0])}</span>` : ""}<span>${lw(r)}</span></li>`).join("")}${subs.map(t => `<li class="sub"><small>${t}</small></li>`).join("")}</ul>` : "";
+  const src = pdf ? `<a href="https://www.mlit.go.jp/koku/content/${esc(pdf)}.pdf" target="_blank" rel="noopener">国土交通省『空港一覧』</a>` : "国土交通省『空港一覧』";
+  return `${cells ? `<div class="zk-dl zk-facts">${cells}</div>` : ""}${list}<p class="zk-src">出典：${src}を加工して作成</p>`;
+}
 const zkKana = s => String(s || "").normalize("NFKC").toLowerCase().replace(/[ァ-ヶ]/g, c => String.fromCharCode(c.charCodeAt(0) - 0x60)).replace(/\s+/g, "");
 const zkYomi = a => AIRPORT_YOMI[a.id] || null;
 function zkMatch(a, q){
@@ -6113,11 +6158,13 @@ function openAirport(id){
   ${noticesHTML(a)}
   ${first && gameAvail() && !a.kind ? `<div class="meet">${godSVG(a)}<div><span class="gametag">エアライン経営</span><b>${godName(a)}と出会った</b><span class="hint">エアライン経営の「守り神」で会えます（仮の姿）</span></div></div>` : ""}
   ${ts.length ? `<h3 class="sub">ターミナル　${got} / ${ts.length}</h3><p class="hint">ターミナルの印は空港の印と別に集めます（86 の数に入りません）。ターミナルで押した回も、空港で押した回に数えます。</p><div class="aplist">${termList}</div>` : ""}
+  ${AIRPORT_FACTS[a.id] ? `<div id="zkFacts" data-a="${a.id}">${zkFactsHTML(a.id)}</div>` : ""}
   ${false && a.iata === "HND" ? `<button class="btn2 opsbtn" style="width:100%;margin-top:12px" data-ap-ops>羽田の今の運用（滑走路・進入）</button>` : ""}
   ${pv || nx ? `<div class="zk-pn">${pv ? `<button type="button" data-zk-go="${pv.id}"><span aria-hidden="true">‹</span><b>${esc(godShort(pv))}</b>${/[^\x00-\x7f]/.test(code(pv)) ? "" : `<small>${esc(code(pv))}</small>`}</button>` : "<span></span>"}${nx ? `<button type="button" data-zk-go="${nx.id}"><b>${esc(godShort(nx))}</b>${/[^\x00-\x7f]/.test(code(nx)) ? "" : `<small>${esc(code(nx))}</small>`}<span aria-hidden="true">›</span></button>` : "<span></span>"}</div>` : ""}
   ${first ? `<div class="row2"><button class="btn2" data-close>閉じる</button><button class="btn1" data-share-a="${a.id}" data-share-at="${first}">画像で共有</button></div>
   <button class="btn2" style="width:100%;margin-top:8px" data-photo-a="${a.id}" data-photo-at="${first}">写真に押す</button>` : `<button class="btn2" style="width:100%;margin-top:14px" data-close>閉じる</button>`}`;
   if(!$("dAirport").open) $("dAirport").showModal();
+  zkLoadFacts();
   NOW = null; if(canNow(a)){ loadNow(a); renderNow(); }
 }
 // 前／次：ボタンと、印のカードを横にはらう（画面の端20pxは受けない。Safari の戻る動きとぶつけない）
