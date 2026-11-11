@@ -86,7 +86,7 @@ async def main():
         check('全部乗せに戻る:', await pg.evaluate(TABS) == 'home,book,log,ops,sg' and await pg.evaluate("localStorage.getItem('soramemo.layout')") is None and 'タブ1つ・見方1つ・かたまり1つをまた出しました' in await pg.inner_text('#dLayout .loundo'))
         await pg.evaluate("$('dLayout').close(); goTab('log')"); await pg.wait_for_timeout(600)
         await pg.click('[data-vs-open="log"]'); await pg.wait_for_timeout(300)
-        check('フライトの鉛筆はフライトの見方だけのシート（review-c5 の1）:', await pg.evaluate("$('dViews').open && !$('dLayout').open && VS.k === 'log'") and await pg.locator('#dViews [data-vs-sw]').count() == 9)
+        check('フライトの鉛筆はフライトの見方だけのシート（review-c5 の1）:', await pg.evaluate("$('dViews').open && !$('dLayout').open && VS.k === 'log'") and await pg.locator('#dViews [data-vs-sw]').count() == 2)   # 日誌は「いつも」・地図と年のまとめ
         await pg.click('#dViews [data-vs-all]'); await pg.wait_for_timeout(300)
         check('「表示の編集をすべて見る」でフライトの見方の所へ:', await pg.evaluate("$('dLayout').open && !$('dViews').open && LO_PAGE === 'log'") and await pg.evaluate("(() => { const g = document.querySelector('#dLayout [data-lo-go=\"log\"]').getBoundingClientRect(); return g.top > 0 && g.top < 400; })()"))
         await c.close()

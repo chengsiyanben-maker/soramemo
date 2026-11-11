@@ -227,7 +227,7 @@ async def main():
         c = await ctx(b, "window.__viewPrefs = [];" + NEW, 2); pg = await page(c, errs, True)
         await pg.evaluate("showHideSuggest('spot')"); await pg.wait_for_timeout(300)
         t = await pg.inner_text('#dPersona')
-        check('撮る：タブを4つにしますか・あわせて3こ:', 'タブを4つにしますか' in t and 'あわせて3こ' in t and '4つにする' in t and '5つのまま使う' in t)
+        check('撮る：タブを4つにしますか・あわせて2こ（フライトの見方「修行」はなくなった）:', 'タブを4つにしますか' in t and 'あわせて2こ' in t and '4つにする' in t and '5つのまま使う' in t)
         await pg.screenshot(path=os.path.join(SHOTS, '08-c4-spot.png'))
         await pg.click('#dPersona [data-hs-yes]'); await pg.wait_for_timeout(500)
         check('撮る：修行のタブが外れる:', await pg.evaluate(TABS) == 'home,book,log,ops')

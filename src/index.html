@@ -8040,7 +8040,7 @@ async function afterCheckout(){
 const SLOTS = [["朝", h => h >= 5 && h < 10], ["昼", h => h >= 10 && h < 16], ["夕方", h => h >= 16 && h < 20], ["夜", h => h >= 20 || h < 5]];
 function yearStats(y){
   const inY = t => new Date(t).getFullYear() === y;
-  const cs = S.checkins.filter(c => inY(c.t)), fs = S.flights.filter(f => inY(f.arr));
+  const cs = S.checkins.filter(c => inY(c.t)), fs = S.flights.filter(f => inY(f.arr) && !isCar(f));   // 車などの移動は便に入れない（11/11）
   const m = Array.from({length:12}, () => ({c:0, f:0}));
   cs.forEach(c => m[new Date(c.t).getMonth()].c++); fs.forEach(f => m[new Date(f.arr).getMonth()].f++);
   const season = [0,0,0,0]; cs.forEach(c => season[seasonOf(c.t)]++);
