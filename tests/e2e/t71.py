@@ -43,14 +43,15 @@ async def main():
 
         # 運用：見方の右端の鉛筆から、表示の編集（運用の見方の所）へ
         await pg.evaluate("goTab('ops')"); await pg.wait_for_timeout(1200)
-        check('見方の右端に鉛筆:', await pg.locator('[data-lo-open="ops"]').count() == 1 and await pg.locator('#opsViews [data-vw]').count() == 7)
-        await pg.click('[data-lo-open="ops"]'); await pg.wait_for_timeout(300)
-        check('鉛筆で表示の編集が開く:', await pg.evaluate("$('dLayout').open && LO_PAGE === 'ops'"))
-        for v in ['day', 'ontime', 'art']: await pg.click(f'[data-lo-view="ops:{v}"]')
+        check('見方の右端に鉛筆:', await pg.locator('[data-vs-open="ops"]').count() == 1 and await pg.locator('#opsViews [data-vw]').count() == 7)
+        await pg.click('[data-vs-open="ops"]'); await pg.wait_for_timeout(300)
+        check('鉛筆で運用の見方のシートが開く:', await pg.evaluate("$('dViews').open && VS.k === 'ops'"))
+        for v in ['day', 'ontime', 'art']: await pg.click(f'#dViews [data-vs-sw="{v}"]')
         check('見方を隠す:', await pg.locator('#opsViews [data-vw]').count() == 4 and await pg.locator('#opsViews [data-vw="ops:day"]').count() == 0)
-        for v in ['board', 'strip', 'photo']: await pg.click(f'[data-lo-view="ops:{v}"]')
-        check('最後の1つは隠せない:', await pg.locator('[data-lo-view="ops:runway"]').is_disabled() and await pg.locator('#opsViews [data-vw]').count() == 1)
-        for v in ['board', 'strip', 'photo']: await pg.click(f'[data-lo-view="ops:{v}"]')
+        for v in ['board', 'strip', 'photo']: await pg.click(f'#dViews [data-vs-sw="{v}"]')
+        check('最後の1つは隠せない:', await pg.locator('#dViews [data-vs-sw="runway"]').is_disabled() and await pg.locator('#opsViews [data-vw]').count() == 1)
+        for v in ['board', 'strip', 'photo']: await pg.click(f'#dViews [data-vs-sw="{v}"]')
+        await pg.evaluate("$('dViews').close(); openLayout('ops', 'screen')"); await pg.wait_for_timeout(300)
         # 空港
         for a in ['HND', 'HIJ']: await pg.click(f'[data-lo-ap="{a}"]')
         aps = await pg.eval_on_selector_all('#opsAps .aplist [data-ops-ap]', 'e => e.map(x => x.dataset.opsAp)')
