@@ -218,5 +218,6 @@ def s01():
             '<li>修行のページの行だけ番号（1〜3）がある。見方は並べ替えないので番号は要らない</li></ul></div></div>') % (th, rows)
     page(OUT + '/01-now.html', '01 今の見方の設定', body, False, X)
 
-s01(); s02(); s02(night=True); s03(); s04()
-print('ok')
+if __name__ == "__main__":
+    s01(); s02(); s02(night=True); s03(); s04()
+    print('ok')
