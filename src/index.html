@@ -2627,8 +2627,14 @@ nav.tabs{transition:transform .3s cubic-bezier(.2,.8,.2,1),opacity .2s}
 #v-log .fbhead h2{margin:0;font:800 28px/1.2 var(--gothic);letter-spacing:.04em;color:var(--fb-ink)}
 #v-log .fbhead .lbtns{display:flex;gap:10px}
 #v-log .vwrow{margin:0 0 12px}
-#v-log .fbyr{position:sticky;top:0;z-index:3;background:var(--fb-card);border-radius:24px;box-shadow:var(--fb-shadow);padding:10px 14px;margin:0 0 16px;color:var(--fb-ink)}
-#v-log .fbyr:not([data-mode="diary"]){position:relative;top:auto}   /* 上に止まるのは日誌だけ（下へ送ると年が変わる） */
+#v-log .fbyr{position:relative;background:var(--fb-card);border-radius:24px;box-shadow:var(--fb-shadow);padding:10px 14px;margin:0 0 16px;color:var(--fb-ink)}
+/* 日誌で年のカードが上へ出ていったら、年の字と ‹ › だけの細い帯を上に止める（月の見出しを隠さない・11/11 review-app-1 の2）。
+   帯は高さ0の入れ物に載せるので、出ても消えても下の便の位置は動かない */
+#v-log .fbmini{position:sticky;top:0;z-index:3;height:0;overflow:visible}
+#v-log .fbmini[hidden]{display:block;visibility:hidden}
+#v-log .fbyr-mini{position:absolute;left:0;right:0;top:0;margin:0;padding:2px 8px;border-radius:999px}
+#v-log .fbyr-mini .yrsw button{height:40px}
+#v-log .fbyr-mini .yrname b{font-size:18px}
 #v-log .fbyr .yrsw{display:grid;grid-template-columns:44px 1fr 44px;align-items:center}
 #v-log .fbyr .yrsw button{height:44px;border:0;background:none;color:var(--fb-mute);font:700 20px var(--gothic);border-radius:999px;padding:0}
 #v-log .fbyr .yrsw button[disabled]{color:var(--fb-fade)}
@@ -2725,6 +2731,7 @@ nav.tabs{transition:transform .3s cubic-bezier(.2,.8,.2,1),opacity .2s}
 #v-log .fblg .lgrow{display:flex;align-items:center;gap:14px;flex-wrap:wrap;font-size:13px;color:var(--fb-mute)}
 #v-log .fblg .lgrow span{display:inline-flex;align-items:center;gap:6px}
 #v-log .fblg .lgrow i{display:inline-block;width:30px;border-radius:9px;background:var(--fb-line)}
+#v-log .fblg .lgrow i.dash{background:repeating-linear-gradient(90deg,var(--fb-line) 0 4px,transparent 4px 8px);border-radius:0}   /* 凡例の車などは点線（上の指定に負けないようにここで） */
 #v-log .fblg .lgbot{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:10px}
 #v-log .fblg .lgbot small{display:block;font-size:13px;color:var(--fb-mute)}
 #v-log .fblg .lgbot b{display:block;font-size:16px;font-weight:800}
@@ -3253,6 +3260,7 @@ dialog.ckconfirm button.go{background:#E9C46A;color:#111827}
       <div class="viewsw" id="logViews" role="tablist" aria-label="フライトの見方"></div>
       <div id="bpPending"></div>
       <div class="fbyr" id="fbYr"></div>
+      <div class="fbmini" id="fbMini" hidden><div class="fbyr fbyr-mini" id="fbMiniBar"></div></div>
       <div id="flights"></div>
       <p class="hint lhint">便を押すと、くわしい所と「画像で共有」を出します。右上のボタンで搭乗券のバーコードを読むと、便名・航空会社・座席を付けます（名前と予約番号は保存しません）。<button class="linkbtn" id="bpImg">スクリーンショットから読み取る</button></p>
       <input type="file" id="bpFile" accept="image/*" hidden><input type="file" id="photoFile" accept="image/*" hidden>
@@ -4993,7 +5001,7 @@ function renderLog(){
   YEAR = FB_Y;   // 成績のステータスの目安も同じ年に（前の「年ごと」の切り替えと同じ）
   setViewsw("logViews", "log");
   const mode = VIEW.log, yr = $("fbYr");
-  yr.dataset.mode = mode; yr.innerHTML = fbYrHTML(ys, mode === "diary");
+  yr.dataset.mode = mode; yr.innerHTML = fbYrHTML(ys, mode === "diary"); fbMiniSync();
   const ye = FB_ES.filter(e => fbYOf(e) === FB_Y);
   if(mode === "map"){ if(FB_RT && !fbRoutes(ye).some(r => r.k === FB_RT)) FB_RT = null; $("flights").innerHTML = fbMapHTML(ye); fbMapSVG(ye); setTimeout(renderFlightMap, 0); }
   else if(mode === "year"){ $("flights").innerHTML = fbYearHTML(ye); renderYearPlus(); }
@@ -5009,9 +5017,16 @@ function renderLog(){
 let FB_SCROLL = 0;
 addEventListener("scroll", () => { if(FB_SCROLL || currentView() !== "log" || VIEW.log !== "diary" || LOG_SEG !== "list") return;
   FB_SCROLL = requestAnimationFrame(() => { FB_SCROLL = 0; const yr = $("fbYr"); if(!yr) return;
-    const lim = yr.getBoundingClientRect().bottom + 40, first = document.querySelector("#flights .fbmh"); let y = first ? +first.dataset.y : FB_Y;   // 年の帯が上のカードの下まで来たら、その年
+    fbMiniSync(); const mini = $("fbMini"), lim = Math.max(yr.getBoundingClientRect().bottom, mini.hidden ? 0 : $("fbMiniBar").getBoundingClientRect().bottom) + 40, first = document.querySelector("#flights .fbmh"); let y = first ? +first.dataset.y : FB_Y;   // 年の帯が上のカードの下まで来たら、その年
     for(const h of document.querySelectorAll("#flights .fbband")){ if(h.getBoundingClientRect().top <= lim) y = +h.dataset.fbyear; else break; }
-    if(y !== FB_Y){ FB_Y = y; YEAR = y; yr.innerHTML = fbYrHTML(fbYears(FB_ES), true); } }); }, { passive:true });
+    if(y !== FB_Y){ FB_Y = y; YEAR = y; yr.innerHTML = fbYrHTML(fbYears(FB_ES), true); fbMiniSync(true); } }); }, { passive:true });
+// 細い帯を出すか：日誌で、年のカードの年の字が上へ隠れたら出す（便・km・空の上は送る前のカードにだけ）
+function fbMiniSync(redraw){
+  const m = $("fbMini"), yr = $("fbYr"); if(!m || !yr) return;
+  const on = currentView() === "log" && VIEW.log === "diary" && LOG_SEG === "list" && yr.getBoundingClientRect().top + 52 < 0;
+  if(redraw || !$("fbMiniBar").innerHTML || $("fbMiniBar").dataset.y !== String(FB_Y)){ $("fbMiniBar").innerHTML = fbYrHTML(fbYears(FB_ES), false); $("fbMiniBar").dataset.y = FB_Y; }
+  if(m.hidden === on) m.hidden = !on;
+}
 // 年を選ぶ：日誌はその年の頭（いちばん新しい便）へ飛ぶ（前後の年の便も続けて見られる）。地図と年のまとめは選んだ年だけになる
 function fbGoYear(y){
   if(!y) return; FB_Y = +y; YEAR = FB_Y; FB_RT = null;
@@ -5022,9 +5037,9 @@ function fbGoYear(y){
   const top = fbYOf(FB_ES[0] || { t:Date.now() }) === FB_Y;
   const el = top ? null : $("fbY-" + FB_Y), yr = $("fbYr");
   if(!el){ window.scrollTo(0, 0); return; }
-  const off = el.getBoundingClientRect().top + scrollY - (yr ? yr.offsetHeight : 0) - 8;   // 年の帯を上のカードのすぐ下に
+  const off = el.getBoundingClientRect().top + scrollY - ($("fbMiniBar").offsetHeight || 44) - 8;   // 年の帯を上の細い帯のすぐ下に   // 年の帯を上のカードのすぐ下に
   const room = document.documentElement.scrollHeight - innerHeight; if(off > room) $("flights").style.paddingBottom = Math.ceil(off - room) + "px";   // いちばん古い年でも頭まで送れるように、下に余白を足す（描き直すと消える）
-  window.scrollTo(0, Math.max(0, off)); FB_Y = +y; yr.innerHTML = fbYrHTML(fbYears(FB_ES), true);
+  window.scrollTo(0, Math.max(0, off)); FB_Y = +y; yr.innerHTML = fbYrHTML(fbYears(FB_ES), true); fbMiniSync(true);
 }
 function fbOpenYears(){
   const ys = fbYears(FB_ES);
@@ -8389,7 +8404,8 @@ function fareOf(rec, t){ const tb = fareTable(rec.airline, t); if(!tb) return nu
   return { table:tb, id:row[0], label:row[1], rate:row[2], bonus:row[3], assumed:!chosen }; }
 function statusRows(){
   const rows = [];
-  for(const f of S.flights) rows.push({t:f.dep, from:f.from, to:f.to, km:f.km, airline:f.airline, fare:f.fare, price:f.price || null, ref:f, kind:"flight"});
+  for(const f of S.flights){ if(isCar(f)) continue;   // 車などの移動は便ではないので、成績の目安にも修行にも数えない（11/11）
+    rows.push({t:f.dep, from:f.from, to:f.to, km:f.km, airline:f.airline, fare:f.fare, price:f.price || null, ref:f, kind:"flight"}); }
   for(const m of S.manual){ const t = Date.parse(m.d + "T12:00:00+09:00"); rows.push({t, from:m.from, to:m.to, km:km(BY[m.from], BY[m.to]), airline:m.airline, fare:m.fare, price:m.price || null, ref:m, kind:"manual"}); }
   return rows;
 }
