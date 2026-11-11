@@ -17,27 +17,24 @@
 - リモートに古い `shugyo` ブランチ（10/21）があるので、`shugyo/<名前>` は push できない（ref がぶつかる）。`shugyo-<名前>` で作る
 
 ## いま持っている仕事
-- 修行の作り直し（11/11 PM の仕事・本人「すべてOK」）：11/11 16時12分 本人が PR #64 を main に入れた。ブランチ feat/shugyo-book、報告 docs/pm/report-shugyo-book-build.md、写真 docs/pm/shugyo-book/
-  - 11/11 2回目：#48・#63 の入った main を取り込み直した（web/ だけぶつかり、組み立て直しで解いた）。修行のテスト・t119・t125 は成功
-  - 見方を「道のり・1便ごと・月ごと」に。sgMain を作り直し、sgRoadView・sgFlightsView・sgFlightPage・sgMonthsView・sgViewsPage などを足した。CSS は .sgd .sgb-* だけ
-  - JGC の札は「記録分」。今の数を入れる形（g.lsIn ＝ { v, at }、shugyo_prefs の中。表は変えていない）。見方と道のりに出すものは g.views・g.show（はじめ全部 ON）
-  - テスト t125（新）成功・t73 を合わせた・t57 は PR #44 の直しを取り込んだ。全部で 83/89（t47・t99・t105 は main でも落ちる、t48 は手元に pdf417gen なし、t34・t37 は揺れ）
-  - 11/11 3回目（review-app-1 の2・3、464cb9d）：運賃を推定した便（fr.assumed）を sgYear で数え、大きな数字の横に「運賃を推定した便 ○便 ›」（押すと1便ごと）・1便の行は「セイバー（推定）」。高さ700以下で道のりを詰め、667 で2つの道の数字まで見える。写真 docs/pm/shugyo-book-fix/。t125 に3項目。全部 85/92（落ちたのは前からの t105・t99・t48・t62 と揺れの t17・t19・t27）
-  - 11/11 4回目（2ed0654）：#65 の入った main を取り込んだ（web/ だけぶつかり、組み立て直しで解いた）。車などの便は statusRows で外れるので修行の関数は変えず、t125 に「車などにした便は道のりの数に入らない」を足した。t73 のフライトの見方「修行」の所は修行のタブの1便ごとでの確かめに書き直した。全部 83/93（前からの t105・t99・t47・t48・t62、揺れの t17・t19・t27・t13・t31。t13・t31 は単独なら成功）。報告 docs/pm/report-shugyo-book-car.md・写真 docs/pm/shugyo-book-car/。PR #64 は反映を待つだけ
-  - 本人に聞くこと：推定の便の数を大きな数字の横の小さいピルにしたこと／JGC の札と数える範囲／今の数を入れる形／見方を選ぶはページ（#dViews にそろえるか）／今年の記録のページの入口がなくなった（消すか残すか）／フライトの見方「修行」と成績の「修行のまとめ」は触っていない／667 では2つの道の箱は上の端だけ
+- 修行の見方のシート（11/11 夜・帳面の次にやること1）：ブランチ shugyo-view-sheet・下書き PR #71・報告 docs/pm/report-shugyo-view-sheet.md・写真 docs/pm/shugyo-view-sheet/
+  - 鉛筆→「修行の見方」シート（画面案 design/view-settings 02c-v2・02c2-v2）。見方3つ＋道のりに出すもの4つの ON／OFF（loRowHTML）。最後の1つ（案A）・道のり OFF の間は道のりに出すものを押せない・元に戻す・「表示の編集をすべて見る」
+  - `LO_EXT.sg = { groups:sgVsGroups, toggle:sgVsToggle, reset:sgVsReset }` で1枚に修行のカード。sgViewsPage と data-sg-sw は消した。dialog #dSgViews は JS で足す
+  - テスト：t125 に14項目。t118・t124・t126 を修行のカードに合わせた（checkin.md に書いた）。全体 90/95（前からの t105・t99・t48・t62、揺れの t31）
+  - 本人に聞くこと：全部乗せに戻すで修行の見方も戻すか（reset は用意済み、呼ぶのはチェックイン担当）／1枚の修行のカードの見方の補足を残すか
+- 修行の作り直し（PR #64）：11/11 16時12分に main に入った。本人に聞くこと（残り）：推定の便の数を大きな数字の横の小さいピルにしたこと／JGC の札と数える範囲／今の数を入れる形／今年の記録のページの入口がなくなった（消すか残すか）／成績の「修行のまとめ」は触っていない／667 では2つの道の箱は上の端だけ
 - 決まりなしの案（11/8）：design/no-rules-1108 の ideas-shugyo.md。コードは変えていない
 - 点検（11/8）：ブランチ shugyo-check1108、下書き PR #44（t57 の直しは PR #64 にも入れた）
 - 棚卸し（11/6）：ブランチ shugyo-inventory、下書き PR #26
 - 本人の返事待ち：候補1（年の区切りを日本時間へ）を12月前に直すか／計算ルールの文書の乗り継ぎ欄を JAL の公式の値に直すか／端数をどう決めるか／SQL 2本（ANA の最後の日・SFJ の便）／候補7（端末版の古い計画の画面）を残すか消すか
 
 ## 次にやること
-0. PR #64 は反映を待つだけ（PM が反映する）。指摘やレビューが来たら直す。本人の答え（報告の「決めてほしいこと」）が出たら合わせる
-1. チェックイン担当の feat/view-settings（見方の設定）が main に入ったら、修行の見方のシート（design/view-settings の 02c-v2）を作る（今の ✎ からのページ sgViewsPage を置き換える）
-2. 本人の了解が出たら、候補1：sgYear・sgMain・sgMoney・renderShugyoCard・sgMonthsView の年と月を日本時間（sgJstDay）でそろえる。ブランチ shugyo-jst-year
-3. 本人の了解が出たら、計算ルールの文書の乗り継ぎの欄を JAL の公式の値に書き換える（必要なら SG_XFER を会社ごとに）
-4. SFJ の SQL の結果で NH38xx・39xx が出たら、羽田の SFJ 便への乗り継ぎを 50分に分ける
-5. 夜の画面の仕組み（data-night）が main に入ったら、修行の夜（.sgb-* の夜の見た目）を本物の夜で撮り直す
-6. PR #20 が main に入ったら t62 を10回流して揺れがないか見る
+0. PR #71（修行の見方のシート）は反映を待つだけ。指摘や本人の答えが来たら直す。PR #64 の本人の答えが出たら合わせる
+1. 本人の了解が出たら、候補1：sgYear・sgMain・sgMoney・renderShugyoCard・sgMonthsView の年と月を日本時間（sgJstDay）でそろえる。ブランチ shugyo-jst-year
+2. 本人の了解が出たら、計算ルールの文書の乗り継ぎの欄を JAL の公式の値に書き換える（必要なら SG_XFER を会社ごとに）
+3. SFJ の SQL の結果で NH38xx・39xx が出たら、羽田の SFJ 便への乗り継ぎを 50分に分ける
+4. 夜の画面の仕組み（data-night）が main に入ったら、修行の夜（.sgb-* と #dSgViews の夜の見た目）を本物の夜で撮り直す
+5. PR #20 が main に入ったら t62 を10回流して揺れがないか見る
 
 ## ほかの担当への依頼
 - データ担当（checkin.md の「下の担当からの依頼」経由）：ANA の時刻表が 12月以降まで入っているかの確認（docs/pm/shugyo-timetable-check.sql）
