@@ -887,7 +887,7 @@ dialog.tpsheet .dlg{display:flex;flex-direction:column;overflow:hidden;padding-b
 .vslast{display:inline-flex;align-items:center;min-height:22px;padding:0 8px;margin-left:6px;border-radius:999px;background:#fff;color:#4B5563;font-size:12px;font-weight:800;vertical-align:1px}
 .vsmsg{list-style:none;margin:0 8px;font-size:13px;line-height:1.6;font-weight:700;color:#4B5563}
 .vwrow .vwone [role="tab"]{pointer-events:none}
-#dLayout .lofilter{align-items:center;position:static}.loall{margin-left:auto;font-size:13px;font-weight:700;color:#6B7280;white-space:nowrap}
+#dLayout .lofilter{align-items:center;position:static}#dLayout .lofilter .lochip{min-height:44px}#dLayout .spctop .mp-back{min-height:44px}.loall{margin-left:auto;font-size:13px;font-weight:700;color:#6B7280;white-space:nowrap}
 .losec{padding:4px;margin-top:10px}
 .losh{display:flex;align-items:center;gap:12px;width:100%;min-height:68px;padding:8px 4px 8px 12px;border:0;border-radius:16px;background:none;text-align:left;font-family:var(--gothic);color:inherit;cursor:pointer}
 .losh:disabled{cursor:default;opacity:1}.losh:focus-visible{outline:3px solid #E9C46A;outline-offset:-3px}
@@ -4790,6 +4790,15 @@ const vwDesc = (k, id) => (VIEW_DESC[k] || {})[id] || "";
    下のタブ（出す・並び）、各画面の見方（隠す）、運用の空港（よく見る空港だけ並べる）、
    ホーム・運用（滑走路の下）・成績のかたまり（出す・並び）。何も変えていなければ、構成（気軽に・撮影・修行）のまま */
 const LO_KEY = "soramemo.layout";
+// デモの間に変えた表示（タブ・見方・かたまり・構成）は、デモを終えると始める前に戻す（review-app-1 の3）。
+// 始めるときにこの端末の値を控え、終えたとき（開き直してデモが終わったときも、読み込みのはじめに）戻す
+const DEMO_LO_BAK = "soramemo.demo.lobak";
+const DEMO_LO_KEYS = () => [LO_KEY, "soramemo.persona", ...Object.keys(VIEWS).map(k => "soramemo.view." + k)];
+function demoLoSave(){ try{ const o = {}; for(const k of DEMO_LO_KEYS()) o[k] = localStorage.getItem(k); localStorage.setItem(DEMO_LO_BAK, JSON.stringify(o)); }catch(e){} }
+function demoLoRestore(){ try{ const raw = localStorage.getItem(DEMO_LO_BAK); if(!raw) return false; const o = JSON.parse(raw) || {};
+  for(const k of DEMO_LO_KEYS()){ if(!(k in o)) continue; if(o[k] == null) localStorage.removeItem(k); else localStorage.setItem(k, o[k]); }
+  localStorage.removeItem(DEMO_LO_BAK); return true; }catch(e){ return false; } }
+demoLoRestore();
 const TAB_ALL = ["home", "book", "log", "sg", "ops", "stats"], TAB_NAME = { home:"ホーム", book:"図鑑", log:"フライト", sg:"修行", ops:"運用", stats:"成績" };
 const LO_BLOCKS = {
   home: [["persona", "いちばん上のカード", "撮影・修行の構成のときに出るカード。いつもいちばん上", true], ["ride", "これから乗る便", "便名を入れると機体を調べる"], ["event", "イベントのお知らせ"], ["tally", "これまでの記録", "空港・路線・距離の数"], ["recent", "最近の印"]],
@@ -5640,7 +5649,9 @@ function loSecDef(id){
     const rows = [{ label:"ホーム", desc:"タブの1番目", always:true },
       ...[...rest, ...TP_ITEMS.filter(v => !rest.includes(v))].map(v => { const o = tabs.includes(v);
         return { kind:"tab", id:v, label:TAB_NAME[v], desc:!o && full ? "ON で外すタブを選びます" : !o && v === "stats" ? "マイページのタイルから開けます" : TP_SUB[v], on:o, dis:o && least, soft:v === "stats", attr:`data-lo-tab="${v}"` }; })];
-    return { name:"タブ", groups:[{ rows }], n:tabs.length, tot:LO_TAB_MAX, hidden:LO_TAB_ITEMS.filter(v => !tabs.includes(v)).map(v => TAB_NAME[v]), go:["タブを選ぶ", "data-tp-open"], note:`ホームを入れて${LO_TAB_MAX}つまで。並べ替えは「タブを選ぶ」で。` }; }
+    const hid = LO_TAB_ITEMS.filter(v => !tabs.includes(v)).map(v => TAB_NAME[v]);
+    // 成績は隠しているものに数えない。全部出していて成績のタブがないときは、見出しで成績の行き先を言う（review-app-1 の2）
+    return { name:"タブ", groups:[{ rows }], n:tabs.length, tot:LO_TAB_MAX, hidden:hid, subText:!hid.length && !tabs.includes("stats") ? "成績はマイページから" : "", go:["タブを選ぶ", "data-tp-open"], note:`ホームを入れて${LO_TAB_MAX}つまで。並べ替えは「タブを選ぶ」で。` }; }
   if(id === "home"){ const rows = [...LO_HOME_FIX.map(([, l, d]) => ({ label:l, desc:d, always:true })), ...loBlkRows("home")];
     return loSecCount({ name:"ホーム", groups:[{ rows }], go:["見本で編集", "data-he-open"] }); }
   if(id === "book" || id === "log") return loSecCount({ name:TAB_NAME[id], groups:[{ rows:loViewRows(id) }], go:[`${TAB_NAME[id]}へ`, `data-lo-goto="${id}"`], away:loAwayNote(id) });
@@ -5697,7 +5708,7 @@ function layoutHTML(){
   const saved = SERVER && user && !demo ? "アカウントに保存し、別の端末でも同じ表示になります。" : "ログインしていないので、この端末に保存しています。";
   return head + `<div class="lofilter" role="group" aria-label="しぼりこみ"><button type="button" class="lochip" data-lo-filter="all" aria-pressed="${!only}">すべて</button><button type="button" class="lochip" data-lo-filter="off" aria-pressed="${only}">隠しているもの <b>${h.n}</b></button><span class="loall">${h.all}このうち</span></div>
     ${empty}${cards}
-    <p class="losave">${only ? "" : "カードを押すと開きます。"}${saved}隠しても記録や機能は消えません。経営の画面はここに入りません。</p>
+    <p class="losave">${only ? "" : "カードを押すと開きます。"}${LO_EXT.sg ? "" : "修行の見方は、修行の画面の鉛筆から変えます。"}${saved}隠しても記録や機能は消えません。経営の画面はここに入りません。</p>
     ${only ? "" : `<button class="lobtn" type="button" data-lo-reset${loAllOn() ? " disabled" : ""}>全部乗せに戻す</button>`}${undo}`;
 }
 function loRender(keep){ const y = $("dLayout").scrollTop; $("dLayoutBody").innerHTML = layoutHTML(); $("dLayout").scrollTop = keep ? y : 0; }
@@ -6674,8 +6685,17 @@ function demoSeed(){
     t = arr + (car ? 1 : i % 2 === 0 ? 2 : 9) * 864e5 + 3 * 36e5; }
   S.demoClock = t; save();
 }
+// デモを終えて表示の設定を戻したあと、覚えている値を読み直して画面に当てる
+function demoLoReload(){
+  try{ const o = JSON.parse(localStorage.getItem(LO_KEY) || "null"); LAYOUT = o && typeof o === "object" && !Array.isArray(o) ? zkFixLayout(o) : null; }catch(e){ LAYOUT = null; }
+  try{ const v = localStorage.getItem(PERSONA_KEY); PERSONA = PERSONAS[v] ? v : "all"; }catch(e){}
+  for(const k of Object.keys(VIEW)) VIEW[k] = viewOf(k);
+  applyLayout(); renderPersonaSettings(); for(const k in DIRTY) DIRTY[k] = true; homeFold(); tpRefresh();
+  if(!loTabs().includes(currentView())) goTab(loTabs()[0]);
+}
 $("toggleDemo").onclick = async () => {
-  if(demo){ try{ localStorage.removeItem("soramemo.demo.v1"); }catch(e){} }
+  if(demo){ try{ localStorage.removeItem("soramemo.demo.v1"); }catch(e){} if(demoLoRestore()) demoLoReload(); }
+  else demoLoSave();
   demo = !demo; document.body.classList.toggle("demo", demo); CO = null; setMode(MODE);
   $("toggleDemo").textContent = demo ? "終了" : "開始";
   await reload(); say("");
