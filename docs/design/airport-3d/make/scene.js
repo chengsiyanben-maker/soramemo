@@ -18,7 +18,7 @@ const TWY = [ [P(-560,-1400),P(-560,1700)], [P(760,-1500),P(760,1800)], [P(-560,
 const DIRTMP=0;
 const BLD = [ {n:'T1',a:-150,b:500,w:180,l:620,h:38}, {n:'T2',a:390,b:300,w:180,l:650,h:38}, {n:'T3',a:-1450,b:150,w:200,l:700,h:34},
   {n:'P1',a:120,b:500,w:120,l:260,h:22}, {n:'H',a:-1150,b:-1250,w:260,l:380,h:30}, {n:'H2',a:-1500,b:-700,w:220,l:300,h:26} ];
-const TOWER = {a:640,b:-420,h:115};
+const TOWER = {a:640,b:-420,h:115.7};
 window.HND = {P,d,p,RW,BLD,TOWER};
 
 function sub(a,b){return [a[0]-b[0],a[1]-b[1],a[2]-b[2]]} function dot(a,b){return a[0]*b[0]+a[1]*b[1]+a[2]*b[2]}
@@ -49,6 +49,8 @@ const PLANES = [
  {id:'NH31',  fl:'NH 31',  to:'伊丹へ',  st:'駐機中',         ty:'B787-9', reg:'JA882A', alt:0, pos:P(-1290,300), h:67, z:0},
  {id:'JL43',  fl:'JL 43',  to:'ロンドンへ', st:'駐機中',       ty:'B777-300ER', reg:'JA731J', alt:0, pos:P(-1290,-100), h:67, z:0},
 ];
+const SIZE={'B787-9':[62.8,60.1],'A350-900':[66.8,64.8],'B777-200':[63.7,60.9],'B767-300ER':[54.9,47.6],'B737-800':[39.5,35.8],'B787-8':[56.7,60.1],'B777-300':[73.9,60.9],'A321neo':[44.5,35.8],'B777-300ER':[73.9,64.8]};
+PLANES.forEach(pl=>{pl.size=SIZE[pl.ty]||[60,55];});
 window.HND.PLANES = PLANES;
 
 function camFrom(pos, tgt, fov, W, H){ const f=nrm(sub(tgt,pos)); const r=nrm(cross(f,[0,0,1])); const u=cross(r,f); const F=(H/2)/Math.tan(fov*R/2); return {pos,f,r,u,F,W,H}; }
@@ -60,7 +62,7 @@ function box(cx,cy,w,l,h,ang,z0=0){ const u=dir(ang), v=[u[1],-u[0]]; const L=l/
   const faces=[]; for(let i=0;i<4;i++){const a=b[i],c=b[(i+1)%4]; faces.push({pts:[[a[0],a[1],z0],[c[0],c[1],z0],[c[0],c[1],z0+h],[a[0],a[1],z0+h]]});}
   faces.push({pts:b.map(q=>[q[0],q[1],z0+h]), top:true}); return faces; }
 
-function planeFaces(pl, s){ const u=dir(pl.h), v=[u[1],-u[0]]; const [x,y]=pl.pos; const z=pl.z; const L=34*s, Wd=3*s, Sp=30*s;
+function planeFaces(pl, s, real){ const u=dir(pl.h), v=[u[1],-u[0]]; const [x,y]=pl.pos; const z=pl.z; const k=real?pl.size[0]/68:1; const L=34*s*k, Wd=3*s*k, Sp=(real?pl.size[1]/2:30)*s;
   const pt=(a,b,c)=>[x+u[0]*a+v[0]*b, y+u[1]*a+v[1]*b, z+c+ (z===0?3*s:0)];
   const F=[]; // 胴体（細い箱）
   const fb=[[-L,-Wd],[L,-Wd],[L,Wd],[-L,Wd]];
@@ -103,10 +105,10 @@ window.drawAirport = function(cv, opt){
   // 立体（建物・塔・機体）を奥から
   const solids=[];
   BLD.forEach(b=>{ const q=P(b.a,b.b); const oz=dot(sub([q[0],q[1],0],c.pos),c.f); box(q[0],q[1],b.w,b.l,b.h*(opt.vx||1.6),337).forEach(f=>{f.kind='b'; f.bn=b.n; f.oz=oz; solids.push(f);}); });
-  const tq=P(TOWER.a,TOWER.b); const th=TOWER.h*(opt.vx||1.6);
+  const tq=P(TOWER.a,TOWER.b); const th=TOWER.h*(opt.vxt||opt.vx||1.6);
   if(!opt.hideTower){ const toz=dot(sub([tq[0],tq[1],0],c.pos),c.f); box(tq[0],tq[1],16,16,th,337).forEach(f=>{f.kind='b';f.oz=toz;solids.push(f);}); box(tq[0],tq[1],34,34,14,337,th).forEach(f=>{f.kind='cab';f.oz=toz-1;solids.push(f);}); }
   const ps = opt.planeScale||1;
-  if(!opt.light && !opt.hideAll) PLANES.forEach(pl=>{ if(opt.hidePlane===pl.id) return; const oz=dot(sub([pl.pos[0],pl.pos[1],pl.z],c.pos),c.f); planeFaces(pl,ps*(pl.z?1.15:1)).forEach(f=>{f.kind='p';f.oz=oz;solids.push(f);}); });
+  if(!opt.light && !opt.hideAll) PLANES.forEach(pl=>{ if(opt.hidePlane===pl.id) return; const oz=dot(sub([pl.pos[0],pl.pos[1],pl.z],c.pos),c.f); planeFaces(pl,ps*(pl.z?1.15:1),opt.real).forEach(f=>{f.kind='p';f.oz=oz;solids.push(f);}); });
   solids.forEach(f=>f.z=avgz(f.pts));
   const Ld=nrm([-.5,-.7,.6]);
   solids.sort((a,b)=>(b.oz-a.oz)||(b.z-a.z)).forEach(f=>{
@@ -127,6 +129,9 @@ window.drawAirport = function(cv, opt){
     const r=Math.max(.6,o.s*Math.min(1.6,2200/z)); const al=Math.max(.25,1-fogT(z));
     const gg=g.createRadialGradient(s[0],s[1],0,s[0],s[1],r*4); gg.addColorStop(0,o.c); gg.addColorStop(1,'rgba(0,0,0,0)'); g.globalAlpha=al*.55; g.fillStyle=gg; g.beginPath(); g.arc(s[0],s[1],r*4,0,7); g.fill();
     g.globalAlpha=al; g.fillStyle=o.c; g.beginPath(); g.arc(s[0],s[1],r,0,7); g.fill(); g.globalAlpha=1; });
+  if(opt.clouds){ let sd=7; const rnd=()=>{sd=(sd*9301+49297)%233280;return sd/233280;}; const n=opt.clouds.amt*9;
+    for(let i=0;i<n;i++){ const q=P(-3000+rnd()*6500,-5000+rnd()*8000,opt.clouds.base); const z=dot(sub(q,c.pos),c.f); if(z<50) continue; const s=proj(c,q); const r=Math.min(140,260000/z)*(0.6+rnd());
+      g.globalAlpha=.42; g.fillStyle=opt.night?'#2A3346':'#FFFFFF'; g.beginPath(); g.ellipse(s[0],s[1],r,r*.42,0,0,7); g.fill(); g.globalAlpha=1; } }
   // 軽い版：機体は向きのある三角だけ
   if(opt.light) PLANES.forEach(pl=>{ const s=proj(c,[pl.pos[0],pl.pos[1],pl.z]); if(s[2]<5) return; const u=dir(pl.h); const a=proj(c,[pl.pos[0]+u[0]*120,pl.pos[1]+u[1]*120,pl.z]); const ang=Math.atan2(a[1]-s[1],a[0]-s[0]);
     g.save(); g.translate(s[0],s[1]); g.rotate(ang); g.fillStyle=opt.night?'#E8ECF1':'#2B3340'; g.beginPath(); g.moveTo(7,0); g.lineTo(-5,-4.5); g.lineTo(-3,0); g.lineTo(-5,4.5); g.closePath(); g.fill(); g.restore(); });

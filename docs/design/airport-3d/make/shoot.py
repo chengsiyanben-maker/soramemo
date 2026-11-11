@@ -23,7 +23,7 @@ JS = r"""() => {
   const unit = el.classList.contains('u') || el.closest('.u');
   if (fs < 11.95 || (fs < 12.95 && !unit)) out.small.push(el.textContent.trim().slice(0,20) + ':' + fs.toFixed(1));
  }
- document.querySelectorAll('.rb,.seg button,.row,.pill,.go3').forEach(e => {
+ document.querySelectorAll('.rb,.seg button,.row,.pill,.go3,.src').forEach(e => {
   const r = e.getBoundingClientRect(); if (!r.width) return;
   const h = e.classList.contains('sw') ? 34 : 44;
   if (r.height < h - .5 || (r.width < 44 - .5)) out.tap.push((e.className + ' ' + e.textContent.trim().slice(0,10)) + ' ' + r.width.toFixed(0) + 'x' + r.height.toFixed(0));
