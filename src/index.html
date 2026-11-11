@@ -767,21 +767,13 @@ dialog.spfull .dlg{padding:16px 16px 32px;max-width:480px;margin:0 auto;max-heig
 .lochips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}.lochip{min-height:40px;padding:0 14px;border-radius:999px;border:1px solid var(--s-line);background:var(--s-card);color:var(--s-ink);font:600 13px var(--gothic);cursor:pointer}
 .lochip[aria-pressed="true"]{background:var(--s-ink);border-color:var(--s-ink);color:var(--s-card)}.lochip:disabled{cursor:not-allowed}
 .loreset{border:1px solid var(--s-line);background:var(--s-card);color:var(--s-ink);border-radius:999px;padding:8px 12px;font:600 12px var(--gothic)}.loreset:disabled{opacity:.45}
-/* 表示の編集（全部乗せ＋フィルター）：✓ と薄い紺＝出す、白に取り消し線＝隠す */
-.lohero{text-align:center;margin:6px 0 4px}.lonum{margin:0;font-family:var(--gothic)}.lonum b{font-size:44px;font-weight:800;color:var(--s-ink);letter-spacing:-.02em}.lonum small{font-size:16px;font-weight:600;color:var(--s-mute)}
+/* 表示の編集の1枚（11/11 の 2版で畳んだカードと ON／OFF に。✓ のピルはやめた） */
 .losub2{margin:2px 0 0;font-size:13px;color:var(--s-mute);font-weight:600}
-.lolegend{display:flex;justify-content:center;align-items:center;gap:4px;margin:8px 0 0;font-size:12.5px;color:var(--s-mute)}.lolegend .ck{width:14px;height:14px;fill:none;stroke:#2E4A7D;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}.lolegend s{margin-left:6px}
 .lofilter{position:sticky;top:-1px;z-index:2;display:flex;gap:8px;padding:10px 0;margin:6px 0 0;background:var(--s-bg,#F5F6F8)}
 .lofilter .lochip[aria-pressed="true"]{background:var(--s-ink);border-color:var(--s-ink);color:var(--s-card)}.lofilter b{font-weight:800;margin-left:2px}
 .locard{background:var(--s-card);border-radius:20px;padding:16px;margin:12px 0 0;box-shadow:0 1px 2px rgba(17,24,39,.04),0 6px 18px -10px rgba(17,24,39,.18)}
 .lot{display:flex;align-items:baseline;gap:8px;margin:0;font:800 15px var(--gothic);color:var(--s-ink)}.lot small{font-size:12px;font-weight:500;color:var(--s-mute)}
-.logrp{margin-top:14px}.logrp h5{display:flex;align-items:baseline;gap:8px;margin:0;font:700 13px var(--gothic);color:var(--s-ink)}.logrp h5 small{font-size:12px;font-weight:500;color:var(--s-mute)}
 .lonote{margin:8px 0 0;font-size:12.5px;line-height:1.6;color:var(--s-mute)}
-.lochip.lopill{display:inline-flex;align-items:center;gap:4px;min-height:44px;background:var(--s-card);border-color:var(--s-line);color:var(--s-mute);text-decoration:line-through;text-decoration-thickness:1.5px}
-.lochip.lopill[aria-pressed="true"]{background:#E8EEF8;border-color:#E8EEF8;color:#1F3A68;text-decoration:none}
-.lochip.lopill .ck{width:15px;height:15px;flex:none;fill:none;stroke:currentColor;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}
-.lochip.lopill:disabled{opacity:1;cursor:not-allowed}
-.lochip.lolock{background:#F3F4F6;border-color:#F3F4F6;color:#374151;text-decoration:none;cursor:default}.lochip.lolock .ck{stroke-width:2}
 .loundo{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:10px 0 0;padding:10px 12px 10px 16px;border-radius:16px;background:#1F2937;color:#fff;font-size:13.5px}
 .loundo button{border:0;background:rgba(255,255,255,.14);color:#fff;border-radius:999px;min-height:36px;padding:0 14px;font:700 13px var(--gothic);white-space:nowrap}
 .losave{margin:16px 4px 0;font-size:12.5px;line-height:1.6;color:var(--s-mute);text-align:center}
@@ -795,7 +787,6 @@ dialog.spfull .dlg{padding:16px 16px 32px;max-width:480px;margin:0 auto;max-heig
 .hslead{font-size:13.5px;line-height:1.75;margin:8px 0 0;color:#374151}
 .hsacts{margin-top:16px}.hsacts .lobtn{border:0;background:#F3F4F6;color:#1F2937}
 .hsfoot{margin:10px 0 0;font-size:12.5px;line-height:1.6;color:#6B7280;text-align:center}
-#dPersona .lochip.lopill{--s-card:#fff;--s-line:#E5E7EB;--s-mute:#6B7280}
 /* ホームのはじめの1枚 */
 .allin-card{background:#EEF3FB;border-radius:20px;padding:14px 16px;margin:12px 0;font-family:var(--gothic)}.allin-card[hidden]{display:none}
 .allin-card .t b{display:block;color:#1F2937;font-size:15px}.allin-card .t small{display:block;color:#4B5563;font-size:12.5px;line-height:1.6;margin-top:2px}
@@ -890,6 +881,28 @@ dialog.tpsheet .dlg{display:flex;flex-direction:column;overflow:hidden;padding-b
 #dLayout .spctop{position:sticky;top:0;z-index:3;margin:-16px -16px 12px;padding:16px 16px 8px;background:var(--s-bg)}
 .tpmore .tpallnow{display:inline-flex;align-items:center;min-height:44px;padding:0 10px;font-size:13px;font-weight:700;color:#6B7280}
 :root[data-night="on"] .tpswap{background:#141B24;box-shadow:inset 0 0 0 2px rgba(220,227,234,.72)}
+/* すべての見方の設定（11/11 13時 本人「すべてよい」・画面案 design/view-settings の 2版）
+   行は全部に説明を1行（OFF でも残し、字を薄く）。最後の1つは札と理由。表示の編集の1枚は画面ごとに畳んだカード */
+.vsrow b small{font-size:13px;line-height:1.4;color:#6B7280}.vsrow.off>b{color:#6B7280}.vsrow.off>b small{color:#6B7280;white-space:normal}
+.vslast{display:inline-flex;align-items:center;min-height:22px;padding:0 8px;margin-left:6px;border-radius:999px;background:#fff;color:#4B5563;font-size:12px;font-weight:800;vertical-align:1px}
+.vsmsg{list-style:none;margin:0 8px;font-size:13px;line-height:1.6;font-weight:700;color:#4B5563}
+.vwrow .vwone [role="tab"]{pointer-events:none}
+#dLayout .lofilter{align-items:center;position:static}.loall{margin-left:auto;font-size:13px;font-weight:700;color:#6B7280;white-space:nowrap}
+.losec{padding:4px;margin-top:10px}
+.losh{display:flex;align-items:center;gap:12px;width:100%;min-height:68px;padding:8px 4px 8px 12px;border:0;border-radius:16px;background:none;text-align:left;font-family:var(--gothic);color:inherit;cursor:pointer}
+.losh:disabled{cursor:default;opacity:1}.losh:focus-visible{outline:3px solid #E9C46A;outline-offset:-3px}
+.loic{flex:none;width:40px;height:40px;border-radius:999px;background:#F3F4F6;display:grid;place-items:center;color:#1F2937}.loic svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.lott{flex:1;min-width:0}.lott b{display:block;font-size:16px;font-weight:800;color:#1F2937}.lott small{display:block;font-size:13px;color:#6B7280;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.locn{flex:none;white-space:nowrap}.locn b{font-size:22px;font-weight:800;color:#1F2937;letter-spacing:-.01em}.locn small{font-size:13px;font-weight:600;color:#6B7280;margin-left:1px}
+.lochev{flex:none;width:44px;height:44px;padding:12px;fill:none;stroke:#6B7280;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;transition:transform .15s}.losec.open .lochev{transform:rotate(180deg)}
+.lobody{padding:0 8px 8px}.lobody .tplist{margin-top:8px}.lobody .lonote{margin:4px 4px 0}
+.logl{margin:14px 4px 0;font-size:13px;font-weight:800;color:#4B5563}.logl small{display:block;font-size:13px;font-weight:600;color:#6B7280;margin-top:2px}
+.logo{display:flex;justify-content:flex-end;margin-top:6px}.logo .lotext{min-height:44px;padding:0 8px;font-weight:800;color:#1F2937}
+.losec.ring{box-shadow:0 0 0 3px #E9C46A,0 6px 18px -10px rgba(17,24,39,.18)}
+.loundo.lofix{position:sticky;bottom:12px;z-index:3;margin-top:14px;box-shadow:0 12px 30px -10px rgba(0,0,0,.4)}
+#dLayout .spctop{box-shadow:0 8px 14px -12px rgba(17,24,39,.35)}
+@media (prefers-reduced-motion:reduce){.lochev{transition:none}}
+:root[data-night="on"] .losec.ring{box-shadow:0 0 0 2px #DCE3EA}
 :root[data-night="on"] .tpswap p{color:#DCE3EA}
 :root[data-night="on"] .tpswap .lochip{--s-card:transparent;--s-line:rgba(220,227,234,.72);--s-ink:#DCE3EA}
 
@@ -4696,6 +4709,13 @@ const VIEWS = {
   ops: [["board", "案内板"], ["day", "1日の山"], ["runway", "滑走路"], ["ontime", "定時"], ["art", "空の道すじ"], ["strip", "短冊"], ["photo", "撮る人"]],
 };
 const VIEW_DEF = { book:"region", log:"diary", ops:"runway" };
+// 見方の説明（鉛筆のシートと表示の編集の1枚で、全部の行に1行。OFF でも残す。画面案 design/view-settings の 2版）
+const VIEW_DESC = {
+  book: { region:"9地方のツメと扉で並べる", map:"日本地図に印", chron:"行った日ごとに新しい順" },
+  log: { diary:"1便1行・月の見出し", map:"何度も乗った区間ほど太い線", year:"便・路線・距離・空の上" },
+  ops: { board:"出発・到着の便を案内板の形で", day:"1時間ごとの便の数と遅れ", runway:"いまの運用と使う滑走路", ontime:"便の定時の割合", art:"全機の航跡を重ねる", strip:"次の離着陸を1便1枚で", photo:"撮る人向けの次に来る便の帯" },
+};
+const vwDesc = (k, id) => (VIEW_DESC[k] || {})[id] || "";
 /* ---------- 表示の編集：見たい表示だけにする（この端末だけに保存） ----------
    下のタブ（出す・並び）、各画面の見方（隠す）、運用の空港（よく見る空港だけ並べる）、
    ホーム・運用（滑走路の下）・成績のかたまり（出す・並び）。何も変えていなければ、構成（気軽に・撮影・修行）のまま */
@@ -4714,9 +4734,11 @@ const ZK_VIEW_MAP = { tiles:"region", signs:"region" };
 const FB_VIEW_MAP = { sg:"diary", pass:"diary", board:"diary", text:"diary", cal:"diary", route:"diary", month:"year", alt:"year" };
 function zkFixLayout(L){
   if(!L || typeof L !== "object" || Array.isArray(L)) return L;
-  if(L.off && Array.isArray(L.off.book)){ L.off.book = [...new Set(L.off.book.filter(id => id !== "tiles" && id !== "signs" && id !== "region"))]; }   // 地方別はいつも出す（空の配列も残す：消すと構成のはじめの値に戻ってしまう）
+  // 11/11 13時 案A：見方はどれも OFF にでき、最後の1つだけ残る。案A の前に保存した物（vA なし）は、前の決まりどおり地方別・日誌を出す
+  //   （前の off.book の region は古い「地方」の見方のこと。空の配列も残す：消すと構成のはじめの値に戻ってしまう）
+  if(L.off && Array.isArray(L.off.book)){ L.off.book = [...new Set(L.off.book.filter(id => id !== "tiles" && id !== "signs" && (L.vA || id !== "region")))]; }
   if(L.order && Array.isArray(L.order.book)) L.order.book = [...new Set(L.order.book.map(id => ZK_VIEW_MAP[id] || id))];
-  if(L.off && Array.isArray(L.off.log)) L.off.log = [...new Set(L.off.log.filter(id => id === "map" || id === "year"))];   // 古い見方を隠していても、新しい3つは出す（日誌はいつも出す）
+  if(L.off && Array.isArray(L.off.log)) L.off.log = [...new Set(L.off.log.filter(id => id === "map" || id === "year" || (L.vA && id === "diary")))];   // 古い見方を隠していても、新しい3つは出す
   if(L.order && Array.isArray(L.order.log)) L.order.log = [...new Set(L.order.log.map(id => FB_VIEW_MAP[id] || id))];
   return L;
 }
@@ -4756,11 +4778,12 @@ function loEdit(){
   if(!LAYOUT){ const P = PERSONAS[PERSONA]; LAYOUT = { off:JSON.parse(JSON.stringify(P.off || {})), order:JSON.parse(JSON.stringify(P.order || {})) }; }
   LAYOUT.off = LAYOUT.off || {}; LAYOUT.order = LAYOUT.order || {}; return LAYOUT; }
 function loToggleOff(k, id, hide){
-  if(hide && ((k === "book" && id === "region") || (k === "log" && id === "diary"))) return false;   // 図鑑の地方別・フライトの日誌はいつも出す
+  // 11/11 13時 案A：地方別・日誌も OFF にできる。見方は最後の1つだけ残す
   const L = loEdit(), set = new Set(L.off[k] || []);
   if(hide) set.add(id); else set.delete(id);
-  if(VIEWS[k] && set.size >= VIEWS[k].length) return false;   // 見方は1つ以上残す
+  if(VIEWS[k] && VIEWS[k].every(([v]) => set.has(v))) return false;   // 見方は1つ以上残す
   L.off[k] = [...set]; if(!L.off[k].length) delete L.off[k];
+  L.vA = 1;   // 案A の決まりで保存した印（読むときに地方別・日誌を戻さない）
   return true;
 }
 // 並べ替え：d だけ動かす（端より先は端で止める）。k が "tabs" のときは下のタブ
@@ -4799,7 +4822,7 @@ function vwEditBtn(el, k){
 const VIEW_RENDER = {};
 // 切り替えを描いたら、選んでいるボタンが見えるところまで横に送る
 function setViewsw(id, k){ const el = $(id); if(!el) return; el.innerHTML = viewswHTML(k); vwEditBtn(el, k);
-  el.parentElement.hidden = viewsShown(k).length < 2;   // 見方が1つだけなら、切り替える物がないので列ごと出さない（表示の編集はマイページから）
+  el.parentElement.hidden = false; el.classList.toggle("vwone", viewsShown(k).length < 2);   // 見方が1つでも名前を残す（今どの見方か分かるように・鉛筆から戻せる。review-1 の6）
   const b = el.querySelector('[aria-selected="true"]'); if(b) el.scrollLeft = Math.max(0, b.offsetLeft - el.offsetLeft - 24); }
 document.addEventListener("click", e => {
   const b = e.target.closest("[data-vw]"); if(!b) return;
@@ -5517,24 +5540,80 @@ function loCount(){ const it = loItems(); return { all:it.length, on:it.filter(x
 // 戻した数を種類ごとに言う（PM 11/9 0時40分：「4こ」でなく「タブ1つ・かたまり3つ」）
 const loOffText = off => [["tab", "タブ"], ["view", "見方"], ["blk", "かたまり"]].map(([k, t]) => [t, off.filter(x => x.kind === k).length]).filter(x => x[1]).map(([t, n]) => `${t}${n}つ`).join("・");
 const loAllOn = () => PERSONA === "all" && !LAYOUT;
-const LO_CHECK = '<svg class="ck" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>';
-const LO_LOCK = '<svg class="ck" viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="11" width="12" height="9" rx="2"/><path d="M9 11V8a3 3 0 0 1 6 0v3"/></svg>';
-function loPill(x){
-  const tabs = loTabs();
-  let dis = false;
-  if(x.kind === "tab") dis = x.on ? tabs.length <= LO_TAB_MIN : tabs.length >= LO_TAB_MAX;
-  if(x.kind === "view") dis = x.on && VIEWS[x.k].length - loOff(x.k).size <= 1;   // 見方は1つ以上残す
-  if(x.kind === "view" && ((x.k === "book" && x.id === "region") || (x.k === "log" && x.id === "diary"))) dis = true;   // 図鑑の地方別・フライトの日誌はいつも出す
-  const attr = x.kind === "tab" ? `data-lo-tab="${x.id}"` : x.kind === "view" ? `data-lo-view="${x.k}:${x.id}"` : `data-lo-blk="${x.k}:${x.id}"`;
-  return `<button type="button" class="lochip lopill" aria-pressed="${x.on}" ${attr}${dis ? " disabled" : ""} aria-label="${esc(x.label)}（${x.on ? "出しています" : "隠しています"}）">${x.on ? LO_CHECK : ""}<span>${esc(x.label)}</span></button>`;
+/* ---------- 表示の編集の1枚（11/11 13時 本人「すべてよい」。画面案 design/view-settings の 03*-v2） ----------
+   画面ごとのカードを畳んで1行（「フライト 2/3 隠している：年のまとめ」）。押すとその場で開き、中は ON／OFF のスイッチ（各画面の鉛筆のシートと同じ部品）。
+   鉛筆の「表示の編集をすべて見る」から来たときは、その画面のカードだけ開いて縁を光らせる。行き先は開いたカードの下に「図鑑へ ›」の形で1つ。
+   消せない物は案A：見方はどれも OFF にでき、最後の1つだけ残る。「いつも」はホームのタブ・ホームの地図・半券・今日の数字だけ（画面そのもの） */
+let LO_OPEN = new Set(), LO_RING = null;
+const LO_SEC_OF = { top:null, tabs:"tabs", home:"home", book:"book", log:"log", sg:"sg", ops:"ops", opsb:"ops", stats:"stats", aps:"aps" };
+// 修行の見方は修行担当の持ち場。修行担当が LO_EXT.sg = { groups(), go } を足すと、1枚に修行のカードが出る（足すまでは出さない）
+//   groups() → [{ title, sub, rows:[{ id, label, desc, on, dis, last, always }] }]、toggle(id) → 変えたら true
+const LO_EXT = {};
+const LO_HOME_FIX = [["map", "ホームの地図", "ホームそのもの"], ["stub", "チェックインの半券", "いちばん近い空港"], ["today", "今日の数字", "今日の印・空港・フライト"]];
+const LO_BLK_DESC = { home:{ event:"開いているイベント", recent:"最近押した印" }, opsb:{ special:"今日飛ぶ特別塗装機" }, stats:{} };
+const LO_APS = ["CTS","SDJ","HND","NRT","NGO","ITM","KIX","HIJ","MYJ","FUK","NGS","KMJ","KOJ","OKA"];
+const LO_ICON = {
+  tabs:'<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="15" width="18" height="5" rx="2.5"/><path d="M7 9h10M9 5h6"/></svg>',
+  aps:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-6-5.5-6-10a6 6 0 0 1 12 0c0 4.5-6 10-6 10Z"/><circle cx="12" cy="11" r="2"/></svg>' };
+const LO_CHEV = '<svg class="lochev" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>';
+// 見方の行（鉛筆のシートと1枚で同じ）。最後の1つは押せない
+function loViewRows(k){
+  const off = loOff(k), on = VIEWS[k].filter(([id]) => !off.has(id)).length;
+  return VIEWS[k].map(([id, l]) => { const o = !off.has(id);
+    return { kind:"view", k, id, label:l, desc:vwDesc(k, id), on:o, last:o && on <= 1, attr:`data-lo-view="${k}:${id}"` }; });
 }
-// タブにない画面の見方・かたまり：薄くせず、上の1行で知らせる（押せないものに見えないように）
+const loBlkRows = k => { const off = loOff(k); return LO_BLOCKS[k].filter(b => !b[3]).map(b => ({ kind:"blk", k, id:b[0], label:b[1], desc:b[2] || (LO_BLK_DESC[k] || {})[b[0]] || "", on:!off.has(b[0]), attr:`data-lo-blk="${k}:${b[0]}"` })); };
+// カードの中身：[{ title, sub, rows }]。数（n/tot）と、隠しているものの名前
+function loSecDef(id){
+  const tabs = loTabs();
+  if(id === "tabs"){ const full = tabs.length >= LO_TAB_MAX, least = tabs.length <= LO_TAB_MIN, rest = tabs.filter(v => v !== "home");
+    const rows = [{ label:"ホーム", desc:"タブの1番目", always:true },
+      ...[...rest, ...TP_ITEMS.filter(v => !rest.includes(v))].map(v => { const o = tabs.includes(v);
+        return { kind:"tab", id:v, label:TAB_NAME[v], desc:!o && full ? "ON で外すタブを選びます" : !o && v === "stats" ? "マイページのタイルから開けます" : TP_SUB[v], on:o, dis:o && least, soft:v === "stats", attr:`data-lo-tab="${v}"` }; })];
+    return { name:"タブ", groups:[{ rows }], n:tabs.length, tot:LO_TAB_MAX, hidden:LO_TAB_ITEMS.filter(v => !tabs.includes(v)).map(v => TAB_NAME[v]), go:["タブを選ぶ", "data-tp-open"], note:`ホームを入れて${LO_TAB_MAX}つまで。並べ替えは「タブを選ぶ」で。` }; }
+  if(id === "home"){ const rows = [...LO_HOME_FIX.map(([, l, d]) => ({ label:l, desc:d, always:true })), ...loBlkRows("home")];
+    return loSecCount({ name:"ホーム", groups:[{ rows }], go:["見本で編集", "data-he-open"] }); }
+  if(id === "book" || id === "log") return loSecCount({ name:TAB_NAME[id], groups:[{ rows:loViewRows(id) }], go:[`${TAB_NAME[id]}へ`, `data-lo-goto="${id}"`], away:loAwayNote(id) });
+  if(id === "ops") return loSecCount({ name:"運用", groups:[{ title:"見方", rows:loViewRows("ops") }, { title:"滑走路の下に出すもの", rows:loBlkRows("opsb") }], go:["運用へ", 'data-lo-goto="ops"'], away:loAwayNote("ops") });
+  if(id === "stats") return loSecCount({ name:"成績", groups:[{ rows:loBlkRows("stats") }], go:["成績へ", 'data-lo-goto="stats"'], away:loAwayNote("stats") });
+  if(id === "sg"){ const X = LO_EXT.sg; let g = []; try{ g = X.groups() || []; }catch(e){}
+    return loSecCount({ name:"修行", groups:g.map(x => ({ ...x, rows:x.rows.map(r => ({ ...r, kind:"ext", attr:`data-lo-ext="sg:${r.id}"` })) })), go:["修行へ", 'data-lo-goto="sg"'], away:loAwayNote("sg") }); }
+  if(id === "aps"){ const mine = loAps() || [], list = LO_APS.filter(c => OPS_AIRPORTS[c]);
+    return { name:"よく見る空港", groups:[{ sub:"ON にすると、運用で空港を選ぶ画面のいちばん上に並びます", rows:list.map(c => ({ kind:"ap", id:c, label:OPS_AIRPORTS[c].name, desc:"", on:mine.includes(c), attr:`data-lo-ap="${c}"` })) }],
+      n:mine.length, tot:list.length, hidden:[], subText:mine.length ? mine.map(c => OPS_AIRPORTS[c] ? OPS_AIRPORTS[c].name : c).join("・") : "まだ選んでいません" }; }
+  return null;
+}
+function loSecCount(s){ const rows = s.groups.flatMap(g => g.rows).filter(r => !r.always); s.n = rows.filter(r => r.on).length; s.tot = rows.length; s.hidden = rows.filter(r => !r.on).map(r => r.label); return s; }
+const loSecIds = () => ["tabs", "home", "book", "log", ...(LO_EXT.sg ? ["sg"] : []), "ops", "stats", "aps"];
+const loSecIcon = id => LO_ICON[id] || tpIcon(id);
+function loRowHTML(r){
+  const right = r.always ? `<span class="tplk">いつも</span>` : loSw(r.on, r.attr, `${esc(r.label)}を出す`, r.dis || r.last);
+  return `<li class="tprow vsrow${r.on || r.always ? "" : " off"}${r.always ? " lock" : ""}"><b>${esc(r.label)}${r.last ? `<span class="vslast">最後の1つ</span>` : ""}${r.desc ? `<small>${esc(r.desc)}</small>` : ""}</b>${right}</li>`
+    + (r.last ? `<li class="vsmsg">見方は1つより減らせません。ほかを ON にすると OFF にできます。</li>` : "");
+}
+function loSecHTML(id, only){
+  const s = loSecDef(id); if(!s) return "";
+  if(only && !s.hidden.length) return "";
+  const open = only || LO_OPEN.has(id), sub = s.subText || (s.hidden.length ? `隠している：${s.hidden.join("・")}` : "全部出しています");
+  const body = !open ? "" : (s.away || "") + s.groups.map(g => { const rows = only ? g.rows.filter(r => !r.on && !r.always && !r.soft) : g.rows; if(!rows.length) return "";
+      return `${g.title ? `<p class="logl">${esc(g.title)}${g.sub ? `<small>${esc(g.sub)}</small>` : ""}</p>` : g.sub ? `<p class="logl"><small>${esc(g.sub)}</small></p>` : ""}<ul class="tplist">${rows.map(loRowHTML).join("")}</ul>`; }).join("")
+    + (s.note && !only ? `<p class="vsmsg">${esc(s.note)}</p>` : "")
+    + (s.go && !only ? `<div class="logo"><button type="button" class="lotext" ${s.go[1]}>${esc(s.go[0])} ›</button></div>` : "");
+  return `<section class="locard losec${open ? " open" : ""}${LO_RING === id ? " ring" : ""}" data-lo-sec="${id}">
+    <button type="button" class="losh" data-lo-fold="${id}" aria-expanded="${open}"${only ? " disabled" : ""}><span class="loic">${loSecIcon(id)}</span><span class="lott"><b>${esc(s.name)}</b><small>${esc(sub)}</small></span><span class="locn"><b>${s.n}</b><small>/${s.tot}</small></span>${only ? "" : LO_CHEV}</button>
+    ${open ? `<div class="lobody">${body}</div>` : ""}</section>`;
+}
+// 隠しているものの数（修行のカードが足されたらその分も）
+function loHidden(){ let n = loCount().off.length, all = loCount().all;
+  if(LO_EXT.sg){ const s = loSecDef("sg"); if(s){ n += s.hidden.length; all += s.tot; } }
+  return { n, all }; }
+// タブにない画面の見方・かたまり：開いたカードの上の1行で知らせる
 const loAwayNote = k => { const v = k === "opsb" ? "ops" : k; if(loTabs().includes(v)) return "";
   return `<p class="lonote">${TAB_NAME[v]}はタブにないので、マイページの「${TAB_NAME[v]}」から開いたときに出ます。</p>`; };
 function layoutHTML(){
   const back = `<button class="mp-back" type="button" data-close><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>${LO_FROM === "settings" ? "マイページ" : "閉じる"}</button>`;
   const head = `<div class="spctop">${back}<h3>表示の編集</h3><span class="sp" aria-hidden="true"></span></div>`;
-  const items = loItems(), c = loCount(), only = LO_FILTER === "off";
+  const c = loCount(), h = loHidden(), only = LO_FILTER === "off";
   if(LO_CONFIRM){
     const n = k => c.off.filter(x => x.kind === k).length;
     return head + `<div class="locard loconfirm"><h4 class="lot">全部乗せに戻しますか？</h4>
@@ -5542,39 +5621,27 @@ function layoutHTML(){
       <div class="loback"><div><b>${n("tab")}</b><small>タブ</small></div><div><b>${n("view")}</b><small>見方</small></div><div><b>${n("blk")}</b><small>かたまり</small></div></div>
       <button class="lobtn lomain" type="button" data-lo-reset-yes>全部乗せに戻す</button><button class="lobtn" type="button" data-lo-reset-no>やめる</button></div>`;
   }
-  const show = list => only ? list.filter(x => !x.on) : list;
-  const group = (title, list, note, go) => { const l = show(list); if(!l.length) return "";
-    return `<div class="logrp"${go ? ` data-lo-go="${go}"` : ""}><h5>${title}</h5>${note || ""}<div class="lochips">${l.map(loPill).join("")}</div></div>`; };
-  const tabsL = items.filter(x => x.kind === "tab");
-  const tabsCard = (() => { const l = show(tabsL); if(only && !l.length) return "";
-    const lock = only ? "" : `<span class="lochip lopill lolock" aria-label="ホーム（いつも出す）">${LO_LOCK}<span>ホーム</span></span>`;
-    return `<section class="locard" data-lo-sec="tabs"><h4 class="lot">タブ<small>下のタブ帯（${LO_TAB_MIN}〜${LO_TAB_MAX}こ）</small></h4>
-      <div class="lochips">${lock}${l.map(loPill).join("")}</div>${only ? "" : `<p class="lonote">成績はマイページのタイルから開けます。隠したタブも、マイページから開けます。</p>`}</section>`; })();
-  const views = LO_VIEW_SEC.map(([k, t]) => group(`${t}の見方`, items.filter(x => x.kind === "view" && x.k === k), loAwayNote(k), k)).join("");
-  const viewsCard = views ? `<section class="locard" data-lo-sec="views"><h4 class="lot">見方<small>画面の上の切り替え・1つ以上</small></h4>${views}</section>` : "";
-  const blks = LO_BLK_SEC.map(([k, t, sub]) => group(t + (sub ? `<small>${sub}</small>` : ""), items.filter(x => x.kind === "blk" && x.k === k), loAwayNote(k), k === "opsb" ? "" : k)).join("");
-  const blksCard = blks ? `<section class="locard" data-lo-sec="blocks"><h4 class="lot">かたまり<small>画面に並ぶカード</small></h4>${blks}</section>` : "";
-  const ORDER = ["CTS","SDJ","HND","NRT","NGO","ITM","KIX","HIJ","MYJ","FUK","NGS","KMJ","KOJ","OKA"], mine = loAps() || [];
-  const apsCard = only ? "" : `<section class="locard" data-lo-sec="aps"><h4 class="lot">よく見る空港<small>${mine.length ? `${mine.length}/${ORDER.length}・運用で空港を選ぶ画面のいちばん上に並びます` : "選ぶと、運用で空港を選ぶ画面のいちばん上に並びます"}</small></h4>
-      <div class="lochips">${ORDER.filter(c => OPS_AIRPORTS[c]).map(c => `<button type="button" class="lochip" aria-pressed="${mine.includes(c)}" data-lo-ap="${c}">${esc(OPS_AIRPORTS[c].name)}</button>`).join("")}</div></section>`;
-  const empty = only && !c.off.length ? `<div class="locard"><p class="lonote" style="margin:0">隠しているものはありません。全部の機能を出しています。</p></div>` : "";
-  const undo = LO_UNDO ? `<div class="loundo" role="status"><span>${esc(LO_UNDO.text)}</span><button type="button" data-lo-undo>元に戻す</button></div>` : "";
-  const saved = SERVER && user && !demo ? "アカウントに保存します。別の端末でも同じ表示になります。" : "ログインしていないので、この端末に保存しています。";
-  return head + `<div class="lohero"><p class="lonum"><b>${c.on}</b><small> / ${c.all}</small></p><p class="losub2">出しているもの</p>
-      <p class="lolegend">${LO_CHECK}出す　<s>取り消し線</s> 隠す</p></div>
-    <div class="lofilter" role="group" aria-label="しぼりこみ"><button type="button" class="lochip" data-lo-filter="all" aria-pressed="${!only}">すべて</button><button type="button" class="lochip" data-lo-filter="off" aria-pressed="${only}">隠しているもの <b>${c.off.length}</b></button></div>
-    ${undo}${empty}${tabsCard}${viewsCard}${blksCard}${apsCard}
-    <p class="losave">${saved}隠しても記録や機能は消えません。</p>
-    <button class="lobtn" type="button" data-lo-reset${loAllOn() ? " disabled" : ""}>全部乗せに戻す</button>`;
+  const cards = loSecIds().filter(id => !only || id !== "aps").map(id => loSecHTML(id, only)).join("");
+  const empty = only && !h.n ? `<div class="locard"><p class="lonote" style="margin:0">隠しているものはありません。全部の機能を出しています。</p></div>` : "";
+  const undo = LO_UNDO ? `<div class="loundo lofix" role="status"><span>${esc(LO_UNDO.text)}</span><button type="button" data-lo-undo>元に戻す</button></div>` : "";
+  const saved = SERVER && user && !demo ? "アカウントに保存し、別の端末でも同じ表示になります。" : "ログインしていないので、この端末に保存しています。";
+  return head + `<div class="lofilter" role="group" aria-label="しぼりこみ"><button type="button" class="lochip" data-lo-filter="all" aria-pressed="${!only}">すべて</button><button type="button" class="lochip" data-lo-filter="off" aria-pressed="${only}">隠しているもの <b>${h.n}</b></button><span class="loall">${h.all}このうち</span></div>
+    ${empty}${cards}
+    <p class="losave">${only ? "" : "カードを押すと開きます。"}${saved}隠しても記録や機能は消えません。経営の画面はここに入りません。</p>
+    ${only ? "" : `<button class="lobtn" type="button" data-lo-reset${loAllOn() ? " disabled" : ""}>全部乗せに戻す</button>`}${undo}`;
 }
 function loRender(keep){ const y = $("dLayout").scrollTop; $("dLayoutBody").innerHTML = layoutHTML(); $("dLayout").scrollTop = keep ? y : 0; }
+// カードを上の固定した見出しのすぐ下へ送る
+function loScrollTo(id){ const d = $("dLayout"), el = d.querySelector(`[data-lo-sec="${id}"]`), top = d.querySelector(".spctop"), f = d.querySelector(".lofilter"); if(!el) return;
+  d.scrollTop = 0; d.scrollTop = el.getBoundingClientRect().top - d.getBoundingClientRect().top - (top ? top.offsetHeight : 0) - 8; void f; }
 function openLayout(page, from){
-  LO_PAGE = page && (page === "top" || TAB_NAME[page]) ? page : "top"; LO_FROM = from || LO_FROM; LO_FILTER = "all"; LO_UNDO = null; LO_CONFIRM = false;
+  const sec = LO_SEC_OF[page] || null;
+  LO_FROM = from || LO_FROM; LO_FILTER = "all"; LO_UNDO = null; LO_CONFIRM = false;
+  LO_OPEN = new Set(sec ? [sec] : []); LO_RING = sec;
   $("dLayoutBody").innerHTML = layoutHTML();
-  if(!$("dLayout").open){ $("dLayout").showModal(); track("layout_open", LO_PAGE); }
-  // 画面の鉛筆から開いたときは、その画面の見方（ホーム・成績はかたまり）へ送る
-  const g = LO_PAGE !== "top" && $("dLayout").querySelector(`[data-lo-go="${LO_PAGE}"]`);
-  if(g){ $("dLayout").scrollTop = 0; $("dLayout").scrollTop = g.getBoundingClientRect().top - $("dLayout").getBoundingClientRect().top - 72; }
+  if(!$("dLayout").open){ $("dLayout").showModal(); track("layout_open", page || "top"); }
+  // 画面の鉛筆から開いたときは、その画面のカードだけ開いて縁を光らせ、そこまで送る
+  if(sec) loScrollTo(sec); else $("dLayout").scrollTop = 0;
 }
 // 変えたあと：保存して画面に当て、開いている画面を描き直す（ログインしていればサーバーにも）
 function loChanged(what, undo){
@@ -5600,16 +5667,21 @@ document.addEventListener("click", e => {
   if(!e.target.closest("#dLayout")) return;
   const q = sel => e.target.closest(sel);
   let b;
-  if((b = q("[data-lo-filter]"))){ LO_FILTER = b.dataset.loFilter; LO_UNDO = null; loRender(false); return; }
+  if((b = q("[data-lo-filter]"))){ LO_FILTER = b.dataset.loFilter; LO_UNDO = null; LO_RING = null; loRender(false); return; }
   if((b = q("[data-lo-reset]"))){ if(loAllOn()) return; LO_CONFIRM = true; LO_UNDO = null; loRender(false); return; }
   if((b = q("[data-lo-reset-no]"))){ LO_CONFIRM = false; loRender(false); return; }
   if((b = q("[data-lo-reset-yes]"))){ const off = loCount().off, n = off.length, snap = loSnap(); LO_CONFIRM = false; LO_FILTER = "all"; loResetAll();
     loChanged("reset", { text:n ? `${loOffText(off)}をまた出しました` : "全部乗せに戻しました", snap }); $("dLayout").scrollTop = 0; return; }
   if((b = q("[data-lo-undo]"))){ if(LO_UNDO && LO_UNDO.snap){ loRestore(LO_UNDO.snap); loChanged("undo"); } return; }
+  if((b = q("[data-lo-fold]"))){ const id = b.dataset.loFold; if(LO_OPEN.has(id)) LO_OPEN.delete(id); else LO_OPEN.add(id); LO_RING = null; loRender(true); return; }
+  if((b = q("[data-lo-goto]"))){ const v = b.dataset.loGoto; $("dLayout").close(); if($("dSettings").open) $("dSettings").close(); goTab(v); return; }
   const snap = loSnap();
+  if((b = q("[data-lo-ext]"))){ const [k, id] = b.dataset.loExt.split(":"), X = LO_EXT[k]; if(!X || !X.toggle) return; let ok = false; try{ ok = X.toggle(id); }catch(_){} if(!ok) return;
+    const r = (loSecDef(k).groups.flatMap(g => g.rows).find(x => x.id === id) || {});
+    loChanged("ext_" + k, { text:`「${r.label || id}」を${r.on ? "出しました" : "隠しました"}`, snap }); return; }
   if((b = q("[data-lo-tab]"))){ const v = b.dataset.loTab, t = loTabs(), on = t.includes(v);
     if(on && t.length <= LO_TAB_MIN) return;
-    if(!on && t.length >= LO_TAB_MAX) return;
+    if(!on && t.length >= LO_TAB_MAX){ openTabPicker("layout"); TP.swap = v; tpRender(); tpKeep(v); return; }   // 5つのときは「タブを選ぶ」で入れ替えるタブを聞く（11/9 の決定）
     loEdit().tabs = on ? t.filter(x => x !== v) : [...t, v];
     if(on && currentView() === v) goTab(loEdit().tabs[0]);
     loChanged("tab_" + v + (on ? "_off" : "_on"), { text:`「${TAB_NAME[v]}」のタブを${on ? "隠しました" : "出しました"}`, snap }); return; }
@@ -5625,17 +5697,15 @@ document.addEventListener("click", e => {
 });
 /* ---------- 見方だけの小さいシート（11/10 20時 PM の指示・改善担当 review-c5 の1） ----------
    各画面の見方の帯の鉛筆で開く。その画面の見方だけを ON／OFF（タブを選ぶと同じ部品）。題・数・完了は上に固定し、送るのは一覧だけ。
-   図鑑の地方別は「いつも」・見方は1つ以上残す（今までと同じ loToggleOff）。全部を見直したいときは下の「表示の編集をすべて見る」から今の1枚へ */
+   11/11 13時 案A：どの見方も OFF にでき、最後の1つだけ残す（「最後の1つ」の札と理由）。全部の行に説明を1行。全部を見直したいときは下の「表示の編集をすべて見る」から1枚へ */
 let VS = { k:null, undo:null };
 function vsHTML(){
-  const k = VS.k, off = loOff(k), list = VIEWS[k] || [], on = list.filter(([id]) => !off.has(id)).length;
-  const row = ([id, l]) => { const o = !off.has(id);
-    if((k === "book" && id === "region") || (k === "log" && id === "diary")) return `<li class="tprow lock vsrow"><b>${esc(l)}</b><span class="tplk">いつも</span></li>`;
-    return `<li class="tprow vsrow${o ? "" : " off"}" data-vs="${id}"><b>${esc(l)}${o ? "" : "<small>見方の帯から隠しています</small>"}</b>${loSw(o, `data-vs-sw="${id}"`, `${esc(l)}を見方の帯に出す`, o && on <= 1)}</li>`; };
+  const k = VS.k, rows = loViewRows(k), on = rows.filter(r => r.on).length;
+  const sw = r => ({ ...r, attr:`data-vs-sw="${r.id}"` });
   const undo = VS.undo ? `<div class="tpbot"><div class="loundo tpundo" role="status"><span>${esc(VS.undo.text)}</span><button type="button" data-vs-undo>元に戻す</button></div></div>` : "";
-  return `<div class="tptop"><div class="tphd"><h3 id="vsTitle">${TAB_NAME[k]}の見方</h3><span class="tpcnt" aria-label="出している見方 ${on}つ（${list.length}つのうち）"><b>${on}</b>/${list.length}</span><button type="button" class="tpdone" data-close>完了</button></div>
-    <p class="tplead">OFF で見方の帯から隠れます。1つ以上残します。</p>${on <= 1 ? `<p class="tpmsg tpleast">見方は1つより減らせません。</p>` : ""}</div>
-    <div class="tpscroll"><ul class="tplist" aria-label="${TAB_NAME[k]}の見方">${list.map(row).join("")}</ul>
+  return `<div class="tptop"><div class="tphd"><h3 id="vsTitle">${TAB_NAME[k]}の見方</h3><span class="tpcnt" aria-label="出している見方 ${on}つ（${rows.length}つのうち）"><b>${on}</b>/${rows.length}</span><button type="button" class="tpdone" data-close>完了</button></div>
+    <p class="tplead">OFF で見方の帯から隠れます。最後の1つは残ります。</p></div>
+    <div class="tpscroll"><ul class="tplist" aria-label="${TAB_NAME[k]}の見方">${rows.map(r => loRowHTML(sw(r)).replace('<li class="tprow vsrow', `<li data-vs="${r.id}" class="tprow vsrow`)).join("")}</ul>
     <div class="tpmore"><button type="button" class="lotext" data-vs-all>表示の編集をすべて見る ›</button></div></div>${undo}`;
 }
 function vsRender(){ const d = $("dViews"); if(!d || !d.open) return; const sc = d.querySelector(".tpscroll"), y = sc ? sc.scrollTop : 0; $("dViewsBody").innerHTML = vsHTML(); const n = d.querySelector(".tpscroll"); if(n) n.scrollTop = y; }
