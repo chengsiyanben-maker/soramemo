@@ -2,7 +2,7 @@ import os, sys
 HERE=os.path.dirname(os.path.abspath(__file__)); WEB=os.path.abspath(os.path.join(HERE,'..','..','web')); WORK=os.environ.get('SORAMEMO_TEST_WORK','/tmp/soramemo-e2e'); os.makedirs(WORK, exist_ok=True)
 # 修行モード：下のタブに修行（運用の代わり）、ホームのカード（次に乗る便・運航の状況・その日の行程）、
 # 修行のタブの中の行き来、フライトの見方「修行」（月ごと・金額を入れる）、成績の「修行のまとめ」（いちばん上）、気軽にでは隠す
-import asyncio, json
+import asyncio, re, json
 from datetime import datetime, timedelta, timezone
 from playwright.async_api import async_playwright
 now = datetime.now(timezone.utc)
@@ -54,17 +54,17 @@ async def main():
         check('計画を作るは修行のタブで開く:', await pg.evaluate("currentView()") == 'sg' and not await pg.evaluate("$('dShugyo').open") and '計画を作る' in await pg.inner_text('#v-sg') and await pg.evaluate('SG_PAGE') == 'find')
         await pg.click('#v-sg .sg-back'); await pg.wait_for_timeout(300)
         t = await pg.inner_text('#v-sg')
-        check('戻るとまとめ（閉じるはなく、会員情報がある）:', '年の修行' in t and '会員情報' in t and '閉じる' not in t)
-        await pg.click('#v-sg [data-sg-go="year"]'); await pg.wait_for_timeout(200)
+        check('戻るとまとめ（閉じるはなく、会員情報がある）:', '修行' in t and '道のり' in t and '会員情報' in t and '閉じる' not in t)
+        await pg.click('#v-sg [data-sg-go="quick"]'); await pg.wait_for_timeout(200)
         await pg.click('nav.tabs button[data-v="sg"]'); await pg.wait_for_timeout(300)
         check('開いているときに修行のタブを押すとまとめに戻る:', await pg.evaluate("SG_PAGE") == 'main')
         await pg.click('#v-sg [data-sg-set="car"][data-v="JAL"]'); await pg.wait_for_timeout(300)
         t = await pg.inner_text('#v-sg')
         check('タブの中で航空会社を切り替えられる:', await pg.evaluate("sgGet().car") == 'JAL' and 'FOP' in t)
-        check('JAL の搭乗回数は記録した便だけ:', '搭乗\n0回' in t or '搭乗 0回' in t)
+        check('JAL の回数の道は記録した便だけ（30回のうち あと 30回）:', bool(re.search(r'あと\s*30\s*回', t)))
         await pg.click('#v-sg [data-sg-set="car"][data-v="ANA"]'); await pg.wait_for_timeout(300)
         t = await pg.inner_text('#v-sg')
-        check('修行のタブ：実績と予定のかたまりが分かれている:', '実績' in t and '記録した便だけ' in t and '予定' in t and 'これから乗る' in t and '計画' in t)
+        check('修行のタブ：実績と予定のかたまりが分かれている:', '実績' in t and '記録した便' in t and '予定の2便に乗ると' in t and '推定' in t)
         await pg.evaluate("sgGo('budget')"); await pg.wait_for_timeout(200)
         await pg.fill('#sgBudget', '100000'); await pg.dispatch_event('#sgBudget', 'change'); await pg.wait_for_timeout(300)
         t = await pg.inner_text('#v-sg'); print('BUDGET', t[:300].replace('\n', ' | '))
