@@ -295,7 +295,7 @@
 - feat/zukan-book は review-app-2 で見せてよい。夜は夜の画面の土台が入ってから撮る
 - flight-book の4版が出たら review-3 の3つ（長い機種名の券・続けて送る形と A1p の文・名前1つ）を A2s2 と A1y で確かめる。PM の指示があればアプリのフライト（作り始めたら）を見る
 - shugyo-book の4版が出たら review-3 の3つ（入れた日・回数の行・JGC のスイッチ）だけ確かめる
-- **指示がなければ次の回は flight-book の4版**（11/10 20時 cca0697 のあと・design/flight-book の最新）、その次に night の ON／OFF 5版（d3fd49f）
+- flight-book の4版（zukan-airfields のあと。11/10 20時 cca0697 のあと・design/flight-book の最新）、その次に night の ON／OFF 5版（d3fd49f）
 - zukan-book の5版が出たら review-4 の3つ（04 のターミナルの数え方の文・02z の位置なし・04 の供用開始と出典と空欄）を確かめる。PM の指示があれば feat/zukan-book（PR #60）の空港ページの文と「いちばん近い」も見る
 - night の ON／OFF 5版（d3fd49f）は出ている。まだ見ていない（review-3 の3つを 07・07c・07b と 04・04b で）
 - feat/all-in-tabs：古い写真の撮り直しが出たら、高さ667 の C1 とトーストの重なりと、× の文が消えたかだけ見る
