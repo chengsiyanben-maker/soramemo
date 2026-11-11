@@ -17,7 +17,7 @@
 - リモートに古い `shugyo` ブランチ（10/21）があるので、`shugyo/<名前>` は push できない（ref がぶつかる）。`shugyo-<名前>` で作る
 
 ## いま持っている仕事
-- 修行の作り直し（11/11 PM の仕事・本人「すべてOK」）：ブランチ feat/shugyo-book、下書き PR #64、報告 docs/pm/report-shugyo-book-build.md、写真 docs/pm/shugyo-book/
+- 修行の作り直し（11/11 PM の仕事・本人「すべてOK」）：11/11 16時12分 本人が PR #64 を main に入れた。ブランチ feat/shugyo-book、報告 docs/pm/report-shugyo-book-build.md、写真 docs/pm/shugyo-book/
   - 11/11 2回目：#48・#63 の入った main を取り込み直した（web/ だけぶつかり、組み立て直しで解いた）。修行のテスト・t119・t125 は成功
   - 見方を「道のり・1便ごと・月ごと」に。sgMain を作り直し、sgRoadView・sgFlightsView・sgFlightPage・sgMonthsView・sgViewsPage などを足した。CSS は .sgd .sgb-* だけ
   - JGC の札は「記録分」。今の数を入れる形（g.lsIn ＝ { v, at }、shugyo_prefs の中。表は変えていない）。見方と道のりに出すものは g.views・g.show（はじめ全部 ON）
