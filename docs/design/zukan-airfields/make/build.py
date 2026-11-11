@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # 図鑑の飛行場・滑空場の入口の画面案を作る。今のアプリ（main の web/ を http://localhost:8765/ で開く）のデモに入り、
 # 図鑑の上に inject.js で入口と別の図鑑を描き足して、1画面1ファイルの HTML（外部の読み込みなし）に書き出す。アプリのコードは変えない。
-# 2版（review-1 の直し）は *-v2.html に書き出す。1版は 63d4675 の inject.js で作ったもの。
+# 3版（review-2 の直し）は *-v3.html に書き出す。2版（review-1 の直し）は 56e064f の build.py で *-v2.html。1版は 63d4675 の inject.js で作ったもの。
 # 使い方：(cd web && python3 -m http.server 8765 &) ; python3 build.py ; python3 shoot.py
 import asyncio, os, re, base64
 from playwright.async_api import async_playwright
@@ -31,12 +31,12 @@ def finish(html, sf, scroll=None, title=''):
     return '<!doctype html>\n' + html
 
 SCREENS = [  # ファイル名, 題, 夜, 作り方, 送る位置
-    ('02-entry-v2', '02 図鑑の最初の画面に入口', False, 'entry', None),
-    ('02b-entry-zero-v2', '02b まだ1つもないとき', False, 'entry0', None),
-    ('03-airfield-book-v2', '03 飛行場・滑空場の図鑑', False, 'book', None),
-    ('03b-airfield-kanto-v2', '03b 関東の扉（送ったところ）', False, 'book', '関東'),
-    ('04-entry-night-v2', '04 夜：図鑑の最初の画面に入口', True, 'entry', None),
-    ('04b-airfield-book-night-v2', '04b 夜：飛行場・滑空場の図鑑', True, 'book', None),
+    ('02-entry-v3', '02 図鑑の最初の画面に入口', False, 'entry', None),
+    ('02b-entry-zero-v3', '02b まだ1つもないとき', False, 'entry0', None),
+    ('03-airfield-book-v3', '03 飛行場・滑空場の図鑑', False, 'book', None),
+    ('03b-airfield-kanto-v3', '03b 関東の扉（送ったところ）', False, 'book', '関東'),
+    ('04-entry-night-v3', '04 夜：図鑑の最初の画面に入口', True, 'entry', None),
+    ('04b-airfield-book-night-v3', '04b 夜：飛行場・滑空場の図鑑', True, 'book', None),
 ]
 
 async def enter(pg):
