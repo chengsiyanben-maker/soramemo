@@ -17,8 +17,8 @@ async def main():
         await pg.goto('file://'+os.path.join(WORK,'index_server_test.html')); await pg.wait_for_load_state('load'); await pg.wait_for_timeout(500)
         await pg.evaluate('__fake.login()'); await pg.wait_for_timeout(600)
         await pg.click('nav.tabs button[data-v=log]'); await pg.wait_for_timeout(200)
-        n = await pg.locator('#flights .flight.tap').count(); print('フライト数:', n)
-        await pg.click('#flights .flight.tap >> nth=0'); await pg.wait_for_timeout(200)
+        n = await pg.locator('#flights .fbrow').count(); print('フライト数:', n)
+        await pg.click('#flights .fbrow >> nth=0'); await pg.wait_for_timeout(300); await pg.click('#fvEdit'); await pg.wait_for_timeout(200)
         await pg.select_option('#fAirline', 'NH'); await pg.wait_for_timeout(100)
         opts = await pg.locator('#fFare option').count(); print('ANAの運賃の選択肢:', opts)
         await pg.click('#dFlight .flist2 button >> nth=3');   # 運賃の区分の札（座席はエコノミー）

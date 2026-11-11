@@ -21,7 +21,7 @@ async def main():
             await pg.click('nav.tabs button[data-v=book]'); print('  book:', await pg.inner_text('#bookProg'), '| dim:', await pg.locator('#zkBody .zk-ap.dim').count())
             await pg.click('nav.tabs button[data-v=stats]'); print('  stats:', (await pg.inner_text('#airlineStats')).replace('\n',' | '))
             await pg.click('nav.tabs button[data-v=log]')
-            print('  flights:', await pg.locator('#flights .flight').count(), '| map routes:', await pg.locator('#map path').count()-1)
+            print('  flights:', await pg.locator('#flights .fbrow').count(), '| map routes:', await pg.locator('#map path').count()-1)
             await pg.click('nav.tabs button[data-v=home]')
         await snap('ALL')
         for m in ['JAL','ANA']:
@@ -30,7 +30,7 @@ async def main():
             if m=='JAL':
                 await pg.screenshot(path=os.path.join(WORK,'f_home_jal.png'))
                 await pg.click('nav.tabs button[data-v=book]'); await pg.screenshot(path=os.path.join(WORK,'f_book_jal.png')); await pg.click('nav.tabs button[data-v=home]')
-                await pg.click('nav.tabs button[data-v=log]'); await pg.click('#shareMap'); await pg.wait_for_timeout(900)
+                await pg.click('nav.tabs button[data-v=log]'); await pg.click('[data-vw="log:map"]'); await pg.wait_for_timeout(300); await pg.click('#shareMap'); await pg.wait_for_timeout(900)
                 src=await pg.get_attribute('#shareImg','src'); open(os.path.join(WORK,'f_mapcard_jal.png'),'wb').write(base64.b64decode(src.split(',')[1])); await pg.click('#shareClose'); await pg.click('nav.tabs button[data-v=home]')
         await pg.wait_for_timeout(400); await pg.reload(); await pg.wait_for_load_state('load'); await pg.wait_for_selector('#focusOff', timeout=30000); print('persist:', await pg.evaluate('FOCUS'))
         await pg.click('#focusOff'); print('after off:', await pg.evaluate('FOCUS'), await pg.is_visible('#focusBar'))

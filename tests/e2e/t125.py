@@ -83,6 +83,17 @@ async def main():
         check('月末の残り：1月末 26,648（ひいた 3,352）・予定は別のカード:', '1月末' in t and '26,648' in t and 'ひいた 3,352' in t and await pg.locator('#v-sg .sgb-mc.p').count() >= 1)
         check('路線ごと：羽田 ⇄ 那覇 4回:', '羽田 ⇄ 那覇' in t and '4回' in t and '6,704' in t)
         await pg.screenshot(path=os.path.join(WORK, 't125_months.png'), full_page=True)
+        # 車などにした便は道のりの数に入らない（フライト PR #65 の statusRows・11/11 本人「案2」）
+        await pg.evaluate("(() => { const f = S.flights.find(x => String(x.id) === '203'); setCar(f, true); sgKeep(() => {}); })()"); await pg.wait_for_timeout(300)
+        y = await pg.evaluate("[sgYear().JAL.pts, sgYear().JAL.n, sgLS().v]")
+        check('車などにした1便は数えない（3便・5,028 FOP・JGC 20）:', y == [5028, 3, 20])
+        await pg.click('#v-sg [data-sg-view="flights"]'); await pg.wait_for_timeout(300)
+        check('車などにした便は1便ごとにも出ない（3行）:', await pg.locator('#v-sg [data-sg-fl]').count() == 3)
+        await pg.click('#v-sg [data-sg-view="road"]'); await pg.wait_for_timeout(300)
+        check('道のりの大きな数字も 5,028:', '5,028' in await pg.inner_text('#v-sg') and '6,704' not in await pg.inner_text('#v-sg .sgb-hero'))
+        await pg.screenshot(path=os.path.join(WORK, 't125_road_car.png'))
+        await pg.evaluate("(() => { const f = S.flights.find(x => String(x.id) === '203'); setCar(f, false); sgKeep(() => {}); })()"); await pg.wait_for_timeout(300)
+        check('便に戻すとまた数える（4便・6,704）:', await pg.evaluate("[sgYear().JAL.pts, sgYear().JAL.n]") == [6704, 4])
         # 見方を選ぶ：JGC を OFF → 道のりから消える。見方を OFF → ピルから消える。最後の1つは消せない
         await pg.click('#v-sg [data-sg-go="views"]'); await pg.wait_for_timeout(300)
         check('見方を選ぶ：はじめは全部 ON（JGC も ON）:', await pg.evaluate("[...document.querySelectorAll('#v-sg [data-sg-sw]')].every(b => b.getAttribute('aria-checked') === 'true')"))

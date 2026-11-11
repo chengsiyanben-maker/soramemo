@@ -10,7 +10,7 @@ async def main():
         pg=await c.new_page(); errs=[]; pg.on('pageerror', lambda e: errs.append(str(e)))
         await pg.goto('file://'+os.path.join(WORK,'index_server_test.html')); await pg.wait_for_load_state('load'); await pg.wait_for_function('document.readyState === "complete" && typeof render === "function"'); await pg.wait_for_timeout(600)
         await pg.evaluate('__fake.login()'); await pg.wait_for_timeout(500)
-        await pg.click('nav.tabs button[data-v=log]'); await pg.click('#flights .flight.tap >> nth=0')
+        await pg.click('nav.tabs button[data-v=log]'); await pg.click('#flights .fbrow >> nth=0'); await pg.wait_for_timeout(300); await pg.click('#fvEdit')
         await pg.select_option('#fAirline','NH'); await pg.fill('#fNo','61'); await pg.click('#fSave'); await pg.wait_for_timeout(500)
         print('rpc:', await pg.evaluate('JSON.stringify(window.__lastRpc)'))
         print('list:', (await pg.inner_text('#flights')).replace('\n',' | '))
