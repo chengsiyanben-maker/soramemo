@@ -57,7 +57,7 @@ async def main():
         check('マイページの入口に今の数・成績のタイル:', '32 / 32' in await pg.inner_text('#personaNote') and await pg.locator('#personaMore .mptile[data-persona-open="stats"]').count() == 1)
         await pg.locator('#dSettings [aria-labelledby="mpPersona"]').screenshot(path=os.path.join(SHOTS, '08-mypage-entry.png'))
         await pg.click('#dSettings .lotile[data-lo-open="top"]'); await pg.wait_for_timeout(300)
-        check('表示の編集が開く（32このうち・ひな形はない・カードは畳んで1行）:', await pg.evaluate("$('dLayout').open") and '32このうち' in await pg.inner_text('#dLayout .loall') and await pg.locator('#dLayout [data-lo-persona]').count() == 0 and await pg.locator('#dLayout .losec.open').count() == 0)
+        check('表示の編集が開く（39このうち＝修行の7行を含む・ひな形はない・カードは畳んで1行）:', await pg.evaluate("$('dLayout').open") and '39このうち' in await pg.inner_text('#dLayout .loall') and await pg.locator('#dLayout [data-lo-persona]').count() == 0 and await pg.locator('#dLayout .losec.open').count() == 0)
         await pg.evaluate("LO_OPEN = new Set(loSecIds()); loRender(true)")   # 全部のカードを開く
         check('出す・隠すのスイッチは32こ＋成績のタブ（11/11 の 2版）:', await pg.locator('#dLayout .losw[data-lo-tab], #dLayout .losw[data-lo-view], #dLayout .losw[data-lo-blk]').count() == 33)
         check('全部出しているときは「全部乗せに戻す」を押せない:', await pg.locator('#dLayout [data-lo-reset]').is_disabled())

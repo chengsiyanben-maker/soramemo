@@ -1,7 +1,7 @@
 import os, sys
 HERE=os.path.dirname(os.path.abspath(__file__)); WEB=os.path.abspath(os.path.join(HERE,'..','..','web')); WORK=os.environ.get('SORAMEMO_TEST_WORK','/tmp/soramemo-e2e'); os.makedirs(WORK, exist_ok=True)
 # 修行の作り直し（11/11・画面案 design/shugyo-book 3版）：見方は道のり・1便ごと・月ごとの3つ。
-# 道のり（大きな数字・1年の何割・2つの道・JGC は「記録分」と今の数を入れる形・入れたら届くか（推定））、1便の内訳、月ごとの年末の残り（回数は1行）、見方を選ぶの ON／OFF
+# 道のり（大きな数字・1年の何割・2つの道・JGC は「記録分」と今の数を入れる形・入れたら届くか（推定））、1便の内訳、月ごとの年末の残り（回数は1行）、修行の見方のシート（ON／OFF・最後の1つ・道のり OFF で押せない・1枚の修行のカード）
 import asyncio, json, re
 from datetime import datetime, timedelta, timezone
 from playwright.async_api import async_playwright
@@ -94,17 +94,38 @@ async def main():
         await pg.screenshot(path=os.path.join(WORK, 't125_road_car.png'))
         await pg.evaluate("(() => { const f = S.flights.find(x => String(x.id) === '203'); setCar(f, false); sgKeep(() => {}); })()"); await pg.wait_for_timeout(300)
         check('便に戻すとまた数える（4便・6,704）:', await pg.evaluate("[sgYear().JAL.pts, sgYear().JAL.n]") == [6704, 4])
-        # 見方を選ぶ：JGC を OFF → 道のりから消える。見方を OFF → ピルから消える。最後の1つは消せない
-        await pg.click('#v-sg [data-sg-go="views"]'); await pg.wait_for_timeout(300)
-        check('見方を選ぶ：はじめは全部 ON（JGC も ON）:', await pg.evaluate("[...document.querySelectorAll('#v-sg [data-sg-sw]')].every(b => b.getAttribute('aria-checked') === 'true')"))
-        await pg.click('#v-sg [data-sg-sw="show.jgc"]'); await pg.wait_for_timeout(300)
-        await pg.click('#v-sg [data-sg-sw="views.flights"]'); await pg.wait_for_timeout(300)
+        # 修行の見方のシート（鉛筆から。画面案 design/view-settings の 02c-v2）：JGC を OFF → 道のりから消える。見方を OFF → ピルから消える。最後の1つは消せない
+        await pg.click('#v-sg [data-sgvs-open]'); await pg.wait_for_timeout(300)
+        check('修行の見方のシートが開く（題・3/3・見方と道のりに出すもの）:', await pg.evaluate("$('dSgViews').open") and '修行の見方' in await pg.inner_text('#dSgViews .tphd') and (await pg.inner_text('#dSgViews .tpcnt')).replace('\n','') == '3/3' and [x.strip() for x in (await pg.evaluate("[...document.querySelectorAll('#dSgViews .logl')].map(e => e.firstChild.textContent)"))] == ['見方', '道のりに出すもの'])
+        check('はじめは全部 ON（JGC も ON）・行は7つ・全部に説明:', await pg.evaluate("[...document.querySelectorAll('#dSgViews [data-sgvs-sw]')].every(b => b.getAttribute('aria-checked') === 'true')") and await pg.locator('#dSgViews .vsrow small').count() == 7)
+        await pg.screenshot(path=os.path.join(WORK, 't125_vs_sheet.png'))
+        await pg.click('#dSgViews [data-sgvs-sw="show.jgc"]'); await pg.wait_for_timeout(300)
+        check('押すと元に戻すの帯:', '「JGC（Life Status）」を隠しました' in await pg.inner_text('#dSgViews .tpundo'))
+        await pg.click('#dSgViews [data-sgvs-sw="views.flights"]'); await pg.wait_for_timeout(300)
         d = await pg.evaluate("__fake.db.shugyo_prefs[0].data")
         check('ON／OFF はサーバーに保存:', d['show']['jgc'] is False and d['views']['flights'] is False)
-        await pg.click('#v-sg [data-sg-sw="views.months"]'); await pg.wait_for_timeout(200)
-        await pg.click('#v-sg [data-sg-sw="views.road"]'); await pg.wait_for_timeout(200)
+        check('シートの裏の見方の帯もすぐ変わる:', await pg.evaluate("[...document.querySelectorAll('#v-sg .sgb-views [data-sg-view]')].map(b => b.textContent).join()") == '道のり,月ごと')
+        await pg.click('#dSgViews [data-sgvs-undo]'); await pg.wait_for_timeout(300)
+        check('元に戻すで 1便ごと がまた ON:', await pg.evaluate("sgShow().views.flights") is True)
+        await pg.click('#dSgViews [data-sgvs-sw="views.flights"]'); await pg.wait_for_timeout(200)
+        await pg.click('#dSgViews [data-sgvs-sw="views.months"]'); await pg.wait_for_timeout(200)
+        check('最後の1つ：押せない・札と理由:', await pg.locator('#dSgViews [data-sgvs-sw="views.road"]').is_disabled() and '最後の1つ' in await pg.inner_text('#dSgViews .vsrow[data-sgvs="views.road"] .vslast') and '1つより減らせません' in await pg.inner_text('#dSgViews .tpscroll'))
         check('見方は1つは残る:', await pg.evaluate("Object.values(sgShow().views).filter(Boolean).length") == 1)
-        await pg.click('#v-sg .sg-back'); await pg.wait_for_timeout(300)
+        # 道のりを OFF にしている間は「道のりに出すもの」は押せない（02c2）
+        await pg.click('#dSgViews [data-sgvs-sw="views.months"]'); await pg.wait_for_timeout(200)
+        await pg.click('#dSgViews [data-sgvs-sw="views.road"]'); await pg.wait_for_timeout(300)
+        check('道のり OFF：道のりに出すものは押せず、見出しの補足が変わる:', await pg.evaluate("[...document.querySelectorAll('#dSgViews [data-sgvs-sw^=\"show.\"]')].every(b => b.disabled)") and '道のりを ON にすると出ます' in await pg.inner_text('#dSgViews .tpscroll') and await pg.locator('#dSgViews .sgvs-dim').count() == 4)
+        await pg.screenshot(path=os.path.join(WORK, 't125_vs_roadoff.png'))
+        await pg.click('#dSgViews [data-sgvs-sw="views.road"]'); await pg.wait_for_timeout(200)
+        # 表示の編集をすべて見る → 1枚の修行のカードが開いて光る。そこで押しても修行の画面が変わる
+        await pg.click('#dSgViews [data-sgvs-all]'); await pg.wait_for_timeout(300)
+        check('すべて見る：1枚の修行のカードが開いて光る（7行）:', await pg.locator('#dLayout [data-lo-sec="sg"].open.ring [data-lo-ext]').count() == 7 and not await pg.evaluate("$('dSgViews').open"))
+        await pg.click('#dLayout [data-lo-ext="sg:views.months"]'); await pg.wait_for_timeout(300)
+        check('1枚で押しても修行の見方が変わる:', '月ごと' in (await pg.inner_text('#dLayout [data-lo-sec="sg"] .losh')).split('隠している：')[-1] and await pg.evaluate("sgShow().views.months") is False)
+        check('reset で全部また出す:', await pg.evaluate("LO_EXT.sg.reset() && Object.values(sgShow().views).every(Boolean) && Object.values(sgShow().show).every(Boolean)"))
+        await pg.evaluate("$('dLayout').close()"); await pg.wait_for_timeout(200)
+        # ここから：1便ごとと月ごと・JGC を OFF
+        await pg.evaluate("(() => { const g = sgShow(); g.views.flights = false; g.views.months = false; g.show.jgc = false; sgKeep(() => {}); })()"); await pg.wait_for_timeout(300)
         t = await pg.inner_text('#v-sg')
         check('JGC を OFF にすると道のりに出ない・ピルは道のりだけ:', 'Life Status' not in t and await pg.evaluate("[...document.querySelectorAll('#v-sg .sgb-views [data-sg-view]')].map(b => b.textContent).join()") == '道のり')
         # 予定も計画もない人：一文と「計画を作る」
