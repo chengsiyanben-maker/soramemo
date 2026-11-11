@@ -1,5 +1,5 @@
 # 見方だけの小さいシート（11/10 20時 PM の指示・改善担当 review-c5 の1）
-#   見方の帯の鉛筆は、その画面の見方だけを ON／OFF するシートを開く（題・数・完了は上に固定）。図鑑の地方別は「いつも」・1つ以上残す・元に戻す
+#   見方の帯の鉛筆は、その画面の見方だけを ON／OFF するシートを開く（題・数・完了は上に固定）。11/11 13時 案A：どの見方も OFF にでき最後の1つだけ残す・元に戻す
 #   鉛筆の押せる所は 44×44。マイページの「全部を見直す」の1枚は題と閉じるが上に残る
 import os, sys, asyncio
 HERE=os.path.dirname(os.path.abspath(__file__)); WEB=os.path.abspath(os.path.join(HERE,'..','..','web'))
@@ -30,7 +30,7 @@ async def main():
         await pg.click('[data-vs-open="book"]'); await pg.wait_for_timeout(300)
         check('図鑑の鉛筆で「図鑑の見方」のシート（表示の編集の1枚ではない）:', await pg.evaluate("$('dViews').open && !$('dLayout').open") and (await pg.inner_text('#vsTitle')) == '図鑑の見方')
         check('題と完了が見える:', await pg.evaluate(TOP))
-        check('地方別は「いつも」・地図と行った順は ON／OFF:', await pg.locator('#dViews .vsrow.lock').count() == 1 and 'いつも' in await pg.inner_text('#dViews .vsrow.lock') and await pg.locator('#dViews [data-vs-sw]').count() == 2 and await pg.locator('#dViews .losw[role="switch"][aria-checked="true"]').count() == 2)
+        check('案A（11/11 13時）：地方別・地図・行った順の3つとも ON／OFF（いつもの行はない）:', await pg.locator('#dViews .vsrow.lock').count() == 0 and await pg.locator('#dViews [data-vs-sw]').count() == 3 and await pg.locator('#dViews .losw[role="switch"][aria-checked="true"]').count() == 3)
         check('数は 3/3:', (await pg.inner_text('#dViews .tpcnt')).replace(' ', '').startswith('3/3'))
         await pg.screenshot(path=os.path.join(SHOTS, '30-844-book-views.png'))
         await pg.click('#dViews [data-vs-sw="chron"]'); await pg.wait_for_timeout(300)
@@ -48,14 +48,14 @@ async def main():
         c, pg, errs = await open_app(b, h=667)
         await pg.evaluate("goTab('log')"); await pg.wait_for_timeout(600)
         await pg.click('[data-vs-open="log"]'); await pg.wait_for_timeout(300)
-        check('667：フライトの見方 3行（日誌は「いつも」・地図と年のまとめは ON／OFF）:', await pg.locator('#dViews .vsrow').count() == 3 and await pg.locator('#dViews [data-vs-sw]').count() == 2 and 'いつも' in await pg.inner_text('#dViews .vsrow.lock'))
+        check('667：フライトの見方 3行（案A：日誌も ON／OFF）:', await pg.locator('#dViews .vsrow').count() == 3 and await pg.locator('#dViews [data-vs-sw]').count() == 3 and await pg.locator('#dViews .vsrow.lock').count() == 0)
         await pg.evaluate("document.querySelector('#dViews .tpscroll').scrollTop = 9999"); await pg.wait_for_timeout(200)
         check('667：一覧を送っても題と完了が見える:', await pg.evaluate(TOP))
         await pg.screenshot(path=os.path.join(SHOTS, '32-667-log-views.png'))
         for i in ['map', 'year']: await pg.click(f'#dViews [data-vs-sw="{i}"]')
         check('667：地図と年のまとめを OFF にしても日誌は残る:', await pg.evaluate("viewsShown('log').map(v => v[0]).join()") == 'diary')
         await pg.click('#dViews [data-vs-all]'); await pg.wait_for_timeout(400)
-        check('「表示の編集をすべて見る」で今の1枚（フライトの所）:', await pg.evaluate("$('dLayout').open && LO_PAGE === 'log'"))
+        check('「表示の編集をすべて見る」で今の1枚（フライトの所）:', await pg.evaluate("$('dLayout').open && LO_RING === 'log'"))
         tv = await pg.evaluate("(() => { const h = document.querySelector('#dLayout .spctop'), r = h.getBoundingClientRect(), x = h.querySelector('[data-close]').getBoundingClientRect(); return r.top >= -1 && x.bottom <= innerHeight && x.top >= 0; })()")
         check('667：表示の編集の1枚も題と閉じるが上に残る:', tv is True)
         await pg.screenshot(path=os.path.join(SHOTS, '33-667-layout-sticky.png'))

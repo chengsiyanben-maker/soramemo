@@ -51,7 +51,7 @@ async def main():
         for v in ['board', 'strip', 'photo']: await pg.click(f'#dViews [data-vs-sw="{v}"]')
         check('最後の1つは隠せない:', await pg.locator('#dViews [data-vs-sw="runway"]').is_disabled() and await pg.locator('#opsViews [data-vw]').count() == 1)
         for v in ['board', 'strip', 'photo']: await pg.click(f'#dViews [data-vs-sw="{v}"]')
-        await pg.evaluate("$('dViews').close(); openLayout('ops', 'screen')"); await pg.wait_for_timeout(300)
+        await pg.evaluate("$('dViews').close(); openLayout('ops', 'screen'); LO_OPEN = new Set(loSecIds()); loRender(true)"); await pg.wait_for_timeout(300)
         # 空港
         for a in ['HND', 'HIJ']: await pg.click(f'[data-lo-ap="{a}"]')
         aps = await pg.eval_on_selector_all('#opsAps .aplist [data-ops-ap]', 'e => e.map(x => x.dataset.opsAp)')
@@ -66,7 +66,7 @@ async def main():
         await pg.click('[data-lo-tab="book"]'); await pg.click('[data-lo-tab="log"]')
         check('タブは2つより減らせない:', await pg.evaluate(TABS) == 'home,ops' and await pg.locator('[data-lo-tab="ops"]').is_disabled())
         await pg.click('[data-lo-tab="book"]'); await pg.click('[data-lo-tab="log"]'); await pg.click('[data-lo-tab="sg"]')
-        check('タブは5つまで出せる:', await pg.evaluate(TABS) == 'home,ops,book,log,sg' and await pg.locator('[data-lo-tab="sg"]').get_attribute('aria-pressed') == 'true')
+        check('タブは5つまで出せる:', await pg.evaluate(TABS) == 'home,ops,book,log,sg' and await pg.locator('[data-lo-tab="sg"]').get_attribute('aria-checked') == 'true')
         await pg.click('[data-lo-tab="sg"]')
         # ホーム・成績のかたまり
         await pg.click('[data-lo-blk="home:recent"]'); await pg.click('[data-lo-blk="stats:status"]')
