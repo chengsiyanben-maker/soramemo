@@ -12,6 +12,6 @@ async def main():
         await pg.click('nav.tabs button[data-v=log]'); await pg.wait_for_timeout(200)
         print('badges:', await pg.locator('#flights .vbadge').all_inner_texts())
         await pg.locator('#flights').scroll_into_view_if_needed(); await pg.screenshot(path=os.path.join(WORK,'vbadge.png'))
-        await pg.click('#flights .flight.tap >> nth=0'); print('dialog:', await pg.inner_text('#fWhen'))
+        await pg.click('#flights .fbrow >> nth=0'); await pg.wait_for_timeout(300); await pg.click('#fvEdit'); print('dialog:', await pg.inner_text('#fWhen'))
         print(errs); await b.close()
 asyncio.run(main())

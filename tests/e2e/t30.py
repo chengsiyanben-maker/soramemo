@@ -22,7 +22,7 @@ async def main():
         cts = await pg.evaluate("'a:'+A.find(a=>a.iata=='CTS').id")
         for v in ['t:HND-T1', cts]:
             await pg.select_option('#demoAirport', v); await pg.press('#checkin','Enter'); await pg.wait_for_timeout(600); await pg.click('#dStamp .row2 .btn2')
-        await pg.click('nav.tabs button[data-v=log]'); await pg.click('[data-lseg=year]'); await pg.wait_for_timeout(200)
+        await pg.click('nav.tabs button[data-v=log]'); await pg.evaluate("VIEW.log = 'year'; renderLog()"); await pg.wait_for_timeout(200)
         print('demo year plus:', (await pg.inner_text('#yrPlus')).replace('\n',' ')[:200])
         await pg.locator('#yrPlus').scroll_into_view_if_needed(); await pg.screenshot(path=os.path.join(WORK,'plus_year.png'))
         await pg.click('#yrShare'); await pg.wait_for_timeout(900)

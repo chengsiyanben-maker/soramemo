@@ -44,7 +44,7 @@ async def main():
         await pg.locator('#homeSheet .sbody').screenshot(path=os.path.join(WORK, 't62_spot.png'))
         # 修行
         await pg.evaluate("setPersona('shugyo', 'test')"); await pg.wait_for_timeout(800)
-        check('修行：タブ:', await pg.evaluate(TABS) == 'home,sg,log,stats' and await pg.evaluate("VIEW.log") == 'sg')
+        check('修行：タブ:', await pg.evaluate(TABS) == 'home,sg,log,stats' and await pg.evaluate("VIEW.log") == 'diary')
         t = await pg.inner_text('#personaCard')
         check('修行：ホームのカード:', 'PP' in t or 'FOP' in t)
         await pg.locator('#homeSheet .sbody').screenshot(path=os.path.join(WORK, 't62_shugyo.png'))
