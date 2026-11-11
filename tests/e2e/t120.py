@@ -65,7 +65,7 @@ async def main():
         check('空港ページ：コード・押した回数・はじめて押した日（年月日）:', 'HND' in t and '押した回数' in t and '2025' in t and 'はじめて押した日' in t)
         check('空港ページ：押した記録は上に3回＋すべて見る:', await pg.locator('#dAirportBody > ul.hist li').count() == 3 and 'すべて見る' in t)
         check('空港ページ：ターミナルの1枚（86 の数に入りません）:', 'ターミナル　2 / 3' in t and '86 の数に入りません' in t and '羽田 第1' in t and '未訪問' not in t)
-        check('空港ページ：開港・滑走路はまだ出さない:', '開港' not in t and '滑走路' not in t and '供用開始' not in t)
+        check('空港ページ：羽田は滑走路と出典（年はないので出さない・「開港」と書かない）:', '開港' not in t and '滑走路' in t and '供用開始' not in t and '加工して作成' in t)   # 11/10 airport_facts（詳しくは t121）
         pn = await pg.evaluate("[...document.querySelectorAll('#dAirportBody [data-zk-go]')].map(x => BY[+x.dataset.zkGo].iata)")
         check('前／次は同じ地方の北から南（羽田の前後）:', len(pn) == 2, str(pn))
         await pg.screenshot(path=os.path.join(SHOTS, '04-844.png'))
