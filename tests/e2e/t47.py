@@ -20,8 +20,8 @@ async def main():
         await pg.click('nav.tabs button[data-v=stats]'); await pg.wait_for_timeout(200)
         print('表示:', (await pg.inner_text('#statusBox')).replace('\n',' ')[:300])
         await pg.click('nav.tabs button[data-v=log]'); await pg.wait_for_timeout(200)
-        # フライトの画面で運賃を選ぶ
-        await pg.click('#flights .flight.tap >> nth=2'); await pg.wait_for_timeout(200)
+        # フライトの画面で運賃を選ぶ（羽田-新千歳の JAL。日誌は日付の新しい順なので id で押す）
+        await pg.click('#flights [data-fbv="a1"]'); await pg.wait_for_timeout(300); await pg.click('#fvEdit'); await pg.wait_for_timeout(200)
         print('運賃の選択肢:', await pg.locator('#fFare option').count(), '| 選択中:', await pg.evaluate("$('fFare').value"), '| 座席:', await pg.inner_text('#fSeat'))
         await pg.click('#dFlight [data-flv="JAL:Y_FLEX"]');   # 運賃は座席と区分に分けて、区分を札で選ぶ
         await pg.click('#fSave'); await pg.wait_for_timeout(200)

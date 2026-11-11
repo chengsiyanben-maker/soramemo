@@ -28,11 +28,11 @@ async def main():
         await pg.click('nav.tabs button[data-v=log]'); await pg.wait_for_timeout(200)
         print('flights:', (await pg.inner_text('#flights')).replace('\n',' | '))
         # edit existing: clear JAL
-        await pg.click('#flights .flight.tap >> nth=2'); await pg.select_option('#fAirline',''); await pg.click('#fSave'); await pg.wait_for_timeout(200)
+        await pg.click('#flights .fbrow >> nth=2'); await pg.wait_for_timeout(300); await pg.click('#fvEdit'); await pg.select_option('#fAirline',''); await pg.click('#fSave'); await pg.wait_for_timeout(200)
         print('after clear:', (await pg.inner_text('#flights')).replace('\n',' | '))
         await pg.evaluate("goTab('log')"); await pg.click('#flAdd'); await pg.wait_for_timeout(450); await pg.select_option('#mFrom', label='新千歳空港'); await pg.select_option('#mTo', label='那覇空港'); await pg.fill('#mDate','2025-08-01'); await pg.select_option('#mAirline','BC'); await pg.click('#mAdd'); await pg.wait_for_timeout(200)
         print('manual:', (await pg.inner_text('#manualList')).replace('\n',' | '))
-        await pg.click('#shareMap'); await pg.wait_for_timeout(1000)
+        await pg.evaluate("setLogSeg('list')"); await pg.click('[data-vw="log:map"]'); await pg.wait_for_timeout(300); await pg.click('#shareMap'); await pg.wait_for_timeout(1000)
         src=await pg.get_attribute('#shareImg','src'); open(os.path.join(WORK,'al_mapcard.png'),'wb').write(base64.b64decode(src.split(',')[1]))
         print(errs); await b.close()
 asyncio.run(main())

@@ -44,7 +44,7 @@ async def main():
         check('国内線では出さない:', '海外の航空会社' not in (await pg.inner_text('#opsBoard')))
         # 2. 記録帳の欄から国際線を足す
         await pg.evaluate("goTab('log')"); await pg.wait_for_timeout(500)
-        await pg.click('[data-lseg="book"]'); await pg.wait_for_timeout(200)
+        await pg.click('#flAdd'); await pg.wait_for_timeout(200)
         await pg.fill('#iFrom', '羽田'); await pg.fill('#iTo', 'HND'); await pg.fill('#iDate', '2026-08-01'); await pg.click('#iAdd'); await pg.wait_for_timeout(200)
         check('国内どうしは断る:', '記録帳' in (await pg.inner_text('#iMsg')))
         await pg.fill('#iTo', 'ソウル'); await pg.fill('#iNo', 'nh 863'); await pg.click('#iAdd'); await pg.wait_for_timeout(800)
@@ -55,7 +55,7 @@ async def main():
         check('海外どうしは断る:', '日本の空港' in (await pg.inner_text('#iMsg')))
         lt = await pg.inner_text('#intlList')
         check('一覧に出る:', '国際線　1件' in lt and 'ICN' in lt and 'NH 863' in lt)
-        await pg.evaluate("$('logSheet').sheetGo && $('logSheet').sheetGo('full')"); await pg.wait_for_timeout(400); await pg.evaluate("$('intlH').scrollIntoView({block:'start'})"); await pg.wait_for_timeout(300); await pg.screenshot(path=os.path.join(WORK, 't60_book.png'))
+        await pg.evaluate("$('intlH').scrollIntoView({block:'start'})"); await pg.wait_for_timeout(300); await pg.screenshot(path=os.path.join(WORK, 't60_book.png'))
         # 3. 乗る便のカードから記録する
         await pg.evaluate("goTab('home')"); await pg.wait_for_timeout(300)
         await pg.fill('#rideNo', 'NH106'); await pg.click('#rideAdd button'); await pg.wait_for_selector('#rideCard [data-ride-rec]', timeout=5000)
@@ -66,7 +66,7 @@ async def main():
         await pg.locator('#rideCard').screenshot(path=os.path.join(WORK, 't60_ride.png'))
         check('記録済みの表示:', '国際線の記録に入れました' in (await pg.inner_text('#rideCard')))
         # 4. 消す（2回押す）
-        await pg.evaluate("goTab('log')"); await pg.wait_for_timeout(400); await pg.click('[data-lseg="book"]'); await pg.wait_for_timeout(200)
+        await pg.evaluate("goTab('log')"); await pg.wait_for_timeout(400); await pg.click('#flAdd'); await pg.wait_for_timeout(200)
         await pg.locator('[data-intl-del]').first.click(); await pg.wait_for_timeout(100)
         check('1回目は確かめる:', 'もう一度押すと消します' in (await pg.inner_text('#intlList')))
         await pg.locator('[data-intl-del]').first.click(); await pg.wait_for_timeout(800)

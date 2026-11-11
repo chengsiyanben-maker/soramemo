@@ -71,8 +71,8 @@ async def main():
         await pg.click('[data-lo-blk="home:recent"]'); await pg.click('[data-lo-blk="stats:status"]')
         check('ホーム：最近の印を隠す:', await pg.evaluate("document.querySelector('[data-lo=\"home:recent\"]').classList.contains('lo-off')"))
         # フライトの隠れていた見方を出す
-        await pg.click('[data-lo-view="log:alt"]')
-        check('フライトの隠れていた見方を出す:', 'alt' not in (await pg.evaluate(LS))['off']['log'] and 'cal' in (await pg.evaluate(LS))['off']['log'])
+        await pg.click('[data-lo-view="log:year"]')
+        check('フライトの隠れていた見方（年のまとめ）を出す:', 'year' not in (await pg.evaluate(LS))['off'].get('log', []))
         await pg.click('#dLayout [data-close]')
 
         # 開き直しても残る

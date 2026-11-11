@@ -27,7 +27,7 @@ async def run(scheme):
         await pg.click('#shareClose')
         await pg.click('nav.tabs button[data-v=log]'); await pg.wait_for_timeout(300)
         await pg.screenshot(path=os.path.join(WORK,f'u_log_{scheme}.png'))
-        await pg.click('#shareMap'); await pg.wait_for_timeout(1200)
+        await pg.click('[data-vw="log:map"]'); await pg.wait_for_timeout(300); await pg.click('#shareMap'); await pg.wait_for_timeout(1200)
         src = await pg.get_attribute('#shareImg','src'); open(os.path.join(WORK,f'u_mapcard_{scheme}.png'),'wb').write(base64.b64decode(src.split(',')[1]))
         print('errors', errs); await b.close()
 async def main():
