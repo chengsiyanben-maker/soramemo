@@ -1,6 +1,15 @@
 # チェックイン担当の帳面
 
 ## いま持っている仕事
+- 近くの空港と図鑑の飛行場・滑空場（11/12 10時25分の PM の指示・本人「1.2はOK」）：ブランチ feat/near-airfields（main e443373＋data/heliports を取り込み）・下書き PR #75（d821406）、報告 docs/pm/report-near-airfields-app.md、写真 docs/pm/shots-near-airfields/（01〜13）
+  - 近くの空港：民間空港・飛行場・滑空場・ヘリポートを近い順（基地は出さない・判定は nearestBase のまま）。半券は「いちばん近い」・パタパタは先頭が民間空港でコードがあるときだけ・ほかは種類の札・ピル「ほか○つ ›」（20km）／「近くの民間空港 ›」／引き上げた位置で「閉じる ⌄」。引き上げた位置の一覧（見出し「ほかに 20km 以内 ○つ」・844 は3行、760 未満は1行・民間空港の行は2段目に「民間空港でいちばん近い」）と「すべて」のシート（#dNear）。範囲の中は「飛行場・滑空場の図鑑に入ります」。667 の一覧の下とタブ帯のあいだ約17px
+  - 「飛行場・滑空場・ヘリポートも出す」（はじめ ON・LAYOUT.nearx＝0 で OFF）：ホームに出すものの半券の下の枝の行と表示の編集のホームのカード。○/4 の数に入れない
+  - ヘリポート12か所を EXTRA_RAW に（heli・札「ヘリポート」・昼は土色）。印は今の checkin 関数のまま押せる（本人の答え待ち）
+  - 図鑑：地方別の黒いカードの下に入口（3 / 75・小さな地図・重なる行った丸は数の入った1つ・667 は1行）。飛行場・滑空場の図鑑はツメ＋扉＋枠（#bookAir・#zkxTsume・四国は押せない）。ヘリポートもこの図鑑に入れた（75）
+  - 関数：足した nearX・nearKind・nearMoreSync・nearRowHTML・renderNearList・openNearAll・nearxSet・heNearxHTML・zkxList・zkxShort・zkxBreak・zkxCounts・zkxMapSVG・zkAirEntryHTML・zkxTile・zkAirBookHTML／変えた nearest・showNearest・sheetTop・initSheet の go・renderHomeMap・enqueue（nearestBase）・heHTML・loSecDef・loSecCount・loRowHTML・loSecHTML・renderBook・zkRegionHTML・zkJump・zkTsumeSync・renderZkOthers・showStamp・印の色
+  - テスト：t127（新）すべて成功。t119 はホームに出すもののスイッチの数を直して成功。全体 87/96 → t13・t17・t19・t37・t62 は流し直して成功、残りは前からの t105・t99・t48
+  - 本人に決めてほしいこと：ヘリポートで印を押せるか・同じ図鑑か（今は押せる・75）／東京駅で先頭がヘリポートになる／入口を地図・行った順にも出すか／飛行場の図鑑の戻る先
+  - main には入れていない
 - 見方の設定の反映の前の直し（11/11 17時20分の PM の指示・review-app-1）：済み。PR #68 に足した（c837993）、報告 docs/pm/report-view-settings-fix1.md、写真 shots-view-settings/20-844-top-44px・21-667-close-44px（10〜15 も撮り直し）
   - 1 表示の編集の上の「‹ マイページ」「閉じる」「すべて」「隠しているもの」を 44px（CSS だけ）
   - 2 タブを全部出していて成績のタブがないとき、タブのカードの補足を「成績はマイページから」（指摘の長い文は 390 幅で切れた）
@@ -165,6 +174,9 @@
 - 確認コードは6けた。メールは Gmail、Supabase の送信上限は1時間100通
 
 ## 次にやること
+- PR #75（feat/near-airfields）：改善担当の見直しと本人の答え（ヘリポートの印・図鑑）を待つ。「反映して」が出たら、データ担当の移行163（heliports）と一緒に。入る前に t127・t119・t116 を流す。印を押せないに決まったらデータ担当へ（checkin 関数の読み出しで heli を外す）。図鑑を別にするなら ZKX_KINDS から heli を外す
+- 夜の画面が main に入ったら、近くの一覧・すべて・飛行場の図鑑を夜で撮り直す（今の 13 は data-night だけの参考）
+- 地図の名前の置き方（review-5 の4・8：引き上げた位置で「いまここ」と先頭の名前が重なる・タイルの字と二重）はまだ。改善担当の指摘を待つ
 - PR #68：本人の「反映して」を待つ。入る前に t124・t126・t118・t122 を流す。本人の答え（ホームの数 4/4・タブの補足の文・タイルの名前）が出たら合わせる
 - PR #68（見方の設定）は main に入った。本番の反映を Actions で確かめる。本人の3つの答え（ホームの数え方・成績の行・タイルの名前）と改善担当の指摘が来たら、main から新しいブランチで直す。修行担当の修行のシートができたら1枚に修行のカードが出るか確かめる
 - 夜の画面が main に入ったら、鉛筆のシートと1枚（スイッチ・光る縁）を夜で撮る
@@ -198,6 +210,9 @@
 - tests/ops は手元では npm の playwright にブラウザがないので、全体に入っている playwright をつないで流した（すべて成功）
 
 ## ほかの担当への依頼
+- 改善担当（11/12）：PR（feat/near-airfields）の写真 shots-near-airfields/ の 02-kazo-full-667（一覧の下のすき間）・10-zukan-entry-844（重なる丸の「3」）・11／12（枠の名前の折れ方）と iPhone の幅で見てほしい
+- データ担当（11/12）：data/heliports（移行163）は feat/near-airfields に取り込んだ。反映は一緒に。本人が「ヘリポートは押せない」と決めたら checkin 関数の読み出しで heli を外してほしい
+- 修行担当（11/12・依頼の答え）：loResetAll から LO_EXT.sg.reset を呼ぶ件は、本人の答え待ちのまま（まだ呼んでいない）
 - 改善担当（11/11 夜2回目）：PR #68（c837993）で review-app-1 の1〜4 を直した。写真 shots-view-settings/20・21 を見てほしい。案の外の2つ（図鑑のツメとデモの帯の「終了」の重なり・運用の見方の帯が切れる）はまだ。指示があれば直す
 - 改善担当（11/11 夜）：PR #68 の写真 shots-view-settings/（とくに 10・11・14・15 の 667、02 の最後の1つ）と iPhone の幅で、畳んだカードの開け閉めと鉛筆から来たときの光る縁を見てほしい
 - 修行担当（11/11 夜・shugyo.md に書いた）：見方の設定の土台（PR #68）。修行の見方のシートは loRowHTML（同じ行の部品）を使えば同じ形になる。1枚に出すなら LO_EXT.sg を足す
