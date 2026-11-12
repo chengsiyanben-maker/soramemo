@@ -31,6 +31,7 @@ const SKY = {
  day:   {top:'#8DB8E3', hor:'#E4EEF7', sea:'#9CC0DE', land:'#E4E9DF', land2:'#DCE3D5', rw:'#4F555D', twy:'#A3A9B0', bld:'#F7F8FA', roof:'#E4E7EC', mark:'#FFFFFF', fog:'#E7F0F8', fogd:16000, light:1.0, sun:null},
  dusk:  {top:'#5A6E9C', hor:'#F2B98A', sea:'#6E7FA8', land:'#C7C2BF', land2:'#BCB7B5', rw:'#4D4F57', twy:'#77777E', bld:'#EDE3DA', roof:'#D7CCC3', mark:'#F4EDE6', fog:'#E9B994', fogd:8000, light:.85, sun:'#FFD7A8'},
  night: {top:'#070B14', hor:'#18233A', sea:'#0B1322', land:'#1A2130', land2:'#161C29', rw:'#252B36', twy:'#2B3240', bld:'#3A4458', roof:'#30394B', mark:'#3B4456', fog:'#18233A', fogd:9000, light:.55, sun:null, lights:true},
+ overcast:{top:'#B7C1CB', hor:'#E3E7EB', sea:'#A9C0D3', land:'#E2E7DE', land2:'#DAE1D4', rw:'#4F555D', twy:'#A3A9B0', bld:'#F7F8FA', roof:'#E4E7EC', mark:'#FFFFFF', fog:'#E3E7EB', fogd:16000, light:.96, sun:null},
  fog:   {top:'#BFC6CE', hor:'#D9DDE1', sea:'#C3CAD1', land:'#D3D7D6', land2:'#CDD1D0', rw:'#7B8087', twy:'#9EA3A9', bld:'#E8EAEC', roof:'#DADDE0', mark:'#EEF0F2', fog:'#D9DDE1', fogd:3800, light:.9, sun:null},
 };
 
@@ -54,7 +55,7 @@ PLANES.forEach(pl=>{pl.size=SIZE[pl.ty]||[60,55];});
 window.HND.PLANES = PLANES;
 
 function camFrom(pos, tgt, fov, W, H){ const f=nrm(sub(tgt,pos)); const r=nrm(cross(f,[0,0,1])); const u=cross(r,f); const F=(H/2)/Math.tan(fov*R/2); return {pos,f,r,u,F,W,H}; }
-function proj(c,q){ const v=sub(q,c.pos); const z=dot(v,c.f); return [c.W/2+dot(v,c.r)/z*c.F, c.H*c.cy-dot(v,c.u)/z*c.F, z]; }
+function proj(c,q){ const v=sub(q,c.pos); const z=dot(v,c.f); return [c.W/2+(c.ox||0)+dot(v,c.r)/z*c.F, c.H*c.cy-dot(v,c.u)/z*c.F, z]; }
 function clip(c,pts){ const N=4; const out=[]; for(let i=0;i<pts.length;i++){ const a=pts[i],b=pts[(i+1)%pts.length]; const za=dot(sub(a,c.pos),c.f), zb=dot(sub(b,c.pos),c.f);
   if(za>=N) out.push(a); if((za>=N)!==(zb>=N)){ const t=(N-za)/(zb-za); out.push([a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t,a[2]+(b[2]-a[2])*t]); } } return out; }
 
@@ -81,6 +82,7 @@ window.drawAirport = function(cv, opt){
   const S=SKY[opt.sky||'day']; const c=camFrom(opt.cam.pos,opt.cam.tgt,opt.cam.fov||50,W,H); c.cy=opt.cam.cy||.5;
   // 3版：シートの上の残り（ピルの下〜シートの上）の真ん中に、見ている所（選んだ機体）を寄せる
   if(opt.fitSheet){ const sh=cv.parentElement.querySelector('.sheet'); const top=sh?sh.getBoundingClientRect().top:H; c.cy=((126+top)/2)/H; }
+  if(opt.shiftTo){ const pl=PLANES.find(q=>q.id===opt.shiftTo); if(pl){ const sh=cv.parentElement.querySelector('.sheet'); const top=sh?sh.getBoundingClientRect().top:H; const s0=proj(c,[pl.pos[0],pl.pos[1],pl.z]); const want=(126+top)/2; c.cy+= (want-s0[1])/H; c.ox=W/2-s0[0]; } }
   const fogT = z => 1-Math.exp(-Math.max(0,z)/S.fogd);
   const col = (cc,z) => mix(cc, S.fog, Math.min(.92,fogT(z)));
   // 空
@@ -96,6 +98,9 @@ window.drawAirport = function(cv, opt){
   RW.forEach(r=>{ const s=strip(r.c[0],r.c[1],r.h,r.len,60); poly(s,col(S.rw,avgz(s)));
     if(!opt.light){ const u=dir(r.h); for(let t=-r.len/2+120;t<r.len/2-120;t+=110){ const m=strip(r.c[0]+u[0]*t,r.c[1]+u[1]*t,r.h,45,2.5); poly(m,col(S.mark,avgz(m))); }
       [-1,1].forEach(e=>{ for(let k=-3;k<=3;k++){ if(!k) continue; const v=[u[1],-u[0]]; const cx=r.c[0]+u[0]*e*(r.len/2-40)+v[0]*k*7, cy=r.c[1]+u[1]*e*(r.len/2-40)+v[1]*k*7; const m=strip(cx,cy,r.h,40,3); poly(m,col(S.mark,avgz(m))); } }); } });
+  const AIR = (!opt.light && !opt.hideAll && opt.airCue) ? PLANES.filter(pl=>pl.z>0 && opt.hidePlane!==pl.id) : [];
+  AIR.forEach(pl=>{ const ps0=opt.planeScale||1; planeFaces(Object.assign({},pl,{z:0.5}), ps0*1.15*(opt.airScale||1), opt.real).forEach(f=>{ if(!f.top && !f.wing) return; poly(f.pts, S.lights?'rgba(0,0,0,.45)':'rgba(30,40,56,.26)'); });
+    const gq=proj(c,[pl.pos[0],pl.pos[1],0]); if(gq[2]>5){ const rr=Math.max(3,Math.min(10,9000/gq[2])); g.strokeStyle=S.lights?'rgba(232,236,241,.55)':'rgba(36,41,47,.5)'; g.lineWidth=1.2; g.beginPath(); g.ellipse(gq[0],gq[1],rr,rr*.4,0,0,7); g.stroke(); } });
   // 夜の灯り（白＝滑走路の縁・緑＝誘導路の中心線・琥珀＝建物の窓）
   const dots=[];
   if(S.lights && !opt.light){
@@ -110,7 +115,7 @@ window.drawAirport = function(cv, opt){
   const tq=P(TOWER.a,TOWER.b); const th=TOWER.h*(opt.vxt||opt.vx||1.6);
   if(!opt.hideTower){ const toz=dot(sub([tq[0],tq[1],0],c.pos),c.f); box(tq[0],tq[1],16,16,th,337).forEach(f=>{f.kind='b';f.oz=toz;solids.push(f);}); box(tq[0],tq[1],34,34,14,337,th).forEach(f=>{f.kind='cab';f.oz=toz-1;solids.push(f);}); }
   const ps = opt.planeScale||1;
-  if(!opt.light && !opt.hideAll) PLANES.forEach(pl=>{ if(opt.hidePlane===pl.id) return; const oz=dot(sub([pl.pos[0],pl.pos[1],pl.z],c.pos),c.f); planeFaces(pl,ps*(pl.z?1.15:1),opt.real).forEach(f=>{f.kind='p';f.oz=oz;solids.push(f);}); });
+  if(!opt.light && !opt.hideAll) PLANES.forEach(pl=>{ if(opt.hidePlane===pl.id) return; const oz=dot(sub([pl.pos[0],pl.pos[1],pl.z],c.pos),c.f); planeFaces(pl,ps*(pl.z?1.15*(opt.airScale||1):1),opt.real).forEach(f=>{f.kind='p';f.oz=oz;solids.push(f);}); });
   solids.forEach(f=>f.z=avgz(f.pts));
   const Ld=nrm([-.5,-.7,.6]);
   solids.sort((a,b)=>(b.oz-a.oz)||(b.z-a.z)).forEach(f=>{
@@ -122,6 +127,7 @@ window.drawAirport = function(cv, opt){
     if(f.kind==='p' && S.light<1 && !S.lights) base=mix(base,'#000000',(1-S.light)*.4);
     poly(f.pts, col(shade(base, lam*(S.lights?1:1)), f.z), f.kind==='p' ? 'rgba(40,50,64,.35)' : (S.lights?'rgba(150,170,200,.18)':'rgba(60,70,84,.12)'));
   });
+  AIR.forEach(pl=>{ const a=proj(c,[pl.pos[0],pl.pos[1],pl.z]), b=proj(c,[pl.pos[0],pl.pos[1],0]); if(a[2]<5||b[2]<5) return; g.save(); g.setLineDash([3,3]); g.strokeStyle=S.lights?'rgba(232,236,241,.6)':'rgba(36,41,47,.55)'; g.lineWidth=1.2; g.beginPath(); g.moveTo(a[0],a[1]); g.lineTo(b[0],b[1]); g.stroke(); g.restore(); });
   if(S.lights && !opt.light){
     BLD.forEach(b=>{ if(b.n[0]!=='T') return; const q=P(b.a,b.b); const u=dir(337), v=[u[1],-u[0]]; for(let t=-b.l/2+30;t<b.l/2;t+=40){ [-1,1].forEach(sd=>{ dots.push({q:[q[0]+u[0]*t+v[0]*sd*(b.w/2+1), q[1]+u[1]*t+v[1]*sd*(b.w/2+1), b.h*(opt.vx||1.6)*.55], c:'#FFB547', s:1.2}); }); } });
     dots.push({q:[tq[0],tq[1],th+8], c:'#7EE2A8', s:2.2});
@@ -136,11 +142,15 @@ window.drawAirport = function(cv, opt){
       g.globalAlpha=opt.clouds.thin?.3:.42; g.fillStyle=opt.night?'#2A3346':'#FFFFFF'; g.beginPath(); g.ellipse(s[0],s[1],r,r*.42,0,0,7); g.fill(); g.globalAlpha=1; } }
   // 3版：雲が低い日の全体の視点は、上の端だけ薄く白く（空港の上は透かす）
   if(opt.clouds && opt.clouds.thin){ const hg=g.createLinearGradient(0,0,0,H*.46); hg.addColorStop(0,opt.night?'rgba(42,51,70,.7)':'rgba(255,255,255,.85)'); hg.addColorStop(.45,opt.night?'rgba(42,51,70,.35)':'rgba(255,255,255,.45)'); hg.addColorStop(1,'rgba(255,255,255,0)'); g.fillStyle=hg; g.fillRect(0,0,W,H*.46); }
+  if(opt.clouds && opt.clouds.top){ let sd=11; const rnd=()=>{sd=(sd*9301+49297)%233280;return sd/233280;}; const bot=Math.max(0,hy-4);
+    g.save(); g.beginPath(); g.rect(0,0,W,bot); g.clip(); const hg=g.createLinearGradient(0,0,0,bot); hg.addColorStop(0,'rgba(236,240,244,.95)'); hg.addColorStop(1,'rgba(236,240,244,.35)'); g.fillStyle=hg; g.fillRect(0,0,W,bot);
+    for(let i=0;i<26;i++){ const x=rnd()*W, y=bot*(0.25+rnd()*0.8), r=30+rnd()*60; g.globalAlpha=.55; g.fillStyle='#F4F6F8'; g.beginPath(); g.ellipse(x,y,r,r*.32,0,0,7); g.fill(); g.globalAlpha=.35; g.fillStyle='#C9D0D8'; g.beginPath(); g.ellipse(x+r*.2,y+r*.12,r*.8,r*.18,0,0,7); g.fill(); }
+    g.restore(); g.globalAlpha=1; }
   // 軽い版：機体は向きのある三角だけ
   if(opt.light) PLANES.forEach(pl=>{ const s=proj(c,[pl.pos[0],pl.pos[1],pl.z]); if(s[2]<5) return; const u=dir(pl.h); const a=proj(c,[pl.pos[0]+u[0]*120,pl.pos[1]+u[1]*120,pl.z]); const ang=Math.atan2(a[1]-s[1],a[0]-s[0]);
     g.save(); g.translate(s[0],s[1]); g.rotate(ang); g.fillStyle=opt.night?'#E8ECF1':'#2B3340'; g.beginPath(); g.moveTo(7,0); g.lineTo(-5,-4.5); g.lineTo(-3,0); g.lineTo(-5,4.5); g.closePath(); g.fill(); g.restore(); });
   // 機体の上の名札の位置を返す
-  const tags={}; PLANES.forEach(pl=>{ const s=proj(c,[pl.pos[0],pl.pos[1],pl.z+ (pl.z?40:18)*ps]); tags[pl.id]={x:s[0],y:s[1],z:s[2]}; });
+  const tags={}; PLANES.forEach(pl=>{ const s=proj(c,[pl.pos[0],pl.pos[1],pl.z+ (pl.z?40*(opt.airScale||1):18)*ps]); tags[pl.id]={x:s[0],y:s[1],z:s[2]}; });
   const t2=proj(c,[tq[0],tq[1],th+20]); tags.TOWER={x:t2[0],y:t2[1],z:t2[2]};
   return tags;
 };
