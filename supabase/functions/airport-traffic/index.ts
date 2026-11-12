@@ -117,14 +117,20 @@ async function fromLive(iata: string): Promise<{ now?: number; ac?: unknown[] } 
   return { now: newest || now, ac: acFromLive(rows, now) };
 }
 
-async function snapshot(iata: string, view = false): Promise<string> {
+// took があれば、どこに時間がかかったかを入れる（見る人の呼び出しの Server-Timing 用。11/13 速さの見直し）
+async function snapshot(iata: string, view = false, took?: string[]): Promise<string> {
+  const t0 = performance.now(), mark = (k: string) => took?.push(`${k};dur=${Math.round(performance.now() - t0)}`);
   const hit = cache.get(iata);
-  if (hit && Date.now() - hit.at < TTL) return hit.body;
+  if (hit && Date.now() - hit.at < TTL) { mark("mem"); return hit.body; }
   const a = AIRPORTS[iata];
-  const j = (view ? await fromLive(iata).catch(() => null) : null) ?? await fetchArea(iata, !view);
+  const live = view ? await fromLive(iata).catch(() => null) : null;
+  if (view) mark("live");
+  const j = live ?? await fetchArea(iata, !view);
+  if (!live) mark("adsb");
   // まとめて取った円から、この空港の半径の中だけを使う
   const planes = planesFromAdsb(j?.ac, a.at, 14000, NEARBY.filter((o) => o !== a.at)).filter((p) => p.dist_km <= a.nm * 1.852);
   const tr = await syncTrails(iata, planes);
+  mark("trails");
   const body = JSON.stringify({
     iata, at: new Date(typeof j?.now === "number" ? j.now : Date.now()).toISOString(), source: "adsb.lol",
     planes: planes.map((p) => ({ ...p, trail: (tr.get(p.id) ?? []).slice(-150).map((x) => x.p) })),
@@ -474,7 +480,9 @@ Deno.serve(async (req) => {
   }
   if (!AIRPORTS[iata]) return new Response(JSON.stringify({ error: "unsupported airport" }), { status: 404, headers: JSON_HEADERS });
   try {
-    return new Response(await snapshot(iata, true), { headers: { ...JSON_HEADERS, "Cache-Control": "max-age=10" } });
+    // 例：Server-Timing: live;dur=35, trails;dur=60（始めからの時間）。記録が止まっていて adsb.lol に聞いたときは adsb が出る
+    const took: string[] = [], body = await snapshot(iata, true, took);
+    return new Response(body, { headers: { ...JSON_HEADERS, "Cache-Control": "max-age=10", "Server-Timing": took.join(", "), "Access-Control-Expose-Headers": "Server-Timing" } });
   } catch (e) {
     console.error(e);
     const hit = cache.get(iata);
