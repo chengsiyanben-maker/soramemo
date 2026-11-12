@@ -397,3 +397,10 @@ review-c4：見せてよい。本人の答え（ON／OFF か −／＋ か）を
 
 ## PM から（11/11 17時20分、見方の設定の反映の前の直し）→ PR #68 で直した（c837993・報告 report-view-settings-fix1.md）
 改善担当 review-app-1（design/view-settings）：反映してよい。反映の前に PR #68 に：表示の編集の上の「‹ マイページ」「閉じる」「すべて」「隠しているもの」を高さ 44px に。ほかの小さい指摘も review-app-1.md を見て入れられるものは入れる
+
+## PM から積んだ次の仕事（11/12 10時25分、近くの空港と図鑑の飛行場・滑空場を作る）
+本人 OK（CLAUDE.md の 11/12 10時）。ブランチ feat/near-airfields（main から、data/heliports を取り込む）、下書き PR
+- 近くの空港：画面案 design/near-airfields の *-v5（cd5b029）と review-5.md。CLAUDE.md「近くの空港」「近くの空港の細かい所」どおり（分けずに近い順・半券とパタパタは先頭・20km・民間空港がなければ1つ足す・基地は出さない・判定の決まりは今のまま）。review-5 の3つ：行は「飛行場・滑空場・ヘリポートも出す（はじめ ON）」・667／740 で一覧の下に 12px 以上・見出し「ほかに 20km 以内 ○つ」。src/index.html の nearest・nearestBase・renderHomeMap・showNearest のあたり
+- 図鑑の飛行場・滑空場：画面案 design/zukan-airfields の *-v3（7bd5ec0）と review-3.md。最初の画面の入口のカード・ツメと地方の扉の別の図鑑（86 に入れない）・同じ所に重なる行った丸は数の入った1つに・夜の凡例の点を外す。直した 02 の 844 の写真を報告に
+- ヘリポート：data/heliports（移行163・t103）を取り込み、種類の札「ヘリポート」
+- テストを直し・足す。390×844 と 667／740、昼と夜で撮る
