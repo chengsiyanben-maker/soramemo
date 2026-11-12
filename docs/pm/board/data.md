@@ -1,6 +1,14 @@
 # データ担当の帳面
 
 ## いま持っている仕事
+- 全体の見回りの直し・データの分（11/13 4時 PM の指示・本人「バグや反応しないところを直し、処理速度を早くして」）：ブランチ data/speed-1113b（data/speed-1113 の上に積んだ）→ 下書き PR #81（向き先 data/speed-1113）。報告 docs/pm/report-sweep-1113-data.md（そのブランチ）
+  - airport-traffic の見る人の呼び出しは置き場 edge_cache の「traffic:空港」（20秒）を1回読んで返す。前は毎回 位置・線を読んで書き戻していた（4.07秒）。置き場に入れるのは見る人の呼び出しで作った答えだけ（記録の処理の分まで入れると書き込みが倍）。作れないときは5分以内の答え（X-Stale）。Server-Timing に shared・put
+  - airport-foreign は「foreign:空港」（60秒）。経路が取れない回は10分以内の答えを出し、取れなかった答えは入れない（_shared/foreign_cache.ts の pickForeign）
+  - 移行 165 ops_speed：flight_schedule (dep, std)・(arr, std)、flight_history (dep, svc_date) の索引／airport_board の1時間ごとの数を1回で数える（返す形・値・権限は同じ）。先頭に lock_timeout 10s。表・RLS 変えない。影響はチェックインだけ、経営なし
+  - 確かめた結果：t105（14項目、前の airport_board と21通り同じ答え・索引が使われる）、t01・t22・t23・t24・t26・t27・t38・t45・t46・t47・t51・t60・t89・t104 通過、supabase/tests 222本・型の確認 通過、番号の重なりなし（157件）。作り物で羽田 46.5→29.2ms
+  - 見立て：app_status・airport_notices・current_events・special_now・ga_recent はデータベースの中は軽く、遅さは距離・順番待ち。airport_tracks は返す量が大きい見込み
+  - 本人待ち：「反映して」（#79 を先に）・speed-check-1113b.sql を反映の前と後に・app_boot（開いた直後の3つを1回で）を作るか
+  - この回は定期の回（PM の指示なし）として呼ばれたが、PM が1分前に積んだ指示（11/13 4時）があったので、そちらをした
 - 速さの見直し（11/13 3時15分 PM の指示・本人「処理速度を早くして」）：ブランチ data/speed-1113 → 下書き PR #79。報告 docs/pm/report-speed-1113.md（そのブランチ）
   - 移行 164 edge_cache（key・body jsonb・at。RLS 有効・ポリシーなし＝service_role だけ。上書きのみで約270行、fillfactor 70）。airport-now・metar が「記憶 → 置き場 → 配信元」の順に見る（入れ物ごとに記憶が消えて毎回 ODPT を最長8秒待っていたのを直す）。配信元が取れないときは置き場の古い値。Server-Timing に shared（metar は shared・upstream）。影響はチェックインだけ、経営なし
   - 確かめた結果：t104（27項目）・t01・t100・t103 通過、番号の重なりなし（156件）。supabase/tests 216本通過（edge_cache_test 9本）、全関数の型の確認も通過。読むだけの SQL docs/pm/speed-check-1113.sql の①〜④は手元の Postgres 16 で流れる（⑤は Logs Explorer 用・未確認）
@@ -127,12 +135,13 @@
 - 本人の決定：規約を改定するときは「terms_versions に1行足す → アプリの定数を変える」の順
 
 ## 移行とテストの番号
-- main の最新は 160（159 airport_yomi・160 airport_facts は 11/10 本番に入った）。156・157 は 11/9 本番に入った。**maint/2026-11-09 の 158 は main の 159 より前になったので、反映の前に migrations.mjs rebase が要る**。maint/2026-11-06 は 153・テスト t93（fix/co-tests の経営の移行も 153 なので、反映の前に rebase）、data/photo-log は 154・テスト t94、maint/2026-11-07 は 155・テスト t95、data/debug-1107 は 156・テスト t96（関数のテストは supabase/tests/live_view_test.ts。main に反映済み）、data/view-prefs は 157・テスト t97、maint/2026-11-09 は 158・テスト t98、maint/2026-11-10 は 161・テスト t101。data/airport-facts は 160・テスト t100。そのほか次に新しく作るものは 162 以降・テストは t102 以降。**maint/2026-11-11 は 162・テスト t102**（161 の maint/2026-11-10 より後。反映の順が変わったら rebase）。**data/heliports の 163・t103 は 11/12 main に入った（PR #75 と一緒）**。**data/speed-1113 は 164・テスト t104**。次に新しく作るものは 165 以降・テストは t105 以降
+- main の最新は 160（159 airport_yomi・160 airport_facts は 11/10 本番に入った）。156・157 は 11/9 本番に入った。**maint/2026-11-09 の 158 は main の 159 より前になったので、反映の前に migrations.mjs rebase が要る**。maint/2026-11-06 は 153・テスト t93（fix/co-tests の経営の移行も 153 なので、反映の前に rebase）、data/photo-log は 154・テスト t94、maint/2026-11-07 は 155・テスト t95、data/debug-1107 は 156・テスト t96（関数のテストは supabase/tests/live_view_test.ts。main に反映済み）、data/view-prefs は 157・テスト t97、maint/2026-11-09 は 158・テスト t98、maint/2026-11-10 は 161・テスト t101。data/airport-facts は 160・テスト t100。そのほか次に新しく作るものは 162 以降・テストは t102 以降。**maint/2026-11-11 は 162・テスト t102**（161 の maint/2026-11-10 より後。反映の順が変わったら rebase）。**data/heliports の 163・t103 は 11/12 main に入った（PR #75 と一緒）**。**data/speed-1113 は 164・テスト t104**。**data/speed-1113b は 165・テスト t105**（164 の上）。次に新しく作るものは 166 以降・テストは t106 以降
 - main に別の移行が先に入ったら、反映の前にもう一度 `node tools/migrations.mjs rebase`
 - 本番は小さいプランで一時ファイルの余裕がない。本人に流してもらう SQL は、大きな中間の表・自己結合・大きな並べ替えを避け、索引で引く形にする
 - SQL のテストは全部で約35分かかる（手元で流すときは裏で流してログを見る。t92 だけで約4分。同じログに2回流すと混ざるので、ログの名前を分ける）
 
 ## 次にやること
+000000000. 全体の見回りの直し（PR #81）：speed-check-1113b.sql の結果で、①の平均ms が大きい関数があれば索引・まとめ表の直し（166 以降）。④で airport_tracks が大きければ、運用予想担当と返し方（間引く・時間で分ける）の案を作る。app_boot を作ると決まったら関数（テスト付き）を作り、チェックインに依頼。CI とレビューに答える
 00000000. 速さの見直し（PR #79）：speed-check-1113.sql の結果が来たら、遅い文・全部読みの多い表から索引の直し（165 以降）を作る。⑤（Logs Explorer）が動かなければ直す。反映後に airport-now の Server-Timing で shared が数十ミリ秒に収まるか見る。CI とレビューに答える
 0000000. ヘリポート（移行163・11/12 本番に入った）：非公共用の地上の数か所を入れると決まったら、新しい移行（164 以降）で足し、印の円の重なりを t103 で見る。**161（maint/2026-11-10）・162（maint/2026-11-11）は main の 163 より前になったので、反映の前に migrations.mjs rebase が要る**
 000000. 空港の3D（PR #72）：本人が形・遅れ・機種の表を決め「作って」となったら、Overpass で羽田の OSM の件数を数え、切り出しの手順（ODbL のファイル）と airport-traffic の ?view=3d（テスト付き）を作る。報告の 5 の SQL の結果が来たら読み取りの量を直す。機種の表をデータベースに置くなら移行と RLS をセットで
@@ -151,6 +160,8 @@
 8. それ以外は PM の指示を待つ（勝手に新しい機能は始めない）。毎週月曜の昼の回は、下の「定期の仕事」（次の候補：点検の結果が来たら、死んだ行や使われていない索引の整理・遅い処理。cold-day-size.sql の結果で全機の航跡の1日が 20MB を超えるなら、ファイルを空港ごとに分ける案を作る。rwy-learn と daily-archive は 11/10 に見た（PR #58）。eta-calib・taxi-out・flight-watch は 11/11 に見た（PR #70）。結果がないまま次の回が来たら、ほかの毎晩・裏の処理（timetable-sync・schedule-sync・odpt-status・co3 の SQL の文）を同じ目で見て、時間の上限のない仕事の一覧を作る）
 
 ## ほかの担当への依頼
+- 運用予想へ（11/13 全体の見回り・PR #81）：(1) livery_board の同じ呼び出し4回を1回に (2) 定時・空の道すじ・ゴーアラウンドは選んだときだけ取る (3) 見方を変えても数分は持っている案内板・お知らせを使う (4) flight_alerts はログインしていない・デモでは呼ばない。案内板と海外の便はサーバー側で速くなる（返す形は同じ）
+- チェックインへ（11/13 全体の見回り）：デモでも push-subscribe が呼ばれている。app_boot を作ると決まったら、開いた直後の app_status・airport_notices・current_events を1つの呼び出しに
 - チェックインへ（11/13 速さの見直し・PR #79）：src/sw.js の networkFirst（アプリ本体）を、保存した版を先に出して裏で更新する形（または網を3秒だけ待つ）にする案。電波の弱い所で開くのが速くなる。PR #79 が入っても空港の今・metar の返す形は変わらない
 - デザインへ（11/13 速さの見直し）：src/index.html の CSS（約333KB・本体の約4分の1）で使っていない決まりの洗い出し
 - チェックインへ（11/11 ヘリポート・PR #74）：番外編に種類 heli の12か所ができた（未反映）。EXTRA_RAW に足す12行（3つ目は ICAO がなければ「ヘリポート」）は docs/pm/report-heliports.md の 6。札・色（XKIND・XCOL・--heli）はデザイン担当の画面案で。パタパタは ICAO のない10か所を滑空場・飛行場と同じ扱いに。本人が「印は押せない」（案B）に決めたら checkin 関数の airports の読み出しで heli を外す。出典「国土交通省『公共用ヘリポート一覧』を加工して作成」を出典の一覧に
@@ -232,6 +243,7 @@
 - 効き目の大きい順に、直し方と危なさを並べる
 
 ## PM から積んだ次の仕事（11/13 4時、全体の見回りの直し）
+（済み・11/12 の回 → PR #81。上の節）
 報告の元：kaizen/sweep-1113 の docs/pm/report-sweep-1113.md（写真は docs/pm/report-sweep-1113-shots/）と data/speed-1113 の docs/pm/report-speed-1113.md。本人「一度すべてを見てバグや反応しないところを直し、処理速度を早くして」。不具合の直しなので画面案は要らない。見た目が変わるもの（大きさ・並び）は最小にし、変わる所は写真を報告に貼る。ブランチと下書き PR、main と本番には入れない。速さの見直し（data/speed-1113）の続き。同じブランチか data/speed-1113b
 - 運用を開いたときに遅いもの：airport-traffic 4.07秒・airport-foreign 3.85秒・airport_board 3.80秒・airport_ontime 3.38秒・airport_tracks 3.24秒・special_now 2.99秒・ga_recent 2.31秒・livery_board 1.5〜1.9秒。edge_cache（移行164）を使える所は使い、RPC は索引と問い合わせの見直し（読むだけの SQL で本番の EXPLAIN を本人に頼む形）
 - 開いた直後の app_status・airport_notices・current_events がそれぞれ 1.0〜1.6 秒。小さい表のはずなので原因を
