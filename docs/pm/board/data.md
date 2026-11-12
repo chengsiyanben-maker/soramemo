@@ -9,6 +9,7 @@
   - 見立て：app_status・airport_notices・current_events・special_now・ga_recent はデータベースの中は軽く、遅さは距離・順番待ち。airport_tracks は返す量が大きい見込み
   - 本人待ち：「反映して」（#79 を先に）・speed-check-1113b.sql を反映の前と後に・app_boot（開いた直後の3つを1回で）を作るか
   - この回は定期の回（PM の指示なし）として呼ばれたが、PM が1分前に積んだ指示（11/13 4時）があったので、そちらをした
+  - 2回目の回（PM が手で同じ指示をもう一度呼んだ。新しい結果・レビューはなし）：済みだったので livery_board だけ読み直した。reg_legs の主キー（reg, day）で30日分を引き、時刻表・前の30日の埋めは前の日と今日の行だけ（中の条件で止まる）なので、データベースの中の直しはなし。1.5〜1.9秒×4 は同じ呼び出しの重なり（運用予想への依頼のとおり）
 - 速さの見直し（11/13 3時15分 PM の指示・本人「処理速度を早くして」）：ブランチ data/speed-1113 → 下書き PR #79。報告 docs/pm/report-speed-1113.md（そのブランチ）
   - 移行 164 edge_cache（key・body jsonb・at。RLS 有効・ポリシーなし＝service_role だけ。上書きのみで約270行、fillfactor 70）。airport-now・metar が「記憶 → 置き場 → 配信元」の順に見る（入れ物ごとに記憶が消えて毎回 ODPT を最長8秒待っていたのを直す）。配信元が取れないときは置き場の古い値。Server-Timing に shared（metar は shared・upstream）。影響はチェックインだけ、経営なし
   - 確かめた結果：t104（27項目）・t01・t100・t103 通過、番号の重なりなし（156件）。supabase/tests 216本通過（edge_cache_test 9本）、全関数の型の確認も通過。読むだけの SQL docs/pm/speed-check-1113.sql の①〜④は手元の Postgres 16 で流れる（⑤は Logs Explorer 用・未確認）
