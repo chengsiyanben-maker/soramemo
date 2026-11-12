@@ -117,11 +117,11 @@ async def main():
             await pg.screenshot(path=os.path.join(SHOTS, f'02-kazo-full-{hh}.png'))
             check(f'{hh}：エラーなし', not errs, errs); await c.close()
 
-        # 3. 竜ヶ崎飛行場の中：半券はその飛行場・琥珀・「飛行場・滑空場の図鑑に入ります」
+        # 3. 竜ヶ崎飛行場の中：半券はその飛行場・琥珀・「飛行場・滑空場・ヘリポートの図鑑に入ります」
         c, pg, errs = await page(b, RYU, shots=True)
         i = await info(pg)
         check('竜ヶ崎：判定範囲の中で札「飛行場」', i['state'] == 'in' and i['tag'] == '飛行場' and '判定範囲の中' in i['dist'], i)
-        check('竜ヶ崎：「飛行場・滑空場の図鑑に入ります」（review-5 の6）', '飛行場・滑空場の図鑑に入ります' in i['dist'], i['dist'])
+        check('竜ヶ崎：「飛行場・滑空場・ヘリポートの図鑑に入ります」（review-5 の6・11/12 本人「A」）', '飛行場・滑空場・ヘリポートの図鑑に入ります' in i['dist'], i['dist'])
         await pg.screenshot(path=os.path.join(SHOTS, '04-ryugasaki-844.png'))
         check('竜ヶ崎：エラーなし', not errs, errs); await c.close()
 
@@ -185,17 +185,29 @@ async def main():
             await pg.evaluate("""(() => { const t = Date.now() - 864e5 * 30; S.checkins.push({a:2015, t}, {a:3002, t:t + 1e6}, {a:3004, t:t + 2e6}, {a:3004, t:t + 3e6}, {a:IATA.HND.id, t:t + 4e6}); for(const k in DIRTY) DIRTY[k] = true; goTab("book"); })()""")
             await pg.wait_for_timeout(600)
             e = await pg.inner_text('#zkBody .zx-entry')
-            check(f'{hh} 図鑑：黒いカードのすぐ下に入口（もう1つの図鑑・3 / 75）', await pg.evaluate('!!document.querySelector("#zkBody .zk-hero + .zx-entry")') and '飛行場・滑空場の図鑑' in e and '3' in e and '/ 75' in e, e.replace('\n', ' '))
+            check(f'{hh} 図鑑：黒いカードのすぐ下に入口（もう1つの図鑑・3 / 75）', await pg.evaluate('!!document.querySelector("#zkBody .zk-hero + .zx-entry")') and '飛行場・滑空場・ヘリポートの図鑑' in e.replace('\n', '') and '3' in e and '/ 75' in e, e.replace('\n', ' '))
             if hh == 844:
                 m = await pg.evaluate('[document.querySelectorAll("#zkBody .zxmap .mv").length, [...document.querySelectorAll("#zkBody .zxmap .mn")].map(x => x.textContent)]')
                 check('844 図鑑：関東の3つは数の入った1つの丸（review-3 の1）', m[0] == 1 and m[1] == ['3'], m)
                 check('844 図鑑：入口の内訳に飛行場・滑空場・ヘリポート', all(x in e for x in ['飛行場 2', '滑空場 1', 'ヘリポート 0']), e)
             else:
                 check('667 図鑑：入口は1行の形（地図と内訳を外す）', not await pg.is_visible('#zkBody .zxmap') and not await pg.is_visible('#zkBody .zx-kd'))
+            enl = await pg.evaluate('''(() => { const el = document.querySelector("#zkBody .zx-entry .zx-t"), n = [...el.querySelectorAll("span")].pop().firstChild, t = n.textContent, i = t.indexOf("ヘリポート"); const r = document.createRange(); r.setStart(n, i); r.setEnd(n, i + 5); return [r.getClientRects().length, Math.round(el.getBoundingClientRect().height)]; })()''')
+            check(f'{hh} 図鑑：入口の題の「ヘリポート」が語の途中で折れない', enl[0] == 1, enl)
             await pg.screenshot(path=os.path.join(SHOTS, f'10-zukan-entry-{hh}.png'))
             check(f'{hh} 図鑑：86 の数は変わらない（1 / 86）', (await pg.inner_text('#bookProg')).strip() == '1')
             await pg.click('#zkBody .zx-entry'); await pg.wait_for_timeout(600)
             check(f'{hh} 飛行場の図鑑：開く・地方の扉と枠・ツメ', await pg.evaluate('!$("bookAir").hidden && document.querySelectorAll("#bookAir .zk-rg").length == 8 && document.querySelectorAll("#bookAir .zk-ap").length == 75') and await pg.is_visible('#zkxTsume'))
+            # 題（11/12 14時49分 本人「A」）：入口・図鑑の題・扉の札・ほかの図鑑の行で同じ名前。「ヘリポート」は語の途中で折れない
+            tt = await pg.evaluate('''(() => { const one = el => { const t = el.textContent, i = t.indexOf("ヘリポート"); if(i < 0) return null; const w = document.createTreeWalker(el, NodeFilter.SHOW_TEXT); let n, o = 0, s = null; while((n = w.nextNode())){ if(o + n.length > i){ s = [n, i - o]; break; } o += n.length; } const r = document.createRange(); r.setStart(s[0], s[1]); r.setEnd(s[0], s[1] + 5); return r.getClientRects().length; };
+              const h = document.querySelector("#bookAir .book-head h2"), en = document.querySelector("#zkBody .zx-entry .zx-t"), tg = [...document.querySelectorAll("#bookAir .zx-dtag")];
+              return { h:h.textContent, hl:one(h), en:en.textContent, enl:one(en), tags:[...new Set(tg.map(x => x.textContent))], tagl:tg.filter(x => x.offsetParent).map(one), aria:document.querySelector("#zkBody .zx-entry").getAttribute("aria-label") }; })()''')
+            check(f'{hh} 飛行場の図鑑：題・入口・扉の札が新しい名前', tt['h'] == '飛行場・滑空場・ヘリポートの図鑑' and tt['en'] == '飛行場・滑空場・ヘリポートの図鑑' and tt['tags'] == ['飛行場・滑空場・ヘリポート'] and tt['aria'].startswith('飛行場・滑空場・ヘリポートの図鑑を開く'), tt)
+            dr = await pg.evaluate('[...document.querySelectorAll("#bookAir .zk-door")].map(d => { const r = d.getBoundingClientRect(), t = d.querySelector(".zx-dtag").getBoundingClientRect(), u = d.querySelector(".zk-up").getBoundingClientRect(); return t.right <= r.right - 4 && u.right <= r.right + 1 && u.width >= 44 && t.top >= r.top && t.bottom <= r.bottom ? null : d.dataset.rg || d.querySelector("h3").textContent; }).filter(Boolean)')
+            check(f'{hh} 飛行場の図鑑：扉の札と上へのボタンが扉からはみ出さない（北海道も）', not dr, dr)
+            check(f'{hh} 飛行場の図鑑：「ヘリポート」が語の途中で折れない', tt['hl'] == 1 and all(x == 1 for x in tt['tagl']), tt)
+            oth = await pg.evaluate('(() => { renderZkOthers(); return [...document.querySelectorAll("#bookOthers [data-zkseg=air] .tx b")].map(x => x.textContent); })()')
+            check(f'{hh} ほかの図鑑・実績：行の名前も新しい名前', oth == ['飛行場・滑空場・ヘリポートの図鑑'], oth)
             check(f'{hh} 飛行場の図鑑：四国のツメは押せない', await pg.evaluate('document.querySelector("#zkxTsume [data-zkj=\'四国\']").disabled'))
             await pg.screenshot(path=os.path.join(SHOTS, f'11-airbook-{hh}.png'))
             await pg.click('#zkxTsume [data-zkj="関東"]'); await pg.wait_for_timeout(900)
@@ -211,6 +223,10 @@ async def main():
             await pg.evaluate('document.documentElement.dataset.night = "on"'); await pg.wait_for_timeout(200)
             await pg.screenshot(path=os.path.join(SHOTS, f'13-airbook-kanto-night-{hh}.png'))
             await pg.evaluate('delete document.documentElement.dataset.night')
+            await pg.evaluate('document.querySelector("[data-zkseg=others]").click()'); await pg.wait_for_timeout(500)
+            orow = await pg.evaluate('(() => { const b = document.querySelector("#bookOthers [data-zkseg=air]"); return b && b.offsetParent ? [b.querySelector(".tx b").textContent, Math.round(b.getBoundingClientRect().height)] : null; })()')
+            check(f'{hh} ほかの図鑑・実績：開いて行が見える（新しい名前）', orow and orow[0] == '飛行場・滑空場・ヘリポートの図鑑', orow)
+            await pg.screenshot(path=os.path.join(SHOTS, f'14-others-{hh}.png'))
             check(f'{hh} 図鑑：エラーなし', not errs, errs); await c.close()
         await b.close()
     print('errors', fails)

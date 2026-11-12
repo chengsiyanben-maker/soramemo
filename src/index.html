@@ -2426,6 +2426,8 @@ dialog.psheet .btn1,dialog.psheet .btn2{display:block;width:100%;margin-top:10px
 #v-book .zx-kinds b{font-family:var(--sign);font-size:15px;color:#fff;margin-left:2px}#v-book .zx-kinds small{font-size:12px;color:#C9D2DE}
 #v-book .zx-dtag{margin-left:8px;display:inline-flex;align-items:center;height:26px;padding:0 7px;border-radius:999px;font-size:13px;font-weight:800;white-space:nowrap;color:var(--bk-ink);box-shadow:inset 0 0 0 1.2px #9AA3AF}
 #v-book .zx-dtag+.zk-up{margin-left:auto}
+/* 扉の札「飛行場・滑空場・ヘリポート」（11/12 本人「A」）：入らない地方（北海道など）は「・」のあとで2行に。上へのボタンは隠さない */
+#v-book .zx-dtag{flex:0 1 auto;min-width:0;flex-wrap:wrap;column-gap:0;height:auto;min-height:26px;padding:3px 9px;font-size:12px;line-height:1.2;border-radius:13px;margin-left:6px}
 #bookAir .zk-door h3,#bookAir .zk-door .u{white-space:nowrap}#bookAir .zk-door{gap:4px;padding-right:12px}
 #v-book .zx-ap{gap:4px;height:auto;min-height:104px}
 #v-book .zx-ap .zx-nm{font-size:16px;font-weight:800;line-height:1.25;color:var(--bk-ink);word-break:keep-all;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
@@ -3359,7 +3361,7 @@ dialog.ckconfirm button.go{background:#E9C46A;color:#111827}
     <div id="bookOthers" hidden></div>
     <div id="bookKigou" hidden></div>
     <div id="bookAir" hidden>
-      <div class="book-head"><h2>飛行場・滑空場</h2></div>
+      <div class="book-head"><h2>飛行場・滑空場・ヘリポートの図鑑</h2></div>
     </div>
     <div id="bookExtra" hidden>
       <div class="book-head"><h2>番外編</h2></div>
@@ -4257,6 +4259,8 @@ function km(a, b){ const R=6371, r=Math.PI/180; const dl=(b.lat-a.lat)*r, dn=(b.
 //   判定（印）の決まりは nearestBase のまま。範囲の外のときだけ、先頭（半券に出すもの）を近い順のいちばん上にする。
 //   others＝先頭のほかに 20km 以内（近い順）。20km 以内に民間空港がなく、先頭も民間空港でないときは、いちばん近い民間空港を civ に1つ足す（数には入れない）
 //   「飛行場・滑空場・ヘリポートも出す」（はじめ ON。LAYOUT.nearx === 0 で OFF）を OFF にすると、並びは民間空港だけ（今までの見え方）
+// 飛行場・滑空場・ヘリポートの図鑑の題（11/12 14時49分 本人「A」）：入口・扉の札・ほかの図鑑・実績の行で同じ名前。折るなら「・」のあと（.nw でかたまりごと折る）
+const ZKX_TITLE = "飛行場・滑空場・ヘリポートの図鑑", ZKX_TITLE_BR = '<span class="nw">飛行場・</span><span class="nw">滑空場・</span><span class="nw">ヘリポートの図鑑</span>';
 const NEAR_KM = 20, NEAR_XK = ["field", "glider", "heli"];
 const nearX = () => { try{ return !(LAYOUT && LAYOUT.nearx === 0); }catch(e){ return true; } };
 let NEAR_P = null;   // いちばん新しく調べた位置（設定を変えたら並べ直す）
@@ -4492,7 +4496,7 @@ function showNearest(n){
   const ok = n.within, el = $("nearDist");
   el.classList.toggle("ok", ok);
   el.innerHTML = ok ? `${n.term ? esc(n.term.name) + " ・ " : ""}<i class="dot ok" aria-hidden="true"></i>判定範囲の中`
-      + (NEAR_XK.includes(n.a.kind) ? `<span class="nbook">飛行場・滑空場の図鑑に入ります</span>` : "")
+      + (NEAR_XK.includes(n.a.kind) ? `<span class="nbook">${ZKX_TITLE}に入ります</span>` : "")
     : `<i class="dot" aria-hidden="true"></i>判定範囲の外 ・ ここから <b>${homeKm(n.km)}</b>`;
   renderNearList(); nearMoreSync();
   homeState();
@@ -4594,7 +4598,7 @@ function showStamp(a, t, first, flight, term, firstTerm){
   ${a.kind === "secret" ? `<p class="xnote"><b>番外編：${XKIND.secret.label}</b><br>なぜあなたはそこに行けるの！？？？　一般の人は行けない場所です。全クリには数えない、押せた人だけの印です。写真や位置の公開は、その場の決まりに従ってください。</p>`
     : a.kind === "mil" ? `<p class="xnote"><b>番外編：${XKIND.mil.label}</b><br>基地の中には入れません。フェンスの外の公道・公園・展望できる場所から楽しんでください。航空祭などの一般公開日も、基地の案内に従ってください。ドローンは飛ばさないでください（法律で飛行が禁止されている区域があります）。</p>`
     : a.kind === "glider" ? `<p class="xnote"><b>番外編：${XKIND.glider.label}</b><br>グライダーが飛んでいるときは、滑走路や河川敷に入らず、関係者の案内に従ってください。</p>`
-    : a.kind === "heli" ? `<p class="xnote"><b>${XKIND.heli.label}</b><br>公共用のヘリポートです。離着陸の場所には入らず、柵の外から楽しんでください。飛行場・滑空場の図鑑に入ります（集めた空港の数とは別）。</p>`
+    : a.kind === "heli" ? `<p class="xnote"><b>${XKIND.heli.label}</b><br>公共用のヘリポートです。離着陸の場所には入らず、柵の外から楽しんでください。${ZKX_TITLE}に入ります（集めた空港の数とは別）。</p>`
     : a.kind === "field" ? `<p class="xnote"><b>番外編：${XKIND.field.label}</b><br>定期便のない空港や、小型機の飛行場です。滑走路や格納庫などには、許可なく入らないでください。見学できる場所や日が決まっているところもあります。</p>` : ""}
   ${flight ? `<p><b>${BY[flight.from].name} → ${a.name}</b>　${fmtKm(flight.km)}km を記録しました。</p><button class="btn2" style="width:100%;margin-top:8px" data-flight="${fid(flight)}">乗った便を記録する</button>` : a.kind ? "" : `<p>次の空港でチェックインすると、ここからのフライトが記録されます。</p>`}
   ${(() => { if(!pendingSnap) return ""; const now = unlockedIds(); const fresh = ACH.filter(x => now.has(x.id) && !pendingSnap.has(x.id)); pendingSnap = null;
@@ -4935,13 +4939,13 @@ function zkxMapSVG(xv){
   g += cl.map(c => { const k = c.n.length > 1 ? (ks => ks.sort((x, y) => ks.filter(v => v === y).length - ks.filter(v => v === x).length)[0])(c.n.map(a => a.kind)) : c.n[0].kind;
     return c.n.length > 1 ? `<circle cx="${c.x.toFixed(1)}" cy="${c.y.toFixed(1)}" r="7.5" class="mv" style="fill:${ZKX_COL[k]}"/><text x="${c.x.toFixed(1)}" y="${(c.y + 3.6).toFixed(1)}" class="mn">${c.n.length}</text>`
       : `<circle cx="${c.x.toFixed(1)}" cy="${c.y.toFixed(1)}" r="4.5" class="mv" style="fill:${ZKX_COL[k]}"/>`; }).join("");
-  return `<svg class="zxmap" viewBox="0 0 ${W} ${H}" role="img" aria-label="飛行場・滑空場の地図。色の丸が行った所（重なる所は数の入った丸）">${g}</svg>`;
+  return `<svg class="zxmap" viewBox="0 0 ${W} ${H}" role="img" aria-label="飛行場・滑空場・ヘリポートの地図。色の丸が行った所（重なる所は数の入った丸）">${g}</svg>`;
 }
 // 図鑑の最初の画面の入口（黒いカードのすぐ下）。高さ700未満は1行の形（地図と内訳は CSS で外す）
 function zkAirEntryHTML(){
   const c = zkxCounts();
-  return `<button class="zx-entry" type="button" data-zkseg="air" aria-label="飛行場・滑空場の図鑑を開く。${c.got.length}/${c.list.length}。集めた空港とは別に数えます">
-    <span class="zx-top"><span class="zx-pill">もう1つの図鑑</span><b class="zx-t">飛行場・滑空場の図鑑</b></span>
+  return `<button class="zx-entry" type="button" data-zkseg="air" aria-label="${ZKX_TITLE}を開く。${c.got.length}/${c.list.length}。集めた空港とは別に数えます">
+    <span class="zx-top"><span class="zx-pill">もう1つの図鑑</span><b class="zx-t">${ZKX_TITLE_BR}</b></span>
     <span class="zx-bot"><span class="zx-l"><span class="zx-n"><b class="num">${c.got.length}</b><span class="u">/ ${c.list.length}</span><span class="zx-sep">集めた空港とは<br>別に数えます</span></span>
       <span class="zx-kd">${c.kind.map(([k, g, t]) => `<span><i style="background:${ZKX_COL[k]}"></i>${XKIND[k].short} <b>${g}</b><small>/${t}</small></span>`).join("")}<span><i class="my"></i>まだ</span></span></span>
     <span class="zx-r">${zkxMapSVG(c.xv)}</span></span><span class="zx-open" aria-hidden="true">開く<svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></span></button>`;
@@ -4960,10 +4964,10 @@ function zkAirBookHTML(){
     <div class="rg">${rgs.map(r => `<div><span class="t"><span>${r.rg}</span><span>${r.list.length ? `${r.got}<small>/${r.list.length}</small>` : `<small>なし</small>`}</span></span><span class="b"><i style="width:${r.list.length ? Math.round(r.got / r.list.length * 100) : 0}%;background:${zkCol(r.rg)}"></i></span></div>`).join("")}</div></div>
     <p class="zk-lead">集めた空港（${A.length}）とは別に数えます。自衛隊の飛行場（基地）は、今までどおり「ほかの図鑑・実績」の中にあります。</p>`;
   const body = rgs.filter(r => r.list.length).map(r => `<section class="zk-rg" id="zkxrg-${r.rg}" data-rg="${r.rg}" style="--c:${zkCol(r.rg)}">
-    <div class="zk-door"><h3>${r.rg}</h3><b class="num">${r.got}</b><span class="u">/ ${r.list.length}</span><span class="zx-dtag">飛行場・滑空場</span><button class="zk-up" type="button" data-zk-up aria-label="図鑑の上へ"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 14l6-6 6 6"/></svg></button></div>
+    <div class="zk-door"><h3>${r.rg}</h3><b class="num">${r.got}</b><span class="u">/ ${r.list.length}</span><span class="zx-dtag"><span class="nw">飛行場・</span><span class="nw">滑空場・</span><span class="nw">ヘリポート</span></span><button class="zk-up" type="button" data-zk-up aria-label="図鑑の上へ"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 14l6-6 6 6"/></svg></button></div>
     <div class="zk-grid">${r.list.map(a => zkxTile(a, c.xv.has(a.id), vc.get(a.id) || 0)).join("")}</div></section>`).join("");
   const tsume = `<nav class="zk-tsume" id="zkxTsume" aria-label="地方へ飛ぶ">${rgs.map(r => `<button type="button" data-zkj="${r.rg}" style="--c:${zkCol(r.rg)}" aria-label="${r.rg}へ"${r.list.length ? "" : ` disabled aria-disabled="true"`}><span>${r.rg}</span></button>`).join("")}</nav>`;
-  return `${ZK_BACK_MAIN}<div class="book-head"><h2>飛行場・滑空場の図鑑</h2></div><div class="zk-main">${hero}${body}</div>${tsume}`;
+  return `${ZK_BACK_MAIN}<div class="book-head"><h2>${ZKX_TITLE_BR}</h2></div><div class="zk-main">${hero}${body}</div>${tsume}`;
 }
 /* ---------- ほかの図鑑・実績（86 の数には入らない） ---------- */
 function renderZkOthers(){
@@ -4976,7 +4980,7 @@ function renderZkOthers(){
   const book = (seg, col, t, sub, [g, all]) => `<button class="zk-book" type="button" data-zkseg="${seg}" style="--c:${col}"><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true">${ic[seg]}</svg></span><span class="tx"><b>${t}</b><small>${sub}</small></span><span class="n"><b class="num">${g}</b><span class="u">/ ${all}</span></span></button>`;
   box.innerHTML = `${ZK_BACK_MAIN}<div class="book-head"><h2>ほかの図鑑・実績</h2></div><p class="zk-lead">ここで集めても「集めた空港」の数は変わりません。</p>
     ${book("ach", "var(--secret,#7A4FB0)", "実績", "空港の印や回数・路線・距離で達成するもの", [main.filter(x => st.done.has(x.id)).length, main.length])}
-    ${book("air", "var(--field,#3E7D52)", "飛行場・滑空場の図鑑", "定期便のない飛行場・グライダーの滑空場・ヘリポート", cnt(ZKX_KINDS))}
+    ${book("air", "var(--field,#3E7D52)", ZKX_TITLE_BR, "定期便のない飛行場・グライダーの滑空場・ヘリポート", cnt(ZKX_KINDS))}
     ${book("extra", "var(--mil,#2E4A6B)", "番外編", "自衛隊の飛行場と、一般の人が行けない飛行場", cnt(["mil", "secret"]))}
     ${book("liv", "#8A6A2F", "機体図鑑（特別塗装機）", "乗った・見た特別塗装機", liv)}
     <h3 class="zk-back-h">もどる</h3>
