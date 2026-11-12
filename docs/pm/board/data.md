@@ -4,6 +4,7 @@
 - 速さの見直し（11/13 3時15分 PM の指示・本人「処理速度を早くして」）：ブランチ data/speed-1113 → 下書き PR #79。報告 docs/pm/report-speed-1113.md（そのブランチ）
   - 移行 164 edge_cache（key・body jsonb・at。RLS 有効・ポリシーなし＝service_role だけ。上書きのみで約270行、fillfactor 70）。airport-now・metar が「記憶 → 置き場 → 配信元」の順に見る（入れ物ごとに記憶が消えて毎回 ODPT を最長8秒待っていたのを直す）。配信元が取れないときは置き場の古い値。Server-Timing に shared（metar は shared・upstream）。影響はチェックインだけ、経営なし
   - 確かめた結果：t104（27項目）・t01・t100・t103 通過、番号の重なりなし（156件）。supabase/tests 216本通過（edge_cache_test 9本）、全関数の型の確認も通過。読むだけの SQL docs/pm/speed-check-1113.sql の①〜④は手元の Postgres 16 で流れる（⑤は Logs Explorer 用・未確認）
+  - 2回目の回（PM が同じ指示でもう一度呼んだ。新しい結果はなし）：airport-traffic の見る人の呼び出しにも Server-Timing（mem・live・adsb・trails）を足して PR #79 に積んだ。型の確認と supabase/tests 216本 通過
   - 見つけたこと（持ち場の外）：アプリ本体 web/index.html は 1.36MB（gzip 396KB）、うち CSS 約333KB。sw.js は本体をいつも網から先に取るので、電波が弱いと毎回待つ
   - 本人待ち：「反映して」・speed-check-1113.sql の結果・アプリの開き方と CSS をチェックイン／デザインに回すか
 - ヘリポートの種類（11/11 23時45分 PM の指示・本人「ヘリポートも入れる」）：ブランチ data/heliports → 下書き PR #74。報告 docs/pm/report-heliports.md。**11/12 16時32分、移行163とテスト t103 は同じ中身のまま PR #75（チェックイン担当の近くの空港）と一緒に main に入った（3ac3d91）。PR #74 はそれで閉じられた（マージなし）。反映の Actions（run 43176007239）は 17時05分に成功し、本番に入った**。本人の決定：近くの空港と一緒に反映・図鑑は「飛行場・滑空場・ヘリポートの図鑑」に入れる（86 に数えない）
