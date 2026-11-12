@@ -31,14 +31,14 @@ async def main():
         for h in (844, 667):
             c, pg, errs = await open_app(b, h)
             # マイページから（‹ マイページ）
-            await pg.evaluate("openLayout('top', 'settings')"); await pg.wait_for_timeout(300)
+            await pg.evaluate("window.__sgx = LO_EXT.sg; delete LO_EXT.sg; openLayout('top', 'settings')"); await pg.wait_for_timeout(300)
             hs = await heights(pg)
             check(f'{h} マイページから：上の3つが 44px 以上:', len(hs) == 3 and all(x[1] >= 44 for x in hs), str(hs))
             sub = await pg.inner_text('#dLayout [data-lo-sec="tabs"] .lott small')
             check(f'{h} タブのカードの見出し（成績のタブなし）:', sub == '成績はマイページから', sub)
             check(f'{h} 修行のカードがない間の1行:', '修行の見方は、修行の画面の鉛筆から変えます。' in await pg.inner_text('#dLayout .losave'))
             if h == 844: await pg.screenshot(path=os.path.join(SHOTS, '20-844-top-44px.png'))
-            await pg.evaluate("$('dLayout').close()")
+            await pg.evaluate("$('dLayout').close(); LO_EXT.sg = window.__sgx")
             # 鉛筆から（閉じる）
             await pg.evaluate("openLayout('book', 'screen')"); await pg.wait_for_timeout(300)
             hs = await heights(pg)
@@ -56,9 +56,9 @@ async def main():
         check('隠しているタブがあるときは「隠している：…」:', sub.startswith('隠している：'), sub)
         await pg.evaluate("$('dLayout').close(); loResetAll(); loSave(); applyLayout()")
         # 修行のカードが足されたら1行は消える
-        await pg.evaluate("LO_EXT.sg = { groups: () => [], toggle: () => false }; openLayout('top', 'settings')"); await pg.wait_for_timeout(200)
+        await pg.evaluate("window.__sgx = LO_EXT.sg; LO_EXT.sg = { groups: () => [], toggle: () => false }; openLayout('top', 'settings')"); await pg.wait_for_timeout(200)
         check('修行のカードがあるときは1行を出さない:', '修行の見方は' not in await pg.inner_text('#dLayout .losave'))
-        await pg.evaluate("delete LO_EXT.sg; $('dLayout').close()")
+        await pg.evaluate("LO_EXT.sg = window.__sgx; $('dLayout').close()")
         # デモ：隠した見方はデモを終えると戻る（終了ボタン）
         await pg.evaluate("loToggleOff('log', 'map', true); loSave(); applyLayout()")
         before = await pg.evaluate("[...loOff('book')].sort().join(',') + '|' + [...loOff('log')].sort().join(',')")

@@ -3071,6 +3071,7 @@ dialog.ckconfirm button.go{background:#E9C46A;color:#111827}
 .sgd .sgb-views{display:flex;align-items:center;gap:4px;margin:0 0 12px}.sgd .sgb-views [role=tab]{border:0;background:none;color:var(--sg-ink);font:700 14.5px var(--gothic);padding:0 16px;min-height:44px;border-radius:999px}
 .sgd .sgb-views [role=tab][aria-selected="true"]{background:var(--hero,#0F1B2D);color:#fff;font-weight:800}
 .sgd .sgb-pen{border:0;background:none;width:44px;height:44px;border-radius:50%;color:var(--sg-ink)}.sgb-pen svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linejoin:round}
+#dSgViews .sgvs-dim > b{opacity:.5}
 .sgd .sgb-card{display:block;width:100%;box-sizing:border-box;background:var(--sg-card);color:var(--sg-ink);border:0;border-radius:22px;padding:16px 18px;margin-top:10px;text-align:left;font-family:var(--gothic);box-shadow:0 1px 4px rgba(15,27,45,.06)}
 .sgd .sgb-card.list{padding:2px 18px}.sgd .sgb-card small{display:block;font-size:12.5px;color:var(--sg-mute);font-weight:500;line-height:1.5}
 .sgd .sgb-k{display:inline-block;font:800 12px/1 var(--gothic);border-radius:999px;padding:5px 10px;margin-right:8px;background:#EEF1F5;color:#374151;vertical-align:1px}
@@ -11793,7 +11794,7 @@ function sgTitle(car){
   const v = sgShow().views, cur = sgViewNow();
   const top = sgTabOn() ? `<div class="sgb-hd"><h2>修行</h2>${sgSeg("car", [["ANA", "ANA"], ["JAL", "JAL"]], car)}<span class="sgb-sp"></span><button class="sg-back" data-sg-go="profile" type="button">会員情報</button></div>`
     : `<div class="sgb-hd"><button class="sg-back" data-close type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>閉じる</button><h2>修行</h2>${sgSeg("car", [["ANA", "ANA"], ["JAL", "JAL"]], car)}<span class="sgb-sp"></span><button class="sg-back" data-sg-go="profile" type="button">会員情報</button></div>`;
-  return `${top}<div class="sgb-views" role="tablist" aria-label="修行の見方">${SG_VIEWS.filter(x => v[x[0]]).map(([k, l]) => `<button type="button" role="tab" data-sg-view="${k}" aria-selected="${k === cur}">${l}</button>`).join("")}<span class="sgb-sp"></span><button class="sgb-pen" type="button" data-sg-go="views" aria-label="見方を選ぶ">${SG_PEN}</button></div>`;
+  return `${top}<div class="sgb-views" role="tablist" aria-label="修行の見方">${SG_VIEWS.filter(x => v[x[0]]).map(([k, l]) => `<button type="button" role="tab" data-sg-view="${k}" aria-selected="${k === cur}">${l}</button>`).join("")}<span class="sgb-sp"></span><button class="sgb-pen" type="button" data-sgvs-open aria-label="修行の見方を変える">${SG_PEN}</button></div>`;
 }
 function sgMain(){
   const car = sgCar(), v = sgViewNow();
@@ -11915,14 +11916,55 @@ function sgMonthsView(){
       ${rts.length > 3 ? `<button class="sgb-rt more" type="button" data-sg-allrt><span><b>${SG_ALLRT ? "3つだけにする" : "すべての路線"}</b><small>${rts.length}路線</small></span>${SG_CV}</button>` : ""}</div>
     <button class="sgb-card sgb-link" data-sg-go="road" type="button"><span><b>乗れる日と年末までの道のり</b><small>カレンダーで乗れる日を選ぶ</small></span>${SG_CV}</button>`;
 }
-// 見方を選ぶ（✎）：見方3つと、道のりに出すもの。ON／OFF のスイッチ（字の札つき）
-function sgViewsPage(){
-  const g = sgShow(), car = sgCar(), sw = (kind, k, on, l, s, n) => `<div class="sgb-sw"><span>${n ? `<i>${n}</i>` : ""}<b>${l}</b><small>${s}</small></span><button type="button" role="switch" aria-checked="${on}" data-sg-sw="${kind}.${k}" aria-label="${esc(l)}"><em>${on ? "ON" : "OFF"}</em></button></div>`;
-  return `${sgHead("見方を選ぶ")}
-    <div class="sgb-h"><b>見方</b></div><div class="sgb-card list">${SG_VIEWS.map(([k, l, s], i) => sw("views", k, g.views[k], l, s, i + 1)).join("")}</div>
-    <div class="sgb-h"><b>道のりに出すもの</b></div><div class="sgb-card list">${SG_SHOWS.map(([k, l, s]) => sw("show", k, g.show[k], l, k === "jgc" && car !== "JAL" ? s + "（JAL を選んだときだけ出ます）" : s)).join("")}</div>
-    <p class="sgb-n">目指さないものは OFF にできます。見方は1つは残ります。</p>`;
+// 修行の見方のシート（11/11 本人「すべての見方の設定」・画面案 design/view-settings の 02c-v2・02c2）
+//   見方の帯の鉛筆で開く。見方3つと「道のりに出すもの」を ON／OFF（行はチェックイン担当の loRowHTML でほかの画面と同じ形）。
+//   見方は最後の1つが残る（案A）。道のりを OFF にしている間は「道のりに出すもの」は押せない。表示の編集の1枚にも LO_EXT.sg で同じ行を出す
+const SG_VS_DESC = { months:"月末の残り・路線ごと", jgc:"JAL を選んだときだけ出ます" };
+function sgVsGroups(){
+  const g = sgShow(), on = SG_VIEWS.filter(x => g.views[x[0]]).length, road = !!g.views.road;
+  return [{ title:"見方", sub:"OFF で見方の帯から隠れます。最後の1つは残ります。", rows:SG_VIEWS.map(([k, l, s]) => ({ id:"views." + k, label:l, desc:SG_VS_DESC[k] || s, on:!!g.views[k], last:!!g.views[k] && on <= 1 })) },
+    { title:"道のりに出すもの", sub:road ? "道のりの画面に出すかたまり" : "道のりを ON にすると出ます", rows:SG_SHOWS.map(([k, l, s]) => ({ id:"show." + k, label:l, desc:SG_VS_DESC[k] || s, on:!!g.show[k], dis:!road })) }];
 }
+// 1つ切り替える（変えたら true）。保存して修行の画面を描き直す
+function sgVsToggle(id){
+  const [kind, k] = String(id).split("."), G = sgShow(); if(!G[kind] || !(k in G[kind])) return false;
+  if(kind === "views" && G.views[k] && SG_VIEWS.filter(x => G.views[x[0]]).length <= 1) return false;   // 見方は最後の1つが残る
+  if(kind === "show" && !G.views.road) return false;   // 道のりが OFF の間は押せない
+  G[kind][k] = !G[kind][k]; sgSave(); track("shugyo_vs", id + (G[kind][k] ? "_on" : "_off"));
+  if(sgTabOn() || $("dShugyo").open) sgKeep(() => {});
+  return true;
+}
+// reset()：全部また出す（変えたら true）。表示の編集の「全部乗せに戻す」から呼んでもらう用（呼ぶのはチェックイン担当。checkin.md に依頼）
+function sgVsReset(){ const G = sgShow(), was = JSON.stringify([G.views, G.show]); G.views = { road:true, flights:true, months:true }; G.show = { two:true, jgc:true, reach:true, next:true };
+  if(JSON.stringify([G.views, G.show]) === was) return false; sgSave(); if(sgTabOn() || $("dShugyo").open) sgKeep(() => {}); return true; }
+LO_EXT.sg = { groups:sgVsGroups, toggle:sgVsToggle, reset:sgVsReset };
+let SG_VS_UNDO = null;
+function sgVsHTML(){
+  const gs = sgVsGroups(), rows = gs[0].rows, on = rows.filter(r => r.on).length;
+  const row = r => loRowHTML({ ...r, attr:`data-sgvs-sw="${r.id}"` }).replace('<li class="tprow vsrow', `<li data-sgvs="${r.id}" class="tprow vsrow${r.dis ? " sgvs-dim" : ""}`);
+  const undo = SG_VS_UNDO ? `<div class="tpbot"><div class="loundo tpundo" role="status"><span>${esc(SG_VS_UNDO.text)}</span><button type="button" data-sgvs-undo>元に戻す</button></div></div>` : "";
+  return `<div class="tptop"><div class="tphd"><h3 id="sgVsTitle">修行の見方</h3><span class="tpcnt" aria-label="出している見方 ${on}つ（${rows.length}つのうち）"><b>${on}</b>/${rows.length}</span><button type="button" class="tpdone" data-close>完了</button></div></div>
+    <div class="tpscroll">${gs.map(x => `<p class="logl">${esc(x.title)}<small>${esc(x.sub)}</small></p><ul class="tplist" aria-label="${esc(x.title)}">${x.rows.map(row).join("")}</ul>`).join("")}
+    <div class="tpmore"><button type="button" class="lotext" data-sgvs-all>表示の編集をすべて見る ›</button></div></div>${undo}`;
+}
+function sgVsRender(){ const d = $("dSgViews"); if(!d || !d.open) return; const sc = d.querySelector(".tpscroll"), y = sc ? sc.scrollTop : 0; $("dSgViewsBody").innerHTML = sgVsHTML(); const n = d.querySelector(".tpscroll"); if(n) n.scrollTop = y; }
+function openSgViews(){
+  let d = $("dSgViews");
+  if(!d){ document.body.insertAdjacentHTML("beforeend", `<dialog id="dSgViews" class="psheet tpsheet vssheet" aria-labelledby="sgVsTitle"><div class="dlg" id="dSgViewsBody"></div></dialog>`); d = $("dSgViews"); d.addEventListener("close", () => { SG_VS_UNDO = null; }); }
+  SG_VS_UNDO = null; $("dSgViewsBody").innerHTML = sgVsHTML();
+  if(!d.open){ d.showModal(); track("view_sheet_open", "sg"); }
+  const h = $("sgVsTitle"); if(h){ h.tabIndex = -1; h.style.outline = "none"; h.focus(); }
+}
+document.addEventListener("click", e => {
+  const o = e.target.closest("[data-sgvs-open]"); if(o){ openSgViews(); return; }
+  if(!e.target.closest("#dSgViews")) return;
+  let b;
+  if((b = e.target.closest("[data-sgvs-all]"))){ $("dSgViews").close(); openLayout("sg", "screen"); return; }
+  if((b = e.target.closest("[data-sgvs-undo]"))){ const u = SG_VS_UNDO; if(u){ SG_VS_UNDO = null; sgVsToggle(u.id); sgVsRender(); } return; }
+  if((b = e.target.closest("[data-sgvs-sw]"))){ if(b.disabled) return; const id = b.dataset.sgvsSw; if(!sgVsToggle(id)) return;
+    const r = sgVsGroups().flatMap(x => x.rows).find(x => x.id === id) || {};
+    SG_VS_UNDO = { id, text:`「${r.label || id}」を${r.on ? "出しました" : "隠しました"}` }; sgVsRender(); return; }
+});
 function sgPlan(){
   const Y = sgYear(), car = sgCar(Y), goal = sgGoal(car, Y), fut = sgFuture(), unit = car === "JAL" ? "FOP" : "PP";
   const rows = fut.map(p => ({ p, L:sgPlanLeg(p) }));
@@ -12596,7 +12638,7 @@ document.addEventListener("click", async e => {
 });
 // 実績の数字の出どころ（記録だけ／合わせた数字＋そのあとの記録）
 const sgActualNote = (Y, car) => Y[car].sync ? `${sgMD(Y[car].sync.at)}に合わせた数字 ＋ そのあとに記録した便` : "記録した便だけで数えています";
-const SG_PAGES = { main:sgMain, plan:sgPlan, year:sgYearPage, ops:sgOps, routes:sgRoutesPage, planner:sgPlanner, budget:sgBudget, quick:sgQuick, profile:sgProfile, find:sgFind, build:sgBuild, compare:sgCompare, road:sgRoad, flight:sgFlightPage, views:sgViewsPage };
+const SG_PAGES = { main:sgMain, plan:sgPlan, year:sgYearPage, ops:sgOps, routes:sgRoutesPage, planner:sgPlanner, budget:sgBudget, quick:sgQuick, profile:sgProfile, find:sgFind, build:sgBuild, compare:sgCompare, road:sgRoad, flight:sgFlightPage };
 /* 修行の画面は2つの置き場所で同じものを出す：修行のタブ（下のタブに修行があるとき）と、窓（ないとき） */
 const sgTabOn = () => { const v = $("v-sg"); return !!v && v.classList.contains("on") && !$("dShugyo").open; };
 const sgCanTab = () => MODE === "rally" && loTabs().includes("sg");
@@ -12633,9 +12675,6 @@ document.addEventListener("click", async e => {
     if($("sgLsV").value === "" || !(v >= 0 && v < 100000)){ $("sgLsV").focus(); return; }
     g.lsIn = { v, at:d > sgToday() ? sgToday() : d }; SG_LSEDIT = false; await sgSave(); sgKeep(() => {}); return; }
   if(t.closest("[data-sg-lsclear]")){ delete g.lsIn; SG_LSEDIT = false; await sgSave(); sgKeep(() => {}); return; }
-  const sw = t.closest("[data-sg-sw]"); if(sw){ const [kind, k] = sw.dataset.sgSw.split("."), G = sgShow();
-    if(kind === "views" && G.views[k] && SG_VIEWS.filter(x => G.views[x[0]]).length <= 1) return;   // 見方は1つは残す
-    G[kind][k] = !G[kind][k]; await sgSave(); sgKeep(() => {}); return; }
   if(t.closest("[data-sg-allrt]")){ SG_ALLRT = !SG_ALLRT; sgKeep(() => {}); return; }
   const set = t.closest("[data-sg-set]"); if(set){ const k = set.dataset.sgSet, v = set.dataset.v;
     if(k === "car"){ g.car = v; SG_LEG = 0; sgSave(); } else if(k === "dir") SG_DIR = +v; else if(k === "qside") SG_QSIDE = v; else if(k === "qcar"){ SG_QCAR = v; SG_QF = "all"; } else if(k === "pmode"){ sgPQ().mode = v; sgSave(); } else if(k === "phow"){ sgPQ().how = v; sgSave(); } else if(k === "apmode"){ sgPQ().apmode = v; sgSave(); }
