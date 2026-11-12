@@ -10,7 +10,7 @@ PM の指示（11/13 4時）：改善担当の見回り（kaizen/sweep-1113 の�
 | K2 | 「エアライン経営とは」の押せる範囲 32 → 44px（見た目は同じ。透明な広がりで、上の切り替えにはかぶらない） | CSS .gamenote summary |
 | K3 | 会社名 37 → 44px（見た目は同じ）。役職の「選ぶ」33 → 44px（**ここだけ見た目が 11px 高くなる**。選ぶ欄は透明な広がりが付けられないため。写真） | CSS .coname・.role select |
 | K4 | 機体の「持っている／買う」42 → 44px（見た目は 42px のまま） | CSS .cseg.fmode button |
-| 時間の上限 | 経営の毎日・毎時の仕事20本（co・co3。止めた co3-trouble-detect は除く）に statement_timeout と lock_timeout 5s を付けた。15分ごと・毎時は1分、外の取り込みは30秒、ふつうの毎晩は3分、co3-daily と月・シーズンの締めは5分。時刻と中身は今のまま | 移行 20261113000165_co_cron_timeout.sql（cron の付け直しだけ。表・関数・RLS は変えない） |
+| 時間の上限 | 経営の毎日・毎時の仕事20本（co・co3。止めた co3-trouble-detect は除く）に statement_timeout と lock_timeout 5s を付けた。15分ごと・毎時は1分、外の取り込みは30秒、ふつうの毎晩は3分、co3-daily と月・シーズンの締めは5分。時刻と中身は今のまま | 移行 20261113000166_co_cron_timeout.sql（cron の付け直しだけ。表・関数・RLS は変えない） |
 
 K2 のデモの「終了」・「マイページ」はチェックインの持ち場なので触っていない。
 
@@ -32,4 +32,4 @@ K2 のデモの「終了」・「マイページ」はチェックインの持�
 - 役職の「選ぶ」の高さが 11px 増える（写真）。これでよいか
 - 毎晩の仕事の上限（1分〜5分）は本番でかかっている時間を見ていない。反映の前に、本人に読むだけの SQL（cron.job_run_details の経営の仕事のかかった時間）を流してもらい、上限より短いか確かめたい：
   `select j.jobname, max(d.end_time - d.start_time) as longest, count(*) from cron.job_run_details d join cron.job j using (jobid) where j.jobname like 'co%' and d.start_time > now() - interval '7 days' group by 1 order by 2 desc;`
-- 移行の番号 165 は、データ担当の次の移行とぶつかるかもしれない。反映の前に `node tools/migrations.mjs rebase`
+- 移行の番号はデータ担当の 165（ops_speed）とぶつかったので 166 に付け直した（11/13）。反映の前に `node tools/migrations.mjs rebase`
