@@ -230,3 +230,9 @@
 - 毎晩・毎分の処理（pg_cron）の時間の伸び方。索引の足りない所、使っていない索引
 - アプリが最初に読むデータの量（図鑑・近くの空港・ヘリポートを足して増えた分）。小さくできる所
 - 効き目の大きい順に、直し方と危なさを並べる
+
+## PM から積んだ次の仕事（11/13 4時、全体の見回りの直し）
+報告の元：kaizen/sweep-1113 の docs/pm/report-sweep-1113.md（写真は docs/pm/report-sweep-1113-shots/）と data/speed-1113 の docs/pm/report-speed-1113.md。本人「一度すべてを見てバグや反応しないところを直し、処理速度を早くして」。不具合の直しなので画面案は要らない。見た目が変わるもの（大きさ・並び）は最小にし、変わる所は写真を報告に貼る。ブランチと下書き PR、main と本番には入れない。速さの見直し（data/speed-1113）の続き。同じブランチか data/speed-1113b
+- 運用を開いたときに遅いもの：airport-traffic 4.07秒・airport-foreign 3.85秒・airport_board 3.80秒・airport_ontime 3.38秒・airport_tracks 3.24秒・special_now 2.99秒・ga_recent 2.31秒・livery_board 1.5〜1.9秒。edge_cache（移行164）を使える所は使い、RPC は索引と問い合わせの見直し（読むだけの SQL で本番の EXPLAIN を本人に頼む形）
+- 開いた直後の app_status・airport_notices・current_events がそれぞれ 1.0〜1.6 秒。小さい表のはずなので原因を
+- 測ったのはアメリカから。日本からの時間は短い見込み。直す前と後を同じ場所で比べる
