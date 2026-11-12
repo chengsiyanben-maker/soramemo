@@ -17,7 +17,7 @@
 - リモートに古い `shugyo` ブランチ（10/21）があるので、`shugyo/<名前>` は push できない（ref がぶつかる）。`shugyo-<名前>` で作る
 
 ## いま持っている仕事
-- 修行の見方のシート（11/11 夜・帳面の次にやること1）：ブランチ shugyo-view-sheet・下書き PR #71・報告 docs/pm/report-shugyo-view-sheet.md・写真 docs/pm/shugyo-view-sheet/
+- 修行の見方のシート（11/11 夜・帳面の次にやること1）：11/12 10時24分 本人が PR #71 を main に入れた。ブランチ shugyo-view-sheet・報告 docs/pm/report-shugyo-view-sheet.md・写真 docs/pm/shugyo-view-sheet/
   - 鉛筆→「修行の見方」シート（画面案 design/view-settings 02c-v2・02c2-v2）。見方3つ＋道のりに出すもの4つの ON／OFF（loRowHTML）。最後の1つ（案A）・道のり OFF の間は道のりに出すものを押せない・元に戻す・「表示の編集をすべて見る」
   - `LO_EXT.sg = { groups:sgVsGroups, toggle:sgVsToggle, reset:sgVsReset }` で1枚に修行のカード。sgViewsPage と data-sg-sw は消した。dialog #dSgViews は JS で足す
   - テスト：t125 に14項目。t118・t124・t126 を修行のカードに合わせた（checkin.md に書いた）。全体 90/95（前からの t105・t99・t48・t62、揺れの t31）
@@ -29,7 +29,7 @@
 - 本人の返事待ち：候補1（年の区切りを日本時間へ）を12月前に直すか／計算ルールの文書の乗り継ぎ欄を JAL の公式の値に直すか／端数をどう決めるか／SQL 2本（ANA の最後の日・SFJ の便）／候補7（端末版の古い計画の画面）を残すか消すか
 
 ## 次にやること
-0. PR #71（修行の見方のシート）は反映を待つだけ。指摘や本人の答えが来たら直す。PR #64 の本人の答えが出たら合わせる
+0. PR #71（修行の見方のシート）は main に入った（11/12）。本人の答え（全部乗せに戻すで修行も戻すか・1枚の補足）が出たら合わせる。PR #64 の本人の答えが出たら合わせる
 1. 本人の了解が出たら、候補1：sgYear・sgMain・sgMoney・renderShugyoCard・sgMonthsView の年と月を日本時間（sgJstDay）でそろえる。ブランチ shugyo-jst-year
 2. 本人の了解が出たら、計算ルールの文書の乗り継ぎの欄を JAL の公式の値に書き換える（必要なら SG_XFER を会社ごとに）
 3. SFJ の SQL の結果で NH38xx・39xx が出たら、羽田の SFJ 便への乗り継ぎを 50分に分ける
