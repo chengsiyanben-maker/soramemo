@@ -1,8 +1,11 @@
 // 空港の今：その空港の天気（気象通報）と、直近の到着・出発便（JAL・ANA の公式のリアルタイム情報）をまとめて返す。
 //   GET /functions/v1/airport-now?iata=HND
 // ログインは不要（公開の情報だけを返す）。配信元に負担をかけないよう、空港ごとに数分ためて使い回す。
+// ためる場所は「関数の中の記憶」と、関数どうしで使い回す置き場（表 edge_cache、移行 164）の2つ。記憶は入れ物ごとに消えるので、
+// 記憶になければ置き場を1回だけ読み、それも古ければ配信元へ（11/13 速さの見直し）。配信元が取れないときは、置き場の古い値で返す
 // 便の情報は ODPT の合言葉（ODPT_CONSUMER_KEY）が設定されているときだけ取る。未設定なら flights は null（アプリは便の欄を出さない）。
 import { createClient } from "npm:@supabase/supabase-js@2.117.2";
+import { choose, type Entry, readShared, writeShared } from "../_shared/edge_cache.ts";
 import { amedasNearest, type AmedasStation, amedasWeather, type FlightRow, normalize, recent, tafPeriods, weather } from "../_shared/airport_now.ts";
 
 const CORS = { "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Headers": "authorization, apikey, content-type", "Access-Control-Allow-Methods": "GET, OPTIONS" };
@@ -32,17 +35,19 @@ async function airportOf(iata: string): Promise<Apt | null> {
 // 予報（TAF）：30分ためて使う。ない空港も多い（その場合は null）
 const TAF_TTL = 30 * 60_000;
 const tafCache = new Map<string, { at: number; v: unknown }>();
-async function getTaf(icao: string) {
-  const hit = tafCache.get(icao);
-  if (hit && Date.now() - hit.at < TAF_TTL) return hit.v;
+async function getTaf(icao: string, sh: Map<string, Entry>) {
+  const key = `now:taf:${icao}`, c = choose(tafCache.get(icao), sh.get(key), TAF_TTL);
+  if (c.fresh) { tafCache.set(icao, c.fresh); return c.fresh.v; }
+  const hit = c.stale;
   try {
     const r = await fetch(`https://aviationweather.gov/api/data/taf?ids=${icao}&format=json`, { headers: { "User-Agent": "soramemo (airport-now)" }, signal: T(WX_MS) });
-    if (r.status === 204) { tafCache.set(icao, { at: Date.now(), v: null }); return null; }
+    if (r.status === 204) { tafCache.set(icao, { at: Date.now(), v: null }); await writeShared(admin, key, null); return null; }
     if (!r.ok) throw new Error("taf " + r.status);
     const t = (await r.json())[0];
     const periods = t && Array.isArray(t.fcsts) ? tafPeriods(t.fcsts, Math.floor(Date.now() / 1000)) : [];
     const v = periods.length ? { issued: t.issueTime ?? null, periods } : null;
     tafCache.set(icao, { at: Date.now(), v });
+    await writeShared(admin, key, v);
     return v;
   } catch { return hit ? hit.v : null; }
 }
@@ -71,9 +76,10 @@ async function getAmedas(apt: Apt) {
 }
 
 const wxCache = new Map<string, { at: number; v: unknown }>();
-async function getWeather(icao: string) {
-  const hit = wxCache.get(icao);
-  if (hit && Date.now() - hit.at < WX_TTL) return hit.v;
+async function getWeather(icao: string, sh: Map<string, Entry>) {
+  const key = `now:wx:${icao}`, c = choose(wxCache.get(icao), sh.get(key), WX_TTL);
+  if (c.fresh) { wxCache.set(icao, c.fresh); return c.fresh.v; }
+  const hit = c.stale;
   try {
     const r = await fetch(`https://aviationweather.gov/api/data/metar?ids=${icao}&format=json`, { headers: { "User-Agent": "soramemo (airport-now)" }, signal: T(WX_MS) });
     if (!r.ok) throw new Error("metar " + r.status);
@@ -81,6 +87,7 @@ async function getWeather(icao: string) {
     const m = text.trim() ? JSON.parse(text)[0] : null;
     const v = m ? weather(m) : null;
     wxCache.set(icao, { at: Date.now(), v });
+    await writeShared(admin, key, v);
     return v;
   } catch {
     if (hit) return hit.v;   // 取れないときは古い通報
@@ -106,10 +113,11 @@ async function odpt(type: string, op: string, key: string, iata: string): Promis
   const j = await r.json();
   return Array.isArray(j) ? j : [];
 }
-async function getFlights(iata: string) {
+async function getFlights(iata: string, sh: Map<string, Entry>) {
   if (!ODPT_KEY) return null;
-  const hit = flCache.get(iata);
-  if (hit && Date.now() - hit.at < FL_TTL) return hit.v;
+  const key = `now:fl:${iata}`, c = choose(flCache.get(iata), sh.get(key), FL_TTL);
+  if (c.fresh) { flCache.set(iata, c.fresh as { at: number; v: { arr: FlightRow[]; dep: FlightRow[] } }); return c.fresh.v; }
+  const hit = c.stale;
   try {
     const parts = await Promise.all(OPERATORS.flatMap((op) => [
       odpt("FlightInformationArrival", op, "odpt:arrivalAirport", iata).then((l) => l.map((x) => normalize(x, "arr"))),
@@ -119,6 +127,7 @@ async function getFlights(iata: string) {
     const pick = (i: number) => recent(parts.filter((_, k) => k % 2 === i).flat().filter((x): x is FlightRow => !!x), nowMin);
     const v = { arr: pick(0), dep: pick(1) };
     flCache.set(iata, { at: Date.now(), v });
+    await writeShared(admin, key, v);
     return v;
   } catch { return hit ? hit.v : null; }
 }
@@ -133,10 +142,16 @@ Deno.serve(async (req) => {
   let apt: Apt | null;
   try { apt = await timed("db", airportOf(iata)); } catch { return new Response(JSON.stringify({ error: "unavailable" }), { status: 503, headers: JSON_HEADERS }); }
   if (!apt) return new Response(JSON.stringify({ error: "unsupported airport" }), { status: 404, headers: JSON_HEADERS });
-  const [metar, taf, flights] = await Promise.all([timed("metar", getWeather(apt.icao)), timed("taf", getTaf(apt.icao)), timed("odpt", getFlights(iata))]);
+  // 記憶にない（または古い）ものだけ、置き場から1回でまとめて読む
+  const now = Date.now(), need: string[] = [];
+  if (!(wxCache.has(apt.icao) && now - wxCache.get(apt.icao)!.at < WX_TTL)) need.push(`now:wx:${apt.icao}`);
+  if (!(tafCache.has(apt.icao) && now - tafCache.get(apt.icao)!.at < TAF_TTL)) need.push(`now:taf:${apt.icao}`);
+  if (ODPT_KEY && !(flCache.has(iata) && now - flCache.get(iata)!.at < FL_TTL)) need.push(`now:fl:${iata}`);
+  const sh = need.length ? await timed("shared", readShared(admin, need)) : new Map<string, Entry>();
+  const [metar, taf, flights] = await Promise.all([timed("metar", getWeather(apt.icao, sh)), timed("taf", getTaf(apt.icao, sh)), timed("odpt", getFlights(iata, sh))]);
   const wx = metar ?? await timed("amedas", getAmedas(apt));     // 気象通報がない空港は、近くのアメダスで代わりにする
   took.total = Math.round(performance.now() - t0);
-  // 例：Server-Timing: db;dur=3, metar;dur=420, taf;dur=380, odpt;dur=7900, total;dur=7905（始めからの時間。中身はふくまない）
+  // 例：Server-Timing: db;dur=3, shared;dur=12, metar;dur=420, taf;dur=380, odpt;dur=7900, total;dur=7905（始めからの時間。中身はふくまない）
   const timing = Object.entries(took).map(([k, v]) => `${k};dur=${v}`).join(", ");
   return new Response(JSON.stringify({ iata, at: new Date().toISOString(), weather: wx, taf, flights }),
     { headers: { ...JSON_HEADERS, "Cache-Control": "max-age=60", "Server-Timing": timing, "Access-Control-Expose-Headers": "Server-Timing" } });
