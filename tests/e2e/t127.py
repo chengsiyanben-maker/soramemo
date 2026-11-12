@@ -29,6 +29,10 @@ async def info(pg):
     return await pg.evaluate("""(() => ({ name:$('nearName').textContent, label:$('nearLabel').textContent, flap:$('nearCode').textContent, tag:$('nearTag').hidden ? '' : $('nearTag').textContent,
       more:$('nearMore').hidden ? '' : $('nearMore').textContent.trim(), dist:$('nearDist').textContent, state:$('bpass').dataset.state,
       others:HOME_NEAR.others.map(o => o.a.name), civ:HOME_NEAR.civ ? HOME_NEAR.civ.a.name : null }))()""")
+# 引き上げた位置の地図：「いまここ」と先頭が、上の段の下からシートの上の端までの見える所に両方入るか（review-app-1 の1）
+MAPVIS = """(() => { const tz = document.querySelector('.topzone').getBoundingClientRect().bottom, st = $('homeSheet').getBoundingClientRect().top, mt = $('homeMap').getBoundingClientRect().top;
+  const y = ll => HOME_MAP.latLngToContainerPoint(ll).y + mt, a = y([HOME_NEAR.a.lat, HOME_NEAR.a.lon]), m = y([HOME_POS.lat, HOME_POS.lon]);
+  return { ok: a > tz && a < st && m > tz && m < st, a: Math.round(a), me: Math.round(m), tz: Math.round(tz), st: Math.round(st) }; })()"""
 async def full(pg):
     await pg.click('#nearMore'); await pg.wait_for_timeout(700)
 async def main():
@@ -69,7 +73,14 @@ async def main():
         h = await pg.inner_text('#nearList .nlh')
         check('加須：見出し「ほかに 20km 以内 6つ」（review-5 の3）', 'ほかに 20km 以内 6つ' in h, h)
         rows = await pg.evaluate('[...document.querySelectorAll("#nearList .nrow2")].map(x => x.innerText.replace(/\\s+/g, " "))')
-        check('加須：844 は3行＋民間空港の行（2段目に「民間空港でいちばん近い」）', len(rows) == 4 and '民間空港でいちばん近い' in rows[-1] and '調布空港' in rows[-1], rows)
+        check('加須：844 は民間空港の行も入れて3行（2段目に「民間空港でいちばん近い」・review-app-1 の2）', len(rows) == 3 and '民間空港でいちばん近い' in rows[-1] and '調布空港' in rows[-1], rows)
+        gap = await pg.evaluate('document.querySelector("nav.tabs .in").getBoundingClientRect().top - $("nearList").getBoundingClientRect().bottom')
+        check(f'加須：844 も一覧の下とタブ帯のあいだ 12px 以上（{round(gap)}px・review-app-1 の2）', gap >= 12, gap)
+        st = await pg.evaluate('$("homeStrip").getBoundingClientRect().top')
+        check(f'加須：引き上げた位置で今日の数字のカードが帯の下からのぞかない（上の端 {round(st)}px）', st >= 844, st)
+        mv = await pg.evaluate(MAPVIS)
+        check('加須：引き上げた地図に「いまここ」と先頭が両方入る（review-app-1 の1）', mv['ok'], mv)
+        check('加須：引き上げた位置では地図の ＋− を出さない（review-app-1 の7）', not await pg.is_visible('.leaflet-control-zoom'))
         await pg.screenshot(path=os.path.join(SHOTS, '02-kazo-full-844.png'))
         await pg.click('[data-near-all]'); await pg.wait_for_timeout(400)
         n = await pg.evaluate('document.querySelectorAll("#dNear .nrow2").length')
@@ -79,9 +90,13 @@ async def main():
         await pg.click('#dNear .nrow2'); await pg.wait_for_timeout(500)
         check('加須：行を押すとその飛行場のページ', await pg.evaluate('$("dAirport").open && !$("dNear").open') and '大利根滑空場' in await pg.inner_text('#dAirportBody'))
         await pg.evaluate('$("dAirport").close()')
+        sc = await pg.evaluate('(() => { const bd = $("homeSheet").querySelector(".sbody"), r = $("homeStrip").getBoundingClientRect(), nt = document.querySelector("nav.tabs .in").getBoundingClientRect().top; bd.scrollTop += r.bottom - nt + 12; const r2 = $("homeStrip").getBoundingClientRect(); return [Math.round(r2.top), Math.round(r2.bottom), Math.round(nt), Math.round($("homeSheet").getBoundingClientRect().top)]; })()')
+        check('加須：送ると今日の数字のカードが丸ごと見える（シートの上の端とタブ帯のあいだ）', sc[1] <= sc[2] and sc[0] >= sc[3], sc)
+        await pg.evaluate('$("homeSheet").querySelector(".sbody").scrollTop = 0'); await pg.wait_for_timeout(200)
         await pg.click('#nearMore'); await pg.wait_for_timeout(700)
         t1 = await pg.evaluate('$("homeSheet").getBoundingClientRect().top')
         check(f'加須：閉じると最初の位置に戻る（{round(top0)} → {round(t1)}）', abs(t1 - top0) < 2 and (await pg.inner_text('#nearMore')).strip() == 'ほか6つ')
+        check('加須：閉じると ＋− が戻る', await pg.is_visible('.leaflet-control-zoom'))
         tiny = await pg.evaluate('[...document.querySelectorAll("#nearMore,#nearList button")].filter(b => b.offsetParent && b.getBoundingClientRect().height < 44).map(b => b.textContent)')
         check('加須：押せる所は44px 以上', not tiny, tiny)
         check('加須：エラーなし', not errs, errs); await c.close()
@@ -95,6 +110,10 @@ async def main():
             gap = await pg.evaluate('document.querySelector("nav.tabs .in").getBoundingClientRect().top - $("nearList").getBoundingClientRect().bottom')
             check(f'{hh}：引き上げた位置の一覧は1行＋民間空港の行', n == 2, n)
             check(f'{hh}：一覧の下とタブ帯のあいだ 12px 以上（{round(gap)}px）', gap >= 12, gap)
+            st = await pg.evaluate('$("homeStrip").getBoundingClientRect().top')
+            check(f'{hh}：今日の数字のカードがのぞかない（上の端 {round(st)}px）', st >= hh, st)
+            mv = await pg.evaluate(MAPVIS)
+            check(f'{hh}：引き上げた地図に「いまここ」と先頭が両方入る', mv['ok'], mv)
             await pg.screenshot(path=os.path.join(SHOTS, f'02-kazo-full-{hh}.png'))
             check(f'{hh}：エラーなし', not errs, errs); await c.close()
 
@@ -111,11 +130,23 @@ async def main():
         i = await info(pg)
         check('東京駅：先頭は東京ヘリポート・札「ヘリポート」・パタパタなし', i['name'] == '東京ヘリポート' and i['tag'] == 'ヘリポート' and not i['flap'], i)
         await pg.screenshot(path=os.path.join(SHOTS, '05-tokyo-heli-844.png'))
+        await full(pg)
+        mv = await pg.evaluate(MAPVIS)
+        check('東京駅：引き上げた地図に「いまここ」と東京ヘリポートが両方入る（review-app-1 の1）', mv['ok'], mv)
+        nm = await pg.evaluate('[...document.querySelectorAll("#nearList .nrow2 .tx b")].map(b => [b.firstChild.textContent, b.scrollHeight <= b.clientHeight + 1])')
+        check('東京駅：一覧の名前はふだん呼ぶ短い名前「羽田空港」で切れない（review-app-1 の3）', nm and nm[0][0] == '羽田空港' and all(x[1] for x in nm), nm)
+        await pg.screenshot(path=os.path.join(SHOTS, '05b-tokyo-full-844.png'))
+        await pg.click('[data-near-all]'); await pg.wait_for_timeout(400)
+        nm = await pg.evaluate('[...document.querySelectorAll("#dNear .nrow2 .tx b")].map(b => b.firstChild.textContent)')
+        check('東京駅：すべても短い名前', nm == ['羽田空港'], nm)
+        await pg.evaluate('$("dNear").close()'); await pg.click('#nearMore'); await pg.wait_for_timeout(700)
         # 「飛行場・滑空場・ヘリポートも出す」を OFF：羽田が先頭・パタパタ HND
         await pg.click('[data-he-open]'); await pg.wait_for_timeout(500)
         t = await pg.inner_text('#dHomeEdBody')
         check('ホームに出すもの：半券の下に「飛行場・滑空場・ヘリポートも出す」（はじめ ON）', '飛行場・滑空場・ヘリポートも出す' in t and await pg.evaluate('document.querySelector("#dHomeEdBody [data-nearx]").getAttribute("aria-checked")') == 'true')
         await pg.screenshot(path=os.path.join(SHOTS, '06-home-edit-nearx-844.png'))
+        nw = await pg.evaluate('[...document.querySelectorAll("#dHomeEdBody .nw")].map(x => [x.textContent, x.getClientRects().length, Math.round(x.getBoundingClientRect().height)])')
+        check('ホームに出すもの：「ヘリポートも出す」が語の途中で折れない（review-app-1 の6）', len(nw) == 2 and all(x[2] < 30 for x in nw), nw)
         await pg.click('#dHomeEdBody [data-nearx]'); await pg.wait_for_timeout(500)
         check('OFF にすると保存（LAYOUT.nearx = 0）', await pg.evaluate('LAYOUT && LAYOUT.nearx === 0'))
         await pg.evaluate('$("dHomeEd").close()'); await pg.wait_for_timeout(400)
@@ -126,6 +157,9 @@ async def main():
         # 表示の編集のホームのカード：4/4 のまま（数に入れない）・行がある
         await pg.evaluate('openLayout("home", "settings")'); await pg.wait_for_timeout(500)
         hc = await pg.inner_text('[data-lo-sec="home"]')
+        check('表示の編集：OFF のときホームのカードの補足に「近くは民間空港だけ」（review-app-1 の6）', '近くは民間空港だけ' in hc, hc[:80])
+        nw = await pg.evaluate('[...document.querySelectorAll("#dLayout .nw")].map(x => Math.round(x.getBoundingClientRect().height))')
+        check('表示の編集：「ヘリポートも出す」が語の途中で折れない', len(nw) == 2 and all(0 < x < 30 for x in nw), nw)
         check('表示の編集：ホームのカードに行がある・数は○/4 のまま（数に入れない）', '飛行場・滑空場・ヘリポートも出す' in hc and '/4' in hc.replace('\n', '') and '/5' not in hc.replace('\n', ''), hc[:200])
         await pg.screenshot(path=os.path.join(SHOTS, '08-layout-nearx-844.png'))
         await pg.click('#dLayout [data-nearx]'); await pg.wait_for_timeout(400)

@@ -833,7 +833,7 @@ dialog.heed{--s-bg:#EEF1F5}
 /* 半券の中身の設定（枝の行）：半券の行の下に少し下げて置く */
 dialog.heed .hepc.hesub{margin-left:24px;position:relative}
 dialog.heed .hepc.hesub::before,.tprow.losub::before{content:"";position:absolute;left:-14px;top:-10px;width:10px;height:34px;border-left:2px solid #C9CFD8;border-bottom:2px solid #C9CFD8;border-bottom-left-radius:8px}
-.tprow.losub{margin-left:24px;position:relative}
+.tprow.losub{margin-left:24px;position:relative;padding-top:8px;padding-bottom:8px}
 .heh{margin:6px 2px 0;font-size:26px;font-weight:800;color:#1F2937}.helead{margin:8px 2px 0;font-size:14px;line-height:1.65;color:#4B5563}
 .heprev{list-style:none;margin:14px 0 0;padding:10px;border-radius:24px;box-shadow:inset 0 0 0 1.5px #D9DEE6;display:flex;flex-direction:column;gap:8px}
 .hepc{position:relative;display:flex;align-items:center;min-height:52px;padding:8px 52px 8px 14px;border-radius:18px;background:#fff;box-shadow:0 1px 2px rgba(17,24,39,.05),0 6px 16px -10px rgba(17,24,39,.2)}
@@ -869,7 +869,7 @@ dialog.tpsheet .dlg{display:flex;flex-direction:column;overflow:hidden;padding-b
 .tpcnt{margin-left:auto;font-size:13px;color:#6B7280;white-space:nowrap}.tpcnt b{font-size:22px;font-weight:800;color:#1F2937}.tpcnt small{margin-left:6px;font-size:12px;color:#6B7280}
 .tphd .tpdone{margin-left:4px}
 .tprow{min-height:62px;gap:8px;padding:0 4px 0 10px}.tpn{width:20px}.tpi{width:34px;height:34px}.losw{min-width:72px}
-.tprow b{min-width:0}.tprow b small{font-size:11.5px;line-height:1.35}
+.nw{display:inline-block;white-space:nowrap}.tprow b{min-width:0}.tprow b small{font-size:11.5px;line-height:1.35}
 .tprow.off b small{white-space:nowrap}.tplist.full .tprow.off b small{white-space:normal}
 .hepc.fix{background:#F3F5F8;box-shadow:inset 0 0 0 1.5px #E3E7ED}
 .heed .heundo{position:static;margin:12px 0 0}
@@ -3030,6 +3030,7 @@ dialog.fbx .row2>button{flex:1;min-height:52px;border-radius:999px}
 .hmap .hm-edge b{font-weight:800}
 :root[data-view="home"] .hmap .leaflet-top.leaflet-right{top:auto;bottom:calc(100vh - var(--home-sheet,520px) + 52px)}
 :root[data-view="home"] .hmap .leaflet-bar{border:0;box-shadow:none;background:none;border-radius:0;overflow:visible;margin-right:14px}
+:root[data-view="home"][data-sheet="full"] .hmap .leaflet-control-zoom{display:none}   /* 引き上げた位置では ＋− がシートに半分隠れるので出さない（review-app-1 の7） */
 :root[data-view="home"] .hmap .leaflet-control-zoom a{width:44px;height:44px;line-height:44px;margin-top:8px;border:0;border-radius:999px!important;background:var(--h3-card);box-shadow:var(--h3-shadow);color:var(--h3-strong);font:400 22px var(--gothic)}
 /* シート */
 :root[data-view="home"] #homeSheet{background:var(--h3-bg);padding:0 16px}
@@ -3084,7 +3085,7 @@ dialog.fbx .row2>button{flex:1;min-height:52px;border-radius:999px}
 .nrow2 .t.cv{background:#E8EDF4;color:#24426E}.nrow2 .t.fd{background:#DCEBDF;color:#24502F}.nrow2 .t.gl{background:#D7EAF6;color:#134F72}.nrow2 .t.hp{background:#F1E7D8;color:#5E4114}
 .nrow2 .tx{flex:1;min-width:0;display:flex;flex-direction:column;line-height:1.3}
 .nrow2 .tx small{font-size:13px;font-weight:600;color:#5F6878}
-.nrow2 .tx b{font-size:15px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nrow2 .tx b{font-size:15px;font-weight:800;line-height:1.3;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;word-break:normal;overflow-wrap:anywhere}
 .nrow2 .tx b i{font-style:normal;font-size:13px;font-weight:600;color:#5F6878;margin-left:6px}
 .nrow2 .k{flex:none;font-size:18px;font-weight:800;font-variant-numeric:tabular-nums}
 .nrow2 .k small{font-size:12px;font-weight:600;color:#6B7280;margin-left:2px}
@@ -4506,17 +4507,29 @@ function nearMoreSync(){
   b.setAttribute("aria-expanded", String(full));
   b.setAttribute("aria-label", full ? "近くの一覧を閉じる" : n.others.length ? `ほかに20km以内${n.others.length}つの一覧を開く` : "近くの民間空港を開く");
 }
-// 引き上げた位置の一覧（20km 以内・近い順）。高さ 760 未満は1行、ほかは3行。民間空港を足したときは下にその1行（2段目に「民間空港でいちばん近い」）
+// 一覧と「すべて」の名前は、ふだん呼ぶ短い名前（羽田空港・伊丹空港など。図鑑の索引の頭の字と同じ考え方）。長い名前は2行まで折る（review-app-1 の3）
+const NEAR_SHORT = { HND:"羽田空港", ITM:"伊丹空港", NRT:"成田空港", KIX:"関西空港" };
+const nearShort = a => a.kind ? a.name : NEAR_SHORT[a.iata] || a.name.replace(/（[^）]*）/, "");
+// 引き上げた位置の一覧（20km 以内・近い順）。民間空港を足したときの行も入れて、高さ 760 未満は2行、ほかは3行（844 も一覧の下を 12px 以上空ける。review-app-1 の2）
 const nearRowHTML = (o, civ) => { const [kn, kc] = nearKind(o.a), pf = String(o.a.pref || "").replace(/[都府県]$/, "");
   const k = o.km < 1 ? [Math.round(o.km * 1000), "m"] : [o.km < 100 ? o.km.toFixed(1) : fmtKm(o.km), "km"];
-  return `<button class="nrow2" type="button" data-zka="${o.a.id}" aria-label="${esc(kn)}、${esc(o.a.name)}、${k.join("")}"><span class="t ${kc}">${esc(kn)}</span><span class="tx">${civ ? `<small>民間空港でいちばん近い</small>` : ""}<b>${esc(o.a.name)}<i>${esc(pf)}</i></b></span><span class="k">${k[0]}<small>${k[1]}</small></span><svg class="c" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>`; };
+  return `<button class="nrow2" type="button" data-zka="${o.a.id}" aria-label="${esc(kn)}、${esc(o.a.name)}、${k.join("")}"><span class="t ${kc}">${esc(kn)}</span><span class="tx">${civ ? `<small>民間空港でいちばん近い</small>` : ""}<b>${esc(nearShort(o.a))}<i>${esc(pf)}</i></b></span><span class="k">${k[0]}<small>${k[1]}</small></span><svg class="c" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>`; };
 function renderNearList(){
   const box = $("nearList"), n = HOME_NEAR; if(!box) return;
   if(!n || !n.others || (!n.others.length && !n.civ)){ box.hidden = true; box.innerHTML = ""; return; }
-  const max = innerHeight < 760 ? 1 : 3, rows = n.others.slice(0, max);
+  const max = Math.max(1, (innerHeight < 760 ? 2 : 3) - (n.civ ? 1 : 0)), rows = n.others.slice(0, max);
   box.hidden = false;
   box.innerHTML = (n.others.length ? `<div class="nlh"><b>ほかに 20km 以内 ${n.others.length}つ</b><small>近い順</small><button class="allp" type="button" data-near-all>すべて<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button></div>` : `<div class="nlh"><b>20km 以内にほかはありません</b></div>`)
     + rows.map(o => nearRowHTML(o)).join("") + (n.civ ? nearRowHTML(n.civ, true) : "");
+  nearGapSync();
+}
+// 引き上げた位置では、一覧の下の今日の数字のカードがタブ帯の下からのぞかないよう、続きは画面の下の端より下から始める（送ると丸ごと見える。review-app-1 の2）
+function nearGapSync(){
+  const l = $("nearList"), sh = $("homeSheet"); if(!l || !sh) return;
+  l.style.marginBottom = "";
+  if(sh.dataset.snap !== "full" || l.hidden || !l.offsetHeight) return;
+  const bd = sh.querySelector(".sbody"), bot = sheetTop("home", "full") + l.getBoundingClientRect().bottom - sh.getBoundingClientRect().top + (bd ? bd.scrollTop : 0);
+  l.style.marginBottom = Math.max(12, Math.round(innerHeight - bot + 8)) + "px";
 }
 // すべて：20km 以内の全部（近い順）と、足した民間空港
 function openNearAll(){
@@ -5861,8 +5874,10 @@ function loSecDef(id){
     const hid = LO_TAB_ITEMS.filter(v => !tabs.includes(v)).map(v => TAB_NAME[v]);
     // 成績は隠しているものに数えない。全部出していて成績のタブがないときは、見出しで成績の行き先を言う（review-app-1 の2）
     return { name:"タブ", groups:[{ rows }], n:tabs.length, tot:LO_TAB_MAX, hidden:hid, subText:!hid.length && !tabs.includes("stats") ? "成績はマイページから" : "", go:["タブを選ぶ", "data-tp-open"], note:`ホームを入れて${LO_TAB_MAX}つまで。並べ替えは「タブを選ぶ」で。` }; }
-  if(id === "home"){ const rows = [...LO_HOME_FIX.flatMap(([k, l, d]) => [{ label:l, desc:d, always:true }, ...(k === "stub" ? [{ kind:"nearx", label:NEARX_L[0], desc:NEARX_L[1], on:nearX(), nocount:true, sub:true, attr:"data-nearx" }] : [])]), ...loBlkRows("home")];
-    return loSecCount({ name:"ホーム", groups:[{ rows }], go:["見本で編集", "data-he-open"] }); }
+  if(id === "home"){ const rows = [...LO_HOME_FIX.flatMap(([k, l, d]) => [{ label:l, desc:d, always:true }, ...(k === "stub" ? [{ kind:"nearx", label:NEARX_L[0], labelHTML:NEARX_H, desc:NEARX_L[1], on:nearX(), nocount:true, sub:true, attr:"data-nearx" }] : [])]), ...loBlkRows("home")];
+    const s = loSecCount({ name:"ホーム", groups:[{ rows }], go:["見本で編集", "data-he-open"] });
+    if(!nearX()) s.subText = "近くは民間空港だけ" + (s.hidden.length ? `・隠している：${s.hidden.join("・")}` : "");   // OFF に気づけるように（review-app-1 の6）
+    return s; }
   if(id === "book" || id === "log") return loSecCount({ name:TAB_NAME[id], groups:[{ rows:loViewRows(id) }], go:[`${TAB_NAME[id]}へ`, `data-lo-goto="${id}"`], away:loAwayNote(id) });
   if(id === "ops") return loSecCount({ name:"運用", groups:[{ title:"見方", rows:loViewRows("ops") }, { title:"滑走路の下に出すもの", rows:loBlkRows("opsb") }], go:["運用へ", 'data-lo-goto="ops"'], away:loAwayNote("ops") });
   if(id === "stats") return loSecCount({ name:"成績", groups:[{ rows:loBlkRows("stats") }], go:["成績へ", 'data-lo-goto="stats"'], away:loAwayNote("stats") });
@@ -5878,7 +5893,7 @@ const loSecIds = () => ["tabs", "home", "book", "log", ...(LO_EXT.sg ? ["sg"] : 
 const loSecIcon = id => LO_ICON[id] || tpIcon(id);
 function loRowHTML(r){
   const right = r.always ? `<span class="tplk">いつも</span>` : loSw(r.on, r.attr, `${esc(r.label)}を出す`, r.dis || r.last);
-  return `<li class="tprow vsrow${r.on || r.always ? "" : " off"}${r.always ? " lock" : ""}${r.sub ? " losub" : ""}"><b>${esc(r.label)}${r.last ? `<span class="vslast">最後の1つ</span>` : ""}${r.desc ? `<small>${esc(r.desc)}</small>` : ""}</b>${right}</li>`
+  return `<li class="tprow vsrow${r.on || r.always ? "" : " off"}${r.always ? " lock" : ""}${r.sub ? " losub" : ""}"><b>${r.labelHTML || esc(r.label)}${r.last ? `<span class="vslast">最後の1つ</span>` : ""}${r.desc ? `<small>${esc(r.desc)}</small>` : ""}</b>${right}</li>`
     + (r.last ? `<li class="vsmsg">見方は1つより減らせません。ほかを ON にすると OFF にできます。</li>` : "");
 }
 function loSecHTML(id, only){
@@ -6103,7 +6118,8 @@ const HE_FIXED = [["半券", "チェックインの半券", "いちばん近い�
 const HE_SUB = { ride:"便名を入れると機体を調べる", event:"開いているイベント", tally:"空港・路線・距離", recent:"" };
 // 半券の中身の設定（かたまりではないので数に入れない）：半券の下の枝の行。ON＝飛行場なども出る（ほかの行と同じ向き。review-5 の1 案A）
 const NEARX_L = ["飛行場・滑空場・ヘリポートも出す", "OFF にすると民間空港だけ"];
-const heNearxHTML = () => { const on = nearX(); return `<li class="hepc sw hesub${on ? "" : " off"}"><div><b>${NEARX_L[0]}</b><small>${NEARX_L[1]}</small></div>${loSw(on, "data-nearx", "飛行場・滑空場・ヘリポートも近くの並びに出す")}</li>`; };
+const NEARX_H = `<span class="nw">飛行場・滑空場・</span><span class="nw">ヘリポートも出す</span>`;   // 「も出す」の前で折らない（review-app-1 の6）
+const heNearxHTML = () => { const on = nearX(); return `<li class="hepc sw hesub${on ? "" : " off"}"><div><b>${NEARX_H}</b><small>${NEARX_L[1]}</small></div>${loSw(on, "data-nearx", "飛行場・滑空場・ヘリポートも近くの並びに出す")}</li>`; };
 function heHTML(){
   const off = loOff("home"), on = loOrder("home").filter(id => !off.has(id)), out = LO_BLOCKS.home.filter(b => !b[3] && off.has(b[0]));
   const name = id => (LO_BLOCKS.home.find(b => b[0] === id) || [])[1] || id;
@@ -6637,6 +6653,8 @@ async function renderHomeMap(){
   const last = S.checkins[S.checkins.length - 1];
   const a = HOME_NEAR ? HOME_NEAR.a : last ? BY[last.a] : A.find(x => x.iata === "HND");
   if(!a) return;
+  // 引き上げた位置（近くの一覧を見るとき）は、残った細い地図に「いまここ」と先頭が両方入るよう寄せ直す（review-app-1 の1）。閉じたら最初の寄せ方へ
+  const full = $("homeSheet") && $("homeSheet").dataset.snap === "full";
   if(HOME_LAYER) HOME_LAYER.remove();
   HOME_LAYER = L.layerGroup().addTo(HOME_MAP);
   const APT = "#7A1F5C", rad = a.radius || 1500;
@@ -6650,24 +6668,24 @@ async function renderHomeMap(){
     me = [HOME_POS.lat, HOME_POS.lon];
     if(!HOME_NEAR.within) L.polyline([[a.lat, a.lon], me], { color:APT, weight:1.6, opacity:.8, dashArray:"1 6", lineCap:"round", interactive:false }).addTo(HOME_LAYER);
     L.marker(me, { interactive:false, keyboard:false, icon:L.divIcon({ className:"", html:`<div class="hm-me"></div>${HOME_NEAR.within ? "" : '<div class="hm-mel">いまここ</div>'}`, iconSize:[18, 18], iconAnchor:[9, 9] }) }).addTo(HOME_LAYER);
-    if(HOME_NEAR.km <= HOME_FIT_KM) bounds = bounds.extend(me);
+    if(HOME_NEAR.km <= HOME_FIT_KM || full) bounds = bounds.extend(me);
   }
-  const pad = homeMapPad();
+  const pad = homeMapPad(full ? "full" : "half");
   HOME_MAP.fitBounds(bounds, { paddingTopLeft:[pad.l, pad.t], paddingBottomRight:[pad.r, pad.b], maxZoom:14, animate:false });   // 下はシートに隠れる
   homeEdge(me && HOME_NEAR && !HOME_NEAR.within ? me : null, HOME_NEAR ? HOME_NEAR.km : 0, pad);
   // 空港の名前は、地図の広く空いている側に置く（右の＋−と重ならないように）
   { const ap = $("homeMap").querySelector(".hm-ap"), c = HOME_MAP.latLngToContainerPoint([a.lat, a.lon]); if(ap) ap.classList.toggle("l", c.x > $("homeMap").clientWidth * .5); }
 }
-// 地図の見える所（上の段・シート・右の＋−を除く）
-function homeMapPad(){
-  const tz = document.querySelector(".topzone"), top = tz ? Math.max(90, tz.getBoundingClientRect().bottom) : 110;
-  return { t:top + 28, b:innerHeight - sheetTop("home", "half") + 28, l:40, r:72 };
+// 地図の見える所（上の段・シート・右の＋−を除く）。引き上げた位置は見える高さが細いので、余白を詰め、＋−は隠すので右も詰める
+function homeMapPad(snap){
+  const tz = document.querySelector(".topzone"), top = tz ? Math.max(90, tz.getBoundingClientRect().bottom) : 110, st = sheetTop("home", snap || "half");
+  return snap === "full" ? { t:top + 14, b:innerHeight - st + 30, l:40, r:40, st } : { t:top + 28, b:innerHeight - st + 28, l:40, r:72, st };
 }
 // 自分が地図の外にいるとき、端に「いまここ ○km」と向きの矢印を置く
 function homeEdge(me, dist, pad){
   let el = $("homeEdge"); const box = $("homeMap");
   if(!me || !HOME_MAP || !box){ if(el) el.hidden = true; return; }
-  const p = HOME_MAP.latLngToContainerPoint(me), W = box.clientWidth, H = innerHeight - (innerHeight - sheetTop("home", "half"));
+  const p = HOME_MAP.latLngToContainerPoint(me), W = box.clientWidth, H = pad.st;
   const x0 = 16, x1 = W - 16, y0 = pad.t - 8, y1 = H - 16;
   if(p.x >= x0 && p.x <= x1 && p.y >= y0 && p.y <= y1){ if(el) el.hidden = true; return; }
   if(!el){ el = document.createElement("div"); el.id = "homeEdge"; el.className = "hm-edge"; el.setAttribute("role", "img"); box.appendChild(el); }
@@ -6729,8 +6747,8 @@ function initSheet(sheet, view){
       const tb = document.querySelector("nav.tabs .in"), gz = sheet.querySelector(".grabzone");
       body.style.maxHeight = s === "half" && tb && tb.offsetHeight ? Math.max(0, Math.round(tb.getBoundingClientRect().top - 4 - top - (gz ? gz.offsetHeight : 28))) + "px" : "";
       document.documentElement.style.setProperty("--home-sheet", Math.round(s === "half" ? top : sheetTop(view, "half")) + "px");
-      if(s === "half") setTimeout(() => { if(document.documentElement.dataset.view === "home") renderHomeMap(); }, 360);
-      if(typeof nearMoreSync === "function") nearMoreSync();
+      setTimeout(() => { if(document.documentElement.dataset.view === "home" && sheet.dataset.snap === s) renderHomeMap(); }, 360);   // 引き上げたときも寄せ直す（review-app-1 の1）
+      if(typeof nearMoreSync === "function"){ nearMoreSync(); nearGapSync(); }
     }
     if(document.documentElement.dataset.view === view) document.documentElement.dataset.sheet = s;   // 地図だけのときは下のメニューを隠す
     if(s !== "full") body.scrollTop = 0;
