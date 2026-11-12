@@ -7,6 +7,8 @@
 <title>そらメモ</title>
 <link rel="manifest" href="manifest.webmanifest">
 <script src="config.js"></script>
+<script>/* サーバーの部品（supabase-js）を、本体（約1MB の script）を読むのと並べて先に取り始める（11/13 速さ）。開いた直後の app_status・airport_notices・current_events が早く出る。URL は SUPABASE_JS と同じにする（t128 で確かめる） */
+if(window.SORAMEMO_CONFIG && window.SORAMEMO_CONFIG.supabaseUrl){ const l = document.createElement("link"); l.rel = "preload"; l.as = "script"; l.id = "sbPreload"; l.href = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2/dist/umd/supabase.js"; document.head.appendChild(l); }</script>
 <link rel="apple-touch-icon" href="icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -1405,6 +1407,12 @@ dialog.auth::backdrop{background:var(--a-bg)}
 .auth .pill2{display:inline-block;border:0;border-radius:999px;background:var(--a-pill);color:var(--a-strong);font-family:inherit;font-style:normal;font-size:15px;font-weight:700;padding:13px 26px;cursor:pointer}
 .auth .pill2 b{color:var(--a-ana)}
 .auth .linkish{border:0;background:none;padding:0;font-family:inherit;font-style:normal;color:var(--a-sub);text-decoration:underline;cursor:pointer}
+/* ログインの最初の画面：「デモで試す」は新規登録のすぐ下に、押せる大きさ（高さ 44px）で。高さ 700px 未満は上の余白を詰めて1画面に入れる（11/13 見回り #4） */
+.auth .au-lhero{margin-top:32px}.auth .au-lfield{margin-top:56px}
+.auth .au-demo{margin-top:4px;text-align:center}
+.auth .au-demo button{min-height:44px;padding:0 18px;border:0;border-radius:999px;background:none;font-family:inherit;font-style:normal;font-size:14px;font-weight:600;color:var(--a-sub);cursor:pointer}
+.auth .au-demo button b{color:var(--a-strong);text-decoration:underline;text-underline-offset:3px}
+@media (max-height:700px){.auth .au-lhero{margin-top:4px}.auth .au-lhero .logo svg{width:52px;height:52px}.auth .au-lhero h1{margin-top:12px!important;font-size:28px!important}.auth .au-lfield{margin-top:28px}}
 .auth .amsg{font-size:13px;margin:12px 4px 0;color:var(--a-sub);min-height:0}
 .auth .amsg.err{color:var(--a-jal)}
 .auth .amsg:empty{display:none}
@@ -2443,6 +2451,9 @@ dialog.psheet .btn1,dialog.psheet .btn2{display:block;width:100%;margin-top:10px
 #v-book .zk-tsume{position:fixed;right:max(0px,calc(50vw - 300px));top:120px;display:flex;flex-direction:column;gap:2px;z-index:20}
 :root:not([data-bkview="region"]) #v-book #zkTsume,:root:not([data-bookseg="main"]) #v-book #zkTsume,:root:not([data-bookseg="air"]) #v-book #zkxTsume{display:none}
 #v-book .zk-tsume button:disabled{opacity:.45;cursor:default}
+#v-book .zk-tsume.tight{gap:0}
+/* 図鑑で下の方のボタン（扉の「図鑑の上へ」など）へ送るとき、下のタブ帯にもぐらせない（11/13 見回り #7） */
+:root[data-view="book"]{scroll-padding-bottom:calc(var(--zk-tabbar,84px) + 12px)}
 #v-book .zk-tsume button{width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:0;border-radius:14px 0 0 14px;padding:0;background:color-mix(in srgb,var(--c) 16%,var(--bk-card));color:var(--bk-ink);font:700 13px var(--gothic);writing-mode:vertical-rl;letter-spacing:0;line-height:1;box-shadow:inset 4px 0 0 var(--c);cursor:pointer}
 #v-book .zk-tsume button.on{width:52px;margin-left:-8px;background:var(--bk-card);box-shadow:inset 6px 0 0 var(--c),-6px 6px 18px -8px rgba(17,24,39,.35);font-weight:800}
 [data-night="on"] #v-book .zk-tsume button{background:var(--bk-card);box-shadow:inset 0 0 0 1px rgba(220,227,234,.35)}
@@ -3012,6 +3023,9 @@ dialog.fbx .row2>button{flex:1;min-height:52px;border-radius:999px}
 :root[data-view="home"] .modesw button[aria-selected="true"]{background:var(--h3-strong);color:#fff}
 :root[data-view="home"] .gamenote,:root[data-view="home"] .demo-banner{display:none!important}
 :root[data-view="home"] .topzone{position:relative}
+/* ホームの地図の上にかぶる透明な枠（MAIN.wrap・上の段のすき間）は押した指を地図へ通す。中のボタンだけ押せる（11/13 見回り #2：667 で＋−が押せない） */
+:root[data-view="home"] main.wrap,:root[data-view="home"] .topzone{pointer-events:none}
+:root[data-view="home"] main.wrap>*,:root[data-view="home"] .topzone>*{pointer-events:auto}
 :root[data-view="home"] body.demo .demopill{position:absolute;left:58px;top:65px;display:flex;align-items:center;gap:6px;height:30px;padding:0 12px;border-radius:999px;background:var(--h3-card);color:var(--h3-ink);font-size:13px;font-weight:700;box-shadow:var(--h3-shadow)}
 :root[data-view="home"] .demopill::before{content:"";width:7px;height:7px;border-radius:999px;background:var(--h3-mute)}
 :root[data-view="home"] .statusbar,:root[data-view="home"] .focusbar{position:relative;z-index:3;margin-top:8px}
@@ -3227,6 +3241,16 @@ dialog.ckconfirm button.go{background:#E9C46A;color:#111827}
 :is([data-night="on"],[data-palette="board"]) .sgd .sgb-hd .sg-seg button[aria-pressed="true"]{background:#262B33;color:#fff}
 :is([data-night="on"],[data-palette="board"]) .sgd .sg-btn.ghost{box-shadow:inset 0 0 0 1px #8B95A3}
 :is([data-night="on"],[data-palette="board"]) .sgd .sgb-est{background:none;color:inherit;box-shadow:inset 0 0 0 1px #8B95A3}:is([data-night="on"],[data-palette="board"]) .sgd .sgb-card .sgb-est b small{color:inherit}
+/* 押せる範囲を 44px に（11/13 見回り #7）：見た目の大きさは変えず、透明な広がり（::after）で押せる所だけ広げる */
+div.viewsw{padding:4px 8px 1px;margin:-4px -6px 12px;border-bottom:0;background:linear-gradient(var(--vw-track),var(--vw-track)) 6px 100%/calc(100% - 12px) 1px no-repeat}
+#v-ops div.viewsw{margin-top:0}
+div.viewsw>button{position:relative}div.viewsw>button::after{content:"";position:absolute;inset:-4px -8px 0}
+.topzone .iconbtn,.modesw button,.demo-banner button{position:relative}
+.modesw{overflow:visible}
+.topzone .iconbtn::after{content:"";position:absolute;inset:-5px 0}
+.modesw button::after{content:"";position:absolute;inset:-4px 0}
+.demo-banner button::after{content:"";position:absolute;inset:-6px -2px}
+#homeSheet .grab::after{content:"";position:absolute;left:0;right:0;top:-20px;bottom:0}
 </style>
 </head>
 <body>
@@ -4111,8 +4135,9 @@ document.addEventListener("click", async e => {
   renderRide();
 });
 async function renderRideIntl(p, force){
-  const box = $("rideCard"), today = new Date(Date.now() + 9*36e5).toISOString().slice(0, 10);
-  if(p.day < today){ box.hidden = true; box.innerHTML = ""; return; }
+  // 国際線は前の日（日本時間）に出て夜中も飛んでいる便がある（11/13 見回り：0〜4時に「記録に入れる」が出なかった）。前の日に出た便までは出す
+  const box = $("rideCard"), yday = new Date(Date.now() + 9*36e5 - 864e5).toISOString().slice(0, 10), today = new Date(Date.now() + 9*36e5).toISOString().slice(0, 10);
+  if(p.day < yday){ box.hidden = true; box.innerHTML = ""; return; }
   if(force || !RIDE_LIVE || RIDE_LIVE.no !== p.no || Date.now() - RIDE_LIVE_T > 60_000){ RIDE_LIVE_T = Date.now(); RIDE_LIVE = { no:p.no, d: await fetchLive(p.no, p.dep) }; }
   const d = RIDE_LIVE.d || {}, dep = d.dep || p.dep, arr = d.arr || p.arr, est = d.source === "route_estimate";
   const ph = d.phase, pct = d.progress != null ? Math.round(Number(d.progress) * 100) : null;
@@ -4245,7 +4270,7 @@ function loadScript(src){
 async function initServer(){
   try{ await loadScript(SUPABASE_JS); if(!window.supabase || !window.supabase.createClient) throw new Error("supabase-js missing"); }catch(e){ say("サーバーにつながりませんでした。電波のよい場所で開き直してください。", true); return; }
   sb = window.supabase.createClient(SORAMEMO_CONFIG.supabaseUrl, SORAMEMO_CONFIG.supabaseAnonKey);
-  loadAppStatus(); loadNotices(); loadEvents();
+  loadAppStatus(); loadNotices(); loadEvents();   // 3つは待たずに並べて呼ぶ（どれもログインの確かめより先）
   const { data } = await sb.auth.getSession(); user = data.session ? data.session.user : null;
   sb.auth.onAuthStateChange((_ev, session) => { const u = session ? session.user : null; if((u&&u.id) !== (user&&user.id)){ user = u; CO = null; reload().then(() => flushQueue(true)); } });
   await reload(); flushQueue(true); afterCheckout();
@@ -4794,7 +4819,14 @@ function zkTsumeSync(force){
   if(!cur){ const f = document.querySelector(root + " .zk-rg"); cur = f && f.dataset.rg; }
   ts.querySelectorAll("[data-zkj]").forEach(b => { const on = b.dataset.zkj === cur; b.classList.toggle("on", on); if(on) b.setAttribute("aria-current", "true"); else b.removeAttribute("aria-current"); });
   const main = document.querySelector(root + " .zk-main"), top = main ? main.getBoundingClientRect().top : 120;
-  ts.style.top = Math.max(safe + 12, Math.min(top, 140)) + "px";
+  // デモの帯が見えている間は、ツメの上端を帯の下に（「終了」にかぶせない。11/13 見回り #1）
+  const db = document.body.classList.contains("demo") ? document.querySelector(".demo-banner") : null, dbb = db ? db.getBoundingClientRect().bottom : 0;
+  let y = Math.max(safe + 12, Math.min(top, 140), dbb > 0 ? dbb + 8 : 0);
+  // 帯の下にずらして下のタブ帯にかかるとき（高さ 667 など）は、ツメのすき間を詰めて帯のすぐ下から並べる
+  const tb = document.querySelector("nav.tabs"), lim = tb ? tb.getBoundingClientRect().top - 4 : innerHeight;
+  ts.classList.remove("tight");
+  if(dbb > 0 && y + ts.offsetHeight > lim){ ts.classList.add("tight"); y = Math.max(dbb + 4, Math.min(y, lim - ts.offsetHeight)); }
+  ts.style.top = y + "px";
 }
 let ZK_RAF = 0;
 addEventListener("scroll", () => { if(ZK_RAF || currentView() !== "book") return; ZK_RAF = requestAnimationFrame(() => { ZK_RAF = 0; zkTsumeSync(); }); }, { passive:true });
@@ -5128,7 +5160,8 @@ const VIEW_RENDER = {};
 // 切り替えを描いたら、選んでいるボタンが見えるところまで横に送る
 function setViewsw(id, k){ const el = $(id); if(!el) return; el.innerHTML = viewswHTML(k); vwEditBtn(el, k);
   el.parentElement.hidden = false; el.classList.toggle("vwone", viewsShown(k).length < 2);   // 見方が1つでも名前を残す（今どの見方か分かるように・鉛筆から戻せる。review-1 の6）
-  const b = el.querySelector('[aria-selected="true"]'); if(b) el.scrollLeft = Math.max(0, b.offsetLeft - el.offsetLeft - 24); }
+  // 選んだ見方が帯の中に見えているときは左端から（先頭の見方を隠さない）。画面の外のときだけ送る（11/13 見回り #3）
+  const b = el.querySelector('[aria-selected="true"]'); if(b){ const x = b.offsetLeft - el.offsetLeft; el.scrollLeft = x + b.offsetWidth + 8 > el.clientWidth ? Math.max(0, x - 24) : 0; } }
 document.addEventListener("click", e => {
   const b = e.target.closest("[data-vw]"); if(!b) return;
   const [k, id] = b.dataset.vw.split(":"); if(VIEW[k] === id) return;
@@ -5307,7 +5340,8 @@ async function renderFlightMap(){
   if(FB_MAP){ try{ FB_MAP.remove(); }catch(e){} FB_MAP = null; }
   try{
     FB_MAP = L.map(box, { zoomControl:false, attributionControl:false, scrollWheelZoom:false, boxZoom:false, zoomSnap:0.25, minZoom:4, maxZoom:10 });
-    await mapBase(FB_MAP, { interactive:true });
+    // 下地は国土地理院の淡色地図（画像）。日本全体の縮尺ではベクトル地図に陸と海が出ず白地になるため（11/13 見回り #9）
+    L.tileLayer("https://cyberjapandata.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png", { maxZoom:18, minZoom:2 }).addTo(FB_MAP);
   }catch(e){ return; }
   box.closest(".fbmapc").classList.add("leaf");
   const es = FB_ES.filter(e => fbYOf(e) === FB_Y), rts = fbRoutes(es), pts = [];
@@ -6598,14 +6632,17 @@ $("gateDemo").onclick = () => { track("gate", "demo"); if(!demo) $("toggleDemo")
 // 地名は市区町村・空港・海や川・駅だけ）。WebGL が使えないときは、淡色地図（画像）にする
 async function mapBase(map, opts = {}){
   const pale = () => L.tileLayer("https://cyberjapandata.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png", { maxZoom:18 }).addTo(map);
+  let tmp = null;
   try{
     const c = document.createElement("canvas"); if(!(c.getContext("webgl2") || c.getContext("webgl"))) throw new Error("no webgl");
+    // 地図の部品（maplibre、約800KB）は地図を出すこの時に読む。届くまでは軽い淡色地図を敷き、描き終わったら外す（11/13：遅い回線で地図が白いまま待たない）
+    if(!window.maplibregl) tmp = pale();
     if(!document.querySelector(`link[href="${MAPLIBRE.css}"]`)){ const l = document.createElement("link"); l.rel = "stylesheet"; l.href = MAPLIBRE.css; document.head.appendChild(l); }
     await loadScript(MAPLIBRE.js); await loadScript(MAPLIBRE.bridge);
     if(!L.maplibreGL) throw new Error("no bridge");
     const w = (a, b, c2) => ["interpolate", ["linear"], ["zoom"], 8, a, 12, b, 16, c2];
     const ctg = ["get", "annoCtg"], font = ["NotoSansJP-Regular"];
-    L.maplibreGL({ interactive:!!opts.interactive, style:{ version:8,
+    const gl = L.maplibreGL({ interactive:!!opts.interactive, style:{ version:8,
       glyphs:"https://gsi-cyberjapan.github.io/optimal_bvmap/glyphs/{fontstack}/{range}.pbf",
       sources:{ gsi:{ type:"vector", tiles:["https://cyberjapandata.gsi.go.jp/xyz/experimental_bvmap/{z}/{x}/{y}.pbf"], minzoom:4, maxzoom:16 } },
       layers:[
@@ -6631,7 +6668,8 @@ async function mapBase(map, opts = {}){
           layout:{ "text-field":["get", "annoChar"], "text-font":font, "text-size":10.5 }, paint:{ "text-color":"#7B8390", "text-halo-color":"#FFFFFF", "text-halo-width":1.2 } },
         { id:"lbl-airport", type:"symbol", source:"gsi", "source-layer":"label", filter:["==", ctg, 441],
           layout:{ "text-field":["get", "annoChar"], "text-font":font, "text-size":12 }, paint:{ "text-color":"#1F2937", "text-halo-color":"#FFFFFF", "text-halo-width":1.6 } } ] } }).addTo(map);
-  }catch(e){ pale(); }
+    if(tmp){ const t = tmp, off = () => { try{ map.removeLayer(t); }catch(_){ } }, mm = gl.getMaplibreMap && gl.getMaplibreMap(); if(mm && mm.once){ mm.once("idle", off); setTimeout(off, 8000); } else off(); }
+  }catch(e){ if(!tmp) pale(); }
 }
 // ホームの上の地図：いちばん近い空港（まだなら最後にチェックインした空港）と判定範囲、調べた現在地。動かさない地図（国土地理院の淡色地図）
 let HOME_MAP = null, HOME_LAYER = null, HOME_NEAR = null, HOME_POS = null;
@@ -6913,7 +6951,8 @@ function demoSeed(){
     ["HND","ITM","NH"],["ITM","HND","NH"],["HND","KMQ","JL"],["KMQ","HND","JL"],["HND","HKD","NH"],["HKD","HND","NH"],["HND","KOJ","JL"],["KOJ","HND","JL"],
     ["HND","AKJ","NH"],["AKJ","HND","NH"],["HND","KCZ","JL"],["KCZ","HND","JL"],["HND","NGS","NH"],["NGS","FUK","CAR"],["FUK","HND","NH"],["HND","SDJ","JL"],["SDJ","HND","JL"],
     ["HND","MMY","JL"],["MMY","HND","JL"],["HND","HIJ","NH"],["HIJ","HND","NH"],["HND","OIT","NH"],["OIT","HND","NH"]];
-  let t = Date.now() - 330 * 864e5;
+  // 見本の便は「日本時間の今日の0時」から数えた決まった時刻（330日前の朝8時から）。開くたびに時刻が変わらない（共有の写真を本番で撮るため。11/13 見回り #11）
+  let t = Math.floor((Date.now() + 9 * 36e5) / 864e5) * 864e5 - 9 * 36e5 - 330 * 864e5 + 8 * 36e5;
   for(let i = 0; i < legs.length; i++){ const [f, to, al] = legs[i], A1 = IATA[f], A2 = IATA[to]; if(!A1 || !A2) continue;
     const car = al === "CAR", d = km(A1, A2), dur = car ? 150 * 6e4 : Math.round((d / 700 + 0.5) * 36e5);   // 長崎→福岡は車などの移動（便に入れない見本。便は30のまま・空港も16のまま）
     if(i % 2 === 0 || S.checkins.length === 0 || S.checkins[S.checkins.length - 1].a !== A1.id) S.checkins.push({a:A1.id, t, acc:12, term:null});
@@ -10643,7 +10682,7 @@ function pushButtonHTML(iata){
   return `<button class="linkbtn2 fwpush" data-fw-push="${esc(iata)}" aria-pressed="${on}">${on ? `${esc(name)}の通知をやめる` : `${esc(name)}の遅れ・ダイバートを通知する`}</button>`;
 }
 async function loadPushKey(){
-  if(PUSH_KEY !== undefined) return;
+  if(PUSH_KEY !== undefined || demo) return;   // デモでは通知の鍵を取りに行かない（push-subscribe を呼ばない。11/13 見回り）
   try{ const r = await fetch(SORAMEMO_CONFIG.supabaseUrl.replace(/\/$/, "") + "/functions/v1/push-subscribe", { headers:{ apikey:SORAMEMO_CONFIG.supabaseAnonKey } });
     PUSH_KEY = r.ok ? ((await r.json()).key || null) : null; }catch(e){ PUSH_KEY = null; }
 }
@@ -13450,7 +13489,10 @@ function authOpen(flow, step){
   if(!$("dAuth").open) $("dAuth").showModal();
   authRender(); track("auth_open", flow + ":" + AU.step);
 }
-function authClose(){ if($("dAuth").open) $("dAuth").close(); $("auCap").innerHTML = ""; AU_CAP.widget = null; AU_CAP.token = null; }
+// 閉じるときは Turnstile の箱を turnstile.remove() で片付けてから消す（開き直したときの「already been rendered」「Cannot find Widget」の警告を出さない。11/13 見回り）
+function authCapOff(){ try{ if(window.turnstile && typeof window.turnstile.remove === "function" && AU_CAP.widget !== null) window.turnstile.remove(AU_CAP.widget); }catch(e){} $("auCap").innerHTML = ""; AU_CAP.widget = null; AU_CAP.token = null; }
+function authClose(){ if($("dAuth").open) $("dAuth").close(); authCapOff(); }
+$("dAuth").addEventListener("close", authCapOff);   // Esc などで閉じたときも片付ける
 // 登録の途中や同意の画面は、Esc で閉じない（閉じても次に開いたときにまた出る）
 $("dAuth").addEventListener("cancel", e => { if(AU.flow === "gate" || (AU.flow === "signup" && !["email", "code"].includes(AU.step))) e.preventDefault(); });
 const AU_ICON = {
@@ -13473,19 +13515,19 @@ function authRender(){
   $("auCap").hidden = !capOn; if(capOn) initAuthCaptcha();
   if(s === "login"){
     top = `<div class="top" style="justify-content:flex-end"><button class="skip" type="button" data-au="close">あとで</button></div>
-      <div class="hero" style="margin-top:32px;text-align:center">
+      <div class="hero au-lhero" style="text-align:center">
         <div class="logo"><svg viewBox="0 0 64 64" width="64" height="64" aria-hidden="true"><rect width="64" height="64" rx="18" fill="var(--a-card)"/><circle cx="32" cy="32" r="20" fill="none" stroke="var(--c-apt)" stroke-width="2.5" stroke-dasharray="3 4"/><path d="M20 38 L44 24" stroke="var(--a-strong)" stroke-width="3" stroke-linecap="round"/><path d="M38 22 l7 1.5 -2.5 6.5" fill="none" stroke="var(--a-strong)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><circle cx="20" cy="38" r="3.5" fill="var(--a-jal)"/></svg></div>
         <h1 style="margin-top:22px;font-size:32px">そらメモ</h1>
         <p class="lead" style="margin-top:8px">空港にチェックインして、印を集める。</p>
       </div>
-      <div class="field" style="margin-top:56px">
+      <div class="field au-lfield">
         <label class="label" for="auEmail">ログイン</label>
         <input class="input" id="auEmail" type="email" placeholder="メールアドレス" autocomplete="email" inputmode="email" value="${esc(AU.email)}">
         <p class="note">メールに届く数字のコードでログインします。パスワードはありません。</p>${auMsg()}
       </div><div class="spacer"></div>`;
     foot = `<button class="cta" type="button" data-au="login-send"${AU.busy ? " disabled" : ""}>ログイン用のコードを送る</button>
       <div style="margin-top:14px;text-align:center"><button class="pill2" type="button" data-au="to-signup">はじめての方は<b>新規登録</b></button></div>
-      <p class="note" style="text-align:center;margin-top:18px">登録しなくても<button class="linkish" type="button" data-au="demo">デモで試す</button>ことができます</p>`;
+      <div class="au-demo"><button type="button" data-au="demo">登録しないで<b>デモで試す</b></button></div>`;
   } else if(s === "nouser"){
     top = `${auTop("to-login")}<div class="hero"><p class="eyebrow">ログイン</p><h1>このメールアドレスは<br>まだ登録されていません</h1>
       <p class="lead"><b>${esc(AU.email)}</b><br>はじめての方は、新規登録から始めてください。</p></div><div class="spacer"></div>`;
