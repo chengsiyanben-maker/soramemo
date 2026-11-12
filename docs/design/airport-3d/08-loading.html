@@ -1,0 +1,91 @@
+<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>08 開いたときだけ読み込む</title><style>
+:root{--bg:#F4F4F4;--paper:#FFFFFF;--ink:#24292F;--sub:#6B7280;--faint:#9CA3AF;--wash:#EEF1F5;--hero:#0F1B2D;--shadow:0 12px 28px -18px rgba(15,23,42,.45);--glass:rgba(255,255,255,.88);--sel:#0F1B2D;--on-sel:#FFFFFF;--sp:#856620;--sp-bg:#F4ECD8;--now:#0F1B2D;--go:#3D7A4E}
+:root[data-night]{--bg:#0B0D10;--paper:#121418;--ink:#E8ECF1;--sub:#A7B0BC;--faint:#7C8592;--wash:#1C2027;--hero:#0B0D10;--shadow:0 12px 28px -18px rgba(0,0,0,.9);--glass:rgba(18,20,24,.86);--sel:transparent;--on-sel:#FFFFFF;--sp:#E8ECF1;--sp-bg:#262B33;--now:#FFB547;--go:#7EE2A8}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-family:"Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic UI","Yu Gothic","Noto Sans JP","Noto Sans CJK JP",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit;border:0;background:none;padding:0}
+.num{font-feature-settings:"tnum";font-weight:800;letter-spacing:-.01em}
+.u{font-size:12px;color:var(--sub);font-weight:600;margin-left:2px}
+/* 3D の全画面 */
+.stage{position:fixed;inset:0;overflow:hidden}
+.stage canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.top{position:absolute;left:0;right:0;top:0;padding:12px 16px 0;display:flex;align-items:center;gap:10px}
+.rb{width:44px;height:44px;border-radius:999px;background:var(--glass);box-shadow:var(--shadow);display:flex;align-items:center;justify-content:center;flex:none;backdrop-filter:blur(8px)}
+.rb svg{width:20px;height:20px;stroke:var(--ink);fill:none;stroke-width:2.2;stroke-linecap:round}
+.ttl{flex:1;min-width:0;background:var(--glass);border-radius:999px;box-shadow:var(--shadow);height:44px;display:flex;flex-direction:column;justify-content:center;padding:0 16px;backdrop-filter:blur(8px)}
+.ttl b{font-size:15px;line-height:1.2}.ttl small{font-size:13px;color:var(--sub);line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.seg{position:absolute;left:16px;right:16px;top:66px;display:flex;background:var(--glass);border-radius:999px;box-shadow:var(--shadow);padding:4px;backdrop-filter:blur(8px)}
+.seg button{flex:1;height:44px;border-radius:999px;font-size:14px;font-weight:700;color:var(--sub);display:flex;align-items:center;justify-content:center;gap:6px;white-space:nowrap}
+.seg button.on{background:var(--sel);color:var(--on-sel)}
+:root[data-night] .seg button.on{box-shadow:inset 0 0 0 1.5px #FFFFFF}
+.seg button[disabled]{color:var(--faint)}
+.chip{position:absolute;left:16px;display:inline-flex;align-items:center;gap:8px;height:32px;padding:0 12px;border-radius:999px;background:var(--glass);box-shadow:var(--shadow);font-size:13px;color:var(--sub);backdrop-filter:blur(8px)}
+.chip i{width:8px;height:8px;border-radius:9px;background:var(--go);display:inline-block}
+.tag{position:absolute;transform:translate(-50%,-100%);background:var(--paper);color:var(--ink);font-size:13px;font-weight:700;padding:3px 9px;border-radius:999px;box-shadow:var(--shadow);white-space:nowrap}
+.tag:after{content:"";position:absolute;left:50%;bottom:-5px;margin-left:-5px;border:5px solid transparent;border-top-color:var(--paper);border-bottom:0}
+.tag.sel{background:var(--hero);color:#fff}.tag.sel:after{border-top-color:var(--hero)}
+:root[data-night] .tag.sel{background:#121418;box-shadow:inset 0 0 0 1.5px #fff}
+:root[data-night] .tag.sel:after{border-top-color:#fff}
+.tag small{font-weight:600;color:var(--sub);margin-left:4px;font-size:13px}.tag.sel small{color:rgba(255,255,255,.75)}
+/* 下のシート */
+.sheet{position:absolute;left:0;right:0;bottom:0;background:var(--paper);border-radius:24px 24px 0 0;box-shadow:0 -10px 30px -18px rgba(15,23,42,.5);padding:8px 16px 16px}
+.grab{width:40px;height:5px;border-radius:9px;background:var(--wash);margin:0 auto 10px}
+.sh{display:flex;align-items:baseline;justify-content:space-between;margin:2px 4px 6px}
+.sh h2{font-size:17px;margin:0}.sh .num{font-size:24px}
+.sh small{font-size:13px;color:var(--sub)}
+.row{display:flex;align-items:center;gap:12px;min-height:56px;padding:6px 4px;border-radius:16px}
+.row + .row{margin-top:2px}
+.row .fl{width:84px;flex:none}.row .fl b{display:block;font-size:17px;font-weight:800;line-height:1.2}.row .fl small{display:block;font-size:13px;color:var(--sub)}
+.row .st{flex:1;font-size:14px;color:var(--ink)}.row .st small{display:block;font-size:13px;color:var(--sub)}
+.row .st.now{color:var(--now);font-weight:700}
+.row .go{color:var(--faint);font-size:20px}
+.sp{display:inline-flex;align-items:center;height:22px;padding:0 8px;border-radius:999px;background:var(--sp-bg);color:var(--sp);font-size:13px;font-weight:700;margin-left:6px;vertical-align:2px}
+.note{font-size:13px;color:var(--sub);line-height:1.6;margin:8px 4px 0}
+/* 機体のカード */
+.card .hd{display:flex;align-items:flex-start;gap:10px;margin:0 4px}
+.card .hd .big{font-size:30px;line-height:1.1}
+.card .hd .rt{font-size:14px;color:var(--sub);margin-top:4px}
+.card .hd .x{margin-left:auto}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px 0 0}
+.cell{background:var(--wash);border-radius:16px;padding:10px 12px}
+.cell small{display:block;font-size:13px;color:var(--sub)}.cell b{font-size:19px}
+.btns{display:flex;gap:8px;margin-top:12px}
+.pill{height:48px;border-radius:999px;padding:0 18px;font-size:15px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;gap:6px;white-space:nowrap}
+.pill.main{background:var(--hero);color:#fff;flex:1}
+:root[data-night] .pill.main{background:transparent;color:#fff;box-shadow:inset 0 0 0 1.5px #fff}
+.pill.sub{background:var(--wash);color:var(--ink)}
+.banner{position:absolute;left:16px;right:16px;top:126px;background:var(--paper);border-radius:20px;box-shadow:var(--shadow);padding:12px 14px;display:flex;gap:10px;align-items:center}
+.banner p{margin:0;font-size:13px;line-height:1.55;color:var(--ink);flex:1}.banner p b{display:block;font-size:14px}
+.banner .pill{height:44px;padding:0 14px;font-size:14px}
+/* 空港ページ（入口） */
+.dlg{position:fixed;left:12px;right:12px;top:62px;bottom:0;background:var(--paper);border-radius:28px 28px 0 0;overflow:hidden;box-shadow:var(--shadow)}
+.dlg .in{padding:0 24px 24px}
+.under{position:fixed;inset:0;background:#AEB4BB}
+:root[data-night] .under{background:#05070A}
+.under .pp{position:absolute;top:14px;left:16px;display:flex;gap:6px}
+.under .pp span{height:40px;padding:0 14px;border-radius:999px;background:rgba(255,255,255,.55);display:inline-flex;align-items:center;font-size:14px;font-weight:700;color:#24292F}
+:root[data-night] .under .pp span{background:rgba(255,255,255,.08);color:#A7B0BC}
+.under .pp span.on{background:#0F1B2D;color:#fff}
+.rec h4{font-size:17px;margin:20px 0 8px}.rec li{list-style:none;font-size:15px;line-height:2}.rec ul{margin:0;padding:0}
+.rec .all{font-size:15px;font-weight:700;margin-top:6px;display:block}
+.now3d{background:var(--wash);border-radius:22px;padding:14px;margin-top:22px}
+.now3d .h{display:flex;align-items:baseline;justify-content:space-between;margin:0 2px 10px}.now3d .h b{font-size:18px}.now3d .h small{font-size:13px;color:var(--sub)}
+.thumb{position:relative;height:200px;border-radius:18px;overflow:hidden;background:#C9DDF0}
+.thumb canvas{position:absolute;inset:0;width:100%;height:100%}
+.thumb .lb{position:absolute;left:10px;top:10px;font-size:13px;background:var(--glass);border-radius:999px;padding:4px 10px;color:var(--ink);font-weight:700}
+.thumb .lb small{color:var(--sub);font-weight:600;font-size:13px}
+.thumb .go3{position:absolute;right:10px;bottom:10px;height:44px;padding:0 16px;border-radius:999px;background:var(--hero);color:#fff;font-size:15px;font-weight:800;display:inline-flex;align-items:center;gap:6px;box-shadow:var(--shadow)}
+:root[data-night] .thumb .go3{background:#121418;box-shadow:inset 0 0 0 1.5px #fff}
+.now3d .ft{font-size:13px;color:var(--sub);margin:10px 2px 0;line-height:1.55}
+.now3d .rest{display:flex;gap:8px;margin-top:12px}
+.now3d .rest div{flex:1;background:var(--paper);border-radius:16px;padding:10px 12px}.now3d .rest small{display:block;font-size:13px;color:var(--sub)}.now3d .rest b{font-size:22px}
+.later{font-size:13px;color:var(--faint);text-align:center;margin-top:14px}
+/* 読み込み */
+.load{position:absolute;left:24px;right:24px;top:40%;transform:translateY(-50%);background:var(--paper);border-radius:24px;box-shadow:var(--shadow);padding:22px 20px}
+.load h2{font-size:18px;margin:0 0 4px}.load p{font-size:13px;color:var(--sub);margin:0 0 14px;line-height:1.6}
+.bar{height:8px;border-radius:9px;background:var(--wash);overflow:hidden}.bar i{display:block;height:100%;width:62%;background:var(--hero);border-radius:9px}
+.load .n{display:flex;justify-content:space-between;align-items:baseline;margin-top:10px}.load .n .num{font-size:26px}
+.load .pill{margin-top:14px;width:100%}
+.ghost{position:absolute;inset:0;background:linear-gradient(#DCE7F2,#EEF1F5)}
+:root[data-night] .ghost{background:linear-gradient(#070B14,#18233A)}
+.sheet{height:36vh;overflow:hidden}.sheet.card{height:auto}</style></head><body><div class="stage"><div class="ghost"></div><div class="top"><button class="rb" aria-label="閉じる"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button><div class="ttl"><b>羽田　3D</b><small>読み込み中</small></div><button class="rb" aria-label="表示の設定"><svg viewBox="0 0 24 24" style="fill:var(--ink);stroke:none"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg></button></div><div class="load"><h2>3Dを読み込んでいます</h2><p>空港の形と、いまの機体の位置だけを読み込みます。開いたときだけで、閉じると片付けます。</p><div class="bar"><i></i></div><div class="n"><span><span class="num">0.9</span><span class="u">MB</span></span><small style="font-size:13px;color:var(--sub)">1.5MB のうち</small></div><button class="pill sub">やめる</button></div></div></body></html>
