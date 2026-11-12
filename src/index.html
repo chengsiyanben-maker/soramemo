@@ -24,7 +24,7 @@
   --shu:#111111; --shu-wash:#EDEDED; --gold:#A9822E; --dot:#BDBDBD;
   /* 文字に使う色（背景との明るさの差を4.5倍以上にする：WCAG AA） */
   --shu-text:#111111; --gold-text:#856620; --on-shu:#FFFFFF; --gold-badge:#856620; --on-gold:#FFFFFF;
-  --mil:#2B4A73; --glider:#1F7FB6; --field:#3D7A4E; --secret:#6B3FA0;
+  --mil:#2B4A73; --glider:#1F7FB6; --field:#3D7A4E; --secret:#6B3FA0; --heli:#7A5A24;
   --mincho:"Shippori Mincho","Hiragino Mincho ProN","Yu Mincho",serif;
   /* 本文は端末に入っている書体を使う（Webフォントは見出し・印の明朝体だけにして、通信量と描画を軽くする） */
   --hero:#0F1B2D;   /* 濃い面はこの紺1色（夜の滑走路）。真っ黒やグラデーションは使わない */
@@ -53,7 +53,7 @@
   --sky:#0A0E17; --paper:#131A27; --ink:#E8ECF1; --sumi:#A7B0BC; --line:#1F2A3F;
   --shu:#FFB547; --shu-wash:#1C2027; --gold:#E0B85C; --dot:#3A414C;
   --shu-text:#FFB547; --gold-text:#E0B85C; --on-shu:#0B0D10; --gold-badge:#E0B85C; --on-gold:#0B0D10;
-  --mil:#7FA6D9; --glider:#5CC1F0; --field:#7BC48E; --secret:#B99AE0; --go:#7EE2A8; --stop:#E5484D;
+  --mil:#7FA6D9; --glider:#5CC1F0; --field:#7BC48E; --secret:#B99AE0; --heli:#D9B77A; --go:#7EE2A8; --stop:#E5484D;
   color-scheme:dark;}
 [data-palette="board"] .brand{font-family:var(--dotfont);font-weight:400;color:var(--shu);letter-spacing:.12em}
 [data-palette="board"] h2,[data-palette="board"] .dlg h3,[data-palette="board"] .apnow .nowhead h3{font-family:var(--gothic);font-weight:800;letter-spacing:.08em}
@@ -830,6 +830,10 @@ nav.tabs button{user-select:none;-webkit-user-select:none;-webkit-touch-callout:
 .hsl{margin:14px 0 0;font-size:13px;font-weight:800;color:#4B5563}
 #dPersona .hsacts .lobtn{background:#fff;box-shadow:0 1px 2px rgba(17,24,39,.06),0 6px 18px -10px rgba(17,24,39,.3);min-height:52px;font-size:15.5px;font-weight:800}
 dialog.heed{--s-bg:#EEF1F5}
+/* 半券の中身の設定（枝の行）：半券の行の下に少し下げて置く */
+dialog.heed .hepc.hesub{margin-left:24px;position:relative}
+dialog.heed .hepc.hesub::before,.tprow.losub::before{content:"";position:absolute;left:-14px;top:-10px;width:10px;height:34px;border-left:2px solid #C9CFD8;border-bottom:2px solid #C9CFD8;border-bottom-left-radius:8px}
+.tprow.losub{margin-left:24px;position:relative}
 .heh{margin:6px 2px 0;font-size:26px;font-weight:800;color:#1F2937}.helead{margin:8px 2px 0;font-size:14px;line-height:1.65;color:#4B5563}
 .heprev{list-style:none;margin:14px 0 0;padding:10px;border-radius:24px;box-shadow:inset 0 0 0 1.5px #D9DEE6;display:flex;flex-direction:column;gap:8px}
 .hepc{position:relative;display:flex;align-items:center;min-height:52px;padding:8px 52px 8px 14px;border-radius:18px;background:#fff;box-shadow:0 1px 2px rgba(17,24,39,.05),0 6px 16px -10px rgba(17,24,39,.2)}
@@ -2338,7 +2342,7 @@ dialog.psheet .btn1,dialog.psheet .btn2{display:block;width:100%;margin-top:10px
 #v-book .zk-lead{font-size:13px;color:var(--bk-sub);margin:8px 2px 0;line-height:1.6}
 #v-book .zk-note{margin:10px 2px 0}
 /* 地方別：右にツメのぶん空ける */
-:root[data-bkview="region"][data-bookseg="main"] #zkBody .zk-main,:root[data-bkview="region"][data-bookseg="main"] #bookMain .vwrow,:root[data-bkview="region"][data-bookseg="main"] #zkNotice{margin-right:44px}
+:root[data-bookseg="air"] #bookAir .zk-main,:root[data-bookseg="air"] #bookAir .zk-back,:root[data-bookseg="air"] #bookAir .book-head,:root[data-bkview="region"][data-bookseg="main"] #zkBody .zk-main,:root[data-bkview="region"][data-bookseg="main"] #bookMain .vwrow,:root[data-bkview="region"][data-bookseg="main"] #zkNotice{margin-right:44px}
 /* 上の「索引」「ほかの図鑑・実績」もツメの左で止める（review-facts-1 の5）。狭い画面では余白を少し詰める */
 :root[data-bkview="region"][data-bookseg="main"] #v-book .zk-ttl{margin-right:44px}
 @media (max-width:380px){:root[data-bkview="region"][data-bookseg="main"] #v-book .zk-ttl{gap:6px}:root[data-bkview="region"][data-bookseg="main"] #v-book .zk-ttl .zk-pill{padding:0 11px}}
@@ -2393,9 +2397,50 @@ dialog.psheet .btn1,dialog.psheet .btn2{display:block;width:100%;margin-top:10px
 #v-book .zk-ap:focus-visible,#v-book .zk-pill:focus-visible,#v-book .zk-tsume button:focus-visible{outline:3px solid #2563EB;outline-offset:2px}
 #v-book .zk-sec{display:flex;align-items:baseline;gap:4px;margin:16px 2px 0;font:800 15px var(--gothic);color:var(--bk-ink)}
 #v-book .zk-sec b{font-family:var(--sign);font-size:18px;margin-left:6px}#v-book .zk-sec small{font-size:12px;color:var(--bk-sub);font-weight:600}
+/* 飛行場・滑空場の図鑑（11/12 design/zukan-airfields 3版）：入口のカード・黒いカード・枠の種類の札 */
+#v-book .zx-entry{position:relative;display:flex;flex-direction:column;gap:4px;width:100%;margin-top:10px;padding:14px 12px 14px 16px;border:0;border-radius:22px;background:var(--bk-card);box-shadow:var(--bk-shadow);color:var(--bk-ink);text-align:left;font-family:var(--gothic);cursor:pointer}
+#v-book .zx-entry:focus-visible{outline:3px solid #2563EB;outline-offset:2px}
+#v-book .zx-top{display:flex;flex-direction:column;align-items:flex-start;gap:4px;padding-right:84px}
+#v-book .zx-bot{display:flex;align-items:flex-end;gap:6px}
+#v-book .zx-l{flex:1;min-width:0;display:flex;flex-direction:column;align-items:flex-start;gap:4px}
+#v-book .zx-pill{display:inline-flex;align-items:center;height:28px;padding:0 10px;border-radius:999px;font-size:13px;font-weight:800;color:var(--bk-ink);box-shadow:inset 0 0 0 1.5px #8D96A3}
+#v-book .zx-pill.w{color:#F3F4F6;box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.55);margin-bottom:6px}
+#v-book .zx-t{font-size:18px;font-weight:800;line-height:1.35}
+#v-book .zx-n{display:flex;align-items:baseline;gap:4px;white-space:nowrap}
+#v-book .zx-n .num{font-size:28px}
+#v-book .zx-n .u{font-size:13px;color:var(--bk-sub)}
+#v-book .zx-sep{margin-left:10px;font-size:13px;font-weight:700;line-height:1.35;color:#2F6B41;align-self:center}
+#v-book .zx-kd{display:flex;flex-direction:column;gap:2px;margin-top:4px;font-size:13px;color:var(--bk-sub);font-weight:600}
+#v-book .zx-kd b{font-family:var(--sign);font-size:16px;color:var(--bk-ink)}#v-book .zx-kd small{font-size:12px}
+#v-book .zx-kd i{display:inline-block;width:10px;height:10px;border-radius:999px;margin-right:6px;vertical-align:0}
+#v-book .zx-kd i.my{width:6px;height:6px;margin:0 8px 1px 2px;background:#B8C0CB}
+#v-book .zx-r{flex:none;width:130px;margin-top:-28px}
+#v-book .zxmap{display:block;width:130px;height:170px}
+#v-book .zxmap .m86{fill:#D6DBE2}#v-book .zxmap .my{fill:#B8C0CB}#v-book .zxmap .mv{stroke:#fff;stroke-width:1.6}
+#v-book .zxmap .mn{font:800 9px var(--gothic);fill:#fff;text-anchor:middle}
+#v-book .zx-open{position:absolute;right:10px;top:10px;display:inline-flex;align-items:center;gap:2px;min-height:44px;padding:0 10px 0 14px;border-radius:999px;background:rgba(17,24,39,.06);font-size:14px;font-weight:800;color:var(--bk-ink)}
+#v-book .zx-open svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+@media (max-height:700px){#v-book .zx-r,#v-book .zx-kd{display:none}#v-book .zx-entry{padding:10px 12px 10px 16px}#v-book .zx-t{font-size:16px}#v-book .zx-pill:not(.w){display:none}}
+#v-book .zx-hero{padding-top:12px}
+#v-book .zx-kinds{display:flex;gap:14px;margin:6px 0 2px;font-size:13px;color:#C9D2DE;font-weight:700;white-space:nowrap}
+#v-book .zx-kinds b{font-family:var(--sign);font-size:15px;color:#fff;margin-left:2px}#v-book .zx-kinds small{font-size:12px;color:#C9D2DE}
+#v-book .zx-dtag{margin-left:8px;display:inline-flex;align-items:center;height:26px;padding:0 7px;border-radius:999px;font-size:13px;font-weight:800;white-space:nowrap;color:var(--bk-ink);box-shadow:inset 0 0 0 1.2px #9AA3AF}
+#v-book .zx-dtag+.zk-up{margin-left:auto}
+#bookAir .zk-door h3,#bookAir .zk-door .u{white-space:nowrap}#bookAir .zk-door{gap:4px;padding-right:12px}
+#v-book .zx-ap{gap:4px;height:auto;min-height:104px}
+#v-book .zx-ap .zx-nm{font-size:16px;font-weight:800;line-height:1.25;color:var(--bk-ink);word-break:keep-all;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+#v-book .zx-ap.long .zx-nm{font-size:13px;-webkit-line-clamp:3}
+#v-book .zx-ap.no .zx-nm{color:var(--zk-pale)}
+#v-book .zx-k{align-self:flex-start;display:inline-flex;align-items:center;height:24px;padding:0 7px;border-radius:999px;font-size:13px;font-weight:700;white-space:nowrap;letter-spacing:0}
+#v-book .zx-k.fd{background:#DCEBDF;color:#24502F}#v-book .zx-k.gl{background:#D7EAF6;color:#134F72}#v-book .zx-k.hp{background:#F1E7D8;color:#5E4114}
+[data-night="on"] #v-book .zx-k,[data-night="on"] #v-book .zx-dtag{background:transparent;color:var(--bk-ink);box-shadow:inset 0 0 0 1.2px rgba(220,227,234,.5)}
+[data-night="on"] #v-book .zx-kd i:not(.my){display:none}
+[data-night="on"] #v-book .zxmap .mv{fill:#DCE3EA!important;stroke:#141B24}[data-night="on"] #v-book .zxmap .mn{fill:#141B24}
+[data-night="on"] #v-book .zx-sep{color:var(--bk-ink)}
 /* 右端のツメ：昼は地方の色、夜は色なし */
 #v-book .zk-tsume{position:fixed;right:max(0px,calc(50vw - 300px));top:120px;display:flex;flex-direction:column;gap:2px;z-index:20}
-:root:not([data-bkview="region"]) #v-book .zk-tsume,:root:not([data-bookseg="main"]) #v-book .zk-tsume{display:none}
+:root:not([data-bkview="region"]) #v-book #zkTsume,:root:not([data-bookseg="main"]) #v-book #zkTsume,:root:not([data-bookseg="air"]) #v-book #zkxTsume{display:none}
+#v-book .zk-tsume button:disabled{opacity:.45;cursor:default}
 #v-book .zk-tsume button{width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:0;border-radius:14px 0 0 14px;padding:0;background:color-mix(in srgb,var(--c) 16%,var(--bk-card));color:var(--bk-ink);font:700 13px var(--gothic);writing-mode:vertical-rl;letter-spacing:0;line-height:1;box-shadow:inset 4px 0 0 var(--c);cursor:pointer}
 #v-book .zk-tsume button.on{width:52px;margin-left:-8px;background:var(--bk-card);box-shadow:inset 6px 0 0 var(--c),-6px 6px 18px -8px rgba(17,24,39,.35);font-weight:800}
 [data-night="on"] #v-book .zk-tsume button{background:var(--bk-card);box-shadow:inset 0 0 0 1px rgba(220,227,234,.35)}
@@ -3010,6 +3055,50 @@ dialog.fbx .row2>button{flex:1;min-height:52px;border-radius:999px}
 #v-home .bp-main .nearest .dist .dot.ok{background:var(--h3-ok)}
 #v-home .bp-stub{border-radius:0 24px 24px 0;gap:10px;padding:12px 6px;border-left:2px dashed rgba(15,27,45,.35);box-shadow:none;transform-origin:0 50%}
 #v-home .bp-stub .v{font-size:16px;letter-spacing:.06em;line-height:1}
+/* 近くの空港（11/12 画面案 design/near-airfields 5版）：先頭の種類の札・「ほか○つ ›」のピル・引き上げた位置の一覧・すべて */
+#v-home .nrow{display:flex;align-items:center;gap:8px;min-height:44px;margin:4px 0 6px}
+#v-home .nrow[hidden]{display:none}
+#v-home .bp-main .nrow .flap:not(:empty){margin:0}
+#v-home .nrow .flap:empty{display:none}
+#v-home .ktag{display:inline-flex;align-items:center;height:30px;padding:0 12px;border-radius:999px;font-size:14px;font-weight:800;letter-spacing:.04em;white-space:nowrap}
+#v-home .ktag[hidden]{display:none}
+#v-home .ktag.cv{background:#E8EDF4;color:#24426E}
+#v-home .ktag.fd{background:#DCEBDF;color:#24502F}
+#v-home .ktag.gl{background:#D7EAF6;color:#134F72}
+#v-home .ktag.hp{background:#F1E7D8;color:#5E4114}
+#v-home .ktag.ml{background:rgba(255,255,255,.14);color:#F3F4F6}
+#v-home .nmore{margin-left:auto;flex:none;display:inline-flex;align-items:center;gap:2px;min-height:44px;padding:0 10px 0 14px;border:0;border-radius:999px;background:rgba(255,255,255,.12);color:#F3F4F6;font:800 14px var(--gothic);white-space:nowrap;cursor:pointer}
+#v-home .nmore[hidden]{display:none}
+#v-home .nmore svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+#v-home .nmore:focus-visible{outline:3px solid #93C5FD;outline-offset:2px}
+#v-home .bp-main .nearest .dist .nbook{display:block;margin-top:2px}
+#v-home .nlist{margin-top:8px;border-radius:22px;background:#fff;box-shadow:var(--h3-shadow);padding:4px 0 6px}
+#homeSheet:not([data-snap="full"]) .nlist{display:none}
+#v-home .nlh{display:flex;align-items:center;gap:8px;min-height:52px;padding:0 6px 0 16px}
+#v-home .nlh b{font-size:15px;font-weight:800;color:var(--h3-strong,#1F2937)}
+#v-home .nlh small{font-size:13px;font-weight:600;color:var(--h3-sub,#5F6878)}
+#v-home .nlh .allp,#dNear .nclose{margin-left:auto;display:inline-flex;align-items:center;gap:2px;min-height:44px;padding:0 10px 0 14px;border:0;border-radius:999px;background:rgba(17,24,39,.06);font:800 14px var(--gothic);color:#1F2937;white-space:nowrap;cursor:pointer}
+#v-home .nlh .allp svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.nrow2{display:flex;align-items:center;gap:10px;width:100%;min-height:56px;padding:4px 6px 4px 14px;border:0;background:none;text-align:left;font-family:var(--gothic);color:#1F2937;cursor:pointer}
+.nrow2 .t{flex:none;display:inline-flex;align-items:center;justify-content:center;min-width:56px;height:28px;padding:0 9px;border-radius:999px;font-size:13px;font-weight:700}
+.nrow2 .t.cv{background:#E8EDF4;color:#24426E}.nrow2 .t.fd{background:#DCEBDF;color:#24502F}.nrow2 .t.gl{background:#D7EAF6;color:#134F72}.nrow2 .t.hp{background:#F1E7D8;color:#5E4114}
+.nrow2 .tx{flex:1;min-width:0;display:flex;flex-direction:column;line-height:1.3}
+.nrow2 .tx small{font-size:13px;font-weight:600;color:#5F6878}
+.nrow2 .tx b{font-size:15px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nrow2 .tx b i{font-style:normal;font-size:13px;font-weight:600;color:#5F6878;margin-left:6px}
+.nrow2 .k{flex:none;font-size:18px;font-weight:800;font-variant-numeric:tabular-nums}
+.nrow2 .k small{font-size:12px;font-weight:600;color:#6B7280;margin-left:2px}
+.nrow2 .c{flex:none;width:20px;height:20px;fill:none;stroke:#6B7280;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.nrow2:focus-visible{outline:3px solid #2563EB;outline-offset:-3px;border-radius:14px}
+@media (max-height:700px){#v-home .nlist{padding:2px 0}#v-home .nlh{min-height:48px}#v-home .nlist .nrow2{min-height:48px;padding-top:2px;padding-bottom:2px}}   /* 667：引き上げた位置で一覧の下とタブ帯のあいだを 12px 以上（review-5 の2） */
+dialog.neardlg .dlg{padding:14px 12px 28px}
+#dNear .nah{display:flex;align-items:center;gap:10px;padding:0 6px 8px}
+#dNear h3{margin:0;flex:1;font-size:20px;color:#1F2937}
+#dNear h3 small{display:block;font-size:13px;font-weight:600;color:#5F6878}
+#dNear .nclose{background:#0F1B2D;color:#fff;padding:0 18px}
+#dNear .nach{margin:12px 16px 0;font-size:13px;font-weight:700;color:#5F6878}
+/* 夜（data-night="on"）：札は色なし、光るのは数字だけ */
+:root[data-night="on"] #v-home .ktag:not(.ml),:root[data-night="on"] .nrow2 .t{background:transparent;color:#DCE3EA;box-shadow:inset 0 0 0 1.5px rgba(220,227,234,.5)}
 #v-home .bp-stub .s{font-size:13px;font-weight:700;line-height:1.35;text-align:center;color:var(--stub-sub)}
 #v-home .bp-stub .s i{font-style:normal;font-size:16px;font-weight:800}
 #v-home .bp-stub.off{background:var(--h3-off-bg);color:var(--h3-off-ink);border-left-color:#9CA3AF;cursor:pointer}
@@ -3173,13 +3262,14 @@ dialog.ckconfirm button.go{background:#E9C46A;color:#111827}
       <div class="bp-main">
         <div class="nearest">
           <div class="label" id="nearLabel">いちばん近い空港</div>
-          <div class="flap" id="nearCode" aria-hidden="true"></div>
+          <div class="nrow" id="nearRow" hidden><div class="flap" id="nearCode" aria-hidden="true"></div><span class="ktag" id="nearTag" hidden></span><button class="nmore" type="button" id="nearMore" hidden aria-expanded="false"></button></div>
           <div class="name idle" id="nearName">空港に着いたら、印を押そう</div>
           <div class="dist" id="nearDist">半券を切ると、現在地からいちばん近い空港を調べます。</div>
         </div>
       </div>
       <button class="bp-stub" id="checkin" aria-label="チェックイン（半券を右へ引いて切ります。押すと確かめてから切ります）"><span class="v">チェックイン</span><span class="s" id="stubSub"><i aria-hidden="true">→</i> 右へ引いて<br>印をもらう</span></button>
     </div>
+    <div class="nlist" id="nearList" hidden aria-label="近くの空港・飛行場の一覧"></div>
     <div class="hstrip" id="homeStrip" aria-label="今日の数字">
       <div><span class="lab">今日の印</span><b id="hsToday">0</b></div>
       <div><span class="lab">空港</span><b id="hsAp">0</b><small>/<span id="hsApT">86</span></small></div>
@@ -3546,6 +3636,7 @@ dialog.ckconfirm button.go{background:#E9C46A;color:#111827}
   <div class="opsaps" id="opsAps"></div></div></dialog>
 <dialog id="dLayout" class="spfull" aria-label="表示を編集"><div class="dlg" id="dLayoutBody"></div></dialog>
 <dialog id="dTabs" class="psheet tpsheet" aria-labelledby="tpTitle"><div class="dlg" id="dTabsBody"></div></dialog>
+<dialog id="dNear" class="spsheet neardlg" aria-labelledby="nearAllT"><div class="dlg" id="dNearBody"></div></dialog>
 <dialog id="dViews" class="psheet tpsheet vssheet" aria-labelledby="vsTitle"><div class="dlg" id="dViewsBody"></div></dialog>
 <dialog id="dHomeEd" class="spfull heed" aria-labelledby="heTitle"><div class="dlg" id="dHomeEdBody"></div></dialog>
 <dialog id="dReset" class="psheet rssheet" aria-labelledby="rsTitle"><div class="dlg" id="dResetBody"></div></dialog>
@@ -3626,12 +3717,12 @@ const RAW = [[1,"成田国際空港","NRT","千葉県",35.76858,140.388714,2000,
 // 空港は、どの一覧でも北から順（緯度の高い順）に並べる
 const NORTH_FIRST = (x, y) => y.lat - x.lat || x.id - y.id;
 const A = RAW.map(r => ({id:r[0], name:r[1], iata:r[2], pref:r[3], lat:r[4], lon:r[5], radius:r[6], rare:!!r[7]})).sort(NORTH_FIRST);
-// 番外編：自衛隊の飛行場（mil。米軍が管理する横田・嘉手納・普天間は、一般の人が入れないので secret）、滑空場（glider）、飛行場（field：定期便のない公共用の空港と民間の飛行場）。位置は OurAirports。民間の86空港とは別の図鑑で、全国制覇などには数えない
-const EXTRA_RAW = [[1001,"千歳基地","RJCJ","北海道",42.794498,141.666,2000,"mil"],[1002,"八雲分屯基地","RJCY","北海道",42.245955,140.265729,1500,"mil"],[1003,"旭川駐屯地","RJCA","北海道",43.794734,142.365432,1500,"mil"],[1004,"計根別飛行場","RJCS","北海道",43.425154,144.741354,1500,"mil"],[1005,"大湊航空基地","RJSO","青森県",41.232808,141.132171,1500,"mil"],[1006,"松島基地","RJST","宮城県",38.4049,141.220001,2000,"mil"],[1007,"霞目駐屯地","RJSU","宮城県",38.2356,140.923004,1500,"mil"],[1008,"宇都宮駐屯地","RJTU","栃木県",36.5145,139.87101,1500,"mil"],[1009,"霞ヶ浦駐屯地","RJAK","茨城県",36.034698,140.192993,1500,"mil"],[1010,"入間基地","RJTJ","埼玉県",35.8419,139.410995,2000,"mil"],[1011,"下総航空基地","RJTL","千葉県",35.798901,140.011002,2000,"mil"],[1012,"木更津駐屯地","RJTK","千葉県",35.3983,139.910004,1500,"mil"],[1013,"館山航空基地","RJTE","千葉県",34.987099,139.828995,1500,"mil"],[1014,"立川駐屯地","RJTC","東京都",35.7121,139.403243,1500,"mil"],[1015,"横田基地","RJTY","東京都",35.748501,139.348007,2000,"secret"],[1016,"厚木基地","RJTA","神奈川県",35.454601,139.449997,2000,"mil"],[1017,"静浜基地","RJNY","静岡県",34.812801,138.298004,1500,"mil"],[1018,"浜松基地","RJNH","静岡県",34.750198,137.703003,2000,"mil"],[1019,"岐阜基地","RJNG","岐阜県",35.3941,136.869995,2000,"mil"],[1020,"明野駐屯地","RJOE","三重県",34.533298,136.671997,1500,"mil"],[1021,"防府北基地","RJOF","山口県",34.034746,131.548716,1500,"mil"],[1022,"小月航空基地","RJOZ","山口県",34.0453,131.052002,1500,"mil"],[1023,"芦屋基地","RJFA","福岡県",33.883099,130.653,2000,"mil"],[1024,"築城基地","RJFZ","福岡県",33.685001,131.039993,2000,"mil"],[1025,"目達原駐屯地","RJDM","佐賀県",33.325445,130.413787,1500,"mil"],[1026,"大村航空基地","RJDU","長崎県",32.928046,129.934168,1500,"mil"],[1027,"新田原基地","RJFN","宮崎県",32.083599,131.451004,2000,"mil"],[1028,"鹿屋航空基地","RJFY","鹿児島県",31.36672,130.838805,2000,"mil"],[1029,"嘉手納基地","RODN","沖縄県",26.351667,127.769444,2000,"secret"],[1030,"普天間飛行場","ROTM","沖縄県",26.2743,127.755997,2000,"secret"],[2001,"深川滑空場","滑空場","北海道",43.69892,142.03745,800,"glider"],[2002,"夕張川滑空場","滑空場","北海道",43.10809,141.62755,800,"glider"],[2003,"新篠津滑空場","滑空場","北海道",43.2743,141.652436,800,"glider"],[2004,"白老滑空場","滑空場","北海道",42.536824,141.254919,800,"glider"],[2005,"当麻滑空場","滑空場","北海道",43.87484,142.51119,800,"glider"],[2006,"美瑛滑空場","滑空場","北海道",43.53125,142.56389,800,"glider"],[2007,"大郷滑空場","滑空場","宮城県",38.4368,140.99466,800,"glider"],[2008,"鬼怒川滑空場","滑空場","栃木県",36.68102,139.94322,800,"glider"],[2009,"小山滑空場","滑空場","栃木県",36.30085,139.90523,800,"glider"],[2010,"真壁滑空場","滑空場","茨城県",36.26608,140.07195,800,"glider"],[2011,"つくば滑空場","滑空場","茨城県",36.23878,140.06,800,"glider"],[2012,"関宿滑空場","滑空場","千葉県",36.015574,139.816561,800,"glider"],[2013,"宝珠花滑空場","滑空場","埼玉県",36.03903,139.81066,800,"glider"],[2014,"大利根滑空場","滑空場","埼玉県",36.16458,139.67117,800,"glider"],[2015,"加須滑空場","滑空場","埼玉県",36.1866,139.61748,800,"glider"],[2016,"羽生滑空場","滑空場","埼玉県",36.19942,139.6031,800,"glider"],[2017,"妻沼滑空場","滑空場","埼玉県",36.21338,139.41697,800,"glider"],[2018,"妻沼第2滑空場","滑空場","埼玉県",36.20044,139.43405,800,"glider"],[2019,"上里滑空場","滑空場","埼玉県",36.27324,139.1518,800,"glider"],[2020,"板倉滑空場","滑空場","群馬県",36.26616,139.63388,800,"glider"],[2021,"韮崎滑空場","滑空場","山梨県",35.69042,138.46484,800,"glider"],[2022,"長野滑空場","滑空場","長野県",36.63339,138.256073,800,"glider"],[2023,"霧ヶ峰滑空場","滑空場","長野県",36.09332,138.16283,800,"glider"],[2024,"浜北滑空場","滑空場","静岡県",34.83975,137.82417,800,"glider"],[2025,"岡崎滑空場","滑空場","愛知県",34.94533,137.14662,800,"glider"],[2026,"木曽川滑空場","滑空場","岐阜県",35.21016,136.67814,800,"glider"],[2027,"大野滑空場","滑空場","岐阜県",35.4492,136.60299,800,"glider"],[2028,"櫛田川滑空場","滑空場","三重県",34.59808,136.57514,800,"glider"],[2029,"一志滑空場","滑空場","三重県",34.66876,136.42173,800,"glider"],[2030,"吉井川滑空場","滑空場","岡山県",34.6744,134.07234,800,"glider"],[2031,"防府滑空場","滑空場","山口県",34.03937,131.54031,800,"glider"],[2032,"久住滑空場","滑空場","大分県",33.03444,131.23344,800,"glider"],[2033,"白川滑空場","滑空場","熊本県",32.776029,130.630532,800,"glider"],[30,"礼文空港","RJCR","北海道",45.455002,141.039001,1000,"field"],[48,"福井空港","RJNF","福井県",36.142799,136.223999,1500,"field"],[60,"小値賀空港","RJDO","長崎県",33.1908,129.089996,1000,"field"],[62,"上五島空港","RJDK","長崎県",33.013576,129.192363,1000,"field"],[73,"慶良間空港","ROKR","沖縄県",26.168337,127.293423,1000,"field"],[76,"伊江島空港","RORE","沖縄県",26.722537,127.786801,1000,"field"],[81,"波照間空港","RORH","沖縄県",24.059751,123.80558,1000,"field"],[86,"岡南空港","RJBK","岡山県",34.590801,133.932999,1500,"field"],[88,"大分県央空港","飛行場","大分県",33.026331,131.505577,1500,"field"],[89,"八尾空港","RJOY","大阪府",34.596298,135.602997,1500,"field"],[3001,"大樹町多目的航空公園","飛行場","北海道",42.499971,143.441759,800,"field"],[3002,"ホンダエアポート","飛行場","埼玉県",35.97633,139.524125,800,"field"],[3003,"大利根飛行場","飛行場","茨城県",35.85937,140.241219,800,"field"],[3004,"竜ヶ崎飛行場","飛行場","茨城県",35.906276,140.242152,800,"field"],[3005,"福島スカイパーク","飛行場","福島県",37.82322,140.38767,800,"field"],[3006,"笠岡ふれあい空港","飛行場","岡山県",34.476022,133.488961,800,"field"],[3007,"飛騨エアパーク","飛行場","岐阜県",36.17939,137.313573,800,"field"],[3008,"スカイポート美唄","飛行場","北海道",43.38992,141.85892,800,"field"],[3009,"スカイポート北見","飛行場","北海道",43.77998,143.73064,800,"field"],[3010,"アップルポート余市","飛行場","北海道",43.17089,140.80753,800,"field"],[3011,"新得農道空港","飛行場","北海道",43.07622,142.87658,800,"field"],[3012,"滝川スカイパーク","飛行場","北海道",43.549349,141.894103,800,"field"],[3013,"別海フライトパーク","飛行場","北海道",43.47484,144.78309,800,"field"],[3014,"美幌エアパーク","飛行場","北海道",43.81589,144.07879,800,"field"],[3015,"上士幌航空公園","飛行場","北海道",43.244787,143.277673,800,"field"],[3016,"厚真スカイパーク","飛行場","北海道",42.64362,141.87865,800,"field"],[3017,"鹿部飛行場","飛行場","北海道",42.045033,140.793293,800,"field"],[3018,"白鷹エアロパーク","飛行場","山形県",38.16359,140.0619,800,"field"],[3019,"諏訪之瀬島飛行場","飛行場","鹿児島県",29.60624,129.70221,800,"field"],[3020,"薩摩硫黄島飛行場","飛行場","鹿児島県",30.784722,130.270556,800,"field"],
+// 番外編：ヘリポート（heli。11/12 国交省「公共用ヘリポート一覧」の12か所・移行163）。自衛隊の飛行場（mil。米軍が管理する横田・嘉手納・普天間は、一般の人が入れないので secret）、滑空場（glider）、飛行場（field：定期便のない公共用の空港と民間の飛行場）。位置は OurAirports。民間の86空港とは別の図鑑で、全国制覇などには数えない
+const EXTRA_RAW = [[1001,"千歳基地","RJCJ","北海道",42.794498,141.666,2000,"mil"],[1002,"八雲分屯基地","RJCY","北海道",42.245955,140.265729,1500,"mil"],[1003,"旭川駐屯地","RJCA","北海道",43.794734,142.365432,1500,"mil"],[1004,"計根別飛行場","RJCS","北海道",43.425154,144.741354,1500,"mil"],[1005,"大湊航空基地","RJSO","青森県",41.232808,141.132171,1500,"mil"],[1006,"松島基地","RJST","宮城県",38.4049,141.220001,2000,"mil"],[1007,"霞目駐屯地","RJSU","宮城県",38.2356,140.923004,1500,"mil"],[1008,"宇都宮駐屯地","RJTU","栃木県",36.5145,139.87101,1500,"mil"],[1009,"霞ヶ浦駐屯地","RJAK","茨城県",36.034698,140.192993,1500,"mil"],[1010,"入間基地","RJTJ","埼玉県",35.8419,139.410995,2000,"mil"],[1011,"下総航空基地","RJTL","千葉県",35.798901,140.011002,2000,"mil"],[1012,"木更津駐屯地","RJTK","千葉県",35.3983,139.910004,1500,"mil"],[1013,"館山航空基地","RJTE","千葉県",34.987099,139.828995,1500,"mil"],[1014,"立川駐屯地","RJTC","東京都",35.7121,139.403243,1500,"mil"],[1015,"横田基地","RJTY","東京都",35.748501,139.348007,2000,"secret"],[1016,"厚木基地","RJTA","神奈川県",35.454601,139.449997,2000,"mil"],[1017,"静浜基地","RJNY","静岡県",34.812801,138.298004,1500,"mil"],[1018,"浜松基地","RJNH","静岡県",34.750198,137.703003,2000,"mil"],[1019,"岐阜基地","RJNG","岐阜県",35.3941,136.869995,2000,"mil"],[1020,"明野駐屯地","RJOE","三重県",34.533298,136.671997,1500,"mil"],[1021,"防府北基地","RJOF","山口県",34.034746,131.548716,1500,"mil"],[1022,"小月航空基地","RJOZ","山口県",34.0453,131.052002,1500,"mil"],[1023,"芦屋基地","RJFA","福岡県",33.883099,130.653,2000,"mil"],[1024,"築城基地","RJFZ","福岡県",33.685001,131.039993,2000,"mil"],[1025,"目達原駐屯地","RJDM","佐賀県",33.325445,130.413787,1500,"mil"],[1026,"大村航空基地","RJDU","長崎県",32.928046,129.934168,1500,"mil"],[1027,"新田原基地","RJFN","宮崎県",32.083599,131.451004,2000,"mil"],[1028,"鹿屋航空基地","RJFY","鹿児島県",31.36672,130.838805,2000,"mil"],[1029,"嘉手納基地","RODN","沖縄県",26.351667,127.769444,2000,"secret"],[1030,"普天間飛行場","ROTM","沖縄県",26.2743,127.755997,2000,"secret"],[2001,"深川滑空場","滑空場","北海道",43.69892,142.03745,800,"glider"],[2002,"夕張川滑空場","滑空場","北海道",43.10809,141.62755,800,"glider"],[2003,"新篠津滑空場","滑空場","北海道",43.2743,141.652436,800,"glider"],[2004,"白老滑空場","滑空場","北海道",42.536824,141.254919,800,"glider"],[2005,"当麻滑空場","滑空場","北海道",43.87484,142.51119,800,"glider"],[2006,"美瑛滑空場","滑空場","北海道",43.53125,142.56389,800,"glider"],[2007,"大郷滑空場","滑空場","宮城県",38.4368,140.99466,800,"glider"],[2008,"鬼怒川滑空場","滑空場","栃木県",36.68102,139.94322,800,"glider"],[2009,"小山滑空場","滑空場","栃木県",36.30085,139.90523,800,"glider"],[2010,"真壁滑空場","滑空場","茨城県",36.26608,140.07195,800,"glider"],[2011,"つくば滑空場","滑空場","茨城県",36.23878,140.06,800,"glider"],[2012,"関宿滑空場","滑空場","千葉県",36.015574,139.816561,800,"glider"],[2013,"宝珠花滑空場","滑空場","埼玉県",36.03903,139.81066,800,"glider"],[2014,"大利根滑空場","滑空場","埼玉県",36.16458,139.67117,800,"glider"],[2015,"加須滑空場","滑空場","埼玉県",36.1866,139.61748,800,"glider"],[2016,"羽生滑空場","滑空場","埼玉県",36.19942,139.6031,800,"glider"],[2017,"妻沼滑空場","滑空場","埼玉県",36.21338,139.41697,800,"glider"],[2018,"妻沼第2滑空場","滑空場","埼玉県",36.20044,139.43405,800,"glider"],[2019,"上里滑空場","滑空場","埼玉県",36.27324,139.1518,800,"glider"],[2020,"板倉滑空場","滑空場","群馬県",36.26616,139.63388,800,"glider"],[2021,"韮崎滑空場","滑空場","山梨県",35.69042,138.46484,800,"glider"],[2022,"長野滑空場","滑空場","長野県",36.63339,138.256073,800,"glider"],[2023,"霧ヶ峰滑空場","滑空場","長野県",36.09332,138.16283,800,"glider"],[2024,"浜北滑空場","滑空場","静岡県",34.83975,137.82417,800,"glider"],[2025,"岡崎滑空場","滑空場","愛知県",34.94533,137.14662,800,"glider"],[2026,"木曽川滑空場","滑空場","岐阜県",35.21016,136.67814,800,"glider"],[2027,"大野滑空場","滑空場","岐阜県",35.4492,136.60299,800,"glider"],[2028,"櫛田川滑空場","滑空場","三重県",34.59808,136.57514,800,"glider"],[2029,"一志滑空場","滑空場","三重県",34.66876,136.42173,800,"glider"],[2030,"吉井川滑空場","滑空場","岡山県",34.6744,134.07234,800,"glider"],[2031,"防府滑空場","滑空場","山口県",34.03937,131.54031,800,"glider"],[2032,"久住滑空場","滑空場","大分県",33.03444,131.23344,800,"glider"],[2033,"白川滑空場","滑空場","熊本県",32.776029,130.630532,800,"glider"],[30,"礼文空港","RJCR","北海道",45.455002,141.039001,1000,"field"],[48,"福井空港","RJNF","福井県",36.142799,136.223999,1500,"field"],[60,"小値賀空港","RJDO","長崎県",33.1908,129.089996,1000,"field"],[62,"上五島空港","RJDK","長崎県",33.013576,129.192363,1000,"field"],[73,"慶良間空港","ROKR","沖縄県",26.168337,127.293423,1000,"field"],[76,"伊江島空港","RORE","沖縄県",26.722537,127.786801,1000,"field"],[81,"波照間空港","RORH","沖縄県",24.059751,123.80558,1000,"field"],[86,"岡南空港","RJBK","岡山県",34.590801,133.932999,1500,"field"],[88,"大分県央空港","飛行場","大分県",33.026331,131.505577,1500,"field"],[89,"八尾空港","RJOY","大阪府",34.596298,135.602997,1500,"field"],[3001,"大樹町多目的航空公園","飛行場","北海道",42.499971,143.441759,800,"field"],[3002,"ホンダエアポート","飛行場","埼玉県",35.97633,139.524125,800,"field"],[3003,"大利根飛行場","飛行場","茨城県",35.85937,140.241219,800,"field"],[3004,"竜ヶ崎飛行場","飛行場","茨城県",35.906276,140.242152,800,"field"],[3005,"福島スカイパーク","飛行場","福島県",37.82322,140.38767,800,"field"],[3006,"笠岡ふれあい空港","飛行場","岡山県",34.476022,133.488961,800,"field"],[3007,"飛騨エアパーク","飛行場","岐阜県",36.17939,137.313573,800,"field"],[3008,"スカイポート美唄","飛行場","北海道",43.38992,141.85892,800,"field"],[3009,"スカイポート北見","飛行場","北海道",43.77998,143.73064,800,"field"],[3010,"アップルポート余市","飛行場","北海道",43.17089,140.80753,800,"field"],[3011,"新得農道空港","飛行場","北海道",43.07622,142.87658,800,"field"],[3012,"滝川スカイパーク","飛行場","北海道",43.549349,141.894103,800,"field"],[3013,"別海フライトパーク","飛行場","北海道",43.47484,144.78309,800,"field"],[3014,"美幌エアパーク","飛行場","北海道",43.81589,144.07879,800,"field"],[3015,"上士幌航空公園","飛行場","北海道",43.244787,143.277673,800,"field"],[3016,"厚真スカイパーク","飛行場","北海道",42.64362,141.87865,800,"field"],[3017,"鹿部飛行場","飛行場","北海道",42.045033,140.793293,800,"field"],[3018,"白鷹エアロパーク","飛行場","山形県",38.16359,140.0619,800,"field"],[3019,"諏訪之瀬島飛行場","飛行場","鹿児島県",29.60624,129.70221,800,"field"],[3020,"薩摩硫黄島飛行場","飛行場","鹿児島県",30.784722,130.270556,800,"field"],[5001,"豊富ヘリポート","ヘリポート","北海道",45.10043,141.75893,600,"heli"],[5002,"米沢ヘリポート","ヘリポート","山形県",37.91295,140.1661,600,"heli"],[5003,"栃木ヘリポート","ヘリポート","栃木県",36.55991,140.00607,600,"heli"],[5004,"群馬ヘリポート","ヘリポート","群馬県",36.317904,139.106752,600,"heli"],[5005,"高崎ヘリポート","ヘリポート","群馬県",36.32499,138.99352,600,"heli"],[5006,"東京ヘリポート","RJTI","東京都",35.635924,139.839475,600,"heli"],[5007,"静岡ヘリポート","ヘリポート","静岡県",35.02441,138.40877,600,"heli"],[5008,"若狭ヘリポート","ヘリポート","福井県",35.490338,135.78553,600,"heli"],[5009,"津市伊勢湾ヘリポート","ヘリポート","三重県",34.672773,136.55581,600,"heli"],[5010,"奈良県ヘリポート","ヘリポート","奈良県",34.65621,135.88461,600,"heli"],[5011,"広島ヘリポート","RJBH","広島県",34.371451,132.417666,800,"heli"],[5012,"枕崎ヘリポート","ヘリポート","鹿児島県",31.268255,130.357706,600,"heli"],
   // 一般の人が行けない飛行場（全クリには数えない。押せた人だけの秘密の枠）
   [4001,"硫黄島航空基地","RJAW","東京都",24.784,141.3228,2000,"secret"],[4002,"南鳥島航空基地","RJAM","東京都",24.2897,153.9794,1500,"secret"]];
 const XA = EXTRA_RAW.map(r => ({id:r[0], name:r[1], iata:r[2], pref:r[3], lat:r[4], lon:r[5], radius:r[6], rare:false, kind:r[7]})).sort(NORTH_FIRST);
-const XKIND = { mil:{ label:"自衛隊の飛行場", short:"基地" }, glider:{ label:"滑空場", short:"滑空場" }, field:{ label:"飛行場", short:"飛行場" }, secret:{ label:"一般の人が行けない飛行場", short:"秘境" } };
+const XKIND = { mil:{ label:"自衛隊の飛行場", short:"基地" }, glider:{ label:"滑空場", short:"滑空場" }, field:{ label:"飛行場", short:"飛行場" }, secret:{ label:"一般の人が行けない飛行場", short:"秘境" }, heli:{ label:"ヘリポート", short:"ヘリポート" } };
 const BY = Object.fromEntries([...A, ...XA].map(a => [a.id, a]));
 const IS_EXTRA = id => !!(BY[id] && BY[id].kind);
 /* 複数のターミナルがある大規模空港のターミナル（座標：OpenStreetMap。駅が直結しているものは駅、ほかはターミナルビル）
@@ -4161,13 +4252,24 @@ async function initServer(){
 function km(a, b){ const R=6371, r=Math.PI/180; const dl=(b.lat-a.lat)*r, dn=(b.lon-a.lon)*r;
   const h=Math.sin(dl/2)**2+Math.cos(a.lat*r)*Math.cos(b.lat*r)*Math.sin(dn/2)**2; return 2*R*Math.asin(Math.sqrt(h)); }
 // 民間空港の範囲内なら民間空港。そうでなければ範囲内の番外編の飛行場。どちらでもなければ、いちばん近い民間空港（範囲外の案内用）
+// 近くの空港（11/11 17時・23時42分・11/12 10時の決定）：民間空港と飛行場・滑空場・ヘリポートを分けずに近い順に並べる（基地 mil・secret は出さない）。
+//   判定（印）の決まりは nearestBase のまま。範囲の外のときだけ、先頭（半券に出すもの）を近い順のいちばん上にする。
+//   others＝先頭のほかに 20km 以内（近い順）。20km 以内に民間空港がなく、先頭も民間空港でないときは、いちばん近い民間空港を civ に1つ足す（数には入れない）
+//   「飛行場・滑空場・ヘリポートも出す」（はじめ ON。LAYOUT.nearx === 0 で OFF）を OFF にすると、並びは民間空港だけ（今までの見え方）
+const NEAR_KM = 20, NEAR_XK = ["field", "glider", "heli"];
+const nearX = () => { try{ return !(LAYOUT && LAYOUT.nearx === 0); }catch(e){ return true; } };
+let NEAR_P = null;   // いちばん新しく調べた位置（設定を変えたら並べ直す）
 function nearest(p){
-  const r = nearestBase(p);
-  // 判定の範囲の外でも、5km以内に飛行場・滑空場があれば、ホームにそれを案内する（基地は除く）
-  if(r.within) return r;
-  let nb = null, nd = Infinity; for(const a of XA){ if(a.kind === "mil" || a.kind === "secret") continue; const k = km(p, a); if(k < nd){ nd = k; nb = a; } }
-  return nb && nd <= 5 ? {...r, near:{a:nb, km:nd}} : r;
+  const r = nearestBase(p), x = nearX(); NEAR_P = p;
+  const pool = [...A, ...(x ? XA.filter(a => NEAR_XK.includes(a.kind)) : [])].map(a => ({ a, km:km(p, a) })).sort((u, v) => u.km - v.km);
+  let head = r;
+  if(!r.within && x && pool[0] && pool[0].a.kind && pool[0].km < r.km) head = { a:pool[0].a, km:pool[0].km, term:null, within:false };
+  const others = pool.filter(o => o.a !== head.a && o.km <= NEAR_KM);
+  const civ = !head.a.kind || others.some(o => !o.a.kind) ? null : (c => ({ a:c.a, km:c.km }))(nearestCivil(p));
+  return { ...head, others, civ };
 }
+// 種類の札：民間空港・飛行場・滑空場・ヘリポート（基地・秘境は判定範囲の中のときだけ出る）
+const nearKind = a => !a.kind ? ["民間空港", "cv"] : [XKIND[a.kind].short, { field:"fd", glider:"gl", heli:"hp", mil:"ml", secret:"ml" }[a.kind]];
 function nearestBase(p){
   const c = nearestCivil(p); if(c.within) return c;
   let eb = null, ed = Infinity; for(const a of XA){ const k = km(p, a); if(k < ed){ ed = k; eb = a; } }
@@ -4241,7 +4343,7 @@ function routes(){ const s=new Set(); for(const f of flyOnly(focusFlights())){ s
 
 /* ---------- stamp svg ---------- */
 function stampSVG(a, t, opt={}){
-  const seed = (a.id*37)%17 - 8, col = a.kind === "mil" ? "var(--mil)" : a.kind === "secret" ? "var(--secret)" : a.kind === "glider" ? "var(--glider)" : a.kind === "field" ? "var(--field)" : a.rare ? "var(--gold)" : "var(--shu)", c = code(a);
+  const seed = (a.id*37)%17 - 8, col = a.kind === "mil" ? "var(--mil)" : a.kind === "secret" ? "var(--secret)" : a.kind === "glider" ? "var(--glider)" : a.kind === "field" ? "var(--field)" : a.kind === "heli" ? "var(--heli)" : a.rare ? "var(--gold)" : "var(--shu)", c = code(a);
   const fs = /[^\x00-\x7f]/.test(c) ? 22 : c.length > 3 ? 25 : c.length > 2 ? 30 : 34; let id = "s"+a.id+(opt.big?"b":"");
   const arcName = opt.term ? `${opt.term.short} ${opt.term.name}` : a.name.replace("空港",""), afs = arcName.length > 6 ? 9 : 10.5;
   if(opt.term) id += opt.term.tag;
@@ -4379,16 +4481,66 @@ function demoNow(a){
 }
 function showNearest(n){
   HOME_NEAR = n; setTimeout(renderHomeMap, 0);
-  $("nearLabel").textContent = "いちばん近い空港";
+  $("nearLabel").textContent = "いちばん近い";
   $("nearName").textContent = n.a.name; $("nearName").classList.remove("idle");
-  const cd = code(n.a); $("nearCode").innerHTML = /^[A-Z0-9]{3,4}$/.test(cd) ? [...cd].map(ch => `<i>${ch}</i>`).join("") : "";
+  // パタパタは並びの先頭に合わせる：先頭が民間空港でコードがあるときだけ。ほか（コードのない民間空港・飛行場・滑空場・ヘリポート）は種類の札
+  const cd = code(n.a), flap = !n.a.kind && /^[A-Z0-9]{3,4}$/.test(cd), [kn, kc] = nearKind(n.a), tag = $("nearTag");
+  $("nearCode").innerHTML = flap ? [...cd].map(ch => `<i>${ch}</i>`).join("") : "";
+  tag.hidden = flap; tag.className = "ktag " + kc; tag.textContent = flap ? "" : kn;
+  $("nearRow").hidden = false;
   const ok = n.within, el = $("nearDist");
   el.classList.toggle("ok", ok);
   el.innerHTML = ok ? `${n.term ? esc(n.term.name) + " ・ " : ""}<i class="dot ok" aria-hidden="true"></i>判定範囲の中`
-    : `<i class="dot" aria-hidden="true"></i>判定範囲の外 ・ ここから <b>${homeKm(n.km)}</b>`
-    + (!ok && n.near ? `<br>近くに${esc(n.near.a.name)}（${XKIND[n.near.a.kind].short}・${homeKm(n.near.km)}）` : "");
+      + (NEAR_XK.includes(n.a.kind) ? `<span class="nbook">飛行場・滑空場の図鑑に入ります</span>` : "")
+    : `<i class="dot" aria-hidden="true"></i>判定範囲の外 ・ ここから <b>${homeKm(n.km)}</b>`;
+  renderNearList(); nearMoreSync();
   homeState();
 }
+// 半券の右上のピル：最初の位置は「ほか○つ ›」（20km 以内に民間空港がなく足したときだけなら「近くの民間空港 ›」）、引き上げた位置は「閉じる ⌄」
+function nearMoreSync(){
+  const b = $("nearMore"), n = HOME_NEAR; if(!b) return;
+  const has = !!(n && n.others && (n.others.length || n.civ)), full = $("homeSheet").dataset.snap === "full";
+  b.hidden = !has; if(!has) return;
+  b.innerHTML = full ? `閉じる<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>`
+    : `${n.others.length ? `ほか${n.others.length}つ` : "近くの民間空港"}<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>`;
+  b.setAttribute("aria-expanded", String(full));
+  b.setAttribute("aria-label", full ? "近くの一覧を閉じる" : n.others.length ? `ほかに20km以内${n.others.length}つの一覧を開く` : "近くの民間空港を開く");
+}
+// 引き上げた位置の一覧（20km 以内・近い順）。高さ 760 未満は1行、ほかは3行。民間空港を足したときは下にその1行（2段目に「民間空港でいちばん近い」）
+const nearRowHTML = (o, civ) => { const [kn, kc] = nearKind(o.a), pf = String(o.a.pref || "").replace(/[都府県]$/, "");
+  const k = o.km < 1 ? [Math.round(o.km * 1000), "m"] : [o.km < 100 ? o.km.toFixed(1) : fmtKm(o.km), "km"];
+  return `<button class="nrow2" type="button" data-zka="${o.a.id}" aria-label="${esc(kn)}、${esc(o.a.name)}、${k.join("")}"><span class="t ${kc}">${esc(kn)}</span><span class="tx">${civ ? `<small>民間空港でいちばん近い</small>` : ""}<b>${esc(o.a.name)}<i>${esc(pf)}</i></b></span><span class="k">${k[0]}<small>${k[1]}</small></span><svg class="c" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>`; };
+function renderNearList(){
+  const box = $("nearList"), n = HOME_NEAR; if(!box) return;
+  if(!n || !n.others || (!n.others.length && !n.civ)){ box.hidden = true; box.innerHTML = ""; return; }
+  const max = innerHeight < 760 ? 1 : 3, rows = n.others.slice(0, max);
+  box.hidden = false;
+  box.innerHTML = (n.others.length ? `<div class="nlh"><b>ほかに 20km 以内 ${n.others.length}つ</b><small>近い順</small><button class="allp" type="button" data-near-all>すべて<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button></div>` : `<div class="nlh"><b>20km 以内にほかはありません</b></div>`)
+    + rows.map(o => nearRowHTML(o)).join("") + (n.civ ? nearRowHTML(n.civ, true) : "");
+}
+// すべて：20km 以内の全部（近い順）と、足した民間空港
+function openNearAll(){
+  const n = HOME_NEAR; if(!n || !n.others) return;
+  $("dNearBody").innerHTML = `<div class="nah"><h3 id="nearAllT">20km 以内<small>${esc(n.a.name)}のほか ・ ${n.others.length}つ ・ 近い順</small></h3><button class="nclose" type="button" data-close>閉じる</button></div>
+    <div class="nalist">${n.others.map(o => nearRowHTML(o)).join("")}${n.civ ? `<p class="nach">民間空港でいちばん近い</p>${nearRowHTML(n.civ)}` : ""}</div>`;
+  $("dNear").showModal(); track("near_all", String(n.others.length));
+}
+document.addEventListener("click", e => {
+  if(e.target.closest("[data-near-all]")){ openNearAll(); return; }
+  const b = e.target.closest("#nearMore"); if(!b) return;
+  const sh = $("homeSheet"), full = sh.dataset.snap === "full"; track("near_more", full ? "close" : "open");
+  if(sh.sheetGo) sh.sheetGo(full ? "half" : "full");
+  if(!full) setTimeout(() => { const l = $("nearList"), bd = sh.querySelector(".sbody"); if(l && bd) bd.scrollTop = 0; }, 0);
+});
+document.addEventListener("click", e => { if(e.target.closest("#dNear [data-zka]")) $("dNear").close(); }, true);
+// 「飛行場・滑空場・ヘリポートも出す」を変える（ホームに出すもの・表示の編集。かたまりの数には入れない）
+function nearxSet(on){
+  const snap = loSnap(), L = loEdit(); if(on) delete L.nearx; else L.nearx = 0;
+  loChanged("nearx");
+  if($("dHomeEd").open){ HE.undo = { text:on ? "飛行場・滑空場・ヘリポートも出します" : "近くの並びを民間空港だけにしました", snap }; heRender(); }
+  if(NEAR_P && HOME_NEAR) showNearest(nearest(NEAR_P));
+}
+document.addEventListener("click", e => { const b = e.target.closest("[data-nearx]"); if(!b || b.disabled) return; nearxSet(b.getAttribute("aria-checked") !== "true"); });
 // 距離の書き方：1km 未満は m、100km 未満は小数1けた
 const homeKm = k => k < 1 ? Math.round(k * 1000) + "m" : k < 100 ? k.toFixed(1) + "km" : fmtKm(k) + "km";
 // ホームの状態の出し分け：ログインしていない ＞ 判定範囲の外 ＞ 範囲の中（位置がまだ分からないときは、切って調べる）
@@ -4429,6 +4581,7 @@ function showStamp(a, t, first, flight, term, firstTerm){
   ${a.kind === "secret" ? `<p class="xnote"><b>番外編：${XKIND.secret.label}</b><br>なぜあなたはそこに行けるの！？？？　一般の人は行けない場所です。全クリには数えない、押せた人だけの印です。写真や位置の公開は、その場の決まりに従ってください。</p>`
     : a.kind === "mil" ? `<p class="xnote"><b>番外編：${XKIND.mil.label}</b><br>基地の中には入れません。フェンスの外の公道・公園・展望できる場所から楽しんでください。航空祭などの一般公開日も、基地の案内に従ってください。ドローンは飛ばさないでください（法律で飛行が禁止されている区域があります）。</p>`
     : a.kind === "glider" ? `<p class="xnote"><b>番外編：${XKIND.glider.label}</b><br>グライダーが飛んでいるときは、滑走路や河川敷に入らず、関係者の案内に従ってください。</p>`
+    : a.kind === "heli" ? `<p class="xnote"><b>${XKIND.heli.label}</b><br>公共用のヘリポートです。離着陸の場所には入らず、柵の外から楽しんでください。飛行場・滑空場の図鑑に入ります（集めた空港の数とは別）。</p>`
     : a.kind === "field" ? `<p class="xnote"><b>番外編：${XKIND.field.label}</b><br>定期便のない空港や、小型機の飛行場です。滑走路や格納庫などには、許可なく入らないでください。見学できる場所や日が決まっているところもあります。</p>` : ""}
   ${flight ? `<p><b>${BY[flight.from].name} → ${a.name}</b>　${fmtKm(flight.km)}km を記録しました。</p><button class="btn2" style="width:100%;margin-top:8px" data-flight="${fid(flight)}">乗った便を記録する</button>` : a.kind ? "" : `<p>次の空港でチェックインすると、ここからのフライトが記録されます。</p>`}
   ${(() => { if(!pendingSnap) return ""; const now = unlockedIds(); const fresh = ACH.filter(x => now.has(x.id) && !pendingSnap.has(x.id)); pendingSnap = null;
@@ -4574,7 +4727,7 @@ function renderBook(){
   else if(mode === "chron") box.innerHTML = zkChronHTML(v, vc, shown);
   else box.innerHTML = zkRegionHTML(v, vc, shown, fa, ua);
   if(mode === "region") zkTsumeSync();
-  $("bookAir").innerHTML = ZK_BACK + `<div class="book-head"><h2>飛行場・滑空場</h2></div>` + extraBook(["field", "glider"], "定期便のない空港や小型機の飛行場、グライダーの滑空場です。86空港の全国制覇には数えず、別の実績があります。");
+  if(BOOK_SEG === "air"){ $("bookAir").innerHTML = zkAirBookHTML(); zkTsumeSync(); }
   $("bookExtra").innerHTML = ZK_BACK + `<div class="book-head"><h2>番外編</h2></div>` + extraBook(["mil"], "自衛隊の飛行場です。86空港の全国制覇には数えず、別の実績があります。基地の中には入れないので、フェンスの外から押せる距離にしてあります。")
     + extraBook(["secret"], "一般の人が行けない飛行場です。全クリには数えません。押せた人だけの秘密の枠です。");
   if(ZK_JUMP){ const rg = ZK_JUMP; ZK_JUMP = null; setTimeout(() => zkJump(rg, false), 0); }
@@ -4598,11 +4751,11 @@ function zkRegionHTML(v, vc, shown, fa, ua){
     <div class="zk-grid">${r.list.map(a => { const on = v.has(a.id), dim = on && FOCUS !== "ALL" && !fa.has(a.id) && !ua.has(a.id), pend = on && FOCUS !== "ALL" && !fa.has(a.id) && ua.has(a.id);
       return zkTile(a, { on, n:vc.get(a.id) || 0, dim, pend }); }).join("")}</div>${zkTermBlock(r.prefs)}</section>`).join("");
   const tsume = `<nav class="zk-tsume" id="zkTsume" aria-label="地方へ飛ぶ">${REGION.map(([rg]) => `<button type="button" data-zkj="${rg}" style="--c:${zkCol(rg)}" aria-label="${rg}へ"><span>${rg}</span></button>`).join("")}</nav>`;
-  return `<div class="zk-main">${hero}${note}${body}<p class="zk-foot"><button class="zk-link" type="button" data-zkseg="kigou">記号の意味</button></p></div>${tsume}`;
+  return `<div class="zk-main">${hero}${zkAirEntryHTML()}${note}${body}<p class="zk-foot"><button class="zk-link" type="button" data-zkseg="kigou">記号の意味</button></p></div>${tsume}`;
 }
 // ツメ：押すとその地方の扉が上に止まる所まで飛ぶ
 function zkJump(rg, smooth = true){
-  const sec = document.getElementById("zkrg-" + rg); if(!sec) return;
+  const sec = document.getElementById((BOOK_SEG === "air" ? "zkxrg-" : "zkrg-") + rg); if(!sec) return;
   const safe = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--zk-safe")) || 0;
   const y = sec.getBoundingClientRect().top + window.scrollY - safe;
   window.scrollTo({ top:Math.max(0, y), behavior: smooth && !matchMedia("(prefers-reduced-motion: reduce)").matches ? "smooth" : "auto" });
@@ -4616,13 +4769,14 @@ document.addEventListener("click", e => { if(e.target.closest("[data-zk-up]")) w
 document.addEventListener("click", e => { const b = e.target.closest("[data-zkj]"); if(!b) return; track("zk_jump", b.dataset.zkj); zkJump(b.dataset.zkj); });
 // いま上にある地方のツメを目立たせる・ツメの位置（上のカードより下、画面の上の端より下）
 function zkTsumeSync(force){
-  const ts = $("zkTsume"); if(!ts || currentView() !== "book" || BOOK_SEG !== "main") return;
+  const air = BOOK_SEG === "air", root = air ? "#bookAir" : "#zkBody";   // 飛行場・滑空場の図鑑も同じツメ（11/12 design/zukan-airfields 3版）
+  const ts = $(air ? "zkxTsume" : "zkTsume"); if(!ts || currentView() !== "book" || (BOOK_SEG !== "main" && !air)) return;
   const safe = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--zk-safe")) || 0;
   let cur = force || null;
-  if(!cur){ for(const sec of document.querySelectorAll("#zkBody .zk-rg")){ if(sec.getBoundingClientRect().top <= safe + 60) cur = sec.dataset.rg; } }
-  if(!cur){ const f = document.querySelector("#zkBody .zk-rg"); cur = f && f.dataset.rg; }
+  if(!cur){ for(const sec of document.querySelectorAll(root + " .zk-rg")){ if(sec.getBoundingClientRect().top <= safe + 60) cur = sec.dataset.rg; } }
+  if(!cur){ const f = document.querySelector(root + " .zk-rg"); cur = f && f.dataset.rg; }
   ts.querySelectorAll("[data-zkj]").forEach(b => { const on = b.dataset.zkj === cur; b.classList.toggle("on", on); if(on) b.setAttribute("aria-current", "true"); else b.removeAttribute("aria-current"); });
-  const main = document.querySelector("#zkBody .zk-main"), top = main ? main.getBoundingClientRect().top : 120;
+  const main = document.querySelector(root + " .zk-main"), top = main ? main.getBoundingClientRect().top : 120;
   ts.style.top = Math.max(safe + 12, Math.min(top, 140)) + "px";
 }
 let ZK_RAF = 0;
@@ -4744,6 +4898,60 @@ document.addEventListener("click", e => {
   const t = e.target.closest("[data-zkit]"); if(t){ ZK_IDX.tab = t.dataset.zkit; renderZkIndex(); return; }
   const h = e.target.closest("[data-zkih]"); if(h){ const el = document.getElementById("zkih-" + h.dataset.zkih); if(el) window.scrollTo({ top:el.getBoundingClientRect().top + scrollY - 12 }); }
 });
+/* ---------- 飛行場・滑空場の図鑑（11/11 18時 本人「今のまま別の図鑑で目立たせる」・11/12 画面案 design/zukan-airfields 3版） ----------
+   86 の数に入れない別の図鑑。図鑑の最初の画面に入口のカード、中は空港の図鑑と同じ「ツメ＋地方の扉＋そろえた枠」。
+   ヘリポート（11/12 移行163）もこの図鑑に入れる（本人の答え待ち：印を押せるか・同じ図鑑か）。基地・秘境は今までどおり「ほかの図鑑・実績」の番外編 */
+const ZKX_KINDS = ["field", "glider", "heli"], ZKX_COL = { field:"#3D7A4E", glider:"#1F7FB6", heli:"#9A7434" };
+const zkxList = () => XA.filter(a => ZKX_KINDS.includes(a.kind));
+// 枠の名前：「滑空場」「飛行場」「空港」「ヘリポート」を外した短い名前。カタカナの語は境目でだけ折る
+const zkxShort = a => a.name.replace(/(滑空場|飛行場|ヘリポート|空港)$/, "") || a.name;
+const zkxBreak = t => esc(t).replace(/(エアポート|エアパーク|エアロパーク|スカイポート|スカイパーク|フライト|パーク|航空公園|多目的)/g, "<wbr>$1").replace(/^<wbr>/, "").replace(/<wbr>(パーク)/g, (m, x, i, all) => all.slice(0, i).endsWith("スカイ") || all.slice(0, i).endsWith("エア") || all.slice(0, i).endsWith("エアロ") ? x : m).replace(/(スカイポート|アップルポート)(?=[一-龥])/g, "$1<wbr>");
+function zkxCounts(){
+  const xv = visitedExtra(), list = zkxList(), got = list.filter(a => xv.has(a.id));
+  const kind = ZKX_KINDS.map(k => [k, got.filter(a => a.kind === k).length, list.filter(a => a.kind === k).length]);
+  return { xv, list, got, kind };
+}
+// 小さな地図：86空港は薄い点、まだは灰の小さな点、行った所は色の丸。近くで重なる行った丸は、数の入った1つの丸にまとめる（review-3 の1）
+function zkxMapSVG(xv){
+  const W = 130, H = 170, P = a => [((a.lon - 128.6) / (146.2 - 128.6)) * (W - 12) + 6, ((45.6 - a.lat) / (45.6 - 30.8)) * (H - 14) + 7];
+  const inMap = a => a.lat > 30.5 && a.lon > 128.4;   // 地図の外（沖縄・南の島）は描かない
+  let g = A.filter(inMap).map(a => { const [x, y] = P(a); return `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="1.6" class="m86"/>`; }).join("");
+  g += zkxList().filter(a => inMap(a) && !xv.has(a.id)).map(a => { const [x, y] = P(a); return `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="2.2" class="my"/>`; }).join("");
+  const pts = zkxList().filter(a => inMap(a) && xv.has(a.id)).map(a => ({ a, p:P(a) })), cl = [];
+  for(const o of pts){ const c = cl.find(c => Math.hypot(c.x - o.p[0], c.y - o.p[1]) < 9); if(c){ c.n.push(o.a); } else cl.push({ x:o.p[0], y:o.p[1], n:[o.a] }); }
+  g += cl.map(c => { const k = c.n.length > 1 ? (ks => ks.sort((x, y) => ks.filter(v => v === y).length - ks.filter(v => v === x).length)[0])(c.n.map(a => a.kind)) : c.n[0].kind;
+    return c.n.length > 1 ? `<circle cx="${c.x.toFixed(1)}" cy="${c.y.toFixed(1)}" r="7.5" class="mv" style="fill:${ZKX_COL[k]}"/><text x="${c.x.toFixed(1)}" y="${(c.y + 3.6).toFixed(1)}" class="mn">${c.n.length}</text>`
+      : `<circle cx="${c.x.toFixed(1)}" cy="${c.y.toFixed(1)}" r="4.5" class="mv" style="fill:${ZKX_COL[k]}"/>`; }).join("");
+  return `<svg class="zxmap" viewBox="0 0 ${W} ${H}" role="img" aria-label="飛行場・滑空場の地図。色の丸が行った所（重なる所は数の入った丸）">${g}</svg>`;
+}
+// 図鑑の最初の画面の入口（黒いカードのすぐ下）。高さ700未満は1行の形（地図と内訳は CSS で外す）
+function zkAirEntryHTML(){
+  const c = zkxCounts();
+  return `<button class="zx-entry" type="button" data-zkseg="air" aria-label="飛行場・滑空場の図鑑を開く。${c.got.length}/${c.list.length}。集めた空港とは別に数えます">
+    <span class="zx-top"><span class="zx-pill">もう1つの図鑑</span><b class="zx-t">飛行場・滑空場の図鑑</b></span>
+    <span class="zx-bot"><span class="zx-l"><span class="zx-n"><b class="num">${c.got.length}</b><span class="u">/ ${c.list.length}</span><span class="zx-sep">集めた空港とは<br>別に数えます</span></span>
+      <span class="zx-kd">${c.kind.map(([k, g, t]) => `<span><i style="background:${ZKX_COL[k]}"></i>${XKIND[k].short} <b>${g}</b><small>/${t}</small></span>`).join("")}<span><i class="my"></i>まだ</span></span></span>
+    <span class="zx-r">${zkxMapSVG(c.xv)}</span></span><span class="zx-open" aria-hidden="true">開く<svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></span></button>`;
+}
+// 1つの枠：短い名前・種類の札・行った（✓ と回数）／まだ
+function zkxTile(a, on, n){
+  const nm = zkxShort(a), [kn, kc] = nearKind(a);
+  return `<button class="zk-ap zx-ap${on ? "" : " no"}${nm.length >= 7 ? " long" : ""}" type="button" data-zka="${a.id}" style="--c:${zkCol(regionOf(a))}" aria-label="${esc(a.name)}、${esc(kn)}、${on ? n + "回" : "まだ"}">
+    <span class="zx-nm">${zkxBreak(nm)}</span><span class="zx-k ${kc}">${esc(kn)}</span><span class="ft">${on ? `${ZK_CHECK}<b>${n}</b>回` : `${ZK_YET}まだ`}</span></button>`;
+}
+function zkAirBookHTML(){
+  const c = zkxCounts(), vc = new Map(); for(const x of S.checkins) if(IS_EXTRA(x.a)) vc.set(x.a, (vc.get(x.a) || 0) + 1);
+  const rgs = REGION.map(([rg]) => { const list = c.list.filter(a => regionOf(a) === rg); return { rg, list, got:list.filter(a => c.xv.has(a.id)).length }; });
+  const hero = `<div class="zk-hero zx-hero"><span class="zx-pill w">もう1つの図鑑</span><div class="ht"><span class="lab">集めた数</span><b class="num">${c.got.length}</b><span class="u">/ ${c.list.length}</span><span class="side">まだ ${c.list.length - c.got.length}</span></div>
+    <p class="zx-kinds">${c.kind.map(([k, g, t]) => `<span>${XKIND[k].short} <b>${g}</b><small>/${t}</small></span>`).join("")}</p>
+    <div class="rg">${rgs.map(r => `<div><span class="t"><span>${r.rg}</span><span>${r.list.length ? `${r.got}<small>/${r.list.length}</small>` : `<small>なし</small>`}</span></span><span class="b"><i style="width:${r.list.length ? Math.round(r.got / r.list.length * 100) : 0}%;background:${zkCol(r.rg)}"></i></span></div>`).join("")}</div></div>
+    <p class="zk-lead">集めた空港（${A.length}）とは別に数えます。自衛隊の飛行場（基地）は、今までどおり「ほかの図鑑・実績」の中にあります。</p>`;
+  const body = rgs.filter(r => r.list.length).map(r => `<section class="zk-rg" id="zkxrg-${r.rg}" data-rg="${r.rg}" style="--c:${zkCol(r.rg)}">
+    <div class="zk-door"><h3>${r.rg}</h3><b class="num">${r.got}</b><span class="u">/ ${r.list.length}</span><span class="zx-dtag">飛行場・滑空場</span><button class="zk-up" type="button" data-zk-up aria-label="図鑑の上へ"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 14l6-6 6 6"/></svg></button></div>
+    <div class="zk-grid">${r.list.map(a => zkxTile(a, c.xv.has(a.id), vc.get(a.id) || 0)).join("")}</div></section>`).join("");
+  const tsume = `<nav class="zk-tsume" id="zkxTsume" aria-label="地方へ飛ぶ">${rgs.map(r => `<button type="button" data-zkj="${r.rg}" style="--c:${zkCol(r.rg)}" aria-label="${r.rg}へ"${r.list.length ? "" : ` disabled aria-disabled="true"`}><span>${r.rg}</span></button>`).join("")}</nav>`;
+  return `${ZK_BACK_MAIN}<div class="book-head"><h2>飛行場・滑空場の図鑑</h2></div><div class="zk-main">${hero}${body}</div>${tsume}`;
+}
 /* ---------- ほかの図鑑・実績（86 の数には入らない） ---------- */
 function renderZkOthers(){
   const box = $("bookOthers"); if(!box) return;
@@ -4755,7 +4963,7 @@ function renderZkOthers(){
   const book = (seg, col, t, sub, [g, all]) => `<button class="zk-book" type="button" data-zkseg="${seg}" style="--c:${col}"><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true">${ic[seg]}</svg></span><span class="tx"><b>${t}</b><small>${sub}</small></span><span class="n"><b class="num">${g}</b><span class="u">/ ${all}</span></span></button>`;
   box.innerHTML = `${ZK_BACK_MAIN}<div class="book-head"><h2>ほかの図鑑・実績</h2></div><p class="zk-lead">ここで集めても「集めた空港」の数は変わりません。</p>
     ${book("ach", "var(--secret,#7A4FB0)", "実績", "空港の印や回数・路線・距離で達成するもの", [main.filter(x => st.done.has(x.id)).length, main.length])}
-    ${book("air", "var(--field,#3E7D52)", "飛行場・滑空場", "定期便のない飛行場とグライダーの滑空場", cnt(["field", "glider"]))}
+    ${book("air", "var(--field,#3E7D52)", "飛行場・滑空場の図鑑", "定期便のない飛行場・グライダーの滑空場・ヘリポート", cnt(ZKX_KINDS))}
     ${book("extra", "var(--mil,#2E4A6B)", "番外編", "自衛隊の飛行場と、一般の人が行けない飛行場", cnt(["mil", "secret"]))}
     ${book("liv", "#8A6A2F", "機体図鑑（特別塗装機）", "乗った・見た特別塗装機", liv)}
     <h3 class="zk-back-h">もどる</h3>
@@ -5653,7 +5861,7 @@ function loSecDef(id){
     const hid = LO_TAB_ITEMS.filter(v => !tabs.includes(v)).map(v => TAB_NAME[v]);
     // 成績は隠しているものに数えない。全部出していて成績のタブがないときは、見出しで成績の行き先を言う（review-app-1 の2）
     return { name:"タブ", groups:[{ rows }], n:tabs.length, tot:LO_TAB_MAX, hidden:hid, subText:!hid.length && !tabs.includes("stats") ? "成績はマイページから" : "", go:["タブを選ぶ", "data-tp-open"], note:`ホームを入れて${LO_TAB_MAX}つまで。並べ替えは「タブを選ぶ」で。` }; }
-  if(id === "home"){ const rows = [...LO_HOME_FIX.map(([, l, d]) => ({ label:l, desc:d, always:true })), ...loBlkRows("home")];
+  if(id === "home"){ const rows = [...LO_HOME_FIX.flatMap(([k, l, d]) => [{ label:l, desc:d, always:true }, ...(k === "stub" ? [{ kind:"nearx", label:NEARX_L[0], desc:NEARX_L[1], on:nearX(), nocount:true, sub:true, attr:"data-nearx" }] : [])]), ...loBlkRows("home")];
     return loSecCount({ name:"ホーム", groups:[{ rows }], go:["見本で編集", "data-he-open"] }); }
   if(id === "book" || id === "log") return loSecCount({ name:TAB_NAME[id], groups:[{ rows:loViewRows(id) }], go:[`${TAB_NAME[id]}へ`, `data-lo-goto="${id}"`], away:loAwayNote(id) });
   if(id === "ops") return loSecCount({ name:"運用", groups:[{ title:"見方", rows:loViewRows("ops") }, { title:"滑走路の下に出すもの", rows:loBlkRows("opsb") }], go:["運用へ", 'data-lo-goto="ops"'], away:loAwayNote("ops") });
@@ -5665,19 +5873,19 @@ function loSecDef(id){
       n:mine.length, tot:list.length, hidden:[], subText:mine.length ? mine.map(c => OPS_AIRPORTS[c] ? OPS_AIRPORTS[c].name : c).join("・") : "まだ選んでいません" }; }
   return null;
 }
-function loSecCount(s){ const rows = s.groups.flatMap(g => g.rows).filter(r => !r.always); s.n = rows.filter(r => r.on).length; s.tot = rows.length; s.hidden = rows.filter(r => !r.on).map(r => r.label); return s; }
+function loSecCount(s){ const rows = s.groups.flatMap(g => g.rows).filter(r => !r.always && !r.nocount); s.n = rows.filter(r => r.on).length; s.tot = rows.length; s.hidden = rows.filter(r => !r.on).map(r => r.label); return s; }
 const loSecIds = () => ["tabs", "home", "book", "log", ...(LO_EXT.sg ? ["sg"] : []), "ops", "stats", "aps"];
 const loSecIcon = id => LO_ICON[id] || tpIcon(id);
 function loRowHTML(r){
   const right = r.always ? `<span class="tplk">いつも</span>` : loSw(r.on, r.attr, `${esc(r.label)}を出す`, r.dis || r.last);
-  return `<li class="tprow vsrow${r.on || r.always ? "" : " off"}${r.always ? " lock" : ""}"><b>${esc(r.label)}${r.last ? `<span class="vslast">最後の1つ</span>` : ""}${r.desc ? `<small>${esc(r.desc)}</small>` : ""}</b>${right}</li>`
+  return `<li class="tprow vsrow${r.on || r.always ? "" : " off"}${r.always ? " lock" : ""}${r.sub ? " losub" : ""}"><b>${esc(r.label)}${r.last ? `<span class="vslast">最後の1つ</span>` : ""}${r.desc ? `<small>${esc(r.desc)}</small>` : ""}</b>${right}</li>`
     + (r.last ? `<li class="vsmsg">見方は1つより減らせません。ほかを ON にすると OFF にできます。</li>` : "");
 }
 function loSecHTML(id, only){
   const s = loSecDef(id); if(!s) return "";
   if(only && !s.hidden.length) return "";
   const open = only || LO_OPEN.has(id), sub = s.subText || (s.hidden.length ? `隠している：${s.hidden.join("・")}` : "全部出しています");
-  const body = !open ? "" : (s.away || "") + s.groups.map(g => { const rows = only ? g.rows.filter(r => !r.on && !r.always && !r.soft) : g.rows; if(!rows.length) return "";
+  const body = !open ? "" : (s.away || "") + s.groups.map(g => { const rows = only ? g.rows.filter(r => !r.on && !r.always && !r.soft && !r.nocount) : g.rows; if(!rows.length) return "";
       return `${g.title ? `<p class="logl">${esc(g.title)}${g.sub ? `<small>${esc(g.sub)}</small>` : ""}</p>` : g.sub ? `<p class="logl"><small>${esc(g.sub)}</small></p>` : ""}<ul class="tplist">${rows.map(loRowHTML).join("")}</ul>`; }).join("")
     + (s.note && !only ? `<p class="vsmsg">${esc(s.note)}</p>` : "")
     + (s.go && !only ? `<div class="logo"><button type="button" class="lotext" ${s.go[1]}>${esc(s.go[0])} ›</button></div>` : "");
@@ -5893,11 +6101,15 @@ function tpSet(list, what, text){
 let HE = { undo:null, from:"screen" };
 const HE_FIXED = [["半券", "チェックインの半券", "いちばん近い空港"], ["today", "今日の数字", "今日の印・空港・フライト"]];
 const HE_SUB = { ride:"便名を入れると機体を調べる", event:"開いているイベント", tally:"空港・路線・距離", recent:"" };
+// 半券の中身の設定（かたまりではないので数に入れない）：半券の下の枝の行。ON＝飛行場なども出る（ほかの行と同じ向き。review-5 の1 案A）
+const NEARX_L = ["飛行場・滑空場・ヘリポートも出す", "OFF にすると民間空港だけ"];
+const heNearxHTML = () => { const on = nearX(); return `<li class="hepc sw hesub${on ? "" : " off"}"><div><b>${NEARX_L[0]}</b><small>${NEARX_L[1]}</small></div>${loSw(on, "data-nearx", "飛行場・滑空場・ヘリポートも近くの並びに出す")}</li>`; };
 function heHTML(){
   const off = loOff("home"), on = loOrder("home").filter(id => !off.has(id)), out = LO_BLOCKS.home.filter(b => !b[3] && off.has(b[0]));
   const name = id => (LO_BLOCKS.home.find(b => b[0] === id) || [])[1] || id;
   const back = `<button class="mp-back" type="button" data-close><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>戻る</button>`;
-  const fixed = HE_FIXED.map(([k, n, s]) => `<li class="hepc fix"><div><b>${n}</b><small>${s}</small></div><span class="helk">いつも</span></li>`).join("");
+  const fixed = HE_FIXED.map(([k, n, s]) => `<li class="hepc fix"><div><b>${n}</b><small>${s}</small></div><span class="helk">いつも</span></li>`
+    + (k === "半券" ? heNearxHTML() : "")).join("");
   // OFF にしたかたまりも見本の中のその場に残す（11/9 1時 PM の1）
   const rows = loOrder("home").map(id => { const v = !off.has(id);
     return `<li class="hepc sw${v ? "" : " off"}"><div><b>${esc(name(id))}</b>${HE_SUB[id] ? `<small>${HE_SUB[id]}</small>` : ""}</div>${loSw(v, `data-he-${v ? "off" : "on"}="${id}"`, `「${esc(name(id))}」をホームに出す`)}</li>`; }).join("");
@@ -6432,7 +6644,7 @@ async function renderHomeMap(){
   const rw = (typeof OPS_AIRPORTS !== "undefined" && OPS_AIRPORTS[a.iata] && OPS_AIRPORTS[a.iata].rwy) || [];
   for(const r of rw) L.polyline([[r[1], r[2]], [r[5], r[6]]], { color:APT, weight:5, opacity:.85, lineCap:"round", interactive:false }).addTo(HOME_LAYER);
   L.circleMarker([a.lat, a.lon], { radius:rw.length ? 14 : 7, color:APT, weight:2, fill:!rw.length, fillColor:"#fff", fillOpacity:1, interactive:false }).addTo(HOME_LAYER);
-  L.marker([a.lat, a.lon], { interactive:false, keyboard:false, icon:L.divIcon({ className:"", html:`<div class="hm-ap"><b>${esc(code(a))} ${esc(godShort(a))}</b><span>判定範囲 ${homeKm(rad / 1000)}</span></div>`, iconSize:[0, 0] }) }).addTo(HOME_LAYER);
+  L.marker([a.lat, a.lon], { interactive:false, keyboard:false, icon:L.divIcon({ className:"", html:`<div class="hm-ap"><b>${a.kind ? esc(a.name) : esc(code(a)) + " " + esc(godShort(a))}</b><span>判定範囲 ${homeKm(rad / 1000)}</span></div>`, iconSize:[0, 0] }) }).addTo(HOME_LAYER);
   let bounds = L.latLng(a.lat, a.lon).toBounds(rad * 2), me = null;
   if(HOME_POS && HOME_NEAR && HOME_NEAR.a === a){
     me = [HOME_POS.lat, HOME_POS.lon];
@@ -6496,7 +6708,8 @@ function sheetTop(view, snap){
     const last = [$("homeGate"), $("homeStrip"), $("bpass")].find(x => x && !x.hidden && x.offsetHeight);
     const navTop = tb && tb.offsetHeight ? tb.getBoundingClientRect().top : vh - nav;
     const bd = sh && sh.querySelector(".sbody"), off = sh && last ? last.getBoundingClientRect().bottom - sh.getBoundingClientRect().top + (bd ? bd.scrollTop : 0) : 260;   // 中を送っていても同じ位置になるように
-    return Math.max(sheetTop(view, "full"), Math.min(Math.round(navTop - 8 - off), peek - 40));   // どの場合も、半券が画面の外へ出ない   // 地図は 844 の高さで約500px。上のカードが大きいときは、引き上げた位置まで上げてよい
+    const nl = $("nearList"), nlh = nl && last !== $("bpass") && nl.offsetHeight ? nl.getBoundingClientRect().height + 8 : 0;   // 引き上げた位置だけ出る近くの一覧の分は数えない（最初の位置はいつも同じ高さ）
+    return Math.max(sheetTop(view, "full"), Math.min(Math.round(navTop - 8 - off + nlh), peek - 40));   // どの場合も、半券が画面の外へ出ない   // 地図は 844 の高さで約500px。上のカードが大きいときは、引き上げた位置まで上げてよい
   }
   return Math.min(Math.round(vh * .46), peek - 60);
 }
@@ -6517,6 +6730,7 @@ function initSheet(sheet, view){
       body.style.maxHeight = s === "half" && tb && tb.offsetHeight ? Math.max(0, Math.round(tb.getBoundingClientRect().top - 4 - top - (gz ? gz.offsetHeight : 28))) + "px" : "";
       document.documentElement.style.setProperty("--home-sheet", Math.round(s === "half" ? top : sheetTop(view, "half")) + "px");
       if(s === "half") setTimeout(() => { if(document.documentElement.dataset.view === "home") renderHomeMap(); }, 360);
+      if(typeof nearMoreSync === "function") nearMoreSync();
     }
     if(document.documentElement.dataset.view === view) document.documentElement.dataset.sheet = s;   // 地図だけのときは下のメニューを隠す
     if(s !== "full") body.scrollTop = 0;
@@ -6702,7 +6916,7 @@ $("toggleDemo").onclick = async () => {
   await reload(); say("");
   if(demo){ demoSeed(); render(); showNearest(nearest(demoPlace())); say("見本の記録（1年ぶん・16空港・30フライト）を入れてあります。チェックインすると、ここに足されます。"); }
   else { $("nearName").textContent="空港に着いたら、印を押そう"; $("nearName").classList.add("idle"); $("nearDist").textContent="半券を切ると、現在地からいちばん近い空港を調べます。"; $("nearDist").classList.remove("ok");
-    HOME_NEAR = null; HOME_POS = null; $("nearCode").innerHTML = ""; homeState(); homeLocStart(); }
+    HOME_NEAR = null; HOME_POS = null; $("nearCode").innerHTML = ""; $("nearRow").hidden = true; renderNearList(); homeState(); homeLocStart(); }
   $("dSettings").close();
 };
 $("wipe").onclick = () => {
@@ -6816,7 +7030,7 @@ function achState(){
   const ap = new Set(), visits = new Map(), rare = new Set(), terms = new Set(), rt = new Set(), groups = new Set();
   const seasons = new Map(), days = new Map(), years = new Map(), dir = new Set(), round = new Set(), ends = new Set();
   const endIds = new Set(EXTREMES.map(([, a]) => a.id));
-  const regionCnt = {}, lapCnt = {}, termCnt = {}, xset = { mil:new Set(), glider:new Set(), field:new Set(), secret:new Set() };
+  const regionCnt = {}, lapCnt = {}, termCnt = {}, xset = { mil:new Set(), glider:new Set(), field:new Set(), secret:new Set(), heli:new Set() };
   let ci = 0, km = 0, maxV = 0, morning = 0, night = 0, newyear = 0, four = 0, lastMonth = null, streak = 0, bestStreak = 0, maxDay = 0, ns = 0, yearAp = 0, yearKm = 0;
   // 種類ごとに、まだ達成していない実績を目標の小さい順に並べておく
   const pending = new Map();
@@ -8137,7 +8351,7 @@ const qKey = () => "soramemo.queue." + (user ? user.id : "anon");
 function qLoad(){ try{ return JSON.parse(localStorage.getItem(qKey()) || "[]"); }catch(e){ return []; } }
 function qSave(q){ try{ localStorage.setItem(qKey(), JSON.stringify(q)); }catch(e){} renderQueue(); }
 function enqueue(p){
-  const n = nearest(p), q = qLoad();
+  const n = nearestBase(p), q = qLoad();   // 保留は判定の決まりの空港で（近い順の先頭ではなく）
   q.push({lat:p.lat, lon:p.lon, acc:p.acc, ts:p.ts || Date.now(), a:n.a.id, term:n.term ? n.term.id : null});
   qSave(q);
   say(`電波が届かないため、${placeName(n.a, n.term)}のチェックインを保留しました。電波が戻ったら自動で送ります（24時間以内）。`);
@@ -12934,7 +13148,7 @@ $("openGuide").onclick = () => { $("dSettings").close(); obShow(0); $("dGuide").
 function maybeGuide(){ let seen = false; try{ seen = !!localStorage.getItem("soramemo.onboarded"); }catch(e){} if(!seen){ obShow(0); $("dGuide").showModal(); } }
 
 /* ---------- share images ---------- */
-const XCOL = { mil:"#2B4A73", glider:"#1F7FB6", field:"#3D7A4E", secret:"#6B3FA0" };   // 共有画像の印の色（自衛隊は濃紺、滑空場は空色、飛行場は緑）
+const XCOL = { mil:"#2B4A73", glider:"#1F7FB6", field:"#3D7A4E", secret:"#6B3FA0", heli:"#7A5A24" };   // 共有画像の印の色（自衛隊は濃紺、滑空場は空色、飛行場は緑）
 const PALETTES = {
   board:   {sky:"#0B0D10", ink:"#E8ECF1", sumi:"#A7B0BC", line:"#262B33", shu:"#FFB547", gold:"#E0B85C", dot:"#3A414C", paper:"#121418"},
   mono:    {sky:"#EEF1F5", ink:"#111111", sumi:"#5C5C5C", line:"#D6D6D6", shu:"#111111", gold:"#A9822E", dot:"#BDBDBD", paper:"#FFFFFF"},
@@ -12967,7 +13181,7 @@ setPalette(document.documentElement.getAttribute("data-palette") || "mono");
 const GOTHIC = '"Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic UI","Yu Gothic","Meiryo","Noto Sans JP",sans-serif';
 function circle(ctx, x, y, r){ ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI*2); ctx.stroke(); }
 function drawStamp(ctx, cx, cy, R, a, t, term){
-  const k = R/54, col = a.kind === "mil" ? XCOL.mil : a.kind === "secret" ? XCOL.secret : a.kind === "glider" ? XCOL.glider : a.kind === "field" ? XCOL.field : a.rare ? PAL.gold : PAL.shu, c = code(a);
+  const k = R/54, col = a.kind === "mil" ? XCOL.mil : a.kind === "secret" ? XCOL.secret : a.kind === "glider" ? XCOL.glider : a.kind === "field" ? XCOL.field : a.kind === "heli" ? XCOL.heli : a.rare ? PAL.gold : PAL.shu, c = code(a);
   ctx.save(); ctx.translate(cx, cy); ctx.rotate(((a.id*37)%17-8)*Math.PI/180);
   ctx.strokeStyle = col; ctx.fillStyle = col; ctx.textAlign = "center";
   ctx.lineWidth = 4*k; circle(ctx, 0, 0, 54*k); ctx.lineWidth = 1.2*k; circle(ctx, 0, 0, 47*k);
