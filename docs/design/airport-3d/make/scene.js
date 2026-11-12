@@ -79,6 +79,8 @@ window.drawAirport = function(cv, opt){
   const dpr = window.devicePixelRatio||1; const W=cv.clientWidth, H=cv.clientHeight; cv.width=W*dpr; cv.height=H*dpr;
   const g=cv.getContext('2d'); g.setTransform(dpr,0,0,dpr,0,0);
   const S=SKY[opt.sky||'day']; const c=camFrom(opt.cam.pos,opt.cam.tgt,opt.cam.fov||50,W,H); c.cy=opt.cam.cy||.5;
+  // 3版：シートの上の残り（ピルの下〜シートの上）の真ん中に、見ている所（選んだ機体）を寄せる
+  if(opt.fitSheet){ const sh=cv.parentElement.querySelector('.sheet'); const top=sh?sh.getBoundingClientRect().top:H; c.cy=((126+top)/2)/H; }
   const fogT = z => 1-Math.exp(-Math.max(0,z)/S.fogd);
   const col = (cc,z) => mix(cc, S.fog, Math.min(.92,fogT(z)));
   // 空
@@ -130,8 +132,10 @@ window.drawAirport = function(cv, opt){
     const gg=g.createRadialGradient(s[0],s[1],0,s[0],s[1],r*4); gg.addColorStop(0,o.c); gg.addColorStop(1,'rgba(0,0,0,0)'); g.globalAlpha=al*.55; g.fillStyle=gg; g.beginPath(); g.arc(s[0],s[1],r*4,0,7); g.fill();
     g.globalAlpha=al; g.fillStyle=o.c; g.beginPath(); g.arc(s[0],s[1],r,0,7); g.fill(); g.globalAlpha=1; });
   if(opt.clouds){ let sd=7; const rnd=()=>{sd=(sd*9301+49297)%233280;return sd/233280;}; const n=opt.clouds.amt*9;
-    for(let i=0;i<n;i++){ const q=P(-3000+rnd()*6500,-5000+rnd()*8000,opt.clouds.base); const z=dot(sub(q,c.pos),c.f); if(z<50) continue; const s=proj(c,q); const r=Math.min(140,260000/z)*(0.6+rnd());
-      g.globalAlpha=.42; g.fillStyle=opt.night?'#2A3346':'#FFFFFF'; g.beginPath(); g.ellipse(s[0],s[1],r,r*.42,0,0,7); g.fill(); g.globalAlpha=1; } }
+    for(let i=0;i<n;i++){ const q=P(-3000+rnd()*6500,-5000+rnd()*8000,opt.clouds.base); const z=dot(sub(q,c.pos),c.f); if(z<50) continue; if(opt.clouds.thin && z<9000) continue; const s=proj(c,q); const r=Math.min(140,260000/z)*(0.6+rnd());
+      g.globalAlpha=opt.clouds.thin?.3:.42; g.fillStyle=opt.night?'#2A3346':'#FFFFFF'; g.beginPath(); g.ellipse(s[0],s[1],r,r*.42,0,0,7); g.fill(); g.globalAlpha=1; } }
+  // 3版：雲が低い日の全体の視点は、上の端だけ薄く白く（空港の上は透かす）
+  if(opt.clouds && opt.clouds.thin){ const hg=g.createLinearGradient(0,0,0,H*.46); hg.addColorStop(0,opt.night?'rgba(42,51,70,.7)':'rgba(255,255,255,.85)'); hg.addColorStop(.45,opt.night?'rgba(42,51,70,.35)':'rgba(255,255,255,.45)'); hg.addColorStop(1,'rgba(255,255,255,0)'); g.fillStyle=hg; g.fillRect(0,0,W,H*.46); }
   // 軽い版：機体は向きのある三角だけ
   if(opt.light) PLANES.forEach(pl=>{ const s=proj(c,[pl.pos[0],pl.pos[1],pl.z]); if(s[2]<5) return; const u=dir(pl.h); const a=proj(c,[pl.pos[0]+u[0]*120,pl.pos[1]+u[1]*120,pl.z]); const ang=Math.atan2(a[1]-s[1],a[0]-s[0]);
     g.save(); g.translate(s[0],s[1]); g.rotate(ang); g.fillStyle=opt.night?'#E8ECF1':'#2B3340'; g.beginPath(); g.moveTo(7,0); g.lineTo(-5,-4.5); g.lineTo(-3,0); g.lineTo(-5,4.5); g.closePath(); g.fill(); g.restore(); });

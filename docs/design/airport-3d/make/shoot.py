@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # 使い方：python3 shoot.py <画面案のフォルダ> [ファイル名の型]（zukan-airfields の shoot.py を3Dの画面の部品に合わせたもの）
-# 各 HTML を幅390・高さ844（と667）で PNG にし、字の大きさ・押す所・はみ出し・枠の中の切れを測る
+# 各 HTML を幅390・高さ844（と667、3つ目の引数に 740 を渡せば 740 も）で PNG にし、字の大きさ・押す所・はみ出し・枠の中の切れを測る
 import asyncio, sys, os, glob, json
 from playwright.async_api import async_playwright
 D = sys.argv[1]
@@ -41,10 +41,10 @@ async def main():
         for f in sorted(glob.glob(D + '/' + (sys.argv[2] if len(sys.argv) > 2 else '*') + '.html')):
             n = os.path.basename(f)[:-5]
             if n == 'index': continue
-            for h in (844, 667):
+            for h in (844, 667) + ((740,) if len(sys.argv) > 3 and sys.argv[3] == '740' and n.split('-')[0] in ('02a', '02b', '04', '04n') else ()):
                 pg = await b.new_page(viewport={'width': 390, 'height': h}, device_scale_factor=2 if h == 844 else 1)
                 await pg.goto('file://' + f); await pg.wait_for_timeout(250)
-                await pg.screenshot(path='%s/png/%s%s.png' % (D, n, '' if h == 844 else '-667'))
+                await pg.screenshot(path='%s/png/%s%s.png' % (D, n, '' if h == 844 else '-%d' % h))
                 if h == 844:
                     res[n] = await pg.evaluate(JS)
                 await pg.close()
