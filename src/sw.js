@@ -67,7 +67,8 @@ self.addEventListener("fetch", (e) => {
 // スマホへの通知（遅れ・ダイバートの推定、特別塗装機）。サーバーの flight-watch・airport-traffic から届く
 self.addEventListener("push", (e) => {
   let d = {}; try { d = e.data ? e.data.json() : {}; } catch (_) { d = { body: e.data ? e.data.text() : "" }; }
-  e.waitUntil(self.registration.showNotification(d.title || "そらメモ", { body: d.body || "", tag: d.tag || "soramemo", icon: "icon-192.png", badge: "icon-192.png", data: { url: typeof d.url === "string" && (d.url.startsWith("./#ops") || /^\.\/#special-[A-Z0-9-]{2,10}$/.test(d.url)) ? d.url : "./#ops" } }));
+  // 同じ便の通知は同じ tag で上書きする。renotify は届いた中身に tag があるときだけ渡す（上書きのときも鳴らす）
+  e.waitUntil(self.registration.showNotification(d.title || "そらメモ", { body: d.body || "", tag: d.tag || "soramemo", renotify: !!(d.tag && d.renotify), icon: "icon-192.png", badge: "icon-192.png", data: { url: typeof d.url === "string" && (d.url.startsWith("./#ops") || /^\.\/#special-[A-Z0-9-]{2,10}$/.test(d.url)) ? d.url : "./#ops" } }));
 });
 self.addEventListener("notificationclick", (e) => {
   e.notification.close();
