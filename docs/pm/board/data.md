@@ -1,6 +1,11 @@
 # データ担当の帳面
 
 ## いま持っている仕事
+- 運用予想を learn_hi に（11/13 17時30分 PM の指示・本人「切り替えて」）：ブランチ data/rot-learn-hi → main 向けの下書き PR #85。報告 docs/pm/report-rot-learn-hi.md（そのブランチ）
+  - 移行 166 rot_learn_hi：predict_rotation_v2 が rot_predict('learn_hi', …) を呼ぶ（返す形は今のまま、'method' だけ 'learn_hi'）。表・索引・RLS・採点（3通り）・権限は変えない。先頭に lock_timeout 10s。影響はチェックイン（運用予想の画面）だけ、経営なし。アプリはまだ v2 を呼んでいない
+  - 確かめた結果：t106（10項目）・t90（33）・t91・t92（26）通過、番号の重なりなし（156件）
+  - 本人待ち：「反映して」・反映のあとに報告の 3 の読むだけの SQL（method が learn_hi か）
+  - この回は定期の回（PM の指示なし）として呼ばれたが、PM が同じ時刻に積んだ指示（11/13 17時30分）があったので、そちらをした
 - 全体の見回りの直し・データの分（11/13 4時 PM の指示・本人「バグや反応しないところを直し、処理速度を早くして」）：ブランチ data/speed-1113b（data/speed-1113 の上に積んだ）→ 下書き PR #81（向き先 data/speed-1113）。報告 docs/pm/report-sweep-1113-data.md（そのブランチ）
   - airport-traffic の見る人の呼び出しは置き場 edge_cache の「traffic:空港」（20秒）を1回読んで返す。前は毎回 位置・線を読んで書き戻していた（4.07秒）。置き場に入れるのは見る人の呼び出しで作った答えだけ（記録の処理の分まで入れると書き込みが倍）。作れないときは5分以内の答え（X-Stale）。Server-Timing に shared・put
   - airport-foreign は「foreign:空港」（60秒）。経路が取れない回は10分以内の答えを出し、取れなかった答えは入れない（_shared/foreign_cache.ts の pickForeign）
@@ -136,12 +141,13 @@
 - 本人の決定：規約を改定するときは「terms_versions に1行足す → アプリの定数を変える」の順
 
 ## 移行とテストの番号
-- main の最新は 160（159 airport_yomi・160 airport_facts は 11/10 本番に入った）。156・157 は 11/9 本番に入った。**maint/2026-11-09 の 158 は main の 159 より前になったので、反映の前に migrations.mjs rebase が要る**。maint/2026-11-06 は 153・テスト t93（fix/co-tests の経営の移行も 153 なので、反映の前に rebase）、data/photo-log は 154・テスト t94、maint/2026-11-07 は 155・テスト t95、data/debug-1107 は 156・テスト t96（関数のテストは supabase/tests/live_view_test.ts。main に反映済み）、data/view-prefs は 157・テスト t97、maint/2026-11-09 は 158・テスト t98、maint/2026-11-10 は 161・テスト t101。data/airport-facts は 160・テスト t100。そのほか次に新しく作るものは 162 以降・テストは t102 以降。**maint/2026-11-11 は 162・テスト t102**（161 の maint/2026-11-10 より後。反映の順が変わったら rebase）。**data/heliports の 163・t103 は 11/12 main に入った（PR #75 と一緒）**。**data/speed-1113 は 164・テスト t104**。**data/speed-1113b は 165・テスト t105**（164 の上）。次に新しく作るものは 166 以降・テストは t106 以降
+- main の最新は 160（159 airport_yomi・160 airport_facts は 11/10 本番に入った）。156・157 は 11/9 本番に入った。**maint/2026-11-09 の 158 は main の 159 より前になったので、反映の前に migrations.mjs rebase が要る**。maint/2026-11-06 は 153・テスト t93（fix/co-tests の経営の移行も 153 なので、反映の前に rebase）、data/photo-log は 154・テスト t94、maint/2026-11-07 は 155・テスト t95、data/debug-1107 は 156・テスト t96（関数のテストは supabase/tests/live_view_test.ts。main に反映済み）、data/view-prefs は 157・テスト t97、maint/2026-11-09 は 158・テスト t98、maint/2026-11-10 は 161・テスト t101。data/airport-facts は 160・テスト t100。そのほか次に新しく作るものは 162 以降・テストは t102 以降。**maint/2026-11-11 は 162・テスト t102**（161 の maint/2026-11-10 より後。反映の順が変わったら rebase）。**data/heliports の 163・t103 は 11/12 main に入った（PR #75 と一緒）**。**data/speed-1113 は 164・テスト t104**。**data/speed-1113b は 165・テスト t105**（164 の上）。**data/rot-learn-hi は 166・テスト t106**（関数1つだけなので 164・165 と順番が入れ替わってもよい）。次に新しく作るものは 167 以降・テストは t107 以降
 - main に別の移行が先に入ったら、反映の前にもう一度 `node tools/migrations.mjs rebase`
 - 本番は小さいプランで一時ファイルの余裕がない。本人に流してもらう SQL は、大きな中間の表・自己結合・大きな並べ替えを避け、索引で引く形にする
 - SQL のテストは全部で約35分かかる（手元で流すときは裏で流してログを見る。t92 だけで約4分。同じログに2回流すと混ざるので、ログの名前を分ける）
 
 ## 次にやること
+0000000000. 運用予想 learn_hi（PR #85）：「反映して」が出たら番号を確かめ（main に別の移行が先なら rebase）、反映のあとの SQL の結果を読む。約4週間後（12月中旬、記録が42日そろったら）rotation-eval-view.sql で learn・learn_hi・base を比べ直し、PM に案を出す。運用予想担当の依頼 (1)（predict_rotation を4つ目の方式として採点）・(3)（rot_eval_summary）は本人が決めたら作る。CI とレビューに答える
 000000000. 全体の見回りの直し（PR #81）：speed-check-1113b.sql の結果で、①の平均ms が大きい関数があれば索引・まとめ表の直し（166 以降）。④で airport_tracks が大きければ、運用予想担当と返し方（間引く・時間で分ける）の案を作る。app_boot を作ると決まったら関数（テスト付き）を作り、チェックインに依頼。CI とレビューに答える
 00000000. 速さの見直し（PR #79）：speed-check-1113.sql の結果が来たら、遅い文・全部読みの多い表から索引の直し（165 以降）を作る。⑤（Logs Explorer）が動かなければ直す。反映後に airport-now の Server-Timing で shared が数十ミリ秒に収まるか見る。CI とレビューに答える
 0000000. ヘリポート（移行163・11/12 本番に入った）：非公共用の地上の数か所を入れると決まったら、新しい移行（164 以降）で足し、印の円の重なりを t103 で見る。**161（maint/2026-11-10）・162（maint/2026-11-11）は main の 163 より前になったので、反映の前に migrations.mjs rebase が要る**
@@ -161,6 +167,7 @@
 8. それ以外は PM の指示を待つ（勝手に新しい機能は始めない）。毎週月曜の昼の回は、下の「定期の仕事」（次の候補：点検の結果が来たら、死んだ行や使われていない索引の整理・遅い処理。cold-day-size.sql の結果で全機の航跡の1日が 20MB を超えるなら、ファイルを空港ごとに分ける案を作る。rwy-learn と daily-archive は 11/10 に見た（PR #58）。eta-calib・taxi-out・flight-watch は 11/11 に見た（PR #70）。結果がないまま次の回が来たら、ほかの毎晩・裏の処理（timetable-sync・schedule-sync・odpt-status・co3 の SQL の文）を同じ目で見て、時間の上限のない仕事の一覧を作る）
 
 ## ほかの担当への依頼
+- 運用予想へ（11/13 learn_hi・PR #85）：predict_rotation_v2 は learn_hi で答える形になった（未反映）。返す形は同じ、'method' だけ 'learn_hi'。画面は今までどおり estimate・next[].src を使い、「予想・保証しない」の書き方は変えない。依頼 (2) の p_mode 引数は、learn_hi に決まったので作らず v2 の中身を替えた
 - 運用予想へ（11/13 全体の見回り・PR #81）：(1) livery_board の同じ呼び出し4回を1回に (2) 定時・空の道すじ・ゴーアラウンドは選んだときだけ取る (3) 見方を変えても数分は持っている案内板・お知らせを使う (4) flight_alerts はログインしていない・デモでは呼ばない。案内板と海外の便はサーバー側で速くなる（返す形は同じ）
 - チェックインへ（11/13 全体の見回り）：デモでも push-subscribe が呼ばれている。app_boot を作ると決まったら、開いた直後の app_status・airport_notices・current_events を1つの呼び出しに
 - チェックインへ（11/13 速さの見直し・PR #79）：src/sw.js の networkFirst（アプリ本体）を、保存した版を先に出して裏で更新する形（または網を3秒だけ待つ）にする案。電波の弱い所で開くのが速くなる。PR #79 が入っても空港の今・metar の返す形は変わらない
@@ -251,4 +258,5 @@
 - 測ったのはアメリカから。日本からの時間は短い見込み。直す前と後を同じ場所で比べる
 
 ## PM から積んだ次の仕事（11/13 17時30分、運用予想を learn_hi に）
+（済み・11/13 17時30分の回 → PR #85。上の節）
 本人「切り替えて」。predict_rotation_v2 は今 rot_predict('learn', …) を呼んでいる。'learn_hi' にする移行を（返す形は同じ、'method' も 'learn_hi' に）。表は変えないので RLS の変更はなし（関数の権限は今のまま anon・authenticated に実行だけ）。テストを足す。ブランチ data/rot-learn-hi、下書き PR。運用予想担当が画面の呼び出しを v2 に替える（yosoku.md）。約4週間後（記録が42日そろったら）に rotation-eval-view.sql で比べ直す
