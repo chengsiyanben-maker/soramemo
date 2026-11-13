@@ -5,21 +5,24 @@ HERE=os.path.dirname(os.path.abspath(__file__)); WEB=os.path.abspath(os.path.joi
 import asyncio, json
 from datetime import datetime, timedelta, timezone
 from playwright.async_api import async_playwright
-now = datetime.now(timezone.utc)
-iso = lambda m: (now + timedelta(minutes=m)).isoformat()
-BOARD = {'iata': 'HND', 'now': iso(0), 'hours': [{'h': h, 'flights': 0, 'late': 0, 'cancel': 0, 'ref': 0} for h in range(24)], 'next_arr': [],
-         'next_dep': [{'flight': 'NH106', 'other': 'LAX', 'sched': iso(40), 'intl': True, 't': iso(40)}]}
+# 3 の「乗る便のカード」は、日本時間0〜4時に前の日に出た飛行中の国際線でも出ることを、時計を夜中1時半に固定した回でも確かめる（11/13 見回り）
+def data_for(now):
+    iso = lambda m: (now + timedelta(minutes=m)).isoformat()
+    board = {'iata': 'HND', 'now': iso(0), 'hours': [{'h': h, 'flights': 0, 'late': 0, 'cancel': 0, 'ref': 0} for h in range(24)], 'next_arr': [],
+             'next_dep': [{'flight': 'NH106', 'other': 'LAX', 'sched': iso(40), 'intl': True, 't': iso(40)}]}
+    live = {'flight': 'NH106', 'found': True, 'source': 'odpt', 'dep': 'HND', 'arr': 'LAX', 'std': iso(-240), 'sta': iso(375), 'atd': iso(-230), 'phase': 'air', 'progress': 0.4,
+            'pos': {'lat': 45, 'lon': 170, 'alt_ft': 37000, 'kt': 560, 'at': iso(0)}, 'eta_pred': iso(360)}
+    return board, live
 FOREIGN = {'iata': 'HND', 'planes': [{'flight': 'KE2707', 'airline': 'KE', 'kind': 'arr', 'other': 'GMP', 'status': 'approach', 'alt_ft': 4000, 'type': 'A333', 'km': 22},
                                      {'flight': 'UA838', 'airline': 'UA', 'kind': 'dep', 'other': 'SFO', 'status': 'departed', 'alt_ft': 9000, 'type': 'B789', 'km': 30}]}
-LIVE = {'flight': 'NH106', 'found': True, 'source': 'odpt', 'dep': 'HND', 'arr': 'LAX', 'std': iso(-240), 'sta': iso(375), 'atd': iso(-230), 'phase': 'air', 'progress': 0.4,
-        'pos': {'lat': 45, 'lon': 170, 'alt_ft': 37000, 'kt': 560, 'at': iso(0)}, 'eta_pred': iso(360)}
-fails = []
+fails = []; TAG = ['']
 def check(label, ok):
-    print(label, ok)
-    if not ok: fails.append(label)
-async def main():
-    async with async_playwright() as p:
-        b=await p.chromium.launch(); c=await b.new_context(viewport={'width':400,'height':860}, timezone_id='Asia/Tokyo')
+    print(TAG[0] + label, ok)
+    if not ok: fails.append(TAG[0] + label)
+async def run(b, now, tag):
+        BOARD, LIVE = data_for(now); TAG[0] = tag
+        c=await b.new_context(viewport={'width':400,'height':860}, timezone_id='Asia/Tokyo')
+        if tag: await c.clock.set_system_time(now)
         await c.add_init_script("localStorage.setItem('soramemo.onboarded','1'); localStorage.setItem('soramemo.layout', JSON.stringify({tabs:['home','book','log','ops','stats'], off:{home:[],book:[],log:[],ops:[],stats:['sgsum']}})); localStorage.setItem('soramemo.install.later','1'); localStorage.setItem('soramemo.view.ops','board')")
         await c.route('https://cdn.jsdelivr.net/npm/@supabase/**', lambda r: r.fulfill(path=os.path.join(HERE,'fake_sb.js'), content_type='application/javascript'))
         async def rpc(r):
@@ -71,5 +74,14 @@ async def main():
         check('1回目は確かめる:', 'もう一度押すと消します' in (await pg.inner_text('#intlList')))
         await pg.locator('[data-intl-del]').first.click(); await pg.wait_for_timeout(800)
         check('消せた:', len(await pg.evaluate("__fake.db.intl_flights")) == 1)
-        print('errors', errs + fails); await b.close()
+        if errs: fails.extend(tag + e for e in errs)
+        await c.close()
+async def main():
+    async with async_playwright() as p:
+        b = await p.chromium.launch()
+        await run(b, datetime.now(timezone.utc), '')
+        # 日本時間 1:30（前の日 22:30 に出た便が飛行中）。乗る便のカードの「国際線の記録に入れる」が出るか
+        jst = datetime.now(timezone(timedelta(hours=9))).replace(hour=1, minute=30, second=0, microsecond=0)
+        await run(b, jst.astimezone(timezone.utc), '[夜中1時半] ')
+        print('errors', fails); await b.close()
 asyncio.run(main())
