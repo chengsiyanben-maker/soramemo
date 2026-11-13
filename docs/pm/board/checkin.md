@@ -1,7 +1,7 @@
 # チェックイン担当の帳面
 
 ## いま持っている仕事
-- 全体の見回りの直し（11/13 4時の PM の指示・report-sweep-1113／report-speed-1113）：済み。ブランチ checkin/fix-sweep-1113（main 3ac3d91 から）・下書き PR #84（91a8a4e・2d63304）、報告 docs/pm/report-fix-sweep-1113.md、写真 docs/pm/shots-fix-sweep-1113/
+- 全体の見回りの直し（11/13 4時の PM の指示・report-sweep-1113／report-speed-1113）：済み。ブランチ checkin/fix-sweep-1113（main 3ac3d91 から）・下書き PR #84（91a8a4e・2d63304）、報告 docs/pm/report-fix-sweep-1113.md、写真 docs/pm/shots-fix-sweep-1113/。11/13 20時、PM のまとめの PR #87（pm/release-1113）で main に入った（4fb2f42）
   - 1 図鑑のツメをデモの帯の下に（667 はすき間 0 の .tight）／2 ホームの MAIN.wrap・上の段の透明な所は pointer-events:none／3 乗る便のカード（国際線）は前の日に出た便まで出す・t60 は「今」と「日本時間 1:30」（clock.set_system_time）の2回／4 フライトの地図は淡色地図（画像）を敷く（maplibre は使わない）／5 ログインの「デモで試す」は新規登録の下に高さ 44px・700px 未満は上を詰める／6 図鑑の scroll-padding-bottom／7 見方の帯・上の段・デモの「終了」・シートのつまみは ::after で押せる範囲 44px 以上（div.viewsw の下の線は背景に）／8 sw.js は staleWhileRevalidate・supabase-js を head で先読み（#sbPreload）・mapBase は部品が届くまで淡色地図・3つの rpc は前から並べて呼んでいた／9 デモの便は今日0時から数えた決まった時刻・loadPushKey はデモでは呼ばない・authCapOff で turnstile.remove()／ついで setViewsw は選んだ見方が見えていれば左端から（見回り #3）
   - 関数：変えた zkTsumeSync・renderRideIntl・renderFlightMap・mapBase・authRender・authClose・setViewsw・demoSeed・loadPushKey／足した authCapOff。fake_turnstile.js に remove
   - テスト：t128（54項目）すべて成功。全体 89/97（t123・t17・t27・t34・t62 は流し直して成功、残りは前からの t105・t99・t48）
@@ -192,7 +192,7 @@
 - 確認コードは6けた。メールは Gmail、Supabase の送信上限は1時間100通
 
 ## 次にやること
-- PR #84（全体の見回りの直し）：本人の「反映して」と改善担当の見直しを待つ。運用予想の PR #83 と一緒に入れるときは、あとから入る方で web/ を作り直す（node tools/build.mjs）。入る前に t128・t60・t127・t126 を流す。見回りの残りで運用予想の持ち場（#5・#6・#8・#10・運用の通信の数）は運用予想の担当、夜の CSS（#12）は夜の画面の土台のとき。maplibre の読み込みをさらに遅らせる・980KB の script を分けるのは次の候補（PM の判断待ち）
+- PR #84（全体の見回りの直し）：main に入った（PR #87・4fb2f42）。本番の配る版が Actions で出たか、次の回で確かめる。改善担当の見直しが来たら main から新しいブランチで直す。（前の書き付け）本人の「反映して」と改善担当の見直しを待つ。運用予想の PR #83 と一緒に入れるときは、あとから入る方で web/ を作り直す（node tools/build.mjs）。入る前に t128・t60・t127・t126 を流す。見回りの残りで運用予想の持ち場（#5・#6・#8・#10・運用の通信の数）は運用予想の担当、夜の CSS（#12）は夜の画面の土台のとき。maplibre の読み込みをさらに遅らせる・980KB の script を分けるのは次の候補（PM の判断待ち）
 - PR #75：改善担当は review-app-2 で「反映してよい」、図鑑の題も入れた（7a901bd）。本人の「反映して」が出たら、データ担当の移行163（heliports）と一緒に。入る前に t127・t119・t116 を流す。review-app-2 の反映のあとでよい4つ（844 で一覧が短いとシートの下が空く・表示の編集の補足「隠している」が切れる・東京ヘリポートの名札が点線にかかる・関東の扉に「大利根」が2つ）は、反映のあと main から直す
 - PR #75：改善担当の見直し（加須の 844／740 と東京駅の 844 の引き上げた位置）を待つ。指摘5（夜の札の濃さ）は夜の画面の土台のあと。t17 がまた落ちたら成績の称号を押す所を調べる
 - PR #75（feat/near-airfields）：改善担当の見直しと本人の答え（ヘリポートの印・図鑑）を待つ。「反映して」が出たら、データ担当の移行163（heliports）と一緒に。入る前に t127・t119・t116 を流す。印を押せないに決まったらデータ担当へ（checkin 関数の読み出しで heli を外す）。図鑑を別にするなら ZKX_KINDS から heli を外す
