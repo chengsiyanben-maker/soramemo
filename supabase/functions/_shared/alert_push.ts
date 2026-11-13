@@ -10,15 +10,19 @@ export async function notifyFlights(admin: SupabaseClient, scheduleIds: number[]
   const ids = [...new Set(scheduleIds)];
   if (!pub || !priv || !ids.length) return 0;
   // 同じ便（同じ出発・到着・定刻）の行も集める（共同運航・時刻表の重なり）
-  const { data: base } = await admin.from("flight_schedule").select("id, flight, svc_date, dep, arr, std").in("id", ids);
+  const { data: base } = await admin.from("flight_schedule").select("id, flight, svc_date, dep, arr, std, sta").in("id", ids);
   if (!base?.length) return 0;
-  const { data: sib } = await admin.from("flight_schedule").select("id, flight, svc_date, dep, arr, std")
+  const { data: sib } = await admin.from("flight_schedule").select("id, flight, svc_date, dep, arr, std, sta")
     .in("dep", [...new Set(base.map((r) => r.dep))]).in("std", [...new Set(base.map((r) => r.std))]).limit(2000);
   const keyOf = (r: { dep: string; arr: string; std: string }) => `${r.dep}|${r.arr}|${Date.parse(r.std)}`;
   const want = new Set(base.map(keyOf));
   const scheds = [...new Map([...base, ...(sib ?? []).filter((r) => want.has(keyOf(r)))].map((r) => [r.id, r])).values()] as MergeSched[];
   const { data: rows } = await admin.from("flight_alerts").select("schedule_id, kind, message, iata, late, official").in("schedule_id", scheds.map((r) => r.id));
-  const groups = mergeAlerts(scheds, (rows ?? []) as MergeAlert[]);
+  // 空港の名前（門限・0時前後の文に使う）
+  const iatas = [...new Set(scheds.flatMap((r) => [r.dep, r.arr]))];
+  const { data: aps } = await admin.from("airports").select("iata, name").in("iata", iatas);
+  const nm = new Map(((aps ?? []) as { iata: string; name: string }[]).map((a) => [a.iata, String(a.name).replace(/国際空港$|空港$/, "").replace(/^.*（(.+)）$/, "$1")]));
+  const groups = mergeAlerts(scheds, (rows ?? []) as MergeAlert[], (i) => nm.get(i) ?? i);
   if (!groups.length) return 0;
   // 宛先：関係する空港を選んでいる人と、「この便に乗る」でその便（便名@運航日）を選んでいる人
   const cols = "id, endpoint, p256dh, auth, airports, flights";

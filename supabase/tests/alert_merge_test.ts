@@ -1,4 +1,4 @@
-// 遅れの通知を1つの便につき1件にまとめる：推定→公式・出発→到着・共同運航2行・同じ遅れの繰り返し・15分と60分の分かれ目・30分ふえたときの上書き
+// 遅れの通知を1つの便につき1件にまとめる：推定→公式・出発→到着・共同運航2行・同じ遅れの繰り返し・乗る便の15分・空港は主要空港の門限と0時前後だけ・30分ふえたときの上書き
 import { assertEquals } from "jsr:@std/assert@1";
 import { eligible, type MergeAlert, mergeAlerts, type MergeSched, payloadOf, shouldSend } from "../functions/_shared/alert_merge.ts";
 
@@ -38,12 +38,49 @@ Deno.test("欠航は遅れより先に見出しにする", () => {
   assertEquals(eligible(sub([], ["HND"]), g[0]), true);
 });
 
-Deno.test("15分と60分の分かれ目：乗る便は15分から、空港の人は60分から", () => {
+Deno.test("乗る便は15分から。空港の人には、ふつうの遅れは何分でも知らせない", () => {
   const g = (late: number) => mergeAlerts(S, [A(3, "delay_dep", late, true)])[0];
   const fl = sub(["JL503@2026-11-13"]), ap = sub([], ["HND"]);
-  assertEquals([eligible(fl, g(14)), eligible(fl, g(15)), eligible(ap, g(59)), eligible(ap, g(60))], [false, true, false, true]);
+  assertEquals([eligible(fl, g(14)), eligible(fl, g(15)), eligible(ap, g(60)), eligible(ap, g(180))], [false, true, false, false]);
   assertEquals(eligible(sub(["JL999@2026-11-13"], ["OKA"]), g(120)), false);   // 関係のない人には送らない
   assertEquals(eligible(sub(["JL0503@2026-11-13"]), g(15)), true);              // 先頭の0は無視して比べる
+});
+
+// 夜の便：到着の定刻を日本時間で決める
+const J = (hhmm: string, day = "2026-11-13") => `${day}T${hhmm}:00+09:00`;
+const N = (id: number, flight: string, dep: string, arr: string, std: string, sta: string): MergeSched => ({ id, flight, svc_date: "2026-11-13", dep, arr, std: J(std), sta: J(sta) });
+const names = (i: string) => ({ HND: "羽田", ITM: "伊丹", FUK: "福岡", NRT: "成田", CTS: "新千歳", KMJ: "熊本", OKA: "那覇" } as Record<string, string>)[i] ?? i;
+const night = (s: MergeSched, late: number, kind = "delay_arr", official = true) =>
+  mergeAlerts([s], [{ schedule_id: s.id, kind, late, official, message: `ふつうの文${late}`, iata: [s.arr, s.dep] }], names)[0];
+
+Deno.test("門限：伊丹の21時の30分前より後に着く見込みは「間に合わないおそれ」、21時より後は引き返し・ほかの空港も書く。主要空港を選んだ人に届く", () => {
+  const g = night(N(11, "JL139", "HND", "ITM", "18:30", "19:47"), 65);
+  assertEquals(g.rank, 2);
+  assertEquals(g.body, "伊丹の門限（21時）に間に合わないおそれ：JL139 羽田→伊丹、到着の見込み 20時52分（約65分遅れ）（航空会社の運航情報から）");
+  assertEquals(night(N(11, "JL139", "HND", "ITM", "18:30", "19:47"), 80, "delay_arr", false).body,
+    "伊丹の門限（21時）に間に合わない見込み：JL139 羽田→伊丹、到着の見込み 21時07分（約80分遅れ）。出発した空港へ引き返すか、ほかの空港へ向かうことがあります（推定）");
+  assertEquals([eligible(sub([], ["ITM"]), g), eligible(sub([], ["HND"]), g), eligible(sub([], ["KMJ"]), g)], [true, true, false]);
+});
+
+Deno.test("門限：福岡の22時の30分前より後に着く見込み。30分より前なら知らせない", () => {
+  assertEquals(night(N(12, "NH265", "HND", "FUK", "19:30", "21:20"), 15).body.startsWith("福岡の門限（22時）に間に合わないおそれ：NH265 羽田→福岡、到着の見込み 21時35分（約15分遅れ）"), true);
+  assertEquals(night(N(12, "NH265", "HND", "FUK", "19:30", "21:00"), 20).rank, 1);   // 21時20分：30分より前
+  assertEquals(night(N(13, "JL3083", "HND", "NRT", "21:00", "23:00"), 40).body.startsWith("成田の門限（24時）"), true);
+});
+
+Deno.test("0時前後：24時間の空港に、遅れで23時30分〜翌1時に着く見込みの便。定刻がもともと遅い便や1時より後は知らせない", () => {
+  const g = night(N(14, "JL529", "HND", "CTS", "21:30", "23:05"), 45, "delay_dep", false);
+  assertEquals([g.rank, g.body], [2, "0時前後に着く見込み：JL529 羽田→新千歳、到着の見込み 23時50分（約45分遅れ）"]);
+  assertEquals(night(N(15, "NH1", "HND", "OKA", "21:00", "23:40"), 20).rank, 1);   // 定刻が23時30分より後
+  assertEquals(night(N(16, "NH2", "HND", "CTS", "21:00", "22:40"), 150).rank, 1);  // 1時10分：1時より後
+  assertEquals(night(N(17, "NH3", "HND", "CTS", "21:00", "23:20"), 10).rank, 1);   // 15分より短い遅れ
+  assertEquals(eligible(sub([], ["CTS"]), g), true);
+});
+
+Deno.test("門限・0時前後になったら、前にふつうの遅れを送った人にも送り直す（重くなった）", () => {
+  assertEquals(shouldSend({ rank: 1, late: 30, official: true }, { rank: 2, late: 40, official: true }), true);
+  assertEquals(shouldSend({ rank: 2, late: 40, official: true }, { rank: 2, late: 55, official: true }), false);
+  assertEquals(shouldSend({ rank: 2, late: 40, official: true }, { rank: 2, late: 70, official: true }), true);
 });
 
 Deno.test("同じ遅れの繰り返しは送らず、重くなった・運航情報がはじめて届いた・30分以上ふえたときだけ送る", () => {
@@ -66,5 +103,5 @@ Deno.test("通知は同じ便を同じ tag にし、上書きでも鳴らす。�
 
 Deno.test("遅れの分がない古いお知らせは60分として扱う", () => {
   const g = mergeAlerts(S, [A(3, "delay_arr", null, false)])[0];
-  assertEquals([g.late, eligible(sub([], ["CTS"]), g)], [60, true]);
+  assertEquals([g.late, eligible(sub(["JL503@2026-11-13"]), g), eligible(sub([], ["CTS"]), g)], [60, true, false]);
 });
