@@ -10202,7 +10202,7 @@ function planeHTML(reg, hist, pred){
   const route = (a, b) => `${a ? esc(placeShort(a)) : "？"} → ${b ? esc(placeShort(b)) : "？"}`;
   const rows = [...legs.map((l, i) => { const now = live && i === legs.length - 1;
       return `<li class="${now ? "now" : ""}"><span class="d"></span><span class="t"><b>${esc(csFlight(l.callsign))}</b> ${route(l.dep, l.arr)}<small>${hm2(l.first)}〜${now ? "（いま飛行中）" : hm2(l.last)}</small></span><em>${now ? "飛行中" : "飛んだ"}</em></li>`; }),
-    ...((pred && pred.next) || []).map(n => `<li class="next"><span class="d"></span><span class="t"><b>${esc(pred.src === "reg" ? csFlight(n.callsign) : n.flight)}</b> ${route(n.dep, n.arr)}<small>${pred.src === "reg" ? (n.time ? esc(n.time) + "ごろ" : "") : hm2(n.std)}（予想・${Math.round(Number(n.share) * 100)}%）</small></span><em>予想</em></li>`)].join("");
+    ...((pred && pred.next) || []).map(n => `<li class="next"><span class="d"></span><span class="t"><b>${esc(pred.src === "reg" ? csFlight(n.callsign) : n.flight)}</b> ${route(n.dep, n.arr)}<small>${pred.src === "reg" ? (n.time ? esc(n.time) + "ごろ" : "") : hm2(n.std)}（${esc(predTag(n))}）</small></span><em>予想</em></li>`)].join("");
   return `<div class="spctop"><button class="mp-back" data-close type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>戻る</button><h3>機体の1日</h3><span class="sp" aria-hidden="true"></span></div>
     <form class="plsearch" data-plform><input id="plReg" value="${esc(reg)}" placeholder="JA01XJ" aria-label="登録記号" autocomplete="off" maxlength="10"><button class="btn1" type="submit">探す</button></form>
     ${!reg ? `<p class="hint">機体の登録記号（例：JA01XJ）を入れると、今日飛んだ便と、この先の便（予想）を出します。</p>` : hist === null ? `<p class="hint">読み込んでいます…</p>` :
@@ -10210,7 +10210,7 @@ function planeHTML(reg, hist, pred){
       ${legs.length || (pred && pred.next && pred.next.length) ? `<div class="plmap" id="plMap" role="img" aria-label="今日飛んだ道すじの地図"></div>` : ""}</div>
     ${rows ? `<ul class="pllegs">${rows}</ul>` : `<p class="hint">今日この機体が飛んだ記録は、まだありません（日本の上空を飛んだ航空会社の便だけ記録しています）。</p>`}
     ${/^JA[0-9A-Z]{3,5}$/.test(reg) && SERVER ? `<button class="linkbtn2" data-plpush="${esc(reg)}" type="button">この機体が近づいたら知らせる</button>` : ""}`}
-    <p class="fwnote">飛んだ便は機体の位置の記録（adsb.lol）から。出発・到着の空港は毎晩の航跡から入るので、今日の便は空いていることがあります。この先の便は前の60日の記録からの推定で、機体の入れ替えで違うことがあります。</p>`;
+    <p class="fwnote">飛んだ便は機体の位置の記録（adsb.lol）から。出発・到着の空港は毎晩の航跡から入るので、今日の便は空いていることがあります。この先の便は${pred && pred.method ? "前の記録（特別塗装機は航空会社の運航情報にある予定の便も）" : "前の60日の記録"}からの推定で、機体の入れ替えで違うことがあります。</p>`;
 }
 async function drawPlaneMap(hist, pred){
   const el = $("plMap"); if(!el) return;
@@ -10344,12 +10344,25 @@ function trendHTML(def, t, l){
 }
 document.addEventListener("click", e => { if(e.target.closest("[data-trend]")) openTrend(); });
 
-// 機体の運用の予想（推定）：時刻表のある JAL・ANA の便は predict_rotation、ほかの機体は全機の記録（reg_legs）から predict_rotation_reg
+// 機体の運用の予想（推定）：時刻表のある JAL・ANA の便は predict_rotation、ほかの機体は全機の記録（reg_legs）から学ぶ予想 predict_rotation_v2（learn_hi）。
+//   v2 が null・空（いまの便が分からない／この先の便が出ない）のときは、今までの predict_rotation_reg に戻す。予想は実績と分けて持ち、画面では「推定」と出す
+const predHasNext = d => !!(d && d.known && Array.isArray(d.next) && d.next.length);
 async function loadPrediction(reg){
   const a = await rpcPost("predict_rotation", { p_reg:reg });
   if(a && a.known) return a;
+  const v = await rpcPost("predict_rotation_v2", { p_reg:reg });
+  if(predHasNext(v)) return v;
   const b = await rpcPost("predict_rotation_reg", { p_reg:reg });
-  return b && b.known ? b : a || b;
+  if(predHasNext(b)) return b;
+  return [v, b].find(d => d && d.known) || a || b || v;
+}
+// 機体の1日の予想の札：割合があれば「予想・66%」、特別塗装機の予定の便は「予想・塗装機の予定」
+const predTag = n => n.src === "livery" ? "予想・塗装機の予定" : n.share != null && Number.isFinite(Number(n.share)) ? `予想・${Math.round(Number(n.share) * 100)}%` : "予想";
+// 予想の1便の根拠（小さい字）：特別塗装機の予定の便は割合がないので出どころを、学ぶ予想は前の42日、今までの決め方は前の60日
+function predWhy(n){
+  if(n.src === "livery") return "特別塗装機の予定の便から";
+  const days = n.src === "learn" ? 42 : 60, sh = Number(n.share);
+  return n.share != null && Number.isFinite(sh) ? `前の${days}日で${Math.round(sh * 100)}%${n.seen != null ? `（${n.seen}回）` : ""}` : `前の${days}日の記録から`;
 }
 const csFlight = cs => spFl(cs) || cs;
 function predictionHTML(d){
@@ -10358,10 +10371,10 @@ function predictionHTML(d){
   const k = d.known, reg = d.src === "reg";
   const route = (a, b) => a || b ? `${esc(placeShort(a) || "？")}→${esc(placeShort(b) || "？")}` : "";
   const rows = (d.next || []).map(n => reg
-    ? `<li><b>${esc(csFlight(n.callsign))}</b> ${n.time ? esc(n.time) + "ごろ " : ""}${route(n.dep, n.arr)}<small>前の60日で${Math.round(Number(n.share) * 100)}%（${n.seen}回）</small></li>`
+    ? `<li><b>${esc(csFlight(n.callsign))}</b> ${n.time ? esc(n.time) + "ごろ " : ""}${route(n.dep, n.arr)}<small>${esc(predWhy(n))}</small></li>`
     : `<li><b>${esc(n.flight)}</b> ${hm2(n.std)} ${esc(placeShort(n.dep))}→${esc(placeShort(n.arr))}<small>前の60日で${Math.round(Number(n.share) * 100)}%</small></li>`).join("");
   return `<p class="hint" style="margin:0">いまの便：<b>${esc(reg ? csFlight(k.callsign) : k.flight)}</b> ${reg ? route(k.dep, k.arr) + (k.last ? `（${hm2(k.last)}に見えた）` : "") : `${esc(placeShort(k.dep))}→${esc(placeShort(k.arr))}`}</p>`
-    + (rows ? `<ol class="predlist">${rows}</ol><p class="fwnote">推定です。${reg ? "全機の位置の記録（adsb.lol）で、この便のあとに同じ機体が飛んだ便から出しています。" : "過去にこの機体の便のあとに続いた便の記録から出しています。"}機体の入れ替えで違うことがあります。</p>`
+    + (rows ? `<ol class="predlist">${rows}</ol><p class="fwnote">推定です。${reg ? "全機の位置の記録（adsb.lol）で、この便のあとに同じ機体が飛んだ便から出しています。" : "過去にこの機体の便のあとに続いた便の記録から出しています。"}${(d.next || []).some(n => n.src === "livery") ? "特別塗装機は、航空会社の運航情報にある予定の便も使っています。" : ""}機体の入れ替えで違うことがあります。</p>`
             : `<p class="hint">この先の便は、まだ記録が足りず予想できません（毎日の記録が貯まると出ます）。</p>`);
 }
 document.addEventListener("click", async e => {
