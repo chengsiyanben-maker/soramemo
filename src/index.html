@@ -1608,6 +1608,11 @@ dialog.mypage .dlg .close{display:none}
 #v-ops .bdseq .dot{position:absolute;left:0;top:-13px;width:9px;height:9px;border-radius:50%;background:var(--op-card);border:2.5px solid #2563EB}
 #v-ops .bdseq li.past{opacity:.6}
 #v-ops .bdseq b{font-size:13px;color:var(--op-ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* 長い行き先（「サンフランシスコから」など）は2行まで折る（11/13 の見回り）。押せる範囲は見た目を変えずに 44px（到着／出発・すべて／国内線／国際線・原文・くわしく） */
+#v-ops .bdseq b{white-space:normal;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;line-height:1.3}#v-ops .bdseq b .nw{white-space:nowrap}
+#v-ops .bdtabs button{position:relative}#v-ops .bdtabs button::after{content:"";position:absolute;left:-2px;right:-2px;top:50%;height:44px;transform:translateY(-50%)}
+#v-ops .fwraw summary{position:relative}#v-ops .fwraw summary::after{content:"";position:absolute;left:50%;top:50%;width:max(100%,44px);height:44px;transform:translate(-50%,-50%)}
+#v-ops .opswhy summary{position:relative}#v-ops .opswhy summary::after{content:"";position:absolute;left:0;right:0;top:50%;height:44px;transform:translateY(-50%)}
 #v-ops .bdseq .rel{font-size:15px;font-weight:800;color:var(--op-ink);margin-top:2px}
 #v-ops .bdseq .tm em{font-style:normal;color:#B45309;font-weight:700;margin-left:4px}
 #v-ops .bdsum{font-size:12px;color:var(--op-mute)}
@@ -9462,6 +9467,7 @@ function observeOpsDay(planes, def = opsDef()){
 // </ops-core>
 const appName = (mode, good, rw, def) => ((((def || opsDef()).modes[mode] || {}).app || {})[good ? "good" : "bad"] || {})[rw] || "";
 let OPS_MODE = "auto", OPS_WX = null, OPS_MAP = null, OPS_LAYER = null;
+let OPS_WX_WAIT = true;   // 気象通報を読み込み中（届くまで風の欄は「読み込み中」、運用の札は出さない）
 async function loadLeaflet(){
   if(window.L) return;
   if(!document.querySelector(`link[href="${LEAFLET.css}"]`)){ const l = document.createElement("link"); l.rel = "stylesheet"; l.href = LEAFLET.css; document.head.appendChild(l); }
@@ -9560,23 +9566,25 @@ function renderOps(){
   const modeChips = `<button class="chip" data-ops="auto" aria-pressed="${OPS_MODE === "auto"}">今の運用</button>` + Object.entries(def.modes).map(([k, o]) => `<button class="chip" data-ops="${k}" aria-pressed="${OPS_MODE === k}">${o.label.replace(/の運用$|運用$/, "").replace(/運用（/, "（")}</button>`).join("");
   const approach = op.arr.map(r => { const k = appKey(mode, est.good, r); return `${r} ${k ? keyName(k) : appName(mode, est.good, r)}`; }).join("・");
   const plus = plusOn();
-  const src = OPS_MODE !== "auto" ? "手で選んだ運用" : obs ? "実際の機体から判定" : est.unsure ? "判定できず（仮の表示）" : "風から推定";
+  // 気象通報が届くまでは札を出さない（「風から推定」と風の欄の「—」が食い違わないように。11/13 の見回り）
+  const src = OPS_MODE !== "auto" ? "手で選んだ運用" : obs ? "実際の機体から判定" : !OPS_WX && OPS_WX_WAIT ? "" : est.unsure ? "判定できず（仮の表示）" : !OPS_WX ? "気象通報なし（仮の表示）" : "風から推定";
   const why = obs ? `${obsText(obs)}${obs.mode !== est.mode && !est.unsure ? `（風からの推定は${def.modes[est.mode].label}）` : ""}`
     : OPS_MODE === "auto" ? `${OPS_OBS && OPS_OBS.mixed ? "着陸に向かう機体の滑走路が分かれている（切り替え中かもしれません）ため、風から推定しています。" : ""}${plus ? est.why : est.whyPlain}` : "";
   const nr = OPS_MODE === "auto" ? nightRule(def) : null, shut = nr && nr.closed && !obs;
   // 計器のタイル：いまの運用（滑走路のラベル）・風・視程・運用時間・気象通報の時刻
   const W = OPS_WX, hm = t => { const d = new Date(t); return `${d.getHours()}:${String(d.getMinutes()).padStart(2, "0")}`; };
   const rwl = (r, k) => `<span class="rwl ${k}">${r}</span>`;
-  const windTile = !W || W.wspd == null ? `<div class="otile"><small>風</small><b class="num">—</b><span>気象通報なし</span></div>`
+  const windTile = !W && OPS_WX_WAIT ? `<div class="otile"><small>風</small><b class="num">…</b><span>読み込み中</span></div>`
+    : !W || W.wspd == null ? `<div class="otile"><small>風</small><b class="num">—</b><span>気象通報なし</span></div>`
     : `<div class="otile wind"><small>風</small><div class="wrow">${W.wdir == null ? "" : `<svg class="compass" viewBox="0 0 40 40" role="img" aria-label="${W.wdir}度の方向から"><circle cx="20" cy="20" r="17"/><text x="20" y="9.5">N</text><g transform="rotate(${(W.wdir + 180) % 360} 20 20)"><path class="ar" d="M20 31 L24 21 L20 23.5 L16 21 Z"/><path class="sh" d="M20 9 V23"/></g></svg>`}<b class="num">${W.wspd}<small>kt</small></b></div><span>${W.wdir == null ? (W.wspd ? "向き不定" : "ほぼ無風") : `${W.wdir}° から`}${W.wgst ? `・最大${W.wgst}kt` : ""}</span></div>`;
   const visTile = !W ? "" : plus ? `<div class="otile"><small>視程</small><b class="num">${W.vis_m == null ? "—" : W.vis_m >= 10000 ? "10<small>km+</small>" : `${(W.vis_m / 1000).toFixed(1)}<small>km</small>`}</b><span>気象通報 ${hm(W.time)}</span></div>`
     : `<div class="otile lock"><small>視程・推定のわけ</small><b>そらメモ＋</b><span>気象通報 ${hm(W.time)}</span></div>`;
   $("opsInfo").innerHTML = `<div class="opshero">
-      <div class="oh1"><span>${shut ? "夜間" : "いまの運用"}</span><span class="opssrc${obs ? " live" : ""}">${shut ? "夜間" : src}</span></div>
+      <div class="oh1"><span>${shut ? "夜間" : "いまの運用"}</span>${shut || src ? `<span class="opssrc${obs ? " live" : ""}">${shut ? "夜間" : src}</span>` : ""}</div>
       <div class="oh2"><b class="mode">${shut ? "運用時間外" : op.label}</b><details class="opsmd"${OPS_MODE !== "auto" ? " open" : ""}><summary>ほかの向き</summary><div class="opsmdc" role="group" aria-label="運用の切り替え">${modeChips}</div></details></div>
       ${op.arr.length || op.dep.length ? `<div class="ohrw"><div><small>着陸</small><span>${op.arr.map(r => rwl(r, "arr")).join("") || "—"}</span></div><div><small>離陸</small><span>${op.dep.map(r => rwl(r, "dep")).join("") || "—"}</span></div></div>` : ""}
     </div>
-    <div class="otiles">${windTile}${visTile}<div class="otile"><small>運用時間</small><b>${opsHours(def)}</b><span>${opsHours(def) === "24時間" ? "AIP JAPAN" : opsOpen(def) ? "いまは運用中" : "いまは時間外"}</span></div>${SERVER ? `<div class="otile" id="opsDelayTile">${delayTileHTML(FW.get(OPS_AP))}</div>` : W ? "" : `<div class="otile"><small>気象通報</small><b>—</b><span>読み込めません</span></div>`}</div>
+    <div class="otiles">${windTile}${visTile}<div class="otile"><small>運用時間</small><b>${opsHours(def)}</b><span>${opsHours(def) === "24時間" ? "AIP JAPAN" : opsOpen(def) ? "いまは運用中" : "いまは時間外"}</span></div>${fwOn() ? `<div class="otile" id="opsDelayTile">${delayTileHTML(FW.get(OPS_AP))}</div>` : W || OPS_WX_WAIT ? "" : `<div class="otile"><small>気象通報</small><b>—</b><span>読み込めません</span></div>`}</div>
     ${nr ? `<p class="opsnight">夜間：${esc(nr.text)}${nr.closed ? "。下は、朝の最初の便が使いそうな向き（風から推定）です" : ""}（AIP JAPAN）</p>` : ""}
     <div class="opsrows">
       <div><span class="lbl">着陸</span>${op.arr.map(r => { const k = appKey(mode, est.good, r); return `<span class="rw arr">${r}</span><small>${k ? keyName(k) : appName(mode, est.good, r)}</small>`; }).join(" ")}</div>
@@ -9587,16 +9595,30 @@ function renderOps(){
   OPS_CUR = { def, op, rw };
   opsScopeChips(); drawOpsMap(rw, op, plus, mode, est.good); opsLegendKey(); renderSpots(def, op, rw); if(LOC_LAST && OPS_MAP) opsLocDraw(); applyOpsView(); if(VIEW.ops === "runway" && LOC_WATCH == null) opsLocStart();
 }
+// 見方の帯：はじめは左端（案内板）から。選んでいる見方が画面の外のときだけ、見えるところまで送る（11/13 の見回り：開くと滑走路まで送られていた）
+function opsViewsReveal(x = 0){
+  const el = $("opsViews"); if(!el) return; el.scrollLeft = x;
+  const b = el.querySelector('[aria-selected="true"]'); if(!b || !el.clientWidth) return;
+  const l = b.offsetLeft - el.offsetLeft, r = l + b.offsetWidth;
+  if(l < el.scrollLeft) el.scrollLeft = Math.max(0, l - 24); else if(r > el.scrollLeft + el.clientWidth) el.scrollLeft = r - el.clientWidth + 24;
+}
 // 地図が見えているか（見方の切り替えで隠れているときに位置を合わせると、大きさが0で計算できない）
 const opsMapShown = () => { const m = $("opsMap"); return !!m && m.offsetWidth > 0 && m.offsetHeight > 0; };
 /* 運用の見方：案内板（01）・1日の山（02）・滑走路（03）・定時（04）・空の道すじ（05）・短冊（07）・撮る人（09） */
 function applyOpsView(){
-  setViewsw("opsViews", "ops");
+  { const el = $("opsViews"), x = el ? el.scrollLeft : 0; setViewsw("opsViews", "ops"); opsViewsReveal(x); }
   const v = VIEW.ops;
   document.querySelectorAll("#v-ops [data-ov]").forEach(el => el.classList.toggle("ovoff", !el.dataset.ov.split(" ").includes(v)));
   if(["day", "strip", "photo"].includes(v) && BOARD && BOARD_AP === OPS_AP) renderOpsDerived(BOARD);
 }
-VIEW_RENDER.ops = () => { if(VIEW.ops === "runway"){ renderOps(); if(OPS_MAP) setTimeout(() => { opsFit(); opsLocStart(); }, 30); } else applyOpsView(); };
+// 見方を変えたとき：先に見方の中身を出し（最初の変化を早く）、地図の描き直しは画面が変わってから。読むのはその見方の分だけ（3分以内の結果は使う）
+VIEW_RENDER.ops = () => {
+  applyOpsView(); opsTraffic();
+  OPS_LAZY = true; try{ renderOpsAlerts(); } finally{ OPS_LAZY = false; }
+  if(VIEW.ops === "runway") requestAnimationFrame(() => setTimeout(() => { if(VIEW.ops !== "runway" || !opsOn()) return; renderOps(); if(OPS_MAP){ opsFit(); opsLocStart(); } }, 0));
+};
+// 機体の位置（airport-traffic）は、地図のある見方（滑走路）と撮る人のときだけ読む
+function opsTraffic(){ if(opsNeed("traffic")){ if(TRAFFIC_TIMER == null) startTraffic(); } else stopTraffic(); }
 const OPS_CREDIT_S = () => `<p class="fwnote">時刻は JAL・ANA の時刻表と運航情報。${ODPT_CREDIT}</p>`;
 function renderOpsDerived(d){
   if(!d || BOARD_AP !== OPS_AP) return;
@@ -9861,11 +9883,15 @@ const opsOn = () => $("v-ops").classList.contains("on");
    ダイヤが入っていないあいだは何も出ない。お知らせは推定で、航空会社の発表ではない */
 const FW = new Map();   // IATA → お知らせの配列
 const FW_KIND = { cancel:"欠航", delay_dep:"出発の遅れ", no_takeoff:"離陸を確認できず", delay_arr:"到着の遅れ", divert:"ダイバートの可能性", return:"引き返し", divert_landed:"ダイバート" };
+const FW_AT = new Map();   // IATA → 読んだ時刻（見方を変えたときは、少し前の結果を使う）
+// 運用の遅れ・欠航のお知らせは、ログインしている人だけに出す（ログインしていない人・デモでは読まない。空港のページは今のまま）
+const fwOn = () => SERVER && !!user && !demo;
 async function loadFlightAlerts(iata){
   if(!SERVER) return;
+  if(FW.has(iata) && opsFresh(FW_AT.get(iata) || 0, 50_000)) return;
   try{ const r = await fetch(SORAMEMO_CONFIG.supabaseUrl.replace(/\/$/, "") + "/rest/v1/rpc/flight_alerts", { method:"POST",
       headers:{ "Content-Type":"application/json", apikey:SORAMEMO_CONFIG.supabaseAnonKey, Authorization:"Bearer " + SORAMEMO_CONFIG.supabaseAnonKey }, body:JSON.stringify({ p_iata:iata }) });
-    if(r.ok){ const d = await r.json(); FW.set(iata, Array.isArray(d) ? d : []); } }catch(e){}
+    if(r.ok){ const d = await r.json(); FW.set(iata, Array.isArray(d) ? d : []); FW_AT.set(iata, Date.now()); } }catch(e){}
 }
 // お知らせ1件を、1行目「バッジ・便名・種類」、2行目「出発→到着・定刻→新しい時刻」、3行目「理由のタグ・原文」にする。
 // 数字と理由は、お知らせの文（航空会社の運航情報か推定の文）から取り出す。取り出せないものは出さず、原文はいつでも見られる
@@ -9900,14 +9926,17 @@ function fwHTML(list, iata, withPush){
 /* ---------- いま飛んでいる特別塗装機 ----------
    サーバーが機体を記録するたびに、特別塗装機の一覧（航空会社の発表などから作ったもの）の登録記号の機体を見つけて残している。直近15分ぶん */
 let SP_PLANS = [];   // 特別塗装機で飛ぶ予定の便（航空会社の運航情報の文から）
+let SPECIAL_AT = 0, SPECIAL_AP = null;
 async function loadSpecial(){
   if(!SERVER) return;
+  if(SPECIAL_AP === OPS_AP && opsFresh(SPECIAL_AT, 50_000)) return;
+  const iata = OPS_AP;
   try{ const r = await fetch(SORAMEMO_CONFIG.supabaseUrl.replace(/\/$/, "") + "/rest/v1/rpc/livery_plans_upcoming", { method:"POST",
       headers:{ "Content-Type":"application/json", apikey:SORAMEMO_CONFIG.supabaseAnonKey, Authorization:"Bearer " + SORAMEMO_CONFIG.supabaseAnonKey }, body:JSON.stringify({ p_iata:OPS_AP }) });
     if(r.ok){ const d = await r.json(); SP_PLANS = Array.isArray(d) ? d : []; } }catch(e){}
   try{ const r = await fetch(SORAMEMO_CONFIG.supabaseUrl.replace(/\/$/, "") + "/rest/v1/rpc/special_now", { method:"POST",
       headers:{ "Content-Type":"application/json", apikey:SORAMEMO_CONFIG.supabaseAnonKey, Authorization:"Bearer " + SORAMEMO_CONFIG.supabaseAnonKey }, body:"{}" });
-    if(r.ok){ const d = await r.json(); SPECIAL.clear(); for(const x of Array.isArray(d) ? d : []) SPECIAL.set(x.reg, x); } }catch(e){}
+    if(r.ok){ const d = await r.json(); SPECIAL.clear(); for(const x of Array.isArray(d) ? d : []) SPECIAL.set(x.reg, x); SPECIAL_AT = Date.now(); SPECIAL_AP = iata; } }catch(e){}
 }
 // どこにいるか：運用タブの空港の着陸・離陸中ならその空港、そうでなければいちばん近い空港（150km以内）
 function specialWhere(x){
@@ -9926,7 +9955,7 @@ function spPushHTML(){
 // この空港に3時間のうちに来る特別塗装機：飛んでいる機体（行き先がこの空港）と、運航情報に特別塗装機と書かれた便
 function spInboundHTML(){
   const here = OPS_AP, until = Date.now() + 3 * 36e5, items = [];
-  for(const r of spbRows()) if(r.st === "flying" && ((r.leg && r.leg.arr === here) || (r.now.iata === here && r.now.phase === "arr"))){
+  for(const r of spbRows(spbLiveSrc())) if(r.st === "flying" && ((r.leg && r.leg.arr === here) || (r.now.iata === here && r.now.phase === "arr"))){
     const eta = spbEta(r) || (r.leg && r.leg.sta && Date.parse(r.leg.sta)) || null;
     items.push({ t:eta, reg:r.reg, name:r.name, hot:r.now.iata === here && r.now.phase === "arr", sub:`${esc(spbFl((r.leg && r.leg.cs) || r.now.callsign))}${r.leg && r.leg.dep ? `・${esc(placeShort(r.leg.dep))}から` : ""}・${r.now.iata === here && r.now.phase === "arr" ? "着陸に向かっている" : "飛行中"}${eta ? "（推定）" : ""}` });
   }
@@ -9981,9 +10010,24 @@ async function loadSpb(force){
   if(got.some(Boolean)){ SPB = got.flatMap(x => x || []); SPB_AT = Date.now(); }
   return SPB || [];
 }
+// 運用の「この空港に来る特別塗装機」用：いま飛んでいる特別塗装機（special_now）の足あとだけを1回で読む
+//（前は全部の機体を30機ずつ4回読んでいた。特別塗装機の画面を1分以内に開いていれば、その結果を使う）
+let SPB_LIVE = null, SPB_LIVE_AT = 0, SPB_LIVE_KEY = "";
+const spbLiveSrc = () => SPB && Date.now() - SPB_AT < 60_000 ? SPB : (SPB_LIVE || []);
+async function loadSpbLive(){
+  if(!SERVER) return [];
+  if(SPB && Date.now() - SPB_AT < 60_000) return SPB;
+  const regs = [...SPECIAL.keys()].filter(r => LIVERY_NAMES[r]).sort(), key = regs.join(",");
+  if(!regs.length){ SPB_LIVE = []; SPB_LIVE_KEY = ""; return SPB_LIVE; }
+  if(SPB_LIVE && key === SPB_LIVE_KEY && opsFresh(SPB_LIVE_AT, 50_000)) return SPB_LIVE;
+  const parts = []; for(let i = 0; i < regs.length; i += 30) parts.push(regs.slice(i, i + 30));
+  const got = await Promise.all(parts.map(p => rpcPost("livery_board", { p_regs:p })));
+  if(got.some(Array.isArray)){ SPB_LIVE = got.flatMap(x => Array.isArray(x) ? x : []); SPB_LIVE_AT = Date.now(); SPB_LIVE_KEY = key; }
+  return SPB_LIVE || [];
+}
 // 機体ごとの状態。flying：いま空にいる、today：今日飛んだ、recent：この30日、none：見ていない
-function spbRows(){
-  const by = new Map((SPB || []).map(b => [b.reg, b])), today = spJstDate(Date.now());
+function spbRows(src = SPB){
+  const by = new Map((src || []).map(b => [b.reg, b])), today = spJstDate(Date.now());
   return Object.entries(LIVERY_NAMES).map(([reg, name]) => {
     const b = by.get(reg) || {}, air = LIVERY_AIR[reg] || "", legs = (Array.isArray(b.today) ? b.today : []).map(l => ({ ...l }));
     // 発着が分からない便は、前後の便でつなぐ（前の便の到着 ＝ 次の便の出発）
@@ -10319,14 +10363,27 @@ document.addEventListener("click", async e => {
   if(open){ out.innerHTML = `<p class="hint">読み込んでいます…</p>`; out.innerHTML = predictionHTML(await loadPrediction(reg)); }
 });
 async function renderSpecial(){
-  await Promise.all([loadSpecial(), loadSpb()]); const box = $("opsSpecial"), html = specialHTML();
-  box.hidden = !html; box.innerHTML = html;
+  const draw = () => { const box = $("opsSpecial"), html = specialHTML(); box.hidden = !html; box.innerHTML = html; };
+  // いま飛んでいる機体が分かってから、その機体の足あとだけを読む（特別塗装機の全部の足あとは、特別塗装機の画面を開いたときに読む）
+  await loadSpecial(); draw(); await loadSpbLive(); draw();
 }
+/* 運用の見方ごとに要るもの。選んでいない見方の分は読まない（11/13 の見回り：開くと14本同時だった） */
+const OPS_NEED = { alerts:["runway", "board"], special:["runway", "photo"], curfew:["runway"], board:["board", "day", "strip", "photo"], foreign:["board"],
+  yday:["day"], ontime:["ontime"], art:["art"], ga:["runway", "board", "photo"], traffic:["runway", "photo"] };
+const opsNeed = k => (OPS_NEED[k] || []).includes(VIEW.ops);
+// 見方を変えたときは、3分以内に読んだ結果をそのまま使う（案内板・お知らせ・海外の便を取り直さない）。1分ごとの読み直しは今までどおり
+let OPS_LAZY = false;
+const opsFresh = (at, ttl) => Date.now() - at < (OPS_LAZY ? Math.max(ttl, 180_000) : ttl);
 async function renderOpsAlerts(){
   if(!SERVER) return;
-  renderSpecial(); renderCurfew(); renderBoard(); renderYday(); renderOntime(); renderArt(); renderGaBox();
+  // 選んでいる見方で見えるものだけ読む（ほかの見方の分は、その見方を選んだときに読む）
+  const need = opsNeed;
+  if(need("special")) renderSpecial(); if(need("curfew")) renderCurfew(); if(need("board")) renderBoard(); if(need("yday")) renderYday();
+  if(need("ontime")) renderOntime(); if(need("art")) renderArt(); if(need("ga")) renderGaBox();
+  const box = $("opsAlerts");
+  if(!need("alerts") || !fwOn()){ if(!fwOn()){ box.hidden = true; box.innerHTML = ""; } return; }
   const iata = OPS_AP; await loadFlightAlerts(iata); if(OPS_AP !== iata) return;
-  const box = $("opsAlerts"), html = fwHTML(FW.get(iata), iata, true);
+  const html = fwHTML(FW.get(iata), iata, true);
   box.hidden = !html; box.innerHTML = html;
   const dt = $("opsDelayTile"); if(dt) dt.innerHTML = delayTileHTML(FW.get(iata));
 }
@@ -10405,7 +10462,7 @@ function aptPos(c){ try{ return IATA[c] || (WORLD_POS[c] ? { lat:WORLD_POS[c][0]
 function intlKm(a, b){ const p = aptPos(a), q = aptPos(b); return p && q ? Math.round(km(p, q)) : 0; }
 async function loadBoard(iata){
   if(!SERVER) return null;
-  if(BOARD && BOARD_AP === iata && BOARD.kind === BOARD_KIND && Date.now() - BOARD_AT < 110_000) return BOARD;
+  if(BOARD && BOARD_AP === iata && BOARD.kind === BOARD_KIND && opsFresh(BOARD_AT, 110_000)) return BOARD;
   try{ const r = await fetch(SORAMEMO_CONFIG.supabaseUrl.replace(/\/$/, "") + "/rest/v1/rpc/airport_board", { method:"POST",
       headers:{ "Content-Type":"application/json", apikey:SORAMEMO_CONFIG.supabaseAnonKey, Authorization:"Bearer " + SORAMEMO_CONFIG.supabaseAnonKey }, body:JSON.stringify({ p_iata:iata, p_kind:BOARD_KIND }) });
     if(r.ok){ BOARD = await r.json(); BOARD_AP = iata; BOARD.kind = BOARD_KIND; BOARD_AT = Date.now(); return BOARD; } }catch(e){}
@@ -10422,7 +10479,7 @@ const FOREIGN_JA = { KE:"大韓航空", OZ:"アシアナ航空", "7C":"チェジ
   OM:"MIATモンゴル航空", AI:"エア・インディア", ZG:"ZIPAIR", "3K":"ジェットスター・アジア" };
 async function loadForeign(iata){
   if(!SERVER) return null;
-  if(FOREIGN && FOREIGN_AP === iata && Date.now() - FOREIGN_AT < 60_000) return FOREIGN;
+  if(FOREIGN && FOREIGN_AP === iata && opsFresh(FOREIGN_AT, 60_000)) return FOREIGN;
   try{ const r = await fetch(SORAMEMO_CONFIG.supabaseUrl.replace(/\/$/, "") + `/functions/v1/airport-foreign?iata=${iata}`, { headers:{ apikey:SORAMEMO_CONFIG.supabaseAnonKey } });
     if(r.ok){ const d = await r.json(); if(Array.isArray(d.planes)){ FOREIGN = d; FOREIGN_AP = iata; FOREIGN_AT = Date.now(); return d; } } }catch(e){}
   return FOREIGN_AP === iata ? FOREIGN : null;
@@ -10431,7 +10488,7 @@ function foreignHTML(d, arr){
   if(!d || BOARD_KIND === "dom") return "";
   const ST = { approach:"着陸に向かっています", landed:"着陸しました", ground:"出発前（地上）", departed:"離陸しました" };
   const list = (d.planes || []).filter(p => p.kind === (arr ? "arr" : "dep"));
-  const rows = list.map(p => `<li><span class="dot" aria-hidden="true"></span><b>${esc(arr ? placeAny(p.other) + "から" : placeAny(p.other) + "へ")}</b>
+  const rows = list.map(p => `<li><span class="dot" aria-hidden="true"></span><b>${esc(placeAny(p.other))}<span class="nw">${arr ? "から" : "へ"}</span></b>
       <span class="fl"><i class="intl">海外</i>${esc(p.flight)}${p.type ? "・" + esc(p.type) : ""}${FOREIGN_JA[p.airline] ? "・" + esc(FOREIGN_JA[p.airline]) : ""}</span>
       <span class="rel">${ST[p.status] || ""}</span><span class="tm">推定${p.alt_ft != null ? `　高度 ${fmtKm(p.alt_ft)}ft` : ""}　${p.km}km</span></li>`).join("");
   return `<div class="bdhead"><h3>海外の航空会社（いま近くにいる便）</h3></div>
@@ -10451,7 +10508,7 @@ function boardHTML(d, fg){
   const kind = f => f.actual ? ["実際", f.actual] : f.est ? ["見込み", f.est] : (f.inferred || f.predicted) ? ["推定", f.inferred || f.predicted] : ["定刻", f.sched];
   const items = list.map(f => { const [k, t] = kind(f), past = Date.parse(f.t) <= now, late = Math.round((Date.parse(t) - Date.parse(f.sched)) / 60000);
     return `<li class="${past ? "past" : ""}"><span class="dot" aria-hidden="true"></span>
-      <b>${esc(arr ? name(f.other) + "から" : name(f.other) + "へ")}</b><span class="fl">${f.intl ? `<i class="intl">国際</i>` : ""}${esc(f.flight)}${f.aircraft ? "・" + esc(f.aircraft) : ""}</span>
+      <b>${esc(name(f.other))}<span class="nw">${arr ? "から" : "へ"}</span></b><span class="fl">${f.intl ? `<i class="intl">国際</i>` : ""}${esc(f.flight)}${f.aircraft ? "・" + esc(f.aircraft) : ""}</span>
       <span class="rel">${boardRel(f.t, now)}</span><span class="tm">${k} ${hmS(t)}${late >= 15 && k !== "定刻" ? `<em>${late}分遅れ</em>` : ""}</span></li>`; }).join("");
   const hrs = d.hours || [], nowH = new Date(now).getHours();
   const late = hrs.reduce((x, h) => x + Number(h.late || 0), 0), cancel = hrs.reduce((x, h) => x + Number(h.cancel || 0), 0);
@@ -10474,7 +10531,8 @@ function boardHTML(d, fg){
 }
 async function renderBoard(){
   const iata = OPS_AP, box = $("opsBoard"); if(!box) return;
-  const [d, fg] = await Promise.all([loadBoard(iata), loadForeign(iata)]); if(OPS_AP !== iata) return;
+  // 海外の便は案内板の見方のときだけ読む（1日の山・短冊・撮る人は JAL・ANA の時刻表だけを使う）
+  const [d, fg] = await Promise.all([loadBoard(iata), opsNeed("foreign") ? loadForeign(iata) : FOREIGN_AP === iata ? FOREIGN : null]); if(OPS_AP !== iata) return;
   if(!d){ box.hidden = true; box.innerHTML = ""; return; }
   box.hidden = false; box.innerHTML = boardHTML(d, fg); renderOpsDerived(d);
 }
@@ -11754,11 +11812,11 @@ document.addEventListener("click", async e => {
 });
 // 運用のタブを開いたとき（ほかのタブへ移ったら、機体の読み込みを止める）
 async function openOps(){
-  track("ops", "open"); OPS_MODE = "auto"; OPS_OBS = null;
+  track("ops", "open"); OPS_MODE = "auto"; OPS_OBS = null; if(!OPS_WX) OPS_WX_WAIT = true;
   $("opsWx").textContent = "気象通報を読み込んでいます…"; renderOps();
   const [m] = await Promise.all([loadMetar(), loadLeaflet().catch(() => {})]);
-  OPS_WX = m; $("opsWx").textContent = wxText(m); renderOps(); renderOpsAlerts();
-  setTimeout(startTraffic, 120);   // 地図ができてから
+  OPS_WX = m; OPS_WX_WAIT = false; $("opsWx").textContent = wxText(m); renderOps(); renderOpsAlerts();
+  setTimeout(() => { if(opsOn() && opsNeed("traffic")) startTraffic(); }, 120);   // 地図ができてから。地図のない見方では読まない
   // 基本はいちばん近い空港にする（タブで選んだあとは、このページを開いているあいだ変えない）
   autoOpsAirport().then(ap => { if(!ap) return; OPS_NEAR = ap; if(ap !== OPS_AP && !OPS_PICKED && opsOn()) setOpsAirport(ap); else renderOps(); });
 }
@@ -11770,12 +11828,12 @@ async function setOpsAirport(iata){
   if(!OPS_AIRPORTS[iata]) return;
   OPS_AP = iata; try{ localStorage.setItem("soramemo.opsAirport", iata); }catch(e){}
   SP_SPOT = null;
-  OPS_MODE = "auto"; OPS_OBS = null; OPS_WX = null; OPS_PLANES = []; TRAFFIC_FIT = false; OPS_SID_DIR = "all";
+  OPS_MODE = "auto"; OPS_OBS = null; OPS_WX = null; OPS_WX_WAIT = true; OPS_PLANES = []; TRAFFIC_FIT = false; OPS_SID_DIR = "all";
   if(TRAFFIC_LAYER){ TRAFFIC_LAYER.remove(); TRAFFIC_LAYER = null; }
   if(OPS_MAP){ OPS_MAP._opsAp = iata; OPS_MAP.setView(opsDef().center, 10, { animate:false }); }
   $("trafficNote").textContent = ""; $("opsWx").textContent = "気象通報を読み込んでいます…"; renderOps();
   const m = await loadMetar(); if(OPS_AP !== iata) return;
-  OPS_WX = m; $("opsWx").textContent = wxText(m); renderOps(); startTraffic(); renderOpsAlerts();
+  OPS_WX = m; OPS_WX_WAIT = false; $("opsWx").textContent = wxText(m); renderOps(); if(opsNeed("traffic")) startTraffic(); else stopTraffic(); renderOpsAlerts();
 }
 document.addEventListener("click", e => { const b = e.target.closest("[data-ops-ap]"); if(!b) return; OPS_PICKED = true; track("ops_ap", b.dataset.opsAp); setOpsAirport(b.dataset.opsAp); });
 

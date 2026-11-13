@@ -4,7 +4,7 @@
 //   保存した版がまだないとき（はじめて開いたとき）は、網から取る
 // ・アイコンや、版の番号が付いた外部の部品・フォントは、保存した版を使う
 // ・サーバー（Supabase）などとの通信には手を出さない（失敗は失敗としてアプリに伝える）
-const CACHE = "soramemo-27990f99d3";   // 配る用を作るとき（tools/build.mjs）に中身から自動で付く
+const CACHE = "soramemo-76707b1e54";   // 配る用を作るとき（tools/build.mjs）に中身から自動で付く
 const CORE = ["./", "./index.html", "./config.js", "./manifest.webmanifest", "./icon.svg", "./icon-192.png", "./icon-512.png", "./privacy.html", "./terms.html", "./tokushoho.html", "./fonts/mincho0-eb2e11e60b.woff2", "./fonts/dot0-8d4bfa62e8.woff2", "./fonts/sign0-046a5a18b8.woff2"];
 // フォント（fonts/ の中身はファイル名に中身の印が付いている）は、版が変わっても消さない別の保存場所に置く（公開のたびに取り直さない）
 const FONTS = "soramemo-fonts";
