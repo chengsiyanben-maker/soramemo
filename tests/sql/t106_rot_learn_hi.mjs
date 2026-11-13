@@ -1,4 +1,4 @@
-// 運用予想を learn_hi に切り替える（移行 166）：predict_rotation_v2 は rot_predict('learn_hi', …) と同じ答え・返す形は今のまま・
+// 運用予想を learn_hi に切り替える（移行 167）：predict_rotation_v2 は rot_predict('learn_hi', …) と同じ答え・返す形は今のまま・
 // 2回しか見ていない便は出さない・よく見る便は今までどおり・権限は anon・authenticated に実行だけ・表と採点は変えない
 import { PGlite } from '@electric-sql/pglite';
 import fs from 'fs';

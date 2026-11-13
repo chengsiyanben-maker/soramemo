@@ -3,7 +3,7 @@
 PM の指示（11/13 17時30分）・本人「切り替えて」。ブランチ data/rot-learn-hi → 下書き PR（main 向け）。main にも本番にも入れていない。
 
 ## 1. 作ったもの
-- 移行 166 `supabase/migrations/20261113000166_rot_learn_hi.sql`
+- 移行 167 `supabase/migrations/20261113000167_rot_learn_hi.sql`
   - predict_rotation_v2 が呼ぶ方式を `rot_predict('learn', …)` → `rot_predict('learn_hi', …)` に（学んだ便を出すしきい値が「2回以上・3割以上」→「3回以上・4割以上」）
   - 返す形は今のまま。`method` の値だけ `'learn_hi'` になる（記録のない機体の答えも同じ）。便ごとの `src` は今までどおり livery／learn／base
   - 表・索引・RLS・毎晩の処理（rot-pairs・rot-eval の採点は base・learn・learn_hi の3通りのまま）は変えない。関数の権限も今のまま（anon・authenticated に実行だけ、security definer）
