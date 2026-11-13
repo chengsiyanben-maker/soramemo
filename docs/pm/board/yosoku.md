@@ -45,11 +45,19 @@
 - 本人に決めてほしいこと：ログインなしの人に遅れ・欠航を出さなくてよいか（1行の案内を出すか）／「気象通報なし（仮の表示）」の言い方／livery_board を「飛んでいる分だけ1回」にしたこと
 - チェックイン担当へ：setViewsw の送り方を共通にするか（checkin.md の依頼に書いた）
 
-## 次にやること
-1. PR #83 のレビュー・CI に答える。本人の3つの決定を待つ
-2. PR #25・#36 のレビューに答える（11/8 時点でコメントなし）
-3. 本人が docs/pm/yosoku-livery-coverage.sql を流した結果が来たら、report-livery-predict.md の見込みを本番の数に直す
-4. 11/13 の方式の決定を待ってから、yosoku/use-method → yosoku/livery-predict（画面はデザイン担当の案のあと）
+## 11/13 夜にしたこと（画面の予想を v2 に切り替え）→ 下書き PR #86（yosoku/rot-v2）・報告 docs/pm/report-rot-v2.md
+- loadPrediction を「predict_rotation → predict_rotation_v2 → predict_rotation_reg」に。v2 が null・失敗・空なら reg に戻す（predHasNext）
+- src＝livery の便は「特別塗装機の予定の便から」／機体の1日は「予想・塗装機の予定」（predWhy・predTag）。learn は「前の42日」。書き方「推定です…」は今のまま
+- 変えた関数：loadPrediction・predictionHTML・planeHTML（足した：predHasNext・predWhy・predTag）
+- テスト t131（14項目）・t68・tests/ops 通過。全 e2e は t99・t105（経営・main でも落ちる）・t48（pdf417gen なし）以外通過
+- 本人に決めてほしいこと：JAL・ANA でも v2 を先にするか（今は predict_rotation が先で learn_hi が出ない機体がある）／「保証しません」を画面の文に足すか／反映は data/rot-learn-hi のあと
 
-## PM から積んだ次の仕事（11/13 17時30分、画面の予想を v2 に切り替え）
+## 次にやること
+1. PR #86 のレビュー・CI に答える。本人の3つの決定（JAL・ANA の順番など）を待つ
+2. PR #83 のレビュー・CI に答える。本人の3つの決定を待つ
+3. PR #25・#36 のレビューに答える
+4. 本人が docs/pm/yosoku-livery-coverage.sql を流した結果が来たら、report-livery-predict.md の見込みを本番の数に直す
+5. 塗装ごとの運用予想（yosoku/livery-predict）：方式は learn_hi に決まったので、デザイン担当の画面案を待って作る。約4週間後（42日そろったら）の比べ直しの結果も見る
+
+## PM から積んだ次の仕事（11/13 17時30分、画面の予想を v2 に切り替え）【済み・PR #86】
 本人「切り替えて」（決定事項：運用予想の画面は learn_hi）。画面が今呼んでいる predict_rotation_reg を predict_rotation_v2 に替える（運用タブ・撮る人の「この機体の運用（推定）」・機体のくわしく・特別塗装機の この先の便など、予想を出す部品のすべて）。返す形は同じで、'estimate': true と便ごとの src が増える。見た目と「予想・保証しない」の書き方は変えないので画面案は要らない。v2 が null や空のときは今の predict_rotation_reg に戻す。データ担当が v2 を learn_hi にする移行を data/rot-learn-hi で作る。ブランチ yosoku/rot-v2、下書き PR。変えた関数の名前を報告に
