@@ -1,0 +1,209 @@
+<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=390, initial-scale=1"><title>案A 撮る人のくわしく</title><style>
+:root{--bg:#EEF1F5;--card:#FFFFFF;--ink:#24292F;--ink2:#374151;--mute:#6B7280;--sub:#8A919C;--pill:#EEF0F3;--hero:#0F1B2D;
+  --now:#C2410C;--now-wash:#FDF0E6;--pred:#4B5563;--pred-wash:#F4F6F9;--ok:#1F7A3F;--ok-wash:#E7F6EC;--jal:#C8102E;
+  --sh:0 12px 26px -18px rgba(15,23,42,.30),inset 0 0 0 1px rgba(17,24,39,.06);
+  --gothic:"Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic UI","Noto Sans CJK JP","Noto Sans JP",system-ui,sans-serif}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg)}
+body{width:390px;min-height:844px;margin:0 auto;font:500 15px/1.5 var(--gothic);color:var(--ink);-webkit-font-smoothing:antialiased;position:relative;overflow-x:hidden}
+.pad{padding:12px 16px 120px}
+button{font:inherit;color:inherit}
+.top{display:flex;align-items:center;gap:8px;height:56px}
+.back{height:44px;padding:0 16px 0 10px;border:0;border-radius:999px;background:var(--card);box-shadow:var(--sh);font-weight:800;font-size:15px;display:inline-flex;align-items:center;gap:4px}
+.back svg{width:20px;height:20px;stroke:var(--ink);fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.top h1{flex:1;text-align:center;font-size:17px;font-weight:800;margin:0 52px 0 0}
+.search{display:flex;gap:8px;margin:6px 0 12px}
+.search input{flex:1;min-width:0;width:100%;height:48px;border:0;border-radius:999px;background:var(--card);box-shadow:var(--sh);padding:0 18px;font:800 17px var(--gothic);color:var(--ink)}
+.btn1{height:48px;padding:0 20px;border:0;border-radius:999px;background:var(--hero);color:#fff;font-weight:800;font-size:15px}
+.card{background:var(--card);border-radius:22px;box-shadow:var(--sh);padding:16px}
+.card+.card,.card+.sec,.sec+.card{margin-top:12px}
+.plane{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+.plane b{font-size:22px;font-weight:900;letter-spacing:.01em}
+.plane small{display:block;font-size:13px;color:var(--mute);margin-top:2px}
+.live{flex:none;font-size:13px;font-weight:800;color:var(--ok);background:var(--ok-wash);border-radius:999px;padding:6px 12px}
+.map{margin-top:12px;border-radius:16px;overflow:hidden;background:#E8EEF4;position:relative}
+.map svg{display:block;width:100%;height:auto}
+.legend{display:flex;gap:16px;flex-wrap:wrap;margin-top:10px;font-size:13px;color:var(--mute)}
+.legend i{display:inline-block;width:22px;height:0;border-top:3px solid #9CA3AF;vertical-align:middle;margin-right:6px}
+.legend i.p{border-top:3px dashed var(--pred)}
+.legend i.n{border-top-color:var(--now)}
+.sec{display:flex;align-items:baseline;justify-content:space-between;margin:20px 4px 8px}
+.sec b{font-size:16px;font-weight:800}
+.sec span{font-size:13px;color:var(--mute)}
+/* 時間の線 */
+.tl{list-style:none;margin:0;padding:6px 14px;background:var(--card);border-radius:22px;box-shadow:var(--sh)}
+.tl li{display:grid;grid-template-columns:62px 22px 1fr auto;align-items:start;column-gap:8px;padding:10px 0;position:relative}
+.tl .tm b{display:block;font-size:20px;font-weight:900;line-height:1.15;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.tl .tm small{display:block;font-size:13px;color:var(--sub);line-height:1.3}
+.tl .dot{position:relative;height:100%;min-height:40px}
+.tl .dot::before{content:"";position:absolute;left:10px;top:0;bottom:-20px;border-left:3px solid #CBD2DA}
+.tl li:last-child .dot::before{bottom:auto;height:14px}
+.tl .dot i{position:absolute;left:4px;top:5px;width:15px;height:15px;border-radius:50%;background:#9CA3AF;box-shadow:0 0 0 3px var(--card)}
+.tl .tx b{font-size:16px;font-weight:800}
+.tl .tx span{display:block;font-size:15px;color:var(--ink2);line-height:1.4}
+.tl .tx small{display:block;font-size:13px;color:var(--mute);margin-top:2px}
+.tl .tag{font-size:13px;color:var(--sub);font-weight:700;padding-top:3px;text-align:right}
+.tl li.now{background:var(--now-wash);border-radius:16px;margin:4px -8px;padding:10px 8px}
+.tl li.now .dot::before{border-left-color:#CBD2DA}
+.tl li.now .dot i{background:var(--now);box-shadow:0 0 0 3px var(--now-wash),0 0 0 7px rgba(194,65,12,.18)}
+.tl li.now .tag{color:var(--now)}
+.tl li.now .tm b{color:var(--now)}
+.tl li.p .dot::before{border-left:3px dashed #B7BFC9}
+.tl li.p .dot i{background:var(--card);border:2.5px dashed var(--pred);box-shadow:0 0 0 3px var(--card)}
+.tl li.p .tm b{color:var(--pred);font-weight:800}
+.tl li.p .tm b em{font-style:normal;font-size:13px;font-weight:700;color:var(--sub);margin-left:1px}
+.tl li.p .tx b,.tl li.p .tx span{color:var(--pred)}
+.tl li.day{display:block;padding:12px 0 2px 92px;font-size:13px;font-weight:800;color:var(--mute)}
+.tl li.day::before{content:"";position:absolute;left:80px;top:0;bottom:0;border-left:3px dashed #B7BFC9}
+/* 境目 */
+.edge{display:block!important;padding:14px 0 10px!important;text-align:center}
+.edge::before{content:"";position:absolute;left:0;right:0;top:27px;border-top:2px dashed #C3CAD3}
+.edge b{position:relative;display:inline-block;background:var(--hero);color:#fff;font-size:13px;font-weight:800;border-radius:999px;padding:5px 14px}
+.edge small{display:block;font-size:13px;color:var(--mute);margin-top:6px}
+/* 確からしさ（3段の濃さ＋言葉） */
+.cf{display:inline-flex;align-items:center;gap:6px;white-space:nowrap;font-size:13px;font-weight:800;color:var(--pred)}
+.cf .d{display:inline-flex;gap:3px}
+.cf .d i{width:9px;height:9px;border-radius:50%;background:#D5DAE1}
+.cf.c3 .d i{background:var(--pred)}
+.cf.c2 .d i:nth-child(-n+2){background:var(--pred)}
+.cf.c1 .d i:nth-child(1){background:var(--pred)}
+.cf.lv{color:var(--ink)}
+.cf.lv .d i{border-radius:3px;background:var(--ink)}
+.pillbtn{height:44px;padding:0 18px;border:0;border-radius:999px;background:var(--pill);font-weight:800;font-size:15px;display:inline-flex;align-items:center;gap:6px;color:var(--ink)}
+.pillbtn.dark{background:var(--hero);color:#fff}
+.pillbtn.w{background:var(--card);box-shadow:var(--sh)}
+.pillbtn.line{background:transparent;box-shadow:inset 0 0 0 1.5px #C9CFD7}
+.row2{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.note{font-size:13px;line-height:1.7;color:var(--mute);margin:16px 4px 0}
+.warn{display:flex;gap:8px;align-items:flex-start;font-size:13px;line-height:1.6;color:var(--ink2);background:var(--pred-wash);border-radius:14px;padding:10px 12px;margin-top:10px}
+.warn b{font-weight:800}
+/* 下のタブ帯 */
+.tabbar{position:fixed;left:50%;transform:translateX(-50%);bottom:12px;width:362px;height:68px;border-radius:999px;background:rgba(255,255,255,.96);box-shadow:0 14px 34px -16px rgba(15,23,42,.35),inset 0 0 0 1px rgba(17,24,39,.06);display:flex;justify-content:space-around;align-items:center;z-index:5}
+.tabbar span{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:13px;font-weight:800;color:var(--mute);min-width:56px}
+.tabbar span svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:1.8}
+.tabbar span.on{color:#2563EB}
+/* 運用タブの欄（今のアプリの .lo / ops カードに合わせる） */
+.opsh{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.opsh b{font-size:17px;font-weight:800}
+.opsh span{font-size:13px;color:var(--mute);background:var(--pill);border-radius:999px;padding:3px 10px;font-weight:700}
+.spl{list-style:none;margin:0;padding:0}
+.spl>li{padding:14px 0}
+.spl>li+li{box-shadow:0 -1px 0 #EEF0F3}
+.spl .nm{font-size:16px;font-weight:800}
+.spl .nm small{font-size:13px;font-weight:500;color:var(--mute);margin-left:4px}
+.spl .wh{font-size:14px;color:var(--ink2);margin-top:2px}
+.spl .pillbtn{margin-top:10px;height:44px;font-size:14px}
+/* 小さい時間の線（一覧の中に開く形） */
+.mini{list-style:none;margin:10px 0 0;padding:6px 12px;background:var(--pred-wash);border-radius:18px}
+.mini li{display:grid;grid-template-columns:56px 18px 1fr auto;column-gap:6px;align-items:start;padding:8px 0;position:relative}
+.mini .tm b{display:block;font-size:17px;font-weight:900;line-height:1.2;font-variant-numeric:tabular-nums}
+.mini .tm small{display:block;font-size:13px;color:var(--sub)}
+.mini .dot{position:relative;min-height:34px}
+.mini .dot::before{content:"";position:absolute;left:7px;top:0;bottom:-16px;border-left:2.5px dashed #B7BFC9}
+.mini li:last-child .dot::before{bottom:auto;height:12px}
+.mini .dot i{position:absolute;left:1px;top:5px;width:14px;height:14px;border-radius:50%;background:var(--pred-wash);border:2.5px dashed var(--pred)}
+.mini li.now .dot i{background:var(--now);border:0;box-shadow:0 0 0 3px var(--pred-wash),0 0 0 6px rgba(194,65,12,.18)}
+.mini li.now .dot::before{border-left:2.5px solid #CBD2DA}
+.mini li.now .tm b{color:var(--now)}
+.mini li.now .tag{color:var(--now);font-size:13px;font-weight:800}
+.mini li.p .tm b{color:var(--pred);font-weight:800}
+.mini li.p .tm b em{font-style:normal;font-size:13px;color:var(--sub);font-weight:700}
+.mini .tx{font-size:14px;line-height:1.45;color:var(--ink2)}
+.mini .tx b{font-size:15px;font-weight:800;color:var(--ink)}
+.mini li.p .tx,.mini li.p .tx b{color:var(--pred)}
+.mini .tx small{display:block;font-size:13px;color:var(--mute)}
+.mini .edge{grid-template-columns:1fr!important;padding:12px 0 6px!important}
+.mini .edge::before{top:24px}
+.mini .edge b{background:var(--hero)}
+.mini .edge small{margin-top:4px}
+.minifoot{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:10px}
+.minifoot small{font-size:13px;color:var(--mute)}
+/* 濃い面（特別塗装機のくわしく）＝今のアプリの spbhero に合わせる */
+.hero{background:var(--hero);color:#fff;border-radius:24px;padding:18px;position:relative;overflow:hidden;box-shadow:0 18px 34px -22px rgba(15,23,42,.6)}
+.hero::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--jal);opacity:.85}
+.hero small{font-size:13px;color:#A7B0BC}
+.hero .nm{font-size:22px;font-weight:800;margin-top:2px}
+.hero .rt{display:flex;align-items:center;gap:14px;font-size:34px;font-weight:900;margin-top:6px;letter-spacing:.02em}
+.hero .rt i{font-style:normal;color:#E9C46A;font-size:26px}
+.hero .rt span{margin-left:auto;font-size:14px;font-weight:600;color:#C9D1DB}
+.tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+.tiles div{background:rgba(255,255,255,.07);border-radius:14px;padding:10px 12px}
+.tiles span{display:block;font-size:13px;color:#A7B0BC}
+.tiles b{font-size:21px;font-weight:900}
+.tiles b small{font-size:13px;color:#A7B0BC;margin-left:2px}
+/* シート */
+.dim{position:fixed;inset:0;background:rgba(15,23,42,.42);z-index:8}
+.sheet{position:fixed;left:50%;transform:translateX(-50%);bottom:0;width:390px;background:var(--card);border-radius:26px 26px 0 0;padding:10px 20px 28px;z-index:9;box-shadow:0 -18px 40px -20px rgba(15,23,42,.4)}
+.sheet .grab{width:40px;height:5px;border-radius:9px;background:#D5DAE1;margin:0 auto 12px}
+.sheet h2{font-size:19px;font-weight:900;margin:0 0 4px}
+.sheet p{font-size:14px;color:var(--ink2);margin:0 0 12px;line-height:1.65}
+.lv3{list-style:none;margin:0;padding:0}
+.lv3 li{display:grid;grid-template-columns:1fr;gap:4px;align-items:start;padding:12px 0}
+.lv3 li+li{box-shadow:0 -1px 0 #EEF0F3}
+.lv3 .ex{font-size:14px;line-height:1.6;color:var(--ink2)}
+.lv3 .ex b{font-size:15px;color:var(--ink)}
+/* 案B：次の1便を大きく */
+.next{background:var(--card);border-radius:24px;box-shadow:var(--sh);padding:18px;position:relative}
+.next .lab{display:flex;justify-content:space-between;align-items:center}
+.next .lab b{font-size:13px;font-weight:800;color:#fff;background:var(--hero);border-radius:999px;padding:5px 12px}
+.next .big{display:flex;align-items:baseline;gap:4px;margin-top:12px}
+.next .big b{font-size:44px;font-weight:900;line-height:1;letter-spacing:-.02em;color:var(--pred);font-variant-numeric:tabular-nums}
+.next .big em{font-style:normal;font-size:15px;font-weight:700;color:var(--sub)}
+.next .rt{font-size:22px;font-weight:800;margin-top:8px;color:var(--ink2)}
+.next .rt small{font-size:15px;color:var(--mute);font-weight:600;margin-left:6px}
+.next .foot{display:flex;justify-content:space-between;align-items:center;margin-top:14px;padding-top:12px;box-shadow:0 -1px 0 #EEF0F3}
+.next .foot small{font-size:13px;color:var(--mute)}
+.after{list-style:none;margin:0;padding:4px 16px;background:var(--card);border-radius:22px;box-shadow:var(--sh)}
+.after li{display:grid;grid-template-columns:94px 1fr auto;gap:8px;align-items:center;padding:12px 0}
+.after li+li{box-shadow:0 -1px 0 #EEF0F3}
+.after .tm{white-space:nowrap;font-size:18px;font-weight:800;color:var(--pred);font-variant-numeric:tabular-nums}
+.after .tm em{font-style:normal;font-size:13px;color:var(--sub)}
+.after .tx{font-size:15px;color:var(--pred)}
+.after .tx b{font-weight:800}
+.flown{display:flex;align-items:center;justify-content:space-between;background:var(--card);border-radius:22px;box-shadow:var(--sh);padding:14px 16px;min-height:56px}
+.flown b{font-size:15px;font-weight:800}
+.flown small{display:block;font-size:13px;color:var(--mute)}
+.flown svg{width:20px;height:20px;stroke:var(--mute);fill:none;stroke-width:2.2}
+/* 案C：1日の帯 */
+.band{position:relative;height:118px;margin:10px 0 0}
+.band .ax{position:absolute;left:0;right:0;top:34px;height:44px;border-radius:12px;background:var(--pred-wash)}
+.band .blk{position:absolute;top:34px;height:44px;border-radius:10px}
+.band .blk.f{background:#AEB6C0}
+.band .blk.n{background:var(--now)}
+.band .blk.p{background:repeating-linear-gradient(135deg,rgba(75,85,99,var(--a)) 0 5px,rgba(75,85,99,calc(var(--a)*.35)) 5px 10px);box-shadow:inset 0 0 0 2px rgba(75,85,99,var(--a))}
+.band .blk.sel{outline:3px solid var(--hero);outline-offset:2px}
+.band .tk{position:absolute;top:84px;font-size:13px;color:var(--sub);transform:translateX(-50%);font-variant-numeric:tabular-nums}
+.band .nowl{position:absolute;top:22px;height:64px;border-left:2px solid var(--now)}
+.band .nowl span{white-space:nowrap;position:absolute;top:-22px;left:-18px;font-size:13px;font-weight:800;color:var(--now)}
+.band .edgeL{position:absolute;top:2px;font-size:13px;font-weight:800;color:#fff;background:var(--hero);border-radius:999px;padding:2px 10px;white-space:nowrap}
+.bleg{display:flex;flex-wrap:wrap;gap:14px;font-size:13px;color:var(--mute);margin-top:4px}
+.bleg i{display:inline-block;width:18px;height:12px;border-radius:4px;vertical-align:-1px;margin-right:6px}
+.selc{margin-top:12px;background:var(--pred-wash);border-radius:18px;padding:12px 14px;display:grid;grid-template-columns:1fr auto;gap:4px 10px;align-items:center}
+.selc .tm{font-size:24px;font-weight:900;color:var(--pred)}
+.selc .tm em{font-style:normal;font-size:13px;color:var(--sub)}
+.selc .tx{grid-column:1/-1;font-size:15px;color:var(--ink2)}
+.selc .tx b{font-weight:800}
+.small-list{list-style:none;margin:0;padding:4px 16px;background:var(--card);border-radius:22px;box-shadow:var(--sh)}
+.small-list li{display:flex;justify-content:space-between;align-items:center;padding:11px 0;font-size:15px}
+.small-list li+li{box-shadow:0 -1px 0 #EEF0F3}
+.small-list li .t{font-weight:800;font-variant-numeric:tabular-nums;width:64px;display:inline-block}
+.small-list li.p{color:var(--pred)}
+.small-list li small{font-size:13px;color:var(--sub)}
+/* 今の画面（写真に番号） */
+.shot{position:relative;border-radius:22px;overflow:hidden;box-shadow:var(--sh);background:#fff}
+.shot img{display:block;width:100%}
+.mk{position:absolute;width:28px;height:28px;border-radius:50%;background:#C2410C;color:#fff;font-size:15px;font-weight:900;display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 3px #fff}
+.issues{list-style:none;margin:12px 0 0;padding:0;counter-reset:n}
+.issues li{display:grid;grid-template-columns:28px 1fr;gap:10px;background:var(--card);border-radius:18px;box-shadow:var(--sh);padding:12px 14px;font-size:14px;line-height:1.6;color:var(--ink2)}
+.issues li+li{margin-top:8px}
+.issues li i{font-style:normal;width:26px;height:26px;border-radius:50%;background:#C2410C;color:#fff;font-weight:900;display:flex;align-items:center;justify-content:center;font-size:14px}
+.issues li b{color:var(--ink)}
+.cap{font-size:13px;color:var(--mute);margin:6px 4px 0}
+</style></head><body><div class="pad"><div class="top"><button class="back"><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg>戻る</button><h1>JL258</h1></div>
+    <div class="card"><small style="font-size:13px;color:var(--mute)">着陸</small><div style="display:flex;align-items:baseline;gap:8px"><b style="font-size:34px;font-weight:900">15:24</b><small style="font-size:13px;color:var(--sub)">ごろ（推定）</small><span style="margin-left:auto;font-size:15px;font-weight:800">34L か 34R</span></div>
+      <div style="font-size:14px;color:var(--ink2);margin-top:4px">広島 → 羽田・B738・高度 24,000ft・空港まで約180km</div></div>
+    <div class="card"><div style="display:flex;justify-content:space-between;align-items:center"><span><small style="font-size:13px;color:var(--mute)">この機体の運用（予想）</small><b style="display:block;font-size:18px;font-weight:900">JA339J <span style="font-size:13px;color:var(--mute);font-weight:600">★JAL Jubilee Express</span></b></span></div>
+      <ul class="mini"><li class="now"><div class="tm"><b>14:18</b><small>いま</small></div><div class="dot"><i></i></div><div class="tx"><b>JL258</b> 広島 → 羽田<small>着く 15:24ごろ（推定）</small></div><div class="tag">飛行中</div></li><li class="edge"><b>ここから予想</b><small>推定です。保証しません</small></li><li class="p"><div class="tm"><b>16:15<em>ごろ</em></b></div><div class="dot"><i></i></div><div class="tx"><b>JL147</b> 羽田 → 青森<small><span class="cf lv"><span class="d"><i></i><i></i><i></i></span>運航情報の予定</span></small></div><div></div></li><li class="p"><div class="tm"><b>18:35<em>ごろ</em></b></div><div class="dot"><i></i></div><div class="tx"><b>JL148</b> 青森 → 羽田<small><span class="cf c3"><span class="d"><i></i><i></i><i></i></span>高い</span></small></div><div></div></li><li class="p"><div class="tm"><b>20:30<em>ごろ</em></b></div><div class="dot"><i></i></div><div class="tx"><b>JL599</b> 羽田 → 新千歳<small><span class="cf c2"><span class="d"><i></i><i></i><i></i></span>中くらい</span></small></div><div></div></li></ul>
+      <div class="row2"><button class="pillbtn line">機体の1日 ›</button><button class="pillbtn">確からしさとは</button></div></div>
+    <div class="card" style="opacity:.55"><small style="font-size:13px;color:var(--mute)">どこから撮る</small><div style="font-size:15px;font-weight:800;margin-top:4px">城南島海浜公園・浮島町公園 …</div></div>
+    </div></body></html>
