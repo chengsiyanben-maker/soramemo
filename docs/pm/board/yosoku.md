@@ -53,7 +53,7 @@
 - 本人に決めてほしいこと：JAL・ANA でも v2 を先にするか（今は predict_rotation が先で learn_hi が出ない機体がある）／「保証しません」を画面の文に足すか／反映は data/rot-learn-hi のあと
 
 ## 次にやること
-1. PR #86 のレビュー・CI に答える。本人の3つの決定（JAL・ANA の順番など）を待つ
+1. PR #86 は main に入った（11/13 20時14分）。本人の3つの決定（JAL・ANA の順番・「保証しません」・本番の反映は data/rot-learn-hi が先）を待つ
 2. PR #83 のレビュー・CI に答える。本人の3つの決定を待つ
 3. PR #25・#36 のレビューに答える
 4. 本人が docs/pm/yosoku-livery-coverage.sql を流した結果が来たら、report-livery-predict.md の見込みを本番の数に直す
