@@ -50,3 +50,6 @@
 2. PR #25・#36 のレビューに答える（11/8 時点でコメントなし）
 3. 本人が docs/pm/yosoku-livery-coverage.sql を流した結果が来たら、report-livery-predict.md の見込みを本番の数に直す
 4. 11/13 の方式の決定を待ってから、yosoku/use-method → yosoku/livery-predict（画面はデザイン担当の案のあと）
+
+## PM から積んだ次の仕事（11/13 17時30分、画面の予想を v2 に切り替え）
+本人「切り替えて」（決定事項：運用予想の画面は learn_hi）。画面が今呼んでいる predict_rotation_reg を predict_rotation_v2 に替える（運用タブ・撮る人の「この機体の運用（推定）」・機体のくわしく・特別塗装機の この先の便など、予想を出す部品のすべて）。返す形は同じで、'estimate': true と便ごとの src が増える。見た目と「予想・保証しない」の書き方は変えないので画面案は要らない。v2 が null や空のときは今の predict_rotation_reg に戻す。データ担当が v2 を learn_hi にする移行を data/rot-learn-hi で作る。ブランチ yosoku/rot-v2、下書き PR。変えた関数の名前を報告に

@@ -249,3 +249,6 @@
 - 運用を開いたときに遅いもの：airport-traffic 4.07秒・airport-foreign 3.85秒・airport_board 3.80秒・airport_ontime 3.38秒・airport_tracks 3.24秒・special_now 2.99秒・ga_recent 2.31秒・livery_board 1.5〜1.9秒。edge_cache（移行164）を使える所は使い、RPC は索引と問い合わせの見直し（読むだけの SQL で本番の EXPLAIN を本人に頼む形）
 - 開いた直後の app_status・airport_notices・current_events がそれぞれ 1.0〜1.6 秒。小さい表のはずなので原因を
 - 測ったのはアメリカから。日本からの時間は短い見込み。直す前と後を同じ場所で比べる
+
+## PM から積んだ次の仕事（11/13 17時30分、運用予想を learn_hi に）
+本人「切り替えて」。predict_rotation_v2 は今 rot_predict('learn', …) を呼んでいる。'learn_hi' にする移行を（返す形は同じ、'method' も 'learn_hi' に）。表は変えないので RLS の変更はなし（関数の権限は今のまま anon・authenticated に実行だけ）。テストを足す。ブランチ data/rot-learn-hi、下書き PR。運用予想担当が画面の呼び出しを v2 に替える（yosoku.md）。約4週間後（記録が42日そろったら）に rotation-eval-view.sql で比べ直す
