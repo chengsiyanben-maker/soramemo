@@ -1,6 +1,10 @@
 # チェックイン担当の帳面
 
 ## いま持っている仕事
+- 遅れの通知の受け取り（11/13 21時20分の PM の指示・データ担当 data/alert-merge の依頼）：済み。ブランチ checkin/push-renotify（main 4fb2f42 から）・下書き PR #90（016bba9・bcbb90a）、報告 docs/pm/report-push-renotify.md
+  - src/sw.js の push の受け取りで showNotification に `renotify: !!(d.tag && d.renotify)` を渡す（tag がないときは立てない）。web/sw.js を組み立て直した（1行だけ）。画面と src/index.html は変えていない（変えた関数なし）
+  - テスト：t132 を足した（sw.js を node の vm で読み push を5件送る・9項目成功）。t128・t60 成功。全体 93/101（t123・t17・t47・t62・t19 は流し直して成功、残りは前からの t105・t99・t48）
+  - 本人に決めてほしいこと：なし。data/alert-merge と一緒に反映
 - 全体の見回りの直し（11/13 4時の PM の指示・report-sweep-1113／report-speed-1113）：済み。ブランチ checkin/fix-sweep-1113（main 3ac3d91 から）・下書き PR #84（91a8a4e・2d63304）、報告 docs/pm/report-fix-sweep-1113.md、写真 docs/pm/shots-fix-sweep-1113/。11/13 20時、PM のまとめの PR #87（pm/release-1113）で main に入った（4fb2f42）
   - 1 図鑑のツメをデモの帯の下に（667 はすき間 0 の .tight）／2 ホームの MAIN.wrap・上の段の透明な所は pointer-events:none／3 乗る便のカード（国際線）は前の日に出た便まで出す・t60 は「今」と「日本時間 1:30」（clock.set_system_time）の2回／4 フライトの地図は淡色地図（画像）を敷く（maplibre は使わない）／5 ログインの「デモで試す」は新規登録の下に高さ 44px・700px 未満は上を詰める／6 図鑑の scroll-padding-bottom／7 見方の帯・上の段・デモの「終了」・シートのつまみは ::after で押せる範囲 44px 以上（div.viewsw の下の線は背景に）／8 sw.js は staleWhileRevalidate・supabase-js を head で先読み（#sbPreload）・mapBase は部品が届くまで淡色地図・3つの rpc は前から並べて呼んでいた／9 デモの便は今日0時から数えた決まった時刻・loadPushKey はデモでは呼ばない・authCapOff で turnstile.remove()／ついで setViewsw は選んだ見方が見えていれば左端から（見回り #3）
   - 関数：変えた zkTsumeSync・renderRideIntl・renderFlightMap・mapBase・authRender・authClose・setViewsw・demoSeed・loadPushKey／足した authCapOff。fake_turnstile.js に remove
@@ -192,6 +196,8 @@
 - 確認コードは6けた。メールは Gmail、Supabase の送信上限は1時間100通
 
 ## 次にやること
+- PR #90（通知の renotify）：data/alert-merge と一緒に本人の「反映して」を待つ。先にこちらだけ入っても動きは今までと同じ。通知の説明の文を画面に出すかは、デザイン担当の画面案と本人の答えが出てから
+- 手元で build するときは tools で npm ci、python に brotli と fonttools が要る（11/13 の回で入れた）
 - PR #84（全体の見回りの直し）：main に入った（PR #87・4fb2f42）。本番の配る版が Actions で出たか、次の回で確かめる。改善担当の見直しが来たら main から新しいブランチで直す。（前の書き付け）本人の「反映して」と改善担当の見直しを待つ。運用予想の PR #83 と一緒に入れるときは、あとから入る方で web/ を作り直す（node tools/build.mjs）。入る前に t128・t60・t127・t126 を流す。見回りの残りで運用予想の持ち場（#5・#6・#8・#10・運用の通信の数）は運用予想の担当、夜の CSS（#12）は夜の画面の土台のとき。maplibre の読み込みをさらに遅らせる・980KB の script を分けるのは次の候補（PM の判断待ち）
 - PR #75：改善担当は review-app-2 で「反映してよい」、図鑑の題も入れた（7a901bd）。本人の「反映して」が出たら、データ担当の移行163（heliports）と一緒に。入る前に t127・t119・t116 を流す。review-app-2 の反映のあとでよい4つ（844 で一覧が短いとシートの下が空く・表示の編集の補足「隠している」が切れる・東京ヘリポートの名札が点線にかかる・関東の扉に「大利根」が2つ）は、反映のあと main から直す
 - PR #75：改善担当の見直し（加須の 844／740 と東京駅の 844 の引き上げた位置）を待つ。指摘5（夜の札の濃さ）は夜の画面の土台のあと。t17 がまた落ちたら成績の称号を押す所を調べる
@@ -231,6 +237,7 @@
 - tests/ops は手元では npm の playwright にブラウザがないので、全体に入っている playwright をつないで流した（すべて成功）
 
 ## ほかの担当への依頼
+- データ担当（11/13 夜）：data/alert-merge の依頼の renotify は PR #90 で入れた（`renotify: !!(d.tag && d.renotify)`）。反映は一緒に
 - 運用予想の担当（11/13）：見回り #3（帯が送られて開く）は土台の setViewsw で直した（PR #84）。選んだ見方が帯の中に見えていれば左端から、外のときだけ送る。#5・#6・#8・#10 と運用の通信の数・重複（遅い上位 1〜9）はそちらの持ち場のまま
 - 改善担当（11/13）：PR #84 の写真 shots-fix-sweep-1113/（01 図鑑のデモ 844／667・02 ホーム 667・04 フライトの地図・05 ログイン 667・07 運用の帯）と、iPhone で押せる範囲を見てほしい
 - データ担当（11/13）：report-speed-1113 の 3 の 2（サービスワーカーを保存した版を先に）は PR #84 で入れた
@@ -474,5 +481,5 @@ review-c4：見せてよい。本人の答え（ON／OFF か −／＋ か）を
 見回りの直し5本（#79・#81〜#84）をまとめて全 e2e：99件中94件、流し直して t19・t47・t123 は通る。t48 は手元の環境だけ。t62「断ったらしばらく聞かない」は main でも3回中2回落ちる（前からの揺れ）。次の回で揺れの原因を直す
 経営の t128 は t129 に付け直した（PM）
 
-## PM から積んだ次の仕事（11/13 21時20分、遅れの通知の受け取り）
+## PM から積んだ次の仕事（11/13 21時20分、遅れの通知の受け取り）→ PR #90 で入れた（016bba9・報告 report-push-renotify.md）
 データ担当の data/alert-merge（遅れの通知を1件にまとめる）の依頼。src/sw.js の push の受け取り（showNotification）で、届いた中身の renotify を渡す（`renotify: !!d.renotify`、tag があるときだけ）。同じ便の通知を上書きしたときにも鳴るようにするため。画面は変えない。ブランチ checkin/push-renotify、下書き PR。data/alert-merge と一緒に反映する
