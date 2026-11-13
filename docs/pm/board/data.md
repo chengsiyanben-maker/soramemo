@@ -1,6 +1,14 @@
 # データ担当の帳面
 
 ## いま持っている仕事
+- 遅れの通知を1つにまとめて、すぐ知らせる（11/13 20時20分 PM の指示・本人「遅れが二重にくる時があるので、きちんとまとめて、遅れが発生次第通知が来るようにして」）：ブランチ data/alert-merge → main 向けの下書き PR #88（この回で見張りを始めた）。報告 docs/pm/report-alert-merge.md（そのブランチ）
+  - 通知は「便名@運航日@出発空港」で1件（_shared/alert_merge.ts）。出発と到着・推定と運航情報・共同運航の2行（同じ出発・到着・定刻）・空港と乗る便の両方、のどれでも1件。送るのは はじめて／欠航・ダイバート・引き返しになった／運航情報がはじめて届いた／送った遅れから30分以上ふえた、だけ。tag は fw-便名@運航日@出発空港、renotify: true、urgency high
+  - 乗る便（push_subs.flights）は15分から・空港は60分から。遅れのお知らせは15分から作る（推定の出発は離陸が定刻の30分後から、「まだ飛行中」は15分から30分ごとに出し直す）。画面の一覧 flight_alerts() は今までどおり60分以上だけ（返す形同じ）
+  - odpt-status?fast=1 を毎分（cron odpt-status-fast）：乗る便の空港だけ ODPT に問い合わせ（1回6件まで・50秒に1回。_shared/odpt_fast.ts）。目安は今の回 1日約1,150件＋毎分の回 多くて1分6件
+  - 移行 168 alert_merge：flight_alerts に late・official・updated_at、flight_alerts_put（推定で運航情報を上書きしない）、表 alert_push_log（RLS 有効・ポリシーなし・購読と一緒に消える・3日で掃除）、alert_push_claim（同時でも二重にしない）、odpt_status_runs の id 2、見張り（alert_watchdog）と flight-watch の安全装置は60分以上だけ数える。先頭に lock_timeout 10s。影響はチェックイン（通知だけ・画面は同じ）、経営なし
+  - 確かめた結果：関数のテスト alert_merge_test（8）・odpt_fast_test（3）・odpt_status_test・flight_watch_test（15分に直した）通過、SQL t107（24）・t15・t18・t01・t51 通過、番号の重なりなし（160件）。**この回は Deno を入れられなかった（外のコードの入れ方を止められた）ので、Node で Deno.test を動かす代わりの道具（作業用の場所だけ）で流した。CI の deno test を見る**
+  - 本人待ち：docs/pm/alert-dup-check.sql（読むだけ）の結果・毎分の回を入れてよいか・「反映して」
+  - この回は定期の回（PM の指示なし）として呼ばれたが、PM が 20時20分に積んだ指示があったので、そちらをした
 - 運用予想を learn_hi に（11/13 17時30分 PM の指示・本人「切り替えて」）：ブランチ data/rot-learn-hi → main 向けの下書き PR #85。報告 docs/pm/report-rot-learn-hi.md（そのブランチ）
   - 移行 166 rot_learn_hi：predict_rotation_v2 が rot_predict('learn_hi', …) を呼ぶ（返す形は今のまま、'method' だけ 'learn_hi'）。表・索引・RLS・採点（3通り）・権限は変えない。先頭に lock_timeout 10s。影響はチェックイン（運用予想の画面）だけ、経営なし。アプリはまだ v2 を呼んでいない
   - 確かめた結果：t106（10項目）・t90（33）・t91・t92（26）通過、番号の重なりなし（156件）
@@ -143,12 +151,13 @@
 - 本人の決定：規約を改定するときは「terms_versions に1行足す → アプリの定数を変える」の順
 
 ## 移行とテストの番号
-- main の最新は 160（159 airport_yomi・160 airport_facts は 11/10 本番に入った）。156・157 は 11/9 本番に入った。**maint/2026-11-09 の 158 は main の 159 より前になったので、反映の前に migrations.mjs rebase が要る**。maint/2026-11-06 は 153・テスト t93（fix/co-tests の経営の移行も 153 なので、反映の前に rebase）、data/photo-log は 154・テスト t94、maint/2026-11-07 は 155・テスト t95、data/debug-1107 は 156・テスト t96（関数のテストは supabase/tests/live_view_test.ts。main に反映済み）、data/view-prefs は 157・テスト t97、maint/2026-11-09 は 158・テスト t98、maint/2026-11-10 は 161・テスト t101。data/airport-facts は 160・テスト t100。そのほか次に新しく作るものは 162 以降・テストは t102 以降。**maint/2026-11-11 は 162・テスト t102**（161 の maint/2026-11-10 より後。反映の順が変わったら rebase）。**data/heliports の 163・t103 は 11/12 main に入った（PR #75 と一緒）**。**data/speed-1113 は 164・テスト t104**。**data/speed-1113b は 165・テスト t105**（164 の上）。**data/rot-learn-hi は 166・テスト t106**（関数1つだけなので 164・165 と順番が入れ替わってもよい）。次に新しく作るものは 167 以降・テストは t107 以降
+- main の最新は 160（159 airport_yomi・160 airport_facts は 11/10 本番に入った）。156・157 は 11/9 本番に入った。**maint/2026-11-09 の 158 は main の 159 より前になったので、反映の前に migrations.mjs rebase が要る**。maint/2026-11-06 は 153・テスト t93（fix/co-tests の経営の移行も 153 なので、反映の前に rebase）、data/photo-log は 154・テスト t94、maint/2026-11-07 は 155・テスト t95、data/debug-1107 は 156・テスト t96（関数のテストは supabase/tests/live_view_test.ts。main に反映済み）、data/view-prefs は 157・テスト t97、maint/2026-11-09 は 158・テスト t98、maint/2026-11-10 は 161・テスト t101。data/airport-facts は 160・テスト t100。そのほか次に新しく作るものは 162 以降・テストは t102 以降。**maint/2026-11-11 は 162・テスト t102**（161 の maint/2026-11-10 より後。反映の順が変わったら rebase）。**data/heliports の 163・t103 は 11/12 main に入った（PR #75 と一緒）**。**data/speed-1113 は 164・テスト t104**。**data/speed-1113b は 165・テスト t105**（164 の上）。**data/rot-learn-hi は 166・テスト t106**（関数1つだけなので 164・165 と順番が入れ替わってもよい）。（164〜167 は 11/13 に main に入った。166 は経営の co_cron_timeout、learn_hi は 167 に付け直し）。**data/alert-merge は 168・テスト t107**。次に新しく作るものは 169 以降・テストは t108 以降
 - main に別の移行が先に入ったら、反映の前にもう一度 `node tools/migrations.mjs rebase`
 - 本番は小さいプランで一時ファイルの余裕がない。本人に流してもらう SQL は、大きな中間の表・自己結合・大きな並べ替えを避け、索引で引く形にする
 - SQL のテストは全部で約35分かかる（手元で流すときは裏で流してログを見る。t92 だけで約4分。同じログに2回流すと混ざるので、ログの名前を分ける）
 
 ## 次にやること
+00000000000. 遅れの通知（PR #88）：alert-dup-check.sql の結果で①〜④のどれが多いかを見て、まとめ方を確かめる（③④が0でも害はない）。CI の deno test が落ちたら直す（手元は代わりの道具で流した）。「反映して」が出たら番号を確かめ、次の日に cron.job_run_details（odpt-status-fast・odpt-status・flight-watch）を見てもらい、毎分の回が詰まっていないか・ODPT の問い合わせ数を見る。チェックインの sw.js（renotify）が入ったか確かめる
 0000000000. 運用予想 learn_hi（PR #85）：「反映して」が出たら番号を確かめ（main に別の移行が先なら rebase）、反映のあとの SQL の結果を読む。約4週間後（12月中旬、記録が42日そろったら）rotation-eval-view.sql で learn・learn_hi・base を比べ直し、PM に案を出す。運用予想担当の依頼 (1)（predict_rotation を4つ目の方式として採点）・(3)（rot_eval_summary）は本人が決めたら作る。CI とレビューに答える
 000000000. 全体の見回りの直し（PR #81）：speed-check-1113b.sql の結果で、①の平均ms が大きい関数があれば索引・まとめ表の直し（166 以降）。④で airport_tracks が大きければ、運用予想担当と返し方（間引く・時間で分ける）の案を作る。app_boot を作ると決まったら関数（テスト付き）を作り、チェックインに依頼。CI とレビューに答える
 00000000. 速さの見直し（PR #79）：speed-check-1113.sql の結果が来たら、遅い文・全部読みの多い表から索引の直し（165 以降）を作る。⑤（Logs Explorer）が動かなければ直す。反映後に airport-now の Server-Timing で shared が数十ミリ秒に収まるか見る。CI とレビューに答える
@@ -169,6 +178,7 @@
 8. それ以外は PM の指示を待つ（勝手に新しい機能は始めない）。毎週月曜の昼の回は、下の「定期の仕事」（次の候補：点検の結果が来たら、死んだ行や使われていない索引の整理・遅い処理。cold-day-size.sql の結果で全機の航跡の1日が 20MB を超えるなら、ファイルを空港ごとに分ける案を作る。rwy-learn と daily-archive は 11/10 に見た（PR #58）。eta-calib・taxi-out・flight-watch は 11/11 に見た（PR #70）。結果がないまま次の回が来たら、ほかの毎晩・裏の処理（timetable-sync・schedule-sync・odpt-status・co3 の SQL の文）を同じ目で見て、時間の上限のない仕事の一覧を作る）
 
 ## ほかの担当への依頼
+- チェックインへ（11/13 遅れの通知・PR #88）：src/sw.js の push の受け取りの showNotification で、届いた中身の renotify を渡してほしい（`renotify: !!d.renotify`。tag があるときだけ）。同じ便の通知を上書きするときにも鳴るように。今のままでも1件にはまとまるが、上書きで音が鳴らない。通知の url は `./#ops-出発空港`（今の受け取りの決まりで通る）。「この便に乗る」の説明に「15分以上の遅れから知らせます（空港ごとの通知は60分から）」が要るかはデザイン担当の画面案で
 - 運用予想へ（11/13 learn_hi・PR #85）：predict_rotation_v2 は learn_hi で答える形になった（未反映）。返す形は同じ、'method' だけ 'learn_hi'。画面は今までどおり estimate・next[].src を使い、「予想・保証しない」の書き方は変えない。依頼 (2) の p_mode 引数は、learn_hi に決まったので作らず v2 の中身を替えた
 - 運用予想へ（11/13 全体の見回り・PR #81）：(1) livery_board の同じ呼び出し4回を1回に (2) 定時・空の道すじ・ゴーアラウンドは選んだときだけ取る (3) 見方を変えても数分は持っている案内板・お知らせを使う (4) flight_alerts はログインしていない・デモでは呼ばない。案内板と海外の便はサーバー側で速くなる（返す形は同じ）
 - チェックインへ（11/13 全体の見回り）：デモでも push-subscribe が呼ばれている。app_boot を作ると決まったら、開いた直後の app_status・airport_notices・current_events を1つの呼び出しに
@@ -264,6 +274,7 @@
 本人「切り替えて」。predict_rotation_v2 は今 rot_predict('learn', …) を呼んでいる。'learn_hi' にする移行を（返す形は同じ、'method' も 'learn_hi' に）。表は変えないので RLS の変更はなし（関数の権限は今のまま anon・authenticated に実行だけ）。テストを足す。ブランチ data/rot-learn-hi、下書き PR。運用予想担当が画面の呼び出しを v2 に替える（yosoku.md）。約4週間後（記録が42日そろったら）に rotation-eval-view.sql で比べ直す
 
 ## PM から積んだ次の仕事（11/13 20時20分、遅れの通知を1つにまとめて、すぐ知らせる）
+（済み・11/13 の回 → PR #88。上の節）
 本人「飛行機の遅れが二重にくる時があるので、きちんとまとめて、遅れが発生次第通知が来るようにして」。決定事項（11/13 遅れの通知）に従う。通知の送り手（alert_push.ts・flight-watch・odpt-status・flight_alerts）はデータ担当の持ち場。ブランチ data/alert-merge、下書き PR、本番には入れない。
 二重になりうる所（PM が読んだ見当。まず本番の flight_alerts の重なりを読むだけの SQL で確かめて報告に）
 - delay_dep と delay_arr が別の種類なので、1つの遅れで2回届く
