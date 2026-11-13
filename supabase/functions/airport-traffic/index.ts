@@ -17,6 +17,7 @@ import { notifyRegFly as notifyRegFlyWith, wantsRegFly } from "../_shared/livery
 import { normCallsign } from "../_shared/flight_watch.ts";
 import { depEtaMin, dueNow, etaMin, jstDate, opsChanged, spotDepMessage, spotDepReason, spotMessage, spotReason, type SpotDep, type SpotPlane, type SpotSub } from "../_shared/spot_push.ts";
 import webpush from "npm:web-push@3.6.7";
+import { choose, readShared, writeShared } from "../_shared/edge_cache.ts";
 
 const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, { auth: { persistSession: false } });
 
@@ -117,21 +118,39 @@ async function fromLive(iata: string): Promise<{ now?: number; ac?: unknown[] } 
   return { now: newest || now, ac: acFromLive(rows, now) };
 }
 
-async function snapshot(iata: string, view = false): Promise<string> {
+// took があれば、どこに時間がかかったかを入れる（見る人の呼び出しの Server-Timing 用。11/13 速さの見直し）
+async function snapshot(iata: string, view = false, took?: string[]): Promise<string> {
+  const t0 = performance.now(), mark = (k: string) => took?.push(`${k};dur=${Math.round(performance.now() - t0)}`);
   const hit = cache.get(iata);
-  if (hit && Date.now() - hit.at < TTL) return hit.body;
+  if (hit && Date.now() - hit.at < TTL) { mark("mem"); return hit.body; }
+  // 見る人の呼び出しは、ほかの入れ物が20秒以内に作った答え（edge_cache、移行 164）をそのまま使う（11/13 全体の見回りの直し）。
+  //   前は呼ばれるたびに、位置を読み・線を読み・線を書き戻していた（入れ物ごとの記憶はすぐ消えるため、ほぼ毎回）
+  if (view) {
+    const sh = (await readShared(admin, [SHARED(iata)])).get(SHARED(iata));
+    const { fresh } = choose(undefined, sh, TTL);
+    mark("shared");
+    if (fresh?.v) { const body = JSON.stringify(fresh.v); cache.set(iata, { at: fresh.at, body }); return body; }
+  }
   const a = AIRPORTS[iata];
-  const j = (view ? await fromLive(iata).catch(() => null) : null) ?? await fetchArea(iata, !view);
+  const live = view ? await fromLive(iata).catch(() => null) : null;
+  if (view) mark("live");
+  const j = live ?? await fetchArea(iata, !view);
+  if (!live) mark("adsb");
   // まとめて取った円から、この空港の半径の中だけを使う
   const planes = planesFromAdsb(j?.ac, a.at, 14000, NEARBY.filter((o) => o !== a.at)).filter((p) => p.dist_km <= a.nm * 1.852);
   const tr = await syncTrails(iata, planes);
+  mark("trails");
   const body = JSON.stringify({
     iata, at: new Date(typeof j?.now === "number" ? j.now : Date.now()).toISOString(), source: "adsb.lol",
     planes: planes.map((p) => ({ ...p, trail: (tr.get(p.id) ?? []).slice(-150).map((x) => x.p) })),
   });
   cache.set(iata, { at: Date.now(), body });
+  // 見る人の呼び出しで作った答えだけ置き場に入れる（記録の処理の30秒ごとの答えまで入れると、書き込みが倍になるため）
+  if (view) { await writeShared(admin, SHARED(iata), JSON.parse(body)); mark("put"); }
   return body;
 }
+const SHARED = (iata: string) => `traffic:${iata}`;
+const STALE_MAX = 5 * 60_000;   // 作れないときに代わりに出す答えの古さの上限
 
 // 今回取った円の機体（便名のあるもの）の位置を live_positions に残す
 async function recordPositions(bodies: Map<string, string>, slot: number) {
@@ -474,11 +493,16 @@ Deno.serve(async (req) => {
   }
   if (!AIRPORTS[iata]) return new Response(JSON.stringify({ error: "unsupported airport" }), { status: 404, headers: JSON_HEADERS });
   try {
-    return new Response(await snapshot(iata, true), { headers: { ...JSON_HEADERS, "Cache-Control": "max-age=10" } });
+    // 例：Server-Timing: shared;dur=8（置き場の答えを使った）／shared;dur=8, live;dur=35, trails;dur=60, put;dur=70（作った。始めからの時間）。記録が止まっていて adsb.lol に聞いたときは adsb が出る
+    const took: string[] = [], body = await snapshot(iata, true, took);
+    return new Response(body, { headers: { ...JSON_HEADERS, "Cache-Control": "max-age=10", "Server-Timing": took.join(", "), "Access-Control-Expose-Headers": "Server-Timing" } });
   } catch (e) {
     console.error(e);
     const hit = cache.get(iata);
     if (hit) return new Response(hit.body, { headers: { ...JSON_HEADERS, "X-Stale": "1" } });
+    // この入れ物に記憶がなくても、置き場に5分以内の答えがあればそれを出す
+    const sh = (await readShared(admin, [SHARED(iata)])).get(SHARED(iata));
+    if (sh?.v && Date.now() - sh.at < STALE_MAX) return new Response(JSON.stringify(sh.v), { headers: { ...JSON_HEADERS, "X-Stale": "1" } });
     const why = e instanceof Error ? (e.name === "TimeoutError" ? "timeout" : e.message.slice(0, 60)) : "error";
     return new Response(JSON.stringify({ error: "unavailable", why }), { status: 503, headers: JSON_HEADERS });
   }

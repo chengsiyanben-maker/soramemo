@@ -1,5 +1,7 @@
 // そらメモのサービスワーカー（オフラインでも開けるようにする）
-// ・アプリ本体と設定（HTML・config.js）は最新版を優先し、圏外のときだけ保存した版を使う（更新がすぐ届くように）
+// ・アプリ本体と設定（HTML・config.js など）は、保存した版をすぐ出し、裏で新しい版を取って保存し直す（11/13：電波の弱い所でも待たずに開く）
+//   新しい版を配ると sw.js の版も変わるので、新しいサービスワーカーに切り替わったときにアプリが「新しい版が届きました」を出す（今の仕組みのまま）
+//   保存した版がまだないとき（はじめて開いたとき）は、網から取る
 // ・アイコンや、版の番号が付いた外部の部品・フォントは、保存した版を使う
 // ・サーバー（Supabase）などとの通信には手を出さない（失敗は失敗としてアプリに伝える）
 const CACHE = "soramemo-__BUILD__";   // 配る用を作るとき（tools/build.mjs）に中身から自動で付く
@@ -34,6 +36,13 @@ async function networkFirst(req, fallback) {
     return (await cache.match(req, { ignoreSearch: true })) || (fallback && (await cache.match(fallback))) || Response.error();
   }
 }
+async function staleWhileRevalidate(e, fallback) {
+  const req = e.request, cache = await caches.open(CACHE);
+  const hit = (await cache.match(req, { ignoreSearch: true })) || (fallback && (await cache.match(fallback)));
+  const net = fetch(req).then((res) => (res.ok ? cache.put(req, res.clone()).then(() => res) : res));
+  if (hit) { e.waitUntil(net.catch(() => {})); return hit; }
+  return net.catch(() => networkFirst(req, fallback));
+}
 async function cacheFirst(req, name = CACHE) {
   const cache = await caches.open(name), hit = await cache.match(req);
   if (hit) return hit;
@@ -48,7 +57,7 @@ self.addEventListener("fetch", (e) => {
   const url = new URL(req.url);
   if (url.origin === location.origin) {
     const isPage = req.mode === "navigate" || /\.(html|js|webmanifest)$/.test(url.pathname) || url.pathname.endsWith("/");
-    e.respondWith(isPage ? networkFirst(req, req.mode === "navigate" ? "./index.html" : null) : cacheFirst(req, isFont(url) ? FONTS : CACHE));
+    e.respondWith(isPage ? staleWhileRevalidate(e, req.mode === "navigate" ? "./index.html" : null) : cacheFirst(req, isFont(url) ? FONTS : CACHE));
     return;
   }
   if (CDN.some((p) => req.url.startsWith(p))) e.respondWith(cacheFirst(req));
