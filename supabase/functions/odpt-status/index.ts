@@ -1,13 +1,15 @@
 // 航空会社の運航情報（ODPT。JAL・ANA グループの出発・到着）から、欠航・遅れ・ダイバート・引き返しを見つけてお知らせ（flight_alerts）と通知にし、
 // 便ごとの実際の時刻・状態・搭乗口を予定の便（flight_schedule）に残す（フライトの記録の照合・便の候補に使う）。
 //   GET /functions/v1/odpt-status         （pg_cron が5分ごとに呼ぶ。何度呼ばれても、ODPT に問い合わせるのは4分に1回）
+//   GET /functions/v1/odpt-status?fast=1  （pg_cron が毎分呼ぶ。「この便に乗る」で選ばれた便の空港だけを見て、遅れをすぐ知らせる。ODPT への問い合わせは1回に6件まで・50秒に1回）
 //   GET /functions/v1/odpt-status?diag=1  （運営の確認用：ODPT が返してくる項目の名前と状態の値の一覧だけを返す。便のデータは返さない）
 //   GET /functions/v1/odpt-status?diag=2  （運営の確認用：お知らせの文のうち「運航」を含むもの（特別塗装機で飛ぶ便など）の言い回しの一覧）
 // 特別塗装機で飛ぶ予定の便（お知らせの文に「〇〇で運航いたします」）は livery_plans に残し、その空港の特別塗装機の通知を申し込んでいる人へ、飛ぶ前に1回知らせる
 // 機体の位置からの推定ではないので、お知らせに「推定」は付けず「航空会社の運航情報」と書く。
 import { createClient } from "npm:@supabase/supabase-js@2.117.2";
 import { liveryPlans, odptStatus } from "../_shared/odpt_status.ts";
-import { sendAlertPush, sendSpPush } from "../_shared/alert_push.ts";
+import { notifyFlights, sendSpPush } from "../_shared/alert_push.ts";
+import { fastTargets } from "../_shared/odpt_fast.ts";
 import { LIVERIES } from "../_shared/liveries.ts";
 
 const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, { auth: { persistSession: false } });
@@ -18,6 +20,7 @@ const JSON_HEADERS = { "Content-Type": "application/json", "Access-Control-Allow
 const MIN = 60_000;
 
 async function odpt(type: "Departure" | "Arrival", op: string, airport?: string): Promise<unknown[]> {
+  if (!OPERATORS.includes(op)) return [];
   const u = new URL(`${ODPT}/odpt:FlightInformation${type}`);
   u.searchParams.set("odpt:operator", `odpt.Operator:${op}`);
   if (airport) u.searchParams.set(type === "Departure" ? "odpt:departureAirport" : "odpt:arrivalAirport", `odpt.Airport:${airport}`);
@@ -39,6 +42,45 @@ async function fetchAll(type: "Departure" | "Arrival", airports: string[], error
     } catch (e) { errors.push(String(e)); }
   }
   return items;
+}
+
+// お知らせを入れる・書き直す（flight_alerts_put）。入った・書き直した便の schedule_id を返す
+async function putAlerts(alerts: { schedule_id: number }[]) {
+  if (!alerts.length) return { changed: [] as number[], error: null };
+  const { data, error } = await admin.rpc("flight_alerts_put", { p: alerts.map((a) => ({ ...a, official: true })) });
+  return { changed: [...new Set((data ?? []).map((r: { schedule_id: number }) => r.schedule_id))] as number[], error };
+}
+
+// 「この便に乗る」で選ばれた便だけを毎分見る（遅れが出たらすぐ知らせる）。選ばれた便がなければ ODPT に問い合わせない
+async function fast() {
+  const { data: run } = await admin.from("odpt_status_runs").update({ ran_at: new Date().toISOString() })
+    .eq("id", 2).lt("ran_at", new Date(Date.now() - 50_000).toISOString()).select("id");
+  if (!run?.length) return new Response(JSON.stringify({ skipped: "recent" }), { headers: JSON_HEADERS });
+  const now = Date.now();
+  const { data: subs } = await admin.from("push_subs").select("flights").neq("flights", "{}").limit(5000);
+  const keys = [...new Set(((subs ?? []) as { flights: string[] | null }[]).flatMap((s) => s.flights ?? []))].filter((k) => /^[A-Z0-9]{2}\d{1,4}[A-Z]?@\d{4}-\d{2}-\d{2}$/.test(k));
+  if (!keys.length) return new Response(JSON.stringify({ fast: 0 }), { headers: JSON_HEADERS });
+  const flights = [...new Set(keys.map((k) => k.split("@")[0]))], dates = [...new Set(keys.map((k) => k.split("@")[1]))];
+  const { data: rows } = await admin.from("flight_schedule").select("id, svc_date, flight, dep, arr, std, sta, source, atd, ata")
+    .in("flight", flights).in("svc_date", dates).gte("std", new Date(now - 8 * 60 * MIN).toISOString()).lte("std", new Date(now + 4 * 60 * MIN).toISOString()).limit(500);
+  const want = new Set(keys);
+  const mine = (rows ?? []).filter((r) => want.has(`${r.flight}@${r.svc_date}`) && !r.ata);
+  const { calls, scheds } = fastTargets(mine, now, 6);
+  if (!calls.length) return new Response(JSON.stringify({ fast: mine.length, calls: 0 }), { headers: JSON_HEADERS });
+  const errors: string[] = [], depItems: unknown[] = [], arrItems: unknown[] = [];
+  await Promise.all(calls.map(async (c) => {
+    try { (c.type === "Departure" ? depItems : arrItems).push(...await odpt(c.type, c.op, c.airport)); } catch (e) { errors.push(String(e)); }
+  }));
+  const { data: aps } = await admin.from("airports").select("iata, name").in("iata", [...new Set(scheds.flatMap((x) => [x.dep, x.arr]))]);
+  const names = new Map((aps ?? []).map((a) => [a.iata, String(a.name).replace(/国際空港$|空港$/, "").replace(/^.*（(.+)）$/, "$1")]));
+  const { alerts, updates } = odptStatus(depItems, arrItems, scheds, (i) => names.get(i) ?? i);
+  const cancelled = alerts.filter((a) => a.kind === "cancel").map((a) => a.schedule_id);
+  if (cancelled.length) await admin.from("flight_alerts").delete().in("schedule_id", cancelled).in("kind", ["delay_dep", "delay_arr", "no_takeoff"]);
+  if (updates.length) { const { error } = await admin.rpc("apply_flight_status", { p: updates }); if (error) errors.push("apply " + error.message); }
+  const { changed, error } = await putAlerts(alerts);
+  if (error) errors.push("put " + error.message);
+  const pushed = await notifyFlights(admin, changed);
+  return new Response(JSON.stringify({ fast: mine.length, calls: calls.length, alerts: alerts.length, new: changed.length, pushed, errors: errors.slice(0, 3) }), { headers: JSON_HEADERS });
 }
 
 Deno.serve(async (req) => {
@@ -65,6 +107,7 @@ Deno.serve(async (req) => {
       }
       return new Response(JSON.stringify({ texts: Object.fromEntries([...texts].slice(0, 40)), errors }), { headers: JSON_HEADERS });
     }
+    if (new URL(req.url).searchParams.get("fast") === "1") return await fast();
     // 4分に1回だけ
     const { data: run } = await admin.from("odpt_status_runs").update({ ran_at: new Date().toISOString() })
       .eq("id", 1).lt("ran_at", new Date(Date.now() - 4 * MIN).toISOString()).select("id");
@@ -88,16 +131,11 @@ Deno.serve(async (req) => {
     if (cancelled.length) await admin.from("flight_alerts").delete().in("schedule_id", cancelled).in("kind", ["delay_dep", "delay_arr", "no_takeoff"]);
     // 便ごとの実際の時刻・状態・搭乗口を残す（一度入った実際の時刻は消さない）
     if (updates.length) { const { error } = await admin.rpc("apply_flight_status", { p: updates }); if (error) errors.push("apply " + error.message); }
-    // 同じ便・同じ種類のお知らせは1回だけ（機体の位置からの推定が先に出していることもある）
-    let fresh = alerts;
-    if (alerts.length) {
-      const { data: ins, error } = await admin.from("flight_alerts").upsert(alerts, { onConflict: "schedule_id,kind", ignoreDuplicates: true }).select("schedule_id, kind");
-      if (error) throw error;
-      const ok = new Set((ins ?? []).map((r) => `${r.schedule_id}|${r.kind}`));
-      fresh = alerts.filter((a) => ok.has(`${a.schedule_id}|${a.kind}`));
-    }
-    const svc = new Map(scheds.map((s) => [s.id, s.svc]));
-    const pushed = await sendAlertPush(admin, fresh.map((a) => ({ ...a, fkey: `${a.flight}@${svc.get(a.schedule_id)}` })));
+    // 同じ便・同じ種類のお知らせは1行（航空会社の運航情報は推定を上書きする。遅れが変わったら書き直す）。通知は1つの便につき1件にまとめる
+    const { changed, error: putErr } = await putAlerts(alerts);
+    if (putErr) throw putErr;
+    const fresh = changed;
+    const pushed = await notifyFlights(admin, changed);
 
     // 特別塗装機で飛ぶ予定の便：新しく見つかった便だけ、飛ぶ前に知らせる
     const plans = liveryPlans(depItems, scheds, LIVERIES.filter((l) => l.kind !== "alliance").map((l) => l.name));

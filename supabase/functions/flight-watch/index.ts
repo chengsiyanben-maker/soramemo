@@ -3,7 +3,7 @@
 // ダイヤが空（または見張る便がない）なら、機体は取りに行かず、何もしない。
 // 見つけたお知らせは flight_alerts に残し、その空港を選んでいる人のスマホへ通知する（VAPID の鍵があるときだけ）。
 import { createClient } from "npm:@supabase/supabase-js@2.117.2";
-import { sendAlertPush } from "../_shared/alert_push.ts";
+import { notifyFlights } from "../_shared/alert_push.ts";
 import { type Airport, blankWatch, callsignsFor, onRoute, type Sched, type Seen, step, type Watch, loadCalib, loadModeCalib } from "../_shared/flight_watch.ts";
 
 const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, { auth: { persistSession: false } });
@@ -32,7 +32,6 @@ Deno.serve(async () => {
     const { data: rows } = await admin.from("flight_schedule").select("id, svc_date, flight, dep, arr, std, sta, aircraft, dep_status, arr_status, flight_watch(state)")
       .gte("std", new Date(now - 8 * 60 * MIN).toISOString()).lte("std", new Date(now + 30 * MIN).toISOString()).limit(3000);
     const list = (rows ?? []).map((r) => ({
-      fkey: `${r.flight}@${r.svc_date}`,
       // 航空会社の運航情報（ODPT）が届いている便：遅れはそちら（odpt-status）に任せ、推定の遅れは出さない（欠航の便を別の機体と取り違えることがある）
       official: !!(r.dep_status || r.arr_status),
       s: { id: r.id, flight: r.flight, dep: r.dep, arr: r.arr, std: Date.parse(r.std), sta: Date.parse(r.sta), aircraft: r.aircraft } as Sched,
@@ -51,29 +50,28 @@ Deno.serve(async () => {
     const seen = new Map<string, Seen>();
     for (const p of pos ?? []) seen.set(p.callsign, { callsign: p.callsign, lat: p.lat, lon: p.lon, alt_ft: p.alt_ft, ground: p.ground, fpm: p.fpm, kt: p.kt, type: p.type, reg: p.reg, at: Date.parse(p.seen_at) });
     const upd: { schedule_id: number; state: Watch; updated_at: string }[] = [];
-    const out: { schedule_id: number; kind: string; flight: string; dep: string; arr: string; iata: string[]; message: string }[] = [];
-    const fkeys = new Map<number, string>();
-    for (const { s, w, fkey, official } of list) {
-      fkeys.set(s.id, fkey);
+    const out: { schedule_id: number; kind: string; flight: string; dep: string; arr: string; iata: string[]; message: string; late: number | null; official: false }[] = [];
+    for (const { s, w, official } of list) {
       const hit = callsignsFor(s.flight).map((c) => seen.get(c)).find((x) => x && onRoute(s, x, aps)) ?? null;
       const r = step(s, w, hit, now, aps);
       if (JSON.stringify(r.watch) !== JSON.stringify(w)) upd.push({ schedule_id: s.id, state: r.watch, updated_at: new Date().toISOString() });
-      for (const a of r.alerts) if (!(official && (a.kind === "delay_dep" || a.kind === "delay_arr"))) out.push({ schedule_id: s.id, kind: a.kind, flight: s.flight, dep: s.dep, arr: s.arr, iata: [...new Set(a.iata)], message: a.message });
+      for (const a of r.alerts) if (!(official && (a.kind === "delay_dep" || a.kind === "delay_arr"))) out.push({ schedule_id: s.id, kind: a.kind, flight: s.flight, dep: s.dep, arr: s.arr, iata: [...new Set(a.iata)], message: a.message, late: a.late ?? null, official: false });
     }
     if (upd.length) await admin.from("flight_watch").upsert(upd);
-    // 同じ便・同じ種類のお知らせは1回だけ（航空会社の運航情報（odpt-status）が先に出していることがある）
-    let fresh = out;
-    // 安全装置：推定のお知らせが直近1時間に30件以上出ていたら、誤りが続いているおそれがあるので、新しく出さない（運営の見張りが気づく）
+    // 同じ便・同じ種類のお知らせは1行（推定で航空会社の運航情報を上書きしない。遅れが30分以上ふえたときは書き直す）。通知は1つの便につき1件にまとめる
+    // 安全装置：推定の大きなお知らせ（60分以上の遅れ・遅れ以外）が直近1時間に30件以上出ていたら、誤りが続いているおそれがあるので、新しく出さない（運営の見張りが気づく）
     if (out.length) {
-      const { count } = await admin.from("flight_alerts").select("id", { count: "exact", head: true }).neq("kind", "cancel").gt("created_at", new Date(now - 60 * MIN).toISOString());
-      if ((count ?? 0) >= 30) { out.length = 0; fresh = []; }
+      const { count } = await admin.from("flight_alerts").select("id", { count: "exact", head: true }).eq("official", false).neq("kind", "cancel")
+        .or("late.is.null,late.gte.60").gt("created_at", new Date(now - 60 * MIN).toISOString());
+      if ((count ?? 0) >= 30) out.length = 0;
     }
+    let changed: number[] = [];
     if (out.length) {
-      const { data: ins } = await admin.from("flight_alerts").upsert(out, { onConflict: "schedule_id,kind", ignoreDuplicates: true }).select("schedule_id, kind");
-      const ok = new Set((ins ?? []).map((r) => `${r.schedule_id}|${r.kind}`));
-      fresh = out.filter((a) => ok.has(`${a.schedule_id}|${a.kind}`));
+      const { data: ins, error } = await admin.rpc("flight_alerts_put", { p: out });
+      if (error) throw error;
+      changed = (ins ?? []).map((r: { schedule_id: number }) => r.schedule_id);
     }
-    const pushed = await sendAlertPush(admin, fresh.map((a) => ({ ...a, fkey: fkeys.get(a.schedule_id)! })));
+    const pushed = await notifyFlights(admin, changed);
     return new Response(JSON.stringify({ watching: list.length, seen: seen.size, updated: upd.length, alerts: out.length, pushed }), { headers: JSON_HEADERS });
   } catch (e) {
     console.error(e);
