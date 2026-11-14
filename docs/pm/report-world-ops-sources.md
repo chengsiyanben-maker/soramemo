@@ -31,14 +31,14 @@ PM の指示：11/14 21時10分（本人「ヨーロッパとか日本から就�
 | FAA NOTAM API | NOTAM（閉鎖・滑走路の閉鎖） | — | api.faa.gov で client_id・client_secret の登録が要る。古い仕組みで NMS へ移る途中 | 規約は未読 | 後回し（閉鎖は NAS Status に出る） |
 | **EUROCONTROL NOP Public Portal**（ヨーロッパ） | 流れの制限（規制）の一覧・管制区ごとの遅れの色・ネットワークのお知らせ | — | 自分で登録してから見る画面。API・RSS はなし（手引き） | 再利用・自動で読むことの条件が書かれていない（手引き・ログインのページ・サイトの「プライバシーと利用条件」・免責のページのどれにも見つからず「© EUROCONTROL」だけ） | **使わない**（画面を自動で読むしかない・条件不明） |
 | EUROCONTROL NM B2B | 規制・便ごとの情報 | すぐ | 証明書（PKI）と契約。管制・航空会社・空港・飛行計画の会社など運航に関わる組織だけ | アプリの作り手の枠はない | **使わない** |
-| **仁川国際空港公社**（韓国の公共データポータル data.go.kr） | 「航空機運航現況 詳細照会」：便名・共同運航・予定と変わった時刻・出発／到着の空港・ゲート・**機体の登録記号**・駐機場・**運航の状態**（状態の値の一覧は活用ガイドにあり、未読） | 即時（記載） | REST（JSON／XML）。登録して鍵。開発用 1日500回、運用は申請で1日10万回まで（サービスの URL と使い方の説明が要る） | 利用許諾の範囲「制限なし」。商用・出典の書き方はポータルの方針のページで確かめる（未読） | **使える見込み**（旅そらで登録） |
+| **仁川国際空港公社**（韓国の公共データポータル data.go.kr） | 「航空機運航現況 詳細照会」：便名・共同運航・予定と変わった時刻・出発／到着の空港・ゲート・**機体の登録記号**・駐機場・**運航の状態**（状態の値の一覧は活用ガイドにあり、未読） | 即時（記載） | REST（JSON／XML）。登録して鍵。開発用 1日500回、運用は申請で1日10万回まで（サービスの URL と使い方の説明が要る） | 利用許諾の範囲「制限なし」。ポータルの方針（https://www.data.go.kr/ugs/selectPortalPolicyView.do 、11/14 に読んだ）の「第0類型（自由利用）」は「商用・非商用とも利用可・出典の表示は条件でない・加工可」。ただし方針のページに「制限なし」という言葉そのものはなく、第0類型にあたると読んだのは私の読み。第三者の権利を含むデータは権利者の許諾が要る、とも書いてある。出典「仁川国際空港公社（韓国 公共データポータル）」は書いておく案 | **使える見込み**（旅そらで登録） |
 | 台湾 **TDX**（交通部の運輸データ） | 台湾の空港（桃園・松山・高雄など）の便の動き（FIDS）：予定・見込み・実際の出発／到着。台湾から出る便は出発側だけ | 記載が不明確 | 会員登録して API キー。無料 | 政府資料開放授權條款 1.0（出典を書けば商用も可の政府のライセンス） | **使える見込み**（旅そらで登録） |
 | 香港空港管理局（DATA.GOV.HK） | 香港の便の一覧（状態つき） | **前の日まで** | JSON（/flights/past） | 商用も無料で再利用可。出典と権利者（空港管理局・政府・DATA.GOV.HK）を書く・免責 | いまの止まり具合には**使わない**（前の日の欠航を数えるだけなら可） |
 | Airservices Australia | 出発の間引き（シドニーなど） | — | 運航に関わる組織用の CDM の画面だけ（見つかった公開の資料は説明と月報） | — | 使わない |
 | 中国（民航局）・東南アジア・中東 | 公開の公式の API は見つからなかった | — | — | 有料の民間の API（Variflight・FlightAware など）は使わない | 使わない |
 | **JAL・ANA の国際線（ODPT、今あるもの）** | 海外の空港を発着する JAL・ANA の便の欠航・遅れ | 今の odpt-status（5分ごと） | 今の取り込みのまま。外へ新しく問い合わせない | ODPT の規約の範囲で今と同じ使い方 | **使う（第二候補）** |
 
-読めなかったもの：nasstatus.faa.gov の XML の全部の項目（11/14 に開いたときは閉鎖の項目だけで、Update_Time が 2026-10-26 と出た。取得の道具のためた答えの可能性があるので、本人のブラウザで開いて今の時刻が出るか確かめたい）・FAA のサイトの「Disclaimer Statement」の本文・data.go.kr の方針のページと活用ガイド・TDX の FIDS の項目表・EUROCONTROL の再利用の条件。
+読めなかったもの：nasstatus.faa.gov の XML の全部の項目（11/14 に開いたときは閉鎖の項目だけで、Update_Time が 2026-10-26 と出た。取得の道具のためた答えの可能性があるので、本人のブラウザで開いて今の時刻が出るか確かめたい）・FAA のサイトの「Disclaimer Statement」の本文・data.go.kr の活用ガイド（方針のページは 11/14 の2回目の回で読んだ）・TDX の FIDS の項目表・EUROCONTROL の再利用の条件。
 
 ## 4. どう出すかの案（効き目の大きい順）
 1. **アメリカの止まり具合（FAA）**　手間：小　回数：2分に1回（1日720回、1回数KB〜数十KB）
@@ -67,6 +67,7 @@ PM の指示：11/14 21時10分（本人「ヨーロッパとか日本から就�
 - FAA NOTAM API の説明（apis.io） https://apis.io/apis/faa/faa-notam-api/
 - EUROCONTROL NOP Public Portal 利用者の手引き https://www.nm.eurocontrol.int/HELP_PUBLIC/pdf/NOP%20Public%20Portal%20-%20User%20Guide.pdf ・ログインの説明 https://www.nm.eurocontrol.int/HELP/Login_to_the_Public_Portal.html
 - EUROCONTROL NM B2B https://www.eurocontrol.int/service/network-manager-business-business-b2b-web-services ・サイトの利用条件 https://www.eurocontrol.int/info/privacy-and-website-terms-use ・免責 https://www.eurocontrol.int/info/disclaimers
+- 韓国 公共データポータルの方針 https://www.data.go.kr/ugs/selectPortalPolicyView.do
 - 仁川 航空機運航現況 詳細照会 https://www.data.go.kr/data/15140153/openapi.do （ほか 15114085・15095069 は時刻表・月の統計で止まり具合には使わない）
 - 台湾 TDX 空港の即時の出発便 https://data.gov.tw/en/datasets/161169 ・航空 API の注意 https://motc-ptx-api-documentation.gitbook.io/motc-ptx-api-documentation/api-zi-liao-shi-yong-zhu-yi-shi-xiang/aviation
 - 香港 Flight Information https://data.gov.hk/en-data/dataset/aahk-team1-flight-info ・項目表 https://www.hongkongairport.com/iwov-resources/misc/opendata/Flight_Information_DataSpec_en.pdf ・利用条件 https://data.gov.hk/en/terms-and-conditions
