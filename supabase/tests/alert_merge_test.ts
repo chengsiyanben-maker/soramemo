@@ -117,3 +117,59 @@ Deno.test("欠航・ダイバート・引き返しは、主要でない空港を
   assertEquals(eligible(km, mergeAlerts(T, [a("delay_dep", 180)])[0]), false);
   assertEquals(eligible(sub([], ["HND"]), mergeAlerts(T, [a("cancel", null)])[0]), true);   // 主要空港の人にもこれまでどおり
 });
+
+// ── 着く・出る空港の止まり具合（FAA。移行 169） ──
+import { addWorld, worldLine, worldOnlyGroups, type WorldSched, type WorldStatus } from "../functions/_shared/alert_merge.ts";
+const W: WorldSched[] = [
+  { id: 21, flight: "JL0062", svc_date: "2026-11-15", dep: "NRT", arr: "LAX", std: "2026-11-15T08:00:00Z", sta: "2026-11-15T18:00:00Z" },
+  { id: 22, flight: "AA8402", svc_date: "2026-11-15", dep: "NRT", arr: "LAX", std: "2026-11-15T08:00:00Z", sta: "2026-11-15T18:00:00Z" },   // 共同運航
+  { id: 23, flight: "NH105", svc_date: "2026-11-15", dep: "LAX", arr: "HND", std: "2026-11-15T03:00:00Z", sta: "2026-11-15T14:00:00Z", atd: "2026-11-15T03:10:00Z" },
+];
+const nm = (i: string) => ({ NRT: "成田", LAX: "ロサンゼルス", HND: "羽田" } as Record<string, string>)[i] ?? i;
+const GS: WorldStatus = { iata: "LAX", kind: "ground_stop", ends: "2026-11-15T06:30:00Z" };
+
+Deno.test("止まり具合：着く空港の地上待機は1行（終わりの見込みは日本時間）", () => {
+  assertEquals(worldLine(W[0], [GS], nm), { key: "arr:LAX:ground_stop", text: "到着地ロサンゼルスで地上待機中（FAA・15時30分まで見込み）" });
+});
+
+Deno.test("止まり具合：出発した便には出発地の止まり具合を足さない・遅れと除氷は足さない", () => {
+  assertEquals(worldLine(W[2], [GS], nm), null);
+  assertEquals(worldLine(W[0], [{ iata: "LAX", kind: "delay_arr" }, { iata: "LAX", kind: "deicing" }], nm), null);
+});
+
+Deno.test("止まり具合：同じ空港に2つあれば重い方（閉鎖 → 地上待機 → 出発の間引き）", () => {
+  const w = worldLine(W[0], [{ iata: "LAX", kind: "gdp", avg_delay: 50 }, { iata: "LAX", kind: "closure", ends: null }], nm);
+  assertEquals(w, { key: "arr:LAX:closure", text: "到着地ロサンゼルスの空港が閉鎖中（FAA）" });
+  assertEquals(worldLine(W[0], [{ iata: "LAX", kind: "gdp", avg_delay: 50 }], nm)?.text, "到着地ロサンゼルスで出発の間引き中（FAA・平均50分の遅れ）");
+});
+
+Deno.test("止まり具合：遅れの通知に1行足す（同じ通知・同じ tag）", () => {
+  const g = addWorld(mergeAlerts(W as MergeSched[], [A(21, "delay_dep", 40, true, "出発が約40分遅れる見込み")]), W, [GS], nm);
+  assertEquals([g.length, g[0].world, g[0].body], [1, "arr:LAX:ground_stop", "出発が約40分遅れる見込み\n到着地ロサンゼルスで地上待機中（FAA・15時30分まで見込み）"]);
+  assertEquals(payloadOf(g[0], true).tag, "fw-JL62@2026-11-15@NRT");
+});
+
+Deno.test("止まり具合：お知らせのない便は止まり具合だけの通知（rank 0）。共同運航は1件・お知らせのある便は作らない", () => {
+  const only = worldOnlyGroups(W, [], [GS], nm);
+  assertEquals(only.length, 1);
+  assertEquals([only[0].gkey, only[0].rank, only[0].world, only[0].body], ["JL62@2026-11-15@NRT", 0, "arr:LAX:ground_stop", "JL62 成田→ロサンゼルス：到着地ロサンゼルスで地上待機中（FAA・15時30分まで見込み）"]);
+  assertEquals(only[0].fkeys.includes("AA8402@2026-11-15"), true);
+  const have = mergeAlerts(W as MergeSched[], [A(21, "delay_dep", 40, true)]);
+  assertEquals(worldOnlyGroups(W, have, [GS], nm).length, 0);
+});
+
+Deno.test("止まり具合：止まり具合だけの通知は「この便に乗る」の人だけ。乗る便なら15分未満の遅れでも止まり具合があれば届く", () => {
+  const only = worldOnlyGroups(W, [], [GS], nm)[0];
+  assertEquals([eligible(sub(["JL62@2026-11-15"]), only), eligible(sub(["AA8402@2026-11-15"]), only), eligible(sub([], ["NRT"]), only)], [true, true, false]);
+  const small = addWorld(mergeAlerts(W as MergeSched[], [A(21, "delay_dep", 5, true)]), W, [GS], nm)[0];
+  assertEquals([eligible(sub(["JL62@2026-11-15"]), small), eligible(sub([], ["NRT"]), small)], [true, false]);
+});
+
+Deno.test("止まり具合：はじめて分かった・変わったら送り直す。同じなら送らない。止まり具合だけで遅れの通知を上書きしない", () => {
+  assertEquals(shouldSend({ rank: 1, late: 40, official: true }, { rank: 1, late: 40, official: true, world: "arr:LAX:ground_stop" }), true);
+  assertEquals(shouldSend({ rank: 1, late: 40, official: true, world: "arr:LAX:ground_stop" }, { rank: 1, late: 40, official: true, world: "arr:LAX:ground_stop" }), false);
+  assertEquals(shouldSend({ rank: 1, late: 40, official: true, world: "arr:LAX:ground_stop" }, { rank: 1, late: 40, official: true, world: "arr:LAX:closure" }), true);
+  assertEquals(shouldSend({ rank: 1, late: 40, official: true }, { rank: 0, late: null, official: false, world: "arr:LAX:ground_stop" }), false);
+  // 止まり具合だけの通知のあとに遅れが出たら送る
+  assertEquals(shouldSend({ rank: 0, late: null, official: false, world: "arr:LAX:ground_stop" }, { rank: 1, late: 20, official: false, world: "arr:LAX:ground_stop" }), true);
+});
