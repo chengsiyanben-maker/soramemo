@@ -23,9 +23,9 @@ PM の指示：11/15 0時10分（本人「OK」：report-world-ops-sources の�
 
 ## 2. 確かめた結果
 - SQL のテスト **t108（23項目）**：取り込みの始まり・続き・終わり・また始まり、10分より古いものは出さない、国際線の数え方（共同運航・欠航・別の日・国内線）、画面の関数の形と出典、通知の記録（rank 0・送り直し・上書きしない・今までの30分の決まり）、RLS と権限、仕事の上限。すべて通過
-- 関係するテスト t107（30）・t15・t18・t01・t51 通過。番号の重なりなし（161件）。SQL のテスト全部の結果は下の「全体の流し」
+- 関係するテスト t107（30）・t15・t18・t01・t51 通過。番号の重なりなし（161件）。SQL のテスト全部も通過（下）
 - 関数のテスト：faa_nas_test（8）・alert_merge_test（20、止まり具合の7つを足した）を含め **deno test 255本すべて通過**。この回は Deno を入れられたので、本物の deno test で流した。world-status・odpt-status・flight-watch の型の確認も通過
-- 全体の流し：（下に追記）
+- 全体の流し：SQL のテスト全部（111本、t49 も含む）すべて通過（11/14、手元で約30分）
 
 ## 3. まだ確かめていないこと
 - **FAA の XML の本物の形**：この回も nasstatus.faa.gov を開けなかった（取得の許可が下りなかった）。読み方は FAA の昔からの AirportStatus の形（Ground_Delay・Program・Delay・Airport の入れ物、ARPT・Reason・Avg・Max・End_Time・Start・Reopen・Arrival_Departure Type）に合わせ、名前の違う入れ物でも <ARPT> を含めば拾うようにした。反映の前に、本人のブラウザで XML を開いて1回分を docs/pm/faa-sample.xml に貼ってもらえれば、それでテストを足す
