@@ -3,7 +3,8 @@
 //   ・出発の遅れと到着の遅れ、推定と航空会社の運航情報は、1つの通知にまとめる（運航情報があれば推定より運航情報を使う）
 //   ・「この便に乗る」（push_subs.flights）の人へは15分の遅れから知らせる
 //   ・空港ごとの通知（push_subs.airports）は主要空港だけ。遅れは「門限（運用時間の終わり）に間に合わないおそれ」と「遅れで0時前後に着く」便だけを知らせる
-//     （11/13 本人「通知がくるのは主要空港がいいな、門限ギリギリになりそうな便とか0時に着くような便とか」）。欠航・ダイバート・引き返しも主要空港だけ
+//     （11/13 本人「通知がくるのは主要空港がいいな、門限ギリギリになりそうな便とか0時に着くような便とか」）。
+//     欠航・ダイバート・引き返しは、主要でない空港を選んだ人にも届ける（11/14 本人「すべてOK」）
 //   ・送ってよいか（はじめて・重くなった・運航情報がはじめて届いた・遅れが30分以上ふえた）は、データベースの alert_push_claim が決める（下の shouldSend は同じ決まりの写し）
 export type MergeSched = { id: number; flight: string; svc_date: string; dep: string; arr: string; std: string | number; sta?: string | number | null };
 export type MergeAlert = { schedule_id: number; kind: string; message: string; iata: string[]; late?: number | null; official?: boolean | null };
@@ -111,12 +112,12 @@ export function mergeAlerts(scheds: MergeSched[], alerts: MergeAlert[], names: (
 
 // この購読に、この便を知らせてよいか
 //   乗る便：15分以上の遅れと、欠航・ダイバート・引き返し
-//   空港：選んだ主要空港の便で、門限・0時前後の遅れ（rank 2）と、欠航・ダイバート・引き返し。ふつうの遅れは知らせない
+//   空港：欠航・ダイバート・引き返し（rank 3 以上）は選んだ空港すべて。門限・0時前後の遅れ（rank 2）は選んだ主要空港の便だけ。ふつうの遅れは知らせない
 export function eligible(sub: MergeSub, g: MergeGroup): boolean {
   const byFlight = (sub.flights ?? []).some((f) => g.fkeys.includes(f) || g.fkeys.includes(normNo(f)));
-  const byAirport = sub.airports.some((i) => MAJOR.includes(i) && g.iata.includes(i));
   if (byFlight && (g.rank > 1 || (g.late ?? OLD_LATE) >= FLIGHT_SUB_MIN)) return true;
-  return byAirport && g.rank >= 2;
+  if (g.rank >= 3) return sub.airports.some((i) => g.iata.includes(i));
+  return g.rank === 2 && sub.airports.some((i) => MAJOR.includes(i) && g.iata.includes(i));
 }
 
 // 前に送ったものと比べて、送り直すか（データベースの alert_push_claim と同じ決まり。テストと説明のための写し）

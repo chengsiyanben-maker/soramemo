@@ -1,4 +1,4 @@
-// 遅れの通知を1つの便につき1件にまとめる：推定→公式・出発→到着・共同運航2行・同じ遅れの繰り返し・乗る便の15分・空港は主要空港の門限と0時前後だけ・30分ふえたときの上書き
+// 遅れの通知を1つの便につき1件にまとめる：推定→公式・出発→到着・共同運航2行・同じ遅れの繰り返し・乗る便の15分・空港は主要空港の門限と0時前後だけ（欠航・ダイバート・引き返しはどの空港にも）・30分ふえたときの上書き
 import { assertEquals } from "jsr:@std/assert@1";
 import { eligible, type MergeAlert, mergeAlerts, type MergeSched, payloadOf, shouldSend } from "../functions/_shared/alert_merge.ts";
 
@@ -104,4 +104,16 @@ Deno.test("通知は同じ便を同じ tag にし、上書きでも鳴らす。�
 Deno.test("遅れの分がない古いお知らせは60分として扱う", () => {
   const g = mergeAlerts(S, [A(3, "delay_arr", null, false)])[0];
   assertEquals([g.late, eligible(sub(["JL503@2026-11-13"]), g), eligible(sub([], ["CTS"]), g)], [60, true, false]);
+});
+
+Deno.test("欠航・ダイバート・引き返しは、主要でない空港を選んだ人にも届く。ふつうの遅れ・門限の遅れは届かない", () => {
+  const T: MergeSched[] = [{ id: 21, flight: "JL631", svc_date: "2026-11-14", dep: "HND", arr: "KMJ", std: STD }];
+  const a = (kind: string, late: number | null) => ({ schedule_id: 21, kind, late, official: true, message: kind, iata: ["HND", "KMJ"] });
+  const km = sub([], ["KMJ"]), ok = sub([], ["OKA"]);
+  for (const k of ["cancel", "divert", "divert_landed", "return"]) {
+    const g = mergeAlerts(T, [a(k, null)])[0];
+    assertEquals([k, g.rank >= 3, eligible(km, g), eligible(ok, g)], [k, true, true, false]);   // 関係のない空港の人には送らない
+  }
+  assertEquals(eligible(km, mergeAlerts(T, [a("delay_dep", 180)])[0]), false);
+  assertEquals(eligible(sub([], ["HND"]), mergeAlerts(T, [a("cancel", null)])[0]), true);   // 主要空港の人にもこれまでどおり
 });

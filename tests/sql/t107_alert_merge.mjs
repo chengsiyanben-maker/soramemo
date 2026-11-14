@@ -75,6 +75,16 @@ const n = (await rows(`select n, rank from public.alert_push_log where sub_id = 
 check('送った回数と重さを残す', n.n === 4 && n.rank === 5, n);
 await db.exec(`delete from public.push_subs where id = ${u1}`);
 check('購読を消すと送った記録も消える', (await rows(`select count(*)::int c from public.alert_push_log where sub_id = ${u1}`))[0].c === 0);
+// 主要でない空港を選んだ人への欠航（11/14 本人：欠航・ダイバート・引き返しは主要でない空港の人にも届ける。宛先は関数の eligible が選び、記録は同じ決まり）
+await db.exec(`insert into public.push_subs (endpoint, p256dh, auth, airports, flights) values ('https://push.example/c', 'k', 'a', '{KMJ}', '{}')`);
+const u3 = (await rows(`select id from public.push_subs where endpoint = 'https://push.example/c'`))[0].id;
+const K = (rank, body) => ({ sub_id: u3, gkey: 'JL631@2026-11-14@HND', svc_date: '2026-11-14', rank, late: null, official: true, body });
+r = await claim([K(4, 'ダイバート')]);
+check('主要でない空港の人へのダイバートを送る', r.length === 1 && r[0] === `${u3}|JL631@2026-11-14@HND|false`, r);
+r = await claim([K(5, '欠航')]);
+check('そのあと欠航になったら送り直す（更新）', r.length === 1 && r[0].endsWith('|true'), r);
+r = await claim([K(5, '欠航')]);
+check('同じ欠航は二度送らない', r.length === 0, r);
 
 // 急増の見張り：60分以上の遅れと遅れ以外だけを数える
 await db.exec(`insert into public.flight_alerts (kind, flight, dep, arr, iata, message, late) select 'delay_dep', 'NH' || g, 'HND', 'OKA', '{HND}', 'x', 20 from generate_series(1, 30) g`);
