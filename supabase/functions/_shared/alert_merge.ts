@@ -6,6 +6,8 @@
 //     （11/13 本人「通知がくるのは主要空港がいいな、門限ギリギリになりそうな便とか0時に着くような便とか」）。
 //     欠航・ダイバート・引き返しは、主要でない空港を選んだ人にも届ける（11/14 本人「すべてOK」）
 //   ・送ってよいか（はじめて・重くなった・運航情報がはじめて届いた・遅れが30分以上ふえた）は、データベースの alert_push_claim が決める（下の shouldSend は同じ決まりの写し）
+//   ・着く空港か出る空港（アメリカ）が地上待機・閉鎖・出発の間引きなら、同じ通知に1行足す（FAA NAS Status。11/15 本人「OK」）。
+//     はじめて分かったときは同じ通知を上書きして知らせる。お知らせのない便は「この便に乗る」の人にだけ、止まり具合だけの通知（rank 0）を同じ tag で出す
 export type MergeSched = { id: number; flight: string; svc_date: string; dep: string; arr: string; std: string | number; sta?: string | number | null };
 export type MergeAlert = { schedule_id: number; kind: string; message: string; iata: string[]; late?: number | null; official?: boolean | null };
 export type MergeGroup = {
@@ -13,11 +15,12 @@ export type MergeGroup = {
   flight: string; svc_date: string; dep: string; arr: string;
   fkeys: string[];         // まとめた便すべての「便名@運航日」（「この便に乗る」の宛先に使う）
   iata: string[];          // 関係する空港（空港ごとの通知の宛先）
-  rank: number;            // 1 遅れ・2 門限に間に合わないおそれ／0時前後に着く遅れ・3 引き返し・4 ダイバート・5 欠航
+  rank: number;            // 0 着く・出る空港の止まり具合だけ（お知らせなし）・1 遅れ・2 門限に間に合わないおそれ／0時前後に着く遅れ・3 引き返し・4 ダイバート・5 欠航
   late: number | null;     // いちばん大きい遅れ（分）。運航情報があれば運航情報の中で
   official: boolean;       // 見出しのお知らせが航空会社の運航情報か
   eta: number | null;      // 到着の見込み（定刻＋遅れ。ミリ秒）
   body: string;            // 通知の本文
+  world?: string | null;   // 足した止まり具合の印（例 "arr:LAX:ground_stop"）。はじめて分かった・変わったら上書きして知らせる
 };
 export type MergeSub = { id: number; airports: string[]; flights: string[] | null };
 
@@ -115,18 +118,77 @@ export function mergeAlerts(scheds: MergeSched[], alerts: MergeAlert[], names: (
 //   空港：欠航・ダイバート・引き返し（rank 3 以上）は選んだ空港すべて。門限・0時前後の遅れ（rank 2）は選んだ主要空港の便だけ。ふつうの遅れは知らせない
 export function eligible(sub: MergeSub, g: MergeGroup): boolean {
   const byFlight = (sub.flights ?? []).some((f) => g.fkeys.includes(f) || g.fkeys.includes(normNo(f)));
+  if (g.rank === 0) return byFlight && !!g.world;   // 止まり具合だけの通知は「この便に乗る」の人だけ
+  if (byFlight && g.world) return true;             // 乗る便の着く・出る空港が止まっている
   if (byFlight && (g.rank > 1 || (g.late ?? OLD_LATE) >= FLIGHT_SUB_MIN)) return true;
   if (g.rank >= 3) return sub.airports.some((i) => g.iata.includes(i));
   return g.rank === 2 && sub.airports.some((i) => MAJOR.includes(i) && g.iata.includes(i));
 }
 
 // 前に送ったものと比べて、送り直すか（データベースの alert_push_claim と同じ決まり。テストと説明のための写し）
-export type Sent = { rank: number; late: number | null; official: boolean };
+export type Sent = { rank: number; late: number | null; official: boolean; world?: string | null };
 export function shouldSend(prev: Sent | null, next: Sent): boolean {
   if (!prev) return true;
   if (next.rank > prev.rank) return true;
   if (next.official && !prev.official && next.rank >= prev.rank) return true;
-  return next.rank <= 2 && next.rank === prev.rank && (next.late ?? 0) >= (prev.late ?? 0) + GROW_MIN;
+  if (next.rank >= 1 && next.rank <= 2 && next.rank === prev.rank && (next.late ?? 0) >= (prev.late ?? 0) + GROW_MIN) return true;
+  return !!next.world && next.world !== (prev.world ?? null) && next.rank >= Math.min(prev.rank, 1);
+}
+
+// ── 着く・出る空港の止まり具合（FAA NAS Status。world_status_now の行） ──
+export type WorldStatus = { iata: string; kind: string; ends?: string | null; avg_delay?: number | null };
+export type WorldSched = { id: number; flight: string; svc_date: string; dep: string; arr: string; std: string | number; sta?: string | number | null;
+  atd?: string | null; ata?: string | null };
+// 通知に足す種類（重い順）。15分以上の遅れ・除氷は画面だけ
+const WORLD_RANK: Record<string, number> = { closure: 3, ground_stop: 2, gdp: 1 };
+const until = (t: string | null | undefined) => t ? `・${hm(Date.parse(t))}まで見込み` : "";
+function worldText(role: "arr" | "dep", name: string, s: WorldStatus): string {
+  const where = `${role === "arr" ? "到着地" : "出発地"}${name}`;
+  if (s.kind === "closure") return `${where}の空港が閉鎖中（FAA${s.ends ? `・${hm(Date.parse(s.ends))}再開見込み` : ""}）`;
+  if (s.kind === "ground_stop") return `${where}で地上待機中（FAA${until(s.ends)}）`;
+  return `${where}で出発の間引き中（FAA${s.avg_delay ? `・平均${s.avg_delay}分の遅れ` : ""}${until(s.ends)}）`;
+}
+// この便に足す止まり具合（なければ null）。着く空港はまだ着いていない便、出る空港はまだ出ていない便だけ
+export function worldLine(s: WorldSched, statuses: WorldStatus[], names: (i: string) => string = (i) => i): { key: string; text: string } | null {
+  const pick = (iata: string) => statuses.filter((x) => x.iata === iata && WORLD_RANK[x.kind])
+    .sort((a, b) => WORLD_RANK[b.kind] - WORLD_RANK[a.kind])[0];
+  const parts: { key: string; text: string }[] = [];
+  const d = !s.atd ? pick(s.dep) : undefined;
+  if (d) parts.push({ key: `dep:${d.iata}:${d.kind}`, text: worldText("dep", names(d.iata), d) });
+  const a = !s.ata ? pick(s.arr) : undefined;
+  if (a) parts.push({ key: `arr:${a.iata}:${a.kind}`, text: worldText("arr", names(a.iata), a) });
+  if (!parts.length) return null;
+  return { key: parts.map((p) => p.key).join(","), text: parts.map((p) => p.text).join("\n") };
+}
+// まとめた通知に止まり具合の1行を足す（scheds は mergeAlerts に渡した便。atd・ata があれば使う）
+export function addWorld(groups: MergeGroup[], scheds: WorldSched[], statuses: WorldStatus[], names: (i: string) => string = (i) => i): MergeGroup[] {
+  if (!statuses.length) return groups;
+  return groups.map((g) => {
+    const s = scheds.find((x) => x.dep === g.dep && x.arr === g.arr && normNo(x.flight) === g.flight) ?? scheds.find((x) => x.dep === g.dep && x.arr === g.arr);
+    const w = s ? worldLine(s, statuses, names) : null;
+    return w ? { ...g, world: w.key, body: `${g.body}\n${w.text}`.slice(0, 400) } : g;
+  });
+}
+// お知らせのない便の、止まり具合だけの通知（rank 0）。同じ便（出発・到着・定刻）は1件
+export function worldOnlyGroups(scheds: WorldSched[], have: MergeGroup[], statuses: WorldStatus[], names: (i: string) => string = (i) => i): MergeGroup[] {
+  const done = new Set(have.map((g) => `${g.dep}|${g.arr}|${g.svc_date}`));
+  const byKey = new Map<string, WorldSched[]>();
+  for (const s of scheds) { const k = `${s.dep}|${s.arr}|${toMs(s.std)}`; byKey.set(k, [...(byKey.get(k) ?? []), s]); }
+  const out: MergeGroup[] = [];
+  for (const mem of byKey.values()) {
+    const rep = [...mem].sort((a, b) => Number(/^(JL|NH)/.test(b.flight)) - Number(/^(JL|NH)/.test(a.flight)) || a.id - b.id)[0];
+    if (done.has(`${rep.dep}|${rep.arr}|${rep.svc_date}`)) continue;
+    const w = worldLine(rep, statuses, names);
+    if (!w) continue;
+    const flight = normNo(rep.flight);
+    out.push({
+      gkey: `${flight}@${rep.svc_date}@${rep.dep}`, flight, svc_date: rep.svc_date, dep: rep.dep, arr: rep.arr,
+      fkeys: [...new Set(mem.flatMap((s) => [`${s.flight}@${s.svc_date}`, `${normNo(s.flight)}@${s.svc_date}`]))],
+      iata: [rep.dep, rep.arr], rank: 0, late: null, official: false, eta: null,
+      body: `${flight} ${names(rep.dep)}→${names(rep.arr)}：${w.text}`.slice(0, 400), world: w.key,
+    });
+  }
+  return out;
 }
 
 // 通知の中身。同じ便は同じ tag にして、端末の上で前の通知を上書きする（上書きのときも鳴らす：renotify）

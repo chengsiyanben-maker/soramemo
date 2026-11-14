@@ -470,3 +470,5 @@ verify_jwt = false
 verify_jwt = false
 [functions.co3-typhoon]
 verify_jwt = false
+[functions.world-status]
+verify_jwt = false
