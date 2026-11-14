@@ -7,7 +7,9 @@ import { localTime, tzOf } from "./odpt_schedule.ts";
 import { flightNo, gateOf, infoText } from "./airport_now.ts";
 
 export type StatusSched = { id: number; flight: string; dep: string; arr: string; std: number; sta?: number };   // ミリ秒（UTC）
-export type StatusAlert = { schedule_id: number; kind: "cancel" | "delay_dep" | "delay_arr" | "divert" | "return"; flight: string; dep: string; arr: string; iata: string[]; message: string };
+export type StatusAlert = { schedule_id: number; kind: "cancel" | "delay_dep" | "delay_arr" | "divert" | "return"; flight: string; dep: string; arr: string; iata: string[]; message: string; late?: number };
+// 遅れのお知らせを出す境目（分）。「この便に乗る」の人へは15分から（空港ごとの通知は60分から。分けるのは alert_merge.ts）
+export const STATUS_DELAY_MIN = 15;
 export type StatusUpdate = {
   id: number;
   dep_status?: string | null; etd?: string | null; atd?: string | null; dep_gate?: string | null;
@@ -44,8 +46,8 @@ export function odptStatus(depItems: any[], arrItems: any[], scheds: StatusSched
   const alerts = new Map<string, StatusAlert>(), updates = new Map<number, StatusUpdate>();
   const route = (s: StatusSched) => `${s.flight}（${names(s.dep)}→${names(s.arr)}）`;
   let note: string | null = null;   // いま見ている便の、航空会社のお知らせの文（理由）
-  const add = (s: StatusSched, kind: StatusAlert["kind"], message: string, iata = [s.dep, s.arr]) =>
-    alerts.set(`${s.id}|${kind}`, { schedule_id: s.id, kind, flight: s.flight, dep: s.dep, arr: s.arr, iata,
+  const add = (s: StatusSched, kind: StatusAlert["kind"], message: string, iata = [s.dep, s.arr], late?: number) =>
+    alerts.set(`${s.id}|${kind}`, { schedule_id: s.id, kind, flight: s.flight, dep: s.dep, arr: s.arr, iata, ...(late != null ? { late } : {}),
       message: (note ? message.replace(/（航空会社の運航情報）$|・航空会社の運航情報）$/, (m) => m.slice(0, -1) + `。${note}）`) : message).slice(0, 300) });
   const upd = (s: StatusSched, u: Omit<StatusUpdate, "id">) => updates.set(s.id, { ...(updates.get(s.id) ?? { id: s.id }), ...u });
   const iso = (base: number, hm: string | null, tz: string) => hm ? new Date(atNear(base, hm, tz)).toISOString() : null;
@@ -66,7 +68,7 @@ export function odptStatus(depItems: any[], arrItems: any[], scheds: StatusSched
     const t = actual ?? est;
     if (!t) continue;
     const late = Math.round((atNear(s.std, t, tzD) - atNear(s.std, std, tzD)) / MIN);   // 運航情報の定刻から
-    if (late >= 60) add(s, "delay_dep", `${route(s)}は、出発が約${late}分遅れ${actual ? "ました" : "る見込みです"}（定刻 ${hmText(std)} → ${actual ? "出発" : "変更後"} ${hmText(t)}・航空会社の運航情報）`);
+    if (late >= STATUS_DELAY_MIN) add(s, "delay_dep", `${route(s)}は、出発が約${late}分遅れ${actual ? "ました" : "る見込みです"}（定刻 ${hmText(std)} → ${actual ? "出発" : "変更後"} ${hmText(t)}・航空会社の運航情報）`, undefined, late);
   }
   // 到着（相手の空港は「出発空港」の項目）
   for (const it of Array.isArray(arrItems) ? arrItems : []) {
@@ -86,7 +88,7 @@ export function odptStatus(depItems: any[], arrItems: any[], scheds: StatusSched
     const t = actual ?? est;
     if (!t) continue;
     const late = Math.round((atNear(s.sta, t, tzA) - atNear(s.sta, sta, tzA)) / MIN);
-    if (late >= 60) add(s, "delay_arr", `${route(s)}は、到着が約${late}分遅れ${actual ? "ました" : "る見込みです"}（定刻 ${hmText(sta)} → ${actual ? "到着" : "変更後"} ${hmText(t)}・航空会社の運航情報）`, [s.arr, s.dep]);
+    if (late >= STATUS_DELAY_MIN) add(s, "delay_arr", `${route(s)}は、到着が約${late}分遅れ${actual ? "ました" : "る見込みです"}（定刻 ${hmText(sta)} → ${actual ? "到着" : "変更後"} ${hmText(t)}・航空会社の運航情報）`, [s.arr, s.dep], late);
   }
   return { alerts: [...alerts.values()], updates: [...updates.values()] };
 }

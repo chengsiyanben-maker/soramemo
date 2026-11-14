@@ -47,6 +47,20 @@ Deno.test("出発が1時間以上遅れ・到着も1時間以上遅れ", () => {
   assertEquals(all, ["delay_dep", "delay_arr"]);
 });
 
+Deno.test("15分の遅れから出す（離陸が定刻の30分後＝地上走行15分を引いて15分の遅れ）・14分は出さない", () => {
+  const go = (min: number) => run([[null, T0 - 10 * MIN], [at(35.56, 139.80, 2000, T0 + min * MIN, 2500), T0 + min * MIN]]).all;
+  assertEquals(go(30), ["delay_dep"]);
+  assertEquals(go(29), []);
+});
+
+Deno.test("「まだ飛行中」は15分から出し、遅れが30分ふえるごとに出し直す（同じ便の通知は上書き）", () => {
+  let w: Watch = blankWatch(); const lates: number[] = [];
+  const seq: [Seen | null, number][] = [[at(35.56, 139.80, 2000, T0 + 18 * MIN, 2500), T0 + 18 * MIN]];
+  for (let m = 105; m <= 160; m += 5) seq.push([at(41.0, 141.3, 20000, T0 + m * MIN), T0 + m * MIN]);
+  for (const [s, now] of seq) { const r = step(S, w, s, now, APS); w = r.watch; lates.push(...r.alerts.filter((a) => a.kind === "delay_arr").map((a) => a.late!)); }
+  assertEquals(lates, [15, 45]);   // 定刻 T0+95分 → 110分で15分、140分で45分（30分ふえた）。そのあいだは出さない
+});
+
 Deno.test("定刻から1時間15分たっても離陸を確認できない：いまは知らせない（共同運航便で誤るため）", () => {
   const { all } = run([[null, T0 - 10 * MIN], [null, T0 + 70 * MIN], [null, T0 + 76 * MIN], [null, T0 + 90 * MIN]]);
   assertEquals(all, []);

@@ -13,17 +13,21 @@ const names = (i: string) => ({ HND: "羽田", CTS: "新千歳", AOJ: "青森", 
 const item = (no: string, dep: string, std: string, extra: Record<string, unknown> = {}) =>
   ({ "odpt:flightNumber": [no], "odpt:departureAirport": `odpt.Airport:${dep}`, "odpt:scheduledDepartureTime": std, ...extra });
 
-Deno.test("欠航・60分以上の遅れ（見込み・実際）を出し、短い遅れや結べない便は出さない", () => {
+Deno.test("欠航・15分以上の遅れ（見込み・実際）を出し、短い遅れや結べない便は出さない（遅れの分も持つ）", () => {
   const a = statusAlerts([
     item("JL0501", "HND", "09:00", { "odpt:flightStatus": "odpt.FlightStatus:Cancelled" }),
     item("NH55", "HND", "08:00", { "odpt:estimatedDepartureTime": "09:10" }),
-    item("JL503", "HND", "10:00", { "odpt:actualDepartureTime": "10:40" }),
+    item("JL503", "HND", "10:00", { "odpt:actualDepartureTime": "10:14" }),   // 14分：出さない
     item("NH999", "HND", "08:00", { "odpt:flightStatus": "odpt.FlightStatus:Cancelled" }),   // 予定の便にない
     item("NH55", "HND", "08:30", { "odpt:flightStatus": "odpt.FlightStatus:Cancelled" }),    // 定刻が違う（別の日の便）
   ], S, names);
   assertEquals(a.map((x) => [x.schedule_id, x.kind]), [[1, "cancel"], [2, "delay_dep"]]);
   assertEquals(a[0].message, "JL501（羽田→新千歳）は、欠航です（航空会社の運航情報）");
   assertEquals(a[1].message, "NH55（羽田→新千歳）は、出発が約70分遅れる見込みです（定刻 8:00 → 変更後 9:10・航空会社の運航情報）");
+  assertEquals([a[0].late, a[1].late], [undefined, 70]);
+  // 15分ちょうどは出す（「この便に乗る」の人へ15分から知らせる）
+  const b = statusAlerts([item("JL503", "HND", "10:00", { "odpt:actualDepartureTime": "10:15" })], S, names);
+  assertEquals(b.map((x) => [x.schedule_id, x.kind, x.late]), [[4, "delay_dep", 15]]);
 });
 
 Deno.test("日付をまたぐ遅れ（23:30 → 0:45）も75分の遅れとして数える", () => {

@@ -34,8 +34,13 @@ export type Watch = {
   eta?: number | null;                              // 到着予想（推定。機体の位置・速度と機種の巡航速度から。ミリ秒）
   cs?: string | null; reg?: string | null; type?: string | null;   // 見つけた機体の呼び出し符号・登録記号・機種（毎日の記録と航跡に使う）
   eta60?: number | null; eta30?: number | null; eta15?: number | null;   // 到着の60・30・15分前ごろの到着予想（当たり具合を毎日の記録で確かめる）
+  lates?: Record<string, number>;                   // 遅れのお知らせを出したときの遅れ（分）。30分以上ふえたら出し直す（通知は同じ便の1件を上書き）
 };
-export type Alert = { kind: "delay_dep" | "no_takeoff" | "delay_arr" | "divert" | "return" | "divert_landed"; iata: string[]; message: string };
+export type Alert = { kind: "delay_dep" | "no_takeoff" | "delay_arr" | "divert" | "return" | "divert_landed"; iata: string[]; message: string; late?: number };
+// 遅れのお知らせを出す境目（分）。「この便に乗る」の人へは15分から知らせる（空港ごとの通知は60分から。分けるのは alert_merge.ts）
+export const DELAY_MIN = 15;
+// 一度出した遅れが、ここまでふえたら出し直す（分）
+export const DELAY_STEP = 30;
 
 // 機種ごとの巡航速度（真対気速度の目安・ノット）と、到着空港の手前の進入の平均速度。ICAO の機種記号（B738 など）と ODPT の機種記号（738 など）の両方を受ける
 const CRUISE: [RegExp, number, number][] = [
@@ -180,7 +185,15 @@ export function step(s: Sched, w0: Watch, seen: Seen | null, now: number, aps: M
   if (w.start == null) w.start = now;
   const lateStart = w.start > s.std + 15 * MIN;   // 定刻を15分以上すぎてから見張り始めた便
   const name = (i: string) => aps.get(i)?.name ?? i, route = `${s.flight}（${name(s.dep)}→${name(s.arr)}）`;
-  const emit = (a: Alert) => { if (w.sent.includes(a.kind)) return; w.sent.push(a.kind); out.push(a); };
+  const emit = (a: Alert) => {
+    if (w.sent.includes(a.kind)) {
+      // 遅れは、前に出したときより30分以上ふえたときだけ出し直す（ほかの種類は1回だけ）
+      const prev = w.lates?.[a.kind];
+      if (a.late == null || prev == null || a.late < prev + DELAY_STEP) return;
+    } else w.sent.push(a.kind);
+    if (a.late != null) w.lates = { ...(w.lates ?? {}), [a.kind]: a.late };
+    out.push(a);
+  };
   const dep = aps.get(s.dep);
 
   if (seen && !seen.ground && w.phase !== "landed") {
@@ -245,18 +258,23 @@ export function step(s: Sched, w0: Watch, seen: Seen | null, now: number, aps: M
     }
   }
   // 遅れ
-  if (w.takeoff_at != null && !w.takeoff_est && !lateStart && w.takeoff_at - s.std >= 75 * MIN) {
+  // 離陸の時刻から地上走行の15分を引いたものを出発とみなす
+  if (w.takeoff_at != null && !w.takeoff_est && !lateStart && w.takeoff_at - s.std >= (DELAY_MIN + 15) * MIN) {
     const late = Math.round((w.takeoff_at - 15 * MIN - s.std) / MIN);
-    emit({ kind: "delay_dep", iata: [s.dep, s.arr], message: `${route}は、出発が約${late}分遅れました（${hm(w.takeoff_at)}ごろ離陸・推定）` });
+    emit({ kind: "delay_dep", iata: [s.dep, s.arr], late, message: `${route}は、出発が約${late}分遅れました（${hm(w.takeoff_at)}ごろ離陸・推定）` });
   }
   // 「離陸を確認できず」は、いまは出さない（NO_TAKEOFF_ALERT）。共同運航便（JL4344＝フジドリームエアラインズの運航など）は
   // 便名と機体の呼び出し符号が一致せず、ジェット機でも離陸を見分けられないため、誤ったお知らせばかりになった（2026-10-15）
   if (NO_TAKEOFF_ALERT && w.phase === "sched" && !lateStart && !hardToSee(s.aircraft) && now - s.std >= 75 * MIN && now - s.std < 6 * 60 * MIN)
     emit({ kind: "no_takeoff", iata: [s.dep, s.arr], message: `${route}は、出発の定刻（${hm(s.std)}）から1時間以上たっても離陸を確認できていません` });
-  if (w.phase === "landed" && w.landed_at != null && w.landed_iata === s.arr && w.landed_at - s.sta >= 60 * MIN)
-    emit({ kind: "delay_arr", iata: [s.arr, s.dep], message: `${route}は、到着が約${Math.round((w.landed_at - s.sta) / MIN)}分遅れました（${hm(w.landed_at)}ごろ着陸・推定）` });
+  if (w.phase === "landed" && w.landed_at != null && w.landed_iata === s.arr && w.landed_at - s.sta >= DELAY_MIN * MIN) {
+    const late = Math.round((w.landed_at - s.sta) / MIN);
+    emit({ kind: "delay_arr", iata: [s.arr, s.dep], late, message: `${route}は、到着が約${late}分遅れました（${hm(w.landed_at)}ごろ着陸・推定）` });
+  }
   // 「まだ飛行中」は、今も実際に飛んでいるのが見えているときだけ（途中で見えなくなった便は、着陸したのか分からないので出さない）
-  else if (w.phase === "air" && now - s.sta >= 60 * MIN && w.last && now - w.last.at <= 5 * MIN)
-    emit({ kind: "delay_arr", iata: [s.arr, s.dep], message: `${route}は、到着の定刻（${hm(s.sta)}）から1時間以上たっても、まだ飛行中です（推定）` });
+  else if (w.phase === "air" && now - s.sta >= DELAY_MIN * MIN && w.last && now - w.last.at <= 5 * MIN) {
+    const late = Math.round((now - s.sta) / MIN);
+    emit({ kind: "delay_arr", iata: [s.arr, s.dep], late, message: `${route}は、到着の定刻（${hm(s.sta)}）から${late}分たっても、まだ飛行中です（推定）` });
+  }
   return { watch: w, alerts: out };
 }
