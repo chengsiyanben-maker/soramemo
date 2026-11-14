@@ -1,6 +1,13 @@
 # データ担当の帳面
 
 ## いま持っている仕事
+- 海外の空港の止まり具合を作る（11/15 0時10分 PM の指示・本人「OK」：案1・2）：ブランチ data/world-ops → main 向けの下書き PR #93（見張りを始めた）。報告 docs/pm/report-world-ops.md（そのブランチ）
+  - 移行 169 world_ops：表 world_airport_status（RLS 誰でも select・書くのは service_role。続いているものは空港・種類ごとに1行、なくなったら ended_at、3日で掃除）・world_status_put／world_status_rows（service_role）・world_status_now（10分より古い・終わったものは出さない）・world_flight_counts（JAL・ANA の国際線を海外の空港ごとに便・欠航・30分以上の遅れ）・world_airport_ops（画面用、note に出典の文）・alert_push_log に world と rank 0・alert_push_claim に「止まり具合がはじめて分かった・変わったら送り直す」。cron world-status（2分・10s）・world-status-cleanup（30s）。先頭に lock_timeout 10s。影響はチェックイン（運用・通知）、経営なし
+  - 関数 world-status（config.toml に足した）・_shared/faa_nas.ts（XML の読み方・就航先 US_SERVED 24空港）。通知は alert_merge.ts の addWorld・worldLine・worldOnlyGroups（お知らせのない乗る便には止まり具合だけの rank 0）、alert_push.ts の notifyFlights(…, worldOnly)
+  - 確かめた結果：t108（23）・t107・t15・t18・t01・t51 通過、番号の重なりなし（161件）。**この回は npm で Deno 2.5.6 を入れられた**（npm i -g deno@2.5.6）ので、本物の deno test 255本・型の確認が通過。SQL のテスト全部（111本）も通過
+  - 未確認：FAA の XML の本物の形（この回も開く許可が下りず。昔からの AirportStatus の形に合わせ、<ARPT> を含むかたまりを広く拾う）
+  - 本人待ち：「反映して」・US_SERVED を world-destinations.sql の結果で直すか・止まり具合だけの通知（rank 0）を入れてよいか・FAA の XML を1回分貼ってもらう（docs/pm/faa-sample.xml）
+  - この回は定期の回（PM の指示なし）として呼ばれたが、PM が 11/15 0時10分に積んだ指示があったので、そちらをした
 - 海外の空港の止まり具合の元さがし（11/14 21時10分 PM の指示・本人「ヨーロッパとか日本から就航してる空港も欲しいね」）：ブランチ data/world-ops-sources → main 向けの下書き PR #92。報告 docs/pm/report-world-ops-sources.md・読むだけの docs/pm/world-destinations.sql（そのブランチ）。コード・表は変えていない
   - 結論：すぐ使えるのはアメリカの FAA NAS Status（https://nasstatus.faa.gov/api/airport-status-information 、公開の XML・1分ごと・登録なし。地上待機・出発の間引き・閉鎖・15分以上の遅れ・除氷。個別の規約の文は見つからず、米国政府の著作物の一般の決まりと FAA のデータの免責で「使える見込み」）。仁川（data.go.kr「航空機運航現況 詳細照会」、許諾「制限なし」、開発用1日500回）・台湾 TDX（政府資料開放授權條款 1.0）は旅そらで登録すれば使える見込み。香港は前の日の分だけ。EUROCONTROL は公開の画面に機械で読む口がなく条件不明・B2B は運航の組織だけ → 使わない。中国・東南アジア・中東・オセアニアは公開の公式の元なし → 使わない
   - 案（効き目の順）：1 FAA を2分ごと（1日720回）で読み、表 world_airport_status（移行と RLS をセットで）に。運用タブの札・乗る便の通知に1行・羽田／成田のお知らせ 2 今ある JAL・ANA の国際線の欠航・遅れを海外の空港ごとに数える（外へ問い合わせない） 3 仁川・台湾の便の一覧を数える 4 ヨーロッパは EUROCONTROL に問い合わせる案
@@ -167,13 +174,14 @@
 - 本人の決定：規約を改定するときは「terms_versions に1行足す → アプリの定数を変える」の順
 
 ## 移行とテストの番号
-- main の最新は 160（159 airport_yomi・160 airport_facts は 11/10 本番に入った）。156・157 は 11/9 本番に入った。**maint/2026-11-09 の 158 は main の 159 より前になったので、反映の前に migrations.mjs rebase が要る**。maint/2026-11-06 は 153・テスト t93（fix/co-tests の経営の移行も 153 なので、反映の前に rebase）、data/photo-log は 154・テスト t94、maint/2026-11-07 は 155・テスト t95、data/debug-1107 は 156・テスト t96（関数のテストは supabase/tests/live_view_test.ts。main に反映済み）、data/view-prefs は 157・テスト t97、maint/2026-11-09 は 158・テスト t98、maint/2026-11-10 は 161・テスト t101。data/airport-facts は 160・テスト t100。そのほか次に新しく作るものは 162 以降・テストは t102 以降。**maint/2026-11-11 は 162・テスト t102**（161 の maint/2026-11-10 より後。反映の順が変わったら rebase）。**data/heliports の 163・t103 は 11/12 main に入った（PR #75 と一緒）**。**data/speed-1113 は 164・テスト t104**。**data/speed-1113b は 165・テスト t105**（164 の上）。**data/rot-learn-hi は 166・テスト t106**（関数1つだけなので 164・165 と順番が入れ替わってもよい）。（164〜167 は 11/13 に main に入った。166 は経営の co_cron_timeout、learn_hi は 167 に付け直し）。**data/alert-merge は 168・テスト t107**。次に新しく作るものは 169 以降・テストは t108 以降
+- main の最新は 160（159 airport_yomi・160 airport_facts は 11/10 本番に入った）。156・157 は 11/9 本番に入った。**maint/2026-11-09 の 158 は main の 159 より前になったので、反映の前に migrations.mjs rebase が要る**。maint/2026-11-06 は 153・テスト t93（fix/co-tests の経営の移行も 153 なので、反映の前に rebase）、data/photo-log は 154・テスト t94、maint/2026-11-07 は 155・テスト t95、data/debug-1107 は 156・テスト t96（関数のテストは supabase/tests/live_view_test.ts。main に反映済み）、data/view-prefs は 157・テスト t97、maint/2026-11-09 は 158・テスト t98、maint/2026-11-10 は 161・テスト t101。data/airport-facts は 160・テスト t100。そのほか次に新しく作るものは 162 以降・テストは t102 以降。**maint/2026-11-11 は 162・テスト t102**（161 の maint/2026-11-10 より後。反映の順が変わったら rebase）。**data/heliports の 163・t103 は 11/12 main に入った（PR #75 と一緒）**。**data/speed-1113 は 164・テスト t104**。**data/speed-1113b は 165・テスト t105**（164 の上）。**data/rot-learn-hi は 166・テスト t106**（関数1つだけなので 164・165 と順番が入れ替わってもよい）。（164〜167 は 11/13 に main に入った。166 は経営の co_cron_timeout、learn_hi は 167 に付け直し）。**data/alert-merge は 168・テスト t107**（11/14 main に入った）。**data/world-ops は 169・テスト t108**。次に新しく作るものは 170 以降・テストは t109 以降
 - main に別の移行が先に入ったら、反映の前にもう一度 `node tools/migrations.mjs rebase`
 - 本番は小さいプランで一時ファイルの余裕がない。本人に流してもらう SQL は、大きな中間の表・自己結合・大きな並べ替えを避け、索引で引く形にする
 - SQL のテストは全部で約35分かかる（手元で流すときは裏で流してログを見る。t92 だけで約4分。同じログに2回流すと混ざるので、ログの名前を分ける）
 
 ## 次にやること
-000000000000. 海外の止まり具合（PR #92）：本人が案1（FAA）を「作って」としたら、ブランチを分けて表 world_airport_status（移行169以降・RLS は誰でも select・書くのは service_role、終わった行は数日で消す）と取り込み（2分ごと・statement_timeout 付き・テスト付き）を作り、出し方はデザイン担当の画面案を待つ。乗る便の通知に足すなら alert_merge の「1便1通知」に1行足す形。world-destinations.sql の結果で対象の空港を決める。仁川・台湾の鍵が来たら活用ガイドの状態の値を読んでから
+0000000000000. 海外の止まり具合を作る（PR #93）：本人が FAA の XML を貼ったら faa_nas_test に本物の形を足して読み方を直す。world-destinations.sql の結果で US_SERVED を直す。「反映して」が出たら番号を確かめ（main に別の移行が先なら rebase）、次の日に cron.job_run_details（world-status）と関数の返す ms・rows・started を見てもらう。CI とレビューに答える
+000000000000. 海外の止まり具合の元（PR #92）：仁川・台湾の鍵が来たら活用ガイドの状態の値を読んでから、案3（便の一覧を数える）を作る。ヨーロッパは本人が決めたら EUROCONTROL への問い合わせ文
 00000000000. 遅れの通知（PR #88、11/14 の決定も入れ済み）：月曜に本人が流す alert-dup-check.sql の結果で①〜④のどれが多いかを見て、まとめ方を確かめる（③④が0でも害はない）。CI の deno test が落ちたら直す（手元は代わりの道具で流した）。「反映して」が出たら番号を確かめ、次の日に cron.job_run_details（odpt-status-fast・odpt-status・flight-watch）を見てもらい、毎分の回が詰まっていないか・ODPT の問い合わせ数を見る。チェックインの sw.js（renotify）が入ったか確かめる
 0000000000. 運用予想 learn_hi（PR #85）：「反映して」が出たら番号を確かめ（main に別の移行が先なら rebase）、反映のあとの SQL の結果を読む。約4週間後（12月中旬、記録が42日そろったら）rotation-eval-view.sql で learn・learn_hi・base を比べ直し、PM に案を出す。運用予想担当の依頼 (1)（predict_rotation を4つ目の方式として採点）・(3)（rot_eval_summary）は本人が決めたら作る。CI とレビューに答える
 000000000. 全体の見回りの直し（PR #81）：speed-check-1113b.sql の結果で、①の平均ms が大きい関数があれば索引・まとめ表の直し（166 以降）。④で airport_tracks が大きければ、運用予想担当と返し方（間引く・時間で分ける）の案を作る。app_boot を作ると決まったら関数（テスト付き）を作り、チェックインに依頼。CI とレビューに答える
@@ -195,6 +203,8 @@
 8. それ以外は PM の指示を待つ（勝手に新しい機能は始めない）。毎週月曜の昼の回は、下の「定期の仕事」（次の候補：点検の結果が来たら、死んだ行や使われていない索引の整理・遅い処理。cold-day-size.sql の結果で全機の航跡の1日が 20MB を超えるなら、ファイルを空港ごとに分ける案を作る。rwy-learn と daily-archive は 11/10 に見た（PR #58）。eta-calib・taxi-out・flight-watch は 11/11 に見た（PR #70）。結果がないまま次の回が来たら、ほかの毎晩・裏の処理（timetable-sync・schedule-sync・odpt-status・co3 の SQL の文）を同じ目で見て、時間の上限のない仕事の一覧を作る）
 
 ## ほかの担当への依頼
+- デザインへ（11/14 海外の止まり具合・PR #93）：運用タブの海外の便の札・空港のお知らせの画面案。中身は world_airport_ops の返す形（report-world-ops.md の 1）。出典の文（note）を必ず出す
+- チェックインへ（11/14 海外の止まり具合・PR #93）：画面案のあと rpc('world_airport_ops', { p_iata })。出すのは faa が空でないか cancelled・late30 が1以上の空港だけ、の案。乗る便の通知の本文に改行（\n）が入るようになる（sw.js の表示を確かめてほしい）
 - チェックインへ（11/13 遅れの通知・PR #88）：renotify は PR #90 で済み。通知の説明の文（乗る便は15分から、空港ごとの遅れは主要空港の門限・0時前後の便だけ、欠航・ダイバート・引き返しはどの空港でも（11/14））が要るかはデザイン担当の画面案で
 - 運用予想へ（11/13 learn_hi・PR #85）：predict_rotation_v2 は learn_hi で答える形になった（未反映）。返す形は同じ、'method' だけ 'learn_hi'。画面は今までどおり estimate・next[].src を使い、「予想・保証しない」の書き方は変えない。依頼 (2) の p_mode 引数は、learn_hi に決まったので作らず v2 の中身を替えた
 - 運用予想へ（11/13 全体の見回り・PR #81）：(1) livery_board の同じ呼び出し4回を1回に (2) 定時・空の道すじ・ゴーアラウンドは選んだときだけ取る (3) 見方を変えても数分は持っている案内板・お知らせを使う (4) flight_alerts はログインしていない・デモでは呼ばない。案内板と海外の便はサーバー側で速くなる（返す形は同じ）
@@ -327,6 +337,7 @@
 - 使えるものから、どう出すか（運用タブの海外の便・空港のお知らせ・乗る便の通知に「アメリカで地上待機中（FAA）」など）の案と、取り込みの手間・回数の目安を、効き目の大きい順に
 
 ## PM から積んだ次の仕事（11/15 0時10分、海外の空港の止まり具合を作る）
+（済み・11/14 の回 → PR #93。上の節）
 本人「OK」（report-world-ops-sources の案1・2。決定事項【11/15】）。ブランチ data/world-ops、下書き PR、本番には入れない
 1. FAA NAS Status（https://nasstatus.faa.gov/api/airport-status-information）を2分に1回読み、日本から直行便のあるアメリカの空港だけ残す。表 world_airport_status（iata・source・kind・reason・starts・ends・avg_delay・fetched_at）を移行と RLS（誰でも select、書くのは service_role）で。終わったものは数日で消す。取れないとき・古いとき（Update_Time が10分より前）は出さない
 2. 乗る便の通知（alert_merge）：着く空港か出る空港が地上待機・閉鎖・出発の間引きなら、1つの便の1つの通知に1行足す（「到着地ロサンゼルスで地上待機中（FAA・○時まで見込み）」）。はじめて分かったときは上書きで知らせる。新しい通知は増やさない
