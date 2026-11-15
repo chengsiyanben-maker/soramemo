@@ -61,3 +61,11 @@
 
 ## PM から積んだ次の仕事（11/13 17時30分、画面の予想を v2 に切り替え）【済み・PR #86】
 本人「切り替えて」（決定事項：運用予想の画面は learn_hi）。画面が今呼んでいる predict_rotation_reg を predict_rotation_v2 に替える（運用タブ・撮る人の「この機体の運用（推定）」・機体のくわしく・特別塗装機の この先の便など、予想を出す部品のすべて）。返す形は同じで、'estimate': true と便ごとの src が増える。見た目と「予想・保証しない」の書き方は変えないので画面案は要らない。v2 が null や空のときは今の predict_rotation_reg に戻す。データ担当が v2 を learn_hi にする移行を data/rot-learn-hi で作る。ブランチ yosoku/rot-v2、下書き PR。変えた関数の名前を報告に
+
+## PM から積んだ次の仕事（11/15 11時20分、運用予想の見せ方 案A を作る）
+本人「OK」（決定事項【11/15】運用予想の見せ方）。画面案 design/rotation-view の A1-v2〜A6-v2 と docs/pm/report-rotation-view.md（2版）どおりに作る。B・C は作らない。
+- 直す関数：loadPrediction・predictionHTML・planeHTML・specialHTML・spDetailHTML・spbDetailHTML（運用タブの土台・撮る人の並べ方に触る所は checkin.md・satsuei.md に書く）
+- 予想に出さない決まり：①出発の時刻が過ぎた便 ②いま飛んでいる便とそれより前の便（運航情報にあっても）。いまの便が古いときは「JL148 からの予想」
+- 確からしさ：5回以上で割合が高い→「高い」、3〜4回は多くても「中くらい」。回数「12回中11回」を小さく薄く
+- 出典：運航情報の便に本番と同じ ODPT の出典と断り書き
+- テスト：844 と 667 で開いたときに予想の1便目が見える、過ぎた便を出さない、いまの便を出さない。ブランチ yosoku/rotation-view-a、下書き PR、本番には入れない
