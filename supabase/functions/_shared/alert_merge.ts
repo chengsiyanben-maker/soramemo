@@ -38,7 +38,7 @@ export const CURFEW: Record<string, { end: number; label: string }> = {
   FUK: { end: 22 * 60, label: "22時" },
   NRT: { end: 24 * 60, label: "24時" },
 };
-export const CURFEW_NEAR = 30;                                 // 門限の30分前より遅く着く見込みなら知らせる
+export const CURFEW_NEAR = 10;                                 // 門限の10分前より遅く着く見込みなら知らせる（11/15 本人「門限ぎりぎりになるやつ」で30分→10分。空港ごとの通知・乗る便の通知の両方がこの1か所を見る）
 export const MIDNIGHT = { from: 23 * 60 + 30, to: 25 * 60 };   // 0時前後：23時30分〜翌1時
 
 const RANK: Record<string, number> = { cancel: 5, divert_landed: 4, divert: 4, return: 3, delay_dep: 1, delay_arr: 1, no_takeoff: 1 };
