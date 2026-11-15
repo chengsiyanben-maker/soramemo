@@ -1,6 +1,6 @@
 // 遅れの通知を1つの便につき1件にまとめる：推定→公式・出発→到着・共同運航2行・同じ遅れの繰り返し・乗る便の15分・空港は主要空港の門限と0時前後だけ（欠航・ダイバート・引き返しはどの空港にも）・30分ふえたときの上書き
 import { assertEquals } from "jsr:@std/assert@1";
-import { eligible, type MergeAlert, mergeAlerts, type MergeSched, payloadOf, shouldSend } from "../functions/_shared/alert_merge.ts";
+import { CURFEW_NEAR, eligible, type MergeAlert, mergeAlerts, type MergeSched, payloadOf, shouldSend } from "../functions/_shared/alert_merge.ts";
 
 const STD = "2026-11-13T01:00:00+00:00";
 const S: MergeSched[] = [
@@ -53,7 +53,7 @@ const names = (i: string) => ({ HND: "羽田", ITM: "伊丹", FUK: "福岡", NRT
 const night = (s: MergeSched, late: number, kind = "delay_arr", official = true) =>
   mergeAlerts([s], [{ schedule_id: s.id, kind, late, official, message: `ふつうの文${late}`, iata: [s.arr, s.dep] }], names)[0];
 
-Deno.test("門限：伊丹の21時の30分前より後に着く見込みは「間に合わないおそれ」、21時より後は引き返し・ほかの空港も書く。主要空港を選んだ人に届く", () => {
+Deno.test("門限：伊丹の21時の10分前より後に着く見込みは「間に合わないおそれ」、21時より後は引き返し・ほかの空港も書く。主要空港を選んだ人に届く", () => {
   const g = night(N(11, "JL139", "HND", "ITM", "18:30", "19:47"), 65);
   assertEquals(g.rank, 2);
   assertEquals(g.body, "伊丹の門限（21時）に間に合わないおそれ：JL139 羽田→伊丹、到着の見込み 20時52分（約65分遅れ）（航空会社の運航情報から）");
@@ -62,10 +62,26 @@ Deno.test("門限：伊丹の21時の30分前より後に着く見込みは「�
   assertEquals([eligible(sub([], ["ITM"]), g), eligible(sub([], ["HND"]), g), eligible(sub([], ["KMJ"]), g)], [true, true, false]);
 });
 
-Deno.test("門限：福岡の22時の30分前より後に着く見込み。30分より前なら知らせない", () => {
-  assertEquals(night(N(12, "NH265", "HND", "FUK", "19:30", "21:20"), 15).body.startsWith("福岡の門限（22時）に間に合わないおそれ：NH265 羽田→福岡、到着の見込み 21時35分（約15分遅れ）"), true);
-  assertEquals(night(N(12, "NH265", "HND", "FUK", "19:30", "21:00"), 20).rank, 1);   // 21時20分：30分より前
-  assertEquals(night(N(13, "JL3083", "HND", "NRT", "21:00", "23:00"), 40).body.startsWith("成田の門限（24時）"), true);
+Deno.test("門限の幅は10分（11/15 本人）：11分前は出ない・10分前と9分前は出る・過ぎたら出る。伊丹・福岡・成田とも", () => {
+  assertEquals(CURFEW_NEAR, 10);
+  // 伊丹 21時：定刻 20時20分 → 29分遅れで 20時49分（11分前）、30分で 20時50分（10分前）、31分で 20時51分（9分前）、45分で 21時05分（過ぎた）
+  const itm = (late: number) => night(N(11, "JL139", "HND", "ITM", "19:10", "20:20"), late);
+  assertEquals([itm(29).rank, itm(30).rank, itm(31).rank, itm(45).rank], [1, 2, 2, 2]);
+  assertEquals(itm(31).body.startsWith("伊丹の門限（21時）に間に合わないおそれ："), true);
+  assertEquals(itm(45).body.startsWith("伊丹の門限（21時）に間に合わない見込み："), true);
+  // 福岡 22時
+  const fuk = (late: number) => night(N(12, "NH265", "HND", "FUK", "19:30", "21:20"), late);
+  assertEquals([fuk(29).rank, fuk(31).rank, fuk(41).rank], [1, 2, 2]);
+  assertEquals(fuk(31).body.startsWith("福岡の門限（22時）に間に合わないおそれ：NH265 羽田→福岡、到着の見込み 21時51分（約31分遅れ）"), true);
+  assertEquals(fuk(15).rank, 1);   // 21時35分：25分前（前の30分の幅なら出ていた）
+  // 成田 24時
+  const nrt = (late: number) => night(N(13, "JL3083", "HND", "NRT", "21:00", "23:00"), late);
+  assertEquals([nrt(40).rank, nrt(49).rank, nrt(51).rank, nrt(70).rank], [1, 1, 2, 2]);
+  assertEquals(nrt(51).body.startsWith("成田の門限（24時）に間に合わないおそれ"), true);
+  // 乗る便の人にも同じ判定（rank 2 の文）で届く
+  assertEquals([eligible(sub(["JL139@2026-11-13"]), itm(31)), itm(31).body.includes("門限")], [true, true]);
+  // 主要空港の人へ：11分前は届かない（ふつうの遅れ）・9分前は届く
+  assertEquals([eligible(sub([], ["ITM"]), itm(29)), eligible(sub([], ["ITM"]), itm(31))], [false, true]);
 });
 
 Deno.test("0時前後：24時間の空港に、遅れで23時30分〜翌1時に着く見込みの便。定刻がもともと遅い便や1時より後は知らせない", () => {
