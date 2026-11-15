@@ -6,6 +6,7 @@
   - テスト：alert_merge_test に「幅は10分」（伊丹・福岡・成田で11分前は出ない・10分前と9分前は出る・過ぎたら出る・前の幅なら出た25分前は出ない・乗る便にも届く）。30分前提の古い例はまとめた。deno test 255本・型の確認 通過（Deno 2.5.6 を npm で入れられた）
   - 本人待ち：「反映して」（移行がないので rebase 不要、関数の公開だけ）
   - この回は定期の回（PM の指示なし・日曜）として呼ばれたが、PM が 11/15 19時25分に積んだ指示があったので、そちらをした
+  - 2回目の回（11/15、PM が同じ指示を手で呼んだ）：PR #100（18fd97a）で済みだったので、PR #100 のコメント・CI（どちらもまだなし）と main（754bca5 のまま、rebase 不要）だけ見た。変えたものはなし
 - 海外の空港の止まり具合を作る（11/15 0時10分 PM の指示・本人「OK」：案1・2）：ブランチ data/world-ops → main 向けの下書き PR #93（見張りを始めた）。報告 docs/pm/report-world-ops.md（そのブランチ）
   - **11/15 14時59分 PR #93 が main に入った（反映の PR #97 → 754bca5、移行169。仕上げ a33a975 も一緒）。反映の Actions（run 213＝43683425961）はすべて成功（テスト・移行169の適用・関数の公開・アプリ。15時0分〜15時25分）。本番に入った**。次：明日、cron.job_run_details（world-status）と関数の返す rows・started・ms を本人に見てもらう
   - 移行 169 world_ops：表 world_airport_status（RLS 誰でも select・書くのは service_role。続いているものは空港・種類ごとに1行、なくなったら ended_at、3日で掃除）・world_status_put／world_status_rows（service_role）・world_status_now（10分より古い・終わったものは出さない）・world_flight_counts（JAL・ANA の国際線を海外の空港ごとに便・欠航・30分以上の遅れ）・world_airport_ops（画面用、note に出典の文）・alert_push_log に world と rank 0・alert_push_claim に「止まり具合がはじめて分かった・変わったら送り直す」。cron world-status（2分・10s）・world-status-cleanup（30s）。先頭に lock_timeout 10s。影響はチェックイン（運用・通知）、経営なし
