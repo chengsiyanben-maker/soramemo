@@ -235,7 +235,8 @@ def w2():
           '<ul class="kv"><li><span>わけ</span><b>天候（低い雲）<small>FAA の発表の言葉：WEATHER / LOW CEILINGS</small></b></li>'
           '<li><span>いつから</span><b>13:42 ごろから<small>現地 20:42（土）</small></b></li>'
           '<li><span>終わる見込み</span><b>15:30 まで見込み<small>現地 22:30（土）。延びることがあります</small></b></li>'
-          '<li><span>発表の時刻</span><b>14:06<small>2分ごとに見ています</small></b></li></ul>'
+          '<li><span>遅れの向き</span><b>増えています<small>FAA の trend（increasing・decreasing・steady）。ないときは行ごと出さない</small></b></li>'
+          '<li><span>発表の時刻</span><b>14:06<small>FAA の発表の時刻（feed_at。いまの返す形にはないので、データ担当に足してもらう）</small></b></li></ul>'
           '<div class="subh">今日の JAL・ANA の便（ロサンゼルス発着）<small style="font-size:13px;font-weight:600;color:var(--sub);margin-left:6px">遅れは30分以上</small></div>'
           '<div class="cnt3"><div><span>便</span><b>8<small>便</small></b></div><div><span>欠航</span><b>0<small>便</small></b></div><div class="hot"><span>遅れ</span><b>2<small>便</small></b></div></div>'
           f'<div class="box">{INFO}<span><b>運航の判断には使えません。</b>FAA（アメリカ連邦航空局）が出している空港のようすを、そらメモが日本語にしたものです。あなたの便が遅れるかどうかは、航空会社の案内で確かめてください。<br>{NOTE}</span></div></div>')
