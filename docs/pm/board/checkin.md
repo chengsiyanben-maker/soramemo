@@ -8,6 +8,7 @@
   - 関数：足した loadWorldOps・woAp・woFaa・woShow・woHM・woLocal・woFeedAt・woNote・woTag・woCountTag・woSub・woRowTag・worldOpsHTML・worldApSheet・worldRideHTML（WO_KIND・WO_ORDER・WO_TREND・WOPS）／変えた boardHTML・renderBoard・renderRideIntl。dialog#dWorldAp と CSS（.wotag・.wopin・#v-ops .wobox ほか・.ridecard .woline・dialog.wodlg）
   - テスト：t133（新・41項目）成功。t130・t60・t128・t132 成功。全体 92/102（t19・t27・t34・t37・t47 は流し直して成功、t17 は揺れ、t62 は main でも落ちる、残りは前からの t105・t99・t48）
   - 本人に決めてほしいこと：欄を案内板の便の行き先だけに絞った形でよいか／乗る便の1行を押すとくわしくが開く形
+  - 2回目の回（11/15、PM が同じ指示を手で呼んだ）：PR #96 で済みだったので、data/world-ops（a33a975 のまま・取り込み済み）・main（5a22d8e のまま）・PR #96 のコメントと CI（どちらもまだなし）だけ見た。変えたものはなし
 - 遅れの通知の受け取り（11/13 21時20分の PM の指示・データ担当 data/alert-merge の依頼）：済み。ブランチ checkin/push-renotify（main 4fb2f42 から）・下書き PR #90（016bba9・bcbb90a）、報告 docs/pm/report-push-renotify.md
   - src/sw.js の push の受け取りで showNotification に `renotify: !!(d.tag && d.renotify)` を渡す（tag がないときは立てない）。web/sw.js を組み立て直した（1行だけ）。画面と src/index.html は変えていない（変えた関数なし）
   - テスト：t132 を足した（sw.js を node の vm で読み push を5件送る・9項目成功）。t128・t60 成功。全体 93/101（t123・t17・t47・t62・t19 は流し直して成功、残りは前からの t105・t99・t48）
