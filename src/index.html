@@ -743,6 +743,81 @@ dialog.spfull .dlg{padding:16px 16px 32px;max-width:480px;margin:0 auto;max-heig
 .pllegs{list-style:none;margin:10px 0 0;padding:4px 16px;background:var(--s-card);border-radius:22px}.pllegs li{display:flex;gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid var(--s-line)}.pllegs li:last-child{border-bottom:0}
 .pllegs .d{flex:none;width:12px;height:12px;border-radius:50%;background:#9CA3AF}.pllegs .now .d{background:#C2410C}.pllegs .next .d{background:#fff;border:2px dashed #9CA3AF}
 .pllegs .t{flex:1;min-width:0}.pllegs .t small{display:block;font-size:11px;color:var(--s-mute)}.pllegs em{flex:none;font-style:normal;border-radius:7px;padding:3px 8px;font-size:11px;font-weight:800;background:var(--s-bg);color:var(--s-mute)}.pllegs .now em{background:#FDE8DC;color:#C2410C}
+/* 運用予想の時間の線（案A・11/15 本人「OK」・design/rotation-view の2版）：飛んだ便（灰色の実線）→ いま（橙）→「ここから予想」の帯 → 予想（点線・白い丸・「ごろ」） */
+.rtlw{--r-ink:#24292F;--r-ink2:#374151;--r-mute:#6B7280;--r-sub:#7A818C;--r-card:#FFFFFF;--r-wash:#F4F6F9;--r-line:#CBD2DA;--r-dash:#B7BFC9;--r-now:#C2410C;--r-now-wash:#FDF0E6;--r-pred:#4B5563;--r-dot:#D5DAE1;--r-hero:#0F1B2D;--r-on-hero:#FFFFFF;color:var(--r-ink)}
+[data-palette="board"] .rtlw,:root[data-night="on"] .rtlw{--r-ink:#E5E7EB;--r-ink2:#D1D5DB;--r-mute:#A7B0BC;--r-sub:#A7B0BC;--r-card:#16191F;--r-wash:#1D232C;--r-line:#3A4452;--r-dash:#55606E;--r-now:#E9A14B;--r-now-wash:rgba(233,161,75,.14);--r-pred:#C9D1DB;--r-dot:#3A4452;--r-hero:#DCE3EA;--r-on-hero:#0E1014}
+.rtl{list-style:none;margin:10px 0 0;padding:6px 14px;background:var(--r-card);border-radius:22px;box-shadow:0 12px 26px -18px rgba(15,23,42,.3)}
+.rtl.mini{padding:6px 12px;background:var(--r-wash);border-radius:18px;box-shadow:none}
+.rtl li{display:grid;grid-template-columns:62px 22px minmax(0,1fr) auto;align-items:start;column-gap:8px;padding:10px 0;position:relative}
+.rtl.mini li{grid-template-columns:54px 18px minmax(0,1fr) auto;column-gap:6px;padding:8px 0}
+.rtl .tm b{display:block;font-size:20px;font-weight:900;line-height:1.15;font-variant-numeric:tabular-nums;color:var(--r-ink)}
+.rtl.mini .tm b{font-size:17px}
+.rtl .tm small{display:block;font-size:13px;color:var(--r-sub);line-height:1.3}
+.rtl .dot{position:relative;align-self:stretch;min-height:36px}
+.rtl .dot::before{content:"";position:absolute;left:10px;top:0;bottom:-20px;border-left:3px solid var(--r-line)}
+.rtl.mini .dot::before{left:7px;bottom:-16px}
+.rtl li:last-child .dot::before{bottom:auto;height:14px}
+.rtl .dot i{position:absolute;left:4px;top:5px;width:15px;height:15px;border-radius:50%;background:#9CA3AF;box-shadow:0 0 0 3px var(--r-card)}
+.rtl.mini .dot i{left:1px;width:14px;height:14px;box-shadow:0 0 0 3px var(--r-wash)}
+.rtl .tx{min-width:0}.rtl .tx b{font-size:16px;font-weight:800;color:var(--r-ink)}
+.rtl .tx>span{display:block;font-size:15px;color:var(--r-ink2);line-height:1.4}
+.rtl.mini .tx{font-size:15px;color:var(--r-ink2);line-height:1.45}
+.rtl .tx small{display:block;font-size:13px;color:var(--r-mute);margin-top:2px;line-height:1.5}
+.rtl .tag{background:none;border-radius:0;padding:3px 0 0;font-size:13px;color:var(--r-sub);font-weight:700;padding-top:3px;text-align:right;white-space:nowrap}
+.rtl li.now{background:var(--r-now-wash);border-radius:16px;margin:4px -8px;padding:10px 8px}
+.rtl li.now .dot i{background:var(--r-now);box-shadow:0 0 0 3px var(--r-now-wash),0 0 0 7px rgba(194,65,12,.18)}
+.rtl li.now .tag,.rtl li.now .tm b{color:var(--r-now)}
+.rtl li.last .dot i{background:#9CA3AF;box-shadow:0 0 0 3px var(--r-wash),0 0 0 6px rgba(194,65,12,.14)}
+.rtl li.last .tm b{color:var(--r-ink2)}
+.rtl li.p .dot::before,.rtl li.skip .dot::before{border-left:3px dashed var(--r-dash)}
+.rtl li.p .dot i{background:var(--r-card);border:2.5px dashed var(--r-pred);box-shadow:0 0 0 3px var(--r-card);box-sizing:border-box}
+.rtl.mini li.p .dot i{background:var(--r-wash);box-shadow:0 0 0 3px var(--r-wash)}
+.rtl li.p .tm b{color:var(--r-pred);font-weight:800}
+.rtl li.p .tx b,.rtl li.p .tx span{color:var(--r-pred)}
+.rtl li.day{display:block;padding:10px 0 2px 92px;font-size:13px;font-weight:800;color:var(--r-mute)}
+.rtl.mini li.day{padding:8px 0 0 78px}
+.rtl li.day::before{content:"";position:absolute;left:81px;top:0;bottom:0;border-left:3px dashed var(--r-dash)}
+.rtl.mini li.day::before{left:69px}
+.rtl li.skip{grid-template-columns:62px 22px minmax(0,1fr);padding:6px 0}.rtl.mini li.skip{grid-template-columns:54px 18px minmax(0,1fr)}
+.rtl li.skip .tx{font-size:13px;color:var(--r-sub);line-height:1.5}
+.rtl li.edge{display:block;padding:14px 0 10px;text-align:center}
+.rtl li.edge::before{content:"";position:absolute;left:0;right:0;top:27px;border-top:2px dashed #C3CAD3}
+.rtl li.edge b{position:relative;display:inline-block;background:var(--r-hero);color:var(--r-on-hero);font-size:13px;font-weight:800;border-radius:999px;padding:5px 14px}
+.rtl li.edge small{display:block;font-size:13px;color:var(--r-mute);margin-top:6px}
+.rtl li.fold{grid-template-columns:62px 22px minmax(0,1fr) 44px;align-items:center;padding:4px 0}
+.rtl li.fold .tm b{font-size:16px;color:var(--r-mute)}.rtl li.fold .tx b{font-size:15px;color:var(--r-ink2)}
+.rtl li.fold button{grid-column:1/-1;display:grid;grid-template-columns:62px 22px minmax(0,1fr) 44px;column-gap:8px;align-items:center;min-height:52px;width:100%;border:0;background:none;padding:0;text-align:left;font:inherit;color:inherit;cursor:pointer}
+.rtl li.fold svg{width:20px;height:20px;fill:none;stroke:var(--r-mute);stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;justify-self:center;transition:transform .15s}
+.rtl li.fold [aria-expanded="true"] svg{transform:rotate(180deg)}
+.rtl:not(.open) li.flown{display:none}
+.rtl li.flown .tm b{font-size:16px;color:var(--r-mute)}
+.rcf{display:inline-flex;align-items:center;gap:5px;white-space:nowrap;font-size:13px;font-weight:800;color:var(--r-pred)}
+.rtl .tag .rcf{flex-direction:column;align-items:flex-end;gap:1px}.rcf>span{display:inline-flex;align-items:center;gap:5px}
+.rcf .d{display:inline-flex;gap:3px}.rcf .d i{width:9px;height:9px;border-radius:50%;background:var(--r-dot)}
+.rcf.c3 .d i,.rcf.c2 .d i:nth-child(-n+2),.rcf.c1 .d i:nth-child(1){background:var(--r-pred)}
+.rcf .n{font-weight:600;color:var(--r-sub);margin-left:4px}
+.rsrc{display:inline-flex;align-items:center;height:24px;padding:0 9px;border-radius:999px;background:var(--r-card);box-shadow:inset 0 0 0 1.5px #9AA3AE;font-size:13px;font-weight:800;color:var(--r-ink2);white-space:nowrap}
+.rtl.mini .tx .rsrc,.rtl.mini .tx .rcf{margin-top:3px}
+.rwarn{display:flex;gap:8px;align-items:flex-start;font-size:13px;line-height:1.6;color:var(--r-ink2);background:var(--r-wash);border-radius:14px;padding:10px 12px;margin-top:10px}
+.rwarn>span:first-child{flex:none;font-weight:900}
+.rsec{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin:18px 4px 0}.rsec b{font-size:16px;font-weight:900}.rsec span{font-size:13px;color:var(--r-mute)}
+.rbtns{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:12px}
+.rbtns .more{flex:1;font-size:13px;color:var(--r-mute)}
+.rtlw .rbtn{display:inline-flex;align-items:center;min-height:44px;border:0;border-radius:999px;background:var(--r-wash);color:var(--r-ink);font:800 14px var(--gothic);padding:0 18px;cursor:pointer}
+.rtlw .rbtn.line{background:var(--r-card);box-shadow:inset 0 0 0 1.5px #C9CED6}
+.rodpt,.rnote{font-size:13px;line-height:1.65;color:var(--r-mute);margin:10px 2px 0}
+.rodpt a{color:inherit}
+.rmap{margin-top:10px;background:var(--r-card);border-radius:22px;padding:12px 14px;box-shadow:0 12px 26px -18px rgba(15,23,42,.3)}.rmap>b{font-size:15px}
+.rmap .plmap{margin-top:8px}
+.rlegend{display:flex;gap:16px;flex-wrap:wrap;margin-top:8px;font-size:13px;color:var(--r-mute)}.rlegend i{display:inline-block;width:20px;margin-right:5px;vertical-align:middle;border-top:3px solid #9CA3AF}.rlegend i.n{border-top-color:var(--r-now)}.rlegend i.p{border-top:3px dashed #C2410C}
+.rlv{list-style:none;margin:14px 0 0;padding:0}.rlv li{padding:12px 0}.rlv li+li{box-shadow:0 -1px 0 rgba(17,24,39,.06)}.rlv p{margin:6px 0 0;font-size:15px;line-height:1.6;color:var(--r-ink2)}
+.rlv h4{margin:0 0 6px;font-size:15px;font-weight:900}
+/* 運用タブの一覧（.fwlist・.splist）の行の線と余白・ボタンの all:unset を時間の線では使わない */
+#v-ops .rtlw .rtl li,#v-ops .rtlw .rtl li+li,.rtlw .rtl li+li{border-top:0}
+#v-ops .rtlw .rtl li{padding:10px 0}#v-ops .rtlw .rtl.mini li{padding:8px 0}#v-ops .rtlw .rtl li.now{padding:10px 8px}#v-ops .rtlw .rtl li.edge{padding:14px 0 10px}
+#v-ops .rtlw .rtl li.skip{padding:6px 0}#v-ops .rtlw .rtl li.day{padding:10px 0 2px 92px}#v-ops .rtlw .rtl.mini li.day{padding:8px 0 0 78px}#v-ops .rtlw .rtl li.fold{padding:4px 0}
+.rtlw .rbtn,#v-ops .splist .sppred{width:auto;box-sizing:border-box}
+#dRotConf .dlg>p{font-size:15px;line-height:1.7;color:var(--r-ink2)}
 .trbars{margin-top:10px}.trbars .r{display:flex;align-items:center;gap:8px;padding:5px 0;font-size:12px}.trbars .r>span:first-child{width:70px}.trbars .bar{flex:1;display:flex;height:14px;border-radius:7px;overflow:hidden;background:var(--s-bg)}
 .trbars .bar i{display:block;height:100%}.trbars .r>span:last-child{width:84px;text-align:right;font-size:11px;color:var(--s-mute)}
 .trhours{display:flex;align-items:flex-end;gap:3px;height:90px;margin-top:10px}.trhours i{flex:1;border-radius:3px 3px 0 0;background:#9CA3AF;min-height:2px}.trhours i.top{background:var(--s-ink)}
@@ -1552,9 +1627,11 @@ dialog.mypage .dlg .close{display:none}
 #v-ops .opsbox .rw{border-radius:999px;padding:1px 9px}
 #v-ops .opshours{color:var(--op-mute)}
 #v-ops .opsmap{border-radius:22px;box-shadow:var(--op-shadow)}
-#v-ops .splist .sppred{display:inline-block;margin:6px 0 0;border:0;border-radius:999px;background:var(--op-pill);color:var(--op-ink);font:700 11.5px var(--gothic);padding:5px 11px}
-#v-ops .splist .sppred[aria-expanded="true"]{background:var(--op-ink);color:var(--op-card)}
-#v-ops .sppredout{margin:8px 0 2px;padding:10px 12px;border-radius:14px;background:color-mix(in srgb,var(--op-pill) 70%,transparent)}
+#v-ops .splist .sppred{display:inline-flex;align-items:center;gap:6px;min-height:44px;margin:8px 0 0;border:0;border-radius:999px;background:var(--op-pill);color:var(--op-ink);font:800 14px var(--gothic);padding:0 18px;cursor:pointer}
+#v-ops .splist .sppred svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round;transition:transform .15s}
+#v-ops .splist .sppred[aria-expanded="true"]{background:var(--hero);color:#fff}[data-palette="board"] #v-ops .splist .sppred[aria-expanded="true"]{background:#DCE3EA;color:#0E1014}
+#v-ops .splist .sppred[aria-expanded="true"] svg{transform:rotate(180deg)}
+#v-ops .sppredout{margin:4px 0 2px}
 #v-ops .predlist{margin:6px 0 0;padding-left:18px;font-size:12.5px;color:var(--op-ink)}
 #v-ops .predlist small{margin-left:6px;color:var(--op-mute)}
 .spcard .predlist{margin:6px 0 0;padding-left:18px;font-size:12.5px}.spcard .predlist small{margin-left:6px;color:var(--s-mute)}
@@ -3722,6 +3799,7 @@ div.viewsw>button{position:relative}div.viewsw>button::after{content:"";position
 <dialog id="dData" class="spfull" aria-label="データの使い方"><div class="dlg" id="dDataBody"></div></dialog>
 <dialog id="dThatDay" class="spfull" aria-label="あの日の空"><div class="dlg" id="dThatDayBody"></div></dialog>
 <dialog id="dPlane" class="spfull" aria-label="機体の1日"><div class="dlg" id="dPlaneBody"></div></dialog>
+<dialog id="dRotConf" class="spsheet rtlw" aria-label="確からしさ"><div class="dlg" id="dRotConfBody"></div></dialog>
 <dialog id="dTrend" class="spfull" aria-label="空港の傾向"><div class="dlg" id="dTrendBody"></div></dialog>
 <dialog id="dGa" class="sgd" aria-label="ゴーアラウンド"><div class="dlg" id="dGaBody"></div></dialog>
 <dialog id="dOpsAp" class="spsheet" aria-labelledby="opsApTitle"><div class="dlg"><div class="sph"><span class="grab" aria-hidden="true"></span><button class="spx" type="button" data-close aria-label="閉じる">×</button></div>
@@ -10050,7 +10128,7 @@ function specialHTML(){
   const item = (x, mark) => { const go = x.iata && OPS_AIRPORTS[x.iata] && x.iata !== OPS_AP;
     const body = `<b>${mark}${esc(x.name)}</b> <small>${esc(x.airline)}${x.callsign ? "・" + esc(x.callsign) : ""}（${esc(x.reg)}）</small><br><small>${esc(specialWhere(x))}</small>`;
     return `<li>${go ? `<button data-ops-ap="${esc(x.iata)}" aria-label="${esc(x.name)}：${esc(OPS_AIRPORTS[x.iata].name)}の運用を見る">${body}</button>` : body}
-      <button class="sppred" data-sp-pred="${esc(x.reg)}" aria-expanded="false">この先の便（推定）</button><div class="sppredout" data-sp-pred-out="${esc(x.reg)}" hidden></div></li>`; };
+      <button class="sppred" type="button" data-sp-pred="${esc(x.reg)}" data-rot-limit="2" aria-expanded="false">この先の便（予想）${PRED_CHEV}</button><div class="sppredout" data-sp-pred-out="${esc(x.reg)}" hidden></div></li>`; };
   const allyHTML = ally.length ? `<details class="spally"><summary>アライアンス塗装 ${ally.length}機</summary><ul>${ally.map(x => item(x, "◇")).join("")}</ul></details>` : "";
   // これから飛ぶ予定（航空会社の運航情報の文に「〇〇で運航いたします」とある便）。この空港の便を先に、ほかの空港の便はたたむ
   const hm2 = t => new Date(t).toLocaleTimeString("ja-JP", { hour:"2-digit", minute:"2-digit" });
@@ -10161,12 +10239,18 @@ function spbDetailHTML(reg){
   const hero = r.st === "flying" ? `<div class="spbroute">${l.dep || l.arr ? `${spbCode(l.dep)}${spbArrow}${spbCode(l.arr)}` : `<span class="spbunk">行き先は分からない</span>`}<small>${esc(spbFl(l.cs))}</small></div>
       <div class="spbtiles">${tile("着く時刻（推定）", eta ? spHM(eta) : "—")}${tile("時刻表", l.sta ? spHM(l.sta) : "—")}${tile("高さ", r.now.alt_ft != null ? `${(Math.round(r.now.alt_ft / 100) * 100).toLocaleString("ja-JP")}<small>ft</small>` : "—")}</div>`
     : `<p class="spbidle">${r.st === "today" ? "いまは地上か、記録の外にいます。" : r.st === "recent" ? `いまは飛んでいません。最後に見えたのは${esc(spbMd(r.b.last_day))}です。` : "この30日は、記録に入っていません。"}</p>`;
-  const legLi = (x, i) => { const live = r.st === "flying" && i === r.legs.length - 1 && x.cs === r.now.callsign;
-    return `<li class="${live ? "now" : ""}"><span class="tm">${live ? "いま" : spHM(x.first)}</span><span class="rt">${spbCode(x.dep)}${spbArrow}${spbCode(x.arr)}</span><span class="fl">${esc(spbFl(x.cs))}${x.sch ? "<small>時刻表から</small>" : x.hist ? "<small>いつもの路線から</small>" : ""}${live ? "<small>飛行中</small>" : ""}</span></li>`; };
+  // 案A：今日の足あとは飛んだ便を1行にたたみ、いまの便を出す。その下に「この先（予想）」（予想です。保証しません）
+  const lastLive = r.st === "flying" && r.legs.length && r.legs[r.legs.length - 1].cs === r.now.callsign;
+  const curLeg = r.legs.length ? r.legs[r.legs.length - 1] : null, flown = curLeg ? r.legs.slice(0, -1) : [];
+  const why = x => x.sch ? "時刻表から" : x.hist ? "いつもの路線から" : "";
+  const legLi = x => `<li class="flown"><div class="tm"><b>${spHM(x.first)}</b>${x.last ? `<small>〜${spHM(x.last)}</small>` : ""}</div><div class="dot"><i></i></div><div class="tx"><b>${esc(spbFl(x.cs))}</b><span>${predRoute(x.dep, x.arr)}</span>${why(x) ? `<small>${why(x)}</small>` : ""}</div><div class="tag">飛んだ</div></li>`;
+  const fold = flown.length ? `<li class="fold"><button type="button" data-rot-fold aria-expanded="false"><span class="tm"><b>${spHM(flown[0].first)}</b>${flown[flown.length - 1].last ? `<small>〜${spHM(flown[flown.length - 1].last)}</small>` : ""}</span><span class="dot"><i></i></span><span class="tx"><b>今日飛んだ ${flown.length}便</b><small>${flown.slice(0, 4).map(x => esc(spbFl(x.cs))).join("・")}${flown.length > 4 ? " ほか" : ""}</small></span>${PRED_CHEV}</button></li>${flown.map(legLi).join("")}` : "";
+  const curRow = curLeg ? predCurRow({ fl:spbFl(curLeg.cs), dep:curLeg.dep, arr:curLeg.arr, t:Date.parse(curLeg.first) || null, end:Date.parse(curLeg.last) || null, live:!!lastLive, eta, note:why(curLeg) || (lastLive ? "" : "見えた最後の便") }, false) : "";
   return `<div class="spctop"><button class="mp-back" type="button" data-spb-back><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>特別塗装機</button><h3 class="srt">${esc(r.name)}</h3><span class="spbreg">${esc(reg)}</span></div>
     <div class="spbhero g-${r.g}"><div class="spbname"><small>${esc(r.air)}</small><b>${esc(r.name)}</b></div>${hero}</div>
-    <h4 class="loh">今日の足あと<small>主な空港で見えた記録から</small></h4>
-    ${r.legs.length ? `<ul class="spblegs">${r.legs.map(legLi).join("")}</ul>` : `<p class="hint">今日は、まだ記録がありません。</p>`}
+    <div class="rtlw"><div class="rsec"><b>今日の足あと</b><span>主な空港で見えた記録から</span></div>
+    ${r.legs.length ? `<ul class="rtl">${fold}${curRow}</ul>` : `<p class="hint">今日は、まだ記録がありません。</p>`}
+    ${SERVER ? `<div class="rsec"><b>この先（予想）</b><span>予想です。保証しません</span></div><div id="spbPredBox">${spbPredHTML(reg)}</div>` : ""}</div>
     <h4 class="loh">この30日に来た空港<small>着いた回数</small></h4>
     ${arr30.length ? `<div class="spbaps">${arr30.slice(0, 12).map(([c, n]) => `<span>${esc(placeShort(c))} <b>${n}</b>回</span>`).join("")}</div>` : `<p class="hint">この30日の記録はありません。</p>`}
     <div class="spbbtns">${SERVER && PUSH_KEY && pushOK() ? `<button type="button" class="spbbtn" data-spb-push="${esc(reg)}" aria-pressed="${on}">${on ? "この機体の通知をやめる" : "この機体が飛んだら通知"}</button>` : ""}
@@ -10182,8 +10266,27 @@ function spbMap(){
     L.circleMarker([r.now.lat, r.now.lon], { radius:6, color:"#fff", weight:1.5, fillColor:"#A9822E", fillOpacity:1, interactive:false, keyboard:false }).addTo(SPB_MAP);
   setTimeout(() => SPB_MAP && SPB_MAP.invalidateSize(), 60);
 }
+let SPB_PRED = null;   // 特別塗装機のくわしくの予想 {reg, at, d}
+// 特別塗装機のくわしくの「この先（予想）」：予想は機体を開いたときに1回読み、1分は持つ
+function spbPredHTML(reg){
+  const r = spbRows().find(x => x.reg === reg); if(!r) return "";
+  const lastLive = r.st === "flying" && r.legs.length && r.legs[r.legs.length - 1].cs === r.now.callsign;
+  const pd = SPB_PRED && SPB_PRED.reg === reg ? SPB_PRED.d : undefined;
+  const pm = pd === undefined ? null : predModel(pd, predLiveCtx(reg, SPB));
+  const body = pm === null ? `<p class="hint">予想を読み込んでいます…</p>`
+    : pm.none || !pm.steps.length ? predWarn(pm)
+    : `<ul class="rtl">${predRows(lastLive ? { ...pm, skip:null } : pm, false)}</ul>${predWarn(pm)}`;
+  return `${body}<div class="rbtns"><button type="button" class="rbtn line" data-plane="${esc(reg)}">機体の1日 ›</button><button type="button" class="rbtn" data-rot-conf>確からしさとは</button></div>
+    <p class="rnote">${PRED_NOTE}<b>予想です。保証しません。</b></p>${predOdpt(pm)}`;
+}
+async function loadSpbPred(reg){
+  if(!SERVER || !reg || (SPB_PRED && SPB_PRED.reg === reg && Date.now() - SPB_PRED.at < 60_000)) return;
+  const d = await loadPrediction(reg); SPB_PRED = { reg, at:Date.now(), d:d || null };
+  const box = $("spbPredBox"); if(SPB_REG === reg && $("dSpecial").open && box) box.innerHTML = spbPredHTML(reg);
+}
 function renderSpb(){
   const body = $("dSpecialBody"); if(!body) return;
+  if(SPB_REG) loadSpbPred(SPB_REG);
   body.innerHTML = SPB_REG ? spbDetailHTML(SPB_REG) : spbListHTML();
   if(!SPB_REG) spbMap(); else if(SPB_MAP){ SPB_MAP.remove(); SPB_MAP = null; }
 }
@@ -10259,22 +10362,31 @@ async function openPlane(reg){
   drawPlaneMap(Array.isArray(h) ? h : [], p);
 }
 function planeHTML(reg, hist, pred){
-  const hm2 = t => new Date(t).toLocaleTimeString("ja-JP", { hour:"2-digit", minute:"2-digit" });
   const today = jstDay(Date.now()), legs = (hist || []).filter(x => x.day === today).sort((a, b) => Date.parse(a.first) - Date.parse(b.first));
   const live = legs.length && Date.now() - Date.parse(legs[legs.length - 1].last) < 6 * 60_000;
   const nm = LIVERY_NAMES[reg], type = (legs.find(l => l.type) || {}).type || (pred && pred.type) || "";
-  const route = (a, b) => `${a ? esc(placeShort(a)) : "？"} → ${b ? esc(placeShort(b)) : "？"}`;
-  const rows = [...legs.map((l, i) => { const now = live && i === legs.length - 1;
-      return `<li class="${now ? "now" : ""}"><span class="d"></span><span class="t"><b>${esc(csFlight(l.callsign))}</b> ${route(l.dep, l.arr)}<small>${hm2(l.first)}〜${now ? "（いま飛行中）" : hm2(l.last)}</small></span><em>${now ? "飛行中" : "飛んだ"}</em></li>`; }),
-    ...((pred && pred.next) || []).map(n => `<li class="next"><span class="d"></span><span class="t"><b>${esc(pred.src === "reg" ? csFlight(n.callsign) : n.flight)}</b> ${route(n.dep, n.arr)}<small>${pred.src === "reg" ? (n.time ? esc(n.time) + "ごろ" : "") : hm2(n.std)}（${esc(predTag(n))}）</small></span><em>予想</em></li>`)].join("");
+  // 案A：飛んだ便は1行にたたむ → いまの便（飛行中、なければ最後に見えた便）→「ここから予想」→ 予想。開いたときに予想の1便目が見えるよう、地図は予想の下
+  const L = l => ({ fl:csFlight(l.callsign), dep:l.dep, arr:l.arr, t:Date.parse(l.first), end:Date.parse(l.last) });
+  const lv = live ? L(legs[legs.length - 1]) : null;
+  const m = predModel(pred, lv ? { live:{ ...lv, eta:null } } : {});
+  const cur = lv ? { ...lv, live:true } : legs.length ? { ...L(legs[legs.length - 1]), live:false } : m.none ? null : m.cur;
+  const flown = cur && legs.length ? legs.slice(0, -1) : legs;
+  const fold = flown.length ? `<li class="fold"><button type="button" data-rot-fold aria-expanded="false"><span class="tm"><b>${spHM(Date.parse(flown[0].first))}</b><small>〜${spHM(Date.parse(flown[flown.length - 1].last))}</small></span><span class="dot"><i></i></span><span class="tx"><b>今日飛んだ ${flown.length}便</b><small>${flown.slice(0, 4).map(l => esc(csFlight(l.callsign))).join("・")}${flown.length > 4 ? " ほか" : ""}</small></span>${PRED_CHEV}</button></li>`
+    + flown.map(l => `<li class="flown"><div class="tm"><b>${spHM(Date.parse(l.first))}</b><small>〜${spHM(Date.parse(l.last))}</small></div><div class="dot"><i></i></div><div class="tx"><b>${esc(csFlight(l.callsign))}</b><span>${predRoute(l.dep, l.arr)}</span></div><div class="tag">飛んだ</div></li>`).join("") : "";
+  // いまの便を記録（reg_history）から出したときは、予想の側の「出さない便」の1行は要らない（上の行と同じ便）
+  const pm = m.none ? m : { ...m, skip:lv ? null : m.skip };
+  const tl = cur || fold ? `<ul class="rtl">${fold}${cur ? predCurRow(cur, false) : ""}${m.none ? "" : PRED_EDGE + predRows(pm, false)}</ul>` : "";
+  const hasMap = legs.length || (!m.none && m.steps.length);
   return `<div class="spctop"><button class="mp-back" data-close type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>戻る</button><h3>機体の1日</h3><span class="sp" aria-hidden="true"></span></div>
     <form class="plsearch" data-plform><input id="plReg" value="${esc(reg)}" placeholder="JA01XJ" aria-label="登録記号" autocomplete="off" maxlength="10"><button class="btn1" type="submit">探す</button></form>
     ${!reg ? `<p class="hint">機体の登録記号（例：JA01XJ）を入れると、今日飛んだ便と、この先の便（予想）を出します。</p>` : hist === null ? `<p class="hint">読み込んでいます…</p>` :
-    `<div class="spcard"><div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px"><span><b style="font-size:18px">${esc(reg)}</b><small style="display:block">${[type, nm && "★ " + nm].filter(Boolean).map(esc).join("・") || "　"}</small></span>${live ? `<em class="pill" style="font-style:normal;background:#E7F6EC;color:#1F7A3F;border-radius:999px;padding:5px 10px;font-size:11.5px;font-weight:800">いま飛行中</em>` : ""}</div>
-      ${legs.length || (pred && pred.next && pred.next.length) ? `<div class="plmap" id="plMap" role="img" aria-label="今日飛んだ道すじの地図"></div>` : ""}</div>
-    ${rows ? `<ul class="pllegs">${rows}</ul>` : `<p class="hint">今日この機体が飛んだ記録は、まだありません（日本の上空を飛んだ航空会社の便だけ記録しています）。</p>`}
-    ${/^JA[0-9A-Z]{3,5}$/.test(reg) && SERVER ? `<button class="linkbtn2" data-plpush="${esc(reg)}" type="button">この機体が近づいたら知らせる</button>` : ""}`}
-    <p class="fwnote">飛んだ便は機体の位置の記録（adsb.lol）から。出発・到着の空港は毎晩の航跡から入るので、今日の便は空いていることがあります。この先の便は${pred && pred.method ? "前の記録（特別塗装機は航空会社の運航情報にある予定の便も）" : "前の60日の記録"}からの推定で、機体の入れ替えで違うことがあります。</p>`;
+    `<div class="rtlw"><div class="spcard"><div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px"><span><b style="font-size:22px">${esc(reg)}</b><small style="display:block;font-size:13px">${[type, nm && "★" + nm].filter(Boolean).map(esc).join("・") || "　"}</small></span>${live ? `<em class="pill" style="font-style:normal;background:var(--r-now-wash);color:var(--r-now);border-radius:999px;padding:6px 12px;font-size:13px;font-weight:800">飛行中</em>` : ""}</div></div>
+      <div class="rsec"><b>今日</b><span>${predDay(Date.now())}</span></div>
+      ${tl || `<p class="hint">今日この機体が飛んだ記録は、まだありません（日本の上空を飛んだ航空会社の便だけ記録しています）。</p>`}
+      ${m.none && tl ? predWarn({ steps:[] }) : predWarn(m)}
+      <div class="rbtns"><button type="button" class="rbtn" data-rot-conf>確からしさとは</button>${/^JA[0-9A-Z]{3,5}$/.test(reg) && SERVER ? `<button class="rbtn line" data-plpush="${esc(reg)}" type="button">近づいたら知らせる</button>` : ""}</div>
+      ${hasMap ? `<div class="rmap"><b>今日の地図</b><div class="plmap" id="plMap" role="img" aria-label="今日飛んだ道すじと予想の地図"></div><div class="rlegend"><span><i></i>飛んだ</span><span><i class="p"></i>予想</span></div></div>` : ""}
+      <p class="rnote">飛んだ便は機体の位置の記録（adsb.lol）から。出発・到着の空港は毎晩の航跡から入るので、今日の便は空いていることがあります。${PRED_NOTE}${pred && pred.method ? "特別塗装機は、航空会社の運航情報にある予定の便も使っています。" : ""}<b>予想です。保証しません。</b></p>${predOdpt(m)}</div>`}`;
 }
 async function drawPlaneMap(hist, pred){
   const el = $("plMap"); if(!el) return;
@@ -10286,8 +10398,9 @@ async function drawPlaneMap(hist, pred){
   const P = c => { const a = aptPos(c); return a ? [a.lat, a.lon] : null; };
   const seg = (a, b, opt) => { const x = P(a), y = P(b); if(x && y){ L.polyline([x, y], opt).addTo(g); pts.push(x, y); } };
   for(const l of hist.filter(x => x.day === today)) seg(l.dep, l.arr, { color:"#9CA3AF", weight:3 });
-  for(const n of (pred && pred.next) || []) seg(n.dep, n.arr, { color:"#C2410C", weight:3, dashArray:"5 6" });
-  for(const c of new Set([...hist.flatMap(l => [l.dep, l.arr]), ...((pred && pred.next) || []).flatMap(n => [n.dep, n.arr])].filter(Boolean))){ const x = P(c); if(x) L.circleMarker(x, { radius:4, color:"#111827", fillOpacity:1 }).bindTooltip(placeShort(c), { permanent:true, direction:"right", className:"pltip" }).addTo(g); }
+  const steps = (pred && pred.known) ? predModel(pred, {}).steps : [];
+  for(const n of steps) seg(n.dep, n.arr, { color:"#C2410C", weight:3, dashArray:"5 6" });
+  for(const c of new Set([...hist.filter(x => x.day === today).flatMap(l => [l.dep, l.arr]), ...steps.flatMap(n => [n.dep, n.arr])].filter(Boolean))){ const x = P(c); if(x) L.circleMarker(x, { radius:4, color:"#111827", fillOpacity:1 }).bindTooltip(placeShort(c), { permanent:true, direction:"right", className:"pltip" }).addTo(g); }
   if(pts.length) PL_MAP.fitBounds(L.latLngBounds(pts), { padding:[24, 24], maxZoom:8 }); else PL_MAP.setView([36, 137], 5);
 }
 document.addEventListener("click", e => {
@@ -10408,8 +10521,9 @@ function trendHTML(def, t, l){
 }
 document.addEventListener("click", e => { if(e.target.closest("[data-trend]")) openTrend(); });
 
-// 機体の運用の予想（推定）：時刻表のある JAL・ANA の便は predict_rotation、ほかの機体は全機の記録（reg_legs）から学ぶ予想 predict_rotation_v2（learn_hi）。
-//   v2 が null・空（いまの便が分からない／この先の便が出ない）のときは、今までの predict_rotation_reg に戻す。予想は実績と分けて持ち、画面では「推定」と出す
+// 機体の運用の予想：時刻表のある JAL・ANA の便は predict_rotation、ほかの機体は全機の記録（reg_legs）から学ぶ予想 predict_rotation_v2（learn_hi）。
+//   v2 が null・空（いまの便が分からない／この先の便が出ない）のときは、今までの predict_rotation_reg に戻す。
+//   見せ方は案A（11/15 本人「OK」・design/rotation-view の2版）：飛んだ便 → いま → 「ここから予想」の帯 → 予想（点線）。予想は実績と分けて持ち、「予想です。保証しません」と出す
 const predHasNext = d => !!(d && d.known && Array.isArray(d.next) && d.next.length);
 async function loadPrediction(reg){
   const a = await rpcPost("predict_rotation", { p_reg:reg });
@@ -10420,32 +10534,126 @@ async function loadPrediction(reg){
   if(predHasNext(b)) return b;
   return [v, b].find(d => d && d.known) || a || b || v;
 }
-// 機体の1日の予想の札：割合があれば「予想・66%」、特別塗装機の予定の便は「予想・塗装機の予定」
-const predTag = n => n.src === "livery" ? "予想・塗装機の予定" : n.share != null && Number.isFinite(Number(n.share)) ? `予想・${Math.round(Number(n.share) * 100)}%` : "予想";
-// 予想の1便の根拠（小さい字）：特別塗装機の予定の便は割合がないので出どころを、学ぶ予想は前の42日、今までの決め方は前の60日
-function predWhy(n){
-  if(n.src === "livery") return "特別塗装機の予定の便から";
-  const days = n.src === "learn" ? 42 : 60, sh = Number(n.share);
-  return n.share != null && Number.isFinite(sh) ? `前の${days}日で${Math.round(sh * 100)}%${n.seen != null ? `（${n.seen}回）` : ""}` : `前の${days}日の記録から`;
-}
 const csFlight = cs => spFl(cs) || cs;
-function predictionHTML(d){
-  const hm2 = t => new Date(t).toLocaleTimeString("ja-JP", { hour:"2-digit", minute:"2-digit" });
-  if(!d || !d.known) return `<p class="hint">今日この機体が入った便が、まだ分かっていません。</p>`;
-  const k = d.known, reg = d.src === "reg";
-  const route = (a, b) => a || b ? `${esc(placeShort(a) || "？")}→${esc(placeShort(b) || "？")}` : "";
-  const rows = (d.next || []).map(n => reg
-    ? `<li><b>${esc(csFlight(n.callsign))}</b> ${n.time ? esc(n.time) + "ごろ " : ""}${route(n.dep, n.arr)}<small>${esc(predWhy(n))}</small></li>`
-    : `<li><b>${esc(n.flight)}</b> ${hm2(n.std)} ${esc(placeShort(n.dep))}→${esc(placeShort(n.arr))}<small>前の60日で${Math.round(Number(n.share) * 100)}%</small></li>`).join("");
-  return `<p class="hint" style="margin:0">いまの便：<b>${esc(reg ? csFlight(k.callsign) : k.flight)}</b> ${reg ? route(k.dep, k.arr) + (k.last ? `（${hm2(k.last)}に見えた）` : "") : `${esc(placeShort(k.dep))}→${esc(placeShort(k.arr))}`}</p>`
-    + (rows ? `<ol class="predlist">${rows}</ol><p class="fwnote">推定です。${reg ? "全機の位置の記録（adsb.lol）で、この便のあとに同じ機体が飛んだ便から出しています。" : "過去にこの機体の便のあとに続いた便の記録から出しています。"}${(d.next || []).some(n => n.src === "livery") ? "特別塗装機は、航空会社の運航情報にある予定の便も使っています。" : ""}機体の入れ替えで違うことがあります。</p>`
-            : `<p class="hint">この先の便は、まだ記録が足りず予想できません（毎日の記録が貯まると出ます）。</p>`);
+// 便名をくらべる形（JAL599・JL599・JL0599 を同じにする）
+const predKey = s => { const f = String(csFlight(String(s || "").trim().toUpperCase()) || ""); const m = /^([A-Z0-9]{2})0*(\d{1,4})[A-Z]?$/.exec(f); return m ? m[1] + m[2] : f; };
+const predDay = ms => { const d = new Date(ms + 9 * 3600_000); return `${d.getUTCMonth() + 1}月${d.getUTCDate()}日（${"日月火水木金土"[d.getUTCDay()]}）`; };
+const predRoute = (a, b) => `${a ? esc(placeShort(a)) : "？"} → ${b ? esc(placeShort(b)) : "行き先不明"}`;
+// 予想の便を同じ形にそろえる：{fl, dep, arr, t（出発の時刻・ms）, plan（運航情報の予定の便）, share, cnt（確からしさに使う回数）, shown（画面に出す回数）}
+//   3回以上・4割以上の便だけ出す（その先の便はこの便からたどるので、足りない便でそこまでにする）。運航情報の予定の便は別の物差し
+function predSteps(d){
+  const k = d.known, reg = d.src === "reg", out = [];
+  let prev = Date.parse(reg ? k.first : k.std);
+  const day0 = jstDay(Number.isFinite(prev) ? prev : Date.now());
+  for(const n of d.next || []){
+    let t = null;
+    if(reg){ const m = /^(\d{1,2}):(\d{2})$/.exec(String(n.time || ""));
+      if(m){ t = Date.parse(`${day0}T${m[1].padStart(2, "0")}:${m[2]}:00+09:00`); if(Number.isFinite(prev)) while(t < prev) t += 864e5; } }
+    else t = Date.parse(n.std);
+    const sh = Number(n.share), seen = Number(n.seen), plan = n.src === "livery";
+    // 時刻表の予想（predict_rotation）の seen は同じ曜日を2回と数えた点数なので、回数は少なめ（半分）に見て、画面には出さない
+    const cnt = n.seen == null || !Number.isFinite(seen) ? null : reg ? seen : Math.ceil(seen / 2);
+    const st = { fl:reg ? csFlight(n.callsign) : n.flight, dep:n.dep, arr:n.arr, t:Number.isFinite(t) ? t : null, plan,
+      share:n.share != null && Number.isFinite(sh) ? sh : null, cnt, shown:reg && cnt != null ? cnt : null };
+    if(!plan && !(st.share >= 0.4 && st.cnt >= 3)) break;
+    out.push(st); if(st.t) prev = st.t;
+  }
+  return out;
 }
+// 確からしさ：0＝運航情報の予定の便。3＝高い（8割以上で5回以上）、2＝中くらい（6割以上。8割以上でも5回より少ない）、1＝低い（4〜6割）
+function predLevel(s){ if(s.plan) return 0; if(s.share >= 0.8 && s.cnt >= 5) return 3; return s.share >= 0.6 ? 2 : 1; }
+// 画面に出す形にする。ctx.live＝いま飛んでいる便 {fl, dep, arr, t（出発）, eta}（分かるときだけ）
+//   出さない決まり：① 出発の時刻が過ぎた便 ② いま飛んでいる便とそれより前の便（運航情報にあっても）。いまの便が古いときは「JL148 からの予想」
+function predModel(d, ctx){
+  const now = Date.now(), live = ctx && ctx.live && ctx.live.fl ? ctx.live : null;
+  if(!d || !d.known) return { none:true, live };
+  const k = d.known, reg = d.src === "reg";
+  const cur = { fl:reg ? csFlight(k.callsign) : k.flight, dep:k.dep, arr:k.arr, t:Date.parse(reg ? k.first : k.std) || null, end:Date.parse(reg ? k.last : k.sta) || null };
+  cur.live = live ? predKey(live.fl) === predKey(cur.fl) : reg ? !!cur.end && now - cur.end < 6 * 60_000 : k.phase !== "landed" && !!cur.t && cur.t <= now && !!cur.end && now < cur.end;
+  if(cur.live && live) cur.eta = live.eta || null;
+  let steps = predSteps(d), skip = null;
+  if(live && !cur.live){
+    const i = steps.findIndex(s => predKey(s.fl) === predKey(live.fl));
+    if(i >= 0){ skip = { ...steps[i], dep:steps[i].dep || live.dep, arr:steps[i].arr || live.arr }; steps = steps.slice(i + 1); }
+    else{ skip = { fl:live.fl, dep:live.dep, arr:live.arr, t:live.t || null }; if(live.t) steps = steps.filter(s => !s.t || s.t > live.t); }
+  }
+  steps = steps.filter(s => s.t == null || s.t > now);
+  return { cur, live, stale:!!(live && !cur.live), skip, steps, plan:steps.some(s => s.plan) };
+}
+const PRED_EDGE = `<li class="edge"><b>ここから予想</b><small>予想です。保証しません</small></li>`;
+function predConf(s){
+  if(s.plan) return `<span class="rsrc">運航情報</span>`;
+  const lv = predLevel(s), w = ["", "低い", "中くらい", "高い"][lv];
+  return `<span class="rcf c${lv}" aria-label="確からしさ ${w}${s.shown != null ? `・${s.shown}回見た` : ""}"><span><span class="d" aria-hidden="true"><i></i><i></i><i></i></span>${w}</span>${s.shown != null ? `<span class="n">${s.shown}回見た</span>` : ""}</span>`;
+}
+// 1行ずつ。mini＝カードの中の小さい線（便名と区間を1行に、確からしさは下）、そうでなければ機体の1日の大きい線（区間は2行目、確からしさは右）
+function predCurRow(c, mini){
+  const head = mini ? `<b>${esc(c.fl || "")}</b> ${predRoute(c.dep, c.arr)}` : `<b>${esc(c.fl || "")}</b><span>${predRoute(c.dep, c.arr)}</span>`;
+  if(c.live) return `<li class="now"><div class="tm"><b>${c.t ? spHM(c.t) : "—"}</b><small>発</small></div><div class="dot"><i></i></div><div class="tx">${head}${c.eta ? `<small>着く ${spHM(c.eta)}ごろ（推定）</small>` : ""}${c.note ? `<small>${esc(c.note)}</small>` : ""}</div><div class="tag">飛行中</div></li>`;
+  const end = c.end || c.t;
+  return `<li class="last"><div class="tm"><b>${end ? spHM(end) : "—"}</b><small>${c.arr ? "着いた" : "見えた"}</small></div><div class="dot"><i></i></div><div class="tx">${head}<small>${esc(c.note || "記録に入っている最後の便")}</small></div><div></div></li>`;
+}
+function predRows(m, mini, limit){
+  const rows = [], today = jstDay(Date.now());
+  if(m.skip) rows.push(`<li class="skip"><div></div><div class="dot"></div><div class="tx">${m.skip.t ? spHM(m.skip.t) + " " : ""}${esc(m.skip.fl || "")} ${predRoute(m.skip.dep, m.skip.arr)}は、いま飛んでいるので予想に出しません</div></li>`);
+  let day = today;
+  const list = limit ? m.steps.slice(0, limit) : m.steps;
+  for(const s of list){
+    const sd = s.t ? jstDay(s.t) : day;
+    if(sd !== day){ day = sd; rows.push(`<li class="day">${sd === addDay(today, 1) ? "明日 " : ""}${predDay(s.t)}</li>`); }
+    const tm = `<div class="tm"><b>${s.t ? spHM(s.t) : "—"}</b><small>ごろ</small></div><div class="dot"><i></i></div>`;
+    rows.push(mini ? `<li class="p">${tm}<div class="tx"><b>${esc(s.fl || "")}</b> ${predRoute(s.dep, s.arr)}<small>${predConf(s)}</small></div><div></div></li>`
+      : `<li class="p">${tm}<div class="tx"><b>${esc(s.fl || "")}</b><span>${predRoute(s.dep, s.arr)}</span></div><div class="tag">${predConf(s)}</div></li>`);
+  }
+  return rows.join("");
+}
+// 予想が出ないとき・いまの便が古いときの書き方
+function predWarn(m){
+  if(m.none) return `<div class="rwarn"><span>…</span><span>${m.live ? `<b>いま飛んでいる ${esc(m.live.fl)} が記録に入ると</b>、そのあとの便を予想します` : `<b>今日この機体はまだ見えていません</b>。見えたら、そのあとの便を予想します（いまの便が、まだ分かっていません）`}</span></div>`;
+  return (m.stale ? `<div class="rwarn"><span>!</span><span><b>いま飛んでいる ${esc(m.live.fl)} が記録に入るまで</b>、${esc(m.cur.fl || "")} からの予想を出しています。</span></div>` : "")
+    + (m.steps.length ? "" : `<div class="rwarn"><span>…</span><span>この先の便は、<b>まだ記録が足りず予想できません</b>（同じ便を3回見ると出ます）</span></div>`);
+}
+const predOdpt = m => m && m.plan ? `<p class="rodpt">運航情報の${ODPT_CREDIT}</p>` : "";
+const PRED_NOTE = "予想は、この機体が前の記録でいまの便のあとに飛んだ便から出しています（全機の位置の記録・adsb.lol）。機体の入れ替えで違うことがあります。";
+// カードの中の小さい時間の線（運用の特別塗装機・撮る人のくわしく）。o.limit：出す便の数（残りは「あと○便の予想」）、o.reg：ボタンを出す機体、o.conf：「確からしさとは」も出す
+function predictionHTML(d, ctx, o = {}){
+  const m = predModel(d, ctx);
+  if(m.none) return `<div class="rtlw">${predWarn(m)}</div>`;
+  const more = o.limit && m.steps.length > o.limit ? m.steps.length - o.limit : 0;
+  const btns = o.reg ? `<div class="rbtns">${more ? `<small class="more">あと${more}便の予想</small>` : ""}<button type="button" class="rbtn line" data-plane="${esc(o.reg)}">機体の1日 ›</button>${o.conf ? `<button type="button" class="rbtn" data-rot-conf>確からしさとは</button>` : ""}</div>` : "";
+  return `<div class="rtlw"><ul class="rtl mini">${predCurRow(m.cur, true)}${PRED_EDGE}${predRows(m, true, o.limit)}</ul>${predWarn(m)}${btns}
+    <p class="rnote">${PRED_NOTE}<b>予想です。保証しません。</b></p>${predOdpt(m)}</div>`;
+}
+// 確からしさとは（シート）。割合の数字はここだけに出す
+function predConfHTML(){
+  const ex = (lv, sh, n, t) => `<li>${predConf({ share:sh, cnt:n, shown:n })}<p>${t}</p></li>`;
+  return `<div class="sph"><span class="grab" aria-hidden="true"></span><button class="spx" data-close type="button" aria-label="閉じる">×</button></div>
+    <h3 style="margin:4px 0 0;font-size:20px">確からしさ</h3>
+    <p>この機体が前の記録で、いまの便のあとに同じ便を飛んだ割合で3段に分けます。<b>3回以上見た便だけ</b>出し、横に見た回数を書きます。<b>予想です。保証しません。</b></p>
+    <ul class="rlv">${ex(3, .9, 12, "<b>8割以上</b>の日にこの便が続いた。<b>5回以上</b>見た便だけ（3回中3回は「中くらい」）")}
+      ${ex(2, .7, 10, "<b>6〜8割</b>の日に続いた。または8割以上でも見たのが5回より少ない")}
+      ${ex(1, .45, 5, "<b>4〜6割</b>の日に続いた。4割より少ない便は出しません")}</ul>
+    <ul class="rlv"><li><h4>航空会社の運航情報にある便</h4><span class="rsrc">運航情報</span><p>運航情報に「この塗装機で運航」とある便。記録からの予想とは別の物差しで、機体の入れ替えで変わることがあります</p></li></ul>
+    <ul class="rlv"><li><h4>予想に出さない便</h4><p>出発の時刻が過ぎた便と、いま飛んでいる便・それより前の便は、運航情報にあっても予想に出しません</p></li></ul>
+    <p class="rodpt">運航情報の${ODPT_CREDIT}</p>
+    <div class="rbtns" style="justify-content:flex-end"><button type="button" class="btn1" data-close>閉じる</button></div>`;
+}
+// いま飛んでいる便（特別塗装機の足あと livery_board、なければ いま飛んでいる特別塗装機 special_now の便名）
+function predLiveCtx(reg, src){
+  const r = spbRows(src || spbLiveSrc()).find(x => x.reg === reg && x.st === "flying");
+  if(r){ const l = r.leg || {}; return { live:{ fl:spbFl(l.cs || r.now.callsign), dep:l.dep, arr:l.arr, t:l.first ? Date.parse(l.first) : null, eta:spbEta(r) } }; }
+  const x = SPECIAL.get(reg); return x && x.callsign ? { live:{ fl:spbFl(x.callsign) } } : {};
+}
+const ROT_CTX = new Map();   // 撮る人のくわしくで分かっている、いまの便（登録記号ごと）
+const PRED_CHEV = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>`;
 document.addEventListener("click", async e => {
+  if(e.target.closest("[data-rot-conf]")){ $("dRotConfBody").innerHTML = predConfHTML(); $("dRotConf").showModal(); return; }
+  const f = e.target.closest("[data-rot-fold]"); if(f){ const ul = f.closest(".rtl"), open = !ul.classList.contains("open"); ul.classList.toggle("open", open); f.setAttribute("aria-expanded", String(open)); return; }
   const b = e.target.closest("[data-sp-pred]"); if(!b) return;
   const reg = b.dataset.spPred, out = document.querySelector(`[data-sp-pred-out="${CSS.escape(reg)}"]`); if(!out) return;
   const open = b.getAttribute("aria-expanded") !== "true"; b.setAttribute("aria-expanded", String(open)); out.hidden = !open;
-  if(open){ out.innerHTML = `<p class="hint">読み込んでいます…</p>`; out.innerHTML = predictionHTML(await loadPrediction(reg)); }
+  if(open){ out.innerHTML = `<p class="hint">読み込んでいます…</p>`; const d = await loadPrediction(reg);
+    out.innerHTML = predictionHTML(d, ROT_CTX.get(reg) || predLiveCtx(reg), { reg, limit:Number(b.dataset.rotLimit) || 0, conf:b.dataset.rotConf === "1" }); }
 });
 async function renderSpecial(){
   const draw = () => { const box = $("opsSpecial"), html = specialHTML(); box.hidden = !html; box.innerHTML = html; };
@@ -11561,6 +11769,14 @@ document.addEventListener("click", e => { const b = e.target.closest("[data-spfi
 document.addEventListener("click", e => { const b = e.target.closest("[data-spspot]"); if(!b) return; SP_SPOT = b.dataset.spspot; try{ localStorage.setItem("soramemo.photoSpot." + OPS_AP, SP_SPOT); }catch(_){} const dd = b.closest("details"); if(dd) dd.open = false; track("spot", "pick"); if(BOARD) renderPhoto(BOARD); });
 
 // ---- 機体のくわしく ----
+// この機体の運用（予想）：押すと案A の小さい時間の線（運用予想の担当の部品 predictionHTML）。いま飛んでいるなら、その便は予想に出さない
+function spPredCardHTML(x, lv){
+  const r = x.reg || (lv && lv.reg); if(!r) return "";
+  const nm = LIVERY_NAMES[r];
+  ROT_CTX.set(r, lv ? { live:{ fl:x.fl, dep:x.dir === "arr" ? x.other : OPS_AP, arr:x.dir === "arr" ? OPS_AP : x.other, t:x.dir === "dep" ? (x.gate || x.t || null) : null, eta:x.dir === "arr" ? x.t || null : null } } : {});
+  return `<div class="spcard rtlw"><small>この機体の運用（予想）</small><b style="font-size:18px">${esc(r)}${nm ? ` <small style="display:inline;font-size:13px">★${esc(nm)}</small>` : ""}</b>
+    <div class="rbtns" style="margin-top:8px"><button class="rbtn" data-sp-pred="${esc(r)}" data-rot-conf="1" aria-expanded="false" type="button">この先の便（予想）</button></div><div data-sp-pred-out="${esc(r)}" hidden></div></div>`;
+}
 function spDetailHTML(x){
   const now = Date.now(), cur = OPS_CUR, op = cur && cur.op, lv = x.live || spLive(x.fl);
   const late = x.sched && x.t ? Math.round((x.t - x.sched) / 60000) : 0;
@@ -11592,7 +11808,7 @@ function spDetailHTML(x){
     <div class="spgrid">${x.dir === "dep" && x.gate ? `<div class="spcard"><small>出発（搭乗口）</small><b>${spHM(x.gate)}</b><small>${x.sched ? `定刻 ${spHM(x.sched)}${Math.round((x.gate - x.sched) / 60000) >= 5 ? `・${Math.round((x.gate - x.sched) / 60000)}分遅れ` : ""}` : ""}</small></div>` : `<div class="spcard"><small>${x.dir === "arr" ? "着陸" : "離陸"}</small><b>${x.t ? spHM(x.t) + "ごろ" : "—"}</b><small>${x.sched ? `定刻 ${spHM(x.sched)}${late >= 5 ? `・${late}分遅れ` : ""}` : "推定"}${x.est ? "・見込み" : ""}</small></div>`}
       <div class="spcard"><small>滑走路</small><b>${rw ? esc(rw) : "—"}</b><small>${rw ? (rwi.side ? (x.dir === "arr" ? "運用と来た方面からの推定" : "運用と行き先の方面からの推定") : rwi.learn ? `この30日の記録で${x.dir === "arr" ? "着陸" : "離陸"}の${rwi.learn}%がこの滑走路` : "いまの運用からの推定") : "向きが分かりません"}</small></div></div>
     ${where ? `<div class="spcard"><small>いまどこ</small><b class="m">${esc(where)}</b>${lv || x.km ? `<span class="bar"><i style="width:${Math.max(4, Math.min(100, 100 - (lv ? spKm(lv) : x.km) / 2))}%"></i></span>` : ""}</div>` : ""}
-    ${(() => { const r = x.reg || (lv && lv.reg); return r ? `<div class="spcard"><small>この機体の運用（推定）</small><b>${esc(r)}</b><button class="linkbtn2" data-sp-pred="${esc(r)}" aria-expanded="false" type="button">この先の便を見る</button><button class="linkbtn2" data-plane="${esc(r)}" type="button">この機体の1日</button><div data-sp-pred-out="${esc(r)}" hidden></div></div>` : ""; })()}
+    ${spPredCardHTML(x, lv)}
     ${atcSceneHTML(x)}
     ${spots ? `<div class="spcard"><small>どこから撮る</small><ul class="spwhere spgeo">${spots}</ul></div>` : ""}
     ${SERVER && key && !(x.foreign && x.dir === "dep") ? `<button class="spnote big" data-spnote="${esc(key)}" data-spdir="${x.dir}" aria-pressed="${on}">${on ? "知らせを取り消す" : `${x.dir === "arr" ? "着陸" : "離陸"}の${ps.lead || 5}分前に知らせる`}</button>` : ""}
