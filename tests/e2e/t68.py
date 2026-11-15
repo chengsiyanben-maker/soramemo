@@ -44,7 +44,7 @@ async def main():
         # 機体の1日
         await pg.locator('#bookLiv .lvcard').first.click(); await pg.wait_for_timeout(800)
         tp = await pg.inner_text('#dPlane'); print('PLANE', tp[:300].replace('\n', ' | '))
-        check('機体の1日（飛んだ便・飛行中・予想）:', await pg.evaluate("$('dPlane').open") and 'JL501' in tp and 'いま飛行中' in tp and 'JL320' in tp and '82%' in tp)
+        check('機体の1日（飛んだ便・飛行中・予想）:', await pg.evaluate("$('dPlane').open") and 'JL501' in tp and '飛行中' in tp and 'JL320' in tp and '高い' in tp and '82%' not in tp)   # 11/15 から案A（確からしさは言葉と点、割合は出さない）
         await pg.fill('#plReg', 'ja219a'); await pg.press('#plReg', 'Enter'); await pg.wait_for_timeout(500)
         check('登録記号で探す:', any(n == 'reg_history' and b.get('p_reg') == 'JA219A' for n, b in calls))
         await pg.screenshot(path=os.path.join(WORK, 't68_plane.png'))

@@ -1,7 +1,7 @@
 import os, sys
 HERE=os.path.dirname(os.path.abspath(__file__)); WEB=os.path.abspath(os.path.join(HERE,'..','..','web')); WORK=os.environ.get('SORAMEMO_TEST_WORK','/tmp/soramemo-e2e'); os.makedirs(WORK, exist_ok=True)
 # 運用予想：画面の予想を学ぶ予想 predict_rotation_v2（learn_hi）に切り替え。v2 が null・空なら predict_rotation_reg に戻す
-#   特別塗装機の予定の便（src=livery）は割合がないので「0%（null回）」と出さない。学ぶ予想は前の42日。「推定です」の書き方は今のまま
+#   特別塗装機の予定の便（src=livery）は割合がないので「0%（null回）」と出さない。11/15 から見せ方は案A（くわしくは t133）
 import asyncio, json
 from datetime import datetime, timedelta, timezone
 from playwright.async_api import async_playwright
@@ -45,10 +45,10 @@ async def main():
         check('v2 を使う:', d and d.get('method') == 'learn_hi' and 'predict_rotation_v2' in calls and 'predict_rotation_reg' not in calls)
         check('順番は 時刻表→v2:', calls.index('predict_rotation') < calls.index('predict_rotation_v2'))
         h = await pg.evaluate("predictionHTML(%s)" % json.dumps(V2))
-        check('塗装機の予定の便は割合を出さない:', '特別塗装機の予定の便から' in h and 'null' not in h and '>0%' not in h and 'で0%' not in h)
-        check('学ぶ予想は前の42日:', '前の42日で66%（7回）' in h)
-        check('今までの決め方は前の60日:', '前の60日で50%（4回）' in h)
-        check('推定の書き方は今のまま・塗装機の一文:', '推定です。' in h and '機体の入れ替えで違うことがあります' in h and '航空会社の運航情報にある予定の便も使っています' in h)
+        check('塗装機の予定の便は割合を出さない:', '運航情報' in h and 'null' not in h and '0%' not in h)
+        check('学ぶ予想は回数と確からしさ（11/15 案A）:', '7回見た' in h and '中くらい' in h)
+        check('今までの決め方も回数と確からしさ:', '4回見た' in h and '低い' in h)
+        check('予想・保証しない・運航情報の出典（11/15 案A）:', '予想です。保証しません' in h and '機体の入れ替えで違うことがあります' in h and '運航情報の出典' in h)
 
         # 2. v2 の next が空なら reg に戻す
         mode['v2'] = dict(V2, next=[]); calls.clear()
@@ -76,8 +76,8 @@ async def main():
         mode['v2'] = V2; mode['reg'] = REG
         await pg.evaluate("openPlane('JA01XJ')"); await pg.wait_for_timeout(800)
         tp = await pg.inner_text('#dPlane'); print('PLANE', tp[:400].replace('\n', ' | '))
-        check('機体のくわしくに v2 の予想:', 'JL333' in tp and '予想・66%' in tp and '予想・塗装機の予定' in tp and '予想・0%' not in tp and 'JL999' not in tp)
-        check('機体のくわしくの注記:', '航空会社の運航情報にある予定の便も' in tp and '推定' in tp)
+        check('機体のくわしくに v2 の予想:', 'JL333' in tp and '中くらい' in tp and '運航情報' in tp and '0%' not in tp and 'JL999' not in tp)
+        check('機体のくわしくの注記:', '航空会社の運航情報にある予定の便も' in tp and '保証しません' in tp)
         await pg.screenshot(path=os.path.join(WORK, 't131_plane.png'))
         await b.close()
         check('ページのエラーなし:', not errs)
