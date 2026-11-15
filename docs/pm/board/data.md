@@ -9,6 +9,8 @@
   - 本人待ち：「反映して」・US_SERVED を world-destinations.sql の結果で直すか・止まり具合だけの通知（rank 0）を入れてよいか・FAA の XML を1回分貼ってもらう（docs/pm/faa-sample.xml）
   - この回は定期の回（PM の指示なし）として呼ばれたが、PM が 11/15 0時10分に積んだ指示があったので、そちらをした
   - 2回目の回（11/14、PM が同じ指示を手で呼んだ）：PR #93 で済みだったので、PR #93 の CI・コメント（どちらもまだなし）と main（5a22d8e のまま、rebase 不要）だけ見た。変えたものはなし
+  - **3回目の回（11/15 日曜・定期の回として呼ばれたが、PM の 11/15 12時40分の指示が残っていたのでそちらをした）→ PR #93 の a33a975**：移行169の中身を直した（番号はそのまま）。world_airport_ops に feed_at（全体と空港ごと）・空港ごとの note（FAA がある空港用／便の数だけの空港用、notes: {faa, count} も）・faa[] に label（閉鎖中・地上待機中・到着の間引き中・到着の遅れ・出発の遅れ・除氷中）と reason_ja。関数 world_reason_ja(text)（約60語の表。区切った言葉を全部引けたときだけ訳す・知らない言葉があれば原文）。gdp の通知の文も「到着の間引き中」に。t108 28項目・t107・deno test 255本 通過。報告 report-world-ops.md の 6。PR #93 のコメント・レビューはまだなし。main は 5a22d8e のまま（rebase 不要）
+  - 返す形はチェックイン担当の帳面（checkin.md）に書くよう PM に言われたが、ほかの担当の帳面は変えない決まりなので、下の「ほかの担当への依頼」に書いた。PM から checkin.md に写してほしい
 - 海外の空港の止まり具合の元さがし（11/14 21時10分 PM の指示・本人「ヨーロッパとか日本から就航してる空港も欲しいね」）：ブランチ data/world-ops-sources → main 向けの下書き PR #92。報告 docs/pm/report-world-ops-sources.md・読むだけの docs/pm/world-destinations.sql（そのブランチ）。コード・表は変えていない
   - 結論：すぐ使えるのはアメリカの FAA NAS Status（https://nasstatus.faa.gov/api/airport-status-information 、公開の XML・1分ごと・登録なし。地上待機・出発の間引き・閉鎖・15分以上の遅れ・除氷。個別の規約の文は見つからず、米国政府の著作物の一般の決まりと FAA のデータの免責で「使える見込み」）。仁川（data.go.kr「航空機運航現況 詳細照会」、許諾「制限なし」、開発用1日500回）・台湾 TDX（政府資料開放授權條款 1.0）は旅そらで登録すれば使える見込み。香港は前の日の分だけ。EUROCONTROL は公開の画面に機械で読む口がなく条件不明・B2B は運航の組織だけ → 使わない。中国・東南アジア・中東・オセアニアは公開の公式の元なし → 使わない
   - 案（効き目の順）：1 FAA を2分ごと（1日720回）で読み、表 world_airport_status（移行と RLS をセットで）に。運用タブの札・乗る便の通知に1行・羽田／成田のお知らせ 2 今ある JAL・ANA の国際線の欠航・遅れを海外の空港ごとに数える（外へ問い合わせない） 3 仁川・台湾の便の一覧を数える 4 ヨーロッパは EUROCONTROL に問い合わせる案
@@ -181,7 +183,7 @@
 - SQL のテストは全部で約35分かかる（手元で流すときは裏で流してログを見る。t92 だけで約4分。同じログに2回流すと混ざるので、ログの名前を分ける）
 
 ## 次にやること
-0000000000000. 海外の止まり具合を作る（PR #93）：本人が FAA の XML を貼ったら faa_nas_test に本物の形を足して読み方を直す。world-destinations.sql の結果で US_SERVED を直す。「反映して」が出たら番号を確かめ（main に別の移行が先なら rebase）、次の日に cron.job_run_details（world-status）と関数の返す ms・rows・started を見てもらう。CI とレビューに答える
+0000000000000. 海外の止まり具合を作る（PR #93）：本人が FAA の XML を貼ったら faa_nas_test に本物の形を足して読み方を直し、本物の reason で world_reason_ja の表に言葉を足す。world-destinations.sql の結果で US_SERVED を直す。「反映して」が出たら番号を確かめ（main に別の移行が先なら rebase）、次の日に cron.job_run_details（world-status）と関数の返す ms・rows・started を見てもらう。CI とレビューに答える
 000000000000. 海外の止まり具合の元（PR #92）：仁川・台湾の鍵が来たら活用ガイドの状態の値を読んでから、案3（便の一覧を数える）を作る。ヨーロッパは本人が決めたら EUROCONTROL への問い合わせ文
 00000000000. 遅れの通知（PR #88、11/14 の決定も入れ済み）：月曜に本人が流す alert-dup-check.sql の結果で①〜④のどれが多いかを見て、まとめ方を確かめる（③④が0でも害はない）。CI の deno test が落ちたら直す（手元は代わりの道具で流した）。「反映して」が出たら番号を確かめ、次の日に cron.job_run_details（odpt-status-fast・odpt-status・flight-watch）を見てもらい、毎分の回が詰まっていないか・ODPT の問い合わせ数を見る。チェックインの sw.js（renotify）が入ったか確かめる
 0000000000. 運用予想 learn_hi（PR #85）：「反映して」が出たら番号を確かめ（main に別の移行が先なら rebase）、反映のあとの SQL の結果を読む。約4週間後（12月中旬、記録が42日そろったら）rotation-eval-view.sql で learn・learn_hi・base を比べ直し、PM に案を出す。運用予想担当の依頼 (1)（predict_rotation を4つ目の方式として採点）・(3)（rot_eval_summary）は本人が決めたら作る。CI とレビューに答える
@@ -204,6 +206,8 @@
 8. それ以外は PM の指示を待つ（勝手に新しい機能は始めない）。毎週月曜の昼の回は、下の「定期の仕事」（次の候補：点検の結果が来たら、死んだ行や使われていない索引の整理・遅い処理。cold-day-size.sql の結果で全機の航跡の1日が 20MB を超えるなら、ファイルを空港ごとに分ける案を作る。rwy-learn と daily-archive は 11/10 に見た（PR #58）。eta-calib・taxi-out・flight-watch は 11/11 に見た（PR #70）。結果がないまま次の回が来たら、ほかの毎晩・裏の処理（timetable-sync・schedule-sync・odpt-status・co3 の SQL の文）を同じ目で見て、時間の上限のない仕事の一覧を作る）
 
 ## ほかの担当への依頼
+- チェックインへ（11/15 海外の止まり具合の仕上げ・PR #93 の a33a975。PM から checkin.md に写してほしい）：rpc('world_airport_ops', { p_iata }) の返す形は { source, feed_at, note, notes: {faa, count}, airports: [{ iata, note, feed_at, faa: [{kind, label, reason, reason_ja, starts, ends, avg_delay, max_delay, trend, since}], flights, cancelled, late30 }] }。札とくわしくの言葉は label をそのまま（gdp は「到着の間引き中」）。わけは reason_ja を出し、reason（原文）を小さく添える。出典の文は空港ごとの note を出す（仁川などは FAA の字が出ない）。「○時○分 更新」は feed_at（null なら出さない）。くわしくは report-world-ops.md の 6
+- デザインへ（11/15 同上）：feed_at・空港ごとの note・reason_ja・label を足した（W1〜W3 の依頼の分）。描き直しは要らない見込み
 - デザインへ（11/14 海外の止まり具合・PR #93）：運用タブの海外の便の札・空港のお知らせの画面案。中身は world_airport_ops の返す形（report-world-ops.md の 1）。出典の文（note）を必ず出す
 - チェックインへ（11/14 海外の止まり具合・PR #93）：画面案のあと rpc('world_airport_ops', { p_iata })。出すのは faa が空でないか cancelled・late30 が1以上の空港だけ、の案。乗る便の通知の本文に改行（\n）が入るようになる（sw.js の表示を確かめてほしい）
 - チェックインへ（11/13 遅れの通知・PR #88）：renotify は PR #90 で済み。通知の説明の文（乗る便は15分から、空港ごとの遅れは主要空港の門限・0時前後の便だけ、欠航・ダイバート・引き返しはどの空港でも（11/14））が要るかはデザイン担当の画面案で
@@ -348,4 +352,5 @@
 5. 出典の書き方「出典：FAA NAS Status。運航の判断には使えません。遅れることがあります」を返す中身に入れる。テストを足す。影響：チェックイン（運用・通知）。経営は使わない
 
 ## PM から積んだ次の仕事（11/15 12時40分、海外の止まり具合の仕上げ）
+（済み・11/15 の回 → PR #93 の a33a975。上の節）
 本人「A」（決定事項【11/15】見せ方は案A）。data/world-ops（#93）に足す：①world_airport_ops に feed_at（FAA の発表の時刻）②note を「FAA がある空港用」と「便の数だけの空港用」に分ける ③FAA の reason の日本語の表（例 WEATHER / LOW CEILINGS → 天候（低い雲）。ないものは原文）④gdp の言葉は「到着の間引き中」（通知の文も）。チェックイン担当が画面を作るので、返す形が決まったら checkin.md に書く
