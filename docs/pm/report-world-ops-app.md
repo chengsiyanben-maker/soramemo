@@ -15,6 +15,8 @@ PM の指示：11/15 12時40分（本人「A」・決定事項【11/15】見せ�
 src/index.html で足した関数：loadWorldOps・woAp・woFaa・woShow・woHM・woLocal・woFeedAt・woNote・woTag・woCountTag・woSub・woRowTag・worldOpsHTML・worldApSheet・worldRideHTML（定数 WO_KIND・WO_ORDER・WO_TREND、変数 WOPS）
 変えた関数：boardHTML（札・ピンの説明・欄）・renderBoard（読み込み）・renderRideIntl（1行と出典）。足した部品：dialog#dWorldAp、CSS .wotag・.wopin・#v-ops .wobtn／.wokey／.wobox／.worow／.wonote・.ridecard .woline・dialog.wodlg
 
+- 追記（同じ回）：データ担当の仕上げ（PR #93 の a33a975：feed_at・notes・空港ごとの note・label・reason_ja）を取り込み、札とくわしくの言葉は label、わけは reason_ja（下に原文）、出典は空港ごとの note、「○時○分 更新」は feed_at にした（足した関数 woLabel）。t133 にその確かめを足して 44項目成功・t130・t60 成功
+
 ## 2. 確かめた結果
 - 新しいテスト t133（41項目）：札が出る・いちばん重いもの・過ぎた便に出ない・便の数の札が便の列に出ない・国内線の便に出ない・欄は出す空港だけ・断り書きは太字・note・押せる範囲 44px・くわしく（LAX・仁川）・国内線では出さない・375 幅ではみ出さない・取れないとき（空・失敗・空港なし）は何も出さない・滑走路の見方では読まない・乗る便の1行（FAA・便の数）・着いた便に出ない。すべて成功
 - 関係するテスト t130（運用の通信の数）・t60・t128・t132 成功（t130 は取れなかったときも読み直さない形にして通った）
@@ -26,7 +28,7 @@ src/index.html で足した関数：loadWorldOps・woAp・woFaa・woShow・woHM�
 - 乗る便のカードの1行を押すとくわしくが開く形でよいか
 
 ## 4. ほかの担当への依頼
-- データ担当（data/world-ops）：feed_at・note の分け方・reason の日本語・gdp の言葉を足したら、返す名前を checkin.md に書いてほしい。アプリは feed_at（発表ごと・空港・全体のどれでも）・note_faa／note_counts（または空港ごとの note）・reason_ja を読む形にしてある。名前が違えば合わせる。通知の本文の改行（\n）は sw.js がそのまま渡すので表示は今のままでよい（PR #90 の t132 で確かめ済みの形）
+- データ担当（data/world-ops）：a33a975 の返す形に合わせた（依頼はなし）。通知の本文の改行（\n）は sw.js がそのまま渡すので表示は今のままでよい（PR #90 の t132 で確かめ済みの形）
 - デザイン担当：アプリは W1〜W5 どおりに作った。案内板の字の大きさは今の案内板に合わせて小さめ（札 12px）。夜の画面の案が出たら合わせる
 
 ## 5. 全体の流し

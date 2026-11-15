@@ -22,9 +22,9 @@ BOARD = {'iata':'NRT','now':iso(0),'hours':[{'h':h,'flights':2,'late':0,'cancel'
 NOTE = '出典：FAA NAS Status。運航の判断には使えません。遅れることがあります。便の数は JAL・ANA の運航情報（ODPT）から数えたものです'
 WOPS = {'source':'FAA NAS Status','note':NOTE,'airports':[
   {'iata':'LAX','faa':[{'kind':'delay_dep','reason':'VOLUME','starts':None,'ends':None,'avg_delay':20,'max_delay':35,'trend':'increasing','since':iso(-50)},
-                       {'kind':'ground_stop','reason':'WEATHER / LOW CEILINGS','starts':None,'ends':iso(60),'avg_delay':None,'max_delay':None,'trend':None,'since':iso(-30)}],'flights':8,'cancelled':0,'late30':2},
+                       {'kind':'ground_stop','label':'地上待機中','reason':'WEATHER / LOW CEILINGS','reason_ja':'天候（低い雲）','starts':None,'ends':iso(60),'avg_delay':None,'max_delay':None,'trend':None,'since':iso(-30)}],'flights':8,'cancelled':0,'late30':2,'feed_at':iso(-3),'note':'出典：FAA NAS Status。運航の判断には使えません。遅れることがあります'},
   {'iata':'SFO','faa':[{'kind':'gdp','reason':'WEATHER / WIND','starts':None,'ends':iso(120),'avg_delay':45,'max_delay':90,'trend':None,'since':iso(-90)}],'flights':4,'cancelled':0,'late30':0},
-  {'iata':'ICN','faa':[],'flights':14,'cancelled':3,'late30':2},
+  {'iata':'ICN','faa':[],'flights':14,'cancelled':3,'late30':2,'note':'便の数は JAL・ANA の運航情報（ODPT）から数えたものです'},
   {'iata':'HNL','faa':[],'flights':6,'cancelled':0,'late30':0},
   {'iata':'CTS','faa':[],'flights':1,'cancelled':1,'late30':0}]}
 FOREIGN = {'iata':'NRT','planes':[]}
@@ -83,6 +83,7 @@ async def main():
         lax = next((r for r in (box or {}).get('rows', []) if 'ロサンゼルス' in r), '')
         check('LAX の行に「○時○分まで見込み」', 'まで見込み' in lax, lax)
         check('断り書きは欄の中に太字', bool(box) and any('運航の判断には使えません' in x for x in box['b']), box and box['b'])
+        check('「○時○分 更新」は feed_at から', bool(box) and ' 更新' in box['t'], box and box['t'][:40])
         check('出典の note を出す', bool(box) and 'FAA NAS Status' in box['t'] and 'ODPT' in box['t'])
         # 押せる範囲
         hit = await pg.evaluate("(() => { const b = document.querySelector('#opsBoard .wobtn'); const r = b.getBoundingClientRect(); const a = getComputedStyle(b, '::after'); return { h: parseFloat(a.height), w: r.width } })()")
@@ -96,13 +97,14 @@ async def main():
         await pg.click('#opsBoard .bdseq li .wobtn'); await pg.wait_for_timeout(300)
         st = await pg.evaluate("(() => { const d = document.getElementById('dWorldAp'); return { open: d.open, t: d.innerText } })()")
         check('札を押すとくわしくが開く（LAX・地上待機中・FAA の発表）', st['open'] and 'ロサンゼルス' in st['t'] and '地上待機中' in st['t'] and 'FAA の発表' in st['t'], st['t'][:120])
-        check('くわしくに わけ・終わる見込み・遅れの向き・ほかの発表・今日の便', all(k in st['t'] for k in ['わけ', 'WEATHER / LOW CEILINGS', '終わる見込み', '現地', 'ほかの発表', '出発の遅れ', '今日の JAL・ANA の便']), st['t'])
+        check('くわしくに わけ・終わる見込み・遅れの向き・ほかの発表・今日の便', all(k in st['t'] for k in ['わけ', 'WEATHER / LOW CEILINGS', '天候（低い雲）', '発表の時刻', '終わる見込み', '現地', 'ほかの発表', '出発の遅れ', '今日の JAL・ANA の便']), st['t'])
         check('くわしくにも断り書き', 'この便のことではありません' in st['t'] and '運航の判断には使えません' in st['t'])
         await pg.screenshot(path=os.path.join(WORK, 't133_sheet_lax.png'))
         await pg.click('#dWorldAp [data-close]'); await pg.wait_for_timeout(200)
         await pg.evaluate("[...document.querySelectorAll('#opsBoard .worow')].find(r => r.innerText.includes('仁川')).click()"); await pg.wait_for_timeout(300)
         st = await pg.evaluate("document.getElementById('dWorldAp').innerText")
         check('仁川のくわしく：欠航 3便・JAL・ANA の便から・空港の発表はありません', '欠航' in st and 'JAL・ANA の便から' in st and 'ありません' in st and 'FAA の発表' not in st, st[:200])
+        check('仁川のくわしくの出典は空港ごとの note（FAA の字が出ない）', 'FAA' not in st and 'ODPT' in st, st[-120:])
         await pg.screenshot(path=os.path.join(WORK, 't133_sheet_icn.png'))
         await pg.evaluate("document.getElementById('dWorldAp').close()")
         # 国内線
