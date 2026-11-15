@@ -2,6 +2,7 @@
 
 ## いま持っている仕事
 - 海外の空港の止まり具合を作る（11/15 0時10分 PM の指示・本人「OK」：案1・2）：ブランチ data/world-ops → main 向けの下書き PR #93（見張りを始めた）。報告 docs/pm/report-world-ops.md（そのブランチ）
+  - **11/15 14時59分 PR #93 が main に入った（反映の PR #97 → 754bca5、移行169。仕上げ a33a975 も一緒）。反映の Actions（run 213＝43683425961）はすべて成功（テスト・移行169の適用・関数の公開・アプリ。15時0分〜15時25分）。本番に入った**。次：明日、cron.job_run_details（world-status）と関数の返す rows・started・ms を本人に見てもらう
   - 移行 169 world_ops：表 world_airport_status（RLS 誰でも select・書くのは service_role。続いているものは空港・種類ごとに1行、なくなったら ended_at、3日で掃除）・world_status_put／world_status_rows（service_role）・world_status_now（10分より古い・終わったものは出さない）・world_flight_counts（JAL・ANA の国際線を海外の空港ごとに便・欠航・30分以上の遅れ）・world_airport_ops（画面用、note に出典の文）・alert_push_log に world と rank 0・alert_push_claim に「止まり具合がはじめて分かった・変わったら送り直す」。cron world-status（2分・10s）・world-status-cleanup（30s）。先頭に lock_timeout 10s。影響はチェックイン（運用・通知）、経営なし
   - 関数 world-status（config.toml に足した）・_shared/faa_nas.ts（XML の読み方・就航先 US_SERVED 24空港）。通知は alert_merge.ts の addWorld・worldLine・worldOnlyGroups（お知らせのない乗る便には止まり具合だけの rank 0）、alert_push.ts の notifyFlights(…, worldOnly)
   - 確かめた結果：t108（23）・t107・t15・t18・t01・t51 通過、番号の重なりなし（161件）。**この回は npm で Deno 2.5.6 を入れられた**（npm i -g deno@2.5.6）ので、本物の deno test 255本・型の確認が通過。SQL のテスト全部（111本）も通過
