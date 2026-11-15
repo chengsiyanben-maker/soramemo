@@ -1,6 +1,6 @@
 // アメリカ FAA の NAS Status（https://nasstatus.faa.gov/api/airport-status-information、公開の XML・1分ごとに更新・登録なし）を読む。
 // 取得とは分けて、テストしやすくしている（取り込みは functions/world-status、11/15 本人「OK」：決定事項【11/15】）。
-//   ・空港ごとの 地上待機（Ground Stop）・出発の間引き（Ground Delay Program）・閉鎖・15分以上の出発／到着の遅れ・除氷 を取り出す
+//   ・空港ごとの 地上待機（Ground Stop）・到着の間引き（Ground Delay Program）・閉鎖・15分以上の出発／到着の遅れ・除氷 を取り出す
 //   ・日本から直行便のある空港（US_SERVED）だけ残す
 //   ・Update_Time が10分より前なら「古い」として使わない（呼ぶ側で判定。stale）
 // 出典の書き方：「出典：FAA NAS Status。運航の判断には使えません。遅れることがあります」

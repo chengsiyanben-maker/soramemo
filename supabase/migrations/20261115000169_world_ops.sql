@@ -1,11 +1,12 @@
 -- 海外の空港の止まり具合（11/15 本人「OK」：report-world-ops-sources の案1・2。決定事項【11/15】）
 -- ・world_airport_status：アメリカ（ハワイ・グアム含む）の FAA NAS Status を2分に1回読み、日本から直行便のある空港の
---   地上待機・出発の間引き・閉鎖・15分以上の遅れ・除氷を残す（取り込みは関数 world-status）。終わったものは3日で消す
+--   地上待機・到着の間引き・閉鎖・15分以上の遅れ・除氷を残す（取り込みは関数 world-status）。終わったものは3日で消す
 --   （航路・機体の記録ではない）。取れないとき・古いとき（FAA の Update_Time か取った時刻が10分より前）は出さない
 -- ・world_status_put：1回分の取り込みを入れる（続いているものは時刻を書き直す・なくなったものは終わりにする）。新しく始まったものを返す
 -- ・world_status_now：いま出してよいもの（新しい・終わっていない）。通知（alert_merge）と画面が使う
 -- ・world_flight_counts：今ある JAL・ANA の国際線（flight_schedule）を、海外の空港ごとに「欠航○便・30分以上の遅れ○便」に数える
--- ・world_airport_ops：画面で使う。空港ごとに FAA の止まり具合と便の数をまとめ、出典の文を付けて返す
+-- ・world_airport_ops：画面で使う。空港ごとに FAA の止まり具合と便の数をまとめ、出典の文（FAA がある空港用・便の数だけの空港用）と
+--   FAA の発表の時刻（feed_at）・札の言葉（label。gdp は「到着の間引き中」）・わけの日本語（reason_ja：world_reason_ja）を付けて返す
 -- ・alert_push_log に world（通知に足した止まり具合の印）と rank 0（止まり具合だけの通知。「この便に乗る」の人だけ）を足し、
 --   alert_push_claim は止まり具合がはじめて分かったときにも同じ便の通知を上書きして知らせる（新しい通知は増やさない）
 -- 影響：チェックイン（運用タブ・乗る便の通知）。経営は使わない
@@ -19,7 +20,7 @@ create table if not exists public.world_airport_status (
   reason      text check (length(reason) <= 300),
   starts      timestamptz,                 -- 始まり（閉鎖の Start。分からなければ null）
   ends        timestamptz,                 -- 終わりの見込み（地上待機の End_Time・閉鎖の Reopen。分からなければ null）
-  avg_delay   int check (avg_delay is null or avg_delay between 0 and 1440),   -- 平均の遅れ（分。出発の間引き）
+  avg_delay   int check (avg_delay is null or avg_delay between 0 and 1440),   -- 平均の遅れ（分。到着の間引き）
   max_delay   int check (max_delay is null or max_delay between 0 and 1440),   -- いちばん大きい遅れ（分）
   trend       text check (trend in ('increasing', 'decreasing', 'steady')),
   first_seen  timestamptz not null default now(),
@@ -120,27 +121,86 @@ $$;
 revoke all on function public.world_flight_counts(date) from public;
 grant execute on function public.world_flight_counts(date) to anon, authenticated, service_role;
 
+-- FAA の reason（英語）を日本語にする（11/15 PM の指示 ③。例 WEATHER / LOW CEILINGS → 天候（低い雲））。
+-- 「/」「:」で区切った言葉をすべて表で引けたときだけ日本語にし、1つでも知らない言葉があれば原文のまま返す（NOTAM の文など）。
+-- 1つ目の言葉を見出し、残りを（ ）の中に。同じ訳は1つにまとめる（VOLUME / VOLUME → 混雑）
+create or replace function public.world_reason_ja(p text)
+returns text
+language sql immutable set search_path = public as $$
+  with src as (
+    select nullif(btrim(regexp_replace(upper(coalesce(p, '')), '^\s*DUE TO\s+', '')), '') s
+  ), m(k, v) as (values
+    ('WEATHER', '天候'), ('WX', '天候'),
+    ('LOW CEILINGS', '低い雲'), ('LOW CEILING', '低い雲'), ('CEILINGS', '低い雲'), ('LOW CIGS', '低い雲'),
+    ('LOW VISIBILITY', '視界不良'), ('VISIBILITY', '視界不良'), ('FOG', '霧'),
+    ('THUNDERSTORMS', '雷雨'), ('THUNDERSTORM', '雷雨'), ('TSTMS', '雷雨'), ('TSTM', '雷雨'),
+    ('WIND', '強風'), ('WINDS', '強風'), ('HIGH WINDS', '強風'),
+    ('SNOW', '雪'), ('ICE', '氷'), ('SNOW-ICE', '雪・氷'), ('RAIN', '雨'),
+    ('VOLUME', '混雑'), ('VOL', '混雑'), ('HEAVY TRAFFIC', '混雑'), ('TRAFFIC', '混雑'), ('MULTI-TAXI', '混雑'),
+    ('EQUIPMENT', '設備'), ('EQUIP', '設備'), ('OUTAGE', '故障'), ('POWER OUTAGE', '停電'),
+    ('RUNWAY', '滑走路'), ('RWY', '滑走路'), ('TAXIWAY', '誘導路'), ('TAXI', '誘導路'), ('RWY-TAXI', '滑走路・誘導路'),
+    ('CONSTRUCTION', '工事'), ('MAINTENANCE', '整備'), ('CLOSED', '閉鎖'), ('CLOSURE', '閉鎖'),
+    ('STAFFING', '管制官の不足'), ('OTHER', 'その他'), ('VIP MOVEMENT', '要人の移動'), ('VIP', '要人の移動'),
+    ('SECURITY', '保安'), ('EMERGENCY', '緊急事態'), ('AIRSPACE', '空域'), ('FIRE', '火災'),
+    ('TM INITIATIVES', '交通流の調整'), ('TMI', '交通流の調整'), ('MIT', '間隔の確保'),
+    ('DEICING', '除氷'), ('DE-ICING', '除氷'), ('SPACE LAUNCH', 'ロケットの打ち上げ'), ('LAUNCH', 'ロケットの打ち上げ')
+  ), t as (
+    select x.ord, regexp_replace(btrim(x.tok), '\s+', ' ', 'g') tok
+      from src, regexp_split_to_table(src.s, '\s*[/:;,]\s*') with ordinality x(tok, ord)
+     where btrim(x.tok) <> ''
+  ), j as (
+    select t.ord, m.v from t left join m on m.k = t.tok
+  ), u as (
+    select v, min(ord) o from j where v is not null group by v
+  )
+  select case
+    when (select s from src) is null then null
+    when not exists (select 1 from j) or exists (select 1 from j where v is null) then btrim(p)
+    when (select count(*) from u) = 1 then (select v from u)
+    else (select v from u order by o limit 1) || '（' || (select string_agg(v, '・' order by o) from u where o > (select min(o) from u)) || '）'
+  end
+$$;
+revoke all on function public.world_reason_ja(text) from public;
+grant execute on function public.world_reason_ja(text) to anon, authenticated, service_role;
+
 -- 画面で使う：空港ごとの止まり具合（FAA）と今日の便の数。p_iata を渡せばその空港だけ。
--- 返す形：{ source, note, airports: [{ iata, faa: [{kind, reason, starts, ends, avg_delay, max_delay, trend, since}], flights, cancelled, late30 }] }
+-- 返す形（11/15 PM の指示で feed_at・label・reason_ja・空港ごとの note を足した）：
+--   { source, feed_at（FAA の発表の時刻。出せる止まり具合がなければ null）, note（FAA がある空港用。前からの形）, notes: { faa, count },
+--     airports: [{ iata, note（その空港に出す出典の文）, feed_at（その空港の FAA の発表の時刻。FAA がなければ null）,
+--                  faa: [{kind, label, reason, reason_ja, starts, ends, avg_delay, max_delay, trend, since}], flights, cancelled, late30 }] }
+--   label：閉鎖中・地上待機中・到着の間引き中（gdp）・到着の遅れ・出発の遅れ・除氷中。reason は FAA の原文、reason_ja は日本語（知らない言葉は原文）
 create or replace function public.world_airport_ops(p_iata text default null)
 returns jsonb
 language sql stable security definer set search_path = public as $$
-  with st as (
-    select s.iata, jsonb_agg(jsonb_build_object('kind', s.kind, 'reason', s.reason, 'starts', s.starts, 'ends', s.ends,
-             'avg_delay', s.avg_delay, 'max_delay', s.max_delay, 'trend', s.trend, 'since', s.first_seen) order by s.kind) faa
+  with nt as (
+    select '出典：FAA NAS Status。運航の判断には使えません。遅れることがあります。便の数は JAL・ANA の運航情報（ODPT）から数えたものです'::text faa,
+           '出典：JAL・ANA の運航情報（ODPT）から数えたものです。空港全体の数で、この便のことではありません。運航の判断には使えません'::text cnt
+  ), st as (
+    select s.iata, max(s.feed_at) feed_at,
+           jsonb_agg(jsonb_build_object('kind', s.kind,
+             'label', case s.kind when 'closure' then '閉鎖中' when 'ground_stop' then '地上待機中' when 'gdp' then '到着の間引き中'
+                                  when 'delay_arr' then '到着の遅れ' when 'delay_dep' then '出発の遅れ' when 'deicing' then '除氷中' end,
+             'reason', s.reason, 'reason_ja', public.world_reason_ja(s.reason),
+             'starts', s.starts, 'ends', s.ends, 'avg_delay', s.avg_delay, 'max_delay', s.max_delay, 'trend', s.trend, 'since', s.first_seen)
+             order by s.kind) faa
       from public.world_status_now(case when p_iata is null then null else array[upper(p_iata)] end) s group by s.iata
   ), ct as (
     select * from public.world_flight_counts(null) c where p_iata is null or c.iata = upper(p_iata)
   ), j as (
-    select coalesce(st.iata, ct.iata) iata, coalesce(st.faa, '[]'::jsonb) faa,
+    select coalesce(st.iata, ct.iata) iata, coalesce(st.faa, '[]'::jsonb) faa, st.feed_at,
            coalesce(ct.flights, 0) flights, coalesce(ct.cancelled, 0) cancelled, coalesce(ct.late30, 0) late30
       from st full join ct on ct.iata = st.iata
   )
   select jsonb_build_object(
     'source', 'FAA NAS Status',
-    'note', '出典：FAA NAS Status。運航の判断には使えません。遅れることがあります。便の数は JAL・ANA の運航情報（ODPT）から数えたものです',
-    'airports', coalesce((select jsonb_agg(jsonb_build_object('iata', iata, 'faa', faa, 'flights', flights, 'cancelled', cancelled, 'late30', late30)
+    'feed_at', (select max(feed_at) from st),
+    'note', nt.faa,
+    'notes', jsonb_build_object('faa', nt.faa, 'count', nt.cnt),
+    'airports', coalesce((select jsonb_agg(jsonb_build_object('iata', iata,
+                                   'note', case when jsonb_array_length(faa) > 0 then nt.faa else nt.cnt end, 'feed_at', feed_at,
+                                   'faa', faa, 'flights', flights, 'cancelled', cancelled, 'late30', late30)
                                  order by jsonb_array_length(faa) desc, cancelled desc, late30 desc, iata) from j), '[]'::jsonb))
+    from nt
 $$;
 revoke all on function public.world_airport_ops(text) from public;
 grant execute on function public.world_airport_ops(text) to anon, authenticated;

@@ -1,4 +1,4 @@
-// FAA NAS Status の XML を読む：地上待機・出発の間引き・閉鎖・出発／到着の遅れ・除氷、就航先だけ残す、時刻の読み方、古い判定
+// FAA NAS Status の XML を読む：地上待機・到着の間引き・閉鎖・出発／到着の遅れ・除氷、就航先だけ残す、時刻の読み方、古い判定
 import { assertEquals } from "jsr:@std/assert@1";
 import { isStale, parseClock, parseDayTime, parseMinutes, parseNas, parseUpdateTime } from "../functions/_shared/faa_nas.ts";
 

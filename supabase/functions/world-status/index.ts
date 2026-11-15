@@ -1,7 +1,7 @@
 // アメリカの空港の止まり具合（FAA NAS Status）を読み、日本から直行便のある空港の分を world_airport_status に残す（11/15 本人「OK」）。
 //   GET /functions/v1/world-status   （pg_cron が2分ごとに呼ぶ。FAA に問い合わせるのは1回だけ。1日720回）
 // FAA の Update_Time が10分より前（古い）・取れないときは何も書かない（表の行は10分で出なくなる：world_status_now）。
-// 地上待機・閉鎖・出発の間引きが新しく始まった空港は、その空港を出る・着く便のうち「この便に乗る」で選ばれた便に、同じ便の通知を上書きして知らせる
+// 地上待機・閉鎖・到着の間引きが新しく始まった空港は、その空港を出る・着く便のうち「この便に乗る」で選ばれた便に、同じ便の通知を上書きして知らせる
 // （新しい通知は増やさない。遅れのお知らせがある便は、その通知に1行足して送り直す：alert_push.ts の notifyFlights）。
 // 出典：FAA NAS Status。運航の判断には使えません。遅れることがあります
 import { createClient } from "npm:@supabase/supabase-js@2.117.2";
@@ -30,7 +30,7 @@ Deno.serve(async () => {
     }
     const { data: started, error } = await admin.rpc("world_status_put", { p_source: "faa", p_feed_at: new Date(updatedAt!).toISOString(), p: rows });
     if (error) throw error;
-    // 新しく始まった地上待機・閉鎖・出発の間引き → その空港を出る・着く、まだ着いていない便
+    // 新しく始まった地上待機・閉鎖・到着の間引き → その空港を出る・着く、まだ着いていない便
     const hit = [...new Set(((started ?? []) as { iata: string; kind: string }[]).filter((s) => NOTIFY_KINDS.includes(s.kind)).map((s) => s.iata))];
     let pushed = 0, flights = 0;
     if (hit.length) {
