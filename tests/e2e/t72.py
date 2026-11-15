@@ -66,10 +66,13 @@ async def main():
         await pg.click('[data-spb-reg="JA339J"]'); await pg.wait_for_timeout(300)
         d = await pg.inner_text('#dSpecialBody')
         check('機体の画面：いまの便と時刻:', 'JAL Jubilee Express' in d and 'JL113' in d and '着く時刻（推定）' in d and '24,300' in d)
-        check('今日の足あと（2便、時刻表から・いま）:', await pg.locator('.spblegs li').count() == 2 and '時刻表から' in d and await pg.locator('.spblegs li.now').count() == 1)
+
         check('この30日に来た空港（多い順）:', (await pg.locator('.spbaps span').first.inner_text()).startswith('羽田'))
         check('通知が使えない端末では通知のボタンを出さない:', await pg.locator('[data-spb-push]').count() == 0)
         check('戻るボタンに移る:', await pg.evaluate("document.activeElement && document.activeElement.hasAttribute('data-spb-back')"))
+        # 11/15 から案A：飛んだ便は1行にたたむ（押すと開く）→ いまの便
+        await pg.click('#dSpecialBody [data-rot-fold]'); await pg.wait_for_timeout(100); d = await pg.inner_text('#dSpecialBody')
+        check('今日の足あと（2便、時刻表から・いま）:', await pg.locator('#dSpecialBody .rtl li.flown').count() == 1 and '時刻表から' in d and await pg.locator('#dSpecialBody .rtl li.now').count() == 1)
         await pg.screenshot(path=os.path.join(WORK, 't72_detail.png'))
         await axe('機体の画面')
         await pg.click('[data-spb-back]'); await pg.wait_for_timeout(200); await pg.click('[data-spb-reg="JA819A"]'); await pg.wait_for_timeout(300)
