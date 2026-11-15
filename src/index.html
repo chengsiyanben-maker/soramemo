@@ -1628,6 +1628,66 @@ dialog.mypage .dlg .close{display:none}
 [data-palette="board"] #v-ops .bdchart rect{fill:#3B5C93}
 [data-palette="board"] #v-ops .bdchart rect.now{fill:#7AA7F5}
 [data-palette="board"] #v-ops .bdchart .ref{stroke:#A7B0BC}
+/* 海外の空港の止まり具合（11/15 案A・design/world-ops）。札にはピンの印をつけ、この便の欠航・遅れと分ける。重い＝濃い色、注意＝うすい黄、便の数＝グレー */
+.wotag{display:inline-flex;align-items:center;gap:4px;max-width:100%;border-radius:999px;padding:3px 9px 3px 7px;font-size:12px;font-weight:800;line-height:1.35;white-space:nowrap}
+.wotag small{font-size:11px;font-weight:700;opacity:.85;margin-left:2px}
+.wotag.s1{background:#9A3412;color:#fff}.wotag.s2{background:#FEF3C7;color:#92400E}.wotag.s3{background:#EEF0F3;color:#374151}
+.wopin{display:inline-block;flex:none;width:9px;height:12px;background:currentColor;-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 9 12'%3E%3Cpath d='M4.5 0A4.5 4.5 0 0 0 0 4.5C0 7.9 4.5 12 4.5 12S9 7.9 9 4.5A4.5 4.5 0 0 0 4.5 0zm0 6.3a1.8 1.8 0 1 1 0-3.6 1.8 1.8 0 0 1 0 3.6z'/%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 9 12'%3E%3Cpath d='M4.5 0A4.5 4.5 0 0 0 0 4.5C0 7.9 4.5 12 4.5 12S9 7.9 9 4.5A4.5 4.5 0 0 0 4.5 0zm0 6.3a1.8 1.8 0 1 1 0-3.6 1.8 1.8 0 0 1 0 3.6z'/%3E%3C/svg%3E") center/contain no-repeat}
+#v-ops .bdseq .wobtn{position:relative;align-self:flex-start;max-width:100%;margin-top:5px;padding:0;border:0;background:none;font:inherit;cursor:pointer}
+#v-ops .bdseq .wobtn::after{content:"";position:absolute;left:0;right:0;top:50%;height:44px;transform:translateY(-50%)}
+#v-ops .wokey{display:flex;align-items:flex-start;gap:6px;font-size:12px;line-height:1.6;color:var(--op-mute);margin:10px 0 0}
+#v-ops .wokey .wopin{margin-top:4px}
+#v-ops .wobox{margin-top:16px;background:color-mix(in srgb,var(--op-pill) 55%,var(--op-card));border-radius:18px;padding:12px 14px}
+#v-ops .wobox h4{margin:0 0 2px;font-size:14px;font-weight:800;color:var(--op-ink);display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+#v-ops .wobox h4 small{font-size:12px;font-weight:600;color:var(--op-mute)}
+#v-ops .wol{list-style:none;margin:0;padding:0}
+#v-ops .wol li+li{box-shadow:0 -1px 0 color-mix(in srgb,var(--op-sub) 22%,transparent)}
+#v-ops .worow{display:grid;grid-template-columns:1fr 44px;align-items:center;gap:3px 6px;width:100%;min-height:56px;padding:8px 0;border:0;background:none;text-align:left;font:inherit;color:var(--op-ink);cursor:pointer}
+#v-ops .worow .nm{font-size:15px;font-weight:800}
+#v-ops .worow .nm small{font-size:12px;font-weight:600;color:var(--op-sub);margin-left:5px}
+#v-ops .worow .wh{grid-column:1;display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px;font-size:13px;color:var(--op-mute)}
+#v-ops .worow .go{grid-row:1/3;grid-column:2;justify-self:center;font-size:20px;color:var(--op-sub)}
+#v-ops .wonote{font-size:12px;line-height:1.7;color:var(--op-mute);margin:6px 0 0}
+#v-ops .wonote b{color:var(--op-ink);font-weight:800}
+#v-ops .wobox+.bdhead{margin-top:18px}
+.ridecard .woline{display:flex;gap:8px;align-items:flex-start;width:100%;margin:8px 0 2px;border:0;border-radius:12px;padding:9px 11px;font:inherit;font-size:13px;line-height:1.55;text-align:left;cursor:pointer}
+.ridecard .woline .wopin{margin-top:4px}
+.ridecard .woline.s1{background:#FFF1EA;color:#9A3412}.ridecard .woline.s2{background:#FEF7E0;color:#92400E}.ridecard .woline.s3{background:#F4F6F9;color:#374151}
+.ridecard .woline b{font-weight:800}
+.ridecard .woline small{display:block;font-size:12px;color:var(--hm-mute,#6B7280);font-weight:500;margin-top:1px}
+dialog.wodlg .wosh{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;padding-top:6px}
+dialog.wodlg .wosh h2{margin:6px 0 0;font-size:20px;font-weight:900;color:var(--s-ink)}
+dialog.wodlg .wosh h2 small{font-size:14px;font-weight:700;color:var(--s-mute);margin-left:6px}
+dialog.wodlg .wosh button{flex:none;height:44px;padding:0 16px;border:0;border-radius:999px;background:var(--s-bg);color:var(--s-ink);font:800 14px var(--gothic)}
+dialog.wodlg .wobig{margin-top:12px;border-radius:18px;padding:12px 14px}
+dialog.wodlg .wobig.s1{background:#FFF1EA}dialog.wodlg .wobig.s2{background:#FEF7E0}dialog.wodlg .wobig.s3{background:var(--s-bg)}
+dialog.wodlg .wobig .k{display:flex;align-items:center;flex-wrap:wrap;gap:8px}
+dialog.wodlg .wobig .k b{font-size:26px;font-weight:900;color:var(--s-ink)}
+dialog.wodlg .wobig.s1 .k b{color:#9A3412}dialog.wodlg .wobig.s2 .k b{color:#92400E}
+dialog.wodlg .wobig .k b small{font-size:14px;font-weight:700;color:var(--s-mute);margin-left:2px}
+dialog.wodlg .wobig .k span{font-size:12px;font-weight:800;color:#fff;background:#9A3412;border-radius:999px;padding:2px 10px}
+dialog.wodlg .wobig.s2 .k span{background:#92400E}dialog.wodlg .wobig.s3 .k span{background:#4B5563}
+dialog.wodlg .wobig p{margin:2px 0 0;font-size:14px;line-height:1.6;color:var(--s-ink)}
+dialog.wodlg .wokv{list-style:none;margin:8px 0 0;padding:0}
+dialog.wodlg .wokv li{display:grid;grid-template-columns:96px 1fr;gap:8px;padding:9px 0;font-size:14px}
+dialog.wodlg .wokv li+li{box-shadow:0 -1px 0 var(--s-line)}
+dialog.wodlg .wokv li span{color:var(--s-mute);font-size:13px}
+dialog.wodlg .wokv li b{font-weight:800;color:var(--s-ink)}
+dialog.wodlg .wokv li b small{display:block;font-size:12px;font-weight:600;color:var(--s-mute)}
+dialog.wodlg .wosubh{font-size:14px;font-weight:800;margin:14px 0 4px;color:var(--s-ink)}
+dialog.wodlg .wosubh small{font-size:12px;font-weight:600;color:var(--s-mute);margin-left:6px}
+dialog.wodlg .wocnt{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+dialog.wodlg .wocnt div{background:var(--s-bg);border-radius:14px;padding:9px 12px}
+dialog.wodlg .wocnt span{display:block;font-size:12px;color:var(--s-mute)}
+dialog.wodlg .wocnt b{font-size:22px;font-weight:900;color:var(--s-ink);font-variant-numeric:tabular-nums}
+dialog.wodlg .wocnt b small{font-size:12px;font-weight:700;color:var(--s-mute);margin-left:2px}
+dialog.wodlg .wocnt .hot b{color:#9A3412}
+dialog.wodlg .wodisc{font-size:12.5px;line-height:1.7;color:var(--s-mute);background:var(--s-bg);border-radius:14px;padding:10px 12px;margin-top:14px}
+dialog.wodlg .wodisc b{color:var(--s-ink);font-weight:800}
+/* 夜（data-night）と案内板の色：重いは琥珀の縁、注意は琥珀の字（金と会社の色は使わない） */
+:root[data-night="on"] .wotag.s1,[data-palette="board"] .wotag.s1{background:transparent;color:#FBBF24;box-shadow:inset 0 0 0 1.5px #FBBF24}
+:root[data-night="on"] .wotag.s2,[data-palette="board"] .wotag.s2{background:rgba(251,191,36,.12);color:#FBBF24}
+:root[data-night="on"] .wotag.s3,[data-palette="board"] .wotag.s3{background:rgba(255,255,255,.08);color:#D1D5DB}
 #v-ops .bdleg{display:flex;flex-wrap:wrap;gap:12px;font-size:11px;color:var(--op-mute);margin:4px 0 0}
 #v-ops .bdleg span{display:inline-flex;align-items:center;gap:5px}
 #v-ops .bdleg .bar{width:10px;height:10px;border-radius:2px;background:#93B4E8}
@@ -3670,6 +3730,7 @@ div.viewsw>button{position:relative}div.viewsw>button::after{content:"";position
   <div class="opsaps" id="opsAps"></div></div></dialog>
 <dialog id="dLayout" class="spfull" aria-label="表示を編集"><div class="dlg" id="dLayoutBody"></div></dialog>
 <dialog id="dTabs" class="psheet tpsheet" aria-labelledby="tpTitle"><div class="dlg" id="dTabsBody"></div></dialog>
+<dialog id="dWorldAp" class="spsheet wodlg" aria-labelledby="worldApT"><div class="dlg" id="dWorldApBody"></div></dialog>
 <dialog id="dNear" class="spsheet neardlg" aria-labelledby="nearAllT"><div class="dlg" id="dNearBody"></div></dialog>
 <dialog id="dViews" class="psheet tpsheet vssheet" aria-labelledby="vsTitle"><div class="dlg" id="dViewsBody"></div></dialog>
 <dialog id="dHomeEd" class="spfull heed" aria-labelledby="heTitle"><div class="dlg" id="dHomeEdBody"></div></dialog>
@@ -4155,13 +4216,16 @@ async function renderRideIntl(p, force){
     : ph === "lost" ? `<span class="rv">飛行中のようです（いまは機体の位置が届かない所を飛んでいます）</span>`
     : ph === "taxi" ? `<span class="rv">地上を移動しています（出発の前）</span>`
     : `<span class="rv">出発前${d.etd ? `（出発の見込み ${tzHM(d.etd, dep)}${localNote(dep)}）` : ""}</span>`;
+  // 到着地・出発地が海外の空港なら、その空港のいま（FAA の発表か JAL・ANA の便の数）を1行
+  if(SERVER && (!IATA[arr] || !IATA[dep])) await loadWorldOps();
+  const wo = WOPS ? worldRideHTML(dep, arr, d.found ? ph : null) : { html:"", note:"" };
   const bar = pct != null && d.found && ph !== "cancelled" ? `<div class="rbar" role="img" aria-label="飛んだ道のり ${pct}%"><i style="width:${pct}%"></i></div>` : "";
   box.hidden = false;
   box.innerHTML = `<div class="rh"><b>乗る便 ${esc(p.no)}</b><span>${esc(placeAny(dep))} → ${esc(placeAny(arr))}${est ? "（推定）" : ""}</span><button type="button" data-ride-off>やめる</button></div>
     ${d.std ? `<span class="rl">出発 定刻 ${tzHM(d.std, dep)}${localNote(dep)}　到着 定刻 ${tzHM(d.sta, arr)}${localNote(arr)}${!IATA[arr] && WORLD_TZ[arr] ? `（日本時間 ${tzHM(d.sta, "HND")}）` : ""}</span>` : ""}
-    ${st}${bar}${d.reg || d.type ? `<span class="rl">機体 ${esc([d.reg, d.type].filter(Boolean).join("・"))}</span>` : ""}
+    ${st}${wo.html}${bar}${d.reg || d.type ? `<span class="rl">機体 ${esc([d.reg, d.type].filter(Boolean).join("・"))}</span>` : ""}
     ${d.found && ["air", "lost", "landed"].includes(ph) && !!IATA[dep] !== !!IATA[arr] ? (rideRecorded(p) ? `<span class="rl">国際線の記録に入れました（フライトの「記録帳」）</span>` : `<button type="button" class="btn2 rrec" data-ride-rec>この便を国際線の記録に入れる</button>`) : ""}
-    <p class="fwnote">機体の位置は adsb.lol から便名で探した推定で、海の上などでは届かないことがあります。${est ? "この便は時刻表がないため、出発・到着の空港も経路のデータ（adsb.im）からの推定です。" : `時刻は時刻表（現地時刻）と航空会社の運航情報。${ODPT_CREDIT}`}　空港の時間帯：OpenFlights（ODbL）</p>`;
+    <p class="fwnote">${wo.note}機体の位置は adsb.lol から便名で探した推定で、海の上などでは届かないことがあります。${est ? "この便は時刻表がないため、出発・到着の空港も経路のデータ（adsb.im）からの推定です。" : `時刻は時刻表（現地時刻）と航空会社の運航情報。${ODPT_CREDIT}`}　空港の時間帯：OpenFlights（ODbL）</p>`;
 }
 async function renderRide(force){
   const box = $("rideCard"); if(!box) return;
@@ -10516,6 +10580,112 @@ function foreignHTML(d, arr){
     ${rows ? `<ol class="bdseq foreign">${rows}</ol>` : `<p class="hint">いま、この空港の近くに${arr ? "着く" : "出た"}海外の航空会社の便は見つかりません。</p>`}
     <p class="fwnote">時刻表がない航空会社の便を、空港から60km以内の機体の位置（adsb.lol）と、その便の経路のデータ（adsb.im）から推定しています。便名は機体の呼び出し符号から読んでいるため、航空会社の発表とは違うことがあります。</p>`;
 }
+/* 海外の空港の止まり具合（決定事項【11/15】案A・画面案 design/world-ops）。アメリカは FAA NAS Status の発表、ほかは JAL・ANA の今日の国際線の数（サーバーの world_airport_ops）。
+   空港全体のようすで、この便のことではない。運航の判断には使えない。取れないとき・古いときは何も出さない */
+let WOPS = null, WOPS_AT = 0, WOPS_P = null;
+const WO_KIND = { closure:{ l:"閉鎖中", s:1, why:"空港が閉まっています" }, ground_stop:{ l:"地上待機中", s:1, why:"この空港へ向かう便を、出発する空港で止めています" },
+  gdp:{ l:"到着の間引き中", s:2, why:"着く便を減らすため、出発を遅らせています" }, delay_arr:{ l:"到着の遅れ", s:2, why:"着く便が15分以上遅れています" },
+  delay_dep:{ l:"出発の遅れ", s:2, why:"出る便が15分以上遅れています" }, deicing:{ l:"除氷中", s:2, why:"雪や氷を落とすため、出発に時間がかかっています" } };
+const WO_ORDER = ["closure", "ground_stop", "gdp", "delay_arr", "delay_dep", "deicing"];
+const WO_TREND = { increasing:"増えています", decreasing:"減っています", steady:"変わっていません" };
+async function loadWorldOps(){
+  if(!SERVER) return null;
+  // 2分（見方を変えたときは3分）以内に読んだ結果を使う。取れなかったときも同じ間は読み直さない
+  if(WOPS_AT && opsFresh(WOPS_AT, 120_000)) return WOPS;
+  if(WOPS_P) return WOPS_P;
+  WOPS_P = (async () => { const d = await rpcPost("world_airport_ops", { p_iata:null });
+    WOPS = d && Array.isArray(d.airports) ? d : null; WOPS_AT = Date.now();
+    WOPS_P = null; return WOPS; })();
+  return WOPS_P;
+}
+const woAp = c => WOPS && !IATA[c] ? (WOPS.airports || []).find(a => a.iata === c) || null : null;
+const woFaa = a => (a && Array.isArray(a.faa) ? a.faa : []).filter(x => WO_KIND[x.kind]).sort((x, y) => WO_ORDER.indexOf(x.kind) - WO_ORDER.indexOf(y.kind));
+// 出す空港：FAA の発表があるか、欠航・30分以上の遅れが1便以上
+const woShow = a => !!a && (woFaa(a).length > 0 || Number(a.cancelled) > 0 || Number(a.late30) > 0);
+const woHM = t => { const s = jstHM(t); return s ? `${+s.slice(0, 2)}時${s.slice(3)}分` : ""; };
+const woLocal = (t, c) => { const z = WORLD_TZ[c]; if(!t || !z) return ""; const d = new Date(t);
+  return `現地 ${d.toLocaleTimeString("ja-JP", { hour:"2-digit", minute:"2-digit", timeZone:z })}（${d.toLocaleDateString("ja-JP", { weekday:"short", timeZone:z })}）`; };
+const woFeedAt = a => { const xs = [...woFaa(a).map(x => x.feed_at), a && a.feed_at, WOPS && WOPS.feed_at].filter(Boolean).map(Date.parse).filter(Boolean); return xs.length ? new Date(Math.max(...xs)).toISOString() : null; };
+// 出典の文：データ担当が空港の種類ごとに分けたら（note_faa・note_counts、または空港ごとの note）それを使い、なければ1つの note
+const woNote = a => (a && a.note) || (a && woFaa(a).length ? WOPS.note_faa : WOPS.note_counts) || WOPS.note || "";
+// 札（ピンの印つき）。FAA はいちばん重いもの、便の数は欠航（なければ30分以上の遅れ）
+function woTag(a, faaOnly){
+  const f = woFaa(a)[0];
+  if(f){ const k = WO_KIND[f.kind]; return { s:k.s, html:`<span class="wotag s${k.s}"><i class="wopin" aria-hidden="true"></i>${k.l}<small>FAA</small></span>`, text:k.l + "（FAA）" }; }
+  if(faaOnly || !a) return null;
+  if(Number(a.cancelled) > 0) return { s:3, html:`<span class="wotag s3"><i class="wopin" aria-hidden="true"></i>今日 欠航${a.cancelled}便</span>`, text:`今日 欠航${a.cancelled}便` };
+  if(Number(a.late30) > 0) return { s:3, html:`<span class="wotag s3"><i class="wopin" aria-hidden="true"></i>今日 遅れ${a.late30}便</span>`, text:`今日 30分以上の遅れ${a.late30}便` };
+  return null;
+}
+const woCountTag = a => Number(a.cancelled) > 0 ? `<span class="wotag s3"><i class="wopin" aria-hidden="true"></i>今日 欠航${a.cancelled}便</span>` : Number(a.late30) > 0 ? `<span class="wotag s3"><i class="wopin" aria-hidden="true"></i>今日 遅れ${a.late30}便</span>` : "";
+const woSub = f => !f ? "" : f.ends ? `${woHM(f.ends)}まで見込み` : f.avg_delay ? `平均${f.avg_delay}分の遅れ` : f.max_delay ? `いちばん大きい遅れ ${f.max_delay}分` : "";
+// 案内板の便の列に付ける札（FAA だけ・まだ出ていない／着いていない便だけ）
+function woRowTag(f, now){
+  if(!WOPS || BOARD_KIND === "dom" || !f.intl || IATA[f.other] || f.actual || f.cancelled || Date.parse(f.t) <= now) return "";
+  const a = woAp(f.other), t = a && woTag(a, true); if(!t) return "";
+  return `<button type="button" class="wobtn" data-wo="${esc(a.iata)}" aria-label="${esc(placeAny(a.iata))}のいま：${esc(t.text)}。空港全体のようすです">${t.html}</button>`;
+}
+// 「行き先の海外の空港のいま」の欄（案内板の便の行き先・出発地のうち、出す空港だけ）
+function worldOpsHTML(d){
+  if(!WOPS || BOARD_KIND === "dom") return "";
+  const codes = [...new Set([...(d.next_arr || []), ...(d.next_dep || [])].filter(f => f.intl && !IATA[f.other]).map(f => f.other))];
+  const aps = codes.map(woAp).filter(woShow).sort((x, y) => (woTag(x) || { s:9 }).s - (woTag(y) || { s:9 }).s || Number(y.cancelled) - Number(x.cancelled));
+  if(!aps.length) return "";
+  const feeds = aps.map(woFeedAt).filter(Boolean).map(Date.parse), upd = feeds.length ? jstHM(new Date(Math.max(...feeds)).toISOString()) : "";
+  const anyFaa = aps.some(a => woFaa(a).length), anyCnt = aps.some(a => !woFaa(a).length);
+  const notes = [...new Set(aps.map(woNote).filter(Boolean))];
+  const li = a => { const f = woFaa(a)[0], t = woTag(a), sub = woSub(f), cnt = f ? woCountTag(a) : "";
+    return `<li><button type="button" class="worow" data-wo="${esc(a.iata)}"><span class="nm">${esc(placeAny(a.iata))}<small>${esc(a.iata)}</small></span>
+      <span class="wh">${t ? t.html : ""}${cnt}${sub ? `<span>${esc(sub)}</span>` : ""}</span><span class="go" aria-hidden="true">›</span></button></li>`; };
+  return `<div class="wobox"><h4>行き先の海外の空港のいま${upd ? `<small>${upd} 更新</small>` : ""}</h4>
+    <ul class="wol">${aps.map(li).join("")}</ul>
+    <p class="wonote"><b>運航の判断には使えません。</b>${anyFaa ? "アメリカの空港は FAA（アメリカ連邦航空局）の発表" : ""}${anyFaa && anyCnt ? "、" : ""}${anyCnt ? "ほかの空港は JAL・ANA の今日の便の数" : ""}です。</p>
+    ${notes.map(n => `<p class="wonote">${esc(n)}</p>`).join("")}</div>`;
+}
+// くわしく（シート）
+function worldApSheet(c){
+  const a = woAp(c), box = $("dWorldApBody"); if(!a || !box) return;
+  const fs = woFaa(a), f = fs[0], name = placeAny(c), k = f && WO_KIND[f.kind], feed = woFeedAt(a);
+  const row = (l, v, s) => `<li><span>${l}</span><b>${v}${s ? `<small>${s}</small>` : ""}</b></li>`;
+  const big = f ? `<div class="wobig s${k.s}"><div class="k"><b>${k.l}</b><span>FAA の発表</span></div><p>${esc(name)}${f.kind === "ground_stop" ? "へ向かう便を、出発する空港で止めています" : "：" + k.why}</p></div>`
+    : `<div class="wobig s3"><div class="k"><b>${Number(a.cancelled) > 0 ? `欠航 ${a.cancelled}<small>便</small>` : `遅れ ${a.late30}<small>便</small>`}</b><span>JAL・ANA の便から</span></div><p>今日の${esc(name)}発着の JAL・ANA の便 ${Number(a.flights)}便のうち${Number(a.cancelled) > 0 ? "" : "（30分以上の遅れ）"}</p></div>`;
+  const kv = f ? [
+      f.reason ? row("わけ", esc(f.reason_ja || f.reason), f.reason_ja && f.reason_ja !== f.reason ? "FAA の発表の言葉：" + esc(f.reason) : "") : "",
+      (f.starts || f.since) ? row("いつから", `${jstHM(f.starts || f.since)} ごろから`, woLocal(f.starts || f.since, c)) : "",
+      f.ends ? row("終わる見込み", `${jstHM(f.ends)} まで見込み`, `${woLocal(f.ends, c)}。延びることがあります`) : "",
+      f.avg_delay || f.max_delay ? row("遅れ", f.avg_delay ? `平均 ${f.avg_delay}分` : `いちばん大きい ${f.max_delay}分`, f.avg_delay && f.max_delay ? `いちばん大きい遅れ ${f.max_delay}分` : "") : "",
+      WO_TREND[f.trend] ? row("遅れの向き", WO_TREND[f.trend]) : "",
+      feed ? row("発表の時刻", jstHM(feed), woLocal(feed, c)) : "",
+      ...fs.slice(1).map(x => row("ほかの発表", WO_KIND[x.kind].l, [woSub(x), x.reason_ja || x.reason].filter(Boolean).map(esc).join("・")))
+    ].join("") : row("空港の発表", "ありません", "この地域は、いま空港のようすの公開の情報を使っていません");
+  const cnt = `<h4 class="wosubh">今日の JAL・ANA の便（${esc(name)}発着）<small>遅れは30分以上</small></h4>
+    <div class="wocnt"><div><span>便</span><b>${Number(a.flights)}<small>便</small></b></div><div class="${Number(a.cancelled) ? "hot" : ""}"><span>欠航</span><b>${Number(a.cancelled)}<small>便</small></b></div><div class="${Number(a.late30) ? "hot" : ""}"><span>遅れ</span><b>${Number(a.late30)}<small>便</small></b></div></div>`;
+  box.innerHTML = `<div class="wosh"><h2 id="worldApT">${esc(name)}<small>${esc(c)}</small></h2><button type="button" data-close>閉じる</button></div>
+    ${big}<ul class="wokv">${kv}</ul>${cnt}
+    <div class="wodisc"><b>空港全体のようすで、この便のことではありません。運航の判断には使えません。</b><br>${esc(woNote(a))}</div>`;
+  $("dWorldAp").showModal(); track("world_ops", c);
+}
+document.addEventListener("click", e => { const b = e.target.closest("[data-wo]"); if(!b) return; e.stopPropagation(); worldApSheet(b.dataset.wo); });
+// 乗る便のカードの1行（到着地はまだ着いていない便、出発地はまだ出ていない便だけ）
+function worldRideHTML(dep, arr, ph){
+  const out = [], one = (c, isArr) => {
+    const a = woAp(c); if(!woShow(a)) return;
+    const f = woFaa(a)[0], name = placeAny(c), w = isArr ? "到着地" : "出発地";
+    if(f){ const k = WO_KIND[f.kind], tail = f.ends ? `・${woHM(f.ends)}まで見込み` : "";
+      out.push(`<button type="button" class="woline s${k.s}" data-wo="${esc(c)}"><i class="wopin" aria-hidden="true"></i><span><b>${w}${esc(name)}で${k.l}</b>（FAA${tail}）<small>いまの発表です。${isArr ? "着くころ" : "出るころ"}には変わっていることがあります</small></span></button>`); }
+    else { const t = Number(a.cancelled) > 0 ? `今日の欠航 ${a.cancelled}便` : `今日の30分以上の遅れ ${a.late30}便`;
+      out.push(`<button type="button" class="woline s3" data-wo="${esc(c)}"><i class="wopin" aria-hidden="true"></i><span><b>${w}${esc(name)}：${t}</b>（JAL・ANA）<small>空港全体の数です。この便のことではありません</small></span></button>`); }
+    return (f ? "faa" : "cnt") + (isArr ? "arr" : "dep");
+  };
+  if(ph === "cancelled" || ph === "landed") return { html:"", note:"" };
+  const kinds = [];
+  if(!IATA[arr]) kinds.push(one(arr, true));
+  if(!IATA[dep] && !["air", "lost"].includes(ph)) kinds.push(one(dep, false));
+  const ks = kinds.filter(Boolean), where = k => ks.some(x => x === k + "arr") && ks.some(x => x === k + "dep") ? "到着地・出発地" : ks.some(x => x === k + "arr") ? "到着地" : "出発地";
+  const note = ks.some(x => x.startsWith("faa")) ? `${where("faa")}のようすは FAA（アメリカ連邦航空局）の発表で、運航の判断には使えません。遅れることがあります。` : "";
+  const note2 = ks.some(x => x.startsWith("cnt")) ? `${where("cnt")}の便の数は、JAL・ANA の運航情報から数えたもので、空港の発表ではありません。${note ? "" : "運航の判断には使えません。"}` : "";
+  return { html:out.join(""), note:note + note2 };
+}
 function boardRel(t, now){
   const m = Math.round((Date.parse(t) - now) / 60000);
   if(m === 0) return "いま";
@@ -10530,7 +10700,7 @@ function boardHTML(d, fg){
   const items = list.map(f => { const [k, t] = kind(f), past = Date.parse(f.t) <= now, late = Math.round((Date.parse(t) - Date.parse(f.sched)) / 60000);
     return `<li class="${past ? "past" : ""}"><span class="dot" aria-hidden="true"></span>
       <b>${esc(name(f.other))}<span class="nw">${arr ? "から" : "へ"}</span></b><span class="fl">${f.intl ? `<i class="intl">国際</i>` : ""}${esc(f.flight)}${f.aircraft ? "・" + esc(f.aircraft) : ""}</span>
-      <span class="rel">${boardRel(f.t, now)}</span><span class="tm">${k} ${hmS(t)}${late >= 15 && k !== "定刻" ? `<em>${late}分遅れ</em>` : ""}</span></li>`; }).join("");
+      <span class="rel">${boardRel(f.t, now)}</span><span class="tm">${k} ${hmS(t)}${late >= 15 && k !== "定刻" ? `<em>${late}分遅れ</em>` : ""}</span>${woRowTag(f, now)}</li>`; }).join("");
   const hrs = d.hours || [], nowH = new Date(now).getHours();
   const late = hrs.reduce((x, h) => x + Number(h.late || 0), 0), cancel = hrs.reduce((x, h) => x + Number(h.cancel || 0), 0);
   const ys = hrs.map(h => Number(h.late || 0) + Number(h.cancel || 0)), refs = hrs.map(h => Number(h.ref || 0));
@@ -10541,7 +10711,8 @@ function boardHTML(d, fg){
   return `<div class="bdhead"><h3>${arr ? "これから着く便" : "これから出る便"}</h3><div class="bdtabs" role="group" aria-label="到着と出発">
       <button data-board-dir="arr" aria-pressed="${arr}">到着</button><button data-board-dir="dep" aria-pressed="${!arr}">出発</button></div></div>
     <div class="bdtabs bdkind" role="group" aria-label="国内線と国際線">${[["all", "すべて"], ["dom", "国内線"], ["intl", "国際線"]].map(([k, l]) => `<button data-board-kind="${k}" aria-pressed="${BOARD_KIND === k}">${l}</button>`).join("")}</div>
-    ${items ? `<ol class="bdseq">${items}</ol>` : `<p class="hint">この3時間に${arr ? "着く" : "出る"} JAL・ANA の時刻表の${BOARD_KIND === "intl" ? "国際線の" : BOARD_KIND === "dom" ? "国内線の" : ""}便はありません。</p>`}
+    ${items ? `<ol class="bdseq">${items}</ol>${items.includes('class="wobtn"') ? `<p class="wokey"><i class="wopin" aria-hidden="true"></i>ピンの札は、行き先の空港全体のようすです（この便のことではありません）。押すとくわしく出ます。</p>` : ""}` : `<p class="hint">この3時間に${arr ? "着く" : "出る"} JAL・ANA の時刻表の${BOARD_KIND === "intl" ? "国際線の" : BOARD_KIND === "dom" ? "国内線の" : ""}便はありません。</p>`}
+    ${worldOpsHTML(d)}
     ${foreignHTML(fg, arr)}
     <div class="bdhead"><h3>今日の遅れ・欠航</h3><span class="bdsum">遅れ <b>${late}</b>便・欠航 <b>${cancel}</b>便</span></div>
     <svg class="bdchart" viewBox="0 0 ${W} ${H + 14}" role="img" aria-label="今日の1時間ごとの遅れと欠航の便の数。遅れ${late}便、欠航${cancel}便">
@@ -10553,7 +10724,8 @@ function boardHTML(d, fg){
 async function renderBoard(){
   const iata = OPS_AP, box = $("opsBoard"); if(!box) return;
   // 海外の便は案内板の見方のときだけ読む（1日の山・短冊・撮る人は JAL・ANA の時刻表だけを使う）
-  const [d, fg] = await Promise.all([loadBoard(iata), opsNeed("foreign") ? loadForeign(iata) : FOREIGN_AP === iata ? FOREIGN : null]); if(OPS_AP !== iata) return;
+  // 海外の空港の止まり具合は、国際線を出すとき（すべて・国際線）だけ読む
+  const [d, fg] = await Promise.all([loadBoard(iata), opsNeed("foreign") ? loadForeign(iata) : FOREIGN_AP === iata ? FOREIGN : null, opsNeed("foreign") && BOARD_KIND !== "dom" ? loadWorldOps() : null]); if(OPS_AP !== iata) return;
   if(!d){ box.hidden = true; box.innerHTML = ""; return; }
   box.hidden = false; box.innerHTML = boardHTML(d, fg); renderOpsDerived(d);
 }
