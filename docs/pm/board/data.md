@@ -7,6 +7,7 @@
   - 本人待ち：「反映して」（移行がないので rebase 不要、関数の公開だけ）
   - この回は定期の回（PM の指示なし・日曜）として呼ばれたが、PM が 11/15 19時25分に積んだ指示があったので、そちらをした
   - 2回目の回（11/15、PM が同じ指示を手で呼んだ）：PR #100（18fd97a）で済みだったので、PR #100 のコメント・CI（どちらもまだなし）と main（754bca5 のまま、rebase 不要）だけ見た。変えたものはなし
+  - **11/15 21時52分 PR #100 が main に入った（本人が下書きを外して入れた）**。次：反映の Actions（関数 alert-push の公開）が成功したかを次の回で見る。移行なし
 - 海外の空港の止まり具合を作る（11/15 0時10分 PM の指示・本人「OK」：案1・2）：ブランチ data/world-ops → main 向けの下書き PR #93（見張りを始めた）。報告 docs/pm/report-world-ops.md（そのブランチ）
   - **11/15 14時59分 PR #93 が main に入った（反映の PR #97 → 754bca5、移行169。仕上げ a33a975 も一緒）。反映の Actions（run 213＝43683425961）はすべて成功（テスト・移行169の適用・関数の公開・アプリ。15時0分〜15時25分）。本番に入った**。次：明日、cron.job_run_details（world-status）と関数の返す rows・started・ms を本人に見てもらう
   - 移行 169 world_ops：表 world_airport_status（RLS 誰でも select・書くのは service_role。続いているものは空港・種類ごとに1行、なくなったら ended_at、3日で掃除）・world_status_put／world_status_rows（service_role）・world_status_now（10分より古い・終わったものは出さない）・world_flight_counts（JAL・ANA の国際線を海外の空港ごとに便・欠航・30分以上の遅れ）・world_airport_ops（画面用、note に出典の文）・alert_push_log に world と rank 0・alert_push_claim に「止まり具合がはじめて分かった・変わったら送り直す」。cron world-status（2分・10s）・world-status-cleanup（30s）。先頭に lock_timeout 10s。影響はチェックイン（運用・通知）、経営なし
@@ -191,7 +192,7 @@
 - SQL のテストは全部で約35分かかる（手元で流すときは裏で流してログを見る。t92 だけで約4分。同じログに2回流すと混ざるので、ログの名前を分ける）
 
 ## 次にやること
-00000000000000. 門限の幅10分（PR #100）：CI の deno test が落ちたら直す。「反映して」が出たら main に入れて関数を公開（移行なし）
+00000000000000. 門限の幅10分（PR #100、11/15 main に入った）：反映の Actions が成功したか見る。落ちていたら直す
 0000000000000. 海外の止まり具合を作る（PR #93）：本人が FAA の XML を貼ったら faa_nas_test に本物の形を足して読み方を直し、本物の reason で world_reason_ja の表に言葉を足す。world-destinations.sql の結果で US_SERVED を直す。「反映して」が出たら番号を確かめ（main に別の移行が先なら rebase）、次の日に cron.job_run_details（world-status）と関数の返す ms・rows・started を見てもらう。CI とレビューに答える
 000000000000. 海外の止まり具合の元（PR #92）：仁川・台湾の鍵が来たら活用ガイドの状態の値を読んでから、案3（便の一覧を数える）を作る。ヨーロッパは本人が決めたら EUROCONTROL への問い合わせ文
 00000000000. 遅れの通知（PR #88、11/14 の決定も入れ済み）：月曜に本人が流す alert-dup-check.sql の結果で①〜④のどれが多いかを見て、まとめ方を確かめる（③④が0でも害はない）。CI の deno test が落ちたら直す（手元は代わりの道具で流した）。「反映して」が出たら番号を確かめ、次の日に cron.job_run_details（odpt-status-fast・odpt-status・flight-watch）を見てもらい、毎分の回が詰まっていないか・ODPT の問い合わせ数を見る。チェックインの sw.js（renotify）が入ったか確かめる
