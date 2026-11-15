@@ -65,7 +65,21 @@ check('画面の関数：出典の文・止まり具合と便の数をまとめ�
   && Array.isArray(ops.airports) && ops.airports.some((a) => a.iata === 'SFO' && a.faa.length === 1 && a.faa[0].avg_delay === 63 && a.flights === 0), ops);
 const lax = one.airports;
 check('画面の関数：空港を絞れる・LAX は地上待機と便の数（今日の日付でないので0）', lax.length === 1 && lax[0].iata === 'LAX' && lax[0].faa[0].kind === 'ground_stop'
-  && JSON.stringify(Object.keys(lax[0]).sort()) === '["cancelled","faa","flights","iata","late30"]', lax);
+  && JSON.stringify(Object.keys(lax[0]).sort()) === '["cancelled","faa","feed_at","flights","iata","late30","note"]', lax);
+// 11/15 PM の指示：feed_at・空港ごとの出典の文・札の言葉・わけの日本語
+const jfk = ops.airports.find((a) => a.iata === 'JFK');
+const sfoA = ops.airports.find((a) => a.iata === 'SFO');
+check('feed_at：全体と FAA がある空港に FAA の発表の時刻・便の数だけの空港は null', ops.feed_at && sfoA.feed_at && lax[0].feed_at && jfk && jfk.feed_at === null, { f: ops.feed_at, s: sfoA.feed_at, jfk });
+check('出典の文：FAA がある空港は FAA の文・便の数だけの空港は FAA と書かない', /FAA NAS Status/.test(sfoA.note) && !/FAA/.test(jfk.note)
+  && /この便のことではありません/.test(jfk.note) && /運航の判断には使えません/.test(jfk.note) && ops.notes.faa === sfoA.note && ops.notes.count === jfk.note && ops.note === ops.notes.faa, { s: sfoA.note, j: jfk.note });
+check('札の言葉：gdp は「到着の間引き中」・地上待機は「地上待機中」', sfoA.faa[0].label === '到着の間引き中' && lax[0].faa[0].label === '地上待機中', [sfoA.faa[0], lax[0].faa[0]]);
+check('わけ：原文と日本語の両方を返す', sfoA.faa[0].reason === 'low ceilings' && sfoA.faa[0].reason_ja === '低い雲' && lax[0].faa[0].reason_ja === '設備', [sfoA.faa[0], lax[0].faa[0]]);
+const ja = async (x) => (await rows(`select public.world_reason_ja($1) r`, [x]))[0].r;
+const cases = [['WEATHER / LOW CEILINGS', '天候（低い雲）'], ['WX:Thunderstorms', '天候（雷雨）'], ['VOLUME / VOLUME', '混雑'], ['equipment / outage', '設備（故障）'],
+  ['RWY-TAXI / CONSTRUCTION', '滑走路・誘導路（工事）'], ['due to WEATHER / SNOW-ICE', '天候（雪・氷）'], ['TM Initiatives:MIT:VOL', '交通流の調整（間隔の確保・混雑）'],
+  ['!LAX 11/123 LAX AD AP CLSD', '!LAX 11/123 LAX AD AP CLSD'], ['WEATHER / VOLCANO', 'WEATHER / VOLCANO'], [null, null], ['  ', null]];
+const got = []; for (const [a] of cases) got.push(await ja(a));
+check('わけの日本語：区切った言葉をすべて引けたときだけ訳す・知らない言葉があれば原文・空は null', JSON.stringify(got) === JSON.stringify(cases.map((c) => c[1])), got);
 
 // 通知の記録：止まり具合
 await db.exec(`insert into public.push_subs (endpoint, p256dh, auth, airports, flights) values ('https://push.example/w', 'k', 'a', '{}', '{JL62@2026-11-15}')`);
@@ -104,8 +118,9 @@ for (const role of ['anon', 'authenticated']) {
 check('止まり具合の表は誰でも読めるが、書けるのは service_role だけ', denied === 12, denied);
 const rls = (await rows(`select relrowsecurity r from pg_class where relname = 'world_airport_status'`))[0].r;
 const sr = (await rows(`select has_function_privilege('service_role', 'public.world_status_put(text, timestamptz, jsonb)', 'execute') a,
-  has_function_privilege('anon', 'public.world_flight_counts(date)', 'execute') b, has_function_privilege('anon', 'public.world_status_now(text[])', 'execute') c`))[0];
-check('RLS は有効・service_role が取り込み・anon は数える関数と今の止まり具合を使える', rls && sr.a && sr.b && sr.c, { rls, sr });
+  has_function_privilege('anon', 'public.world_flight_counts(date)', 'execute') b, has_function_privilege('anon', 'public.world_status_now(text[])', 'execute') c,
+  has_function_privilege('anon', 'public.world_reason_ja(text)', 'execute') d`))[0];
+check('RLS は有効・service_role が取り込み・anon は数える関数と今の止まり具合を使える', rls && sr.a && sr.b && sr.c && sr.d, { rls, sr });
 const mig = fs.readFileSync(dir + files.find((f) => f.endsWith('_world_ops.sql')), 'utf8');
 check('移行の先頭に lock_timeout・取り込みと掃除の仕事に statement_timeout・一時の表を使わない',
   /^set lock_timeout/m.test(mig) && /'world-status'[\s\S]*statement_timeout = '10s'/.test(mig) && /'world-status-cleanup'[\s\S]*statement_timeout = '30s'/.test(mig) && !/temp table/i.test(mig));

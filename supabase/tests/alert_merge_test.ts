@@ -137,10 +137,10 @@ Deno.test("止まり具合：出発した便には出発地の止まり具合を
   assertEquals(worldLine(W[0], [{ iata: "LAX", kind: "delay_arr" }, { iata: "LAX", kind: "deicing" }], nm), null);
 });
 
-Deno.test("止まり具合：同じ空港に2つあれば重い方（閉鎖 → 地上待機 → 出発の間引き）", () => {
+Deno.test("止まり具合：同じ空港に2つあれば重い方（閉鎖 → 地上待機 → 到着の間引き）", () => {
   const w = worldLine(W[0], [{ iata: "LAX", kind: "gdp", avg_delay: 50 }, { iata: "LAX", kind: "closure", ends: null }], nm);
   assertEquals(w, { key: "arr:LAX:closure", text: "到着地ロサンゼルスの空港が閉鎖中（FAA）" });
-  assertEquals(worldLine(W[0], [{ iata: "LAX", kind: "gdp", avg_delay: 50 }], nm)?.text, "到着地ロサンゼルスで出発の間引き中（FAA・平均50分の遅れ）");
+  assertEquals(worldLine(W[0], [{ iata: "LAX", kind: "gdp", avg_delay: 50 }], nm)?.text, "到着地ロサンゼルスで到着の間引き中（FAA・平均50分の遅れ）");
 });
 
 Deno.test("止まり具合：遅れの通知に1行足す（同じ通知・同じ tag）", () => {

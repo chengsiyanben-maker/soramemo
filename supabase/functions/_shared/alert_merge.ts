@@ -6,7 +6,7 @@
 //     （11/13 本人「通知がくるのは主要空港がいいな、門限ギリギリになりそうな便とか0時に着くような便とか」）。
 //     欠航・ダイバート・引き返しは、主要でない空港を選んだ人にも届ける（11/14 本人「すべてOK」）
 //   ・送ってよいか（はじめて・重くなった・運航情報がはじめて届いた・遅れが30分以上ふえた）は、データベースの alert_push_claim が決める（下の shouldSend は同じ決まりの写し）
-//   ・着く空港か出る空港（アメリカ）が地上待機・閉鎖・出発の間引きなら、同じ通知に1行足す（FAA NAS Status。11/15 本人「OK」）。
+//   ・着く空港か出る空港（アメリカ）が地上待機・閉鎖・到着の間引きなら、同じ通知に1行足す（FAA NAS Status。11/15 本人「OK」）。
 //     はじめて分かったときは同じ通知を上書きして知らせる。お知らせのない便は「この便に乗る」の人にだけ、止まり具合だけの通知（rank 0）を同じ tag で出す
 export type MergeSched = { id: number; flight: string; svc_date: string; dep: string; arr: string; std: string | number; sta?: string | number | null };
 export type MergeAlert = { schedule_id: number; kind: string; message: string; iata: string[]; late?: number | null; official?: boolean | null };
@@ -146,7 +146,7 @@ function worldText(role: "arr" | "dep", name: string, s: WorldStatus): string {
   const where = `${role === "arr" ? "到着地" : "出発地"}${name}`;
   if (s.kind === "closure") return `${where}の空港が閉鎖中（FAA${s.ends ? `・${hm(Date.parse(s.ends))}再開見込み` : ""}）`;
   if (s.kind === "ground_stop") return `${where}で地上待機中（FAA${until(s.ends)}）`;
-  return `${where}で出発の間引き中（FAA${s.avg_delay ? `・平均${s.avg_delay}分の遅れ` : ""}${until(s.ends)}）`;
+  return `${where}で到着の間引き中（FAA${s.avg_delay ? `・平均${s.avg_delay}分の遅れ` : ""}${until(s.ends)}）`;
 }
 // この便に足す止まり具合（なければ null）。着く空港はまだ着いていない便、出る空港はまだ出ていない便だけ
 export function worldLine(s: WorldSched, statuses: WorldStatus[], names: (i: string) => string = (i) => i): { key: string; text: string } | null {

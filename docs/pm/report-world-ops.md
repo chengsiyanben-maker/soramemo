@@ -5,18 +5,18 @@ PM の指示：11/15 0時10分（本人「OK」：report-world-ops-sources の�
 
 ## 1. 作ったもの
 - **移行 169 world_ops**（20261115000169_world_ops.sql。先頭に lock_timeout 10s）
-  - 表 **world_airport_status**（iata・source 'faa'・kind［ground_stop 地上待機・gdp 出発の間引き・closure 閉鎖・delay_arr／delay_dep 15分以上の遅れ・deicing 除氷］・reason・starts・ends・avg_delay・max_delay・trend・first_seen・feed_at（FAA の Update_Time）・fetched_at・ended_at）。続いているものは空港・種類ごとに1行（部分の一意の索引）。**RLS 有効・誰でも select、書くのは service_role だけ**
+  - 表 **world_airport_status**（iata・source 'faa'・kind［ground_stop 地上待機・gdp 到着の間引き・closure 閉鎖・delay_arr／delay_dep 15分以上の遅れ・deicing 除氷］・reason・starts・ends・avg_delay・max_delay・trend・first_seen・feed_at（FAA の Update_Time）・fetched_at・ended_at）。続いているものは空港・種類ごとに1行（部分の一意の索引）。**RLS 有効・誰でも select、書くのは service_role だけ**
   - world_status_put（取り込み1回分：続きは書き直し・なくなったものは消さずに ended_at・新しく始まったものを返す。一時の表は使わない）／world_status_rows（中で使う）：service_role だけ
   - **world_status_now(p_iata)**：いま出してよいもの（終わっていない・Update_Time も取った時刻も10分以内）。取れない・古いときは何も出ない
   - **world_flight_counts(p_date)**：今ある JAL・ANA の国際線（flight_schedule）を、海外の空港（日本の空港の表にない記号）ごとに「便・欠航・30分以上の遅れ」に数える。共同運航（同じ出発・到着・定刻）は1便、欠航は遅れに数えない。anon・authenticated に実行だけ
-  - **world_airport_ops(p_iata)**：画面で使う。`{ source, note, airports: [{ iata, faa: [{kind, reason, starts, ends, avg_delay, max_delay, trend, since}], flights, cancelled, late30 }] }`。note に「出典：FAA NAS Status。運航の判断には使えません。遅れることがあります。便の数は JAL・ANA の運航情報（ODPT）から数えたものです」。止まっている空港が先
+  - **world_airport_ops(p_iata)**：画面で使う。返す形は下の 6（11/15 の仕上げで feed_at・label・reason_ja・空港ごとの note を足した）。止まっている空港が先
   - 通知の記録 alert_push_log に world 列と rank 0（止まり具合だけ）を足し、alert_push_claim に「止まり具合がはじめて分かった・変わったら送り直す」を足した（止まり具合だけの通知で遅れの通知は上書きしない）。RLS は今のまま（関数だけ）
   - pg_cron：world-status（2分ごと・statement_timeout 10s）・world-status-cleanup（毎日 4時35分 日本時間・30s。終わって3日・3日取れていない行を消す。航路・機体の記録ではない）
-- **関数 world-status**（supabase/functions/world-status、config.toml に追加）：FAA の XML を1回読み、就航先だけ残して world_status_put。古い（10分より前）・取れないときは書かない。地上待機・閉鎖・出発の間引きが新しく始まった空港は、その空港を出る・着く、まだ着いていない便（定刻が14時間前〜12時間後）について notifyFlights を呼ぶ
+- **関数 world-status**（supabase/functions/world-status、config.toml に追加）：FAA の XML を1回読み、就航先だけ残して world_status_put。古い（10分より前）・取れないときは書かない。地上待機・閉鎖・到着の間引きが新しく始まった空港は、その空港を出る・着く、まだ着いていない便（定刻が14時間前〜12時間後）について notifyFlights を呼ぶ
 - **_shared/faa_nas.ts**：XML の読み方（<ARPT> を含むかたまりを広く拾う）・時刻（Update_Time・「6:30 pm PST」・「Nov 15 at 06:00 UTC」）・就航先の一覧 US_SERVED（24空港・日本語の名前つき）
 - **乗る便の通知（alert_merge.ts・alert_push.ts）**：1つの便の1つの通知に1行足す（新しい通知は増やさない・tag は同じ fw-便名@運航日@出発空港）
   - 例：「出発が約40分遅れる見込み\n到着地ロサンゼルスで地上待機中（FAA・15時30分まで見込み）」
-  - 着く空港はまだ着いていない便、出る空港はまだ出ていない便だけ。同じ空港に2つあれば 閉鎖 → 地上待機 → 出発の間引き。15分以上の遅れ・除氷は画面だけ（通知には足さない）
+  - 着く空港はまだ着いていない便、出る空港はまだ出ていない便だけ。同じ空港に2つあれば 閉鎖 → 地上待機 → 到着の間引き。15分以上の遅れ・除氷は画面だけ（通知には足さない）
   - 遅れのお知らせのない便は、「この便に乗る」の人にだけ、止まり具合だけの通知（rank 0。例「JL62 成田→ロサンゼルス：到着地ロサンゼルスで地上待機中（FAA・…）」）。空港ごとの通知の人には出さない
   - 乗る便は、15分未満の遅れでも止まり具合があれば届く
 - 影響：**チェックイン（運用タブ・乗る便の通知）**。経営は使わない（表も関数も読まない）
@@ -41,3 +41,32 @@ PM の指示：11/15 0時10分（本人「OK」：report-world-ops-sources の�
 ## 5. ほかの担当への依頼
 - デザイン担当へ：運用タブの海外の便の札・空港のお知らせの画面案。中身は world_airport_ops の返す形（上の 1）。出典の文（note）を必ず出す・「予想」でなく「FAA の発表」なので「保証しない」の書き方は運用予想とは別
 - チェックイン担当へ：画面案のあと、rpc('world_airport_ops', { p_iata }) を呼ぶ。止まっていない空港も便の数で返るので、出すのは faa が空でないか cancelled・late30 が1以上の空港だけ、の案。乗る便の通知の本文に改行（\n）が入るようになる（sw.js はそのまま表示でよいはず。確かめてほしい）
+
+## 6. 11/15 の仕上げ（PM の指示 11/15 12時40分・本人「A」：決定事項【11/15】見せ方は案A）
+同じブランチ data/world-ops（PR #93）・同じ移行 169 に足した（まだ本番に入っていないので、番号は変えずに中身を直した）。
+
+返す形（world_airport_ops）：
+```
+{ source: "FAA NAS Status",
+  feed_at,                  // FAA の発表の時刻（いま出せる止まり具合の中でいちばん新しいもの。1つもなければ null）
+  note,                     // 前からの形（FAA がある空港用の文と同じ）
+  notes: { faa, count },    // 出典の文 2種類
+  airports: [{ iata,
+    note,                   // この空港に出す出典の文（FAA があれば notes.faa、便の数だけなら notes.count）
+    feed_at,                // この空港の FAA の発表の時刻（FAA がなければ null）
+    faa: [{ kind, label, reason, reason_ja, starts, ends, avg_delay, max_delay, trend, since }],
+    flights, cancelled, late30 }] }
+```
+- ① **feed_at**：全体と空港ごとに足した（W1 の「○時○分 更新」・W2 の発表の時刻）
+- ② **出典の文を2つに分けた**
+  - FAA がある空港：「出典：FAA NAS Status。運航の判断には使えません。遅れることがあります。便の数は JAL・ANA の運航情報（ODPT）から数えたものです」
+  - 便の数だけの空港（仁川など）：「出典：JAL・ANA の運航情報（ODPT）から数えたものです。空港全体の数で、この便のことではありません。運航の判断には使えません」（FAA の字は出ない）
+- ③ **FAA の reason の日本語**：関数 world_reason_ja(text)（anon・authenticated に実行だけ）。「/」「:」で区切った言葉を表で引き、1つ目を見出し・残りを（ ）に（WEATHER / LOW CEILINGS → 天候（低い雲）、WX:Thunderstorms → 天候（雷雨）、VOLUME / VOLUME → 混雑、EQUIPMENT / OUTAGE → 設備（故障）、RWY-TAXI / CONSTRUCTION → 滑走路・誘導路（工事））。**1つでも知らない言葉があれば原文のまま**（閉鎖の NOTAM の文など）。画面は reason_ja を出し、原文 reason を小さく添える形（W2）に使える。表は約60語（天候・雲・視界・霧・雷雨・風・雪・氷・混雑・設備・故障・滑走路・誘導路・工事・管制官の不足・要人の移動・交通流の調整 など）
+- ④ **gdp の言葉は「到着の間引き中」**：返す label と、乗る便の通知の文（「到着地サンフランシスコで到着の間引き中（FAA・平均50分の遅れ）」）をそろえた。コメントと報告の言葉もそろえた
+- label：閉鎖中・地上待機中・到着の間引き中・到着の遅れ・出発の遅れ・除氷中（W5 の言葉と同じ）
+- 表は変えていない（関数だけ）ので RLS の変更なし。影響はチェックイン（運用タブ・乗る便の通知）、経営なし
+
+確かめた結果：t108 は 28項目（feed_at・出典の文2つ・label・reason_ja・訳の11例・権限を足した）すべて通過。t107（30）通過。deno test 255本すべて通過（alert_merge_test の「到着の間引き中」も）
+
+本人に決めてほしいこと（足し）：
+5. 日本語の表に足したい言葉があれば（FAA の XML を貼ってもらえれば、本物の reason から足す）
