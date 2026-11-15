@@ -1,6 +1,13 @@
 # チェックイン担当の帳面
 
 ## いま持っている仕事
+- 海外の空港の止まり具合の画面（11/15 12時40分の PM の指示・本人「A」）：済み。ブランチ checkin/world-ops（main 5a22d8e＋data/world-ops 664e5dd）・下書き PR #96（9f601cc・見張り中）、報告 docs/pm/report-world-ops-app.md、写真 docs/pm/shots-world-ops/
+  - 案内板の国際線の便にピンの札（FAA のいちばん重いもの1つ・出発前／到着前だけ・便の数の札は列に出さない）＋ピンの説明の1行。海外の航空会社の上に「行き先の海外の空港のいま」の欄（案内板の便の行き先・出発地のうち FAA があるか欠航・30分以上の遅れがある空港だけ・断り書きは太字・note）。押すとくわしく（#dWorldAp）。乗る便のカード（国際線）に1行（FAA・便の数）と出典の断り
+  - 読むのは rpc('world_airport_ops', { p_iata:null }) を1回。案内板の見方で国内線以外・乗る便が国際線のときだけ。2分（見方を変えたときは3分）は取れなかったときも読み直さない
+  - データ担当がまだ足していない feed_at・note_faa／note_counts（または空港ごとの note）・reason_ja は、届けばそのまま使う形（名前が違えば合わせる）
+  - 関数：足した loadWorldOps・woAp・woFaa・woShow・woHM・woLocal・woFeedAt・woNote・woTag・woCountTag・woSub・woRowTag・worldOpsHTML・worldApSheet・worldRideHTML（WO_KIND・WO_ORDER・WO_TREND・WOPS）／変えた boardHTML・renderBoard・renderRideIntl。dialog#dWorldAp と CSS（.wotag・.wopin・#v-ops .wobox ほか・.ridecard .woline・dialog.wodlg）
+  - テスト：t133（新・41項目）成功。t130・t60・t128・t132 成功。全体 92/102（t19・t27・t34・t37・t47 は流し直して成功、t17 は揺れ、t62 は main でも落ちる、残りは前からの t105・t99・t48）
+  - 本人に決めてほしいこと：欄を案内板の便の行き先だけに絞った形でよいか／乗る便の1行を押すとくわしくが開く形
 - 遅れの通知の受け取り（11/13 21時20分の PM の指示・データ担当 data/alert-merge の依頼）：済み。ブランチ checkin/push-renotify（main 4fb2f42 から）・下書き PR #90（016bba9・bcbb90a）、報告 docs/pm/report-push-renotify.md
   - src/sw.js の push の受け取りで showNotification に `renotify: !!(d.tag && d.renotify)` を渡す（tag がないときは立てない）。web/sw.js を組み立て直した（1行だけ）。画面と src/index.html は変えていない（変えた関数なし）
   - テスト：t132 を足した（sw.js を node の vm で読み push を5件送る・9項目成功）。t128・t60 成功。全体 93/101（t123・t17・t47・t62・t19 は流し直して成功、残りは前からの t105・t99・t48）
@@ -196,6 +203,8 @@
 - 確認コードは6けた。メールは Gmail、Supabase の送信上限は1時間100通
 
 ## 次にやること
+- PR #96（海外の止まり具合の画面）：データ担当が feed_at・note の分け方・reason の日本語を data/world-ops に足したら取り込み、返す名前を合わせて t133 に足す。反映は #93 と一緒（本人の「反映して」待ち）。入る前に t133・t130・t60 を流す。夜の画面の案が出たら札の色を合わせる。改善担当の見直しが来たら直す
+- PR #90 が本番に出たか（Actions）はまだ確かめていない。次の回で見る
 - PR #90（通知の renotify）：11/14 に main に入った。本番の配る版が Actions で出たか次の回で確かめる。（前の書き付け）data/alert-merge と一緒に本人の「反映して」を待つ。先にこちらだけ入っても動きは今までと同じ。通知の説明の文を画面に出すかは、デザイン担当の画面案と本人の答えが出てから
 - 手元で build するときは tools で npm ci、python に brotli と fonttools が要る（11/13 の回で入れた）
 - PR #84（全体の見回りの直し）：main に入った（PR #87・4fb2f42）。本番の配る版が Actions で出たか、次の回で確かめる。改善担当の見直しが来たら main から新しいブランチで直す。（前の書き付け）本人の「反映して」と改善担当の見直しを待つ。運用予想の PR #83 と一緒に入れるときは、あとから入る方で web/ を作り直す（node tools/build.mjs）。入る前に t128・t60・t127・t126 を流す。見回りの残りで運用予想の持ち場（#5・#6・#8・#10・運用の通信の数）は運用予想の担当、夜の CSS（#12）は夜の画面の土台のとき。maplibre の読み込みをさらに遅らせる・980KB の script を分けるのは次の候補（PM の判断待ち）
@@ -237,6 +246,9 @@
 - tests/ops は手元では npm の playwright にブラウザがないので、全体に入っている playwright をつないで流した（すべて成功）
 
 ## ほかの担当への依頼
+- データ担当（11/15・PR #96）：world_airport_ops に feed_at・note の分け方・reason の日本語を足したら、返す名前を checkin.md に書いてほしい。アプリは feed_at（発表ごと・空港・全体のどれでも）・note_faa／note_counts（または空港ごとの note）・reason_ja を読む形
+- デザイン担当（11/15）：海外の止まり具合は W1〜W5 どおりに作った（写真 docs/pm/shots-world-ops/）。札は今の案内板に合わせて 12px。夜の案が出たら合わせる
+- 改善担当（11/15）：PR #96 の写真 shots-world-ops/（t133_board・t133_board_667・t133_sheet_lax／icn・t133_ride_faa／cnt）と iPhone の幅で、札の押せる範囲と欄を見てほしい
 - データ担当（11/13 夜）：data/alert-merge の依頼の renotify は PR #90 で入れた（`renotify: !!(d.tag && d.renotify)`）。反映は一緒に
 - 運用予想の担当（11/13）：見回り #3（帯が送られて開く）は土台の setViewsw で直した（PR #84）。選んだ見方が帯の中に見えていれば左端から、外のときだけ送る。#5・#6・#8・#10 と運用の通信の数・重複（遅い上位 1〜9）はそちらの持ち場のまま
 - 改善担当（11/13）：PR #84 の写真 shots-fix-sweep-1113/（01 図鑑のデモ 844／667・02 ホーム 667・04 フライトの地図・05 ログイン 667・07 運用の帯）と、iPhone で押せる範囲を見てほしい
@@ -484,7 +496,7 @@ review-c4：見せてよい。本人の答え（ON／OFF か −／＋ か）を
 ## PM から積んだ次の仕事（11/13 21時20分、遅れの通知の受け取り）→ PR #90 で入れた（016bba9・報告 report-push-renotify.md）
 データ担当の data/alert-merge（遅れの通知を1件にまとめる）の依頼。src/sw.js の push の受け取り（showNotification）で、届いた中身の renotify を渡す（`renotify: !!d.renotify`、tag があるときだけ）。同じ便の通知を上書きしたときにも鳴るようにするため。画面は変えない。ブランチ checkin/push-renotify、下書き PR。data/alert-merge と一緒に反映する
 
-## PM から積んだ次の仕事（11/15 12時40分、海外の空港の止まり具合の画面）
+## PM から積んだ次の仕事（11/15 12時40分、海外の空港の止まり具合の画面）→ PR #96 で作った（9f601cc・報告 report-world-ops-app.md）
 本人「A」（決定事項【11/15】）。画面案 design/world-ops の W1（案A）・W2・W3・W4・W4b・W5 と docs/pm/report-world-ops-design.md どおり。関数はデータ担当の data/world-ops（#93、world_airport_ops。feed_at・note の分け方・reason の日本語を今足してもらっている）を取り込んで使う。
 - 案内板（boardHTML の .bdseq の li）にピンの札（いちばん重いもの1つ、出発前・到着前の便だけ）。便の数の札は便の列にはつけない
 - foreignHTML の上に「行き先の海外の空港のいま」の欄（空港ごとに1行、押すと spsheet の形のくわしく。断り書きは欄の中に太字、note はすぐ下）
