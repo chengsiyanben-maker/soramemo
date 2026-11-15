@@ -4,7 +4,7 @@
 - 海外の空港の止まり具合の画面（11/15 12時40分の PM の指示・本人「A」）：済み。ブランチ checkin/world-ops（main 5a22d8e＋data/world-ops 664e5dd）・下書き PR #96（9f601cc・見張り中）、報告 docs/pm/report-world-ops-app.md、写真 docs/pm/shots-world-ops/
   - 案内板の国際線の便にピンの札（FAA のいちばん重いもの1つ・出発前／到着前だけ・便の数の札は列に出さない）＋ピンの説明の1行。海外の航空会社の上に「行き先の海外の空港のいま」の欄（案内板の便の行き先・出発地のうち FAA があるか欠航・30分以上の遅れがある空港だけ・断り書きは太字・note）。押すとくわしく（#dWorldAp）。乗る便のカード（国際線）に1行（FAA・便の数）と出典の断り
   - 読むのは rpc('world_airport_ops', { p_iata:null }) を1回。案内板の見方で国内線以外・乗る便が国際線のときだけ。2分（見方を変えたときは3分）は取れなかったときも読み直さない
-  - データ担当がまだ足していない feed_at・note_faa／note_counts（または空港ごとの note）・reason_ja は、届けばそのまま使う形（名前が違えば合わせる）
+  - データ担当の仕上げ（PR #93 の a33a975）の返す形に合わせた：札とくわしくは label、わけは reason_ja（下に原文）、出典は空港ごとの note、「○時○分 更新」は feed_at（足した関数 woLabel・t133 は44項目）
   - 関数：足した loadWorldOps・woAp・woFaa・woShow・woHM・woLocal・woFeedAt・woNote・woTag・woCountTag・woSub・woRowTag・worldOpsHTML・worldApSheet・worldRideHTML（WO_KIND・WO_ORDER・WO_TREND・WOPS）／変えた boardHTML・renderBoard・renderRideIntl。dialog#dWorldAp と CSS（.wotag・.wopin・#v-ops .wobox ほか・.ridecard .woline・dialog.wodlg）
   - テスト：t133（新・41項目）成功。t130・t60・t128・t132 成功。全体 92/102（t19・t27・t34・t37・t47 は流し直して成功、t17 は揺れ、t62 は main でも落ちる、残りは前からの t105・t99・t48）
   - 本人に決めてほしいこと：欄を案内板の便の行き先だけに絞った形でよいか／乗る便の1行を押すとくわしくが開く形
@@ -203,7 +203,7 @@
 - 確認コードは6けた。メールは Gmail、Supabase の送信上限は1時間100通
 
 ## 次にやること
-- PR #96（海外の止まり具合の画面）：データ担当が feed_at・note の分け方・reason の日本語を data/world-ops に足したら取り込み、返す名前を合わせて t133 に足す。反映は #93 と一緒（本人の「反映して」待ち）。入る前に t133・t130・t60 を流す。夜の画面の案が出たら札の色を合わせる。改善担当の見直しが来たら直す
+- PR #96（海外の止まり具合の画面）：data/world-ops の a33a975 まで取り込み済み。#93 にまた変更が来たら取り込み直す。反映は #93 と一緒（本人の「反映して」待ち）。入る前に t133・t130・t60 を流す。夜の画面の案が出たら札の色を合わせる。改善担当の見直しが来たら直す
 - PR #90 が本番に出たか（Actions）はまだ確かめていない。次の回で見る
 - PR #90（通知の renotify）：11/14 に main に入った。本番の配る版が Actions で出たか次の回で確かめる。（前の書き付け）data/alert-merge と一緒に本人の「反映して」を待つ。先にこちらだけ入っても動きは今までと同じ。通知の説明の文を画面に出すかは、デザイン担当の画面案と本人の答えが出てから
 - 手元で build するときは tools で npm ci、python に brotli と fonttools が要る（11/13 の回で入れた）
@@ -246,7 +246,7 @@
 - tests/ops は手元では npm の playwright にブラウザがないので、全体に入っている playwright をつないで流した（すべて成功）
 
 ## ほかの担当への依頼
-- データ担当（11/15・PR #96）：world_airport_ops に feed_at・note の分け方・reason の日本語を足したら、返す名前を checkin.md に書いてほしい。アプリは feed_at（発表ごと・空港・全体のどれでも）・note_faa／note_counts（または空港ごとの note）・reason_ja を読む形
+- データ担当（11/15・PR #96）：a33a975 の返す形（label・reason_ja・feed_at・空港ごとの note）に合わせた。依頼はなし
 - デザイン担当（11/15）：海外の止まり具合は W1〜W5 どおりに作った（写真 docs/pm/shots-world-ops/）。札は今の案内板に合わせて 12px。夜の案が出たら合わせる
 - 改善担当（11/15）：PR #96 の写真 shots-world-ops/（t133_board・t133_board_667・t133_sheet_lax／icn・t133_ride_faa／cnt）と iPhone の幅で、札の押せる範囲と欄を見てほしい
 - データ担当（11/13 夜）：data/alert-merge の依頼の renotify は PR #90 で入れた（`renotify: !!(d.tag && d.renotify)`）。反映は一緒に
