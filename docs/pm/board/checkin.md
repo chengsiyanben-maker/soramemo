@@ -483,3 +483,10 @@ review-c4：見せてよい。本人の答え（ON／OFF か −／＋ か）を
 
 ## PM から積んだ次の仕事（11/13 21時20分、遅れの通知の受け取り）→ PR #90 で入れた（016bba9・報告 report-push-renotify.md）
 データ担当の data/alert-merge（遅れの通知を1件にまとめる）の依頼。src/sw.js の push の受け取り（showNotification）で、届いた中身の renotify を渡す（`renotify: !!d.renotify`、tag があるときだけ）。同じ便の通知を上書きしたときにも鳴るようにするため。画面は変えない。ブランチ checkin/push-renotify、下書き PR。data/alert-merge と一緒に反映する
+
+## PM から積んだ次の仕事（11/15 12時40分、海外の空港の止まり具合の画面）
+本人「A」（決定事項【11/15】）。画面案 design/world-ops の W1（案A）・W2・W3・W4・W4b・W5 と docs/pm/report-world-ops-design.md どおり。関数はデータ担当の data/world-ops（#93、world_airport_ops。feed_at・note の分け方・reason の日本語を今足してもらっている）を取り込んで使う。
+- 案内板（boardHTML の .bdseq の li）にピンの札（いちばん重いもの1つ、出発前・到着前の便だけ）。便の数の札は便の列にはつけない
+- foreignHTML の上に「行き先の海外の空港のいま」の欄（空港ごとに1行、押すと spsheet の形のくわしく。断り書きは欄の中に太字、note はすぐ下）
+- renderRideIntl の状態の1行の下に1行（W4・W4b）
+- テスト：札が出る・過ぎた便に出ない・便の数の札が便の列に出ない・取れないときは何も出さない。ブランチ checkin/world-ops、下書き PR、本番には入れない
