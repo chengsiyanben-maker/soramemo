@@ -331,6 +331,7 @@
 - ロゴ・空港の公式キャラ・他人の写真は使わない。アプリのコードは変えない
 
 ## 次にやること
+- 済み（11/16 夜・2回目）：PM の再度の指示（同じ usual-late、#109 のデータに合わせる）。画面は PR #110 で済みなので描き直さず、main の移行171・182 と照らして報告に「5」を足した。合わないのは3つ：曜日（dow）と spread を foreign_late が返さない／飛んでいる間の eta・late は foreign_watch にあるが service_role だけで画面から読めず、通知を申し込んだ便だけ／門限の形が未定。データ担当への依頼を書き直した
 - 済み（11/16 夜）：PM の指示 11/16 14時（「いつもより○分遅い（推定）」の見せ方 1版、PR #110 の f2b31fc）。ops-split 2版は改善担当の review-2 がまだなので直していない
 - **次の回（PM の指示がなければ）**：改善担当が usual-late 1版（U1・U3 の札の見分け、U2b・U2c、U4）か ops-split 2版を見たら直す。本人の答えが出たら、チェックイン担当（renderRideIntl の見込みの欄と札・foreignHTML の行の札と題・spDetailHTML）に渡す形にまとめる。world-ops 1版・運用予想 2版の改善担当の指摘が来たらそれも直す
 - 済み（11/16）：再度の指示（手動の起動で同じ「運用タブを空港と機体に分ける 2版」）が来たが、PR #98 の 1acb113 で済みなので描き直していない。改善担当の確かめ（review-2）はまだなし
@@ -474,7 +475,7 @@
 - ブランチ design/night、改善担当に見てもらってから本人へ
 
 ## ほかの担当への依頼
-- データ担当へ（11/16 usual-late）：foreign_late に「いつもの時刻を数えた回数」「曜日ごとか曜日を問わないか」「ばらつきの幅（四分位）」を足せるか（U1・U4）。飛んでいる間の着く見込みとのずれも返せるか
+- データ担当へ（11/16 usual-late、report-usual-late.md の 5）：①乗る便のカード用に誰でも呼べる読むだけの関数（例 foreign_watch_get(便名, 日)：usual_arr・usual_n・eta・late・event・門限に近いか。誰が選んだかは返さない）、通知を申し込んでいない人の便も入れるか ②foreign_late に dow と spread を足せるか（回数 usual_n はもう返っている）
 - チェックイン担当へ（11/16 usual-late）：本人の答えのあと。今の renderRideIntl は時刻表にない便でも ODPT の出典を出しているので、adsb.lol の出典と断り書きに入れ替える
 - データ担当へ（11/15 world-ops・PR #94）：world_airport_ops に feed_at（FAA の発表の時刻）を足せるか（W1 の「更新」・W2 の発表の時刻）。world_airport_ops の note を「FAA がある空港用」と「便の数だけの空港用」に分けて返せるか（仁川でも「出典：FAA NAS Status」が出るため。W3）。FAA の reason（英語）の日本語の表がほしい（くわしくの「わけ」に使う）
 - チェックイン担当へ（11/15 world-ops・PR #94）：本人の答えのあと、案内板 boardHTML の .bdseq の li に札、foreignHTML の上に「行き先の海外の空港のいま」、renderRideIntl の状態の1行の下に1行。出す空港はデータ担当の案（faa が空でないか cancelled・late30 が1以上）
