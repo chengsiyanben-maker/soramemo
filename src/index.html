@@ -997,6 +997,60 @@ dialog.tpsheet .dlg{display:flex;flex-direction:column;overflow:hidden;padding-b
 .opsapbtn svg,.opsic svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
 .opsic{width:44px;height:44px;border:0;border-radius:50%;background:var(--op-card);color:var(--op-mute);display:flex;align-items:center;justify-content:center;box-shadow:var(--op-shadow);cursor:pointer}
 #v-ops #opsModes:empty{display:none}
+/* 運用タブの「空港｜機体」（11/16 design/ops-split 2版 A1・A2・A3・V1）。上は1行。はじめ（data-side が付く前）は空港の側 */
+.opsside{flex:none;display:flex;padding:3px;border-radius:999px;background:var(--op-card);box-shadow:var(--op-shadow)}
+.opsside[hidden]{display:none}
+#v-ops .opsbar{gap:6px}#v-ops[data-side="plane"]:not([data-plsel]) .opsbar .sp{display:none}
+.opsside button{min-height:40px;min-width:48px;padding:0 10px;border:0;border-radius:999px;background:none;color:var(--op-mute);font:800 15px/1 var(--gothic);cursor:pointer}
+.opsside button[aria-pressed="true"]{background:var(--sw-on-bg);color:var(--sw-on-ink);box-shadow:inset 0 0 0 1.5px var(--sw-on-ring)}
+#v-ops .opsbar .opsapbtn{min-width:0;gap:6px;padding:0 10px 0 8px}#v-ops .opsbar .opsapbtn b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.opsplq{flex:1;min-width:0;display:flex;align-items:center;gap:6px;min-height:44px;padding:0 14px;border-radius:999px;background:var(--op-card);box-shadow:var(--op-shadow);color:var(--op-mute)}
+.opsplq svg{flex:none;width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round}
+.opsplq input{flex:1;min-width:0;border:0;background:none;font:600 15px var(--gothic);color:var(--op-ink);padding:10px 0;outline:none}
+.opsplq input::placeholder{color:var(--op-mute)}.opsplq input::-webkit-search-cancel-button{display:none}
+.opsplq:focus-within{box-shadow:var(--op-shadow),0 0 0 2px var(--op-ink)}
+.opsplback{flex:none;display:flex;align-items:center;gap:2px;min-height:44px;padding:0 8px 0 4px;border:0;background:none;color:var(--op-ink);font:800 15px var(--gothic);cursor:pointer}
+.opsplback svg,.opsplreg svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+.opsplreg{flex:none;display:flex;align-items:center;gap:6px;min-height:44px;padding:0 10px 0 6px;border:0;border-radius:999px;background:var(--op-card);box-shadow:var(--op-shadow);color:var(--op-ink);cursor:pointer}
+.opsplreg b{font:700 14px/1 ui-monospace,"SFMono-Regular",Menlo,monospace;padding:6px 8px;border-radius:8px;background:var(--op-ink);color:var(--op-card)}
+.opsplreg[data-g="jal"] b{background:#B4232A;color:#fff}.opsplreg[data-g="ana"] b{background:#1C4FA0;color:#fff}.opsplreg[data-g="fda"] b{background:#0F6E8C;color:#fff}
+#v-ops .opsplq,#v-ops .opsplback,#v-ops .opsplreg{display:none}
+#v-ops[data-side="plane"] .opsplq{display:flex}#v-ops[data-side="plane"] #opsApBtn,#v-ops[data-side="plane"] #opsShare{display:none}
+#v-ops[data-plsel] .opsplq,#v-ops[data-plsel] #opsInfoBtn{display:none}#v-ops[data-plsel] .opsplback,#v-ops[data-plsel] .opsplreg,#v-ops[data-plsel] #opsShare{display:flex}
+#v-ops[data-plsel] #opsPViews [role="tab"]{box-shadow:none}
+.opsp{margin-top:2px}.opsp .msg:empty{display:none}
+.opspcard{margin:12px 0 0!important}
+.opspcard .opshead{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+#v-ops .opspcard .opshead span{background:none;padding:0;font-size:13px;font-weight:600;color:var(--op-mute)}
+.opsplist{list-style:none;margin:4px 0 0;padding:0}
+#v-ops .opsplist li{padding:0}
+.opsprow{width:100%;display:flex;align-items:center;gap:12px;min-height:72px;padding:10px 0;border:0;background:none;color:inherit;font:inherit;text-align:left;cursor:pointer}
+.opsprow .tx{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.opsprow .tx b{font-size:16px;font-weight:800;line-height:1.3}.opsprow .tx>small{font-size:13px;color:var(--op-mute)}
+.opsprow .chev,.opspgo .chev,.opspall .chev{flex:none;width:18px;height:18px;fill:none;stroke:var(--op-mute);stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.opspbadge{flex:none;display:grid;place-items:center;width:52px;height:52px;border-radius:14px;background:#4B5563;color:#fff;font:700 13px/1 ui-monospace,"SFMono-Regular",Menlo,monospace}
+.opspbadge[data-g="jal"]{background:#B4232A}.opspbadge[data-g="ana"]{background:#1C4FA0}.opspbadge[data-g="fda"]{background:#0F6E8C}
+.opspst{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:2px}.opspst small{font-size:13px;color:var(--op-mute)}
+.opspfly{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:999px;background:var(--r-now-wash,#E7F5EC);color:var(--r-now,#1F7A3A);font-size:13px;font-weight:800}
+.opspfly i{width:9px;height:9px;border-radius:50%;background:currentColor}
+.opspempty p{margin:6px 0 0;font-size:14px;line-height:1.7;color:var(--op-mute)}
+.opspent{display:flex!important;align-items:center;justify-content:space-between;gap:10px}
+.opspent span{display:flex;flex-direction:column;gap:2px}.opspent b{font-size:15px;font-weight:800}.opspent small{font-size:13px;color:var(--op-mute)}
+.opspgo,.opspall{flex:none;display:inline-flex;align-items:center;gap:4px;min-height:44px;padding:0 14px 0 18px;border:0;border-radius:999px;background:var(--op-pill);color:var(--op-ink);font:800 14px var(--gothic);cursor:pointer}
+.opspall{margin-top:8px}
+.opspnote{margin:14px 4px 0;font-size:13px;line-height:1.7;color:var(--op-mute)}
+#opsPlDay .spctop,#opsPlDay .plsearch,#opsPlDay .spcard,#opsPlDay .rsec{display:none}
+#opsPlDay .rtlw{margin-top:0}#opsPlDay .rtl{margin-top:6px}
+#v-ops #opsPlDay .rtlw .rtl li.edge{display:flex;align-items:center;gap:10px;padding:8px 0 6px;text-align:left}#opsPlDay .rtl li.edge::before{display:none}#opsPlDay .rtl li.edge small{margin:0;font-weight:700;color:var(--op-ink)}
+.opsplhd{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:2px 4px 0}
+.opsplhd span:first-child{min-width:0;display:flex;flex-direction:column;gap:1px}.opsplhd b{font-size:18px;font-weight:800;line-height:1.3;color:var(--op-ink)}.opsplhd small{font-size:13px;color:var(--op-mute)}
+.vsside{display:flex;margin:12px 0 2px;padding:3px;border-radius:999px;background:#ECEEF1}
+.vsside button{flex:1;display:flex;align-items:center;justify-content:center;gap:8px;min-height:44px;border:0;border-radius:999px;background:none;color:#4B5563;font:800 15px var(--gothic);cursor:pointer}
+.vsside button[aria-pressed="true"]{background:var(--sw-on-bg);color:var(--sw-on-ink);box-shadow:inset 0 0 0 1.5px var(--sw-on-ring)}
+.vshid{padding:3px 9px;border-radius:999px;background:#fff;color:#16233A;font-size:12.5px;font-weight:800}
+.vsnote{margin:12px 0 0;padding:12px 14px;border-radius:16px;background:#F3F4F6;font-size:13.5px;line-height:1.7;color:#374151}
+:root[data-night="on"] .vsside{background:rgba(220,227,234,.08)}:root[data-night="on"] .vsside button{color:#AEB9C6}
+:root[data-night="on"] .vshid{background:#DCE3EA;color:#0F1722}:root[data-night="on"] .vsnote{background:rgba(220,227,234,.08);color:#DCE3EA}
 .apsh{margin:2px 0 10px;font:800 18px var(--gothic)}
 .apsearch{display:flex;align-items:center;gap:8px;min-height:44px;padding:0 12px;border-radius:12px;background:var(--s-bg)}
 .apsearch svg{width:18px;height:18px;fill:none;stroke:var(--s-mute);stroke-width:2;stroke-linecap:round;flex:none}
@@ -3648,10 +3702,21 @@ div.viewsw>button{position:relative}div.viewsw>button::after{content:"";position
   <section class="view" id="v-sg" aria-label="修行"><div class="sgd sgtab"><div class="dlg" id="sgTabBody"></div></div></section>
   <section class="view" id="v-ops" aria-label="運用">
   <h2 id="opsTitle" class="srt">羽田の今の運用</h2>
-  <div class="opsbar"><button class="opsapbtn" id="opsApBtn" type="button" aria-haspopup="dialog" aria-label="運用を見る空港を選ぶ（いまは羽田）"><span class="c">HND</span><b>羽田</b><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button><span class="sp"></span>
+  <div class="opsbar"><div class="opsside" id="opsSide" role="group" aria-label="空港を見るか機体を見るか"><button type="button" data-ops-side="ap" aria-pressed="true">空港</button><button type="button" data-ops-side="plane" aria-pressed="false">機体</button></div><button class="opsapbtn" id="opsApBtn" type="button" aria-haspopup="dialog" aria-label="運用を見る空港を選ぶ（いまは羽田）"><span class="c">HND</span><b>羽田</b><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
+    <form class="opsplq" id="opsPlForm" role="search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4"/></svg><input id="opsPlQ" type="search" placeholder="登録記号・便名" aria-label="登録記号か便名で機体を探す" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="10" enterkeyhint="search"></form>
+    <button class="opsplback" id="opsPlBack" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>戻る</button><button class="opsplreg" id="opsPlReg" type="button" aria-label="別の機体を探す"><b></b><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button><span class="sp"></span>
     <button class="opsic" id="opsInfoBtn" type="button" aria-label="この画面について・出典"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><path d="M12 8h.01"/></svg></button><button class="opsic" id="opsShare" type="button" aria-label="共有"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15V3"/><path d="m7 8 5-5 5 5"/><path d="M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/></svg></button></div>
   <p class="msg" id="opsMsg" role="status" aria-live="polite"></p>
   <p class="srt" id="opsWx">気象通報を読み込んでいます…</p>
+  <div class="opsp" id="opsPside" hidden>
+    <div class="viewsw" id="opsPViews" role="tablist" aria-label="機体の見方"></div>
+    <p class="msg" id="opsPlMsg" role="status" aria-live="polite"></p>
+    <div id="opsPRecent"></div>
+    <div class="fwbox" id="opsPSpecial"></div>
+    <div id="opsPlDay"></div>
+    <p class="opspnote" id="opsPNote">機体の位置は <a href="https://adsb.lol" target="_blank" rel="noopener">adsb.lol</a>（ODbL）。予想は記録した便から作ったもので、<b>予想です。保証しません。</b></p>
+  </div>
+  <div class="opsaside" id="opsAside">
   <div class="viewsw" id="opsViews" role="tablist" aria-label="運用の見方"></div>
   <div class="opsmodes" id="opsModes" role="group" aria-label="運用の切り替え" data-ov="runway"></div>
   <div class="opsbox" id="opsInfo" data-ov="runway"></div>
@@ -3676,7 +3741,7 @@ div.viewsw>button{position:relative}div.viewsw>button::after{content:"";position
     <p class="opsstat" id="trafficNote" data-ov="runway"></p>
   </div>
   <div class="lo" data-lo="opsb:special">
-    <div class="fwbox" id="opsSpecial" hidden data-ov="runway photo"></div>
+    <div class="fwbox" id="opsSpecial" hidden data-ov="photo"></div>
   </div>
   <div class="lo" data-lo="opsb:spots">
     <div class="fwbox opsspots" id="opsSpots" hidden data-ov="runway photo"></div>
@@ -3693,6 +3758,7 @@ div.viewsw>button{position:relative}div.viewsw>button::after{content:"";position
     <p class="hint">機体の位置は <a href="https://adsb.lol" target="_blank" rel="noopener">adsb.lol</a>（有志の受信機による ADS-B のオープンデータ、ODbL）。少し遅れることがあり、受信できない機体は出ません。通ってきた線は最大20分ぶん（サーバーで30秒ごとに記録。新千歳・那覇は1分ごと）。</p>
     <p class="hint">公表されている運用のルール、気象通報（METAR）、今飛んでいる機体の位置をもとにした推定です。実際の運用は管制の指示で変わり、深夜早朝（23時〜6時）や悪天候のときは異なることがあります。航法には使えません。地図：国土地理院</p>
   </details>
+  </div>
   </section>
 </main>
 
@@ -5195,13 +5261,16 @@ const VIEWS = {
   book: [["region", "地方別"], ["map", "地図"], ["chron", "行った順"]],   // 11/9 の決定：タイル・地方・案内標は地方別に、年代記は行った順に（id は今のまま）
   log: [["diary", "日誌"], ["map", "地図"], ["year", "年のまとめ"]],   // 11/11 の決定（画面案 07）：搭乗券・案内板・文字だけ・カレンダー・路線→日誌、月ごと・高度→年のまとめ、修行→修行のタブ
   ops: [["board", "案内板"], ["day", "1日の山"], ["runway", "滑走路"], ["ontime", "定時"], ["art", "空の道すじ"], ["strip", "短冊"], ["photo", "撮る人"]],
+  // 11/16 の決定（design/ops-split 2版）：運用タブの「機体」の側の見方。空港の側は ops のまま
+  opsp: [["recent", "最近見た"], ["special", "特別塗装機"]],
 };
-const VIEW_DEF = { book:"region", log:"diary", ops:"runway" };
+const VIEW_DEF = { book:"region", log:"diary", ops:"runway", opsp:"recent" };
 // 見方の説明（鉛筆のシートと表示の編集の1枚で、全部の行に1行。OFF でも残す。画面案 design/view-settings の 2版）
 const VIEW_DESC = {
   book: { region:"9地方のツメと扉で並べる", map:"日本地図に印", chron:"行った日ごとに新しい順" },
   log: { diary:"1便1行・月の見出し", map:"何度も乗った区間ほど太い線", year:"便・路線・距離・空の上" },
-  ops: { board:"出発・到着の便を案内板の形で", day:"1時間ごとの便の数と遅れ", runway:"いまの運用と使う滑走路", ontime:"便の定時の割合", art:"全機の航跡を重ねる", strip:"次の離着陸を1便1枚で", photo:"撮る人向けの次に来る便の帯" },
+  ops: { board:"出発・到着の便を案内板の形で", day:"1時間ごとの便の数と遅れ", runway:"いまの運用と使う滑走路", ontime:"便の定時の割合", art:"全機の航跡を重ねる", strip:"次の離着陸を1便1枚で", photo:"撮影地と次に来る機体" },
+  opsp: { recent:"この端末で開いた機体", special:"いま飛んでいる・この先（予想）" },
 };
 const vwDesc = (k, id) => (VIEW_DESC[k] || {})[id] || "";
 /* ---------- 表示の編集：見たい表示だけにする（この端末だけに保存） ----------
@@ -5211,7 +5280,7 @@ const LO_KEY = "soramemo.layout";
 // デモの間に変えた表示（タブ・見方・かたまり・構成）は、デモを終えると始める前に戻す（review-app-1 の3）。
 // 始めるときにこの端末の値を控え、終えたとき（開き直してデモが終わったときも、読み込みのはじめに）戻す
 const DEMO_LO_BAK = "soramemo.demo.lobak";
-const DEMO_LO_KEYS = () => [LO_KEY, "soramemo.persona", ...Object.keys(VIEWS).map(k => "soramemo.view." + k)];
+const DEMO_LO_KEYS = () => [LO_KEY, "soramemo.persona", "soramemo.ops.side", "soramemo.ops.recent", ...Object.keys(VIEWS).map(k => "soramemo.view." + k)];
 function demoLoSave(){ try{ const o = {}; for(const k of DEMO_LO_KEYS()) o[k] = localStorage.getItem(k); localStorage.setItem(DEMO_LO_BAK, JSON.stringify(o)); }catch(e){} }
 function demoLoRestore(){ try{ const raw = localStorage.getItem(DEMO_LO_BAK); if(!raw) return false; const o = JSON.parse(raw) || {};
   for(const k of DEMO_LO_KEYS()){ if(!(k in o)) continue; if(o[k] == null) localStorage.removeItem(k); else localStorage.setItem(k, o[k]); }
@@ -5220,7 +5289,7 @@ demoLoRestore();
 const TAB_ALL = ["home", "book", "log", "sg", "ops", "stats"], TAB_NAME = { home:"ホーム", book:"図鑑", log:"フライト", sg:"修行", ops:"運用", stats:"成績" };
 const LO_BLOCKS = {
   home: [["persona", "いちばん上のカード", "撮影・修行の構成のときに出るカード。いつもいちばん上", true], ["ride", "これから乗る便", "便名を入れると機体を調べる"], ["event", "イベントのお知らせ"], ["tally", "これまでの記録", "空港・路線・距離の数"], ["recent", "最近の印"]],
-  opsb: [["alerts", "遅れ・ダイバートのお知らせ"], ["map", "地図と近くを飛ぶ機体"], ["special", "特別塗装機"], ["spots", "撮影地"], ["curfew", "門限のある時間"], ["ga", "ゴーアラウンド（推定）"]],
+  opsb: [["alerts", "遅れ・ダイバートのお知らせ"], ["map", "地図と近くを飛ぶ機体"], ["spots", "撮影地"], ["curfew", "門限のある時間"], ["ga", "ゴーアラウンド（推定）"]],
   stats: [["passport", "これまでのパスポート"], ["fleet", "乗った機体"], ["airline", "航空会社別"], ["status", "ステータスの目安"], ["sgsum", "修行のまとめ", "月ごとのポイント・1ポイントあたり・路線ごと"]],
 };
 const LO_ZONE = { home:"homeBlocks", opsb:"opsBlocks", stats:"v-stats" };   // opsb：運用の滑走路の下（見方の ops と分ける）
@@ -5308,13 +5377,23 @@ function viewOf(k){ const sh = viewsShown(k); try{ let v = localStorage.getItem(
   if(k === "book" && ZK_VIEW_MAP[v]){ v = ZK_VIEW_MAP[v]; localStorage.setItem("soramemo.view.book", v); }   // タイル・案内標を選んでいた人は地方別に
   if(k === "log" && FB_VIEW_MAP[v]){ v = FB_VIEW_MAP[v]; localStorage.setItem("soramemo.view.log", v); }   // フライトの古い見方は日誌か年のまとめに
   if(sh.some(x => x[0] === v)) return v; }catch(e){} return sh.some(x => x[0] === VIEW_DEF[k]) ? VIEW_DEF[k] : sh[0][0]; }
-const VIEW = { book:viewOf("book"), log:viewOf("log"), ops:viewOf("ops") };
+const VIEW = { book:viewOf("book"), log:viewOf("log"), ops:viewOf("ops"), opsp:viewOf("opsp") };
+// 見方のシートの題などで使う画面の名前（運用の空港・機体は「運用」）
+const vsName = k => k === "ops" || k === "opsp" ? "運用" : TAB_NAME[k];
+// 運用タブの「機体」の側を出すか（表示の編集・鉛筆のシートで OFF にできる。11/16 の決定 V3・V1c）
+const opsPlaneOn = () => !(LAYOUT && LAYOUT.opsPlane === 0);
+function opsPlaneSet(on){ const L = loEdit(); if(on) delete L.opsPlane; else L.opsPlane = 0; }
+// いま見ている側（空港 ap／機体 plane）は端末に覚える。「機体」を隠しているときはいつも空港
+let OPS_SIDE = (() => { try{ return localStorage.getItem("soramemo.ops.side") === "plane" ? "plane" : "ap"; }catch(e){ return "ap"; } })();
+let OPS_PL_REG = null;   // 機体の側で選んでいる機体（A3）
+const opsSide = () => OPS_SIDE === "plane" && opsPlaneOn() ? "plane" : "ap";
+function opsSideSet(v){ OPS_SIDE = v === "plane" ? "plane" : "ap"; if(OPS_SIDE === "ap") OPS_PL_REG = null; try{ localStorage.setItem("soramemo.ops.side", OPS_SIDE); }catch(e){} }
 const viewswHTML = k => viewsShown(k).map(([id, l]) => `<button role="tab" data-vw="${k}:${id}" aria-selected="${VIEW[k] === id}">${l}</button>`).join("");
 // 見方の切り替えの右に「表示を編集」の鉛筆を置く（切り替えの列の中には、タブ以外を入れない）
 function vwEditBtn(el, k){
   if(el.parentElement && el.parentElement.classList.contains("vwrow")) return;
   const row = document.createElement("div"); row.className = "vwrow"; el.parentNode.insertBefore(row, el); row.appendChild(el);
-  row.insertAdjacentHTML("beforeend", `<button class="vwedit" type="button" data-vs-open="${k}" aria-label="${TAB_NAME[k]}の見方を編集"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="m13.5 6.5 4 4"/></svg></button>`);
+  row.insertAdjacentHTML("beforeend", `<button class="vwedit" type="button" data-vs-open="${k}" aria-label="${vsName(k)}の見方を編集"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="m13.5 6.5 4 4"/></svg></button>`);
 }
 const VIEW_RENDER = {};
 // 切り替えを描いたら、選んでいるボタンが見えるところまで横に送る
@@ -6017,14 +6096,14 @@ function renderPersonaSettings(){
 }
 document.addEventListener("click", e => {
   const o = e.target.closest("[data-persona-open]"); if(o){ $("dSettings").close(); goTab(o.dataset.personaOpen); return; }
-  const g = e.target.closest("[data-pgo]"); if(g){ goTab(g.dataset.pgo); if(g.dataset.pview && VIEW_RENDER[g.dataset.pgo]){ VIEW[g.dataset.pgo] = g.dataset.pview; } return; }
+  const g = e.target.closest("[data-pgo]"); if(g){ if(g.dataset.pgo === "ops" && g.dataset.pview) opsSideSet("ap"); goTab(g.dataset.pgo); if(g.dataset.pview && VIEW_RENDER[g.dataset.pgo]){ VIEW[g.dataset.pgo] = g.dataset.pview; } return; }
 });
 /* ---------- 表示の編集（11/8 全部乗せ＋フィルター）：1枚の画面で、タブ・見方・かたまりを項目ごとのピルで出す・隠す ----------
    ✓ と薄い紺＝出す、白に取り消し線＝隠す（色だけに頼らない）。しぼりこみは「すべて／隠しているもの」。
    ログインしていればアカウントに保存（別の端末でも同じ）、していなければこの端末に保存。並べ替えは1月の公開のあと */
 let LO_PAGE = "top", LO_FROM = "settings", LO_FILTER = "all", LO_UNDO = null, LO_CONFIRM = false;
 const LO_TAB_ITEMS = ["book", "log", "ops", "sg"];   // ホームはいつも出す。成績はマイページのタイル（タブに出しているときだけ並べる）
-const LO_VIEW_SEC = [["book", "図鑑"], ["log", "フライト"], ["ops", "運用"]];
+const LO_VIEW_SEC = [["book", "図鑑"], ["log", "フライト"], ["ops", "運用（空港）"], ["opsp", "運用（機体）"]];
 const LO_BLK_SEC = [["home", "ホーム", "チェックインの半券はいつも出す"], ["opsb", "運用（滑走路の見方の下）"], ["stats", "成績"]];
 const LO_TAB_MAX = 5, LO_TAB_MIN = 2;
 // 全部の項目と、いま出しているか（数え方は画面案と同じ：タブ4・見方19・かたまり15＝38こ（図鑑の見方は 11/9 に3つ））
@@ -6032,28 +6111,30 @@ function loItems(){
   const tabs = loTabs(), out = [];
   for(const v of [...LO_TAB_ITEMS, ...(tabs.includes("stats") ? ["stats"] : [])]) out.push({ kind:"tab", k:"tabs", id:v, label:TAB_NAME[v], on:tabs.includes(v) });
   for(const [k] of LO_VIEW_SEC){ const off = loOff(k); for(const [id, l] of VIEWS[k]) out.push({ kind:"view", k, id, label:l, on:!off.has(id) }); }
+  out.push({ kind:"side", k:"opsside", id:"plane", label:"運用の「機体」", on:opsPlaneOn() });   // 「機体」を出す（11/16）
   for(const [k] of LO_BLK_SEC){ const off = loOff(k); for(const b of LO_BLOCKS[k]) if(!b[3]) out.push({ kind:"blk", k, id:b[0], label:b[1], on:!off.has(b[0]) }); }
   return out;
 }
 function loCount(){ const it = loItems(); return { all:it.length, on:it.filter(x => x.on).length, off:it.filter(x => !x.on) }; }
 // 戻した数を種類ごとに言う（PM 11/9 0時40分：「4こ」でなく「タブ1つ・かたまり3つ」）
-const loOffText = off => [["tab", "タブ"], ["view", "見方"], ["blk", "かたまり"]].map(([k, t]) => [t, off.filter(x => x.kind === k).length]).filter(x => x[1]).map(([t, n]) => `${t}${n}つ`).join("・");
+const loOffText = off => [["tab", "タブ"], ["view", "見方"], ["side", "運用の「機体」"], ["blk", "かたまり"]].map(([k, t]) => [t, off.filter(x => x.kind === k).length]).filter(x => x[1]).map(([t, n]) => `${t}${n}つ`).join("・");
 const loAllOn = () => PERSONA === "all" && !LAYOUT;
 /* ---------- 表示の編集の1枚（11/11 13時 本人「すべてよい」。画面案 design/view-settings の 03*-v2） ----------
    画面ごとのカードを畳んで1行（「フライト 2/3 隠している：年のまとめ」）。押すとその場で開き、中は ON／OFF のスイッチ（各画面の鉛筆のシートと同じ部品）。
    鉛筆の「表示の編集をすべて見る」から来たときは、その画面のカードだけ開いて縁を光らせる。行き先は開いたカードの下に「図鑑へ ›」の形で1つ。
    消せない物は案A：見方はどれも OFF にでき、最後の1つだけ残る。「いつも」はホームのタブ・ホームの地図・半券・今日の数字だけ（画面そのもの） */
 let LO_OPEN = new Set(), LO_RING = null;
-const LO_SEC_OF = { top:null, tabs:"tabs", home:"home", book:"book", log:"log", sg:"sg", ops:"ops", opsb:"ops", stats:"stats", aps:"aps" };
+const LO_SEC_OF = { top:null, tabs:"tabs", home:"home", book:"book", log:"log", sg:"sg", ops:"ops", opsb:"ops", opsp:"opsp", stats:"stats", aps:"aps" };
 // 修行の見方は修行担当の持ち場。修行担当が LO_EXT.sg = { groups(), go } を足すと、1枚に修行のカードが出る（足すまでは出さない）
 //   groups() → [{ title, sub, rows:[{ id, label, desc, on, dis, last, always }] }]、toggle(id) → 変えたら true
 const LO_EXT = {};
 const LO_HOME_FIX = [["map", "ホームの地図", "ホームそのもの"], ["stub", "チェックインの半券", "いちばん近い空港"], ["today", "今日の数字", "今日の印・空港・フライト"]];
-const LO_BLK_DESC = { home:{ event:"開いているイベント", recent:"最近押した印" }, opsb:{ special:"今日飛ぶ特別塗装機" }, stats:{} };
+const LO_BLK_DESC = { home:{ event:"開いているイベント", recent:"最近押した印" }, opsb:{}, stats:{} };
 const LO_APS = ["CTS","SDJ","HND","NRT","NGO","ITM","KIX","HIJ","MYJ","FUK","NGS","KMJ","KOJ","OKA"];
 const LO_ICON = {
   tabs:'<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="15" width="18" height="5" rx="2.5"/><path d="M7 9h10M9 5h6"/></svg>',
-  aps:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-6-5.5-6-10a6 6 0 0 1 12 0c0 4.5-6 10-6 10Z"/><circle cx="12" cy="11" r="2"/></svg>' };
+  aps:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-6-5.5-6-10a6 6 0 0 1 12 0c0 4.5-6 10-6 10Z"/><circle cx="12" cy="11" r="2"/></svg>',
+  opsp:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15.5v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V8.5l-8 5v2l8-2.5V18l-2 1.5V21l3.5-1 3.5 1v-1.5L13 18v-5z"/></svg>' };
 const LO_CHEV = '<svg class="lochev" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>';
 // 見方の行（鉛筆のシートと1枚で同じ）。最後の1つは押せない
 function loViewRows(k){
@@ -6077,7 +6158,11 @@ function loSecDef(id){
     if(!nearX()) s.subText = "近くは民間空港だけ" + (s.hidden.length ? `・隠している：${s.hidden.join("・")}` : "");   // OFF に気づけるように（review-app-1 の6）
     return s; }
   if(id === "book" || id === "log") return loSecCount({ name:TAB_NAME[id], groups:[{ rows:loViewRows(id) }], go:[`${TAB_NAME[id]}へ`, `data-lo-goto="${id}"`], away:loAwayNote(id) });
-  if(id === "ops") return loSecCount({ name:"運用", groups:[{ title:"見方", rows:loViewRows("ops") }, { title:"滑走路の下に出すもの", rows:loBlkRows("opsb") }], go:["運用へ", 'data-lo-goto="ops"'], away:loAwayNote("ops") });
+  if(id === "ops") return loSecCount({ name:"運用（空港）", groups:[{ title:"見方", rows:loViewRows("ops") }, { title:"滑走路の下に出すもの", rows:loBlkRows("opsb") }], go:["運用へ", 'data-lo-goto="ops"'], away:loAwayNote("ops") });
+  // 運用（機体）：「機体」を出す（数えない。OFF のときは見出しで言う）＋見方2つ（V2）
+  if(id === "opsp"){ const on = opsPlaneOn(), rows = loViewRows("opsp").map(r => on ? r : { ...r, dis:true });
+    const s = loSecCount({ name:"運用（機体）", groups:[{ rows:[{ kind:"side", id:"plane", label:"「機体」を出す", desc:on ? "OFF で運用は空港だけ（特別塗装機と機体の1日は見られません）" : "ON にすると運用タブの上に「空港｜機体」が戻ります", on, nocount:true, showOff:true, attr:"data-lo-plane" }, ...rows] }], go:["運用へ", 'data-lo-goto="ops"'], away:loAwayNote("ops") });
+    if(!on) s.subText = "「機体」を隠しています"; return s; }
   if(id === "stats") return loSecCount({ name:"成績", groups:[{ rows:loBlkRows("stats") }], go:["成績へ", 'data-lo-goto="stats"'], away:loAwayNote("stats") });
   if(id === "sg"){ const X = LO_EXT.sg; let g = []; try{ g = X.groups() || []; }catch(e){}
     return loSecCount({ name:"修行", groups:g.map(x => ({ ...x, rows:x.rows.map(r => ({ ...r, kind:"ext", attr:`data-lo-ext="sg:${r.id}"` })) })), go:["修行へ", 'data-lo-goto="sg"'], away:loAwayNote("sg") }); }
@@ -6087,7 +6172,7 @@ function loSecDef(id){
   return null;
 }
 function loSecCount(s){ const rows = s.groups.flatMap(g => g.rows).filter(r => !r.always && !r.nocount); s.n = rows.filter(r => r.on).length; s.tot = rows.length; s.hidden = rows.filter(r => !r.on).map(r => r.label); return s; }
-const loSecIds = () => ["tabs", "home", "book", "log", ...(LO_EXT.sg ? ["sg"] : []), "ops", "stats", "aps"];
+const loSecIds = () => ["tabs", "home", "book", "log", ...(LO_EXT.sg ? ["sg"] : []), "ops", "opsp", "stats", "aps"];
 const loSecIcon = id => LO_ICON[id] || tpIcon(id);
 function loRowHTML(r){
   const right = r.always ? `<span class="tplk">いつも</span>` : loSw(r.on, r.attr, `${esc(r.label)}を出す`, r.dis || r.last);
@@ -6096,9 +6181,9 @@ function loRowHTML(r){
 }
 function loSecHTML(id, only){
   const s = loSecDef(id); if(!s) return "";
-  if(only && !s.hidden.length) return "";
+  if(only && !s.hidden.length && !s.groups.some(g => g.rows.some(r => r.showOff && !r.on))) return "";
   const open = only || LO_OPEN.has(id), sub = s.subText || (s.hidden.length ? `隠している：${s.hidden.join("・")}` : "全部出しています");
-  const body = !open ? "" : (s.away || "") + s.groups.map(g => { const rows = only ? g.rows.filter(r => !r.on && !r.always && !r.soft && !r.nocount) : g.rows; if(!rows.length) return "";
+  const body = !open ? "" : (s.away || "") + s.groups.map(g => { const rows = only ? g.rows.filter(r => !r.on && !r.always && !r.soft && (!r.nocount || r.showOff)) : g.rows; if(!rows.length) return "";
       return `${g.title ? `<p class="logl">${esc(g.title)}${g.sub ? `<small>${esc(g.sub)}</small>` : ""}</p>` : g.sub ? `<p class="logl"><small>${esc(g.sub)}</small></p>` : ""}<ul class="tplist">${rows.map(loRowHTML).join("")}</ul>`; }).join("")
     + (s.note && !only ? `<p class="vsmsg">${esc(s.note)}</p>` : "")
     + (s.go && !only ? `<div class="logo"><button type="button" class="lotext" ${s.go[1]}>${esc(s.go[0])} ›</button></div>` : "");
@@ -6111,7 +6196,7 @@ function loHidden(){ let n = loCount().off.length, all = loCount().all;
   if(LO_EXT.sg){ const s = loSecDef("sg"); if(s){ n += s.hidden.length; all += s.tot; } }
   return { n, all }; }
 // タブにない画面の見方・かたまり：開いたカードの上の1行で知らせる
-const loAwayNote = k => { const v = k === "opsb" ? "ops" : k; if(loTabs().includes(v)) return "";
+const loAwayNote = k => { const v = k === "opsb" || k === "opsp" ? "ops" : k; if(loTabs().includes(v)) return "";
   return `<p class="lonote">${TAB_NAME[v]}はタブにないので、マイページの「${TAB_NAME[v]}」から開いたときに出ます。</p>`; };
 function layoutHTML(){
   const back = `<button class="mp-back" type="button" data-close><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>${LO_FROM === "settings" ? "マイページ" : "閉じる"}</button>`;
@@ -6195,6 +6280,7 @@ document.addEventListener("click", e => {
     if(hide) set.add(id); else set.delete(id); L.off[k] = [...set]; if(!L.off[k].length) delete L.off[k];
     const l = (LO_BLOCKS[k].find(x => x[0] === id) || [])[1] || id;
     loChanged("blk_" + k, { text:`「${l}」を${hide ? "隠しました" : "出しました"}`, snap }); return; }
+  if((b = q("[data-lo-plane]"))){ const on = opsPlaneOn(); opsPlaneSet(!on); opsSideRefresh(); loChanged("ops_plane" + (on ? "_off" : "_on"), { text:`運用の「機体」を${on ? "隠しました" : "出しました"}`, snap }); return; }
   if((b = q("[data-lo-ap]"))){ const c = b.dataset.loAp, L = loEdit(), set = new Set(L.aps || []);
     if(set.has(c)) set.delete(c); else set.add(c); L.aps = [...set]; if(!L.aps.length) delete L.aps; loChanged("aps"); return; }
 });
@@ -6203,12 +6289,17 @@ document.addEventListener("click", e => {
    11/11 13時 案A：どの見方も OFF にでき、最後の1つだけ残す（「最後の1つ」の札と理由）。全部の行に説明を1行。全部を見直したいときは下の「表示の編集をすべて見る」から1枚へ */
 let VS = { k:null, undo:null };
 function vsHTML(){
-  const k = VS.k, rows = loViewRows(k), on = rows.filter(r => r.on).length;
+  const k = VS.k, ops = k === "ops" || k === "opsp", pOff = ops && !opsPlaneOn(), rows = k === "opsp" && pOff ? [] : loViewRows(k), on = rows.filter(r => r.on).length;
   const sw = r => ({ ...r, attr:`data-vs-sw="${r.id}"` });
   const undo = VS.undo ? `<div class="tpbot"><div class="loundo tpundo" role="status"><span>${esc(VS.undo.text)}</span><button type="button" data-vs-undo>元に戻す</button></div></div>` : "";
-  return `<div class="tptop"><div class="tphd"><h3 id="vsTitle">${TAB_NAME[k]}の見方</h3><span class="tpcnt" aria-label="出している見方 ${on}つ（${rows.length}つのうち）"><b>${on}</b>/${rows.length}</span><button type="button" class="tpdone" data-close>完了</button></div>
-    <p class="tplead">OFF で見方の帯から隠れます。最後の1つは残ります。</p></div>
-    <div class="tpscroll"><ul class="tplist" aria-label="${TAB_NAME[k]}の見方">${rows.map(r => loRowHTML(sw(r)).replace('<li class="tprow vsrow', `<li data-vs="${r.id}" class="tprow vsrow`)).join("")}</ul>
+  // 運用は、シートの中でも「空港｜機体」を切り替える（V1・V1b）。「機体」を隠しているときもピルは残し「隠し中」（V1c）
+  const side = ops ? `<div class="vsside" role="group" aria-label="空港と機体"><button type="button" data-vs-side="ops" aria-pressed="${k === "ops"}">空港</button><button type="button" data-vs-side="opsp" aria-pressed="${k === "opsp"}">機体${pOff ? `<span class="vshid">隠し中</span>` : ""}</button></div>` : "";
+  const pRow = { label:"「機体」を出す", desc:pOff ? "ON にすると運用タブの上に「空港｜機体」が戻ります" : "OFF にすると運用タブで特別塗装機と機体の1日が見られなくなります", on:!pOff, attr:"data-vs-plane" };
+  const plane = k !== "opsp" ? "" : pOff ? `<ul class="tplist">${loRowHTML(pRow)}</ul><p class="vsnote">隠している間は、運用タブで特別塗装機と機体の1日が見られません。シートの「機体」のピルは残るので、ここか、マイページの「表示の編集」の同じ行で戻せます。</p>`
+    : `<p class="logl">機体の側ごと隠す<small>運用は空港だけになります</small></p><ul class="tplist">${loRowHTML(pRow)}</ul>`;
+  return `<div class="tptop"><div class="tphd"><h3 id="vsTitle">${vsName(k)}の見方</h3>${rows.length ? `<span class="tpcnt" aria-label="出している見方 ${on}つ（${rows.length}つのうち）"><b>${on}</b>/${rows.length}</span>` : `<span class="tpcnt"></span>`}<button type="button" class="tpdone" data-close>完了</button></div>
+    <p class="tplead">OFF で見方の帯から隠れます。最後の1つは残ります。</p>${side}</div>
+    <div class="tpscroll">${rows.length ? `<ul class="tplist" aria-label="${vsName(k)}の見方">${rows.map(r => loRowHTML(sw(r)).replace('<li class="tprow vsrow', `<li data-vs="${r.id}" class="tprow vsrow`)).join("")}</ul>` : ""}${plane}
     <div class="tpmore"><button type="button" class="lotext" data-vs-all>表示の編集をすべて見る ›</button></div></div>${undo}`;
 }
 function vsRender(){ const d = $("dViews"); if(!d || !d.open) return; const sc = d.querySelector(".tpscroll"), y = sc ? sc.scrollTop : 0; $("dViewsBody").innerHTML = vsHTML(); const n = d.querySelector(".tpscroll"); if(n) n.scrollTop = y; }
@@ -6224,7 +6315,10 @@ document.addEventListener("click", e => {
   if(!e.target.closest("#dViews")) return;
   let b;
   if((b = e.target.closest("[data-vs-all]"))){ const k = VS.k; $("dViews").close(); openLayout(k, "screen"); return; }
-  if((b = e.target.closest("[data-vs-undo]"))){ if(VS.undo){ loRestore(VS.undo.snap); VS.undo = null; loChanged("undo"); vsRender(); } return; }
+  if((b = e.target.closest("[data-vs-undo]"))){ if(VS.undo){ loRestore(VS.undo.snap); VS.undo = null; loChanged("undo"); opsSideRefresh(); vsRender(); } return; }
+  if((b = e.target.closest("[data-vs-side]"))){ if(VS.k === b.dataset.vsSide) return; VS.k = b.dataset.vsSide; VS.undo = null; vsRender(); return; }
+  if((b = e.target.closest("[data-vs-plane]"))){ const on = opsPlaneOn(), snap = loSnap(); opsPlaneSet(!on); loChanged("ops_plane" + (on ? "_off" : "_on"), null); opsSideRefresh();
+    VS.undo = { text:`運用の「機体」を${on ? "隠しました" : "出しました"}`, snap }; vsRender(); return; }
   if((b = e.target.closest("[data-vs-sw]"))){ if(b.disabled) return; const k = VS.k, id = b.dataset.vsSw, hide = !loOff(k).has(id), snap = loSnap();
     if(!loToggleOff(k, id, hide)) return;
     const l = (VIEWS[k].find(x => x[0] === id) || [])[1] || id;
@@ -9686,8 +9780,8 @@ function windChip(wx){
 // 運用を見る空港：上のボタン（3レター・名前・近く）と、選ぶ画面（よく見る空港・北から順に・探す）
 function renderOpsApPicker(ORDER){
   const def = opsDef(), b = $("opsApBtn"); if(!def) return;
-  if(b){ b.innerHTML = `<span class="c">${esc(def.iata)}</span><b>${esc(def.name)}</b>${def.iata === OPS_NEAR ? "<small>近く</small>" : ""}<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>`;
-    b.setAttribute("aria-label", `運用を見る空港を選ぶ（いまは${def.name}）`); }
+  if(b){ b.innerHTML = `<span class="c">${esc(def.iata)}</span><b>${esc(def.name)}</b><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>`;
+    b.setAttribute("aria-label", `運用を見る空港を選ぶ（いまは${def.name}${def.iata === OPS_NEAR ? "・近くの空港" : ""}）`); }
   const q = ($("opsApQ") && $("opsApQ").value || "").trim().toUpperCase(), all = Object.values(OPS_AIRPORTS).sort((x, y) => ORDER.indexOf(x.iata) - ORDER.indexOf(y.iata));
   const hit = d => !q || d.iata.includes(q) || d.name.includes(q) || ((IATA[d.iata] || {}).name || "").includes(q);
   const mine = (loAps() || []).filter(c => OPS_AIRPORTS[c]).map(c => OPS_AIRPORTS[c]).filter(hit);
@@ -9755,10 +9849,108 @@ function opsViewsReveal(x = 0){
   const l = b.offsetLeft - el.offsetLeft, r = l + b.offsetWidth;
   if(l < el.scrollLeft) el.scrollLeft = Math.max(0, l - 24); else if(r > el.scrollLeft + el.clientWidth) el.scrollLeft = r - el.clientWidth + 24;
 }
+/* ---------- 運用タブの「空港｜機体」（11/16 の決定。design/ops-split 2版の A1・A2・A3・Q2・V1〜V3） ----------
+   上の1行：空港の側は「空港｜機体」＋空港のピル＋ⓘ＋共有。機体の側は「空港｜機体」＋探す欄（登録記号・便名）＋ⓘ。
+   機体を選んだあとは「空港｜機体」＋「‹ 戻る」＋登録記号のピル＋共有。見方は空港の側が ops、機体の側が opsp（最近見た・特別塗装機）。
+   撮る人は空港の側にまとめる（案2）。機体の側には入口の1枚だけ。中の部品（機体の1日 planeHTML・特別塗装機 specialHTML）は運用予想担当のものをそのまま使う */
+const OPS_RECENT_KEY = "soramemo.ops.recent";
+const opsRecent = () => { try{ const a = JSON.parse(localStorage.getItem(OPS_RECENT_KEY) || "[]"); return Array.isArray(a) ? a.filter(x => typeof x === "string" && /^[A-Z0-9-]{3,10}$/.test(x)).slice(0, 8) : []; }catch(e){ return []; } };
+function opsRecentAdd(reg){ if(!/^[A-Z0-9-]{3,10}$/.test(reg || "")) return; try{ localStorage.setItem(OPS_RECENT_KEY, JSON.stringify([reg, ...opsRecent().filter(x => x !== reg)].slice(0, 8))); }catch(e){} }
+// 運用タブを見ていて、ほかのシートを開いていないとき：機体の1日はタブの中に出す
+const opsPlaneInTab = () => opsOn() && opsPlaneOn() && !document.querySelector("dialog[open]");
+// 飛んでいる特別塗装機（地上の機体は入れない。アライアンス塗装は数が多いので入れない。review-1 の2）
+const opsFlying = () => [...SPECIAL.values()].filter(x => x.kind !== "alliance" && !(x.alt_ft != null && Number(x.alt_ft) <= 100))
+  .sort((a, b) => (b.iata === OPS_AP) - (a.iata === OPS_AP) || (!!b.iata) - (!!a.iata));
+const OPS_CHEV_R = `<svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>`;
+function opsPlRow(reg, x){
+  const nm = LIVERY_NAMES[reg] || (x && x.name) || reg, air = x && x.airline || LIVERY_AIR[reg] || "", g = air ? spbGroup(air) : "";
+  const sub = [reg, air].filter(Boolean).join("・");
+  const st = x ? `<span class="opspst"><span class="opspfly"><i></i>飛行中</span><small>${esc([x.callsign ? spbFl(x.callsign) : "", specialWhere(x).replace(/^飛行中・?/, "")].filter(Boolean).join(" "))}</small></span>` : "";
+  return `<li><button type="button" class="opsprow" data-plane="${esc(reg)}"><span class="opspbadge" data-g="${g}">${esc(reg.replace(/^JA/, ""))}</span><span class="tx"><b>${esc(nm)}</b><small>${esc(sub)}</small>${st}</span>${OPS_CHEV_R}</button></li>`;
+}
+function opsRecentHTML(){
+  const regs = opsRecent(), fly = opsFlying(), photo = viewsShown("ops").some(([id]) => id === "photo");
+  const recent = regs.length ? `<div class="fwlist opspcard"><div class="opshead"><b>最近見た機体</b><span>この端末で開いた順</span></div><ul class="opsplist">${regs.map(r => opsPlRow(r, SPECIAL.get(r) && opsFlying().includes(SPECIAL.get(r)) ? SPECIAL.get(r) : null)).join("")}</ul></div>`
+    : `<div class="fwlist opspcard opspempty"><div class="opshead"><b>機体を1機ずつ追う</b></div><p>上の欄に登録記号（例：JA339J）か便名（例：JL 323）を入れると、その機体の今日の便と、この先の便（予想）が出ます。開いた機体はここに残ります。</p></div>`;
+  const ent = photo ? `<div class="fwlist opspcard opspent"><span><b>撮影地から見える機体</b><small>空港の「撮る人」にあります</small></span><button type="button" class="opspgo" data-ops-photo>撮る人へ${OPS_CHEV_R}</button></div>` : "";
+  const sp = !SERVER ? "" : `<div class="fwlist opspcard"><div class="opshead"><b>いま飛んでいる特別塗装機</b><span>飛行中 ${fly.length}機</span></div>`
+    + (fly.length ? `<ul class="opsplist">${fly.slice(0, 2).map(x => opsPlRow(x.reg, x)).join("")}</ul>` : `<p class="hint" style="margin:4px 0 0">${SPECIAL_AT ? "いま飛んでいる特別塗装機は見つかっていません。" : "読み込んでいます…"}</p>`)
+    + `<button type="button" class="opspall" data-ops-spall>特別塗装機をすべて見る${OPS_CHEV_R}</button></div>`;
+  return recent + ent + sp;
+}
+// 機体の側の中身（最近見た・特別塗装機・選んだ機体の1日）
+function renderOpsPside(){
+  if(opsSide() !== "plane") return;
+  const sel = !!OPS_PL_REG, v = VIEW.opsp;
+  $("opsPRecent").hidden = sel || v !== "recent"; $("opsPSpecial").hidden = sel || v !== "special"; $("opsPlDay").hidden = !sel;
+  if(!sel && v === "recent") $("opsPRecent").innerHTML = opsRecentHTML();
+  if(!sel && v === "special"){ const html = specialHTML(); $("opsPSpecial").innerHTML = html || `<div class="fwlist"><p class="hint" style="margin:0">特別塗装機は、ログインしなくても見られます。いまは読み込めません。</p></div>`; }
+}
+// 側と、上の1行の出し分け
+function applyOpsSide(){
+  const sec = $("v-ops"), on = opsPlaneOn(), side = opsSide(), sel = side === "plane" && !!OPS_PL_REG;
+  sec.dataset.side = side; sec.toggleAttribute("data-plsel", sel); sec.toggleAttribute("data-noplane", !on);
+  $("opsSide").hidden = !on;
+  $("opsSide").querySelectorAll("[data-ops-side]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.opsSide === side)));
+  $("opsAside").hidden = side !== "ap"; $("opsPside").hidden = side !== "plane";
+  if(sel){ const r = $("opsPlReg"); r.querySelector("b").textContent = OPS_PL_REG; r.dataset.g = (SPECIAL.get(OPS_PL_REG) || {}).airline || LIVERY_AIR[OPS_PL_REG] ? spbGroup((SPECIAL.get(OPS_PL_REG) || {}).airline || LIVERY_AIR[OPS_PL_REG]) : ""; }
+  if(side !== "plane") return;
+  { const el = $("opsPViews"), x = el ? el.scrollLeft : 0; setViewsw("opsPViews", "opsp"); el.scrollLeft = x; }
+  if(sel) $("opsPViews").querySelectorAll('[aria-selected="true"]').forEach(b => b.setAttribute("aria-selected", "false"));   // 機体を選んでいる間は下線を外す（review-1 の5）
+  renderOpsPside();
+}
+// 表示を変えたあと（「機体」を出す の ON／OFF・元に戻す）：運用タブを見ていれば描き直す
+function opsSideRefresh(){ if(typeof opsOn === "function" && opsOn() && typeof VIEW_RENDER.ops === "function") VIEW_RENDER.ops(); }
+VIEW_RENDER.opsp = () => { applyOpsView(); window.scrollTo(0, 0); };
+// タブの中では、登録記号は上のピルにあるので、機体の1日の上のカード（登録記号の大きな字）と「今日」の行の代わりに1行の見出し（A3）
+function opsPlHead(reg, hist, pred){
+  const legs = (hist || []).filter(x => x.day === jstDay(Date.now())), last = legs.sort((a, b) => Date.parse(a.first) - Date.parse(b.first))[legs.length - 1];
+  const live = !!last && Date.now() - Date.parse(last.last) < 6 * 60_000, type = (legs.find(l => l.type) || {}).type || (pred && pred.type) || "";
+  const nm = LIVERY_NAMES[reg];
+  return `<div class="opsplhd"><span><b>${esc(nm || reg)}</b><small>${esc([nm ? reg : "", type, predDay(Date.now())].filter(Boolean).join("・"))}</small></span>${live ? `<span class="opspfly"><i></i>飛行中</span>` : ""}</div>`;
+}
+async function opsPlOpen(reg){
+  opsSideSet("plane"); track("ops", "plane");
+  if(!reg){ OPS_PL_REG = null; VIEW_RENDER.ops(); const q = $("opsPlQ"); if(q) q.focus(); return; }
+  if($("dPlaneBody")) $("dPlaneBody").innerHTML = "";   // 同じ id（plMap・plReg）を2つ作らない
+  OPS_PL_REG = reg; opsRecentAdd(reg); $("opsPlMsg").textContent = "";
+  const box = $("opsPlDay"); box.innerHTML = opsPlHead(reg, null, null) + planeHTML(reg, null, null);
+  VIEW_RENDER.ops(); window.scrollTo(0, 0);
+  const [h, p] = await Promise.all([rpcPost("reg_history", { p_reg:reg, p_days:1 }), loadPrediction(reg)]);
+  if(OPS_PL_REG !== reg) return;
+  box.innerHTML = opsPlHead(reg, Array.isArray(h) ? h : [], p) + planeHTML(reg, Array.isArray(h) ? h : [], p);
+  drawPlaneMap(Array.isArray(h) ? h : [], p);
+}
+document.addEventListener("click", e => {
+  let b;
+  if((b = e.target.closest("[data-ops-side]"))){ const v = b.dataset.opsSide; if(opsSide() === v && !(v === "plane" && OPS_PL_REG)) return;
+    opsSideSet(v); if(v === "plane") OPS_PL_REG = null; track("ops_side", v); VIEW_RENDER.ops(); window.scrollTo(0, 0); return; }
+  if(e.target.closest("#opsPlBack")){ OPS_PL_REG = null; applyOpsView(); window.scrollTo(0, 0); return; }
+  if(e.target.closest("#opsPlReg")){ OPS_PL_REG = null; applyOpsView(); const q = $("opsPlQ"); if(q){ q.value = ""; q.focus(); } return; }
+  if(e.target.closest("[data-ops-spall]")){ VIEW.opsp = "special"; try{ localStorage.setItem("soramemo.view.opsp", "special"); }catch(_){} if(!viewsShown("opsp").some(([id]) => id === "special")) return; applyOpsView(); window.scrollTo(0, 0); return; }
+  if(e.target.closest("[data-ops-photo]")){ opsSideSet("ap"); VIEW.ops = "photo"; try{ localStorage.setItem("soramemo.view.ops", "photo"); }catch(_){} VIEW_RENDER.ops(); window.scrollTo(0, 0); return; }
+  // 機体を選んでいるときに見方の帯を押したら、その見方に戻る
+  if((b = e.target.closest('[data-vw^="opsp:"]')) && OPS_PL_REG){ OPS_PL_REG = null; setTimeout(applyOpsView, 0); }
+});
+// 探す：登録記号（JA で始まる・ハイフンつきの海外の記号）はそのまま、便名（JL323 など）はいまの機体を調べてから
+document.addEventListener("submit", async e => {
+  if(e.target.id !== "opsPlForm") return; e.preventDefault();
+  const q = $("opsPlQ").value.trim().toUpperCase().replace(/[\s　]/g, ""), msg = $("opsPlMsg");
+  if(!q) return;
+  if(/^JA[0-9A-Z]{3,5}$/.test(q) || !/^[A-Z0-9]{2}\d{1,4}$/.test(q)){
+    if(!/^[A-Z0-9-]{3,10}$/.test(q)){ msg.textContent = "登録記号（例：JA339J）か便名（例：JL323）で入れてください。"; return; }
+    $("opsPlQ").value = ""; $("opsPlQ").blur(); return opsPlOpen(q); }
+  if(!SERVER){ msg.textContent = "便名で探すのは、サーバーにつながっているときだけです。登録記号で入れてください。"; return; }
+  msg.textContent = "探しています…";
+  const d = await rpcPost("inbound_aircraft", { p_flight:q, p_dep:null }), reg = d && (d.reg || (d.inbound && d.inbound.reg));
+  if(!reg){ msg.textContent = `${q} の機体は、いまは分かりません。登録記号で入れてみてください。`; return; }
+  msg.textContent = ""; $("opsPlQ").value = ""; $("opsPlQ").blur(); track("ops_plq", "flight"); opsPlOpen(String(reg).toUpperCase());
+});
 // 地図が見えているか（見方の切り替えで隠れているときに位置を合わせると、大きさが0で計算できない）
 const opsMapShown = () => { const m = $("opsMap"); return !!m && m.offsetWidth > 0 && m.offsetHeight > 0; };
 /* 運用の見方：案内板（01）・1日の山（02）・滑走路（03）・定時（04）・空の道すじ（05）・短冊（07）・撮る人（09） */
 function applyOpsView(){
+  applyOpsSide();
   { const el = $("opsViews"), x = el ? el.scrollLeft : 0; setViewsw("opsViews", "ops"); opsViewsReveal(x); }
   const v = VIEW.ops;
   document.querySelectorAll("#v-ops [data-ov]").forEach(el => el.classList.toggle("ovoff", !el.dataset.ov.split(" ").includes(v)));
@@ -9768,7 +9960,7 @@ function applyOpsView(){
 VIEW_RENDER.ops = () => {
   applyOpsView(); opsTraffic();
   OPS_LAZY = true; try{ renderOpsAlerts(); } finally{ OPS_LAZY = false; }
-  if(VIEW.ops === "runway") requestAnimationFrame(() => setTimeout(() => { if(VIEW.ops !== "runway" || !opsOn()) return; renderOps(); if(OPS_MAP){ opsFit(); opsLocStart(); } }, 0));
+  if(VIEW.ops === "runway" && opsSide() === "ap") requestAnimationFrame(() => setTimeout(() => { if(VIEW.ops !== "runway" || opsSide() !== "ap" || !opsOn()) return; renderOps(); if(OPS_MAP){ opsFit(); opsLocStart(); } }, 0));
 };
 // 機体の位置（airport-traffic）は、地図のある見方（滑走路）と撮る人のときだけ読む
 function opsTraffic(){ if(opsNeed("traffic")){ if(TRAFFIC_TIMER == null) startTraffic(); } else stopTraffic(); }
@@ -10394,6 +10586,8 @@ document.addEventListener("click", e => { const b = e.target.closest("[data-livt
 let PL_MAP = null;
 async function openPlane(reg){
   reg = String(reg || "").toUpperCase().replace(/[^A-Z0-9-]/g, "");
+  if(opsPlaneInTab()) return opsPlOpen(reg);   // 11/16：運用タブを見ているときは、シートでなくタブの「機体」の側に出す（A3）
+  opsRecentAdd(reg); if(OPS_PL_REG){ OPS_PL_REG = null; $("opsPlDay").innerHTML = ""; if(opsOn()) applyOpsView(); }   // 同じ id（plMap）を2つ作らない
   track("ops", "plane");
   $("dPlaneBody").innerHTML = planeHTML(reg, null, null); if(!$("dPlane").open) $("dPlane").showModal();
   if(!reg) return;
@@ -10696,14 +10890,15 @@ document.addEventListener("click", async e => {
     out.innerHTML = predictionHTML(d, ROT_CTX.get(reg) || predLiveCtx(reg), { reg, limit:Number(b.dataset.rotLimit) || 0, conf:b.dataset.rotConf === "1" }); }
 });
 async function renderSpecial(){
-  const draw = () => { const box = $("opsSpecial"), html = specialHTML(); box.hidden = !html; box.innerHTML = html; };
+  const draw = () => { if(opsSide() === "plane"){ renderOpsPside(); return; } const box = $("opsSpecial"), html = specialHTML(); box.hidden = !html; box.innerHTML = html; };
   // いま飛んでいる機体が分かってから、その機体の足あとだけを読む（特別塗装機の全部の足あとは、特別塗装機の画面を開いたときに読む）
   await loadSpecial(); draw(); await loadSpbLive(); draw();
 }
 /* 運用の見方ごとに要るもの。選んでいない見方の分は読まない（11/13 の見回り：開くと14本同時だった） */
-const OPS_NEED = { alerts:["runway", "board"], special:["runway", "photo"], curfew:["runway"], board:["board", "day", "strip", "photo"], foreign:["board"],
+const OPS_NEED = { alerts:["runway", "board"], special:["photo"], curfew:["runway"], board:["board", "day", "strip", "photo"], foreign:["board"],
   yday:["day"], ontime:["ontime"], art:["art"], ga:["runway", "board", "photo"], traffic:["runway", "photo"] };
-const opsNeed = k => (OPS_NEED[k] || []).includes(VIEW.ops);
+// 「機体」の側を見ているときは、特別塗装機だけ読む（空港の側の物は読まない）
+const opsNeed = k => opsSide() === "plane" ? k === "special" : (OPS_NEED[k] || []).includes(VIEW.ops);
 // 見方を変えたときは、3分以内に読んだ結果をそのまま使う（案内板・お知らせ・海外の便を取り直さない）。1分ごとの読み直しは今までどおり
 let OPS_LAZY = false;
 const opsFresh = (at, ttl) => Date.now() - at < (OPS_LAZY ? Math.max(ttl, 180_000) : ttl);
@@ -14269,6 +14464,10 @@ function gaFromHash(s){ if(!s) return; const g = /^\/ga\/(\d+)$/.exec(s); if(g) 
   if(m) setTimeout(() => { if(m[1] && OPS_AIRPORTS[m[1]]){ OPS_PICKED = true; OPS_AP = m[1]; try{ localStorage.setItem("soramemo.opsAirport", m[1]); }catch(e){} } goTab("ops"); gaFromHash(m[2]); }, 0); }
 // 運用の共有：いまの空港のリンクと、ひとことの文（推定であることも書く）
 $("opsShare").onclick = async () => {
+  if(opsSide() === "plane" && OPS_PL_REG){ const reg = OPS_PL_REG, nm = LIVERY_NAMES[reg], text = `${nm ? nm + "（" + reg + "）" : reg}の今日の便と、この先（予想）\n#そらメモ`, url = "https://soramemo.jp/";
+    track("ops_share", "plane");
+    try{ if(navigator.share){ await navigator.share({ title:`${reg}の1日`, text, url }); return; } }catch(e){ if(e && e.name === "AbortError") return; }
+    try{ await navigator.clipboard.writeText(`${text}\n${url}`); uiSay("リンクを写しました。"); }catch(e){ uiSay(url); } return; }
   const def = opsDef(), url = `https://soramemo.jp/#ops-${def.iata}`, mode = $("opsInfo").querySelector(".mode");
   const text = `${def.name}の今の運用（推定）：${mode ? mode.textContent : ""}\n#そらメモ #${def.name}空港`;
   track("ops_share", def.iata);
