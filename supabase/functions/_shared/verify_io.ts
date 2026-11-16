@@ -1,4 +1,4 @@
-// 照合（運航確認）の読み書きと、OpenSky への問い合わせ。
+// 照合（運航確認）の読み書きと、到着の一覧の取り先（OpenSky か、私たちの全機の記録 reg_legs）。
 // Supabase の関数（verify-flights）と、GitHub の定期実行（tools/verify_flights.ts）の両方から使う。
 // OpenSky は Supabase のサーバーからは届かないため、毎晩の照合は GitHub の定期実行で動かす。
 import type { SupabaseClient } from "npm:@supabase/supabase-js@2.117.2";
@@ -8,7 +8,21 @@ import type { OpenSkyFlight } from "./verify.ts";
 const API = "https://opensky-network.org/api";
 const TOKEN_URL = "https://auth.opensky-network.org/auth/realms/opensky-network/protocol/openid-connect/token";
 
-export function makeDeps(admin: SupabaseClient, opensky: { clientId: string; clientSecret: string; tokenUrl?: string }): Deps {
+// 照合で「その空港・時間帯に着いた機体」をどこから取るか。VERIFY_SOURCE=adsb なら私たちの全機の記録（reg_legs。adsb.lol・ODbL）、
+// それ以外は今までどおり OpenSky（研究・非商用向けなので、ストアの前に adsb に切り替える案。11/16 data/redo-1116）
+export type VerifySource = "opensky" | "adsb";
+export const verifySource = (v: string | undefined | null): VerifySource => (v ?? "").trim().toLowerCase() === "adsb" ? "adsb" : "opensky";
+
+// reg_legs から OpenSky と同じ形の到着の一覧を返す（関数 verify_arrivals。窓は2日まで）
+export function adsbArrivals(admin: Pick<SupabaseClient, "rpc">) {
+  return async (icao: string, begin: number, end: number): Promise<OpenSkyFlight[]> => {
+    const { data, error } = await admin.rpc("verify_arrivals", { p_arr_icao: icao, p_begin: new Date(begin * 1000).toISOString(), p_end: new Date(end * 1000).toISOString() });
+    if (error) throw new Error("verify_arrivals " + error.message);
+    return Array.isArray(data) ? data as OpenSkyFlight[] : [];
+  };
+}
+
+export function makeDeps(admin: SupabaseClient, opensky: { clientId: string; clientSecret: string; tokenUrl?: string }, source: VerifySource = "opensky"): Deps {
   let token: { value: string; until: number } | null = null;
   async function bearer(): Promise<string> {
     if (token && Date.now() < token.until) return token.value;
@@ -71,5 +85,7 @@ export function makeDeps(admin: SupabaseClient, opensky: { clientId: string; cli
     return `航空会社の運航情報で確認（${n(hit.flight)} ${hm(hit.atd)}発・${hm(hit.ata)}着）`;
   }
 
+  // adsb のときは OpenSky に問い合わせない（航跡は毎晩の daily-archive が全機の記録から付ける）
+  if (source === "adsb") return { loadFlights, fetchArrivals: adsbArrivals(admin), save, officialCheck };
   return { loadFlights, fetchArrivals, save, fetchTrack, officialCheck };
 }

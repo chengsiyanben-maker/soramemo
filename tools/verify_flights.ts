@@ -4,14 +4,16 @@
 // （OpenSky は Supabase のサーバーから届かないため、Supabase の関数ではなくここで動かす）
 import { createClient } from "npm:@supabase/supabase-js@2.117.2";
 import { runVerification } from "../supabase/functions/_shared/verify_job.ts";
-import { makeDeps } from "../supabase/functions/_shared/verify_io.ts";
+import { makeDeps, verifySource } from "../supabase/functions/_shared/verify_io.ts";
 
-const need = ["SUPABASE_URL", "SUPABASE_SERVICE_ROLE_KEY", "OPENSKY_CLIENT_ID", "OPENSKY_CLIENT_SECRET"];
+// VERIFY_SOURCE=adsb なら OpenSky を使わず全機の記録（reg_legs）で照合する（OpenSky の鍵は要らない）
+const source = verifySource(Deno.env.get("VERIFY_SOURCE"));
+const need = ["SUPABASE_URL", "SUPABASE_SERVICE_ROLE_KEY", ...(source === "adsb" ? [] : ["OPENSKY_CLIENT_ID", "OPENSKY_CLIENT_SECRET"])];
 const missing = need.filter((k) => !Deno.env.get(k));
 if (missing.length) { console.error("設定が足りません：" + missing.join("・")); Deno.exit(1); }
 
 const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, { auth: { persistSession: false } });
-const sum = await runVerification(makeDeps(admin, { clientId: Deno.env.get("OPENSKY_CLIENT_ID")!, clientSecret: Deno.env.get("OPENSKY_CLIENT_SECRET")! }));
-console.log("照合の結果", JSON.stringify(sum));
+const sum = await runVerification(makeDeps(admin, { clientId: Deno.env.get("OPENSKY_CLIENT_ID") ?? "", clientSecret: Deno.env.get("OPENSKY_CLIENT_SECRET") ?? "" }, source));
+console.log("照合の結果", source, JSON.stringify(sum));
 // 1件も問い合わせられなかった（全部が通信エラー）ときは、失敗として知らせる
-if (sum.checked > 0 && sum.errors === sum.checked) { console.error("OpenSky に問い合わせられませんでした"); Deno.exit(1); }
+if (sum.checked > 0 && sum.errors === sum.checked) { console.error(source === "adsb" ? "全機の記録を読めませんでした" : "OpenSky に問い合わせられませんでした"); Deno.exit(1); }

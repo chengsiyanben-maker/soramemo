@@ -8,6 +8,7 @@
 import { createClient } from "npm:@supabase/supabase-js@2.117.2";
 import { jstDates, scheduleRows, type ScheduleRow } from "../_shared/odpt_schedule.ts";
 import { callsignsFor } from "../_shared/flight_watch.ts";
+import { feedDates, putFeedDates } from "../_shared/odpt_date.ts";
 
 const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, { auth: { persistSession: false } });
 const KEY = Deno.env.get("ODPT_CONSUMER_KEY") ?? "";
@@ -46,6 +47,8 @@ Deno.serve(async (req) => {
   for (const op of OPERATORS) for (const side of ["originAirport", "destinationAirport"] as const) {
     try {
       const items = await fetchSchedules(op, side, iata);
+      const fdErr = await putFeedDates(admin, feedDates("FlightSchedule", items));   // データの時刻（dc:date）を残す（失敗しても続ける）
+      if (fdErr) errors.push(fdErr);
       if (items.length >= 1000) full++;   // 1,000件ちょうどなら、取りこぼしがあるかもしれない
       // 呼び出し符号に直せない便名（見張れない便）は入れない
       for (const r of scheduleRows(items, dates, op)) if (callsignsFor(r.flight).length) rows.set(`${r.svc_date}|${r.flight}|${r.dep}`, r);

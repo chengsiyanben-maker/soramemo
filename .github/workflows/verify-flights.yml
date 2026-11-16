@@ -22,6 +22,8 @@ jobs:
       SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
       OPENSKY_CLIENT_ID: ${{ secrets.OPENSKY_CLIENT_ID }}
       OPENSKY_CLIENT_SECRET: ${{ secrets.OPENSKY_CLIENT_SECRET }}
+      # adsb にすると OpenSky を使わず全機の記録（reg_legs）で照合する（リポジトリの変数。未設定なら今までどおり OpenSky）
+      VERIFY_SOURCE: ${{ vars.VERIFY_SOURCE }}
     steps:
       - uses: actions/checkout@v4
       - uses: denoland/setup-deno@v2

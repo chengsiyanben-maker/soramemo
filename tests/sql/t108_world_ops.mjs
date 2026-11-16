@@ -57,6 +57,10 @@ check('海外の空港ごと：共同運航は1便・欠航と30分以上の遅�
   JSON.stringify(counts) === JSON.stringify({ JFK: [1, 0, 0], LAX: [3, 1, 1] }), counts);
 
 // 画面で使う関数
+// 画面の関数は「今日（日本時間）」の便を数える。便の数だけの空港（JFK）が出るよう、今日の JFK 行きを1便足す（11/16：日付が変わると落ちていたのを直す）
+await db.exec(`insert into public.flight_schedule (svc_date, flight, dep, arr, std, sta, source)
+  select (now() at time zone 'Asia/Tokyo')::date, 'JL6', 'HND', 'JFK', ((now() at time zone 'Asia/Tokyo')::date + time '10:00') at time zone 'Asia/Tokyo',
+         ((now() at time zone 'Asia/Tokyo')::date + time '22:00') at time zone 'Asia/Tokyo', 'ODPT（JAL）'`);
 await db.exec('set role anon');
 const ops = (await rows(`select public.world_airport_ops() j`))[0].j;
 const one = (await rows(`select public.world_airport_ops('lax') j`))[0].j;
