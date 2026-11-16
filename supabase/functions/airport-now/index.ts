@@ -3,10 +3,11 @@
 // ログインは不要（公開の情報だけを返す）。配信元に負担をかけないよう、空港ごとに数分ためて使い回す。
 // ためる場所は「関数の中の記憶」と、関数どうしで使い回す置き場（表 edge_cache、移行 164）の2つ。記憶は入れ物ごとに消えるので、
 // 記憶になければ置き場を1回だけ読み、それも古ければ配信元へ（11/13 速さの見直し）。配信元が取れないときは、置き場の古い値で返す
-// 便の情報は ODPT の合言葉（ODPT_CONSUMER_KEY）が設定されているときだけ取る。未設定なら flights は null（アプリは便の欄を出さない）。
+// 便の情報は ODPT の合言葉（ODPT_CONSUMER_KEY）が設定されているときだけ取る。flights.dc_date は ODPT のデータの時刻（いちばん新しい dc:date、なければ null）。未設定なら flights は null（アプリは便の欄を出さない）。
 import { createClient } from "npm:@supabase/supabase-js@2.117.2";
 import { choose, type Entry, readShared, writeShared } from "../_shared/edge_cache.ts";
 import { amedasNearest, type AmedasStation, amedasWeather, type FlightRow, normalize, recent, tafPeriods, weather } from "../_shared/airport_now.ts";
+import { maxDcDate } from "../_shared/odpt_date.ts";
 
 const CORS = { "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Headers": "authorization, apikey, content-type", "Access-Control-Allow-Methods": "GET, OPTIONS" };
 const JSON_HEADERS = { ...CORS, "Content-Type": "application/json" };
@@ -102,7 +103,7 @@ async function getWeather(icao: string, sh: Map<string, Entry>) {
   }
 }
 
-const flCache = new Map<string, { at: number; v: { arr: FlightRow[]; dep: FlightRow[] } }>();
+const flCache = new Map<string, { at: number; v: { arr: FlightRow[]; dep: FlightRow[]; dc_date?: string | null } }>();
 async function odpt(type: string, op: string, key: string, iata: string): Promise<Record<string, unknown>[]> {
   const u = new URL(`${ODPT}/odpt:${type}`);
   u.searchParams.set("odpt:operator", `odpt.Operator:${op}`);
@@ -116,16 +117,18 @@ async function odpt(type: string, op: string, key: string, iata: string): Promis
 async function getFlights(iata: string, sh: Map<string, Entry>) {
   if (!ODPT_KEY) return null;
   const key = `now:fl:${iata}`, c = choose(flCache.get(iata), sh.get(key), FL_TTL);
-  if (c.fresh) { flCache.set(iata, c.fresh as { at: number; v: { arr: FlightRow[]; dep: FlightRow[] } }); return c.fresh.v; }
+  if (c.fresh) { flCache.set(iata, c.fresh as { at: number; v: { arr: FlightRow[]; dep: FlightRow[]; dc_date?: string | null } }); return c.fresh.v; }
   const hit = c.stale;
   try {
-    const parts = await Promise.all(OPERATORS.flatMap((op) => [
-      odpt("FlightInformationArrival", op, "odpt:arrivalAirport", iata).then((l) => l.map((x) => normalize(x, "arr"))),
-      odpt("FlightInformationDeparture", op, "odpt:departureAirport", iata).then((l) => l.map((x) => normalize(x, "dep"))),
+    const raw = await Promise.all(OPERATORS.flatMap((op) => [
+      odpt("FlightInformationArrival", op, "odpt:arrivalAirport", iata),
+      odpt("FlightInformationDeparture", op, "odpt:departureAirport", iata),
     ]));
+    const parts = raw.map((l, k) => l.map((x) => normalize(x, k % 2 === 0 ? "arr" : "dep")));
+    const dcDate = maxDcDate(raw.flat());   // ODPT のデータの時刻（画面で「○時○分 時点」と出す。ない時は null）
     const now = new Date(Date.now() + 9 * 3600_000), nowMin = now.getUTCHours() * 60 + now.getUTCMinutes();   // 日本時間の今
     const pick = (i: number) => recent(parts.filter((_, k) => k % 2 === i).flat().filter((x): x is FlightRow => !!x), nowMin);
-    const v = { arr: pick(0), dep: pick(1) };
+    const v = { arr: pick(0), dep: pick(1), dc_date: dcDate };
     flCache.set(iata, { at: Date.now(), v });
     await writeShared(admin, key, v);
     return v;

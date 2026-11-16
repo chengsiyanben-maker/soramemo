@@ -88,7 +88,7 @@ const rls = (await db.query(`select relrowsecurity from pg_class where relname =
 check('flight_history の RLS は有効のまま', rls.relrowsecurity === true, rls);
 
 // 3. 時間の上限
-const mig = fs.readFileSync(dir + '20261111000162_maint_1111.sql', 'utf8');
+const mig = fs.readFileSync(dir + '20261116000177_maint_1111.sql', 'utf8');
 for (const job of ['eta-calib', 'taxi-out', 'flight-watch-cleanup']) {
   const re = new RegExp(`cron\\.schedule\\('${job}'[^]*?\\$job\\$\\s*set statement_timeout = '\\d+min'; set lock_timeout = '5s';`);
   check(`仕事 ${job} の先頭に statement_timeout と lock_timeout`, re.test(mig), job);

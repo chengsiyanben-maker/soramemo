@@ -6,6 +6,7 @@
 // 鍵（ODPT_CONSUMER_KEY）がなければ何もしない。
 import { createClient } from "npm:@supabase/supabase-js@2.117.2";
 import { isJpAirport, timetableRows, TT_AIRPORTS } from "../_shared/timetable.ts";
+import { feedDates, putFeedDates } from "../_shared/odpt_date.ts";
 
 const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, { auth: { persistSession: false } });
 const KEY = Deno.env.get("ODPT_CONSUMER_KEY") ?? "";
@@ -42,6 +43,8 @@ Deno.serve(async (req) => {
     for (const op of OPERATORS) {
       try {
         const items = await fetchFrom(op, iata);
+        const fdErr = await putFeedDates(admin, feedDates("FlightSchedule", items));   // データの時刻（dc:date）を残す
+        if (fdErr) res[`${op}_feed_date`] = fdErr;
         const rows = timetableRows(items, op, isJpAirport).filter((r) => r.dep === iata);
         if (items.length >= 1000) res[`${op}_truncated`] = true;   // 1,000件ちょうどなら、取りこぼしがあるかもしれない
         // 入れ替えは1回の処理で（途中で止まっても、前の時刻表か新しい時刻表のどちらかが残る）

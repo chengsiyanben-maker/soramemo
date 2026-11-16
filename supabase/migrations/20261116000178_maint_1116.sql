@@ -1,7 +1,7 @@
 -- 定期の手入れ 11/16（データ担当）：時間の上限のない毎日・裏の処理をなくす。表・列・索引・RLS・権限・関数の中身は変えない
 --   1. 毎晩の仕事 ops-log-cleanup（運用の記録の90日より前を消す。ops_log は運用の記録で、航路・機体の記録ではない）に
 --      statement_timeout（2分）と lock_timeout（5s）を付ける。時刻と中身は今のまま（main で上限のなかった SQL の仕事の残り。
---      ほかの上限のない SQL の仕事は maint/2026-11-06 の 153 にある）
+--      ほかの上限のない SQL の仕事は 173（もとは maint/2026-11-06 の 153）にある）
 --   2. 裏の処理（Edge Functions）が service_role で呼ぶ「書く関数」12個に lock_timeout を付ける。
 --      service_role には statement_timeout がなく、ほかの処理がつかんだ行や表を待ち続けると、毎分・30秒ごとの処理がうしろに詰まる。
 --      関数の設定（alter function … set）は statement_timeout には効かない（20261105000152 の説明のとおり）が、lock_timeout は効く。

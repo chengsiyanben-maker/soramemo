@@ -1,4 +1,4 @@
-// 古い記録を移す日の候補（cold_candidates）を、索引で次の日を1件ずつ引く形にした（移行 155）。
+// 古い記録を移す日の候補（cold_candidates）を、索引で次の日を1件ずつ引く形にした（移行 174。もとは 155）。
 // 前の作り（日ごとにまとめて並べ替える）と同じ結果になるか、作り物のデータでいろいろな日・件数で比べる。
 import { PGlite } from '@electric-sql/pglite';
 import fs from 'fs';
@@ -84,7 +84,7 @@ check('件数は 40 まで・航跡は便の実績より先', r.b.length === 40 
 
 // 移したあと（消えた日）は候補から外れる
 const first = (await db.query(`select tbl, day::text from public.cold_candidates('2026-01-01', 1)`)).rows[0];
-const n = (await db.query(`select jsonb_array_length(public.cold_rows($1, $2::date)) as n`, [first.tbl, first.day])).rows[0].n;
+const n = (await db.query(`select json_array_length(public.cold_rows($1, $2::date)::json) as n`, [first.tbl, first.day])).rows[0].n;
 await db.query(`select public.cold_done($1, $2::date, 'p', $3, 1)`, [first.tbl, first.day, n]);
 r = await same('2026-01-01', 6);
 check('移した日は候補から外れる', r.ok && !r.b.some((x) => x.tbl === first.tbl && x.day === first.day), r);

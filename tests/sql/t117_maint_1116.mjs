@@ -1,4 +1,4 @@
-// 定期の手入れ 11/16（移行 170）：時間の上限のない処理をなくす
+// 定期の手入れ 11/16（移行 178。もとは 170）：時間の上限のない処理をなくす
 //   1. ops-log-cleanup の仕事の文に statement_timeout と lock_timeout が入っているか（pg_cron は手元にないので文を見る）
 //   2. 裏の処理が呼ぶ書く関数12個に lock_timeout が付いたか・値は毎晩 5s／毎分 10s か
 //   3. 付けたあとも関数は動き、呼んだあとに設定が残らないか（呼び出し元の lock_timeout は元のまま）
@@ -12,7 +12,7 @@ create function auth.uid() returns uuid language sql stable as $$ select nullif(
 create function auth.jwt() returns jsonb language sql stable as $$ select jsonb_build_object('sub', current_setting('request.jwt.claim.sub', true), 'aal', 'aal2') $$;
 grant usage on schema public, auth to anon, authenticated, service_role; grant execute on function auth.uid(), auth.jwt() to anon, authenticated, service_role;`);
 const files = fs.readdirSync(dir).sort();
-const NEW = '20261116000170_maint_1116.sql';
+const NEW = '20261116000178_maint_1116.sql';
 let bad = 0; const check = (label, ok, v) => { console.log((ok ? 'OK ' : 'NG ') + label, ok ? '' : JSON.stringify(v)); if (!ok) bad++; };
 const rows = async (sql, p) => (await db.query(sql, p)).rows;
 
@@ -24,7 +24,7 @@ const FNS = {
 const info = async () => Object.fromEntries((await rows(`select p.proname, p.prosrc, p.proconfig, p.proacl::text acl, p.prosecdef
   from pg_proc p join pg_namespace n on n.oid = p.pronamespace where n.nspname = 'public' and p.proname = any($1)`, [Object.keys(FNS)])).map((r) => [r.proname, r]));
 
-// 170 の前まで入れて、前の形をとっておく
+// 178 の前まで入れて、前の形をとっておく
 for (const f of files) if (f < NEW) await db.exec(fs.readFileSync(dir + f, 'utf8'));
 const before = await info();
 check('12個の関数がそろっている（名前が変わっていない）', Object.keys(before).length === 12, Object.keys(before));

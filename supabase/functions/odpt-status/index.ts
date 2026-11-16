@@ -11,6 +11,7 @@ import { liveryPlans, odptStatus } from "../_shared/odpt_status.ts";
 import { notifyFlights, sendSpPush } from "../_shared/alert_push.ts";
 import { fastTargets } from "../_shared/odpt_fast.ts";
 import { LIVERIES } from "../_shared/liveries.ts";
+import { feedDates, putFeedDates } from "../_shared/odpt_date.ts";
 
 const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, { auth: { persistSession: false } });
 const ODPT_KEY = Deno.env.get("ODPT_CONSUMER_KEY") ?? "";
@@ -125,6 +126,9 @@ Deno.serve(async (req) => {
     const errors: string[] = [];
     const depItems = await fetchAll("Departure", [...new Set(scheds.map((x) => x.dep))], errors);
     const arrItems = await fetchAll("Arrival", [...new Set(scheds.map((x) => x.arr))], errors);
+    // ODPT のデータの時刻（dc:date）を種類・航空会社ごとに残す（画面で「○時○分 時点」と出すため。失敗しても続ける）
+    const fdErr = await putFeedDates(admin, [...feedDates("FlightInformationDeparture", depItems, OPERATORS), ...feedDates("FlightInformationArrival", arrItems, OPERATORS)]);
+    if (fdErr) errors.push(fdErr);
     const { alerts, updates } = odptStatus(depItems, arrItems, scheds, (i) => names.get(i) ?? i);
     // 欠航の便に出ていた推定の遅れ・飛行中のお知らせは消す（別の機体と取り違えたもの）
     const cancelled = alerts.filter((a) => a.kind === "cancel").map((a) => a.schedule_id);
