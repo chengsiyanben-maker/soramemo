@@ -1,6 +1,7 @@
 # チェックイン担当の帳面
 
 ## いま持っている仕事
+- 11/16 17時26分（日本時間）PR #107（見落としの片付け）が main に入った。本番に出たかは次の回に Actions で確かめる。ODPT の時刻はデータ担当の odpt_feed_at が入るまで今までの文のまま
 - 見落としの片付け（11/16 14時10分の PM の指示・本人「OK」）：済み。ブランチ checkin/redo-1116（main 2ae2e1f から）・下書き PR #107（062e504・見張り中）、報告 docs/pm/report-redo-1116.md、写真 docs/pm/shots-redo-1116/
   - 1 運用タブの遅れのカードを1便1枚（fix/fw-merge の入れ直し）：通知のまとめ方にそろえ、便名の0をそろえる・共同運航（出発・到着・出発の定刻が同じ。std を返せばそれ）を1枚・便名は運航情報 → JAL・ANA。足した fwMerge・fwNo（FW_RANK）／変えた fwCard・fwHTML・delayTileHTML。t135
   - 2 送れないときの言い方（#15 の入れ直し）：変えた auSendErr・auSend。t115
