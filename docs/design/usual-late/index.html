@@ -1,0 +1,157 @@
+<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=390,initial-scale=1"><title>いつもより遅いの見せ方 画面案</title><style>
+:root{--bg:#EEF1F5;--card:#FFFFFF;--ink:#24292F;--ink2:#374151;--mute:#6B7280;--sub:#8A919C;--pill:#EEF0F3;
+  --blue:#2563EB;--intl:#1D4ED8;--intl-wash:#DBEAFE;--late:#B45309;--late-wash:#FEF3C7;--ok:#1F7A3F;
+  --us:#92400E;--us-line:#C2853B;--us-gray:#4B5563;--us-gline:#A3AAB5;--hot:#9A3412;--hot-wash:#FFF1EA;
+  --sh:0 12px 26px -18px rgba(15,23,42,.30),inset 0 0 0 1px rgba(17,24,39,.06);
+  --gothic:"Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic UI","Noto Sans CJK JP","Noto Sans JP",system-ui,sans-serif}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg)}
+body{width:390px;min-height:844px;margin:0 auto;font:500 15px/1.5 var(--gothic);color:var(--ink);-webkit-font-smoothing:antialiased;position:relative;overflow-x:hidden}
+.pad{padding:12px 16px 120px}
+button{font:inherit;color:inherit}
+/* いつもとの比べの札（推定）：点線の縁＋波の印。JAL・ANA の「○分遅れ」（塗り・定刻つき）と形で分ける */
+.us{display:inline-flex;align-items:center;gap:5px;border-radius:999px;padding:3px 10px 3px 8px;font-size:13px;font-weight:800;line-height:1.35;white-space:nowrap;border:1.5px dashed var(--us-line);color:var(--us);background:#fff}
+.us svg{flex:none;width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round}
+.us small{font-size:13px;font-weight:700;opacity:.75}
+.us.g{border-color:var(--us-gline);color:var(--us-gray)}
+.us.big{font-size:15px;padding:5px 12px 5px 10px}
+/* JAL・ANA の遅れ（今の形：定刻＋塗りの字） */
+.jl{display:inline-flex;align-items:center;border-radius:6px;padding:1px 7px;font-size:13px;font-weight:800;background:var(--late-wash);color:var(--late)}
+/* ホーム（乗る便のカード） */
+.mapbg{height:300px;background:linear-gradient(180deg,#E9EDF1,#E3E8EE);position:relative;overflow:hidden}
+.mapbg svg{position:absolute;inset:0;width:100%;height:100%}
+.topbar{position:absolute;left:16px;right:16px;top:12px;display:flex;justify-content:space-between;gap:8px;z-index:2}
+.seg{display:flex;background:#E3E7EC;border-radius:999px;padding:4px}
+.seg span{flex:1;height:40px;display:flex;align-items:center;justify-content:center;border-radius:999px;font-size:15px;font-weight:800;color:var(--mute)}
+.topbar .seg{width:236px;background:rgba(255,255,255,.9);box-shadow:var(--sh)}
+.topbar .seg span{font-size:14px}
+.topbar .seg span.on{background:#1F2937;color:#fff}
+.topbar .me{height:48px;padding:0 16px;border-radius:999px;background:var(--card);box-shadow:var(--sh);display:flex;align-items:center;font-size:14px;font-weight:800}
+.hsheet{position:relative;margin-top:-26px;background:#EEF1F5;border-radius:26px 26px 0 0;padding:10px 16px 120px;box-shadow:0 -10px 24px -18px rgba(15,23,42,.35)}
+.hsheet .grab{width:40px;height:5px;border-radius:9px;background:#C9CFD7;margin:0 auto 12px}
+.ride{padding:14px 16px;border-radius:18px;background:var(--card);box-shadow:var(--sh);font-size:14px;line-height:1.6}
+.ride .rh{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
+.ride .rh b{font-size:17px;font-weight:800}
+.ride .rh span{flex:1;font-size:15px;color:var(--ink2)}
+.ride .rh button{border:0;background:none;color:var(--mute);font-weight:700;font-size:14px;min-height:44px;padding:0 4px;text-decoration:underline}
+.ride .rl{display:block;color:var(--mute);font-size:13px;margin-top:2px}
+.ride .rv{display:block;font-weight:800;font-size:15px;margin-top:4px}
+.ride .rv.ok{color:var(--ok)}
+.ride .rv.hot{color:var(--hot)}
+.tag{display:inline-flex;font-size:13px;font-weight:700;border-radius:6px;padding:0 6px;margin-left:6px;vertical-align:2px}
+.tag.f{background:var(--intl-wash);color:var(--intl)}
+.tag.n{background:#EEF0F3;color:var(--ink2)}
+/* 到着の見込み（大きな数字＋札） */
+.eta{margin-top:10px;background:#F7F8FA;border-radius:16px;padding:12px 14px}
+.eta .k{font-size:13px;color:var(--mute);font-weight:700}
+.eta .row{display:flex;align-items:center;flex-wrap:wrap;gap:6px 10px;margin-top:2px}
+.eta .t{font-size:32px;font-weight:900;letter-spacing:.01em;font-variant-numeric:tabular-nums;line-height:1.15}
+.eta .t small{font-size:15px;font-weight:700;color:var(--sub);margin-left:2px}
+.eta .us-n{font-size:14px;color:var(--ink2);margin-top:4px}
+.eta .us-n b{font-weight:800;font-variant-numeric:tabular-nums}
+.eta .us-n small{color:var(--sub);font-size:13px;margin-left:4px}
+.eta .two{display:grid;grid-template-columns:1fr 26px 1fr;align-items:end;margin-top:4px}
+.eta .two div span{display:block;font-size:13px;color:var(--mute);font-weight:700}
+.eta .two div b{font-size:28px;font-weight:900;font-variant-numeric:tabular-nums}
+.eta .two div.u b{color:var(--sub);font-weight:800}
+.eta .two i{font-style:normal;color:var(--sub);font-size:18px;text-align:center;padding-bottom:6px}
+.eta .diff{font-size:14px;font-weight:800;color:var(--us);margin-top:2px}
+.usnote{display:flex;gap:6px;align-items:flex-start;font-size:13px;line-height:1.6;color:var(--ink2);margin-top:8px}
+.usnote svg{flex:none;width:14px;height:14px;stroke:var(--us-gray);fill:none;stroke-width:2;stroke-linecap:round;margin-top:3px}
+.usnote b{font-weight:800}
+.box{display:flex;gap:8px;align-items:flex-start;font-size:13px;line-height:1.7;color:var(--ink2);background:#F4F6F9;border-radius:14px;padding:10px 12px;margin-top:10px}
+.box svg{flex:none;width:16px;height:16px;stroke:var(--mute);fill:none;stroke-width:2;margin-top:3px}
+.box.hot{background:var(--hot-wash);color:var(--hot)}
+.box.hot svg{stroke:var(--hot)}
+.box b{font-weight:800}
+.box small{display:block;color:var(--mute);font-size:13px;font-weight:500}
+.rbar{height:6px;border-radius:9px;background:#E5E8EC;margin-top:10px;overflow:hidden}
+.rbar i{display:block;height:100%;background:var(--blue);border-radius:9px}
+.fwnote{font-size:13px;line-height:1.7;color:var(--sub);margin:10px 0 0}
+.fwnote mark{background:none;color:var(--ink2);font-weight:700}
+.peek{margin-top:12px;height:86px;border-radius:18px;background:var(--card);box-shadow:var(--sh);padding:14px 16px;font-size:15px;font-weight:800;color:var(--ink2)}
+/* 運用タブ（11/16 の決定：上は「空港｜機体」と空港のピルの1行） */
+.brand{display:flex;justify-content:space-between;align-items:center;height:52px}
+.brand b{font-size:20px;font-weight:800;letter-spacing:.06em}
+.brand span{height:44px;display:inline-flex;align-items:center;padding:0 16px;border-radius:999px;background:var(--card);box-shadow:var(--sh);font-size:14px;font-weight:800}
+.opsrow{display:flex;align-items:center;gap:8px;margin-top:10px}
+.sw{display:inline-flex;background:#E3E7EC;border-radius:999px;padding:3px}
+.sw span{height:44px;padding:0 14px;display:inline-flex;align-items:center;border-radius:999px;font-size:14px;font-weight:800;color:var(--mute)}
+.sw span.on{background:#1E3A5F;color:#fff}
+.ap{height:48px;display:inline-flex;align-items:center;gap:8px;padding:0 14px 0 8px;border-radius:999px;background:var(--card);box-shadow:var(--sh);font-size:17px;font-weight:800}
+.ap i{font-style:normal;font-size:13px;font-weight:800;color:#fff;background:#3B4350;border-radius:8px;padding:2px 7px}
+.views{display:flex;gap:22px;margin:16px 4px 12px;font-size:15px;font-weight:800;color:var(--mute);white-space:nowrap;overflow:hidden}
+.views span{padding-bottom:6px}
+.views span.on{color:var(--ink);box-shadow:inset 0 -3px 0 var(--ink)}
+.card{background:var(--card);border-radius:22px;box-shadow:var(--sh);padding:16px}
+.bdhead{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:2px 0 10px}
+.bdhead h3{margin:0;font-size:16px;font-weight:800}
+.bdtabs{display:inline-flex;gap:4px;background:var(--pill);padding:3px;border-radius:999px}
+.bdtabs span{border-radius:999px;padding:0 14px;height:44px;display:inline-flex;align-items:center;font-size:14px;font-weight:700;color:var(--mute)}
+.bdtabs span.on{background:var(--card);color:var(--ink);box-shadow:0 2px 6px -2px rgba(15,23,42,.25)}
+.bdseq{list-style:none;margin:0 -16px 0 0;padding:16px 16px 0 0;display:grid;grid-auto-flow:column;grid-auto-columns:150px;gap:10px;overflow:hidden;position:relative}
+.bdseq::before{content:"";position:absolute;left:0;right:0;top:6px;height:3px;border-radius:2px;background:linear-gradient(90deg,#BFDBFE,var(--blue))}
+.bdseq.fg{grid-auto-columns:172px}
+.bdseq.fg::before{background:repeating-linear-gradient(90deg,#9CA3AF 0 6px,transparent 6px 11px)}
+.bdseq li{position:relative;display:flex;flex-direction:column;gap:2px;font-size:13px;color:var(--mute);min-width:0}
+.bdseq .dot{position:absolute;left:0;top:-14px;width:11px;height:11px;border-radius:50%;background:var(--card);border:2.5px solid var(--blue)}
+.bdseq.fg .dot{border-color:#9CA3AF;border-style:dashed}
+.bdseq b{font-size:15px;font-weight:800;color:var(--ink);line-height:1.3}
+.bdseq .fl{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bdseq .fl i{font-style:normal;font-size:13px;font-weight:700;color:var(--intl);background:var(--intl-wash);border-radius:4px;padding:0 5px;margin-right:5px}
+.bdseq .fl i.n{color:var(--ink2);background:#EEF0F3}
+.bdseq .rel{font-size:16px;font-weight:800;color:var(--ink);margin-top:2px}
+.bdseq .tm{font-variant-numeric:tabular-nums}
+.bdseq .us{align-self:flex-start;margin-top:6px}
+.key{display:flex;align-items:flex-start;gap:6px;font-size:13px;line-height:1.6;color:var(--mute);margin:14px 0 0}
+.key .us{flex:none;padding:1px 7px 1px 6px}
+.sec2{margin-top:22px}
+/* 下のタブ帯 */
+.tabbar{position:fixed;left:50%;transform:translateX(-50%);bottom:12px;width:362px;height:68px;border-radius:999px;background:rgba(255,255,255,.96);box-shadow:0 14px 34px -16px rgba(15,23,42,.35),inset 0 0 0 1px rgba(17,24,39,.06);display:flex;justify-content:space-around;align-items:center;z-index:5}
+.tabbar span{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:13px;font-weight:800;color:var(--mute);min-width:56px}
+.tabbar span svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:1.8}
+.tabbar span.on{color:var(--blue)}
+/* シート（便のくわしく＝今の .spsheet に合わせ、字は 13px 以上に） */
+.dim{position:fixed;inset:0;background:rgba(15,23,42,.42);z-index:8}
+.sheet{position:fixed;left:50%;transform:translateX(-50%);bottom:0;width:390px;max-height:94vh;overflow:hidden;background:var(--card);border-radius:28px 28px 0 0;padding:10px 20px 28px;z-index:9;box-shadow:0 -18px 40px -20px rgba(15,23,42,.4)}
+.sheet .grab{width:40px;height:5px;border-radius:9px;background:#D5DAE1;margin:0 auto 6px}
+.shh{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+.shh small{display:block;font-size:13px;color:var(--mute)}
+.shh h2{font-size:24px;font-weight:900;margin:0}
+.shh button{flex:none;width:44px;height:44px;border:0;border-radius:50%;background:var(--pill);font-weight:800;font-size:18px}
+.spcard{display:block;margin-top:10px;background:#fff;box-shadow:inset 0 0 0 1px #E6E9EE;border-radius:18px;padding:12px 14px}
+.spcard.soft{background:#F4F6F9;box-shadow:none}
+.spcard>small{display:block;font-size:13px;color:var(--mute)}
+.spcard>b{display:block;font-size:24px;font-weight:900;font-variant-numeric:tabular-nums}
+.spcard>b small{font-size:14px;color:var(--sub);font-weight:700;margin-left:2px}
+.spcard .lines{font-size:14px;color:var(--ink2);margin-top:4px}
+.spgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.spgrid .spcard{margin-top:10px}
+.kv{list-style:none;margin:6px 0 0;padding:0}
+.kv li{display:grid;grid-template-columns:96px 1fr;gap:8px;padding:8px 0;font-size:14px}
+.kv li+li{box-shadow:0 -1px 0 #EEF0F3}
+.kv li span{color:var(--mute);font-size:13px}
+.kv li b{font-weight:800}
+.kv li b small{display:block;font-size:13px;font-weight:600;color:var(--sub)}
+/* 一覧 */
+h1.t{font-size:20px;font-weight:900;margin:8px 0 4px}
+p.lead{font-size:14px;color:var(--ink2);margin:0 0 12px;line-height:1.7}
+.cmp{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.cmp .card{padding:14px}
+.cmp h4{margin:0 0 6px;font-size:15px;font-weight:800}
+.cmp p{margin:6px 0 0;font-size:13px;line-height:1.6;color:var(--ink2)}
+.cmp .ex{font-size:14px;font-weight:700;margin-top:8px}
+.cat{list-style:none;margin:0;padding:0}
+.cat li{display:grid;grid-template-columns:158px 1fr;gap:10px;align-items:center;padding:12px 0}
+.cat li+li{box-shadow:0 -1px 0 #EEF0F3}
+.cat li p{margin:0;font-size:14px;line-height:1.55;color:var(--ink2)}
+.cat li p small{display:block;font-size:13px;color:var(--mute)}
+.lvh{font-size:14px;font-weight:800;color:var(--mute);margin:16px 0 0}
+/* 今の画面 */
+.shot{position:relative;border-radius:22px;overflow:hidden;box-shadow:var(--sh);background:#fff}
+.shot img{display:block;width:100%}
+.mk{position:absolute;width:30px;height:30px;border-radius:50%;background:#C2410C;color:#fff;font-size:15px;font-weight:900;display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 3px #fff}
+.nl{list-style:none;margin:12px 0 0;padding:0}
+.nl li{display:grid;grid-template-columns:30px 1fr;gap:10px;padding:8px 0;font-size:14px;line-height:1.6;color:var(--ink2)}
+.nl li i{font-style:normal;width:26px;height:26px;border-radius:50%;background:#C2410C;color:#fff;font-weight:900;font-size:14px;display:flex;align-items:center;justify-content:center}
+</style></head><body><div class="pad"><h1 class="t">「いつもより○分遅い（推定）」の見せ方</h1><p class="lead">design/usual-late 1版（11/16）。場面は 11月16日（月）19時50分。中身の形はデータ担当の foreign_late・foreign_usual・foreign_watch（PR #104）。アプリには入れない画面案です。</p><div class="card"><ul style="list-style:none;margin:0;padding:0"><li style="padding:12px 0;box-shadow:0 -1px 0 #EEF0F3"><a href="00a.html" style="color:var(--ink);font-weight:800;text-decoration:none;display:block;min-height:44px">00a　今の案内板の「海外の航空会社（いま近くにいる便）」<br><small style="font-size:13px;font-weight:500;color:var(--mute)">png/00a.png</small></a></li><li style="padding:12px 0;box-shadow:0 -1px 0 #EEF0F3"><a href="00b.html" style="color:var(--ink);font-weight:800;text-decoration:none;display:block;min-height:44px">00b　今の乗る便のカード（時刻表にない便）<br><small style="font-size:13px;font-weight:500;color:var(--mute)">png/00b.png</small></a></li><li style="padding:12px 0;box-shadow:0 -1px 0 #EEF0F3"><a href="U1.html" style="color:var(--ink);font-weight:800;text-decoration:none;display:block;min-height:44px">U1　案A（おすすめ）乗る便：見込み＋点線の札「いつもより32分遅い」<br><small style="font-size:13px;font-weight:500;color:var(--mute)">png/U1.png</small></a></li><li style="padding:12px 0;box-shadow:0 -1px 0 #EEF0F3"><a href="U1x.html" style="color:var(--ink);font-weight:800;text-decoration:none;display:block;min-height:44px">U1x　案B（比べる用）乗る便：いつも → 見込み を並べる<br><small style="font-size:13px;font-weight:500;color:var(--mute)">png/U1x.png</small></a></li><li style="padding:12px 0;box-shadow:0 -1px 0 #EEF0F3"><a href="U2.html" style="color:var(--ink);font-weight:800;text-decoration:none;display:block;min-height:44px">U2　乗る便：ODPT にない日本の会社・出発前（いつもの時刻だけ）<br><small style="font-size:13px;font-weight:500;color:var(--mute)">png/U2.png</small></a></li><li style="padding:12px 0;box-shadow:0 -1px 0 #EEF0F3"><a href="U2b.html" style="color:var(--ink);font-weight:800;text-decoration:none;display:block;min-height:44px">U2b　乗る便：飛行中・門限に近い見込み<br><small style="font-size:13px;font-weight:500;color:var(--mute)">png/U2b.png</small></a></li><li style="padding:12px 0;box-shadow:0 -1px 0 #EEF0F3"><a href="U2c.html" style="color:var(--ink);font-weight:800;text-decoration:none;display:block;min-height:44px">U2c　乗る便：ダイバートの推定<br><small style="font-size:13px;font-weight:500;color:var(--mute)">png/U2c.png</small></a></li><li style="padding:12px 0;box-shadow:0 -1px 0 #EEF0F3"><a href="U3.html" style="color:var(--ink);font-weight:800;text-decoration:none;display:block;min-height:44px">U3　運用タブの案内板：JAL・ANA の定刻つきと、時刻表にない便の札<br><small style="font-size:13px;font-weight:500;color:var(--mute)">png/U3.png</small></a></li><li style="padding:12px 0;box-shadow:0 -1px 0 #EEF0F3"><a href="U4.html" style="color:var(--ink);font-weight:800;text-decoration:none;display:block;min-height:44px">U4　便のくわしく：いつもの時刻・回数・ばらつき<br><small style="font-size:13px;font-weight:500;color:var(--mute)">png/U4.png</small></a></li><li style="padding:12px 0;box-shadow:0 -1px 0 #EEF0F3"><a href="U5.html" style="color:var(--ink);font-weight:800;text-decoration:none;display:block;min-height:44px">U5　見分け方と札の一覧<br><small style="font-size:13px;font-weight:500;color:var(--mute)">png/U5.png</small></a></li></ul></div></div></body></html>
