@@ -99,7 +99,7 @@ main 4af96c8（#109 で foreign_legs・foreign_watch が入ったあと）から
 - ウィキメディア・コモンズの分類の頁はこの回は読めなかった。読めれば外した機体のいくつかは戻せる見込み
 
 ## 9. 確かめた結果
-- SQL：t123（18項目）すべて OK。SQL のテスト全部：（下）
+- SQL：t123（18項目）すべて OK。SQL のテスト全部 124本 通過（手元の PGlite）
 - deno test：全部 268本 通過（livery_extra_test 5本・liveries_test 4本を含む）。deno check（airport-traffic）通過
 - `node tools/migrations.mjs check`：174件で番号の重なりなし（183 は定期の手入れ maint/2026-11-16b・PR #111 が使っているので、この PR は 184・t123）
 
