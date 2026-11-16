@@ -16,11 +16,13 @@ async def main():
             flights:[{id:'a1',from:id('HND'),to:id('CTS'),dep:t,arr:t+7e6,km:820,airline:'JL',no:null},{id:'a2',from:id('CTS'),to:id('HND'),dep:t+864e5,arr:t+864e5+7e6,km:820,airline:null,no:null},{id:'a3',from:id('HND'),to:id('OKA'),dep:t+2*864e5,arr:t+2*864e5+9e6,km:1555,airline:'NH',no:null}],
             manual:[{from:id('ITM'),to:id('FUK'),d:'2025-05-05',airline:null},{from:id('HND'),to:id('KIX'),d:'2025-06-06',airline:null}]}));
           __fake.db.manual_flights.push({id:900, from_airport:id('HND'), to_airport:id('KIX'), flown_on:'2025-06-06', airline:null}); }""")
-        await pg.fill('#email', 'me@example.com'); await pg.click('#sendLink'); await pg.wait_for_timeout(200)
-        print('コード欄:', await pg.is_visible('#codeBox'))
-        await pg.fill('#loginCode', '111111'); await pg.click('#verifyCode'); await pg.wait_for_timeout(200); print('違うコード:', await pg.inner_text('#loginMsg'))
-        await pg.fill('#loginCode', '12345678'); await pg.click('#verifyCode'); await pg.wait_for_timeout(700)
-        print('ログイン後:', await pg.evaluate('user && user.email'), '| ログイン欄:', await pg.is_hidden('#loginBox'))
+        # ホームのログイン欄はなくしたので、右上の「ログイン」から開くログインの画面で入る
+        await pg.click('#openSettings'); await pg.wait_for_timeout(200)
+        await pg.fill('#auEmail', 'me@example.com'); await pg.click('#dAuth [data-au=login-send]'); await pg.wait_for_timeout(200)
+        print('コード欄:', await pg.is_visible('#auCode'))
+        await pg.fill('#auCode', '111111'); await pg.dispatch_event('#auCode', 'input'); await pg.click('#dAuth [data-au=verify]'); await pg.wait_for_timeout(300); print('違うコード:', (await pg.inner_text('#auStep')).replace('\n',' ')[-40:])
+        await pg.fill('#auCode', '12345678'); await pg.dispatch_event('#auCode', 'input'); await pg.click('#dAuth [data-au=verify]'); await pg.wait_for_timeout(700)
+        print('ログイン後:', await pg.evaluate('user && user.email'), '| ログインの画面が閉じる:', await pg.evaluate('!$("dAuth").open'))
         print('引き継ぎの案内:', (await pg.inner_text('#migrateBar')).replace('\n',' ')[:120])
         await pg.click('[data-migrate=go]'); await pg.wait_for_timeout(700)
         print('結果:', await pg.inner_text('#msg'))
