@@ -17,6 +17,7 @@
 - リモートに古い `shugyo` ブランチ（10/21）があるので、`shugyo/<名前>` は push できない（ref がぶつかる）。`shugyo-<名前>` で作る
 
 ## いま持っている仕事
+- 見落としの片付け（11/16）：#44 を今の main と比べた。t57 の直しは PR #64 で main に入っていたので入れ直さず、main になかった SFJ の SQL だけ写した。ブランチ shugyo-redo-1116・下書き PR #105・報告 docs/pm/report-shugyo-redo-1116.md。t57・t125 成功。#44 は閉じてよいと報告に書いた
 - 修行の見方のシート（11/11 夜・帳面の次にやること1）：11/12 10時24分 本人が PR #71 を main に入れた。ブランチ shugyo-view-sheet・報告 docs/pm/report-shugyo-view-sheet.md・写真 docs/pm/shugyo-view-sheet/
   - 鉛筆→「修行の見方」シート（画面案 design/view-settings 02c-v2・02c2-v2）。見方3つ＋道のりに出すもの4つの ON／OFF（loRowHTML）。最後の1つ（案A）・道のり OFF の間は道のりに出すものを押せない・元に戻す・「表示の編集をすべて見る」
   - `LO_EXT.sg = { groups:sgVsGroups, toggle:sgVsToggle, reset:sgVsReset }` で1枚に修行のカード。sgViewsPage と data-sg-sw は消した。dialog #dSgViews は JS で足す
@@ -29,6 +30,7 @@
 - 本人の返事待ち：候補1（年の区切りを日本時間へ）を12月前に直すか／計算ルールの文書の乗り継ぎ欄を JAL の公式の値に直すか／端数をどう決めるか／SQL 2本（ANA の最後の日・SFJ の便）／候補7（端末版の古い計画の画面）を残すか消すか
 
 ## 次にやること
+（11/16 の見落としの片付けは済み：PR #105）
 0. PR #71（修行の見方のシート）は main に入った（11/12）。本人の答え（全部乗せに戻すで修行も戻すか・1枚の補足）が出たら合わせる。PR #64 の本人の答えが出たら合わせる
 1. 本人の了解が出たら、候補1：sgYear・sgMain・sgMoney・renderShugyoCard・sgMonthsView の年と月を日本時間（sgJstDay）でそろえる。ブランチ shugyo-jst-year
 2. 本人の了解が出たら、計算ルールの文書の乗り継ぎの欄を JAL の公式の値に書き換える（必要なら SG_XFER を会社ごとに）
@@ -67,3 +69,4 @@
 
 ## PM から積んだ次の仕事（11/16 14時10分、見落としの片付け。本人「OK」）
 一覧は docs/pm/board/overlooked-1116.md。作ったのに main に入っていない直しを、今の main に取り込み直して（番号・テストの名前のぶつかりも直して）、新しいブランチの下書き PR に。本番には入れない。古い PR は「入れ直したので閉じてよい」と報告に書く。#44 shugyo-check1108（t57 を金額を隠した画面に合わせる）。今の main でまだ要るか確かめ、要るなら shugyo/redo-1116
+→ 済み（11/16）：t57 は main に入っていた。SQL だけ写して PR #105（ブランチは ref のぶつかりで shugyo-redo-1116）
