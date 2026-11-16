@@ -1054,6 +1054,7 @@ div.viewsw>button[aria-selected="true"]{background:none;border-color:var(--vw-in
 .fwb{font-size:12px;font-weight:900;padding:3px 8px;border-radius:8px;background:#FDE7E7;color:#B42318}.fwb.bad{background:#B42318;color:#fff}
 .fwc .r2{display:flex;align-items:center;gap:8px}.fwc .r2 svg{width:18px;height:11px;fill:none;stroke:#9CA3AF;stroke-width:1.8;flex:none}
 .fwap{display:flex;flex-direction:column;line-height:1.15}.fwap b{font:700 17px ui-monospace,"SFMono-Regular",Menlo,monospace}.fwap small{font-size:11px;color:var(--op-mute,var(--sumi))}
+.odptat{white-space:nowrap}
 .fwtms{margin-left:auto;display:flex;flex-direction:column;align-items:flex-end;gap:2px}.fwtms .fwtm{margin-left:0}.fwtm small{font-family:var(--gothic);font-size:10.5px;color:var(--fw-mute,var(--op-mute,var(--sumi)))}
 .fwtm{margin-left:auto;display:flex;align-items:baseline;gap:6px;font-family:ui-monospace,"SFMono-Regular",Menlo,monospace}.fwtm s{font-size:13px;color:var(--op-mute,var(--sumi))}.fwtm b{font-size:18px;color:#B42318}
 .fwc .r3{display:flex;align-items:center;gap:6px;flex-wrap:wrap}.fwtag{font-size:11px;padding:2px 8px;border-radius:6px;background:var(--op-card,#fff);color:var(--op-ink,var(--ink))}
@@ -3923,7 +3924,33 @@ const AIRLINES = [
   {id:"OT", name:"その他の航空会社",            short:"その他", group:"OTHER"},
 ];
 // ODPT（公共交通オープンデータセンター）のデータを出すところに必ず添える短い出典（全文は利用規約の「11. 外部のデータ」）
-const ODPT_CREDIT = `出典：公共交通オープンデータセンター（正確・完全とは限りません。表示について航空会社へ直接問い合わせないでください。<a href="terms.html#data" target="_blank" rel="noopener">くわしく</a>）`;
+// ODPT の約束で、データの時刻（dc:date）も出典の近くに出す。サーバーの odpt_feed_at() が返す時刻を ODPT_AT に入れ、出典の文を作り直す
+//   （どの画面も描くたびに ODPT_CREDIT を読むので、次に描いたときに「○時○分時点」が入る。取れないあいだは今までの文のまま）
+let ODPT_AT = { status:null, timetable:null };
+function odptAtText(at, dateOnly){
+  const t = Date.parse(at || ""); if(!t) return "";
+  const d = new Date(t + 9*36e5), today = new Date(Date.now() + 9*36e5);
+  const hm = `${d.getUTCHours()}時${String(d.getUTCMinutes()).padStart(2, "0")}分`;
+  return d.toISOString().slice(0, 10) === today.toISOString().slice(0, 10) ? hm : `${d.getUTCMonth() + 1}月${d.getUTCDate()}日${dateOnly ? "" : " " + hm}`;
+}
+function odptCredit(){
+  const st = odptAtText(ODPT_AT.status), tt = odptAtText(ODPT_AT.timetable, true);
+  const at = [st && `運航情報 ${st}`, tt && `時刻表 ${tt}`].filter(Boolean).join("・");
+  return `出典：公共交通オープンデータセンター（${at ? `<span class="odptat">${at}時点</span>。` : ""}正確・完全とは限りません。表示について航空会社へ直接問い合わせないでください。<a href="terms.html#data" target="_blank" rel="noopener">くわしく</a>）`;
+}
+let ODPT_CREDIT = odptCredit();
+function setOdptAt(d){
+  const ok = v => typeof v === "string" && !!Date.parse(v) ? v : null;
+  ODPT_AT = { status:ok(d && d.status_at), timetable:ok(d && d.timetable_at) }; ODPT_CREDIT = odptCredit();
+}
+let ODPT_AT_READ = 0;
+async function loadOdptAt(){
+  if(!SERVER || Date.now() - ODPT_AT_READ < 180_000) return;   // 3分に1回まで（取れなかったときも読み直さない）
+  ODPT_AT_READ = Date.now();
+  try{ const r = await fetch(SORAMEMO_CONFIG.supabaseUrl.replace(/\/$/, "") + "/rest/v1/rpc/odpt_feed_at", { method:"POST",
+      headers:{ "Content-Type":"application/json", apikey:SORAMEMO_CONFIG.supabaseAnonKey, Authorization:"Bearer " + SORAMEMO_CONFIG.supabaseAnonKey }, body:"{}" });
+    if(r.ok) setOdptAt(await r.json()); }catch(e){}
+}
 const ALBY = Object.fromEntries(AIRLINES.map(x => [x.id, x]));
 const GROUPS = [["JAL","JALグループ"],["ANA","ANAグループ"],["OTHER","その他の航空会社"]];
 const KM_GOALS = [[1000,"1,000km"],[5000,"5,000km"],[10000,"1万km"],[20000,"2万km"],[40075,"地球一周"],[80150,"地球二周"]];
@@ -10010,6 +10037,7 @@ const FW_AT = new Map();   // IATA → 読んだ時刻（見方を変えたと�
 const fwOn = () => SERVER && !!user && !demo;
 async function loadFlightAlerts(iata){
   if(!SERVER) return;
+  loadOdptAt();   // 出典の「○時○分時点」（待たない）
   if(FW.has(iata) && opsFresh(FW_AT.get(iata) || 0, 50_000)) return;
   try{ const r = await fetch(SORAMEMO_CONFIG.supabaseUrl.replace(/\/$/, "") + "/rest/v1/rpc/flight_alerts", { method:"POST",
       headers:{ "Content-Type":"application/json", apikey:SORAMEMO_CONFIG.supabaseAnonKey, Authorization:"Bearer " + SORAMEMO_CONFIG.supabaseAnonKey }, body:JSON.stringify({ p_iata:iata }) });
@@ -10679,6 +10707,7 @@ async function renderOpsAlerts(){
   if(!SERVER) return;
   // 選んでいる見方で見えるものだけ読む（ほかの見方の分は、その見方を選んだときに読む）
   const need = opsNeed;
+  loadOdptAt();   // 出典の「○時○分時点」（待たない。次に描いたときに入る）
   if(need("special")) renderSpecial(); if(need("curfew")) renderCurfew(); if(need("board")) renderBoard(); if(need("yday")) renderYday();
   if(need("ontime")) renderOntime(); if(need("art")) renderArt(); if(need("ga")) renderGaBox();
   const box = $("opsAlerts");
