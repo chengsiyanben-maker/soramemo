@@ -29,7 +29,7 @@ for (const f of files) if (f < NEW) await db.exec(fs.readFileSync(dir + f, 'utf8
 const before = await info();
 check('12個の関数がそろっている（名前が変わっていない）', Object.keys(before).length === 12, Object.keys(before));
 check('前は lock_timeout が付いていない', Object.values(before).every((r) => !(r.proconfig ?? []).some((c) => c.startsWith('lock_timeout'))), null);
-for (const f of files) if (f >= NEW) await db.exec(fs.readFileSync(dir + f, 'utf8'));
+await db.exec(fs.readFileSync(dir + NEW, 'utf8'));   // 178 だけ入れて比べる（あとの移行で中身を足す関数があるため）
 const after = await info();
 
 // 2
@@ -38,6 +38,11 @@ check('12個に lock_timeout（毎晩 5s・毎分と30秒ごと 10s）', wrong.l
 // 4
 const changed = Object.keys(FNS).filter((k) => before[k].prosrc !== after[k].prosrc || before[k].acl !== after[k].acl || before[k].prosecdef !== after[k].prosecdef);
 check('本文・権限・security definer は変わっていない', changed.length === 0, changed);
+// あとの移行（181 の cold_done など）で作り直しても、上限は残る
+for (const f of files) if (f > NEW) await db.exec(fs.readFileSync(dir + f, 'utf8'));
+const later = await info();
+const lost = Object.entries(FNS).filter(([k, v]) => !(later[k]?.proconfig ?? []).includes(`lock_timeout=${v}`));
+check('あとの移行を全部入れても12個の lock_timeout は残る', lost.length === 0, lost.map(([k]) => [k, later[k]?.proconfig]));
 const other = (after.flight_alerts_put.proconfig ?? []).filter((c) => !c.startsWith('lock_timeout'));
 const otherBefore = (before.flight_alerts_put.proconfig ?? []);
 check('前からある関数の設定（search_path など）は残る', JSON.stringify(other) === JSON.stringify(otherBefore), { other, otherBefore });

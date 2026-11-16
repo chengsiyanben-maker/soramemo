@@ -53,3 +53,22 @@ PM の指示（11/16 11時40分、本人「海外のデータも収集したい�
 ## 出典
 - adsb.lol Historical data（ODbL 1.0）：https://www.adsb.lol/docs/open-data/historical/
 - adsblol/api（回数の上限の記載）：https://github.com/adsblol/api
+
+## 7. 11/16 14時の決定のあと（PM の指示 ①②③。本人「おすすめ」）
+本番の数（11/16 本人の SQL）：海外の会社など 1日 1,552回・1,346便・29空港。このブランチは **data/redo-1116（PR #108、移行 173〜180）を取り込んだ**ので、反映は #108 のあと。
+
+| | 作ったもの | テスト |
+|---|---|---|
+| ① ODPT にない日本の会社も集める | 171 を直した（まだ main にないので同じ番号のまま）：airline_codes の japan を **odpt** に（ODPT で見られる会社＝JL・NH の便名で飛ぶ JAL・JLJ・JTA・JAC・HAC・ANA・AKX・AJX だけ true）。foreign_legs_build は odpt の会社だけ外す（スカイマーク・ピーチ・ジェットスター・ジャパン・ZIPAIR・春秋航空日本・日本貨物航空などは JA の機体でも入る）。表にない会社の JA の機体（自家用・官庁など）は今までどおり入れない。foreign_late も同じ見分け。foreign-collect-check.sql を3つの区分（ODPT の会社・ODPT にない日本の会社・海外の会社など）に | t110（37項目） |
+| ③ 180日より前をファイル置き場へ | 移行 181 foreign_cold：cold-archive の候補に foreign_legs を足す（ほかの表は400日のまま、foreign_legs だけ180日）。cold_rows・cold_count・cold_done も足し、控えの表 cold_days の決まりに foreign_legs を足した。記録は消さない（置き場の gzip の JSON から読める）。cold_done の lock_timeout 5s（178）は残した。foreign_late・foreign_usual が読むのは前の8週だけなので画面に影響なし | t120（14項目） |
+| ② 乗る便の見張りの表 | 移行 182 foreign_watch：「この便に乗る」で選ばれた便のうち時刻表になく ODPT の会社でない便を1便1行で持ち、いつもの到着空港・時刻（foreign_usual）を定刻の代わりにする。foreign_watch_sync（5分ごと・30s）・foreign_watch_rows・foreign_watch_put（service_role だけ）。状態は運航日の3日後に消す（見張りの途中の状態で、記録ではない。記録は foreign_legs に残る）。RLS 有効・anon・authenticated には何も許さない | t121（17項目） |
+
+- 大きさの見込み：1日1,552回（日本の会社の分が足されて約2割増えると見て約1,900回）×約250バイト×180日 ≒ **約85MB で頭打ち**（それより前は置き場へ）
+- **② はまだ見張りの関数につないでいない**（表と関数まで）。次の回で、flight-watch に「foreign_watch_rows → live_positions の呼び出し符号で位置を見る → いつもの到着時刻とのずれ・成田などの門限の10分前・ダイバート・引き返しを判定 → foreign_watch_put → alert_push_claim（gkey は 便名@運航日@出発空港、分からなければ '---'。本文に「（推定）」）」を足す。出発前の遅れと欠航は出さない
+- 影響：チェックイン（つないだあと、乗る便の通知が時刻表にない便にも届く。画面は変えない）。経営なし
+
+- 確かめた結果：SQL のテスト全部（122本）通過（1回目の通しで t117 だけ落ち、181 で cold_done の中身が増えるのに合わせて直して通過）・deno test 262本 通過・番号の重なりなし
+
+### 本人に決めてほしいこと（追加）
+- 反映の順：#108（173〜180）→ このブランチ（171・181・182）。172（経営）とはぶつからない
+- 「いつもより○分遅い（推定）」の画面はデザインの画面案のあと

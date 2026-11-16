@@ -22,12 +22,14 @@ const one = async (sql, p) => (await rows(sql, p))[0];
 const ts = fs.readFileSync(new URL('../../supabase/functions/_shared/flight_watch.ts', import.meta.url), 'utf8');
 const body = ts.slice(ts.indexOf('const PREFIX'), ts.indexOf('};', ts.indexOf('const PREFIX')));
 const jpLine = /JAPAN_CARRIERS = new Set\(\[([^\]]*)\]/.exec(ts)[1]; const JP = new Set(jpLine.match(/[A-Z0-9]{2}/g));
+// 11/16 本人：ODPT で見られる会社（JL・NH の便名で飛ぶ呼び出し符号）だけを外し、ODPT にない日本の会社は集める
+const ODPT = new Set(); for (const x of body.matchAll(/"?(JL|NH)"?:\s*\[([^\]]*)\]/g)) for (const c of x[2].match(/[A-Z]{3}/g)) ODPT.add(c);
 const want = new Map();
-for (const x of body.matchAll(/"?([A-Z0-9]{2})"?:\s*\[([^\]]*)\]/g)) for (const c of x[2].match(/[A-Z]{3}/g)) if (!want.has(c) || JP.has(x[1])) want.set(c, [x[1], JP.has(x[1])]);
-const have = new Map((await rows(`select icao, iata, japan from public.airline_codes`)).map((r) => [r.icao, [r.iata, r.japan]]));
+for (const x of body.matchAll(/"?([A-Z0-9]{2})"?:\s*\[([^\]]*)\]/g)) for (const c of x[2].match(/[A-Z]{3}/g)) if (!want.has(c) || JP.has(x[1])) want.set(c, [x[1], ODPT.has(c)]);
+const have = new Map((await rows(`select icao, iata, odpt from public.airline_codes`)).map((r) => [r.icao, [r.iata, r.odpt]]));
 const diff = [...want].filter(([c, v]) => JSON.stringify(have.get(c)) !== JSON.stringify(v));
-check('airline_codes は flight_watch.ts の PREFIX・JAPAN_CARRIERS と同じ（ICAO が重なるときは日本の会社）', diff.length === 0 && want.size > 50, diff.slice(0, 5));
-check('日本貨物航空（NCA）は日本の会社', JSON.stringify(have.get('NCA')) === '["KZ",true]', have.get('NCA'));
+check('airline_codes は flight_watch.ts の PREFIX と同じ・odpt は JL・NH の呼び出し符号だけ（JAL・JLJ・JTA・JAC・HAC・ANA・AKX・AJX）', diff.length === 0 && want.size > 50 && [...have].filter(([, v]) => v[1]).map(([c]) => c).sort().join() === 'AJX,AKX,ANA,HAC,JAC,JAL,JLJ,JTA', diff.slice(0, 5));
+check('日本貨物航空（NCA）・スカイマーク・ピーチ・ZIPAIR は ODPT にないので集める', JSON.stringify(have.get('NCA')) === '["KZ",false]' && have.get('SKY')?.[1] === false && have.get('APJ')?.[1] === false && have.get('TZP')?.[1] === false, [have.get('NCA'), have.get('SKY')]);
 
 // 空港があるか
 const aps = (await rows(`select iata from public.airports where iata in ('HND','NRT','KIX','CTS')`)).map((r) => r.iata).sort();
@@ -44,7 +46,9 @@ const d0 = await D(-1);
 await db.exec([
   track('HND', d0, 'BAW5', '06:42', 0), leg('G-YMMU', 'BAW5', d0, '05:50', '06:43', 'B772'),
   track('HND', d0, 'JAL123', '07:00', 1), leg('JA731J', 'JAL123', d0, '06:55', '07:30', 'B738'),
-  track('NRT', d0, 'TZP12', '09:00', 1), leg('JA822J', 'TZP12', d0, '08:55', '09:40', 'B788'),   // 日本の機体（ZIPAIR）は入れない
+  track('NRT', d0, 'TZP12', '09:00', 1), leg('JA822J', 'TZP12', d0, '08:55', '09:40', 'B788'),   // ZIPAIR は ODPT にないので入れる（日本の機体でも）
+  track('HND', d0, 'SKY701', '08:00', 1), leg('JA737L', 'SKY701', d0, '07:55', '08:30', 'B738'),  // スカイマークも入れる
+  track('HND', d0, 'XQZ1', '10:00', 1), leg('JA01AB', 'XQZ1', d0, '09:55', '10:30', 'C56X'),      // 表にない会社の日本の機体（自家用など）は入れない
   track('NRT', d0, 'FDX5100', '03:10', 0), leg('N123FE', 'FDX5100', d0, '02:20', '03:12', 'MD11'), // 表にない会社：便名なしで残す
   track('NRT', d0, 'KAL703', '13:00', 1), track('NRT', d0, 'KAL703', '14:20', 0),               // 引き返し
   track('KIX', d0, 'UAL32', '17:00', 1), track('NRT', d0, 'UAL32', '18:15', 0),                 // 日本の中の区間
@@ -53,11 +57,13 @@ await db.exec([
 let n = (await one(`select public.foreign_legs_build($1::date) n`, [d0])).n;
 let got = await rows(`select callsign, iata, dep_here, flight, airline, reg, type, other, event from public.foreign_legs where day = $1 order by callsign, at`, [d0]);
 const by = Object.fromEntries(got.map((r) => [`${r.callsign}|${r.iata}|${r.dep_here}`, r]));
-check('海外の会社の便だけ（JAL・日本の機体は入らない）', n === 6 && got.length === 6 && !by['JAL123|HND|1'] && !by['TZP12|NRT|1'], got.map((r) => r.callsign));
+check('海外の会社と ODPT にない日本の会社の便（JAL と表にない会社の日本の機体は入らない）', n === 8 && got.length === 8 && !by['JAL123|HND|1'] && !by['XQZ1|HND|1'] && by['TZP12|NRT|1']?.flight === 'ZG12' && by['SKY701|HND|1']?.flight === 'BC701' && by['SKY701|HND|1'].reg === 'JA737L', got.map((r) => r.callsign));
 check('便名・会社・登録記号・機種', by['BAW5|HND|0']?.flight === 'BA5' && by['BAW5|HND|0'].airline === 'BA' && by['BAW5|HND|0'].reg === 'G-YMMU' && by['BAW5|HND|0'].type === 'B772', by['BAW5|HND|0']);
 check('表にない会社は便名なしで残す', by['FDX5100|NRT|0'] && by['FDX5100|NRT|0'].flight === null && by['FDX5100|NRT|0'].reg === 'N123FE', by['FDX5100|NRT|0']);
 check('引き返し：同じ空港を出て5時間以内に着いた', by['KAL703|NRT|0']?.event === 'return' && by['KAL703|NRT|0'].other === 'NRT' && by['KAL703|NRT|1'].event === null, [by['KAL703|NRT|0'], by['KAL703|NRT|1']]);
 check('相手の空港：日本の中の区間は両方に付く', by['UAL32|KIX|1']?.other === 'NRT' && by['UAL32|NRT|0']?.other === 'KIX' && by['UAL32|NRT|0'].event === null, [by['UAL32|KIX|1'], by['UAL32|NRT|0']]);
+const sk = (await one(`select public.foreign_late('BC701', $1::date) j`, [d0])).j;
+check('foreign_late：ODPT にない日本の会社（スカイマーク）の便も返す', sk.legs.length === 1 && sk.legs[0].callsign === 'SKY701' && sk.legs[0].reg === 'JA737L', sk.legs);
 const before = await rows(`select * from public.foreign_legs order by callsign, at`);
 await db.query(`select public.foreign_legs_build($1::date)`, [d0]);
 const again = await rows(`select * from public.foreign_legs order by callsign, at`);
@@ -109,7 +115,7 @@ check('0時をまたぐ：23:58 がいつもで 0:20 着は22分遅い', r.legs[
 r = (await one(`select public.foreign_late('TG640') j`)).j;
 check('いつもの時刻がない便は実績だけ（ずれは出さない）', r.legs.length === 1 && r.legs[0].usual === null && r.legs[0].late_min === null, r.legs);
 r = (await one(`select public.foreign_late('JL5') j`)).j;
-check('日本の会社の便は返さない', r.legs.length === 0, r);
+check('ODPT で見られる会社（JAL）の便は返さない', r.legs.length === 0, r);
 r = (await one(`select public.foreign_late($1) j`, ["x'; drop table x;--"])).j;
 check('読めない便名でもエラーにならず空', Array.isArray(r.legs) && r.legs.length === 0, r);
 r = (await one(`select public.foreign_late('BA5', $1::date) j`, [await D(-7)])).j;

@@ -1,4 +1,5 @@
 -- 海外の航空会社の便の実績を自分で集める（データ担当・11/16）
+--   【11/16 本人】海外の会社に加えて、ODPT にない日本の会社（スカイマーク・ピーチ・ジェットスター・ジャパン・ZIPAIR・春秋航空日本など）も集める。
 --   ODPT には JAL・ANA の便しかなく、羽田国際線（TIAT）の発着はチャレンジ限定ライセンスで本番に使えない（report-foreign-carriers）。
 --   そこで、すでに集めている全機の記録（adsb.lol の機体の位置から毎晩作る airport_tracks_all と reg_legs）から、
 --   日本の空港を出た・着いた海外の会社の便を1回ずつ取り出して残す。外への問い合わせは増えない（adsb.lol・adsb.im とも0回）。
@@ -18,30 +19,31 @@
 create table if not exists public.airline_codes (
   icao  text primary key check (icao ~ '^[A-Z]{3}$'),
   iata  text not null check (iata ~ '^[A-Z0-9]{2}$'),
-  japan boolean not null default false     -- 日本の航空会社（ODPT の時刻表で見られる会社とその仲間）
+  odpt  boolean not null default false     -- ODPT の運航情報・時刻表で見られる会社（JL・NH の便名で飛ぶ JAL・ANA グループ）。11/16 本人の決定で、
+                                           -- ODPT にない日本の会社（スカイマーク・ピーチ・ジェットスター・ジャパン・春秋航空日本など）は海外の会社と同じく集める
 );
 alter table public.airline_codes enable row level security;
 revoke all on public.airline_codes from public, anon, authenticated;
 grant select on public.airline_codes to anon, authenticated;
 drop policy if exists airline_codes_read on public.airline_codes;
 create policy airline_codes_read on public.airline_codes for select to anon, authenticated using (true);
-insert into public.airline_codes (icao, iata, japan) values
-  ('AAL','AA',false), ('AAR','OZ',false), ('ABL','BX',false), ('ACA','AC',false), ('ADO','HD',true), ('AFR','AF',false),
+insert into public.airline_codes (icao, iata, odpt) values
+  ('AAL','AA',false), ('AAR','OZ',false), ('ABL','BX',false), ('ACA','AC',false), ('ADO','HD',false), ('AFR','AF',false),
   ('AIC','AI',false), ('AJX','NH',true), ('AKX','NH',true), ('ALK','UL',false), ('ANA','NH',true), ('ANZ','NZ',false),
-  ('APJ','MM',true), ('ASV','RS',false), ('AUA','OS',false), ('BAV','QH',false), ('BAW','BA',false), ('BKP','PG',false),
+  ('APJ','MM',false), ('ASV','RS',false), ('AUA','OS',false), ('BAV','QH',false), ('BAW','BA',false), ('BKP','PG',false),
   ('CAL','CI',false), ('CCA','CA',false), ('CDG','SC',false), ('CEB','5J',false), ('CES','MU',false), ('CHH','HU',false),
   ('CPA','CX',false), ('CQH','9C',false), ('CRK','HX',false), ('CSH','FM',false), ('CSN','CZ',false), ('CXA','MF',false),
   ('DAL','DL',false), ('DKH','HO',false), ('DLH','LH',false), ('ESR','ZE',false), ('ETD','EY',false), ('ETH','ET',false),
-  ('EVA','BR',false), ('FDA','JH',true), ('FIN','AY',false), ('GCR','GS',false), ('GIA','GA',false), ('HAC','JL',true),
-  ('HAL','HA',false), ('HKE','UO',false), ('HVN','VN',false), ('IBX','FW',true), ('IGO','6E',false), ('JAC','3X',true),
-  ('JAL','JL',true), ('JJA','7C',false), ('JJP','GK',true), ('JLJ','JL',true), ('JNA','LJ',false), ('JSA','3K',false),
+  ('EVA','BR',false), ('FDA','JH',false), ('FIN','AY',false), ('GCR','GS',false), ('GIA','GA',false), ('HAC','JL',true),
+  ('HAL','HA',false), ('HKE','UO',false), ('HVN','VN',false), ('IBX','FW',false), ('IGO','6E',false), ('JAC','3X',true),
+  ('JAL','JL',true), ('JJA','7C',false), ('JJP','GK',false), ('JLJ','JL',true), ('JNA','LJ',false), ('JSA','3K',false),
   ('JST','JQ',false), ('JTA','NU',true), ('KAL','KE',false), ('KLM','KL',false), ('LKE','8L',false), ('MAS','MH',false),
-  ('MGL','OM',false), ('NCA','KZ',true), ('OMA','WY',false), ('ORC','OC',true), ('PAL','PR',false), ('QFA','QF',false),
-  ('QTR','QR',false), ('SAS','SK',false), ('SFJ','7G',true), ('SIA','SQ',false), ('SJO','IJ',true), ('SJX','JX',false),
-  ('SKY','BC',true), ('SNJ','6J',true), ('SVA','SV',false), ('SWR','LX',false), ('TGW','TR',false), ('THA','TG',false),
+  ('MGL','OM',false), ('NCA','KZ',false), ('OMA','WY',false), ('ORC','OC',false), ('PAL','PR',false), ('QFA','QF',false),
+  ('QTR','QR',false), ('SAS','SK',false), ('SFJ','7G',false), ('SIA','SQ',false), ('SJO','IJ',false), ('SJX','JX',false),
+  ('SKY','BC',false), ('SNJ','6J',false), ('SVA','SV',false), ('SWR','LX',false), ('TGW','TR',false), ('THA','TG',false),
   ('THY','TK',false), ('TTW','IT',false), ('TWB','TW',false), ('TZP','ZG',false), ('UAE','EK',false), ('UAL','UA',false),
   ('VJC','VJ',false), ('XAX','D7',false)
-on conflict (icao) do update set iata = excluded.iata, japan = excluded.japan;
+on conflict (icao) do update set iata = excluded.iata, odpt = excluded.odpt;
 
 -- 2
 create table if not exists public.foreign_legs (
@@ -104,7 +106,8 @@ begin
            and l.first_at <= t.at + interval '40 minutes' and l.last_at >= t.at - interval '40 minutes'
          order by abs(extract(epoch from (l.last_at - t.at))) limit 1
       ) r on true
-     where not coalesce(c.japan, false) and coalesce(r.reg, '') !~ '^JA'   -- 日本の会社・日本の機体は入れない
+     -- ODPT で見られる会社（JAL・ANA グループ）は入れない。表にない会社は、日本の機体（JA）なら入れない（自家用・官庁など）
+     where (c.icao is not null and not c.odpt) or (c.icao is null and coalesce(r.reg, '') !~ '^JA')
   ), del as (
     -- その日の作り直し：元（airport_tracks_all）の判定が変わって、もうない行だけ
     delete from public.foreign_legs f
@@ -189,7 +192,7 @@ language sql stable security definer set search_path = public as $$
     select upper(trim(p_flight)) as fl, coalesce(p_day, (now() at time zone 'Asia/Tokyo')::date) as d
   ), cs as (
     select c.icao || substring(f.fl from '^[A-Z0-9]{2}0*([0-9]{1,4})$') as callsign
-      from f join public.airline_codes c on c.iata = substring(f.fl from '^([A-Z0-9]{2})[0-9]{1,4}$') and not c.japan
+      from f join public.airline_codes c on c.iata = substring(f.fl from '^([A-Z0-9]{2})[0-9]{1,4}$') and not c.odpt
      where f.fl ~ '^[A-Z0-9]{2}[0-9]{1,4}$'
   ), l as (
     select x.*, (extract(hour from x.at at time zone 'Asia/Tokyo') * 60 + extract(minute from x.at at time zone 'Asia/Tokyo'))::int as m,
