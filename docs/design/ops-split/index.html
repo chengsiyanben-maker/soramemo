@@ -170,4 +170,76 @@ svg.i{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2.2;stro
 .idx li a b{flex:none;font:800 14px/1 ui-monospace,Menlo,monospace;color:#fff;background:var(--navy);border-radius:8px;padding:6px 7px}
 .idx li a span{font-size:14px;font-weight:700}
 .idx li a small{display:block;font-size:13px;color:var(--mute);font-weight:500}
-</style></head><body><div class="idx"><h1>運用タブを「空港」と「機体」に</h1><p>design/ops-split 1版（11/15）。画面案だけで、アプリには入れません。下のタブ帯は変えません。</p><h2>おすすめの形</h2><ul><li><a href="A1.html"><b>A1</b><span>空港側（滑走路）<small>上に「空港｜機体」。選ぶ欄は空港</small></span></a></li><li><a href="A1b.html"><b>A1b</b><span>空港側（案内板）<small>海外の空港のいまも空港側</small></span></a></li><li><a href="A2.html"><b>A2</b><span>機体側のはじめ<small>最近見た機体＋いま飛んでいる特別塗装機</small></span></a></li><li><a href="A2e.html"><b>A2e</b><span>機体側のはじめ（最近なし）<small>はじめて開いた人</small></span></a></li><li><a href="A3.html"><b>A3</b><span>機体を選んだあと<small>機体の1日（運用予想 案A）をタブの中に</small></span></a></li><li><a href="A4.html"><b>A4</b><span>機体側・特別塗装機<small>いま／この先／羽田に来る</small></span></a></li></ul><h2>撮る人の置き場所 案1（おすすめ）：分ける</h2><ul><li><a href="P1.html"><b>P1</b><span>空港側・撮る人<small>撮影地と見に行く場所だけ</small></span></a></li><li><a href="P2.html"><b>P2</b><span>機体側・次に来る機体<small>撮影地を選ぶ小さな欄つき</small></span></a></li></ul><h2>撮る人の置き場所 案2：空港側にまとめる</h2><ul><li><a href="Q1.html"><b>Q1</b><span>空港側・撮る人<small>今のまま次に来る機体も</small></span></a></li><li><a href="Q2.html"><b>Q2</b><span>機体側のはじめ<small>撮る人への入口だけ</small></span></a></li></ul><h2>見方の設定</h2><ul><li><a href="V1.html"><b>V1</b><span>鉛筆のシート（空港）<small>シートの中でも空港｜機体</small></span></a></li><li><a href="V1b.html"><b>V1b</b><span>鉛筆のシート（機体）<small>「機体」ごと隠せる</small></span></a></li><li><a href="V2.html"><b>V2</b><span>表示の編集<small>運用（空港）と運用（機体）に分ける</small></span></a></li></ul><h2>今の画面</h2><ul><li><a href="00.html"><b>00</b><span>今の並びの整理<small>本番の写真と振り分け</small></span></a></li></ul></div></body></html>
+
+/* 2版：上の1行（空港｜機体＋空港のピル＋ⓘ・共有）。上の段を1段へらす */
+.trow{display:flex;align-items:center;gap:6px;margin-top:16px}
+.trow .sp{flex:1}
+.kind.s span{min-width:0;padding:0 12px;font-size:15px}
+.trow .ap{height:48px;padding:0 10px 0 6px;gap:6px}
+.trow .ap i{padding:5px 5px}
+.trow .search{padding:0 14px;gap:6px;min-width:0;white-space:nowrap;overflow:hidden}
+.trow .back{flex:none;padding:0 12px 0 4px}
+.trow .ap.plr{padding-right:10px}
+/* 2版：見方の帯は横に送れる帯＋右端に固定の鉛筆（本番の .vwrow と同じ） */
+.vrow{display:flex;align-items:center;gap:4px;margin:16px 0 12px 0}
+.vs{flex:1;min-width:0;display:flex;gap:20px;overflow-x:auto;scrollbar-width:none;font-size:15px;font-weight:800;color:var(--mute);white-space:nowrap;padding:0 2px;
+  -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 18px,#000 calc(100% - 22px),transparent);mask-image:linear-gradient(90deg,transparent 0,#000 18px,#000 calc(100% - 22px),transparent)}
+.vs.nol{-webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 22px),transparent);mask-image:linear-gradient(90deg,#000 calc(100% - 22px),transparent)}
+.vs.nofade{-webkit-mask-image:none;mask-image:none}
+.vs::-webkit-scrollbar{display:none}
+.vs span{flex:none;padding:11px 0}
+.vs span.on{color:var(--ink);box-shadow:inset 0 -3px 0 var(--ink)}
+.vrow .pen{flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;color:var(--mute)}
+.vrow.none .vs span{color:var(--mute)}
+/* シートの中の切り替えも紺（上と同じ部品） */
+.kind.insheet{background:var(--pill)}
+.kind.insheet span.on{background:var(--navy);color:#fff;box-shadow:none}
+.kind.insheet span em{font-style:normal;font-size:13px;font-weight:700;color:var(--mute);background:var(--card);border-radius:999px;padding:1px 8px;margin-left:2px}
+/* 海外の空港のいま（world-ops W1 の札と欄。案内板の便の行はピンの札だけ、便の数は欄の中だけ） */
+.st{display:inline-flex;align-items:center;gap:4px;border-radius:999px;padding:2px 9px 2px 7px;font-size:13px;font-weight:800;white-space:nowrap}
+.st svg{flex:none;width:13px;height:13px;fill:currentColor}
+.st small{font-size:13px;font-weight:700;opacity:.85;margin-left:2px}
+.st.s1{background:#9A3412;color:#fff}.st.s2{background:#FEF3C7;color:#92400E}.st.s3{background:var(--pill);color:var(--ink2)}
+.stkey{display:flex;align-items:flex-start;gap:6px;font-size:13px;line-height:1.6;color:var(--mute);margin:8px 0 0}
+.stkey svg{flex:none;width:13px;height:13px;fill:var(--mute);margin-top:4px}
+.wo{margin-top:14px;background:#F7F8FA;border-radius:18px;padding:12px 14px}
+.wo h4{margin:0 0 2px;font-size:15px;font-weight:800;display:flex;justify-content:space-between;align-items:baseline}
+.wo h4 small{font-size:13px;font-weight:600;color:var(--mute)}
+.wol{list-style:none;margin:0;padding:0}
+.wol li{display:flex;align-items:center;gap:8px;min-height:56px;padding:6px 0}
+.wol li+li{box-shadow:0 -1px 0 var(--line)}
+.wol .tx{flex:1;min-width:0}
+.wol .nm{display:block;font-size:16px;font-weight:800}
+.wol .nm small{font-size:13px;font-weight:600;color:var(--sub);margin-left:4px}
+.wol .wh{display:flex;flex-wrap:wrap;gap:4px 8px;align-items:center;font-size:13px;color:var(--ink2);margin-top:2px}
+.wol .go{flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;color:var(--sub)}
+.srcnote{font-size:13px;line-height:1.7;color:var(--mute);margin:6px 0 0}
+.srcnote b{color:var(--ink2);font-weight:800}
+.bdtabs{display:inline-flex;background:var(--pill);border-radius:999px;padding:3px}
+.bdtabs span{height:38px;display:inline-flex;align-items:center;padding:0 14px;border-radius:999px;font-size:14px;font-weight:800;color:var(--mute)}
+.bdtabs span.on{background:var(--card);color:var(--ink);box-shadow:0 2px 6px -3px rgba(15,23,42,.3)}
+.rows .tx .st{margin-top:4px}
+.rtl .tx span.tag{display:inline-flex}.rtl .tx span.tag.live{color:var(--ok)}
+.rows .tx span.st{display:inline-flex;font-size:13px}
+.rows .tx span.st.s1{color:#fff}.rows .tx span.st.s2{color:#92400E}.rows .tx span.st.s3{color:var(--ink2)}
+.rows .tx span.st small{display:inline;color:inherit}
+.rows .tx span.l2{white-space:normal}
+/* 撮る人：空港側と同じ値をつなげて出す（案1） */
+.linked{display:flex;align-items:center;gap:10px;background:#F7F8FA;border-radius:16px;padding:8px 6px 8px 14px;margin:0 0 12px}
+.linked .tx{flex:1;min-width:0}
+.linked b{display:block;font-size:15px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.linked span{display:block;font-size:13px;color:var(--mute)}
+/* 操作の数の表 */
+.cmp{width:100%;border-collapse:separate;border-spacing:0;font-size:14px}
+.cmp th{font-size:13px;font-weight:700;color:var(--mute);text-align:left;padding:4px 6px 8px}
+.cmp td{padding:10px 6px;vertical-align:top;box-shadow:0 -1px 0 var(--line);color:var(--ink2);line-height:1.55}
+.cmp td b.n{display:block;font-size:24px;font-weight:900;color:var(--ink);line-height:1.1}
+.cmp td b.n small{font-size:13px;font-weight:700;color:var(--sub);margin-left:2px}
+.cmp td:first-child{font-weight:800;color:var(--ink);width:30%}
+.cmp td small.s{display:block;font-size:13px;color:var(--mute)}
+.hl{background:#F1F5FF;border-radius:10px}
+/* 比べる用の札 */
+.cap{display:inline-flex;align-items:center;height:26px;padding:0 10px;border-radius:999px;background:#FEF3C7;color:#92400E;font-size:13px;font-weight:800;margin:6px 0 0}
+.offnote{display:flex;gap:10px;align-items:flex-start;background:#F7F8FA;border-radius:16px;padding:12px 14px;margin-top:12px;font-size:14px;color:var(--ink2);line-height:1.6}
+.offnote svg{margin-top:2px;color:var(--mute)}
+</style></head><body><div class="idx"><h1>運用タブを「空港」と「機体」に</h1><p>design/ops-split 2版（11/16）。改善担当 review-1 を受けて直しました。画面案だけで、アプリには入れません。下のタブ帯は変えません。</p><h2>2版：おすすめの形（上は1行）</h2><ul><li><a href="A1-v2.html"><b>A1-v2</b><span>空港側（滑走路）<small>上を1行に。鉛筆は右端に固定</small></span></a></li><li><a href="A1b-v2.html"><b>A1b-v2</b><span>空港側（案内板）<small>便の行はピンの札だけ・便の数は欄の中</small></span></a></li><li><a href="A2-v2.html"><b>A2-v2</b><span>機体側のはじめ<small>最近見た＋特別塗装機は2行と入口</small></span></a></li><li><a href="A2e-v2.html"><b>A2e-v2</b><span>機体側のはじめ（最近なし）<small>例はどの画面も同じ</small></span></a></li><li><a href="A3-v2.html"><b>A3-v2</b><span>機体を選んだあと<small>帯の下線を外す・戻るは1つ</small></span></a></li><li><a href="A4-v2.html"><b>A4-v2</b><span>機体側・特別塗装機<small>飛行中と地上を分けて数える</small></span></a></li></ul><h2>2版：撮る人（案2をおすすめに変えた）</h2><ul><li><a href="Q1-v2.html"><b>Q1-v2</b><span>案2 空港側・撮る人<small>撮影地と次に来る機体が1画面</small></span></a></li><li><a href="Q2-v2.html"><b>Q2-v2</b><span>案2 機体側のはじめ<small>撮る人への入口だけ</small></span></a></li><li><a href="C1-v2.html"><b>C1-v2</b><span>案1・案2 の操作の数<small>押す回数を並べた</small></span></a></li><li><a href="P1-v2.html"><b>P1-v2</b><span>案1 空港側・撮る人（比べる用）<small>撮影地を選ぶ</small></span></a></li><li><a href="P2-v2.html"><b>P2-v2</b><span>案1 次に来る機体（比べる用）<small>撮影地は空港側の値をそのまま</small></span></a></li></ul><h2>2版：見方の設定</h2><ul><li><a href="V1-v2.html"><b>V1-v2</b><span>鉛筆のシート（空港）<small>切り替えは上と同じ紺</small></span></a></li><li><a href="V1b-v2.html"><b>V1b-v2</b><span>鉛筆のシート（機体）<small>「機体」を出す</small></span></a></li><li><a href="V3-v2.html"><b>V3-v2</b><span>「機体」を出す OFF の運用タブ<small>切り替えが消える</small></span></a></li><li><a href="V1c-v2.html"><b>V1c-v2</b><span>OFF のときのシート<small>戻し方</small></span></a></li><li><a href="V2-v2.html"><b>V2-v2</b><span>表示の編集<small>7行すべてを同じ順で</small></span></a></li></ul><h2>2版：上の段の比べ（2段のまま）</h2><ul><li><a href="A1x-v2.html"><b>A1x-v2</b><span>空港側 2段<small>1行より約60px 下がる</small></span></a></li><li><a href="A3x-v2.html"><b>A3x-v2</b><span>機体の1日 2段<small>667 で予想の点が帯の下</small></span></a></li></ul><h2>1版（11/15）</h2><ul><li><a href="A1.html"><b>A1</b><span>空港側（滑走路）</span></a></li><li><a href="A1b.html"><b>A1b</b><span>空港側（案内板）</span></a></li><li><a href="A2.html"><b>A2</b><span>機体側のはじめ</span></a></li><li><a href="A2e.html"><b>A2e</b><span>はじめ（最近なし）</span></a></li><li><a href="A3.html"><b>A3</b><span>機体を選んだあと</span></a></li><li><a href="A4.html"><b>A4</b><span>特別塗装機</span></a></li><li><a href="P1.html"><b>P1</b><span>案1 空港側</span></a></li><li><a href="P2.html"><b>P2</b><span>案1 機体側</span></a></li><li><a href="Q1.html"><b>Q1</b><span>案2 空港側</span></a></li><li><a href="Q2.html"><b>Q2</b><span>案2 機体側</span></a></li><li><a href="V1.html"><b>V1</b><span>シート（空港）</span></a></li><li><a href="V1b.html"><b>V1b</b><span>シート（機体）</span></a></li><li><a href="V2.html"><b>V2</b><span>表示の編集</span></a></li><li><a href="00.html"><b>00</b><span>今の並びの整理<small>本番の写真と振り分け</small></span></a></li></ul></div><script>for(const v of document.querySelectorAll('.vs')){const o=v.querySelector('.on');if(o){const r=o.offsetLeft+o.offsetWidth-v.clientWidth+30;if(r>0){v.scrollLeft=r;}else{v.classList.add('nol');}}else{v.classList.add('nol');}if(v.scrollWidth<=v.clientWidth)v.classList.add('nofade');}</script></body></html>
