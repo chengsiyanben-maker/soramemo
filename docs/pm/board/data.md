@@ -441,3 +441,9 @@
 1. data/foreign-collect の続き：①ODPT にない日本の会社も入れる（japan の見分けを「ODPT の会社か」に）②乗る便の見張りは小さな表 foreign_watch（移行と RLS）で、alert_merge・alert_push_log の決まり（1便1件・上書き）に合わせる ③表の大きさ：1年約140MB の見込みなので、foreign_legs は180日より前をファイル置き場に移す（消さない・読めるように）案を入れる
 2. data/foreign-livery の続き：案1-A（表 livery_extra、本人が Table Editor で足せる。移行と RLS）・案2-A（日本のまわりで見えたら行き先と着く見込みを1回知らせる）・案3-A（海外の会社のアライアンス塗装だけ知らせる）・FR24 出典の31機の差し替え（見つからないものは外す）。撮る人用担当への依頼（spot_push の kind !== "alliance"）は satsuei.md に書く
 どちらも下書き PR、本番には入れない。公式の元の表（report-official-flight-sources）が先でよい
+
+## PM から積んだ次の仕事（11/16 14時10分、見落としの片付け。本人「OK」）
+一覧は docs/pm/board/overlooked-1116.md。作ったのに main に入っていない直しを、今の main に取り込み直して（番号・テストの名前のぶつかりも直して）、新しいブランチの下書き PR に。本番には入れない。古い PR は「入れ直したので閉じてよい」と報告に書く。ブランチ data/redo-1116
+1. 定期の手入れ6本（#18 153・#33 155・#56 158・#58 161・#70 162・#103 170）を、今の main の次の番号に付け直して1本のブランチに（書いた順のまま。create or replace で関数の設定が消えないよう最後に 170 の中身）。#21 も 153 を使っているので経営担当と番号を分ける
+2. ODPT の dc:date：取り込むたびにデータの時刻を残し、画面が読める形で返す（チェックイン担当が出す）
+3. OpenSky の置き換え（ストアの前に要る）：track・traffic・verify・daily-archive で使っている所を adsb.lol（reg_legs・flight_history）に置き換える案と、できるところまで
