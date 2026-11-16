@@ -1,8 +1,9 @@
 // POST /functions/v1/verify-flights（手で呼ぶとき用。JWTの確認は切り、x-cron-secret で守る）
 // 注意：OpenSky は Supabase のサーバーから届かないため、毎晩の照合は GitHub の定期実行（.github/workflows/verify-flights.yml）で動かしている。
+// VERIFY_SOURCE=adsb にすると OpenSky を使わない（全機の記録 reg_legs で照合）ので、この関数を pg_cron から呼んでも動く。
 import { createClient } from "npm:@supabase/supabase-js@2.117.2";
 import { runVerification } from "../_shared/verify_job.ts";
-import { makeDeps } from "../_shared/verify_io.ts";
+import { makeDeps, verifySource } from "../_shared/verify_io.ts";
 
 const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, { auth: { persistSession: false } });
 const CRON_SECRET = Deno.env.get("CRON_SECRET") ?? "";
@@ -15,7 +16,8 @@ function sameSecret(a: string, b: string): boolean {
   return diff === 0;
 }
 
-const deps = makeDeps(admin, { clientId: Deno.env.get("OPENSKY_CLIENT_ID") ?? "", clientSecret: Deno.env.get("OPENSKY_CLIENT_SECRET") ?? "", tokenUrl: Deno.env.get("OPENSKY_TOKEN_URL") ?? undefined });
+const deps = makeDeps(admin, { clientId: Deno.env.get("OPENSKY_CLIENT_ID") ?? "", clientSecret: Deno.env.get("OPENSKY_CLIENT_SECRET") ?? "", tokenUrl: Deno.env.get("OPENSKY_TOKEN_URL") ?? undefined },
+  verifySource(Deno.env.get("VERIFY_SOURCE")));   // VERIFY_SOURCE=adsb なら OpenSky を使わず全機の記録（reg_legs）で照合する
 
 Deno.serve(async (req) => {
   if (!CRON_SECRET || !sameSecret(req.headers.get("x-cron-secret") ?? "", CRON_SECRET)) return new Response("forbidden", { status: 403 });
