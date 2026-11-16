@@ -1,6 +1,11 @@
 # データ担当の帳面
 
 ## いま持っている仕事
+- 海外の会社の便の実績を自分で集める（11/16 11時40分 PM の指示・本人「海外のデータも収集したい」）：ブランチ data/foreign-collect（main 2ae2e1f から）→ main 向けの下書き PR #104（見張りを始めた）。報告 docs/pm/report-foreign-collect.md（そのブランチ）
+  - 分かったこと：reg_legs・airport_tracks_all は会社を問わず「英字3文字＋数字」の便を残していて、海外の会社の便も4つの円の中なら入っていた。海外の空港の側は円の外で分からない
+  - 移行 171（foreign_legs）：表 airline_codes（86行・PREFIX と同じ＋NCA。誰でも select）・foreign_legs（実績。消さない。関数からだけ）・foreign_usual（前の8週の中央値。曜日ごと3回以上・曜日なし5回以上・ばらつき60分以下。関数からだけ）。関数 foreign_legs_build(日)・foreign_usual_build()（運営だけ・lock_timeout 5s）・foreign_late(便名, 日)（誰でも）。毎日の仕事 foreign-legs（45 */3）・foreign-usual（55 18 UTC）、上限つき。外への問い合わせは0回増
+  - テスト t110（34項目 OK）。adsb.lol は ODbL 1.0（出典を関数の note に入れた）。adsb.im は使っていない
+  - 本人待ち：表の大きさ（1年で約100〜140MB の見込み。foreign-collect-check.sql の結果で確かめる）・案A の見張りの表の持ち方（flight_schedule に推定の行／foreign_watch）・ODPT にない日本の会社（スカイマーク・ピーチなど）を入れるか・画面に出すならデザインの画面案から
 - 定期の手入れ 6回目（11/16 月、PM の指示なしの回）：ブランチ maint/2026-11-16（main 2ae2e1f から）→ main 向けの下書き PR #103（見張りを始めた）。報告 docs/pm/maint/2026-11-16-report.md（そのブランチ）
   - 移行 170（maint_1116）：ops-log-cleanup に statement_timeout 2min・lock_timeout 5s／Edge Functions が service_role で呼ぶ書く関数12個に lock_timeout（毎晩 5s：archive_* 4つ・cold_done・airport_tracks_put・reg_legs_route・timetable_replace・world_status_put、毎分 10s：apply_flight_status・flight_alerts_put・reg_legs_touch）。表・索引・RLS・権限・本文は変えない。チェックイン・経営への影響なし
   - テスト t109（13項目 OK）。本物の Postgres 16 で関数の lock_timeout が効くのを確かめた。読むだけの docs/pm/maint/2026-11-16-check.sql（cron の仕事ごとの上限の有無・回数・失敗・最長秒と12関数の設定）
@@ -206,13 +211,14 @@
 - 本人の決定：規約を改定するときは「terms_versions に1行足す → アプリの定数を変える」の順
 
 ## 移行とテストの番号
-- main の最新は 160（159 airport_yomi・160 airport_facts は 11/10 本番に入った）。156・157 は 11/9 本番に入った。**maint/2026-11-09 の 158 は main の 159 より前になったので、反映の前に migrations.mjs rebase が要る**。maint/2026-11-06 は 153・テスト t93（fix/co-tests の経営の移行も 153 なので、反映の前に rebase）、data/photo-log は 154・テスト t94、maint/2026-11-07 は 155・テスト t95、data/debug-1107 は 156・テスト t96（関数のテストは supabase/tests/live_view_test.ts。main に反映済み）、data/view-prefs は 157・テスト t97、maint/2026-11-09 は 158・テスト t98、maint/2026-11-10 は 161・テスト t101。data/airport-facts は 160・テスト t100。そのほか次に新しく作るものは 162 以降・テストは t102 以降。**maint/2026-11-11 は 162・テスト t102**（161 の maint/2026-11-10 より後。反映の順が変わったら rebase）。**data/heliports の 163・t103 は 11/12 main に入った（PR #75 と一緒）**。**data/speed-1113 は 164・テスト t104**。**data/speed-1113b は 165・テスト t105**（164 の上）。**data/rot-learn-hi は 166・テスト t106**（関数1つだけなので 164・165 と順番が入れ替わってもよい）。（164〜167 は 11/13 に main に入った。166 は経営の co_cron_timeout、learn_hi は 167 に付け直し）。**data/alert-merge は 168・テスト t107**（11/14 main に入った）。**data/world-ops は 169・テスト t108**。**maint/2026-11-16 は 170・テスト t109**。次に新しく作るものは 171 以降・テストは t110 以降（data/foreign-carriers・data/foreign-livery は報告だけで番号を使っていない）
+- main の最新は 160（159 airport_yomi・160 airport_facts は 11/10 本番に入った）。156・157 は 11/9 本番に入った。**maint/2026-11-09 の 158 は main の 159 より前になったので、反映の前に migrations.mjs rebase が要る**。maint/2026-11-06 は 153・テスト t93（fix/co-tests の経営の移行も 153 なので、反映の前に rebase）、data/photo-log は 154・テスト t94、maint/2026-11-07 は 155・テスト t95、data/debug-1107 は 156・テスト t96（関数のテストは supabase/tests/live_view_test.ts。main に反映済み）、data/view-prefs は 157・テスト t97、maint/2026-11-09 は 158・テスト t98、maint/2026-11-10 は 161・テスト t101。data/airport-facts は 160・テスト t100。そのほか次に新しく作るものは 162 以降・テストは t102 以降。**maint/2026-11-11 は 162・テスト t102**（161 の maint/2026-11-10 より後。反映の順が変わったら rebase）。**data/heliports の 163・t103 は 11/12 main に入った（PR #75 と一緒）**。**data/speed-1113 は 164・テスト t104**。**data/speed-1113b は 165・テスト t105**（164 の上）。**data/rot-learn-hi は 166・テスト t106**（関数1つだけなので 164・165 と順番が入れ替わってもよい）。（164〜167 は 11/13 に main に入った。166 は経営の co_cron_timeout、learn_hi は 167 に付け直し）。**data/alert-merge は 168・テスト t107**（11/14 main に入った）。**data/world-ops は 169・テスト t108**。**maint/2026-11-16 は 170・テスト t109**。**data/foreign-collect は 171・テスト t110**（170 と別の関数なので順番は入れ替わってもよい）。次に新しく作るものは 172 以降・テストは t111 以降（data/foreign-carriers・data/foreign-livery は報告だけで番号を使っていない）
 - main に別の移行が先に入ったら、反映の前にもう一度 `node tools/migrations.mjs rebase`
 - 本番は小さいプランで一時ファイルの余裕がない。本人に流してもらう SQL は、大きな中間の表・自己結合・大きな並べ替えを避け、索引で引く形にする
 - SQL のテストは全部で約35分かかる（手元で流すときは裏で流してログを見る。t92 だけで約4分。同じログに2回流すと混ざるので、ログの名前を分ける）
 
 ## 次にやること
-00000000000000000. 定期の手入れ 11/16（PR #103）：2026-11-16-check.sql の結果で has_timeout が f の仕事が本番に残っていないか・最長の仕事を見て上限を直す。「反映して」が出たら上の順で rebase。CI とレビューに答える。海外の便の記録（data/foreign-collect）を作るときは 171・t110 から（PR #101・#102 の案A も 171 以降に読み替え）
+000000000000000000. 海外の会社の便の実績（PR #104）：foreign-collect-check.sql の結果で1日の回数を見て、多ければ 400日より前を cold-archive に移す案（cold_candidates・cold_rows・cold_done に foreign_legs を足す。消さない）。本人が案A の表の持ち方を決めたら見張り（flight-watch の続き、172 以降・t111 以降）を作る。「反映して」が出たら番号を確かめ、次の日に cron.job_run_details（foreign-legs・foreign-usual）と foreign_legs の行数を見てもらう。CI とレビューに答える
+00000000000000000. 定期の手入れ 11/16（PR #103）：2026-11-16-check.sql の結果で has_timeout が f の仕事が本番に残っていないか・最長の仕事を見て上限を直す。「反映して」が出たら上の順で rebase。CI とレビューに答える。海外の便の記録は PR #104（171・t110）で作った。PR #101・#102 の案A は 172 以降に読み替え
 0000000000000000. 海外の会社の特別塗装機（PR #102）：本人が案を選んだら作る。表なら移行（170 以降）と RLS・テスト（t109 以降）。FR24 の出典の31機は公式・報道・コモンズで探し直す。G-YMMU の公式・報道の出典を探す。撮る人用担当への依頼（spot_push の alliance の扱い）は案3が決まったら
 000000000000000. 海外の航空会社の便（PR #101）：本人が案を選んだら作る。案A なら移行170・テスト t109 から（乗る便に選んだ海外の便を adsb.lol で見張る推定の行。RLS つき）。案B・C なら問い合わせ文を直して渡し、返事の条件を原文で読んでから取り込みを作る。SQL の結果が来たら、時刻表にない便の多い会社を報告に足す
 00000000000000. 門限の幅10分（PR #100）：11/15 反映の Actions 成功で済み
