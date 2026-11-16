@@ -12,7 +12,9 @@ import { fetchMetars } from "../_shared/metar.ts";
 import { OPS_AIRPORTS, observeOps, runwaysOf } from "../_shared/ops_core.js";
 import { gaStep, guessRwy, quietNow, type Watch, wxRisk } from "../_shared/go_around.ts";
 import { type ArrWatch, arrStep } from "../_shared/rwy_learn.ts";
-import { liveryMap } from "../_shared/liveries.ts";
+import { LIVERIES, type Livery, liveryMap } from "../_shared/liveries.ts";
+import { type Dest, inboundEtaMin, inboundMessage, mergeLiveries, pickDest, type Seen, wantsInbound, wantsLiveryPush } from "../_shared/livery_extra.ts";
+import { parseRoutes } from "../_shared/foreign_now.ts";
 import { notifyRegFly as notifyRegFlyWith, wantsRegFly } from "../_shared/livery_push.ts";
 import { normCallsign } from "../_shared/flight_watch.ts";
 import { depEtaMin, dueNow, etaMin, jstDate, opsChanged, spotDepMessage, spotDepReason, spotMessage, spotReason, type SpotDep, type SpotPlane, type SpotSub } from "../_shared/spot_push.ts";
@@ -193,9 +195,28 @@ async function recordPositions(bodies: Map<string, string>, slot: number) {
   return all.length;
 }
 
+// 特別塗装機の一覧：コードの一覧（liveries.ts）に、表 livery_extra（運営が Table Editor で足す。移行184）を合わせる。5分ためる。
+// 表が読めないとき（移行の前など）はコードの一覧だけ
+let livCache: { at: number; list: Livery[] } | null = null;
+async function allLiveries(): Promise<Livery[]> {
+  if (livCache && Date.now() - livCache.at < 5 * 60_000) return livCache.list;
+  const { data, error } = await admin.from("livery_extra").select("reg, name, airline, kind, src, from_day, until_day").limit(1000);
+  const list = error ? LIVERIES : mergeLiveries(LIVERIES, data);
+  livCache = { at: Date.now(), list };
+  return list;
+}
+// 日本の空港の位置と名前（行き先の推定と知らせの文に使う）
+let JP: Map<string, { lat: number; lon: number; name: string }> | null = null;
+async function japanAirports() {
+  if (JP) return JP;
+  const { data } = await admin.from("airports").select("iata, lat, lon, name").not("iata", "is", null);
+  JP = new Map((data ?? []).filter((a) => /^[A-Z]{3}$/.test(a.iata)).map((a) => [a.iata, { lat: a.lat, lon: a.lon, name: a.name }]));
+  return JP;
+}
+
 // 特別塗装機を livery_sightings に残す（今回取った円の機体から。運用タブの空港の着陸・離陸中なら、その空港も）
 async function recordLiveries(bodies: Map<string, string>) {
-  const L = liveryMap(), seen = new Map<string, Record<string, unknown>>();
+  const L = liveryMap(new Date(), await allLiveries()), seen = new Map<string, Record<string, unknown>>(), motion = new Map<string, { kt: number | null; trk: number | null }>();
   // 空港ごとの機体（着陸・離陸の見分けが付いたもの）
   const near = new Map<string, { iata: string; phase: string }>();
   for (const [iata, body] of bodies) for (const p of (JSON.parse(body).planes ?? []) as { reg?: string; phase?: string }[]) {
@@ -212,11 +233,17 @@ async function recordLiveries(bodies: Map<string, string>) {
         alt_ft: typeof a.alt_baro === "number" ? Math.round(a.alt_baro) : a.alt_baro === "ground" ? 0 : null,
         callsign: typeof a.flight === "string" ? a.flight.trim().slice(0, 10) || null : null,
         iata: n?.iata ?? null, phase: n?.phase ?? null, seen_at: new Date().toISOString() });
+      motion.set(l.reg, { kt: typeof a.gs === "number" ? Math.round(a.gs) : null, trk: typeof a.track === "number" ? Math.round(a.track) % 360 : null });
     }
   }
   if (seen.size) { const { error } = await admin.from("livery_sightings").upsert([...seen.values()]); if (error) throw error; }
-  // 着陸に向かってきた特別塗装機は、その空港を選んでいる人に知らせる（同じ機体・空港は6時間に1回）。アライアンス塗装は毎日飛んでいるので知らせない
-  for (const v of seen.values()) if (v.iata && v.phase === "arr" && v.kind !== "alliance") { try { await notifyLivery(v); } catch (e) { console.error("livery push", e); } }
+  // 着陸に向かってきた特別塗装機は、その空港を選んでいる人に知らせる（同じ機体・空港は6時間に1回）。
+  // アライアンス塗装は、国内の会社のものは毎日飛んでいるので知らせない。海外の会社のものは知らせる（11/16 案3-A）
+  // deno-lint-ignore no-explicit-any
+  for (const v of seen.values()) if (v.iata && v.phase === "arr" && wantsLiveryPush(v as any)) { try { await notifyLivery(v); } catch (e) { console.error("livery push", e); } }
+  // 海外の会社の塗装機は、日本のまわりで見えた時点で行き先と着く見込みを1回知らせる（11/16 案2-A。空港の近くの知らせとは同じ記録で二重にしない）
+  // deno-lint-ignore no-explicit-any
+  try { await notifyInbound([...seen.values()].map((v) => ({ ...v, ...motion.get(String(v.reg)) }) as any)); } catch (e) { console.error("livery inbound", e); }
   // 機体を選んでいる人には、その機体が新しい便（便名）で飛んでいるのを見つけたときに知らせる（1便に1回）
   // deno-lint-ignore no-explicit-any
   for (const v of seen.values()) if (wantsRegFly(v as any)) { try { await notifyRegFly(v); } catch (e) { console.error("livery reg push", e); } }
@@ -247,7 +274,8 @@ async function notifyLivery(v: any) {
   await admin.from("livery_notified").upsert({ reg: v.reg, iata: v.iata, notified_at: new Date().toISOString() });
   const { data: all } = await admin.from("push_subs").select("id, endpoint, p256dh, auth, spot_iata, spot_kinds").contains("sp_airports", [v.iata]);
   // 撮影の知らせで同じ空港の特別塗装機を選んでいる人には、そちら（着陸の数分前）で知らせるので、ここでは送らない
-  const subs = (all ?? []).filter((s) => !(s.spot_iata === v.iata && (s.spot_kinds ?? []).includes("special")));
+  // （撮影の知らせはアライアンス塗装を出さないので、アライアンス塗装のときは撮影の知らせを選んでいる人にもここで送る）
+  const subs = (all ?? []).filter((s) => !(v.kind !== "alliance" && s.spot_iata === v.iata && (s.spot_kinds ?? []).includes("special")));
   if (!subs.length) return;
   webpush.setVapidDetails(Deno.env.get("VAPID_SUBJECT") || "https://soramemo.jp", pub, priv);
   // deno-lint-ignore no-explicit-any
@@ -257,6 +285,53 @@ async function notifyLivery(v: any) {
     try { await webpush.sendNotification({ endpoint: s.endpoint, keys: { p256dh: s.p256dh, auth: s.auth } }, body, { TTL: 900 }); }
     catch (e) { const code = (e as { statusCode?: number }).statusCode; if (code === 404 || code === 410) await admin.from("push_subs").delete().eq("id", s.id); }
   }
+}
+
+// 海外の塗装機の早めの知らせ（案2-A）。行き先は、①ふだん着く空港（foreign_usual、外への問い合わせなし）②なければ経路のデータ（adsb.im の routeset、1回にまとめて1つ）。
+// 同じ便（機体・便名）は12時間に1回だけ調べる（行き先が分からなかったときは15分後にもう一度）。知らせたら livery_notified の（機体・空港）にも入れるので、
+// 着陸の数分前の知らせ（notifyLivery、6時間に1回）とは二重にならない
+const ROUTESET = "https://adsb.im/api/0/routeset";
+async function notifyInbound(list: Seen[]) {
+  const want = list.filter(wantsInbound);
+  if (!want.length) return 0;
+  const pub = Deno.env.get("VAPID_PUBLIC_KEY"), priv = Deno.env.get("VAPID_PRIVATE_KEY");
+  if (!pub || !priv) return 0;
+  const now = Date.now(), cs = (v: Seen) => normCallsign(v.callsign!);
+  const { data: marks } = await admin.from("livery_notified").select("reg, iata, notified_at").in("reg", want.map((v) => v.reg))
+    .gt("notified_at", new Date(now - 12 * 3600_000).toISOString());
+  const done = (v: Seen) => (marks ?? []).some((m) => m.reg === v.reg && (m.iata === `I:${cs(v)}` || (m.iata === `Q:${cs(v)}` && Date.parse(m.notified_at) > now - 15 * 60_000)));
+  const todo = want.filter((v) => !done(v));
+  if (!todo.length) return 0;
+  const airports = await japanAirports();
+  const cands = new Map<string, Dest[]>();
+  const { data: usual } = await admin.rpc("livery_inbound_usual", { p_callsigns: todo.map(cs) });
+  for (const u of (usual ?? []) as { callsign: string; iata: string; mins: number }[]) cands.set(u.callsign, [...(cands.get(u.callsign) ?? []), { iata: u.iata, mins: u.mins }]);
+  const ask = todo.filter((v) => !cands.has(cs(v)));
+  if (ask.length) {
+    try {
+      const r = await fetch(ROUTESET, { method: "POST", headers: { "Content-Type": "application/json", "User-Agent": "soramemo (airport-traffic livery)" },
+        body: JSON.stringify({ planes: ask.map((v) => ({ callsign: cs(v), lat: v.lat, lng: v.lon })) }), signal: AbortSignal.timeout(8000) });
+      if (r.ok) for (const [k, rt] of parseRoutes(await r.json(), ask.map(cs))) cands.set(k, [{ iata: rt.arr }]);
+    } catch (e) { console.error("livery routeset", e); }
+  }
+  webpush.setVapidDetails(Deno.env.get("VAPID_SUBJECT") || "https://soramemo.jp", pub, priv);
+  let sent = 0;
+  for (const v of todo) {
+    const dest = pickDest(v, cands.get(cs(v)) ?? [], airports);
+    await admin.from("livery_notified").upsert({ reg: v.reg, iata: `${dest ? "I" : "Q"}:${cs(v)}`, notified_at: new Date(now).toISOString() });
+    if (!dest) continue;
+    const since = new Date(now - 6 * 3600_000).toISOString();
+    const { data: dup } = await admin.from("livery_notified").select("reg").eq("reg", v.reg).eq("iata", dest.iata).gt("notified_at", since);
+    if (dup?.length) continue;
+    await admin.from("livery_notified").upsert({ reg: v.reg, iata: dest.iata, notified_at: new Date(now).toISOString() });
+    const { data: subs } = await admin.from("push_subs").select("id, endpoint, p256dh, auth").contains("sp_airports", [dest.iata]);
+    if (!subs?.length) continue;
+    // deno-lint-ignore no-explicit-any
+    const name = (OPS_AIRPORTS as any)[dest.iata]?.name ?? airports.get(dest.iata)?.name ?? dest.iata;
+    const m = inboundMessage(v, dest, name, inboundEtaMin(dest.km, v.kt, dest.mins, now), now);
+    for (const s of subs) if (await sendOne(s, m, 3600)) sent++;
+  }
+  return sent;
 }
 
 // ---- 撮影の知らせ（いつもの空港に、選んだ種類の機体が着陸の数分前になったら。同じ機体は1日1回） ----
@@ -276,7 +351,7 @@ async function notifySpot(bodies: Map<string, string>) {
   const { data: subs } = await admin.from("push_subs").select(SPOT_COLS).not("spot_iata", "is", null);
   if (!subs?.length) return 0;
   webpush.setVapidDetails(Deno.env.get("VAPID_SUBJECT") || "https://soramemo.jp", pub, priv);
-  const L = liveryMap(), planesOf = new Map<string, SpotPlane[]>(), today = jstDate();
+  const L = liveryMap(new Date(), await allLiveries()), planesOf = new Map<string, SpotPlane[]>(), today = jstDate();
   let sent = 0;
   for (const s of subs as (SpotSub & { endpoint: string; p256dh: string; auth: string })[]) {
     const iata = s.spot_iata!, body = bodies.get(iata); if (!body) continue;
