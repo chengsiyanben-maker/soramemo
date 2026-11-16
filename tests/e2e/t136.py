@@ -45,6 +45,11 @@ async def main():
         # 描いた画面にも入る（空港の今と同じ出典の部品）
         html = await pg.evaluate('OPS_CREDIT_S()')
         check('描くときに新しい文が入る', st_txt in html)
+        # 運用タブなどからは少しあと（8秒）に読む：開いた直後の本数を増やさない
+        n0 = len(calls); await pg.evaluate('ODPT_AT_READ = 0; loadOdptAtSoon(); loadOdptAtSoon()'); await pg.wait_for_timeout(1000)
+        check('少しあとに読む：すぐには読まない', len(calls) == n0, len(calls))
+        await pg.wait_for_timeout(7800)
+        check('少しあとに読む：8秒後に1回だけ', len(calls) == n0 + 1, len(calls))
         check('エラーなし', not errs, errs); await c.close()
         # 運航情報だけ（時刻表は null）
         c, pg, errs, before, after, calls = await run(b, json.dumps({'status_at':ST, 'timetable_at':None}))

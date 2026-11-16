@@ -3951,6 +3951,9 @@ async function loadOdptAt(){
       headers:{ "Content-Type":"application/json", apikey:SORAMEMO_CONFIG.supabaseAnonKey, Authorization:"Bearer " + SORAMEMO_CONFIG.supabaseAnonKey }, body:"{}" });
     if(r.ok) setOdptAt(await r.json()); }catch(e){}
 }
+// 開いた直後の通信の本数を増やさないよう、少しあとに読む（運用タブは開いたときの本数を絞っている。t130）
+let ODPT_AT_SOON = null;
+function loadOdptAtSoon(){ if(!SERVER || ODPT_AT_SOON || Date.now() - ODPT_AT_READ < 180_000) return; ODPT_AT_SOON = setTimeout(() => { ODPT_AT_SOON = null; loadOdptAt(); }, 8000); }
 const ALBY = Object.fromEntries(AIRLINES.map(x => [x.id, x]));
 const GROUPS = [["JAL","JALグループ"],["ANA","ANAグループ"],["OTHER","その他の航空会社"]];
 const KM_GOALS = [[1000,"1,000km"],[5000,"5,000km"],[10000,"1万km"],[20000,"2万km"],[40075,"地球一周"],[80150,"地球二周"]];
@@ -10037,7 +10040,7 @@ const FW_AT = new Map();   // IATA → 読んだ時刻（見方を変えたと�
 const fwOn = () => SERVER && !!user && !demo;
 async function loadFlightAlerts(iata){
   if(!SERVER) return;
-  loadOdptAt();   // 出典の「○時○分時点」（待たない）
+  loadOdptAtSoon();   // 出典の「○時○分時点」（待たない・少しあとに読む）
   if(FW.has(iata) && opsFresh(FW_AT.get(iata) || 0, 50_000)) return;
   try{ const r = await fetch(SORAMEMO_CONFIG.supabaseUrl.replace(/\/$/, "") + "/rest/v1/rpc/flight_alerts", { method:"POST",
       headers:{ "Content-Type":"application/json", apikey:SORAMEMO_CONFIG.supabaseAnonKey, Authorization:"Bearer " + SORAMEMO_CONFIG.supabaseAnonKey }, body:JSON.stringify({ p_iata:iata }) });
@@ -10707,7 +10710,7 @@ async function renderOpsAlerts(){
   if(!SERVER) return;
   // 選んでいる見方で見えるものだけ読む（ほかの見方の分は、その見方を選んだときに読む）
   const need = opsNeed;
-  loadOdptAt();   // 出典の「○時○分時点」（待たない。次に描いたときに入る）
+  loadOdptAtSoon();   // 出典の「○時○分時点」（待たない。少しあとに読み、次に描いたときに入る）
   if(need("special")) renderSpecial(); if(need("curfew")) renderCurfew(); if(need("board")) renderBoard(); if(need("yday")) renderYday();
   if(need("ontime")) renderOntime(); if(need("art")) renderArt(); if(need("ga")) renderGaBox();
   const box = $("opsAlerts");
