@@ -1,6 +1,14 @@
 # チェックイン担当の帳面
 
 ## いま持っている仕事
+- 運用タブを空港と機体に分ける（11/16 15時50分の PM の指示・本人「OK」）：済み。ブランチ checkin/ops-split（main 4af96c8 から）・下書き PR #112（361bb78・見張り中）、報告 docs/pm/report-ops-split-app.md、写真 docs/pm/shots-ops-split/
+  - 上を1行（空港｜機体＋空港のピル＋ⓘ＋共有／探す欄＋ⓘ／戻る＋登録記号＋共有）。空港のピルの「近く」は外した
+  - 空港の側は見方7つ（撮る人も・案2）。特別塗装機のかたまり（opsb:special）は外し、OPS_NEED.special は撮る人だけ
+  - 機体の側（VIEWS.opsp：recent・special）。最近見たは端末だけ（soramemo.ops.recent・8機）。運用タブを見ているときの openPlane はタブの中（opsPlOpen）、ほかはシート
+  - 「機体」を出す OFF は layout.opsPlane = 0。表示の編集は運用（空港）／運用（機体）。数 39→41
+  - 足した関数：opsPlaneOn・opsPlaneSet・opsSide・opsSideSet・vsName・opsRecent・opsRecentAdd・opsPlaneInTab・opsFlying・opsPlRow・opsRecentHTML・renderOpsPside・applyOpsSide・opsSideRefresh・opsPlHead・opsPlOpen。変えた：applyOpsView・VIEW_RENDER.ops・opsNeed・renderSpecial・openPlane・renderOpsApPicker・vsHTML・loItems・loSecDef・loSecIds・loSecHTML・opsShare ほか（報告に一覧）
+  - テスト t138 を足した。t118・t124・t130 を直した。全体は t123・t48・運営コンソールのもの以外成功
+  - 本人に決めてほしいこと：「近く」を外してよいか／A2e の入口タイル（羽田に来る機体・乗った機体）を入れるか／運用タブの外で機体を押したときもタブへ移すか
 - 11/16 17時26分（日本時間）PR #107（見落としの片付け）が main に入った。本番に出たかは次の回に Actions で確かめる。ODPT の時刻はデータ担当の odpt_feed_at が入るまで今までの文のまま
 - 見落としの片付け（11/16 14時10分の PM の指示・本人「OK」）：済み。ブランチ checkin/redo-1116（main 2ae2e1f から）・下書き PR #107（062e504・見張り中）、報告 docs/pm/report-redo-1116.md、写真 docs/pm/shots-redo-1116/
   - 1 運用タブの遅れのカードを1便1枚（fix/fw-merge の入れ直し）：通知のまとめ方にそろえ、便名の0をそろえる・共同運航（出発・到着・出発の定刻が同じ。std を返せばそれ）を1枚・便名は運航情報 → JAL・ANA。足した fwMerge・fwNo（FW_RANK）／変えた fwCard・fwHTML・delayTileHTML。t135
@@ -216,6 +224,8 @@
 - 確認コードは6けた。メールは Gmail、Supabase の送信上限は1時間100通
 
 ## 次にやること
+- PR #112（運用タブの空港と機体）：本人の答え3つと改善担当の見直しを待つ。反映は本人の「反映して」待ち。入る前に t138・t118・t124・t130・t134 を流す。PR #107 が入った main とは重ならない（取り込み済み）。運用予想が specialHTML に A4 のピルを足したら、機体の側で見え方を撮り直す
+- PR #107 と #96 が本番に出たか（Actions）は、この回も確かめていない。次の回で見る
 - PR #107（見落としの片付け）：データ担当の data/redo-1116 で odpt_feed_at の返す形が決まったら合わせる（今の作りは { status_at, timetable_at }）。flight_alerts() に std・svc_date が足されたら fwMerge はそれでまとめる（作りは済み）。反映は本人の「反映して」待ち。入る前に t135・t136・t130・t115・t7 を流す
 - t123（共有の画像のダイアログが押す所を覆う）は main でも落ちる。次の回で原因を見る
 - PR #96（海外の止まり具合の画面）：data/world-ops の a33a975 まで取り込み済み。#93 にまた変更が来たら取り込み直す。反映は #93 と一緒（本人の「反映して」待ち）。入る前に t133・t130・t60 を流す。夜の画面の案が出たら札の色を合わせる。改善担当の見直しが来たら直す
@@ -261,6 +271,9 @@
 - tests/ops は手元では npm の playwright にブラウザがないので、全体に入っている playwright をつないで流した（すべて成功）
 
 ## ほかの担当への依頼
+- 運用予想（11/16・PR #112）：特別塗装機の見方（A4）の「いま／この先／羽田に来る」のピルと各行の「この先（予想）」は specialHTML の中なので、そちらで作ってほしい（機体の側の #opsPSpecial にそのまま出る）。タブの中の機体の1日は、planeHTML の .spctop・.plsearch・.spcard・.rsec を #opsPlDay の中だけ CSS で隠し、.rtl li.edge を1行にしている。planeHTML の形を変えるときは知らせてほしい（ほかの帳面は変えない決まりなので、PM から伝えてほしい）
+- 撮る人用（11/16・PR #112）：撮る人は空港の側のまま（案2）。機体の側に「撮影地から見える機体 → 撮る人へ」の入口を置いた。撮る人の中身は変えていない（PM から伝えてほしい）
+- 改善担当（11/16・PR #112）：写真 shots-ops-split/（01〜09。とくに 03 の 667 で予想の1便目が下のタブ帯ぎりぎり＝行の下端 579／タブ帯 581）と、375 の幅で上の1行（長い空港名は「…」で切れる）を見てほしい
 - データ担当（11/16・PR #107）：ODPT の dc:date を読む関数 `odpt_feed_at()` を作ってほしい（移行と RLS をセット。anon・authenticated が呼べる・security definer）。返す形は jsonb `{ status_at: 運航情報のいちばん新しい dc:date, timetable_at: 時刻表の dc:date }`（どちらも null 可）。形を変えるなら data.md に書いてもらえれば合わせる。あわせて、できれば public.flight_alerts() の各行に便の定刻 std と運航日 svc_date を足してほしい（画面のカードを通知と同じく共同運航ごと1枚にするため。返す形に足すだけ）
 - データ担当（11/15・PR #96）：a33a975 の返す形（label・reason_ja・feed_at・空港ごとの note）に合わせた。依頼はなし
 - デザイン担当（11/15）：海外の止まり具合は W1〜W5 どおりに作った（写真 docs/pm/shots-world-ops/）。札は今の案内板に合わせて 12px。夜の案が出たら合わせる
@@ -527,5 +540,5 @@ review-c4：見せてよい。本人の答え（ON／OFF か −／＋ か）を
 4. #20 checkin/test-waits（揺れるテストの直し。今揺れている t17・t19・t62・t37 も見る）
 5. ODPT の dc:date（データの時刻）を画面に出す（ODPT の約束。出典の文の近くに「○時○分時点」。データ担当が返す形を data.md に書く）
 
-## PM から積んだ次の仕事（11/16 15時50分、運用タブを空港と機体に分ける。見落としの片付けの反映のあとに始める）
+## PM から積んだ次の仕事（11/16 15時50分、運用タブを空港と機体に分ける。見落としの片付けの反映のあとに始める）→ PR #112 で作った（361bb78・報告 report-ops-split-app.md）
 本人「OK」（決定事項【11/16】運用タブ）。画面案 design/ops-split の2版（A1・A1b・A2・A2e・A3・A4・P1・P2・V3・V1c）と docs/pm/report-ops-split.md どおり。運用タブの土台（切り替え・空港のピル・見方の帯・表示の編集）はチェックイン担当。撮る人の見方の置き場（案2）は撮る人用担当、機体の1日の予想は運用予想担当の部品をそのまま使う（中を変えるときはその担当の帳面に）。ブランチ checkin/ops-split、下書き PR、本番には入れない。テスト：844 と 667 で予想の1便目が見える・鉛筆と選んだ見方が画面の中・「機体」OFF で戻せる
