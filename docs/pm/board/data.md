@@ -9,8 +9,9 @@
 - 定期の手入れ 6回目（11/16 月、PM の指示なしの回）：ブランチ maint/2026-11-16（main 2ae2e1f から）→ main 向けの下書き PR #103（見張りを始めた）。報告 docs/pm/maint/2026-11-16-report.md（そのブランチ）
   - 移行 170（maint_1116）：ops-log-cleanup に statement_timeout 2min・lock_timeout 5s／Edge Functions が service_role で呼ぶ書く関数12個に lock_timeout（毎晩 5s：archive_* 4つ・cold_done・airport_tracks_put・reg_legs_route・timetable_replace・world_status_put、毎分 10s：apply_flight_status・flight_alerts_put・reg_legs_touch）。表・索引・RLS・権限・本文は変えない。チェックイン・経営への影響なし
   - テスト t109（13項目 OK）。本物の Postgres 16 で関数の lock_timeout が効くのを確かめた。読むだけの docs/pm/maint/2026-11-16-check.sql（cron の仕事ごとの上限の有無・回数・失敗・最長秒と12関数の設定）
-  - 反映の順：#18（153）→#33（155）→#56（158）→#58（161）→#70（162）→#103（170）。#33・#56・#58 の create or replace で関数の設定が消えるので 170 は最後。#18 は 11/16 の PR 一覧の1ページ目に出なかった（開いているか要確認）
+  - 反映の順：#18（153）→#33（155）→#56（158）→#58（161）→#70（162）→#103（170）。#33・#56・#58 の create or replace で関数の設定が消えるので 170 は最後。#18 は開いたままの下書き（11/16 2回目の回で確かめた）
   - 本人待ち：「反映して」・2026-11-16-check.sql の結果
+  - 2回目の回（11/16 12時55分、月曜の定期の回・PM の指示なし）：今日の手入れは PR #103 で済みなので作り直さない。#103 は CI の実行・コメントとも まだなし。**#18（153）は下書きのまま開いている**のを確かめた（反映の順は上のまま）。点検の結果（result.csv）はまだ来ていない。変えたものは帳面のこの行だけ
   - この回では PM が 11/16 11時40分に積んだ「海外の会社の便を自分で集める」（data/foreign-collect）は始めていない（月曜の定期の回で PM の指示が付いていなかったため。指示の回で作る）
 - 海外の会社の特別塗装機が来るのも知らせる（11/16 10時55分 PM の指示・本人「海外の塗装機が来るのも通知に出したい」）：ブランチ data/foreign-livery（main 2ae2e1f から）→ main 向けの下書き PR #102（見張りを始めた）。報告 docs/pm/report-foreign-livery.md（そのブランチ）。コード・表は変えていない
   - 分かったこと：liveries.ts に海外の会社の機体はすでにある（特別塗装13機・アライアンス塗装約40機）。G-YMMU（BA の 777-200ER）は一覧になく、アライアンス塗装は「知らせない」決まり（kind !== "alliance" が airport-traffic・odpt-status・livery_push・spot_push の4か所）なので来なかった。今の知らせは運用タブの空港の近くで「着陸に向かっている」と分かったときだけ
