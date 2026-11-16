@@ -1,6 +1,15 @@
 # チェックイン担当の帳面
 
 ## いま持っている仕事
+- 見落としの片付け（11/16 14時10分の PM の指示・本人「OK」）：済み。ブランチ checkin/redo-1116（main 2ae2e1f から）・下書き PR #107（062e504・見張り中）、報告 docs/pm/report-redo-1116.md、写真 docs/pm/shots-redo-1116/
+  - 1 運用タブの遅れのカードを1便1枚（fix/fw-merge の入れ直し）：通知のまとめ方にそろえ、便名の0をそろえる・共同運航（出発・到着・出発の定刻が同じ。std を返せばそれ）を1枚・便名は運航情報 → JAL・ANA。足した fwMerge・fwNo（FW_RANK）／変えた fwCard・fwHTML・delayTileHTML。t135
+  - 2 送れないときの言い方（#15 の入れ直し）：変えた auSendErr・auSend。t115
+  - 3 ホームのメールのログイン欄を消す（#23 の入れ直し。main にまだあった）：#loginBox ほかと initCaptcha・resetCaptcha・CAPTCHA を消した。変えた updateAuthUI
+  - 4 揺れるテスト（#20 の入れ直し）：keepls.py・t117。t17・t19・t37・t62 は4回くり返して成功
+  - 5 ODPT の dc:date：出典に「運航情報 ○時○分・時刻表 ○月○日時点」。足した odptAtText・odptCredit・setOdptAt・loadOdptAt・loadOdptAtSoon（ODPT_AT）、ODPT_CREDIT を let に。変えた loadFlightAlerts・renderOpsAlerts。rpc/odpt_feed_at（データ担当に依頼中・まだない）を運用タブと空港の今を開いて8秒あとに読む（t130 の本数を守るため）。t136
+  - テスト全体 102/107（t123 は main でも落ちる・t99・t105・t48 は前から）
+  - 本人に決めてほしいこと：時刻の書き方／別の1本で読むか、今ある返す形に入れてもらうか
+  - #15・#20・#23 は「入れ直したので閉じてよい」と報告に書いた。fix/fw-merge は PR がなかった
 - 11/15 15時ごろ（日本時間）PR #96（海外の止まり具合の画面）が main に入った（PM のまとめ PR #97・754bca5。運用予想の案A と一緒。運用予想のテストは t134 に番号を変えた）。本番に出たかは次の回に Actions で確かめる。データ担当の #93（移行169）が本番に入っていないと画面には何も出ない（取れないときは出さない作り）
 - 海外の空港の止まり具合の画面（11/15 12時40分の PM の指示・本人「A」）：済み。ブランチ checkin/world-ops（main 5a22d8e＋data/world-ops 664e5dd）・下書き PR #96（9f601cc・見張り中）、報告 docs/pm/report-world-ops-app.md、写真 docs/pm/shots-world-ops/
   - 案内板の国際線の便にピンの札（FAA のいちばん重いもの1つ・出発前／到着前だけ・便の数の札は列に出さない）＋ピンの説明の1行。海外の航空会社の上に「行き先の海外の空港のいま」の欄（案内板の便の行き先・出発地のうち FAA があるか欠航・30分以上の遅れがある空港だけ・断り書きは太字・note）。押すとくわしく（#dWorldAp）。乗る便のカード（国際線）に1行（FAA・便の数）と出典の断り
@@ -205,6 +214,8 @@
 - 確認コードは6けた。メールは Gmail、Supabase の送信上限は1時間100通
 
 ## 次にやること
+- PR #107（見落としの片付け）：データ担当の data/redo-1116 で odpt_feed_at の返す形が決まったら合わせる（今の作りは { status_at, timetable_at }）。flight_alerts() に std・svc_date が足されたら fwMerge はそれでまとめる（作りは済み）。反映は本人の「反映して」待ち。入る前に t135・t136・t130・t115・t7 を流す
+- t123（共有の画像のダイアログが押す所を覆う）は main でも落ちる。次の回で原因を見る
 - PR #96（海外の止まり具合の画面）：data/world-ops の a33a975 まで取り込み済み。#93 にまた変更が来たら取り込み直す。反映は #93 と一緒（本人の「反映して」待ち）。入る前に t133・t130・t60 を流す。夜の画面の案が出たら札の色を合わせる。改善担当の見直しが来たら直す
 - PR #90 が本番に出たか（Actions）はまだ確かめていない。次の回で見る
 - PR #90（通知の renotify）：11/14 に main に入った。本番の配る版が Actions で出たか次の回で確かめる。（前の書き付け）data/alert-merge と一緒に本人の「反映して」を待つ。先にこちらだけ入っても動きは今までと同じ。通知の説明の文を画面に出すかは、デザイン担当の画面案と本人の答えが出てから
@@ -248,6 +259,7 @@
 - tests/ops は手元では npm の playwright にブラウザがないので、全体に入っている playwright をつないで流した（すべて成功）
 
 ## ほかの担当への依頼
+- データ担当（11/16・PR #107）：ODPT の dc:date を読む関数 `odpt_feed_at()` を作ってほしい（移行と RLS をセット。anon・authenticated が呼べる・security definer）。返す形は jsonb `{ status_at: 運航情報のいちばん新しい dc:date, timetable_at: 時刻表の dc:date }`（どちらも null 可）。形を変えるなら data.md に書いてもらえれば合わせる。あわせて、できれば public.flight_alerts() の各行に便の定刻 std と運航日 svc_date を足してほしい（画面のカードを通知と同じく共同運航ごと1枚にするため。返す形に足すだけ）
 - データ担当（11/15・PR #96）：a33a975 の返す形（label・reason_ja・feed_at・空港ごとの note）に合わせた。依頼はなし
 - デザイン担当（11/15）：海外の止まり具合は W1〜W5 どおりに作った（写真 docs/pm/shots-world-ops/）。札は今の案内板に合わせて 12px。夜の案が出たら合わせる
 - 改善担当（11/15）：PR #96 の写真 shots-world-ops/（t133_board・t133_board_667・t133_sheet_lax／icn・t133_ride_faa／cnt）と iPhone の幅で、札の押せる範囲と欄を見てほしい
@@ -505,7 +517,7 @@ review-c4：見せてよい。本人の答え（ON／OFF か −／＋ か）を
 - renderRideIntl の状態の1行の下に1行（W4・W4b）
 - テスト：札が出る・過ぎた便に出ない・便の数の札が便の列に出ない・取れないときは何も出さない。ブランチ checkin/world-ops、下書き PR、本番には入れない
 
-## PM から積んだ次の仕事（11/16 14時10分、見落としの片付け。本人「OK」）
+## PM から積んだ次の仕事（11/16 14時10分、見落としの片付け。本人「OK」）→ PR #107 で入れ直した（062e504・報告 report-redo-1116.md）
 一覧は docs/pm/board/overlooked-1116.md。作ったのに main に入っていない直しを、今の main に取り込み直して（番号・テストの名前のぶつかりも直して）、新しいブランチの下書き PR に。本番には入れない。古い PR は「入れ直したので閉じてよい」と報告に書く。ブランチ checkin/redo-1116
 1. fix/fw-merge（6e689cf）：運用タブの遅れ・欠航・ダイバートのカードを1便1枚に（fwHTML）。#91 の通知のまとめ方（便名＋運航日、共同運航は運航する便）とそろえる。11/16 の本番で出発と到着の両方が634便
 2. #15 checkin/send-busy（確認コードのメールが送れないときの言い方）
