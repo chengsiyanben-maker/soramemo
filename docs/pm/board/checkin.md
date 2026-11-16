@@ -8,6 +8,7 @@
   - 「機体」を出す OFF は layout.opsPlane = 0。表示の編集は運用（空港）／運用（機体）。数 39→41
   - 足した関数：opsPlaneOn・opsPlaneSet・opsSide・opsSideSet・vsName・opsRecent・opsRecentAdd・opsPlaneInTab・opsFlying・opsPlRow・opsRecentHTML・renderOpsPside・applyOpsSide・opsSideRefresh・opsPlHead・opsPlOpen。変えた：applyOpsView・VIEW_RENDER.ops・opsNeed・renderSpecial・openPlane・renderOpsApPicker・vsHTML・loItems・loSecDef・loSecIds・loSecHTML・opsShare ほか（報告に一覧）
   - テスト t138 を足した。t118・t124・t130 を直した。全体は t123・t48・運営コンソールのもの以外成功
+  - 2回目の回（11/16、PM が同じ指示を手で呼んだ）：PR #112 で済みだった。main は 4af96c8（#109）のままで取り込み済み、PR のコメント・CI はまだなし。変えたものはなし
   - 本人に決めてほしいこと：「近く」を外してよいか／A2e の入口タイル（羽田に来る機体・乗った機体）を入れるか／運用タブの外で機体を押したときもタブへ移すか
 - 11/16 17時26分（日本時間）PR #107（見落としの片付け）が main に入った。本番に出たかは次の回に Actions で確かめる。ODPT の時刻はデータ担当の odpt_feed_at が入るまで今までの文のまま
 - 見落としの片付け（11/16 14時10分の PM の指示・本人「OK」）：済み。ブランチ checkin/redo-1116（main 2ae2e1f から）・下書き PR #107（062e504・見張り中）、報告 docs/pm/report-redo-1116.md、写真 docs/pm/shots-redo-1116/
