@@ -51,3 +51,65 @@ G-YMMU（BA の 777-200ER）は、航空写真の記録サイトで「ワンワ�
 ## 出典
 - リポジトリ：supabase/functions/_shared/liveries.ts・supabase/functions/airport-traffic/index.ts（recordLiveries・notifyLivery）・supabase/migrations/20261015000041_foreign_liveries.sql
 - G-YMMU の記録：https://www.airhistory.net/registration/G-YMMU
+
+---
+
+## 7. 作ったもの（11/16 夜の回。PM の指示＝本人「おすすめ」の 案1-A・案2-A・案3-A・FR24 の差し替え）
+main 4af96c8（#109 で foreign_legs・foreign_watch が入ったあと）から。下書きのまま、本番には入れていない。
+
+作業の前の3行：
+- 変えるファイル：移行184（livery_extra・livery_inbound_usual）・_shared/livery_extra.ts（新）・_shared/liveries.ts・airport-traffic/index.ts・テスト（t123・livery_extra_test・liveries_test）
+- 手順：表と RLS → 一覧に表を合わせる → 海外の塗装機を日本のまわりで見つけたら行き先と着く見込みを1回 → アライアンス塗装は海外の会社だけ → FR24 の出典を差し替え
+- 確かめ方：SQL のテスト（t123 と全部）・deno test（全部）・deno check
+
+### 案1-A 表 livery_extra（移行184）
+- 列：reg（主キー。adsb.lol の書き方）・name・airline・kind（special／alliance、既定 special）・src（**必須・https・Flightradar24 は入らない**）・from_day・until_day・note・added_at
+- 本人が Supabase の **Table Editor で1行足すだけ**で、5分以内（関数が5分ためる）に運用タブ・空港のいま・特別塗装機の知らせに出る。コードの変更と反映は要らない。同じ登録記号がコードの一覧にあれば表のほうを使う（名前の直し・終わる日の書き足しにも使える）
+- 終わった塗装は消さずに until_day を入れる
+- RLS：誰でも select（塗装の名前・会社・出典の事実だけ）。anon・authenticated は書けない。書くのは service_role と Table Editor
+- 影響：チェックイン（運用タブ・空港のいまの特別塗装機に表の機体も出る。返す形は同じ）・撮る人用（注目の機体に表の機体も入る）。経営は使わない
+
+### 案2-A 日本のまわりで見えたら行き先と着く見込みを1回（airport-traffic の記録の回）
+- 対象：海外の会社の塗装機（特別塗装と、海外の会社のアライアンス塗装）で、便名があり 5,000ft より上、まだ空港の近くで「着陸に向かっている」と分かっていないもの
+- 行き先：①**ふだん着く空港**（foreign_usual。前の8週の実績。外への問い合わせなし。livery_inbound_usual、service_role だけ）②なければ **adsb.im の経路のデータ**（airport-foreign と同じ問い合わせ先。その回の対象をまとめて1回）。機体の進む向きがその空港へ向いている（ずれ60度まで）・1,500km 以内のときだけ決める
+- 着く見込み：残りの距離 ÷ 対地速度 ＋ 降りる分（80km より遠ければ12分）。ふだんの着く時刻と40分以内ならふだんの時刻を使う
+- 文：「○○（会社・便名）が羽田に向かっています（推定）。着くのは10:42ごろの見込みです（推定）。」送る相手は今の空港の特別塗装機の知らせ（sp_airports）を申し込んでいる人
+- 二重にしない：同じ便（機体・便名）は12時間に1回だけ調べる（行き先が分からなければ15分後にもう一度）。知らせたら livery_notified の（機体・空港）にも入れるので、着陸の数分前の知らせ（6時間に1回）は出ない＝**1回だけ**
+- 外への問い合わせ：塗装機が見えて行き先がふだんの実績から分からないときだけ。1日に数回の見込み
+
+### 案3-A アライアンス塗装は海外の会社のものだけ知らせる
+- 国内の会社（登録記号 JA）のアライアンス塗装は今までどおり知らせない。海外の会社のもの（G-YMMR など）は着陸の数分前の知らせと 案2-A の早めの知らせを出す
+- 撮影の知らせ（spot_push、撮る人用担当のコード）はアライアンス塗装を出さないので、アライアンス塗装のときは撮影の知らせを選んでいる人にも空港の知らせを送るようにした（前は撮影の知らせに任せて送っていなかった）
+- odpt-status の「〇〇で運航いたします」の予定（国内の会社の名前だけ）はそのまま。livery_extra も読まない（国内の会社の塗装はコードの一覧にある）
+
+## 8. FR24 の出典の差し替え（32機＋特別塗装の1機）
+公式・報道・planespotters で確かめた（下の出典は本文で登録記号を見た）。**確かめられなかった28機は外した**。見えたときは本人が livery_extra に出典つきで足せる。
+| 残した・足した | 登録記号 | 出典 |
+|---|---|---|
+| 足した | B-17812（エバー 787-10・スター） | エバー航空の公式発表（2023-05） |
+| 足した（B-16701 の代わり） | B-16715（エバー 777-300ER・スター） | aerotelegraph（2023-05） |
+| 出典を替えて残した | B-16206（エバー A321） | aerotelegraph（2023-05） |
+| 出典を替えて残した | VT-ALJ・VT-ANU（エア・インディア） | Simple Flying（2024-09） |
+| 出典を替えて残した | C-GHLM（エア・カナダ A330） | Simple Flying（2023-03） |
+| 足した | G-YMMR（BA 777-200ER・ワンワールド） | Simple Flying（2022-12） |
+| 特別塗装の出典を替えた | N91007（ユナイテッド Stars and Stripes） | Simple Flying |
+
+外した28機：B-16701・B-6091・B-6093・B-2032・HL7730・B-6296・B-6297・9V-SWI・9V-SWJ・HS-TEL・N76021・N77022・N78017・N218UA・N794UA・N791AN・N796AN・B-KPL（2022年にカタール航空へ移り A7-BOA と報道）・B-HLU・VH-EBL・VH-EBV・A7-BAA・A7-BAB・A7-BAF・A7-BAG・9M-MTE・9M-MTO・4R-ALH
+- **G-YMMU は一覧に入れていない**：報道では BA のワンワールド塗装の 777 は G-YMMR。G-YMMU とする公式・報道の出典は見つからなかった。本人が見た・撮った（11/16 BA5）なら、本人の目撃を出典に livery_extra に足せる（src は本人の写真の頁などの https）
+- ウィキメディア・コモンズの分類の頁はこの回は読めなかった。読めれば外した機体のいくつかは戻せる見込み
+
+## 9. 確かめた結果
+- SQL：t123（18項目）すべて OK。SQL のテスト全部：（下）
+- deno test：全部 268本 通過（livery_extra_test 5本・liveries_test 4本を含む）。deno check（airport-traffic）通過
+- `node tools/migrations.mjs check`：174件で番号の重なりなし（183 は定期の手入れ maint/2026-11-16b・PR #111 が使っているので、この PR は 184・t123）
+
+## 10. 本人に決めてほしいこと（不在のあいだにまとめたもの）
+1. 「反映して」：移行184 と関数（airport-traffic）。PR #111（183）とどちらが先でもよい
+2. 外した28機：このままでよいか（見えたら livery_extra で足す）。コモンズで探し直すか
+3. G-YMMU：本人の目撃を出典に足すか（足すなら Table Editor で reg=G-YMMU・kind=alliance・src=本人の写真などの https）
+4. 早めの知らせの対象を、海外の会社の**特別塗装も**含めている（G-YMMR のようなアライアンス塗装だけでなく、エバーのハローキティなど）。特別塗装は今までは着陸の数分前の1回だけだった。早めの1回に替わる（数分前の知らせは出なくなる）のでよいか
+5. 撮る人用担当への依頼（下）を PM から satsuei.md に写してほしい
+
+## 11. ほかの担当への依頼
+- 撮る人用へ：spot_push.ts の `livery.kind !== "alliance"`（48行目）を、海外の会社のアライアンス塗装は通すようにしてほしい（例：`livery.kind !== "alliance" || !/^JA/.test(livery.reg)`。_shared/livery_extra.ts の `wantsLiveryPush` を使ってもよい）。そうなったら、airport-traffic の notifyLivery の「アライアンス塗装のときは撮影の知らせの人にも送る」を元に戻す（データ担当）
+- チェックインへ：特別塗装機の欄・知らせの説明に「海外の会社の塗装機は、日本のまわりで見えたときに行き先と着く見込み（推定）を1回知らせる」を足すか（デザイン担当の画面案のあと）。返す形は変えていない
