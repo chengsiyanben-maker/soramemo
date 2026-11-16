@@ -79,10 +79,17 @@ for (const def of Object.values(OPS_AIRPORTS)) {
   ok(lines > 0, `${def.iata}：地図に経路の線がある（${lines}本）`);
   ok(errs.length === 0, `${def.iata}：画面のエラーなし`, errs.join(" / "));
   if (def.iata === "HND") {
+    // 11/16 運用タブを空港と機体に分けた（PR #112・#113、画面案 design/ops-split 2版の案2）：特別塗装機のかたまりは「滑走路」から外し、
+    // 空港の側では「撮る人」の見方にだけ「羽田に来る特別塗装機」を出す。滑走路では特別塗装機を読まない（t130）ので、地図の名札に★は付かない。
+    // 名札そのもの（便名と高度）は今までどおり出る。★を滑走路の地図に戻すかは本人の答え待ち（docs/pm/report-fix-ops-test.md）
+    const sp0 = await p.locator("#opsSpecial").isVisible().catch(() => false);
+    ok(!sp0, "羽田 滑走路：特別塗装機の欄は出さない（撮る人の見方と機体の側へ移した）");
+    const tag = await p.locator(".tlabel").count();
+    ok(tag > 0, `羽田 滑走路：地図に機体の名札が出る（${tag}枚）`);
+    await p.locator('[data-vw="ops:photo"]').click(); await p.waitForTimeout(2500);
     const sp = await p.locator("#opsSpecial").innerText().catch(() => "");
-    ok(sp.includes("羽田に来る特別塗装機") && sp.includes("ポケモンジェット 赤") && sp.includes("着陸に向かっている"), "特別塗装機の欄が出る（羽田に来る特別塗装機）", sp.slice(0, 120));
-    const tag = await p.locator(".tlabel.sp").count();
-    ok(tag > 0, "地図の名札に特別塗装機の★が出る");
+    ok(sp.includes("羽田に来る特別塗装機") && sp.includes("ポケモンジェット 赤") && sp.includes("着陸に向かっている"), "羽田 撮る人：特別塗装機の欄が出る（羽田に来る特別塗装機）", sp.slice(0, 120));
+    ok(errs.length === 0, "羽田 撮る人：画面のエラーなし", errs.join(" / "));
   }
   if (def.iata === "NRT") {
     // 成田：出発経路の方向での絞り込み（34運用は方向が3つ以上ある）。経路の線は「経路の全体」のときに出す
