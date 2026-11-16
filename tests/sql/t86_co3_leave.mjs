@@ -62,10 +62,10 @@ await db.exec(`insert into co3_invest (investor, target, amount, pct, status, ac
 // みんな 2時間前に締めたことにする（退会の前に、相手の稼ぎを締めるかを見る）
 await db.exec(`update companies set last_collect = now() - interval '2 hours'`);
 
-const ratio = Number(await q1(`select co3.month_left_ratio()`));
-const revNow = Number(await q1(`select public.co3_op_revenue('${A}', '${hc}')`));
 const vA = Number(await q1(`select public.co_value('${A}')`));
-const expectRefund = Math.ceil(revNow * 5 * ratio), expectBack = Math.max(40000, Math.floor(vA * 0.1));
+const ratio = Number(await q1(`select co3.month_left_ratio()`));
+// 返金の期待値は関数と同じ式を SQL で出す（JS の数にすると切り上げが1円ずれる日がある）
+const expectRefund = Number(await q1(`select ceil(public.co3_op_revenue('${A}', '${hc}') * 5 * co3.month_left_ratio())::bigint`)), expectBack = Math.max(40000, Math.floor(vA * 0.1));
 const pendB = Number(await q1(`select floor(public.co_daily('${B}') * 2 / 24.0)`));
 const c0 = { B: await cash(B), C: await cash(C), D: await cash(D) };
 const r = await q1(`select public.co3_leave_settle('${A}')`);

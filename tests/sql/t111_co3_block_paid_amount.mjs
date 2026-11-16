@@ -60,9 +60,9 @@ check('アプリからは払えない', String(await as(B, `select public.co3_cs
 await db.exec(`update co3_codeshares set paid_amount = 12345 where id = ${csB}`);
 // C も A の路線をブロック買い取りしたが、払った額の記録がない（前からある行）
 const csC = Number(await q1(`insert into co3_codeshares (op_id, seller_id, route_key, kind, status, active_at, paid_month) values ('${A}', '${C}', '${hc}', 'block', 'active', now(), '${m}') returning id`));
-const ratio = Number(await q1(`select co3.month_left_ratio()`));
-const revNow = Number(await q1(`select public.co3_op_revenue('${A}', '${hc}')`));
-const expB = Math.ceil(12345 * ratio), expC = Math.ceil(revNow * 5 * ratio);
+// 期待値は関数と同じ式を SQL で出す（numeric の割合を JS の数にすると、切り上げが1円ずれる日がある）
+const expB = Number(await q1(`select ceil(coalesce(12345::bigint, public.co3_op_revenue('${A}', '${hc}') * 5) * co3.month_left_ratio())::bigint`));
+const expC = Number(await q1(`select ceil(coalesce(null::bigint, public.co3_op_revenue('${A}', '${hc}') * 5) * co3.month_left_ratio())::bigint`));
 const r = await q1(`select public.co3_leave_settle('${A}')`);
 check('返金の合計＝払った額から＋いまの収益から', r.refund === expB + expC && expB !== expC, { r: r.refund, expB, expC });
 const nB = (await db.query(`select meta from co3_news where user_id = '${B}' and ref = 'leave-cs-${csB}'`)).rows[0];
