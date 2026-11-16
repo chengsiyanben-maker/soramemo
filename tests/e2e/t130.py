@@ -55,7 +55,8 @@ async def main():
             await pg.evaluate("goTab('ops')"); await pg.wait_for_timeout(2500)
             n = collections.Counter(reqs)
             check(f'{mode}：滑走路で開くと、ほかの見方の分（定時・空の道すじ・昨日・案内板・海外）を読まない', not any(n[x] for x in OTHER_VIEWS), dict(n))
-            check(f'{mode}：livery_board は1回だけ（いま飛んでいる特別塗装機の分）', n['/rest/v1/rpc/livery_board'] == 1, n['/rest/v1/rpc/livery_board'])
+            # 11/16：特別塗装機は運用タブの「機体」の側へ（滑走路では読まない。撮る人の見方の「羽田に来る特別塗装機」はそのまま）
+            check(f'{mode}：滑走路では特別塗装機（special_now・livery_board）を読まない', n['/rest/v1/rpc/livery_board'] == 0 and n['/rest/v1/rpc/special_now'] == 0, dict(n))
             check(f'{mode}：同じ呼び出しが2回以上ない', all(v == 1 for v in n.values()), dict(n))
             lim = 9 if mode == 'login' else 7   # ログインは flight_alerts と通知の鍵（push-subscribe。デモで呼ばないのはチェックイン担当の直し）が増える
             check(f'{mode}：開いたときの本数は{lim}本以下（前は17本）', len(reqs) <= lim, len(reqs))
@@ -63,8 +64,6 @@ async def main():
                 check('ログイン：flight_alerts を読み、遅れ・欠航のタイルとお知らせが出る', n['/rest/v1/rpc/flight_alerts'] == 1 and await pg.locator('#opsDelayTile').count() == 1 and 'JL123' in await pg.inner_text('#opsAlerts'))
             else:
                 check(f'{mode}：flight_alerts を読まない・遅れ・欠航のタイルとお知らせを出さない', n['/rest/v1/rpc/flight_alerts'] == 0 and await pg.locator('#opsDelayTile').count() == 0 and await pg.evaluate("$('opsAlerts').hidden"))
-            sp = await pg.inner_text('#opsSpecial')
-            check(f'{mode}：羽田に来る特別塗装機は今までどおり出る', 'ポケモンジェット 赤' in sp and '着陸に向かっている' in sp, sp[:80])
             if mode == 'anon':
                 # 見方を変えると、その見方の分だけ読む。戻っても3分以内は読み直さない
                 reqs.clear(); await pg.click('[data-vw="ops:board"]'); await pg.wait_for_timeout(1200)
@@ -83,6 +82,10 @@ async def main():
                 check('定時を選んだときだけ airport_ontime を読む', collections.Counter(reqs)['/rest/v1/rpc/airport_ontime'] == 1, reqs)
                 reqs.clear(); await pg.click('[data-vw="ops:art"]'); await pg.wait_for_timeout(800)
                 check('空の道すじを選んだときだけ airport_tracks を読む', collections.Counter(reqs)['/rest/v1/rpc/airport_tracks'] == 1, reqs)
+                reqs.clear(); await pg.click('[data-vw="ops:photo"]'); await pg.wait_for_timeout(1500)
+                n = collections.Counter(reqs); sp = await pg.inner_text('#opsSpecial')
+                check('撮る人：livery_board は1回だけ（いま飛んでいる特別塗装機の分）', n['/rest/v1/rpc/livery_board'] == 1, dict(n))
+                check('撮る人：羽田に来る特別塗装機は今までどおり出る', 'ポケモンジェット 赤' in sp and '着陸に向かっている' in sp, sp[:80])
             allerr += errs; await c.close()
         # 2. 気象通報が届くまで
         c, pg, errs, reqs = await page(b, 'anon', metar_wait=1.5)
