@@ -1,6 +1,13 @@
 # データ担当の帳面
 
 ## いま持っている仕事
+- **11/16 17時26分 PR #104・#108 が main に入った（本人の反映の PR #109 → 4af96c8、移行171〜182）。反映の Actions（run 215＝43831221783、17時26分〜17時54分）はすべて成功（テスト・SQL を流す・関数の公開・アプリ）。本番に入った**
+  - 次の日（11/17）に本人に流してもらう読むだけの SQL（重くしない）：
+    - `select feed, dc_date at time zone 'Asia/Tokyo' dc, fetched_at at time zone 'Asia/Tokyo' f, n from public.odpt_feed_dates order by feed;`（redo-1116-check.sql の③）
+    - `select j.jobname, count(*) n, count(*) filter (where d.status <> 'succeeded') ng, round(max(extract(epoch from d.end_time - d.start_time))::numeric, 1) max_s from cron.job_run_details d join cron.job j on j.jobid = d.jobid where j.jobname in ('foreign-legs','foreign-usual','foreign-watch-sync','ops-log-cleanup','eta-calib','taxi-out','flight-watch-cleanup') and d.start_time > now() - interval '1 day' group by 1 order by 1;`
+    - `select day, count(*) from public.foreign_legs where day >= current_date - 2 group by 1 order by 1;`
+  - redo-1116-check.sql の ①②（照合を adsb に切り替えるか）は本人待ちのまま。切り替えるまで照合は OpenSky のまま
+  - 下の「見落としの片付け」「海外の便の見張りの続き」の行は本番に入った。古い PR #18・#33・#56・#58・#70・#103 は閉じてよい（本人へ）
 - 海外の便の見張りの続き（11/16 14時 PM の指示の 1。11/16 15時台の回＝PM が「見落としの片付けを先に、時間があればこちら」と手で呼んだ回）：ブランチ data/foreign-collect（PR #104、**data/redo-1116＝#108 を取り込んだ**ので反映は #108 のあと）。報告 docs/pm/report-foreign-collect.md の 7
   - ① 171 を直した（まだ main にないので番号はそのまま）：airline_codes の japan → **odpt**（JAL・JLJ・JTA・JAC・HAC・ANA・AKX・AJX だけ true）。ODPT にない日本の会社（スカイマーク・ピーチ・ZIPAIR・春秋航空日本・日本貨物航空など）は JA の機体でも集める。表にない会社の JA の機体は入れない。t110（37項目）
   - ③ 移行181 foreign_cold：foreign_legs だけ180日より前を cold-archive へ（ほかの表は400日のまま）。cold_days の決まりに foreign_legs を足す。cold_done の lock_timeout 5s は残す。t120（14項目）。大きさは約85MB で頭打ちの見込み
