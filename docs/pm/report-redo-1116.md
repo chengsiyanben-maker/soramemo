@@ -37,7 +37,7 @@ PM の指示（11/16 14時10分、本人「OK」・docs/pm/board/overlooked-1116
 ## 確かめた結果
 - 新しいテスト t118（19項目）・t119（11項目）、付け直した t112〜t117：すべて通過
 - 関数のテスト（deno test supabase/tests/）262本 通過（odpt_date_test 4本・verify_source_test 3本を足した）。型の確認（deno check）通過
-- SQL のテスト全部：下の「全部の結果」に書く
+- SQL のテスト全部（119本）：通過。1回目の通しで t108 だけ落ち（下の日付の件）、直したあと流し直して通過。t118・t119 は別に流して通過
 - 番号の重なりなし（node tools/migrations.mjs check）
 - t108（データ担当の海外の止まり具合のテスト）が **main でも落ちていた**：日付が 11/15 のとき前提の書き方だった。今日の便を1つ足して、日付に左右されないように直した
 - redo-1116-check.sql は手元の Postgres（PGlite）で通ることを確かめた
