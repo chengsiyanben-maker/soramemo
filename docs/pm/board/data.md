@@ -5,6 +5,7 @@
   - _shared/odpt_status.ts の splitActual：実際の時刻が取り込んだ時刻より1分を超えて先なら atd／ata にせず etd／eta（お知らせも「見込み」の文）。odpt_fast.ts：未来の atd は出発前扱い
   - 移行186：apply_flight_status に同じ守り（未来の atd・ata は入れず etd・eta に、残っていた未来の値は次の書き直しで外す。lock_timeout 10s 付け直し）。表・RLS は変えない
   - 確かめた結果：deno 270本・t125 14項目・t18/t21/t23/t27/t51/t89/t105/t108/t117 通過
+  - 11/18 8時16分の PM の指示（ブランチ名 data/odpt-future-actual・本人「進めて」）は、同じ中身なので PR #126 にまとめた（報告に対応を書いた）。本番を見る読むだけの SQL docs/pm/atd-future-check.sql（① 先の atd・ata の数 ② 例20件）を足した。反映の前と次の日に流してもらう
   - 本人待ち：「反映して」・朝一番の便の言い方（案A：inbound_aircraft に first と前の日に着いた空港・時刻を足す／案B：画面の文だけ。おすすめ A）
 - いつもより遅いの画面に要る関数（11/17 の回。PM の指示 11/17 12時20分。曜日は火曜で定期の回として呼ばれたが、PM の積んだ指示があったのでこちらをした）：ブランチ data/usual-late-rpc（main 32d923d から）→ 下書き **PR #118**（見張りを始めた）。報告 docs/pm/report-usual-late-rpc.md。**移行185・テスト t124 を使った**
   - 移行185：読むだけの関数 usual_late(p_flight, p_reg, p_day, p_arr, p_land) だけ（表・RLS は変えない。anon・authenticated は実行だけ）。便名か登録記号（reg_legs のその日と前の日）から、いつもの到着（foreign_usual。dow・n・spread・weeks）・着く見込み（着陸。実績 foreign_legs → 画面が渡す flight-live の land_pred → foreign_watch.eta（10分以内）の順）・late_min と kind（late 15分以上・usual 前後14分・early）・event・divert_to・curfew_near・source・note。見込みがなければ eta null（U1n-v2）。ODPT の会社は reason odpt、知らない記号は unknown、形のちがう値は null
