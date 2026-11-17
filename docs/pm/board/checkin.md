@@ -1,6 +1,13 @@
 # チェックイン担当の帳面
 
 ## いま持っている仕事
+- iPhone のアプリの土台（11/18 6時の定時の回・PM の指示なし。帳面の「次にやること」の1つめ＝決定事項【11/18】作り方 A で本人の答えが出たため）：1回目済み。ブランチ checkin/ios-app（main 61ba9c7 から）・下書き **PR #125**（06e603f・見張り中）、報告 docs/pm/report-ios-app-base.md、写真 docs/pm/shots-ios-app/、Mac の手順 ios-app/README.md
+  - ios-app/（Capacitor 8.6.0・geolocation 8.2.4・share 8.0.3・browser 8.0.5・SPM・iOS 15 以上・appId jp.soramemo.app）。server.url は使わず、build_www.mjs で web/ を www/ に写し capacitor.js を config.js の前に足す（sw.js・now*.html・og は入れない）。Info.plist：ja・縦だけ・位置（使用中のみ）／カメラ／マイクの理由の文・暗号の申告。アイコンは web/icon.svg を角なし 1024px
+  - src/index.html 足した：NATIVE・capPlugin・capGeoErr・capGeoPos・capGeoOpts・capGeoInstall・capShareInstall・capOpenUrl・capLinkInstall・CAP_ON。変えた：captchaOn・pushOK・pushButtonHTML・renderPlusSettings・サービスワーカーの登録。html に data-native="ios"
+  - 位置は navigator.geolocation の中身だけ差し替え（呼ぶ所・下の担当のコードは変えない）。共有は字と URL だけネイティブ、画像つきは WebView のまま。外のリンクは @capacitor/browser
+  - アプリの中ではロボット除け・Web Push（「アプリの通知は準備中です。」）・そらメモ＋の申し込みと解約のボタン・サービスワーカーを使わない
+  - テスト t143（新・18項目）OK。tests/ops 成功。e2e 全体は報告に追記（下の「次にやること」）。Xcode のビルドと iPhone の動きは未確認（Mac がない）
+  - 本人に決めてほしいこと：本番の CAPTCHA が ON ならアプリの中ではログインのコードを送れない（自分用はデモで見るか、別の確かめ方を決めるか）／縦だけでよいか／マイクの理由の文
 - iPhone のアプリにする計画（PM 11/17 20時30分・11/18 0時15分の指示）：済み。ブランチ checkin/ios-plan（main 61ba9c7 から）・下書き **PR #124**（f0aab2d）、報告 docs/pm/report-ios-app-plan.md。コードは変えていない
   - おすすめは Capacitor 8（Node 22 以上・Xcode 26 以上・iOS 15 以上・SPM）で今の web を包み、位置・通知（APNs）・カメラ・共有だけネイティブの部品。server.url で本番を読むだけの形はやめる
   - 審査：4.2・位置は「使用中のみ」と理由の文・非公式の書き方・出典・有料はスマホ新法（2025/12/18）も含めて申請前に確かめる。登録は個人だと本名が販売元に出る、組織は法人と D-U-N-S
@@ -271,7 +278,9 @@
 - 確認コードは6けた。メールは Gmail、Supabase の送信上限は1時間100通
 
 ## 次にやること
-- 次の回は PM の指示を待つ。PR #124（iPhone の計画）の本人の4つの答えが出たら、checkin/ios-app で Capacitor 8 の土台を作る（アプリだけの画面はデザイン担当の画面案のあと）。通知の表の種類の列と APNs に送る関数はデータ担当へ依頼する
+- 次の回は PM の指示を待つ。なければ PR #125 の e2e 全体の結果を報告に足す（この回の途中で流した）。本人が Mac で動かした結果（ビルドが通るか・位置の許可・シートの下の余白）が来たら直す
+- PR #125（iPhone のアプリの土台）：アプリだけの画面はデザイン担当の画面案のあと（data-native で切り替え）。APNs はデータ担当の表と関数のあと。次の段は地図・supabase-js・three.js をアプリの中に入れる・バーコードをネイティブに。反映（main）は本人の「反映して」待ち。入る前に t143 と tests/ops を流す。src/index.html は SERVER の定義のすぐ下に入れ物があるので、ほかの PR とぶつかったらそこを見る
+- t72（特別塗装機の画面を #opsSpecial から開く）が main でも落ちる件は、この回もまだ（PR #125 を先にした）
 - PR #121・#122・#123・#124 の改善担当の見直し・CI・本人の答えを待って直す
 - PR #123（空港の3D）：改善担当の見直し・本人の答えを待って直す。データ担当の形のファイル（OSM・PLATEAU）が来たら a3Build の島と建物を差し替え、角の出典を「© OpenStreetMap・PLATEAU」に。?view=3d が来たら a3Poll の読み先を変えて地上の機体を出す（名札は空だけのまま）。反映は本人の「反映して」待ち。入る前に t142・t121・tests/ops を流す。three.js の版を上げるときは CSP（script-src に jsdelivr）と t142 の three の置き場所を確かめる
 - PR #122（図鑑の飛行場）：シークレットの直しを足した。改善担当の見直しが来たら直す。#121 と夜の CSS の行がぶつかるのは両方残す
@@ -329,6 +338,9 @@
 - tests/ops は手元では npm の playwright にブラウザがないので、全体に入っている playwright をつないで流した（すべて成功）
 
 ## ほかの担当への依頼
+- デザイン担当（11/18・PR #125）：アプリだけの画面（位置と通知の許可の前の説明の1枚・オフラインの画面・アプリで隠すもの＝「ホーム画面に追加」の案内など）の画面案。アプリでは html[data-native="ios"] が付く
+- データ担当（11/18・PR #125）：PR #124 の依頼①〜③のまま（購読の表の種類の列・APNs に送る関数・ODPT の規約の見直し）。あわせて、本番の Supabase で CAPTCHA が ON かを data.md に書いてほしい（ON ならアプリの中のログインが通らない）
+- 修行・撮る人用・運用予想（11/18・PR #125、PM から伝えてほしい）：持ち場のコードは変えていない。navigator.geolocation・navigator.share はそのまま呼べば、アプリの中ではネイティブに回る
 - データ担当（11/18・PR #124、iPhone の計画が決まったら正式に依頼）：①プッシュの購読の表に種類（webpush／apns）の列（移行と RLS をセット）②APNs に送る関数（.p8 の鍵・Key ID・Team ID は秘密の値。同じ便の上書きは apns-collapse-id に今の tag）③ODPT の利用規約でアプリでの配信が許されるかを確認表で見直す
 - デザイン担当（11/18・PR #124、計画が決まったら）：アプリだけの画面（位置と通知の許可を頼む前の説明の1枚・オフラインの画面・アプリでは隠すもの）の画面案
 - データ担当（11/18・PR #123）：空港の3D の1回目は仮の形で作った。11/17 の依頼①〜③はそのまま。①の形のファイルは GeoJSON（滑走路・誘導路・エプロン・ターミナルの多角形と高さ、管制塔の点と高さ）なら a3Build で読める。置き場所（web/ の静的ファイルか Storage か）を data.md に書いてほしい
