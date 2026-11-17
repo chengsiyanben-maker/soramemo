@@ -1,6 +1,11 @@
 # データ担当の帳面
 
 ## いま持っている仕事
+- いつもより遅いの画面に要る関数（11/17 の回。PM の指示 11/17 12時20分。曜日は火曜で定期の回として呼ばれたが、PM の積んだ指示があったのでこちらをした）：ブランチ data/usual-late-rpc（main 32d923d から）→ 下書き **PR #118**（見張りを始めた）。報告 docs/pm/report-usual-late-rpc.md。**移行185・テスト t124 を使った**
+  - 移行185：読むだけの関数 usual_late(p_flight, p_reg, p_day, p_arr, p_land) だけ（表・RLS は変えない。anon・authenticated は実行だけ）。便名か登録記号（reg_legs のその日と前の日）から、いつもの到着（foreign_usual。dow・n・spread・weeks）・着く見込み（着陸。実績 foreign_legs → 画面が渡す flight-live の land_pred → foreign_watch.eta（10分以内）の順）・late_min と kind（late 15分以上・usual 前後14分・early）・event・divert_to・curfew_near・source・note。見込みがなければ eta null（U1n-v2）。ODPT の会社は reason odpt、知らない記号は unknown、形のちがう値は null
+  - 約束：見張りの関数をつなぐとき、foreign_watch.eta は**着陸の見込み**で書き、門限は state.curfew_near（true／false）に入れる
+  - 確かめた結果：t124 32項目・SQL のテスト全部125本 通過・番号の重なりなし
+  - 本人待ち：「反映して」・案内板で選ばれていない飛行中の便にも見込みを出すか（出すなら live_positions に速さの列を足す案）・報告の 7 の SQL の結果
 - 海外の会社の特別塗装機の続き（11/16 夜 PM の手で呼んだ回。11/16 14時の指示の 2・本人「おすすめ」）：ブランチ data/foreign-livery（main 4af96c8 から）→ 下書き **PR #102**（題を直した）。報告 docs/pm/report-foreign-livery.md の 7〜11。**移行184・テスト t123 を使った**
   - 移行184：表 livery_extra（本人が Table Editor で足す。src 必須・https・FR24 不可。誰でも select・書くのは service_role）・livery_inbound_usual（foreign_usual の到着。service_role だけ）
   - _shared/livery_extra.ts（新）・airport-traffic：一覧に表を合わせる（5分ためる）／海外の塗装機を日本のまわりで見たら行き先（①foreign_usual ②adsb.im routeset）と着く見込みを1回（livery_notified の（機体・空港）に入れて数分前の知らせと二重にしない。調べるのは便ごとに12時間に1回、分からなければ15分後）／アライアンス塗装は海外の会社だけ知らせる（案3-A）／アライアンス塗装のときは撮影の知らせの人にも空港の知らせを送る（spot_push が alliance を出さないため。撮る人用が直したら戻す）
@@ -251,12 +256,13 @@
 - 本人の決定：規約を改定するときは「terms_versions に1行足す → アプリの定数を変える」の順
 
 ## 移行とテストの番号
-- main の最新は 160（159 airport_yomi・160 airport_facts は 11/10 本番に入った）。156・157 は 11/9 本番に入った。**maint/2026-11-09 の 158 は main の 159 より前になったので、反映の前に migrations.mjs rebase が要る**。maint/2026-11-06 は 153・テスト t93（fix/co-tests の経営の移行も 153 なので、反映の前に rebase）、data/photo-log は 154・テスト t94、maint/2026-11-07 は 155・テスト t95、data/debug-1107 は 156・テスト t96（関数のテストは supabase/tests/live_view_test.ts。main に反映済み）、data/view-prefs は 157・テスト t97、maint/2026-11-09 は 158・テスト t98、maint/2026-11-10 は 161・テスト t101。data/airport-facts は 160・テスト t100。そのほか次に新しく作るものは 162 以降・テストは t102 以降。**maint/2026-11-11 は 162・テスト t102**（161 の maint/2026-11-10 より後。反映の順が変わったら rebase）。**data/heliports の 163・t103 は 11/12 main に入った（PR #75 と一緒）**。**data/speed-1113 は 164・テスト t104**。**data/speed-1113b は 165・テスト t105**（164 の上）。**data/rot-learn-hi は 166・テスト t106**（関数1つだけなので 164・165 と順番が入れ替わってもよい）。（164〜167 は 11/13 に main に入った。166 は経営の co_cron_timeout、learn_hi は 167 に付け直し）。**data/alert-merge は 168・テスト t107**（11/14 main に入った）。**data/world-ops は 169・テスト t108**。**maint/2026-11-16 は 170・テスト t109**。**data/foreign-collect は 171・テスト t110**（170 と別の関数なので順番は入れ替わってもよい）。（11/16 data/redo-1116 で手入れ6本を 173〜178・t112〜t117 に付け直し、179 odpt_feed_dates・t118、180 verify_arrivals・t119。172・t111 は経営の keiei/redo-1116）。**data/foreign-collect は 181 foreign_cold・t120、182 foreign_watch・t121**。（171〜182 は 11/16 本番に入った。経営の t128 も main にある）。**maint/2026-11-16b は 183・テスト t122**。**data/foreign-livery は 184・テスト t123**。**次に新しく作るものは 185 以降・テストは t124 以降**（t128 は経営が使った）（data/foreign-carriers・data/foreign-livery は報告だけで番号を使っていない）
+- main の最新は 160（159 airport_yomi・160 airport_facts は 11/10 本番に入った）。156・157 は 11/9 本番に入った。**maint/2026-11-09 の 158 は main の 159 より前になったので、反映の前に migrations.mjs rebase が要る**。maint/2026-11-06 は 153・テスト t93（fix/co-tests の経営の移行も 153 なので、反映の前に rebase）、data/photo-log は 154・テスト t94、maint/2026-11-07 は 155・テスト t95、data/debug-1107 は 156・テスト t96（関数のテストは supabase/tests/live_view_test.ts。main に反映済み）、data/view-prefs は 157・テスト t97、maint/2026-11-09 は 158・テスト t98、maint/2026-11-10 は 161・テスト t101。data/airport-facts は 160・テスト t100。そのほか次に新しく作るものは 162 以降・テストは t102 以降。**maint/2026-11-11 は 162・テスト t102**（161 の maint/2026-11-10 より後。反映の順が変わったら rebase）。**data/heliports の 163・t103 は 11/12 main に入った（PR #75 と一緒）**。**data/speed-1113 は 164・テスト t104**。**data/speed-1113b は 165・テスト t105**（164 の上）。**data/rot-learn-hi は 166・テスト t106**（関数1つだけなので 164・165 と順番が入れ替わってもよい）。（164〜167 は 11/13 に main に入った。166 は経営の co_cron_timeout、learn_hi は 167 に付け直し）。**data/alert-merge は 168・テスト t107**（11/14 main に入った）。**data/world-ops は 169・テスト t108**。**maint/2026-11-16 は 170・テスト t109**。**data/foreign-collect は 171・テスト t110**（170 と別の関数なので順番は入れ替わってもよい）。（11/16 data/redo-1116 で手入れ6本を 173〜178・t112〜t117 に付け直し、179 odpt_feed_dates・t118、180 verify_arrivals・t119。172・t111 は経営の keiei/redo-1116）。**data/foreign-collect は 181 foreign_cold・t120、182 foreign_watch・t121**。（171〜182 は 11/16 本番に入った。経営の t128 も main にある）。**maint/2026-11-16b は 183・テスト t122**。**data/foreign-livery は 184・テスト t123**。**data/usual-late-rpc は 185・テスト t124**（183 とは別の関数なのでどちらが先でもよい）。**次に新しく作るものは 186 以降・テストは t125 以降**（t128 は経営が使った）（data/foreign-carriers・data/foreign-livery は報告だけで番号を使っていない）
 - main に別の移行が先に入ったら、反映の前にもう一度 `node tools/migrations.mjs rebase`
 - 本番は小さいプランで一時ファイルの余裕がない。本人に流してもらう SQL は、大きな中間の表・自己結合・大きな並べ替えを避け、索引で引く形にする
 - SQL のテストは全部で約35分かかる（手元で流すときは裏で流してログを見る。t92 だけで約4分。同じログに2回流すと混ざるので、ログの名前を分ける）
 
 ## 次にやること
+0000000000000000000000. いつもより遅いの関数（PR #118）：CI とレビューに答える。「反映して」が出たら番号を確かめ（main に別の移行が先なら rebase）。本人が案内板にも見込みを出すと決めたら live_positions に kt を足す案（移行と RLS・airport-traffic の書き込み）を作る。見張りの関数をつなぐ（0000000000000000000a）ときは eta を着陸の見込み・state.curfew_near で書く
 000000000000000000000. 定期の手入れ 11/16 の2回目（PR #111）：2026-11-16-2-check.sql の結果で aircraft・flights の全部読みの回数を見る。「反映して」が出たら番号を確かめ（main に別の移行が先なら rebase）、反映後にもう一度流して「索引で引いた回数」が増えたか見る。CI とレビューに答える。次の定期の回の候補：結果が来たら死んだ行・使われていない索引。来なければ、関数の中の「表を全部読む文」（索引のない where）を模擬のデータベースの explain で洗い出す
 00000000000000000000. 見落としの片付け（PR #108）：redo-1116-check.sql の ①② が来たら、adsb で確かめられる便の割合を報告に足し、切り替えの案を出す（切り替えるなら VERIFY_SOURCE を設定・照合を pg_cron に戻す移行・出典の一覧から OpenSky を外す依頼）。「反映して」が出たら番号を確かめ、次の日に ③（odpt_feed_dates）を見てもらう。CI とレビューに答える
 0000000000000000000a. 海外の便の見張り（PR #104）：flight-watch に foreign_watch をつなぐ（foreign_watch_rows → live_positions の呼び出し符号 → いつもの到着時刻とのずれ15分から・門限の10分前（CURFEW・CURFEW_NEAR）・ダイバート・引き返し → foreign_watch_put → alert_push_claim。gkey は 便名@運航日@出発空港、分からなければ '---'。本文に「（推定）」。出発前の遅れ・欠航は出さない。純粋な関数 _shared/foreign_watch.ts と deno のテスト）
@@ -290,6 +296,7 @@
 8. それ以外は PM の指示を待つ（勝手に新しい機能は始めない）。毎週月曜の昼の回は、下の「定期の仕事」（次の候補：点検の結果が来たら、死んだ行や使われていない索引の整理・遅い処理。cold-day-size.sql の結果で全機の航跡の1日が 20MB を超えるなら、ファイルを空港ごとに分ける案を作る。rwy-learn と daily-archive は 11/10 に見た（PR #58）。eta-calib・taxi-out・flight-watch は 11/11 に見た（PR #70）。結果がないまま次の回が来たら、ほかの毎晩・裏の処理（timetable-sync・schedule-sync・odpt-status・co3 の SQL の文）を同じ目で見て、時間の上限のない仕事の一覧を作る）
 
 ## ほかの担当への依頼
+- チェックインへ（11/17 いつもより遅い・PR #118。PM から checkin.md に写してほしい）：rpc('usual_late', { p_flight, p_land })（登録記号なら p_reg、空港を決めるなら p_arr）。乗る便のカードは flight-live の **land_pred**（eta_pred ではない）を p_land に渡す。返す形と画面の値の対応は docs/pm/report-usual-late-rpc.md の 2。eta が null なら U1n-v2、usual が null なら「いつもの時刻はまだありません」、event があれば札を出さずダイバート・引き返し。出典の1行は note・source をそのまま（時刻表にない便では ODPT を外す）
 - 撮る人用へ（11/16 海外の塗装機・PR #102。PM から satsuei.md に写してほしい）：spot_push.ts 48行目の `livery.kind !== "alliance"` を、海外の会社のアライアンス塗装は通すように（`|| !/^JA/.test(livery.reg)`、または _shared/livery_extra.ts の wantsLiveryPush）。直ったらデータ担当が airport-traffic の notifyLivery の例外を戻す
 - チェックインへ（11/16 同上）：特別塗装機の知らせの説明に「海外の会社の塗装機は日本のまわりで見えたときに行き先と着く見込み（推定）を1回」を足すか（デザイン担当の画面案のあと）。返す形は変えていない
 - チェックインへ（11/16 見落としの片付け・PR #108。PM から checkin.md に写してほしい）：ODPT の便を出す所（空港ページ・運用タブの案内板など）に「ODPT のデータ ○時○分 時点」を出す。空港ページは airport-now の flights.dc_date、ほかは odpt_feed_dates を select（feed は FlightInformationDeparture:JAL・FlightInformationArrival:ANA・FlightSchedule:JAL など。いちばん新しい dc_date）。null なら出さない。画面案はデザイン担当から
@@ -490,5 +497,5 @@
 2. ODPT の dc:date：取り込むたびにデータの時刻を残し、画面が読める形で返す（チェックイン担当が出す）
 3. OpenSky の置き換え（ストアの前に要る）：track・traffic・verify・daily-archive で使っている所を adsb.lol（reg_legs・flight_history）に置き換える案と、できるところまで
 
-## PM から積んだ次の仕事（11/17 12時20分、いつもより遅いの画面に要る関数）
+## PM から積んだ次の仕事（11/17 12時20分、いつもより遅いの画面に要る関数）【済み：PR #118・report-usual-late-rpc.md】
 本人「OK」（決定事項【11/17】いつもより遅い）。design/usual-late の report（1版・2版の「データ担当へ」）のとおり、飛行中の見込みを画面から読める関数（便名・登録記号から「いつもの到着」「見込みの到着」「いつもより○分」「出典」「dow と spread」）を anon・authenticated に実行だけで。読めないときは U1n-v2 の形で出せるよう null を返す。ブランチ data/usual-late-rpc、下書き PR、本番には入れない。返す形が決まったら checkin.md に書く
