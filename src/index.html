@@ -5174,7 +5174,7 @@ function renderBook(){
   if(mode === "region") zkTsumeSync();
   if(BOOK_SEG === "air"){ $("bookAir").innerHTML = zkAirBookHTML(); zkTsumeSync(); }
   $("bookExtra").innerHTML = ZK_BACK + `<div class="book-head"><h2>基地</h2></div>` + extraBook(["mil"], "自衛隊の飛行場です。86空港の全国制覇には数えず、別の実績があります。基地の中には入れないので、フェンスの外から押せる距離にしてあります。")
-    + extraBook(["secret"], "一般の人が行けない飛行場です。全クリには数えません。押せた人だけの秘密の枠です。");
+    + extraBook(["secret"], "押せた人だけの秘密の枠です。全クリには数えません。");
   if(ZK_JUMP){ const rg = ZK_JUMP; ZK_JUMP = null; setTimeout(() => zkJump(rg, false), 0); }
 }
 // 地方別：上のカード（16／86 と9地方の数）・地方ごとの扉（上に止まる）・そろえた枠・ターミナル・右端のツメ
@@ -5415,7 +5415,7 @@ function zkAirBookHTML(){
 function renderZkOthers(){
   const box = $("bookOthers"); if(!box) return;
   const st = achState(), main = ACH.filter(x => !x.secret), xv = visitedExtra();
-  const cnt = ks => { const l = XA.filter(a => ks.includes(a.kind)); return [l.filter(a => xv.has(a.id)).length, l.length]; };
+  const cnt = ks => { const l = XA.filter(a => ks.includes(a.kind) && (a.kind !== "secret" || xv.has(a.id))); return [l.filter(a => xv.has(a.id)).length, l.length]; };   // シークレットは押した分だけ数える（数を出さない）
   let liv = [0, 0]; try{ const all = livBook(); liv = [all.filter(x => x.flown.length || x.seen.length).length, all.length]; }catch(e){}
   const vt = visitedTerms();
   const ic = { ach:'<path d="m12 3.5 2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z"/>', air:'<path d="M3 19h18M7 19l5-9 5 9M12 10V5"/>', extra:'<path d="M12 3 5 6v5c0 4.5 3 8 7 10 4-2 7-5.5 7-10V6z"/>', liv:'<path d="M2.5 16.5 21 9.5 19 7l-6.5 2.5L7 4.5l-2 .8 3.5 5.3-4 1.6L3 10.5l-1.2.5 1.7 3.4z"/>' };
@@ -5602,15 +5602,17 @@ function extraBook(kinds, note){
   return `<p class="hint">${note}</p>`
     + Object.entries(XKIND).filter(([k]) => kinds.includes(k)).map(([k, info]) => { const list = XA.filter(a => a.kind === k), got = list.filter(a => xv.has(a.id)).length;
       const open = got > 0 || XB_OPEN.has(k);
-      return `<details class="xgrp" data-xk="${k}"${open ? " open" : ""}><summary><h3>${info.label}　${got} / ${list.length}</h3></summary>${open ? extraGrid(k, xv, vc) : ""}</details>`; }).join("");
+      const head = k === "secret" ? `シークレット${got ? `　${got}` : ""}` : `${info.label}　${got} / ${list.length}`;   // シークレットは押すまで中身（名前・場所・数）を出さない（11/18 本人）
+      return `<details class="xgrp" data-xk="${k}"${open ? " open" : ""}><summary><h3>${head}</h3></summary>${open ? extraGrid(k, xv, vc) : ""}</details>`; }).join("");
 }
 // 番外編の印の並び（開いたときだけ作る）
 const XB_OPEN = new Set();
 function extraGrid(k, xv, vc){
-  const list = XA.filter(a => a.kind === k);
+  let list = XA.filter(a => a.kind === k);
+  if(k === "secret"){ const got = list.filter(a => xv.has(a.id)); list = got.length < list.length ? [...got, list.find(a => !xv.has(a.id))] : got; }   // シークレットは押したものと「？？？」1つだけ（いくつあるかを出さない）
   return `<div class="grid">${list.map(a => xv.has(a.id)
         ? `<button class="cell got" data-a="${a.id}"><div class="slot">${stampSVG(a, xv.get(a.id))}${(vc.get(a.id)||0) > 1 ? `<span class="vcount">×${vc.get(a.id)}</span>` : ""}</div><div class="nm">${a.name}</div></button>`
-        : `<div class="cell"><div class="slot">${k === "secret" ? `<svg viewBox="0 0 120 120" class="empty-slot" aria-label="まだ押していない秘密の印" role="img"><circle cx="60" cy="60" r="50"/><text x="60" y="72" text-anchor="middle" font-size="34">？</text></svg>` : emptySVG(a)}</div><div class="nm">${k === "secret" ? "？？？" : a.name}<br><small>${k === "secret" ? "行けないはずの場所" : a.pref}</small></div></div>`).join("")}</div>`;
+        : `<div class="cell"><div class="slot">${k === "secret" ? `<svg viewBox="0 0 120 120" class="empty-slot" aria-label="まだ押していない秘密の印" role="img"><circle cx="60" cy="60" r="50"/><text x="60" y="72" text-anchor="middle" font-size="34">？</text></svg>` : emptySVG(a)}</div><div class="nm">${k === "secret" ? "？？？" : a.name}<br><small>${k === "secret" ? "？" : a.pref}</small></div></div>`).join("")}</div>`;
 }
 document.addEventListener("toggle", e => { const d = e.target; if(!d.matches || !d.matches("details.xgrp")) return;
   const k = d.dataset.xk; if(d.open){ XB_OPEN.add(k);
@@ -7510,7 +7512,7 @@ const ACH = [
   ["旅のかたち","ends","日本の東西南北",`北端（${EXTREMES[0][1].name}）・南端（${EXTREMES[1][1].name}）・東端（${EXTREMES[2][1].name}）・西端（${EXTREMES[3][1].name}）の印を集める`,4,"ends"],
   ["旅のかたち","ns","南北縦断","北海道と沖縄の空港で、同じ日にチェックインする",1,"northSouth"],
   // 全クリ（達成の数）に数えない、押せた人だけの実績。達成するまで名前は隠す
-  ["一般の人が行けない飛行場","sc1","なぜあなたはそこに行けるの！？？？","一般の人が行けない飛行場の印を押す",1,"secret"],
+  ["シークレット","sc1","なぜあなたはそこに行けるの！？？？","一般の人が行けない飛行場の印を押す",1,"secret"],   // 見出しは「シークレット」。取るまで名前・場所・数を出さない（11/18 本人）
 ].map(([cat,id,name,desc,target,kind]) => ({cat,id,name,desc,target,kind, secret: kind === "secret"}));
 
 // 記録を時系列に再生し、各実績の値と達成した時刻を求める。
@@ -7623,7 +7625,7 @@ function renderAch(){
     const shown = x.kind === "km" || x.kind === "yearKm" ? `${fmtKm(v)} / ${fmtKm(x.target)}km`
       : x.kind === "streak" ? `最長 ${v} / ${x.target}か月`
       : x.kind.startsWith("lap:") ? `${v} / ${x.target}空港が${x.kind.split(":")[2]}回以上` : `${v} / ${x.target}`;
-    return `<div class="achc ${ok ? "done" : "lock"}${TITLE === x.id ? " cur" : ""}" ${ok ? `role="button" tabindex="0" data-title="${x.id}"` : ""}>${achIcon(x, ok)}<div class="t">${x.secret && !ok ? "？？？" : x.name}${TITLE === x.id ? `<span class="badge">称号</span>` : ""}</div><div class="v">${ok ? fmtD(st.done.get(x.id)) + " 達成" : x.secret ? "全クリには数えない" : shown}</div><div class="d">${x.secret && !ok ? "どこか、行けないはずの場所で…" : x.desc}</div>${ok || x.secret ? "" : `<div class="bar" aria-hidden="true"><i style="width:${pct}%"></i></div>`}</div>`;
+    return `<div class="achc ${ok ? "done" : "lock"}${TITLE === x.id ? " cur" : ""}" ${ok ? `role="button" tabindex="0" data-title="${x.id}"` : ""}>${achIcon(x, ok)}<div class="t">${x.secret && !ok ? "？？？" : x.name}${TITLE === x.id ? `<span class="badge">称号</span>` : ""}</div><div class="v">${ok ? fmtD(st.done.get(x.id)) + " 達成" : x.secret ? "全クリには数えない" : shown}</div><div class="d">${x.secret && !ok ? "取ると中身が見られます" : x.desc}</div>${ok || x.secret ? "" : `<div class="bar" aria-hidden="true"><i style="width:${pct}%"></i></div>`}</div>`;
   }).join("")}</div></div>`;
   $("ach").innerHTML = (airCats.length ? `<section class="airach" aria-label="飛行場・滑空場の実績"><h3 class="airhead">飛行場・滑空場の実績　${airDone} / ${airAll}</h3>${airCats.map(catHTML).join("")}</section>` : "")
     + restCats.map(cat => cat === "同じ空港" ? visitAchHTML(st) : catHTML(cat)).join("");

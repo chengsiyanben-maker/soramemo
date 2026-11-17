@@ -61,6 +61,7 @@ async def main():
         # 実績の見出し
         cats = await pg.evaluate('[...new Set(ACH.map(x => x.cat))]')
         check('実績の見出しに「番外編」がない', not any('番外編' in x for x in cats), [x for x in cats if '番外' in x or x in ('基地', '滑空場', '飛行場')])
+        check('秘密の実績の見出しは「シークレット」', 'シークレット' in cats and '一般の人が行けない飛行場' not in cats, cats)
         await pg.evaluate("setBookSeg('ach'); renderVisible()"); await pg.wait_for_timeout(300)
         a = await pg.inner_text('#bookAch')
         check('実績の画面：飛行場・滑空場の実績のまとまりが残り、「番外編」の字がない', '飛行場・滑空場の実績' in a and '番外編' not in a, a[:120].replace('\n', ' '))
