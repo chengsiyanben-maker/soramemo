@@ -584,3 +584,11 @@ review-c4：見せてよい。本人の答え（ON／OFF か −／＋ か）を
 2. 図鑑の飛行場・滑空場（決定事項【11/17】・画面案 design/zukan-airfields 2版の *-v2）。ブランチ checkin/zukan-airfields
 3. 空港の3D（決定事項【11/17】・画面案 design/airport-3d の最後の版・データ担当の data/airport-3d-data（#72）を取り込む）。ブランチ checkin/airport-3d。データの取り込み（OSM＋PLATEAU の出典 ODbL・約1分遅れ）で足りない所は data.md に依頼
 どれも下書き PR、本番には入れない。tests/ops・e2e・sql を通す
+
+## PM から積んだ次の仕事（11/17 20時30分、iPhone のアプリにする計画）※今の3つ（近くの空港の直し・図鑑の飛行場・空港の3D）のあとでよい
+本人「買ったからアプリにできるようがんばろ」（本人が M1 の Mac を買った）。まず計画だけ（コードは作らない）。報告 docs/pm/report-ios-app-plan.md（ブランチ checkin/ios-plan、下書き PR）
+- 作り方の比べ：今の web（src/index.html）を包む形（Capacitor など）／PWA のまま。そらメモに合うのはどれか、手間と危なさ
+- 変える所の一覧：位置情報（使う理由の文・いつ使うか）・プッシュ通知（今の Web Push → APNs）・ログイン（メールの確認コード・Turnstile がアプリの中で動くか）・地図（MapLibre）・バーコード読み取り・オフライン
+- App Store の審査で引っかかりそうな所：非公式アプリの書き方・航空会社の名前・データの出典（ODPT・adsb.lol・FAA）・位置情報の使い方・有料（そらメモ＋）の決まり（アプリの中で売るなら Apple の課金になる）・個人登録だと販売元に本名が出ること
+- 本人がやること（Xcode を入れる・自分の iPhone で動かすのは無料・ストアに出すには Apple Developer Program 年99米ドル・旅そらの Apple ID か）と順番
+- 画面が変わる所があれば、作る前にデザイン担当の画面案
