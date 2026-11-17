@@ -113,10 +113,11 @@ def build():
 
     # ---------- K0i iPhone の Safari でホーム画面に置いていない（ログインしていない人の1行を足す）----------
     k0i = home(HND_CARD + STAT) + f'''<div class="dim"></div><div class="sheet"><div class="grab"></div>
-<div class="bigic">{I(BELLX)}</div><div class="shh"><h2>iPhone は、ホーム画面に追加すると知らせが届きます</h2></div>
+<div class="shh"><h2>iPhone は、ホーム画面に追加すると知らせが届きます</h2></div>
 <p class="sub" style="line-height:1.7">いまは Safari で開いているので、iPhone の決まりで知らせが届きません。</p>
+<div class="login1"><p><b>先にログインしてください</b>iPhone では、ホーム画面のそらメモと Safari で保存場所が分かれます。ログインしないと、ここでしたピン止めは移りません。</p><span>ログインする</span></div>
 <ul class="steps"><li>Safari の下の共有の印 {I(SHAREI)} を押す</li><li>「ホーム画面に追加」を押す</li><li>ホーム画面のそらメモから開き、通知を許可する</li></ul>
-<div class="login1"><p><b>ログインしていないときは</b>ホーム画面から開いたそらメモには、ここでしたピン止めが移りません。ログインすると、どちらでも同じピン止めになります。</p><span>ログインして残す</span></div>
+<p class="note">ログインしないときは、ホーム画面のそらメモでもう一度ピン止めしてください。</p>
 <div style="display:flex;gap:8px;margin-top:12px"><span class="pillbtn" style="flex:1">閉じる</span><span class="pillbtn" style="flex:1.4;background:var(--navy);color:#fff">やり方を図で見る</span></div></div>'''
     page("K0i-v4", "K0i iPhone でホーム画面に置いていない", k0i)
 
@@ -270,7 +271,7 @@ def build():
     # ---------- 一覧（作り手の説明はここへ）----------
     L = [("4版：空港をピン止め（おすすめ・review-2 の直し）", [
             ("K0-v4", "通知の許可を聞く前の1枚", "最初のピン止めのときだけ。ボタンは「あとで／通知を許可する」。Android とパソコンはこの形"),
-            ("K0i-v4", "iPhone でホーム画面に置いていない", "ログインしていない人の1行と「ログインして残す」。実機で移ると分かれば1行は消す。iPhone のアプリができたらこの1枚は要らない"),
+            ("K0i-v4", "iPhone でホーム画面に置いていない", "ログインしていない人には手順より先に「先にログイン」（iPhone はホーム画面と Safari で保存場所が分かれる）。ログインしない人はホーム画面でもう一度ピン止め。実機で移ると分かればこの1行は消す。iPhone のアプリができたらこの1枚は要らない"),
             ("K1-v4", "ホーム（本番の形）", "札「ピン止め中 ›」は押すと K1s"),
             ("K1s-v4", "札を押したとき", "羽田の知らせをシートで。外すのは下"),
             ("K1n-v4", "ピン止めしていない空港にいるとき", "黒いカードの上の「ピン止め」"),
