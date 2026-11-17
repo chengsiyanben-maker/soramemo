@@ -18,7 +18,9 @@ export function fastTargets(rows: FastRow[], now: number, cap = 6): { calls: Fas
     .sort((a, b) => Math.abs(Date.parse(a.std) - now) - Math.abs(Date.parse(b.std) - now));
   const calls = new Map<string, FastCall>(), used = new Set<number>();
   for (const r of live) {
-    const c: FastCall = r.atd ? { type: "Arrival", op: opOf(r), airport: r.arr } : { type: "Departure", op: opOf(r), airport: r.dep };
+    // 実際の出発の時刻が、まだ来ていない時刻なら出発していない（前に入った見込みの時刻が残っているとき）
+    const departed = !!r.atd && Date.parse(r.atd) <= now + 60_000;
+    const c: FastCall = departed ? { type: "Arrival", op: opOf(r), airport: r.arr } : { type: "Departure", op: opOf(r), airport: r.dep };
     const k = `${c.type}|${c.op}|${c.airport}`;
     if (!calls.has(k)) { if (calls.size >= cap) continue; calls.set(k, c); }
     used.add(r.id);
