@@ -6,7 +6,7 @@
   - 乗る便があるときはシートの先頭（#rideTop へ #rideCard を移す。rideTop・renderRide0。表示の編集で隠しているときは戻す。国内線も同じ）
   - 案内板（foreignHTML・ulPlane）：題「時刻表にない便（いま近くにいる便）」・凡例・点線・札「海外」「日本」。airport-foreign の planes に usual のキーがない今の版では札は出さず前の字のまま
   - 機体のくわしく（spDetailHTML に ulSpBox を差し込んだだけ。撮る人用・運用予想の持ち場なので依頼に書いた）
-  - データ：rpc/usual_late を呼び、404 のときだけ foreign_late に切り替え（ulFetch・ulNorm）。data/usual-late-rpc はまだない
+  - データ：回の途中でデータ担当の PR #118（移行185 usual_late）が出たので取り込み（マージ）、本物の返す形（usual・eta の入れ子・reason・divert_to・curfew_near）に合わせた（8378c0a まで）。p_arr・p_land も渡す。404 のときだけ foreign_late に切り替え（ulFetch・ulNorm）。usual_late は「いつもの出発」を返さないので出発前（U2）は着く時刻だけ
   - 足した関数：ulName・ulJP・ulMin・ulJstMin・ulDiff・ulTagText・ulTag・ulNorm・ulFromLate・ulFetch・ulCurfew・ulRideBox・rideTop・renderRide0・ulPlane・ulSpBox。変えた：renderRideIntl・renderRide・applyLayout・foreignHTML・spDetailHTML
   - テスト t139（新・33項目）OK、t60 を新しい形に直した。tests/ops すべて成功・tests/sql 124本成功・e2e 107／110（t123・t48・t72 は main でも落ちる。t72 は #opsSpecial の開くボタンが運用タブを分けたあと見つからない）。追いのコミット bedd649（報告）
   - 本人に決めてほしいこと：国内線の乗る便も先頭でよいか／ダイバートのときの国際線の記録の到着空港
@@ -241,7 +241,7 @@
 - 確認コードは6けた。メールは Gmail、Supabase の送信上限は1時間100通
 
 ## 次にやること
-- PR #117（いつもより遅い）：データ担当の data/usual-late-rpc ができたら取り込み、返す形を ulNorm に合わせて t139 の偽の返り値も直す。airport-foreign に usual が足されたら案内板の札を本物の形で確かめる。改善担当の見直しが来たら直す。反映は本人の「反映して」とデータ担当の関数と一緒。入る前に t139・t59・t60・t133・tests/ops を流す。夜の画面が入ったら点線の琥珀を撮る
+- PR #117（いつもより遅い）：PR #118 は取り込み済み（#118 が先に main に入ったら main を取り込み直す。同じ移行185なのでぶつからない）。#118 に直しが来たら取り込み直し、ulNorm と t139 の偽の返り値をそろえる。airport-foreign に usual が足されたら案内板の札を本物の形で確かめる。改善担当の見直しが来たら直す。反映は本人の「反映して」とデータ担当の関数と一緒。入る前に t139・t59・t60・t133・tests/ops を流す。夜の画面が入ったら点線の琥珀を撮る
 - t72（特別塗装機の画面を #opsSpecial から開く）が main でも落ちる。運用タブを空港と機体に分けた形（機体の側）に合わせてテストを直す（次の回、PM の指示がなければ）
 - e2e を流すときは setsid で切り離す（2分で切れるコマンドに付けると run_all ごと止まる）。tests/ops は node_modules/playwright を全体の playwright へのリンクにして流す
 - PR #114（運用タブのテスト）：11/17 1時11分（日本時間）に main に入った（PR #116 の反映のやり直し。経営 t111 の1円ずれの直しも一緒）。反映（Actions 217）は成功（11/17 1時40分）→ #112・#113 の運用タブの空港と機体は本番に出た。★を戻すかは本人の答え待ち
@@ -292,7 +292,7 @@
 - tests/ops は手元では npm の playwright にブラウザがないので、全体に入っている playwright をつないで流した（すべて成功）
 
 ## ほかの担当への依頼
-- データ担当（11/17・PR #117）：usual_late(p_flight text, p_day date default null, p_reg text default null) returns jsonb（anon・authenticated に実行だけ・security definer）の形ならそのまま読める。返す形 { usual_arr:"HH:MM", usual_dep, usual_n, usual_iata, eta, late_min, event:'divert'|'return', arr_at, arr_iata, note }、分からない値は null、便ごと分からなければ null（404 でなければ foreign_late は呼ばない）。名前・形を変えるなら data.md に書いてもらえれば ulNorm で合わせる。あわせて airport-foreign の planes の各行に usual・usual_n・eta・late_min を足してほしい（案内板・機体のくわしくの札）
+- データ担当（11/17・PR #117）：PR #118 の usual_late を取り込んで合わせた。残りの依頼は2つ：①出発前の画面（U2）のため「いつもの出発」（foreign_usual の dep_here=1）も返してほしい ②airport-foreign の planes の各行に usual・usual_n・eta・late_min（案内板・機体のくわしくの札）。（もとの依頼）usual_late(p_flight text, p_day date default null, p_reg text default null) returns jsonb（anon・authenticated に実行だけ・security definer）の形ならそのまま読める。返す形 { usual_arr:"HH:MM", usual_dep, usual_n, usual_iata, eta, late_min, event:'divert'|'return', arr_at, arr_iata, note }、分からない値は null、便ごと分からなければ null（404 でなければ foreign_late は呼ばない）。名前・形を変えるなら data.md に書いてもらえれば ulNorm で合わせる。あわせて airport-foreign の planes の各行に usual・usual_n・eta・late_min を足してほしい（案内板・機体のくわしくの札）
 - 撮る人用・運用予想（11/17・PR #117、PM から伝えてほしい）：決定事項【11/17】U4 のため spDetailHTML に ulSpBox を差し込んだ（時刻表にない便の到着だけ・その便の「着陸」のカードを出さない）。ほかは変えていない
 - 改善担当（11/17・PR #117）：写真 shots-usual-late/ と iPhone の幅で、シートの先頭のカード（667 で半券が下に押される）と案内板の札の切れ方を見てほしい
 - データ担当（または経営担当）（11/17）：tests/sql/t111_co3_block_paid_amount.mjs の expB・expC を SQL と同じ計算（ceil(12345 * month_left_ratio()) を SQL で出す）にするか、1円の幅を許してほしい。11/17 日本時間に手元で NG（r 7891・expB 5761、B の文は 5762）。日によって反映が止まる
