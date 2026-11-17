@@ -1,6 +1,15 @@
 # チェックイン担当の帳面
 
 ## いま持っている仕事
+- いつもより○分遅いの画面（11/17 12時20分の PM の指示・本人「OK」）：済み。ブランチ checkin/usual-late（main 32d923d から）・下書き **PR #117**（0f76975・見張り中）、報告 docs/pm/report-usual-late-app.md、写真 docs/pm/shots-usual-late/
+  - 乗る便のカード（renderRideIntl）：時刻表にない便だけ見込みの箱（U1・U1n・U2・U2b 門限・U2c ダイバート・引き返し）・灰色の点線の札・箱の中の出典の1行。ODPT の出典は外した。長い説明は「出典と注意 ›」
+  - 乗る便があるときはシートの先頭（#rideTop へ #rideCard を移す。rideTop・renderRide0。表示の編集で隠しているときは戻す。国内線も同じ）
+  - 案内板（foreignHTML・ulPlane）：題「時刻表にない便（いま近くにいる便）」・凡例・点線・札「海外」「日本」。airport-foreign の planes に usual のキーがない今の版では札は出さず前の字のまま
+  - 機体のくわしく（spDetailHTML に ulSpBox を差し込んだだけ。撮る人用・運用予想の持ち場なので依頼に書いた）
+  - データ：rpc/usual_late を呼び、404 のときだけ foreign_late に切り替え（ulFetch・ulNorm）。data/usual-late-rpc はまだない
+  - 足した関数：ulName・ulJP・ulMin・ulJstMin・ulDiff・ulTagText・ulTag・ulNorm・ulFromLate・ulFetch・ulCurfew・ulRideBox・rideTop・renderRide0・ulPlane・ulSpBox。変えた：renderRideIntl・renderRide・applyLayout・foreignHTML・spDetailHTML
+  - テスト t139（新・33項目）OK、t60 を新しい形に直した。tests/ops すべて成功・tests/sql 124本成功・e2e 107／110（t123・t48・t72 は main でも落ちる。t72 は #opsSpecial の開くボタンが運用タブを分けたあと見つからない）。追いのコミット bedd649（報告）
+  - 本人に決めてほしいこと：国内線の乗る便も先頭でよいか／ダイバートのときの国際線の記録の到着空港
 - #113 の反映がテストで止まった件（11/16 23時55分の PM の急ぎ）：済み。ブランチ checkin/fix-ops-test（main b9f59f2 から）・下書き PR #114（4391d34・見張り中）、報告 docs/pm/report-fix-ops-test.md。変えたのは tests/ops/ops.test.mjs だけ（src/index.html の関数は変えていない）
   - 画面案 2版（A1-v2 滑走路に特別塗装機の欄なし・Q1-v2 撮る人に出る）どおりなので①テストを直した：羽田は滑走路で「欄なし・名札あり」、撮る人の見方を押して「羽田に来る特別塗装機」とエラーなし。ops.test.mjs はすべて成功（2回）
   - 地図の★：滑走路は特別塗装機を読まない（t130）ので★が付かない。撮る人には地図がない。戻すか本人の答え待ち（戻すなら滑走路で special_now だけ読み、t130 を合わせる）
@@ -232,6 +241,9 @@
 - 確認コードは6けた。メールは Gmail、Supabase の送信上限は1時間100通
 
 ## 次にやること
+- PR #117（いつもより遅い）：データ担当の data/usual-late-rpc ができたら取り込み、返す形を ulNorm に合わせて t139 の偽の返り値も直す。airport-foreign に usual が足されたら案内板の札を本物の形で確かめる。改善担当の見直しが来たら直す。反映は本人の「反映して」とデータ担当の関数と一緒。入る前に t139・t59・t60・t133・tests/ops を流す。夜の画面が入ったら点線の琥珀を撮る
+- t72（特別塗装機の画面を #opsSpecial から開く）が main でも落ちる。運用タブを空港と機体に分けた形（機体の側）に合わせてテストを直す（次の回、PM の指示がなければ）
+- e2e を流すときは setsid で切り離す（2分で切れるコマンドに付けると run_all ごと止まる）。tests/ops は node_modules/playwright を全体の playwright へのリンクにして流す
 - PR #114（運用タブのテスト）：11/17 1時11分（日本時間）に main に入った（PR #116 の反映のやり直し。経営 t111 の1円ずれの直しも一緒）。反映（Actions 217）は成功（11/17 1時40分）→ #112・#113 の運用タブの空港と機体は本番に出た。★を戻すかは本人の答え待ち
 - PR #112（運用タブの空港と機体）：本人の答え3つと改善担当の見直しを待つ。反映は本人の「反映して」待ち。入る前に t138・t118・t124・t130・t134 を流す。PR #107 が入った main とは重ならない（取り込み済み）。運用予想が specialHTML に A4 のピルを足したら、機体の側で見え方を撮り直す
 - PR #107 と #96 が本番に出たか（Actions）は、この回も確かめていない。次の回で見る
@@ -280,6 +292,9 @@
 - tests/ops は手元では npm の playwright にブラウザがないので、全体に入っている playwright をつないで流した（すべて成功）
 
 ## ほかの担当への依頼
+- データ担当（11/17・PR #117）：usual_late(p_flight text, p_day date default null, p_reg text default null) returns jsonb（anon・authenticated に実行だけ・security definer）の形ならそのまま読める。返す形 { usual_arr:"HH:MM", usual_dep, usual_n, usual_iata, eta, late_min, event:'divert'|'return', arr_at, arr_iata, note }、分からない値は null、便ごと分からなければ null（404 でなければ foreign_late は呼ばない）。名前・形を変えるなら data.md に書いてもらえれば ulNorm で合わせる。あわせて airport-foreign の planes の各行に usual・usual_n・eta・late_min を足してほしい（案内板・機体のくわしくの札）
+- 撮る人用・運用予想（11/17・PR #117、PM から伝えてほしい）：決定事項【11/17】U4 のため spDetailHTML に ulSpBox を差し込んだ（時刻表にない便の到着だけ・その便の「着陸」のカードを出さない）。ほかは変えていない
+- 改善担当（11/17・PR #117）：写真 shots-usual-late/ と iPhone の幅で、シートの先頭のカード（667 で半券が下に押される）と案内板の札の切れ方を見てほしい
 - データ担当（または経営担当）（11/17）：tests/sql/t111_co3_block_paid_amount.mjs の expB・expC を SQL と同じ計算（ceil(12345 * month_left_ratio()) を SQL で出す）にするか、1円の幅を許してほしい。11/17 日本時間に手元で NG（r 7891・expB 5761、B の文は 5762）。日によって反映が止まる
 - 運用予想（11/16・PR #112）：特別塗装機の見方（A4）の「いま／この先／羽田に来る」のピルと各行の「この先（予想）」は specialHTML の中なので、そちらで作ってほしい（機体の側の #opsPSpecial にそのまま出る）。タブの中の機体の1日は、planeHTML の .spctop・.plsearch・.spcard・.rsec を #opsPlDay の中だけ CSS で隠し、.rtl li.edge を1行にしている。planeHTML の形を変えるときは知らせてほしい（ほかの帳面は変えない決まりなので、PM から伝えてほしい）
 - 撮る人用（11/16・PR #112）：撮る人は空港の側のまま（案2）。機体の側に「撮影地から見える機体 → 撮る人へ」の入口を置いた。撮る人の中身は変えていない（PM から伝えてほしい）
@@ -559,5 +574,5 @@ review-c4：見せてよい。本人の答え（ON／OFF か −／＋ か）を
 - NG 地図の名札に特別塗装機の★が出る
 運用タブを分けて特別塗装機が「機体」側に移ったため、ops.test.mjs が空港側で探して見つからない形と思われる。画面の決まり（空港側の地図の★は残すのか）を画面案 design/ops-split 2版で確かめ、①画面が正しければ ops.test.mjs を新しい形に直す、②★や欄が本当に消えているなら画面を直す。tests/ops も含めて全部のテストを通す（node tests/ops/ops.test.mjs）。ブランチ checkin/fix-ops-test、下書き PR。main が今このテストで止まっているので急ぎ
 
-## PM から積んだ次の仕事（11/17 12時20分、いつもより遅いの画面）
+## PM から積んだ次の仕事（11/17 12時20分、いつもより遅いの画面）→ PR #117 で作った（0f76975・報告 report-usual-late-app.md）
 本人「OK」（決定事項【11/17】）。画面案 design/usual-late 2版（U1・U1n・U2・U2b・U2c・U3・U4・U5）どおり：renderRideIntl（見込みの箱・灰色の点線の札・箱の中の出典の1行・門限とダイバート）・乗る便があるときはホームのシートの先頭に乗る便のカード・foreignHTML（題の下の凡例・灰色の札）・spDetailHTML（着陸の箱）。関数はデータ担当の data/usual-late-rpc を取り込む（まだなら U1n の形で出す）。tests/ops・e2e・sql を全部通す。ブランチ checkin/usual-late、下書き PR、本番には入れない
