@@ -4455,12 +4455,14 @@ const ulDiff = (m, usual) => m == null || usual == null ? null : ((m - usual + 7
 function ulTagText(late){ if(late == null || !isFinite(late)) return ""; const n = Math.round(late);
   return n >= 15 ? `いつもより${n}分遅い` : n <= -15 ? `いつもより${-n}分早い` : "いつもどおり"; }
 const ulTag = (text, big) => text ? `<span class="ultag${big ? " big" : ""}">${UL_WAVE}${esc(text)}<small>（推定）</small></span>` : "";
-// usual_late の返す形をそろえる（名前の違いは吸収する。分からない値は null）
+// usual_late（データ担当 PR #118・移行185）の返す形をそろえる：usual { time, n, dow, spread }・eta { at, time, src, landed, iata }・late_min・kind・event・divert_to・curfew_near・arr。
+// ODPT の会社（reason 'odpt'）・知らない記号（'unknown'）は null。分からない値は null
 function ulNorm(r){
-  if(!r || typeof r !== "object") return null;
-  const g = (...ks) => { for(const k of ks) if(r[k] != null) return r[k]; return null; };
-  const o = { usual_arr:g("usual_arr", "usual"), usual_dep:g("usual_dep"), usual_n:g("usual_n", "n"), usual_iata:g("usual_iata", "usual_arr_iata"),
-    eta:g("eta", "eta_arr"), late:g("late_min", "late"), event:g("event"), arr_at:g("arr_at", "ata"), arr_iata:g("arr_iata"), note:g("note") };
+  if(!r || typeof r !== "object" || r.reason) return null;
+  const us = r.usual && typeof r.usual === "object" ? r.usual : null, et = r.eta && typeof r.eta === "object" ? r.eta : null, landed = !!(et && et.landed);
+  const o = { usual_arr:us ? us.time : r.usual_arr || null, usual_dep:r.usual_dep || null, usual_n:us ? us.n : r.usual_n || null, usual_iata:r.arr || null,
+    eta:et && !landed ? et.at : null, late:r.late_min != null ? r.late_min : null, event:r.event || null,
+    arr_at:landed ? et.at : null, arr_iata:r.divert_to || (landed ? et.iata : null), curfew:r.curfew_near === true, note:r.note || null };
   return o.usual_arr || o.usual_dep || o.eta || o.event || o.arr_at ? o : null;
 }
 // foreign_late（その日の実績）から：着いた空港・時刻・いつもとのずれ・ダイバート／引き返し
@@ -4472,13 +4474,13 @@ function ulFromLate(fl, arr){
     eta:null, late:a && a.late_min != null ? a.late_min : null, event:a && a.event || null, arr_at:a && a.at || null, arr_iata:a && a.iata || null, note:fl.note || null };
 }
 let UL = new Map(), UL_RPC = true;   // 便名@日 → { at, d }。usual_late がまだないサーバーでは、1回目で foreign_late に切り替える
-async function ulFetch(no, day, arr, reg){
+async function ulFetch(no, day, arr, reg, land){
   if(!SERVER || !no) return null;
   const key = `${no}@${day}`, c = UL.get(key); if(c && Date.now() - c.at < 60_000) return c.d;
   let d = null;
   // 関数がない（404）ときだけ foreign_late に切り替える。関数が null を返したのは「この便は分からない」（U1n の形で出す）
   if(UL_RPC){ try{ const r = await fetch(SORAMEMO_CONFIG.supabaseUrl.replace(/\/$/, "") + "/rest/v1/rpc/usual_late", { method:"POST",
-      headers:{ "Content-Type":"application/json", apikey:SORAMEMO_CONFIG.supabaseAnonKey, Authorization:"Bearer " + SORAMEMO_CONFIG.supabaseAnonKey }, body:JSON.stringify({ p_flight:no, p_day:day, p_reg:reg || null }) });
+      headers:{ "Content-Type":"application/json", apikey:SORAMEMO_CONFIG.supabaseAnonKey, Authorization:"Bearer " + SORAMEMO_CONFIG.supabaseAnonKey }, body:JSON.stringify({ p_flight:no, p_reg:reg || null, p_day:day, p_arr:IATA[arr] ? arr : null, p_land:land || null }) });
       if(r.status === 404) UL_RPC = false; else if(r.ok){ d = ulNorm(await r.json()); UL.set(key, { at:Date.now(), d }); return d; } }catch(e){} }
   if(!UL_RPC && !d) d = ulFromLate(await rpcPost("foreign_late", { p_flight:no, p_day:day }), arr);
   UL.set(key, { at:Date.now(), d }); return d;
@@ -4497,14 +4499,14 @@ function ulRideBox(p, d, u, dep, arr){
       <div class="row"><span class="ap">${esc(placeShort(u2.arr_iata || d.arr || arr))}</span>${u2.arr_at || d.ata ? `<span class="us">${jstHM(u2.arr_at || d.ata)} ごろ着陸</span>` : ""}</div>
       <div class="bd">${ulTag(`いつもは ${placeShort(u2.usual_iata || arr)}`)}</div>${UL_SRC}</div>`, cf:"",
       more:`ダイバート（ほかの空港へ）の推定です。${nm ? esc(nm) + "の案内で確かめてください。" : ""}` };
-  if(ph === "landed"){ const at = u2.arr_at || d.ata, late = u2.late != null ? u2.late : ulDiff(ulJstMin(at), usualA);
+  if(ph === "landed" || u2.arr_at){ const at = u2.arr_at || d.ata, late = u2.late != null ? u2.late : ulDiff(ulJstMin(at), usualA);
     return { box:`<div class="ulbox"><div class="k"><em>着陸</em>${esc(ap)}に着いた時刻</div>
       <div class="row">${at ? `<span class="t">${jstHM(at)}<small>ごろ</small></span>` : `<span class="none">時刻は分かりません</span>`}${usualA != null ? `<span class="us">いつもは <b>${esc(u2.usual_arr)}</b> ごろ</span>` : ""}</div>
       ${usualA != null && at ? `<div class="bd">${ulTag(ulTagText(late), true)}</div>` : usualA == null ? `<p class="us n">いつもの時刻はまだありません</p>` : ""}${UL_SRC}</div>`, cf:"", more:"" }; }
   if(ph === "air" || ph === "lost"){
     const eta = u2.eta || d.eta_pred || null, late = u2.late != null ? u2.late : ulDiff(eta ? ulJstMin(eta) : null, usualA);
     const head = `<div class="k"><em>飛行中</em>${esc(ap)}に着く見込み</div>`;
-    const cf = IATA[arr] && ulCurfew(arr, eta) ? `<div class="ulcf"><b>${esc(IATA[arr].name || ap)}の門限（${CURFEW[arr]}時）の10分前より遅い見込み（推定）</b><span>ダイバート（ほかの空港へ）になることがあります</span></div>` : "";
+    const cf = IATA[arr] && CURFEW[arr] && (u2.curfew || ulCurfew(arr, eta)) ? `<div class="ulcf"><b>${esc(IATA[arr].name || ap)}の門限（${CURFEW[arr]}時）の10分前より遅い見込み（推定）</b><span>ダイバート（ほかの空港へ）になることがあります</span></div>` : "";
     if(!eta) return { box:`<div class="ulbox">${head}<p class="none">見込みはまだ出せません</p>
       ${usualA != null ? `<p class="us">いつもは <b>${esc(u2.usual_arr)}</b> ごろ<small>（推定）${usualN}</small></p>` : `<p class="us n">いつもの時刻はまだありません</p>`}${UL_SRC}</div>`, cf:"", more:"" };
     return { box:`<div class="ulbox">${head}<div class="row"><span class="t">${tzHM(eta, arr)}<small>ごろ</small></span>${usualA != null ? `<span class="us">いつもは <b>${esc(u2.usual_arr)}</b> ごろ</span>` : ""}</div>
@@ -4537,7 +4539,7 @@ async function renderRideIntl(p, force){
   const bar = pct != null && d.found && ph !== "cancelled" ? `<div class="rbar" role="img" aria-label="飛んだ道のり ${pct}%"><i style="width:${pct}%"></i></div>` : "";
   // 時刻表にない便（決定事項【11/17】）：見込みの箱と灰色の点線の札。ODPT の出典は出さず、adsb.lol の1行を箱の中に。長い説明は「出典と注意」の中
   const al = p.airline || String(p.no || "").slice(0, 2), nott = est || (!d.found && !UL_ODPT.has(al));
-  const ub = nott ? ulRideBox({ ...p, airline:al }, d, await ulFetch(p.no, p.day, arr, d.reg), dep, arr) : null;
+  const ub = nott ? ulRideBox({ ...p, airline:al }, d, await ulFetch(p.no, p.day, arr, d.reg, d.found && d.phase === "air" ? d.land_pred || null : null), dep, arr) : null;
   const note = `${wo.note}機体の位置は adsb.lol から便名で探した推定で、海の上などでは届かないことがあります。${nott ? `${est ? "この便は時刻表がないため、出発・到着の空港も経路のデータ（adsb.im）からの推定です。" : ""}いつもの時刻は、前の8週に同じ便が離陸・着陸した時刻（adsb.lol の全機の記録から読んだ推定）の真ん中の値で、3回以上そろった便だけ出します。出発の前の遅れと欠航は分かりません。` : `時刻は時刻表（現地時刻）と航空会社の運航情報。${ODPT_CREDIT}`}　空港の時間帯：OpenFlights（ODbL）`;
   box.hidden = false;
   box.classList.toggle("ul", !!nott);

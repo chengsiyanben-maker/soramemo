@@ -24,11 +24,16 @@ LIVE = {
   'BA9':  {'flight':'BA9','found':True,'source':'route_estimate','dep':'LHR','arr':'HND','phase':'landed','progress':1,'ata':iso(-10),'reg':'G-STBK','type':'B77W'},
   'NH106':{'flight':'NH106','found':True,'source':'odpt','dep':'HND','arr':'LAX','std':iso(-240),'sta':iso(375),'phase':'air','progress':0.4,'pos':{'lat':45,'lon':170,'alt_ft':37000,'kt':560,'at':iso(0)},'eta_pred':iso(360),'reg':'JA791A','type':'B77W'},
 }
+# usual_late（データ担当 PR #118・移行185）と同じ形
+U = lambda t, n: {'time':t, 'mins':int(t[:2])*60+int(t[3:]), 'n':n, 'dow':None, 'spread':10, 'weeks':8}
+E = lambda at, landed=False, iata='HND', src='live': {'at':at, 'time':'', 'src':'track' if landed else src, 'landed':landed, 'iata':iata}
+BASE = {'reason':None, 'source':'adsb.lol（ODbL）', 'note':'推定です。定刻や航空会社の発表ではありません', 'event':None, 'divert_to':None, 'curfew_near':None, 'late_min':None, 'kind':None}
 USUAL = {
-  'BA5':  {'usual_arr':hm(-12), 'usual_n':7, 'eta':iso(20), 'late_min':32},
-  'BC13': {'usual_arr':'21:05', 'usual_n':8, 'eta':at_jst(21, 52), 'late_min':47},
-  'BA9':  {'usual_arr':hm(-30), 'usual_n':8, 'event':'divert', 'arr_iata':'NRT', 'arr_at':iso(-10), 'usual_iata':'HND'},
-  'BC21': {'usual_dep':'19:05', 'usual_arr':'21:05', 'usual_n':8},
+  'BA5':  {**BASE, 'arr':'HND', 'usual':U(hm(-12), 7), 'eta':E(iso(20)), 'late_min':32, 'kind':'late'},
+  'BC13': {**BASE, 'arr':'FUK', 'usual':U('21:05', 8), 'eta':E(at_jst(21, 52), iata='FUK'), 'late_min':47, 'kind':'late', 'curfew_near':True},
+  'BA9':  {**BASE, 'arr':'HND', 'usual':U(hm(-30), 8), 'eta':E(iso(-10), True, 'NRT'), 'event':'divert', 'divert_to':'NRT'},
+  'BC21': {**BASE, 'arr':'FUK', 'usual':U('21:05', 8), 'eta':None},
+  'NH106':{'flight':'NH106', 'reason':'odpt'},
 }
 FOREIGN = {'iata':'HND','planes':[
   {'kind':'arr','flight':'BA5','airline':'BA','other':'LHR','type':'B77W','status':'approach','km':40,'alt_ft':9000,'eta':iso(20),'usual':hm(-12),'usual_n':7,'late_min':32},
@@ -37,7 +42,7 @@ FOREIGN = {'iata':'HND','planes':[
 ]}
 BOARD = {'iata':'HND','now':iso(0),'hours':[{'h':h,'flights':2,'late':0,'cancel':0,'ref':0} for h in range(24)],
   'next_arr':[{'flight':'JL526','other':'CTS','sched':iso(5),'t':iso(23),'est':iso(23)}],'next_dep':[]}
-fails = []
+fails = []; BODIES = []
 def check(name, ok, detail=''):
     print(('OK  ' if ok else 'NG  ') + name + (('  ' + str(detail)) if detail != '' else ''))
     if not ok: fails.append(name)
@@ -50,7 +55,7 @@ async def page(b, plan=None, rpc_missing=False, width=390, height=844, view='boa
         body = None
         if name == 'usual_late':
             if rpc_missing: return await r.fulfill(status=404, body='{"code":"PGRST202"}', content_type='application/json', headers={'Access-Control-Allow-Origin':'*'})
-            body = USUAL.get(json.loads(r.request.post_data or '{}').get('p_flight'))
+            q = json.loads(r.request.post_data or '{}'); BODIES.append(q); body = USUAL.get(q.get('p_flight'))
         elif name == 'foreign_late': body = {'flight':'x','legs':[],'note':'推定です'}
         elif name == 'flight-live':
             f = u.split('flight=')[1].split('&')[0]; body = LIVE.get(f, {'flight':f, 'found':False})
@@ -86,6 +91,8 @@ async def main():
                 check('1 札は橙・赤でない（点線の灰色）', await pg.evaluate("(() => { const s = getComputedStyle(document.querySelector('#rideCard .ultag')); return s.borderStyle === 'dashed' && s.backgroundColor === 'rgb(255, 255, 255)' })()"))
                 check('1 長い説明は「出典と注意」の中', await pg.locator('#rideCard details.ulmore').count() == 1)
                 check('1 usual_late を便名と日で呼ぶ', 'usual_late' in reqs and 'foreign_late' not in reqs, reqs)
+                q = BODIES[-1] if BODIES else {}
+                check('1 usual_late に p_flight・p_reg・p_day・p_arr を渡す', q.get('p_flight') == 'BA5' and q.get('p_reg') == 'G-STBK' and q.get('p_day') == today and q.get('p_arr') == 'HND' and 'p_land' in q, q)
             pos = await pg.evaluate("(() => { const top = document.getElementById('rideTop'), bp = document.getElementById('bpass'), card = document.getElementById('rideCard'); return { inTop: card.parentNode === top, before: !!(top.compareDocumentPosition(bp) & Node.DOCUMENT_POSITION_FOLLOWING) } })()")
             check(f'2 乗る便のカードはシートの先頭（半券より上）{hgt}', pos['inTop'] and pos['before'], pos)
             await pg.evaluate("document.getElementById('homeSheet').dataset.snap = 'half'"); await pg.wait_for_timeout(400)
@@ -120,7 +127,7 @@ async def main():
         check('4 ダイバート：いつもと違う空港・成田・いつもは 羽田', 'いつもと違う空港' in t and '成田' in t and 'いつもは 羽田' in t, t[:300])
         await pg.screenshot(path=os.path.join(WORK, 't139_divert.png')); allerr += errs; await c.close()
         c, pg, errs, reqs, t = await ride(b, 'BC21', 'HND', 'FUK', 'BC')
-        check('4 出発前：いつもの時刻（羽田を出る 19:05 → 福岡に着く 21:05）', '出発前' in t and '19:05' in t and '21:05' in t and '前の8週の8回から' in t, t[:300])
+        check('4 出発前：いつもの時刻（福岡に着く 21:05・前の8週の8回から）', '出発前' in t and '福岡に着く' in t and '21:05' in t and '前の8週の8回から' in t, t[:300])
         check('4 出発前：出発の前の遅れと欠航は分かりません', '出発の前の遅れと欠航は分かりません' in t)
         await pg.screenshot(path=os.path.join(WORK, 't139_before.png')); allerr += errs; await c.close()
         # 7 JAL・ANA の国際線は今までどおり
