@@ -1,6 +1,17 @@
 # チェックイン担当の帳面
 
 ## いま持っている仕事
+- 空港の3D（11/17 18時05分の PM の指示の3つめ・決定事項【11/17】）：1回目済み。ブランチ checkin/airport-3d（main 61ba9c7 から）・下書き **PR #123**（c69545b・見張り中）、報告 docs/pm/report-airport-3d-app.md、写真 docs/pm/shots-airport-3d/
+  - 入口：羽田の空港ページの数字のカードの下に小さな「3Dで見る ›」（押すと直接開く）＋「空港の今」の見出しの下に見本の絵（SVG・何も読まない）。字は「押すと読み込みます（約0.2MB）」
+  - 押したときだけ three.js 0.160.0（jsdelivr の three.module.min.js）を import。全体（北の上空から南・指で左右に回す・空の機体は8倍）／管制塔（約116m・はじめ南）／機体のうしろ。名札は空の機体だけ（高さつき・端で切れない）。一覧・カード・出典のシート・軽い表示（電池20%以下で自動・「ふつうに」）・尾翼は昼だけ金・夜は灯り
+  - 機体は airport-traffic を20秒ごと、1分前の時刻を2つの答えの間でつなぐ（a3Planes・a3Lerp・a3Ahead）。今の airport-traffic は地上の機体を返さない（一覧に「地上の機体はまだ出ません」）
+  - 空港の形は仮（HND_RWY と T1〜T3 の位置から作った島と箱。管制塔の位置はおおよそ）。データ担当の形のファイル・?view=3d・FAA の大きさの表が来たら差し替え（出典の文も）
+  - 変えた関数：openAirport・renderNow。足した：ap3dPillHTML・ap3dCardHTML・openAp3d・closeAp3d・a3*（報告に一覧）
+  - テスト t142（新・40項目）OK。tests/ops 成功。e2e 108／111（t123・t48・t72 は前から）。追いのコミットは報告だけ
+  - 本人に決めてほしいこと：入口の字の大きさ（約0.2MB）／全体の視点の引き具合／カードを開いた写真の上が平らな水色に写る件（ヘッドレスだけか iPhone で）
+- 図鑑の飛行場・滑空場の2回目（PM 11/18 0時15分・本人の決定）：済み。PR #122 に足した（673e278）。報告 report-zukan-airfields-app.md の2回目
+  - 実績の見出しを「シークレット」（ACH の sc1 の cat）・取るまで「？？？」と「取ると中身が見られます」。基地の図鑑の秘密の枠も見出し「シークレット」で押すまで数を出さない・開いても「？？？」1枠・場所も「？」（extraBook・extraGrid）。ほかの図鑑・実績の「基地」の数は押した分だけ（renderZkOthers）
+  - t70・t141 を直して足した。t70・t141・t127 成功
 - 図鑑の飛行場・滑空場（11/17 18時05分の PM の指示の2つめ・決定事項【11/17】）：済み。ブランチ checkin/zukan-airfields（main 61ba9c7 から）・下書き **PR #122**（f6198d9・見張り中）、報告 docs/pm/report-zukan-airfields-app.md、写真 docs/pm/shots-zukan-airfields/
   - 入口・ほかの図鑑・実績の行・ヘリポートの札（データが入ったので出す）は PR #75 のまま。足したのは2つ
   - 「番外編」の言葉をやめた：基地の図鑑の題と行は「基地」（renderBook・renderZkOthers・#bookExtra の題）、印の説明の見出し（showStamp）・空港ページの名前の下（openAirport）・選ぶ欄（fillSelects）・実績の見出し（ACH・renderAch の AIR_CATS。id は不変。秘密の見出しは「一般の人が行けない飛行場」）
@@ -254,8 +265,9 @@
 - 確認コードは6けた。メールは Gmail、Supabase の送信上限は1時間100通
 
 ## 次にやること
-- 次の回は PM の 11/17 18時05分の指示の3つめ「空港の3D」（checkin/airport-3d）を始める（2つめは PR #122 で済み）。画面案は design/airport-3d の4版（*-v4、bdaefcf）。data/airport-3d-data には調べの報告（report-airport-3d-data.md）しかなく、データの中身はまだない。作る順：①羽田の形のファイルがない間は、ops_core の HND_RWY（滑走路の端）だけで低いポリゴンの空港を描き、3D を開いたときだけ部品を読む ②機体は今の airport-traffic の答えを約1分遅らせてなめらかにつなぐ（3D 用の読み方ができたら切り替え）③空と昼夜は今の metar の raw と手元の日の出入りの計算 ④電池20%以下の軽い版。入口は「空港の今」のカードの中。下のデータ担当への依頼を出してある
-- 3つめ「空港の3D」（checkin/airport-3d・data/airport-3d-data を取り込む）は2つめのあと。そのあと iPhone のアプリの計画（checkin/ios-plan・計画だけ）
+- 次の回は iPhone のアプリの計画（PM 11/17 20時30分の指示・checkin/ios-plan・計画だけ・報告 docs/pm/report-ios-app-plan.md）。決定事項【11/17】：自宅の Mac（M1・~/dev/soramemo）で作る
+- PR #123（空港の3D）：改善担当の見直し・本人の答えを待って直す。データ担当の形のファイル（OSM・PLATEAU）が来たら a3Build の島と建物を差し替え、角の出典を「© OpenStreetMap・PLATEAU」に。?view=3d が来たら a3Poll の読み先を変えて地上の機体を出す（名札は空だけのまま）。反映は本人の「反映して」待ち。入る前に t142・t121・tests/ops を流す。three.js の版を上げるときは CSP（script-src に jsdelivr）と t142 の three の置き場所を確かめる
+- PR #122（図鑑の飛行場）：シークレットの直しを足した。改善担当の見直しが来たら直す。#121 と夜の CSS の行がぶつかるのは両方残す
 - PR #121（近くの直し）：改善担当の見直し・CI が来たら直す。反映は本人の「反映して」待ち。入る前に t140・t127・t119・t116 を流す
 - tests/sql を setsid で流しても途中で止まることがある（11/17 は t92 の途中で止まった）。残りは1本ずつ流す
 - PR #117（いつもより遅い）：11/17 15時18分（日本時間）に main に入った（PR #119・61ba9c7、#118 の移行185 も一緒）。反映の Actions が成功して本番に出たかを次の回で確かめる
@@ -310,6 +322,8 @@
 - tests/ops は手元では npm の playwright にブラウザがないので、全体に入っている playwright をつないで流した（すべて成功）
 
 ## ほかの担当への依頼
+- データ担当（11/18・PR #123）：空港の3D の1回目は仮の形で作った。11/17 の依頼①〜③はそのまま。①の形のファイルは GeoJSON（滑走路・誘導路・エプロン・ターミナルの多角形と高さ、管制塔の点と高さ）なら a3Build で読める。置き場所（web/ の静的ファイルか Storage か）を data.md に書いてほしい
+- 改善担当（11/18・PR #123）：写真 shots-airport-3d/（01 入口 844／667・02c 空港の今・03 全体・04 カード 844／667・05 管制塔・06 機体・08b 軽い・09 出典・夜）と iPhone の幅で、名札の重なり・シートの高さ・入口の見つけやすさを見てほしい
 - データ担当へ（11/17・空港の3D のため。決定事項【11/17】・report-airport-3d-data.md のおすすめどおり）：①羽田の形のファイル（OSM の滑走路・誘導路・エプロン・ターミナル＋PLATEAU の建物の高さ、管制塔の位置と高さ 115.7m）を一度だけ切り出し、低いポリゴンの小さな GeoJSON にして置き場所と出典の文（ODbL・PLATEAU）を決めてほしい ②airport-traffic に3D 用の読み方（?iata=HND&view=3d：羽田から30km・1万フィート以下と地上、位置・高さ・向き・速さ・機種・登録記号・便名・見た時刻だけ、adsb.lol に新しく問い合わせない）③羽田に来る約30機種の大きさ（FAA Aircraft Characteristics Database、長さ・翼の幅・尾翼の高さ・形の種類）の小さな表（アプリに持つ JSON でよい）。できるまではチェックイン側は滑走路だけ・今の airport-traffic で作る
 - データ担当（11/17・PR #117）：PR #118 の usual_late を取り込んで合わせた。残りの依頼は2つ：①出発前の画面（U2）のため「いつもの出発」（foreign_usual の dep_here=1）も返してほしい ②airport-foreign の planes の各行に usual・usual_n・eta・late_min（案内板・機体のくわしくの札）。（もとの依頼）usual_late(p_flight text, p_day date default null, p_reg text default null) returns jsonb（anon・authenticated に実行だけ・security definer）の形ならそのまま読める。返す形 { usual_arr:"HH:MM", usual_dep, usual_n, usual_iata, eta, late_min, event:'divert'|'return', arr_at, arr_iata, note }、分からない値は null、便ごと分からなければ null（404 でなければ foreign_late は呼ばない）。名前・形を変えるなら data.md に書いてもらえれば ulNorm で合わせる。あわせて airport-foreign の planes の各行に usual・usual_n・eta・late_min を足してほしい（案内板・機体のくわしくの札）
 - 撮る人用・運用予想（11/17・PR #117、PM から伝えてほしい）：決定事項【11/17】U4 のため spDetailHTML に ulSpBox を差し込んだ（時刻表にない便の到着だけ・その便の「着陸」のカードを出さない）。ほかは変えていない
@@ -377,7 +391,7 @@
 - 修行（11/6）：sgSeg（修行のピル）を運用のゴーアラウンドの設定（gaSetHTML）も使っている。運用を作り直すとき（feat/ops-v3）に別の部品へ替えるなら知らせてほしい。修行側で sgSeg を変えるときは先にここへ書く
 
 
-## PM から積んだ次の仕事（11/18 0時15分、本人の決定）
+## PM から積んだ次の仕事（11/18 0時15分、本人の決定）→ PR #122 に足した（673e278）
 - checkin/zukan-airfields に足す：図鑑の名前は「基地」のままでよい。秘密の実績（一般の人が行けない飛行場）は見出しを「シークレット」にし、取るまで中身（名前・場所・数）を隠す。テスト t141 も合わせる
 
 ## PM から積んだ次の仕事（11/5、本人の「反映して」とは別）
@@ -603,7 +617,7 @@ review-c4：見せてよい。本人の答え（ON／OFF か −／＋ か）を
 ## PM から積んだ次の仕事（11/17 18時05分、止まっていた決めごとが決まった。上から順に）
 1. 近くの空港の小さな直し3つ（大利根が二つ出る・東京ヘリポートの名札が点線にかぶる・夜の名札が薄い）。ブランチ checkin/near-fix → PR #121 で直した（2fc3afc・報告 report-near-fix.md）
 2. 図鑑の飛行場・滑空場（決定事項【11/17】・画面案 design/zukan-airfields 2版の *-v2）。ブランチ checkin/zukan-airfields → PR #122 で作った（f6198d9・報告 report-zukan-airfields-app.md）
-3. 空港の3D（決定事項【11/17】・画面案 design/airport-3d の最後の版・データ担当の data/airport-3d-data（#72）を取り込む）。ブランチ checkin/airport-3d。データの取り込み（OSM＋PLATEAU の出典 ODbL・約1分遅れ）で足りない所は data.md に依頼
+3. 空港の3D（決定事項【11/17】・画面案 design/airport-3d の最後の版・データ担当の data/airport-3d-data（#72）を取り込む）。ブランチ checkin/airport-3d。データの取り込み（OSM＋PLATEAU の出典 ODbL・約1分遅れ）で足りない所は data.md に依頼 → PR #123 で1回目を作った（c69545b・報告 report-airport-3d-app.md。形は仮）
 どれも下書き PR、本番には入れない。tests/ops・e2e・sql を通す
 
 ## PM から積んだ次の仕事（11/17 20時30分、iPhone のアプリにする計画）※今の3つ（近くの空港の直し・図鑑の飛行場・空港の3D）のあとでよい
