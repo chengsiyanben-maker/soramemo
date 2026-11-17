@@ -38,7 +38,8 @@ async def run(b, now, tag):
         # 1. 運用タブ：海外の航空会社の便（推定）
         await pg.evaluate("goTab('home'); goTab('ops')"); await pg.wait_for_selector('#opsBoard:not([hidden])', timeout=8000)
         t = await pg.inner_text('#opsBoard')
-        check('海外の航空会社・到着:', 'ソウル（金浦）から' in t and 'KE2707' in t and '大韓航空' in t and '着陸に向かっています' in t and '推定' in t)
+        # 11/17 の決定（design/usual-late U3-v2）：題は「時刻表にない便」・会社名は行から外し「海外」の札・着陸に向かう便は着く見込みの時刻（ごろ）
+        check('海外の航空会社・到着:', 'ソウル（金浦）から' in t and 'KE2707' in t and '海外' in t and 'ごろ' in t and '推定' in t and '時刻表にない便' in t)
         await pg.locator('#opsBoard').screenshot(path=os.path.join(WORK, 't60_ops.png'))
         await pg.click('[data-board-dir="dep"]'); await pg.wait_for_timeout(200)
         t = await pg.inner_text('#opsBoard')
