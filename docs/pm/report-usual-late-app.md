@@ -26,20 +26,22 @@ PM の指示：11/17 12時20分（決定事項【11/17】案A・画面案 design
 - 変えた：renderRideIntl・renderRide（renderRide0 を呼んでから rideTop）・applyLayout（最後に rideTop）・foreignHTML・spDetailHTML（ulSpBox を差し込むだけ）
 - HTML：.sbody の先頭に `<div class="ridetop" id="rideTop" hidden>`。CSS：.ultag・.ulbox・.ulsrc・.ulcf・.ulmore・.ridecard.ul・#v-ops .bdseq.foreign ほか・.spcard.ulsp・.spcard.ulus
 
-## 2. データの読み方（データ担当の data/usual-late-rpc がまだないため）
-- まず `rpc/usual_late`（p_flight・p_day・p_reg）を呼ぶ。**404（関数がない）のときだけ**、その回から `foreign_late`（main にある。着いたあとの実績）に切り替える。関数が null を返したら「この便は分からない」として U1n の形
-- 読める名前（ulNorm）：usual_arr（または usual）・usual_dep・usual_n・usual_iata・eta・late_min・event（'divert'・'return'）・arr_at・arr_iata。late_min がなければ eta（なければ flight-live の eta_pred）といつもの時刻から手元で出す
-- 案内板・機体のくわしくは airport-foreign の planes の各行の `usual`（"HH:MM"）・`usual_n`・`eta`・`late_min` を読む。**`usual` のキーがない今の版では、前の出し方（状態の字と高度・距離）のまま**。着陸に向かう便の時刻は eta がなければ距離からの目安（撮る人の spEta と同じ）
-- 今の本番の形のままだと：乗る便は飛行中でも「いつもの時刻はまだありません」（foreign_late は着いたあとの行しか返さない）、案内板は題・凡例・灰色の札だけ変わる
+## 2. データの読み方（データ担当の PR #118・移行185 usual_late を取り込んだ）
+- 回の途中でデータ担当の data/usual-late-rpc（PR #118）が出たので、このブランチに取り込み（マージ）、本物の返す形に合わせた（2つ目のコミット）
+- `rpc/usual_late` に p_flight・p_reg・p_day・p_arr（着く空港が日本のとき）・p_land（飛行中なら flight-live の land_pred）を渡す。読むもの（ulNorm）：usual.time・usual.n／eta.at（eta.landed なら着いた時刻と eta.iata）／late_min／event／divert_to／curfew_near／arr。reason（odpt・unknown）のときは何も出さない（U1n か今までの形）
+- 関数がない（404）ときだけ foreign_late に切り替える（本番に移行185が入る前でも壊れない）
+- 門限は curfew_near が true か、手元の CURFEW（伊丹21時・福岡22時）と見込みの時刻で出す
+- usual_late は「いつもの出発」を返さないので、出発前（U2）は「福岡に着く 21:05 ごろ・前の8週の8回から」だけになる（画面案は出る・着くの2つ）。出すならデータ担当へ依頼
+- 案内板・機体のくわしくは airport-foreign の planes の各行の `usual`（"HH:MM"）・`usual_n`・`eta`・`late_min` を読む。**`usual` のキーがない今の版では、前の出し方（状態の字と高度・距離）のまま**（データ担当の報告の「案内板で選ばれていない飛行中の便にも見込みを出すか」の本人の答え待ち）
 
 ## 3. 確かめた結果
-- t139（新・33項目）すべて OK：U1（札・いつもは・出典の1行・ODPT を出さない・点線の灰色）／シートの先頭（844・667 とも出典の1行の下の端 526／469 がタブ帯 758／581 より上）／隠すと戻る／やめると空く／usual_late がない（404）→ foreign_late・U1n／null → foreign_late を呼ばない／門限／ダイバート／出発前／ODPT の国際線は今までどおり／案内板 U3／機体のくわしく U4
+- t139（新・34項目。偽の返り値は usual_late の本物の形）すべて OK：U1（札・いつもは・出典の1行・ODPT を出さない・点線の灰色）／シートの先頭（844・667 とも出典の1行の下の端 526／469 がタブ帯 758／581 より上）／隠すと戻る／やめると空く／usual_late がない（404）→ foreign_late・U1n／null → foreign_late を呼ばない／門限／ダイバート／出発前／ODPT の国際線は今までどおり／案内板 U3／機体のくわしく U4
 - t59・t133 OK。t60 は「海外の航空会社・到着」の確かめを新しい形（時刻表にない便・海外の札・ごろ）に直して OK
 - tests/ops（node tests/ops/ops.test.mjs）：すべて成功（手元は全体の playwright をつないで流した）
 - 写真 docs/pm/shots-usual-late/：t139_ride_844・t139_ride_667（U1）・t139_curfew（U2b）・t139_divert（U2c）・t139_before（U2）・t139_board（U3）
 
 ## 4. 全部のテスト
-- tests/sql：124本すべて成功（手元は2回に分けて流した）
+- tests/sql：124本すべて成功（手元は2回に分けて流した）。取り込んだ t124（usual_late）も成功・SQL の番号の重なりなし
 - e2e 全部（run_all.py）：107／110 成功（運営コンソールの4本は手元にないので飛ばした）。落ちたのは t123（共有の画像のダイアログ）・t48（pdf417gen がない）・t72（#opsSpecial の「特別塗装機」を開くボタンが見つからない）で、**3本とも main（32d923d）でも同じく落ちる**（t72 は main の版で流し直して確かめた。運用タブを空港と機体に分けたあとの形にテストが合っていないと思われる。次の仕事で直す）
 - tests/ops：すべて成功
 
@@ -48,6 +50,6 @@ PM の指示：11/17 12時20分（決定事項【11/17】案A・画面案 design
 2. ダイバートのとき「この便を国際線の記録に入れる」は、着いた空港を予定の空港（羽田）で記録する（flight-live の到着空港）。着いた空港（成田）で記録するか
 
 ## 6. ほかの担当への依頼
-- データ担当：data/usual-late-rpc の関数は `usual_late(p_flight text, p_day date default null, p_reg text default null) returns jsonb`（anon・authenticated に実行だけ・security definer）の形だと、そのまま読める。返す形 `{ usual_arr:"HH:MM", usual_dep:"HH:MM", usual_n, usual_iata, eta, late_min, event, arr_at, arr_iata, note }`（分からない値は null、便ごと分からなければ null）。名前・形を変えるなら data.md に書いてもらえれば合わせる（ulNorm の1か所）。あわせて airport-foreign の planes の各行に `usual`・`usual_n`・`eta`・`late_min` を足してほしい（案内板・機体のくわしくの札）。足すまでは案内板の札は出ない
+- データ担当：（PR #118 を取り込んだので下は済み。残りは「いつもの出発」と airport-foreign の usual）もとの依頼：data/usual-late-rpc の関数は `usual_late(p_flight text, p_day date default null, p_reg text default null) returns jsonb`（anon・authenticated に実行だけ・security definer）の形だと、そのまま読める。返す形 `{ usual_arr:"HH:MM", usual_dep:"HH:MM", usual_n, usual_iata, eta, late_min, event, arr_at, arr_iata, note }`（分からない値は null、便ごと分からなければ null）。名前・形を変えるなら data.md に書いてもらえれば合わせる（ulNorm の1か所）。あわせて airport-foreign の planes の各行に `usual`・`usual_n`・`eta`・`late_min` を足してほしい（案内板・機体のくわしくの札）。足すまでは案内板の札は出ない
 - 撮る人用・運用予想（PM から伝えてほしい）：決定事項【11/17】の U4 のため、spDetailHTML に ulSpBox を差し込んだ（時刻表にない便の到着だけ。その便の「着陸」のカードを出さない）。ほかの所は変えていない
 - 改善担当：写真 shots-usual-late/ と iPhone の幅で、シートの先頭のカード（667 で半券が下に押される）と案内板の札が横に切れる所（「いつもどおり（推定）」が列の幅で切れる）を見てほしい
