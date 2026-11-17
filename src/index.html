@@ -2714,7 +2714,8 @@ dialog.psheet .btn1,dialog.psheet .btn2{display:block;width:100%;margin-top:10px
 #v-book .zx-k{align-self:flex-start;display:inline-flex;align-items:center;height:24px;padding:0 7px;border-radius:999px;font-size:13px;font-weight:700;white-space:nowrap;letter-spacing:0}
 #v-book .zx-k.fd{background:#DCEBDF;color:#24502F}#v-book .zx-k.gl{background:#D7EAF6;color:#134F72}#v-book .zx-k.hp{background:#F1E7D8;color:#5E4114}
 [data-night="on"] #v-book .zx-k,[data-night="on"] #v-book .zx-dtag{background:transparent;color:var(--bk-ink);box-shadow:inset 0 0 0 1.2px rgba(220,227,234,.5)}
-[data-night="on"] #v-book .zx-kd i:not(.my){display:none}
+[data-night="on"] #v-book .zx-kd i:not(.my){background:#DCE3EA!important;box-shadow:0 0 0 1.5px #66778C}[data-night="on"] #v-book .zx-kd i.k-glider{border-radius:2px}
+#v-book .zxmap .zn{display:none}[data-night="on"] #v-book .zxmap .zn{display:inline}[data-night="on"] #v-book .zxmap .zd{display:none}
 [data-night="on"] #v-book .zxmap .mv{fill:#DCE3EA!important;stroke:#141B24}[data-night="on"] #v-book .zxmap .mn{fill:#141B24}
 [data-night="on"] #v-book .zx-sep{color:var(--bk-ink)}
 /* 右端のツメ：昼は地方の色、夜は色なし */
@@ -3647,7 +3648,7 @@ div.viewsw>button{position:relative}div.viewsw>button::after{content:"";position
       <div class="book-head"><h2>飛行場・滑空場・ヘリポートの図鑑</h2></div>
     </div>
     <div id="bookExtra" hidden>
-      <div class="book-head"><h2>番外編</h2></div>
+      <div class="book-head"><h2>基地</h2></div>
     </div>
     <div id="bookLiv" hidden></div>
     <div id="bookAch" hidden>
@@ -5021,11 +5022,11 @@ function showStamp(a, t, first, flight, term, firstTerm){
   <p class="marks">${marks.map(m => `<span class="mark">${m}</span>`).join("")}${seasonSet.size === 4 ? `<span class="mark gold">四季がそろった</span>` : ""}</p>
   ${tierUp ? `<p class="rankup"><b>${godShort(a)}の印が昇格：${visitTier(visitsNow)}</b>（${visitsNow}回目）${tierNow < TOP ? `<br>次の${RANKS[tierNow+1]}まであと${RANK_AT[tierNow+1] - visitsNow}回` : "<br>最高の階級です"}</p>` : ""}
   <p>${note}${a.rare ? "離島の空港です。" : ""}</p>
-  ${a.kind === "secret" ? `<p class="xnote"><b>番外編：${XKIND.secret.label}</b><br>なぜあなたはそこに行けるの！？？？　一般の人は行けない場所です。全クリには数えない、押せた人だけの印です。写真や位置の公開は、その場の決まりに従ってください。</p>`
-    : a.kind === "mil" ? `<p class="xnote"><b>番外編：${XKIND.mil.label}</b><br>基地の中には入れません。フェンスの外の公道・公園・展望できる場所から楽しんでください。航空祭などの一般公開日も、基地の案内に従ってください。ドローンは飛ばさないでください（法律で飛行が禁止されている区域があります）。</p>`
-    : a.kind === "glider" ? `<p class="xnote"><b>番外編：${XKIND.glider.label}</b><br>グライダーが飛んでいるときは、滑走路や河川敷に入らず、関係者の案内に従ってください。</p>`
+  ${a.kind === "secret" ? `<p class="xnote"><b>${XKIND.secret.label}</b><br>なぜあなたはそこに行けるの！？？？　一般の人は行けない場所です。全クリには数えない、押せた人だけの印です。写真や位置の公開は、その場の決まりに従ってください。</p>`
+    : a.kind === "mil" ? `<p class="xnote"><b>${XKIND.mil.label}</b><br>基地の中には入れません。フェンスの外の公道・公園・展望できる場所から楽しんでください。航空祭などの一般公開日も、基地の案内に従ってください。ドローンは飛ばさないでください（法律で飛行が禁止されている区域があります）。</p>`
+    : a.kind === "glider" ? `<p class="xnote"><b>${XKIND.glider.label}</b><br>グライダーが飛んでいるときは、滑走路や河川敷に入らず、関係者の案内に従ってください。</p>`
     : a.kind === "heli" ? `<p class="xnote"><b>${XKIND.heli.label}</b><br>公共用のヘリポートです。離着陸の場所には入らず、柵の外から楽しんでください。${ZKX_TITLE}に入ります（集めた空港の数とは別）。</p>`
-    : a.kind === "field" ? `<p class="xnote"><b>番外編：${XKIND.field.label}</b><br>定期便のない空港や、小型機の飛行場です。滑走路や格納庫などには、許可なく入らないでください。見学できる場所や日が決まっているところもあります。</p>` : ""}
+    : a.kind === "field" ? `<p class="xnote"><b>${XKIND.field.label}</b><br>定期便のない空港や、小型機の飛行場です。滑走路や格納庫などには、許可なく入らないでください。見学できる場所や日が決まっているところもあります。</p>` : ""}
   ${flight ? `<p><b>${BY[flight.from].name} → ${a.name}</b>　${fmtKm(flight.km)}km を記録しました。</p><button class="btn2" style="width:100%;margin-top:8px" data-flight="${fid(flight)}">乗った便を記録する</button>` : a.kind ? "" : `<p>次の空港でチェックインすると、ここからのフライトが記録されます。</p>`}
   ${(() => { if(!pendingSnap) return ""; const now = unlockedIds(); const fresh = ACH.filter(x => now.has(x.id) && !pendingSnap.has(x.id)); pendingSnap = null;
       return fresh.length ? `<div class="newach"><b>実績を達成</b>${fresh.map(x => x.name).join("、")}</div>` : ""; })()}
@@ -5172,7 +5173,7 @@ function renderBook(){
   else box.innerHTML = zkRegionHTML(v, vc, shown, fa, ua);
   if(mode === "region") zkTsumeSync();
   if(BOOK_SEG === "air"){ $("bookAir").innerHTML = zkAirBookHTML(); zkTsumeSync(); }
-  $("bookExtra").innerHTML = ZK_BACK + `<div class="book-head"><h2>番外編</h2></div>` + extraBook(["mil"], "自衛隊の飛行場です。86空港の全国制覇には数えず、別の実績があります。基地の中には入れないので、フェンスの外から押せる距離にしてあります。")
+  $("bookExtra").innerHTML = ZK_BACK + `<div class="book-head"><h2>基地</h2></div>` + extraBook(["mil"], "自衛隊の飛行場です。86空港の全国制覇には数えず、別の実績があります。基地の中には入れないので、フェンスの外から押せる距離にしてあります。")
     + extraBook(["secret"], "一般の人が行けない飛行場です。全クリには数えません。押せた人だけの秘密の枠です。");
   if(ZK_JUMP){ const rg = ZK_JUMP; ZK_JUMP = null; setTimeout(() => zkJump(rg, false), 0); }
 }
@@ -5363,16 +5364,23 @@ function zkxCounts(){
   return { xv, list, got, kind };
 }
 // 小さな地図：86空港は薄い点、まだは灰の小さな点、行った所は色の丸。近くで重なる行った丸は、数の入った1つの丸にまとめる（review-3 の1）
+// 夜は色で見分けられないので、滑空場は四角（11/17 の決定）。昼は今までどおり丸だけ（.zd＝昼の丸・.zn＝夜の四角、CSS で出し分ける）
+function zkxDot(x, y, r, cls, k, st){
+  const c = `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${r}" class="${cls}${k === "glider" ? " zd" : ""}"${st ? ` style="${st}"` : ""}/>`;
+  if(k !== "glider") return c;
+  const q = r * 1.8;
+  return c + `<rect x="${(x - q / 2).toFixed(1)}" y="${(y - q / 2).toFixed(1)}" width="${q.toFixed(1)}" height="${q.toFixed(1)}" rx="${(r * .25).toFixed(1)}" class="${cls} zn"${st ? ` style="${st}"` : ""}/>`;
+}
 function zkxMapSVG(xv){
   const W = 130, H = 170, P = a => [((a.lon - 128.6) / (146.2 - 128.6)) * (W - 12) + 6, ((45.6 - a.lat) / (45.6 - 30.8)) * (H - 14) + 7];
   const inMap = a => a.lat > 30.5 && a.lon > 128.4;   // 地図の外（沖縄・南の島）は描かない
   let g = A.filter(inMap).map(a => { const [x, y] = P(a); return `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="1.6" class="m86"/>`; }).join("");
-  g += zkxList().filter(a => inMap(a) && !xv.has(a.id)).map(a => { const [x, y] = P(a); return `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="2.2" class="my"/>`; }).join("");
+  g += zkxList().filter(a => inMap(a) && !xv.has(a.id)).map(a => { const [x, y] = P(a); return zkxDot(x, y, 2.2, "my", a.kind); }).join("");
   const pts = zkxList().filter(a => inMap(a) && xv.has(a.id)).map(a => ({ a, p:P(a) })), cl = [];
   for(const o of pts){ const c = cl.find(c => Math.hypot(c.x - o.p[0], c.y - o.p[1]) < 9); if(c){ c.n.push(o.a); } else cl.push({ x:o.p[0], y:o.p[1], n:[o.a] }); }
   g += cl.map(c => { const k = c.n.length > 1 ? (ks => ks.sort((x, y) => ks.filter(v => v === y).length - ks.filter(v => v === x).length)[0])(c.n.map(a => a.kind)) : c.n[0].kind;
-    return c.n.length > 1 ? `<circle cx="${c.x.toFixed(1)}" cy="${c.y.toFixed(1)}" r="7.5" class="mv" style="fill:${ZKX_COL[k]}"/><text x="${c.x.toFixed(1)}" y="${(c.y + 3.6).toFixed(1)}" class="mn">${c.n.length}</text>`
-      : `<circle cx="${c.x.toFixed(1)}" cy="${c.y.toFixed(1)}" r="4.5" class="mv" style="fill:${ZKX_COL[k]}"/>`; }).join("");
+    return c.n.length > 1 ? `${zkxDot(c.x, c.y, 7.5, "mv", k, `fill:${ZKX_COL[k]}`)}<text x="${c.x.toFixed(1)}" y="${(c.y + 3.6).toFixed(1)}" class="mn">${c.n.length}</text>`
+      : zkxDot(c.x, c.y, 4.5, "mv", k, `fill:${ZKX_COL[k]}`); }).join("");
   return `<svg class="zxmap" viewBox="0 0 ${W} ${H}" role="img" aria-label="飛行場・滑空場・ヘリポートの地図。色の丸が行った所（重なる所は数の入った丸）">${g}</svg>`;
 }
 // 図鑑の最初の画面の入口（黒いカードのすぐ下）。高さ700未満は1行の形（地図と内訳は CSS で外す）
@@ -5381,7 +5389,7 @@ function zkAirEntryHTML(){
   return `<button class="zx-entry" type="button" data-zkseg="air" aria-label="${ZKX_TITLE}を開く。${c.got.length}/${c.list.length}。集めた空港とは別に数えます">
     <span class="zx-top"><span class="zx-pill">もう1つの図鑑</span><b class="zx-t">${ZKX_TITLE_BR}</b></span>
     <span class="zx-bot"><span class="zx-l"><span class="zx-n"><b class="num">${c.got.length}</b><span class="u">/ ${c.list.length}</span><span class="zx-sep">集めた空港とは<br>別に数えます</span></span>
-      <span class="zx-kd">${c.kind.map(([k, g, t]) => `<span><i style="background:${ZKX_COL[k]}"></i>${XKIND[k].short} <b>${g}</b><small>/${t}</small></span>`).join("")}<span><i class="my"></i>まだ</span></span></span>
+      <span class="zx-kd">${c.kind.map(([k, g, t]) => `<span><i class="k-${k}" style="background:${ZKX_COL[k]}"></i>${XKIND[k].short} <b>${g}</b><small>/${t}</small></span>`).join("")}<span><i class="my"></i>まだ</span></span></span>
     <span class="zx-r">${zkxMapSVG(c.xv)}</span></span><span class="zx-open" aria-hidden="true">開く<svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></span></button>`;
 }
 // 1つの枠：短い名前・種類の札・行った（✓ と回数）／まだ
@@ -5415,7 +5423,7 @@ function renderZkOthers(){
   box.innerHTML = `${ZK_BACK_MAIN}<div class="book-head"><h2>ほかの図鑑・実績</h2></div><p class="zk-lead">ここで集めても「集めた空港」の数は変わりません。</p>
     ${book("ach", "var(--secret,#7A4FB0)", "実績", "空港の印や回数・路線・距離で達成するもの", [main.filter(x => st.done.has(x.id)).length, main.length])}
     ${book("air", "var(--field,#3E7D52)", ZKX_TITLE_BR, "定期便のない飛行場・グライダーの滑空場・ヘリポート", cnt(ZKX_KINDS))}
-    ${book("extra", "var(--mil,#2E4A6B)", "番外編", "自衛隊の飛行場と、一般の人が行けない飛行場", cnt(["mil", "secret"]))}
+    ${book("extra", "var(--mil,#2E4A6B)", "基地", "自衛隊の飛行場と、一般の人が行けない飛行場", cnt(["mil", "secret"]))}
     ${book("liv", "#8A6A2F", "機体図鑑（特別塗装機）", "乗った・見た特別塗装機", liv)}
     <h3 class="zk-back-h">もどる</h3>
     <button class="zk-book zk-home" type="button" data-zkseg="main" style="--c:var(--bk-ink)"><span class="tx"><b>空港の図鑑</b><small>ターミナル ${TERMS.filter(t => vt.has(t.id)).length}/${TERMS.length}</small></span><span class="n"><b class="num">${visited().size}</b><span class="u">/ ${A.length}</span></span><span class="gt" aria-hidden="true">›</span></button>`;
@@ -5994,7 +6002,7 @@ function fillSelects(){
   $("mFrom").innerHTML = `<option value="">出発空港</option>` + opts;
   $("mTo").innerHTML = `<option value="">到着空港</option>` + opts;
   const tOpts = `<optgroup label="ターミナル">${TERMS.map(t=>`<option value="t:${t.id}">${t.short} ${t.name}</option>`).join("")}</optgroup>`;
-  const xOpts = Object.entries(XKIND).filter(([k]) => k !== "secret").map(([k, info]) => `<optgroup label="番外編：${info.label}">${XA.filter(a => a.kind === k).map(a => `<option value="a:${a.id}">${a.name}</option>`).join("")}</optgroup>`).join("");
+  const xOpts = Object.entries(XKIND).filter(([k]) => k !== "secret").map(([k, info]) => `<optgroup label="${info.label}">${XA.filter(a => a.kind === k).map(a => `<option value="a:${a.id}">${a.name}</option>`).join("")}</optgroup>`).join("");
   $("demoAirport").innerHTML = tOpts + opts.replace(/value="(\d+)"/g, 'value="a:$1"') + xOpts;
   $("demoAirport").value = "t:HND-T1";
   $("fAirline").innerHTML = airlineOptions("記録しない");
@@ -7315,7 +7323,7 @@ function openAirport(id){
   let swHint = false; if(rgl.length > 1){ try{ swHint = !localStorage.getItem("soramemo.zk.swipe"); if(swHint) localStorage.setItem("soramemo.zk.swipe", "1"); }catch(e){} }
   const rg = a.kind ? "" : regionOf(a), cd = code(a);
   b.innerHTML = `<div class="zk-aph" style="--c:${a.kind ? "#2E4A6B" : zkCol(rg)}"${rgl.length > 1 ? ` data-zk-swipe="${a.id}"` : ""}><div class="stampbig${dt ? " wide" : ""}">${first ? insigniaSVG(a, first, {big:true, term:null}, dt) : emptySVG(a)}</div>
-    <div class="tx"><b class="cd${/[^\x00-\x7f]/.test(cd) ? " jp" : ""}">${esc(/[^\x00-\x7f]/.test(cd) ? godShort(a) : cd)}</b><h3>${esc(a.name).replace(/（/g, "<wbr>（")}</h3><p>${a.pref}${rg ? "・" + rg : ""}${a.rare?"・離島の空港":""}${a.kind ? "・番外編" : ""}</p></div></div>
+    <div class="tx"><b class="cd${/[^\x00-\x7f]/.test(cd) ? " jp" : ""}">${esc(/[^\x00-\x7f]/.test(cd) ? godShort(a) : cd)}</b><h3>${esc(a.name).replace(/（/g, "<wbr>（")}</h3><p>${a.pref}${rg ? "・" + rg : ""}${a.rare?"・離島の空港":""}${a.kind ? "・" + XKIND[a.kind].label : ""}</p></div></div>
   ${rgl.length > 1 ? `<p class="zk-dots" aria-hidden="true">${rgl.map(x => `<i${x.id === a.id ? ` class="on"` : ""}></i>`).join("")}</p>` : ""}
   ${swHint ? `<p class="zk-swhint">印のカードをはらうと、となりの空港へ</p>` : ""}
   ${first ? `<div class="zk-dl"><div><span class="k">押した回数</span><span class="v"><b class="num">${times}</b><span class="u">回</span></span></div><div><span class="k">はじめて押した日</span><span class="v s">${(d => `<b class="num">${d.getFullYear()}</b><span class="u">年</span><b class="num">${d.getMonth() + 1}</b><span class="u">月</span><b class="num">${d.getDate()}</b><span class="u">日</span>`)(new Date(first))}</span></div></div>`
@@ -7454,21 +7462,21 @@ const ACH = [
   ...A.flatMap(a => VISIT_STEPS.map(([n, label], i) => ["同じ空港", `v${i}_${a.id}`, `${godShort(a)}の${label}`, `${a.name}に${n}回チェックインする`, n, "visit:" + a.id])),
   ...REGION.map(([rg, prefs]) => ["地方制覇", "rg_"+rg, `${rg}制覇`, `${rg}の空港すべての印を集める`, A.filter(a => prefs.includes(a.pref)).length, "region:"+rg]),
   ...[10, 100].flatMap(n => REGION.map(([rg, prefs]) => [`地方制覇 ${n}周`, `rg${n}_${rg}`, `${rg}制覇 ${n}周`, `${rg}の空港すべてに${n}回ずつチェックインする`, A.filter(a => prefs.includes(a.pref)).length, `lap:${rg}:${n}`])),
-  ["番外編：基地","mil1","フェンスの外から","自衛隊の飛行場の印をはじめて押す",1,"mil"],
-  ["番外編：基地","mil5","基地めぐり","自衛隊の飛行場5か所の印を集める",5,"mil"],
-  ["番外編：基地","mil10","航空祭の常連","自衛隊の飛行場10か所の印を集める",10,"mil"],
-  ["番外編：基地","mil20","基地の達人","自衛隊の飛行場20か所の印を集める",20,"mil"],
-  ["番外編：基地","milall","全基地制覇",`自衛隊の飛行場${XA.filter(a => a.kind === "mil").length}か所すべての印を集める`,XA.filter(a => a.kind === "mil").length,"mil"],
-  ["番外編：滑空場","gl1","風に乗る","滑空場の印をはじめて押す",1,"glider"],
-  ["番外編：滑空場","gl5","河川敷の滑空場","滑空場5か所の印を集める",5,"glider"],
-  ["番外編：滑空場","gl10","上昇気流","滑空場10か所の印を集める",10,"glider"],
-  ["番外編：滑空場","gl20","ソアリング","滑空場20か所の印を集める",20,"glider"],
-  ["番外編：滑空場","glall","全滑空場制覇",`滑空場${XA.filter(a => a.kind === "glider").length}か所すべての印を集める`,XA.filter(a => a.kind === "glider").length,"glider"],
-  ["番外編：飛行場","fd1","小さな飛行場","飛行場の印をはじめて押す",1,"field"],
-  ["番外編：飛行場","fd5","ジェネラル・アビエーション","飛行場5か所の印を集める",5,"field"],
-  ["番外編：飛行場","fd10","滑走路をたずねて","飛行場10か所の印を集める",10,"field"],
-  ["番外編：飛行場","fd20","飛行場の達人","飛行場20か所の印を集める",20,"field"],
-  ["番外編：飛行場","fdall","全飛行場制覇",`飛行場${XA.filter(a => a.kind === "field").length}か所すべての印を集める`,XA.filter(a => a.kind === "field").length,"field"],
+  ["基地","mil1","フェンスの外から","自衛隊の飛行場の印をはじめて押す",1,"mil"],
+  ["基地","mil5","基地めぐり","自衛隊の飛行場5か所の印を集める",5,"mil"],
+  ["基地","mil10","航空祭の常連","自衛隊の飛行場10か所の印を集める",10,"mil"],
+  ["基地","mil20","基地の達人","自衛隊の飛行場20か所の印を集める",20,"mil"],
+  ["基地","milall","全基地制覇",`自衛隊の飛行場${XA.filter(a => a.kind === "mil").length}か所すべての印を集める`,XA.filter(a => a.kind === "mil").length,"mil"],
+  ["滑空場","gl1","風に乗る","滑空場の印をはじめて押す",1,"glider"],
+  ["滑空場","gl5","河川敷の滑空場","滑空場5か所の印を集める",5,"glider"],
+  ["滑空場","gl10","上昇気流","滑空場10か所の印を集める",10,"glider"],
+  ["滑空場","gl20","ソアリング","滑空場20か所の印を集める",20,"glider"],
+  ["滑空場","glall","全滑空場制覇",`滑空場${XA.filter(a => a.kind === "glider").length}か所すべての印を集める`,XA.filter(a => a.kind === "glider").length,"glider"],
+  ["飛行場","fd1","小さな飛行場","飛行場の印をはじめて押す",1,"field"],
+  ["飛行場","fd5","ジェネラル・アビエーション","飛行場5か所の印を集める",5,"field"],
+  ["飛行場","fd10","滑走路をたずねて","飛行場10か所の印を集める",10,"field"],
+  ["飛行場","fd20","飛行場の達人","飛行場20か所の印を集める",20,"field"],
+  ["飛行場","fdall","全飛行場制覇",`飛行場${XA.filter(a => a.kind === "field").length}か所すべての印を集める`,XA.filter(a => a.kind === "field").length,"field"],
   ["離島","is1","島へ","離島の空港の印をはじめて押す",1,"rare"],
   ["離島","is5","島めぐり","5つの離島の空港の印を集める",5,"rare"],
   ["離島","isall","島の達人",`離島の空港${RARE_TOTAL}すべての印を集める`,RARE_TOTAL,"rare"],
@@ -7502,7 +7510,7 @@ const ACH = [
   ["旅のかたち","ends","日本の東西南北",`北端（${EXTREMES[0][1].name}）・南端（${EXTREMES[1][1].name}）・東端（${EXTREMES[2][1].name}）・西端（${EXTREMES[3][1].name}）の印を集める`,4,"ends"],
   ["旅のかたち","ns","南北縦断","北海道と沖縄の空港で、同じ日にチェックインする",1,"northSouth"],
   // 全クリ（達成の数）に数えない、押せた人だけの実績。達成するまで名前は隠す
-  ["番外編：秘境","sc1","なぜあなたはそこに行けるの！？？？","一般の人が行けない飛行場の印を押す",1,"secret"],
+  ["一般の人が行けない飛行場","sc1","なぜあなたはそこに行けるの！？？？","一般の人が行けない飛行場の印を押す",1,"secret"],
 ].map(([cat,id,name,desc,target,kind]) => ({cat,id,name,desc,target,kind, secret: kind === "secret"}));
 
 // 記録を時系列に再生し、各実績の値と達成した時刻を求める。
@@ -7607,7 +7615,7 @@ function achIcon(x, ok){
 }
 function renderAch(){
   const st = achState(), allCats = [...new Set(ACH.map(x => x.cat))];
-  const AIR_CATS = ["番外編：滑空場", "番外編：飛行場"], airCats = allCats.filter(c => AIR_CATS.includes(c)), restCats = allCats.filter(c => !AIR_CATS.includes(c));
+  const AIR_CATS = ["滑空場", "飛行場"], airCats = allCats.filter(c => AIR_CATS.includes(c)), restCats = allCats.filter(c => !AIR_CATS.includes(c));
   const airDone = ACH.filter(x => AIR_CATS.includes(x.cat) && st.done.has(x.id)).length, airAll = ACH.filter(x => AIR_CATS.includes(x.cat)).length;
   const ACH_MAIN = ACH.filter(x => !x.secret); $("achProg").textContent = `達成 ${ACH_MAIN.filter(x => st.done.has(x.id)).length} / ${ACH_MAIN.length}`;
   const catHTML = cat => `<div class="achgrp"><h3>${cat}</h3><div class="achs">${ACH.filter(x => x.cat === cat).map(x => {
