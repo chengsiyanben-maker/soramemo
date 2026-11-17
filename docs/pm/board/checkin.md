@@ -578,3 +578,9 @@ review-c4：見せてよい。本人の答え（ON／OFF か −／＋ か）を
 
 ## PM から積んだ次の仕事（11/17 12時20分、いつもより遅いの画面）→ PR #117 で作った（0f76975・報告 report-usual-late-app.md）
 本人「OK」（決定事項【11/17】）。画面案 design/usual-late 2版（U1・U1n・U2・U2b・U2c・U3・U4・U5）どおり：renderRideIntl（見込みの箱・灰色の点線の札・箱の中の出典の1行・門限とダイバート）・乗る便があるときはホームのシートの先頭に乗る便のカード・foreignHTML（題の下の凡例・灰色の札）・spDetailHTML（着陸の箱）。関数はデータ担当の data/usual-late-rpc を取り込む（まだなら U1n の形で出す）。tests/ops・e2e・sql を全部通す。ブランチ checkin/usual-late、下書き PR、本番には入れない
+
+## PM から積んだ次の仕事（11/17 18時05分、止まっていた決めごとが決まった。上から順に）
+1. 近くの空港の小さな直し3つ（大利根が二つ出る・東京ヘリポートの名札が点線にかぶる・夜の名札が薄い）。ブランチ checkin/near-fix
+2. 図鑑の飛行場・滑空場（決定事項【11/17】・画面案 design/zukan-airfields 2版の *-v2）。ブランチ checkin/zukan-airfields
+3. 空港の3D（決定事項【11/17】・画面案 design/airport-3d の最後の版・データ担当の data/airport-3d-data（#72）を取り込む）。ブランチ checkin/airport-3d。データの取り込み（OSM＋PLATEAU の出典 ODbL・約1分遅れ）で足りない所は data.md に依頼
+どれも下書き PR、本番には入れない。tests/ops・e2e・sql を通す
