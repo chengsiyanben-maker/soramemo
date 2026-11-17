@@ -6,7 +6,7 @@
   - src/index.html 足した：NATIVE・capPlugin・capGeoErr・capGeoPos・capGeoOpts・capGeoInstall・capShareInstall・capOpenUrl・capLinkInstall・CAP_ON。変えた：captchaOn・pushOK・pushButtonHTML・renderPlusSettings・サービスワーカーの登録。html に data-native="ios"
   - 位置は navigator.geolocation の中身だけ差し替え（呼ぶ所・下の担当のコードは変えない）。共有は字と URL だけネイティブ、画像つきは WebView のまま。外のリンクは @capacitor/browser
   - アプリの中ではロボット除け・Web Push（「アプリの通知は準備中です。」）・そらメモ＋の申し込みと解約のボタン・サービスワーカーを使わない
-  - テスト t143（新・18項目）OK。tests/ops 成功。e2e 全体は報告に追記（下の「次にやること」）。Xcode のビルドと iPhone の動きは未確認（Mac がない）
+  - テスト t143（新・18項目）OK。tests/ops 成功。e2e 109／111（t48・t72 は main でも落ちる。t123 は通った）。追いのコミット 報告だけ。Xcode のビルドと iPhone の動きは未確認（Mac がない）
   - 本人に決めてほしいこと：本番の CAPTCHA が ON ならアプリの中ではログインのコードを送れない（自分用はデモで見るか、別の確かめ方を決めるか）／縦だけでよいか／マイクの理由の文
 - iPhone のアプリにする計画（PM 11/17 20時30分・11/18 0時15分の指示）：済み。ブランチ checkin/ios-plan（main 61ba9c7 から）・下書き **PR #124**（f0aab2d）、報告 docs/pm/report-ios-app-plan.md。コードは変えていない
   - おすすめは Capacitor 8（Node 22 以上・Xcode 26 以上・iOS 15 以上・SPM）で今の web を包み、位置・通知（APNs）・カメラ・共有だけネイティブの部品。server.url で本番を読むだけの形はやめる
@@ -278,7 +278,7 @@
 - 確認コードは6けた。メールは Gmail、Supabase の送信上限は1時間100通
 
 ## 次にやること
-- 次の回は PM の指示を待つ。なければ PR #125 の e2e 全体の結果を報告に足す（この回の途中で流した）。本人が Mac で動かした結果（ビルドが通るか・位置の許可・シートの下の余白）が来たら直す
+- 次の回は PM の指示を待つ。なければ t72 を直す（運用タブの機体の側に合わせる）。本人が Mac で動かした結果（ビルドが通るか・位置の許可・シートの下の余白）が来たら直す
 - PR #125（iPhone のアプリの土台）：アプリだけの画面はデザイン担当の画面案のあと（data-native で切り替え）。APNs はデータ担当の表と関数のあと。次の段は地図・supabase-js・three.js をアプリの中に入れる・バーコードをネイティブに。反映（main）は本人の「反映して」待ち。入る前に t143 と tests/ops を流す。src/index.html は SERVER の定義のすぐ下に入れ物があるので、ほかの PR とぶつかったらそこを見る
 - t72（特別塗装機の画面を #opsSpecial から開く）が main でも落ちる件は、この回もまだ（PR #125 を先にした）
 - PR #121・#122・#123・#124 の改善担当の見直し・CI・本人の答えを待って直す
