@@ -10,6 +10,7 @@
   - 足した関数：ulName・ulJP・ulMin・ulJstMin・ulDiff・ulTagText・ulTag・ulNorm・ulFromLate・ulFetch・ulCurfew・ulRideBox・rideTop・renderRide0・ulPlane・ulSpBox。変えた：renderRideIntl・renderRide・applyLayout・foreignHTML・spDetailHTML
   - テスト t139（新・33項目）OK、t60 を新しい形に直した。tests/ops すべて成功・tests/sql 124本成功・e2e 107／110（t123・t48・t72 は main でも落ちる。t72 は #opsSpecial の開くボタンが運用タブを分けたあと見つからない）。追いのコミット bedd649（報告）
   - 本人に決めてほしいこと：国内線の乗る便も先頭でよいか／ダイバートのときの国際線の記録の到着空港
+  - 2回目の回（11/17、PM が同じ指示を手で呼んだ）：PR #117 で済みだった。main は 32d923d のまま、#118 の最新は取り込み済み、PR のコメント・CI はまだなし。変えたものはなし
 - #113 の反映がテストで止まった件（11/16 23時55分の PM の急ぎ）：済み。ブランチ checkin/fix-ops-test（main b9f59f2 から）・下書き PR #114（4391d34・見張り中）、報告 docs/pm/report-fix-ops-test.md。変えたのは tests/ops/ops.test.mjs だけ（src/index.html の関数は変えていない）
   - 画面案 2版（A1-v2 滑走路に特別塗装機の欄なし・Q1-v2 撮る人に出る）どおりなので①テストを直した：羽田は滑走路で「欄なし・名札あり」、撮る人の見方を押して「羽田に来る特別塗装機」とエラーなし。ops.test.mjs はすべて成功（2回）
   - 地図の★：滑走路は特別塗装機を読まない（t130）ので★が付かない。撮る人には地図がない。戻すか本人の答え待ち（戻すなら滑走路で special_now だけ読み、t130 を合わせる）
