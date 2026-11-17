@@ -1260,6 +1260,22 @@ div.viewsw>button[aria-selected="true"]{background:none;border-color:var(--vw-in
 .spcard .bar i{display:block;height:6px;background:var(--s-ink);border-radius:3px}
 .spgrid,.sp2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
 .spgrid .spcard,.sp2 .spcard{margin-top:10px}
+/* 時刻表にない便の着陸の箱（U4-v2） */
+.spcard.ulsp{background:#F7F8FA;border:0}
+.spcard.ulsp .row{display:flex;align-items:baseline;flex-wrap:wrap;gap:4px 12px}
+.spcard.ulsp .t{font-size:32px;font-weight:900;font-variant-numeric:tabular-nums;line-height:1.15}
+.spcard.ulsp .t small{display:inline;font-size:15px;font-weight:700;color:#8B93A0;margin-left:2px}
+.spcard.ulsp .us{font-size:14px;color:#374151;margin:0}
+.spcard.ulsp .us b{font-weight:800}
+.spcard.ulsp .us.n{color:#6B7280}
+.spcard.ulsp .bd{margin-top:4px}
+.spcard.ulus dl{display:grid;grid-template-columns:96px 1fr;gap:0;margin:6px 0 0}
+.spcard.ulus dt{font-size:13px;color:#6B7280;padding:8px 0}
+.spcard.ulus dd{margin:0;padding:8px 0}
+.spcard.ulus dd b{display:block;font-size:15px;font-weight:800}
+.spcard.ulus dd small{display:block;font-size:13px;color:#8B93A0}
+.spcard.ulus dt+dd~dt,.spcard.ulus dt+dd~dt+dd{border-top:1px solid #EEF0F3}
+:root[data-night="on"] .spcard.ulsp{background:#1D232C}:root[data-night="on"] .spcard.ulsp .us{color:#D1D5DB}
 .spwhere{list-style:none;margin:4px 0 0;padding:0}
 .spwhere li{display:flex;justify-content:space-between;font-size:14px;padding:3px 0}
 .lt.back,.pill.back{color:#8A5A00;font-weight:700}
@@ -1737,6 +1753,18 @@ dialog.mypage .dlg .close{display:none}
 #v-ops .bdseq li{position:relative;display:flex;flex-direction:column;gap:1px;font-size:11px;color:var(--op-mute);min-width:0}
 #v-ops .bdseq .dot{position:absolute;left:0;top:-13px;width:9px;height:9px;border-radius:50%;background:var(--op-card);border:2.5px solid #2563EB}
 #v-ops .bdseq li.past{opacity:.6}
+/* 時刻表にない便（決定事項【11/17】U3-v2）：点線の線と点・灰色の札。JAL・ANA の便の青い線と分ける */
+#v-ops .bdseq.foreign::before{background:none;border-top:2.5px dashed #9AA1AC;height:0;top:6px}
+#v-ops .bdseq.foreign{grid-auto-columns:minmax(196px,1fr)}
+#v-ops .bdseq.foreign .dot{border:2px dashed #9AA1AC}
+#v-ops .bdseq.foreign .fl .ulkind{margin:0 5px 0 0;font-size:12px;padding:0 5px}
+#v-ops .bdseq.foreign .rel{font-size:15px}
+#v-ops .bdseq .ulrow{margin-top:3px;min-width:0}
+#v-ops .bdseq .ulrow .ultag{padding:2px 8px 2px 6px;font-size:12.5px}
+#v-ops .bdseq .ulrow .ultag small{font-size:12px}
+#v-ops .ullegend{font-size:13px;line-height:1.55;color:var(--op-ink);margin:0 0 4px}
+#v-ops .ullegend b{font-weight:800}
+#v-ops .ulmore summary{color:var(--op-mute)}
 #v-ops .bdseq b{font-size:13px;color:var(--op-ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 /* 長い行き先（「サンフランシスコから」など）は2行まで折る（11/13 の見回り）。押せる範囲は見た目を変えずに 44px（到着／出発・すべて／国内線／国際線・原文・くわしく） */
 #v-ops .bdseq b{white-space:normal;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;line-height:1.3}#v-ops .bdseq b .nw{white-space:nowrap}
@@ -1922,6 +1950,55 @@ ol.steps{padding-left:1.4em;line-height:1.9}
 .ridecard .rbar i{display:block;height:100%;border-radius:999px;background:#2563EB}
 .ridecard .ok{color:#047857}
 .ridecard .fwnote{font-size:11px;color:var(--hm-mute,#5B6270);margin:8px 0 0}
+/* いつもより○分遅い（推定）（決定事項【11/17】案A・design/usual-late 2版）。札はどれも灰色の点線＋波の印＋（推定）。橙と赤は航空会社が出した遅れだけに使う */
+.ultag{display:inline-flex;align-items:center;gap:5px;max-width:100%;border-radius:999px;padding:3px 10px 3px 8px;font-size:13px;font-weight:800;line-height:1.35;white-space:nowrap;border:1.5px dashed #9AA1AC;color:#374151;background:#fff}
+.ultag svg{flex:none;width:14px;height:14px;stroke:#6B7280;fill:none;stroke-width:2;stroke-linecap:round}
+.ultag small{font-size:13px;font-weight:600;color:#6B7280}
+.ultag.big{font-size:15px;padding:4px 12px 4px 10px}
+:root[data-night="on"] .ultag,[data-palette="board"] .ultag{background:transparent;border-color:#E9A14B;color:#E5E7EB}
+:root[data-night="on"] .ultag small,[data-palette="board"] .ultag small{color:#A7B0BC}
+.ridetop .ridecard{margin:0 0 10px}
+.ridecard.ul{font-size:14px;line-height:1.5}
+.ridecard.ul .rh{align-items:center;min-height:44px}
+.ridecard.ul .rh b{font-size:17px;font-weight:800}
+.ridecard.ul .rh span{flex:1;font-size:15px;color:var(--hm-ink,#1F2937)}
+.ridecard.ul .rh button{font-size:14px;min-height:44px}
+.ridecard .ulco{display:block;color:var(--hm-sub,#6B7280);font-size:13px}
+.ulnt,.ulkind{font-style:normal;display:inline-flex;font-size:13px;font-weight:700;border-radius:6px;padding:0 6px;margin-left:6px;vertical-align:1px;background:#EEF0F3;color:#374151}
+.ulbox{margin-top:8px;background:#F7F8FA;border-radius:16px;padding:10px 14px}
+.ulbox .k{font-size:13px;color:var(--hm-sub,#6B7280);font-weight:700}
+.ulbox .k em{font-style:normal;color:#15803D;font-weight:800;margin-right:6px}
+.ulbox .k em.n{color:var(--hm-ink,#1F2937)}
+.ulbox .k em.x{color:#9A3412}
+.ulbox .row{display:flex;align-items:baseline;flex-wrap:wrap;gap:4px 12px}
+.ulbox .t{font-size:32px;font-weight:900;font-variant-numeric:tabular-nums;line-height:1.15;color:var(--hm-ink,#1F2937)}
+.ulbox .t small{font-size:15px;font-weight:700;color:#8B93A0;margin-left:2px}
+.ulbox .ap{font-size:30px;font-weight:900;line-height:1.2;color:var(--hm-ink,#1F2937)}
+.ulbox .us{font-size:14px;color:#374151;margin:0}
+.ulbox .us b{font-weight:800;font-variant-numeric:tabular-nums}
+.ulbox .us small{color:#8B93A0;font-size:13px;margin-left:4px}
+.ulbox .us.n{color:var(--hm-sub,#6B7280);margin-top:2px}
+.ulbox .none{font-size:20px;font-weight:800;color:#374151;margin:2px 0}
+.ulbox .bd{margin-top:4px}
+.ulbox .u2c{display:flex;align-items:flex-end;gap:10px;margin-top:4px}
+.ulbox .u2c div{display:flex;flex-direction:column}
+.ulbox .u2c small{font-size:13px;color:var(--hm-sub,#6B7280);font-weight:700}
+.ulbox .u2c i{font-style:normal;font-size:20px;color:#8B93A0;padding-bottom:6px}
+.ulsrc{display:flex;gap:5px;align-items:flex-start;font-size:13px;line-height:1.55;color:#374151;margin:6px 0 0;font-weight:700}
+.ulsrc svg{flex:none;width:14px;height:14px;stroke:#6B7280;fill:none;stroke-width:2;stroke-linecap:round;margin-top:2px}
+.ulsrc span{font-weight:500;color:var(--hm-sub,#6B7280)}
+.ulsrc span b{color:#374151;font-weight:700}
+.ulcf{margin-top:8px;background:#F1F3F6;border-radius:14px;padding:9px 12px;font-size:13px;line-height:1.55;color:#374151}
+.ulcf b{display:block;font-weight:800}
+.ulcf span{color:var(--hm-sub,#6B7280)}
+.ridecard .ulnote{font-size:13px;color:var(--hm-sub,#6B7280);margin:8px 0 0;line-height:1.55}
+.ridecard .ulmeta{display:flex;justify-content:space-between;gap:8px;font-size:13px;color:var(--hm-sub,#6B7280);margin-top:8px}
+.ulmore summary{display:flex;align-items:center;min-height:44px;font-size:13px;font-weight:700;color:var(--hm-sub,#6B7280);text-decoration:underline;cursor:pointer;list-style:none}
+.ulmore summary::-webkit-details-marker{display:none}
+.ulmore .fwnote{margin-top:0}
+:root[data-night="on"] .ulbox,:root[data-night="on"] .ulcf{background:#1D232C;color:#D1D5DB}
+:root[data-night="on"] .ulbox .t,:root[data-night="on"] .ulbox .ap,:root[data-night="on"] .ulbox .none,:root[data-night="on"] .ulbox .us,:root[data-night="on"] .ulsrc,:root[data-night="on"] .ulsrc span b{color:#E5E7EB}
+:root[data-night="on"] .ulnt,:root[data-night="on"] .ulkind,[data-palette="board"] .ulkind{background:#2A313B;color:#D1D5DB}
 [data-palette="board"] .ridecard .late{color:#FCD34D}
 [data-palette="board"] .ridecard .ok{color:#6EE7B7}
 .evbar{margin:10px 0 0;padding:10px 12px;border-radius:14px;background:#FFF7E6;color:#6B4200;font-size:12.5px;line-height:1.6}
@@ -3476,6 +3553,7 @@ div.viewsw>button{position:relative}div.viewsw>button::after{content:"";position
     <p class="maplegend"><span><i class="lg" style="background:var(--jal)"></i>JAL</span><span><i class="lg" style="background:var(--ana)"></i>ANA</span><span><i class="lg" style="background:#8B95A3"></i>そのほか</span><span><i class="lg dash"></i>航路なし</span><span class="mcred">地図：国土地理院</span></p>
     <div class="grabzone"><button class="grab" type="button" aria-label="シートの大きさを変える"></button></div>
     <div class="sbody">
+    <div class="ridetop" id="rideTop" hidden></div>
     <div class="welcome-card" id="welcomeCard" hidden role="status"></div>
     <div class="pcard lo" data-lo="home:persona" id="personaCard" hidden aria-live="polite"></div>
     <div class="bpass" id="bpass">
@@ -4358,6 +4436,89 @@ document.addEventListener("click", async e => {
   if(err){ b.disabled = false; b.textContent = err; return; }
   renderRide();
 });
+/* いつもより○分遅い（推定）（決定事項【11/17】案A・画面案 design/usual-late 2版 U1〜U5）。時刻表にない便（海外の会社・ODPT にない日本の会社）を、
+   その便の「いつもの時刻」（前の8週の中央値。adsb.lol の全機の記録から）と比べる。札はどれも灰色の点線＋波の印＋（推定）で、JAL・ANA の「定刻・○分遅れ」と分ける。
+   データ：データ担当の usual_late（data/usual-late-rpc）。まだないときは foreign_late（着いたあとの実績）と flight-live の eta_pred で、出せる所だけ出す（U1n） */
+const UL_JP = { BC:"スカイマーク", MM:"ピーチ", GK:"ジェットスター・ジャパン", IJ:"春秋航空日本", "7G":"スターフライヤー", "6J":"ソラシドエア", HD:"エア・ドゥ", JH:"フジドリームエアラインズ", FW:"アイベックスエアラインズ", OC:"オリエンタルエアブリッジ", KZ:"日本貨物航空" };
+const UL_ODPT = new Set(["JL", "NH", "NU", "3X"]);   // ODPT の時刻表・運航情報がある会社（ここは比べない）
+const ulName = a => UL_JP[a] || FOREIGN_JA[a] || "";
+const ulJP = a => !!UL_JP[a];
+const UL_WAVE = `<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M1.5 9c1.6-2.6 3.2-2.6 4.8 0s3.2 2.6 4.8 0 2.6-2.6 3.4-1"/></svg>`;
+const UL_I = `<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/></svg>`;
+// 箱の中の出典の1行（長い説明は「出典と注意」の中へ）
+const UL_SRC = `<p class="ulsrc">${UL_I}<span><b>推定</b>・定刻や航空会社の発表ではありません・出典 adsb.lol（ODbL）</span></p>`;
+const ulMin = hm => { const m = /^(\d{1,2}):(\d{2})/.exec(hm || ""); return m ? +m[1] * 60 + +m[2] : null; };
+const ulJstMin = t => { const s = jstHM(typeof t === "number" ? new Date(t).toISOString() : t); return ulMin(s); };
+// いつもとのずれ（分）。日をまたいでも前後12時間に収める（foreign_late の late_min と同じ式）
+const ulDiff = (m, usual) => m == null || usual == null ? null : ((m - usual + 720 + 2880) % 1440) - 720;
+// 札の言葉：15分以上遅い・前後14分以内＝いつもどおり・15分以上早い（U5）。いつもの時刻がなければ札は出さない
+function ulTagText(late){ if(late == null || !isFinite(late)) return ""; const n = Math.round(late);
+  return n >= 15 ? `いつもより${n}分遅い` : n <= -15 ? `いつもより${-n}分早い` : "いつもどおり"; }
+const ulTag = (text, big) => text ? `<span class="ultag${big ? " big" : ""}">${UL_WAVE}${esc(text)}<small>（推定）</small></span>` : "";
+// usual_late（データ担当 PR #118・移行185）の返す形をそろえる：usual { time, n, dow, spread }・eta { at, time, src, landed, iata }・late_min・kind・event・divert_to・curfew_near・arr。
+// ODPT の会社（reason 'odpt'）・知らない記号（'unknown'）は null。分からない値は null
+function ulNorm(r){
+  if(!r || typeof r !== "object" || r.reason) return null;
+  const us = r.usual && typeof r.usual === "object" ? r.usual : null, et = r.eta && typeof r.eta === "object" ? r.eta : null, landed = !!(et && et.landed);
+  const o = { usual_arr:us ? us.time : r.usual_arr || null, usual_dep:r.usual_dep || null, usual_n:us ? us.n : r.usual_n || null, usual_iata:r.arr || null,
+    eta:et && !landed ? et.at : null, late:r.late_min != null ? r.late_min : null, event:r.event || null,
+    arr_at:landed ? et.at : null, arr_iata:r.divert_to || (landed ? et.iata : null), curfew:r.curfew_near === true, note:r.note || null };
+  return o.usual_arr || o.usual_dep || o.eta || o.event || o.arr_at ? o : null;
+}
+// foreign_late（その日の実績）から：着いた空港・時刻・いつもとのずれ・ダイバート／引き返し
+function ulFromLate(fl, arr){
+  const legs = fl && Array.isArray(fl.legs) ? fl.legs : []; if(!legs.length) return null;
+  const a = [...legs].reverse().find(l => l.dir === "arr") || null, d = legs.find(l => l.dir === "dep") || null;
+  if(!a && !d) return null;
+  return { usual_arr:a && a.usual || null, usual_dep:d && d.usual || null, usual_n:(a && a.usual_n) || (d && d.usual_n) || null, usual_iata:a && a.event === "divert" ? arr : null,
+    eta:null, late:a && a.late_min != null ? a.late_min : null, event:a && a.event || null, arr_at:a && a.at || null, arr_iata:a && a.iata || null, note:fl.note || null };
+}
+let UL = new Map(), UL_RPC = true;   // 便名@日 → { at, d }。usual_late がまだないサーバーでは、1回目で foreign_late に切り替える
+async function ulFetch(no, day, arr, reg, land){
+  if(!SERVER || !no) return null;
+  const key = `${no}@${day}`, c = UL.get(key); if(c && Date.now() - c.at < 60_000) return c.d;
+  let d = null;
+  // 関数がない（404）ときだけ foreign_late に切り替える。関数が null を返したのは「この便は分からない」（U1n の形で出す）
+  if(UL_RPC){ try{ const r = await fetch(SORAMEMO_CONFIG.supabaseUrl.replace(/\/$/, "") + "/rest/v1/rpc/usual_late", { method:"POST",
+      headers:{ "Content-Type":"application/json", apikey:SORAMEMO_CONFIG.supabaseAnonKey, Authorization:"Bearer " + SORAMEMO_CONFIG.supabaseAnonKey }, body:JSON.stringify({ p_flight:no, p_reg:reg || null, p_day:day, p_arr:IATA[arr] ? arr : null, p_land:land || null }) });
+      if(r.status === 404) UL_RPC = false; else if(r.ok){ d = ulNorm(await r.json()); UL.set(key, { at:Date.now(), d }); return d; } }catch(e){} }
+  if(!UL_RPC && !d) d = ulFromLate(await rpcPost("foreign_late", { p_flight:no, p_day:day }), arr);
+  UL.set(key, { at:Date.now(), d }); return d;
+}
+// 門限（伊丹21時・福岡22時）の10分前より遅い見込みか
+const ulCurfew = (arr, eta) => { const h = CURFEW[arr], m = eta ? ulJstMin(eta) : null; return h && m != null && m >= h * 60 - 10 && m < h * 60 + 180; };
+// 乗る便のカードの「見込みの箱」（U1・U1n・U2・U2b・U2c）。時刻表にない便だけ
+function ulRideBox(p, d, u, dep, arr){
+  const ph = d.found ? d.phase : null, ap = placeShort(arr), u2 = u || {}, nm = ulName(p.airline);
+  const usualA = ulMin(u2.usual_arr), usualN = u2.usual_n ? `前の8週の${u2.usual_n}回から` : "";
+  const divert = u2.event === "divert" || (u2.arr_iata && u2.arr_iata !== arr && u2.event !== "return");
+  if(u2.event === "return") return { box:`<div class="ulbox"><div class="k"><em class="x">引き返し</em>出発した空港に戻りました</div>
+      <div class="row"><span class="ap">${esc(placeShort(u2.arr_iata || dep))}</span>${u2.arr_at ? `<span class="us">${jstHM(u2.arr_at)} ごろ着陸</span>` : ""}</div>
+      <div class="bd">${ulTag(`いつもは ${ap}`)}</div>${UL_SRC}</div>`, cf:"", more:`出発した空港に戻ったようです（推定）。${nm ? esc(nm) + "の案内で確かめてください。" : ""}` };
+  if(divert && (ph === "landed" || u2.arr_at)) return { box:`<div class="ulbox"><div class="k"><em class="x">いつもと違う空港</em>着いた空港</div>
+      <div class="row"><span class="ap">${esc(placeShort(u2.arr_iata || d.arr || arr))}</span>${u2.arr_at || d.ata ? `<span class="us">${jstHM(u2.arr_at || d.ata)} ごろ着陸</span>` : ""}</div>
+      <div class="bd">${ulTag(`いつもは ${placeShort(u2.usual_iata || arr)}`)}</div>${UL_SRC}</div>`, cf:"",
+      more:`ダイバート（ほかの空港へ）の推定です。${nm ? esc(nm) + "の案内で確かめてください。" : ""}` };
+  if(ph === "landed" || u2.arr_at){ const at = u2.arr_at || d.ata, late = u2.late != null ? u2.late : ulDiff(ulJstMin(at), usualA);
+    return { box:`<div class="ulbox"><div class="k"><em>着陸</em>${esc(ap)}に着いた時刻</div>
+      <div class="row">${at ? `<span class="t">${jstHM(at)}<small>ごろ</small></span>` : `<span class="none">時刻は分かりません</span>`}${usualA != null ? `<span class="us">いつもは <b>${esc(u2.usual_arr)}</b> ごろ</span>` : ""}</div>
+      ${usualA != null && at ? `<div class="bd">${ulTag(ulTagText(late), true)}</div>` : usualA == null ? `<p class="us n">いつもの時刻はまだありません</p>` : ""}${UL_SRC}</div>`, cf:"", more:"" }; }
+  if(ph === "air" || ph === "lost"){
+    const eta = u2.eta || d.eta_pred || null, late = u2.late != null ? u2.late : ulDiff(eta ? ulJstMin(eta) : null, usualA);
+    const head = `<div class="k"><em>飛行中</em>${esc(ap)}に着く見込み</div>`;
+    const cf = IATA[arr] && CURFEW[arr] && (u2.curfew || ulCurfew(arr, eta)) ? `<div class="ulcf"><b>${esc(IATA[arr].name || ap)}の門限（${CURFEW[arr]}時）の10分前より遅い見込み（推定）</b><span>ダイバート（ほかの空港へ）になることがあります</span></div>` : "";
+    if(!eta) return { box:`<div class="ulbox">${head}<p class="none">見込みはまだ出せません</p>
+      ${usualA != null ? `<p class="us">いつもは <b>${esc(u2.usual_arr)}</b> ごろ<small>（推定）${usualN}</small></p>` : `<p class="us n">いつもの時刻はまだありません</p>`}${UL_SRC}</div>`, cf:"", more:"" };
+    return { box:`<div class="ulbox">${head}<div class="row"><span class="t">${tzHM(eta, arr)}<small>ごろ</small></span>${usualA != null ? `<span class="us">いつもは <b>${esc(u2.usual_arr)}</b> ごろ</span>` : ""}</div>
+      ${usualA != null ? `<div class="bd">${ulTag(ulTagText(late), true)}</div>` : `<p class="us n">いつもの時刻はまだありません</p>`}${UL_SRC}</div>`, cf, more:"" };
+  }
+  // 出発前：いつもの出る・着く時刻（U2）。いつもの時刻もなければ箱は出さない
+  if(!u2.usual_dep && !u2.usual_arr) return null;
+  return { box:`<div class="ulbox"><div class="k"><em class="n">出発前</em>いつもの時刻</div>
+    <div class="u2c">${u2.usual_dep ? `<div><small>${esc(placeShort(dep))}を出る</small><span class="t">${esc(u2.usual_dep)}</span></div>` : ""}${u2.usual_dep && u2.usual_arr ? `<i aria-hidden="true">→</i>` : ""}${u2.usual_arr ? `<div><small>${esc(ap)}に着く</small><span class="t">${esc(u2.usual_arr)}</span></div>` : ""}</div>
+    <p class="us">ごろ${usualN ? "・" + usualN : ""}</p>${UL_SRC}</div>`, cf:"",
+    more:`出発の前の遅れと欠航は分かりません。飛び立つと、いつもとのずれを出します。${nm ? esc(nm) + "の案内で確かめてください。" : ""}` };
+}
 async function renderRideIntl(p, force){
   // 国際線は前の日（日本時間）に出て夜中も飛んでいる便がある（11/13 見回り：0〜4時に「記録に入れる」が出なかった）。前の日に出た便までは出す
   const box = $("rideCard"), yday = new Date(Date.now() + 9*36e5 - 864e5).toISOString().slice(0, 10), today = new Date(Date.now() + 9*36e5).toISOString().slice(0, 10);
@@ -4376,16 +4537,31 @@ async function renderRideIntl(p, force){
   if(SERVER && (!IATA[arr] || !IATA[dep])) await loadWorldOps();
   const wo = WOPS ? worldRideHTML(dep, arr, d.found ? ph : null) : { html:"", note:"" };
   const bar = pct != null && d.found && ph !== "cancelled" ? `<div class="rbar" role="img" aria-label="飛んだ道のり ${pct}%"><i style="width:${pct}%"></i></div>` : "";
+  // 時刻表にない便（決定事項【11/17】）：見込みの箱と灰色の点線の札。ODPT の出典は出さず、adsb.lol の1行を箱の中に。長い説明は「出典と注意」の中
+  const al = p.airline || String(p.no || "").slice(0, 2), nott = est || (!d.found && !UL_ODPT.has(al));
+  const ub = nott ? ulRideBox({ ...p, airline:al }, d, await ulFetch(p.no, p.day, arr, d.reg, d.found && d.phase === "air" ? d.land_pred || null : null), dep, arr) : null;
+  const note = `${wo.note}機体の位置は adsb.lol から便名で探した推定で、海の上などでは届かないことがあります。${nott ? `${est ? "この便は時刻表がないため、出発・到着の空港も経路のデータ（adsb.im）からの推定です。" : ""}いつもの時刻は、前の8週に同じ便が離陸・着陸した時刻（adsb.lol の全機の記録から読んだ推定）の真ん中の値で、3回以上そろった便だけ出します。出発の前の遅れと欠航は分かりません。` : `時刻は時刻表（現地時刻）と航空会社の運航情報。${ODPT_CREDIT}`}　空港の時間帯：OpenFlights（ODbL）`;
   box.hidden = false;
+  box.classList.toggle("ul", !!nott);
   box.innerHTML = `<div class="rh"><b>乗る便 ${esc(p.no)}</b><span>${esc(placeAny(dep))} → ${esc(placeAny(arr))}${est ? "（推定）" : ""}</span><button type="button" data-ride-off>やめる</button></div>
+    ${nott ? `<span class="ulco">${esc(ulName(al))}<i class="ulnt">時刻表にない便</i></span>` : ""}
     ${d.std ? `<span class="rl">出発 定刻 ${tzHM(d.std, dep)}${localNote(dep)}　到着 定刻 ${tzHM(d.sta, arr)}${localNote(arr)}${!IATA[arr] && WORLD_TZ[arr] ? `（日本時間 ${tzHM(d.sta, "HND")}）` : ""}</span>` : ""}
-    ${st}${wo.html}${bar}${d.reg || d.type ? `<span class="rl">機体 ${esc([d.reg, d.type].filter(Boolean).join("・"))}</span>` : ""}
+    ${ub ? ub.box + ub.cf + (ub.more ? `<p class="ulnote">${ub.more}</p>` : "") : st}${wo.html}${ub && (d.reg || d.type || pct != null) ? `<div class="ulmeta"><span>${d.reg || d.type ? `機体 ${esc([d.reg, d.type].filter(Boolean).join("・"))}` : ""}</span>${pct != null && d.found ? `<span>飛んだ道のり ${pct}%</span>` : ""}</div>${bar}` : `${bar}${d.reg || d.type ? `<span class="rl">機体 ${esc([d.reg, d.type].filter(Boolean).join("・"))}</span>` : ""}`}
     ${d.found && ["air", "lost", "landed"].includes(ph) && !!IATA[dep] !== !!IATA[arr] ? (rideRecorded(p) ? `<span class="rl">国際線の記録に入れました（フライトの「記録帳」）</span>` : `<button type="button" class="btn2 rrec" data-ride-rec>この便を国際線の記録に入れる</button>`) : ""}
-    <p class="fwnote">${wo.note}機体の位置は adsb.lol から便名で探した推定で、海の上などでは届かないことがあります。${est ? "この便は時刻表がないため、出発・到着の空港も経路のデータ（adsb.im）からの推定です。" : `時刻は時刻表（現地時刻）と航空会社の運航情報。${ODPT_CREDIT}`}　空港の時間帯：OpenFlights（ODbL）</p>`;
+    ${nott ? `<details class="ulmore"><summary>出典と注意 ›</summary><p class="fwnote">${note}</p></details>` : `<p class="fwnote">${note}</p>`}`;
 }
-async function renderRide(force){
+// 乗る便があるときは、ホームのシートの先頭に乗る便のカード（決定事項【11/17】・画面案 U1-v2）。表示の編集で「乗る便」を隠しているときは動かさない
+function rideTop(){
+  const box = $("rideCard"), top = $("rideTop"), home = document.querySelector('.lo[data-lo="home:ride"]'); if(!box || !top || !home) return;
+  const up = !box.hidden && !home.classList.contains("lo-off");
+  if(up && box.parentNode !== top) top.appendChild(box); else if(!up && box.parentNode !== home) home.prepend(box);
+  top.hidden = !up;
+}
+async function renderRide(force){ await renderRide0(force); rideTop(); }
+async function renderRide0(force){
   const box = $("rideCard"); if(!box) return;
   if(ridePlan() && ridePlan().intl && SERVER){ if($("rideAdd")) $("rideAdd").hidden = true; return renderRideIntl(ridePlan(), force); }
+  box.classList.remove("ul");
   const p = ridePlan(), a = p && BY[p.from], b = p && BY[p.to], today = new Date(Date.now() + 9*36e5).toISOString().slice(0, 10);
   const show = SERVER && !!p && !!a && !!b && p.day >= today && /^[A-Z]{3}$/.test(a.iata);
   if($("rideAdd")) $("rideAdd").hidden = !SERVER || show;
@@ -5372,6 +5548,7 @@ function applyLayout(){
     if(zone) for(const id of loOrder(k)){ const el = zone.querySelector(`:scope > .lo[data-lo="${k}:${id}"]`); if(el) zone.appendChild(el); }
   }
   if(typeof applyPersonaTabs === "function") applyPersonaTabs();
+  try{ rideTop(); }catch(e){}
 }
 function viewOf(k){ const sh = viewsShown(k); try{ let v = localStorage.getItem("soramemo.view." + k);
   if(k === "book" && ZK_VIEW_MAP[v]){ v = ZK_VIEW_MAP[v]; localStorage.setItem("soramemo.view.book", v); }   // タイル・案内標を選んでいた人は地方別に
@@ -11013,16 +11190,28 @@ async function loadForeign(iata){
     if(r.ok){ const d = await r.json(); if(Array.isArray(d.planes)){ FOREIGN = d; FOREIGN_AP = iata; FOREIGN_AT = Date.now(); return d; } } }catch(e){}
   return FOREIGN_AP === iata ? FOREIGN : null;
 }
+// 時刻表にない便の1行の時刻と札（U3）。airport-foreign が usual（いつもの時刻）を返すときだけ札を出す。返さない古い版は前の出し方のまま
+function ulPlane(p){
+  const now = Date.now(), arr = p.kind === "arr";
+  const t = p.eta || p.at || (arr && p.status === "approach" && p.km != null ? now + spEta(p.km, (p.alt_ft || 0) > 10000 ? 300 : 200) * 60000 : null);
+  const has = Object.prototype.hasOwnProperty.call(p, "usual") || Object.prototype.hasOwnProperty.call(p, "late_min");
+  const late = p.late_min != null ? p.late_min : ulDiff(t ? ulJstMin(t) : null, ulMin(p.usual));
+  return { time:t ? `${jstHM(typeof t === "number" ? new Date(t).toISOString() : t)}ごろ` : "", has, tag:has && p.usual ? ulTag(ulTagText(late)) : "", none:has && !p.usual };
+}
 function foreignHTML(d, arr){
   if(!d || BOARD_KIND === "dom") return "";
   const ST = { approach:"着陸に向かっています", landed:"着陸しました", ground:"出発前（地上）", departed:"離陸しました" };
   const list = (d.planes || []).filter(p => p.kind === (arr ? "arr" : "dep"));
-  const rows = list.map(p => `<li><span class="dot" aria-hidden="true"></span><b>${esc(placeAny(p.other))}<span class="nw">${arr ? "から" : "へ"}</span></b>
-      <span class="fl"><i class="intl">海外</i>${esc(p.flight)}${p.type ? "・" + esc(p.type) : ""}${FOREIGN_JA[p.airline] ? "・" + esc(FOREIGN_JA[p.airline]) : ""}</span>
-      <span class="rel">${ST[p.status] || ""}</span><span class="tm">推定${p.alt_ft != null ? `　高度 ${fmtKm(p.alt_ft)}ft` : ""}　${p.km}km</span></li>`).join("");
-  return `<div class="bdhead"><h3>海外の航空会社（いま近くにいる便）</h3></div>
-    ${rows ? `<ol class="bdseq foreign">${rows}</ol>` : `<p class="hint">いま、この空港の近くに${arr ? "着く" : "出た"}海外の航空会社の便は見つかりません。</p>`}
-    <p class="fwnote">時刻表がない航空会社の便を、空港から60km以内の機体の位置（adsb.lol）と、その便の経路のデータ（adsb.im）から推定しています。便名は機体の呼び出し符号から読んでいるため、航空会社の発表とは違うことがあります。</p>`;
+  // 決定事項【11/17】：題は「時刻表にない便」（ODPT にない日本の会社も入る）。札「海外」「日本」は灰色。会社名は行から外す（U3-v2）
+  const rows = list.map(p => { const u = ulPlane(p);
+    return `<li class="ul"><span class="dot" aria-hidden="true"></span><b>${esc(placeAny(p.other))}<span class="nw">${arr ? "から" : "へ"}</span></b>
+      <span class="fl"><i class="ulkind">${ulJP(p.airline) ? "日本" : "海外"}</i>${esc(p.flight)}${p.type ? "・" + esc(p.type) : ""}</span>
+      <span class="rel">${u.time && (u.has || p.status === "approach") ? u.time : ST[p.status] || ""}</span>
+      ${u.tag ? `<span class="ulrow">${u.tag}</span>` : u.none ? `<span class="tm">いつもの時刻はまだありません</span>` : `<span class="tm">推定${p.alt_ft != null ? `　高度 ${fmtKm(p.alt_ft)}ft` : ""}　${p.km}km</span>`}</li>`; }).join("");
+  return `<div class="bdhead"><h3>時刻表にない便（いま近くにいる便）</h3></div>
+    <p class="ullegend"><b>点線の札</b>はいつもの時刻との比べ（推定）。定刻や航空会社の発表ではありません・出典 adsb.lol（ODbL）</p>
+    ${rows ? `<ol class="bdseq foreign">${rows}</ol>` : `<p class="hint">いま、この空港の近くに${arr ? "着く" : "出た"}時刻表にない便は見つかりません。</p>`}
+    <details class="ulmore"><summary>出典と注意 ›</summary><p class="fwnote">時刻表がない便（海外の航空会社と、JAL・ANA グループ以外の日本の航空会社）を、空港から60km以内の機体の位置（adsb.lol）と、その便の経路のデータ（adsb.im）から推定しています。便名は機体の呼び出し符号から読んでいるため、航空会社の発表とは違うことがあります。いつもの時刻は、前の8週に同じ便が着陸・離陸した時刻の真ん中の値で、3回以上そろった便だけ出します。前後14分以内は「いつもどおり」です。</p></details>`;
 }
 /* 海外の空港の止まり具合（決定事項【11/15】案A・画面案 design/world-ops）。アメリカは FAA NAS Status の発表、ほかは JAL・ANA の今日の国際線の数（サーバーの world_airport_ops）。
    空港全体のようすで、この便のことではない。運航の判断には使えない。取れないとき・古いときは何も出さない */
@@ -12013,6 +12202,15 @@ function spPredCardHTML(x, lv){
   return `<div class="spcard rtlw"><small>この機体の運用（予想）</small><b style="font-size:18px">${esc(r)}${nm ? ` <small style="display:inline;font-size:13px">★${esc(nm)}</small>` : ""}</b>
     <div class="rbtns" style="margin-top:8px"><button class="rbtn" data-sp-pred="${esc(r)}" data-rot-conf="1" aria-expanded="false" type="button">この先の便（予想）</button></div><div data-sp-pred-out="${esc(r)}" hidden></div></div>`;
 }
+// 機体のくわしく：時刻表にない便の着陸の箱と「いつもの時刻（推定）」のカード（決定事項【11/17】U4-v2。チェックイン担当が足した。撮る人用・運用予想の帳面へは PM から伝える）
+function ulSpBox(x){
+  if(!x || !x.foreign || x.dir !== "arr" || !x.t) return "";
+  const fp = ((FOREIGN_AP === OPS_AP && FOREIGN && FOREIGN.planes) || []).find(p => p.flight === x.fl && p.kind === "arr") || {};
+  const usual = fp.usual || null, late = fp.late_min != null ? fp.late_min : ulDiff(ulJstMin(x.t), ulMin(usual));
+  return `<div class="spcard ulsp"><small>着陸の見込み</small><div class="row"><span class="t">${spHM(x.t)}<small>ごろ</small></span>${usual ? `<span class="us">いつもは <b>${esc(usual)}</b> ごろ</span>` : ""}</div>
+    ${usual ? `<div class="bd">${ulTag(ulTagText(late), true)}</div>` : `<p class="us n">いつもの時刻はまだありません</p>`}${UL_SRC}</div>
+    ${usual ? `<div class="spcard ulus"><small>いつもの時刻（推定）</small><dl><dt>いつも</dt><dd><b>${esc(usual)} ごろ</b><small>前の8週の着陸の真ん中の値</small></dd>${fp.usual_n ? `<dt>数えた回数</dt><dd><b>${esc(fp.usual_n)}回</b><small>3回以上そろった便だけ出します</small></dd>` : ""}</dl></div>` : ""}`;
+}
 function spDetailHTML(x){
   const now = Date.now(), cur = OPS_CUR, op = cur && cur.op, lv = x.live || spLive(x.fl);
   const late = x.sched && x.t ? Math.round((x.t - x.sched) / 60000) : 0;
@@ -12034,14 +12232,14 @@ function spDetailHTML(x){
           <div><small>${g.len ? `${esc(g.len.code)} が横7割` : "焦点距離"}</small><b>${g.focal ? `${g.focal}<small>mm</small>` : "—"}</b></div></div>
         ${g.light.length ? `<div class="l3">${g.light.map(l => `<span class="${l.cur}">${l.at}<b>${LIGHT[l.cur]}</b></span>`).join("")}</div>` : ""}
         <p class="nt">${g.len ? `焦点距離はフルサイズ換算。機体の長さ ${g.len.m}m と、撮影地からの距離 約${spRound10(g.dist)}m から。` : "機種が分からないため、焦点距離は出せません。"}高さは着陸を3°、離陸を8%として出した推定です。</p></li>`; }).join(""); })();
-  const kd = x.kind && SP_KIND[x.kind];
+  const kd = x.kind && SP_KIND[x.kind], ulb = ulSpBox(x);
   return `<div class="sph"><span class="grab" aria-hidden="true"></span><button class="spx" data-close type="button" aria-label="閉じる">×</button></div>
     <div class="spdh"><div><small>${esc(placeAny(x.other))}${x.dir === "arr" ? "から・" + esc(opsDef().name) + "に着陸" : "へ・" + esc(opsDef().name) + "から離陸"}</small><h3>${esc(x.fl)}</h3></div>${kd ? `<em style="background:${kd[1]}">${kd[0]}</em>` : ""}</div>
-    <div class="spcard soft"><small>機体</small>${x.reg ? `<div class="spdreg">${spRegHTML(x.reg, x.regSrc)}</div>` : ""}<b>${x.type ? esc(x.type) : x.reg ? "" : "機体は分かっていません"}</b>
+    ${ulb}<div class="spcard soft"><small>機体</small>${x.reg ? `<div class="spdreg">${spRegHTML(x.reg, x.regSrc)}</div>` : ""}<b>${x.type ? esc(x.type) : x.reg ? "" : "機体は分かっていません"}</b>
       ${x.liv ? `<span>特別塗装「${esc(x.liv)}」</span>` : ""}${x.reg ? `<small>${spRegWhy(x)}</small>` : ""}<small>${x.foreign ? `${esc(FOREIGN_JA[x.airline] || x.airline || "")}の便。機種は機体の位置のデータから` : "機種は時刻表の予定"}</small></div>
     ${x.dir === "dep" && x.gate ? `<div class="spgrid"><div class="spcard"><small>離陸</small><b>${spHM(x.t)}${x.tkActual ? "" : "ごろ"}</b><small>${x.tkActual ? "機体の位置で見つけた離陸" : `出発 ${spHM(x.gate)}（${SP_GATE[x.gateSrc]}）`}</small></div>
       <div class="spcard"><small>地上走行</small><b>${x.taxi != null ? `約${x.taxi}分` : "—"}</b><small>出発から離陸まで。空港ごとの目安を、毎晩、記録から決め直します</small></div></div>` : ""}
-    <div class="spgrid">${x.dir === "dep" && x.gate ? `<div class="spcard"><small>出発（搭乗口）</small><b>${spHM(x.gate)}</b><small>${x.sched ? `定刻 ${spHM(x.sched)}${Math.round((x.gate - x.sched) / 60000) >= 5 ? `・${Math.round((x.gate - x.sched) / 60000)}分遅れ` : ""}` : ""}</small></div>` : `<div class="spcard"><small>${x.dir === "arr" ? "着陸" : "離陸"}</small><b>${x.t ? spHM(x.t) + "ごろ" : "—"}</b><small>${x.sched ? `定刻 ${spHM(x.sched)}${late >= 5 ? `・${late}分遅れ` : ""}` : "推定"}${x.est ? "・見込み" : ""}</small></div>`}
+    <div class="spgrid">${x.dir === "dep" && x.gate ? `<div class="spcard"><small>出発（搭乗口）</small><b>${spHM(x.gate)}</b><small>${x.sched ? `定刻 ${spHM(x.sched)}${Math.round((x.gate - x.sched) / 60000) >= 5 ? `・${Math.round((x.gate - x.sched) / 60000)}分遅れ` : ""}` : ""}</small></div>` : ulb ? "" : `<div class="spcard"><small>${x.dir === "arr" ? "着陸" : "離陸"}</small><b>${x.t ? spHM(x.t) + "ごろ" : "—"}</b><small>${x.sched ? `定刻 ${spHM(x.sched)}${late >= 5 ? `・${late}分遅れ` : ""}` : "推定"}${x.est ? "・見込み" : ""}</small></div>`}
       <div class="spcard"><small>滑走路</small><b>${rw ? esc(rw) : "—"}</b><small>${rw ? (rwi.side ? (x.dir === "arr" ? "運用と来た方面からの推定" : "運用と行き先の方面からの推定") : rwi.learn ? `この30日の記録で${x.dir === "arr" ? "着陸" : "離陸"}の${rwi.learn}%がこの滑走路` : "いまの運用からの推定") : "向きが分かりません"}</small></div></div>
     ${where ? `<div class="spcard"><small>いまどこ</small><b class="m">${esc(where)}</b>${lv || x.km ? `<span class="bar"><i style="width:${Math.max(4, Math.min(100, 100 - (lv ? spKm(lv) : x.km) / 2))}%"></i></span>` : ""}</div>` : ""}
     ${spPredCardHTML(x, lv)}
