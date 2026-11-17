@@ -4010,6 +4010,63 @@ div.viewsw>button{position:relative}div.viewsw>button::after{content:"";position
    Supabase の Project Settings → API の「Project URL」と「anon public」キーを入れる。 */
 const SORAMEMO_CONFIG = window.SORAMEMO_CONFIG || { supabaseUrl: "", supabaseAnonKey: "" };   // 値は config.js に書く
 const SERVER = !!(SORAMEMO_CONFIG.supabaseUrl && SORAMEMO_CONFIG.supabaseAnonKey);
+/* ---------- iPhone のアプリ（Capacitor）の中で開いたときだけ働く薄い入れ物（決定事項【11/18】作り方 A）。
+   ブラウザで開いたときは何もしない。位置・共有・外のリンクをネイティブの部品に回す。
+   呼ぶ所（navigator.geolocation など）は変えずに、中身だけ差し替える（下の担当のコードもそのまま動く） */
+const NATIVE = (() => { try{ return !!(window.Capacitor && typeof window.Capacitor.isNativePlatform === "function" && window.Capacitor.isNativePlatform()); }catch(e){ return false; } })();
+function capPlugin(name){
+  const C = window.Capacitor; if(!NATIVE || !C) return null;
+  try{ if(typeof C.registerPlugin === "function") return C.registerPlugin(name); }catch(e){}
+  return (C.Plugins && C.Plugins[name]) || null;
+}
+// 位置：@capacitor/geolocation（「使用中のみ」）。ブラウザの形（コールバック・code 1=拒否 3=時間切れ）に合わせて返す
+function capGeoErr(e){ const m = String((e && (e.message || e.code)) || ""); return { code: /denied|permission|authoriz|許可/i.test(m) ? 1 : /time ?out/i.test(m) ? 3 : 2, message: m }; }
+function capGeoPos(p){ const c = (p && p.coords) || {}; return { timestamp: (p && p.timestamp) || Date.now(), coords: { latitude: c.latitude, longitude: c.longitude, accuracy: c.accuracy, altitude: c.altitude ?? null, altitudeAccuracy: c.altitudeAccuracy ?? null, heading: c.heading ?? null, speed: c.speed ?? null } }; }
+function capGeoOpts(o){ o = o || {}; return { enableHighAccuracy: !!o.enableHighAccuracy, timeout: o.timeout || 10000, maximumAge: o.maximumAge || 0 }; }
+function capGeoInstall(){
+  const G = capPlugin("Geolocation"); if(!G) return false;
+  const ids = new Map(); let n = 0;
+  const shim = {
+    getCurrentPosition(ok, ng, o){ G.getCurrentPosition(capGeoOpts(o)).then(p => ok && ok(capGeoPos(p)), e => ng && ng(capGeoErr(e))); },
+    watchPosition(ok, ng, o){
+      const id = ++n;
+      Promise.resolve(G.watchPosition(capGeoOpts(o), (p, e) => { if(!ids.has(id)) return; if(e) ng && ng(capGeoErr(e)); else if(p) ok && ok(capGeoPos(p)); }))
+        .then(cid => { if(ids.has(id)) ids.set(id, cid); else G.clearWatch({ id: cid }).catch(() => {}); }, e => ng && ng(capGeoErr(e)));
+      ids.set(id, null); return id;
+    },
+    clearWatch(id){ if(!ids.has(id)) return; const cid = ids.get(id); ids.delete(id); if(cid != null) Promise.resolve(G.clearWatch({ id: cid })).catch(() => {}); }
+  };
+  try{ Object.defineProperty(navigator, "geolocation", { value: shim, configurable: true }); }catch(e){}
+  if(navigator.geolocation !== shim){ const g = navigator.geolocation; if(!g) return false; g.getCurrentPosition = shim.getCurrentPosition; g.watchPosition = shim.watchPosition; g.clearWatch = shim.clearWatch; }
+  return true;
+}
+// 共有：字と URL だけの共有は @capacitor/share（ネイティブの共有シート）。画像つきは WebView の navigator.share のまま（なければ何もしない）
+function capShareInstall(){
+  const S = capPlugin("Share"); if(!S) return false;
+  const orig = navigator.share ? navigator.share.bind(navigator) : null;
+  const share = async (d) => {
+    d = d || {};
+    if(d.files && d.files.length){ if(orig) return orig(d); const e = new Error("files"); e.name = "NotAllowedError"; throw e; }
+    try{ await S.share({ title: d.title, text: d.text, url: d.url, dialogTitle: d.title }); }
+    catch(e){ if(/cancel/i.test(String(e && (e.message || e)))){ const x = new Error("cancel"); x.name = "AbortError"; throw x; } throw e; }
+  };
+  try{ Object.defineProperty(navigator, "share", { value: share, configurable: true, writable: true }); }catch(e){ try{ navigator.share = share; }catch(_){ return false; } }
+  return true;
+}
+// 外のリンク（target=_blank・window.open）はアプリの中のブラウザ（@capacitor/browser）で開く
+function capOpenUrl(url){ const B = capPlugin("Browser"); if(B && /^https?:/i.test(url)){ B.open({ url }).catch(() => {}); return true; } return false; }
+function capLinkInstall(){
+  if(!capPlugin("Browser")) return false;
+  document.addEventListener("click", e => {
+    const a = e.target && e.target.closest && e.target.closest('a[target="_blank"]'); if(!a) return;
+    const u = a.href || ""; if(/^https?:/i.test(u) && !u.startsWith(location.origin) && capOpenUrl(u)) e.preventDefault();
+  }, true);
+  const wo = window.open ? window.open.bind(window) : null;
+  window.open = (u, ...rest) => { try{ const abs = new URL(u, location.href).href; if(/^https?:/i.test(abs) && !abs.startsWith(location.origin) && capOpenUrl(abs)) return null; }catch(e){} return wo ? wo(u, ...rest) : null; };
+  return true;
+}
+const CAP_ON = NATIVE ? { geo: capGeoInstall(), share: capShareInstall(), link: capLinkInstall() } : null;
+if(NATIVE) document.documentElement.dataset.native = "ios";
 const SUPABASE_JS = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2/dist/umd/supabase.js";
 let sb = null, user = null;
 /* [id, 名称, IATA, 都道府県, 緯度, 経度, 判定半径m, 離島] — 国土交通省 空港一覧(2026-09-01) × OurAirports */
@@ -8899,6 +8956,8 @@ function renderPlusSettings(){
   const info = $("plusInfo"), btn = $("plusBtn");
   btn.hidden = true; $("plusBtnYear").hidden = true;
   if(demo){ info.textContent = "デモモードでは、年間まとめ・一括取り込み・ステータスの先読み・羽田の運用の詳しい理由をお試しできます。"; return; }
+  // アプリの中では申し込みと解約の入口を出さない（決定事項【11/18】そらメモ＋はアプリの中で売らない）。加入中の人の特典はそのまま使える
+  if(NATIVE && SERVER){ info.textContent = PLUS ? `加入中${PLUS_UNTIL ? `（次の更新 ${fmtD(PLUS_UNTIL)}）` : ""}。` : "アプリの中では、そらメモ＋の申し込みはできません。"; return; }
   if(!SERVER){ info.textContent = "年間まとめ・過去フライトの一括取り込み・ステータスの先読み・羽田の運用の詳しい理由（月額500円・年額4,800円）。サーバー版でログインすると申し込めます。"; return; }
   if(!user){ info.textContent = "ログインすると申し込めます（月額500円・年額4,800円）。"; return; }
   if(PLUS){ info.textContent = `加入中${PLUS_UNTIL ? `（次の更新 ${fmtD(PLUS_UNTIL)}）` : ""}。年間まとめ・一括取り込み・ステータスの先読み・羽田の運用の詳しい理由が使えます。`; btn.hidden = false; btn.textContent = "管理・解約"; btn.dataset.act = "portal"; return; }
@@ -9190,7 +9249,7 @@ $("delAcct").onclick = async () => {
 
 /* ---------- ロボット除け（Cloudflare Turnstile）。config.js に turnstileSiteKey があるときだけ使う ---------- */
 const TURNSTILE_JS = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
-const captchaOn = () => !!(SORAMEMO_CONFIG.turnstileSiteKey);
+const captchaOn = () => !!(SORAMEMO_CONFIG.turnstileSiteKey) && !NATIVE;   // アプリの中では使わない（決定事項【11/18】自分用の段では使わない）
 
 
 /* ---------- ログイン前（端末の中だけ）の記録を、アカウントの記録帳に引き継ぐ ---------- */
@@ -11559,10 +11618,11 @@ async function renderCurfew(){
 let PUSH_KEY;   // VAPID の公開鍵（サーバーにまだなければ null。そのときは通知のボタンを出さない）
 const pushAps = () => { try{ return JSON.parse(localStorage.getItem("soramemo.pushAirports") || "[]"); }catch(e){ return []; } };
 const pushSp = () => { try{ return JSON.parse(localStorage.getItem("soramemo.pushSpecial") || "[]"); }catch(e){ return []; } };   // 特別塗装機の通知を申し込んだ空港
-const pushOK = () => "serviceWorker" in navigator && "PushManager" in window && "Notification" in window;
+const pushOK = () => !NATIVE && "serviceWorker" in navigator && "PushManager" in window && "Notification" in window;   // アプリの中は APNs ができるまで出さない
 function pushButtonHTML(iata){
   if(!SERVER || PUSH_KEY === null) return "";
   if(PUSH_KEY === undefined){ loadPushKey().then(() => { if(PUSH_KEY && opsOn()) renderOpsAlerts(); }); return ""; }
+  if(NATIVE) return `<p class="hint" style="margin:8px 0 0">アプリの通知は準備中です。</p>`;
   if(!pushOK()) return `<p class="hint" style="margin:8px 0 0">スマホへの通知は、この端末のブラウザでは使えません（iPhone はホーム画面に追加したそらメモから使えます）。</p>`;
   const on = pushAps().includes(iata), name = (OPS_AIRPORTS[iata] || {}).name || iata;
   return `<button class="linkbtn2 fwpush" data-fw-push="${esc(iata)}" aria-pressed="${on}">${on ? `${esc(name)}の通知をやめる` : `${esc(name)}の遅れ・ダイバートを通知する`}</button>`;
@@ -14638,7 +14698,7 @@ $("nameEdit").onclick = () => authOpen("rename", "name");
 
 /* ---------- オフライン用の仕組みと、新しい版のお知らせ ---------- */
 $("appVer").textContent = "版 " + APP_VERSION;
-if("serviceWorker" in navigator && window.isSecureContext && location.protocol !== "file:" && window.top === window.self){
+if(!NATIVE && "serviceWorker" in navigator && window.isSecureContext && location.protocol !== "file:" && window.top === window.self){   // アプリの中ではサービスワーカーを使わない（全部アプリに入っている）
   const hadController = !!navigator.serviceWorker.controller;
   navigator.serviceWorker.register("sw.js").then(reg => {
     // アプリに戻ってきたとき（ホーム画面から開いたままの人も）に、新しい版が出ていないか確かめる
