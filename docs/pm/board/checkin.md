@@ -1,6 +1,7 @@
 # チェックイン担当の帳面
 
 ## いま持っている仕事
+- PM の指示 11/18 5時50分（本人「全てOK、iPhone は自分用から試してみよう」）：1 シークレットの直しは PR #122（673e278）で済みだった。2 iPhone の土台は PR #125 で済みだったので、Mac で動かす手順（1行ずつ・Xcode でチームを選んで ▶・うまくいかないときの表）を docs/pm/report-ios-app.md に足した（PR #125 の追いのコミット）。デザイン担当への依頼は指示どおり design.md の末尾に「チェックイン担当からの依頼」として書いた（ほかの帳面を変えない決まりの例外。PM の指示のため）
 - iPhone のアプリの土台（11/18 6時の定時の回・PM の指示なし。帳面の「次にやること」の1つめ＝決定事項【11/18】作り方 A で本人の答えが出たため）：1回目済み。ブランチ checkin/ios-app（main 61ba9c7 から）・下書き **PR #125**（06e603f・見張り中）、報告 docs/pm/report-ios-app-base.md、写真 docs/pm/shots-ios-app/、Mac の手順 ios-app/README.md
   - ios-app/（Capacitor 8.6.0・geolocation 8.2.4・share 8.0.3・browser 8.0.5・SPM・iOS 15 以上・appId jp.soramemo.app）。server.url は使わず、build_www.mjs で web/ を www/ に写し capacitor.js を config.js の前に足す（sw.js・now*.html・og は入れない）。Info.plist：ja・縦だけ・位置（使用中のみ）／カメラ／マイクの理由の文・暗号の申告。アイコンは web/icon.svg を角なし 1024px
   - src/index.html 足した：NATIVE・capPlugin・capGeoErr・capGeoPos・capGeoOpts・capGeoInstall・capShareInstall・capOpenUrl・capLinkInstall・CAP_ON。変えた：captchaOn・pushOK・pushButtonHTML・renderPlusSettings・サービスワーカーの登録。html に data-native="ios"
@@ -338,7 +339,7 @@
 - tests/ops は手元では npm の playwright にブラウザがないので、全体に入っている playwright をつないで流した（すべて成功）
 
 ## ほかの担当への依頼
-- デザイン担当（11/18・PR #125）：アプリだけの画面（位置と通知の許可の前の説明の1枚・オフラインの画面・アプリで隠すもの＝「ホーム画面に追加」の案内など）の画面案。アプリでは html[data-native="ios"] が付く
+- デザイン担当（11/18・PR #125・design.md にも書いた）：アプリだけの画面（位置と通知の許可の前の説明の1枚・オフラインの画面・アプリで隠すもの＝「ホーム画面に追加」の案内など）の画面案。アプリでは html[data-native="ios"] が付く
 - データ担当（11/18・PR #125）：PR #124 の依頼①〜③のまま（購読の表の種類の列・APNs に送る関数・ODPT の規約の見直し）。あわせて、本番の Supabase で CAPTCHA が ON かを data.md に書いてほしい（ON ならアプリの中のログインが通らない）
 - 修行・撮る人用・運用予想（11/18・PR #125、PM から伝えてほしい）：持ち場のコードは変えていない。navigator.geolocation・navigator.share はそのまま呼べば、アプリの中ではネイティブに回る
 - データ担当（11/18・PR #124、iPhone の計画が決まったら正式に依頼）：①プッシュの購読の表に種類（webpush／apns）の列（移行と RLS をセット）②APNs に送る関数（.p8 の鍵・Key ID・Team ID は秘密の値。同じ便の上書きは apns-collapse-id に今の tag）③ODPT の利用規約でアプリでの配信が許されるかを確認表で見直す
