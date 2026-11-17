@@ -1,6 +1,13 @@
 # チェックイン担当の帳面
 
 ## いま持っている仕事
+- 図鑑の飛行場・滑空場（11/17 18時05分の PM の指示の2つめ・決定事項【11/17】）：済み。ブランチ checkin/zukan-airfields（main 61ba9c7 から）・下書き **PR #122**（f6198d9・見張り中）、報告 docs/pm/report-zukan-airfields-app.md、写真 docs/pm/shots-zukan-airfields/
+  - 入口・ほかの図鑑・実績の行・ヘリポートの札（データが入ったので出す）は PR #75 のまま。足したのは2つ
+  - 「番外編」の言葉をやめた：基地の図鑑の題と行は「基地」（renderBook・renderZkOthers・#bookExtra の題）、印の説明の見出し（showStamp）・空港ページの名前の下（openAirport）・選ぶ欄（fillSelects）・実績の見出し（ACH・renderAch の AIR_CATS。id は不変。秘密の見出しは「一般の人が行けない飛行場」）
+  - 夜の小さな地図で滑空場は四角（zkxDot・zkxMapSVG。.zxmap .zn／.zd で昼夜を出し分け）。夜の凡例も出す（zkAirEntryHTML の i に k-種類）
+  - テスト t141（13項目）OK・tests/ops 成功・e2e 108／111（t123・t48・t72 は前から）
+  - PR #121 と夜の図鑑の CSS の行（.zx-k・.zx-kd i）がぶつかる。両方の行を残せばよい（PR に書いた）。先に入った方のあとで、もう一方に main を取り込み直す
+  - 本人に決めてほしいこと：基地の図鑑の名前「基地」でよいか（一般の人が行けない飛行場も入る）／秘密の実績の見出し
 - 近くの空港の小さな直し3つ（11/17 18時05分の PM の指示の1つめ）：済み。ブランチ checkin/near-fix（main 61ba9c7 から）・下書き **PR #121**（2fc3afc・見張り中）、報告 docs/pm/report-near-fix.md、写真 docs/pm/shots-near-fix/
   - 大利根が二つ：同じ短い名前が2つのときだけ正式な名前（zkxCut・ZKX_DUP・zkxShort）。「大利根／滑空場」で折る（zkxBreak）
   - 東京ヘリポートの名札：いまここへの点線にかからない側に置く（renderHomeMap の最後・homeSegHit）。点線が縦（加須・八尾）は今のまま
@@ -247,7 +254,7 @@
 - 確認コードは6けた。メールは Gmail、Supabase の送信上限は1時間100通
 
 ## 次にやること
-- PM の 11/17 18時05分の指示の2つめ「図鑑の飛行場・滑空場」（checkin/zukan-airfields）を次の回で始める。下調べ（11/17）：入口は黒いカードのすぐ下・ほかの図鑑・実績の行はもう main にある（PR #75、3版で作った）。design/zukan-airfields には 11/12 の 3版までしかなく「2版」は古い版なので、3版（今の main）を土台に決定事項【11/17】との差だけ直す（違えば PM が直す）。残りの差：①「番外編」の言葉が飛行場・滑空場の所に残る（空港ページの xnote「番外編：滑空場／飛行場」・選ぶ欄の optgroup「番外編：…」・実績の AIR_CATS「番外編：滑空場」）②夜の地図で滑空場を四角にする（飛行場の図鑑の小さな地図の点）③ヘリポートの札をデータが入るまで出さない（移行163 で12か所入ったので今は出してよいか確かめる）。基地の「番外編」の図鑑（extraBook mil）は名前を変えるか PM に聞く
+- 次の回は PM の 11/17 18時05分の指示の3つめ「空港の3D」（checkin/airport-3d）を始める（2つめは PR #122 で済み）。画面案は design/airport-3d の4版（*-v4、bdaefcf）。data/airport-3d-data には調べの報告（report-airport-3d-data.md）しかなく、データの中身はまだない。作る順：①羽田の形のファイルがない間は、ops_core の HND_RWY（滑走路の端）だけで低いポリゴンの空港を描き、3D を開いたときだけ部品を読む ②機体は今の airport-traffic の答えを約1分遅らせてなめらかにつなぐ（3D 用の読み方ができたら切り替え）③空と昼夜は今の metar の raw と手元の日の出入りの計算 ④電池20%以下の軽い版。入口は「空港の今」のカードの中。下のデータ担当への依頼を出してある
 - 3つめ「空港の3D」（checkin/airport-3d・data/airport-3d-data を取り込む）は2つめのあと。そのあと iPhone のアプリの計画（checkin/ios-plan・計画だけ）
 - PR #121（近くの直し）：改善担当の見直し・CI が来たら直す。反映は本人の「反映して」待ち。入る前に t140・t127・t119・t116 を流す
 - tests/sql を setsid で流しても途中で止まることがある（11/17 は t92 の途中で止まった）。残りは1本ずつ流す
@@ -303,6 +310,7 @@
 - tests/ops は手元では npm の playwright にブラウザがないので、全体に入っている playwright をつないで流した（すべて成功）
 
 ## ほかの担当への依頼
+- データ担当へ（11/17・空港の3D のため。決定事項【11/17】・report-airport-3d-data.md のおすすめどおり）：①羽田の形のファイル（OSM の滑走路・誘導路・エプロン・ターミナル＋PLATEAU の建物の高さ、管制塔の位置と高さ 115.7m）を一度だけ切り出し、低いポリゴンの小さな GeoJSON にして置き場所と出典の文（ODbL・PLATEAU）を決めてほしい ②airport-traffic に3D 用の読み方（?iata=HND&view=3d：羽田から30km・1万フィート以下と地上、位置・高さ・向き・速さ・機種・登録記号・便名・見た時刻だけ、adsb.lol に新しく問い合わせない）③羽田に来る約30機種の大きさ（FAA Aircraft Characteristics Database、長さ・翼の幅・尾翼の高さ・形の種類）の小さな表（アプリに持つ JSON でよい）。できるまではチェックイン側は滑走路だけ・今の airport-traffic で作る
 - データ担当（11/17・PR #117）：PR #118 の usual_late を取り込んで合わせた。残りの依頼は2つ：①出発前の画面（U2）のため「いつもの出発」（foreign_usual の dep_here=1）も返してほしい ②airport-foreign の planes の各行に usual・usual_n・eta・late_min（案内板・機体のくわしくの札）。（もとの依頼）usual_late(p_flight text, p_day date default null, p_reg text default null) returns jsonb（anon・authenticated に実行だけ・security definer）の形ならそのまま読める。返す形 { usual_arr:"HH:MM", usual_dep, usual_n, usual_iata, eta, late_min, event:'divert'|'return', arr_at, arr_iata, note }、分からない値は null、便ごと分からなければ null（404 でなければ foreign_late は呼ばない）。名前・形を変えるなら data.md に書いてもらえれば ulNorm で合わせる。あわせて airport-foreign の planes の各行に usual・usual_n・eta・late_min を足してほしい（案内板・機体のくわしくの札）
 - 撮る人用・運用予想（11/17・PR #117、PM から伝えてほしい）：決定事項【11/17】U4 のため spDetailHTML に ulSpBox を差し込んだ（時刻表にない便の到着だけ・その便の「着陸」のカードを出さない）。ほかは変えていない
 - 改善担当（11/17・PR #117）：写真 shots-usual-late/ と iPhone の幅で、シートの先頭のカード（667 で半券が下に押される）と案内板の札の切れ方を見てほしい
@@ -590,7 +598,7 @@ review-c4：見せてよい。本人の答え（ON／OFF か −／＋ か）を
 
 ## PM から積んだ次の仕事（11/17 18時05分、止まっていた決めごとが決まった。上から順に）
 1. 近くの空港の小さな直し3つ（大利根が二つ出る・東京ヘリポートの名札が点線にかぶる・夜の名札が薄い）。ブランチ checkin/near-fix → PR #121 で直した（2fc3afc・報告 report-near-fix.md）
-2. 図鑑の飛行場・滑空場（決定事項【11/17】・画面案 design/zukan-airfields 2版の *-v2）。ブランチ checkin/zukan-airfields
+2. 図鑑の飛行場・滑空場（決定事項【11/17】・画面案 design/zukan-airfields 2版の *-v2）。ブランチ checkin/zukan-airfields → PR #122 で作った（f6198d9・報告 report-zukan-airfields-app.md）
 3. 空港の3D（決定事項【11/17】・画面案 design/airport-3d の最後の版・データ担当の data/airport-3d-data（#72）を取り込む）。ブランチ checkin/airport-3d。データの取り込み（OSM＋PLATEAU の出典 ODbL・約1分遅れ）で足りない所は data.md に依頼
 どれも下書き PR、本番には入れない。tests/ops・e2e・sql を通す
 
