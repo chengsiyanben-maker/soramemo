@@ -5,7 +5,8 @@
   - 移行185：読むだけの関数 usual_late(p_flight, p_reg, p_day, p_arr, p_land) だけ（表・RLS は変えない。anon・authenticated は実行だけ）。便名か登録記号（reg_legs のその日と前の日）から、いつもの到着（foreign_usual。dow・n・spread・weeks）・着く見込み（着陸。実績 foreign_legs → 画面が渡す flight-live の land_pred → foreign_watch.eta（10分以内）の順）・late_min と kind（late 15分以上・usual 前後14分・early）・event・divert_to・curfew_near・source・note。見込みがなければ eta null（U1n-v2）。ODPT の会社は reason odpt、知らない記号は unknown、形のちがう値は null
   - 約束：見張りの関数をつなぐとき、foreign_watch.eta は**着陸の見込み**で書き、門限は state.curfew_near（true／false）に入れる
   - 確かめた結果：t124 32項目・SQL のテスト全部125本 通過・番号の重なりなし
-  - 本人待ち：「反映して」・案内板で選ばれていない飛行中の便にも見込みを出すか（出すなら live_positions に速さの列を足す案）・報告の 7 の SQL の結果
+  - **11/17 15時18分 PR #118 は main に入った（PM の反映の PR #119 → 61ba9c7、移行185。チェックインの usual_late の取り込みと一緒）**。反映の Actions の結果と、次の日の報告の 7 の SQL の結果を見る
+  - 本人待ち：案内板で選ばれていない飛行中の便にも見込みを出すか（出すなら live_positions に速さの列を足す案）・報告の 7 の SQL の結果
 - 海外の会社の特別塗装機の続き（11/16 夜 PM の手で呼んだ回。11/16 14時の指示の 2・本人「おすすめ」）：ブランチ data/foreign-livery（main 4af96c8 から）→ 下書き **PR #102**（題を直した）。報告 docs/pm/report-foreign-livery.md の 7〜11。**移行184・テスト t123 を使った**
   - 移行184：表 livery_extra（本人が Table Editor で足す。src 必須・https・FR24 不可。誰でも select・書くのは service_role）・livery_inbound_usual（foreign_usual の到着。service_role だけ）
   - _shared/livery_extra.ts（新）・airport-traffic：一覧に表を合わせる（5分ためる）／海外の塗装機を日本のまわりで見たら行き先（①foreign_usual ②adsb.im routeset）と着く見込みを1回（livery_notified の（機体・空港）に入れて数分前の知らせと二重にしない。調べるのは便ごとに12時間に1回、分からなければ15分後）／アライアンス塗装は海外の会社だけ知らせる（案3-A）／アライアンス塗装のときは撮影の知らせの人にも空港の知らせを送る（spot_push が alliance を出さないため。撮る人用が直したら戻す）
