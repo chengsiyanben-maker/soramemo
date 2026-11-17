@@ -25,7 +25,7 @@
 
 - t143：18／18 OK（写真 docs/pm/shots-ios-app/ の t143_app_home・t143_app_login・t143_web_home。ホームとログインの見た目は web と同じ、ログインに Turnstile の箱が出ない）
 - tests/ops：すべて成功
-- e2e の全体：（下に追記）
+- e2e の全体：109／111（落ちたのは t48（pdf417gen がない）と t72（特別塗装機を #opsSpecial から開く）で、どちらも main でも落ちる前からのもの。前から落ちていた t123 はこの回は通った。運営コンソールのテスト4本は手元にないので飛ばした）
 - `npx cap add ios` は Linux で通った（Package.swift に3つの部品）。**Xcode でのビルドと iPhone での動きはまだ確かめていない**（Mac がないため。本人の Mac で初めて動く）
 - tests/sql は表を変えていないので流していない
 
