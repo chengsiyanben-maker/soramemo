@@ -1,5 +1,5 @@
 <!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>機体のピン止め</title><style>
+<title>ピン止め</title><style>
 :root{--bg:#EEF1F5;--card:#FFFFFF;--ink:#24292F;--ink2:#374151;--mute:#6B7280;--sub:#8A919C;--pill:#EEF0F3;--line:#E6E9EE;
   --blue:#2563EB;--navy:#16233A;--jal:#B4232A;--ana:#1C4FA0;--late:#B45309;--ok:#1F7A3F;
   --sw-on:#16233A;--sw-off:#E5E8EE;--sw-off-ring:#768090;
@@ -259,4 +259,72 @@ svg.i{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2.2;stro
 .lab small{font-size:13px;font-weight:600;color:#B8C4D3}
 .cmp{background:rgba(255,255,255,.12);border-radius:18px;padding:12px 14px;margin-top:22px;font-size:14px;line-height:1.7;color:#EEF2F7}
 .cmp b{color:#fff}
-</style></head><body><div class="idx"><h1>機体のピン止め</h1><p>design/pin 1版（11/17）。画面案だけで、アプリには入れません。下のタブ帯・運用の上の1行は今のまま。見本の時刻は 11/17 15:10。</p><h2>運用の「機体」のはじめ</h2><ul><li><a href="P1.html"><b>P1</b><span>ピン止めの段（ログインした人）<small>最近見たの上・いまどこ・次の便（予想）・最後に見た</small></span></a></li><li><a href="P1g.html"><b>P1g</b><span>ログインしない人<small>「この端末だけに保存」とログインの入口</small></span></a></li><li><a href="P1m.html"><b>P1m</b><span>ピン止めが多い人<small>はじめは5機まで・すべて見る</small></span></a></li><li><a href="P1e.html"><b>P1e</b><span>まだ1機もない人<small>1枚の小さな案内だけ</small></span></a></li><li><a href="P1x.html"><b>P1x</b><span>比べる用：見方に「ピン止め」<small>見方の帯を3つにする案</small></span></a></li></ul><h2>付け外しする所</h2><ul><li><a href="P2o.html"><b>P2o</b><span>機体の1日（付ける前）<small>上の1行の右にピンの印</small></span></a></li><li><a href="P2.html"><b>P2</b><span>機体の1日（付けた直後）<small>帯で「知らせます」と設定への入口</small></span></a></li><li><a href="P3.html"><b>P3</b><span>特別塗装機の欄<small>行ごとの右にピンの印</small></span></a></li><li><a href="P4.html"><b>P4</b><span>機体図鑑の1機<small>名前の横に「ピン止め中」</small></span></a></li></ul><h2>並べ替え・上限</h2><ul><li><a href="P5.html"><b>P5</b><span>ピン止めをすべて見る<small>≡ で並べ替え・外す・12 / 20機</small></span></a></li><li><a href="P5f.html"><b>P5f</b><span>20機いっぱいのとき<small>外す1機を選ぶシート</small></span></a></li></ul><h2>知らせ</h2><ul><li><a href="P6.html"><b>P6</b><span>知らせの設定<small>2つの ON／OFF と自分の空港</small></span></a></li><li><a href="P7.html"><b>P7</b><span>知らせの見本<small>二重にしない決まり</small></span></a></li></ul></div></body></html>
+
+/* ホーム：地図とシート（本番の形に合わせる） */
+.map{position:absolute;inset:0 0 auto 0;height:420px;background:linear-gradient(160deg,#EDEFF2,#E3E7EC);overflow:hidden}
+.map::before{content:"";position:absolute;left:120px;top:110px;width:200px;height:200px;border-radius:50%;border:2px dashed #8A3B67;opacity:.7}
+.map i{position:absolute;height:8px;border-radius:9px;background:#8A3B67;opacity:.85}
+.mtop{position:relative;z-index:2;display:flex;justify-content:space-between;align-items:center;padding:12px 16px}
+.mtop .seg{display:flex;background:#fff;border-radius:999px;padding:4px;box-shadow:var(--sh)}
+.mtop .seg span{height:40px;display:inline-flex;align-items:center;white-space:nowrap;padding:0 10px;border-radius:999px;font-size:14px;font-weight:800;color:var(--mute)}
+.mtop .seg span.on{background:var(--navy);color:#fff}
+.mtop .mp{height:44px;display:inline-flex;align-items:center;white-space:nowrap;padding:0 12px;border-radius:999px;background:#fff;box-shadow:var(--sh);font-size:14px;font-weight:800}
+.hsheet{position:absolute;left:0;right:0;top:300px;background:var(--bg);border-radius:26px 26px 0 0;padding:10px 16px 120px;z-index:3;box-shadow:0 -12px 30px -20px rgba(15,23,42,.4)}
+.hsheet .grab{width:40px;height:5px;border-radius:9px;background:#C9CFD8;margin:0 auto 10px}
+.near1{display:flex;border-radius:22px;overflow:hidden;background:#111A2B;color:#fff}
+.near1 .l{flex:1;padding:14px 14px 16px 16px;min-width:0}
+.near1 .l small{font-size:13px;color:#AEB8C6}
+.flap{display:flex;gap:6px;margin:6px 0 8px}
+.flap b{width:38px;height:44px;border-radius:8px;background:#1E2738;display:flex;align-items:center;justify-content:center;font:700 24px/1 ui-monospace,Menlo,monospace;color:#FFB547}
+.near1 .nm{display:flex;align-items:center;gap:8px}
+.near1 .nm b{font-size:17px;font-weight:800;flex:1;min-width:0}
+.near1 .nm .pinbtn{background:rgba(255,255,255,.12);color:#fff;box-shadow:none}
+.near1 .nm .pinbtn.on{background:#fff;color:#111A2B}
+.near1 .sub{font-size:13px;color:#C9D2DE}
+.near1 .ck{flex:none;width:92px;background:#E9C46A;color:#2B2410;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:14px;font-weight:900;writing-mode:vertical-rl;letter-spacing:.2em}
+.nlist .tg2{flex:none;font-size:13px;font-weight:800;border-radius:999px;padding:3px 10px;background:#F3EBDD;color:#7A5A22}
+.nlist .tg2.ap{background:#E8EEF7;color:#1F3A66}
+.nlist .km{flex:none;font-size:18px;font-weight:900}
+.nlist .km small{font-size:13px;color:var(--sub);font-weight:700;margin-left:2px}
+/* 空港ページ */
+.aph{display:flex;align-items:flex-start;gap:10px;margin-top:8px}
+.aph .tx{flex:1;min-width:0}
+.aph .code{display:inline-block;font:700 14px/1 ui-monospace,Menlo,monospace;color:#fff;background:var(--ink);border-radius:7px;padding:6px 8px}
+.aph h2{margin:8px 0 0;font-size:21px;font-weight:900;line-height:1.3}
+.aph span.s{display:block;font-size:13px;color:var(--mute);margin-top:2px}
+.nrow{display:flex;align-items:center;gap:10px;min-height:56px}
+.nrow .bi{flex:none;width:36px;height:36px;border-radius:50%;background:var(--pill);display:inline-flex;align-items:center;justify-content:center;color:var(--ink2)}
+.nrow .tx{flex:1;min-width:0}
+.nrow .tx b{display:block;font-size:15px;font-weight:800}
+.nrow .tx span{display:block;font-size:13px;color:var(--mute)}
+.on1{display:inline-flex;align-items:center;gap:4px;font-size:13px;font-weight:800;color:var(--ink2);background:var(--pill);border-radius:999px;padding:2px 9px;margin:2px 4px 0 0}
+.nrow .tx .on1,.apc .on1{display:inline-flex}
+.on1.x{color:var(--sub);background:transparent;box-shadow:inset 0 0 0 1.5px #D5DAE1}
+/* 知らせの設定の空港カード */
+.apc{background:var(--card);border-radius:22px;box-shadow:var(--sh);padding:12px 12px 12px 16px;margin-top:12px}
+.apc .top{display:flex;align-items:center;gap:10px;min-height:48px}
+.apc .top i{font:700 13px/1 ui-monospace,Menlo,monospace;font-style:normal;color:#fff;background:var(--ink);border-radius:6px;padding:5px 6px}
+.apc .top b{flex:1;font-size:17px;font-weight:800}
+.apc .top .go{width:44px;height:44px;display:flex;align-items:center;justify-content:center;color:var(--sub)}
+.apc .chips2{display:flex;flex-wrap:wrap;margin-top:2px}
+.onoff li.dis .tx b{color:var(--sub)}
+.onoff li.dis .tg{opacity:.45}
+.more2{font-size:13px;font-weight:800;color:var(--ink2);display:inline-flex;align-items:center;min-height:44px}
+.danger{height:48px;display:flex;align-items:center;justify-content:center;border-radius:999px;background:var(--card);box-shadow:var(--sh);font-size:15px;font-weight:800;color:var(--ink2);margin-top:16px}
+.pinpill:not(.on){background:var(--card);box-shadow:var(--sh)}
+.secth{font-size:13px;font-weight:800;color:var(--mute);margin:22px 4px 0;letter-spacing:.04em}
+.mig{display:flex;gap:12px;align-items:flex-start}
+.mig .pi{flex:none;width:44px;height:44px;border-radius:50%;background:var(--navy);color:#fff;display:inline-flex;align-items:center;justify-content:center}
+.mig p{margin:0;font-size:14px;line-height:1.7;color:var(--ink2)}
+.mig p b{display:block;font-size:17px;color:var(--ink);margin-bottom:4px}
+.mt16{margin-top:16px}
+.grid4{width:100%;border-collapse:separate;border-spacing:0;font-size:13px}
+.grid4 th{font-weight:800;color:var(--mute);text-align:center;padding:4px 2px 8px}
+.grid4 th:first-child{text-align:left}
+.grid4 td{text-align:center;padding:6px 2px;height:56px}
+.grid4 td:first-child{text-align:left;font-size:15px;font-weight:800}
+.grid4 tr+tr td{box-shadow:0 -1px 0 var(--line)}
+.dot2{display:inline-flex;width:44px;height:44px;border-radius:50%;align-items:center;justify-content:center;background:var(--pill);color:var(--sub);font-size:13px;font-weight:800}
+.dot2.on{background:var(--navy);color:#fff}
+.dot2.na{background:transparent;color:#B7BEC8}
+</style></head><body><div class="idx"><h1>ピン止め</h1><p>design/pin 2版（11/17）。ピン止めの中心は空港。空港をピン止めすると、その空港に特別塗装機が向かってきたら知らせます。空港ごとの知らせの申し込みはピン止めの1か所にまとめます。画面案だけで、アプリには入れません。</p><h2>2版：空港をピン止め（おすすめ）</h2><ul><li><a href="00-v2.html"><b>00</b><span>今の空港ごとの知らせ<small>本番の写真と、4か所に分かれた申し込み</small></span></a></li><li><a href="K1-v2.html"><b>K1</b><span>ホーム・近くの空港<small>いちばん近い空港と「ほか」の行にピンの印</small></span></a></li><li><a href="K2-v2.html"><b>K2</b><span>空港ページ<small>名前の横に「ピン止め中」・「羽田の知らせ」の1行</small></span></a></li><li><a href="K3-v2.html"><b>K3</b><span>図鑑の空港の1枚<small>ピン止めのピル</small></span></a></li><li><a href="K4-v2.html"><b>K4</b><span>ピン止めした直後<small>はじめは特別塗装機だけ ON</small></span></a></li><li><a href="K5-v2.html"><b>K5</b><span>知らせ（1か所）<small>ピン止めした空港の一覧・便・機体</small></span></a></li><li><a href="K5b-v2.html"><b>K5b</b><span>比べる用：表の形<small>空港×知らせを1枚に</small></span></a></li><li><a href="K6-v2.html"><b>K6</b><span>羽田の知らせ<small>4つの ON／OFF・外す</small></span></a></li><li><a href="K6n-v2.html"><b>K6n</b><span>石垣の知らせ<small>出せない知らせは薄く・理由つき</small></span></a></li><li><a href="K7-v2.html"><b>K7</b><span>運用タブ 空港側<small>今の通知のボタンを状態と入口に</small></span></a></li><li><a href="K8-v2.html"><b>K8</b><span>空港を選ぶシート<small>ピン止めした空港が先頭</small></span></a></li><li><a href="K9-v2.html"><b>K9</b><span>今の利用者への案内<small>申し込み済みの空港をそのままピン止め</small></span></a></li><li><a href="K10-v2.html"><b>K10</b><span>知らせの見本<small>二重にしない</small></span></a></li></ul><h2>1版：機体をピン止め（2番目の案として残す）</h2><ul><li><a href="P1.html"><b>P1</b><span>機体側・ピン止めの段<small>いまどこ・次の便（予想）・最後に見た</small></span></a></li><li><a href="P1g.html"><b>P1g</b><span>ログインしない人<small>この端末だけ</small></span></a></li><li><a href="P1m.html"><b>P1m</b><span>多い人<small>はじめは5機</small></span></a></li><li><a href="P1e.html"><b>P1e</b><span>1機もない人<small></small></span></a></li><li><a href="P1x.html"><b>P1x</b><span>比べる用：見方にピン止め<small></small></span></a></li><li><a href="P2o.html"><b>P2o</b><span>機体の1日（付ける前）<small></small></span></a></li><li><a href="P2.html"><b>P2</b><span>機体の1日（付けた直後）<small></small></span></a></li><li><a href="P3.html"><b>P3</b><span>特別塗装機の欄<small></small></span></a></li><li><a href="P4.html"><b>P4</b><span>機体図鑑の1機<small></small></span></a></li><li><a href="P5.html"><b>P5</b><span>すべて見る<small>並べ替え・外す</small></span></a></li><li><a href="P5f.html"><b>P5f</b><span>20機いっぱい<small></small></span></a></li><li><a href="P6.html"><b>P6</b><span>機体の知らせの設定<small></small></span></a></li><li><a href="P7.html"><b>P7</b><span>機体の知らせの見本<small></small></span></a></li></ul></div></body></html>
