@@ -558,3 +558,6 @@ review-c4：見せてよい。本人の答え（ON／OFF か −／＋ か）を
 - NG 特別塗装機の欄が出る（羽田に来る特別塗装機）
 - NG 地図の名札に特別塗装機の★が出る
 運用タブを分けて特別塗装機が「機体」側に移ったため、ops.test.mjs が空港側で探して見つからない形と思われる。画面の決まり（空港側の地図の★は残すのか）を画面案 design/ops-split 2版で確かめ、①画面が正しければ ops.test.mjs を新しい形に直す、②★や欄が本当に消えているなら画面を直す。tests/ops も含めて全部のテストを通す（node tests/ops/ops.test.mjs）。ブランチ checkin/fix-ops-test、下書き PR。main が今このテストで止まっているので急ぎ
+
+## PM から積んだ次の仕事（11/17 12時20分、いつもより遅いの画面）
+本人「OK」（決定事項【11/17】）。画面案 design/usual-late 2版（U1・U1n・U2・U2b・U2c・U3・U4・U5）どおり：renderRideIntl（見込みの箱・灰色の点線の札・箱の中の出典の1行・門限とダイバート）・乗る便があるときはホームのシートの先頭に乗る便のカード・foreignHTML（題の下の凡例・灰色の札）・spDetailHTML（着陸の箱）。関数はデータ担当の data/usual-late-rpc を取り込む（まだなら U1n の形で出す）。tests/ops・e2e・sql を全部通す。ブランチ checkin/usual-late、下書き PR、本番には入れない
