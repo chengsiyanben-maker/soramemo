@@ -2713,7 +2713,9 @@ dialog.psheet .btn1,dialog.psheet .btn2{display:block;width:100%;margin-top:10px
 #v-book .zx-ap.no .zx-nm{color:var(--zk-pale)}
 #v-book .zx-k{align-self:flex-start;display:inline-flex;align-items:center;height:24px;padding:0 7px;border-radius:999px;font-size:13px;font-weight:700;white-space:nowrap;letter-spacing:0}
 #v-book .zx-k.fd{background:#DCEBDF;color:#24502F}#v-book .zx-k.gl{background:#D7EAF6;color:#134F72}#v-book .zx-k.hp{background:#F1E7D8;color:#5E4114}
-[data-night="on"] #v-book .zx-k,[data-night="on"] #v-book .zx-dtag{background:transparent;color:var(--bk-ink);box-shadow:inset 0 0 0 1.2px rgba(220,227,234,.5)}
+[data-night="on"] #v-book .zx-dtag{background:transparent;color:var(--bk-ink);box-shadow:inset 0 0 0 1.2px rgba(220,227,234,.5)}
+/* 夜の札（11/17 の直し・review-app-1 の5）：まだの枠でも行った枠でも、地の色に頼らず濃い札に明るい字（design/near-airfields 5版の夜と同じ色）。4.5:1 以上 */
+[data-night="on"] #v-book .zx-k{background:#141B24;color:#BCC6D1;box-shadow:inset 0 0 0 1px rgba(150,170,195,.18)}
 [data-night="on"] #v-book .zx-kd i:not(.my){display:none}
 [data-night="on"] #v-book .zxmap .mv{fill:#DCE3EA!important;stroke:#141B24}[data-night="on"] #v-book .zxmap .mn{fill:#141B24}
 [data-night="on"] #v-book .zx-sep{color:var(--bk-ink)}
@@ -3385,7 +3387,9 @@ dialog.neardlg .dlg{padding:14px 12px 28px}
 #dNear .nclose{background:#0F1B2D;color:#fff;padding:0 18px}
 #dNear .nach{margin:12px 16px 0;font-size:13px;font-weight:700;color:#5F6878}
 /* 夜（data-night="on"）：札は色なし、光るのは数字だけ */
-:root[data-night="on"] #v-home .ktag:not(.ml),:root[data-night="on"] .nrow2 .t{background:transparent;color:#DCE3EA;box-shadow:inset 0 0 0 1.5px rgba(220,227,234,.5)}
+:root[data-night="on"] #v-home .ktag:not(.ml){background:transparent;color:#DCE3EA;box-shadow:inset 0 0 0 1.5px rgba(220,227,234,.5)}
+/* 一覧の札は、白いカードの上でも夜のカードの上でも読めるよう、濃い札に明るい字（design/near-airfields 5版の夜・review-app-1 の5） */
+:root[data-night="on"] .nrow2 .t{background:#141B24;color:#BCC6D1;box-shadow:inset 0 0 0 1px rgba(150,170,195,.18)}
 #v-home .bp-stub .s{font-size:13px;font-weight:700;line-height:1.35;text-align:center;color:var(--stub-sub)}
 #v-home .bp-stub .s i{font-style:normal;font-size:16px;font-weight:800}
 #v-home .bp-stub.off{background:var(--h3-off-bg);color:var(--h3-off-ink);border-left-color:#9CA3AF;cursor:pointer}
@@ -5355,8 +5359,11 @@ document.addEventListener("click", e => {
 const ZKX_KINDS = ["field", "glider", "heli"], ZKX_COL = { field:"#3D7A4E", glider:"#1F7FB6", heli:"#9A7434" };
 const zkxList = () => XA.filter(a => ZKX_KINDS.includes(a.kind));
 // 枠の名前：「滑空場」「飛行場」「空港」「ヘリポート」を外した短い名前。カタカナの語は境目でだけ折る
-const zkxShort = a => a.name.replace(/(滑空場|飛行場|ヘリポート|空港)$/, "") || a.name;
-const zkxBreak = t => esc(t).replace(/(エアポート|エアパーク|エアロパーク|スカイポート|スカイパーク|フライト|パーク|航空公園|多目的)/g, "<wbr>$1").replace(/^<wbr>/, "").replace(/<wbr>(パーク)/g, (m, x, i, all) => all.slice(0, i).endsWith("スカイ") || all.slice(0, i).endsWith("エア") || all.slice(0, i).endsWith("エアロ") ? x : m).replace(/(スカイポート|アップルポート)(?=[一-龥])/g, "$1<wbr>");
+const zkxCut = a => a.name.replace(/(滑空場|飛行場|ヘリポート|空港)$/, "") || a.name;
+// 同じ短い名前が2つあるとき（大利根滑空場と大利根飛行場）は、両方とも正式な名前で出す（review-app-2 の5・11/17 の直し）
+let ZKX_DUP = null;
+const zkxShort = a => { if(!ZKX_DUP){ const n = new Map(); for(const x of XA) n.set(zkxCut(x), (n.get(zkxCut(x)) || 0) + 1); ZKX_DUP = n; } return ZKX_DUP.get(zkxCut(a)) > 1 ? a.name : zkxCut(a); };
+const zkxBreak = t => esc(t).replace(/(エアポート|エアパーク|エアロパーク|スカイポート|スカイパーク|フライト|パーク|航空公園|多目的)/g, "<wbr>$1").replace(/^<wbr>/, "").replace(/<wbr>(パーク)/g, (m, x, i, all) => all.slice(0, i).endsWith("スカイ") || all.slice(0, i).endsWith("エア") || all.slice(0, i).endsWith("エアロ") ? x : m).replace(/(スカイポート|アップルポート)(?=[一-龥])/g, "$1<wbr>").replace(/(.)(滑空場|飛行場|ヘリポート)$/, "$1<wbr>$2");   // 正式な名前で出すとき（大利根滑空場）は「大利根／滑空場」で折る
 function zkxCounts(){
   const xv = visitedExtra(), list = zkxList(), got = list.filter(a => xv.has(a.id));
   const kind = ZKX_KINDS.map(k => [k, got.filter(a => a.kind === k).length, list.filter(a => a.kind === k).length]);
@@ -7147,7 +7154,18 @@ async function renderHomeMap(){
   HOME_MAP.fitBounds(bounds, { paddingTopLeft:[pad.l, pad.t], paddingBottomRight:[pad.r, pad.b], maxZoom:14, animate:false });   // 下はシートに隠れる
   homeEdge(me && HOME_NEAR && !HOME_NEAR.within ? me : null, HOME_NEAR ? HOME_NEAR.km : 0, pad);
   // 空港の名前は、地図の広く空いている側に置く（右の＋−と重ならないように）
-  { const ap = $("homeMap").querySelector(".hm-ap"), c = HOME_MAP.latLngToContainerPoint([a.lat, a.lon]); if(ap) ap.classList.toggle("l", c.x > $("homeMap").clientWidth * .5); }
+  // 「いまここ」へ点線を引いているときは、名札が点線にかからない側を選ぶ（東京駅の東京ヘリポート・review-app-2 の4。点線が縦のときは今のまま）
+  { const ap = $("homeMap").querySelector(".hm-ap"), c = HOME_MAP.latLngToContainerPoint([a.lat, a.lon]);
+    if(ap){ let left = c.x > $("homeMap").clientWidth * .5;
+      if(me && !HOME_NEAR.within){ const m = HOME_MAP.latLngToContainerPoint(me), w = ap.offsetWidth || 120, h = ap.offsetHeight || 36;
+        const hit = l => homeSegHit(m.x - c.x, m.y - c.y, l ? -(w + 26) : 26, -40, w, h);
+        if(hit(left) && !hit(!left)) left = !left; }
+      ap.classList.toggle("l", left); } }
+}
+// 空港の点（0,0）から（dx,dy）への線が、名札の四角（x,y,w,h。空港の点からの位置）を通るか
+function homeSegHit(dx, dy, x, y, w, h){
+  const N = 40; for(let i = 1; i <= N; i++){ const px = dx * i / N, py = dy * i / N; if(px >= x - 4 && px <= x + w + 4 && py >= y - 4 && py <= y + h + 4) return true; }
+  return false;
 }
 // 地図の見える所（上の段・シート・右の＋−を除く）。引き上げた位置は見える高さが細いので、余白を詰め、＋−は隠すので右も詰める
 function homeMapPad(snap){
