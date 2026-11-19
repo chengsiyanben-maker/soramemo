@@ -1,5 +1,6 @@
 import os, sys
 HERE=os.path.dirname(os.path.abspath(__file__)); WEB=os.path.abspath(os.path.join(HERE,'..','..','web')); WORK=os.environ.get('SORAMEMO_TEST_WORK','/tmp/soramemo-e2e'); os.makedirs(WORK, exist_ok=True)
+# （11/19 運用タブは一覧＋専用ページになった。このテストは中身を前の形（見方のタブ）で確かめるので soramemo.ops.hub=0。一覧は t148）
 # 表示の編集（11/8 全部乗せ＋フィルター）：下のタブ（出す・隠す、2〜5こ）、見方（隠す）、運用の空港（よく見る空港だけ）、運用の下・ホーム・成績のかたまり（出す・隠す）。
 # 開き直しても残る。全部乗せに戻すと全部出る。並べ替えは1月の公開のあと（いまの画面にはない）
 # 読み込み直しを確かめるため、ファイルとしてではなく小さなサーバーから開く（file:// だと最初の読み込み直しで保存が消えることがある）
@@ -26,7 +27,7 @@ async def main():
     async with async_playwright() as p:
         b = await p.chromium.launch(); errs = []
         c = await b.new_context(viewport={'width':400,'height':860}, timezone_id='Asia/Tokyo')
-        await c.add_init_script("localStorage.setItem('soramemo.onboarded','1'); localStorage.setItem('soramemo.install.later','1');")
+        await c.add_init_script("localStorage.setItem('soramemo.ops.hub','0'); localStorage.setItem('soramemo.onboarded','1'); localStorage.setItem('soramemo.install.later','1');")
         await c.route('https://cdn.jsdelivr.net/npm/@supabase/**', lambda r: r.fulfill(path=os.path.join(HERE,'fake_sb.js'), content_type='application/javascript'))
         async def rpc(r):
             name = r.request.url.rsplit('/', 1)[-1]
