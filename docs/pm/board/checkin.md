@@ -1,6 +1,17 @@
 # チェックイン担当の帳面
 
 ## いま持っている仕事
+- 11/20 3時台（日本時間）の定時の回（PM 2時45分の2つ）：どちらも作って下書きにした
+  - 図鑑の絞り込みと県名（design/zukan-filter 1版 F1〜F3）：ブランチ checkin/zukan-filter（main 863fb3d から）・下書き **PR #138**（07d7cc0）・報告 docs/pm/report-zukan-filter-app.md・写真 docs/pm/shots-zukan-filter/
+    - 見方の帯「地方別・地図」・ピル「すべて 75・飛行場 30・滑空場 33・ヘリポート 12」（localStorage soramemo.zkx.kind・soramemo.zkx.view、DEMO_LO_KEYS にも足した）・全部の枠に県名13px・1つに絞ると種類の札を外す・地図の見方（点と「まだ」の一覧）
+    - 変えた関数：zkxTile・zkAirBookHTML・DEMO_LO_KEYS、新 zkxGet・zkxKind・zkxView・zkxSet・zkxBigMapSVG・ピルと見方の click
+    - t149（新）・t127（見方の帯の押す所を44pxに）・t116・t118・t122・t124・t126・t60・t7系 成功（t72 は前から）
+    - 本人に決めてほしいこと：地図の「まだ」の一覧を全部出すか畳むか・地図に沖縄と南の島が入らない
+  - フライトの「空の上」と航跡（data/flight-actual・PR #136 の列）：ブランチ checkin/flight-actual（main 863fb3d から）・下書き **PR #139**（7d61b8a→b37dc33）・報告 docs/pm/report-flight-actual-app.md・写真 docs/pm/shots-flight-actual/
+    - select に act_dep_at・act_arr_at・act_src（エラーなら前の列で読み直す）・空の上は fbMin（実際の時刻があればその差）・1行に「目安」・年の帯と年のまとめに「（推定を含む）」・くわしくに取り先の説明・地図は区間のいちばん新しい航跡（fbTrackOf）・出典「航跡：adsb.lol（ODbL）」
+    - 変えた関数：読み込み（fetchAll("flights")・S.flights）・fbEntries・fbSum・fbYrHTML・fbRowHTML・fbYearHTML・便のくわしく・fbMapHTML・fbMapSVG・renderFlightMap・共有の画像、新 fbActOf・fbMin・FB_SRC_TXT・fbTrackOf。tests/e2e/fake_sb.js に window.__flightsAct
+    - t150（新）成功・関係する e2e 51本中50本成功（t72 は前から）
+    - 本人に決めてほしいこと：くわしくの出発・到着も実際の時刻にするか・1区間に航跡が何本もあるときの描き方・出典の言い方
 - 11/20 2時半（日本時間）：PR #137 で checkin/ios-app と checkin/tear-finger（PR #133）が main に入った（863fb3d）。PR #134（運用の一覧）に main を取り込んだ（e3dd9f8・src は自動で重なり、web/ だけ作り直し）。t148・t146・t147・t143・t74・t138・t130・tests/ops 成功
 - PR #130（ピン止め）：11/20 2時29分（日本時間）に main に入った。本番の反映（Actions）が成功したかは次の回で確かめる。iPhone で Safari →ホーム画面にピン止めが移るか（報告 report-pin-app.md の手順）は本人の結果待ち。直しは main から新しいブランチで
 - 11/20 1時台の定時の回（PM 1時10分「運用の地図の数をそろえる」）：PR #134（checkin/ops-hub）に足した（21180c2）。報告 docs/pm/report-ops-hub-app.md の「追記2」・写真 docs/pm/shots-ops-hub/t148_map_legend_844・t148_map_wide_844・t148_list_844
@@ -324,6 +335,8 @@
 - 確認コードは6けた。メールは Gmail、Supabase の送信上限は1時間100通
 
 ## 次にやること
+- PR #138（図鑑の絞り込み）・#139（フライトの実際の時刻）：改善担当の見直し・PM の自動の反映を待つ。#139 はデータ担当の #136（移行187）と一緒に入れる（先に入っても前の列で読み直すので壊れない）。入る前に #138 は t149・t127、#139 は t150 と t123・t47・t61 を流す。#138 と #139 は src/index.html の別の所（図鑑とフライト）。web/ はあとから入る方で作り直す
+- 本番の反映（PR #130・#137）の Actions が成功したかは、この回も確かめていない。次の回で見る
 - PR #134（運用の一覧）：本人の答え 1〜6 は 11/20 に済み（5・6 は 21180c2 で入れた）。改善担当の見直しを待って直す。昼の回に本番の羽田のデータ（読むだけ）で凡例の2行を撮り直す。入る前に t148・tests/ops・運用の e2e を流す。PR #125（アプリ）の電波がないカード（I5）は、#134 が入ったらカードの形で足す。#125 と #134 は src/index.html の別の所（NATIVE の部分と運用の土台）で、openOps・setOpsAirport の行だけ両方が触る（あとから入る方で合わせる）
 - 夜の画面が入ったら、運用の一覧のカードの夜の色を design/ops-hub の H1n に合わせる
 - PR #125 と #130（ピン止め）が両方 main に入るとき：K0i・K5n の「iPhone はホーム画面に追加すると届きます」をアプリでは PUSH_NG_TXT() に。#133 と #125 は src で重ならない見込み（半券の処理と NATIVE の部分は別の所）
@@ -394,6 +407,8 @@
 - tests/ops は手元では npm の playwright にブラウザがないので、全体に入っている playwright をつないで流した（すべて成功）
 
 ## ほかの担当への依頼
+- 改善担当（11/20・PR #138・#139）：図鑑の絞り込み（写真 shots-zukan-filter/）とフライトの「目安」「（推定を含む）」の札（shots-flight-actual/）の見え方を見てほしい
+- データ担当（11/20・PR #139、PM から伝えてほしい）：画面は act_src が 'odpt'・'adsb'・'timetable' のどれかで、到着が出発より後のときだけ使う。track は [[緯度, 経度], ...] の2点以上
 - 撮る人用・運用予想（11/19・PR #134、PM から伝えてほしい）：運用タブは一覧＋専用ページになった。中身（renderPhoto・specialHTML・planeHTML）はそのまま専用ページに出る。見方の帯（#opsViews・#opsPViews）は出ない。前の形で試すときは localStorage soramemo.ops.hub="0"
 - 改善担当（11/19・PR #134）：写真 shots-ops-hub/（一覧 844／667・開く途中・各ページ・左端から引く途中）と iPhone で、動きの速さとカードの数字の分かりやすさを見てほしい
 - デザイン担当（11/19・PR #134）：滑走路と地図以外の専用ページは今の中身のまま。描くなら写真とそろえてほしい
@@ -782,14 +797,14 @@ review-c4：見せてよい。本人の答え（ON／OFF か −／＋ か）を
 - 見た目はほぼ今のまま（数字が変わるだけ、「目安」の札が増えるだけ）なので、画面案は待たなくてよい。
 - テスト：実際の時刻がある便とない便で合計が合う・track の線が描かれる。
 
-## PM から渡す（11/20 2時45分）：図鑑の絞り込みと県名の画面案が決まった → checkin/zukan-filter で作る
+## PM から渡す（11/20 2時45分）：図鑑の絞り込みと県名の画面案が決まった → checkin/zukan-filter で作る → PR #138 で作った（07d7cc0・報告 report-zukan-filter-app.md）
 - 画面案 design/zukan-filter 1版（PR #135、docs/design/zukan-filter/）の F1・F2・F3 のとおり。PM のおすすめで決めた：
   1. 基地は今のまま別の図鑑（ピルは「すべて・飛行場・滑空場・ヘリポート」の4つ、すべて＝75）
   2. この図鑑に見方の帯「地方別・地図」を足す（F3。地図でも同じピルが効く）
   3. 1つの種類に絞ったときは枠の種類の札を外して県名だけ（F2）
 - 県名は全部の枠に13pxの薄いグレー（取っていない所も）。絞り込みは端末に覚える。シークレットは出さない。
 
-## PM から渡す（11/20 2時45分）：フライトの「空の上」と航跡の画面 → checkin/flight-actual で作る（data/flight-actual・PR #136 の列を使う）
+## PM から渡す（11/20 2時45分）：フライトの「空の上」と航跡の画面 → checkin/flight-actual で作る（data/flight-actual・PR #136 の列を使う） → PR #139 で作った（7d61b8a・報告 report-flight-actual-app.md）
 - 列：flights の act_dep_at・act_arr_at・act_src（'odpt'・'adsb'・'timetable'・空）。select に足す。
 - 「空の上」：act_src があれば act_arr_at − act_dep_at、なければ今までどおり arr_at − dep_at。1便の行では act_src が空の便に小さく「目安」。年のまとめで推定（adsb・timetable）や目安を含むときは小さく「（推定を含む）」。呼び名は「空の上」のまま。
 - 地図：track があればその線（今の大圏の線の代わり）、なければ今の線。出典は今の「adsb.lol（ODbL）」。
