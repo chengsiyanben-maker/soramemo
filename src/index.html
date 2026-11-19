@@ -626,6 +626,40 @@ body.game nav.tabs button[aria-current="page"] svg{color:#7FB3FF}
 @media (prefers-reduced-motion:reduce){#v-home .bpass.no .bp-stub{animation:none}}
 #v-home .stubmsg{margin:10px 4px 0;padding:9px 16px;border-radius:16px;background:var(--hm-card);box-shadow:0 6px 18px -10px rgba(17,24,39,.4);font-size:13px;font-weight:700;line-height:1.5;color:var(--hm-ink)}
 #v-home .stubmsg.err{color:var(--shu-text)}
+/* iPhone のアプリだけの画面（決定事項【11/19】design/ios-app 2版）。ブラウザでは出ない（NATIVE のときだけ hidden を外す） */
+.nvloc{margin:2px 0 10px;border-radius:22px;background:var(--hm-card,#fff);box-shadow:0 12px 26px -18px rgba(15,23,42,.30),inset 0 0 0 1px rgba(17,24,39,.06);padding:16px;color:var(--hm-ink,#24292F)}
+.nvloc .t,.nvsheet .t{display:flex;align-items:center;gap:10px}
+.nvloc .wi,.nvsheet .wi,.nvnet .wi{flex:none;width:44px;height:44px;border-radius:50%;background:#FEF3C7;color:#92400E;display:flex;align-items:center;justify-content:center}
+.nvloc .wi svg,.nvsheet .wi svg,.nvnet .wi svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.nvloc .t b{font-size:17px;font-weight:800;line-height:1.4}
+.nvloc p,.nvsheet p{font-size:14px;line-height:1.7;color:#374151;margin:8px 0 0}
+.nvpath{display:flex;flex-wrap:wrap;align-items:center;gap:4px;margin-top:10px;font-size:13px;font-weight:800;color:#374151}
+.nvpath span{background:#EEF0F3;border-radius:999px;padding:3px 10px}
+.nvpath i{font-style:normal;color:#8A919C}
+.nvbt{display:flex;gap:8px;margin-top:12px}
+.nvbt button{flex:1;min-height:44px;border:0;border-radius:999px;display:flex;align-items:center;justify-content:center;font:800 14px/1.3 var(--gothic);background:#EEF0F3;color:#374151;white-space:nowrap;cursor:pointer}
+.nvbt button.pri{background:#16233A;color:#fff}
+.nvnet{display:flex;align-items:center;gap:10px;background:#FFF7E6;border-radius:18px;padding:10px 12px;margin:0 0 10px;box-shadow:inset 0 0 0 1px rgba(146,64,14,.12)}
+.nvnet .wi{width:32px;height:32px}.nvnet .wi svg{width:18px;height:18px}
+.nvnet .tx{flex:1;font-size:13px;line-height:1.55;color:#5B3A0A}
+.nvnet .tx b{display:block;font-size:14px;color:#3B2606}
+.nvnet .tx small{display:block;font-size:13px;color:#7C5A1F}
+#v-ops .nvnet{margin:10px 0 0}
+dialog.nvsheet .dlg{padding:10px 20px calc(24px + env(safe-area-inset-bottom,0px))}
+dialog.nvsheet h3{font-size:20px;font-weight:900;line-height:1.4;margin:0}
+dialog.nvsheet .nvnote{font-size:13px;color:#6B7280;margin:10px 0 0}
+dialog.nvsheet .nvbt{margin-top:16px}
+.auth .nvrows{display:grid;gap:14px;margin-top:28px}
+.auth .nvrow{display:flex;gap:14px;align-items:flex-start}
+.auth .nvrow i{font-style:normal;flex:none;width:34px;height:34px;border-radius:999px;background:var(--a-wash);color:var(--a-ana);display:grid;place-items:center;font-size:15px;font-weight:800}
+.auth .nvrow b{display:block;font-size:15px;line-height:1.5;color:var(--a-strong)}
+.auth .nvrow small{display:block;font-size:13px;color:var(--a-sub);line-height:1.6}
+.auth .nvfoot{font-size:13px;color:var(--a-sub);text-align:center;margin:12px 0 0;line-height:1.6}
+:root[data-night="on"] .nvnet,:root[data-night="on"] .nvloc .wi,:root[data-night="on"] .nvsheet .wi{background:transparent;box-shadow:inset 0 0 0 1.5px rgba(233,161,75,.55);color:#E9A14B}
+:root[data-night="on"] .nvnet .tx,:root[data-night="on"] .nvnet .tx b,:root[data-night="on"] .nvnet .tx small{color:#E5E7EB}
+:root[data-night="on"] .nvloc p,:root[data-night="on"] .nvsheet p,:root[data-night="on"] .nvpath{color:#D1D5DB}
+:root[data-night="on"] .nvpath span,:root[data-night="on"] .nvbt button{background:rgba(220,227,234,.10);color:#E5E7EB}
+:root[data-night="on"] .nvbt button.pri{background:transparent;color:#fff;box-shadow:inset 0 0 0 1.5px #fff}
 #v-home .hsheet>.msg{font-size:14px;margin:10px 4px 0;min-height:0}
 #v-home .ckhint{font-size:11.5px;line-height:1.7;color:var(--hm-mute);margin:8px 4px 0;text-align:center}
 #v-home .inflight,#v-home .tally{box-shadow:0 16px 36px -18px rgba(15,23,42,.28),0 2px 6px rgba(15,23,42,.05)}
@@ -2708,7 +2742,7 @@ dialog.psheet .btn1,dialog.psheet .btn2{display:block;width:100%;margin-top:10px
 #v-book .zk-lead{font-size:13px;color:var(--bk-sub);margin:8px 2px 0;line-height:1.6}
 #v-book .zk-note{margin:10px 2px 0}
 /* 地方別：右にツメのぶん空ける */
-:root[data-bookseg="air"] #bookAir .zk-main,:root[data-bookseg="air"] #bookAir .zk-back,:root[data-bookseg="air"] #bookAir .book-head,:root[data-bkview="region"][data-bookseg="main"] #zkBody .zk-main,:root[data-bkview="region"][data-bookseg="main"] #bookMain .vwrow,:root[data-bkview="region"][data-bookseg="main"] #zkNotice{margin-right:44px}
+:root[data-bookseg="air"] #bookAir .zk-main,:root[data-bookseg="air"] #bookAir .zk-back,:root[data-bookseg="air"] #bookAir .book-head,:root[data-bkview="region"][data-bookseg="main"] #zkBody .zk-main,:root[data-bkview="region"][data-bookseg="main"] #bookMain .vwrow,:root[data-bkview="region"][data-bookseg="main"] #zkNotice,:root[data-bkview="region"][data-bookseg="main"] #nvNetBook{margin-right:44px}
 /* 上の「索引」「ほかの図鑑・実績」もツメの左で止める（review-facts-1 の5）。狭い画面では余白を少し詰める */
 :root[data-bkview="region"][data-bookseg="main"] #v-book .zk-ttl{margin-right:44px}
 @media (max-width:380px){:root[data-bkview="region"][data-bookseg="main"] #v-book .zk-ttl{gap:6px}:root[data-bkview="region"][data-bookseg="main"] #v-book .zk-ttl .zk-pill{padding:0 11px}}
@@ -3614,6 +3648,99 @@ div.viewsw>button{position:relative}div.viewsw>button::after{content:"";position
 .modesw button::after{content:"";position:absolute;inset:-4px 0}
 .demo-banner button::after{content:"";position:absolute;inset:-6px -2px}
 #homeSheet .grab::after{content:"";position:absolute;left:0;right:0;top:-20px;bottom:0}
+/* ---------- 空港のピン止め（design/pin 4版）：している＝紺の塗り「ピン止め中 ›」・していない＝白地「ピン止め」 ---------- */
+:root{--pin:#1B2B4B;--pin-ink:#FFFFFF;--pin-wash:#EEF2F8}
+:root[data-night="on"]{--pin:rgba(220,227,234,.16);--pin-ink:#DCE3EA;--pin-wash:rgba(220,227,234,.08)}
+.pinic{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linejoin:round;stroke-linecap:round}
+.pinchev{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.pinpill{display:inline-flex;align-items:center;gap:5px;min-height:36px;padding:0 12px 0 11px;border:0;border-radius:999px;background:#FFFFFF;color:var(--pin);font:800 13px/1 var(--gothic);box-shadow:0 4px 12px -6px rgba(15,23,42,.35),inset 0 0 0 1.5px var(--pin);cursor:pointer;white-space:nowrap}
+.pinpill.on{background:var(--pin);color:var(--pin-ink);box-shadow:none}
+.pinpill .pinchev{width:13px;height:13px;margin-left:-1px}
+.pinpill.dark{min-height:44px;margin:-6px 0;padding:0;background:none;box-shadow:none;color:#F9FAFB;font-size:13px}
+.pinpill.dark .pv{display:inline-flex;align-items:center;gap:5px;min-height:32px;padding:0 11px 0 10px;border-radius:999px;box-shadow:inset 0 0 0 1.5px rgba(249,250,251,.6)}
+.pinpill.dark.on .pv{background:rgba(255,255,255,.14);box-shadow:none}
+#v-home .nlab{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:32px}
+#v-home .nearpin[hidden]{display:none}
+.nrw{display:flex;align-items:center}.nrw .nrow2{flex:1;min-width:0;gap:8px;padding-right:2px}.nrw .nrow2 .tx small{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nrpin{flex:none;width:44px;height:44px;margin:0 6px 0 0;border:0;border-radius:999px;display:grid;place-items:center;background:#FFFFFF;color:var(--pin);box-shadow:inset 0 0 0 1.5px #C9D2DF;cursor:pointer}
+.nrpin.on{background:var(--pin);color:var(--pin-ink);box-shadow:none}.nrpin .pinic{width:18px;height:18px}
+.pinhome{display:flex;align-items:center;gap:12px;width:100%;min-height:64px;margin:0 0 12px;padding:10px 14px;border:0;border-radius:20px;background:#FFFFFF;color:#1F2937;text-align:left;font-family:var(--gothic);box-shadow:0 10px 24px -18px rgba(15,23,42,.35),inset 0 0 0 1px rgba(17,24,39,.06);cursor:pointer}
+.pinhome[hidden]{display:none}
+.pinhome .ic{flex:none;width:36px;height:36px;border-radius:999px;display:grid;place-items:center;background:var(--pin);color:var(--pin-ink)}
+.pinhome .tx{flex:1;min-width:0}.pinhome b{display:block;font-size:15px;font-weight:800}.pinhome small{display:block;font-size:12.5px;color:#5F6878;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pinap{margin:12px 0 4px}.pinap .pinpill{margin-bottom:10px}
+.pinapc{display:flex;align-items:flex-start;gap:12px;width:100%;padding:14px 14px 12px;border:0;border-radius:20px;background:#FFFFFF;color:#1F2937;text-align:left;font-family:var(--gothic);box-shadow:0 10px 24px -18px rgba(15,23,42,.35),inset 0 0 0 1px rgba(17,24,39,.06);cursor:pointer}
+.pinapc .ic{flex:none;width:34px;height:34px;border-radius:999px;display:grid;place-items:center;background:var(--pin-wash);color:var(--pin)}
+.pinapc .ic svg,.pinbell svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linejoin:round}
+.pinapc .tx{flex:1;min-width:0}.pinapc b{display:block;font-size:15px;font-weight:800}.pinapc .tx>small{display:block;font-size:12.5px;color:#5F6878;margin-top:2px}
+.pinapc>.pinchev{margin-top:8px;color:#6B7280}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;align-items:center}
+.pinchip{font-style:normal;font-size:12.5px;font-weight:700;color:var(--pin);background:var(--pin-wash);border-radius:999px;padding:5px 10px}
+.chips small{font-size:12.5px;color:#5F6878}
+.pinline{display:flex;align-items:center;gap:10px;width:100%;min-height:56px;margin-top:8px;padding:8px 14px;border:0;border-radius:16px;background:var(--pin-wash);color:var(--pin);text-align:left;font-family:var(--gothic);cursor:pointer}
+.pinline span{flex:1;min-width:0}.pinline b{display:block;font-size:14px;font-weight:800}.pinline small{display:block;font-size:12.5px;color:#4B5563;margin-top:2px}
+.pinline.on>.pinic{color:var(--pin)}
+:root[data-night="on"] .pinline{color:#DCE3EA}:root[data-night="on"] .pinline small{color:#AEB9C6}
+.appin{flex:none;width:28px;height:28px;border-radius:999px;display:grid;place-items:center;background:var(--pin);color:var(--pin-ink)}.appin .pinic{width:14px;height:14px}
+.aprow small.cur{color:#15803D}
+#dOpsAp .pinaplist{display:flex;flex-direction:column;gap:0}
+dialog.pinsheet .dlg{padding:12px 18px 22px}
+.pinhd{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:6px}
+.pinhd h3,.pinask{margin:0;font-family:var(--gothic);font-size:20px;font-weight:900;line-height:1.35;color:var(--s-ink)}
+.pindone,.pinmain{flex:none;min-height:44px;padding:0 18px;border:0;border-radius:999px;background:var(--pin);color:var(--pin-ink);font:800 14px/1 var(--gothic);cursor:pointer}
+.pinghost{min-height:44px;padding:0 18px;border:0;border-radius:999px;background:var(--s-bg);color:var(--s-ink);font:700 14px/1 var(--gothic);cursor:pointer}
+.pinsub{margin:8px 0 0;font-size:13.5px;line-height:1.6;color:var(--s-mute)}
+.pindev{display:flex;align-items:center;gap:6px;margin:10px 0 0;font-size:13px;line-height:1.5;color:var(--s-mute)}
+.pindev svg{width:16px;height:16px;flex:none;fill:none;stroke:#15803D;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.pindev.ask{justify-content:space-between;padding:8px 8px 8px 14px;border-radius:14px;background:#FDF3E2;color:#6B4510;font-weight:700}
+.pindev.ng{color:#8A5A12}
+.pinallow{flex:none;min-height:40px;padding:0 14px;border:0;border-radius:999px;background:var(--pin);color:var(--pin-ink);font:800 13px/1 var(--gothic);cursor:pointer}
+details.pindev{display:block;padding:10px 14px;border-radius:14px;background:var(--pin-wash);color:var(--s-ink)}
+details.pindev summary{display:flex;justify-content:space-between;gap:8px;font-weight:700;cursor:pointer;list-style:none}details.pindev summary::-webkit-details-marker{display:none}
+details.pindev summary span{flex:none;color:var(--pin)}details.pindev ol{margin:8px 0 4px;padding-left:1.3em}details.pindev p{margin:4px 0 0;font-size:12.5px;color:var(--s-mute)}
+.pinrows{margin-top:6px}
+.pinrow{display:flex;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid var(--s-line)}.pinrow:last-child{border-bottom:0}
+.pinrow .t{flex:1;min-width:0}.pinrow b{display:block;font-size:15px;font-weight:800;color:var(--s-ink)}.pinrow small{display:block;font-size:12.5px;line-height:1.55;color:var(--s-mute);margin-top:2px}
+.pinrow.na b{color:#8B95A3}
+.pinmore{display:inline-flex;align-items:center;gap:2px;min-height:36px;margin-top:2px;padding:0;border:0;background:none;color:var(--pin);font:700 13px/1 var(--gothic);cursor:pointer}
+:root[data-night="on"] .pinmore{color:#DCE3EA}
+.pinno{display:inline-block;margin-top:4px;font-style:normal;font-size:12px;font-weight:700;color:#8A5A12;background:#FDF3E2;border-radius:999px;padding:3px 9px}
+.pinwhy{color:#5F6878}
+.pinfoot{margin:10px 0 0;font-size:12.5px;line-height:1.65;color:var(--s-mute)}
+.pinbot{display:flex;justify-content:flex-end;margin-top:12px}
+.pinoff{display:block;width:100%;min-height:48px;margin-top:16px;border:0;border-radius:999px;background:var(--s-card);color:var(--s-ink);font:800 14px/1 var(--gothic);box-shadow:0 6px 16px -10px rgba(15,23,42,.35),inset 0 0 0 1px rgba(17,24,39,.08);cursor:pointer}
+.pinnote{margin:8px 0 0;font-size:12.5px;line-height:1.6;color:var(--s-mute);text-align:left}
+.pinbell{width:48px;height:48px;margin:8px 0 12px;border-radius:999px;display:grid;place-items:center;background:var(--pin-wash);color:var(--pin)}.pinbell svg{width:22px;height:22px}
+.pin2b{display:grid;grid-template-columns:1fr 1.6fr;gap:10px;margin-top:16px}
+.pintop{display:flex;align-items:center;justify-content:space-between;margin:2px 0 12px}
+.pintop h3{margin:0;font-family:var(--gothic);font-size:17px;font-weight:800;color:var(--s-ink)}
+.pintop .mp-back{display:flex;align-items:center;gap:4px;min-height:40px;border:0;background:var(--s-card);color:var(--s-ink);font-weight:700;font-size:13px;padding:0 14px 0 10px;border-radius:999px;box-shadow:0 6px 16px -10px rgba(15,23,42,.35)}
+.pintop .mp-back svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.pinsp{width:78px}
+.pinlh{display:flex;align-items:center;gap:8px;margin:18px 0 8px;color:var(--s-ink)}.pinlh .pinic{width:28px;height:28px;padding:6px;box-sizing:border-box;border-radius:999px;background:var(--pin);color:var(--pin-ink)}
+.pinlh b{font-size:16px;font-weight:800}.pinlh small{font-size:13px;color:var(--s-mute)}
+.pincard{display:block;width:100%;margin-top:10px;padding:14px 16px;border:0;border-radius:20px;background:var(--s-card);color:var(--s-ink);text-align:left;font-family:var(--gothic);box-shadow:0 10px 24px -18px rgba(15,23,42,.35),inset 0 0 0 1px rgba(17,24,39,.06);cursor:pointer}
+.pincard.st{cursor:default}
+.pincard .h{display:flex;align-items:center;gap:10px}.pincard .h b{flex:1;font-size:16px;font-weight:800}.pincard .h .pinchev{color:#6B7280}
+.pincd{font-style:normal;flex:none;font:700 12.5px/1 ui-monospace,"SFMono-Regular",Menlo,monospace;padding:5px 7px;border-radius:7px;background:#1F2937;color:#FFFFFF}
+:root[data-night="on"] .pincd{background:transparent;color:#DCE3EA;box-shadow:inset 0 0 0 1.5px rgba(220,227,234,.5)}
+.pinempty{margin:10px 0 0;padding:16px;border-radius:18px;background:var(--s-card);font-size:13.5px;line-height:1.6;color:var(--s-mute)}
+.pinq{display:flex;align-items:center;gap:8px;margin-top:12px;padding:0 14px;min-height:48px;border-radius:999px;background:var(--s-card);color:var(--pin);box-shadow:inset 0 0 0 1.5px #C9D2DF}
+.pinq input{flex:1;min-width:0;border:0;background:none;font:600 14px/1 var(--gothic);color:var(--s-ink);outline:none}
+.pinqlist{margin-top:8px;padding:2px 14px;border-radius:18px;background:var(--s-card)}
+.pinqrow{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:52px;border-bottom:1px solid var(--s-line)}.pinqrow:last-child{border-bottom:0}
+.pinqrow span{display:flex;align-items:center;gap:8px;min-width:0}.pinqrow b{font-size:14px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pinbtn{flex:none;display:inline-flex;align-items:center;gap:4px;min-height:40px;padding:0 12px;border:0;border-radius:999px;background:#FFFFFF;color:var(--pin);font:800 13px/1 var(--gothic);box-shadow:inset 0 0 0 1.5px var(--pin);cursor:pointer}
+.pinbadge{flex:none;display:inline-flex;align-items:center;gap:4px;padding:6px 10px;border-radius:999px;background:var(--pin);color:var(--pin-ink);font-size:12.5px;font-weight:800}
+.pinsec{margin:20px 0 0;font-size:13px;font-weight:700;color:var(--s-mute)}
+.pinapn{display:flex;align-items:center;gap:8px;margin:0}.pinapn b{font-size:16px;font-weight:800}
+.pinbox{margin-top:10px;padding:2px 16px;border-radius:20px;background:var(--s-card)}
+.pinband{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom,0px) + 92px);z-index:60;width:min(440px,calc(100vw - 32px));box-sizing:border-box;display:flex;align-items:center;gap:10px;padding:8px 8px 8px 16px;border-radius:18px;background:#1B2B4B;color:#FFFFFF;font:700 13.5px/1.4 var(--gothic);box-shadow:0 14px 30px -14px rgba(15,23,42,.6)}
+.pinband.in{bottom:calc(env(safe-area-inset-bottom,0px) + 16px)}
+.pinband span{flex:1;min-width:0}
+.pinband button{flex:none;min-height:40px;padding:0 14px;border:0;border-radius:999px;background:rgba(255,255,255,.16);color:#FFFFFF;font:800 13px/1 var(--gothic);cursor:pointer}
+:root[data-night="on"] .pinpill:not(.on):not(.dark),:root[data-night="on"] .nrpin:not(.on),:root[data-night="on"] .pinbtn{background:transparent;color:#DCE3EA;box-shadow:inset 0 0 0 1.5px rgba(220,227,234,.5)}
+:root[data-night="on"] .pinhome,:root[data-night="on"] .pinapc{background:var(--h-card,#141B24);color:#DCE3EA}
 </style>
 </head>
 <body>
@@ -3646,13 +3773,14 @@ div.viewsw>button{position:relative}div.viewsw>button::after{content:"";position
     <p class="maplegend"><span><i class="lg" style="background:var(--jal)"></i>JAL</span><span><i class="lg" style="background:var(--ana)"></i>ANA</span><span><i class="lg" style="background:#8B95A3"></i>そのほか</span><span><i class="lg dash"></i>航路なし</span><span class="mcred">地図：国土地理院</span></p>
     <div class="grabzone"><button class="grab" type="button" aria-label="シートの大きさを変える"></button></div>
     <div class="sbody">
+    <div class="nvnet" id="nvNetHome" hidden role="status"></div>   <!-- iPhone のアプリ：電波がないとき（I2-v2） -->
     <div class="ridetop" id="rideTop" hidden></div>
     <div class="welcome-card" id="welcomeCard" hidden role="status"></div>
     <div class="pcard lo" data-lo="home:persona" id="personaCard" hidden aria-live="polite"></div>
     <div class="bpass" id="bpass">
       <div class="bp-main">
         <div class="nearest">
-          <div class="label" id="nearLabel">いちばん近い空港</div>
+          <div class="nlab"><div class="label" id="nearLabel">いちばん近い空港</div><span class="nearpin" id="nearPin" hidden></span></div>
           <div class="nrow" id="nearRow" hidden><div class="flap" id="nearCode" aria-hidden="true"></div><span class="ktag" id="nearTag" hidden></span><button class="nmore" type="button" id="nearMore" hidden aria-expanded="false"></button></div>
           <div class="name idle" id="nearName">空港に着いたら、印を押そう</div>
           <div class="dist" id="nearDist">半券を切ると、現在地からいちばん近い空港を調べます。</div>
@@ -3661,6 +3789,7 @@ div.viewsw>button{position:relative}div.viewsw>button::after{content:"";position
       <button class="bp-stub" id="checkin" aria-label="チェックイン（半券を右へ引いて切ります。押すと確かめてから切ります）"><span class="v">チェックイン</span><span class="s" id="stubSub"><i aria-hidden="true">→</i> 右へ引いて<br>印をもらう</span></button>
     </div>
     <p class="stubmsg" id="stubMsg" hidden aria-hidden="true"></p>
+    <div class="nvloc" id="nvLocOff" hidden role="status"></div>   <!-- iPhone のアプリ：位置を許可しなかった人（design/ios-app 2版 I1c） -->
     <div class="nlist" id="nearList" hidden aria-label="近くの空港・飛行場の一覧"></div>
     <div class="hstrip" id="homeStrip" aria-label="今日の数字">
       <div><span class="lab">今日の印</span><b id="hsToday">0</b></div>
@@ -3693,6 +3822,7 @@ div.viewsw>button{position:relative}div.viewsw>button::after{content:"";position
       <div class="ridecard" id="rideCard" hidden aria-live="polite"></div>
       <form class="rideadd" id="rideAdd" hidden><label for="rideNo">これから乗る便</label><input id="rideNo" placeholder="例 JL509" autocapitalize="characters" autocomplete="off" maxlength="7" inputmode="latin"><button class="chip" type="submit">機体を調べる</button><p class="hint" id="rideMsg" role="status" aria-live="polite"></p></form>
     </div>
+    <div class="lo" data-lo="home:pins"><button class="pinhome" type="button" id="pinHome" hidden aria-label="ピン止めした空港の知らせを開く"></button></div>
     <div class="lo" data-lo="home:event">
       <div class="evbar" id="eventBar" hidden></div>
     </div>
@@ -3730,6 +3860,7 @@ div.viewsw>button{position:relative}div.viewsw>button::after{content:"";position
   <section class="view" id="v-book" aria-label="図鑑">
     <div id="bookMain">
       <div class="zk-ttl"><h2>図鑑</h2><button class="zk-pill" type="button" data-zkseg="index"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4"/></svg>索引</button><button class="zk-pill" type="button" data-zkseg="others">ほかの図鑑・実績</button></div>
+      <div class="nvnet" id="nvNetBook" hidden role="status"></div>
       <div class="viewsw" id="bookViews" role="tablist" aria-label="図鑑の見方"></div>
       <div id="zkNotice"></div>
       <div id="zkBody"></div>
@@ -3811,6 +3942,7 @@ div.viewsw>button{position:relative}div.viewsw>button::after{content:"";position
           <button class="lbtn dark" id="flAdd" aria-label="過去のフライトを記録帳に追加" title="過去のフライトを記録帳に追加"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
         </div>
       </div>
+      <div class="nvnet" id="nvNetLog" hidden role="status"></div>
       <div class="viewsw" id="logViews" role="tablist" aria-label="フライトの見方"></div>
       <div id="bpPending"></div>
       <div class="fbyr" id="fbYr"></div>
@@ -3878,6 +4010,7 @@ div.viewsw>button{position:relative}div.viewsw>button::after{content:"";position
     <form class="opsplq" id="opsPlForm" role="search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4"/></svg><input id="opsPlQ" type="search" placeholder="登録記号・便名" aria-label="登録記号か便名で機体を探す" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="10" enterkeyhint="search"></form>
     <button class="opsplback" id="opsPlBack" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>戻る</button><button class="opsplreg" id="opsPlReg" type="button" aria-label="別の機体を探す"><b></b><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button><span class="sp"></span>
     <button class="opsic" id="opsInfoBtn" type="button" aria-label="この画面について・出典"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><path d="M12 8h.01"/></svg></button><button class="opsic" id="opsShare" type="button" aria-label="共有"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15V3"/><path d="m7 8 5-5 5 5"/><path d="M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/></svg></button></div>
+  <div class="nvnet" id="nvNetOps" hidden role="status"></div>
   <p class="msg" id="opsMsg" role="status" aria-live="polite"></p>
   <p class="srt" id="opsWx">気象通報を読み込んでいます…</p>
   <div class="opsp" id="opsPside" hidden>
@@ -3948,6 +4081,8 @@ div.viewsw>button{position:relative}div.viewsw>button::after{content:"";position
 </div></nav>
 
 <dialog id="dStamp"><div class="dlg" id="dStampBody"></div></dialog>
+<dialog id="dLocWhy" class="auth nvwhy" aria-labelledby="nvLwT"><main class="phone" id="dLocWhyBody"></main></dialog>   <!-- iPhone のアプリ：位置の説明（I1-v2） -->
+<dialog id="dNvSheet" class="psheet nvsheet" aria-labelledby="nvShT"><div class="dlg" id="dNvSheetBody"></div></dialog>   <!-- iPhone のアプリ：小さい説明（I1e・I4c・I4m） -->
 <dialog id="dAirport" aria-label="空港"><div class="dlg" id="dAirportBody"></div></dialog>
 <dialog id="dAp3d" class="a3dlg" aria-label="羽田の3D"></dialog>
 <dialog id="dAuth" class="auth" aria-label="ログイン・新規登録"><main class="phone"><div id="auStep"></div><div id="auCap" class="captcha"></div><div id="auFoot"></div></main></dialog>
@@ -4028,6 +4163,8 @@ div.viewsw>button{position:relative}div.viewsw>button::after{content:"";position
   <h3 id="opsApTitle" class="apsh">運用を見る空港</h3>
   <label class="apsearch"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg><input id="opsApQ" type="search" placeholder="空港名か3レターで探す（例：OKA）" autocomplete="off" aria-label="空港を探す"></label>
   <div class="opsaps" id="opsAps"></div></div></dialog>
+<dialog id="dPin" class="spsheet pinsheet" aria-labelledby="pinT"><div class="dlg" id="dPinBody"></div></dialog>
+<dialog id="dPins" class="spfull pinfull" aria-labelledby="pinsT"><div class="dlg" id="dPinsBody"></div></dialog>
 <dialog id="dLayout" class="spfull" aria-label="表示を編集"><div class="dlg" id="dLayoutBody"></div></dialog>
 <dialog id="dTabs" class="psheet tpsheet" aria-labelledby="tpTitle"><div class="dlg" id="dTabsBody"></div></dialog>
 <dialog id="dWorldAp" class="spsheet wodlg" aria-labelledby="worldApT"><div class="dlg" id="dWorldApBody"></div></dialog>
@@ -4067,6 +4204,10 @@ div.viewsw>button{position:relative}div.viewsw>button::after{content:"";position
     <button class="lotile lotile2" type="button" data-lo-open="top"><span class="t"><b>全部を見直す</b><small id="personaNote"></small></span><span class="n" id="loTileN"></span></button>
     <div class="pmore" id="personaMore"></div>
   </section>
+  <section class="mp-sec" aria-labelledby="mpPins"><h4 id="mpPins">知らせ</h4>
+    <div class="set-row"><div><small>ピン止めした空港ごとに、特別塗装機・遅れ・ゴーアラウンド・撮影の知らせを選べます。</small></div></div>
+    <button class="lotile" type="button" data-pins-open><span class="t"><b>知らせ</b><small>ピン止めした空港・乗る便</small></span><span class="n" id="pinTileN"></span></button>
+  </section>
   <section class="mp-sec" aria-labelledby="mpShow"><h4 id="mpShow">表示</h4>
     <div class="set-row"><div><small>JAL・ANAそれぞれのフライトだけで数えた表示に切り替えます。記録は消えません。</small></div></div>
     <div class="seg" role="group" aria-label="表示">
@@ -4105,6 +4246,208 @@ div.viewsw>button{position:relative}div.viewsw>button::after{content:"";position
    Supabase の Project Settings → API の「Project URL」と「anon public」キーを入れる。 */
 const SORAMEMO_CONFIG = window.SORAMEMO_CONFIG || { supabaseUrl: "", supabaseAnonKey: "" };   // 値は config.js に書く
 const SERVER = !!(SORAMEMO_CONFIG.supabaseUrl && SORAMEMO_CONFIG.supabaseAnonKey);
+/* ---------- iPhone のアプリ（Capacitor）の中で開いたときだけ働く薄い入れ物（決定事項【11/18】作り方 A）。
+   ブラウザで開いたときは何もしない。位置・共有・外のリンクをネイティブの部品に回す。
+   呼ぶ所（navigator.geolocation など）は変えずに、中身だけ差し替える（下の担当のコードもそのまま動く） */
+const NATIVE = (() => { try{ return !!(window.Capacitor && typeof window.Capacitor.isNativePlatform === "function" && window.Capacitor.isNativePlatform()); }catch(e){ return false; } })();
+function capPlugin(name){
+  const C = window.Capacitor; if(!NATIVE || !C) return null;
+  try{ if(typeof C.registerPlugin === "function") return C.registerPlugin(name); }catch(e){}
+  return (C.Plugins && C.Plugins[name]) || null;
+}
+// 位置：@capacitor/geolocation（「使用中のみ」）。ブラウザの形（コールバック・code 1=拒否 3=時間切れ）に合わせて返す
+function capGeoErr(e){ const m = String((e && (e.message || e.code)) || ""); return { code: /denied|permission|authoriz|許可/i.test(m) ? 1 : /time ?out/i.test(m) ? 3 : 2, message: m }; }
+function capGeoPos(p){ const c = (p && p.coords) || {}; return { timestamp: (p && p.timestamp) || Date.now(), coords: { latitude: c.latitude, longitude: c.longitude, accuracy: c.accuracy, altitude: c.altitude ?? null, altitudeAccuracy: c.altitudeAccuracy ?? null, heading: c.heading ?? null, speed: c.speed ?? null } }; }
+function capGeoOpts(o){ o = o || {}; return { enableHighAccuracy: !!o.enableHighAccuracy, timeout: o.timeout || 10000, maximumAge: o.maximumAge || 0 }; }
+function capGeoInstall(){
+  const G = capPlugin("Geolocation"); if(!G) return false;
+  const ids = new Map(); let n = 0;
+  const shim = {
+    getCurrentPosition(ok, ng, o){ G.getCurrentPosition(capGeoOpts(o)).then(p => ok && ok(capGeoPos(p)), e => ng && ng(capGeoErr(e))); },
+    watchPosition(ok, ng, o){
+      const id = ++n;
+      Promise.resolve(G.watchPosition(capGeoOpts(o), (p, e) => { if(!ids.has(id)) return; if(e) ng && ng(capGeoErr(e)); else if(p) ok && ok(capGeoPos(p)); }))
+        .then(cid => { if(ids.has(id)) ids.set(id, cid); else G.clearWatch({ id: cid }).catch(() => {}); }, e => ng && ng(capGeoErr(e)));
+      ids.set(id, null); return id;
+    },
+    clearWatch(id){ if(!ids.has(id)) return; const cid = ids.get(id); ids.delete(id); if(cid != null) Promise.resolve(G.clearWatch({ id: cid })).catch(() => {}); }
+  };
+  try{ Object.defineProperty(navigator, "geolocation", { value: shim, configurable: true }); }catch(e){}
+  if(navigator.geolocation !== shim){ const g = navigator.geolocation; if(!g) return false; g.getCurrentPosition = shim.getCurrentPosition; g.watchPosition = shim.watchPosition; g.clearWatch = shim.clearWatch; }
+  return true;
+}
+// 共有：字と URL だけの共有は @capacitor/share（ネイティブの共有シート）。画像つきは WebView の navigator.share のまま（なければ何もしない）
+function capShareInstall(){
+  const S = capPlugin("Share"); if(!S) return false;
+  const orig = navigator.share ? navigator.share.bind(navigator) : null;
+  const share = async (d) => {
+    d = d || {};
+    if(d.files && d.files.length){ if(orig) return orig(d); const e = new Error("files"); e.name = "NotAllowedError"; throw e; }
+    try{ await S.share({ title: d.title, text: d.text, url: d.url, dialogTitle: d.title }); }
+    catch(e){ if(/cancel/i.test(String(e && (e.message || e)))){ const x = new Error("cancel"); x.name = "AbortError"; throw x; } throw e; }
+  };
+  try{ Object.defineProperty(navigator, "share", { value: share, configurable: true, writable: true }); }catch(e){ try{ navigator.share = share; }catch(_){ return false; } }
+  return true;
+}
+// 外のリンク（target=_blank・window.open）はアプリの中のブラウザ（@capacitor/browser）で開く
+function capOpenUrl(url){ const B = capPlugin("Browser"); if(B && /^https?:/i.test(url)){ B.open({ url }).catch(() => {}); return true; } return false; }
+function capLinkInstall(){
+  if(!capPlugin("Browser")) return false;
+  document.addEventListener("click", e => {
+    const a = e.target && e.target.closest && e.target.closest('a[target="_blank"]'); if(!a) return;
+    const u = a.href || ""; if(/^https?:/i.test(u) && !u.startsWith(location.origin) && capOpenUrl(u)) e.preventDefault();
+  }, true);
+  const wo = window.open ? window.open.bind(window) : null;
+  window.open = (u, ...rest) => { try{ const abs = new URL(u, location.href).href; if(/^https?:/i.test(abs) && !abs.startsWith(location.origin) && capOpenUrl(abs)) return null; }catch(e){} return wo ? wo(u, ...rest) : null; };
+  return true;
+}
+const CAP_ON = NATIVE ? { geo: capGeoInstall(), share: capShareInstall(), link: capLinkInstall() } : null;
+if(NATIVE) document.documentElement.dataset.native = "ios";
+/* ---------- iPhone のアプリだけの画面（決定事項【11/19】design/ios-app 2版）。ブラウザでは何もしない ----------
+   I1 位置の説明（ログインか「デモで試す」のあと、はじめてホームを開く前に1回）・I1c／I1e 位置を許可しなかった人・I4c／I4m カメラとマイクの小さい説明
+   I2／I5／I5z 電波がないときの帯と「最後に読んだ ○時○分」（端末の中に読んだ時刻を残すだけ。表は変えない）・I3 アプリで隠すものと代わりの1行 */
+const NV_KEY = { loc:"soramemo.native.locwhy", cam:"soramemo.native.camwhy", mic:"soramemo.native.micwhy", last:"soramemo.native.lastread" };
+const nvGet = k => { try{ return localStorage.getItem(k); }catch(e){ return null; } };
+const nvSet = (k, v) => { try{ localStorage.setItem(k, v); }catch(e){} };
+const NV_SVG = {
+  pin: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-6.5-6.1-6.5-11a6.5 6.5 0 0 1 9.8-5.6"/><path d="M18.4 9.2c.1.3.1.5.1.8 0 4.9-6.5 11-6.5 11"/><path d="M4 4l16 16"/></svg>`,
+  net: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 9a14 14 0 0 1 19 0"/><path d="M5.5 12.5a9.5 9.5 0 0 1 13 0"/><path d="M9 16a4.5 4.5 0 0 1 6 0"/><path d="M12 19.5h.01"/><path d="M4 4l16 16"/></svg>`,
+  cam: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8.5C4 7.7 4.7 7 5.5 7h2l1.5-2h6l1.5 2h2c.8 0 1.5.7 1.5 1.5v9c0 .8-.7 1.5-1.5 1.5h-13C4.7 19 4 18.3 4 17.5Z"/><circle cx="12" cy="13" r="3.5"/></svg>`,
+  mic: `<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3.5" width="6" height="11" rx="3"/><path d="M5.5 11.5a6.5 6.5 0 0 0 13 0"/><path d="M12 18v3"/></svg>`
+};
+// 代わりの1行（I3-v2 の表）。下の担当の画面（撮る人の通知・聞く・修行の通知）からも呼べる
+const NV_TXT = {
+  locDenied: "位置の使用が許可されていません。設定 › アプリ › そらメモ › 位置情報で『このアプリの使用中』にしてください。",
+  locNone: "位置を使えませんでした。設定のデモモードで試せます。",
+  cam: "カメラの使用が許可されていません。設定 › アプリ › そらメモ › カメラ、または「画像から読み取る」で。",
+  mic: "マイクの使用が許可されていません。設定 › アプリ › そらメモ › マイクで。",
+  save: "この iPhone に保存できませんでした。空き容量を確かめてください。",
+  push: "アプリの通知は準備中です。"
+};
+const PUSH_NG_TXT = () => NATIVE ? NV_TXT.push : "スマホへの通知は、この端末のブラウザでは使えません（iPhone はホーム画面に追加したそらメモから使えます）。";
+const MIC_NG_TXT = () => NATIVE ? NV_TXT.mic : "マイクを使えませんでした。ブラウザの設定でマイクを許可してください。";
+const nvPathHTML = last => `<div class="nvpath" aria-label="設定 › アプリ › そらメモ › ${last}"><span>設定</span><i>›</i><span>アプリ</span><i>›</i><span>そらメモ</span><i>›</i><span>${last}</span></div>`;
+// 位置の許可の様子："granted"・"denied"・"prompt"（分からなければ null）。アプリは @capacitor/geolocation の checkPermissions、ブラウザは Permissions API
+async function geoPermState(){
+  if(NATIVE){
+    const G = capPlugin("Geolocation"); if(!G || typeof G.checkPermissions !== "function") return "prompt";
+    try{ const r = await G.checkPermissions(), v = r && (r.location || r.coarseLocation); return v === "granted" ? "granted" : v === "denied" ? "denied" : "prompt"; }
+    catch(e){ return /disabled|not enabled|services/i.test(String(e && (e.message || e))) ? "denied" : "prompt"; }   // 端末の位置情報サービスそのものが切れているとき
+  }
+  try{ return (await navigator.permissions.query({ name:"geolocation" })).state; }catch(e){ return null; }
+}
+// iPhone の確認を出す（「次へ」のあと）。出せないときは1回だけ位置を測って確認を出させる
+async function geoPermAsk(){
+  const G = capPlugin("Geolocation");
+  if(G && typeof G.requestPermissions === "function"){ try{ await G.requestPermissions({ permissions:["location"] }); }catch(e){} }
+  else if(navigator.geolocation){ await new Promise(res => { let d = false; const f = () => { if(!d){ d = true; res(); } }; try{ navigator.geolocation.getCurrentPosition(f, f, { timeout:15000, maximumAge:600000 }); }catch(_){ f(); } setTimeout(f, 16000); }); }
+  return geoPermState();
+}
+const nvFocusTitle = id => { const h = document.getElementById(id); if(h){ h.tabIndex = -1; h.style.outline = "none"; try{ h.focus({ preventScroll:true }); }catch(e){} } };   // 開いたとき、ボタンに枠が出ないよう見出しへ
+// 設定アプリのそらメモを開く（iOS の UIApplication.openSettingsURLString ＝ "app-settings:"。Capacitor はアプリの外の URL を iOS に渡す）
+function nvOpenSettings(){ try{ track("native", "settings"); }catch(e){} try{ window.location.href = "app-settings:"; }catch(e){} }
+// I1：位置の説明（Info.plist の理由の文と同じことだけを書く。ボタンは「次へ」1つ）
+function nvLocWhyHTML(foot){
+  return `<div class="top"><span></span></div>
+    <div class="hero" style="margin-top:28px"><h1 id="nvLwT" style="font-size:26px">空港にいるかを確かめるために、位置を使います</h1><p class="lead">このあと iPhone の確認が出ます。</p></div>
+    <div class="nvrows">
+      <div class="nvrow"><i>1</i><div><b>空港にいるかを確かめて、印を押すために使います</b><small>空港ごとに決めた判定範囲の中でだけ、チェックインの印を押せます</small></div></div>
+      <div class="nvrow"><i>2</i><div><b>いる場所を送るのは、印を押すときだけです</b><small>近くの空港を近い順に並べるのは、この iPhone の中で計算します</small></div></div>
+      <div class="nvrow"><i>3</i><div><b>使うのは、そらメモを開いている間だけです</b><small>いる場所を、ほかの人に見せることはありません</small></div></div>
+    </div><div class="spacer"></div>${foot === false ? "" : `<div><button class="cta" type="button" data-nv="loc-next">次へ</button><p class="nvfoot">許可しなくても、図鑑・フライト・運用は見られます。<br>あとから iPhone の設定で変えられます。</p></div>`}`;
+}
+let NV_GEO = null, NV_LOCWHY_ON = false, NV_LW_DONE = false, NV_LW_BUSY = false;
+// ホームを開いたとき（ログインか「デモで試す」のあと）：まだ聞いていなければ I1 を1回だけ出す。許可しなかった人は I1c のカード
+async function nvLocWhyMaybe(){
+  if(!NATIVE || NV_LOCWHY_ON || NV_LW_BUSY) return;
+  if(NV_LW_DONE || nvGet(NV_KEY.loc)){ NV_LW_DONE = true; return nvGeoRefresh(); }
+  if(!(demo || user || !SERVER) || document.documentElement.dataset.view !== "home" || document.querySelector("dialog[open]")) return;
+  NV_LW_BUSY = true; const st = await geoPermState(); NV_LW_BUSY = false;
+  if(st !== "prompt"){ nvSet(NV_KEY.loc, "1"); NV_LW_DONE = true; return nvGeoRefresh(); }   // もう答えている人には出さない
+  if(document.querySelector("dialog[open]") || NV_LOCWHY_ON) return;
+  NV_LOCWHY_ON = true; $("dLocWhyBody").innerHTML = nvLocWhyHTML(); $("dLocWhy").showModal(); nvFocusTitle("nvLwT"); track("native", "locwhy");
+}
+async function nvLocNext(){
+  nvSet(NV_KEY.loc, "1"); NV_LW_DONE = true; const b = document.querySelector('[data-nv="loc-next"]'); if(b) b.disabled = true;
+  const st = await geoPermAsk(); NV_LOCWHY_ON = false; if($("dLocWhy").open) $("dLocWhy").close(); track("native", "loc_" + st);
+  NV_GEO = st; nvGeoApply(); if(st === "granted" && typeof homeLocStart === "function") homeLocStart();
+}
+async function nvGeoRefresh(){ if(!NATIVE) return; NV_GEO = await geoPermState(); nvGeoApply(); }
+// I1c：位置が使えない人のホーム。黒いカード（半券）の代わりに出す。デモ中は出さない
+function nvGeoApply(){
+  const el = $("nvLocOff"), bp = $("bpass"); if(!el || !bp) return;
+  const on = NATIVE && NV_GEO === "denied" && !demo && (user || !SERVER);
+  if(on){
+    el.innerHTML = `<div class="t"><span class="wi">${NV_SVG.pin}</span><b>位置が使えないので、チェックインできません</b></div><p>設定でそらメモの位置情報を「このアプリの使用中」にすると使えます。</p>${nvPathHTML("位置情報")}<div class="nvbt"><button type="button" data-nv="demo">デモで試す</button><button type="button" class="pri" data-nv="settings">設定を開く</button></div>`;
+    el.hidden = false; bp.hidden = true; bp.dataset.nvHide = "1";
+  } else { el.hidden = true; if(bp.dataset.nvHide){ bp.hidden = false; delete bp.dataset.nvHide; } }
+}
+// I1e：半券を押して、許可がないと分かったとき（小さいシート）
+function nvLocOffSheet(){
+  if(!NATIVE) return false;
+  NV_GEO = "denied"; nvGeoApply();
+  $("dNvSheetBody").innerHTML = `<div class="sph"><span class="grab" aria-hidden="true"></span></div><div class="t"><span class="wi">${NV_SVG.pin}</span><h3 id="nvShT">印を押すには、位置が要ります</h3></div>
+    <p>いまは位置の使用を許可していません。設定で「このアプリの使用中」にすると、空港にいるかを確かめて印を押せます。</p>${nvPathHTML("位置情報")}
+    <div class="nvbt"><button type="button" data-nv="demo">デモで試す</button><button type="button" class="pri" data-nv="settings">設定を開く</button></div>`;
+  if(!$("dNvSheet").open) $("dNvSheet").showModal(); nvFocusTitle("nvShT"); return true;
+}
+// I4c・I4m：カメラとマイクの小さい説明（はじめて使うときに1回。ボタンは「次へ」1つ・閉じる取っ手なし）。下の担当の画面からも await nvPermWhy("mic") で呼べる
+const NV_PERM = {
+  cam: { svg:"cam", t:"搭乗券のバーコードを、カメラで読みます", p:"読んだ便名と日付で、乗った便を記録します。カメラを使うのは、この画面を開いている間だけです。", n:"このあと iPhone の確認が出ます。許可しなくても、便名を打って記録できます。" },
+  mic: { svg:"mic", t:"管制の音声を、マイクで聞き取ります", p:"受信機の音をマイクで拾って、文字にします。<br>音声はこの iPhone の中だけで処理し、送りません。", n:"このあと iPhone の確認が出ます。はじめての日は、文字にする部品（約80MB）を読み込みます。" }
+};
+function nvPermWhy(kind){
+  const o = NV_PERM[kind]; if(!NATIVE || !o || nvGet(NV_KEY[kind])) return Promise.resolve();
+  return new Promise(res => {
+    const d = $("dNvSheet");
+    $("dNvSheetBody").innerHTML = `<div class="sph"><span class="grab" aria-hidden="true"></span></div><div class="t"><span class="wi">${NV_SVG[o.svg]}</span><h3 id="nvShT">${o.t}</h3></div><p>${o.p}</p>
+      <div class="nvbt"><button type="button" class="pri" data-nv="perm-next">次へ</button></div><p class="nvnote">${o.n}</p>`;
+    const done = () => { d.removeEventListener("close", done); nvSet(NV_KEY[kind], "1"); res(); };
+    d.addEventListener("close", done); track("native", kind + "why"); if(!d.open) d.showModal(); nvFocusTitle("nvShT");
+  });
+}
+// I2・I5・I5z：電波がないときの帯。ホーム・運用・図鑑・フライトの頭に出す。戻ったら運用を自動で読み直す
+function nvLastSave(){
+  if(!NATIVE || typeof OPS_CUR === "undefined" || !OPS_CUR || !OPS_WX) return;
+  nvSet(NV_KEY.last, JSON.stringify({ ap: OPS_AP, at: Date.now(), label: (OPS_CUR.op && OPS_CUR.op.label) || "" }));
+}
+function nvLastText(){
+  let o = null; try{ o = JSON.parse(nvGet(NV_KEY.last) || "null"); }catch(e){}
+  if(!o || !o.at || (typeof OPS_AP !== "undefined" && o.ap && o.ap !== OPS_AP)) return "";
+  const d = new Date(o.at), now = new Date(), day = d.toDateString() === now.toDateString() ? "" : `${d.getMonth() + 1}月${d.getDate()}日 `;
+  return `最後に読んだのは ${day}${d.getHours()}:${String(d.getMinutes()).padStart(2, "0")}${o.label ? `（${String(o.label).replace(/[<>&"]/g, "")}）` : ""}`;
+}
+function nvNetRender(){
+  if(!NATIVE) return;
+  const off = navigator.onLine === false;
+  const set = (id, sub, extra) => { const el = $(id); if(!el) return; el.hidden = !off; if(off) el.innerHTML = `<span class="wi">${NV_SVG.net}</span><div class="tx"><b>電波がありません</b>${sub}${extra ? `<small>${extra}</small>` : ""}</div>`; };
+  set("nvNetHome", "チェックインは保留して、電波が戻ったら送ります");
+  set("nvNetOps", "戻ると、自動で読み直します", nvLastText());
+  set("nvNetBook", "図鑑とフライトは、この iPhone の記録で見られます");
+  set("nvNetLog", "図鑑とフライトは、この iPhone の記録で見られます");
+}
+async function nvNetBack(){
+  nvNetRender();
+  if(document.documentElement.dataset.view !== "ops" || typeof loadMetar !== "function") return;
+  const ap = OPS_AP, m = await loadMetar(); if(!m || ap !== OPS_AP) return;
+  OPS_WX = m; OPS_WX_WAIT = false; $("opsWx").textContent = wxText(m); renderOps(); renderOpsAlerts(); nvLastSave();
+  if(opsNeed("traffic")) startTraffic();
+}
+if(NATIVE){
+  setTimeout(() => { nvNetRender(); renderInstall(); }, 0);
+  { const d = document.getElementById("dLocWhy"); if(d) d.addEventListener("cancel", e => e.preventDefault()); }   // I1 は「次へ」だけで進む
+  window.addEventListener("offline", () => nvNetRender());
+  window.addEventListener("online", () => nvNetBack());
+  document.addEventListener("visibilitychange", () => { if(!document.hidden){ nvNetRender(); nvGeoRefresh(); } });   // 設定アプリから戻ったとき
+  document.addEventListener("click", e => {
+    const b = e.target.closest && e.target.closest("[data-nv]"); if(!b) return;
+    const k = b.dataset.nv;
+    if(k === "loc-next") return nvLocNext();
+    if(k === "settings") return nvOpenSettings();
+    if(k === "perm-next"){ $("dNvSheet").close(); return; }
+    if(k === "demo"){ if($("dNvSheet").open) $("dNvSheet").close(); track("native", "denied_demo"); if(!demo) $("toggleDemo").click(); return; }
+  });
+}
 const SUPABASE_JS = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2/dist/umd/supabase.js";
 let sb = null, user = null;
 /* [id, 名称, IATA, 都道府県, 緯度, 経度, 判定半径m, 離島] — 国土交通省 空港一覧(2026-09-01) × OurAirports */
@@ -4277,7 +4620,7 @@ function unpackS(o){
   return { demoClock:o.dc || null, checkins:(o.c || []).map(r => ({a:r[0], t:r[1], acc:r[2], term:r[3] || null})), flights:(o.f || []).map(fl), manual:(o.m || []).map(mn), intl:(o.i || []).map(it), shugyo:o.sg || null };
 }
 function load(){ try{ const v = localStorage.getItem(key()); S = v ? unpackS(JSON.parse(v)) : blank(); }catch(e){ S = blank(); } }
-function save(){ if(SERVER && !demo) return; try{ localStorage.setItem(key(), JSON.stringify(packS(S))); }catch(e){ say("この端末に記録を保存できませんでした。ブラウザの設定で保存が許可されているか確認してください。", true); } }
+function save(){ if(SERVER && !demo) return; try{ localStorage.setItem(key(), JSON.stringify(packS(S))); }catch(e){ say(NATIVE ? NV_TXT.save : "この端末に記録を保存できませんでした。ブラウザの設定で保存が許可されているか確認してください。", true); } }
 
 // Supabase は1回に返す行数が標準で1,000行まで。記録が多い人のために、1,000行ずつ最後まで読む
 async function fetchAll(table, cols, order){
@@ -5336,10 +5679,10 @@ async function checkin(){
   }catch(e){
     btn.disabled = false;
     track("geo_fail", e && e.code);
-    if(e && e.code === 1) return say("位置情報の利用が許可されていません。ブラウザかアプリの設定で、このページの位置情報を許可してください。", true);
+    if(e && e.code === 1){ if(NATIVE){ nvLocOffSheet(); return say(NV_TXT.locDenied, true); } return say("位置情報の利用が許可されていません。ブラウザかアプリの設定で、このページの位置情報を許可してください。", true); }
     if(e && e.code === 3) return say("位置を取得できないまま時間切れになりました。電波のよい場所でもう一度押してください。", true);
     if(e && e.code === "stale") return say("新しい位置を取得できませんでした。地下などでは位置が更新されないことがあります。地上や窓の近くでもう一度押してください。", true);
-    return say("この画面では位置情報を使えません。ブラウザで直接開くか、設定のデモモードで試してください。", true);
+    return say(NATIVE ? NV_TXT.locNone : "この画面では位置情報を使えません。ブラウザで直接開くか、設定のデモモードで試してください。", true);
   }
   btn.disabled = false;
   const n = nearest(p);
@@ -5419,7 +5762,7 @@ function showNearest(n){
   el.innerHTML = ok ? `${n.term ? esc(n.term.name) + " ・ " : ""}<i class="dot ok" aria-hidden="true"></i>判定範囲の中`
       + (NEAR_XK.includes(n.a.kind) ? `<span class="nbook">${ZKX_TITLE}に入ります</span>` : "")
     : `<i class="dot" aria-hidden="true"></i>判定範囲の外 ・ ここから <b>${homeKm(n.km)}</b>`;
-  renderNearList(); nearMoreSync();
+  renderNearList(); nearMoreSync(); pinNearSync();
   homeState();
 }
 // 半券の右上のピル：最初の位置は「ほか○つ ›」（20km 以内に民間空港がなく足したときだけなら「近くの民間空港 ›」）、引き上げた位置は「閉じる ⌄」
@@ -5438,7 +5781,10 @@ const nearShort = a => a.kind ? a.name : NEAR_SHORT[a.iata] || a.name.replace(/�
 // 引き上げた位置の一覧（20km 以内・近い順）。民間空港を足したときの行も入れて、高さ 760 未満は2行、ほかは3行（844 も一覧の下を 12px 以上空ける。review-app-1 の2）
 const nearRowHTML = (o, civ) => { const [kn, kc] = nearKind(o.a), pf = String(o.a.pref || "").replace(/[都府県]$/, "");
   const k = o.km < 1 ? [Math.round(o.km * 1000), "m"] : [o.km < 100 ? o.km.toFixed(1) : fmtKm(o.km), "km"];
-  return `<button class="nrow2" type="button" data-zka="${o.a.id}" aria-label="${esc(kn)}、${esc(o.a.name)}、${k.join("")}"><span class="t ${kc}">${esc(kn)}</span><span class="tx">${civ ? `<small>民間空港でいちばん近い</small>` : ""}<b>${esc(nearShort(o.a))}<i>${esc(pf)}</i></b></span><span class="k">${k[0]}<small>${k[1]}</small></span><svg class="c" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>`; };
+  return `<div class="nrw"><button class="nrow2" type="button" data-zka="${o.a.id}" aria-label="${esc(kn)}、${esc(o.a.name)}、${k.join("")}"><span class="t ${kc}">${esc(kn)}</span><span class="tx">${civ ? `<small>民間空港でいちばん近い</small>` : ""}<b>${esc(nearShort(o.a))}<i>${esc(pf)}</i></b></span><span class="k">${k[0]}<small>${k[1]}</small></span></button>${nearPinBtn(o.a)}</div>`; };
+// 行の右のピンの丸（K1o）：していない＝白地に線のピン、している＝紺の塗り。押すと付け外し（外したら元に戻せる）
+const nearPinBtn = a => { const k = pinKey(a), on = pinned(k);
+  return `<button type="button" class="nrpin${on ? " on" : ""}" ${on ? `data-pin-remove="${esc(k)}"` : `data-pin-add="${esc(k)}"`} aria-pressed="${on}" aria-label="${esc(nearShort(a))}を${on ? "ピン止めから外す" : "ピン止め"}">${PIN_SVG(on)}</button>`; };
 function renderNearList(){
   const box = $("nearList"), n = HOME_NEAR; if(!box) return;
   if(!n || !n.others || (!n.others.length && !n.civ)){ box.hidden = true; box.innerHTML = ""; return; }
@@ -5493,6 +5839,7 @@ function homeState(){
   ck.setAttribute("aria-label", st === "guest" ? "チェックイン（ログインすると使えます。押すとログインの画面を開きます）" : st === "out" ? "チェックイン（判定範囲に入ると切れます。押すと位置を調べ直します）"
     : st === "paused" ? "チェックイン（一時停止中）" : "チェックイン（半券を右へ引いて切ります。押すと確かめてから切ります）");
   $("stubSub").innerHTML = st === "guest" ? "ログイン<br>すると使える" : st === "out" ? "範囲に入る<br>と切れる" : st === "paused" ? "一時停止中" : '<i aria-hidden="true">→</i> 右へ引いて<br>印をもらう';
+  if(NATIVE){ nvGeoApply(); if(!NV_LW_DONE) nvLocWhyMaybe(); }   // iPhone のアプリ：位置の説明（I1）を1回・許可しなかった人は半券の代わりに I1c
   const gate = $("homeGate"), strip = $("homeStrip"), layoutChanged = gate.hidden === guest;
   gate.hidden = !guest; strip.hidden = guest;
   $("mpLabel").textContent = guest ? "ログイン" : "マイページ";
@@ -5969,7 +6316,7 @@ function demoLoRestore(){ try{ const raw = localStorage.getItem(DEMO_LO_BAK); if
 demoLoRestore();
 const TAB_ALL = ["home", "book", "log", "sg", "ops", "stats"], TAB_NAME = { home:"ホーム", book:"図鑑", log:"フライト", sg:"修行", ops:"運用", stats:"成績" };
 const LO_BLOCKS = {
-  home: [["persona", "いちばん上のカード", "撮影・修行の構成のときに出るカード。いつもいちばん上", true], ["ride", "これから乗る便", "便名を入れると機体を調べる"], ["event", "イベントのお知らせ"], ["tally", "これまでの記録", "空港・路線・距離の数"], ["recent", "最近の印"]],
+  home: [["persona", "いちばん上のカード", "撮影・修行の構成のときに出るカード。いつもいちばん上", true], ["ride", "これから乗る便", "便名を入れると機体を調べる"], ["pins", "ピン止めした空港", "ピン止めが1つ以上あるときだけ出ます"], ["event", "イベントのお知らせ"], ["tally", "これまでの記録", "空港・路線・距離の数"], ["recent", "最近の印"]],
   opsb: [["alerts", "遅れ・ダイバートのお知らせ"], ["map", "地図と近くを飛ぶ機体"], ["spots", "撮影地"], ["curfew", "門限のある時間"], ["ga", "ゴーアラウンド（推定）"]],
   stats: [["passport", "これまでのパスポート"], ["fleet", "乗った機体"], ["airline", "航空会社別"], ["status", "ステータスの目安"], ["sgsum", "修行のまとめ", "月ごとのポイント・1ポイントあたり・路線ごと"]],
 };
@@ -6703,11 +7050,11 @@ function goTab(v, seg){
   if(v === "sg"){ if(!SG_FORCE && currentView() === "sg") SG_PAGE = "main"; SG_FORCE = false; DIRTY.sg = true; }
   if(v === "log" && currentView() !== "log" && typeof setLogSeg === "function") setLogSeg("list");   // ほかのタブから来たら日誌などの一覧（記録帳の入力は閉じる）
   document.querySelectorAll("section.view").forEach(s => s.classList.toggle("on", s.id === "v-" + v));
-  document.documentElement.dataset.view = v; if(v === "home"){ setTimeout(renderHomeMap, 0); setTimeout(homeLocStart, 0); } else if(typeof homeLocStop === "function") homeLocStop(); if(v === "log") setTimeout(renderFlightMap, 0);   // フライトの地図はカードの中の別の地図（地図の見方のときだけ）
+  document.documentElement.dataset.view = v; if(v === "home"){ setTimeout(renderHomeMap, 0); setTimeout(homeLocStart, 0); if(NATIVE) setTimeout(nvLocWhyMaybe, 0); } else if(typeof homeLocStop === "function") homeLocStop(); if(v === "log") setTimeout(renderFlightMap, 0);   // フライトの地図はカードの中の別の地図（地図の見方のときだけ）
   { const sh = v === "home" ? $("homeSheet") : null; document.documentElement.dataset.sheet = sh ? sh.dataset.snap : ""; }
   if(v === "ops" && !wasOps) openOps(); else if(v !== "ops" && wasOps) stopTraffic();
   if(seg) setBookSeg(seg);
-  renderVisible();
+  renderVisible(); if(NATIVE) nvNetRender();
   window.scrollTo(0,0);
 }
 function setMode(m, go = true){
@@ -7511,20 +7858,30 @@ document.documentElement.dataset.view = document.documentElement.dataset.view ||
 // 搭乗券の半券を右へ引いて切ると、チェックイン（56px 引けば切れる。半券の真ん中をつかんでも画面の端までに届く）。
 // 押すだけなら「印をもらいますか」を1回確かめてから切る。キーボードの Enter・Space ではそのままチェックイン。
 // ログインしていない・判定範囲の外のときは切れない（押すとログインの画面・位置の調べ直し）
-const TEAR_AT = 56;
+// 半券を指で切る（11/19 本人の iPhone：右寄りをつかむと画面の端まで 66px しかなく、56px に届かず切れなかった）
+//   切れる長さ：つかんだ所から画面の右端までの残りの半分（28〜56px）。速く右へはじいたら短くても切る（0.5px/ms 以上・20px 以上）
+//   縦と横を決めるのは 10px 動いてから。横が縦の 0.6 倍以上なら横（指の揺れで先に縦へ少し動いても切れるように）
+const TEAR_AT = 56, TEAR_MIN = 28, TEAR_AXIS = 10, TEAR_XY = 0.6, TEAR_FLICK_V = 0.5, TEAR_FLICK_D = 20;
+const tearAt = room => Math.max(TEAR_MIN, Math.min(TEAR_AT, Math.round(room / 2)));
 (() => { const b = $("checkin"), wrap = $("bpass"); if(!b || !wrap) return;
-  let x0 = 0, y0 = 0, dx = 0, axis = "", drag = false, moved = false;
+  let x0 = 0, y0 = 0, dx = 0, axis = "", drag = false, moved = false, need = TEAR_AT, pts = [];
   const set = () => { b.style.transformOrigin = ""; b.style.transform = dx ? `translate(${dx}px,${Math.round(dx * .12)}px) rotate(${Math.round(dx / 10)}deg)` : ""; };
-  const reset = () => { dx = 0; axis = ""; b.style.transform = ""; b.style.transformOrigin = ""; };
+  const reset = () => { dx = 0; axis = ""; pts = []; b.style.transform = ""; b.style.transformOrigin = ""; };
   const st = () => wrap.dataset.state || "idle", off = () => ["guest", "out", "paused"].includes(st());
-  b.addEventListener("pointerdown", e => { if(b.disabled) return; drag = true; moved = false; x0 = e.clientX; y0 = e.clientY; dx = 0; axis = ""; try{ b.setPointerCapture(e.pointerId); }catch(_){} if(!off()) b.classList.add("dragging"); });
+  // 指を離す前の 100ms の右への速さ（px/ms）。時刻は指の動きの時刻（e.timeStamp）で数える
+  const speed = () => { if(pts.length < 2) return 0; const z = pts[pts.length - 1], r = pts.filter(q => z.t - q.t <= 100), a = r[0]; return z.t > a.t ? (z.x - a.x) / (z.t - a.t) : 0; };
+  b.addEventListener("pointerdown", e => { if(b.disabled) return; drag = true; moved = false; x0 = e.clientX; y0 = e.clientY; dx = 0; axis = ""; pts = [{ x:e.clientX, t:e.timeStamp }];
+    need = tearAt((document.documentElement.clientWidth || innerWidth) - e.clientX);
+    try{ b.setPointerCapture(e.pointerId); }catch(_){} if(!off()) b.classList.add("dragging"); });
   b.addEventListener("pointermove", e => { if(!drag) return;
-    const mx = e.clientX - x0, my = e.clientY - y0;
-    if(!axis && Math.hypot(mx, my) > 6) axis = Math.abs(my) > Math.abs(mx) ? "y" : "x";   // 縦に動かしたときは切らない（右へ引くだけ）
-    if(Math.hypot(mx, my) > 6) moved = true;
+    const mx = e.clientX - x0, my = e.clientY - y0, d = Math.hypot(mx, my);
+    pts.push({ x:e.clientX, t:e.timeStamp }); if(pts.length > 12) pts.shift();
+    if(!axis && d >= TEAR_AXIS) axis = Math.abs(mx) >= Math.abs(my) * TEAR_XY ? "x" : "y";   // 縦に動かしたときは切らない（右へ引くだけ）
+    if(d > 6) moved = true;
     if(axis === "x" && !off()){ dx = Math.max(0, Math.min(170, mx)); set(); } });
   const end = () => { if(!drag) return; drag = false; b.classList.remove("dragging");
-    if(dx >= TEAR_AT) tear(); else { const m = moved; reset(); if(!m) tap(); } };
+    const flick = axis === "x" && !off() && dx >= TEAR_FLICK_D && speed() >= TEAR_FLICK_V;
+    if(axis === "x" && !off() && (dx >= need || flick)) tear(); else { const m = moved; reset(); if(!m) tap(); } };
   b.addEventListener("pointerup", end); b.addEventListener("pointercancel", () => { if(!drag) return; drag = false; b.classList.remove("dragging"); reset(); });
   // 押せたときだけ半券が切れて飛ぶ（11/19 シミュレーター：チェックイン済みでも切れる動きをして、理由が見えないまま半券が戻っていた）。
   // 調べている間は引いた所で止めて待ち、押せなかったときは戻して小さく揺らし、理由を半券のすぐ下に出す（ckNote）
@@ -7576,7 +7933,8 @@ async function homeRecheck(){
     const p = demo ? (q => ({ lat:q.lat, lon:q.lon, acc:10 }))(demoPlace()) : await fresh().catch(e => { if(HOME_POS && HOME_POS.at && Date.now() - HOME_POS.at < 60000) return HOME_POS; throw e; });
     HOME_POS = p; const n = nearest(p); showNearest(n);
     say(n.within ? "判定範囲の中です。半券を右へ引くと、印がもらえます。" : `${n.a.name}の判定範囲の外です。あと約${Math.max(0.1, n.km - n.a.radius / 1000).toFixed(1)}km近づくと切れます。`);
-  }catch(e){ say(e && e.code === 1 ? "位置情報の利用が許可されていません。ブラウザかアプリの設定で、このページの位置情報を許可してください。" : "位置を取得できませんでした。電波のよい場所でもう一度押してください。", true); }
+  }catch(e){ if(e && e.code === 1 && NATIVE) nvLocOffSheet();
+    say(e && e.code === 1 ? (NATIVE ? NV_TXT.locDenied : "位置情報の利用が許可されていません。ブラウザかアプリの設定で、このページの位置情報を許可してください。") : "位置を取得できませんでした。電波のよい場所でもう一度押してください。", true); }
 }
 $("recentBook").onclick = () => goTab("book");
 $("hsUp").onclick = () => $("homeSheet").sheetGo && $("homeSheet").sheetGo("full");
@@ -7707,7 +8065,7 @@ function homeEdge(me, dist, pad){
 let HOME_WATCH = null;
 async function homeLocStart(){
   if(demo || HOME_WATCH != null || !navigator.geolocation || document.documentElement.dataset.view !== "home" || document.hidden) return;
-  let st = "prompt"; try{ st = (await navigator.permissions.query({ name:"geolocation" })).state; }catch(e){ return; }
+  const st = await geoPermState(); if(st == null) return;   // アプリは @capacitor/geolocation の許可、ブラウザは Permissions API
   if(st !== "granted" || HOME_WATCH != null || demo) return;
   HOME_WATCH = navigator.geolocation.watchPosition(x => {
     if(demo || document.documentElement.dataset.view !== "home"){ homeLocStop(); return; }
@@ -7852,6 +8210,7 @@ function openAirport(id){
     <div class="tx"><b class="cd${/[^\x00-\x7f]/.test(cd) ? " jp" : ""}">${esc(/[^\x00-\x7f]/.test(cd) ? godShort(a) : cd)}</b><h3>${esc(a.name).replace(/（/g, "<wbr>（")}</h3><p>${a.pref}${rg ? "・" + rg : ""}${a.rare?"・離島の空港":""}${a.kind ? "・" + XKIND[a.kind].label : ""}</p></div></div>
   ${rgl.length > 1 ? `<p class="zk-dots" aria-hidden="true">${rgl.map(x => `<i${x.id === a.id ? ` class="on"` : ""}></i>`).join("")}</p>` : ""}
   ${swHint ? `<p class="zk-swhint">印のカードをはらうと、となりの空港へ</p>` : ""}
+  ${a.kind === "mil" || a.kind === "secret" ? "" : pinApHTML(pinKey(a))}
   ${first ? `<div class="zk-dl"><div><span class="k">押した回数</span><span class="v"><b class="num">${times}</b><span class="u">回</span></span></div><div><span class="k">はじめて押した日</span><span class="v s">${(d => `<b class="num">${d.getFullYear()}</b><span class="u">年</span><b class="num">${d.getMonth() + 1}</b><span class="u">月</span><b class="num">${d.getDate()}</b><span class="u">日</span>`)(new Date(first))}</span></div></div>`
     : `<div class="zk-yet"><b>ここでチェックインすると印が付きます</b><span>判定の範囲 <b class="num">${a.radius >= 1000 ? (a.radius / 1000).toFixed(a.radius % 1000 ? 1 : 0) : a.radius}</b><span class="u">${a.radius >= 1000 ? "km" : "m"}</span>（空港の中心から）</span>${typeof HOME_POS !== "undefined" && HOME_POS ? `<span>いまの場所から <b class="num">${fmtKm(km(HOME_POS, a))}</b><span class="u">km</span></span>` : ""}</div>`}
   ${ap3dPillHTML(a)}
@@ -9434,6 +9793,8 @@ function renderPlusSettings(){
   const info = $("plusInfo"), btn = $("plusBtn");
   btn.hidden = true; $("plusBtnYear").hidden = true;
   if(demo){ info.textContent = "デモモードでは、年間まとめ・一括取り込み・ステータスの先読み・羽田の運用の詳しい理由をお試しできます。"; return; }
+  // アプリの中では申し込みと解約の入口を出さない（決定事項【11/18】そらメモ＋はアプリの中で売らない）。加入中の人の特典はそのまま使える
+  if(NATIVE && SERVER){ info.textContent = PLUS ? `加入中${PLUS_UNTIL ? `（次の更新 ${fmtD(PLUS_UNTIL)}）` : ""}。` : "アプリの中では、そらメモ＋の申し込みはできません。"; return; }
   if(!SERVER){ info.textContent = "年間まとめ・過去フライトの一括取り込み・ステータスの先読み・羽田の運用の詳しい理由（月額500円・年額4,800円）。サーバー版でログインすると申し込めます。"; return; }
   if(!user){ info.textContent = "ログインすると申し込めます（月額500円・年額4,800円）。"; return; }
   if(PLUS){ info.textContent = `加入中${PLUS_UNTIL ? `（次の更新 ${fmtD(PLUS_UNTIL)}）` : ""}。年間まとめ・一括取り込み・ステータスの先読み・羽田の運用の詳しい理由が使えます。`; btn.hidden = false; btn.textContent = "管理・解約"; btn.dataset.act = "portal"; return; }
@@ -9725,7 +10086,7 @@ $("delAcct").onclick = async () => {
 
 /* ---------- ロボット除け（Cloudflare Turnstile）。config.js に turnstileSiteKey があるときだけ使う ---------- */
 const TURNSTILE_JS = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
-const captchaOn = () => !!(SORAMEMO_CONFIG.turnstileSiteKey);
+const captchaOn = () => !!(SORAMEMO_CONFIG.turnstileSiteKey) && !NATIVE;   // アプリの中では使わない（決定事項【11/18】自分用の段では使わない）
 
 
 /* ---------- ログイン前（端末の中だけ）の記録を、アカウントの記録帳に引き継ぐ ---------- */
@@ -9932,12 +10293,13 @@ async function decodeImageFile(file){
 }
 let SCAN = null;
 async function startCamera(){
+  if(NATIVE) await nvPermWhy("cam");   // iPhone のアプリ：はじめての1回だけ小さい説明（I4c）
   $("scanMsg").textContent = "カメラを起動しています…"; $("scanMsg").className = "msg"; $("dScan").showModal();
   try{
     const rd = await zxReader(); SCAN = rd;
     await rd.decodeFromConstraints({ video: { facingMode: "environment" } }, $("scanVideo"), (res) => { if(res && SCAN){ stopCamera(); handleBarcode(res.getText()); } });
     $("scanMsg").textContent = "";
-  }catch(e){ $("scanMsg").textContent = "カメラを使えませんでした。ブラウザの設定でカメラを許可するか、「画像から読み取る」を使ってください。"; $("scanMsg").className = "msg err"; }
+  }catch(e){ $("scanMsg").textContent = NATIVE ? NV_TXT.cam : "カメラを使えませんでした。ブラウザの設定でカメラを許可するか、「画像から読み取る」を使ってください。"; $("scanMsg").className = "msg err"; }
 }
 function stopCamera(){ try{ if(SCAN) SCAN.reset(); }catch(e){} SCAN = null; if($("dScan").open) $("dScan").close(); }
 function bpPending(){ try{ return JSON.parse(localStorage.getItem(BP_KEY) || "[]"); }catch(e){ return []; } }
@@ -10018,12 +10380,14 @@ const IS_IOS = /iPhone|iPad|iPod/.test(navigator.userAgent), IS_ANDROID = /Andro
 window.addEventListener("beforeinstallprompt", e => { e.preventDefault(); INSTALL_EVT = e; renderInstall(); });
 window.addEventListener("appinstalled", () => { INSTALL_EVT = null; track("install", "done"); renderInstall(); });
 function renderInstall(){
+  if(NATIVE){ $("installRow").hidden = true; $("installBar").hidden = true; return; }   // iPhone のアプリの中では出さない（I3）
   const inst = isStandalone();
   $("installRow").hidden = inst;
   let later = false; try{ later = !!localStorage.getItem("soramemo.install.later"); }catch(e){}
   $("installBar").hidden = inst || later || !(INSTALL_EVT || IS_IOS || IS_ANDROID);
 }
 async function doInstall(){
+  if(NATIVE) return;
   if(INSTALL_EVT){ INSTALL_EVT.prompt(); try{ const r = await INSTALL_EVT.userChoice; track("install", r && r.outcome); }catch(e){} INSTALL_EVT = null; renderInstall(); return; }
   track("install", IS_IOS ? "ios_help" : "help");
   showBP(IS_IOS ? `<h3>ホーム画面に追加する（iPhone）</h3><ol class="steps"><li>Safari でこのページを開く</li><li>画面下の共有ボタン（四角から矢印が出ているもの）を押す</li><li>「ホーム画面に追加」を押す</li><li>右上の「追加」を押す</li></ol><p class="hint">ホーム画面のそらメモからは、メールに届くコードでログインしてください。</p>`
@@ -10500,7 +10864,9 @@ function renderOpsApPicker(ORDER){
   const row = d => `<button class="aprow" type="button" data-ops-ap="${d.iata}" aria-current="${d.iata === OPS_AP}"><span class="c">${d.iata}</span><b>${esc(d.name)}</b>${d.iata === OPS_NEAR ? "<small>近く</small>" : ""}</button>`;
   const cell = d => `<button class="apcell" type="button" data-ops-ap="${d.iata}" aria-current="${d.iata === OPS_AP}"><b>${d.iata}</b><span>${esc(d.name)}</span></button>`;
   const list = all.filter(hit);
-  $("opsAps").innerHTML = (mine.length ? `<h4>よく見る空港</h4><div class="aplist">${mine.map(row).join("")}</div>` : "")
+  const pinAps = pins().filter(p => OPS_AIRPORTS[p.k]).map(p => OPS_AIRPORTS[p.k]).filter(hit);
+  const prow = d => `<button class="aprow" type="button" data-ops-ap="${d.iata}" aria-current="${d.iata === OPS_AP}"><span class="c">${d.iata}</span><b>${esc(d.name)}</b>${d.iata === OPS_AP ? `<small class="cur">選んでいる</small>` : ""}<span class="appin" aria-label="ピン止め中">${PIN_SVG(true)}</span></button>`;
+  $("opsAps").innerHTML = (pinAps.length ? `<h4>ピン止めした空港</h4><div class="aplist pinaplist">${pinAps.map(prow).join("")}</div>` : "") + (mine.length ? `<h4>よく見る空港</h4><div class="aplist">${mine.map(row).join("")}</div>` : "")
     + `<h4>${q ? "見つかった空港" : "北から順に"}</h4>` + (list.length ? `<div class="apgrid">${list.map(cell).join("")}</div>` : `<p class="hint">「${esc(q)}」に合う空港はありません。運用を出しているのは14空港です。</p>`);
 }
 document.addEventListener("click", e => {
@@ -11042,6 +11408,9 @@ function specialWhere(x){
   return [best ? `${best.name}の近く` : "飛行中", alt].filter(Boolean).join("・");
 }
 function spPushHTML(){
+  return pinLineHTML(OPS_AP);   // 決定事項【11/19】：特別塗装機の知らせはピン止めの空港から（K7）
+}
+function spPushHTMLOld(){
   if(!SERVER || !PUSH_KEY || !pushOK()) return "";
   const on = pushSp().includes(OPS_AP), name = opsDef().name;
   return `<button class="linkbtn2 fwpush" data-sp-push="${esc(OPS_AP)}" aria-pressed="${on}">${on ? `${esc(name)}の特別塗装機の通知をやめる` : `${esc(name)}に特別塗装機が来たら通知する`}</button>`;
@@ -12094,11 +12463,15 @@ async function renderCurfew(){
 let PUSH_KEY;   // VAPID の公開鍵（サーバーにまだなければ null。そのときは通知のボタンを出さない）
 const pushAps = () => { try{ return JSON.parse(localStorage.getItem("soramemo.pushAirports") || "[]"); }catch(e){ return []; } };
 const pushSp = () => { try{ return JSON.parse(localStorage.getItem("soramemo.pushSpecial") || "[]"); }catch(e){ return []; } };   // 特別塗装機の通知を申し込んだ空港
-const pushOK = () => "serviceWorker" in navigator && "PushManager" in window && "Notification" in window;
+const pushOK = () => !NATIVE && "serviceWorker" in navigator && "PushManager" in window && "Notification" in window;   // アプリの中は APNs ができるまで出さない
 function pushButtonHTML(iata){
+  return pinLineHTML(iata);   // 決定事項【11/19】：空港ごとの知らせはピン止めにまとめる（下の古いボタンは使わない）
+}
+function pushButtonHTMLOld(iata){
   if(!SERVER || PUSH_KEY === null) return "";
   if(PUSH_KEY === undefined){ loadPushKey().then(() => { if(PUSH_KEY && opsOn()) renderOpsAlerts(); }); return ""; }
-  if(!pushOK()) return `<p class="hint" style="margin:8px 0 0">スマホへの通知は、この端末のブラウザでは使えません（iPhone はホーム画面に追加したそらメモから使えます）。</p>`;
+  if(NATIVE) return `<p class="hint" style="margin:8px 0 0">アプリの通知は準備中です。</p>`;
+  if(!pushOK()) return `<p class="hint" style="margin:8px 0 0">${PUSH_NG_TXT()}</p>`;
   const on = pushAps().includes(iata), name = (OPS_AIRPORTS[iata] || {}).name || iata;
   return `<button class="linkbtn2 fwpush" data-fw-push="${esc(iata)}" aria-pressed="${on}">${on ? `${esc(name)}の通知をやめる` : `${esc(name)}の遅れ・ダイバートを通知する`}</button>`;
 }
@@ -12163,6 +12536,268 @@ async function pushRide(key){
 }
 document.addEventListener("click", e => { const b = e.target.closest("[data-ride-push]"); if(b) pushRide(b.dataset.ridePush); });
 document.addEventListener("click", e => { const b = e.target.closest("[data-fw-push]"); if(b) togglePush(b.dataset.fwPush); });
+
+/* ---------- 空港のピン止め（決定事項【11/19】・画面案 design/pin 4版） ----------
+   ピン止めした空港ごとに、4つの知らせ（特別塗装機・遅れ／欠航／ダイバート・ゴーアラウンド（推定）・撮影）を ON／OFF する。
+   知らせの送り手は今の push-subscribe のまま：ピン止めから airports・sp_airports・ga.airports・spot.iata を作って送る（表はまだ作らない）。
+   ピン止めはこの端末に保存（アカウントへの保存はデータ担当の表ができてから）。上限は12空港。前から13以上申し込んでいた人はそのまま続く */
+const PIN_KEY = "soramemo.pins", PIN_MAX = 12;
+const PIN_MAIN8 = ["HND", "NRT", "KIX", "ITM", "NGO", "CTS", "FUK", "OKA"];
+const PIN_KINDS = ["sp", "dl", "ga", "spot"];
+const PIN_KN = { sp:"特別塗装機", dl:"遅れ・欠航・ダイバート", ga:"ゴーアラウンド", spot:"撮影" };
+const PIN_SVG = on => `<svg class="pinic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3h6l-1 6 3 3v2H7v-2l3-3z"${on ? ` fill="currentColor"` : ""}/><path d="M12 14v7"/></svg>`;
+const PIN_CHEV = `<svg class="pinchev" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>`;
+// 空港の鍵：86空港は3レター、ほか（飛行場・滑空場・ヘリポート）は "#" ＋番号
+const pinKey = a => a && IATA[a.iata] === a ? a.iata : a ? "#" + a.id : null;
+const pinAp = k => !k ? null : k[0] === "#" ? BY[+k.slice(1)] || null : IATA[k] || null;
+const pinCode = k => k && k[0] !== "#";   // 知らせを出せるのは3レターのある空港だけ
+const pinName = k => { const a = pinAp(k); return a ? nearShort(a).replace(/空港$/, "") : k; };
+function pinsLoad(){ try{ const v = JSON.parse(localStorage.getItem(PIN_KEY) || "null"); return Array.isArray(v) ? v.filter(p => p && typeof p.k === "string" && pinAp(p.k)) : null; }catch(e){ return null; } }
+function pinsSave(list){ try{ localStorage.setItem(PIN_KEY, JSON.stringify(list)); }catch(e){} }
+// はじめて開いたとき：今の申し込み（特別塗装機・遅れ・ゴーアラウンド・撮影の空港）をそのままピン止めに移す（K9。上限を超えていても全部）
+function pins(){
+  let list = pinsLoad();
+  if(!list){
+    list = []; const add = (k, f) => { if(!IATA[k]) return; let p = list.find(x => x.k === k); if(!p){ p = { k, sp:false, dl:false, ga:false }; list.push(p); } if(f) p[f] = true; };
+    pushSp().forEach(k => add(k, "sp")); pushAps().forEach(k => add(k, "dl"));
+    const g = pushGa(); if(gaActive(g)) g.airports.forEach(k => add(k, "ga"));
+    const s = pushSpot(); if(spotActive(s)) add(s.iata);
+    pinsSave(list);
+    if(list.length) try{ localStorage.setItem("soramemo.pins.moved", String(list.length)); }catch(e){}
+  }
+  return list;
+}
+const pinOf = k => pins().find(p => p.k === k) || null;
+const pinned = k => !!pinOf(k);
+const pinSpotOn = k => { const s = pushSpot(); return spotActive(s) && s.iata === k; };
+const pinIsOn = (p, kind) => kind === "spot" ? pinSpotOn(p.k) : !!p[kind];
+// その空港で出せる知らせか（出せないときは理由）
+function pinAvail(k, kind){
+  if(!pinCode(k)) return "3レターのない飛行場には、知らせを出せません。";
+  if(kind === "ga" && !GA_ORDER.includes(k)) return "ゴーアラウンドは、運用を出している14空港だけです。";
+  if(kind === "spot" && !(OPS_AIRPORTS[k] && OPS_SPOTS[k])) return "撮影の知らせは、撮影地のある空港だけです。";
+  return "";
+}
+function pinDesc(k, kind){
+  const nm = pinName(k);
+  if(kind === "sp") return "国内・海外の特別塗装機。アライアンス塗装は海外の会社のものだけ。同じ機体は6時間に1回";
+  if(kind === "dl") return k === "HND" ? "0時前後に着く便・欠航・ダイバート・引き返し。羽田は24時間なので門限はありません"
+    : PIN_MAIN8.includes(k) ? "門限の10分前より遅く着く見込みの便・0時前後に着く便・欠航・ダイバート・引き返し"
+    : `${nm}は欠航・ダイバート・引き返しだけ。門限ギリギリと0時前後は羽田・成田・関西・伊丹・中部・新千歳・福岡・那覇の8空港です`;
+  if(kind === "ga") return "1機ごと・続いたとき・強い横風・低い雲・雷";
+  if(kind === "spot"){ const s = pushSpot(); return spotActive(s) && s.iata !== k ? `ON にすると、撮影の知らせを${pinName(s.iata)}から${nm}に移します（1つの空港だけ）` : `撮影地から見える機体を来る前に。ピン止めした空港のうち1つだけ${spotActive(s) ? `（いまは${pinName(s.iata)}）` : ""}`; }
+  return "";
+}
+const PIN_KT = { sp:"特別塗装機が向かってきたら", dl:"遅れ・欠航・ダイバート", ga:"ゴーアラウンド（推定）", spot:"撮影の知らせ" };
+// この端末に届くか：ok・ask（まだ許可していない）・denied・ios（iPhone の Safari でホーム画面に置いていない）・none（使えない）・demo
+function pinDeliver(){
+  if(demo) return "demo";
+  if(!SERVER) return "none";
+  if(!pushOK()){ const ios = /iP(hone|ad|od)/.test(navigator.userAgent) && !(navigator.standalone || matchMedia("(display-mode: standalone)").matches);
+    return document.documentElement.dataset.native ? "none" : ios ? "ios" : "none"; }
+  if(PUSH_KEY === null) return "none";
+  return Notification.permission === "granted" ? "ok" : Notification.permission === "denied" ? "denied" : "ask";
+}
+function pinDeliverHTML(){
+  const d = pinDeliver();
+  if(d === "ok") return `<p class="pindev ok"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 5 5 9-10"/></svg>この端末に届きます（通知を許可済み）</p>`;
+  if(d === "ask") return `<div class="pindev ask"><span>この端末には、まだ届きません</span><button type="button" class="pinallow" data-pin-allow>許可する</button></div>`;
+  if(d === "denied") return `<p class="pindev ng">通知がブロックされています。端末の設定で、そらメモの通知を許可すると届きます。</p>`;
+  if(d === "ios") return `<details class="pindev ios"><summary>iPhone では、ホーム画面に追加したそらメモに届きます<span>やり方 ›</span></summary>
+    <ol><li>先にログインする（ピン止めをアカウントに残すため。準備中）</li><li>Safari の共有ボタン →「ホーム画面に追加」</li><li>ホーム画面のそらメモを開き、通知を許可する</li></ol>
+    <p>ログインしていないときは、ホーム画面のそらメモでもう一度ピン止めしてください。</p></details>`;
+  if(d === "demo") return `<p class="pindev">デモでは知らせは届きません（ピン止めは試せます）。</p>`;
+  return `<p class="pindev">この端末のブラウザでは、知らせを受け取れません。</p>`;
+}
+// ピン止めから今の申し込みの形を作って送る。届かない端末では保存だけ（許可したときに送る）
+async function pinSync(ask){
+  const list = pins(), d = pinDeliver();
+  if(!(d === "ok" || (ask && d === "ask"))) return d;
+  if(PUSH_KEY === undefined) await loadPushKey();
+  const codes = f => list.filter(p => p[f] && pinCode(p.k)).map(p => p.k);
+  const g = pushGa(), ga = { ...g, airports:codes("ga"), kinds:g.kinds.length ? g.kinds : ["plane", "cluster", "wind", "cloud"] };
+  const s = pushSpot(), spot = spotActive(s) && !list.some(p => p.k === s.iata) ? { ...s, iata:null } : s;
+  const ok = await syncPush(codes("dl"), pushFlights(), codes("sp"), spot, ga);
+  return ok ? "ok" : "fail";
+}
+let PIN_UNDO = null, PIN_SHEET = null, PIN_PAGE = null;
+// 下の帯（○○をピン止めしました｜知らせの設定・元に戻す）。シートが開いていればその中に出す
+function pinBand(text, btn, attr){
+  document.querySelectorAll(".pinband").forEach(x => x.remove());
+  const open = [...document.querySelectorAll("dialog[open]")].pop(), host = open ? open.querySelector(".dlg") || open : document.body;
+  const el = document.createElement("div"); el.className = "pinband" + (open ? " in" : ""); el.setAttribute("role", "status");
+  el.innerHTML = `${PIN_SVG(true)}<span>${esc(text)}</span>${btn ? `<button type="button" ${attr}>${esc(btn)}</button>` : ""}`;
+  host.appendChild(el); clearTimeout(pinBand.t); pinBand.t = setTimeout(() => el.remove(), 6000);
+}
+function pinRedraw(){
+  try{ if(HOME_NEAR) pinNearSync(); }catch(e){}
+  pinHomeSync();
+  if($("dPin").open && PIN_SHEET) $("dPinBody").innerHTML = pinSheetHTML(PIN_SHEET.k, PIN_SHEET.mode);
+  if($("dPins").open) $("dPinsBody").innerHTML = PIN_PAGE ? pinPageHTML(PIN_PAGE) : pinListHTML();
+  const ap = document.querySelector("#dAirportBody [data-pin-ap]"); if(ap && $("dAirport").open) ap.outerHTML = pinApHTML(ap.dataset.pinAp);
+  if(opsOn()){ try{ renderSpecial(); renderOpsAlerts(); }catch(e){} }
+}
+// ピン止めする。はじめての1回はシート（許可していなければ先に K0）、2回目からは帯
+async function pinAdd(k, from){
+  const list = pins(); if(list.some(p => p.k === k)){ pinOpen(k); return; }
+  if(list.length >= PIN_MAX){ pinBand(`ピン止めは${PIN_MAX}空港までです。外してから足してください`, "知らせの設定", "data-pin-list"); return; }
+  list.push({ k, sp:pinCode(k), dl:false, ga:false }); pinsSave(list); track("pin", "add_" + (from || ""));
+  let first = false; try{ first = !localStorage.getItem("soramemo.pins.first"); localStorage.setItem("soramemo.pins.first", "1"); }catch(e){}
+  if(first && pinDeliver() === "ask" && pinCode(k)){ PIN_SHEET = { k, mode:"ask" }; $("dPinBody").innerHTML = pinAskHTML(k); if(!$("dPin").open) $("dPin").showModal(); pinRedraw(); return; }
+  await pinSync();
+  if(first){ PIN_SHEET = { k, mode:"new" }; $("dPinBody").innerHTML = pinSheetHTML(k, "new"); if(!$("dPin").open) $("dPin").showModal(); }
+  else pinBand(`${pinName(k)}をピン止めしました`, "知らせの設定", `data-pin-open="${esc(k)}"`);
+  pinRedraw();
+}
+// 外す（知らせもすべて止まる）。すぐあとなら元に戻せる
+async function pinRemove(k){
+  const list = pins(), p = list.find(x => x.k === k); if(!p) return;
+  PIN_UNDO = { list:JSON.parse(JSON.stringify(list)), spot:pinSpotOn(k) ? k : null };
+  pinsSave(list.filter(x => x.k !== k)); track("pin", "remove");
+  if(PIN_UNDO.spot){ const s = pushSpot(); s.iata = null; try{ localStorage.setItem("soramemo.pushSpot", JSON.stringify(s)); }catch(e){} }
+  if($("dPin").open && PIN_SHEET && PIN_SHEET.k === k) $("dPin").close();
+  if(PIN_PAGE === k) PIN_PAGE = null;
+  await pinSync(); pinRedraw();
+  pinBand(`${pinName(k)}のピン止めを外しました`, "元に戻す", "data-pin-undo");
+}
+async function pinUndo(){
+  const u = PIN_UNDO; if(!u) return; PIN_UNDO = null; pinsSave(u.list);
+  if(u.spot){ const s = pushSpot(); s.iata = u.spot; try{ localStorage.setItem("soramemo.pushSpot", JSON.stringify(s)); }catch(e){} }
+  document.querySelectorAll(".pinband").forEach(x => x.remove()); await pinSync(); pinRedraw(); track("pin", "undo");
+}
+async function pinToggle(k, kind){
+  const list = pins(), p = list.find(x => x.k === k); if(!p || pinAvail(k, kind)) return;
+  if(kind === "spot"){
+    const s = pushSpot(), on = pinSpotOn(k);
+    if(!on && !(s.kinds || []).length){ pinSpotSet(k); return; }   // まだ撮影の知らせを作っていない：撮る人の設定を開く
+    s.iata = on ? null : k; try{ localStorage.setItem("soramemo.pushSpot", JSON.stringify(s)); }catch(e){}
+  }else p[kind] = !p[kind];
+  pinsSave(list); track("pin", kind); const r = await pinSync(); pinRedraw();
+  if(r === "fail") uiSay("知らせの申し込みに失敗しました。少し待って、もう一度お試しください。");
+}
+// 撮影地と機体を選ぶ（撮る人用の担当の設定の画面を、その空港で開く）
+async function pinSpotSet(k){ if(!OPS_AIRPORTS[k]) return; OPS_PICKED = true; if(OPS_AP !== k) await setOpsAirport(k); openSpPush(); }
+function pinOpen(k){ PIN_SHEET = { k, mode:"edit" }; $("dPinBody").innerHTML = pinSheetHTML(k, "edit"); if(!$("dPin").open) $("dPin").showModal(); track("pin", "open"); }
+function pinRowsHTML(k){
+  const p = pinOf(k), d = pinDeliver(), no = d !== "ok";
+  return `<div class="pinrows">${PIN_KINDS.map(kind => { const why = pinAvail(k, kind), on = !why && p && pinIsOn(p, kind);
+    const more = !why && kind === "ga" ? `<button type="button" class="pinmore" data-ga-open="set">細かく${PIN_CHEV}</button>`
+      : !why && kind === "spot" ? `<button type="button" class="pinmore" data-pin-spot="${esc(k)}">撮影地と機体を選ぶ${PIN_CHEV}</button>`
+      : why && kind === "ga" && pinCode(k) ? `<small class="pinwhy">${esc(GA_ORDER.filter(i => OPS_AIRPORTS[i]).map(i => OPS_AIRPORTS[i].name).join("・"))}</small>` : "";
+    return `<div class="pinrow${why ? " na" : ""}"><span class="t"><b>${PIN_KT[kind]}</b><small>${esc(why || pinDesc(k, kind))}</small>${on && no ? `<em class="pinno">届きません</em>` : ""}${more}</span>
+      ${loSw(on, `data-pin-kind="${kind}" data-pin-k="${esc(k)}"`, `${pinName(k)}の${PIN_KT[kind]}`, !!why)}</div>`; }).join("")}</div>`;
+}
+const PIN_FOOT = `<p class="pinfoot">どれも機体の位置（adsb.lol・ODbL）や運航情報（ODPT）からの<b>推定です。保証しません。</b>乗る便の遅れは、乗る便の知らせ1つにまとめます。</p>`;
+// 1空港の知らせ（シート）：mode＝new（ピン止めした直後・K4）・edit（「ピン止め中 ›」から・K1s）
+function pinSheetHTML(k, mode){
+  const nm = pinName(k), a = pinAp(k);
+  if(!pinned(k)) return `<div class="sph"><span class="grab" aria-hidden="true"></span></div><p class="pinsub">${esc(nm)}はピン止めしていません。</p>`;
+  return `<div class="sph"><span class="grab" aria-hidden="true"></span></div>
+    <div class="pinhd"><h3 id="pinT">${esc(mode === "new" ? `${nm}をピン止めしました` : `${nm}の知らせ`)}</h3><button type="button" class="pindone" data-close>完了</button></div>
+    ${mode === "new" ? `<p class="pinsub">何を知らせますか。あとから「ピン止め中」を押して変えられます。</p>` : `<p class="pinsub">${esc(a ? a.name : nm)}</p>`}
+    ${pinCode(k) ? pinDeliverHTML() : ""}${pinRowsHTML(k)}${pinCode(k) ? PIN_FOOT : ""}
+    ${mode === "new" ? `<div class="pinbot"><button type="button" class="pinghost" data-pin-cancel="${esc(k)}">取り消す</button></div>`
+      : `<button type="button" class="pinoff" data-pin-remove="${esc(k)}">${esc(nm)}のピン止めを外す</button><p class="pinnote">外すと${esc(nm)}の知らせはすべて止まります（すぐあとなら元に戻せます）。</p>`}`;
+}
+// はじめてのピン止めで、通知をまだ許可していないとき（K0）。許可しなくてもピン止めはできる
+function pinAskHTML(k){
+  const nm = pinName(k);
+  return `<div class="sph"><span class="grab" aria-hidden="true"></span></div><div class="pinbell"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg></div>
+    <h3 class="pinask" id="pinT">${esc(nm)}をピン止めしました。知らせを届けますか</h3>
+    <p class="pinsub">特別塗装機が${esc(nm)}に向かってきたら、この端末に知らせます。このあと端末の確認で「許可」を押してください。</p>
+    <div class="pin2b"><button type="button" class="pinghost" data-pin-later="${esc(k)}">あとで</button><button type="button" class="pinmain" data-pin-allow="${esc(k)}">通知を許可する</button></div>
+    <p class="pinnote">許可しなくてもピン止めはできます（知らせだけ届きません）。あとから「知らせ」の画面で許可できます。</p>`;
+}
+// 知らせ（マイページから・K5）：ピン止めした空港の一覧・便・機体ごとの知らせ
+function pinListHTML(){
+  const list = pins(), d = pinDeliver(), fl = pushFlights(), regs = pushSpRegs();
+  const card = p => { const on = PIN_KINDS.filter(kind => !pinAvail(p.k, kind) && pinIsOn(p, kind)), offN = PIN_KINDS.filter(kind => !pinAvail(p.k, kind)).length - on.length;
+    return `<button type="button" class="pincard" data-pin-page="${esc(p.k)}"><span class="h">${pinCode(p.k) ? `<i class="pincd">${esc(p.k)}</i>` : ""}<b>${esc(pinName(p.k))}</b>${PIN_CHEV}</span>
+      <span class="chips">${on.map(kind => `<i class="pinchip">✓ ${PIN_KN[kind]}</i>`).join("")}${!pinCode(p.k) ? `<small>知らせは出せません（ピン止めだけ）</small>` : offN ? `<small>${on.length ? `ほか${offN}つは OFF` : "知らせはすべて OFF"}</small>` : ""}</span></button>`; };
+  return `<div class="pintop"><button class="mp-back" data-close type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>${$("dSettings").open ? "マイページ" : "閉じる"}</button><h3 id="pinsT">知らせ</h3><span class="pinsp" aria-hidden="true"></span></div>
+    ${pinDeliverHTML()}
+    <div class="pinlh">${PIN_SVG(true)}<b>ピン止めした空港</b><small>${list.length} / ${PIN_MAX}</small></div>
+    ${list.length > PIN_MAX ? `<p class="pinnote">前から申し込んでいた${list.length}空港をそのまま続けています。新しく足すのは${PIN_MAX}より少なくなってからです。</p>` : ""}
+    ${list.map(card).join("") || `<p class="pinempty">まだありません。近くの空港・空港のページ・運用タブの「ピン止め」から足せます。</p>`}
+    <label class="pinq">${PIN_SVG(false)}<input id="pinQ" type="search" placeholder="＋ 空港をピン止め（名前か3レター）" autocomplete="off" aria-label="ピン止めする空港を探す"></label><div id="pinQOut"></div>
+    <p class="pinnote">ピン止めは、いまはこの端末に保存します（アカウントへの保存は準備中）。</p>
+    <p class="pinsec">便</p>
+    <div class="pincard st"><span class="h"><b>乗る便</b></span><span class="chips"><small>${fl.length ? `${fl.map(x => { const [no, dd] = x.split("@"); return `${esc(no)}（${+dd.slice(5, 7)}/${+dd.slice(8, 10)}）`; }).join("・")}・15分の遅れから` : "「この便に乗る」で選んだ便の遅れ・ダイバートを知らせます"}</small></span></div>
+    ${regs.length ? `<p class="pinsec">機体ごとの知らせ</p><div class="pincard st"><span class="h"><b>${regs.length}機</b></span><span class="chips"><small>${esc(regs.join("・"))}。前に申し込んだ機体。どの空港へ飛ぶときも届きます。新しく足すことはできません</small></span></div>` : ""}
+    ${d === "ok" || d === "demo" ? "" : `<p class="pinnote">ON にしていても、この端末に届かないあいだは知らせは来ません。</p>`}`;
+}
+// 1空港の知らせ（知らせの画面の中・K6）
+function pinPageHTML(k){
+  const nm = pinName(k), a = pinAp(k);
+  if(!pinned(k)){ PIN_PAGE = null; return pinListHTML(); }
+  return `<div class="pintop"><button class="mp-back" data-pin-back type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>知らせ</button><h3 id="pinsT">${esc(nm)}の知らせ</h3><span class="pinsp" aria-hidden="true"></span></div>
+    <p class="pinapn">${pinCode(k) ? `<i class="pincd">${esc(k)}</i>` : ""}<b>${esc(a ? a.name : nm)}</b></p>
+    ${pinCode(k) ? pinDeliverHTML() : ""}<div class="pinbox">${pinRowsHTML(k)}</div>${pinCode(k) ? PIN_FOOT : ""}
+    <button type="button" class="pinoff" data-pin-remove="${esc(k)}">${esc(nm)}のピン止めを外す</button><p class="pinnote">外すと${esc(nm)}の知らせはすべて止まります（すぐあとなら元に戻せます）。</p>`;
+}
+function pinListOpen(){ PIN_PAGE = null; $("dPinsBody").innerHTML = pinListHTML(); if(!$("dPins").open) $("dPins").showModal(); $("dPins").scrollTop = 0; track("pin", "list"); }
+function pinQOut(){
+  const q = ($("pinQ") && $("pinQ").value || "").trim(), out = $("pinQOut"); if(!out) return;
+  if(!q){ out.innerHTML = ""; return; }
+  const Q = q.toUpperCase(), hit = Object.values(BY).filter(a => !(a.kind === "mil" || a.kind === "secret") && (a.name.includes(q) || (a.iata && a.iata.toUpperCase() === Q) || nearShort(a).includes(q))).slice(0, 8);
+  out.innerHTML = hit.length ? `<div class="pinqlist">${hit.map(a => { const k = pinKey(a), on = pinned(k);
+    return `<div class="pinqrow"><span>${pinCode(k) ? `<i class="pincd">${esc(k)}</i>` : ""}<b>${esc(a.name)}</b></span>${on ? `<span class="pinbadge">${PIN_SVG(true)}ピン止め中</span>` : `<button type="button" class="pinbtn" data-pin-add="${esc(k)}">${PIN_SVG(false)}ピン止め</button>`}</div>`; }).join("")}</div>`
+    : `<p class="pinnote">「${esc(q)}」に合う空港はありません。</p>`;
+}
+// ピン止めの札：している＝紺の塗り「ピン止め中 ›」（押すと知らせ）、していない＝白地「ピン止め」（押すとピン止め）
+const pinPillHTML = (k, extra = "") => { if(!k) return ""; const w = h => extra.includes("dark") ? `<span class="pv">${h}</span>` : h;
+  return pinned(k) ? `<button type="button" class="pinpill on${extra}" data-pin-open="${esc(k)}" aria-label="${esc(pinName(k))}はピン止め中。押すと知らせの設定">${w(`${PIN_SVG(true)}ピン止め中${PIN_CHEV}`)}</button>`
+    : `<button type="button" class="pinpill${extra}" data-pin-add="${esc(k)}" aria-label="${esc(pinName(k))}をピン止め">${w(`${PIN_SVG(false)}ピン止め`)}</button>`; };
+// ホームのいちばん近い空港のカード（K1）
+function pinNearSync(){ const b = $("nearPin"), n = HOME_NEAR; if(!b) return; const k = n && n.a ? pinKey(n.a) : null; b.innerHTML = k ? pinPillHTML(k, " dark") : ""; b.hidden = !k; }
+// ホームの「ピン止めした空港」（K1h。1つ以上のときだけ）
+function pinHomeSync(){
+  const b = $("pinHome"); if(!b) return; const list = pins();
+  if($("pinTileN")) $("pinTileN").innerHTML = `<b>${list.length}</b><small>/${PIN_MAX}</small>`;
+  b.hidden = !list.length; if(!list.length){ b.innerHTML = ""; return; }
+  b.innerHTML = `<span class="ic">${PIN_SVG(true)}</span><span class="tx"><b>ピン止めした空港 ${list.length}</b><small>${esc(list.map(p => pinName(p.k)).join("・"))}</small></span>${PIN_CHEV}`;
+}
+// 空港のページ（K2）：札と「○○の知らせ」の1枚
+function pinApHTML(k){
+  if(!k) return "";
+  const p = pinOf(k), on = p ? PIN_KINDS.filter(kind => !pinAvail(k, kind) && pinIsOn(p, kind)) : [], offN = p ? PIN_KINDS.filter(kind => !pinAvail(k, kind)).length - on.length : 0;
+  return `<div class="pinap" data-pin-ap="${esc(k)}">${pinPillHTML(k)}${p ? `<button type="button" class="pinapc" data-pin-open="${esc(k)}"><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg></span>
+    <span class="tx"><b>${esc(pinName(k))}の知らせ</b><small>何を知らせるか・ピン止めを外す</small><span class="chips">${on.map(kind => `<i class="pinchip">✓ ${PIN_KN[kind]}</i>`).join("")}${!pinCode(k) ? `<small>知らせは出せません</small>` : offN ? `<small>${on.length ? `ほか${offN}つは OFF` : "知らせはすべて OFF"}</small>` : ""}</span></span>${PIN_CHEV}</button>` : ""}</div>`;
+}
+// 運用タブ（K7）：今の「通知する」のボタンの代わりに、ピン止めの状態と入口の1行
+function pinLineHTML(iata){
+  if(!SERVER || !iata) return "";
+  const p = pinOf(iata), nm = (OPS_AIRPORTS[iata] || {}).name || pinName(iata);
+  if(!p) return `<button type="button" class="pinline" data-pin-add="${esc(iata)}">${PIN_SVG(false)}<span><b>${esc(nm)}をピン止めして知らせを受ける</b><small>特別塗装機・遅れ・ゴーアラウンド・撮影</small></span>${PIN_CHEV}</button>`;
+  const on = PIN_KINDS.filter(kind => !pinAvail(iata, kind) && pinIsOn(p, kind)).map(kind => kind === "dl" ? "遅れ" : PIN_KN[kind]);
+  return `<button type="button" class="pinline on" data-pin-open="${esc(iata)}">${PIN_SVG(true)}<span><b>${esc(nm)}はピン止め中</b><small>${on.length ? `${on.join("・")}が ON` : "知らせはすべて OFF"}${pinDeliver() === "ok" || !on.length ? "" : "（この端末には届きません）"}</small></span>${PIN_CHEV}</button>`;
+}
+// 運用の「知らせる空港」を変えたら、ピン止めのゴーアラウンドもそろえる（足りなければピン止めを足す・上限まで）
+function pinFromGa(aps){
+  const list = pins();
+  for(const p of list) p.ga = aps.includes(p.k);
+  for(const k of aps) if(!list.some(p => p.k === k) && list.length < PIN_MAX) list.push({ k, sp:false, dl:false, ga:true });
+  pinsSave(list); pinRedraw();
+}
+document.addEventListener("click", async e => {
+  const t = e.target;
+  const add = t.closest("[data-pin-add]"); if(add){ e.preventDefault(); e.stopPropagation(); pinAdd(add.dataset.pinAdd, add.closest("#dPins") ? "list" : add.closest("#bpass") ? "near" : add.closest("#dAirport") ? "ap" : add.closest("#v-ops") ? "ops" : ""); if(add.closest("#dPins")) setTimeout(pinQOut, 0); return; }
+  const op = t.closest("[data-pin-open]"); if(op){ e.preventDefault(); e.stopPropagation(); document.querySelectorAll(".pinband").forEach(x => x.remove()); pinOpen(op.dataset.pinOpen); return; }
+  const kd = t.closest("[data-pin-kind]"); if(kd && !kd.disabled){ pinToggle(kd.dataset.pinK, kd.dataset.pinKind); return; }
+  const rm = t.closest("[data-pin-remove]"); if(rm){ pinRemove(rm.dataset.pinRemove); return; }
+  const cc = t.closest("[data-pin-cancel]"); if(cc){ const k = cc.dataset.pinCancel; pinsSave(pins().filter(p => p.k !== k)); $("dPin").close(); await pinSync(); pinRedraw(); track("pin", "cancel"); return; }
+  if(t.closest("[data-pin-undo]")){ pinUndo(); return; }
+  const al = t.closest("[data-pin-allow]"); if(al){ const k = al.dataset.pinAllow; const r = await pinSync(true); track("pin", "allow_" + r);
+    if(k && PIN_SHEET && PIN_SHEET.mode === "ask"){ PIN_SHEET = { k, mode:"new" }; $("dPinBody").innerHTML = pinSheetHTML(k, "new"); }
+    pinRedraw(); return; }
+  const lt = t.closest("[data-pin-later]"); if(lt){ const k = lt.dataset.pinLater; $("dPin").close(); pinBand(`${pinName(k)}をピン止めしました`, "知らせの設定", `data-pin-open="${esc(k)}"`); return; }
+  const sp = t.closest("[data-pin-spot]"); if(sp){ pinSpotSet(sp.dataset.pinSpot); return; }
+  const pg = t.closest("[data-pin-page]"); if(pg){ PIN_PAGE = pg.dataset.pinPage; $("dPinsBody").innerHTML = pinPageHTML(PIN_PAGE); $("dPins").scrollTop = 0; return; }
+  if(t.closest("[data-pin-back]")){ PIN_PAGE = null; $("dPinsBody").innerHTML = pinListHTML(); return; }
+  if(t.closest("[data-pin-list]") || t.closest("#pinHome") || t.closest("[data-pins-open]")){ document.querySelectorAll(".pinband").forEach(x => x.remove()); pinListOpen(); return; }
+}, true);
+document.addEventListener("input", e => { if(e.target.id === "pinQ") pinQOut(); });
+setTimeout(() => { try{ pinHomeSync(); pinNearSync(); }catch(e){} }, 0);
 
 // ---- いちばん近い空港 ----
 let OPS_PICKED = false, OPS_NEAR = null;   // OPS_PICKED：利用者がタブで選んだ・リンクや通知で開いた（このページを開いているあいだ、近い空港へ変えない）
@@ -13195,7 +13830,7 @@ async function openOps(){
   track("ops", "open"); OPS_MODE = "auto"; OPS_OBS = null; if(!OPS_WX) OPS_WX_WAIT = true;
   $("opsWx").textContent = "気象通報を読み込んでいます…"; renderOps();
   const [m] = await Promise.all([loadMetar(), loadLeaflet().catch(() => {})]);
-  OPS_WX = m; OPS_WX_WAIT = false; $("opsWx").textContent = wxText(m); renderOps(); renderOpsAlerts();
+  OPS_WX = m; OPS_WX_WAIT = false; $("opsWx").textContent = wxText(m); renderOps(); renderOpsAlerts(); if(NATIVE){ nvLastSave(); nvNetRender(); }
   setTimeout(() => { if(opsOn() && opsNeed("traffic")) startTraffic(); }, 120);   // 地図ができてから。地図のない見方では読まない
   // 基本はいちばん近い空港にする（タブで選んだあとは、このページを開いているあいだ変えない）
   autoOpsAirport().then(ap => { if(!ap) return; OPS_NEAR = ap; if(ap !== OPS_AP && !OPS_PICKED && opsOn()) setOpsAirport(ap); else renderOps(); });
@@ -13213,7 +13848,7 @@ async function setOpsAirport(iata){
   if(OPS_MAP){ OPS_MAP._opsAp = iata; OPS_MAP.setView(opsDef().center, 10, { animate:false }); }
   $("trafficNote").textContent = ""; $("opsWx").textContent = "気象通報を読み込んでいます…"; renderOps();
   const m = await loadMetar(); if(OPS_AP !== iata) return;
-  OPS_WX = m; OPS_WX_WAIT = false; $("opsWx").textContent = wxText(m); renderOps(); if(opsNeed("traffic")) startTraffic(); else stopTraffic(); renderOpsAlerts();
+  OPS_WX = m; OPS_WX_WAIT = false; $("opsWx").textContent = wxText(m); renderOps(); if(opsNeed("traffic")) startTraffic(); else stopTraffic(); renderOpsAlerts(); if(NATIVE){ nvLastSave(); nvNetRender(); }
 }
 document.addEventListener("click", e => { const b = e.target.closest("[data-ops-ap]"); if(!b) return; OPS_PICKED = true; track("ops_ap", b.dataset.opsAp); setOpsAirport(b.dataset.opsAp); });
 
@@ -14562,7 +15197,7 @@ document.addEventListener("click", async e => {
     if(!off && (!next.airports.length || !next.kinds.length)){ GA_MSG = "空港と、知らせる種類を1つ以上選んでください。"; redraw(); return; }
     GA_MSG = "保存しています…"; redraw();
     const ok = await syncPush(pushAps(), pushFlights(), pushSp(), pushSpot(), next);
-    if(ok){ track("push", off ? "ga_off" : "ga_on"); $("dGa").close(); uiSay(off ? "ゴーアラウンドの知らせをやめました。" : `${next.airports.map(i => OPS_AIRPORTS[i].name).join("・")}のゴーアラウンド（推定）と、起きやすい天気を知らせます。`); renderGaBox(); }
+    if(ok){ pinFromGa(next.airports); track("push", off ? "ga_off" : "ga_on"); $("dGa").close(); uiSay(off ? "ゴーアラウンドの知らせをやめました。" : `${next.airports.map(i => OPS_AIRPORTS[i].name).join("・")}のゴーアラウンド（推定）と、起きやすい天気を知らせます。`); renderGaBox(); }
     else { GA_MSG = "保存できませんでした。通知の許可を確かめて、もう一度お試しください。"; redraw(); }
   }
 });
@@ -15002,6 +15637,7 @@ function authRender(){
         <div class="row"><i>3</i><div><b>あとからでも許可できます</b><small>いま断っても、地図を見たり記録帳に書いたりはできます。</small></div></div>
       </div>${auMsg()}<div class="spacer"></div>`;
     foot = `<button class="cta" type="button" data-au="loc-allow"${AU.busy ? " disabled" : ""}>位置情報を許可する</button><button class="ghost" type="button" data-au="loc-later">あとで</button>`;
+    if(NATIVE){ top = nvLocWhyHTML(false); foot = `<button class="cta" type="button" data-au="loc-allow"${AU.busy ? " disabled" : ""}>次へ</button><p class="nvfoot">許可しなくても、図鑑・フライト・運用は見られます。<br>あとから iPhone の設定で変えられます。</p>`; }   // iPhone のアプリ（I1-v2）
   }
   st.innerHTML = top; ft.innerHTML = foot;
   const f = st.querySelector("#auCode, #auName, #auEmail"); if(f) setTimeout(() => { try{ f.focus({ preventScroll:true }); }catch(e){} }, 30);
@@ -15139,6 +15775,7 @@ document.addEventListener("click", async e => {
     auSay("同意いただけなかったため、ログアウトしました。同意するまでは記録をサーバーに保存できません。登録しなくてもデモで試せます。", true); return; }
   if(a === "loc-allow"){
     track("signup", "loc_allow");
+    if(NATIVE){ nvSet(NV_KEY.loc, "1"); AU.busy = true; authRender(); NV_GEO = await geoPermAsk(); AU.busy = false; return auFinish(); }   // iPhone のアプリ：I1 を見たので、ホームで2回目は出さない
     if(navigator.geolocation){ AU.busy = true; authRender();
       await new Promise(res => { let done = false; const fin = () => { if(!done){ done = true; res(); } };
         try{ navigator.geolocation.getCurrentPosition(fin, fin, { enableHighAccuracy:false, timeout:15000, maximumAge:600000 }); }catch(_){ fin(); } setTimeout(fin, 16000); });
@@ -15173,7 +15810,7 @@ $("nameEdit").onclick = () => authOpen("rename", "name");
 
 /* ---------- オフライン用の仕組みと、新しい版のお知らせ ---------- */
 $("appVer").textContent = "版 " + APP_VERSION;
-if("serviceWorker" in navigator && window.isSecureContext && location.protocol !== "file:" && window.top === window.self){
+if(!NATIVE && "serviceWorker" in navigator && window.isSecureContext && location.protocol !== "file:" && window.top === window.self){   // アプリの中ではサービスワーカーを使わない（全部アプリに入っている）
   const hadController = !!navigator.serviceWorker.controller;
   navigator.serviceWorker.register("sw.js").then(reg => {
     // アプリに戻ってきたとき（ホーム画面から開いたままの人も）に、新しい版が出ていないか確かめる
