@@ -39,3 +39,8 @@
 ## ほかの担当への依頼
 - デザイン担当：撮影記録の画面案（spec-photo-log.md の 9-1）。PM 経由で渡してもらう
 - データ担当：表 photo_log と関数 photo_candidates（spec-photo-log.md の 9-2）。PM 経由で渡してもらう
+
+## PM からの知らせ（11/19 18時15分、運用タブが一覧＋専用ページになる・checkin/ops-hub PR #134、まだ本番に入っていない）
+- 運用タブの入り口は、カード10枚の一覧になる。押すとその見方の専用ページが開き、今の中身（renderPhoto・specialHTML・planeHTML）がそのまま出る。
+- 見方の帯（#opsViews・#opsPViews）は一覧の形では出ない。前の形で試すときは localStorage の soramemo.ops.hub を "0" にする。
+- 自分の持ち場で画面を足すときは、一覧のカードと専用ページの形に合わせる（くわしくは docs/pm/report-ops-hub-app.md）。

@@ -78,3 +78,8 @@
 - 部品（ほかの担当が呼ぶ）：predictionHTML(d, ctx, {reg, limit, conf})・predModel・predRows・predCurRow・predWarn・predLiveCtx。ctx.live＝いま飛んでいる便 {fl, dep, arr, t, eta}
 - テスト t133（29項目×844・667）新、t131・t68・t72 を直した。tests/ops 成功。全 e2e は t105・t123（main でも落ちる）・t48（pdf417gen なし）・t62（流し直すと成功）以外成功
 - データ担当へ：v2 に回数の分母、predict_rotation に重みなしの回数（data.md の依頼に書いた。本人の決定しだい）
+
+## PM からの知らせ（11/19 18時15分、運用タブが一覧＋専用ページになる・checkin/ops-hub PR #134、まだ本番に入っていない）
+- 運用タブの入り口は、カード10枚の一覧になる。押すとその見方の専用ページが開き、今の中身（renderPhoto・specialHTML・planeHTML）がそのまま出る。
+- 見方の帯（#opsViews・#opsPViews）は一覧の形では出ない。前の形で試すときは localStorage の soramemo.ops.hub を "0" にする。
+- 自分の持ち場で画面を足すときは、一覧のカードと専用ページの形に合わせる（くわしくは docs/pm/report-ops-hub-app.md）。
