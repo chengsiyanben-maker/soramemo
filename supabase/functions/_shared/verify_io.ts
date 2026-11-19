@@ -41,14 +41,6 @@ export function makeDeps(admin: SupabaseClient, opensky: { clientId: string; cli
     return await res.json();
   }
 
-  // 実際に飛んだ航路（飛行中のどこかの時刻を渡すと、その飛行の全体が返る）。見つからなければ null
-  async function fetchTrack(icao24: string, time: number): Promise<unknown> {
-    const res = await fetch(`${API}/tracks/all?icao24=${encodeURIComponent(icao24)}&time=${time}`, { headers: { Authorization: `Bearer ${await bearer()}` }, signal: AbortSignal.timeout(30000) });
-    if (res.status === 404) return null;
-    if (!res.ok) throw new Error(`track ${res.status}`);
-    return (await res.json())?.path ?? null;
-  }
-
   async function loadFlights(): Promise<Row[]> {
     const today = new Date(); today.setUTCHours(0, 0, 0, 0);       // 到着記録は夜間にまとめて更新されるため、前日以前の分だけ
     const { data, error } = await admin.from("flights")
@@ -85,7 +77,14 @@ export function makeDeps(admin: SupabaseClient, opensky: { clientId: string; cli
     return `航空会社の運航情報で確認（${n(hit.flight)} ${hm(hit.atd)}発・${hm(hit.ata)}着）`;
   }
 
-  // adsb のときは OpenSky に問い合わせない（航跡は毎晩の daily-archive が全機の記録から付ける）
-  if (source === "adsb") return { loadFlights, fetchArrivals: adsbArrivals(admin), save, officialCheck };
-  return { loadFlights, fetchArrivals, save, fetchTrack, officialCheck };
+  // 実際の出発・到着の時刻（航空会社の運航情報 → 毎日の記録 → 時刻表）。照合した8日分を見直す
+  async function fillActual(): Promise<unknown> {
+    const { data, error } = await admin.rpc("flights_fill_actual", { p_days: 8, p_limit: 2000 });
+    if (error) throw new Error("flights_fill_actual " + error.message);
+    return data;
+  }
+
+  // 航跡は OpenSky から取らない（研究・非商用だけの条件のため。11/20）。毎晩の daily-archive が全機の記録（adsb.lol・ODbL）から付ける
+  if (source === "adsb") return { loadFlights, fetchArrivals: adsbArrivals(admin), save, officialCheck, fillActual };
+  return { loadFlights, fetchArrivals, save, officialCheck, fillActual };
 }

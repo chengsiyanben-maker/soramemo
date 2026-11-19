@@ -41,7 +41,25 @@ Deno.test("adsb のときは OpenSky に問い合わせず（航跡も取らず�
     assertEquals(sum.verified, 1);
     assertEquals(saved, [[1, "verified", "JAL501 便名一致", 1, null]]);
     assertEquals(fetched, 0);
-    // 今までどおり（opensky）なら航跡を取る関数がある
-    assertEquals(typeof makeDeps(admin, { clientId: "", clientSecret: "" }).fetchTrack, "function");
+    // opensky でも航跡は取らない（OpenSky は研究・非商用だけの条件。11/20 から航跡は全機の記録だけ）
+    assertEquals(makeDeps(admin, { clientId: "", clientSecret: "" }).fetchTrack, undefined);
   } finally { globalThis.fetch = realFetch; }
+});
+
+Deno.test("照合のあと実際の時刻を入れる（flights_fill_actual を8日分で呼ぶ・失敗しても照合の結果は変えない）", async () => {
+  const calls: unknown[] = [];
+  // deno-lint-ignore no-explicit-any
+  const admin: any = { rpc: (name: string, args: unknown) => { calls.push([name, args]); return Promise.resolve({ data: { updated: 2 }, error: null }); } };
+  for (const src of ["adsb", "opensky"] as const) {
+    calls.length = 0;
+    const d = makeDeps(admin, { clientId: "", clientSecret: "" }, src);
+    const sum = await runVerification({ ...d, loadFlights: async () => [], save: async () => {} });
+    assertEquals(sum.actual, { updated: 2 });
+    assertEquals(calls, [["flights_fill_actual", { p_days: 8, p_limit: 2000 }]]);
+  }
+  // deno-lint-ignore no-explicit-any
+  const bad: any = { rpc: () => Promise.resolve({ data: null, error: { message: "boom" } }) };
+  const sum = await runVerification({ ...makeDeps(bad, { clientId: "", clientSecret: "" }, "adsb"), loadFlights: async () => [], save: async () => {} });
+  assertEquals(sum.actual, "error");
+  assertEquals(sum.checked, 0);
 });
