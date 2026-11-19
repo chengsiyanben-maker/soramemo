@@ -1,5 +1,6 @@
 import os, sys
 HERE=os.path.dirname(os.path.abspath(__file__)); WEB=os.path.abspath(os.path.join(HERE,'..','..','web')); WORK=os.environ.get('SORAMEMO_TEST_WORK','/tmp/soramemo-e2e'); os.makedirs(WORK, exist_ok=True)
+# （11/19 運用タブは一覧＋専用ページになった。このテストは中身を前の形（見方のタブ）で確かめるので soramemo.ops.hub=0。一覧は t148）
 # 運用タブの見回りの直し（11/13 の全体の見回り。運用予想担当）
 #   1 選んでいる見方の分だけ読む（開いたときの通信の本数）・livery_board は1回・見方を変えても3分以内の結果を使う・ログインしていない人とデモは flight_alerts を読まない
 #   2 気象通報が届くまでは風の欄「読み込み中」・札を出さない
@@ -36,7 +37,7 @@ async def page(b, mode, view='runway', metar_wait=0.0):
         body = {'special_now':SPECIAL, 'livery_board':LBOARD, 'airport_board':BOARD, 'airport-foreign':FOREIGN, 'metar':METAR, 'flight_alerts':ALERTS, 'airport-traffic':{'planes':[], 'at':iso(0)}}.get(name, {} if '/functions/' in u else [])
         await r.fulfill(status=200, body=json.dumps(body), content_type='application/json', headers={'Access-Control-Allow-Origin':'*'})
     await c.route('https://fake.supabase.co/rest/**', h); await c.route('https://fake.supabase.co/functions/**', h)
-    await c.add_init_script("localStorage.setItem('soramemo.onboarded','1'); localStorage.setItem('soramemo.install.later','1'); localStorage.setItem('soramemo.tpTaught','1'); localStorage.setItem('soramemo.zk.notice','1'); localStorage.setItem('soramemo.persona','all'); localStorage.setItem('soramemo.opsAirport','HND'); localStorage.setItem('soramemo.view.ops','%s');" % view)
+    await c.add_init_script("localStorage.setItem('soramemo.ops.hub','0'); localStorage.setItem('soramemo.onboarded','1'); localStorage.setItem('soramemo.install.later','1'); localStorage.setItem('soramemo.tpTaught','1'); localStorage.setItem('soramemo.zk.notice','1'); localStorage.setItem('soramemo.persona','all'); localStorage.setItem('soramemo.opsAirport','HND'); localStorage.setItem('soramemo.view.ops','%s');" % view)
     pg = await c.new_page(); errs = []; pg.on('pageerror', lambda e: errs.append(str(e)))
     await pg.goto('file://'+os.path.join(WORK,'index_server_test.html')); await pg.wait_for_load_state('load')
     await pg.wait_for_function('document.readyState === "complete" && typeof render === "function" && typeof sb !== "undefined" && !!sb'); await pg.wait_for_timeout(400)

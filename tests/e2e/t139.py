@@ -1,5 +1,6 @@
 import os, sys
 HERE=os.path.dirname(os.path.abspath(__file__)); WEB=os.path.abspath(os.path.join(HERE,'..','..','web')); WORK=os.environ.get('SORAMEMO_TEST_WORK','/tmp/soramemo-e2e'); os.makedirs(WORK, exist_ok=True)
+# （11/19 運用タブは一覧＋専用ページになった。このテストは中身を前の形（見方のタブ）で確かめるので soramemo.ops.hub=0。一覧は t148）
 # いつもより○分遅い（推定）（決定事項【11/17】案A・画面案 design/usual-late 2版 U1〜U5）
 #   1 乗る便（時刻表にない便・飛行中）：見込みの時刻＋灰色の点線の札「いつもより32分遅い（推定）」＋箱の中の出典の1行。ODPT の出典は出さない
 #   2 乗る便があるときは、ホームのシートの先頭（半券より上）にカード。844・667 で箱の中の出典の1行が下のタブ帯より上に見える
@@ -62,7 +63,7 @@ async def page(b, plan=None, rpc_missing=False, width=390, height=844, view='boa
         else: body = {'airport_board':BOARD, 'airport-foreign':FOREIGN, 'airport-traffic':{'planes':[], 'at':iso(0)}}.get(name, {} if '/functions/' in u else [])
         await r.fulfill(status=200, body=json.dumps(body), content_type='application/json', headers={'Access-Control-Allow-Origin':'*'})
     await c.route('https://fake.supabase.co/rest/**', h); await c.route('https://fake.supabase.co/functions/**', h)
-    init = "localStorage.setItem('soramemo.onboarded','1'); localStorage.setItem('soramemo.install.later','1'); localStorage.setItem('soramemo.tpTaught','1'); localStorage.setItem('soramemo.zk.notice','1'); localStorage.setItem('soramemo.persona','all'); localStorage.setItem('soramemo.opsAirport','HND'); localStorage.setItem('soramemo.view.ops','%s');" % view
+    init = "localStorage.setItem('soramemo.ops.hub','0'); localStorage.setItem('soramemo.onboarded','1'); localStorage.setItem('soramemo.install.later','1'); localStorage.setItem('soramemo.tpTaught','1'); localStorage.setItem('soramemo.zk.notice','1'); localStorage.setItem('soramemo.persona','all'); localStorage.setItem('soramemo.opsAirport','HND'); localStorage.setItem('soramemo.view.ops','%s');" % view
     if plan: init += "localStorage.setItem('soramemo.plan', %s);" % json.dumps(json.dumps(plan))
     await c.add_init_script(init)
     pg = await c.new_page(); errs = []; pg.on('pageerror', lambda e: errs.append(str(e)))
