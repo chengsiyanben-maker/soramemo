@@ -1,6 +1,7 @@
 # チェックイン担当の帳面
 
 ## いま持っている仕事
+- 11/20 3時台の手動の回（PM が同じ2つを指示）：どちらも前の回で済み（PR #138・#139）。main は 863fb3d のままで、data/flight-actual はまだ main に入っていないので取り込み直しは不要だった。#136 が main に入ったら #139 に main を取り込み、t150 を流し直す
 - 11/20 3時台（日本時間）の定時の回（PM 2時45分の2つ）：どちらも作って下書きにした
   - 図鑑の絞り込みと県名（design/zukan-filter 1版 F1〜F3）：ブランチ checkin/zukan-filter（main 863fb3d から）・下書き **PR #138**（07d7cc0）・報告 docs/pm/report-zukan-filter-app.md・写真 docs/pm/shots-zukan-filter/
     - 見方の帯「地方別・地図」・ピル「すべて 75・飛行場 30・滑空場 33・ヘリポート 12」（localStorage soramemo.zkx.kind・soramemo.zkx.view、DEMO_LO_KEYS にも足した）・全部の枠に県名13px・1つに絞ると種類の札を外す・地図の見方（点と「まだ」の一覧）
