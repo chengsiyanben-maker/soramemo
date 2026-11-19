@@ -2842,6 +2842,33 @@ dialog.psheet .btn1,dialog.psheet .btn2{display:block;width:100%;margin-top:10px
 #v-book .zxmap .zn{display:none}[data-night="on"] #v-book .zxmap .zn{display:inline}[data-night="on"] #v-book .zxmap .zd{display:none}
 [data-night="on"] #v-book .zxmap .mv{fill:#DCE3EA!important;stroke:#141B24}[data-night="on"] #v-book .zxmap .mn{fill:#141B24}
 [data-night="on"] #v-book .zx-sep{color:var(--bk-ink)}
+/* 図鑑の飛行場・滑空場・ヘリポート：種類の絞り込みと県名（11/20 design/zukan-filter 1版） */
+#v-book .zx-seg{display:flex;gap:2px;margin:2px 0 12px;padding:3px;border-radius:999px;background:#E4E8EE}
+#v-book .zx-seg button{flex:1 1 0;min-width:0;min-height:48px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2px;border:0;border-radius:999px;background:none;color:var(--bk-sub);font:700 13px/1.2 var(--gothic);white-space:nowrap;cursor:pointer}
+#v-book .zx-seg button .u{font:600 12px/1.2 var(--gothic);color:var(--bk-sub)}
+#v-book .zx-seg button[aria-pressed="true"]{background:var(--bk-card);color:var(--bk-ink);font-weight:800;box-shadow:0 2px 8px -3px rgba(15,23,42,.28)}
+#v-book .zx-ap .zx-pf{font-size:13px;font-weight:600;line-height:1.2;color:var(--bk-sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+#v-book .zx-one .zx-ap .zx-k{display:none}
+#v-book .zx-hero .ht .lab i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px;vertical-align:1px}
+#bookAir .zk-main>.vwrow{margin-top:4px}#zkxViews button{min-height:44px}
+:root[data-bookseg="air"][data-zxview="map"] #bookAir .zk-main{margin-right:0}
+#v-book .zx-bigmap{margin-top:12px;padding:12px 12px 10px;border-radius:22px;background:var(--bk-card);box-shadow:var(--bk-shadow)}
+#v-book .zx-bigmap svg{display:block;width:100%;height:auto;max-height:380px}
+#v-book .zx-bigmap .m86{fill:#DDE2E8}#v-book .zx-bigmap .my{fill:#fff;stroke:#9AA4B1;stroke-width:1.6}#v-book .zx-bigmap .mv{stroke:#fff;stroke-width:2}
+#v-book .zx-bigmap .zn{display:none}
+#v-book .zx-bigmap text{font:700 13px var(--gothic);fill:var(--bk-ink);paint-order:stroke;stroke:#fff;stroke-width:3px;stroke-linejoin:round}
+#v-book .zx-lg{display:flex;gap:14px;margin:6px 4px 0;font-size:13px;font-weight:600;color:var(--bk-sub)}
+#v-book .zx-lg i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px}#v-book .zx-lg i.y{background:#fff;box-shadow:inset 0 0 0 1.6px #9AA4B1}
+#v-book .zx-list{margin-top:12px}#v-book .zx-list h4{margin:14px 4px 6px;font-size:13px;font-weight:800;color:var(--bk-sub)}
+#v-book .zx-list .r{display:flex;align-items:center;gap:10px;width:100%;min-height:48px;padding:0 14px;margin-top:6px;border:0;border-radius:16px;background:var(--bk-card);box-shadow:var(--bk-shadow);font:inherit;text-align:left;cursor:pointer}
+#v-book .zx-list .r b{font-size:15px;font-weight:800;color:var(--zk-pale);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#v-book .zx-list .r .pf{margin-left:auto;flex:none;font-size:13px;color:var(--bk-sub);font-weight:600}
+#v-book .zx-list .r i{width:10px;height:10px;border-radius:50%;flex:none;background:#fff;box-shadow:inset 0 0 0 1.6px #9AA4B1}#v-book .zx-list .r i.k-glider{border-radius:2px}
+[data-night="on"] #v-book .zx-seg{background:#141B24}[data-night="on"] #v-book .zx-seg button[aria-pressed="true"]{background:#232C38;color:#E8EDF2;box-shadow:inset 0 0 0 1px rgba(220,227,234,.35)}
+[data-night="on"] #v-book .zx-hero .ht .lab i{background:#DCE3EA!important}
+[data-night="on"] #v-book .zx-bigmap .m86{fill:#2A3340}[data-night="on"] #v-book .zx-bigmap .my{fill:#0F141B;stroke:#66778C}[data-night="on"] #v-book .zx-bigmap .mv{fill:#DCE3EA!important;stroke:#141B24}
+[data-night="on"] #v-book .zx-bigmap .zn{display:inline}[data-night="on"] #v-book .zx-bigmap .zd{display:none}
+[data-night="on"] #v-book .zx-bigmap text{stroke:#0F141B}[data-night="on"] #v-book .zx-lg i:not(.y){background:#DCE3EA!important}[data-night="on"] #v-book .zx-lg i.y,[data-night="on"] #v-book .zx-list .r i{background:#0F141B;box-shadow:inset 0 0 0 1.6px #66778C}
 /* 右端のツメ：昼は地方の色、夜は色なし */
 #v-book .zk-tsume{position:fixed;right:max(0px,calc(50vw - 300px));top:120px;display:flex;flex-direction:column;gap:2px;z-index:20}
 :root:not([data-bkview="region"]) #v-book #zkTsume,:root:not([data-bookseg="main"]) #v-book #zkTsume,:root:not([data-bookseg="air"]) #v-book #zkxTsume{display:none}
@@ -6236,25 +6263,64 @@ function zkAirEntryHTML(){
       <span class="zx-kd">${c.kind.map(([k, g, t]) => `<span><i class="k-${k}" style="background:${ZKX_COL[k]}"></i>${XKIND[k].short} <b>${g}</b><small>/${t}</small></span>`).join("")}<span><i class="my"></i>まだ</span></span></span>
     <span class="zx-r">${zkxMapSVG(c.xv)}</span></span><span class="zx-open" aria-hidden="true">開く<svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></span></button>`;
 }
-// 1つの枠：短い名前・種類の札・行った（✓ と回数）／まだ
+// 1つの枠：短い名前・県名（11/20 design/zukan-filter 1版・取っていない所も）・種類の札（1つの種類に絞ったときは CSS で外す）・行った（✓ と回数）／まだ
 function zkxTile(a, on, n){
   const nm = zkxShort(a), [kn, kc] = nearKind(a);
-  return `<button class="zk-ap zx-ap${on ? "" : " no"}${nm.length >= 7 ? " long" : ""}" type="button" data-zka="${a.id}" style="--c:${zkCol(regionOf(a))}" aria-label="${esc(a.name)}、${esc(kn)}、${on ? n + "回" : "まだ"}">
-    <span class="zx-nm">${zkxBreak(nm)}</span><span class="zx-k ${kc}">${esc(kn)}</span><span class="ft">${on ? `${ZK_CHECK}<b>${n}</b>回` : `${ZK_YET}まだ`}</span></button>`;
+  return `<button class="zk-ap zx-ap${on ? "" : " no"}${nm.length >= 7 ? " long" : ""}" type="button" data-zka="${a.id}" style="--c:${zkCol(regionOf(a))}" aria-label="${esc(a.name)}、${esc(a.pref || "")}、${esc(kn)}、${on ? n + "回" : "まだ"}">
+    <span class="zx-nm">${zkxBreak(nm)}</span><span class="zx-pf">${esc(a.pref || "")}</span><span class="zx-k ${kc}">${esc(kn)}</span><span class="ft">${on ? `${ZK_CHECK}<b>${n}</b>回` : `${ZK_YET}まだ`}</span></button>`;
+}
+/* 種類の絞り込みと見方（11/20 本人「飛行場、滑空場、ヘリポートのフィルター機能、すべてに何県か表示して」・画面案 design/zukan-filter 1版 F1〜F3）
+   ピルは「すべて・飛行場・滑空場・ヘリポート」の4つ（基地は今のまま別の図鑑）。見方は「地方別・地図」。どちらも端末に覚える（表は変えない） */
+const ZKX_KIND_KEY = "soramemo.zkx.kind", ZKX_VIEW_KEY = "soramemo.zkx.view";
+const ZKX_LAB = { all:"すべて", field:"飛行場", glider:"滑空場", heli:"ヘリポート" };
+const zkxGet = (k, ok, d) => { try{ const v = localStorage.getItem(k); return ok.includes(v) ? v : d; }catch(e){ return d; } };
+const zkxKind = () => zkxGet(ZKX_KIND_KEY, ["all", ...ZKX_KINDS], "all");
+const zkxView = () => zkxGet(ZKX_VIEW_KEY, ["region", "map"], "region");
+function zkxSet(k, v){ try{ localStorage.setItem(k, v); }catch(e){} }
+// 地図の見方：絞った種類の点だけ。まだ＝灰の輪、行った＝色の丸と名前（沖縄・南の島は地図の外なので下の一覧で）
+function zkxBigMapSVG(list, xv){
+  const W = 300, H = 380, P = a => [((a.lon - 128.6) / (146.2 - 128.6)) * (W - 16) + 8, ((45.6 - a.lat) / (45.6 - 30.8)) * (H - 16) + 8];
+  const inMap = a => a.lat > 30.5 && a.lon > 128.4;
+  let g = A.filter(inMap).map(a => { const [x, y] = P(a); return `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="1.8" class="m86"/>`; }).join("");
+  g += list.filter(a => inMap(a) && !xv.has(a.id)).map(a => { const [x, y] = P(a); return zkxDot(x, y, 4, "my", a.kind); }).join("");
+  g += list.filter(a => inMap(a) && xv.has(a.id)).map(a => { const [x, y] = P(a); return `${zkxDot(x, y, 6, "mv", a.kind, `fill:${ZKX_COL[a.kind]}`)}<text x="${(x - 10).toFixed(1)}" y="${(y + 4.5).toFixed(1)}" text-anchor="end">${esc(zkxShort(a))}</text>`; }).join("");
+  return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${ZKX_TITLE}の地図。色の丸が行った所、灰の輪がまだの所">${g}</svg>`;
 }
 function zkAirBookHTML(){
   const c = zkxCounts(), vc = new Map(); for(const x of S.checkins) if(IS_EXTRA(x.a)) vc.set(x.a, (vc.get(x.a) || 0) + 1);
-  const rgs = REGION.map(([rg]) => { const list = c.list.filter(a => regionOf(a) === rg); return { rg, list, got:list.filter(a => c.xv.has(a.id)).length }; });
-  const hero = `<div class="zk-hero zx-hero"><span class="zx-pill w">もう1つの図鑑</span><div class="ht"><span class="lab">集めた数</span><b class="num">${c.got.length}</b><span class="u">/ ${c.list.length}</span><span class="side">まだ ${c.list.length - c.got.length}</span></div>
-    <p class="zx-kinds">${c.kind.map(([k, g, t]) => `<span>${XKIND[k].short} <b>${g}</b><small>/${t}</small></span>`).join("")}</p>
-    <div class="rg">${rgs.map(r => `<div><span class="t"><span>${r.rg}</span><span>${r.list.length ? `${r.got}<small>/${r.list.length}</small>` : `<small>なし</small>`}</span></span><span class="b"><i style="width:${r.list.length ? Math.round(r.got / r.list.length * 100) : 0}%;background:${zkCol(r.rg)}"></i></span></div>`).join("")}</div></div>
-    <p class="zk-lead">集めた空港（${A.length}）とは別に数えます。自衛隊の飛行場（基地）は、今までどおり「ほかの図鑑・実績」の中にあります。</p>`;
-  const body = rgs.filter(r => r.list.length).map(r => `<section class="zk-rg" id="zkxrg-${r.rg}" data-rg="${r.rg}" style="--c:${zkCol(r.rg)}">
-    <div class="zk-door"><h3>${r.rg}</h3><b class="num">${r.got}</b><span class="u">/ ${r.list.length}</span><span class="zx-dtag"><span class="nw">飛行場・</span><span class="nw">滑空場・</span><span class="nw">ヘリポート</span></span><button class="zk-up" type="button" data-zk-up aria-label="図鑑の上へ"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 14l6-6 6 6"/></svg></button></div>
+  const kind = zkxKind(), view = zkxView(), one = kind !== "all";
+  const list = one ? c.list.filter(a => a.kind === kind) : c.list, got = list.filter(a => c.xv.has(a.id));
+  const rgs = REGION.map(([rg]) => { const l = list.filter(a => regionOf(a) === rg); return { rg, list:l, got:l.filter(a => c.xv.has(a.id)).length }; });
+  const lab = one ? `<i style="background:${ZKX_COL[kind]}"></i>${ZKX_LAB[kind]}` : "集めた数";
+  const hero = `<div class="zk-hero zx-hero"><span class="zx-pill w">もう1つの図鑑</span><div class="ht"><span class="lab">${lab}</span><b class="num">${got.length}</b><span class="u">/ ${list.length}</span><span class="side">まだ ${list.length - got.length}</span></div>
+    ${one ? "" : `<p class="zx-kinds">${c.kind.map(([k, g, t]) => `<span>${XKIND[k].short} <b>${g}</b><small>/${t}</small></span>`).join("")}</p>`}
+    ${view === "map" ? "" : `<div class="rg">${rgs.map(r => `<div><span class="t"><span>${r.rg}</span><span>${r.list.length ? `${r.got}<small>/${r.list.length}</small>` : `<small>なし</small>`}</span></span><span class="b"><i style="width:${r.list.length ? Math.round(r.got / r.list.length * 100) : 0}%;background:${zkCol(r.rg)}"></i></span></div>`).join("")}</div>`}</div>`;
+  const vw = `<div class="vwrow"><div class="viewsw" id="zkxViews" role="tablist" aria-label="見方">${[["region", "地方別"], ["map", "地図"]].map(([id, t]) => `<button type="button" role="tab" data-zxv="${id}" aria-selected="${view === id}">${t}</button>`).join("")}</div></div>`;
+  const seg = `<div class="zx-seg" id="zkxSeg" role="group" aria-label="種類で絞り込む">${["all", ...ZKX_KINDS].map(k => `<button type="button" data-zxk="${k}" aria-pressed="${kind === k}">${ZKX_LAB[k]}<span class="u">${k === "all" ? c.list.length : c.list.filter(a => a.kind === k).length}</span></button>`).join("")}</div>`;
+  let body;
+  if(view === "map"){
+    const yet = list.filter(a => !c.xv.has(a.id));
+    body = `${hero}<div class="zx-bigmap">${zkxBigMapSVG(list, c.xv)}<p class="zx-lg"><span><i style="background:${one ? ZKX_COL[kind] : ZKX_COL.field}"></i>行った</span><span><i class="y"></i>まだ</span></p></div>
+      <div class="zx-list">${yet.length ? `<h4>まだ ${yet.length}</h4>` : `<p class="zk-lead">${one ? ZKX_LAB[kind] + "は" : ""}全部行きました。</p>`}${yet.map(a => `<button type="button" class="r" data-zka="${a.id}"><i class="k-${a.kind}"></i><b>${esc(zkxShort(a))}</b><span class="pf">${esc(a.pref || "")}</span></button>`).join("")}</div>`;
+  } else {
+    const dt = one ? "" : `<span class="zx-dtag"><span class="nw">飛行場・</span><span class="nw">滑空場・</span><span class="nw">ヘリポート</span></span>`;
+    body = `${hero}${one ? "" : `<p class="zk-lead">集めた空港（${A.length}）とは別に数えます。自衛隊の飛行場（基地）は、今までどおり「ほかの図鑑・実績」の中にあります。</p>`}` + rgs.filter(r => r.list.length).map(r => `<section class="zk-rg" id="zkxrg-${r.rg}" data-rg="${r.rg}" style="--c:${zkCol(r.rg)}">
+    <div class="zk-door"><h3>${r.rg}</h3><b class="num">${r.got}</b><span class="u">/ ${r.list.length}</span>${dt}<button class="zk-up" type="button" data-zk-up aria-label="図鑑の上へ"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 14l6-6 6 6"/></svg></button></div>
     <div class="zk-grid">${r.list.map(a => zkxTile(a, c.xv.has(a.id), vc.get(a.id) || 0)).join("")}</div></section>`).join("");
-  const tsume = `<nav class="zk-tsume" id="zkxTsume" aria-label="地方へ飛ぶ">${rgs.map(r => `<button type="button" data-zkj="${r.rg}" style="--c:${zkCol(r.rg)}" aria-label="${r.rg}へ"${r.list.length ? "" : ` disabled aria-disabled="true"`}><span>${r.rg}</span></button>`).join("")}</nav>`;
-  return `${ZK_BACK_MAIN}<div class="book-head"><h2>${ZKX_TITLE_BR}</h2></div><div class="zk-main">${hero}${body}</div>${tsume}`;
+  }
+  const tsume = view === "map" ? "" : `<nav class="zk-tsume" id="zkxTsume" aria-label="地方へ飛ぶ">${rgs.map(r => `<button type="button" data-zkj="${r.rg}" style="--c:${zkCol(r.rg)}" aria-label="${r.rg}へ"${r.list.length ? "" : ` disabled aria-disabled="true"`}><span>${r.rg}</span></button>`).join("")}</nav>`;
+  document.documentElement.dataset.zxview = view;
+  return `${ZK_BACK_MAIN}<div class="book-head"><h2>${ZKX_TITLE_BR}</h2></div><div class="zk-main${one ? " zx-one" : ""}">${vw}${seg}${body}</div>${tsume}`;
 }
+// ピルと見方を押したら覚えて描き直す（位置は見方の帯の所に戻す）
+document.addEventListener("click", e => {
+  const b = e.target.closest("#bookAir [data-zxk], #bookAir [data-zxv]"); if(!b) return;
+  if(b.dataset.zxk){ zkxSet(ZKX_KIND_KEY, b.dataset.zxk); track("zkx_kind", b.dataset.zxk); }
+  else { zkxSet(ZKX_VIEW_KEY, b.dataset.zxv); track("zkx_view", b.dataset.zxv); }
+  const y = window.scrollY; $("bookAir").innerHTML = zkAirBookHTML(); zkTsumeSync();
+  const el = $("zkxSeg"); if(el){ const top = el.getBoundingClientRect().top + window.scrollY - 140; window.scrollTo(0, Math.min(y, Math.max(0, top))); }
+  const f = document.querySelector(b.dataset.zxk ? `#bookAir [data-zxk="${b.dataset.zxk}"]` : `#bookAir [data-zxv="${b.dataset.zxv}"]`); if(f) f.focus({ preventScroll:true });
+});
 /* ---------- ほかの図鑑・実績（86 の数には入らない） ---------- */
 function renderZkOthers(){
   const box = $("bookOthers"); if(!box) return;
@@ -6308,7 +6374,7 @@ const LO_KEY = "soramemo.layout";
 // デモの間に変えた表示（タブ・見方・かたまり・構成）は、デモを終えると始める前に戻す（review-app-1 の3）。
 // 始めるときにこの端末の値を控え、終えたとき（開き直してデモが終わったときも、読み込みのはじめに）戻す
 const DEMO_LO_BAK = "soramemo.demo.lobak";
-const DEMO_LO_KEYS = () => [LO_KEY, "soramemo.persona", "soramemo.ops.side", "soramemo.ops.recent", ...Object.keys(VIEWS).map(k => "soramemo.view." + k)];
+const DEMO_LO_KEYS = () => [LO_KEY, "soramemo.persona", "soramemo.ops.side", "soramemo.ops.recent", "soramemo.zkx.kind", "soramemo.zkx.view", ...Object.keys(VIEWS).map(k => "soramemo.view." + k)];
 function demoLoSave(){ try{ const o = {}; for(const k of DEMO_LO_KEYS()) o[k] = localStorage.getItem(k); localStorage.setItem(DEMO_LO_BAK, JSON.stringify(o)); }catch(e){} }
 function demoLoRestore(){ try{ const raw = localStorage.getItem(DEMO_LO_BAK); if(!raw) return false; const o = JSON.parse(raw) || {};
   for(const k of DEMO_LO_KEYS()){ if(!(k in o)) continue; if(o[k] == null) localStorage.removeItem(k); else localStorage.setItem(k, o[k]); }
