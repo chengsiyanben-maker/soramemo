@@ -1,0 +1,20 @@
+{
+  "name": "soramemo-ios",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node build_www.mjs",
+    "sync": "node build_www.mjs && cap sync ios",
+    "open": "cap open ios"
+  },
+  "dependencies": {
+    "@capacitor/browser": "8.0.5",
+    "@capacitor/core": "8.6.0",
+    "@capacitor/geolocation": "8.2.4",
+    "@capacitor/ios": "8.6.0",
+    "@capacitor/share": "8.0.3"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "8.6.0"
+  }
+}
