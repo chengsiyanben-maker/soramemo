@@ -1,0 +1,368 @@
+<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>H5 空港を切り替える</title><style>
+:root{--bg:#EEF1F5;--card:#FFFFFF;--ink:#24292F;--ink2:#374151;--mute:#6B7280;--sub:#8A919C;--pill:#EEF0F3;--line:#E6E9EE;
+  --blue:#2563EB;--navy:#16233A;--jal:#B4232A;--ana:#1C4FA0;--late:#B45309;--ok:#1F7A3F;
+  --sw-on:#16233A;--sw-off:#E5E8EE;--sw-off-ring:#768090;
+  --sh:0 12px 26px -18px rgba(15,23,42,.30),inset 0 0 0 1px rgba(17,24,39,.06);
+  --gothic:"Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic UI","Noto Sans CJK JP","Noto Sans JP",system-ui,sans-serif}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg)}
+body{width:390px;min-height:844px;margin:0 auto;font:500 15px/1.5 var(--gothic);color:var(--ink);-webkit-font-smoothing:antialiased;position:relative;overflow-x:hidden}
+.pad{padding:8px 16px 120px}
+button{font:inherit;color:inherit}
+svg.i{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+/* アプリの上（今のまま） */
+.brand{display:flex;justify-content:space-between;align-items:center;height:52px}
+.brand b{font-size:19px;font-weight:800;letter-spacing:.12em;display:flex;align-items:center;gap:6px}
+.brand span{height:44px;display:inline-flex;align-items:center;padding:0 16px;border-radius:999px;background:var(--card);box-shadow:var(--sh);font-size:14px;font-weight:800}
+.mode{display:flex;background:#E3E7EC;border-radius:999px;padding:4px;margin-top:6px}
+.mode span{flex:1;height:40px;display:flex;align-items:center;justify-content:center;border-radius:999px;font-size:14px;font-weight:800;color:var(--mute)}
+.mode span.on{background:var(--card);color:var(--ink);box-shadow:0 2px 8px -3px rgba(15,23,42,.3)}
+/* 新：空港｜機体（運用タブの中の切り替え。上のスタンプラリー｜エアライン経営と見分けるため、選んだ側は濃い紺） */
+.kindrow{display:flex;align-items:center;gap:8px;margin-top:16px}
+.kind{display:inline-flex;gap:4px;background:var(--card);box-shadow:var(--sh);border-radius:999px;padding:4px}
+.kind span{height:40px;min-width:88px;padding:0 16px;display:inline-flex;align-items:center;justify-content:center;gap:6px;border-radius:999px;font-size:15px;font-weight:800;color:var(--mute)}
+.kind span.on{background:var(--navy);color:#fff}
+.kind span svg{width:17px;height:17px}
+.kindrow .sp{flex:1}
+.ic{width:44px;height:44px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;color:var(--ink2)}
+/* 空港・機体を選ぶ欄 */
+.pickrow{display:flex;align-items:center;gap:8px;margin-top:12px}
+.ap{height:48px;display:inline-flex;align-items:center;gap:8px;padding:0 14px 0 8px;border-radius:999px;background:var(--card);box-shadow:var(--sh);font-size:17px;font-weight:800}
+.ap i{font:700 13px/1 ui-monospace,Menlo,monospace;font-style:normal;color:#fff;background:var(--ink);border-radius:6px;padding:5px 6px}
+.ap small{font-size:13px;font-weight:700;color:var(--ana)}
+.ap.plr i{background:var(--jal)}
+.ap.plr em{font-style:normal;font-size:13px;font-weight:700;color:var(--mute)}
+.search{flex:1;height:48px;display:flex;align-items:center;gap:8px;padding:0 16px;border-radius:999px;background:var(--card);box-shadow:var(--sh);font-size:15px;color:var(--sub)}
+.back{height:44px;display:inline-flex;align-items:center;gap:2px;padding:0 12px 0 6px;border-radius:999px;background:var(--pill);font-size:14px;font-weight:800;color:var(--ink2)}
+/* 見方の帯（今の .viewsw：下線のタブ＋鉛筆） */
+.views{display:flex;align-items:center;gap:20px;margin:16px 0 12px 2px;font-size:15px;font-weight:800;color:var(--mute);white-space:nowrap;overflow:hidden}
+.views span{padding:11px 0 11px}
+.views span.on{color:var(--ink);box-shadow:inset 0 -3px 0 var(--ink)}
+.views .pen{margin-left:auto;flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;color:var(--mute);background:linear-gradient(90deg,rgba(238,241,245,0),var(--bg) 30%)}
+.views.fade{mask-image:linear-gradient(90deg,#000 86%,transparent)}
+.card{background:var(--card);border-radius:22px;box-shadow:var(--sh);padding:16px}
+.card+.card,.mt{margin-top:12px}
+.h{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin:0 0 8px}
+.h b{font-size:16px;font-weight:800}
+.h small{font-size:13px;font-weight:600;color:var(--mute)}
+.note{font-size:13px;line-height:1.7;color:var(--mute);margin:10px 0 0}
+.note b{color:var(--ink2)}
+/* 滑走路（今の見方の頭） */
+.hero{background:#0F1B2D;color:#fff;border-radius:22px;padding:16px 16px 14px}
+.hero .t{display:flex;justify-content:space-between;align-items:center;font-size:13px;color:#C9D2DE}
+.hero .t em{font-style:normal;font-weight:800;color:#86EFAC;background:rgba(134,239,172,.12);border-radius:999px;padding:2px 10px}
+.hero h3{margin:6px 0 10px;font-size:28px;font-weight:900;letter-spacing:.02em}
+.hero .rw{display:flex;gap:18px;font-size:13px;color:#C9D2DE}
+.hero .rw b{display:inline-block;margin:4px 6px 0 0;border:1.5px solid #fff;border-radius:6px;padding:1px 8px;font-size:16px;font-weight:800;color:#fff}
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.tile{background:var(--card);border-radius:18px;box-shadow:var(--sh);padding:12px 14px}
+.tile span{display:block;font-size:13px;color:var(--mute)}
+.tile b{font-size:28px;font-weight:900}
+.tile b small{font-size:14px;font-weight:700;color:var(--sub);margin-left:2px}
+.tile em{display:block;font-style:normal;font-size:13px;color:var(--sub)}
+/* 一覧の行 */
+.rows{list-style:none;margin:0;padding:0}
+.rows li{display:flex;align-items:center;gap:12px;min-height:60px;padding:8px 0}
+.rows li+li{box-shadow:0 -1px 0 var(--line)}
+.rows .tx{flex:1;min-width:0}
+.rows .tx b{display:block;font-size:16px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rows .tx span{display:block;font-size:13px;color:var(--mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rows .tx span span{display:inline;color:inherit}
+.rows .tx span .tag{display:inline-flex;vertical-align:1px}
+.rows .tx span .tag.live{color:var(--ok)}.rows .tx span .tag.pred{color:#3730A3}.rows .tx span .tag.gray{color:var(--ink2)}
+.rows .go{flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;color:var(--sub)}
+.reg{font:700 13px/1 ui-monospace,Menlo,monospace}
+.sw{flex:none;width:52px;height:52px;border-radius:16px;display:flex;align-items:center;justify-content:center;font:800 13px/1 ui-monospace,Menlo,monospace;color:#fff}
+.tag{display:inline-flex;align-items:center;gap:4px;border-radius:999px;padding:2px 9px;font-size:13px;font-weight:800;white-space:nowrap}
+.tag.live{background:#E7F5EC;color:var(--ok)}
+.tag.gray{background:var(--pill);color:var(--ink2)}
+.tag.pred{background:#EEF2FF;color:#3730A3}
+.chips{display:flex;gap:8px;overflow:hidden}
+.chip{height:44px;display:inline-flex;align-items:center;gap:6px;padding:0 14px;border-radius:999px;background:var(--card);box-shadow:var(--sh);font-size:14px;font-weight:800;white-space:nowrap}
+.chip.dark{background:var(--navy);color:#fff}
+.chip small{font-size:14px;font-weight:700;color:var(--sub)}
+.pillbtn{height:44px;display:inline-flex;align-items:center;justify-content:center;gap:4px;padding:0 18px;border-radius:999px;background:var(--pill);font-size:14px;font-weight:800;color:var(--ink2)}
+/* 運用予想 案A（.rtl）：飛んだ便は1行にたたむ・「ここから予想」の帯 */
+.rtl{list-style:none;margin:6px 0 0;padding:0}
+.rtl li{display:grid;grid-template-columns:62px 22px 1fr;align-items:start;min-height:52px}
+.rtl .tm b{font-size:16px;font-weight:800;font-variant-numeric:tabular-nums}
+.rtl .tm small{display:block;font-size:13px;color:var(--sub)}
+.rtl .dot{position:relative;height:100%}
+.rtl .dot::before{content:"";position:absolute;left:10px;top:0;bottom:0;width:2px;background:#CBD2DC}
+.rtl .dot i{position:absolute;left:5px;top:6px;width:12px;height:12px;border-radius:50%;background:var(--ink2)}
+.rtl li.pr .dot::before{background:repeating-linear-gradient(#AAB3C0 0 4px,transparent 4px 8px)}
+.rtl li.pr .dot i{background:#fff;border:2px solid #6366F1}
+.rtl li.now .dot i{background:var(--ok);box-shadow:0 0 0 4px rgba(31,122,63,.18)}
+.rtl .tx{padding-bottom:12px}
+.rtl .tx b{font-size:16px;font-weight:800}
+.rtl .tx span{display:block;font-size:14px;color:var(--ink2)}
+.rtl .tx em{display:flex;align-items:center;gap:6px;font-style:normal;font-size:13px;color:var(--mute);margin-top:2px}
+.rtl li.fold .tx{color:var(--mute);font-size:14px}
+.edge{grid-column:1/-1!important;display:flex!important;align-items:center;gap:8px;min-height:44px!important;margin:4px 0 6px}
+.edge b{background:var(--navy);color:#fff;border-radius:999px;padding:3px 12px;font-size:13px;font-weight:800}
+.edge span{font-size:13px;font-weight:700;color:var(--ink2)}
+.cf{display:inline-flex;gap:3px;margin-right:2px}
+.cf i{display:inline-block;width:7px;height:7px;border-radius:50%;background:#6366F1}
+.cf i.o{background:#C7CAF5}
+/* 撮る人 */
+.spot{display:flex;align-items:center;gap:10px}
+.next li{min-height:64px}
+.tmbig{flex:none;width:58px;font-size:18px;font-weight:900;font-variant-numeric:tabular-nums}
+/* 振り分けの表（00） */
+.sort{list-style:none;margin:0;padding:0}
+.sort li{display:grid;grid-template-columns:1fr 64px 64px;gap:6px;align-items:center;min-height:44px;padding:6px 0;font-size:14px}
+.sort li+li{box-shadow:0 -1px 0 var(--line)}
+.sort li.hd{font-size:13px;color:var(--mute);font-weight:700;min-height:28px}
+.sort li span{text-align:center;font-weight:800}
+.sort li small{display:block;font-size:13px;color:var(--sub)}
+.dotA{color:var(--ink)}.dotB{color:var(--navy)}
+.shot{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:8px 0 0}
+.shot figure{margin:0}
+.shot img{width:100%;border-radius:12px;box-shadow:var(--sh);display:block}
+.shot figcaption{font-size:13px;color:var(--mute);text-align:center;margin-top:4px}
+/* 下のタブ帯（変えない） */
+.tabbar{position:fixed;left:50%;transform:translateX(-50%);bottom:12px;width:362px;height:68px;border-radius:999px;background:rgba(255,255,255,.96);box-shadow:0 14px 34px -16px rgba(15,23,42,.35),inset 0 0 0 1px rgba(17,24,39,.06);display:flex;justify-content:space-around;align-items:center;z-index:5}
+.tabbar span{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:13px;font-weight:800;color:var(--mute);min-width:56px}
+.tabbar span svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:1.8}
+.tabbar span.on{color:var(--blue)}
+/* シート */
+.dim{position:fixed;inset:0;background:rgba(15,23,42,.42);z-index:8}
+.sheet{position:fixed;left:50%;transform:translateX(-50%);bottom:0;width:390px;max-height:94vh;overflow:hidden;background:var(--card);border-radius:26px 26px 0 0;padding:10px 20px 28px;z-index:9;box-shadow:0 -18px 40px -20px rgba(15,23,42,.4)}
+.sheet .grab{width:40px;height:5px;border-radius:9px;background:#D5DAE1;margin:0 auto 8px}
+.shh{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.shh h2{font-size:20px;font-weight:900;margin:0}
+.shh button{flex:none;height:44px;padding:0 18px;border:0;border-radius:999px;background:var(--navy);color:#fff;font-weight:800;font-size:14px}
+.sub{font-size:14px;color:var(--mute);margin:4px 0 0}
+.kind.insheet{box-shadow:none;background:var(--pill);margin-top:12px;display:flex}
+.kind.insheet span{flex:1}
+.kind.insheet span.on{background:var(--card);color:var(--ink);box-shadow:0 2px 8px -3px rgba(15,23,42,.3)}
+.onoff{list-style:none;margin:8px 0 0;padding:0}
+.onoff li{display:flex;align-items:center;gap:12px;min-height:56px;padding:4px 0}
+.onoff li+li{box-shadow:0 -1px 0 var(--line)}
+.onoff .tx{flex:1;min-width:0}
+.onoff .tx b{display:block;font-size:16px;font-weight:800}
+.onoff .tx span{display:block;font-size:13px;color:var(--mute)}
+.onoff .grip{flex:none;width:28px;color:#AAB2BD;text-align:center;font-size:18px}
+.onoff li.fixed .tx b::after{content:"いつも";margin-left:8px;font-size:13px;font-weight:700;color:var(--mute);background:var(--pill);border-radius:999px;padding:1px 8px}
+.tg{flex:none;position:relative;width:76px;height:36px;border-radius:999px;display:flex;align-items:center;font-size:13px;font-weight:800}
+.tg.on{background:var(--sw-on);color:#fff;padding-left:12px}
+.tg.on::after{content:"";position:absolute;right:4px;top:4px;width:28px;height:28px;border-radius:50%;background:#fff}
+.tg.off{background:var(--sw-off);color:#4B5563;box-shadow:inset 0 0 0 1.5px var(--sw-off-ring);justify-content:flex-end;padding-right:12px}
+.tg.off::after{content:"";position:absolute;left:4px;top:4px;width:28px;height:28px;border-radius:50%;background:#fff;box-shadow:inset 0 0 0 1.5px var(--sw-off-ring)}
+.grp{font-size:14px;font-weight:800;color:var(--ink2);margin:18px 0 0;display:flex;align-items:center;gap:8px}
+.grp small{font-size:13px;font-weight:600;color:var(--sub)}
+.badge{display:inline-flex;align-items:center;height:24px;padding:0 10px;border-radius:999px;background:#FEF3C7;color:#92400E;font-size:13px;font-weight:800}
+/* 表示の編集（全画面） */
+.full{padding:10px 16px 40px}
+.full .top{display:flex;align-items:center;justify-content:space-between;height:52px}
+.full .top h2{font-size:18px;font-weight:900;margin:0}
+.pills{display:flex;gap:6px;margin:8px 0 4px;overflow:hidden}
+.pills span{height:44px;display:inline-flex;align-items:center;padding:0 16px;border-radius:999px;background:var(--card);box-shadow:var(--sh);font-size:14px;font-weight:800;color:var(--mute);white-space:nowrap}
+.pills span.on{background:var(--navy);color:#fff}
+/* 一覧ページ */
+.idx{padding:16px 16px 40px}
+.idx h1{font-size:22px;font-weight:900;margin:8px 0 4px}
+.idx p{font-size:14px;color:var(--ink2);margin:6px 0}
+.idx h2{font-size:16px;font-weight:900;margin:22px 0 6px}
+.idx ul{list-style:none;margin:0;padding:0}
+.idx li a{display:flex;align-items:center;gap:10px;min-height:52px;padding:6px 14px;margin-top:8px;background:var(--card);border-radius:16px;box-shadow:var(--sh);color:var(--ink);text-decoration:none}
+.idx li a b{flex:none;font:800 14px/1 ui-monospace,Menlo,monospace;color:#fff;background:var(--navy);border-radius:8px;padding:6px 7px}
+.idx li a span{font-size:14px;font-weight:700}
+.idx li a small{display:block;font-size:13px;color:var(--mute);font-weight:500}
+
+:root{--hero:#0F1B2D}
+body{width:393px}
+.tabbar{width:365px}
+.sheet{width:393px}
+body.lock{overflow:hidden;height:100vh}
+/* 一覧の頭：空港のピル（ピン止めの空港に切り替える）と i だけ。「空港｜機体」の切り替えはなくす */
+.hubh{display:flex;align-items:center;gap:8px;margin-top:16px}
+.hubh .sp{flex:1}
+.hubh .ap{gap:6px;padding:0 12px 0 8px;cursor:pointer}
+.hubh .ap .pin{width:16px;height:16px;color:var(--navy)}
+.hubh .ap>svg:last-child{color:var(--mute)}
+.ic.card1{background:var(--card);box-shadow:var(--sh)}
+.srch{margin-top:12px;display:flex}
+.srch .search{cursor:text}
+/* カード：見出し1語＋大きな数字か小さな絵だけ */
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
+.c{position:relative;background:var(--card);border-radius:22px;box-shadow:var(--sh);height:128px;overflow:hidden;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.c.w{grid-column:1/-1;height:148px}
+.c.wl{grid-column:1/-1;height:128px}
+.cin{position:absolute;inset:0;padding:14px 16px}
+.lb{font-size:15px;font-weight:800;color:var(--mute);line-height:1.2}
+.big{position:absolute;left:16px;bottom:14px;font-size:40px;font-weight:900;line-height:1;letter-spacing:-.01em;font-variant-numeric:tabular-nums;color:var(--ink)}
+.big small{font-size:15px;font-weight:700;color:var(--sub);margin-left:3px;letter-spacing:0}
+.big.m{font-size:34px}
+.cpic{position:absolute;right:14px;top:14px;color:var(--sub)}
+.cpic svg{width:22px;height:22px}
+.dots{position:absolute;right:16px;bottom:18px;display:flex;gap:5px}
+.dots i{width:12px;height:12px;border-radius:50%;display:block}
+.ring{position:absolute;right:14px;top:12px;width:36px;height:36px}
+.bars{position:absolute;left:16px;right:16px;bottom:14px;height:58px}
+.trk{position:absolute;left:0;right:0;bottom:0;height:96px}
+/* 滑走路のカード（濃い面はこの紺1色） */
+.c.dark{background:var(--hero);box-shadow:none}
+.dark .lb{color:#AEB9C8}
+.dark .big{color:#fff;font-size:44px}
+.rwc{position:absolute;right:16px;bottom:16px;display:flex;gap:6px}
+.rwc span{border:1.5px solid rgba(255,255,255,.85);border-radius:8px;padding:2px 8px;font-size:16px;font-weight:800;color:#fff;font-variant-numeric:tabular-nums}
+.rwc span.o{border-color:rgba(255,255,255,.35);color:#AEB9C8}
+/* 地図のカード（航空図風） */
+.mapsvg{position:absolute;inset:0;width:100%;height:100%;display:block}
+.c.map .lb{position:absolute;left:12px;top:12px;background:rgba(255,255,255,.92);color:var(--ink2);border-radius:999px;padding:5px 12px}
+.c.map .big{left:12px;bottom:12px;background:rgba(255,255,255,.92);border-radius:14px;padding:6px 10px 6px 12px;font-size:30px}
+.regs{position:absolute;left:16px;bottom:16px;display:flex;gap:6px}
+.regs span{font:700 13px/1 ui-monospace,Menlo,monospace;background:var(--pill);border-radius:999px;padding:7px 10px;color:var(--ink2)}
+.sbig{position:absolute;right:14px;top:12px;width:44px;height:44px;border-radius:50%;background:var(--pill);display:flex;align-items:center;justify-content:center;color:var(--ink2)}
+.edit{display:flex;justify-content:center;margin-top:18px}
+/* 専用ページ（一覧の上にかぶさる。戻るで一覧へ） */
+#stage{position:fixed;top:0;left:50%;width:393px;margin-left:-196.5px;height:100vh;z-index:3;pointer-events:none;visibility:hidden}
+#stage.on{pointer-events:auto;visibility:visible}
+#dvbg{position:absolute;inset:0;background:var(--bg)}
+#dv{position:absolute;inset:0;padding:8px 16px 0;z-index:2}
+.dtop{display:flex;align-items:center;gap:8px;height:56px}
+.dtop .sp{flex:1}
+.dtop .back{cursor:pointer;background:var(--card);box-shadow:var(--sh)}
+.dtop .ttl{font-size:17px;font-weight:900}
+#tgt{border-radius:24px}
+.dtiles{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
+.dtile{background:var(--card);border-radius:20px;box-shadow:var(--sh);padding:12px 16px 14px}
+.dtile span{display:block;font-size:14px;font-weight:800;color:var(--mute)}
+.dtile b{display:block;font-size:34px;font-weight:900;line-height:1.15;font-variant-numeric:tabular-nums}
+.dtile b small{font-size:15px;font-weight:700;color:var(--sub);margin-left:3px}
+.dtile em{display:block;font-style:normal;font-size:13px;color:var(--sub)}
+.dline{font-size:14px;line-height:1.6;color:var(--mute);margin:14px 4px 0}
+#fly{position:absolute;z-index:1;overflow:hidden;visibility:hidden;will-change:left,top,width,height}
+#fly .L{position:absolute;left:0;top:0}
+.hero2{background:var(--hero);color:#fff}
+.h2in{padding:16px 18px}
+.h2in .lb{color:#AEB9C8}
+.h2in h3{margin:4px 0 0;font-size:44px;font-weight:900;line-height:1.1;letter-spacing:.01em}
+.h2in svg.rw{display:block;width:325px;height:178px;margin:8px auto 4px}
+.rwrow{display:flex;gap:18px;font-size:14px;font-weight:800;color:#AEB9C8}
+.rwrow b{display:inline-block;margin:4px 6px 0 0;border:1.5px solid #fff;border-radius:8px;padding:1px 8px;font-size:17px;font-weight:800;color:#fff}
+/* 地図の専用ページ */
+.mapd .dtop{position:absolute;left:16px;right:16px;top:8px;z-index:2}
+.mapd .dtop .ic{background:var(--card);box-shadow:var(--sh)}
+.mapcard{position:absolute;left:16px;right:16px;top:536px;background:var(--card);border-radius:24px;box-shadow:0 14px 30px -18px rgba(15,23,42,.45),inset 0 0 0 1px rgba(17,24,39,.06);padding:14px 16px 16px}
+.mapcard .row{display:flex;align-items:flex-end;justify-content:space-between;gap:8px}
+.mapcard .big{position:static;font-size:40px}
+.fl{display:flex;gap:6px;margin-top:10px}
+.fl span{height:44px;display:inline-flex;align-items:center;padding:0 14px;border-radius:999px;background:var(--pill);font-size:14px;font-weight:800;color:var(--ink2)}
+.fl span.on{background:var(--navy);color:#fff}
+/* シート（空港を選ぶ・i の中） */
+.aprow{list-style:none;margin:6px 0 0;padding:0}
+.aprow li{display:flex;align-items:center;gap:12px;min-height:56px}
+.aprow li+li{box-shadow:0 -1px 0 var(--line)}
+.aprow .cd{flex:none;font:700 14px/1 ui-monospace,Menlo,monospace;color:#fff;background:var(--ink);border-radius:7px;padding:6px 7px}
+.aprow .nm{flex:1;font-size:17px;font-weight:800}
+.aprow .ck{flex:none;width:44px;height:44px;display:flex;align-items:center;justify-content:center;color:var(--navy)}
+.aprow .pn{flex:none;width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--navy);color:#fff}
+.aprow .pn.off{background:var(--pill);color:var(--ink2)}
+.aprow .pn svg{width:18px;height:18px}
+.src{list-style:none;margin:10px 0 0;padding:0}
+.src li{padding:10px 0;font-size:14px;line-height:1.6;color:var(--ink2)}
+.src li+li{box-shadow:0 -1px 0 var(--line)}
+.src li b{display:block;font-size:15px;color:var(--ink)}
+.warn{margin-top:12px;background:var(--pill);border-radius:16px;padding:12px 14px;font-size:14px;line-height:1.6;color:var(--ink2)}
+.warn b{color:var(--ink)}
+/* 夜（design/ios-app の夜と同じ色） */
+body.night{background:#0E1014;color:#DCE3EA}
+body.night{--bg:#0E1014;--card:#16191F;--ink:#E5E7EB;--ink2:#D1D5DB;--mute:#A7B0BC;--sub:#A7B0BC;--pill:#1D232C;--line:#2A2F37;--navy:#2B3A52;--hero:#17243A;
+  --sh:inset 0 0 0 1px rgba(220,227,234,.10)}
+body.night .tabbar{background:rgba(22,25,31,.96)}
+body.night .tabbar span.on{color:#DCE3EA}
+body.night .brand span,body.night .mode span.on{background:#1D232C;color:#DCE3EA}
+body.night .mode{background:#16191F}
+body.night .ap i,body.night .aprow .cd{background:#DCE3EA;color:#0E1014}
+body.night .hubh .ap .pin{color:#DCE3EA}
+body.night .c.dark,body.night .hero2{box-shadow:inset 0 0 0 1px rgba(220,227,234,.12)}
+body.night .c.map .lb,body.night .c.map .big{background:rgba(22,25,31,.9);color:#E5E7EB}
+body.night .fl span.on,body.night .aprow .pn{background:transparent;color:#fff;box-shadow:inset 0 0 0 2px #DCE3EA}
+body.night .aprow .ck{color:#DCE3EA}
+</style></head><body class=""><div id="list" class="pad"><div class="brand"><b><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m8 15 8-6-3 8-1-3Z"/></svg>そらメモ</b><span>マイページ</span></div>
+<div class="mode"><span class="on">スタンプラリー</span><span>エアライン経営</span></div>
+<div class="hubh"><span class="ap" id="apbtn"><i>HND</i>羽田<svg class="i pin" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.5 3.5h7"/><path style="fill:currentColor" d="M10 3.5v5.2L6.8 13h10.4L14 8.7V3.5Z"/><path d="M12 13v7.5"/></svg><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></span><span class="sp"></span><span class="ic card1"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><path d="M12 8h.01"/></svg></span></div>
+<div class="srch"><span class="search"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>登録記号・便名で探す</span></div><div class="grid"><div class="c w dark" data-k="rw"><div class="cin"><div class="lb">滑走路</div><div class="big">北風</div><div class="rwc"><span>34L</span><span>34R</span><span>05</span></div></div></div><div class="c w map" data-k="map"><svg class="mapsvg" viewBox="0 0 393 600" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+<rect width="393" height="600" fill="#D9E6F0"/>
+<path d="M0 0H393V120C350 150 330 190 300 205 260 225 240 250 228 280 222 300 210 312 196 318 170 330 150 360 120 380 80 405 40 420 0 430Z" fill="#E7ECE3" stroke="#C9D3C4" stroke-width="2"/>
+<path d="M0 600V520C60 500 100 520 140 560 160 580 170 600 170 600Z" fill="#E7ECE3" stroke="#C9D3C4" stroke-width="2"/>
+<g fill="none" stroke="#7C8DAE" stroke-width="1.2" stroke-dasharray="5 6" opacity=".75"><circle cx="210" cy="320" r="70"/><circle cx="210" cy="320" r="150"/><circle cx="210" cy="320" r="240"/></g>
+<path d="M210 320 196 40M210 320 120 600" stroke="#7C8DAE" stroke-width="1" opacity=".5" fill="none"/>
+<g fill="#4B5563"><rect x="-2.5" y="-24" width="5" height="48" transform="translate(200 318) rotate(-23)"/><rect x="-2.5" y="-20" width="5" height="40" transform="translate(222 314) rotate(-23)"/>
+<rect x="-2.5" y="-17" width="5" height="34" transform="translate(214 338) rotate(40)"/><rect x="-2.5" y="-17" width="5" height="34" transform="translate(236 340) rotate(50)"/></g>
+<path transform="translate(120 170) rotate(160)" d="M0-7 2 1 7 3 7 5 2 4 1 8 3 10 3 11 0 10.5-3 11-3 10-1 8-2 4-7 5-7 3-2 1Z" fill="#1F2A44"/><path transform="translate(250 120) rotate(200)" d="M0-7 2 1 7 3 7 5 2 4 1 8 3 10 3 11 0 10.5-3 11-3 10-1 8-2 4-7 5-7 3-2 1Z" fill="#1F2A44"/><path transform="translate(300 230) rotate(250)" d="M0-7 2 1 7 3 7 5 2 4 1 8 3 10 3 11 0 10.5-3 11-3 10-1 8-2 4-7 5-7 3-2 1Z" fill="#1F2A44"/><path transform="translate(80 360) rotate(20)" d="M0-7 2 1 7 3 7 5 2 4 1 8 3 10 3 11 0 10.5-3 11-3 10-1 8-2 4-7 5-7 3-2 1Z" fill="#1F2A44"/><path transform="translate(330 420) rotate(300)" d="M0-7 2 1 7 3 7 5 2 4 1 8 3 10 3 11 0 10.5-3 11-3 10-1 8-2 4-7 5-7 3-2 1Z" fill="#1F2A44"/><path transform="translate(170 470) rotate(340)" d="M0-7 2 1 7 3 7 5 2 4 1 8 3 10 3 11 0 10.5-3 11-3 10-1 8-2 4-7 5-7 3-2 1Z" fill="#1F2A44"/><path transform="translate(60 250) rotate(100)" d="M0-7 2 1 7 3 7 5 2 4 1 8 3 10 3 11 0 10.5-3 11-3 10-1 8-2 4-7 5-7 3-2 1Z" fill="#1F2A44"/><path transform="translate(215 205) rotate(150)" d="M0-7 2 1 7 3 7 5 2 4 1 8 3 10 3 11 0 10.5-3 11-3 10-1 8-2 4-7 5-7 3-2 1Z" fill="#1F2A44"/><path transform="translate(350 330) rotate(230)" d="M0-7 2 1 7 3 7 5 2 4 1 8 3 10 3 11 0 10.5-3 11-3 10-1 8-2 4-7 5-7 3-2 1Z" fill="#1F2A44"/><path transform="translate(140 410) rotate(10)" d="M0-7 2 1 7 3 7 5 2 4 1 8 3 10 3 11 0 10.5-3 11-3 10-1 8-2 4-7 5-7 3-2 1Z" fill="#1F2A44"/><path transform="translate(255 520) rotate(330)" d="M0-7 2 1 7 3 7 5 2 4 1 8 3 10 3 11 0 10.5-3 11-3 10-1 8-2 4-7 5-7 3-2 1Z" fill="#1F2A44"/><path transform="translate(40 140) rotate(120)" d="M0-7 2 1 7 3 7 5 2 4 1 8 3 10 3 11 0 10.5-3 11-3 10-1 8-2 4-7 5-7 3-2 1Z" fill="#1F2A44"/><path transform="translate(290 60) rotate(190)" d="M0-7 2 1 7 3 7 5 2 4 1 8 3 10 3 11 0 10.5-3 11-3 10-1 8-2 4-7 5-7 3-2 1Z" fill="#1F2A44"/><path transform="translate(180 95) rotate(170)" d="M0-7 2 1 7 3 7 5 2 4 1 8 3 10 3 11 0 10.5-3 11-3 10-1 8-2 4-7 5-7 3-2 1Z" fill="#1F2A44"/>
+<path transform="translate(232 262) rotate(160)" d="M0-9 2.6 1.3 9 3.8 9 6.4 2.6 5.1 1.3 10.2 3.8 12.8 3.8 14 0 13.4-3.8 14-3.8 12.8-1.3 10.2-2.6 5.1-9 6.4-9 3.8-2.6 1.3Z" fill="#A9822E"/>
+<circle cx="232" cy="262" r="15" fill="none" stroke="#A9822E" stroke-width="2"/>
+</svg><div class="lb">地図</div><div class="big">23<small>機</small></div></div><div class="c" data-k="board"><div class="cin"><div class="lb">案内板</div><div class="big m">15:18<small>着</small></div></div></div><div class="c" data-k="sp"><div class="cin"><div class="lb">特別塗装機</div><div class="big">2<small>機</small></div><div class="dots"><i style="background:#B4232A"></i><i style="background:#0E7490"></i></div></div></div><div class="c" data-k="late"><div class="cin"><div class="lb">遅れ</div><div class="big">8<small>分</small></div></div></div><div class="c" data-k="strip"><div class="cin"><div class="lb">短冊</div><div class="big">2<small>分後</small></div></div></div><div class="c" data-k="day"><div class="cin"><div class="lb">1日の山</div><svg class="bars" viewBox="0 0 100 58" preserveAspectRatio="none" aria-hidden="true"><rect x="0.80" y="48" width="3.96" height="10" rx="1.4" fill="#AAB3C0"/><rect x="6.36" y="24" width="3.96" height="34" rx="1.4" fill="#AAB3C0"/><rect x="11.91" y="6" width="3.96" height="52" rx="1.4" fill="#AAB3C0"/><rect x="17.47" y="0" width="3.96" height="58" rx="1.4" fill="#AAB3C0"/><rect x="23.02" y="12" width="3.96" height="46" rx="1.4" fill="#AAB3C0"/><rect x="28.58" y="18" width="3.96" height="40" rx="1.4" fill="#AAB3C0"/><rect x="34.13" y="14" width="3.96" height="44" rx="1.4" fill="#AAB3C0"/><rect x="39.69" y="8" width="3.96" height="50" rx="1.4" fill="#AAB3C0"/><rect x="45.24" y="4" width="3.96" height="54" rx="1.4" fill="#AAB3C0"/><rect x="50.80" y="10" width="3.96" height="48" rx="1.4" fill="#16233A"/><rect x="56.36" y="20" width="3.96" height="38" rx="1.4" fill="#DDE2E9"/><rect x="61.91" y="16" width="3.96" height="42" rx="1.4" fill="#DDE2E9"/><rect x="67.47" y="2" width="3.96" height="56" rx="1.4" fill="#DDE2E9"/><rect x="73.02" y="8" width="3.96" height="50" rx="1.4" fill="#DDE2E9"/><rect x="78.58" y="18" width="3.96" height="40" rx="1.4" fill="#DDE2E9"/><rect x="84.13" y="28" width="3.96" height="30" rx="1.4" fill="#DDE2E9"/><rect x="89.69" y="36" width="3.96" height="22" rx="1.4" fill="#DDE2E9"/><rect x="95.24" y="46" width="3.96" height="12" rx="1.4" fill="#DDE2E9"/></svg></div></div><div class="c" data-k="ontime"><div class="cin"><div class="lb">定時</div><svg class="ring" viewBox="0 0 36 36" aria-hidden="true"><circle cx="18" cy="18" r="14" fill="none" stroke="#E5E8EE" stroke-width="5"/><path d="M18 4A14 14 0 1 1 7.21 9.08" fill="none" stroke="#16233A" stroke-width="5" stroke-linecap="round"/></svg><div class="big">86<small>%</small></div></div></div><div class="c" data-k="art"><svg class="trk" viewBox="0 0 175 96" preserveAspectRatio="xMidYMax slice" aria-hidden="true"><g fill="none" stroke="#3B4B66" stroke-width="1.6" opacity=".55"><path d="M-10 30C40 40 80 70 110 96"/><path d="M20 -5C50 30 85 70 110 96"/><path d="M200 10C170 40 140 70 110 96"/><path d="M200 60C170 75 140 85 110 96"/><path d="M-10 80C30 82 70 90 110 96"/><path d="M90 -5C95 30 102 70 110 96"/><path d="M200 110C160 106 130 100 110 96"/><path d="M150 -5C140 30 125 70 110 96"/></g></svg><div class="cin"><div class="lb">空の道すじ</div></div></div><div class="c" data-k="photo"><div class="cin"><div class="lb">撮る人</div><span class="cpic"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l2-2.5h6L17 8h3v11H4Z"/><circle cx="12" cy="13" r="3.6"/></svg></span><div class="big">4<small>か所</small></div></div></div></div>
+<div class="edit"><span class="pillbtn">並べ替え・隠す</span></div></div><div id="stage"><div id="dvbg"></div><div id="dv"></div><div id="fly"></div></div><nav class="tabbar">
+<span><svg class="" viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 10.5 12 4l8.5 6.5"/><path d="M5.5 9v10h4.5v-5.5h4V19h4.5V9"/></svg>ホーム</span>
+<span><svg class="" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5C4 4.7 4.7 4 5.5 4H11v15H5.5c-.8 0-1.5.5-1.5 1.2V5.5Z"/><path d="M20 5.5c0-.8-.7-1.5-1.5-1.5H13v15h5.5c.8 0 1.5.5 1.5 1.2V5.5Z"/></svg>図鑑</span>
+<span><svg class="" viewBox="0 0 24 24" aria-hidden="true"><path d="M10.5 13.5 4 11l1.4-1.4 7 1.1 3.9-3.9c.8-.8 2.1-.8 2.9 0s.8 2.1 0 2.9l-3.9 3.9 1.1 7L15 22l-2.5-6.5-3 3v2.5L8 22.5l-1.3-3.2L3.5 18 5 16.5h2.5Z"/></svg>フライト</span>
+<span class="on"><svg class="" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.5"/><path d="M12 12 18 6"/></svg>運用</span>
+<span><svg class="" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 18 10 12l3 3 7-8"/><path d="M15 7h5v5"/></svg>修行</span></nav><div class="dim"></div><div class="sheet"><div class="grab"></div><div class="shh"><h2>空港</h2><button>閉じる</button></div>
+<div class="grp">ピン止め<small>3</small></div><ul class="aprow"><li><span class="cd">HND</span><span class="nm">羽田</span><span class="ck"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4.5 4.5L19 7"/></svg></span><span class="pn"><svg class="i pin" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.5 3.5h7"/><path style="fill:currentColor" d="M10 3.5v5.2L6.8 13h10.4L14 8.7V3.5Z"/><path d="M12 13v7.5"/></svg></span></li><li><span class="cd">NRT</span><span class="nm">成田</span><span class="ck"></span><span class="pn"><svg class="i pin" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.5 3.5h7"/><path style="fill:currentColor" d="M10 3.5v5.2L6.8 13h10.4L14 8.7V3.5Z"/><path d="M12 13v7.5"/></svg></span></li><li><span class="cd">ISG</span><span class="nm">石垣</span><span class="ck"></span><span class="pn"><svg class="i pin" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.5 3.5h7"/><path style="fill:currentColor" d="M10 3.5v5.2L6.8 13h10.4L14 8.7V3.5Z"/><path d="M12 13v7.5"/></svg></span></li></ul>
+<div class="grp">近く</div><ul class="aprow"><li style='opacity:.45'><span class="cd">HND</span><span class="nm">羽田</span><span class="ck"></span><span class="pn"><svg class="i pin" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.5 3.5h7"/><path style="fill:currentColor" d="M10 3.5v5.2L6.8 13h10.4L14 8.7V3.5Z"/><path d="M12 13v7.5"/></svg></span></li></ul>
+<div class="pickrow"><span class="search"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>空港名・コード</span></div></div>
+<script>window.FREEZE = null; const DETAIL = {"rw": {"top": "<div class=\"dtop\"><span class=\"back\"><svg class=\"i\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M15 6l-6 6 6 6\"/></svg>運用</span><span class=\"sp\"></span><span class=\"ic card1\"><svg class=\"i\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><circle cx=\"12\" cy=\"12\" r=\"9\"/><path d=\"M12 11v5\"/><path d=\"M12 8h.01\"/></svg></span></div>", "tw": 361, "th": 392, "rest": "<div class=\"dtiles\"><div class=\"dtile\"><span>風</span><b>7<small>kt</small></b><em>340° から</em></div><div class=\"dtile\"><span>視程</span><b>10<small>km 以上</small></b><em>15:00 の気象通報</em></div></div>\n<p class=\"dline\">実際に飛んでいる機体の向きから判定しています。</p>", "to": "<div class=\"h2in\" style=\"width:361px\"><div class=\"lb\">羽田の滑走路</div><h3>北風運用</h3><svg class=\"rw\" viewBox=\"0 0 325 178\" aria-hidden=\"true\">\n<line x1=\"112\" y1=\"128\" x2=\"170\" y2=\"92\" stroke=\"#3A4A63\" stroke-width=\"8\" stroke-linecap=\"round\"/>\n<line x1=\"96\" y1=\"150\" x2=\"150\" y2=\"18\" stroke=\"#FFFFFF\" stroke-width=\"9\" stroke-linecap=\"round\"/><line x1=\"150\" y1=\"140\" x2=\"198\" y2=\"30\" stroke=\"#FFFFFF\" stroke-width=\"9\" stroke-linecap=\"round\"/>\n<line x1=\"212\" y1=\"150\" x2=\"290\" y2=\"96\" stroke=\"#FFFFFF\" stroke-width=\"9\" stroke-linecap=\"round\"/>\n<path d=\"M90 172l6-14 6 14Z\" fill=\"#86EFAC\" transform=\"rotate(22 96 165)\"/>\n<path d=\"M144 162l6-14 6 14Z\" fill=\"#86EFAC\" transform=\"rotate(22 150 155)\"/>\n<path d=\"M296 86l-14 2 9 10Z\" fill=\"#86EFAC\"/>\n<text x=\"58\" y=\"160\" fill=\"#fff\" font-size=\"14\" font-weight=\"800\" font-family=\"inherit\">34L</text><text x=\"160\" y=\"160\" fill=\"#fff\" font-size=\"14\" font-weight=\"800\" font-family=\"inherit\">34R</text>\n<text x=\"196\" y=\"174\" fill=\"#fff\" font-size=\"14\" font-weight=\"800\" font-family=\"inherit\">05</text>\n</svg><div class=\"rwrow\"><div>着陸<br><b>34L</b><b>34R</b></div><div>離陸<br><b>05</b><b>34R</b></div></div></div>", "cls": "hero2", "radius": 24, "page": ""}, "map": {"top": "<div class=\"dtop\"><span class=\"back\"><svg class=\"i\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M15 6l-6 6 6 6\"/></svg>運用</span><span class=\"sp\"></span><span class=\"ic\"><svg class=\"i\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><circle cx=\"12\" cy=\"12\" r=\"9\"/><path d=\"M12 11v5\"/><path d=\"M12 8h.01\"/></svg></span></div>", "tw": 393, "th": 600, "rest": "<div class=\"mapcard\"><div class=\"row\"><div><div class=\"lb\">近くを飛ぶ機体</div><div class=\"big\">23<small>機</small></div></div></div>\n<div class=\"fl\"><span class=\"on\">すべて</span><span>特別塗装機</span><span>着陸</span></div><p class=\"dline\" style=\"margin:10px 2px 0\">機体を押すと、その機体の1日へ。</p></div>", "to": "<svg class=\"mapsvg\" viewBox=\"0 0 393 600\" preserveAspectRatio=\"xMidYMid slice\" aria-hidden=\"true\">\n<rect width=\"393\" height=\"600\" fill=\"#D9E6F0\"/>\n<path d=\"M0 0H393V120C350 150 330 190 300 205 260 225 240 250 228 280 222 300 210 312 196 318 170 330 150 360 120 380 80 405 40 420 0 430Z\" fill=\"#E7ECE3\" stroke=\"#C9D3C4\" stroke-width=\"2\"/>\n<path d=\"M0 600V520C60 500 100 520 140 560 160 580 170 600 170 600Z\" fill=\"#E7ECE3\" stroke=\"#C9D3C4\" stroke-width=\"2\"/>\n<g fill=\"none\" stroke=\"#7C8DAE\" stroke-width=\"1.2\" stroke-dasharray=\"5 6\" opacity=\".75\"><circle cx=\"210\" cy=\"320\" r=\"70\"/><circle cx=\"210\" cy=\"320\" r=\"150\"/><circle cx=\"210\" cy=\"320\" r=\"240\"/></g>\n<path d=\"M210 320 196 40M210 320 120 600\" stroke=\"#7C8DAE\" stroke-width=\"1\" opacity=\".5\" fill=\"none\"/>\n<g fill=\"#4B5563\"><rect x=\"-2.5\" y=\"-24\" width=\"5\" height=\"48\" transform=\"translate(200 318) rotate(-23)\"/><rect x=\"-2.5\" y=\"-20\" width=\"5\" height=\"40\" transform=\"translate(222 314) rotate(-23)\"/>\n<rect x=\"-2.5\" y=\"-17\" width=\"5\" height=\"34\" transform=\"translate(214 338) rotate(40)\"/><rect x=\"-2.5\" y=\"-17\" width=\"5\" height=\"34\" transform=\"translate(236 340) rotate(50)\"/></g>\n<path transform=\"translate(120 170) rotate(160)\" d=\"M0-7 2 1 7 3 7 5 2 4 1 8 3 10 3 11 0 10.5-3 11-3 10-1 8-2 4-7 5-7 3-2 1Z\" fill=\"#1F2A44\"/><path transform=\"translate(250 120) rotate(200)\" d=\"M0-7 2 1 7 3 7 5 2 4 1 8 3 10 3 11 0 10.5-3 11-3 10-1 8-2 4-7 5-7 3-2 1Z\" fill=\"#1F2A44\"/><path transform=\"translate(300 230) rotate(250)\" d=\"M0-7 2 1 7 3 7 5 2 4 1 8 3 10 3 11 0 10.5-3 11-3 10-1 8-2 4-7 5-7 3-2 1Z\" fill=\"#1F2A44\"/><path transform=\"translate(80 360) rotate(20)\" d=\"M0-7 2 1 7 3 7 5 2 4 1 8 3 10 3 11 0 10.5-3 11-3 10-1 8-2 4-7 5-7 3-2 1Z\" fill=\"#1F2A44\"/><path transform=\"translate(330 420) rotate(300)\" d=\"M0-7 2 1 7 3 7 5 2 4 1 8 3 10 3 11 0 10.5-3 11-3 10-1 8-2 4-7 5-7 3-2 1Z\" fill=\"#1F2A44\"/><path transform=\"translate(170 470) rotate(340)\" d=\"M0-7 2 1 7 3 7 5 2 4 1 8 3 10 3 11 0 10.5-3 11-3 10-1 8-2 4-7 5-7 3-2 1Z\" fill=\"#1F2A44\"/><path transform=\"translate(60 250) rotate(100)\" d=\"M0-7 2 1 7 3 7 5 2 4 1 8 3 10 3 11 0 10.5-3 11-3 10-1 8-2 4-7 5-7 3-2 1Z\" fill=\"#1F2A44\"/><path transform=\"translate(215 205) rotate(150)\" d=\"M0-7 2 1 7 3 7 5 2 4 1 8 3 10 3 11 0 10.5-3 11-3 10-1 8-2 4-7 5-7 3-2 1Z\" fill=\"#1F2A44\"/><path transform=\"translate(350 330) rotate(230)\" d=\"M0-7 2 1 7 3 7 5 2 4 1 8 3 10 3 11 0 10.5-3 11-3 10-1 8-2 4-7 5-7 3-2 1Z\" fill=\"#1F2A44\"/><path transform=\"translate(140 410) rotate(10)\" d=\"M0-7 2 1 7 3 7 5 2 4 1 8 3 10 3 11 0 10.5-3 11-3 10-1 8-2 4-7 5-7 3-2 1Z\" fill=\"#1F2A44\"/><path transform=\"translate(255 520) rotate(330)\" d=\"M0-7 2 1 7 3 7 5 2 4 1 8 3 10 3 11 0 10.5-3 11-3 10-1 8-2 4-7 5-7 3-2 1Z\" fill=\"#1F2A44\"/><path transform=\"translate(40 140) rotate(120)\" d=\"M0-7 2 1 7 3 7 5 2 4 1 8 3 10 3 11 0 10.5-3 11-3 10-1 8-2 4-7 5-7 3-2 1Z\" fill=\"#1F2A44\"/><path transform=\"translate(290 60) rotate(190)\" d=\"M0-7 2 1 7 3 7 5 2 4 1 8 3 10 3 11 0 10.5-3 11-3 10-1 8-2 4-7 5-7 3-2 1Z\" fill=\"#1F2A44\"/><path transform=\"translate(180 95) rotate(170)\" d=\"M0-7 2 1 7 3 7 5 2 4 1 8 3 10 3 11 0 10.5-3 11-3 10-1 8-2 4-7 5-7 3-2 1Z\" fill=\"#1F2A44\"/>\n<path transform=\"translate(232 262) rotate(160)\" d=\"M0-9 2.6 1.3 9 3.8 9 6.4 2.6 5.1 1.3 10.2 3.8 12.8 3.8 14 0 13.4-3.8 14-3.8 12.8-1.3 10.2-2.6 5.1-9 6.4-9 3.8-2.6 1.3Z\" fill=\"#A9822E\"/>\n<circle cx=\"232\" cy=\"262\" r=\"15\" fill=\"none\" stroke=\"#A9822E\" stroke-width=\"2\"/>\n</svg>", "cls": "", "radius": 0, "page": "mapd"}};
+const $ = s => document.querySelector(s);
+const clamp = v => Math.max(0, Math.min(1, v));
+const lerp = (a, b, t) => a + (b - a) * t;
+const ease = t => 1 - Math.pow(1 - t, 3);
+let cur = null, card = null, r0 = null, r1 = null, P = 0, D = 0;
+function rectIn(el){ const s = $('#stage').getBoundingClientRect(), r = el.getBoundingClientRect(); return {x:r.left - s.left, y:r.top - s.top, w:r.width, h:r.height}; }
+function setup(k){
+  const d = DETAIL[k]; if(!d) return false;
+  cur = k; card = document.querySelector('.c[data-k="'+k+'"]');
+  $('#stage').classList.add('on'); document.body.classList.add('lock');
+  $('#dv').className = d.page; $('#dv').innerHTML = d.top + '<div id="tgt" style="width:'+d.tw+'px;height:'+d.th+'px;'+(d.page==='mapd'?'position:absolute;left:0;top:0':'')+'"></div>' + d.rest;
+  const f = $('#fly'); f.className = d.cls; f.innerHTML = '<div class="L from" style="width:'+card.offsetWidth+'px;height:'+card.offsetHeight+'px">'+card.innerHTML+'</div><div class="L to" style="width:'+d.tw+'px;height:'+d.th+'px">'+d.to+'</div>';
+  f.style.background = getComputedStyle(card).backgroundColor;
+  if(d.page === 'mapd'){ f.querySelector('.from').style.cssText += ';inset:0;width:auto;height:auto'; f.querySelector('.to').style.cssText += ';inset:0;width:auto;height:auto'; f.querySelector('.from svg.mapsvg').remove(); f.style.background='transparent'; f.querySelector('.to').style.opacity=1; }
+  r0 = rectIn(card); r1 = rectIn($('#tgt')); f.dataset.r0 = d.radius0 || 22; f.dataset.r1 = d.radius;
+  return true;
+}
+function render(p, d){
+  P = p; D = d || 0;
+  const f = $('#fly'), st = $('#stage'), list = $('#list');
+  if(p <= 0 && D <= 0){ st.classList.remove('on'); f.style.visibility='hidden'; if(card) card.style.visibility=''; list.style.transform=''; document.body.classList.remove('lock'); return; }
+  st.classList.add('on'); document.body.classList.add('lock'); card.style.visibility = 'hidden'; f.style.visibility = 'visible';
+  const R = {x:lerp(r0.x,r1.x,p), y:lerp(r0.y,r1.y,p), w:lerp(r0.w,r1.w,p), h:lerp(r0.h,r1.h,p)};
+  Object.assign(f.style, {left:R.x+'px', top:R.y+'px', width:R.w+'px', height:R.h+'px', borderRadius:lerp(+f.dataset.r0, +f.dataset.r1, p)+'px'});
+  const fr = f.querySelector('.from'), to = f.querySelector('.to');
+  fr.style.opacity = 1 - clamp(p / 0.35);
+  if(cur !== 'map') to.style.opacity = clamp((p - 0.15) / 0.45);
+  $('#dvbg').style.opacity = clamp((p - 0.1) / 0.55);
+  const q = clamp((p - 0.55) / 0.45);
+  for(const el of $('#dv').children){ if(el.id === 'tgt') continue; el.style.opacity = q; el.style.transform = 'translateY(' + (18 * (1 - q)) + 'px)'; }
+  list.style.transform = 'scale(' + (1 - 0.03 * p * (1 - D)) + ')'; list.style.transformOrigin = '50% 0';
+  // 左端から引いて戻る（iPhone の戻る操作）：ページが指に付いて右へ動き、少し小さくなる
+  st.style.transform = D ? 'translateX(' + (D * 393 * 0.62) + 'px) scale(' + (1 - 0.1 * D) + ')' : '';
+  st.style.borderRadius = D ? Math.min(28, D * 120) + 'px' : '';
+  st.style.overflow = D ? 'hidden' : '';
+  st.style.boxShadow = D ? '-18px 0 40px -20px rgba(15,23,42,.5)' : '';
+}
+function anim(from, to, ms, done, dfrom){
+  const t0 = performance.now();
+  function step(t){ const k = clamp((t - t0) / ms), e = ease(k); render(lerp(from, to, e), dfrom ? dfrom * (1 - ease(clamp(k / 0.5))) : 0); if(k < 1) requestAnimationFrame(step); else if(done) done(); }
+  requestAnimationFrame(step);
+}
+window.R = (k, p, d) => { if(cur !== k){ render(0,0); setup(k); } render(p, d); };
+function open(k){ if(!setup(k)) return; anim(0, 1, 460); }
+function close(dfrom){ anim(1, 0, 380, () => render(0, 0), dfrom); }
+document.addEventListener('click', e => {
+  if(window.FREEZE) return;
+  const c = e.target.closest('.c[data-k]'); if(c && !cur && P === 0) return open(c.dataset.k);
+  if(e.target.closest('.back')) return close();
+});
+// 左端から引く
+let drag = null;
+document.addEventListener('pointerdown', e => { if(window.FREEZE || P < 1) return; const s = $('#stage').getBoundingClientRect(); if(e.clientX - s.left < 28) drag = {x:e.clientX}; });
+document.addEventListener('pointermove', e => { if(drag) render(1, clamp((e.clientX - drag.x) / 393)); });
+document.addEventListener('pointerup', e => { if(!drag) return; const d = clamp((e.clientX - drag.x) / 393); drag = null; if(d > 0.3) close(d); else anim(1, 1, 200, null, d); });
+document.addEventListener('click', e => { if(e.target.closest('.back')) cur = cur; });
+const _close = close; close = function(d){ _close(d); setTimeout(() => { cur = null; }, 400); };
+window.addEventListener('load', () => { if(window.FREEZE && window.FREEZE.k){ setup(window.FREEZE.k); render(window.FREEZE.p, window.FREEZE.d || 0); } });
+</script></body></html>
