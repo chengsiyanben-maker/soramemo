@@ -2893,6 +2893,33 @@ dialog.psheet .btn1,dialog.psheet .btn2{display:block;width:100%;margin-top:10px
 #v-book .zxmap .zn{display:none}[data-night="on"] #v-book .zxmap .zn{display:inline}[data-night="on"] #v-book .zxmap .zd{display:none}
 [data-night="on"] #v-book .zxmap .mv{fill:#DCE3EA!important;stroke:#141B24}[data-night="on"] #v-book .zxmap .mn{fill:#141B24}
 [data-night="on"] #v-book .zx-sep{color:var(--bk-ink)}
+/* 図鑑の飛行場・滑空場・ヘリポート：種類の絞り込みと県名（11/20 design/zukan-filter 1版） */
+#v-book .zx-seg{display:flex;gap:2px;margin:2px 0 12px;padding:3px;border-radius:999px;background:#E4E8EE}
+#v-book .zx-seg button{flex:1 1 0;min-width:0;min-height:48px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2px;border:0;border-radius:999px;background:none;color:var(--bk-sub);font:700 13px/1.2 var(--gothic);white-space:nowrap;cursor:pointer}
+#v-book .zx-seg button .u{font:600 12px/1.2 var(--gothic);color:var(--bk-sub)}
+#v-book .zx-seg button[aria-pressed="true"]{background:var(--bk-card);color:var(--bk-ink);font-weight:800;box-shadow:0 2px 8px -3px rgba(15,23,42,.28)}
+#v-book .zx-ap .zx-pf{font-size:13px;font-weight:600;line-height:1.2;color:var(--bk-sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+#v-book .zx-one .zx-ap .zx-k{display:none}
+#v-book .zx-hero .ht .lab i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px;vertical-align:1px}
+#bookAir .zk-main>.vwrow{margin-top:4px}#zkxViews button{min-height:44px}
+:root[data-bookseg="air"][data-zxview="map"] #bookAir .zk-main{margin-right:0}
+#v-book .zx-bigmap{margin-top:12px;padding:12px 12px 10px;border-radius:22px;background:var(--bk-card);box-shadow:var(--bk-shadow)}
+#v-book .zx-bigmap svg{display:block;width:100%;height:auto;max-height:380px}
+#v-book .zx-bigmap .m86{fill:#DDE2E8}#v-book .zx-bigmap .my{fill:#fff;stroke:#9AA4B1;stroke-width:1.6}#v-book .zx-bigmap .mv{stroke:#fff;stroke-width:2}
+#v-book .zx-bigmap .zn{display:none}
+#v-book .zx-bigmap text{font:700 13px var(--gothic);fill:var(--bk-ink);paint-order:stroke;stroke:#fff;stroke-width:3px;stroke-linejoin:round}
+#v-book .zx-lg{display:flex;gap:14px;margin:6px 4px 0;font-size:13px;font-weight:600;color:var(--bk-sub)}
+#v-book .zx-lg i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px}#v-book .zx-lg i.y{background:#fff;box-shadow:inset 0 0 0 1.6px #9AA4B1}
+#v-book .zx-list{margin-top:12px}#v-book .zx-list h4{margin:14px 4px 6px;font-size:13px;font-weight:800;color:var(--bk-sub)}
+#v-book .zx-list .r{display:flex;align-items:center;gap:10px;width:100%;min-height:48px;padding:0 14px;margin-top:6px;border:0;border-radius:16px;background:var(--bk-card);box-shadow:var(--bk-shadow);font:inherit;text-align:left;cursor:pointer}
+#v-book .zx-list .r b{font-size:15px;font-weight:800;color:var(--zk-pale);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#v-book .zx-list .r .pf{margin-left:auto;flex:none;font-size:13px;color:var(--bk-sub);font-weight:600}
+#v-book .zx-list .r i{width:10px;height:10px;border-radius:50%;flex:none;background:#fff;box-shadow:inset 0 0 0 1.6px #9AA4B1}#v-book .zx-list .r i.k-glider{border-radius:2px}
+[data-night="on"] #v-book .zx-seg{background:#141B24}[data-night="on"] #v-book .zx-seg button[aria-pressed="true"]{background:#232C38;color:#E8EDF2;box-shadow:inset 0 0 0 1px rgba(220,227,234,.35)}
+[data-night="on"] #v-book .zx-hero .ht .lab i{background:#DCE3EA!important}
+[data-night="on"] #v-book .zx-bigmap .m86{fill:#2A3340}[data-night="on"] #v-book .zx-bigmap .my{fill:#0F141B;stroke:#66778C}[data-night="on"] #v-book .zx-bigmap .mv{fill:#DCE3EA!important;stroke:#141B24}
+[data-night="on"] #v-book .zx-bigmap .zn{display:inline}[data-night="on"] #v-book .zx-bigmap .zd{display:none}
+[data-night="on"] #v-book .zx-bigmap text{stroke:#0F141B}[data-night="on"] #v-book .zx-lg i:not(.y){background:#DCE3EA!important}[data-night="on"] #v-book .zx-lg i.y,[data-night="on"] #v-book .zx-list .r i{background:#0F141B;box-shadow:inset 0 0 0 1.6px #66778C}
 /* 右端のツメ：昼は地方の色、夜は色なし */
 #v-book .zk-tsume{position:fixed;right:max(0px,calc(50vw - 300px));top:120px;display:flex;flex-direction:column;gap:2px;z-index:20}
 :root:not([data-bkview="region"]) #v-book #zkTsume,:root:not([data-bookseg="main"]) #v-book #zkTsume,:root:not([data-bookseg="air"]) #v-book #zkxTsume{display:none}
@@ -3144,6 +3171,8 @@ nav.tabs{transition:transform .3s cubic-bezier(.2,.8,.2,1),opacity .2s}
 #v-log .fbhead h2{margin:0;font:800 28px/1.2 var(--gothic);letter-spacing:.04em;color:var(--fb-ink)}
 #v-log .fbhead .lbtns{display:flex;gap:10px}
 #v-log .vwrow{margin:0 0 12px}
+#v-log .fbmeyasu{display:block;font-size:12px;font-weight:600;color:var(--fb-mute);line-height:1.2}
+#v-log .fbest{display:block;font-size:12px;font-weight:600;color:var(--fb-mute);white-space:nowrap}
 #v-log .fbyr{position:relative;background:var(--fb-card);border-radius:24px;box-shadow:var(--fb-shadow);padding:10px 14px;margin:0 0 16px;color:var(--fb-ink)}
 /* 日誌で年のカードが上へ出ていったら、年の字と ‹ › だけの細い帯を上に止める（月の見出しを隠さない・11/11 review-app-1 の2）。
    帯は高さ0の入れ物に載せるので、出ても消えても下の便の位置は動かない */
@@ -5514,7 +5543,9 @@ const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt
 async function loadServer(){
   const [c, f, m, g, sg] = await Promise.all([
     fetchAll("checkins", "id,airport_id,terminal_id,created_at,accuracy_m,weather,wind_kt,ops", "created_at"),
-    fetchAll("flights", "id,from_airport,to_airport,dep_at,arr_at,distance_km,status,airline,flight_no,fare,seat,track,price", "arr_at"),
+    // 実際の出発・到着（11/20 data/flight-actual・移行187）。列がまだないサーバーでは前の列で読み直す
+    fetchAll("flights", "id,from_airport,to_airport,dep_at,arr_at,distance_km,status,airline,flight_no,fare,seat,track,price,act_dep_at,act_arr_at,act_src", "arr_at")
+      .then(r => r.error ? fetchAll("flights", "id,from_airport,to_airport,dep_at,arr_at,distance_km,status,airline,flight_no,fare,seat,track,price", "arr_at") : r),
     fetchAll("manual_flights", "id,from_airport,to_airport,flown_on,airline,fare,seat,price", null),
     fetchAll("intl_flights", "id,flown_on,dep,arr,flight_no,airline,seat,dep_at,arr_at,distance_km", null),
     sb.from("shugyo_prefs").select("data").maybeSingle().then(x => x, () => ({ data:null })),
@@ -5525,7 +5556,7 @@ async function loadServer(){
   if(err){ say("記録を読み込めませんでした。電波のよい場所で開き直してください。", true); return; }
   S = { demoClock:null,
     checkins: c.data.map(r => ({a:r.airport_id, term:r.terminal_id, t:Date.parse(r.created_at), acc:r.accuracy_m, wx:r.weather || null, wind:r.wind_kt ?? null, ops:r.ops || null})),
-    flights: f.data.map(r => ({id:r.id, from:r.from_airport, to:r.to_airport, dep:Date.parse(r.dep_at), arr:Date.parse(r.arr_at), km:r.distance_km, status:r.status, airline:r.airline, no:r.flight_no, fare:r.fare || null, seat:r.seat || null, price:r.price ?? null, track:Array.isArray(r.track) ? r.track : null})),
+    flights: f.data.map(r => ({id:r.id, from:r.from_airport, to:r.to_airport, dep:Date.parse(r.dep_at), arr:Date.parse(r.arr_at), km:r.distance_km, status:r.status, airline:r.airline, no:r.flight_no, fare:r.fare || null, seat:r.seat || null, price:r.price ?? null, track:Array.isArray(r.track) ? r.track : null, ...fbActOf(r)})),
     manual: m.data.map(r => ({id:r.id, from:r.from_airport, to:r.to_airport, d:r.flown_on, airline:r.airline, fare:r.fare || null, seat:r.seat || null, price:r.price ?? null})),
     shugyo: sg && sg.data && sg.data.data ? sg.data.data : null,
     // 国際線の記録（読めなくてもほかの記録は出す。表がまだない古いサーバーでも動くように）
@@ -6289,25 +6320,64 @@ function zkAirEntryHTML(){
       <span class="zx-kd">${c.kind.map(([k, g, t]) => `<span><i class="k-${k}" style="background:${ZKX_COL[k]}"></i>${XKIND[k].short} <b>${g}</b><small>/${t}</small></span>`).join("")}<span><i class="my"></i>まだ</span></span></span>
     <span class="zx-r">${zkxMapSVG(c.xv)}</span></span><span class="zx-open" aria-hidden="true">開く<svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></span></button>`;
 }
-// 1つの枠：短い名前・種類の札・行った（✓ と回数）／まだ
+// 1つの枠：短い名前・県名（11/20 design/zukan-filter 1版・取っていない所も）・種類の札（1つの種類に絞ったときは CSS で外す）・行った（✓ と回数）／まだ
 function zkxTile(a, on, n){
   const nm = zkxShort(a), [kn, kc] = nearKind(a);
-  return `<button class="zk-ap zx-ap${on ? "" : " no"}${nm.length >= 7 ? " long" : ""}" type="button" data-zka="${a.id}" style="--c:${zkCol(regionOf(a))}" aria-label="${esc(a.name)}、${esc(kn)}、${on ? n + "回" : "まだ"}">
-    <span class="zx-nm">${zkxBreak(nm)}</span><span class="zx-k ${kc}">${esc(kn)}</span><span class="ft">${on ? `${ZK_CHECK}<b>${n}</b>回` : `${ZK_YET}まだ`}</span></button>`;
+  return `<button class="zk-ap zx-ap${on ? "" : " no"}${nm.length >= 7 ? " long" : ""}" type="button" data-zka="${a.id}" style="--c:${zkCol(regionOf(a))}" aria-label="${esc(a.name)}、${esc(a.pref || "")}、${esc(kn)}、${on ? n + "回" : "まだ"}">
+    <span class="zx-nm">${zkxBreak(nm)}</span><span class="zx-pf">${esc(a.pref || "")}</span><span class="zx-k ${kc}">${esc(kn)}</span><span class="ft">${on ? `${ZK_CHECK}<b>${n}</b>回` : `${ZK_YET}まだ`}</span></button>`;
+}
+/* 種類の絞り込みと見方（11/20 本人「飛行場、滑空場、ヘリポートのフィルター機能、すべてに何県か表示して」・画面案 design/zukan-filter 1版 F1〜F3）
+   ピルは「すべて・飛行場・滑空場・ヘリポート」の4つ（基地は今のまま別の図鑑）。見方は「地方別・地図」。どちらも端末に覚える（表は変えない） */
+const ZKX_KIND_KEY = "soramemo.zkx.kind", ZKX_VIEW_KEY = "soramemo.zkx.view";
+const ZKX_LAB = { all:"すべて", field:"飛行場", glider:"滑空場", heli:"ヘリポート" };
+const zkxGet = (k, ok, d) => { try{ const v = localStorage.getItem(k); return ok.includes(v) ? v : d; }catch(e){ return d; } };
+const zkxKind = () => zkxGet(ZKX_KIND_KEY, ["all", ...ZKX_KINDS], "all");
+const zkxView = () => zkxGet(ZKX_VIEW_KEY, ["region", "map"], "region");
+function zkxSet(k, v){ try{ localStorage.setItem(k, v); }catch(e){} }
+// 地図の見方：絞った種類の点だけ。まだ＝灰の輪、行った＝色の丸と名前（沖縄・南の島は地図の外なので下の一覧で）
+function zkxBigMapSVG(list, xv){
+  const W = 300, H = 380, P = a => [((a.lon - 128.6) / (146.2 - 128.6)) * (W - 16) + 8, ((45.6 - a.lat) / (45.6 - 30.8)) * (H - 16) + 8];
+  const inMap = a => a.lat > 30.5 && a.lon > 128.4;
+  let g = A.filter(inMap).map(a => { const [x, y] = P(a); return `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="1.8" class="m86"/>`; }).join("");
+  g += list.filter(a => inMap(a) && !xv.has(a.id)).map(a => { const [x, y] = P(a); return zkxDot(x, y, 4, "my", a.kind); }).join("");
+  g += list.filter(a => inMap(a) && xv.has(a.id)).map(a => { const [x, y] = P(a); return `${zkxDot(x, y, 6, "mv", a.kind, `fill:${ZKX_COL[a.kind]}`)}<text x="${(x - 10).toFixed(1)}" y="${(y + 4.5).toFixed(1)}" text-anchor="end">${esc(zkxShort(a))}</text>`; }).join("");
+  return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${ZKX_TITLE}の地図。色の丸が行った所、灰の輪がまだの所">${g}</svg>`;
 }
 function zkAirBookHTML(){
   const c = zkxCounts(), vc = new Map(); for(const x of S.checkins) if(IS_EXTRA(x.a)) vc.set(x.a, (vc.get(x.a) || 0) + 1);
-  const rgs = REGION.map(([rg]) => { const list = c.list.filter(a => regionOf(a) === rg); return { rg, list, got:list.filter(a => c.xv.has(a.id)).length }; });
-  const hero = `<div class="zk-hero zx-hero"><span class="zx-pill w">もう1つの図鑑</span><div class="ht"><span class="lab">集めた数</span><b class="num">${c.got.length}</b><span class="u">/ ${c.list.length}</span><span class="side">まだ ${c.list.length - c.got.length}</span></div>
-    <p class="zx-kinds">${c.kind.map(([k, g, t]) => `<span>${XKIND[k].short} <b>${g}</b><small>/${t}</small></span>`).join("")}</p>
-    <div class="rg">${rgs.map(r => `<div><span class="t"><span>${r.rg}</span><span>${r.list.length ? `${r.got}<small>/${r.list.length}</small>` : `<small>なし</small>`}</span></span><span class="b"><i style="width:${r.list.length ? Math.round(r.got / r.list.length * 100) : 0}%;background:${zkCol(r.rg)}"></i></span></div>`).join("")}</div></div>
-    <p class="zk-lead">集めた空港（${A.length}）とは別に数えます。自衛隊の飛行場（基地）は、今までどおり「ほかの図鑑・実績」の中にあります。</p>`;
-  const body = rgs.filter(r => r.list.length).map(r => `<section class="zk-rg" id="zkxrg-${r.rg}" data-rg="${r.rg}" style="--c:${zkCol(r.rg)}">
-    <div class="zk-door"><h3>${r.rg}</h3><b class="num">${r.got}</b><span class="u">/ ${r.list.length}</span><span class="zx-dtag"><span class="nw">飛行場・</span><span class="nw">滑空場・</span><span class="nw">ヘリポート</span></span><button class="zk-up" type="button" data-zk-up aria-label="図鑑の上へ"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 14l6-6 6 6"/></svg></button></div>
+  const kind = zkxKind(), view = zkxView(), one = kind !== "all";
+  const list = one ? c.list.filter(a => a.kind === kind) : c.list, got = list.filter(a => c.xv.has(a.id));
+  const rgs = REGION.map(([rg]) => { const l = list.filter(a => regionOf(a) === rg); return { rg, list:l, got:l.filter(a => c.xv.has(a.id)).length }; });
+  const lab = one ? `<i style="background:${ZKX_COL[kind]}"></i>${ZKX_LAB[kind]}` : "集めた数";
+  const hero = `<div class="zk-hero zx-hero"><span class="zx-pill w">もう1つの図鑑</span><div class="ht"><span class="lab">${lab}</span><b class="num">${got.length}</b><span class="u">/ ${list.length}</span><span class="side">まだ ${list.length - got.length}</span></div>
+    ${one ? "" : `<p class="zx-kinds">${c.kind.map(([k, g, t]) => `<span>${XKIND[k].short} <b>${g}</b><small>/${t}</small></span>`).join("")}</p>`}
+    ${view === "map" ? "" : `<div class="rg">${rgs.map(r => `<div><span class="t"><span>${r.rg}</span><span>${r.list.length ? `${r.got}<small>/${r.list.length}</small>` : `<small>なし</small>`}</span></span><span class="b"><i style="width:${r.list.length ? Math.round(r.got / r.list.length * 100) : 0}%;background:${zkCol(r.rg)}"></i></span></div>`).join("")}</div>`}</div>`;
+  const vw = `<div class="vwrow"><div class="viewsw" id="zkxViews" role="tablist" aria-label="見方">${[["region", "地方別"], ["map", "地図"]].map(([id, t]) => `<button type="button" role="tab" data-zxv="${id}" aria-selected="${view === id}">${t}</button>`).join("")}</div></div>`;
+  const seg = `<div class="zx-seg" id="zkxSeg" role="group" aria-label="種類で絞り込む">${["all", ...ZKX_KINDS].map(k => `<button type="button" data-zxk="${k}" aria-pressed="${kind === k}">${ZKX_LAB[k]}<span class="u">${k === "all" ? c.list.length : c.list.filter(a => a.kind === k).length}</span></button>`).join("")}</div>`;
+  let body;
+  if(view === "map"){
+    const yet = list.filter(a => !c.xv.has(a.id));
+    body = `${hero}<div class="zx-bigmap">${zkxBigMapSVG(list, c.xv)}<p class="zx-lg"><span><i style="background:${one ? ZKX_COL[kind] : ZKX_COL.field}"></i>行った</span><span><i class="y"></i>まだ</span></p></div>
+      <div class="zx-list">${yet.length ? `<h4>まだ ${yet.length}</h4>` : `<p class="zk-lead">${one ? ZKX_LAB[kind] + "は" : ""}全部行きました。</p>`}${yet.map(a => `<button type="button" class="r" data-zka="${a.id}"><i class="k-${a.kind}"></i><b>${esc(zkxShort(a))}</b><span class="pf">${esc(a.pref || "")}</span></button>`).join("")}</div>`;
+  } else {
+    const dt = one ? "" : `<span class="zx-dtag"><span class="nw">飛行場・</span><span class="nw">滑空場・</span><span class="nw">ヘリポート</span></span>`;
+    body = `${hero}${one ? "" : `<p class="zk-lead">集めた空港（${A.length}）とは別に数えます。自衛隊の飛行場（基地）は、今までどおり「ほかの図鑑・実績」の中にあります。</p>`}` + rgs.filter(r => r.list.length).map(r => `<section class="zk-rg" id="zkxrg-${r.rg}" data-rg="${r.rg}" style="--c:${zkCol(r.rg)}">
+    <div class="zk-door"><h3>${r.rg}</h3><b class="num">${r.got}</b><span class="u">/ ${r.list.length}</span>${dt}<button class="zk-up" type="button" data-zk-up aria-label="図鑑の上へ"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 14l6-6 6 6"/></svg></button></div>
     <div class="zk-grid">${r.list.map(a => zkxTile(a, c.xv.has(a.id), vc.get(a.id) || 0)).join("")}</div></section>`).join("");
-  const tsume = `<nav class="zk-tsume" id="zkxTsume" aria-label="地方へ飛ぶ">${rgs.map(r => `<button type="button" data-zkj="${r.rg}" style="--c:${zkCol(r.rg)}" aria-label="${r.rg}へ"${r.list.length ? "" : ` disabled aria-disabled="true"`}><span>${r.rg}</span></button>`).join("")}</nav>`;
-  return `${ZK_BACK_MAIN}<div class="book-head"><h2>${ZKX_TITLE_BR}</h2></div><div class="zk-main">${hero}${body}</div>${tsume}`;
+  }
+  const tsume = view === "map" ? "" : `<nav class="zk-tsume" id="zkxTsume" aria-label="地方へ飛ぶ">${rgs.map(r => `<button type="button" data-zkj="${r.rg}" style="--c:${zkCol(r.rg)}" aria-label="${r.rg}へ"${r.list.length ? "" : ` disabled aria-disabled="true"`}><span>${r.rg}</span></button>`).join("")}</nav>`;
+  document.documentElement.dataset.zxview = view;
+  return `${ZK_BACK_MAIN}<div class="book-head"><h2>${ZKX_TITLE_BR}</h2></div><div class="zk-main${one ? " zx-one" : ""}">${vw}${seg}${body}</div>${tsume}`;
 }
+// ピルと見方を押したら覚えて描き直す（位置は見方の帯の所に戻す）
+document.addEventListener("click", e => {
+  const b = e.target.closest("#bookAir [data-zxk], #bookAir [data-zxv]"); if(!b) return;
+  if(b.dataset.zxk){ zkxSet(ZKX_KIND_KEY, b.dataset.zxk); track("zkx_kind", b.dataset.zxk); }
+  else { zkxSet(ZKX_VIEW_KEY, b.dataset.zxv); track("zkx_view", b.dataset.zxv); }
+  const y = window.scrollY; $("bookAir").innerHTML = zkAirBookHTML(); zkTsumeSync();
+  const el = $("zkxSeg"); if(el){ const top = el.getBoundingClientRect().top + window.scrollY - 140; window.scrollTo(0, Math.min(y, Math.max(0, top))); }
+  const f = document.querySelector(b.dataset.zxk ? `#bookAir [data-zxk="${b.dataset.zxk}"]` : `#bookAir [data-zxv="${b.dataset.zxv}"]`); if(f) f.focus({ preventScroll:true });
+});
 /* ---------- ほかの図鑑・実績（86 の数には入らない） ---------- */
 function renderZkOthers(){
   const box = $("bookOthers"); if(!box) return;
@@ -6361,7 +6431,7 @@ const LO_KEY = "soramemo.layout";
 // デモの間に変えた表示（タブ・見方・かたまり・構成）は、デモを終えると始める前に戻す（review-app-1 の3）。
 // 始めるときにこの端末の値を控え、終えたとき（開き直してデモが終わったときも、読み込みのはじめに）戻す
 const DEMO_LO_BAK = "soramemo.demo.lobak";
-const DEMO_LO_KEYS = () => [LO_KEY, "soramemo.persona", "soramemo.ops.side", "soramemo.ops.recent", ...Object.keys(VIEWS).map(k => "soramemo.view." + k)];
+const DEMO_LO_KEYS = () => [LO_KEY, "soramemo.persona", "soramemo.ops.side", "soramemo.ops.recent", "soramemo.zkx.kind", "soramemo.zkx.view", ...Object.keys(VIEWS).map(k => "soramemo.view." + k)];
 function demoLoSave(){ try{ const o = {}; for(const k of DEMO_LO_KEYS()) o[k] = localStorage.getItem(k); localStorage.setItem(DEMO_LO_BAK, JSON.stringify(o)); }catch(e){} }
 function demoLoRestore(){ try{ const raw = localStorage.getItem(DEMO_LO_BAK); if(!raw) return false; const o = JSON.parse(raw) || {};
   for(const k of DEMO_LO_KEYS()){ if(!(k in o)) continue; if(o[k] == null) localStorage.removeItem(k); else localStorage.setItem(k, o[k]); }
@@ -6536,11 +6606,19 @@ function setLogSeg(s){
 }
 $("flAdd").onclick = () => { setLogSeg("book"); window.scrollTo(0, 0); const m = $("mFrom"); if(m){ m.scrollIntoView({ block:"center" }); m.focus({ preventScroll:true }); } };
 $("fbBack").onclick = () => { setLogSeg("list"); window.scrollTo(0, 0); };
+/* 「空の上」（11/20 PM・data/flight-actual）：実際の出発・到着（act_src があるとき）の差。ないときは今までどおりチェックインの時刻の差で「目安」
+   act_src：odpt＝航空会社の運航情報・adsb＝機体の位置からの推定・timetable＝時刻表の定刻（推定） */
+function fbActOf(r){
+  const src = ["odpt", "adsb", "timetable"].includes(r.act_src) ? r.act_src : null, d = src ? Date.parse(r.act_dep_at) : NaN, a = src ? Date.parse(r.act_arr_at) : NaN;
+  return src && a > d ? { actDep:d, actArr:a, actSrc:src } : { actDep:null, actArr:null, actSrc:null };
+}
+const fbMin = f => Math.max(0, Math.round(((f.actSrc ? f.actArr : f.arr) - (f.actSrc ? f.actDep : f.dep)) / 6e4));
+const FB_SRC_TXT = { odpt:"航空会社の運航情報から", adsb:"機体の位置から（推定）", timetable:"時刻表の定刻から（推定）" };
 // 日誌の行：チェックインでできた便・車などの移動・記録帳の便（新しい順）。記録帳の便は路線の数には入れない（前からの決まり）
 function fbEntries(){
   const out = [];
   for(const f of S.flights){ if(!(inFocus(f) || !f.airline) || !BY[f.from] || !BY[f.to]) continue; const car = isCar(f);
-    out.push({ kind:car ? "car" : "fly", f, key:fid(f), t:f.dep, from:f.from, to:f.to, km:f.km, airline:car ? null : f.airline, min:Math.max(0, Math.round((f.arr - f.dep) / 6e4)) }); }
+    out.push({ kind:car ? "car" : "fly", f, key:fid(f), t:f.dep, from:f.from, to:f.to, km:f.km, airline:car ? null : f.airline, min:fbMin(f), src:car ? null : f.actSrc || "" }); }
   S.manual.forEach((m, i) => { if(!BY[m.from] || !BY[m.to]) return; if(FOCUS !== "ALL" && !(m.airline && (ALBY[m.airline] || {}).group === FOCUS)) return;
     out.push({ kind:"book", m, key:"m" + i, t:Date.parse(m.d + "T12:00:00+09:00"), from:m.from, to:m.to, km:km(BY[m.from], BY[m.to]), airline:m.airline && ALBY[m.airline] ? m.airline : null, min:null }); });
   return out.sort((a, b) => b.t - a.t);
@@ -6550,7 +6628,7 @@ const fbRtKey = e => [e.from, e.to].sort((a, b) => a - b).join("-");
 function fbSum(es){
   const fl = es.filter(e => e.kind !== "car"), car = es.filter(e => e.kind === "car");
   return { n:fl.length, km:fl.reduce((x, e) => x + e.km, 0), min:fl.reduce((x, e) => x + (e.min || 0), 0), car:car.length, carKm:car.reduce((x, e) => x + e.km, 0),
-    rt:new Set(fl.filter(e => e.kind === "fly").map(fbRtKey)).size };
+    rt:new Set(fl.filter(e => e.kind === "fly").map(fbRtKey)).size, est:fl.some(e => e.kind === "fly" && e.src !== "odpt") };
 }
 // 時間の書き方：「2時間20分」。数字は大きく、単位は小さく
 const fbDur = min => { const h = Math.floor(min / 60), m = min % 60; return `<span class="dur">${h ? `<b>${h}</b><small>時間</small>` : ""}<b>${h ? String(m).padStart(2, "0") : m}</b><small>分</small></span>`; };
@@ -6566,7 +6644,7 @@ function fbYrHTML(ys, withNums){
   return `<div class="yrsw"><button type="button" data-fby="${older ?? ""}" aria-label="${older ? older + "年へ" : "これより前の年はありません"}"${older ? "" : " disabled"}>‹</button>
       <button type="button" class="yrname" data-fbyears aria-haspopup="dialog" aria-label="${FB_Y}年。押すと年を選べます"><b>${FB_Y}年</b><span aria-hidden="true">▾</span></button>
       <button type="button" data-fby="${newer ?? ""}" aria-label="${newer ? newer + "年へ" : "いちばん新しい年です"}"${newer ? "" : " disabled"}>›</button></div>`
-    + (withNums ? `<div class="yrnums"><span><b>${st.n}</b><small>便</small></span><span><b>${fmtKm(st.km)}</b><small>km</small></span><span><small>空の上</small>${fbDur(st.min)}</span></div>`
+    + (withNums ? `<div class="yrnums"><span><b>${st.n}</b><small>便</small></span><span><b>${fmtKm(st.km)}</b><small>km</small></span><span><small>空の上</small>${fbDur(st.min)}${st.est ? `<small class="fbest">（推定を含む）</small>` : ""}</span></div>`
       + (st.car ? `<p class="yrcar">車など ${st.car}（${fmtKm(st.carKm)} km）は別に数えています</p>` : "") : "");
 }
 // 日誌の1行：日付が左・区間は名前で大きく・2行目に出発の時刻と便名・右に時間と距離。左の細い帯が会社の色（夜は出さない）
@@ -6575,7 +6653,7 @@ function fbRowHTML(e){
   const sub = e.kind === "car" ? `<span class="fbcar">車など</span>`
     : e.kind === "book" ? `<span class="sub">記録帳${e.airline ? "・" + esc(fbAlName(e.airline)) : ""}</span>`
     : `<span class="sub"><b>${hmOf(e.f.dep)}</b> 発・${esc(lgNo(e.f))}${statusBadge(e.f)}</span>`;
-  const right = e.kind === "fly" ? `${fbDur(e.min)}<small>${fmtKm(e.km)} km</small>`
+  const right = e.kind === "fly" ? `${fbDur(e.min)}${e.src ? "" : `<small class="fbmeyasu">目安</small>`}<small>${fmtKm(e.km)} km</small>`
     : `<span class="dur"><b>${fmtKm(e.km)}</b><small>km</small></span><small>${e.kind === "car" ? "空の上なし" : "時刻なし"}</small>`;
   const what = e.kind === "car" ? "車などの移動" : e.kind === "book" ? "記録帳の便" : (e.f.no || "便");
   return `<li><button type="button" class="fbrow" data-g="${g}" data-fbv="${e.key}" aria-label="${d.getMonth() + 1}月${d.getDate()}日、${esc(godShort(a))}から${esc(godShort(b))}、${what}">
@@ -6613,7 +6691,7 @@ function fbYearHTML(es){
   const mx = Math.max(1, ...months.map(x => x.n)), best = months.reduce((b, x, i) => x.km > (b ? months[b - 1].km : 0) ? i + 1 : b, 0);
   const rts = fbRoutes(es).filter(r => r.fly.length).slice(0, 3);
   const tile = (l, v) => `<div class="fbtile"><small>${l}</small><div>${v}</div></div>`;
-  return `<div class="fbtiles">${tile("便", `<b>${st.n}</b><small>便</small>`)}${tile("路線", `<b>${st.rt}</b><small>路線（往復で1つ）</small>`)}${tile("距離", `<b>${fmtKm(st.km)}</b><small>km</small>`)}${tile("空の上", fbDur(st.min))}</div>
+  return `<div class="fbtiles">${tile("便", `<b>${st.n}</b><small>便</small>`)}${tile("路線", `<b>${st.rt}</b><small>路線（往復で1つ）</small>`)}${tile("距離", `<b>${fmtKm(st.km)}</b><small>km</small>`)}${tile("空の上", fbDur(st.min) + (st.est ? `<small class="fbest">（推定を含む）</small>` : ""))}</div>
     ${st.car ? `<p class="fbnote">車など ${st.car}（${fmtKm(st.carKm)} km）は、便・距離・空の上に入れず別に数えています。</p>` : ""}
     ${plusOn() ? `<div class="fbshr"><button class="fbpill" type="button" data-fbyshare><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15V3"/><path d="m7 8 5-5 5 5"/><path d="M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/></svg>この年を画像で共有</button></div>` : ""}
     <h3 class="fbh">月ごとの便の数</h3>
@@ -6633,13 +6711,15 @@ function fbMapHTML(es){
       <div class="fbtiles s3">${`<div class="fbtile"><small>回数</small><div><b>${sel.fly.length}</b><small>回</small>${sel.car.length ? `<small>・車など ${sel.car.length}</small>` : ""}</div></div>`}<div class="fbtile"><small>距離</small><div><b>${fmtKm((sel.fly[0] || sel.car[0]).km)}</b><small>km</small></div></div><div class="fbtile"><small>空の上の合計</small><div>${sel.fly.length ? fbDur(mins) : "<b>—</b>"}</div></div></div>
       ${sel.fly.length ? `<p class="fbnote">区間 ${fmtKm(mi.mi)} マイル${mi.official ? "" : "（地図上の距離から）"}</p>` : ""}
       <ul class="fbrows">${[...sel.fly, ...sel.car].sort((x, y) => y.t - x.t).map(fbRowHTML).join("")}</ul></div>`; }
-  return `<div class="fbmapc"><div class="fbleaf" id="fbLeaf" aria-hidden="true"></div><svg id="map" class="fbsvg" viewBox="0 0 400 420" role="img" aria-label="${FB_Y}年に飛んだ線と空港の地図"></svg><span class="mcred">地図：国土地理院</span></div>
+  return `<div class="fbmapc"><div class="fbleaf" id="fbLeaf" aria-hidden="true"></div><svg id="map" class="fbsvg" viewBox="0 0 400 420" role="img" aria-label="${FB_Y}年に飛んだ線と空港の地図"></svg><span class="mcred">地図：国土地理院${rts.some(r => r.fly.length && fbTrackOf(r)) ? "・航跡：adsb.lol（ODbL）" : ""}</span></div>
     <div class="fbcard fblg"><div class="lgrow"><small>太さ＝回数</small>${[2, 4, 6].map(n => `<span><i style="height:${fbW(n)}px"></i>${n}回</span>`).join("")}${hasCar ? `<span><i class="dash"></i>車など</span>` : ""}</div>
       <div class="lgbot">${top ? `<div><small>いちばん太い線</small><b>${fbRtName(top.k)}（${top.fly.length}回）</b></div>` : `<div><small>この年に飛んだ線はまだありません</small></div>`}<button class="fbpill" id="shareMap" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15V3"/><path d="m7 8 5-5 5 5"/><path d="M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/></svg>画像で共有</button></div></div>
     ${selHTML}
     ${rts.length ? `<h3 class="fbh">乗った区間<small>${rts.length}区間・太い順</small></h3>
       <div class="fbcard"><ul class="fbrts">${rts.map(r => `<li><button type="button" data-fbrt="${r.k}" aria-pressed="${r.k === FB_RT}"><i class="w${r.fly.length ? "" : " dash"}" style="height:${fbW(r.fly.length || r.car.length)}px" aria-hidden="true"></i><span><b>${fbRtName(r.k)}</b><small>${esc(r.k.split("-").map(id => code(BY[+id])).join(" ⇄ "))}・${fmtKm((r.fly[0] || r.car[0]).km)} km${r.car.length ? `・車など ${r.car.length}` : ""}</small></span><em>${r.fly.length || r.car.length}<small>回</small></em></button></li>`).join("")}</ul></div>` : ""}`;
 }
+// 区間の線に使う航跡（11/20 PM）：その区間でいちばん新しい航跡のある便の track（[[緯度, 経度], ...]・adsb.lol）。なければ null（今の弧の線）
+function fbTrackOf(r){ const e = [...r.fly].sort((x, y) => y.t - x.t).find(e => e.f && Array.isArray(e.f.track) && e.f.track.length >= 2 && e.f.track.every(p => Array.isArray(p) && isFinite(p[0]) && isFinite(p[1]))); return e ? e.f.track : null; }
 // 地図の線（SVG。地図が読めないときと、テストの手元の版）
 function fbMapSVG(es){
   const svg = $("map"); if(!svg) return;
@@ -6649,7 +6729,8 @@ function fbMapSVG(es){
     return `M${x1.toFixed(1)} ${y1.toFixed(1)}Q${(mx - dy / L2 * k).toFixed(1)} ${(my + dx / L2 * k).toFixed(1)} ${x2.toFixed(1)} ${y2.toFixed(1)}`; };
   for(const r of [...rts].reverse()){ const [a, b] = r.k.split("-").map(Number), on = !FB_RT || FB_RT === r.k;
     if(r.car.length) parts.push(`<path d="${arc(BY[a], BY[b])}" fill="none" stroke="${on ? "var(--fb-line)" : "var(--fb-fade)"}" stroke-width="${fbW(r.car.length) * .7}" stroke-linecap="round" stroke-dasharray="3 4"/>`);
-    if(r.fly.length) parts.push(`<path d="${arc(BY[a], BY[b])}" fill="none" stroke="${on ? "var(--fb-line)" : "var(--fb-fade)"}" stroke-width="${fbW(r.fly.length) * .7}" stroke-linecap="round" data-n="${r.fly.length}"/>`); }
+    const tk = r.fly.length ? fbTrackOf(r) : null, tkd = tk ? tk.map((p, i) => { const [x, y] = proj({ lat:p[0], lon:p[1] }); return `${i ? "L" : "M"}${x.toFixed(1)} ${y.toFixed(1)}`; }).join("") : "";
+    if(r.fly.length) parts.push(`<path d="${tk ? tkd : arc(BY[a], BY[b])}"${tk ? ` data-track="1" stroke-linejoin="round"` : ""} fill="none" stroke="${on ? "var(--fb-line)" : "var(--fb-fade)"}" stroke-width="${fbW(r.fly.length) * .7}" stroke-linecap="round" data-n="${r.fly.length}"/>`); }
   for(const a of A){ if(!v.has(a.id)) continue; const [x, y] = proj(a); parts.push(`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="3.6" fill="var(--chart-bg)" stroke="var(--fb-line)" stroke-width="1.6"><title>${esc(a.name)}</title></circle>`); }
   svg.innerHTML = parts.join("");
 }
@@ -6673,7 +6754,9 @@ async function renderFlightMap(){
     const dx = b.lon - a.lon, dy = b.lat - a.lat, L2 = Math.hypot(dx, dy) || 1, k = Math.min(1.2, L2 * .18), cx = (a.lon + b.lon) / 2 - dy / L2 * k, cy = (a.lat + b.lat) / 2 + dx / L2 * k, ll = [];
     for(let t = 0; t <= 1.0001; t += .05) ll.push([(1 - t) ** 2 * a.lat + 2 * (1 - t) * t * cy + t * t * b.lat, (1 - t) ** 2 * a.lon + 2 * (1 - t) * t * cx + t * t * b.lon]);
     if(r.car.length) L.polyline(ll, { color:on ? line : fade, weight:fbW(r.car.length), dashArray:"4 6", lineCap:"round", interactive:false }).addTo(FB_MAP);
-    if(r.fly.length) L.polyline(ll, { color:on ? line : fade, weight:fbW(r.fly.length), lineCap:"round", interactive:false }).addTo(FB_MAP);
+    const tk = r.fly.length ? fbTrackOf(r) : null;   // 航跡がある区間は実際に飛んだ線
+    if(r.fly.length) L.polyline(tk || ll, { color:on ? line : fade, weight:fbW(r.fly.length), lineCap:"round", lineJoin:"round", interactive:false }).addTo(FB_MAP);
+    if(tk) for(const p of tk) pts.push(p);
     pts.push([a.lat, a.lon], [b.lat, b.lon]); }
   const seen = new Set();
   for(const e of es){ if(e.kind === "book") continue; for(const id of [e.from, e.to]){ if(seen.has(id)) continue; seen.add(id); const a = BY[id];
@@ -6750,7 +6833,7 @@ function fbOpenView(key){
   const mi = routeMiles(e.from, e.to, e.km);
   const tiles = e.kind === "car"
     ? `<div class="fbtile"><small>距離（空港どうしの直線）</small><div><b>${fmtKm(e.km)}</b><small>km</small></div></div><div class="fbtile"><small>空の上</small><div><b>—</b></div><small class="s">便・空の上・距離には入れません</small></div>`
-    : `<div class="fbtile"><small>空の上</small><div>${e.min != null ? fbDur(e.min) : "<b>—</b>"}</div>${e.kind === "fly" ? `<small class="s">チェックインの時刻から</small>` : `<small class="s">記録帳の便（時刻なし）</small>`}</div>
+    : `<div class="fbtile"><small>空の上</small><div>${e.min != null ? fbDur(e.min) : "<b>—</b>"}</div>${e.kind === "fly" ? `<small class="s">${e.src ? FB_SRC_TXT[e.src] : "目安・チェックインの時刻から"}</small>` : `<small class="s">記録帳の便（時刻なし）</small>`}</div>
        <div class="fbtile"><small>距離</small><div><b>${fmtKm(e.km)}</b><small>km</small></div><small class="s">区間 ${fmtKm(mi.mi)} マイル</small></div>
        ${e.kind === "fly" ? `<div class="fbtile"><small>機体</small><div><b id="fvReg">—</b></div><small class="s" id="fvType">記録がありません</small></div>
        <div class="fbtile"><small>座席</small><div><b>${f.seat ? esc(f.seat) : "—"}</b></div><small class="s">${f.seat ? "記録した席" : "記録がありません"}</small></div>` : ""}`;
@@ -6807,7 +6890,7 @@ async function fbPassCard(s){
   ctx.fillStyle = "#FFFFFF"; ctx.font = `700 170px Sign, ${GOTHIC}`; ctx.textAlign = "left"; ctx.fillText(code(a), X + 56, Y + 240); ctx.textAlign = "right"; ctx.fillText(code(b), X + W - 56, Y + 240);
   ctx.fillStyle = "#8F9AAD"; ctx.font = `600 48px ${GOTHIC}`; ctx.textAlign = "center"; ctx.fillText("→", X + W / 2, Y + 200);
   ctx.fillStyle = "#C9D1DE"; ctx.font = `700 40px ${GOTHIC}`; ctx.textAlign = "left"; ctx.fillText(godShort(a), X + 60, Y + 310); ctx.textAlign = "right"; ctx.fillText(godShort(b), X + W - 60, Y + 310);
-  const cols = [["出発", hmOf(f.dep)], ["空の上", fbDurTxt(Math.max(0, Math.round((f.arr - f.dep) / 6e4)))], ["距離", `${fmtKm(f.km)} km`]];
+  const cols = [["出発", hmOf(f.dep)], ["空の上", fbDurTxt(fbMin(f))], ["距離", `${fmtKm(f.km)} km`]];
   cols.forEach(([l, v], i) => { const x = X + 60 + i * 290; ctx.textAlign = "left"; ctx.fillStyle = "#AEB8C8"; ctx.font = `700 32px ${GOTHIC}`; ctx.fillText(l, x, Y + 420); ctx.fillStyle = "#FFFFFF"; ctx.font = `700 60px Sign, ${GOTHIC}`; ctx.fillText(v, x, Y + 490); });
   // 下の段
   const maxW = W - 120; let parts = [s.type, s.showReg && s.reg ? s.reg : null, s.showSeat && s.seat ? `${s.seat}席` : null].filter(Boolean);
