@@ -1,5 +1,6 @@
 import os, sys
 HERE=os.path.dirname(os.path.abspath(__file__)); WORK=os.environ.get('SORAMEMO_TEST_WORK','/tmp/soramemo-e2e'); os.makedirs(WORK, exist_ok=True)
+# （11/19 運用タブは一覧＋専用ページになった。このテストは中身を前の形（見方のタブ）で確かめるので soramemo.ops.hub=0。一覧は t148）
 # 滑走路の見方の地図：模式図をやめて本物の地図・滑走路の色（着陸・離陸・使っていない）・撮影地の名札（押すと撮影地の情報）・空港のまわり／経路の全体・現在地は空港の敷地の中だけ
 import asyncio, json
 from datetime import datetime, timezone
@@ -13,7 +14,7 @@ def check(label, ok):
 async def page(p, geo):
     b = await p.chromium.launch()
     c = await b.new_context(viewport={'width':400,'height':900}, timezone_id='Asia/Tokyo', geolocation=geo, permissions=['geolocation'])
-    await c.add_init_script("localStorage.setItem('soramemo.onboarded','1'); localStorage.setItem('soramemo.install.later','1'); localStorage.setItem('soramemo.view.ops','runway')")
+    await c.add_init_script("localStorage.setItem('soramemo.ops.hub','0'); localStorage.setItem('soramemo.onboarded','1'); localStorage.setItem('soramemo.install.later','1'); localStorage.setItem('soramemo.view.ops','runway')")
     await c.route('https://cdn.jsdelivr.net/npm/@supabase/**', lambda r: r.fulfill(path=os.path.join(HERE,'fake_sb.js'), content_type='application/javascript'))
     await c.route('https://fake.supabase.co/rest/v1/spot_info**', lambda r: r.fulfill(status=200, body=json.dumps(INFO), content_type='application/json', headers={'Access-Control-Allow-Origin':'*'}))
     await c.route('https://fake.supabase.co/rest/v1/rpc/**', lambda r: r.fulfill(status=200, body='[]', content_type='application/json', headers={'Access-Control-Allow-Origin':'*'}))

@@ -1,5 +1,6 @@
 # すべての見方の設定（11/11 13時 本人「すべてよい」・画面案 design/view-settings の 2版）
 #   各画面の鉛筆のシート：全部の行に説明（OFF でも残る）・案A（どの見方も OFF にでき、最後の1つだけ残る。「最後の1つ」の札と理由）・見方が1つでも帯に名前が残る
+# （11/19 運用タブは一覧＋専用ページになった。このテストは中身を前の形（見方のタブ）で確かめるので soramemo.ops.hub=0。一覧は t148）
 #   表示の編集の1枚：画面ごとに畳んだカード（タブ 5/5）・押すとその場で開く・行き先の字・隠しているもので絞る・鉛筆から来たらそのカードだけ開いて光る・部品は ON／OFF（✓ のピルはない）
 #   案A の前に保存した物は前の決まりどおり（地方別・日誌は出す）。修行のカードは修行担当が LO_EXT.sg を足したときだけ
 import os, sys, asyncio
@@ -10,7 +11,7 @@ fails = []
 def check(label, ok, extra=''):
     print(label, ok, extra)
     if not ok: fails.append(label)
-NEW = "localStorage.setItem('soramemo.onboarded','1'); localStorage.setItem('soramemo.persona','all'); localStorage.setItem('soramemo.install.later','1'); localStorage.setItem('soramemo.zk.notice','new'); localStorage.setItem('soramemo.tp.tip','1'); localStorage.setItem('soramemo.tpTaught','1');"
+NEW = "localStorage.setItem('soramemo.ops.hub','0'); localStorage.setItem('soramemo.onboarded','1'); localStorage.setItem('soramemo.persona','all'); localStorage.setItem('soramemo.install.later','1'); localStorage.setItem('soramemo.zk.notice','new'); localStorage.setItem('soramemo.tp.tip','1'); localStorage.setItem('soramemo.tpTaught','1');"
 async def open_app(b, h=844, night=False):
     c = await b.new_context(viewport={'width':390,'height':h}, device_scale_factor=2, timezone_id='Asia/Tokyo')
     await c.route('**/web/config.js', lambda r: r.fulfill(body='window.SORAMEMO_CONFIG = {};', content_type='application/javascript'))

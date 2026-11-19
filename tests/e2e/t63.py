@@ -1,5 +1,6 @@
 import os, sys
 HERE=os.path.dirname(os.path.abspath(__file__)); WEB=os.path.abspath(os.path.join(HERE,'..','..','web')); WORK=os.environ.get('SORAMEMO_TEST_WORK','/tmp/soramemo-e2e'); os.makedirs(WORK, exist_ok=True)
+# （11/19 運用タブは一覧＋専用ページになった。このテストは中身を前の形（見方のタブ）で確かめるので soramemo.ops.hub=0。一覧は t148）
 # 撮る人の見方：注目の機体・機体のくわしく・撮影条件と天気・近づいたら知らせる・表示する機体を選ぶ・登録記号と決め方の札
 import asyncio, json
 from datetime import datetime, timedelta, timezone
@@ -23,7 +24,7 @@ def check(label, ok):
 async def main():
     async with async_playwright() as p:
         b=await p.chromium.launch(); c=await b.new_context(viewport={'width':400,'height':860}, timezone_id='Asia/Tokyo')
-        await c.add_init_script("localStorage.setItem('soramemo.onboarded','1'); localStorage.setItem('soramemo.install.later','1')")
+        await c.add_init_script("localStorage.setItem('soramemo.ops.hub','0'); localStorage.setItem('soramemo.onboarded','1'); localStorage.setItem('soramemo.install.later','1')")
         await c.route('https://cdn.jsdelivr.net/npm/@supabase/**', lambda r: r.fulfill(path=os.path.join(HERE,'fake_sb.js'), content_type='application/javascript'))
         async def rpc(r):
             name = r.request.url.rsplit('/', 1)[-1]

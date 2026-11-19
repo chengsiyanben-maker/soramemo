@@ -1,5 +1,6 @@
 import os, sys
 HERE=os.path.dirname(os.path.abspath(__file__)); WEB=os.path.abspath(os.path.join(HERE,'..','..','web')); WORK=os.environ.get('SORAMEMO_TEST_WORK','/tmp/soramemo-e2e'); os.makedirs(WORK, exist_ok=True)
+# （11/19 運用タブは一覧＋専用ページになった。このテストは中身を前の形（見方のタブ）で確かめるので soramemo.ops.hub=0。一覧は t148）
 # ゴーアラウンドの知らせ：運用タブの今日のゴーアラウンド、1件のくわしく（高さの動き・そのときの天気）、着陸の天気（起きやすさ）、知らせの設定、通知から開く
 import asyncio, json
 from datetime import datetime, timedelta, timezone
@@ -19,7 +20,7 @@ def check(label, ok):
 async def main():
     async with async_playwright() as p:
         b=await p.chromium.launch(); c=await b.new_context(viewport={'width':400,'height':860}, timezone_id='Asia/Tokyo')
-        await c.add_init_script("localStorage.setItem('soramemo.onboarded','1'); localStorage.setItem('soramemo.install.later','1'); localStorage.setItem('soramemo.view.ops','board')")
+        await c.add_init_script("localStorage.setItem('soramemo.ops.hub','0'); localStorage.setItem('soramemo.onboarded','1'); localStorage.setItem('soramemo.install.later','1'); localStorage.setItem('soramemo.view.ops','board')")
         await c.route('https://cdn.jsdelivr.net/npm/@supabase/**', lambda r: r.fulfill(path=os.path.join(HERE,'fake_sb.js'), content_type='application/javascript'))
         EV = {'id': 12, 'iata': 'HND', 'at': iso(-10), 'callsign': 'JAL123', 'flight': 'JL123', 'type': 'B738', 'reg': 'JA301J', 'low_ft': 450, 'low_km': 2.1, 'rwy': '34L', 'again_at': iso(-3),
               'wx': {'time': iso(-30), 'wdir': 250, 'wspd': 25, 'wgst': 38, 'vis_m': 9999, 'raw': 'RJTT 210530Z 25025G38KT 9999 FEW025 BKN030 18/10 Q1002'},

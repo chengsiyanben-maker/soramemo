@@ -1,5 +1,6 @@
 import os, sys
 HERE=os.path.dirname(os.path.abspath(__file__)); WEB=os.path.abspath(os.path.join(HERE,'..','..','web')); WORK=os.environ.get('SORAMEMO_TEST_WORK','/tmp/soramemo-e2e'); os.makedirs(WORK, exist_ok=True)
+# （11/19 運用タブは一覧＋専用ページになった。このテストは中身を前の形（見方のタブ）で確かめるので soramemo.ops.hub=0。一覧は t148）
 # 運用タブを空港と機体に分ける（決定事項【11/16】・design/ops-split 2版の A1・A2・A3・Q2・V1・V1c・V3）
 #   1 上は1行：空港の側は「空港｜機体」＋空港のピル＋ⓘ＋共有。機体の側は探す欄＋ⓘ。選んだあとは「‹ 戻る」＋登録記号＋共有
 #   2 機体の側のはじめの見方は「最近見た」。飛んでいる特別塗装機（地上の機体は入れない）と撮る人への入口
@@ -41,7 +42,7 @@ async def page(b, height=844, side='ap', recent=None):
         await r.fulfill(status=200, body=json.dumps(body), content_type='application/json', headers={'Access-Control-Allow-Origin': '*'})
     await c.route('https://fake.supabase.co/rest/**', h); await c.route('https://fake.supabase.co/functions/**', h)
     await c.route('https://cyberjapandata.gsi.go.jp/**', lambda r: r.fulfill(status=404, body=''))
-    init = ("localStorage.setItem('soramemo.onboarded','1'); localStorage.setItem('soramemo.install.later','1'); localStorage.setItem('soramemo.tpTaught','1'); localStorage.setItem('soramemo.zk.notice','1');"
+    init = ("localStorage.setItem('soramemo.ops.hub','0'); localStorage.setItem('soramemo.onboarded','1'); localStorage.setItem('soramemo.install.later','1'); localStorage.setItem('soramemo.tpTaught','1'); localStorage.setItem('soramemo.zk.notice','1');"
             "localStorage.setItem('soramemo.persona','all'); localStorage.setItem('soramemo.opsAirport','HND'); localStorage.setItem('soramemo.view.ops','photo'); localStorage.setItem('soramemo.ops.side','%s');" % side)
     if recent is not None: init += "localStorage.setItem('soramemo.ops.recent', %s);" % json.dumps(json.dumps(recent))
     await c.add_init_script(init)
