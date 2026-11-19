@@ -7614,20 +7614,30 @@ document.documentElement.dataset.view = document.documentElement.dataset.view ||
 // 搭乗券の半券を右へ引いて切ると、チェックイン（56px 引けば切れる。半券の真ん中をつかんでも画面の端までに届く）。
 // 押すだけなら「印をもらいますか」を1回確かめてから切る。キーボードの Enter・Space ではそのままチェックイン。
 // ログインしていない・判定範囲の外のときは切れない（押すとログインの画面・位置の調べ直し）
-const TEAR_AT = 56;
+// 半券を指で切る（11/19 本人の iPhone：右寄りをつかむと画面の端まで 66px しかなく、56px に届かず切れなかった）
+//   切れる長さ：つかんだ所から画面の右端までの残りの半分（28〜56px）。速く右へはじいたら短くても切る（0.5px/ms 以上・20px 以上）
+//   縦と横を決めるのは 10px 動いてから。横が縦の 0.6 倍以上なら横（指の揺れで先に縦へ少し動いても切れるように）
+const TEAR_AT = 56, TEAR_MIN = 28, TEAR_AXIS = 10, TEAR_XY = 0.6, TEAR_FLICK_V = 0.5, TEAR_FLICK_D = 20;
+const tearAt = room => Math.max(TEAR_MIN, Math.min(TEAR_AT, Math.round(room / 2)));
 (() => { const b = $("checkin"), wrap = $("bpass"); if(!b || !wrap) return;
-  let x0 = 0, y0 = 0, dx = 0, axis = "", drag = false, moved = false;
+  let x0 = 0, y0 = 0, dx = 0, axis = "", drag = false, moved = false, need = TEAR_AT, pts = [];
   const set = () => { b.style.transformOrigin = ""; b.style.transform = dx ? `translate(${dx}px,${Math.round(dx * .12)}px) rotate(${Math.round(dx / 10)}deg)` : ""; };
-  const reset = () => { dx = 0; axis = ""; b.style.transform = ""; b.style.transformOrigin = ""; };
+  const reset = () => { dx = 0; axis = ""; pts = []; b.style.transform = ""; b.style.transformOrigin = ""; };
   const st = () => wrap.dataset.state || "idle", off = () => ["guest", "out", "paused"].includes(st());
-  b.addEventListener("pointerdown", e => { if(b.disabled) return; drag = true; moved = false; x0 = e.clientX; y0 = e.clientY; dx = 0; axis = ""; try{ b.setPointerCapture(e.pointerId); }catch(_){} if(!off()) b.classList.add("dragging"); });
+  // 指を離す前の 100ms の右への速さ（px/ms）。時刻は指の動きの時刻（e.timeStamp）で数える
+  const speed = () => { if(pts.length < 2) return 0; const z = pts[pts.length - 1], r = pts.filter(q => z.t - q.t <= 100), a = r[0]; return z.t > a.t ? (z.x - a.x) / (z.t - a.t) : 0; };
+  b.addEventListener("pointerdown", e => { if(b.disabled) return; drag = true; moved = false; x0 = e.clientX; y0 = e.clientY; dx = 0; axis = ""; pts = [{ x:e.clientX, t:e.timeStamp }];
+    need = tearAt((document.documentElement.clientWidth || innerWidth) - e.clientX);
+    try{ b.setPointerCapture(e.pointerId); }catch(_){} if(!off()) b.classList.add("dragging"); });
   b.addEventListener("pointermove", e => { if(!drag) return;
-    const mx = e.clientX - x0, my = e.clientY - y0;
-    if(!axis && Math.hypot(mx, my) > 6) axis = Math.abs(my) > Math.abs(mx) ? "y" : "x";   // 縦に動かしたときは切らない（右へ引くだけ）
-    if(Math.hypot(mx, my) > 6) moved = true;
+    const mx = e.clientX - x0, my = e.clientY - y0, d = Math.hypot(mx, my);
+    pts.push({ x:e.clientX, t:e.timeStamp }); if(pts.length > 12) pts.shift();
+    if(!axis && d >= TEAR_AXIS) axis = Math.abs(mx) >= Math.abs(my) * TEAR_XY ? "x" : "y";   // 縦に動かしたときは切らない（右へ引くだけ）
+    if(d > 6) moved = true;
     if(axis === "x" && !off()){ dx = Math.max(0, Math.min(170, mx)); set(); } });
   const end = () => { if(!drag) return; drag = false; b.classList.remove("dragging");
-    if(dx >= TEAR_AT) tear(); else { const m = moved; reset(); if(!m) tap(); } };
+    const flick = axis === "x" && !off() && dx >= TEAR_FLICK_D && speed() >= TEAR_FLICK_V;
+    if(axis === "x" && !off() && (dx >= need || flick)) tear(); else { const m = moved; reset(); if(!m) tap(); } };
   b.addEventListener("pointerup", end); b.addEventListener("pointercancel", () => { if(!drag) return; drag = false; b.classList.remove("dragging"); reset(); });
   // 押せたときだけ半券が切れて飛ぶ（11/19 シミュレーター：チェックイン済みでも切れる動きをして、理由が見えないまま半券が戻っていた）。
   // 調べている間は引いた所で止めて待ち、押せなかったときは戻して小さく揺らし、理由を半券のすぐ下に出す（ckNote）
