@@ -23,7 +23,10 @@ BOARD = {'iata': 'HND', 'next_arr': [{'flight': 'JL110', 'other': 'ITM', 'sched'
          'hours': [{'h': h, 'flights': f, 'late': l, 'cancel': 0} for h, f, l in zip(range(24), [0,0,0,0,0,1,8,20,24,22,20,18,19,20,21,22,23,24,22,20,16,10,4,1], [0,0,0,0,0,0,1,2,3,2,1,1,1,2,2,1,0,0,0,0,0,0,0,0])]}
 SPECIAL = [{'reg': 'JA819A', 'name': 'ポケモンジェット 赤', 'airline': 'ANA', 'callsign': 'ANA1', 'kind': 'livery', 'lat': 35.6, 'lon': 139.9, 'alt_ft': 3000, 'iata': 'HND', 'phase': 'arr'},
            {'reg': 'JA01XJ', 'name': 'A350 1号機', 'airline': 'JAL', 'callsign': 'JAL5', 'kind': 'livery', 'lat': 34.0, 'lon': 135.0, 'alt_ft': 30000, 'iata': None, 'phase': None}]
-PLANES = [{'id': 't%d' % i, 'callsign': 'TST%d' % i, 'lat': 35.6 + i * .01, 'lon': 139.8, 'alt_ft': 2000, 'kt': 150, 'hdg': 340, 'fpm': -700, 'phase': 'arr', 'dist_km': 7, 'type': 'B738', 'reg': 'JA%03dA' % i} for i in range(5)]
+# 作り物の機体：羽田（35.55・139.78）の南の進入（34 に向かう 5機）が地図の「空港のまわり」の範囲の中に入るように置く（11/19 22時45分 PM の指示で置き直し）。
+#   6機目は遠く（約85km 北）の出発機：数（6機）には入るが、地図カードの絵の外なので印は描かない
+PLANES = [{'id': 't%d' % i, 'callsign': 'TST%d' % i, 'lat': 35.515 + i * .006, 'lon': 139.80, 'alt_ft': 2000, 'kt': 150, 'hdg': 340, 'fpm': -700, 'phase': 'arr', 'dist_km': 7, 'type': 'B738', 'reg': 'JA%03dA' % i} for i in range(5)] \
+       + [{'id': 't9', 'callsign': 'FAR9', 'lat': 36.32, 'lon': 139.80, 'alt_ft': 20000, 'kt': 400, 'hdg': 0, 'fpm': 2000, 'phase': 'dep', 'dist_km': 85, 'type': 'B789', 'reg': 'JA999A'}]
 fails = []
 def check(name, ok, detail=''):
     print(('OK  ' if ok else 'NG  ') + name + (('  ' + str(detail)) if detail != '' else ''))
@@ -70,7 +73,11 @@ async def main():
         check('1 「空港｜機体」と見方のタブは出さない', not await visible(pg, '#opsSide') and not await visible(pg, '#opsViews') and not await visible(pg, '#opsAside'))
         check('1 頭は空港のピル＋i、検索窓は上に残す（案A）', await visible(pg, '#opsApBtn') and await visible(pg, '#opsInfoBtn') and await visible(pg, '#opsPlForm'))
         t = r['txt']
-        check('1 カードの数字：滑走路は北風・地図は5機・案内板は15:18着', '北風' in t and '5\n機' in t.replace(' ', '') or ('北風' in t and '5機' in t.replace('\n', '')) , t.replace('\n', ' ')[:200])
+        check('1 カードの数字：滑走路は北風・地図は6機・案内板は15:18着', '北風' in t and '6機' in t.replace('\n', '').replace(' ', ''), t.replace('\n', ' ')[:200])
+        r = await pg.evaluate("[...document.querySelectorAll('[data-ohub=\"map\"] .ohplanes [data-ohpl]')].map(e => e.dataset.ohpl)")
+        check('1 地図カードの絵に今の機体の印（近い5機・絵の外の遠い機体は描かない）', sorted(r) == ['TST0','TST1','TST2','TST3','TST4'], r)
+        r = await pg.evaluate("(() => { const s = document.querySelector('[data-ohub=\"map\"] .ohart').getBoundingClientRect(); return [...document.querySelectorAll('[data-ohub=\"map\"] [data-ohpl]')].every(e => { const r = e.getBoundingClientRect(); return r.width > 0 && r.left >= s.left - 1 && r.right <= s.right + 1 && r.top >= s.top - 1 && r.bottom <= s.bottom + 1; }); })()")
+        check('1 地図カードの機体の印はカードの中に見える', r)
         check('1 カードの数字：特別塗装機・短冊・定時が数で出る', '15:18' in t and '分後' in t and '%' in t, t.replace('\n', ' ')[:200])
         m = await pg.evaluate(MEASURE, '#v-ops')
         check('8 一覧（390）：字13px以上・押す所44px以上・はみ出しなし', not m['small'] and not m['tiny'] and not m['wide'], m)
@@ -124,6 +131,9 @@ async def main():
             v = await visible(pg, sel) if cid not in ('late', 'ontime', 'art') else True   # 遅れ・定時・空の道すじは、その日のデータがあるときだけ欄が出る（偽のサーバーでは空）
             m = await pg.evaluate(MEASURE, '.opsbar')
             check(f'4 「{cid}」を押すと専用ページ（{sel} が見える・頭のはみ出しなし）', r['hub'] == 'page' and r['page'] == cid and v and not m['wide'], (r, v, m['wide']))
+            if cid == 'map':
+                r = await pg.evaluate("(() => { const m = $('opsMap').getBoundingClientRect(); const els = [...document.querySelectorAll('#opsMap .tplane')]; return { all: els.length, inside: els.filter(e => { const r = e.getBoundingClientRect(); return r.width > 0 && r.left >= m.left && r.right <= m.right && r.top >= m.top && r.bottom <= m.bottom; }).length }; })()")
+                check('4 地図の専用ページ：着陸に向かう5機の印が地図の中に出る', r['inside'] == 5, r)
             if cid in ('map', 'special', 'photo'): await pg.screenshot(path=os.path.join(WORK, f't148_{cid}_844.png'))
             await pg.evaluate("$('opsHubBack').click()"); await pg.wait_for_timeout(600)
             if await pg.evaluate("$('v-ops').dataset.hub") != 'list': check(f'4 「{cid}」から戻れる', False)

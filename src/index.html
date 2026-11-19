@@ -10750,6 +10750,18 @@ function ohBoardStats(){
   const hrs = d.hours || [], tot = hrs.reduce((x, h) => x + Number(h.flights || 0), 0), late = hrs.reduce((x, h) => x + Number(h.late || 0), 0), cancel = hrs.reduce((x, h) => x + Number(h.cancel || 0), 0);
   return { arr: arr[0] ? tm(arr[0]) : null, next: all[0] ? tm(all[0]) : null, hrs, tot, late, cancel };
 }
+// 地図カードの絵に、今の機体（OPS_PLANES）を小さな飛行機の印で重ねる（11/19 22時45分 PM）。
+//   絵の空港（210,80）を空港の中心に、外の点線の輪（半径74）を約15km にして置く。地図の専用ページと同じく着陸・離陸の機体だけ、近い順に最大12機。絵の外の機体は描かない
+const OH_MAP_KM = 15 / 74;
+function ohMapPlanes(){
+  const def = opsDef(); if(!def || !def.center || !(OPS_PLANES || []).length) return "";
+  const [cl, cn] = def.center, kx = Math.cos(cl * Math.PI / 180) * 111.32;
+  const pts = OPS_PLANES.filter(p => (p.phase === "arr" || p.phase === "dep") && Number.isFinite(+p.lat) && Number.isFinite(+p.lon))
+    .map(p => { const dx = (p.lon - cn) * kx, dy = (p.lat - cl) * 110.57; return { p, d:Math.hypot(dx, dy), x:210 + dx / OH_MAP_KM, y:80 - dy / OH_MAP_KM }; })
+    .filter(o => o.x >= 6 && o.x <= 354 && o.y >= 6 && o.y <= 144).sort((a, b) => a.d - b.d).slice(0, 12);
+  if(!pts.length) return "";
+  return `<g class="ohplanes">${pts.map(({ p, x, y }) => `<path data-ohpl="${esc(p.callsign || p.id || "")}" transform="translate(${x.toFixed(1)} ${y.toFixed(1)}) rotate(${Math.round(+p.hdg || 0)}) scale(.62) translate(-12 -12)" d="M12 2l1.6 7.2 7.4 4.3v2l-7.4-2.1-.4 5.1 2.4 1.8v1.6L12 21l-3.6.9v-1.6l2.4-1.8-.4-5.1L3 15.5v-2l7.4-4.3z" fill="${TRAFFIC_COL[p.phase]}" stroke="#fff" stroke-width="1.2"/>`).join("")}</g>`;
+}
 function ohCardHTML([id, label, , wide]){
   const b = ohBoardStats(), na = `<b class="na">—</b>`;
   let cls = "ohc" + (wide ? " wide" : ""), v = "", art = "";
@@ -10759,7 +10771,7 @@ function ohCardHTML([id, label, , wide]){
     v = `<span class="ohv">${lb ? `<b>${esc(lb)}</b>` : na}${rws.length ? `<span class="ohchips">${rws.map(r => `<i>${esc(r)}</i>`).join("")}</span>` : ""}</span>`;
   } else if(id === "map"){
     cls += " map"; const n = (OPS_PLANES || []).length;
-    art = `<svg class="ohart" viewBox="0 0 360 150" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><path d="M0 40 C80 30 120 70 200 60 S320 20 360 30 V0 H0Z" fill="#EEF2E6"/><g fill="none" stroke="#8C9AAE" stroke-dasharray="4 5"><circle cx="210" cy="80" r="40"/><circle cx="210" cy="80" r="74"/></g><g stroke="#374151" stroke-width="5" stroke-linecap="round"><path d="M196 62 L206 100"/><path d="M208 60 L218 98"/><path d="M214 104 L236 90"/></g></svg>`;
+    art = `<svg class="ohart" viewBox="0 0 360 150" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><path d="M0 40 C80 30 120 70 200 60 S320 20 360 30 V0 H0Z" fill="#EEF2E6"/><g fill="none" stroke="#8C9AAE" stroke-dasharray="4 5"><circle cx="210" cy="80" r="40"/><circle cx="210" cy="80" r="74"/></g><g stroke="#374151" stroke-width="5" stroke-linecap="round"><path d="M196 62 L206 100"/><path d="M208 60 L218 98"/><path d="M214 104 L236 90"/></g>${ohMapPlanes()}</svg>`;
     v = `<span class="ohv">${TRAFFIC_TIMER != null || n ? `<b>${n}</b><small>機</small>` : na}</span>`;
   } else if(id === "board") v = `<span class="ohv">${b && b.arr ? `<b>${ohHM(b.arr)}</b><small>着</small>` : na}</span>`;
   else if(id === "special"){ const n = SPECIAL_AT ? opsFlying().length : null;
