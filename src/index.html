@@ -621,6 +621,11 @@ body.game nav.tabs button[aria-current="page"] svg{color:#7FB3FF}
 #v-home .bpass.nudge .bp-stub{animation:stubNudge .7s ease}
 @keyframes stubNudge{0%,100%{transform:none}30%{transform:translateX(16px) rotate(2deg)}60%{transform:translateX(4px)}}
 @media (prefers-reduced-motion:reduce){#v-home .bpass.nudge .bp-stub{animation:none}}
+#v-home .bpass.no .bp-stub{animation:stubNo .45s ease}
+@keyframes stubNo{0%,100%{transform:none}25%{transform:translateX(-6px)}50%{transform:translateX(5px)}75%{transform:translateX(-3px)}}
+@media (prefers-reduced-motion:reduce){#v-home .bpass.no .bp-stub{animation:none}}
+#v-home .stubmsg{margin:10px 4px 0;padding:9px 16px;border-radius:16px;background:var(--hm-card);box-shadow:0 6px 18px -10px rgba(17,24,39,.4);font-size:13px;font-weight:700;line-height:1.5;color:var(--hm-ink)}
+#v-home .stubmsg.err{color:var(--shu-text)}
 #v-home .hsheet>.msg{font-size:14px;margin:10px 4px 0;min-height:0}
 #v-home .ckhint{font-size:11.5px;line-height:1.7;color:var(--hm-mute);margin:8px 4px 0;text-align:center}
 #v-home .inflight,#v-home .tally{box-shadow:0 16px 36px -18px rgba(15,23,42,.28),0 2px 6px rgba(15,23,42,.05)}
@@ -3655,6 +3660,7 @@ div.viewsw>button{position:relative}div.viewsw>button::after{content:"";position
       </div>
       <button class="bp-stub" id="checkin" aria-label="チェックイン（半券を右へ引いて切ります。押すと確かめてから切ります）"><span class="v">チェックイン</span><span class="s" id="stubSub"><i aria-hidden="true">→</i> 右へ引いて<br>印をもらう</span></button>
     </div>
+    <p class="stubmsg" id="stubMsg" hidden aria-hidden="true"></p>
     <div class="nlist" id="nearList" hidden aria-label="近くの空港・飛行場の一覧"></div>
     <div class="hstrip" id="homeStrip" aria-label="今日の数字">
       <div><span class="lab">今日の印</span><b id="hsToday">0</b></div>
@@ -5057,13 +5063,17 @@ async function renderRide0(force){
   const d = RIDE.d, hm = t => t ? new Date(t).toLocaleTimeString("ja-JP", { hour:"2-digit", minute:"2-digit" }) : "—";
   if(!d || !d.found){ box.hidden = true; box.innerHTML = ""; return; }
   const ib = d.inbound, srcLabel = { actual:"到着", est:"到着の見込み", landed:"着陸（推定）", predicted:"到着予想（推定）", sched:"到着予定（定刻）" }[d.arr_src] || "";
+  // JAL の運航情報は、出発の前から「実際の出発時刻」の欄に見込みの時刻を入れることがある（11/18 JL661）。今より後の時刻は「出発しました」にせず見込みとして出す
+  const past = t => !!t && Date.parse(t) <= Date.now() + 60_000, srcL = d.arr_src === "actual" && d.arr_at && !past(d.arr_at) ? "到着の見込み" : srcLabel;
   let st = "";
-  if(d.atd) st = `<span class="rv ok">出発しました（${hm(d.atd)}）</span>`;
+  if(d.atd && past(d.atd)) st = `<span class="rv ok">出発しました（${hm(d.atd)}）</span>`;
+  else if(d.atd) st = `<span class="rv">出発の見込み ${hm(d.atd)}（航空会社の運航情報）</span>`;
   else if(ib && ib.cancelled) st = `<span class="rv late">前の便が欠航です。機体が変わるかもしれません</span>`;
   else if(ib) st = Number(d.late) >= 10 ? `<span class="rv late">出発は約${d.late}分遅れの見込み（推定）</span>` : `<span class="rv ok">定刻ごろに出発できそうです（推定）</span>`;
-  const ibLine = !ib ? `<span class="rl">この便の前に同じ機体が飛ぶ便は、まだ記録が足りず分かりません。</span>`
+  // 朝一番の便（前の日の夜に着いた機体）：データ側が first_of_day を返したら「前の便はありません」と出す（返さないうちは今までの1行）
+  const ibLine = !ib ? (d.first_of_day ? `<span class="rl">朝一番の便です（この日、この機体の前の便はありません）。</span>` : `<span class="rl">この便の前に同じ機体が飛ぶ便は見つかりませんでした（朝一番の便なら、前の便はありません）。</span>`)
     : `<span class="rl">この便の機体（推定）</span><span class="rv">${esc(ib.flight.replace(/^([A-Z0-9]{2})0+(\d)/, "$1$2"))}　${esc(placeShort(ib.dep))} → ${esc(placeShort(ib.arr))}${ib.reg ? `・${esc(ib.reg)}` : ""}</span>`
-      + `<span>${ib.ata ? "到着しました" : ib.phase === "air" ? "飛行中" : ib.atd || ib.takeoff ? "出発しました" : "まだ出発していません"}　${srcLabel} ${hm(d.arr_at)}${ib.pos && ib.pos.alt != null ? `・高度 ${fmtKm(Number(ib.pos.alt))}ft` : ""}</span>`;
+      + `<span>${past(ib.ata) ? "到着しました" : ib.phase === "air" ? "飛行中" : past(ib.atd) || past(ib.takeoff) ? "出発しました" : "まだ出発していません"}　${srcL} ${hm(d.arr_at)}${ib.pos && ib.pos.alt != null ? `・高度 ${fmtKm(Number(ib.pos.alt))}ft` : ""}</span>`;
   box.hidden = false;
   box.innerHTML = `<div class="rh"><b>乗る便 ${esc(p.no)}</b><span>${esc(placeShort(b.iata))}行き　定刻 ${hm(d.std)}${d.etd ? `（見込み ${hm(d.etd)}）` : ""}</span><button type="button" data-ride-off>やめる</button></div>
     ${st}${ibLine}
@@ -7516,10 +7526,16 @@ const TEAR_AT = 56;
   const end = () => { if(!drag) return; drag = false; b.classList.remove("dragging");
     if(dx >= TEAR_AT) tear(); else { const m = moved; reset(); if(!m) tap(); } };
   b.addEventListener("pointerup", end); b.addEventListener("pointercancel", () => { if(!drag) return; drag = false; b.classList.remove("dragging"); reset(); });
+  // 押せたときだけ半券が切れて飛ぶ（11/19 シミュレーター：チェックイン済みでも切れる動きをして、理由が見えないまま半券が戻っていた）。
+  // 調べている間は引いた所で止めて待ち、押せなかったときは戻して小さく揺らし、理由を半券のすぐ下に出す（ckNote）
   async function tear(){
-    b.style.transform = "translate(210px,40px) rotate(26deg)"; b.style.opacity = "0"; track("tear", 1);
+    track("tear", 1); ckNote("");
+    b.style.transform = "translate(64px,8px) rotate(6deg)";
     const before = S.checkins.length;
-    try{ await checkin(); } finally { setTimeout(() => { b.style.opacity = ""; reset(); }, S.checkins.length > before ? 1200 : 200); }
+    try{ await checkin(); } finally {
+      if(S.checkins.length > before){ b.style.transform = "translate(210px,40px) rotate(26deg)"; b.style.opacity = "0"; setTimeout(() => { b.style.opacity = ""; reset(); }, 1200); }
+      else { reset(); wrap.classList.remove("no"); void wrap.offsetWidth; wrap.classList.add("no"); ckNote(); }
+    }
   }
   // 押しただけのとき
   function tap(){
@@ -7538,8 +7554,18 @@ $("checkin").onclick = e => {   // キーボード（e.detail が 0）とほか�
   if(e.detail !== 0) return;
   const st = $("bpass").dataset.state;
   if(st === "guest"){ authOpen("login", "login"); return; }
-  checkin();
+  const before = S.checkins.length; ckNote("");
+  checkin().then(() => { if(S.checkins.length <= before) ckNote(); });
 };
+// 押せなかった理由（#msg と同じ文）を半券のすぐ下に出す。シートが下がっていても見える所。8秒で消える。t を "" で消す
+let CK_NOTE_T = 0;
+function ckNote(t){
+  const el = $("stubMsg"), m = $("msg"); if(!el) return;
+  clearTimeout(CK_NOTE_T);
+  const txt = t === undefined ? (m ? m.textContent.trim() : "") : t;
+  el.textContent = txt; el.hidden = !txt; el.classList.toggle("err", t === undefined && !!m && m.classList.contains("err"));
+  if(txt) CK_NOTE_T = setTimeout(() => { el.hidden = true; }, 8000);
+}
 // 範囲の外で押したとき：位置を新しく調べ直す（範囲に入っていれば、そのまま切れる形に変わる）
 async function homeRecheck(){
   say("いまいる場所を調べ直しています…");
