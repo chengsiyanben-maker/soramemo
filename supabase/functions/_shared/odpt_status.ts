@@ -39,8 +39,18 @@ export function atNear(base: number, hm: string, tz = "Asia/Tokyo"): number {
   return [t - 864e5, t, t + 864e5].sort((a, b) => Math.abs(a - base) - Math.abs(b - base))[0];
 }
 
+// 「実際の時刻」の欄に、まだ来ていない時刻が入っていたら（JAL は出発の前から見込みの時刻をこの欄に入れることがある。11/18 JL661）、
+// 実際の時刻にせず見込みの時刻として扱う。取り込んだ時刻 now より、この幅を超えて先なら見込み（時計のずれの分だけ許す）
+export const FUTURE_ACTUAL_SLACK = 60_000;
+// 実際の時刻（"HH:MM"）が now より先なら、見込みに回す：[実際, 見込み] を返す（見込みの欄に値があればそちらを使う）
+export function splitActual(base: number, actual: string | null, est: string | null, tz: string, now: number): [string | null, string | null] {
+  if (!actual || atNear(base, actual, tz) <= now + FUTURE_ACTUAL_SLACK) return [actual, est];
+  return [null, est ?? actual];
+}
+
+// now：取り込んだ時刻（ミリ秒）。テストでは決めた時刻を渡す
 // deno-lint-ignore no-explicit-any
-export function odptStatus(depItems: any[], arrItems: any[], scheds: StatusSched[], names: (iata: string) => string) {
+export function odptStatus(depItems: any[], arrItems: any[], scheds: StatusSched[], names: (iata: string) => string, now = Date.now()) {
   const byKey = new Map<string, StatusSched[]>();
   for (const s of scheds) { const k = `${norm(s.flight)}|${s.dep}`; byKey.set(k, [...(byKey.get(k) ?? []), s]); }
   const alerts = new Map<string, StatusAlert>(), updates = new Map<number, StatusUpdate>();
@@ -59,8 +69,8 @@ export function odptStatus(depItems: any[], arrItems: any[], scheds: StatusSched
     const s = nearestSched(byKey.get(`${fn.no}|${dep}`) ?? [], std, "std");
     if (!s) continue;
     note = infoText(it["odpt:flightInformationText"], it["odpt:flightInformationSummary"]);
-    const status = st(it["odpt:flightStatus"]), actual = hhmm(it["odpt:actualDepartureTime"]), est = hhmm(it["odpt:estimatedDepartureTime"]);
-    const tzD = tzOf(s.dep);
+    const status = st(it["odpt:flightStatus"]), tzD = tzOf(s.dep);
+    const [actual, est] = splitActual(s.std, hhmm(it["odpt:actualDepartureTime"]), hhmm(it["odpt:estimatedDepartureTime"]), tzD, now);
     upd(s, { dep_status: status, atd: iso(s.std, actual, tzD), etd: iso(s.std, est, tzD), dep_gate: gateOf(it["odpt:departureGate"]) });
     const sl = (status ?? "").toLowerCase();
     if (/cancel/.test(sl)) { add(s, "cancel", `${route(s)}は、欠航です（航空会社の運航情報）`); continue; }
@@ -78,8 +88,8 @@ export function odptStatus(depItems: any[], arrItems: any[], scheds: StatusSched
     const s = nearestSched(byKey.get(`${fn.no}|${dep}`) ?? [], sta, "sta");
     if (!s || s.sta == null) continue;
     note = infoText(it["odpt:flightInformationText"], it["odpt:flightInformationSummary"]);
-    const status = st(it["odpt:flightStatus"]), actual = hhmm(it["odpt:actualArrivalTime"]), est = hhmm(it["odpt:estimatedArrivalTime"]);
-    const tzA = tzOf(s.arr);
+    const status = st(it["odpt:flightStatus"]), tzA = tzOf(s.arr);
+    const [actual, est] = splitActual(s.sta, hhmm(it["odpt:actualArrivalTime"]), hhmm(it["odpt:estimatedArrivalTime"]), tzA, now);
     upd(s, { arr_status: status, ata: iso(s.sta, actual, tzA), eta: iso(s.sta, est, tzA), arr_gate: gateOf(it["odpt:arrivalGate"]) });
     const sl = (status ?? "").toLowerCase();
     if (/cancel/.test(sl)) { add(s, "cancel", `${route(s)}は、欠航です（航空会社の運航情報）`); continue; }
@@ -94,8 +104,8 @@ export function odptStatus(depItems: any[], arrItems: any[], scheds: StatusSched
 }
 
 // deno-lint-ignore no-explicit-any
-export function statusAlerts(items: any[], scheds: StatusSched[], names: (iata: string) => string): StatusAlert[] {
-  return odptStatus(items, [], scheds, names).alerts;
+export function statusAlerts(items: any[], scheds: StatusSched[], names: (iata: string) => string, now = Date.now()): StatusAlert[] {
+  return odptStatus(items, [], scheds, names, now).alerts;
 }
 
 // ---- 特別塗装機で飛ぶ予定の便 ----

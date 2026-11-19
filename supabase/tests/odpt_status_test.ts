@@ -102,3 +102,29 @@ Deno.test("国際線：到着の時刻は到着する国の時刻（ロサンゼ
   assertEquals(u.atd, "2026-10-19T15:29:00.000Z");   // 羽田 0:29（日本時間）
   assertEquals(atNear(Date.parse("2026-10-20T01:45:00Z"), "18:45", "America/Los_Angeles"), Date.parse("2026-10-20T01:45:00Z"));
 });
+
+Deno.test("実際の時刻の欄にまだ来ていない時刻（JAL の見込み）が入っていたら、実際の時刻にせず見込みとして残す（11/18 JL661）", () => {
+  const sc: StatusSched[] = [{ id: 9, flight: "JL661", dep: "HND", arr: "FUK", std: T("2026-11-18T08:05:00+09:00"), sta: T("2026-11-18T10:05:00+09:00") }];
+  const dep = (actual: string, extra: Record<string, unknown> = {}) => item("JL661", "HND", "08:05", { "odpt:actualDepartureTime": actual, ...extra });
+  // 7:34 に取り込んだ：08:08 はまだ来ていないので atd にしない（etd にする）
+  let r = odptStatus([dep("08:08")], [], sc, names, T("2026-11-18T07:34:00+09:00"));
+  assertEquals([r.updates[0].atd, r.updates[0].etd], [null, "2026-11-17T23:08:00.000Z"]);
+  // 見込みの欄にも値があれば、そちらを etd に使う
+  r = odptStatus([dep("08:08", { "odpt:estimatedDepartureTime": "08:10" })], [], sc, names, T("2026-11-18T07:34:00+09:00"));
+  assertEquals([r.updates[0].atd, r.updates[0].etd], [null, "2026-11-17T23:10:00.000Z"]);
+  // 8:10 に取り込んだ：08:08 は過ぎたので実際の出発の時刻にする
+  r = odptStatus([dep("08:08")], [], sc, names, T("2026-11-18T08:10:00+09:00"));
+  assertEquals([r.updates[0].atd, r.updates[0].etd], ["2026-11-17T23:08:00.000Z", null]);
+  // 時計のずれの分（1分）までは実際の時刻のまま
+  r = odptStatus([dep("08:08")], [], sc, names, T("2026-11-18T08:07:00+09:00"));
+  assertEquals(r.updates[0].atd, "2026-11-17T23:08:00.000Z");
+  // 遅れのお知らせも「遅れました」でなく「遅れる見込みです」
+  const a = statusAlerts([dep("08:30")], sc, names, T("2026-11-18T07:34:00+09:00"));
+  assertEquals(a[0].message, "JL661（羽田→FUK）は、出発が約25分遅れる見込みです（定刻 8:05 → 変更後 8:30・航空会社の運航情報）");
+  // 到着も同じ（まだ来ていない ata は eta に）
+  const arr = { "odpt:flightNumber": ["JL661"], "odpt:departureAirport": "odpt.Airport:HND", "odpt:scheduledArrivalTime": "10:05", "odpt:actualArrivalTime": "10:00" };
+  r = odptStatus([], [arr], sc, names, T("2026-11-18T09:30:00+09:00"));
+  assertEquals([r.updates[0].ata, r.updates[0].eta], [null, "2026-11-18T01:00:00.000Z"]);
+  r = odptStatus([], [arr], sc, names, T("2026-11-18T10:01:00+09:00"));
+  assertEquals([r.updates[0].ata, r.updates[0].eta], ["2026-11-18T01:00:00.000Z", null]);
+});
