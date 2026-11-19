@@ -3521,6 +3521,99 @@ div.viewsw>button{position:relative}div.viewsw>button::after{content:"";position
 .modesw button::after{content:"";position:absolute;inset:-4px 0}
 .demo-banner button::after{content:"";position:absolute;inset:-6px -2px}
 #homeSheet .grab::after{content:"";position:absolute;left:0;right:0;top:-20px;bottom:0}
+/* ---------- 空港のピン止め（design/pin 4版）：している＝紺の塗り「ピン止め中 ›」・していない＝白地「ピン止め」 ---------- */
+:root{--pin:#1B2B4B;--pin-ink:#FFFFFF;--pin-wash:#EEF2F8}
+:root[data-night="on"]{--pin:rgba(220,227,234,.16);--pin-ink:#DCE3EA;--pin-wash:rgba(220,227,234,.08)}
+.pinic{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linejoin:round;stroke-linecap:round}
+.pinchev{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.pinpill{display:inline-flex;align-items:center;gap:5px;min-height:36px;padding:0 12px 0 11px;border:0;border-radius:999px;background:#FFFFFF;color:var(--pin);font:800 13px/1 var(--gothic);box-shadow:0 4px 12px -6px rgba(15,23,42,.35),inset 0 0 0 1.5px var(--pin);cursor:pointer;white-space:nowrap}
+.pinpill.on{background:var(--pin);color:var(--pin-ink);box-shadow:none}
+.pinpill .pinchev{width:13px;height:13px;margin-left:-1px}
+.pinpill.dark{min-height:44px;margin:-6px 0;padding:0;background:none;box-shadow:none;color:#F9FAFB;font-size:13px}
+.pinpill.dark .pv{display:inline-flex;align-items:center;gap:5px;min-height:32px;padding:0 11px 0 10px;border-radius:999px;box-shadow:inset 0 0 0 1.5px rgba(249,250,251,.6)}
+.pinpill.dark.on .pv{background:rgba(255,255,255,.14);box-shadow:none}
+#v-home .nlab{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:32px}
+#v-home .nearpin[hidden]{display:none}
+.nrw{display:flex;align-items:center}.nrw .nrow2{flex:1;min-width:0;gap:8px;padding-right:2px}.nrw .nrow2 .tx small{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nrpin{flex:none;width:44px;height:44px;margin:0 6px 0 0;border:0;border-radius:999px;display:grid;place-items:center;background:#FFFFFF;color:var(--pin);box-shadow:inset 0 0 0 1.5px #C9D2DF;cursor:pointer}
+.nrpin.on{background:var(--pin);color:var(--pin-ink);box-shadow:none}.nrpin .pinic{width:18px;height:18px}
+.pinhome{display:flex;align-items:center;gap:12px;width:100%;min-height:64px;margin:0 0 12px;padding:10px 14px;border:0;border-radius:20px;background:#FFFFFF;color:#1F2937;text-align:left;font-family:var(--gothic);box-shadow:0 10px 24px -18px rgba(15,23,42,.35),inset 0 0 0 1px rgba(17,24,39,.06);cursor:pointer}
+.pinhome[hidden]{display:none}
+.pinhome .ic{flex:none;width:36px;height:36px;border-radius:999px;display:grid;place-items:center;background:var(--pin);color:var(--pin-ink)}
+.pinhome .tx{flex:1;min-width:0}.pinhome b{display:block;font-size:15px;font-weight:800}.pinhome small{display:block;font-size:12.5px;color:#5F6878;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pinap{margin:12px 0 4px}.pinap .pinpill{margin-bottom:10px}
+.pinapc{display:flex;align-items:flex-start;gap:12px;width:100%;padding:14px 14px 12px;border:0;border-radius:20px;background:#FFFFFF;color:#1F2937;text-align:left;font-family:var(--gothic);box-shadow:0 10px 24px -18px rgba(15,23,42,.35),inset 0 0 0 1px rgba(17,24,39,.06);cursor:pointer}
+.pinapc .ic{flex:none;width:34px;height:34px;border-radius:999px;display:grid;place-items:center;background:var(--pin-wash);color:var(--pin)}
+.pinapc .ic svg,.pinbell svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linejoin:round}
+.pinapc .tx{flex:1;min-width:0}.pinapc b{display:block;font-size:15px;font-weight:800}.pinapc .tx>small{display:block;font-size:12.5px;color:#5F6878;margin-top:2px}
+.pinapc>.pinchev{margin-top:8px;color:#6B7280}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;align-items:center}
+.pinchip{font-style:normal;font-size:12.5px;font-weight:700;color:var(--pin);background:var(--pin-wash);border-radius:999px;padding:5px 10px}
+.chips small{font-size:12.5px;color:#5F6878}
+.pinline{display:flex;align-items:center;gap:10px;width:100%;min-height:56px;margin-top:8px;padding:8px 14px;border:0;border-radius:16px;background:var(--pin-wash);color:var(--pin);text-align:left;font-family:var(--gothic);cursor:pointer}
+.pinline span{flex:1;min-width:0}.pinline b{display:block;font-size:14px;font-weight:800}.pinline small{display:block;font-size:12.5px;color:#4B5563;margin-top:2px}
+.pinline.on>.pinic{color:var(--pin)}
+:root[data-night="on"] .pinline{color:#DCE3EA}:root[data-night="on"] .pinline small{color:#AEB9C6}
+.appin{flex:none;width:28px;height:28px;border-radius:999px;display:grid;place-items:center;background:var(--pin);color:var(--pin-ink)}.appin .pinic{width:14px;height:14px}
+.aprow small.cur{color:#15803D}
+#dOpsAp .pinaplist{display:flex;flex-direction:column;gap:0}
+dialog.pinsheet .dlg{padding:12px 18px 22px}
+.pinhd{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:6px}
+.pinhd h3,.pinask{margin:0;font-family:var(--gothic);font-size:20px;font-weight:900;line-height:1.35;color:var(--s-ink)}
+.pindone,.pinmain{flex:none;min-height:44px;padding:0 18px;border:0;border-radius:999px;background:var(--pin);color:var(--pin-ink);font:800 14px/1 var(--gothic);cursor:pointer}
+.pinghost{min-height:44px;padding:0 18px;border:0;border-radius:999px;background:var(--s-bg);color:var(--s-ink);font:700 14px/1 var(--gothic);cursor:pointer}
+.pinsub{margin:8px 0 0;font-size:13.5px;line-height:1.6;color:var(--s-mute)}
+.pindev{display:flex;align-items:center;gap:6px;margin:10px 0 0;font-size:13px;line-height:1.5;color:var(--s-mute)}
+.pindev svg{width:16px;height:16px;flex:none;fill:none;stroke:#15803D;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.pindev.ask{justify-content:space-between;padding:8px 8px 8px 14px;border-radius:14px;background:#FDF3E2;color:#6B4510;font-weight:700}
+.pindev.ng{color:#8A5A12}
+.pinallow{flex:none;min-height:40px;padding:0 14px;border:0;border-radius:999px;background:var(--pin);color:var(--pin-ink);font:800 13px/1 var(--gothic);cursor:pointer}
+details.pindev{display:block;padding:10px 14px;border-radius:14px;background:var(--pin-wash);color:var(--s-ink)}
+details.pindev summary{display:flex;justify-content:space-between;gap:8px;font-weight:700;cursor:pointer;list-style:none}details.pindev summary::-webkit-details-marker{display:none}
+details.pindev summary span{flex:none;color:var(--pin)}details.pindev ol{margin:8px 0 4px;padding-left:1.3em}details.pindev p{margin:4px 0 0;font-size:12.5px;color:var(--s-mute)}
+.pinrows{margin-top:6px}
+.pinrow{display:flex;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid var(--s-line)}.pinrow:last-child{border-bottom:0}
+.pinrow .t{flex:1;min-width:0}.pinrow b{display:block;font-size:15px;font-weight:800;color:var(--s-ink)}.pinrow small{display:block;font-size:12.5px;line-height:1.55;color:var(--s-mute);margin-top:2px}
+.pinrow.na b{color:#8B95A3}
+.pinmore{display:inline-flex;align-items:center;gap:2px;min-height:36px;margin-top:2px;padding:0;border:0;background:none;color:var(--pin);font:700 13px/1 var(--gothic);cursor:pointer}
+:root[data-night="on"] .pinmore{color:#DCE3EA}
+.pinno{display:inline-block;margin-top:4px;font-style:normal;font-size:12px;font-weight:700;color:#8A5A12;background:#FDF3E2;border-radius:999px;padding:3px 9px}
+.pinwhy{color:#5F6878}
+.pinfoot{margin:10px 0 0;font-size:12.5px;line-height:1.65;color:var(--s-mute)}
+.pinbot{display:flex;justify-content:flex-end;margin-top:12px}
+.pinoff{display:block;width:100%;min-height:48px;margin-top:16px;border:0;border-radius:999px;background:var(--s-card);color:var(--s-ink);font:800 14px/1 var(--gothic);box-shadow:0 6px 16px -10px rgba(15,23,42,.35),inset 0 0 0 1px rgba(17,24,39,.08);cursor:pointer}
+.pinnote{margin:8px 0 0;font-size:12.5px;line-height:1.6;color:var(--s-mute);text-align:left}
+.pinbell{width:48px;height:48px;margin:8px 0 12px;border-radius:999px;display:grid;place-items:center;background:var(--pin-wash);color:var(--pin)}.pinbell svg{width:22px;height:22px}
+.pin2b{display:grid;grid-template-columns:1fr 1.6fr;gap:10px;margin-top:16px}
+.pintop{display:flex;align-items:center;justify-content:space-between;margin:2px 0 12px}
+.pintop h3{margin:0;font-family:var(--gothic);font-size:17px;font-weight:800;color:var(--s-ink)}
+.pintop .mp-back{display:flex;align-items:center;gap:4px;min-height:40px;border:0;background:var(--s-card);color:var(--s-ink);font-weight:700;font-size:13px;padding:0 14px 0 10px;border-radius:999px;box-shadow:0 6px 16px -10px rgba(15,23,42,.35)}
+.pintop .mp-back svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.pinsp{width:78px}
+.pinlh{display:flex;align-items:center;gap:8px;margin:18px 0 8px;color:var(--s-ink)}.pinlh .pinic{width:28px;height:28px;padding:6px;box-sizing:border-box;border-radius:999px;background:var(--pin);color:var(--pin-ink)}
+.pinlh b{font-size:16px;font-weight:800}.pinlh small{font-size:13px;color:var(--s-mute)}
+.pincard{display:block;width:100%;margin-top:10px;padding:14px 16px;border:0;border-radius:20px;background:var(--s-card);color:var(--s-ink);text-align:left;font-family:var(--gothic);box-shadow:0 10px 24px -18px rgba(15,23,42,.35),inset 0 0 0 1px rgba(17,24,39,.06);cursor:pointer}
+.pincard.st{cursor:default}
+.pincard .h{display:flex;align-items:center;gap:10px}.pincard .h b{flex:1;font-size:16px;font-weight:800}.pincard .h .pinchev{color:#6B7280}
+.pincd{font-style:normal;flex:none;font:700 12.5px/1 ui-monospace,"SFMono-Regular",Menlo,monospace;padding:5px 7px;border-radius:7px;background:#1F2937;color:#FFFFFF}
+:root[data-night="on"] .pincd{background:transparent;color:#DCE3EA;box-shadow:inset 0 0 0 1.5px rgba(220,227,234,.5)}
+.pinempty{margin:10px 0 0;padding:16px;border-radius:18px;background:var(--s-card);font-size:13.5px;line-height:1.6;color:var(--s-mute)}
+.pinq{display:flex;align-items:center;gap:8px;margin-top:12px;padding:0 14px;min-height:48px;border-radius:999px;background:var(--s-card);color:var(--pin);box-shadow:inset 0 0 0 1.5px #C9D2DF}
+.pinq input{flex:1;min-width:0;border:0;background:none;font:600 14px/1 var(--gothic);color:var(--s-ink);outline:none}
+.pinqlist{margin-top:8px;padding:2px 14px;border-radius:18px;background:var(--s-card)}
+.pinqrow{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:52px;border-bottom:1px solid var(--s-line)}.pinqrow:last-child{border-bottom:0}
+.pinqrow span{display:flex;align-items:center;gap:8px;min-width:0}.pinqrow b{font-size:14px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pinbtn{flex:none;display:inline-flex;align-items:center;gap:4px;min-height:40px;padding:0 12px;border:0;border-radius:999px;background:#FFFFFF;color:var(--pin);font:800 13px/1 var(--gothic);box-shadow:inset 0 0 0 1.5px var(--pin);cursor:pointer}
+.pinbadge{flex:none;display:inline-flex;align-items:center;gap:4px;padding:6px 10px;border-radius:999px;background:var(--pin);color:var(--pin-ink);font-size:12.5px;font-weight:800}
+.pinsec{margin:20px 0 0;font-size:13px;font-weight:700;color:var(--s-mute)}
+.pinapn{display:flex;align-items:center;gap:8px;margin:0}.pinapn b{font-size:16px;font-weight:800}
+.pinbox{margin-top:10px;padding:2px 16px;border-radius:20px;background:var(--s-card)}
+.pinband{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom,0px) + 92px);z-index:60;width:min(440px,calc(100vw - 32px));box-sizing:border-box;display:flex;align-items:center;gap:10px;padding:8px 8px 8px 16px;border-radius:18px;background:#1B2B4B;color:#FFFFFF;font:700 13.5px/1.4 var(--gothic);box-shadow:0 14px 30px -14px rgba(15,23,42,.6)}
+.pinband.in{bottom:calc(env(safe-area-inset-bottom,0px) + 16px)}
+.pinband span{flex:1;min-width:0}
+.pinband button{flex:none;min-height:40px;padding:0 14px;border:0;border-radius:999px;background:rgba(255,255,255,.16);color:#FFFFFF;font:800 13px/1 var(--gothic);cursor:pointer}
+:root[data-night="on"] .pinpill:not(.on):not(.dark),:root[data-night="on"] .nrpin:not(.on),:root[data-night="on"] .pinbtn{background:transparent;color:#DCE3EA;box-shadow:inset 0 0 0 1.5px rgba(220,227,234,.5)}
+:root[data-night="on"] .pinhome,:root[data-night="on"] .pinapc{background:var(--h-card,#141B24);color:#DCE3EA}
 </style>
 </head>
 <body>
@@ -3559,7 +3652,7 @@ div.viewsw>button{position:relative}div.viewsw>button::after{content:"";position
     <div class="bpass" id="bpass">
       <div class="bp-main">
         <div class="nearest">
-          <div class="label" id="nearLabel">いちばん近い空港</div>
+          <div class="nlab"><div class="label" id="nearLabel">いちばん近い空港</div><span class="nearpin" id="nearPin" hidden></span></div>
           <div class="nrow" id="nearRow" hidden><div class="flap" id="nearCode" aria-hidden="true"></div><span class="ktag" id="nearTag" hidden></span><button class="nmore" type="button" id="nearMore" hidden aria-expanded="false"></button></div>
           <div class="name idle" id="nearName">空港に着いたら、印を押そう</div>
           <div class="dist" id="nearDist">半券を切ると、現在地からいちばん近い空港を調べます。</div>
@@ -3599,6 +3692,7 @@ div.viewsw>button{position:relative}div.viewsw>button::after{content:"";position
       <div class="ridecard" id="rideCard" hidden aria-live="polite"></div>
       <form class="rideadd" id="rideAdd" hidden><label for="rideNo">これから乗る便</label><input id="rideNo" placeholder="例 JL509" autocapitalize="characters" autocomplete="off" maxlength="7" inputmode="latin"><button class="chip" type="submit">機体を調べる</button><p class="hint" id="rideMsg" role="status" aria-live="polite"></p></form>
     </div>
+    <div class="lo" data-lo="home:pins"><button class="pinhome" type="button" id="pinHome" hidden aria-label="ピン止めした空港の知らせを開く"></button></div>
     <div class="lo" data-lo="home:event">
       <div class="evbar" id="eventBar" hidden></div>
     </div>
@@ -3933,6 +4027,8 @@ div.viewsw>button{position:relative}div.viewsw>button::after{content:"";position
   <h3 id="opsApTitle" class="apsh">運用を見る空港</h3>
   <label class="apsearch"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg><input id="opsApQ" type="search" placeholder="空港名か3レターで探す（例：OKA）" autocomplete="off" aria-label="空港を探す"></label>
   <div class="opsaps" id="opsAps"></div></div></dialog>
+<dialog id="dPin" class="spsheet pinsheet" aria-labelledby="pinT"><div class="dlg" id="dPinBody"></div></dialog>
+<dialog id="dPins" class="spfull pinfull" aria-labelledby="pinsT"><div class="dlg" id="dPinsBody"></div></dialog>
 <dialog id="dLayout" class="spfull" aria-label="表示を編集"><div class="dlg" id="dLayoutBody"></div></dialog>
 <dialog id="dTabs" class="psheet tpsheet" aria-labelledby="tpTitle"><div class="dlg" id="dTabsBody"></div></dialog>
 <dialog id="dWorldAp" class="spsheet wodlg" aria-labelledby="worldApT"><div class="dlg" id="dWorldApBody"></div></dialog>
@@ -3971,6 +4067,10 @@ div.viewsw>button{position:relative}div.viewsw>button::after{content:"";position
     <button class="lotile" type="button" data-he-open><span class="t"><b>ホームに出すもの</b><small>OFF にすると隠れます</small></span><span class="n" id="heTileN"></span></button>
     <button class="lotile lotile2" type="button" data-lo-open="top"><span class="t"><b>全部を見直す</b><small id="personaNote"></small></span><span class="n" id="loTileN"></span></button>
     <div class="pmore" id="personaMore"></div>
+  </section>
+  <section class="mp-sec" aria-labelledby="mpPins"><h4 id="mpPins">知らせ</h4>
+    <div class="set-row"><div><small>ピン止めした空港ごとに、特別塗装機・遅れ・ゴーアラウンド・撮影の知らせを選べます。</small></div></div>
+    <button class="lotile" type="button" data-pins-open><span class="t"><b>知らせ</b><small>ピン止めした空港・乗る便</small></span><span class="n" id="pinTileN"></span></button>
   </section>
   <section class="mp-sec" aria-labelledby="mpShow"><h4 id="mpShow">表示</h4>
     <div class="set-row"><div><small>JAL・ANAそれぞれのフライトだけで数えた表示に切り替えます。記録は消えません。</small></div></div>
@@ -4924,7 +5024,7 @@ function showNearest(n){
   el.innerHTML = ok ? `${n.term ? esc(n.term.name) + " ・ " : ""}<i class="dot ok" aria-hidden="true"></i>判定範囲の中`
       + (NEAR_XK.includes(n.a.kind) ? `<span class="nbook">${ZKX_TITLE}に入ります</span>` : "")
     : `<i class="dot" aria-hidden="true"></i>判定範囲の外 ・ ここから <b>${homeKm(n.km)}</b>`;
-  renderNearList(); nearMoreSync();
+  renderNearList(); nearMoreSync(); pinNearSync();
   homeState();
 }
 // 半券の右上のピル：最初の位置は「ほか○つ ›」（20km 以内に民間空港がなく足したときだけなら「近くの民間空港 ›」）、引き上げた位置は「閉じる ⌄」
@@ -4943,7 +5043,10 @@ const nearShort = a => a.kind ? a.name : NEAR_SHORT[a.iata] || a.name.replace(/�
 // 引き上げた位置の一覧（20km 以内・近い順）。民間空港を足したときの行も入れて、高さ 760 未満は2行、ほかは3行（844 も一覧の下を 12px 以上空ける。review-app-1 の2）
 const nearRowHTML = (o, civ) => { const [kn, kc] = nearKind(o.a), pf = String(o.a.pref || "").replace(/[都府県]$/, "");
   const k = o.km < 1 ? [Math.round(o.km * 1000), "m"] : [o.km < 100 ? o.km.toFixed(1) : fmtKm(o.km), "km"];
-  return `<button class="nrow2" type="button" data-zka="${o.a.id}" aria-label="${esc(kn)}、${esc(o.a.name)}、${k.join("")}"><span class="t ${kc}">${esc(kn)}</span><span class="tx">${civ ? `<small>民間空港でいちばん近い</small>` : ""}<b>${esc(nearShort(o.a))}<i>${esc(pf)}</i></b></span><span class="k">${k[0]}<small>${k[1]}</small></span><svg class="c" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>`; };
+  return `<div class="nrw"><button class="nrow2" type="button" data-zka="${o.a.id}" aria-label="${esc(kn)}、${esc(o.a.name)}、${k.join("")}"><span class="t ${kc}">${esc(kn)}</span><span class="tx">${civ ? `<small>民間空港でいちばん近い</small>` : ""}<b>${esc(nearShort(o.a))}<i>${esc(pf)}</i></b></span><span class="k">${k[0]}<small>${k[1]}</small></span></button>${nearPinBtn(o.a)}</div>`; };
+// 行の右のピンの丸（K1o）：していない＝白地に線のピン、している＝紺の塗り。押すと付け外し（外したら元に戻せる）
+const nearPinBtn = a => { const k = pinKey(a), on = pinned(k);
+  return `<button type="button" class="nrpin${on ? " on" : ""}" ${on ? `data-pin-remove="${esc(k)}"` : `data-pin-add="${esc(k)}"`} aria-pressed="${on}" aria-label="${esc(nearShort(a))}を${on ? "ピン止めから外す" : "ピン止め"}">${PIN_SVG(on)}</button>`; };
 function renderNearList(){
   const box = $("nearList"), n = HOME_NEAR; if(!box) return;
   if(!n || !n.others || (!n.others.length && !n.civ)){ box.hidden = true; box.innerHTML = ""; return; }
@@ -5464,7 +5567,7 @@ function demoLoRestore(){ try{ const raw = localStorage.getItem(DEMO_LO_BAK); if
 demoLoRestore();
 const TAB_ALL = ["home", "book", "log", "sg", "ops", "stats"], TAB_NAME = { home:"ホーム", book:"図鑑", log:"フライト", sg:"修行", ops:"運用", stats:"成績" };
 const LO_BLOCKS = {
-  home: [["persona", "いちばん上のカード", "撮影・修行の構成のときに出るカード。いつもいちばん上", true], ["ride", "これから乗る便", "便名を入れると機体を調べる"], ["event", "イベントのお知らせ"], ["tally", "これまでの記録", "空港・路線・距離の数"], ["recent", "最近の印"]],
+  home: [["persona", "いちばん上のカード", "撮影・修行の構成のときに出るカード。いつもいちばん上", true], ["ride", "これから乗る便", "便名を入れると機体を調べる"], ["pins", "ピン止めした空港", "ピン止めが1つ以上あるときだけ出ます"], ["event", "イベントのお知らせ"], ["tally", "これまでの記録", "空港・路線・距離の数"], ["recent", "最近の印"]],
   opsb: [["alerts", "遅れ・ダイバートのお知らせ"], ["map", "地図と近くを飛ぶ機体"], ["spots", "撮影地"], ["curfew", "門限のある時間"], ["ga", "ゴーアラウンド（推定）"]],
   stats: [["passport", "これまでのパスポート"], ["fleet", "乗った機体"], ["airline", "航空会社別"], ["status", "ステータスの目安"], ["sgsum", "修行のまとめ", "月ごとのポイント・1ポイントあたり・路線ごと"]],
 };
@@ -7318,6 +7421,7 @@ function openAirport(id){
     <div class="tx"><b class="cd${/[^\x00-\x7f]/.test(cd) ? " jp" : ""}">${esc(/[^\x00-\x7f]/.test(cd) ? godShort(a) : cd)}</b><h3>${esc(a.name).replace(/（/g, "<wbr>（")}</h3><p>${a.pref}${rg ? "・" + rg : ""}${a.rare?"・離島の空港":""}${a.kind ? "・番外編" : ""}</p></div></div>
   ${rgl.length > 1 ? `<p class="zk-dots" aria-hidden="true">${rgl.map(x => `<i${x.id === a.id ? ` class="on"` : ""}></i>`).join("")}</p>` : ""}
   ${swHint ? `<p class="zk-swhint">印のカードをはらうと、となりの空港へ</p>` : ""}
+  ${a.kind === "mil" || a.kind === "secret" ? "" : pinApHTML(pinKey(a))}
   ${first ? `<div class="zk-dl"><div><span class="k">押した回数</span><span class="v"><b class="num">${times}</b><span class="u">回</span></span></div><div><span class="k">はじめて押した日</span><span class="v s">${(d => `<b class="num">${d.getFullYear()}</b><span class="u">年</span><b class="num">${d.getMonth() + 1}</b><span class="u">月</span><b class="num">${d.getDate()}</b><span class="u">日</span>`)(new Date(first))}</span></div></div>`
     : `<div class="zk-yet"><b>ここでチェックインすると印が付きます</b><span>判定の範囲 <b class="num">${a.radius >= 1000 ? (a.radius / 1000).toFixed(a.radius % 1000 ? 1 : 0) : a.radius}</b><span class="u">${a.radius >= 1000 ? "km" : "m"}</span>（空港の中心から）</span>${typeof HOME_POS !== "undefined" && HOME_POS ? `<span>いまの場所から <b class="num">${fmtKm(km(HOME_POS, a))}</b><span class="u">km</span></span>` : ""}</div>`}
   ${first ? `<p class="marks">${SEASONS.map((x,i) => `<span class="mark${ss.has(i) ? " on" : " off"}">${x}</span>`).join("")}${ss.size === 4 ? `<span class="mark gold">四季がそろった</span>` : ""}</p>
@@ -9965,7 +10069,9 @@ function renderOpsApPicker(ORDER){
   const row = d => `<button class="aprow" type="button" data-ops-ap="${d.iata}" aria-current="${d.iata === OPS_AP}"><span class="c">${d.iata}</span><b>${esc(d.name)}</b>${d.iata === OPS_NEAR ? "<small>近く</small>" : ""}</button>`;
   const cell = d => `<button class="apcell" type="button" data-ops-ap="${d.iata}" aria-current="${d.iata === OPS_AP}"><b>${d.iata}</b><span>${esc(d.name)}</span></button>`;
   const list = all.filter(hit);
-  $("opsAps").innerHTML = (mine.length ? `<h4>よく見る空港</h4><div class="aplist">${mine.map(row).join("")}</div>` : "")
+  const pinAps = pins().filter(p => OPS_AIRPORTS[p.k]).map(p => OPS_AIRPORTS[p.k]).filter(hit);
+  const prow = d => `<button class="aprow" type="button" data-ops-ap="${d.iata}" aria-current="${d.iata === OPS_AP}"><span class="c">${d.iata}</span><b>${esc(d.name)}</b>${d.iata === OPS_AP ? `<small class="cur">選んでいる</small>` : ""}<span class="appin" aria-label="ピン止め中">${PIN_SVG(true)}</span></button>`;
+  $("opsAps").innerHTML = (pinAps.length ? `<h4>ピン止めした空港</h4><div class="aplist pinaplist">${pinAps.map(prow).join("")}</div>` : "") + (mine.length ? `<h4>よく見る空港</h4><div class="aplist">${mine.map(row).join("")}</div>` : "")
     + `<h4>${q ? "見つかった空港" : "北から順に"}</h4>` + (list.length ? `<div class="apgrid">${list.map(cell).join("")}</div>` : `<p class="hint">「${esc(q)}」に合う空港はありません。運用を出しているのは14空港です。</p>`);
 }
 document.addEventListener("click", e => {
@@ -10507,6 +10613,9 @@ function specialWhere(x){
   return [best ? `${best.name}の近く` : "飛行中", alt].filter(Boolean).join("・");
 }
 function spPushHTML(){
+  return pinLineHTML(OPS_AP);   // 決定事項【11/19】：特別塗装機の知らせはピン止めの空港から（K7）
+}
+function spPushHTMLOld(){
   if(!SERVER || !PUSH_KEY || !pushOK()) return "";
   const on = pushSp().includes(OPS_AP), name = opsDef().name;
   return `<button class="linkbtn2 fwpush" data-sp-push="${esc(OPS_AP)}" aria-pressed="${on}">${on ? `${esc(name)}の特別塗装機の通知をやめる` : `${esc(name)}に特別塗装機が来たら通知する`}</button>`;
@@ -11561,6 +11670,9 @@ const pushAps = () => { try{ return JSON.parse(localStorage.getItem("soramemo.pu
 const pushSp = () => { try{ return JSON.parse(localStorage.getItem("soramemo.pushSpecial") || "[]"); }catch(e){ return []; } };   // 特別塗装機の通知を申し込んだ空港
 const pushOK = () => "serviceWorker" in navigator && "PushManager" in window && "Notification" in window;
 function pushButtonHTML(iata){
+  return pinLineHTML(iata);   // 決定事項【11/19】：空港ごとの知らせはピン止めにまとめる（下の古いボタンは使わない）
+}
+function pushButtonHTMLOld(iata){
   if(!SERVER || PUSH_KEY === null) return "";
   if(PUSH_KEY === undefined){ loadPushKey().then(() => { if(PUSH_KEY && opsOn()) renderOpsAlerts(); }); return ""; }
   if(!pushOK()) return `<p class="hint" style="margin:8px 0 0">スマホへの通知は、この端末のブラウザでは使えません（iPhone はホーム画面に追加したそらメモから使えます）。</p>`;
@@ -11628,6 +11740,268 @@ async function pushRide(key){
 }
 document.addEventListener("click", e => { const b = e.target.closest("[data-ride-push]"); if(b) pushRide(b.dataset.ridePush); });
 document.addEventListener("click", e => { const b = e.target.closest("[data-fw-push]"); if(b) togglePush(b.dataset.fwPush); });
+
+/* ---------- 空港のピン止め（決定事項【11/19】・画面案 design/pin 4版） ----------
+   ピン止めした空港ごとに、4つの知らせ（特別塗装機・遅れ／欠航／ダイバート・ゴーアラウンド（推定）・撮影）を ON／OFF する。
+   知らせの送り手は今の push-subscribe のまま：ピン止めから airports・sp_airports・ga.airports・spot.iata を作って送る（表はまだ作らない）。
+   ピン止めはこの端末に保存（アカウントへの保存はデータ担当の表ができてから）。上限は12空港。前から13以上申し込んでいた人はそのまま続く */
+const PIN_KEY = "soramemo.pins", PIN_MAX = 12;
+const PIN_MAIN8 = ["HND", "NRT", "KIX", "ITM", "NGO", "CTS", "FUK", "OKA"];
+const PIN_KINDS = ["sp", "dl", "ga", "spot"];
+const PIN_KN = { sp:"特別塗装機", dl:"遅れ・欠航・ダイバート", ga:"ゴーアラウンド", spot:"撮影" };
+const PIN_SVG = on => `<svg class="pinic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3h6l-1 6 3 3v2H7v-2l3-3z"${on ? ` fill="currentColor"` : ""}/><path d="M12 14v7"/></svg>`;
+const PIN_CHEV = `<svg class="pinchev" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>`;
+// 空港の鍵：86空港は3レター、ほか（飛行場・滑空場・ヘリポート）は "#" ＋番号
+const pinKey = a => a && IATA[a.iata] === a ? a.iata : a ? "#" + a.id : null;
+const pinAp = k => !k ? null : k[0] === "#" ? BY[+k.slice(1)] || null : IATA[k] || null;
+const pinCode = k => k && k[0] !== "#";   // 知らせを出せるのは3レターのある空港だけ
+const pinName = k => { const a = pinAp(k); return a ? nearShort(a).replace(/空港$/, "") : k; };
+function pinsLoad(){ try{ const v = JSON.parse(localStorage.getItem(PIN_KEY) || "null"); return Array.isArray(v) ? v.filter(p => p && typeof p.k === "string" && pinAp(p.k)) : null; }catch(e){ return null; } }
+function pinsSave(list){ try{ localStorage.setItem(PIN_KEY, JSON.stringify(list)); }catch(e){} }
+// はじめて開いたとき：今の申し込み（特別塗装機・遅れ・ゴーアラウンド・撮影の空港）をそのままピン止めに移す（K9。上限を超えていても全部）
+function pins(){
+  let list = pinsLoad();
+  if(!list){
+    list = []; const add = (k, f) => { if(!IATA[k]) return; let p = list.find(x => x.k === k); if(!p){ p = { k, sp:false, dl:false, ga:false }; list.push(p); } if(f) p[f] = true; };
+    pushSp().forEach(k => add(k, "sp")); pushAps().forEach(k => add(k, "dl"));
+    const g = pushGa(); if(gaActive(g)) g.airports.forEach(k => add(k, "ga"));
+    const s = pushSpot(); if(spotActive(s)) add(s.iata);
+    pinsSave(list);
+    if(list.length) try{ localStorage.setItem("soramemo.pins.moved", String(list.length)); }catch(e){}
+  }
+  return list;
+}
+const pinOf = k => pins().find(p => p.k === k) || null;
+const pinned = k => !!pinOf(k);
+const pinSpotOn = k => { const s = pushSpot(); return spotActive(s) && s.iata === k; };
+const pinIsOn = (p, kind) => kind === "spot" ? pinSpotOn(p.k) : !!p[kind];
+// その空港で出せる知らせか（出せないときは理由）
+function pinAvail(k, kind){
+  if(!pinCode(k)) return "3レターのない飛行場には、知らせを出せません。";
+  if(kind === "ga" && !GA_ORDER.includes(k)) return "ゴーアラウンドは、運用を出している14空港だけです。";
+  if(kind === "spot" && !(OPS_AIRPORTS[k] && OPS_SPOTS[k])) return "撮影の知らせは、撮影地のある空港だけです。";
+  return "";
+}
+function pinDesc(k, kind){
+  const nm = pinName(k);
+  if(kind === "sp") return "国内・海外の特別塗装機。アライアンス塗装は海外の会社のものだけ。同じ機体は6時間に1回";
+  if(kind === "dl") return k === "HND" ? "0時前後に着く便・欠航・ダイバート・引き返し。羽田は24時間なので門限はありません"
+    : PIN_MAIN8.includes(k) ? "門限の10分前より遅く着く見込みの便・0時前後に着く便・欠航・ダイバート・引き返し"
+    : `${nm}は欠航・ダイバート・引き返しだけ。門限ギリギリと0時前後は羽田・成田・関西・伊丹・中部・新千歳・福岡・那覇の8空港です`;
+  if(kind === "ga") return "1機ごと・続いたとき・強い横風・低い雲・雷";
+  if(kind === "spot"){ const s = pushSpot(); return spotActive(s) && s.iata !== k ? `ON にすると、撮影の知らせを${pinName(s.iata)}から${nm}に移します（1つの空港だけ）` : `撮影地から見える機体を来る前に。ピン止めした空港のうち1つだけ${spotActive(s) ? `（いまは${pinName(s.iata)}）` : ""}`; }
+  return "";
+}
+const PIN_KT = { sp:"特別塗装機が向かってきたら", dl:"遅れ・欠航・ダイバート", ga:"ゴーアラウンド（推定）", spot:"撮影の知らせ" };
+// この端末に届くか：ok・ask（まだ許可していない）・denied・ios（iPhone の Safari でホーム画面に置いていない）・none（使えない）・demo
+function pinDeliver(){
+  if(demo) return "demo";
+  if(!SERVER) return "none";
+  if(!pushOK()){ const ios = /iP(hone|ad|od)/.test(navigator.userAgent) && !(navigator.standalone || matchMedia("(display-mode: standalone)").matches);
+    return document.documentElement.dataset.native ? "none" : ios ? "ios" : "none"; }
+  if(PUSH_KEY === null) return "none";
+  return Notification.permission === "granted" ? "ok" : Notification.permission === "denied" ? "denied" : "ask";
+}
+function pinDeliverHTML(){
+  const d = pinDeliver();
+  if(d === "ok") return `<p class="pindev ok"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 5 5 9-10"/></svg>この端末に届きます（通知を許可済み）</p>`;
+  if(d === "ask") return `<div class="pindev ask"><span>この端末には、まだ届きません</span><button type="button" class="pinallow" data-pin-allow>許可する</button></div>`;
+  if(d === "denied") return `<p class="pindev ng">通知がブロックされています。端末の設定で、そらメモの通知を許可すると届きます。</p>`;
+  if(d === "ios") return `<details class="pindev ios"><summary>iPhone では、ホーム画面に追加したそらメモに届きます<span>やり方 ›</span></summary>
+    <ol><li>先にログインする（ピン止めをアカウントに残すため。準備中）</li><li>Safari の共有ボタン →「ホーム画面に追加」</li><li>ホーム画面のそらメモを開き、通知を許可する</li></ol>
+    <p>ログインしていないときは、ホーム画面のそらメモでもう一度ピン止めしてください。</p></details>`;
+  if(d === "demo") return `<p class="pindev">デモでは知らせは届きません（ピン止めは試せます）。</p>`;
+  return `<p class="pindev">この端末のブラウザでは、知らせを受け取れません。</p>`;
+}
+// ピン止めから今の申し込みの形を作って送る。届かない端末では保存だけ（許可したときに送る）
+async function pinSync(ask){
+  const list = pins(), d = pinDeliver();
+  if(!(d === "ok" || (ask && d === "ask"))) return d;
+  if(PUSH_KEY === undefined) await loadPushKey();
+  const codes = f => list.filter(p => p[f] && pinCode(p.k)).map(p => p.k);
+  const g = pushGa(), ga = { ...g, airports:codes("ga"), kinds:g.kinds.length ? g.kinds : ["plane", "cluster", "wind", "cloud"] };
+  const s = pushSpot(), spot = spotActive(s) && !list.some(p => p.k === s.iata) ? { ...s, iata:null } : s;
+  const ok = await syncPush(codes("dl"), pushFlights(), codes("sp"), spot, ga);
+  return ok ? "ok" : "fail";
+}
+let PIN_UNDO = null, PIN_SHEET = null, PIN_PAGE = null;
+// 下の帯（○○をピン止めしました｜知らせの設定・元に戻す）。シートが開いていればその中に出す
+function pinBand(text, btn, attr){
+  document.querySelectorAll(".pinband").forEach(x => x.remove());
+  const open = [...document.querySelectorAll("dialog[open]")].pop(), host = open ? open.querySelector(".dlg") || open : document.body;
+  const el = document.createElement("div"); el.className = "pinband" + (open ? " in" : ""); el.setAttribute("role", "status");
+  el.innerHTML = `${PIN_SVG(true)}<span>${esc(text)}</span>${btn ? `<button type="button" ${attr}>${esc(btn)}</button>` : ""}`;
+  host.appendChild(el); clearTimeout(pinBand.t); pinBand.t = setTimeout(() => el.remove(), 6000);
+}
+function pinRedraw(){
+  try{ if(HOME_NEAR) pinNearSync(); }catch(e){}
+  pinHomeSync();
+  if($("dPin").open && PIN_SHEET) $("dPinBody").innerHTML = pinSheetHTML(PIN_SHEET.k, PIN_SHEET.mode);
+  if($("dPins").open) $("dPinsBody").innerHTML = PIN_PAGE ? pinPageHTML(PIN_PAGE) : pinListHTML();
+  const ap = document.querySelector("#dAirportBody [data-pin-ap]"); if(ap && $("dAirport").open) ap.outerHTML = pinApHTML(ap.dataset.pinAp);
+  if(opsOn()){ try{ renderSpecial(); renderOpsAlerts(); }catch(e){} }
+}
+// ピン止めする。はじめての1回はシート（許可していなければ先に K0）、2回目からは帯
+async function pinAdd(k, from){
+  const list = pins(); if(list.some(p => p.k === k)){ pinOpen(k); return; }
+  if(list.length >= PIN_MAX){ pinBand(`ピン止めは${PIN_MAX}空港までです。外してから足してください`, "知らせの設定", "data-pin-list"); return; }
+  list.push({ k, sp:pinCode(k), dl:false, ga:false }); pinsSave(list); track("pin", "add_" + (from || ""));
+  let first = false; try{ first = !localStorage.getItem("soramemo.pins.first"); localStorage.setItem("soramemo.pins.first", "1"); }catch(e){}
+  if(first && pinDeliver() === "ask" && pinCode(k)){ PIN_SHEET = { k, mode:"ask" }; $("dPinBody").innerHTML = pinAskHTML(k); if(!$("dPin").open) $("dPin").showModal(); pinRedraw(); return; }
+  await pinSync();
+  if(first){ PIN_SHEET = { k, mode:"new" }; $("dPinBody").innerHTML = pinSheetHTML(k, "new"); if(!$("dPin").open) $("dPin").showModal(); }
+  else pinBand(`${pinName(k)}をピン止めしました`, "知らせの設定", `data-pin-open="${esc(k)}"`);
+  pinRedraw();
+}
+// 外す（知らせもすべて止まる）。すぐあとなら元に戻せる
+async function pinRemove(k){
+  const list = pins(), p = list.find(x => x.k === k); if(!p) return;
+  PIN_UNDO = { list:JSON.parse(JSON.stringify(list)), spot:pinSpotOn(k) ? k : null };
+  pinsSave(list.filter(x => x.k !== k)); track("pin", "remove");
+  if(PIN_UNDO.spot){ const s = pushSpot(); s.iata = null; try{ localStorage.setItem("soramemo.pushSpot", JSON.stringify(s)); }catch(e){} }
+  if($("dPin").open && PIN_SHEET && PIN_SHEET.k === k) $("dPin").close();
+  if(PIN_PAGE === k) PIN_PAGE = null;
+  await pinSync(); pinRedraw();
+  pinBand(`${pinName(k)}のピン止めを外しました`, "元に戻す", "data-pin-undo");
+}
+async function pinUndo(){
+  const u = PIN_UNDO; if(!u) return; PIN_UNDO = null; pinsSave(u.list);
+  if(u.spot){ const s = pushSpot(); s.iata = u.spot; try{ localStorage.setItem("soramemo.pushSpot", JSON.stringify(s)); }catch(e){} }
+  document.querySelectorAll(".pinband").forEach(x => x.remove()); await pinSync(); pinRedraw(); track("pin", "undo");
+}
+async function pinToggle(k, kind){
+  const list = pins(), p = list.find(x => x.k === k); if(!p || pinAvail(k, kind)) return;
+  if(kind === "spot"){
+    const s = pushSpot(), on = pinSpotOn(k);
+    if(!on && !(s.kinds || []).length){ pinSpotSet(k); return; }   // まだ撮影の知らせを作っていない：撮る人の設定を開く
+    s.iata = on ? null : k; try{ localStorage.setItem("soramemo.pushSpot", JSON.stringify(s)); }catch(e){}
+  }else p[kind] = !p[kind];
+  pinsSave(list); track("pin", kind); const r = await pinSync(); pinRedraw();
+  if(r === "fail") uiSay("知らせの申し込みに失敗しました。少し待って、もう一度お試しください。");
+}
+// 撮影地と機体を選ぶ（撮る人用の担当の設定の画面を、その空港で開く）
+async function pinSpotSet(k){ if(!OPS_AIRPORTS[k]) return; OPS_PICKED = true; if(OPS_AP !== k) await setOpsAirport(k); openSpPush(); }
+function pinOpen(k){ PIN_SHEET = { k, mode:"edit" }; $("dPinBody").innerHTML = pinSheetHTML(k, "edit"); if(!$("dPin").open) $("dPin").showModal(); track("pin", "open"); }
+function pinRowsHTML(k){
+  const p = pinOf(k), d = pinDeliver(), no = d !== "ok";
+  return `<div class="pinrows">${PIN_KINDS.map(kind => { const why = pinAvail(k, kind), on = !why && p && pinIsOn(p, kind);
+    const more = !why && kind === "ga" ? `<button type="button" class="pinmore" data-ga-open="set">細かく${PIN_CHEV}</button>`
+      : !why && kind === "spot" ? `<button type="button" class="pinmore" data-pin-spot="${esc(k)}">撮影地と機体を選ぶ${PIN_CHEV}</button>`
+      : why && kind === "ga" && pinCode(k) ? `<small class="pinwhy">${esc(GA_ORDER.filter(i => OPS_AIRPORTS[i]).map(i => OPS_AIRPORTS[i].name).join("・"))}</small>` : "";
+    return `<div class="pinrow${why ? " na" : ""}"><span class="t"><b>${PIN_KT[kind]}</b><small>${esc(why || pinDesc(k, kind))}</small>${on && no ? `<em class="pinno">届きません</em>` : ""}${more}</span>
+      ${loSw(on, `data-pin-kind="${kind}" data-pin-k="${esc(k)}"`, `${pinName(k)}の${PIN_KT[kind]}`, !!why)}</div>`; }).join("")}</div>`;
+}
+const PIN_FOOT = `<p class="pinfoot">どれも機体の位置（adsb.lol・ODbL）や運航情報（ODPT）からの<b>推定です。保証しません。</b>乗る便の遅れは、乗る便の知らせ1つにまとめます。</p>`;
+// 1空港の知らせ（シート）：mode＝new（ピン止めした直後・K4）・edit（「ピン止め中 ›」から・K1s）
+function pinSheetHTML(k, mode){
+  const nm = pinName(k), a = pinAp(k);
+  if(!pinned(k)) return `<div class="sph"><span class="grab" aria-hidden="true"></span></div><p class="pinsub">${esc(nm)}はピン止めしていません。</p>`;
+  return `<div class="sph"><span class="grab" aria-hidden="true"></span></div>
+    <div class="pinhd"><h3 id="pinT">${esc(mode === "new" ? `${nm}をピン止めしました` : `${nm}の知らせ`)}</h3><button type="button" class="pindone" data-close>完了</button></div>
+    ${mode === "new" ? `<p class="pinsub">何を知らせますか。あとから「ピン止め中」を押して変えられます。</p>` : `<p class="pinsub">${esc(a ? a.name : nm)}</p>`}
+    ${pinCode(k) ? pinDeliverHTML() : ""}${pinRowsHTML(k)}${pinCode(k) ? PIN_FOOT : ""}
+    ${mode === "new" ? `<div class="pinbot"><button type="button" class="pinghost" data-pin-cancel="${esc(k)}">取り消す</button></div>`
+      : `<button type="button" class="pinoff" data-pin-remove="${esc(k)}">${esc(nm)}のピン止めを外す</button><p class="pinnote">外すと${esc(nm)}の知らせはすべて止まります（すぐあとなら元に戻せます）。</p>`}`;
+}
+// はじめてのピン止めで、通知をまだ許可していないとき（K0）。許可しなくてもピン止めはできる
+function pinAskHTML(k){
+  const nm = pinName(k);
+  return `<div class="sph"><span class="grab" aria-hidden="true"></span></div><div class="pinbell"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg></div>
+    <h3 class="pinask" id="pinT">${esc(nm)}をピン止めしました。知らせを届けますか</h3>
+    <p class="pinsub">特別塗装機が${esc(nm)}に向かってきたら、この端末に知らせます。このあと端末の確認で「許可」を押してください。</p>
+    <div class="pin2b"><button type="button" class="pinghost" data-pin-later="${esc(k)}">あとで</button><button type="button" class="pinmain" data-pin-allow="${esc(k)}">通知を許可する</button></div>
+    <p class="pinnote">許可しなくてもピン止めはできます（知らせだけ届きません）。あとから「知らせ」の画面で許可できます。</p>`;
+}
+// 知らせ（マイページから・K5）：ピン止めした空港の一覧・便・機体ごとの知らせ
+function pinListHTML(){
+  const list = pins(), d = pinDeliver(), fl = pushFlights(), regs = pushSpRegs();
+  const card = p => { const on = PIN_KINDS.filter(kind => !pinAvail(p.k, kind) && pinIsOn(p, kind)), offN = PIN_KINDS.filter(kind => !pinAvail(p.k, kind)).length - on.length;
+    return `<button type="button" class="pincard" data-pin-page="${esc(p.k)}"><span class="h">${pinCode(p.k) ? `<i class="pincd">${esc(p.k)}</i>` : ""}<b>${esc(pinName(p.k))}</b>${PIN_CHEV}</span>
+      <span class="chips">${on.map(kind => `<i class="pinchip">✓ ${PIN_KN[kind]}</i>`).join("")}${!pinCode(p.k) ? `<small>知らせは出せません（ピン止めだけ）</small>` : offN ? `<small>${on.length ? `ほか${offN}つは OFF` : "知らせはすべて OFF"}</small>` : ""}</span></button>`; };
+  return `<div class="pintop"><button class="mp-back" data-close type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>${$("dSettings").open ? "マイページ" : "閉じる"}</button><h3 id="pinsT">知らせ</h3><span class="pinsp" aria-hidden="true"></span></div>
+    ${pinDeliverHTML()}
+    <div class="pinlh">${PIN_SVG(true)}<b>ピン止めした空港</b><small>${list.length} / ${PIN_MAX}</small></div>
+    ${list.length > PIN_MAX ? `<p class="pinnote">前から申し込んでいた${list.length}空港をそのまま続けています。新しく足すのは${PIN_MAX}より少なくなってからです。</p>` : ""}
+    ${list.map(card).join("") || `<p class="pinempty">まだありません。近くの空港・空港のページ・運用タブの「ピン止め」から足せます。</p>`}
+    <label class="pinq">${PIN_SVG(false)}<input id="pinQ" type="search" placeholder="＋ 空港をピン止め（名前か3レター）" autocomplete="off" aria-label="ピン止めする空港を探す"></label><div id="pinQOut"></div>
+    <p class="pinnote">ピン止めは、いまはこの端末に保存します（アカウントへの保存は準備中）。</p>
+    <p class="pinsec">便</p>
+    <div class="pincard st"><span class="h"><b>乗る便</b></span><span class="chips"><small>${fl.length ? `${fl.map(x => { const [no, dd] = x.split("@"); return `${esc(no)}（${+dd.slice(5, 7)}/${+dd.slice(8, 10)}）`; }).join("・")}・15分の遅れから` : "「この便に乗る」で選んだ便の遅れ・ダイバートを知らせます"}</small></span></div>
+    ${regs.length ? `<p class="pinsec">機体ごとの知らせ</p><div class="pincard st"><span class="h"><b>${regs.length}機</b></span><span class="chips"><small>${esc(regs.join("・"))}。前に申し込んだ機体。どの空港へ飛ぶときも届きます。新しく足すことはできません</small></span></div>` : ""}
+    ${d === "ok" || d === "demo" ? "" : `<p class="pinnote">ON にしていても、この端末に届かないあいだは知らせは来ません。</p>`}`;
+}
+// 1空港の知らせ（知らせの画面の中・K6）
+function pinPageHTML(k){
+  const nm = pinName(k), a = pinAp(k);
+  if(!pinned(k)){ PIN_PAGE = null; return pinListHTML(); }
+  return `<div class="pintop"><button class="mp-back" data-pin-back type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>知らせ</button><h3 id="pinsT">${esc(nm)}の知らせ</h3><span class="pinsp" aria-hidden="true"></span></div>
+    <p class="pinapn">${pinCode(k) ? `<i class="pincd">${esc(k)}</i>` : ""}<b>${esc(a ? a.name : nm)}</b></p>
+    ${pinCode(k) ? pinDeliverHTML() : ""}<div class="pinbox">${pinRowsHTML(k)}</div>${pinCode(k) ? PIN_FOOT : ""}
+    <button type="button" class="pinoff" data-pin-remove="${esc(k)}">${esc(nm)}のピン止めを外す</button><p class="pinnote">外すと${esc(nm)}の知らせはすべて止まります（すぐあとなら元に戻せます）。</p>`;
+}
+function pinListOpen(){ PIN_PAGE = null; $("dPinsBody").innerHTML = pinListHTML(); if(!$("dPins").open) $("dPins").showModal(); $("dPins").scrollTop = 0; track("pin", "list"); }
+function pinQOut(){
+  const q = ($("pinQ") && $("pinQ").value || "").trim(), out = $("pinQOut"); if(!out) return;
+  if(!q){ out.innerHTML = ""; return; }
+  const Q = q.toUpperCase(), hit = Object.values(BY).filter(a => !(a.kind === "mil" || a.kind === "secret") && (a.name.includes(q) || (a.iata && a.iata.toUpperCase() === Q) || nearShort(a).includes(q))).slice(0, 8);
+  out.innerHTML = hit.length ? `<div class="pinqlist">${hit.map(a => { const k = pinKey(a), on = pinned(k);
+    return `<div class="pinqrow"><span>${pinCode(k) ? `<i class="pincd">${esc(k)}</i>` : ""}<b>${esc(a.name)}</b></span>${on ? `<span class="pinbadge">${PIN_SVG(true)}ピン止め中</span>` : `<button type="button" class="pinbtn" data-pin-add="${esc(k)}">${PIN_SVG(false)}ピン止め</button>`}</div>`; }).join("")}</div>`
+    : `<p class="pinnote">「${esc(q)}」に合う空港はありません。</p>`;
+}
+// ピン止めの札：している＝紺の塗り「ピン止め中 ›」（押すと知らせ）、していない＝白地「ピン止め」（押すとピン止め）
+const pinPillHTML = (k, extra = "") => { if(!k) return ""; const w = h => extra.includes("dark") ? `<span class="pv">${h}</span>` : h;
+  return pinned(k) ? `<button type="button" class="pinpill on${extra}" data-pin-open="${esc(k)}" aria-label="${esc(pinName(k))}はピン止め中。押すと知らせの設定">${w(`${PIN_SVG(true)}ピン止め中${PIN_CHEV}`)}</button>`
+    : `<button type="button" class="pinpill${extra}" data-pin-add="${esc(k)}" aria-label="${esc(pinName(k))}をピン止め">${w(`${PIN_SVG(false)}ピン止め`)}</button>`; };
+// ホームのいちばん近い空港のカード（K1）
+function pinNearSync(){ const b = $("nearPin"), n = HOME_NEAR; if(!b) return; const k = n && n.a ? pinKey(n.a) : null; b.innerHTML = k ? pinPillHTML(k, " dark") : ""; b.hidden = !k; }
+// ホームの「ピン止めした空港」（K1h。1つ以上のときだけ）
+function pinHomeSync(){
+  const b = $("pinHome"); if(!b) return; const list = pins();
+  if($("pinTileN")) $("pinTileN").innerHTML = `<b>${list.length}</b><small>/${PIN_MAX}</small>`;
+  b.hidden = !list.length; if(!list.length){ b.innerHTML = ""; return; }
+  b.innerHTML = `<span class="ic">${PIN_SVG(true)}</span><span class="tx"><b>ピン止めした空港 ${list.length}</b><small>${esc(list.map(p => pinName(p.k)).join("・"))}</small></span>${PIN_CHEV}`;
+}
+// 空港のページ（K2）：札と「○○の知らせ」の1枚
+function pinApHTML(k){
+  if(!k) return "";
+  const p = pinOf(k), on = p ? PIN_KINDS.filter(kind => !pinAvail(k, kind) && pinIsOn(p, kind)) : [], offN = p ? PIN_KINDS.filter(kind => !pinAvail(k, kind)).length - on.length : 0;
+  return `<div class="pinap" data-pin-ap="${esc(k)}">${pinPillHTML(k)}${p ? `<button type="button" class="pinapc" data-pin-open="${esc(k)}"><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg></span>
+    <span class="tx"><b>${esc(pinName(k))}の知らせ</b><small>何を知らせるか・ピン止めを外す</small><span class="chips">${on.map(kind => `<i class="pinchip">✓ ${PIN_KN[kind]}</i>`).join("")}${!pinCode(k) ? `<small>知らせは出せません</small>` : offN ? `<small>${on.length ? `ほか${offN}つは OFF` : "知らせはすべて OFF"}</small>` : ""}</span></span>${PIN_CHEV}</button>` : ""}</div>`;
+}
+// 運用タブ（K7）：今の「通知する」のボタンの代わりに、ピン止めの状態と入口の1行
+function pinLineHTML(iata){
+  if(!SERVER || !iata) return "";
+  const p = pinOf(iata), nm = (OPS_AIRPORTS[iata] || {}).name || pinName(iata);
+  if(!p) return `<button type="button" class="pinline" data-pin-add="${esc(iata)}">${PIN_SVG(false)}<span><b>${esc(nm)}をピン止めして知らせを受ける</b><small>特別塗装機・遅れ・ゴーアラウンド・撮影</small></span>${PIN_CHEV}</button>`;
+  const on = PIN_KINDS.filter(kind => !pinAvail(iata, kind) && pinIsOn(p, kind)).map(kind => kind === "dl" ? "遅れ" : PIN_KN[kind]);
+  return `<button type="button" class="pinline on" data-pin-open="${esc(iata)}">${PIN_SVG(true)}<span><b>${esc(nm)}はピン止め中</b><small>${on.length ? `${on.join("・")}が ON` : "知らせはすべて OFF"}${pinDeliver() === "ok" || !on.length ? "" : "（この端末には届きません）"}</small></span>${PIN_CHEV}</button>`;
+}
+// 運用の「知らせる空港」を変えたら、ピン止めのゴーアラウンドもそろえる（足りなければピン止めを足す・上限まで）
+function pinFromGa(aps){
+  const list = pins();
+  for(const p of list) p.ga = aps.includes(p.k);
+  for(const k of aps) if(!list.some(p => p.k === k) && list.length < PIN_MAX) list.push({ k, sp:false, dl:false, ga:true });
+  pinsSave(list); pinRedraw();
+}
+document.addEventListener("click", async e => {
+  const t = e.target;
+  const add = t.closest("[data-pin-add]"); if(add){ e.preventDefault(); e.stopPropagation(); pinAdd(add.dataset.pinAdd, add.closest("#dPins") ? "list" : add.closest("#bpass") ? "near" : add.closest("#dAirport") ? "ap" : add.closest("#v-ops") ? "ops" : ""); if(add.closest("#dPins")) setTimeout(pinQOut, 0); return; }
+  const op = t.closest("[data-pin-open]"); if(op){ e.preventDefault(); e.stopPropagation(); document.querySelectorAll(".pinband").forEach(x => x.remove()); pinOpen(op.dataset.pinOpen); return; }
+  const kd = t.closest("[data-pin-kind]"); if(kd && !kd.disabled){ pinToggle(kd.dataset.pinK, kd.dataset.pinKind); return; }
+  const rm = t.closest("[data-pin-remove]"); if(rm){ pinRemove(rm.dataset.pinRemove); return; }
+  const cc = t.closest("[data-pin-cancel]"); if(cc){ const k = cc.dataset.pinCancel; pinsSave(pins().filter(p => p.k !== k)); $("dPin").close(); await pinSync(); pinRedraw(); track("pin", "cancel"); return; }
+  if(t.closest("[data-pin-undo]")){ pinUndo(); return; }
+  const al = t.closest("[data-pin-allow]"); if(al){ const k = al.dataset.pinAllow; const r = await pinSync(true); track("pin", "allow_" + r);
+    if(k && PIN_SHEET && PIN_SHEET.mode === "ask"){ PIN_SHEET = { k, mode:"new" }; $("dPinBody").innerHTML = pinSheetHTML(k, "new"); }
+    pinRedraw(); return; }
+  const lt = t.closest("[data-pin-later]"); if(lt){ const k = lt.dataset.pinLater; $("dPin").close(); pinBand(`${pinName(k)}をピン止めしました`, "知らせの設定", `data-pin-open="${esc(k)}"`); return; }
+  const sp = t.closest("[data-pin-spot]"); if(sp){ pinSpotSet(sp.dataset.pinSpot); return; }
+  const pg = t.closest("[data-pin-page]"); if(pg){ PIN_PAGE = pg.dataset.pinPage; $("dPinsBody").innerHTML = pinPageHTML(PIN_PAGE); $("dPins").scrollTop = 0; return; }
+  if(t.closest("[data-pin-back]")){ PIN_PAGE = null; $("dPinsBody").innerHTML = pinListHTML(); return; }
+  if(t.closest("[data-pin-list]") || t.closest("#pinHome") || t.closest("[data-pins-open]")){ document.querySelectorAll(".pinband").forEach(x => x.remove()); pinListOpen(); return; }
+}, true);
+document.addEventListener("input", e => { if(e.target.id === "pinQ") pinQOut(); });
+setTimeout(() => { try{ pinHomeSync(); pinNearSync(); }catch(e){} }, 0);
 
 // ---- いちばん近い空港 ----
 let OPS_PICKED = false, OPS_NEAR = null;   // OPS_PICKED：利用者がタブで選んだ・リンクや通知で開いた（このページを開いているあいだ、近い空港へ変えない）
@@ -14027,7 +14401,7 @@ document.addEventListener("click", async e => {
     if(!off && (!next.airports.length || !next.kinds.length)){ GA_MSG = "空港と、知らせる種類を1つ以上選んでください。"; redraw(); return; }
     GA_MSG = "保存しています…"; redraw();
     const ok = await syncPush(pushAps(), pushFlights(), pushSp(), pushSpot(), next);
-    if(ok){ track("push", off ? "ga_off" : "ga_on"); $("dGa").close(); uiSay(off ? "ゴーアラウンドの知らせをやめました。" : `${next.airports.map(i => OPS_AIRPORTS[i].name).join("・")}のゴーアラウンド（推定）と、起きやすい天気を知らせます。`); renderGaBox(); }
+    if(ok){ pinFromGa(next.airports); track("push", off ? "ga_off" : "ga_on"); $("dGa").close(); uiSay(off ? "ゴーアラウンドの知らせをやめました。" : `${next.airports.map(i => OPS_AIRPORTS[i].name).join("・")}のゴーアラウンド（推定）と、起きやすい天気を知らせます。`); renderGaBox(); }
     else { GA_MSG = "保存できませんでした。通知の許可を確かめて、もう一度お試しください。"; redraw(); }
   }
 });
