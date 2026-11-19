@@ -1,6 +1,6 @@
 import os, sys
 HERE=os.path.dirname(os.path.abspath(__file__)); WEB=os.path.abspath(os.path.join(HERE,'..','..','web')); WORK=os.environ.get('SORAMEMO_TEST_WORK','/tmp/soramemo-e2e'); os.makedirs(WORK, exist_ok=True)
-# ホームの搭乗券（3版）：半券は右へ 56px 引けば切れる（半券の真ん中をつかんでも画面の端までに届く）。短く引いたら戻る。
+# ホームの搭乗券（3版）：半券は右へ引けば切れる（11/19 から切れる長さはつかんだ所から画面の端までの残りの半分・28〜56px。くわしくは t147）。短く引いたら戻る。
 # 下へ引いても切れない。押すだけなら「印をもらいますか」を1回確かめてから切る。半券の上で始めた指ではシートは動かない。
 # 最初の位置では、数字の帯の下端がタブ帯の上（小さい・ふつう・大きい画面のどれでも）。半券は琥珀の平らな面
 import asyncio, threading, http.server, socketserver, functools
@@ -34,8 +34,8 @@ async def main():
             check(f'{w}x{h} 数字の帯はタブ帯の上（{round(g["nav"] - g["strip"])}px）:', 0 <= g['nav'] - g['strip'] <= 16)
             if h >= 844: check(f'{w}x{h} 最初の位置で地図は450px以上（{round(g["top"])}px）:', g['top'] >= 450)
             check(f'{w}x{h} 半券の真ん中から画面の端まで56px以上（{round(g["right"])}px）:', g['right'] >= 56)
-            await drag(pg, 40, 0)
-            check(f'{w}x{h} 右へ40pxでは切れずに戻る:', await pg.evaluate("window.__ck") == 0 and await pg.evaluate("$('checkin').style.transform") == '')
+            await drag(pg, 18, 0)   # 切れる長さ（28px 以上）にも、はじき（20px 以上）にも届かない
+            check(f'{w}x{h} 右へ18pxでは切れずに戻る:', await pg.evaluate("window.__ck") == 0 and await pg.evaluate("$('checkin').style.transform") == '')
             await drag(pg, 60, 0); await pg.wait_for_timeout(1400)
             check(f'{w}x{h} 真ん中をつかんで右へ60pxで切れる:', await pg.evaluate("window.__ck") == 1)
             top0 = await pg.evaluate("$('homeSheet').getBoundingClientRect().top")

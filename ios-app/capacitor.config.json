@@ -1,0 +1,10 @@
+{
+  "appId": "jp.soramemo.app",
+  "appName": "そらメモ",
+  "webDir": "www",
+  "ios": {
+    "contentInset": "never",
+    "limitsNavigationsToAppBoundDomains": false
+  },
+  "plugins": {}
+}
