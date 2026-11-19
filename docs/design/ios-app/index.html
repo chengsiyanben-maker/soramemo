@@ -550,4 +550,46 @@ body.night .foot1{background:linear-gradient(180deg,rgba(14,16,20,0),#0E1014 26%
 body.night .foot1 .main{background:transparent;box-shadow:inset 0 0 0 2px #DCE3EA;color:#fff}
 body.night .foot1 .sec{color:#DCE3EA}
 body.night .offwi{color:#E9A14B!important;box-shadow:inset 0 0 0 1.5px rgba(233,161,75,.5)!important}
-</style></head><body class=""><div class="idx"><h1>iPhone のアプリだけの画面</h1><p>design/ios-app 1版（11/19）。チェックイン担当の依頼（11/18・report-ios-app-base.md）。アプリのコードは変えていない。通知の許可の前の1枚は、アプリの通知（APNs）ができてから。</p><h2>① 位置の許可を頼む前の説明</h2><ul><li><a href="I1.html"><b>I1</b><span>位置を使う前の説明の1枚<small>ログインか「デモで試す」のあと、はじめてホームを開く前に1回だけ。ボタンは「次へ」1つ（閉じる・あとでは置かない）</small></span></a></li><li><a href="I1n.html"><b>I1n</b><span>同じ（夜の画面）<small>主ボタンは白い字と縁、光る色は緑だけ</small></span></a></li><li><a href="I1b.html"><b>I1b</b><span>「次へ」のあと<small>iPhone の確認が上に出る。iOS の画面なので描かず、場所と文（Info.plist の理由の文）だけ</small></span></a></li><li><a href="I1c.html"><b>I1c</b><span>許可しなかったとき（ホーム）<small>黒いカードの代わりに「位置が使えないので、チェックインできません」。設定を開く・デモで試す</small></span></a></li><li><a href="I1d.html"><b>I1d</b><span>正確な位置情報がオフ<small>おおよその位置（誤差が判定範囲より大きい）のとき</small></span></a></li></ul><h2>② オフライン</h2><ul><li><a href="I2.html"><b>I2</b><span>起動したときにつながらない<small>全画面。「もう一度」1つ。記録は消えていないと書く</small></span></a></li><li><a href="I2n.html"><b>I2n</b><span>同じ（夜の画面）<small>印は琥珀の線</small></span></a></li><li><a href="I2b.html"><b>I2b</b><span>使っている途中で切れた<small>シートの頭に「オフライン」の帯。チェックインは保留して送る（今の動き）</small></span></a></li><li><a href="I2c.html"><b>I2c</b><span>チェックインを保留したあと<small>帯に「保留 1件」と今の文</small></span></a></li></ul><h2>③ アプリで隠すもの</h2><ul><li><a href="I3.html"><b>I3</b><span>隠すもの・言いかえるもの（一覧）<small>関数と今の文・アプリの文。「これから」はチェックイン担当へ</small></span></a></li><li><a href="I3w.html"><b>I3w</b><span>今のホーム（Safari）<small>「ホーム画面に追加しませんか」の帯</small></span></a></li><li><a href="I3h.html"><b>I3h</b><span>アプリのホーム<small>帯なし。ほかは web と同じ</small></span></a></li><li><a href="I3m.html"><b>I3m</b><span>マイページの設定（アプリ）<small>「ホーム画面に追加」を出さない・位置情報の行・通知は準備中</small></span></a></li></ul></div></body></html>
+
+/* 2版：データが読めないカード（どの画面のカードも同じ形。枠と題は残し、中身の代わりにこの形） */
+.nod{display:flex;align-items:center;gap:12px;padding:6px 0 2px}
+.nod .wi{flex:none;width:40px;height:40px;border-radius:50%;background:var(--pill);color:var(--mute);display:flex;align-items:center;justify-content:center}
+.nod .wi svg{width:20px;height:20px}
+.nod .tx{flex:1;min-width:0}
+.nod .tx b{display:block;font-size:15px;font-weight:800}
+.nod .tx span{display:block;font-size:13px;line-height:1.55;color:var(--mute)}
+.nod .re{flex:none;height:44px;padding:0 16px;border-radius:999px;background:var(--pill);display:inline-flex;align-items:center;font-size:14px;font-weight:800;color:var(--ink2)}
+.last{display:block;font-size:13px;color:var(--sub);margin-top:8px}
+.offtop{display:flex;align-items:center;gap:10px;background:#FFF7E6;border-radius:18px;padding:10px 12px;margin-top:12px;box-shadow:inset 0 0 0 1px rgba(146,64,14,.12)}
+.offtop .wi{flex:none;width:32px;height:32px;border-radius:50%;background:#FEF3C7;color:#92400E;display:flex;align-items:center;justify-content:center}
+.offtop .wi svg{width:18px;height:18px}
+.offtop .tx{flex:1;font-size:13px;line-height:1.55;color:#5B3A0A}
+.offtop .tx b{display:block;font-size:14px;color:#3B2606}
+body.night .offtop,body.night .offbar{background:transparent;box-shadow:inset 0 0 0 1.5px rgba(233,161,75,.55)}
+body.night .offtop .wi,body.night .offbar .wi{background:transparent;color:#E9A14B}
+body.night .offtop .tx,body.night .offtop .tx b{color:#E9A14B}
+body.night .nod .re{color:#DCE3EA}
+body.night .tabbar{background:rgba(22,25,31,.96)}
+body.night .brand span,body.night .mode span.on{background:#1D232C;color:#DCE3EA}
+body.night .mode{background:#16191F}
+body.night .tabbar span.on{color:#DCE3EA}
+body.night .ksw span.on{background:transparent;color:#fff;box-shadow:inset 0 0 0 2px #DCE3EA}
+body.night .apsel i{background:#DCE3EA;color:#0E1014}
+/* 地図のタイルが読めないとき（線と空港の点は中に入っているので出る） */
+.mapoff{background:repeating-linear-gradient(45deg,#E3E8EE 0 10px,#DDE3EA 10px 20px)!important}
+.mapnote{position:absolute;left:50%;top:140px;transform:translateX(-50%);z-index:2;font-size:13px;font-weight:800;color:#5B6B7D;background:rgba(255,255,255,.85);border-radius:999px;padding:6px 14px;white-space:nowrap}
+/* 使うときの小さい説明（カメラ・マイク）：シートだが下に引いて閉じる取っ手は付けない */
+.ask{position:fixed;left:50%;transform:translateX(-50%);bottom:0;width:390px;background:var(--card);border-radius:26px 26px 0 0;padding:22px 20px 34px;z-index:9;box-shadow:0 -18px 40px -20px rgba(15,23,42,.5)}
+.ask .hd{display:flex;align-items:center;gap:12px}
+.ask .hd .wi{flex:none;width:52px;height:52px;border-radius:50%;background:var(--pill);color:var(--navy);display:flex;align-items:center;justify-content:center}
+.ask .hd .wi svg{width:26px;height:26px}
+.ask .hd b{font-size:19px;font-weight:900;line-height:1.4}
+.ask p{font-size:14px;line-height:1.7;color:var(--ink2);margin:12px 0 0}
+.ask ul{margin:8px 0 0;padding:0 0 0 18px;font-size:14px;line-height:1.7;color:var(--ink2)}
+.ask .main{height:52px;margin-top:16px;border-radius:999px;background:var(--navy);color:#fff;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800}
+.ask small{display:block;font-size:13px;line-height:1.6;color:var(--mute);margin-top:10px;text-align:center}
+/* 設定アプリへの道（文字だけ。iOS の画面は描かない） */
+.path{display:flex;flex-wrap:wrap;align-items:center;gap:4px;margin-top:10px;font-size:13px;font-weight:800;color:var(--ink2)}
+.path span{background:var(--pill);border-radius:999px;padding:3px 10px}
+.path i{font-style:normal;color:var(--sub)}
+</style></head><body class=""><div class="idx"><h1>iPhone のアプリだけの画面</h1><p>design/ios-app 2版（11/19・PM の指示 9時55分）。改善担当に見てもらう前提の一覧。アプリのコードは変えていない。通知の許可の前の1枚は、アプリの通知（APNs）ができてから。</p><h2>2版（PM の指示 11/19 9時55分）</h2><ul><li><a href="I1-v2.html"><b>I1-v2</b><span>位置を使う前の説明の1枚<small>理由は「印を押すため・使用中のみ・印を押すときだけ送る」。ボタンは「次へ」1つ</small></span></a></li><li><a href="I1n-v2.html"><b>I1n-v2</b><span>同じ（夜の画面）<small>主ボタンは白い字と縁、光る色は緑だけ</small></span></a></li><li><a href="I1b-v2.html"><b>I1b-v2</b><span>「次へ」のあと<small>iPhone の確認の場所。文は新しい理由の文（Info.plist も合わせる）</small></span></a></li><li><a href="I4c-v2.html"><b>I4c-v2</b><span>カメラを使う前（搭乗券）<small>「搭乗券を読み取る」を初めて押したときの小さい版</small></span></a></li><li><a href="I4m-v2.html"><b>I4m-v2</b><span>マイクを使う前（管制の聞き取り）<small>「スマホで受信」を初めて押したときの小さい版</small></span></a></li><li><a href="I1c-v2.html"><b>I1c-v2</b><span>位置を許可しなかった人（ホーム）<small>設定アプリへの道（字だけ）・設定を開く・デモで試す</small></span></a></li><li><a href="I1e-v2.html"><b>I1e-v2</b><span>許可しなかった人が印を押そうとしたとき<small>小さいシートで同じ2つ</small></span></a></li><li><a href="I2-v2.html"><b>I2-v2</b><span>電波がないとき（ホーム）<small>画面はアプリの中。地図の絵だけ出ない。チェックインは保留して送る</small></span></a></li><li><a href="I5-v2.html"><b>I5-v2</b><span>電波がないとき（運用タブ）<small>カードの枠と題は残し、中身の代わりに「読み込めませんでした・もう一度」</small></span></a></li><li><a href="I5n-v2.html"><b>I5n-v2</b><span>同じ（夜の画面）<small>帯は琥珀の線</small></span></a></li><li><a href="I5z-v2.html"><b>I5z-v2</b><span>電波がないとき（図鑑）<small>自分の記録は見られる。サーバーのデータのカードだけ同じ形</small></span></a></li><li><a href="I3-v2.html"><b>I3-v2</b><span>アプリで隠すもの・代わりに出す1行<small>「これから」はチェックイン担当へ</small></span></a></li></ul><h2>1版（比べる用に残す）</h2><ul><li><a href="I1.html"><b>I1</b><span>位置を使う前の説明</span></a></li><li><a href="I1d.html"><b>I1d</b><span>正確な位置情報がオフ<small>2版でもそのまま使う</small></span></a></li><li><a href="I2.html"><b>I2</b><span>起動したときにつながらない（全画面）<small>部品をアプリに入れるまでの形</small></span></a></li><li><a href="I2b.html"><b>I2b</b><span>使っている途中で切れた</span></a></li><li><a href="I2c.html"><b>I2c</b><span>保留したあと<small>2版でもそのまま使う</small></span></a></li><li><a href="I3.html"><b>I3</b><span>隠すもの（1版の表）</span></a></li><li><a href="I3w.html"><b>I3w</b><span>今のホーム（Safari）</span></a></li><li><a href="I3h.html"><b>I3h</b><span>アプリのホーム</span></a></li><li><a href="I3m.html"><b>I3m</b><span>マイページの設定（アプリ）<small>2版でもそのまま使う</small></span></a></li></ul></div></body></html>
