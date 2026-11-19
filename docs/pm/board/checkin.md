@@ -1,6 +1,7 @@
 # チェックイン担当の帳面
 
 ## いま持っている仕事
+- PM の指示 11/19 11時（ピン止めを checkin/pin で・データ担当への依頼を data.md に・iPhone の手順を報告に）：ピン止めと iPhone の手順は PR #130（9d21a37）で済んでいた。data.md はほかの帳面を変えない決まりに当たるので書かず、依頼は下の「ほかの担当への依頼」（11/19・PR #130）のまま。**PM から data.md へ写してほしい**。PR #128 は閉じてよい（PM に任せる）
 - PM から積んだ仕事（11/19 9時50分・決定事項【11/19】ピン止めは4版）：1回目済み。ブランチ checkin/pin（main 61ba9c7 から）・下書き **PR #130**（9d21a37・見張り中）・報告 docs/pm/report-pin-app.md・写真 docs/pm/shots-pin/
   - 作った：K1（黒いカードの札 #nearPin）・K1o（一覧の丸 .nrpin、nearRowHTML を .nrw で包んだ）・K4／K4t／K4u（シート・帯・元に戻す）・K0（許可を聞く）・K1s／K6（4つの ON／OFF・出せない知らせは理由）・K2（空港のページ pinApHTML）・K7（pushButtonHTML・spPushHTML の中身を pinLineHTML に。古い形は *Old に残した）・K8（空港を選ぶシートの先頭）・K5（#dPins・マイページの「知らせ」）・K1h（LO_BLOCKS.home に pins・#pinHome）・K9（はじめて開いたとき今の申し込みをそのまま移す・12超えもそのまま）
   - 表は変えていない。ピン止めは localStorage soramemo.pins（[{k,sp,dl,ga}]、k は3レターか "#番号"）。撮影は pushSpot().iata で持つ。pinSync が今の syncPush に airports・sp_airports・ga・spot を作って送る。運用のゴーアラウンドの保存で pinFromGa
@@ -355,7 +356,7 @@
 - tests/ops は手元では npm の playwright にブラウザがないので、全体に入っている playwright をつないで流した（すべて成功）
 
 ## ほかの担当への依頼
-- データ担当（11/19・PR #130）：ピン止めをアカウントに残すなら表（利用者ごと・空港の鍵（3レターか #番号）・特別塗装機／遅れ／ゴーアラウンドの ON／OFF・並び順・上限12、前から13以上の人はそのまま）と移行・RLS。push-subscribe は今の形のままで動く（アプリがピン止めから作って送る）。sp_airports の上限14は前から13〜14の人のため残してほしい。重なる知らせを1回にする処理（K10）
+- データ担当（11/19・PR #130。PM から data.md へ写してほしい）：アプリは表を使わず localStorage soramemo.pins（[{k,sp,dl,ga}]、k は3レターか #番号）に持ち、今の push-subscribe に airports・sp_airports・ga・spot をピン止めから作って送っている。ピン止めをアカウントに残すなら表（利用者ごと・空港の鍵（3レターか #番号）・特別塗装機／遅れ／ゴーアラウンドの ON／OFF・並び順・上限12、前から13以上の人はそのまま）と移行・RLS。push-subscribe は今の形のままで動く（アプリがピン止めから作って送る）。sp_airports の上限14は前から13〜14の人のため残してほしい。重なる知らせを1回にする処理（K10）
 - デザイン担当（11/19・PR #130）：4版どおりに作った（写真 docs/pm/shots-pin/）。K5 の並べ替え・K9 の1回の案内・夜の版はまだ
 - 改善担当（11/19・PR #130）：写真 shots-pin/ と iPhone の幅で、黒いカードの札・一覧の丸・知らせのシートの高さを見てほしい
 - 撮る人用（11/19・PR #130、PM から伝えてほしい）：撮影の知らせの中身は変えていない。ピン止めのシートの「撮影」を ON にすると pushSpot の iata だけを移し、「撮影地と機体を選ぶ ›」はその空港に運用を切り替えて openSpPush を開く
