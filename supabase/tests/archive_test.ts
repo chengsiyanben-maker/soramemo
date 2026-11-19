@@ -1,5 +1,5 @@
 import { assertEquals, assert } from "jsr:@std/assert@1";
-import { buildHistory, decodePolyline, encodePolyline, jstYesterday, normFlight, thin, toHistory, type SchedRow, userTrack } from "../functions/_shared/archive.ts";
+import { buildHistory, decodePolyline, encodePolyline, jstYesterday, normFlight, thin, toHistory, type SchedRow, userTrack, userTrackFromPolyline } from "../functions/_shared/archive.ts";
 
 const base = (o: Partial<SchedRow>): SchedRow => ({ svc_date: "2026-10-17", flight: "JL100", dep: "HND", arr: "ITM", std: "2026-10-17T00:00:00.000Z", sta: "2026-10-17T01:05:00.000Z",
   atd: null, ata: null, dep_status: null, arr_status: null, aircraft: "B767", source: "ODPT", state: null, ...o });
@@ -40,4 +40,13 @@ Deno.test("便名の0を取る・利用者の航跡は200点までに均等に�
   assertEquals(t.length, 200);
   assertEquals([t[0], t[199]], [[35, 139], [35.449, 139.449]]);
   assertEquals(userTrack(pts.slice(0, 1)), null);
+});
+
+Deno.test("毎晩の記録の航跡（polyline）から利用者のフライトの航跡を作る（11/20 さかのぼり）", () => {
+  const pts = [{ lat: 35.5494, lon: 139.7798 }, { lat: 35.9, lon: 140.2 }, { lat: 42.7752, lon: 141.6923 }];
+  const t = userTrackFromPolyline(encodePolyline(pts));
+  assertEquals(t, [[35.5494, 139.7798], [35.9, 140.2], [42.7752, 141.6923]]);
+  assertEquals(userTrackFromPolyline(""), null);
+  assertEquals(userTrackFromPolyline(null), null);
+  assertEquals(userTrackFromPolyline(encodePolyline([pts[0]])), null);   // 1点だけは線にならない
 });
