@@ -132,11 +132,11 @@ async def main():
         # C2：ホームに出すもの（ホームのシートの1行から）
         check('ホームのシートの下に「ホームに出すものを選ぶ」:', await pg.locator('#v-home .helink[data-he-open]').count() == 1)
         await pg.evaluate("document.querySelector('#v-home .helink').click()"); await pg.wait_for_timeout(300)
-        check('ホームに出すものが開く（半券と今日の数字は「いつも」で切り替えなし・かたまりのスイッチは4つ＋半券の枝の行（飛行場なども出す）1つ）:', await pg.evaluate("$('dHomeEd').open") and await pg.locator('#dHomeEd .helk').count() == 2 and await pg.locator('#dHomeEd [data-he-off]').count() == 4 and await pg.locator('#dHomeEd .losw:not([data-nearx])').count() == 4 and await pg.locator('#dHomeEd .losw[data-nearx]').count() == 1 and await pg.locator('#dHomeEd .hepc.hero .losw').count() == 0)
+        check('ホームに出すものが開く（半券と今日の数字は「いつも」で切り替えなし・かたまりのスイッチは5つ（11/19 ピン止めした空港を足した）＋半券の枝の行（飛行場なども出す）1つ）:', await pg.evaluate("$('dHomeEd').open") and await pg.locator('#dHomeEd .helk').count() == 2 and await pg.locator('#dHomeEd [data-he-off]').count() == 5 and await pg.locator('#dHomeEd .losw:not([data-nearx])').count() == 5 and await pg.locator('#dHomeEd .losw[data-nearx]').count() == 1 and await pg.locator('#dHomeEd .hepc.hero .losw').count() == 0)
         check('ホームの文も「OFF にすると隠れます」:', 'OFF にすると隠れます' in await pg.inner_text('#dHomeEd .helead'))
         await pg.click('#dHomeEd [data-he-off="ride"]'); await pg.click('#dHomeEd [data-he-off="event"]'); await pg.wait_for_timeout(200)
         check('見本の札と灰色の枠・戻るは「戻る」:', await pg.locator('#dHomeEd .heprev .hetag').count() == 1 and '戻る' in await pg.inner_text('#dHomeEd .mp-back'))
-        check('OFF にしてもその場に残る（行は4つのまま・OFF が2つ・「外したもの」の列はない）:', await pg.locator('#dHomeEd .hepc.sw:not(.hesub)').count() == 4 and await pg.locator('#dHomeEd .hepc.off [data-he-on]').count() == 2 and await pg.locator('#dHomeEd .hesec').count() == 0)
+        check('OFF にしてもその場に残る（行は5つのまま・OFF が2つ・「外したもの」の列はない）:', await pg.locator('#dHomeEd .hepc.sw:not(.hesub)').count() == 5 and await pg.locator('#dHomeEd .hepc.off [data-he-on]').count() == 2 and await pg.locator('#dHomeEd .hesec').count() == 0)
         check('ホームでも隠れる:', await pg.evaluate("document.querySelector('[data-lo=\"home:event\"]').classList.contains('lo-off')"))
         check('「元に戻す」:', 'イベントのお知らせ」を外しました' in await pg.inner_text('#dHomeEd .heundo'))
         check('半券と今日の数字は同じ薄い地（濃い塗りでない）:', await pg.evaluate("(() => { const a = [...document.querySelectorAll('#dHomeEd .hepc.fix')].map(e => getComputedStyle(e).backgroundColor); return a.length === 2 && a[0] === a[1] && a[0] !== 'rgb(17, 24, 39)'; })()"))
@@ -163,7 +163,7 @@ async def main():
         # マイページの入口
         await pg.evaluate("$('dSettings').showModal(); renderMyPage()"); await pg.wait_for_timeout(300)
         check('マイページ：タブを選ぶ・ホームに出すもの・全部を見直す:', await pg.locator('#dSettings [data-tp-open]').count() == 1 and await pg.locator('#dSettings .lotile[data-he-open]').count() == 1 and await pg.locator('#dSettings [data-lo-open="top"]').count() == 1)
-        check('数（タブ 5/5・ホーム 4/4）:', (await pg.inner_text('#tpTileN')).replace('\n', '') == '5/5' and (await pg.inner_text('#heTileN')).replace('\n', '') == '4/4')
+        check('数（タブ 5/5・ホーム 5/5）:', (await pg.inner_text('#tpTileN')).replace('\n', '') == '5/5' and (await pg.inner_text('#heTileN')).replace('\n', '') == '5/5')
         await pg.locator('#dSettings [aria-labelledby="mpPersona"]').screenshot(path=os.path.join(SHOTS, '06-mypage.png'))
         await pg.click('#dSettings [data-tp-open]'); await pg.wait_for_timeout(300)
         check('マイページからも同じシート:', await pg.evaluate("$('dTabs').open"))

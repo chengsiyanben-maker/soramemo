@@ -67,7 +67,7 @@ async def main():
         check('畳んだカードが画面ごとに並ぶ（修行のカードは修行担当の LO_EXT.sg）:', secs == ['tabs', 'home', 'book', 'log', 'sg', 'ops', 'opsp', 'stats', 'aps'], str(secs))
         check('はじめは全部畳んでいる・スイッチは見えない:', await pg.locator('#dLayout .losec.open').count() == 0 and await pg.locator('#dLayout .losw').count() == 0)
         check('タブのカードは 5/5（ホームを入れて5つまで）:', (await pg.inner_text('#dLayout [data-lo-sec="tabs"] .locn')).replace(' ', '') == '5/5')
-        check('✓ のピルと大きい数字はない:', await pg.locator('#dLayout .lopill, #dLayout .lonum').count() == 0 and '41このうち' in await pg.inner_text('#dLayout .loall'))
+        check('✓ のピルと大きい数字はない:', await pg.locator('#dLayout .lopill, #dLayout .lonum').count() == 0 and '42このうち' in await pg.inner_text('#dLayout .loall'))
         h = await pg.evaluate("Math.min(...[...document.querySelectorAll('#dLayout .losh')].map(x => x.getBoundingClientRect().height))")
         check('カードの見出しの押せる高さ 44px 以上:', h >= 44, str(h))
         await shot(pg, '10-844-layout-top.png')

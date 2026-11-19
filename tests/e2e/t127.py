@@ -160,7 +160,7 @@ async def main():
         check('表示の編集：OFF のときホームのカードの補足に「近くは民間空港だけ」（review-app-1 の6）', '近くは民間空港だけ' in hc, hc[:80])
         nw = await pg.evaluate('[...document.querySelectorAll("#dLayout .nw")].map(x => Math.round(x.getBoundingClientRect().height))')
         check('表示の編集：「ヘリポートも出す」が語の途中で折れない', len(nw) == 2 and all(0 < x < 30 for x in nw), nw)
-        check('表示の編集：ホームのカードに行がある・数は○/4 のまま（数に入れない）', '飛行場・滑空場・ヘリポートも出す' in hc and '/4' in hc.replace('\n', '') and '/5' not in hc.replace('\n', ''), hc[:200])
+        check('表示の編集：ホームのカードに行がある・数は○/5 のまま（11/19 ピン止めした空港を足した）（数に入れない）', '飛行場・滑空場・ヘリポートも出す' in hc and '/5' in hc.replace('\n', '') and '/6' not in hc.replace('\n', ''), hc[:200])
         await pg.screenshot(path=os.path.join(SHOTS, '08-layout-nearx-844.png'))
         await pg.click('#dLayout [data-nearx]'); await pg.wait_for_timeout(400)
         check('表示の編集で ON に戻すと LAYOUT.nearx がなくなる', await pg.evaluate('!(LAYOUT && "nearx" in LAYOUT)'))
