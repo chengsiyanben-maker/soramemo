@@ -26,7 +26,9 @@ SPECIAL = [{'reg': 'JA819A', 'name': 'ポケモンジェット 赤', 'airline': 
 # 作り物の機体：羽田（35.55・139.78）の南の進入（34 に向かう 5機）が地図の「空港のまわり」の範囲の中に入るように置く（11/19 22時45分 PM の指示で置き直し）。
 #   6機目は遠く（約85km 北）の出発機：数（6機）には入るが、地図カードの絵の外なので印は描かない
 PLANES = [{'id': 't%d' % i, 'callsign': 'TST%d' % i, 'lat': 35.515 + i * .006, 'lon': 139.80, 'alt_ft': 2000, 'kt': 150, 'hdg': 340, 'fpm': -700, 'phase': 'arr', 'dist_km': 7, 'type': 'B738', 'reg': 'JA%03dA' % i} for i in range(5)] \
-       + [{'id': 't9', 'callsign': 'FAR9', 'lat': 36.32, 'lon': 139.80, 'alt_ft': 20000, 'kt': 400, 'hdg': 0, 'fpm': 2000, 'phase': 'dep', 'dist_km': 85, 'type': 'B789', 'reg': 'JA999A'}]
+       + [{'id': 't9', 'callsign': 'FAR9', 'lat': 36.32, 'lon': 139.80, 'alt_ft': 20000, 'kt': 400, 'hdg': 0, 'fpm': 2000, 'phase': 'dep', 'dist_km': 85, 'type': 'B789', 'reg': 'JA999A'}] \
+       + [{'id': 't8', 'callsign': 'OVR8', 'lat': 35.56, 'lon': 139.79, 'alt_ft': 35000, 'kt': 450, 'hdg': 90, 'fpm': 0, 'phase': 'other', 'dist_km': 1, 'type': 'A359', 'reg': 'B-18901'}]
+#   7機目は真上を通るだけの機体（phase other）：地図にも出さず、カードの数にも入れない（11/20 本人）
 fails = []
 def check(name, ok, detail=''):
     print(('OK  ' if ok else 'NG  ') + name + (('  ' + str(detail)) if detail != '' else ''))
@@ -73,7 +75,7 @@ async def main():
         check('1 「空港｜機体」と見方のタブは出さない', not await visible(pg, '#opsSide') and not await visible(pg, '#opsViews') and not await visible(pg, '#opsAside'))
         check('1 頭は空港のピル＋i、検索窓は上に残す（案A）', await visible(pg, '#opsApBtn') and await visible(pg, '#opsInfoBtn') and await visible(pg, '#opsPlForm'))
         t = r['txt']
-        check('1 カードの数字：滑走路は北風・地図は6機・案内板は15:18着', '北風' in t and '6機' in t.replace('\n', '').replace(' ', ''), t.replace('\n', ' ')[:200])
+        check('1 カードの数字：滑走路は北風・地図は6機（上空を通るだけの1機は数えない）・案内板は15:18着', '北風' in t and '6機' in t.replace('\n', '').replace(' ', ''), t.replace('\n', ' ')[:200])
         r = await pg.evaluate("[...document.querySelectorAll('[data-ohub=\"map\"] .ohplanes [data-ohpl]')].map(e => e.dataset.ohpl)")
         check('1 地図カードの絵に今の機体の印（近い5機・絵の外の遠い機体は描かない）', sorted(r) == ['TST0','TST1','TST2','TST3','TST4'], r)
         r = await pg.evaluate("(() => { const s = document.querySelector('[data-ohub=\"map\"] .ohart').getBoundingClientRect(); return [...document.querySelectorAll('[data-ohub=\"map\"] [data-ohpl]')].every(e => { const r = e.getBoundingClientRect(); return r.width > 0 && r.left >= s.left - 1 && r.right <= s.right + 1 && r.top >= s.top - 1 && r.bottom <= s.bottom + 1; }); })()")
@@ -134,6 +136,17 @@ async def main():
             if cid == 'map':
                 r = await pg.evaluate("(() => { const m = $('opsMap').getBoundingClientRect(); const els = [...document.querySelectorAll('#opsMap .tplane')]; return { all: els.length, inside: els.filter(e => { const r = e.getBoundingClientRect(); return r.width > 0 && r.left >= m.left && r.right <= m.right && r.top >= m.top && r.bottom <= m.bottom; }).length }; })()")
                 check('4 地図の専用ページ：着陸に向かう5機の印が地図の中に出る', r['inside'] == 5, r)
+                r = await pg.evaluate("({ tin: (document.querySelector('#trafficNote [data-tin]') || {}).dataset, tout: (document.querySelector('#trafficNote [data-tout]') || {}).dataset, txt: $('trafficNote').innerText })")
+                check('4 凡例に「この範囲に 5機」', r['tin'] and r['tin'].get('tin') == '5' and 'この範囲に' in r['txt'], r)
+                check('4 範囲の外の1機は「ほかの1機は『経路の全体』で見られます」の1行', r['tout'] and r['tout'].get('tout') == '1' and 'ほかの1機は『経路の全体』で見られます' in r['txt'], r)
+                m = await pg.evaluate(MEASURE, '#trafficNote')
+                check('8 凡例：字13px以上・はみ出しなし', not m['small'] and not m['wide'], m)
+                await pg.screenshot(path=os.path.join(WORK, 't148_map_legend_844.png'))
+                await pg.evaluate("document.querySelector('#trafficNote [data-tout]').click()"); await pg.wait_for_timeout(1200)
+                r = await pg.evaluate("({ scope: OPS_SCOPE, pressed: document.querySelector('.opsscope [data-scope=\"wide\"]').getAttribute('aria-pressed'), tin: (document.querySelector('#trafficNote [data-tin]') || {}).dataset, tout: !!document.querySelector('#trafficNote [data-tout]') })")
+                check('4 その1行を押すと「経路の全体」に切り替わり、6機がこの範囲に入って1行は消える', r['scope'] == 'wide' and r['pressed'] == 'true' and r['tin'] and r['tin'].get('tin') == '6' and not r['tout'], r)
+                await pg.screenshot(path=os.path.join(WORK, 't148_map_wide_844.png'))
+                await pg.evaluate("document.querySelector('.opsscope [data-scope=\"near\"]').click()"); await pg.wait_for_timeout(800)
             if cid in ('map', 'special', 'photo'): await pg.screenshot(path=os.path.join(WORK, f't148_{cid}_844.png'))
             await pg.evaluate("$('opsHubBack').click()"); await pg.wait_for_timeout(600)
             if await pg.evaluate("$('v-ops').dataset.hub") != 'list': check(f'4 「{cid}」から戻れる', False)

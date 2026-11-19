@@ -2303,7 +2303,10 @@ ul.fc{margin:4px 0;padding-left:1.2em;line-height:1.9}
 .opsstat:empty{display:none}
 .opsstat i{display:inline-block;width:14px;height:3px;border-radius:2px;margin-left:4px}
 .opsstat i:first-child{margin-left:0}
-.opsstat span{margin-left:auto;font-size:12px;color:var(--sumi)}
+.opsstat span{margin-left:auto;font-size:13px;color:var(--sumi)}
+.opsstat .tin{flex-basis:100%;font-style:normal;font-size:13px;color:var(--ink)}
+.opsstat .tin b{font-size:15px;font-weight:800}
+.opsstat .tout{flex-basis:100%;margin:2px 0 0;padding:6px 12px;border:0;border-radius:999px;background:var(--op-pill,#EEF1F5);color:var(--ink);font:inherit;font-size:13px;text-align:left;cursor:pointer}
 .opsabout{margin:6px 0 8px;border-top:1px solid var(--line);padding-top:8px}
 .opsabout summary{cursor:pointer;font-size:13px;display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px}
 .opsabout summary small{font-size:11.5px;color:var(--sumi)}
@@ -10770,7 +10773,7 @@ function ohCardHTML([id, label, , wide]){
     const rws = op ? [...new Set([...(op.arr || []), ...(op.dep || [])])].slice(0, 3) : [];
     v = `<span class="ohv">${lb ? `<b>${esc(lb)}</b>` : na}${rws.length ? `<span class="ohchips">${rws.map(r => `<i>${esc(r)}</i>`).join("")}</span>` : ""}</span>`;
   } else if(id === "map"){
-    cls += " map"; const n = (OPS_PLANES || []).length;
+    cls += " map"; const n = (OPS_PLANES || []).filter(p => p.phase === "arr" || p.phase === "dep").length;   // 地図に出す着陸・離陸の機体だけ数える（上空を通るだけの機体は数えない。11/20 本人）
     art = `<svg class="ohart" viewBox="0 0 360 150" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><path d="M0 40 C80 30 120 70 200 60 S320 20 360 30 V0 H0Z" fill="#EEF2E6"/><g fill="none" stroke="#8C9AAE" stroke-dasharray="4 5"><circle cx="210" cy="80" r="40"/><circle cx="210" cy="80" r="74"/></g><g stroke="#374151" stroke-width="5" stroke-linecap="round"><path d="M196 62 L206 100"/><path d="M208 60 L218 98"/><path d="M214 104 L236 90"/></g>${ohMapPlanes()}</svg>`;
     v = `<span class="ohv">${TRAFFIC_TIMER != null || n ? `<b>${n}</b><small>機</small>` : na}</span>`;
   } else if(id === "board") v = `<span class="ohv">${b && b.arr ? `<b>${ohHM(b.arr)}</b><small>着</small>` : na}</span>`;
@@ -10990,7 +10993,7 @@ function drawOpsMap(rw, op, plus, mode, good){
       L.polyline(line, { color:"#2B6CB0", weight:2, dashArray:"2 6", opacity:.85, noFit:true }).bindTooltip(`RWY ${id} から ${n}（${sd.dir}）の出発経路`).addTo(OPS_LAYER);
       const e = pts[pts.length - 1]; L.marker([e[0], e[1]], { icon:L.divIcon({ className:"sidlabel", html:`${n}<small>${sd.dir}</small>`, iconSize:[54, 26], iconAnchor:[27, 13] }) }).addTo(OPS_LAYER); }
   }
-  setTimeout(() => { if(!opsMapShown()) return; OPS_MAP.invalidateSize(); if(TRAFFIC_FIT) return; const bd = L.featureGroup(OPS_LAYER.getLayers().filter(l => l instanceof L.Polyline && !l.options.noFit)).getBounds(); if(bd.isValid()) OPS_MAP.fitBounds(bd, { padding:[18, 18], animate:false }); }, 60);
+  setTimeout(() => { if(!opsMapShown()) return; OPS_MAP.invalidateSize(); if(TRAFFIC_FIT) return; const bd = L.featureGroup(OPS_LAYER.getLayers().filter(l => l instanceof L.Polyline && !l.options.noFit)).getBounds(); if(OPS_SHOW.traffic) for(const { mk } of TRAFFIC_MK) bd.extend(mk.getLatLng()); if(bd.isValid()) OPS_MAP.fitBounds(bd, { padding:[18, 18], animate:false }); }, 60);
 }
 let OPS_SID_DIR = "all";   // 出発経路の行き先の方向（"all" か「北へ」など）。空港を切り替えると「すべて」に戻る
 const DIR8 = ["北へ", "北東へ", "東へ", "南東へ", "南へ", "南西へ", "西へ", "北西へ"];
@@ -11080,7 +11083,10 @@ function opsFit(){
     for(const [, la, lo] of OPS_SPOTS[def.iata] || []) if(km({ lat:la, lon:lo }, { lat:def.center[0], lon:def.center[1] }) <= 4) pts.push([la, lo]);
     if(pts.length) OPS_MAP.fitBounds(L.latLngBounds(pts), { padding:[18, 18], maxZoom:15, animate:false }); setTimeout(spotDeclutter, 0); return; }
   const ls = [...(OPS_LAYER ? OPS_LAYER.getLayers() : []), ...(TRAFFIC_LAYER && OPS_SHOW.traffic ? TRAFFIC_LAYER.getLayers() : [])].filter(l => l instanceof L.Polyline && !l.options.noFit);
-  const bd = L.featureGroup(ls).getBounds(); if(bd.isValid()) OPS_MAP.fitBounds(bd, { padding:[16, 16], animate:false });
+  const bd = L.featureGroup(ls).getBounds();
+  // 着陸・離陸の機体の今の位置も入れる（凡例の「ほかの○機は『経路の全体』で見られます」で切り替えたとき、その機体が見えるように。11/20）
+  if(OPS_SHOW.traffic) for(const { mk } of TRAFFIC_MK) bd.extend(mk.getLatLng());
+  if(bd.isValid()) OPS_MAP.fitBounds(bd, { padding:[16, 16], animate:false });
 }
 /* 今飛んでいる機体と、通ってきた線（OpenSky。10〜20秒遅れ）。地図を開いているあいだ、30秒ごとに読み直す */
 let TRAFFIC_LAYER = null, TRAFFIC_TIMER = null, TRAFFIC_FIT = false;
@@ -11116,11 +11122,30 @@ async function loadTraffic(){
   }
   // はじめて読み込んだときだけ、着陸に向かう機体の線が入るように地図を合わせる
   if(!TRAFFIC_FIT && arr.length && OPS_SCOPE === "wide"){ TRAFFIC_FIT = true;
-    const pts = arr.flatMap(p => [...(p.trail || []), [p.lat, p.lon]]).concat([opsDef().center]);
+    const pts = arr.flatMap(p => [...(p.trail || []), [p.lat, p.lon]]).concat(dep.map(p => [p.lat, p.lon]), [opsDef().center]);   // 離陸した機体の今の位置も入れる（凡例の「ほかの○機」が切り替えたあと見えるように。11/20）
     setTimeout(() => { if(!opsMapShown()) return; OPS_MAP.invalidateSize(); OPS_MAP.stop(); OPS_MAP.fitBounds(L.latLngBounds(pts), { padding:[20, 20], maxZoom:11, animate:false }); }, 400); }
   if(!OPS_MAP._declutter){ OPS_MAP._declutter = true; OPS_MAP.on("zoomend", declutterLabels); }
   setTimeout(declutterLabels, 0); setTimeout(declutterLabels, 450);
-  $("trafficNote").innerHTML = `<i style="background:${TRAFFIC_COL.arr}"></i>着陸に向かう ${arr.length}機　<i style="background:${TRAFFIC_COL.dep}"></i>離陸して上昇中 ${dep.length}機<span>${jstHM(d.at)} 時点</span>`;
+  TRAFFIC_LAST = d; trafficNoteDraw();
+  if(!OPS_MAP._tnote){ OPS_MAP._tnote = true; OPS_MAP.on("moveend zoomend", trafficNoteDraw); }
+}
+// 凡例：着陸・離陸の数＋「この範囲に ○機」（いま地図に見えている着陸・離陸の機体）。
+//   空港のまわりで範囲の外に機体がいるときは「ほかの○機は『経路の全体』で見られます」の1行を出し、押すと経路の全体に切り替える（11/20 本人）
+let TRAFFIC_LAST = null;
+document.addEventListener("click", e => { if(!e.target.closest("[data-tout]")) return; track("ops", "tout"); const c = document.querySelector('.opsscope [data-scope="wide"]'); if(c) c.click(); });
+function trafficInView(){
+  const d = TRAFFIC_LAST, ps = d && Array.isArray(d.planes) ? d.planes.filter(p => p.phase === "arr" || p.phase === "dep") : [];
+  if(!OPS_MAP || !opsMapShown()) return { all:ps.length, inside:null };
+  const bd = OPS_MAP.getBounds();
+  return { all:ps.length, inside:ps.filter(p => Number.isFinite(+p.lat) && Number.isFinite(+p.lon) && bd.contains([+p.lat, +p.lon])).length };
+}
+function trafficNoteDraw(){
+  const d = TRAFFIC_LAST, el = $("trafficNote"); if(!d || !el || !Array.isArray(d.planes)) return;
+  const arr = d.planes.filter(p => p.phase === "arr").length, dep = d.planes.filter(p => p.phase === "dep").length, v = trafficInView();
+  const out = v.inside == null ? 0 : v.all - v.inside;
+  el.innerHTML = `<i style="background:${TRAFFIC_COL.arr}"></i>着陸に向かう ${arr}機　<i style="background:${TRAFFIC_COL.dep}"></i>離陸して上昇中 ${dep}機<span>${jstHM(d.at)} 時点</span>`
+    + (v.inside == null ? "" : `<em class="tin" data-tin="${v.inside}">この範囲に <b>${v.inside}</b>機</em>`)
+    + (out > 0 && OPS_SCOPE === "near" ? `<button type="button" class="tout" data-tout="${out}">ほかの${out}機は『経路の全体』で見られます ›</button>` : "");
 }
 // 機体の名札（便名と高度）が重なるときは、優先度の低いほうを隠す（隠れた機体も、押すと詳しく出る）
 // 優先：着陸に向かう機体 → 離陸した機体、同じなら空港に近い順。引いた縮尺（9より小さい）では名札を出さない
