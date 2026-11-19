@@ -4586,7 +4586,7 @@ async function renderRide0(force){
   else if(ib && ib.cancelled) st = `<span class="rv late">前の便が欠航です。機体が変わるかもしれません</span>`;
   else if(ib) st = Number(d.late) >= 10 ? `<span class="rv late">出発は約${d.late}分遅れの見込み（推定）</span>` : `<span class="rv ok">定刻ごろに出発できそうです（推定）</span>`;
   // 朝一番の便（前の日の夜に着いた機体）：データ側が first_of_day を返したら「前の便はありません」と出す（返さないうちは今までの1行）
-  const ibLine = !ib ? (d.first_of_day ? `<span class="rl">朝一番の便です（この日、この機体の前の便はありません）。</span>` : `<span class="rl">この便の前に同じ機体が飛ぶ便は、まだ記録が足りず分かりません。</span>`)
+  const ibLine = !ib ? (d.first_of_day ? `<span class="rl">朝一番の便です（この日、この機体の前の便はありません）。</span>` : `<span class="rl">この便の前に同じ機体が飛ぶ便は見つかりませんでした（朝一番の便なら、前の便はありません）。</span>`)
     : `<span class="rl">この便の機体（推定）</span><span class="rv">${esc(ib.flight.replace(/^([A-Z0-9]{2})0+(\d)/, "$1$2"))}　${esc(placeShort(ib.dep))} → ${esc(placeShort(ib.arr))}${ib.reg ? `・${esc(ib.reg)}` : ""}</span>`
       + `<span>${past(ib.ata) ? "到着しました" : ib.phase === "air" ? "飛行中" : past(ib.atd) || past(ib.takeoff) ? "出発しました" : "まだ出発していません"}　${srcL} ${hm(d.arr_at)}${ib.pos && ib.pos.alt != null ? `・高度 ${fmtKm(Number(ib.pos.alt))}ft` : ""}</span>`;
   box.hidden = false;

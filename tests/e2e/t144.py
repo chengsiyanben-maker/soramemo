@@ -63,9 +63,9 @@ async def main():
         check('過去の atd は「出発しました」:', '出発しました（' in st and '出発の見込み' not in st)
         check('前の便の過去の到着は「到着しました」:', '到着しました' in t)
         t, st = await ride('first')
-        check('first_of_day なら朝一番の便:', '朝一番の便です' in t and '記録が足りず' not in t)
+        check('first_of_day なら朝一番の便:', '朝一番の便です' in t and '見つかりませんでした' not in t)
         t, st = await ride('none')
-        check('first_of_day がなければ今までの1行:', '記録が足りず' in t)
+        check('first_of_day がなければ「見つかりませんでした（朝一番の便なら…）」:', '見つかりませんでした' in t and '朝一番の便なら' in t)
         await c.close()
         # ---- 2. 半券（デモ。同じ空港に2回押す）
         for w, h in [(375, 667), (390, 844)]:
