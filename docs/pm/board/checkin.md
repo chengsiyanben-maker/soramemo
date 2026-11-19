@@ -1,6 +1,13 @@
 # チェックイン担当の帳面
 
 ## いま持っている仕事
+- 11/19 夜の回（PM の指示：1 アプリだけの画面 2 運用の一覧 3 半券の指）：1 と 3 は前の回で済み（PR #125・#133）。2 を作った
+  - 運用タブを一覧＋専用ページに（PM 11/19 15時・design/ops-hub 1版 案A）：ブランチ checkin/ops-hub（main 3a71781 から）・下書き **PR #134**（8f80885・見張り中）・報告 docs/pm/report-ops-hub-app.md・写真 docs/pm/shots-ops-hub/
+    - #opsHubList（カード10枚 OH_CARDS）・#v-ops[data-hub="list"|"page"]・[data-page]。専用ページは今の見方の中身をそのまま（滑走路は地図を隠す・地図は運用の箱を隠す・遅れは #opsAlerts・特別塗装機は機体の側の special・検索窓からは page="plane"）
+    - 動きは clip-path（開く 460ms・戻る 380ms・reduce で動きなし）。左端 24px から引いて戻る（touch と mouse）。i は #dOpsSrc。opsNeed は一覧で board・special・traffic だけ
+    - 試験用の切り替え localStorage soramemo.ops.hub="0" で前の形。前の形を前提にした e2e 17本（t113・t124・t128・t130・t133・t138・t139・t53・t55・t59・t60・t61・t63・t65・t66・t68・t71）に付けた
+    - t148（新）・tests/ops・上の17本 成功。e2e 全体は報告に追記
+    - 本人に決めてほしいこと：並べ替え（今は隠す・出すだけ）・遅れと定時のカードの数の意味・専用ページの共有のボタン
 - 11/19 夕方の定時の回（PM の指示なし・帳面の積んだ順）：2つ済み
   - iPhone のアプリだけの画面（PM 11/19 11時55分・design/ios-app 2版）：PR #125（checkin/ios-app）に足した（5ac9b45・報告の追記 90ac1ab）。報告 docs/pm/report-ios-app-screens.md・写真 docs/pm/shots-ios-app/t146_*
     - I1 位置の説明（#dLocWhy・ログインかデモのあとホームで1回・「次へ」で requestPermissions・答え済みには出さない・登録の流れの位置の段もアプリでは同じ文と「次へ」）・I1c（#nvLocOff が半券の代わり・bpass.dataset.nvHide）・I1e（#dNvSheet）・I4c（startCamera の前に nvPermWhy("cam")）・I2／I5／I5z（#nvNetHome／Ops／Book／Log・最後に読んだ時刻は localStorage soramemo.native.lastread）・I3（renderInstall／doInstall・保存・位置・カメラの文、PUSH_NG_TXT／MIC_NG_TXT）・homeLocStart は geoPermState（アプリは checkPermissions）・Info.plist の文と iPad 縦だけ
@@ -304,7 +311,8 @@
 - 確認コードは6けた。メールは Gmail、Supabase の送信上限は1時間100通
 
 ## 次にやること
-- 次は運用タブを一覧＋専用ページに（PM 11/19 15時・design/ops-hub 1版・checkin/ops-hub）。電波がないカード（I5 の「読み込めませんでした／もう一度」）もそのカードの形で入れる
+- PR #134（運用の一覧）：改善担当の見直し・本人の答えを待って直す。入る前に t148・tests/ops・運用の e2e を流す。PR #125（アプリ）の電波がないカード（I5）は、#134 が入ったらカードの形で足す。#125 と #134 は src/index.html の別の所（NATIVE の部分と運用の土台）で、openOps・setOpsAirport の行だけ両方が触る（あとから入る方で合わせる）
+- 夜の画面が入ったら、運用の一覧のカードの夜の色を design/ops-hub の H1n に合わせる
 - PR #125 と #130（ピン止め）が両方 main に入るとき：K0i・K5n の「iPhone はホーム画面に追加すると届きます」をアプリでは PUSH_NG_TXT() に。#133 と #125 は src で重ならない見込み（半券の処理と NATIVE の部分は別の所）
 - PR #133：本人の iPhone の結果と改善担当の見直しを待つ。入る前に t147・t74・t144・t7 を流す
 - PR #125：Mac で「設定を開く」・位置の確認・オフラインの帯を試した結果が来たら直す。入る前に t143・t146・tests/ops を流す
@@ -372,6 +380,9 @@
 - tests/ops は手元では npm の playwright にブラウザがないので、全体に入っている playwright をつないで流した（すべて成功）
 
 ## ほかの担当への依頼
+- 撮る人用・運用予想（11/19・PR #134、PM から伝えてほしい）：運用タブは一覧＋専用ページになった。中身（renderPhoto・specialHTML・planeHTML）はそのまま専用ページに出る。見方の帯（#opsViews・#opsPViews）は出ない。前の形で試すときは localStorage soramemo.ops.hub="0"
+- 改善担当（11/19・PR #134）：写真 shots-ops-hub/（一覧 844／667・開く途中・各ページ・左端から引く途中）と iPhone で、動きの速さとカードの数字の分かりやすさを見てほしい
+- デザイン担当（11/19・PR #134）：滑走路と地図以外の専用ページは今の中身のまま。描くなら写真とそろえてほしい
 - 撮る人用（11/19・PR #125、PM から伝えてほしい）：聞く画面（atcRxStart）の getUserMedia の前に `await nvPermWhy("mic")`、失敗の文を `MIC_NG_TXT()` に。spPush・spSel の「この端末のブラウザでは使えません…」を `PUSH_NG_TXT()` に（アプリでは「アプリの通知は準備中です。」になる）
 - 修行（11/19・PR #125、PM から伝えてほしい）：修行の通知の注意（sg-note の「この端末のブラウザでは使えません…」）を `PUSH_NG_TXT()` に
 - 改善担当（11/19・PR #125）：写真 shots-ios-app/t146_*（I1・I1c・I1e・I4c・I2・I5・I5z、667 は I1・I1c）を見てほしい。667 の I1 は下の注意2行がスクロールの下
@@ -721,7 +732,7 @@ review-c4：見せてよい。本人の答え（ON／OFF か −／＋ か）を
 - テスト：e2e に指の操作（CDP の Input.dispatchTouchEvent）で、半券の右寄り（右端から20px）をつかんで端まで引くと切れる・はじくと切れる・縦に動かすと切れない、を足す。
 - 画面の見た目は変えない。本番には「反映して」まで入れない。
 
-## PM から積んだ次の仕事（11/19 15時、運用タブを一覧＋専用ページに）※iPhone のアプリの画面（design/ios-app 2版）のあと。checkin/ops-hub で作る
+## PM から積んだ次の仕事（11/19 15時、運用タブを一覧＋専用ページに）→ PR #134 で作った（8f80885・報告 report-ops-hub-app.md）※iPhone のアプリの画面（design/ios-app 2版）のあと。checkin/ops-hub で作る
 - design/ops-hub 1版（PR #132、docs/design/ops-hub/）のとおりに作る。本人の決め：機体の検索窓は上に残す（案A）・動きはこの速さ（開く約0.46秒・戻る約0.38秒、prefers-reduced-motion では動きなし）・カードは10枚この並び（並べ替え・隠すは今の lo の仕組みを使う）。
 - 今の見方のタブ（滑走路・案内板・1日・定時・航跡アート・ストリップ・撮る人）と「空港｜機体」の切り替えはなくし、それぞれをカードの専用ページへ。中身は今のものをそのまま入れ、説明の文は1行に削る。出典・注意は i の中へ。
 - 左端から引いて戻る（iPhone のアプリでもブラウザでも）。戻ったらカードの位置へ縮む。
