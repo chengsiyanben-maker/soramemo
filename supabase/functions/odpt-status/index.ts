@@ -74,7 +74,7 @@ async function fast() {
   }));
   const { data: aps } = await admin.from("airports").select("iata, name").in("iata", [...new Set(scheds.flatMap((x) => [x.dep, x.arr]))]);
   const names = new Map((aps ?? []).map((a) => [a.iata, String(a.name).replace(/国際空港$|空港$/, "").replace(/^.*（(.+)）$/, "$1")]));
-  const { alerts, updates } = odptStatus(depItems, arrItems, scheds, (i) => names.get(i) ?? i);
+  const { alerts, updates } = odptStatus(depItems, arrItems, scheds, (i) => names.get(i) ?? i, Date.now());
   const cancelled = alerts.filter((a) => a.kind === "cancel").map((a) => a.schedule_id);
   if (cancelled.length) await admin.from("flight_alerts").delete().in("schedule_id", cancelled).in("kind", ["delay_dep", "delay_arr", "no_takeoff"]);
   if (updates.length) { const { error } = await admin.rpc("apply_flight_status", { p: updates }); if (error) errors.push("apply " + error.message); }
@@ -129,7 +129,7 @@ Deno.serve(async (req) => {
     // ODPT のデータの時刻（dc:date）を種類・航空会社ごとに残す（画面で「○時○分 時点」と出すため。失敗しても続ける）
     const fdErr = await putFeedDates(admin, [...feedDates("FlightInformationDeparture", depItems, OPERATORS), ...feedDates("FlightInformationArrival", arrItems, OPERATORS)]);
     if (fdErr) errors.push(fdErr);
-    const { alerts, updates } = odptStatus(depItems, arrItems, scheds, (i) => names.get(i) ?? i);
+    const { alerts, updates } = odptStatus(depItems, arrItems, scheds, (i) => names.get(i) ?? i, Date.now());
     // 欠航の便に出ていた推定の遅れ・飛行中のお知らせは消す（別の機体と取り違えたもの）
     const cancelled = alerts.filter((a) => a.kind === "cancel").map((a) => a.schedule_id);
     if (cancelled.length) await admin.from("flight_alerts").delete().in("schedule_id", cancelled).in("kind", ["delay_dep", "delay_arr", "no_takeoff"]);
