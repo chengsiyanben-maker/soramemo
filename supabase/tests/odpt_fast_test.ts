@@ -28,3 +28,10 @@ Deno.test("問い合わせは1回に cap 件まで（今に近い便から）。
 Deno.test("会社は時刻表の出典から、なければ便名から", () => {
   assertEquals([opOf({ flight: "JL1" }), opOf({ flight: "NH1" }), opOf({ flight: "NU1" }), opOf({ flight: "XX1", source: "…（JAL）" })], ["JAL", "ANA", "JAL", "JAL"]);
 });
+
+Deno.test("atd がまだ来ていない時刻（前に入った見込みが残っている）なら、出発前として出発空港の出発情報を見る", () => {
+  const { calls } = fastTargets([r(5, "JL661", "HND", "FUK", 30, { atd: new Date(NOW + 33 * 60_000).toISOString() })], NOW);
+  assertEquals(calls, [{ type: "Departure", op: "JAL", airport: "HND" }]);
+  const past = fastTargets([r(6, "JL661", "HND", "FUK", -5, { atd: new Date(NOW - 2 * 60_000).toISOString() })], NOW);
+  assertEquals(past.calls, [{ type: "Arrival", op: "JAL", airport: "FUK" }]);
+});
