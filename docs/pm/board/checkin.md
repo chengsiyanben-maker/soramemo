@@ -1,6 +1,7 @@
 # チェックイン担当の帳面
 
 ## いま持っている仕事
+- 11/20 3時19分（日本時間）に PR #140（運用の一覧 #134・data/flight-actual 移行187）が main に入り、#138・#139 がぶつかった → 両方に main を取り込んだ（#138 07eb3db・#139 281a9fe。src は自動で重なり、web/ だけ作り直し）。t149・t127・t148・t150・t47・t61 成功、t123 は前からの失敗
 - 11/20 3時台の手動の回（PM が同じ2つを指示）：どちらも前の回で済み（PR #138・#139）。main は 863fb3d のままで、data/flight-actual はまだ main に入っていないので取り込み直しは不要だった。#136 が main に入ったら #139 に main を取り込み、t150 を流し直す
 - 11/20 3時台（日本時間）の定時の回（PM 2時45分の2つ）：どちらも作って下書きにした
   - 図鑑の絞り込みと県名（design/zukan-filter 1版 F1〜F3）：ブランチ checkin/zukan-filter（main 863fb3d から）・下書き **PR #138**（07d7cc0）・報告 docs/pm/report-zukan-filter-app.md・写真 docs/pm/shots-zukan-filter/
