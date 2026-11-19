@@ -2914,6 +2914,7 @@ dialog.psheet .btn1,dialog.psheet .btn2{display:block;width:100%;margin-top:10px
 #v-book .zx-list .r{display:flex;align-items:center;gap:10px;width:100%;min-height:48px;padding:0 14px;margin-top:6px;border:0;border-radius:16px;background:var(--bk-card);box-shadow:var(--bk-shadow);font:inherit;text-align:left;cursor:pointer}
 #v-book .zx-list .r b{font-size:15px;font-weight:800;color:var(--zk-pale);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 #v-book .zx-list .r .pf{margin-left:auto;flex:none;font-size:13px;color:var(--bk-sub);font-weight:600}
+#v-book .zx-list .more{display:flex;align-items:center;justify-content:center;gap:4px;width:100%;min-height:48px;margin-top:8px;border:0;border-radius:999px;background:var(--bk-card);box-shadow:var(--bk-shadow);font:inherit;font-size:14px;font-weight:800;color:var(--bk-sub);cursor:pointer}#v-book .zx-list .more svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
 #v-book .zx-list .r i{width:10px;height:10px;border-radius:50%;flex:none;background:#fff;box-shadow:inset 0 0 0 1.6px #9AA4B1}#v-book .zx-list .r i.k-glider{border-radius:2px}
 [data-night="on"] #v-book .zx-seg{background:#141B24}[data-night="on"] #v-book .zx-seg button[aria-pressed="true"]{background:#232C38;color:#E8EDF2;box-shadow:inset 0 0 0 1px rgba(220,227,234,.35)}
 [data-night="on"] #v-book .zx-hero .ht .lab i{background:#DCE3EA!important}
@@ -3303,6 +3304,7 @@ dialog.fbx .fvhead .times{display:flex;justify-content:space-between;margin-top:
 dialog.fbx .fvhead .times span{display:inline-flex;align-items:baseline;gap:8px}
 dialog.fbx .fvhead .times small{font-size:13px;color:var(--fb-mute);font-weight:700}
 dialog.fbx .fvhead .times b{font:700 26px var(--sign)}
+dialog.fbx .fvhead .fvsrc{margin:6px 0 0;font-size:12px;font-weight:600;color:var(--fb-mute)}
 dialog.fbx .fbcarline{display:flex;align-items:center;gap:10px;margin:12px 0 0;font-size:13px;color:var(--fb-mute)}
 dialog.fbx .fbcarline .fbcar{margin:0}
 dialog.fbx .fvmap{display:block;width:100%;height:auto;max-height:280px;background:#E9EEF2;border-radius:24px;box-shadow:var(--fb-shadow);margin:0 0 6px}
@@ -6358,7 +6360,8 @@ function zkAirBookHTML(){
   if(view === "map"){
     const yet = list.filter(a => !c.xv.has(a.id));
     body = `${hero}<div class="zx-bigmap">${zkxBigMapSVG(list, c.xv)}<p class="zx-lg"><span><i style="background:${one ? ZKX_COL[kind] : ZKX_COL.field}"></i>行った</span><span><i class="y"></i>まだ</span></p></div>
-      <div class="zx-list">${yet.length ? `<h4>まだ ${yet.length}</h4>` : `<p class="zk-lead">${one ? ZKX_LAB[kind] + "は" : ""}全部行きました。</p>`}${yet.map(a => `<button type="button" class="r" data-zka="${a.id}"><i class="k-${a.kind}"></i><b>${esc(zkxShort(a))}</b><span class="pf">${esc(a.pref || "")}</span></button>`).join("")}</div>`;
+      <div class="zx-list">${yet.length ? `<h4>まだ ${yet.length}</h4>` : `<p class="zk-lead">${one ? ZKX_LAB[kind] + "は" : ""}全部行きました。</p>`}${(ZKX_YET_OPEN ? yet : yet.slice(0, ZKX_YET_N)).map(a => `<button type="button" class="r" data-zka="${a.id}"><i class="k-${a.kind}"></i><b>${esc(zkxShort(a))}</b><span class="pf">${esc(a.pref || "")}</span></button>`).join("")}
+        ${!ZKX_YET_OPEN && yet.length > ZKX_YET_N ? `<button type="button" class="more" id="zkxYetMore" aria-expanded="false">残り${yet.length - ZKX_YET_N}か所<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>` : ""}</div>`;
   } else {
     const dt = one ? "" : `<span class="zx-dtag"><span class="nw">飛行場・</span><span class="nw">滑空場・</span><span class="nw">ヘリポート</span></span>`;
     body = `${hero}${one ? "" : `<p class="zk-lead">集めた空港（${A.length}）とは別に数えます。自衛隊の飛行場（基地）は、今までどおり「ほかの図鑑・実績」の中にあります。</p>`}` + rgs.filter(r => r.list.length).map(r => `<section class="zk-rg" id="zkxrg-${r.rg}" data-rg="${r.rg}" style="--c:${zkCol(r.rg)}">
@@ -6369,9 +6372,18 @@ function zkAirBookHTML(){
   document.documentElement.dataset.zxview = view;
   return `${ZK_BACK_MAIN}<div class="book-head"><h2>${ZKX_TITLE_BR}</h2></div><div class="zk-main${one ? " zx-one" : ""}">${vw}${seg}${body}</div>${tsume}`;
 }
+// 地図の見方の「まだ」の一覧は5行だけ出し、「残り○か所 ›」で全部開く（11/20 PM のおすすめ）。種類や見方を変えたら畳み直す
+const ZKX_YET_N = 5; let ZKX_YET_OPEN = false;
+document.addEventListener("click", e => {
+  const m = e.target.closest("#bookAir #zkxYetMore"); if(!m) return;
+  const i = ZKX_YET_N; ZKX_YET_OPEN = true; track("zkx_yet_more", ""); const y = window.scrollY;
+  $("bookAir").innerHTML = zkAirBookHTML(); zkTsumeSync(); window.scrollTo(0, y);
+  const f = document.querySelectorAll("#bookAir .zx-list .r")[i]; if(f) f.focus({ preventScroll:true });
+});
 // ピルと見方を押したら覚えて描き直す（位置は見方の帯の所に戻す）
 document.addEventListener("click", e => {
   const b = e.target.closest("#bookAir [data-zxk], #bookAir [data-zxv]"); if(!b) return;
+  ZKX_YET_OPEN = false;
   if(b.dataset.zxk){ zkxSet(ZKX_KIND_KEY, b.dataset.zxk); track("zkx_kind", b.dataset.zxk); }
   else { zkxSet(ZKX_VIEW_KEY, b.dataset.zxv); track("zkx_view", b.dataset.zxv); }
   const y = window.scrollY; $("bookAir").innerHTML = zkAirBookHTML(); zkTsumeSync();
@@ -6842,7 +6854,7 @@ function fbOpenView(key){
       ${e.kind !== "book" ? `<button type="button" class="fbicon" id="fvEdit" data-fvedit="${e.key}" aria-label="便を記録・直す"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="m13.5 6.5 4 4"/></svg></button>` : ""}</div>
     <div class="fbcard fvhead"><p class="when">${esc(head)}</p>
       <div class="codes"><div><b>${esc(code(a))}</b><span>${esc(godShort(a))}</span></div><i aria-hidden="true">→</i><div class="r"><b>${esc(code(b))}</b><span>${esc(godShort(b))}</span></div></div>
-      ${e.kind === "fly" ? `<div class="times"><span><small>出発</small><b>${hmOf(f.dep)}</b></span><span><small>到着</small><b>${hmOf(f.arr)}</b></span></div>` : e.kind === "car" ? `<p class="fbcarline"><span class="fbcar">車など</span>空港のあいだを車などで移動しました</p>` : ""}</div>
+      ${e.kind === "fly" ? `<div class="times"><span><small>出発</small><b>${hmOf(f.actSrc ? f.actDep : f.dep)}</b></span><span><small>到着</small><b>${hmOf(f.actSrc ? f.actArr : f.arr)}</b></span></div>${f.actSrc ? `<p class="fvsrc">チェックイン ${hmOf(f.dep)}〜${hmOf(f.arr)}</p>` : ""}` : e.kind === "car" ? `<p class="fbcarline"><span class="fbcar">車など</span>空港のあいだを車などで移動しました</p>` : ""}</div>
     <div class="fbtiles">${tiles}</div>
     ${fbMiniMap(e)}
     <h3 class="fbh">この区間の${e.kind === "car" ? "移動" : "便"}<small>${esc(godShort(a))} ⇄ ${esc(godShort(b))}</small><em>${sameRt.length}回</em></h3>
