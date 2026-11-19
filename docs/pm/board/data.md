@@ -8,6 +8,7 @@
   - 確かめた結果：t126 26項目・deno 272本・型の確かめ・番号の重なりなし。SQL のテスト全部 126/127 通過（落ちたのは main でも落ちる経営の t49）
   - 本人待ち（PM のおすすめで可）：「空の上」は ODPT のゲートの時刻の差でよいか・便名のない便を reg_legs で埋めるか・31日より前の航跡を cold-archive から埋めるか・照合を adsb に切り替えるか
   - 11/20 2回目の呼び出し（同じ指示）：新しい仕事はなし。main（863fb3d・PR #137）を取り込み、移行の番号の重なりなし（187 のまま）・deno 272本・t126 通過を確かめて push した
+  - **11/20 3時18分（JST）PR #136 は main に入った（移行187）**。本番に出たかを Actions で確かめ、次の日に flight-actual-check.sql の ② と daily-archive の結果（actual・track_back）を見てもらう
   - 反映のあと：docs/pm/flight-actual-check.sql の ② で取り先ごとの数と航跡の数を見てもらう
 - 未来の「実際の時刻」を見込みにする（11/18 朝の回。定期の回として呼ばれたが、PM の積んだ急ぎの指示 11/18 7時45分 があったのでこちらをした）：ブランチ data/atd-future（main 61ba9c7 から）→ 下書き **PR #126**（見張りを始めた）。報告 docs/pm/report-atd-future.md。**移行186・テスト t125 を使った**
   - _shared/odpt_status.ts の splitActual：実際の時刻が取り込んだ時刻より1分を超えて先なら atd／ata にせず etd／eta（お知らせも「見込み」の文）。odpt_fast.ts：未来の atd は出発前扱い
