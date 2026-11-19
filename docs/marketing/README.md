@@ -5,7 +5,10 @@ Instagram（ryou_ma767）で、アーリーアクセスの登録を増やすた�
 
 | ファイル | 中身 |
 |---|---|
-| [plan-4weeks.md](plan-4weeks.md) | 11月9日の週から4週分の投稿予定（曜日・時間の目安・種類・ねらい） |
+| [plan-4weeks.md](plan-4weeks.md) | 4週分の投稿予定。11/12 に金・土・日へ組み直し（11/13〜12/6）。日付はここが正 |
+| [reels.md](reels.md) | リールの台本（週1本：修行・チェックイン・経営・図鑑・予備の近くの空港）と撮り方 |
+| [shoot-guide.md](shoot-guide.md) | 本番（soramemo.jp）のデモで画面を撮る手順（本人用） |
+| [posts-shugyo.md](posts-shugyo.md) | 修行の広報（カルーセル6枚・ストーリーズ） |
 | [posts-first3.md](posts-first3.md) | 最初の3投稿の文面（ハッシュタグ込み）と画像の説明 |
 | [posts-week2.md](posts-week2.md) | 2週目の3投稿（リール①の台本・ストーリーズ・フライトの残し方） |
 | [metrics.md](metrics.md) | 週ごとに見る数字と、その見方・記録表 |
