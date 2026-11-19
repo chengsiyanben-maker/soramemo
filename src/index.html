@@ -3171,6 +3171,8 @@ nav.tabs{transition:transform .3s cubic-bezier(.2,.8,.2,1),opacity .2s}
 #v-log .fbhead h2{margin:0;font:800 28px/1.2 var(--gothic);letter-spacing:.04em;color:var(--fb-ink)}
 #v-log .fbhead .lbtns{display:flex;gap:10px}
 #v-log .vwrow{margin:0 0 12px}
+#v-log .fbmeyasu{display:block;font-size:12px;font-weight:600;color:var(--fb-mute);line-height:1.2}
+#v-log .fbest{display:block;font-size:12px;font-weight:600;color:var(--fb-mute);white-space:nowrap}
 #v-log .fbyr{position:relative;background:var(--fb-card);border-radius:24px;box-shadow:var(--fb-shadow);padding:10px 14px;margin:0 0 16px;color:var(--fb-ink)}
 /* 日誌で年のカードが上へ出ていったら、年の字と ‹ › だけの細い帯を上に止める（月の見出しを隠さない・11/11 review-app-1 の2）。
    帯は高さ0の入れ物に載せるので、出ても消えても下の便の位置は動かない */
@@ -5541,7 +5543,9 @@ const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt
 async function loadServer(){
   const [c, f, m, g, sg] = await Promise.all([
     fetchAll("checkins", "id,airport_id,terminal_id,created_at,accuracy_m,weather,wind_kt,ops", "created_at"),
-    fetchAll("flights", "id,from_airport,to_airport,dep_at,arr_at,distance_km,status,airline,flight_no,fare,seat,track,price", "arr_at"),
+    // 実際の出発・到着（11/20 data/flight-actual・移行187）。列がまだないサーバーでは前の列で読み直す
+    fetchAll("flights", "id,from_airport,to_airport,dep_at,arr_at,distance_km,status,airline,flight_no,fare,seat,track,price,act_dep_at,act_arr_at,act_src", "arr_at")
+      .then(r => r.error ? fetchAll("flights", "id,from_airport,to_airport,dep_at,arr_at,distance_km,status,airline,flight_no,fare,seat,track,price", "arr_at") : r),
     fetchAll("manual_flights", "id,from_airport,to_airport,flown_on,airline,fare,seat,price", null),
     fetchAll("intl_flights", "id,flown_on,dep,arr,flight_no,airline,seat,dep_at,arr_at,distance_km", null),
     sb.from("shugyo_prefs").select("data").maybeSingle().then(x => x, () => ({ data:null })),
@@ -5552,7 +5556,7 @@ async function loadServer(){
   if(err){ say("記録を読み込めませんでした。電波のよい場所で開き直してください。", true); return; }
   S = { demoClock:null,
     checkins: c.data.map(r => ({a:r.airport_id, term:r.terminal_id, t:Date.parse(r.created_at), acc:r.accuracy_m, wx:r.weather || null, wind:r.wind_kt ?? null, ops:r.ops || null})),
-    flights: f.data.map(r => ({id:r.id, from:r.from_airport, to:r.to_airport, dep:Date.parse(r.dep_at), arr:Date.parse(r.arr_at), km:r.distance_km, status:r.status, airline:r.airline, no:r.flight_no, fare:r.fare || null, seat:r.seat || null, price:r.price ?? null, track:Array.isArray(r.track) ? r.track : null})),
+    flights: f.data.map(r => ({id:r.id, from:r.from_airport, to:r.to_airport, dep:Date.parse(r.dep_at), arr:Date.parse(r.arr_at), km:r.distance_km, status:r.status, airline:r.airline, no:r.flight_no, fare:r.fare || null, seat:r.seat || null, price:r.price ?? null, track:Array.isArray(r.track) ? r.track : null, ...fbActOf(r)})),
     manual: m.data.map(r => ({id:r.id, from:r.from_airport, to:r.to_airport, d:r.flown_on, airline:r.airline, fare:r.fare || null, seat:r.seat || null, price:r.price ?? null})),
     shugyo: sg && sg.data && sg.data.data ? sg.data.data : null,
     // 国際線の記録（読めなくてもほかの記録は出す。表がまだない古いサーバーでも動くように）
@@ -6602,11 +6606,19 @@ function setLogSeg(s){
 }
 $("flAdd").onclick = () => { setLogSeg("book"); window.scrollTo(0, 0); const m = $("mFrom"); if(m){ m.scrollIntoView({ block:"center" }); m.focus({ preventScroll:true }); } };
 $("fbBack").onclick = () => { setLogSeg("list"); window.scrollTo(0, 0); };
+/* 「空の上」（11/20 PM・data/flight-actual）：実際の出発・到着（act_src があるとき）の差。ないときは今までどおりチェックインの時刻の差で「目安」
+   act_src：odpt＝航空会社の運航情報・adsb＝機体の位置からの推定・timetable＝時刻表の定刻（推定） */
+function fbActOf(r){
+  const src = ["odpt", "adsb", "timetable"].includes(r.act_src) ? r.act_src : null, d = src ? Date.parse(r.act_dep_at) : NaN, a = src ? Date.parse(r.act_arr_at) : NaN;
+  return src && a > d ? { actDep:d, actArr:a, actSrc:src } : { actDep:null, actArr:null, actSrc:null };
+}
+const fbMin = f => Math.max(0, Math.round(((f.actSrc ? f.actArr : f.arr) - (f.actSrc ? f.actDep : f.dep)) / 6e4));
+const FB_SRC_TXT = { odpt:"航空会社の運航情報から", adsb:"機体の位置から（推定）", timetable:"時刻表の定刻から（推定）" };
 // 日誌の行：チェックインでできた便・車などの移動・記録帳の便（新しい順）。記録帳の便は路線の数には入れない（前からの決まり）
 function fbEntries(){
   const out = [];
   for(const f of S.flights){ if(!(inFocus(f) || !f.airline) || !BY[f.from] || !BY[f.to]) continue; const car = isCar(f);
-    out.push({ kind:car ? "car" : "fly", f, key:fid(f), t:f.dep, from:f.from, to:f.to, km:f.km, airline:car ? null : f.airline, min:Math.max(0, Math.round((f.arr - f.dep) / 6e4)) }); }
+    out.push({ kind:car ? "car" : "fly", f, key:fid(f), t:f.dep, from:f.from, to:f.to, km:f.km, airline:car ? null : f.airline, min:fbMin(f), src:car ? null : f.actSrc || "" }); }
   S.manual.forEach((m, i) => { if(!BY[m.from] || !BY[m.to]) return; if(FOCUS !== "ALL" && !(m.airline && (ALBY[m.airline] || {}).group === FOCUS)) return;
     out.push({ kind:"book", m, key:"m" + i, t:Date.parse(m.d + "T12:00:00+09:00"), from:m.from, to:m.to, km:km(BY[m.from], BY[m.to]), airline:m.airline && ALBY[m.airline] ? m.airline : null, min:null }); });
   return out.sort((a, b) => b.t - a.t);
@@ -6616,7 +6628,7 @@ const fbRtKey = e => [e.from, e.to].sort((a, b) => a - b).join("-");
 function fbSum(es){
   const fl = es.filter(e => e.kind !== "car"), car = es.filter(e => e.kind === "car");
   return { n:fl.length, km:fl.reduce((x, e) => x + e.km, 0), min:fl.reduce((x, e) => x + (e.min || 0), 0), car:car.length, carKm:car.reduce((x, e) => x + e.km, 0),
-    rt:new Set(fl.filter(e => e.kind === "fly").map(fbRtKey)).size };
+    rt:new Set(fl.filter(e => e.kind === "fly").map(fbRtKey)).size, est:fl.some(e => e.kind === "fly" && e.src !== "odpt") };
 }
 // 時間の書き方：「2時間20分」。数字は大きく、単位は小さく
 const fbDur = min => { const h = Math.floor(min / 60), m = min % 60; return `<span class="dur">${h ? `<b>${h}</b><small>時間</small>` : ""}<b>${h ? String(m).padStart(2, "0") : m}</b><small>分</small></span>`; };
@@ -6632,7 +6644,7 @@ function fbYrHTML(ys, withNums){
   return `<div class="yrsw"><button type="button" data-fby="${older ?? ""}" aria-label="${older ? older + "年へ" : "これより前の年はありません"}"${older ? "" : " disabled"}>‹</button>
       <button type="button" class="yrname" data-fbyears aria-haspopup="dialog" aria-label="${FB_Y}年。押すと年を選べます"><b>${FB_Y}年</b><span aria-hidden="true">▾</span></button>
       <button type="button" data-fby="${newer ?? ""}" aria-label="${newer ? newer + "年へ" : "いちばん新しい年です"}"${newer ? "" : " disabled"}>›</button></div>`
-    + (withNums ? `<div class="yrnums"><span><b>${st.n}</b><small>便</small></span><span><b>${fmtKm(st.km)}</b><small>km</small></span><span><small>空の上</small>${fbDur(st.min)}</span></div>`
+    + (withNums ? `<div class="yrnums"><span><b>${st.n}</b><small>便</small></span><span><b>${fmtKm(st.km)}</b><small>km</small></span><span><small>空の上</small>${fbDur(st.min)}${st.est ? `<small class="fbest">（推定を含む）</small>` : ""}</span></div>`
       + (st.car ? `<p class="yrcar">車など ${st.car}（${fmtKm(st.carKm)} km）は別に数えています</p>` : "") : "");
 }
 // 日誌の1行：日付が左・区間は名前で大きく・2行目に出発の時刻と便名・右に時間と距離。左の細い帯が会社の色（夜は出さない）
@@ -6641,7 +6653,7 @@ function fbRowHTML(e){
   const sub = e.kind === "car" ? `<span class="fbcar">車など</span>`
     : e.kind === "book" ? `<span class="sub">記録帳${e.airline ? "・" + esc(fbAlName(e.airline)) : ""}</span>`
     : `<span class="sub"><b>${hmOf(e.f.dep)}</b> 発・${esc(lgNo(e.f))}${statusBadge(e.f)}</span>`;
-  const right = e.kind === "fly" ? `${fbDur(e.min)}<small>${fmtKm(e.km)} km</small>`
+  const right = e.kind === "fly" ? `${fbDur(e.min)}${e.src ? "" : `<small class="fbmeyasu">目安</small>`}<small>${fmtKm(e.km)} km</small>`
     : `<span class="dur"><b>${fmtKm(e.km)}</b><small>km</small></span><small>${e.kind === "car" ? "空の上なし" : "時刻なし"}</small>`;
   const what = e.kind === "car" ? "車などの移動" : e.kind === "book" ? "記録帳の便" : (e.f.no || "便");
   return `<li><button type="button" class="fbrow" data-g="${g}" data-fbv="${e.key}" aria-label="${d.getMonth() + 1}月${d.getDate()}日、${esc(godShort(a))}から${esc(godShort(b))}、${what}">
@@ -6679,7 +6691,7 @@ function fbYearHTML(es){
   const mx = Math.max(1, ...months.map(x => x.n)), best = months.reduce((b, x, i) => x.km > (b ? months[b - 1].km : 0) ? i + 1 : b, 0);
   const rts = fbRoutes(es).filter(r => r.fly.length).slice(0, 3);
   const tile = (l, v) => `<div class="fbtile"><small>${l}</small><div>${v}</div></div>`;
-  return `<div class="fbtiles">${tile("便", `<b>${st.n}</b><small>便</small>`)}${tile("路線", `<b>${st.rt}</b><small>路線（往復で1つ）</small>`)}${tile("距離", `<b>${fmtKm(st.km)}</b><small>km</small>`)}${tile("空の上", fbDur(st.min))}</div>
+  return `<div class="fbtiles">${tile("便", `<b>${st.n}</b><small>便</small>`)}${tile("路線", `<b>${st.rt}</b><small>路線（往復で1つ）</small>`)}${tile("距離", `<b>${fmtKm(st.km)}</b><small>km</small>`)}${tile("空の上", fbDur(st.min) + (st.est ? `<small class="fbest">（推定を含む）</small>` : ""))}</div>
     ${st.car ? `<p class="fbnote">車など ${st.car}（${fmtKm(st.carKm)} km）は、便・距離・空の上に入れず別に数えています。</p>` : ""}
     ${plusOn() ? `<div class="fbshr"><button class="fbpill" type="button" data-fbyshare><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15V3"/><path d="m7 8 5-5 5 5"/><path d="M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/></svg>この年を画像で共有</button></div>` : ""}
     <h3 class="fbh">月ごとの便の数</h3>
@@ -6699,13 +6711,15 @@ function fbMapHTML(es){
       <div class="fbtiles s3">${`<div class="fbtile"><small>回数</small><div><b>${sel.fly.length}</b><small>回</small>${sel.car.length ? `<small>・車など ${sel.car.length}</small>` : ""}</div></div>`}<div class="fbtile"><small>距離</small><div><b>${fmtKm((sel.fly[0] || sel.car[0]).km)}</b><small>km</small></div></div><div class="fbtile"><small>空の上の合計</small><div>${sel.fly.length ? fbDur(mins) : "<b>—</b>"}</div></div></div>
       ${sel.fly.length ? `<p class="fbnote">区間 ${fmtKm(mi.mi)} マイル${mi.official ? "" : "（地図上の距離から）"}</p>` : ""}
       <ul class="fbrows">${[...sel.fly, ...sel.car].sort((x, y) => y.t - x.t).map(fbRowHTML).join("")}</ul></div>`; }
-  return `<div class="fbmapc"><div class="fbleaf" id="fbLeaf" aria-hidden="true"></div><svg id="map" class="fbsvg" viewBox="0 0 400 420" role="img" aria-label="${FB_Y}年に飛んだ線と空港の地図"></svg><span class="mcred">地図：国土地理院</span></div>
+  return `<div class="fbmapc"><div class="fbleaf" id="fbLeaf" aria-hidden="true"></div><svg id="map" class="fbsvg" viewBox="0 0 400 420" role="img" aria-label="${FB_Y}年に飛んだ線と空港の地図"></svg><span class="mcred">地図：国土地理院${rts.some(r => r.fly.length && fbTrackOf(r)) ? "・航跡：adsb.lol（ODbL）" : ""}</span></div>
     <div class="fbcard fblg"><div class="lgrow"><small>太さ＝回数</small>${[2, 4, 6].map(n => `<span><i style="height:${fbW(n)}px"></i>${n}回</span>`).join("")}${hasCar ? `<span><i class="dash"></i>車など</span>` : ""}</div>
       <div class="lgbot">${top ? `<div><small>いちばん太い線</small><b>${fbRtName(top.k)}（${top.fly.length}回）</b></div>` : `<div><small>この年に飛んだ線はまだありません</small></div>`}<button class="fbpill" id="shareMap" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15V3"/><path d="m7 8 5-5 5 5"/><path d="M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/></svg>画像で共有</button></div></div>
     ${selHTML}
     ${rts.length ? `<h3 class="fbh">乗った区間<small>${rts.length}区間・太い順</small></h3>
       <div class="fbcard"><ul class="fbrts">${rts.map(r => `<li><button type="button" data-fbrt="${r.k}" aria-pressed="${r.k === FB_RT}"><i class="w${r.fly.length ? "" : " dash"}" style="height:${fbW(r.fly.length || r.car.length)}px" aria-hidden="true"></i><span><b>${fbRtName(r.k)}</b><small>${esc(r.k.split("-").map(id => code(BY[+id])).join(" ⇄ "))}・${fmtKm((r.fly[0] || r.car[0]).km)} km${r.car.length ? `・車など ${r.car.length}` : ""}</small></span><em>${r.fly.length || r.car.length}<small>回</small></em></button></li>`).join("")}</ul></div>` : ""}`;
 }
+// 区間の線に使う航跡（11/20 PM）：その区間でいちばん新しい航跡のある便の track（[[緯度, 経度], ...]・adsb.lol）。なければ null（今の弧の線）
+function fbTrackOf(r){ const e = [...r.fly].sort((x, y) => y.t - x.t).find(e => e.f && Array.isArray(e.f.track) && e.f.track.length >= 2 && e.f.track.every(p => Array.isArray(p) && isFinite(p[0]) && isFinite(p[1]))); return e ? e.f.track : null; }
 // 地図の線（SVG。地図が読めないときと、テストの手元の版）
 function fbMapSVG(es){
   const svg = $("map"); if(!svg) return;
@@ -6715,7 +6729,8 @@ function fbMapSVG(es){
     return `M${x1.toFixed(1)} ${y1.toFixed(1)}Q${(mx - dy / L2 * k).toFixed(1)} ${(my + dx / L2 * k).toFixed(1)} ${x2.toFixed(1)} ${y2.toFixed(1)}`; };
   for(const r of [...rts].reverse()){ const [a, b] = r.k.split("-").map(Number), on = !FB_RT || FB_RT === r.k;
     if(r.car.length) parts.push(`<path d="${arc(BY[a], BY[b])}" fill="none" stroke="${on ? "var(--fb-line)" : "var(--fb-fade)"}" stroke-width="${fbW(r.car.length) * .7}" stroke-linecap="round" stroke-dasharray="3 4"/>`);
-    if(r.fly.length) parts.push(`<path d="${arc(BY[a], BY[b])}" fill="none" stroke="${on ? "var(--fb-line)" : "var(--fb-fade)"}" stroke-width="${fbW(r.fly.length) * .7}" stroke-linecap="round" data-n="${r.fly.length}"/>`); }
+    const tk = r.fly.length ? fbTrackOf(r) : null, tkd = tk ? tk.map((p, i) => { const [x, y] = proj({ lat:p[0], lon:p[1] }); return `${i ? "L" : "M"}${x.toFixed(1)} ${y.toFixed(1)}`; }).join("") : "";
+    if(r.fly.length) parts.push(`<path d="${tk ? tkd : arc(BY[a], BY[b])}"${tk ? ` data-track="1" stroke-linejoin="round"` : ""} fill="none" stroke="${on ? "var(--fb-line)" : "var(--fb-fade)"}" stroke-width="${fbW(r.fly.length) * .7}" stroke-linecap="round" data-n="${r.fly.length}"/>`); }
   for(const a of A){ if(!v.has(a.id)) continue; const [x, y] = proj(a); parts.push(`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="3.6" fill="var(--chart-bg)" stroke="var(--fb-line)" stroke-width="1.6"><title>${esc(a.name)}</title></circle>`); }
   svg.innerHTML = parts.join("");
 }
@@ -6739,7 +6754,9 @@ async function renderFlightMap(){
     const dx = b.lon - a.lon, dy = b.lat - a.lat, L2 = Math.hypot(dx, dy) || 1, k = Math.min(1.2, L2 * .18), cx = (a.lon + b.lon) / 2 - dy / L2 * k, cy = (a.lat + b.lat) / 2 + dx / L2 * k, ll = [];
     for(let t = 0; t <= 1.0001; t += .05) ll.push([(1 - t) ** 2 * a.lat + 2 * (1 - t) * t * cy + t * t * b.lat, (1 - t) ** 2 * a.lon + 2 * (1 - t) * t * cx + t * t * b.lon]);
     if(r.car.length) L.polyline(ll, { color:on ? line : fade, weight:fbW(r.car.length), dashArray:"4 6", lineCap:"round", interactive:false }).addTo(FB_MAP);
-    if(r.fly.length) L.polyline(ll, { color:on ? line : fade, weight:fbW(r.fly.length), lineCap:"round", interactive:false }).addTo(FB_MAP);
+    const tk = r.fly.length ? fbTrackOf(r) : null;   // 航跡がある区間は実際に飛んだ線
+    if(r.fly.length) L.polyline(tk || ll, { color:on ? line : fade, weight:fbW(r.fly.length), lineCap:"round", lineJoin:"round", interactive:false }).addTo(FB_MAP);
+    if(tk) for(const p of tk) pts.push(p);
     pts.push([a.lat, a.lon], [b.lat, b.lon]); }
   const seen = new Set();
   for(const e of es){ if(e.kind === "book") continue; for(const id of [e.from, e.to]){ if(seen.has(id)) continue; seen.add(id); const a = BY[id];
@@ -6816,7 +6833,7 @@ function fbOpenView(key){
   const mi = routeMiles(e.from, e.to, e.km);
   const tiles = e.kind === "car"
     ? `<div class="fbtile"><small>距離（空港どうしの直線）</small><div><b>${fmtKm(e.km)}</b><small>km</small></div></div><div class="fbtile"><small>空の上</small><div><b>—</b></div><small class="s">便・空の上・距離には入れません</small></div>`
-    : `<div class="fbtile"><small>空の上</small><div>${e.min != null ? fbDur(e.min) : "<b>—</b>"}</div>${e.kind === "fly" ? `<small class="s">チェックインの時刻から</small>` : `<small class="s">記録帳の便（時刻なし）</small>`}</div>
+    : `<div class="fbtile"><small>空の上</small><div>${e.min != null ? fbDur(e.min) : "<b>—</b>"}</div>${e.kind === "fly" ? `<small class="s">${e.src ? FB_SRC_TXT[e.src] : "目安・チェックインの時刻から"}</small>` : `<small class="s">記録帳の便（時刻なし）</small>`}</div>
        <div class="fbtile"><small>距離</small><div><b>${fmtKm(e.km)}</b><small>km</small></div><small class="s">区間 ${fmtKm(mi.mi)} マイル</small></div>
        ${e.kind === "fly" ? `<div class="fbtile"><small>機体</small><div><b id="fvReg">—</b></div><small class="s" id="fvType">記録がありません</small></div>
        <div class="fbtile"><small>座席</small><div><b>${f.seat ? esc(f.seat) : "—"}</b></div><small class="s">${f.seat ? "記録した席" : "記録がありません"}</small></div>` : ""}`;
@@ -6873,7 +6890,7 @@ async function fbPassCard(s){
   ctx.fillStyle = "#FFFFFF"; ctx.font = `700 170px Sign, ${GOTHIC}`; ctx.textAlign = "left"; ctx.fillText(code(a), X + 56, Y + 240); ctx.textAlign = "right"; ctx.fillText(code(b), X + W - 56, Y + 240);
   ctx.fillStyle = "#8F9AAD"; ctx.font = `600 48px ${GOTHIC}`; ctx.textAlign = "center"; ctx.fillText("→", X + W / 2, Y + 200);
   ctx.fillStyle = "#C9D1DE"; ctx.font = `700 40px ${GOTHIC}`; ctx.textAlign = "left"; ctx.fillText(godShort(a), X + 60, Y + 310); ctx.textAlign = "right"; ctx.fillText(godShort(b), X + W - 60, Y + 310);
-  const cols = [["出発", hmOf(f.dep)], ["空の上", fbDurTxt(Math.max(0, Math.round((f.arr - f.dep) / 6e4)))], ["距離", `${fmtKm(f.km)} km`]];
+  const cols = [["出発", hmOf(f.dep)], ["空の上", fbDurTxt(fbMin(f))], ["距離", `${fmtKm(f.km)} km`]];
   cols.forEach(([l, v], i) => { const x = X + 60 + i * 290; ctx.textAlign = "left"; ctx.fillStyle = "#AEB8C8"; ctx.font = `700 32px ${GOTHIC}`; ctx.fillText(l, x, Y + 420); ctx.fillStyle = "#FFFFFF"; ctx.font = `700 60px Sign, ${GOTHIC}`; ctx.fillText(v, x, Y + 490); });
   // 下の段
   const maxW = W - 120; let parts = [s.type, s.showReg && s.reg ? s.reg : null, s.showSeat && s.seat ? `${s.seat}席` : null].filter(Boolean);
