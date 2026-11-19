@@ -6,7 +6,8 @@
   - 移行186：apply_flight_status に同じ守り（未来の atd・ata は入れず etd・eta に、残っていた未来の値は次の書き直しで外す。lock_timeout 10s 付け直し）。表・RLS は変えない
   - 確かめた結果：deno 270本・t125 14項目・t18/t21/t23/t27/t51/t89/t105/t108/t117 通過
   - 11/18 8時16分の PM の指示（ブランチ名 data/odpt-future-actual・本人「進めて」）は、同じ中身なので PR #126 にまとめた（報告に対応を書いた）。本番を見る読むだけの SQL docs/pm/atd-future-check.sql（① 先の atd・ata の数 ② 例20件）を足した。反映の前と次の日に流してもらう
-  - 本人待ち：「反映して」・朝一番の便の言い方（案A：inbound_aircraft に first と前の日に着いた空港・時刻を足す／案B：画面の文だけ。おすすめ A）
+  - **11/19 3時55分（UTC）PR #126 は main に入った（移行186）**。本番に出たかを Actions で確かめ、次の日に docs/pm/atd-future-check.sql の ① future_now が 0 か見てもらう
+  - 本人待ち：朝一番の便の言い方（案A：inbound_aircraft に first と前の日に着いた空港・時刻を足す／案B：画面の文だけ。おすすめ A）
 - いつもより遅いの画面に要る関数（11/17 の回。PM の指示 11/17 12時20分。曜日は火曜で定期の回として呼ばれたが、PM の積んだ指示があったのでこちらをした）：ブランチ data/usual-late-rpc（main 32d923d から）→ 下書き **PR #118**（見張りを始めた）。報告 docs/pm/report-usual-late-rpc.md。**移行185・テスト t124 を使った**
   - 移行185：読むだけの関数 usual_late(p_flight, p_reg, p_day, p_arr, p_land) だけ（表・RLS は変えない。anon・authenticated は実行だけ）。便名か登録記号（reg_legs のその日と前の日）から、いつもの到着（foreign_usual。dow・n・spread・weeks）・着く見込み（着陸。実績 foreign_legs → 画面が渡す flight-live の land_pred → foreign_watch.eta（10分以内）の順）・late_min と kind（late 15分以上・usual 前後14分・early）・event・divert_to・curfew_near・source・note。見込みがなければ eta null（U1n-v2）。ODPT の会社は reason odpt、知らない記号は unknown、形のちがう値は null
   - 約束：見張りの関数をつなぐとき、foreign_watch.eta は**着陸の見込み**で書き、門限は state.curfew_near（true／false）に入れる
@@ -275,7 +276,7 @@
 - SQL のテストは全部で約35分かかる（手元で流すときは裏で流してログを見る。t92 だけで約4分。同じログに2回流すと混ざるので、ログの名前を分ける）
 
 ## 次にやること
-00000000000000000000000. 未来の実際の時刻（PR #126）：CI とレビューに答える。「反映して」が出たら番号を確かめ（main に別の移行が先なら rebase）。本人が朝一番の案A を選んだら inbound_aircraft を作り直す（読むだけ。187・t126）
+00000000000000000000000. 未来の実際の時刻（PR #126・main に入った）：反映の Actions の結果と、atd-future-check.sql の結果を見る。本人が朝一番の案A を選んだら inbound_aircraft を作り直す（読むだけ。187・t126）
 0000000000000000000000. いつもより遅いの関数（PR #118）：CI とレビューに答える。「反映して」が出たら番号を確かめ（main に別の移行が先なら rebase）。本人が案内板にも見込みを出すと決めたら live_positions に kt を足す案（移行と RLS・airport-traffic の書き込み）を作る。見張りの関数をつなぐ（0000000000000000000a）ときは eta を着陸の見込み・state.curfew_near で書く
 000000000000000000000. 定期の手入れ 11/16 の2回目（PR #111）：2026-11-16-2-check.sql の結果で aircraft・flights の全部読みの回数を見る。「反映して」が出たら番号を確かめ（main に別の移行が先なら rebase）、反映後にもう一度流して「索引で引いた回数」が増えたか見る。CI とレビューに答える。次の定期の回の候補：結果が来たら死んだ行・使われていない索引。来なければ、関数の中の「表を全部読む文」（索引のない where）を模擬のデータベースの explain で洗い出す
 00000000000000000000. 見落としの片付け（PR #108）：redo-1116-check.sql の ①② が来たら、adsb で確かめられる便の割合を報告に足し、切り替えの案を出す（切り替えるなら VERIFY_SOURCE を設定・照合を pg_cron に戻す移行・出典の一覧から OpenSky を外す依頼）。「反映して」が出たら番号を確かめ、次の日に ③（odpt_feed_dates）を見てもらう。CI とレビューに答える
