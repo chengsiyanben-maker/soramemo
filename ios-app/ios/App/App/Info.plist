@@ -23,11 +23,11 @@
 	<key>CFBundleVersion</key>
 	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>空港にいるかを確かめて、チェックインの印を押すために使います。いる場所は印を押すときと近くの空港を出すときだけ使い、ほかの人には見せません。</string>
+	<string>空港にいるかを確かめて、チェックインの印を押すために使います。いる場所は印を押すときだけ送り、ほかの人には見せません。</string>
 	<key>NSCameraUsageDescription</key>
-	<string>搭乗券のバーコードを読んで、乗った便を記録するために使います。</string>
+	<string>搭乗券のバーコードを読んで、乗った便を記録するために使います。カメラを使うのは、読み取りの画面を開いている間だけです。</string>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>管制の音声を文字にするために使います。音声はこの iPhone の中だけで処理します。</string>
+	<string>管制の音声を文字にするために使います。音声はこの iPhone の中だけで処理し、送りません。</string>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
 	<key>LSRequiresIPhoneOS</key>
@@ -66,10 +66,9 @@
 	<key>UISupportedInterfaceOrientations~ipad</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
-		<string>UIInterfaceOrientationPortraitUpsideDown</string>
-		<string>UIInterfaceOrientationLandscapeLeft</string>
-		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>UIRequiresFullScreen</key>
+	<true/>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
 </dict>
