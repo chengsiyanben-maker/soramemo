@@ -110,3 +110,9 @@ export function userTrack(pts: { lat: number; lon: number }[], max = 200): [numb
   for (let i = 0; i < n; i++) { const p = pts[Math.round(i * (pts.length - 1) / (n - 1))]; out.push([Math.round(p.lat * 1e4) / 1e4, Math.round(p.lon * 1e4) / 1e4]); }
   return out;
 }
+
+// 毎晩の記録の航跡（flight_tracks.pts の polyline）から、利用者のフライトの航跡（flights.track）を作る。読めなければ null
+export function userTrackFromPolyline(pts: string | null | undefined): [number, number][] | null {
+  if (typeof pts !== "string" || !pts) return null;
+  try { return userTrack(decodePolyline(pts)); } catch { return null; }
+}

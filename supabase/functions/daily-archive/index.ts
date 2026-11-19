@@ -3,7 +3,7 @@
 //   GET /functions/v1/daily-archive?days=13    … 時刻表が残っている13日前までさかのぼって作る（初回用）
 // 何度呼んでも同じ結果になる（上書き）。同じ日を30分以内に作り直すことはしない（呼び出しの悪用で重くならないように）。
 import { createClient } from "npm:@supabase/supabase-js@2.117.2";
-import { buildHistory, encodePolyline, jstYesterday, normFlight, type SchedRow, thin, userTrack } from "../_shared/archive.ts";
+import { buildHistory, encodePolyline, jstYesterday, normFlight, type SchedRow, thin, userTrack, userTrackFromPolyline } from "../_shared/archive.ts";
 
 const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, { auth: { persistSession: false } });
 const JSON_HEADERS = { "Content-Type": "application/json" };
@@ -77,6 +77,23 @@ Deno.serve(async (req) => {
       const d = new Date(Date.parse(y + "T00:00:00Z") - i * 86_400_000).toISOString().slice(0, 10);
       out.push(await archiveDay(d));
     }
+    // 利用者のフライトの実際の出発・到着（毎日の記録ができたので、機体の位置からの推定の時刻でも入る）と、
+    // 31日前までの航跡のさかのぼり（flight_tracks から。その日の分は上の archiveDay で付けた）
+    const after: Record<string, unknown> = {};
+    const { data: act, error: acte } = await admin.rpc("flights_fill_actual", { p_days: 3, p_limit: 2000 });
+    if (acte) console.error("actual", acte.message); else after.actual = act;
+    let back = 0;
+    const { data: todo, error: tde } = await admin.rpc("flights_track_todo", { p_limit: 300 });
+    if (tde) console.error("track todo", tde.message);
+    for (const t of (todo ?? []) as { id: number; pts: string }[]) {
+      const track = userTrackFromPolyline(t.pts);
+      if (!track) continue;
+      const { error } = await admin.from("flights").update({ track }).eq("id", t.id).is("track", null);
+      if (error) { console.error("track back", error.message); break; }
+      back++;
+    }
+    after.track_back = back;
+    out.push(after);
     console.log("daily-archive", JSON.stringify(out));
     return new Response(JSON.stringify(out), { headers: JSON_HEADERS });
   } catch (e) {

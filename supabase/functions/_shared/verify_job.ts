@@ -12,12 +12,15 @@ export type Deps = {
   // 航空会社の運航情報（ODPT。予定の便に残した実際の時刻）で確かめる。確かめられたら説明の文、だめなら null。
   // OpenSky で確かめられなかったとき（記録なし・当てはまる便なし・通信エラー）にだけ使う
   officialCheck?: (r: Row) => Promise<string | null>;
+  // 照合のあと、便名の分かったフライトに実際の出発・到着の時刻を入れる（関数 flights_fill_actual。失敗しても照合の結果は変えない）
+  fillActual?: () => Promise<unknown>;
 };
 export const JOB = { maxPerRun: 200, maxAttempts: 3 };
 
 export async function runVerification(d: Deps) {
   const rows = (await d.loadFlights()).slice(0, JOB.maxPerRun);
-  const sum = { checked: 0, verified: 0, no_data: 0, unmatched: 0, errors: 0, official: 0 };
+  const sum: { checked: number; verified: number; no_data: number; unmatched: number; errors: number; official: number; actual?: unknown } =
+    { checked: 0, verified: 0, no_data: 0, unmatched: 0, errors: 0, official: 0 };
   const official = async (r: Row) => { if (!d.officialCheck) return false; try { const note = await d.officialCheck(r); if (!note) return false;
     await d.save(r.id, "verified", note, r.attempts + 1); sum.verified++; sum.official++; return true; } catch (e) { console.error("official", e); return false; } };
   const cache = new Map<string, OpenSkyFlight[]>();
@@ -48,5 +51,6 @@ export async function runVerification(d: Deps) {
     else if (v.status === "no_data") { await d.save(r.id, "no_data", "到着記録なし", r.attempts + 1); sum.no_data++; }
     else { await d.save(r.id, null, "当てはまる便なし", r.attempts + 1); sum.unmatched++; }
   }
+  if (d.fillActual) { try { sum.actual = await d.fillActual(); } catch (e) { console.error("actual", e); sum.actual = "error"; } }
   return sum;
 }
