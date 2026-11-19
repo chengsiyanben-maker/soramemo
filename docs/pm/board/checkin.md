@@ -6,7 +6,7 @@
     - #opsHubList（カード10枚 OH_CARDS）・#v-ops[data-hub="list"|"page"]・[data-page]。専用ページは今の見方の中身をそのまま（滑走路は地図を隠す・地図は運用の箱を隠す・遅れは #opsAlerts・特別塗装機は機体の側の special・検索窓からは page="plane"）
     - 動きは clip-path（開く 460ms・戻る 380ms・reduce で動きなし）。左端 24px から引いて戻る（touch と mouse）。i は #dOpsSrc。opsNeed は一覧で board・special・traffic だけ
     - 試験用の切り替え localStorage soramemo.ops.hub="0" で前の形。前の形を前提にした e2e 17本（t113・t124・t128・t130・t133・t138・t139・t53・t55・t59・t60・t61・t63・t65・t66・t68・t71）に付けた
-    - t148（新）・tests/ops・上の17本 成功。e2e 全体は報告に追記
+    - t148（新）・tests/ops・上の17本 成功。e2e 全体 112／115（t48・t72・t123 は main でも落ちる）
     - 本人に決めてほしいこと：並べ替え（今は隠す・出すだけ）・遅れと定時のカードの数の意味・専用ページの共有のボタン
 - 11/19 夕方の定時の回（PM の指示なし・帳面の積んだ順）：2つ済み
   - iPhone のアプリだけの画面（PM 11/19 11時55分・design/ios-app 2版）：PR #125（checkin/ios-app）に足した（5ac9b45・報告の追記 90ac1ab）。報告 docs/pm/report-ios-app-screens.md・写真 docs/pm/shots-ios-app/t146_*
