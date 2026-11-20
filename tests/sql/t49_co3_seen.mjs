@@ -25,12 +25,15 @@ await db.exec(`insert into checkins (user_id, airport_id, lat, lon, accuracy_m, 
     ('${A}', ${ids.NRT}, 35.77, 140.39, 10, ${T}, ${T}),
     ('${B}', ${ids.NRT}, 35.77, 140.39, 10, ${T}, ${T});
   update checkins set flags = '{impossible_speed}' where user_id = '${B}';
-  insert into flight_history (svc_date, flight, dep, arr, std, sta, type, reg) values
-    ((${T} at time zone 'Asia/Tokyo')::date, 'KZ110', 'NRT', 'ANC', ${T} + interval '20 minutes', ${T} + interval '7 hours', 'B748', 'JA11KZ'),
-    ((${T} at time zone 'Asia/Tokyo')::date, 'JL7', 'NRT', 'JFK', ${T} - interval '30 minutes', ${T} + interval '12 hours', 'B789', 'JA861J'),
-    ((${T} at time zone 'Asia/Tokyo')::date, 'JL5', 'NRT', 'ORD', ${T} - interval '40 minutes', ${T} + interval '12 hours', 'B788', 'JA831J'),
-    ((${T} at time zone 'Asia/Tokyo')::date, 'JL3', 'NRT', 'LAX', ${T} - interval '35 minutes', ${T} + interval '12 hours', 'B77W', 'JA731J'),
-    ((${T} at time zone 'Asia/Tokyo')::date, 'NH9', 'NRT', 'ORD', ${T} + interval '2 hours', ${T} + interval '14 hours', 'B789', 'JA882A')`);
+  -- 便の日付（svc_date）は本物と同じく出発の日本時間の日付にする。チェックインの日で入れると、日本時間2時〜2時45分ごろは
+  -- 出発（T の30〜40分前）が前の日になり、乗った便の突き合わせ（co_rides）が外れてテストだけ落ちていた（11/21 経営）
+  insert into flight_history (svc_date, flight, dep, arr, std, sta, type, reg)
+    select (v.std at time zone 'Asia/Tokyo')::date, v.flight, v.dep, v.arr, v.std, v.sta, v.type, v.reg from (values
+      ('KZ110', 'NRT', 'ANC', ${T} + interval '20 minutes', ${T} + interval '7 hours', 'B748', 'JA11KZ'),
+      ('JL7', 'NRT', 'JFK', ${T} - interval '30 minutes', ${T} + interval '12 hours', 'B789', 'JA861J'),
+      ('JL5', 'NRT', 'ORD', ${T} - interval '40 minutes', ${T} + interval '12 hours', 'B788', 'JA831J'),
+      ('JL3', 'NRT', 'LAX', ${T} - interval '35 minutes', ${T} + interval '12 hours', 'B77W', 'JA731J'),
+      ('NH9', 'NRT', 'ORD', ${T} + interval '2 hours', ${T} + interval '14 hours', 'B789', 'JA882A')) v (flight, dep, arr, std, sta, type, reg)`);
 await as(A, `select public.co_state()`);
 let list = await as(A, `select public.co3_seen_list()`);
 const regs = list.map((x) => x.reg).sort().join(',');
@@ -91,5 +94,18 @@ check('維持費：オンなら機種の表（48＋30＋B787-8 の25×1.3＝32.5
 await db.exec(`insert into flights (user_id, from_airport, to_airport, dep_at, arr_at, distance_km, flight_no, airline)
     select '${A}', ${ids.NRT}, ${ids.HND}, h.std, h.std + interval '1 hour', 60, 'JL3', 'JL' from flight_history h where h.reg = 'JA731J'`);
 check('乗った機体（JA731J）は見た機体の一覧から外れる', !(await as(A, `select public.co3_seen_list()`)).some((x) => x.reg === 'JA731J'), null);
+
+// 日付の境目：日本時間 0時10分のチェックインと、前の日 23時40分に出た便（便の日付は前の日）。流す時刻によらず必ず境目を試す（11/21）
+await db.exec(`insert into checkins (user_id, airport_id, lat, lon, accuracy_m, position_at, created_at) values
+    ('${A}', ${ids.HND}, 35.55, 139.78, 10, '2026-11-01 00:10+09', '2026-11-01 00:10+09');
+  insert into flight_history (svc_date, flight, dep, arr, std, sta, type, reg) values
+    ('2026-10-31', 'JL909', 'HND', 'OKA', '2026-10-31 23:40+09', '2026-11-01 02:10+09', 'B763', 'JA602J'),
+    ('2026-11-01', 'JL900', 'HND', 'OKA', '2026-11-01 00:40+09', '2026-11-01 03:10+09', 'B738', 'JA330J')`);
+let edge = (await as(A, `select public.co3_seen_list()`)).map((x) => x.reg);
+check('日付の境目：前の日の23時40分の便も、その日の0時40分の便も見える', edge.includes('JA602J') && edge.includes('JA330J'), edge);
+await db.exec(`insert into flights (user_id, from_airport, to_airport, dep_at, arr_at, distance_km, flight_no, airline) values
+    ('${A}', ${ids.HND}, ${ids.NRT}, '2026-10-31 23:40+09', '2026-11-01 02:10+09', 1500, '909', 'JL')`);
+edge = (await as(A, `select public.co3_seen_list()`)).map((x) => x.reg);
+check('日付の境目：前の日の23時40分の便に乗ったら、その機体は見た機体の一覧から外れる', !edge.includes('JA602J') && edge.includes('JA330J'), edge);
 
 if (bad) { console.log(`NG ${bad}`); process.exit(1); } else console.log('すべて OK');
