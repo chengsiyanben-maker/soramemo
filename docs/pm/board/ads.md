@@ -10,6 +10,10 @@
   - 高画質で動画を撮る方法：CDP の Page.captureScreenshot を clip（scale 2.77）で連続、Animation.setPlaybackRate 1/4 でゆっくり再生して撮り、時刻を4で割って並べる（tools/rec.js・mk.py・build.py）。Playwright の recordVideo とスクリーンキャストは CSS の大きさ（390幅）でしか撮れない
   - 朝の回へ：運用カルーセルとリールM は夜の版があるので、撮り直すなら同じ tools で作り直せる。リールJ の3D は昼に撮り直す（11/23 10:00 まで）。季節の札（夏の訪問）は映さないかぼかす
   - 撮り方の手順：Playwright で本番を開き「とばす」→「デモで試す」（ログインの画面が出たらその中の「デモで試す」）。羽田の空港ページは図鑑の羽田のマス（data-zka）から、3D の視点ボタンは data-a3-view
+- 11/22・23 の広報（ads/new-1122、下書き PR #152、ads/new-1121 の上）。報告 docs/pm/report-ads-new-1122.md（11/21 2時の回）
+  - PM の指示「11/22・23 を ads/new-1122 で」の前に、11/22・23 の分は ads/new-1121 でできていたので重ねて作らず、足りなかった **リールE の動画**（岡山空港 → 吉井川滑空場の近くの空港。new-1121/reels/reelE-near.mp4）を作り、2日分の一覧（docs/marketing/new-1122.md：時刻・ファイル・状態）にまとめた
+  - 11/22 はリール N・E・K＋図鑑のカルーセル＋ストーリーズで全部できた。11/23 は J（3D 夜の仮の版）だけ。3Dのカルーセル・ストーリーズ・J の昼の版は 11/21 朝の回、O は本人、フライトのカルーセルは実際の時刻の便の画面待ち（代わりは6つのまとめ）
+  - デモの「いる空港」の選びには基地もある。基地は選ばない
 - アーリーアクセスの告知（ads/early-access、下書き PR）。報告 docs/pm/report-ads-early-access.md
 - 2週目の3投稿（ads/week2、下書き PR #43）。報告 docs/pm/report-ads-week2.md
 - 修行の広報と金・土・日への組み直し（ads/shugyo、下書き PR #76。#77 の中身もここに入れて #77 は閉じた）。報告 docs/pm/report-ads-shugyo.md（「追加」「追加2」）
