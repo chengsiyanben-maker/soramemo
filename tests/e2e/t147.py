@@ -21,11 +21,15 @@ srv = socketserver.TCPServer(('127.0.0.1', 0), functools.partial(Quiet, director
 threading.Thread(target=srv.serve_forever, daemon=True).start()
 async def touch(cdp, pg, pts, gap_ms):
     # pts：[(x, y), ...]。最初で指を置き、間を gap_ms ごとに動かし、最後で離す
-    await cdp.send('Input.dispatchTouchEvent', {'type': 'touchStart', 'touchPoints': [{'x': pts[0][0], 'y': pts[0][1]}]})
-    for x, y in pts[1:]:
+    # 11/20：全部を並べて流すと1回の送りが遅れ、はじく速さが足りずに落ちていた。指の動きの時刻（timestamp → e.timeStamp）を
+    #   「gap_ms ごと（0 のときは 10ms ごと）」に決めて渡し、機械の重さで速さが変わらないようにする
+    import time
+    t0 = time.time(); step = (gap_ms or 10) / 1000
+    await cdp.send('Input.dispatchTouchEvent', {'type': 'touchStart', 'touchPoints': [{'x': pts[0][0], 'y': pts[0][1]}], 'timestamp': t0})
+    for k, (x, y) in enumerate(pts[1:], 1):
         if gap_ms: await pg.wait_for_timeout(gap_ms)
-        await cdp.send('Input.dispatchTouchEvent', {'type': 'touchMove', 'touchPoints': [{'x': x, 'y': y}]})
-    await cdp.send('Input.dispatchTouchEvent', {'type': 'touchEnd', 'touchPoints': []})
+        await cdp.send('Input.dispatchTouchEvent', {'type': 'touchMove', 'touchPoints': [{'x': x, 'y': y}], 'timestamp': t0 + k * step})
+    await cdp.send('Input.dispatchTouchEvent', {'type': 'touchEnd', 'touchPoints': [], 'timestamp': t0 + len(pts) * step})
     await pg.wait_for_timeout(250)
 def line(x0, y0, x1, y1, n):
     return [(x0 + (x1 - x0) * k / n, y0 + (y1 - y0) * k / n) for k in range(n + 1)]
@@ -51,7 +55,7 @@ async def main():
             # 1 右寄りをつかんで端まで（ゆっくり：16ms ごとに 10 回）
             await touch(cdp, pg, line(grip, y, W - 1, y, 10), 16)
             n = await torn(pg); check(f'{w} 1 右端から20pxをつかんで画面の端まで引くと切れる（{round(W - 1 - grip)}px）', n == 1, n)
-            # 2 はじく：左寄り（切れる長さ 53px）をつかんで 48px を 3 回で（ヘッドレスでは1回が約30ms・約0.75px/ms）
+            # 2 はじく：左寄り（切れる長さ 53px）をつかんで 48px を 3 回で（指の時刻は10msごと・約1.6px/ms）
             left = r['l'] + 10
             await touch(cdp, pg, line(left, y, left + 48, y, 3), 0)
             n = await torn(pg); check(f'{w} 2 速く右へはじくと、切れる長さ（53px）より短くても切れる（48px）', n == 1, n)

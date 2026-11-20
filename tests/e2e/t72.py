@@ -43,6 +43,8 @@ async def main():
         pg = await c.new_page(); pg.on('pageerror', lambda e: errs.append(str(e)))
         await pg.goto(URL); await pg.wait_for_load_state('load'); await pg.wait_for_timeout(600)
         await pg.evaluate("setOpsAirport('HND'); goTab('ops')"); await pg.wait_for_timeout(1800)
+        # 11/19 から運用タブは一覧＋専用ページ（design/ops-hub）。「羽田に来る特別塗装機」の欄は「撮る人」のページにある
+        if await pg.evaluate("$('v-ops').dataset.hub === 'list'"): await pg.evaluate("opsHubOpen('photo')"); await pg.wait_for_timeout(900)
         sp = await pg.inner_text('#opsSpecial')
         check('運用：羽田に来る特別塗装機（飛んでいる2機のうち羽田行き1機）:', '羽田に来る特別塗装機' in sp and 'ポケモンジェット 赤' in sp and '着陸に向かっている' in sp and 'JAL Jubilee' not in sp.split('いま飛んでいる特別塗装機')[0])
         await pg.click('#opsSpecial [data-spb-open=""]'); await pg.wait_for_timeout(800)
