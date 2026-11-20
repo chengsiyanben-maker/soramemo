@@ -6624,6 +6624,8 @@ function fbActOf(r){
   const src = ["odpt", "adsb", "timetable"].includes(r.act_src) ? r.act_src : null, d = src ? Date.parse(r.act_dep_at) : NaN, a = src ? Date.parse(r.act_arr_at) : NaN;
   return src && a > d ? { actDep:d, actArr:a, actSrc:src } : { actDep:null, actArr:null, actSrc:null };
 }
+// 出発の時刻（11/20 PM）：実際の時刻がある便はそれ、ない便はチェックインの出発。日誌の1行・くわしく・共有の画像でそろえる
+const fbDepAt = f => f.actSrc ? f.actDep : f.dep;
 const fbMin = f => Math.max(0, Math.round(((f.actSrc ? f.actArr : f.arr) - (f.actSrc ? f.actDep : f.dep)) / 6e4));
 const FB_SRC_TXT = { odpt:"航空会社の運航情報から", adsb:"機体の位置から（推定）", timetable:"時刻表の定刻から（推定）" };
 // 日誌の行：チェックインでできた便・車などの移動・記録帳の便（新しい順）。記録帳の便は路線の数には入れない（前からの決まり）
@@ -6664,7 +6666,7 @@ function fbRowHTML(e){
   const d = new Date(e.t), a = BY[e.from], b = BY[e.to], g = e.kind === "car" ? "CAR" : e.airline ? (ALBY[e.airline] || {}).group || "OTHER" : "NONE";
   const sub = e.kind === "car" ? `<span class="fbcar">車など</span>`
     : e.kind === "book" ? `<span class="sub">記録帳${e.airline ? "・" + esc(fbAlName(e.airline)) : ""}</span>`
-    : `<span class="sub"><b>${hmOf(e.f.dep)}</b> 発・${esc(lgNo(e.f))}${statusBadge(e.f)}</span>`;
+    : `<span class="sub"><b>${hmOf(fbDepAt(e.f))}</b> 発・${esc(lgNo(e.f))}${statusBadge(e.f)}</span>`;
   const right = e.kind === "fly" ? `${fbDur(e.min)}${e.src ? "" : `<small class="fbmeyasu">目安</small>`}<small>${fmtKm(e.km)} km</small>`
     : `<span class="dur"><b>${fmtKm(e.km)}</b><small>km</small></span><small>${e.kind === "car" ? "空の上なし" : "時刻なし"}</small>`;
   const what = e.kind === "car" ? "車などの移動" : e.kind === "book" ? "記録帳の便" : (e.f.no || "便");
@@ -6854,7 +6856,7 @@ function fbOpenView(key){
       ${e.kind !== "book" ? `<button type="button" class="fbicon" id="fvEdit" data-fvedit="${e.key}" aria-label="便を記録・直す"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="m13.5 6.5 4 4"/></svg></button>` : ""}</div>
     <div class="fbcard fvhead"><p class="when">${esc(head)}</p>
       <div class="codes"><div><b>${esc(code(a))}</b><span>${esc(godShort(a))}</span></div><i aria-hidden="true">→</i><div class="r"><b>${esc(code(b))}</b><span>${esc(godShort(b))}</span></div></div>
-      ${e.kind === "fly" ? `<div class="times"><span><small>出発</small><b>${hmOf(f.actSrc ? f.actDep : f.dep)}</b></span><span><small>到着</small><b>${hmOf(f.actSrc ? f.actArr : f.arr)}</b></span></div>${f.actSrc ? `<p class="fvsrc">チェックイン ${hmOf(f.dep)}〜${hmOf(f.arr)}</p>` : ""}` : e.kind === "car" ? `<p class="fbcarline"><span class="fbcar">車など</span>空港のあいだを車などで移動しました</p>` : ""}</div>
+      ${e.kind === "fly" ? `<div class="times"><span><small>出発</small><b>${hmOf(fbDepAt(f))}</b></span><span><small>到着</small><b>${hmOf(f.actSrc ? f.actArr : f.arr)}</b></span></div>${f.actSrc ? `<p class="fvsrc">チェックイン ${hmOf(f.dep)}〜${hmOf(f.arr)}</p>` : ""}` : e.kind === "car" ? `<p class="fbcarline"><span class="fbcar">車など</span>空港のあいだを車などで移動しました</p>` : ""}</div>
     <div class="fbtiles">${tiles}</div>
     ${fbMiniMap(e)}
     <h3 class="fbh">この区間の${e.kind === "car" ? "移動" : "便"}<small>${esc(godShort(a))} ⇄ ${esc(godShort(b))}</small><em>${sameRt.length}回</em></h3>
@@ -6902,7 +6904,7 @@ async function fbPassCard(s){
   ctx.fillStyle = "#FFFFFF"; ctx.font = `700 170px Sign, ${GOTHIC}`; ctx.textAlign = "left"; ctx.fillText(code(a), X + 56, Y + 240); ctx.textAlign = "right"; ctx.fillText(code(b), X + W - 56, Y + 240);
   ctx.fillStyle = "#8F9AAD"; ctx.font = `600 48px ${GOTHIC}`; ctx.textAlign = "center"; ctx.fillText("→", X + W / 2, Y + 200);
   ctx.fillStyle = "#C9D1DE"; ctx.font = `700 40px ${GOTHIC}`; ctx.textAlign = "left"; ctx.fillText(godShort(a), X + 60, Y + 310); ctx.textAlign = "right"; ctx.fillText(godShort(b), X + W - 60, Y + 310);
-  const cols = [["出発", hmOf(f.dep)], ["空の上", fbDurTxt(fbMin(f))], ["距離", `${fmtKm(f.km)} km`]];
+  const cols = [["出発", hmOf(fbDepAt(f))], ["空の上", fbDurTxt(fbMin(f))], ["距離", `${fmtKm(f.km)} km`]];
   cols.forEach(([l, v], i) => { const x = X + 60 + i * 290; ctx.textAlign = "left"; ctx.fillStyle = "#AEB8C8"; ctx.font = `700 32px ${GOTHIC}`; ctx.fillText(l, x, Y + 420); ctx.fillStyle = "#FFFFFF"; ctx.font = `700 60px Sign, ${GOTHIC}`; ctx.fillText(v, x, Y + 490); });
   // 下の段
   const maxW = W - 120; let parts = [s.type, s.showReg && s.reg ? s.reg : null, s.showSeat && s.seat ? `${s.seat}席` : null].filter(Boolean);
