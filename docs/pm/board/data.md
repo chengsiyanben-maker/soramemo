@@ -569,3 +569,9 @@
   3. adsb.im（経路の routeset）の利用条件を確かめて、利用規約の確認表に書く
   4. 外にデータをまとめて返す口（ログインなしで live_positions・reg_legs をそのまま大量に返す関数）がないか確かめ、あれば上限を付ける案を報告に
 - 仕上がったら PM が自動で反映する（鍵は本人が秘密の設定に入れる）
+
+## PM から積んだ次の仕事（11/21 2時20分、adsb.lol の続き。report-adsblol-key の 2・3 を PM のおすすめで決めた）※data/adsblol-key2 で
+- 外に返す口の上限は案1（おすすめ）で作る
+- adsb.im の条件（https://adsb.im/ と vradarserver/standing-data の LICENSE）を WebFetch で開いて確かめ、利用規約の確認表に書く。使えない条件なら経路の推定を止める案を報告に
+- first_of_day の線（3日以上・7割以上）はこのまま。overnight は今は画面に出さない
+- 本人は adhoc の鍵を申し込み済み（11/21 1時）。届いたら本人が ADSBLOL_API_KEY に入れる
