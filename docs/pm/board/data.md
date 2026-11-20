@@ -550,3 +550,13 @@
 2. inbound_aircraft：前の便がないとき、その機体が前の日の夜に着いて泊まった（この日の最初の便）なら first_of_day を返す（11/19 の依頼、checkin.md の「データ担当（11/19・PR #128）」）
 3. #81（data/speed-1113b）が今の main で済んでいるか確かめる。済んでいれば「閉じてよい」と報告に（PR は PM が閉じる）
 - 移行は RLS とセットで。テストを足す。仕上がったら PM が自動で反映する
+
+## PM から積んだ次の仕事（11/21 1時10分、adsb.lol の鍵と使い方の守り）※data/adsblol-key で
+- adsb.lol から返事があった（11/6、本人の旅そらのメールに。定型文）。要点：使うなら鍵を取る（匿名の鍵＝試し用で1か月ごと・受信機の鍵・adhoc の鍵＝申し込みを人が読む）。共有の IP（Supabase の関数も当たりうる）は 429 になりやすく、鍵があると自分の枠になる。User-Agent で名乗り、Retry-After を守る。大量のデータを配り直さない・競合の追跡 API を作らない（自分のアプリで位置を見せるのはよい）。お金を得るなら sponsor で費用の分を返すのが期待。
+- 今のコード：User-Agent「soramemo (…)」と Retry-After は済み（airport-traffic）。鍵はまだない。
+- やること：
+  1. adsb.lol に問い合わせる所（airport-traffic・flight_live・foreign_now など全部）で、Supabase の秘密の設定 ADSBLOL_API_KEY があればそれを付ける形に（ヘッダーの名前は adsb.lol の案内 https://www.adsb.lol/mmb・api.adsb.lol/docs で確かめる）。鍵がなければ今のまま動く。鍵はコードに書かない
+  2. User-Agent に連絡先（https://soramemo.jp/）を足す
+  3. adsb.im（経路の routeset）の利用条件を確かめて、利用規約の確認表に書く
+  4. 外にデータをまとめて返す口（ログインなしで live_positions・reg_legs をそのまま大量に返す関数）がないか確かめ、あれば上限を付ける案を報告に
+- 仕上がったら PM が自動で反映する（鍵は本人が秘密の設定に入れる）
