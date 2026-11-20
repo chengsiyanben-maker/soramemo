@@ -1,6 +1,7 @@
 # チェックイン担当の帳面
 
 ## いま持っている仕事
+- 11/21 手動の回（PM が同じ「空の道すじの上限に合わせる」を指示）：前の回で PR #157 として済み。この回は main（#156 まで）と data/adsblol-key2（5dce3ac・t122 の直し）を取り込み直して push（d8a9a18）。src/・web/ の変化はなし（関数は変えていない）。t155・t55 成功
 - 11/21 4時台（日本時間）の定時の回（PM 11/21 4時「空の道すじの上限に合わせる」）：ブランチ checkin/track-quota（main 17d48db ＋ data/adsblol-key2 を取り込み）・下書き **PR #157**（af801d6）・報告 docs/pm/report-track-quota.md・写真 docs/pm/shots-track-quota/
   - airport_tracks・cold-tracks をログイン中はログインの鍵（access_token）で読む。login_required／rate_limited（cold は 401／429）で日付の下に小さな一文。未ログイン・デモは前の7日まで（端で「ログインすると見られます」の1行）。あの日の空も同じ一文。空の道の下の注に「（8日より前はログインした人だけ）」
   - 変えた関数：loadArt・renderArt・renderThatDay（足した：ART_FREE_DAYS・artLoggedIn・artMinDay・artToken・artErrOf・artErrText）。rpcPost は変えていない
