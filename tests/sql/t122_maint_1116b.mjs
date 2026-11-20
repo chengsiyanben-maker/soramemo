@@ -40,8 +40,8 @@ const before = (await rows(SHAPE))[0];
 const noBefore = await rows(NOIDX);
 await db.exec(fs.readFileSync(dir + NEW, 'utf8'));
 await db.exec(fs.readFileSync(dir + NEW, 'utf8'));   // 2回流しても困らない（if not exists）
+const after = (await rows(SHAPE))[0];   // 188 だけの変化を比べる（あとの移行が表を足しても落ちないように・11/21 移行190）
 for (const f of files) if (f > NEW) await db.exec(fs.readFileSync(dir + f, 'utf8'));
-const after = (await rows(SHAPE))[0];
 const noAfter = await rows(NOIDX);
 
 // 1
@@ -89,7 +89,7 @@ const ac = (await rows(`select id from public.aircraft where user_id = '${V}' or
 await db.exec(`delete from public.aircraft where id = ${ac[0]}`);
 check('機体を消しても動き、残りの機体はそのまま', (await rows(`select count(*)::int c from public.aircraft where user_id = '${V}'`))[0].c === 1, null);
 
-// 4（before は 188 の前まで・after は 188 のあとの移行まで流したもの）
+// 4（before は 188 の前まで・after は 188 を流した直後）
 check('列は変わらない', JSON.stringify(before.cols) === JSON.stringify(after.cols), null);
 check('RLS のポリシーは変わらない', JSON.stringify(before.pol) === JSON.stringify(after.pol), null);
 check('表の権限は変わらない', JSON.stringify(before.grants) === JSON.stringify(after.grants), null);
