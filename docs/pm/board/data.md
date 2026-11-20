@@ -1,6 +1,14 @@
 # データ担当の帳面
 
 ## いま持っている仕事
+- **adsb.lol の続き：外に返す口の上限（11/21 の回・2つ目。PM の指示 11/21 2時20分。土曜で定期の回として呼ばれたが、PM の積んだ指示があったのでこちらをした）**：ブランチ data/adsblol-key2（main 8c39141 から）→ 下書き **PR #153**（見張りを始めた）。報告 docs/pm/report-adsblol-key2.md。**移行190・テスト t129 を使った**
+  - 移行190 track_quota（表＋RLS・方針なし）：airport_tracks は今日と前の7日はだれでも、それより前はログインした人だけ・1人1時間に空港×日60組（同じ組は数えない）。ログインなし {"error":"login_required"}・上限 {"error":"rate_limited","retry_after_min"}。中身は airport_tracks_raw（直接呼べない）に移し、airport_tracks は volatile・statement_timeout 8秒。運営の役は数えない。退会で消える。航跡の表と RLS は変えない
+  - cold-tracks：ログインの鍵を getUser で確かめ、track_quota_take（service_role だけ）で同じ上限。401・429（Retry-After）。Cache-Control は private
+  - t27 の「40日前を匿名で読む」を直した。deno の cold_test に bearerToken の1本
+  - **反映はチェックイン担当の直し（ログインの鍵を付ける）と同時に**。今のアプリは anon の鍵で呼ぶので、先に入れるとログインした人も8日より前が見えなくなる
+  - adsb.im の条件：この回も開けず（ページを開く許可の確認が時間切れ）。使えない条件なら経路の推定を止め、ODPT と reg_legs の区間だけにする案を報告に。確認表は書き換えていない
+  - 確かめた結果：t129 25項目・SQL 全部128本（t49 が1回揺れて流し直しで通過。main でも通る）・deno test 273本・deno check 通過
+  - 本人待ち（PM のおすすめで可）：上限の数（60組・前の7日）・adsb.im の2ページを開く・反映（チェックインの直しと一緒）
 - **adsb.lol の鍵と使い方の守り（11/21 の回。PM の指示 11/21 1時10分。土曜で定期の回として呼ばれたが、PM の積んだ指示があったのでこちらをした）**：ブランチ data/adsblol-key（main 8c39141 から）→ 下書き **PR #149**（見張りを始めた）。報告 docs/pm/report-adsblol-key.md。**移行・テストの番号は使っていない**（表・RLS は変えない）
   - _shared/adsblol.ts（新）：秘密の設定 ADSBLOL_API_KEY があれば api.adsb.lol に鍵を付ける（なければ今までどおり）。ヘッダー名は ADSBLOL_KEY_HEADER（既定 api-auth。**案内のページを開けず未確認**）。adsb.im には付けない
   - User-Agent を `soramemo (<関数名>; https://soramemo.jp/)` に（airport-traffic・flight-live・airport-foreign の5か所）。flight-live に Retry-After の守り（429・420 のあと最長5分止める）
@@ -293,12 +301,13 @@
 - 本人の決定：規約を改定するときは「terms_versions に1行足す → アプリの定数を変える」の順
 
 ## 移行とテストの番号
-- main の最新は 160（159 airport_yomi・160 airport_facts は 11/10 本番に入った）。156・157 は 11/9 本番に入った。**maint/2026-11-09 の 158 は main の 159 より前になったので、反映の前に migrations.mjs rebase が要る**。maint/2026-11-06 は 153・テスト t93（fix/co-tests の経営の移行も 153 なので、反映の前に rebase）、data/photo-log は 154・テスト t94、maint/2026-11-07 は 155・テスト t95、data/debug-1107 は 156・テスト t96（関数のテストは supabase/tests/live_view_test.ts。main に反映済み）、data/view-prefs は 157・テスト t97、maint/2026-11-09 は 158・テスト t98、maint/2026-11-10 は 161・テスト t101。data/airport-facts は 160・テスト t100。そのほか次に新しく作るものは 162 以降・テストは t102 以降。**maint/2026-11-11 は 162・テスト t102**（161 の maint/2026-11-10 より後。反映の順が変わったら rebase）。**data/heliports の 163・t103 は 11/12 main に入った（PR #75 と一緒）**。**data/speed-1113 は 164・テスト t104**。**data/speed-1113b は 165・テスト t105**（164 の上）。**data/rot-learn-hi は 166・テスト t106**（関数1つだけなので 164・165 と順番が入れ替わってもよい）。（164〜167 は 11/13 に main に入った。166 は経営の co_cron_timeout、learn_hi は 167 に付け直し）。**data/alert-merge は 168・テスト t107**（11/14 main に入った）。**data/world-ops は 169・テスト t108**。**maint/2026-11-16 は 170・テスト t109**。**data/foreign-collect は 171・テスト t110**（170 と別の関数なので順番は入れ替わってもよい）。（11/16 data/redo-1116 で手入れ6本を 173〜178・t112〜t117 に付け直し、179 odpt_feed_dates・t118、180 verify_arrivals・t119。172・t111 は経営の keiei/redo-1116）。**data/foreign-collect は 181 foreign_cold・t120、182 foreign_watch・t121**。（171〜182 は 11/16 本番に入った。経営の t128 も main にある）。**maint/2026-11-16b は 183・テスト t122**。**data/foreign-livery は 184・テスト t123**。**data/usual-late-rpc は 185・テスト t124**（183 とは別の関数なのでどちらが先でもよい）。data/atd-future は 186・テスト t125。**data/flight-actual は 187・テスト t126**。**data/redo-1120 は 188（maint_1116b の付け直し・テスト t122）・189（inbound_first_of_day・テスト t127）**。**次に新しく作るものは 190 以降・テストは t129 以降**（t128 は経営が使った。maint/2026-11-16b の 183 は使わない）（data/foreign-carriers・data/foreign-livery は報告だけで番号を使っていない）
+- main の最新は 160（159 airport_yomi・160 airport_facts は 11/10 本番に入った）。156・157 は 11/9 本番に入った。**maint/2026-11-09 の 158 は main の 159 より前になったので、反映の前に migrations.mjs rebase が要る**。maint/2026-11-06 は 153・テスト t93（fix/co-tests の経営の移行も 153 なので、反映の前に rebase）、data/photo-log は 154・テスト t94、maint/2026-11-07 は 155・テスト t95、data/debug-1107 は 156・テスト t96（関数のテストは supabase/tests/live_view_test.ts。main に反映済み）、data/view-prefs は 157・テスト t97、maint/2026-11-09 は 158・テスト t98、maint/2026-11-10 は 161・テスト t101。data/airport-facts は 160・テスト t100。そのほか次に新しく作るものは 162 以降・テストは t102 以降。**maint/2026-11-11 は 162・テスト t102**（161 の maint/2026-11-10 より後。反映の順が変わったら rebase）。**data/heliports の 163・t103 は 11/12 main に入った（PR #75 と一緒）**。**data/speed-1113 は 164・テスト t104**。**data/speed-1113b は 165・テスト t105**（164 の上）。**data/rot-learn-hi は 166・テスト t106**（関数1つだけなので 164・165 と順番が入れ替わってもよい）。（164〜167 は 11/13 に main に入った。166 は経営の co_cron_timeout、learn_hi は 167 に付け直し）。**data/alert-merge は 168・テスト t107**（11/14 main に入った）。**data/world-ops は 169・テスト t108**。**maint/2026-11-16 は 170・テスト t109**。**data/foreign-collect は 171・テスト t110**（170 と別の関数なので順番は入れ替わってもよい）。（11/16 data/redo-1116 で手入れ6本を 173〜178・t112〜t117 に付け直し、179 odpt_feed_dates・t118、180 verify_arrivals・t119。172・t111 は経営の keiei/redo-1116）。**data/foreign-collect は 181 foreign_cold・t120、182 foreign_watch・t121**。（171〜182 は 11/16 本番に入った。経営の t128 も main にある）。**maint/2026-11-16b は 183・テスト t122**。**data/foreign-livery は 184・テスト t123**。**data/usual-late-rpc は 185・テスト t124**（183 とは別の関数なのでどちらが先でもよい）。data/atd-future は 186・テスト t125。**data/flight-actual は 187・テスト t126**。**data/redo-1120 は 188（maint_1116b の付け直し・テスト t122）・189（inbound_first_of_day・テスト t127）**。**data/adsblol-key2 は 190 track_quota・テスト t129**。**次に新しく作るものは 191 以降・テストは t130 以降**（t128 は経営が使った。maint/2026-11-16b の 183 は使わない）（data/foreign-carriers・data/foreign-livery は報告だけで番号を使っていない）
 - main に別の移行が先に入ったら、反映の前にもう一度 `node tools/migrations.mjs rebase`
 - 本番は小さいプランで一時ファイルの余裕がない。本人に流してもらう SQL は、大きな中間の表・自己結合・大きな並べ替えを避け、索引で引く形にする
 - SQL のテストは全部で約35分かかる（手元で流すときは裏で流してログを見る。t92 だけで約4分。同じログに2回流すと混ざるので、ログの名前を分ける）
 
 ## 次にやること
+- 外に返す口の上限（PR #153）：CI とレビューに答える。チェックイン担当の直しが仕上がったら一緒に反映（main に別の移行が先なら rebase。188・189 の PR #146 が先に入るはず）。adsb.im の条件が分かったら確認表を直し、使えなければ経路の推定を止める案を作る
 00000000000000000000000000. adsb.lol の鍵（PR #149）：CI とレビューに答える。本人が鍵を入れたら、ログの「adsb.lol 429」「retry ok」が減ったかを見てもらう。ヘッダー名が違うと分かったら既定を直す。外に返す口の案が決まったら、案1なら移行（airport_tracks の grant・数える小さな表＋RLS・テスト。190 以降・t129 以降）とチェックイン担当への依頼（ログインの鍵を付けて呼ぶ）。adsb.im の条件が合わなければ、行き先を foreign_usual だけにする案
 0000000000000000000000000. 見落としの片付け 11/20（PR #146）：CI とレビューに答える。PM が反映するとき main に別の移行が先なら rebase。反映のあと 2026-11-16-2-check.sql で「索引で引いた回数」が増えたか見てもらう。本人が history の線や overnight を決めたら直す
 000000000000000000000000. 実際の出発・到着（PR #136）：CI とレビューに答える。「反映して」が出たら番号を確かめ（main に別の移行が先なら rebase）、反映の前後に flight-actual-check.sql を流してもらう。本人が決めたら、便名のない便を reg_legs で埋める・31日より前の航跡を cold-archive から埋める（188 以降・t127 以降）
@@ -337,6 +346,7 @@
 8. それ以外は PM の指示を待つ（勝手に新しい機能は始めない）。毎週月曜の昼の回は、下の「定期の仕事」（次の候補：点検の結果が来たら、死んだ行や使われていない索引の整理・遅い処理。cold-day-size.sql の結果で全機の航跡の1日が 20MB を超えるなら、ファイルを空港ごとに分ける案を作る。rwy-learn と daily-archive は 11/10 に見た（PR #58）。eta-calib・taxi-out・flight-watch は 11/11 に見た（PR #70）。結果がないまま次の回が来たら、ほかの毎晩・裏の処理（timetable-sync・schedule-sync・odpt-status・co3 の SQL の文）を同じ目で見て、時間の上限のない仕事の一覧を作る）
 
 ## ほかの担当への依頼
+- チェックインへ（11/21 空の道すじの上限・PR #153。PM から checkin.md に写してほしい）：loadArt の airport_tracks（rpcPost）と cold-tracks の fetch で、ログインしているときは Authorization: Bearer <session の access_token> を付ける（今は anon の鍵）。返り値が配列でないとき、error が login_required なら「8日より前の空の道すじはログインすると見られます」、rate_limited なら「たくさん読んだので、○分（retry_after_min）ほどあとでまた見られます」を小さく出す。未ログインとデモの日付は前の7日までにしてよい。データ側（移行190）と同時に反映する
 - チェックインへ（11/20 朝一番の便・PR #146。PM から checkin.md に写してほしい）：inbound_aircraft が first_of_day（true／false）を返すようになった（移行189）。PR #128 の作りのまま読める。first_src（reg・history・null）と、reg のときだけ overnight（前の日に泊まった便：flight・dep・arr・arr_at・arr_src・reg）も返す。出すかは画面案しだい
 - チェックインへ（11/20 実際の出発・到着・PR #136。PM から checkin.md に写してほしい）：flights の act_dep_at・act_arr_at・act_src（odpt・adsb・timetable・空）を select に足す。「空の上」は act_src があれば act_arr_at − act_dep_at、なければ今までどおり arr_at − dep_at。adsb・timetable を含むときは「推定を含む」の小さい注記。地図は track があればその線、なければ大圏の線（出典 adsb.lol・ODbL）。画面の形が変わるなら先にデザイン担当の画面案
 - チェックイン（11/18・PR #126）：renderRide0 の `if(d.atd)` を「atd が今より後なら『出発の見込み 08:08』」にしてほしい（データ側で未来の atd は来なくなるが念のため）。前の便の行の ib.atd も同じ。朝一番の便の言い方は本人の答えのあと
@@ -570,7 +580,7 @@
   4. 外にデータをまとめて返す口（ログインなしで live_positions・reg_legs をそのまま大量に返す関数）がないか確かめ、あれば上限を付ける案を報告に
 - 仕上がったら PM が自動で反映する（鍵は本人が秘密の設定に入れる）
 
-## PM から積んだ次の仕事（11/21 2時20分、adsb.lol の続き。report-adsblol-key の 2・3 を PM のおすすめで決めた）※data/adsblol-key2 で
+## PM から積んだ次の仕事（11/21 2時20分、adsb.lol の続き。report-adsblol-key の 2・3 を PM のおすすめで決めた）※data/adsblol-key2 で【済み：PR #153・report-adsblol-key2.md。adsb.im は開けず未確認】
 - 外に返す口の上限は案1（おすすめ）で作る
 - adsb.im の条件（https://adsb.im/ と vradarserver/standing-data の LICENSE）を WebFetch で開いて確かめ、利用規約の確認表に書く。使えない条件なら経路の推定を止める案を報告に
 - first_of_day の線（3日以上・7割以上）はこのまま。overnight は今は画面に出さない
