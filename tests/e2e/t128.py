@@ -1,5 +1,6 @@
 import os, sys, json, asyncio, threading, functools, http.server, socketserver, shutil, tempfile
 HERE=os.path.dirname(os.path.abspath(__file__)); WEB=os.path.abspath(os.path.join(HERE,'..','..','web')); WORK=os.environ.get('SORAMEMO_TEST_WORK','/tmp/soramemo-e2e'); os.makedirs(WORK, exist_ok=True)
+# （11/19 運用タブは一覧＋専用ページになった。このテストは中身を前の形（見方のタブ）で確かめるので soramemo.ops.hub=0。一覧は t148）
 # 全体の見回り（11/13 改善担当 report-sweep-1113・データ担当 report-speed-1113）の直し
 #   1 図鑑でデモの「終了」が押せる（ツメがかぶらない）・ツメが下のタブ帯にかからない（844・667）
 #   2 ホームの地図の「＋」「−」が押せる（667 でも MAIN.wrap がかぶらない）
@@ -17,7 +18,7 @@ def check(name, ok, detail=''):
     print(('OK  ' if ok else 'NG  ') + name + (('  ' + str(detail)) if detail != '' else ''))
     if not ok: fails.append(name)
 HANEDA = (35.5494, 139.7798)
-INIT = "localStorage.setItem('soramemo.onboarded','1'); localStorage.setItem('soramemo.install.later','1'); localStorage.setItem('soramemo.tpTaught','1'); localStorage.setItem('soramemo.zk.notice','1');"
+INIT = "localStorage.setItem('soramemo.ops.hub','0'); localStorage.setItem('soramemo.onboarded','1'); localStorage.setItem('soramemo.install.later','1'); localStorage.setItem('soramemo.tpTaught','1'); localStorage.setItem('soramemo.zk.notice','1');"
 async def openp(b, h=844, mode='demo', extra='', reqs=None):
     c = await b.new_context(viewport={'width':390,'height':h}, geolocation={'latitude':HANEDA[0],'longitude':HANEDA[1],'accuracy':20}, permissions=['geolocation'], timezone_id='Asia/Tokyo', has_touch=True)
     await c.route('https://cdn.jsdelivr.net/npm/@supabase/**', lambda r: r.fulfill(path=os.path.join(HERE,'fake_sb.js'), content_type='application/javascript'))

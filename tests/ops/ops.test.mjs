@@ -69,6 +69,10 @@ async function page(iata, mode, at = NOON) {
 for (const def of Object.values(OPS_AIRPORTS)) {
   const mode = pickMode(def), { ctx, p, errs } = await page(def.iata, mode);
   await p.goto(`${BASE}/index.html#ops-${def.iata}`);
+  // 11/19 運用タブは一覧＋専用ページ（design/ops-hub 1版）。一覧の「滑走路」のカードから専用ページを開いて確かめる（地図はこのページの下の「地図」のカードと同じ中身）
+  await p.waitForSelector('[data-ohub="runway"]', { timeout: 15000 }).catch(() => {});
+  ok(await p.locator('#opsHubList [data-ohub]').count() === 10, `${def.iata}：運用の一覧に10枚のカード`);
+  await p.locator('[data-ohub="map"]').click().catch(() => {}); await p.waitForTimeout(700);
   await p.waitForFunction(() => document.querySelector("#opsInfo .opssrc"), null, { timeout: 15000 }).catch(() => {});
   await p.waitForTimeout(2500);
   const info = await p.locator("#opsInfo").innerText().catch(() => "");
@@ -79,15 +83,23 @@ for (const def of Object.values(OPS_AIRPORTS)) {
   ok(lines > 0, `${def.iata}：地図に経路の線がある（${lines}本）`);
   ok(errs.length === 0, `${def.iata}：画面のエラーなし`, errs.join(" / "));
   if (def.iata === "HND") {
+    // 11/16 運用タブを空港と機体に分けた（PR #112・#113、画面案 design/ops-split 2版の案2）：特別塗装機のかたまりは「滑走路」から外し、
+    // 空港の側では「撮る人」の見方にだけ「羽田に来る特別塗装機」を出す。滑走路では特別塗装機を読まない（t130）ので、地図の名札に★は付かない。
+    // 名札そのもの（便名と高度）は今までどおり出る。★を滑走路の地図に戻すかは本人の答え待ち（docs/pm/report-fix-ops-test.md）
+    const sp0 = await p.locator("#opsSpecial").isVisible().catch(() => false);
+    ok(!sp0, "羽田 滑走路：特別塗装機の欄は出さない（撮る人の見方と機体の側へ移した）");
+    const tag = await p.locator(".tlabel").count();
+    ok(tag > 0, `羽田 滑走路：地図に機体の名札が出る（${tag}枚）`);
+    await p.locator("#opsHubBack").click(); await p.waitForTimeout(600);
+    await p.locator('[data-ohub="photo"]').click(); await p.waitForTimeout(2500);
     const sp = await p.locator("#opsSpecial").innerText().catch(() => "");
-    ok(sp.includes("羽田に来る特別塗装機") && sp.includes("ポケモンジェット 赤") && sp.includes("着陸に向かっている"), "特別塗装機の欄が出る（羽田に来る特別塗装機）", sp.slice(0, 120));
-    const tag = await p.locator(".tlabel.sp").count();
-    ok(tag > 0, "地図の名札に特別塗装機の★が出る");
+    ok(sp.includes("羽田に来る特別塗装機") && sp.includes("ポケモンジェット 赤") && sp.includes("着陸に向かっている"), "羽田 撮る人：特別塗装機の欄が出る（羽田に来る特別塗装機）", sp.slice(0, 120));
+    ok(errs.length === 0, "羽田 撮る人：画面のエラーなし", errs.join(" / "));
   }
   if (def.iata === "NRT") {
     // 成田：出発経路の方向での絞り込み（34運用は方向が3つ以上ある）。経路の線は「経路の全体」のときに出す
     ok(await p.locator('#opsSidDir [data-sid-dir]').count() === 0, "成田：空港のまわりでは出発経路の方向の切り替えを出さない");
-    await p.locator('[data-scope="wide"]').click(); await p.waitForTimeout(1000);
+    await p.locator('[data-scope="wide"]').click(); await p.waitForTimeout(1000);   // 「地図」の専用ページの中
     const lines = await p.locator("#opsMap path.leaflet-interactive").count();
     const n0 = await p.locator('#opsSidDir [data-sid-dir]').count();
     ok(n0 >= 4, `成田：出発経路の方向の切り替えが出る（${n0}個）`);
@@ -110,7 +122,8 @@ for (const iata of ["HND", "SDJ", "FUK", "OKA"]) {
 // 3) 深夜：羽田23時30分は「深夜・北風運用」と夜の説明、福岡23時（機体なし）は「運用時間外」
 {
   const def = OPS_AIRPORTS.HND, { ctx, p, errs } = await page("HND", "north", new Date("2026-10-16T14:30:00Z"));
-  await p.goto(`${BASE}/index.html#ops-HND`); await p.waitForTimeout(2500);
+  await p.goto(`${BASE}/index.html#ops-HND`); await p.waitForTimeout(1500);
+  await p.locator('[data-ohub="runway"]').click().catch(() => {}); await p.waitForTimeout(1200);
   const info = await p.locator("#opsInfo").innerText().catch(() => "");
   ok(info.includes(def.modes.nightN.label) && info.includes("夜間："), "羽田 23:30：深夜・北風運用と夜の説明", info.slice(0, 160));
   ok(errs.length === 0, "羽田 23:30：画面のエラーなし", errs.join(" / "));
@@ -120,6 +133,7 @@ for (const url of ["index.html#ops-FUK", "now.html?ap=FUK"]) {
   const { ctx, p, errs } = await page("FUK", "b", new Date("2026-10-16T14:00:00Z"));
   await p.route(FAKE + "/functions/v1/airport-traffic*", (r) => r.fulfill({ json: { iata: "FUK", at: new Date("2026-10-16T14:00:00Z").toISOString(), source: "adsb.lol", planes: [] } }));
   await p.goto(`${BASE}/${url}`); await p.waitForTimeout(2500);
+  if (url.startsWith("index")) { await p.locator('[data-ohub="runway"]').click().catch(() => {}); await p.waitForTimeout(1200); }
   const txt = await p.locator("body").innerText().catch(() => "");
   ok(txt.includes("運用時間外") && txt.includes("22時〜7時は離着陸できません"), `福岡 23:00（${url}）：運用時間外`, txt.slice(0, 200));
   // 運用のタブは計器のタイル（「運用時間」と「7時〜22時」が別の行）、空港のいまは1行
@@ -141,7 +155,8 @@ for (const url of ["index.html#ops-FUK", "now.html?ap=FUK"]) {
     { dir: "arr", flight: "IJ123", other: "HND", sched: T(-60), est: null, actual: null, inferred: T(-52), status: null, cancelled: false },
     { dir: "arr", flight: "6J21", other: "HND", sched: T(-8), est: null, actual: null, predicted: T(6), status: null, cancelled: false, dep_actual: T(-80) },
   ] } }));
-  await p.goto(`${BASE}/index.html#ops-ITM`); await p.waitForTimeout(3500);
+  await p.goto(`${BASE}/index.html#ops-ITM`); await p.waitForTimeout(1500);
+  await p.locator('[data-ohub="runway"]').click().catch(() => {}); await p.waitForTimeout(2500);   // 門限チャレンジは「滑走路」の専用ページ
   const txt = await p.locator("#opsCurfew").innerText().catch(() => "");
   ok(txt.includes("門限チャレンジ") && txt.includes("21:00") && txt.includes("あと 30分"), "伊丹 20:30：門限チャレンジと残り時間", txt.slice(0, 120));
   ok(txt.includes("到着") && txt.includes("間に合いそう") && txt.includes("過ぎる見込み") && txt.includes("欠航") && txt.includes("記録なし") && txt.includes("到着（推定）") && txt.includes("機体の位置から推定") && txt.includes("到着予想 21:06"), "伊丹 20:30：便ごとの判定（到着予想も・運航情報がない便は推定の着陸時刻、それもなければ「記録なし」）", txt);

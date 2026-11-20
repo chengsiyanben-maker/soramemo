@@ -1,5 +1,6 @@
 # すべての見方の設定（11/11 13時 本人「すべてよい」・画面案 design/view-settings の 2版）
 #   各画面の鉛筆のシート：全部の行に説明（OFF でも残る）・案A（どの見方も OFF にでき、最後の1つだけ残る。「最後の1つ」の札と理由）・見方が1つでも帯に名前が残る
+# （11/19 運用タブは一覧＋専用ページになった。このテストは中身を前の形（見方のタブ）で確かめるので soramemo.ops.hub=0。一覧は t148）
 #   表示の編集の1枚：画面ごとに畳んだカード（タブ 5/5）・押すとその場で開く・行き先の字・隠しているもので絞る・鉛筆から来たらそのカードだけ開いて光る・部品は ON／OFF（✓ のピルはない）
 #   案A の前に保存した物は前の決まりどおり（地方別・日誌は出す）。修行のカードは修行担当が LO_EXT.sg を足したときだけ
 import os, sys, asyncio
@@ -10,7 +11,7 @@ fails = []
 def check(label, ok, extra=''):
     print(label, ok, extra)
     if not ok: fails.append(label)
-NEW = "localStorage.setItem('soramemo.onboarded','1'); localStorage.setItem('soramemo.persona','all'); localStorage.setItem('soramemo.install.later','1'); localStorage.setItem('soramemo.zk.notice','new'); localStorage.setItem('soramemo.tp.tip','1'); localStorage.setItem('soramemo.tpTaught','1');"
+NEW = "localStorage.setItem('soramemo.ops.hub','0'); localStorage.setItem('soramemo.onboarded','1'); localStorage.setItem('soramemo.persona','all'); localStorage.setItem('soramemo.install.later','1'); localStorage.setItem('soramemo.zk.notice','new'); localStorage.setItem('soramemo.tp.tip','1'); localStorage.setItem('soramemo.tpTaught','1');"
 async def open_app(b, h=844, night=False):
     c = await b.new_context(viewport={'width':390,'height':h}, device_scale_factor=2, timezone_id='Asia/Tokyo')
     await c.route('**/web/config.js', lambda r: r.fulfill(body='window.SORAMEMO_CONFIG = {};', content_type='application/javascript'))
@@ -64,15 +65,15 @@ async def main():
         await pg.evaluate("$('dSettings').showModal(); renderMyPage()"); await pg.wait_for_timeout(300)
         await pg.click('#dSettings .lotile[data-lo-open="top"]'); await pg.wait_for_timeout(300)
         secs = await pg.eval_on_selector_all('#dLayout .losec', 'e => e.map(x => x.dataset.loSec)')
-        check('畳んだカードが画面ごとに並ぶ（修行のカードは修行担当の LO_EXT.sg）:', secs == ['tabs', 'home', 'book', 'log', 'sg', 'ops', 'stats', 'aps'], str(secs))
+        check('畳んだカードが画面ごとに並ぶ（修行のカードは修行担当の LO_EXT.sg）:', secs == ['tabs', 'home', 'book', 'log', 'sg', 'ops', 'opsp', 'stats', 'aps'], str(secs))
         check('はじめは全部畳んでいる・スイッチは見えない:', await pg.locator('#dLayout .losec.open').count() == 0 and await pg.locator('#dLayout .losw').count() == 0)
         check('タブのカードは 5/5（ホームを入れて5つまで）:', (await pg.inner_text('#dLayout [data-lo-sec="tabs"] .locn')).replace(' ', '') == '5/5')
-        check('✓ のピルと大きい数字はない:', await pg.locator('#dLayout .lopill, #dLayout .lonum').count() == 0 and '39このうち' in await pg.inner_text('#dLayout .loall'))
+        check('✓ のピルと大きい数字はない:', await pg.locator('#dLayout .lopill, #dLayout .lonum').count() == 0 and '42このうち' in await pg.inner_text('#dLayout .loall'))
         h = await pg.evaluate("Math.min(...[...document.querySelectorAll('#dLayout .losh')].map(x => x.getBoundingClientRect().height))")
         check('カードの見出しの押せる高さ 44px 以上:', h >= 44, str(h))
         await shot(pg, '10-844-layout-top.png')
         await pg.click('#dLayout [data-lo-fold="ops"]'); await pg.wait_for_timeout(250)
-        check('押すとその場で開く（運用：見方7＋滑走路の下6）:', await pg.locator('#dLayout [data-lo-sec="ops"].open .losw').count() == 13 and await pg.get_attribute('#dLayout [data-lo-fold="ops"]', 'aria-expanded') == 'true' and await pg.locator('#dLayout .losec.open').count() == 1)
+        check('押すとその場で開く（運用（空港）：見方7＋滑走路の下5。特別塗装機は機体の側へ）:', await pg.locator('#dLayout [data-lo-sec="ops"].open .losw').count() == 12 and await pg.get_attribute('#dLayout [data-lo-fold="ops"]', 'aria-expanded') == 'true' and await pg.locator('#dLayout .losec.open').count() == 1)
         check('開いたカードの見出し「見方」「滑走路の下に出すもの」と行き先「運用へ ›」:', '滑走路の下に出すもの' in await pg.inner_text('#dLayout [data-lo-sec="ops"]') and '運用へ ›' in await pg.inner_text('#dLayout [data-lo-sec="ops"] .logo'))
         await pg.evaluate("loScrollTo('ops')"); await pg.wait_for_timeout(150)
         await shot(pg, '11-844-layout-ops.png')

@@ -1,5 +1,5 @@
-// 定期の手入れ 11/16 の2回目（移行 183）：引く索引のない外部キーとよく引く列に索引を足す
-//   1. 183 のあと、public の外部キーで「先頭がその列の索引」がないものは、空港・端末・種類の表を指すもの（ほぼ消さない小さな表）と
+// 定期の手入れ 11/16 の2回目（移行 188。もとは 183・PR #111）：引く索引のない外部キーとよく引く列に索引を足す
+//   1. 188 のあと、public の外部キーで「先頭がその列の索引」がないものは、空港・端末・種類の表を指すもの（ほぼ消さない小さな表）と
 //      auth.users を指す経営の数本（1人消すとき1回だけ読む）だけになったか（足した8本が効いているか）
 //   2. 部分索引でも、外部キーの確かめと同じ形（列 = $1 の汎用の計画）で索引が使われるか
 //   3. 退会（auth.users を消す）と機体を売る形（aircraft を消す）が今までどおり動き、set null・cascade の結果が同じか
@@ -13,7 +13,7 @@ create function auth.uid() returns uuid language sql stable as $$ select nullif(
 create function auth.jwt() returns jsonb language sql stable as $$ select jsonb_build_object('sub', current_setting('request.jwt.claim.sub', true), 'aal', 'aal2') $$;
 grant usage on schema public, auth to anon, authenticated, service_role; grant execute on function auth.uid(), auth.jwt() to anon, authenticated, service_role;`);
 const files = fs.readdirSync(dir).sort();
-const NEW = '20261116000183_maint_1116b.sql';
+const NEW = '20261120000188_maint_1116b.sql';
 let bad = 0; const check = (label, ok, v) => { console.log((ok ? 'OK ' : 'NG ') + label, ok ? '' : JSON.stringify(v)); if (!ok) bad++; };
 const rows = async (sql, p) => (await db.query(sql, p)).rows;
 
@@ -48,8 +48,8 @@ const noAfter = await rows(NOIDX);
 const WANT = ['aircraft.user_id', 'flights.dep_checkin', 'flights.arr_checkin', 'co3_market.aircraft_id', 'co3_orders.aircraft_id',
   'co3_breakdowns.spare_id', 'co3_heavy.spare_id', 'co3_extra.aircraft_id'];
 const has = (list, k) => list.some((r) => `${r.tbl}.${r.cols}` === k);
-check('183 の前は8本とも引く索引がなかった', WANT.every((k) => has(noBefore, k)), WANT.filter((k) => !has(noBefore, k)));
-check('183 のあとは8本とも引く索引がある', WANT.every((k) => !has(noAfter, k)), WANT.filter((k) => has(noAfter, k)));
+check('188 の前は8本とも引く索引がなかった', WANT.every((k) => has(noBefore, k)), WANT.filter((k) => !has(noBefore, k)));
+check('188 のあとは8本とも引く索引がある', WANT.every((k) => !has(noAfter, k)), WANT.filter((k) => has(noAfter, k)));
 const SMALL = ['public.airports', 'public.terminals', 'public.co3_types', 'public.game_events', 'public.atc_feeders', 'airports', 'terminals', 'co3_types', 'game_events', 'atc_feeders', 'auth.users'];
 const left = noAfter.filter((r) => !SMALL.includes(r.ref));
 check('残るのは空港・端末・種類などの小さな表と auth.users を指すものだけ', left.length === 0, left);
@@ -89,7 +89,7 @@ const ac = (await rows(`select id from public.aircraft where user_id = '${V}' or
 await db.exec(`delete from public.aircraft where id = ${ac[0]}`);
 check('機体を消しても動き、残りの機体はそのまま', (await rows(`select count(*)::int c from public.aircraft where user_id = '${V}'`))[0].c === 1, null);
 
-// 4（183 は最後の移行なので、before は 182 まで・after は 183 まで）
+// 4（before は 188 の前まで・after は 188 のあとの移行まで流したもの）
 check('列は変わらない', JSON.stringify(before.cols) === JSON.stringify(after.cols), null);
 check('RLS のポリシーは変わらない', JSON.stringify(before.pol) === JSON.stringify(after.pol), null);
 check('表の権限は変わらない', JSON.stringify(before.grants) === JSON.stringify(after.grants), null);

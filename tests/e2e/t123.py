@@ -120,7 +120,13 @@ async def main():
         lines = await pg.evaluate("""(async () => { const s = { ...FB_SHARE, type:'B777-300ER（とても長い機種名の見本）', reg:'JA751A', seat:'103K', showReg:true, showSeat:true };
           const cv = await fbPassCard(s); return cv.width; })()""")
         check('長い機種名でも券が描ける:', lines == 1080)
-        await pg.click('#fbShareGo'); await pg.wait_for_timeout(600)
+        await pg.click('#fbShareGo')
+        # 券を描いて画像にするまで時間がかかることがある（字の読み込み待ち）。決まった時間ではなく、共有の窓が開くまで待つ（11/20）
+        # （wait_for_function は防御設定の unsafe-eval に引っかかるので、evaluate を繰り返して待つ）
+        for _ in range(40):
+            if await pg.evaluate("$('dShare').open"): break
+            await pg.wait_for_timeout(200)
+        await pg.wait_for_timeout(200)
         check('共有するで共有の窓へ:', await pg.evaluate("$('dShare').open") and not await pg.evaluate("$('dFbShare').open"))
         await pg.evaluate("$('dShare').close()")
         # ✎ で便の窓 → 車などにすると便から外れる

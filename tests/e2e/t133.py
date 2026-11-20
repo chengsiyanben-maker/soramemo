@@ -1,5 +1,6 @@
 import os, sys
 HERE=os.path.dirname(os.path.abspath(__file__)); WEB=os.path.abspath(os.path.join(HERE,'..','..','web')); WORK=os.environ.get('SORAMEMO_TEST_WORK','/tmp/soramemo-e2e'); os.makedirs(WORK, exist_ok=True)
+# （11/19 運用タブは一覧＋専用ページになった。このテストは中身を前の形（見方のタブ）で確かめるので soramemo.ops.hub=0。一覧は t148）
 # 海外の空港の止まり具合（決定事項【11/15】案A・画面案 design/world-ops の W1〜W5）
 #   1 案内板の国際線の便にピンの札（FAA のいちばん重いもの1つ）。過ぎた便・着いた便には出さない。便の数の札は便の列に出さない
 #   2 「行き先の海外の空港のいま」の欄：出す空港だけ（FAA があるか欠航・30分以上の遅れ）・断り書きは太字・note を出す・国内線では出さない
@@ -43,7 +44,7 @@ async def page(b, view='board', wops=WOPS, live=LIVE, plan=None, width=390, heig
         body = {'airport_board':BOARD, 'airport-foreign':FOREIGN, 'world_airport_ops':wops, 'flight-live':live, 'airport-traffic':{'planes':[], 'at':iso(0)}}.get(name, {} if '/functions/' in u else [])
         await r.fulfill(status=200, body=json.dumps(body), content_type='application/json', headers={'Access-Control-Allow-Origin':'*'})
     await c.route('https://fake.supabase.co/rest/**', h); await c.route('https://fake.supabase.co/functions/**', h)
-    init = "localStorage.setItem('soramemo.onboarded','1'); localStorage.setItem('soramemo.install.later','1'); localStorage.setItem('soramemo.tpTaught','1'); localStorage.setItem('soramemo.zk.notice','1'); localStorage.setItem('soramemo.persona','all'); localStorage.setItem('soramemo.opsAirport','NRT'); localStorage.setItem('soramemo.view.ops','%s');" % view
+    init = "localStorage.setItem('soramemo.ops.hub','0'); localStorage.setItem('soramemo.onboarded','1'); localStorage.setItem('soramemo.install.later','1'); localStorage.setItem('soramemo.tpTaught','1'); localStorage.setItem('soramemo.zk.notice','1'); localStorage.setItem('soramemo.persona','all'); localStorage.setItem('soramemo.opsAirport','NRT'); localStorage.setItem('soramemo.view.ops','%s');" % view
     if plan: init += "localStorage.setItem('soramemo.plan', %s);" % json.dumps(json.dumps(plan))
     await c.add_init_script(init)
     pg = await c.new_page(); errs = []; pg.on('pageerror', lambda e: errs.append(str(e)))
