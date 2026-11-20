@@ -41,7 +41,11 @@ await db.exec(`insert into public.flight_history (svc_date, flight, dep, arr, st
 r = await as('anon', `select public.airport_tracks('HND', ${y})`);
 check('ほかの空港の便が2000便を超えても、その空港の航跡は欠けない', r?.length === 2, r?.length);
 r = await as('anon', `select public.airport_tracks('HND', ${y} - 40)`);
-check('31日より前の日も返す（記録はずっと残す）', Array.isArray(r) && r.length === 1, r);
+check('前の7日より前は、ログインなしでは返さない（移行190）', r?.error === 'login_required', r);
+await db.exec(`insert into auth.users (id) values ('00000000-0000-0000-0000-0000000000a1'); select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-0000000000a1', false)`);
+r = await as('authenticated', `select public.airport_tracks('HND', ${y} - 40)`);
+await db.exec(`select set_config('request.jwt.claim.sub', '', false)`);
+check('31日より前の日も、ログインした人には返す（記録はずっと残す）', Array.isArray(r) && r.length === 1, r);
 r = await as('anon', `select public.airport_tracks('HND', (now() at time zone 'Asia/Tokyo')::date)`);
 check('今日の分は、全機の航跡がなければ返さない（JAL・ANA の便の航跡は前の日まで）', Array.isArray(r) && r.length === 0, r);
 r = await as('anon', `select count(*) from public.archive_user_flights(${y})`);
