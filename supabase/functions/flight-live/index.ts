@@ -7,6 +7,7 @@ import { createClient } from "npm:@supabase/supabase-js@2.117.2";
 import { callsignsFor, type Airport, loadCalib, loadModeCalib } from "../_shared/flight_watch.ts";
 import { liveState, type LiveSched, type Plane, toPlane } from "../_shared/flight_live.ts";
 import { worldAirport } from "../_shared/world_airports.ts";
+import { adsbImHeaders, adsbLolHeaders, backoffUntil } from "../_shared/adsblol.ts";
 
 const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, { auth: { persistSession: false } });
 const H = { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*", "Cache-Control": "public, max-age=30" };
@@ -25,13 +26,15 @@ async function airport(iata: string): Promise<Airport | null> {
 }
 
 const cache = new Map<string, { at: number; p: Plane | null }>();
-let last = 0;
+let last = 0, blockedUntil = 0;
 async function findPlane(cs: string): Promise<Plane | null> {
   const hit = cache.get(cs); if (hit && Date.now() - hit.at < 45_000) return hit.p;
   const wait = last + 1000 - Date.now(); if (wait > 0) await new Promise((r) => setTimeout(r, wait));   // 続けて問い合わせるときは1秒あける
+  if (Date.now() < blockedUntil) throw new Error("adsb.lol backoff");   // 429・420 のあとは Retry-After まで問い合わせない
   last = Date.now();
-  const r = await fetch(`https://api.adsb.lol/v2/callsign/${encodeURIComponent(cs)}`, { headers: { "User-Agent": "soramemo (flight-live)" }, signal: AbortSignal.timeout(10000) });
-  if (!r.ok) throw new Error("adsb.lol " + r.status);
+  const r = await fetch(`https://api.adsb.lol/v2/callsign/${encodeURIComponent(cs)}`, { headers: adsbLolHeaders("flight-live"), signal: AbortSignal.timeout(10000) });
+  if (r.status === 429 || r.status === 420) { blockedUntil = backoffUntil(Date.now(), r.headers.get("retry-after")); console.log("adsb.lol", r.status, "backoff"); }
+  if (!r.ok) { await r.body?.cancel(); throw new Error("adsb.lol " + r.status); }
   const j = await r.json(), now = typeof j?.now === "number" ? j.now : Date.now();
   const p = ((j?.ac ?? []) as unknown[]).map((a) => toPlane(a, now)).find((x) => x) ?? null;
   cache.set(cs, { at: Date.now(), p });
@@ -39,7 +42,7 @@ async function findPlane(cs: string): Promise<Plane | null> {
 }
 // 時刻表にない便：機体の位置から経路を推定する（adsb.im の経路のデータ。tar1090 と同じ問い合わせ先。もっともらしいものだけ）
 async function guessRoute(p: Plane): Promise<{ dep: string; arr: string } | null> {
-  const r = await fetch("https://adsb.im/api/0/routeset", { method: "POST", headers: { "Content-Type": "application/json", "User-Agent": "soramemo (flight-live)" },
+  const r = await fetch("https://adsb.im/api/0/routeset", { method: "POST", headers: adsbImHeaders("flight-live"),
     body: JSON.stringify({ planes: [{ callsign: p.callsign, lat: p.lat, lng: p.lon }] }), signal: AbortSignal.timeout(10000) });
   if (!r.ok) return null;
   const x = ((await r.json()) as { _airport_codes_iata?: string; plausible?: boolean | number }[])?.[0];

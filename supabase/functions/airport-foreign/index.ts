@@ -8,6 +8,7 @@ import { createClient } from "npm:@supabase/supabase-js@2.117.2";
 import { classifyForeign, foreignNear, type LivePos, parseRoutes } from "../_shared/foreign_now.ts";
 import { readShared, writeShared } from "../_shared/edge_cache.ts";
 import { pickForeign } from "../_shared/foreign_cache.ts";
+import { adsbImHeaders } from "../_shared/adsblol.ts";
 
 const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, { auth: { persistSession: false } });
 const H = { "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Methods": "GET, OPTIONS", "Content-Type": "application/json", "Access-Control-Expose-Headers": "Server-Timing, X-Stale" };
@@ -30,7 +31,7 @@ async function routes(planes: { callsign: string; lat: number; lon: number }[]) 
   if (!planes.length) return new Map();
   const wait = 1000 - (Date.now() - lastRoute); if (wait > 0) await new Promise((r) => setTimeout(r, wait));
   lastRoute = Date.now();
-  const r = await fetch(ROUTESET, { method: "POST", headers: { "Content-Type": "application/json", "User-Agent": "soramemo (airport-foreign)" },
+  const r = await fetch(ROUTESET, { method: "POST", headers: adsbImHeaders("airport-foreign"),
     body: JSON.stringify({ planes: planes.map((p) => ({ callsign: p.callsign, lat: p.lat, lng: p.lon })) }), signal: AbortSignal.timeout(10000) });
   if (!r.ok) throw new Error(`routeset ${r.status}`);
   return parseRoutes(await r.json(), planes.map((p) => p.callsign));
