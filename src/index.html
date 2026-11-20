@@ -12092,7 +12092,7 @@ async function renderThatDay(){
   TD.last.facts = facts; TD.last.center = center;
   $("tdInfo").innerHTML = `${tracks.length && center ? `<button class="linkbtn2" data-tdshare type="button" style="float:right">画像で共有</button>` : ""}<small>${esc(cur.label)}</small><b style="display:block;font-size:17px;margin-top:2px">${esc(placeShort(cur.iata))}の空　${artLabel(cur.day)}</b>
     <div class="tdfacts">${facts.map(([k, v]) => `<div>${k}<b>${esc(String(v))}</b></div>`).join("")}</div>
-    ${!tracks.length ? `<p class="hint">${cur.day < ART_FIRST ? "記録を始めた2026年10月18日より前の日です。航跡はありません。" : "この日の航跡は、まだありません（その日の分は次の朝にできます）。"}</p>` : ""}
+    ${!tracks.length ? `<p class="hint">${cur.day < ART_FIRST ? "記録を始めた2026年10月18日より前の日です。航跡はありません。" : ART.err && ART.iata === cur.iata && ART.day === cur.day ? artErrText(ART.err) : "この日の航跡は、まだありません（その日の分は次の朝にできます）。"}</p>` : ""}
     <p class="fwnote">航跡は空港の近くで15,000ft より低く飛んだ機体（${ADSB_A}・ODbL）。橙が出発、水色が到着、白があなたの便。運用・滑走路は推定です。</p>`;
 }
 // 自分の便の航跡を白で重ねる（x0・y0 から一辺 W の四角に、drawArt と同じ縮尺で）
@@ -12709,14 +12709,32 @@ function decodePl(s){
   while(i < s.length){ lat += nx(); lon += nx(); out.push([lat / 1e4, lon / 1e4]); }
   return out;
 }
+// 空の道すじは、今日と前の7日はだれでも、それより前の日はログインした人だけ（1時間に「空港×日」60組まで。移行190）
+const ART_FREE_DAYS = 7;
+const artLoggedIn = () => !!(SERVER && sb && user && !demo);
+const artMinDay = () => artLoggedIn() ? ART_FIRST : [ART_FIRST, addDay(jstToday(), -ART_FREE_DAYS)].sort()[1];
+async function artToken(){   // ログインしているときはログインの鍵、ほかは anon の鍵
+  if(artLoggedIn()){ try{ const { data } = await sb.auth.getSession(); if(data && data.session && data.session.access_token) return data.session.access_token; }catch(e){} }
+  return SORAMEMO_CONFIG.supabaseAnonKey;
+}
+const artErrOf = j => j && !Array.isArray(j) && (j.error === "login_required" || j.error === "rate_limited") ? { kind:j.error, min:Math.max(1, Number(j.retry_after_min) || 60) } : null;
+const artErrText = e => !e ? "" : e.kind === "login_required" ? "8日より前の空の道すじはログインすると見られます。" : `たくさん読んだので、${e.min}分ほどあとでまた見られます。`;
 async function loadArt(iata, day){
-  if(ART.iata === iata && ART.day === day && ART.tracks) return ART.tracks;
-  let t = await rpcPost("airport_tracks", { p_iata:iata, p_day:day });
-  // 400日より前の日は、ファイル置き場に移してある（cold-tracks から読む）
+  if(ART.iata === iata && ART.day === day && ART.tracks && !ART.err) return ART.tracks;
+  const tok = await artToken(), base = SORAMEMO_CONFIG.supabaseUrl.replace(/\/$/, "");
+  let t = null;
+  try{ const r = await fetch(base + "/rest/v1/rpc/airport_tracks", { method:"POST", headers:{ "Content-Type":"application/json", apikey:SORAMEMO_CONFIG.supabaseAnonKey, Authorization:"Bearer " + tok }, body:JSON.stringify({ p_iata:iata, p_day:day }) });
+    t = r.ok ? await r.json() : null; }catch(e){}
+  // 400日より前の日は、ファイル置き場に移してある（cold-tracks から読む。ログインなしは 401、上限は 429）
   if(Array.isArray(t) && !t.length && day < addDay(jstToday(), -395)){
-    try{ const r = await fetch(SORAMEMO_CONFIG.supabaseUrl.replace(/\/$/, "") + `/functions/v1/cold-tracks?iata=${encodeURIComponent(iata)}&day=${day}`, { headers:{ apikey:SORAMEMO_CONFIG.supabaseAnonKey } }); if(r.ok) t = await r.json(); }catch(e){}
+    try{ const r = await fetch(base + `/functions/v1/cold-tracks?iata=${encodeURIComponent(iata)}&day=${day}`, { headers:{ apikey:SORAMEMO_CONFIG.supabaseAnonKey, Authorization:"Bearer " + tok } });
+      if(r.ok) t = await r.json();
+      else if(r.status === 401) t = { error:"login_required" };
+      else if(r.status === 429){ let j = {}; try{ j = await r.json(); }catch(_){} const ra = Number(r.headers.get("Retry-After")); t = { error:"rate_limited", retry_after_min:j.retry_after_min || (ra ? Math.ceil(ra / 60) : 60) }; }
+    }catch(e){}
   }
-  ART = { iata, day, band:ART.band, tracks:Array.isArray(t) ? t.map(x => ({ dep:x.d === 1, h:Number.isInteger(x.h) ? x.h : null, pts:decodePl(String(x.p || "")) })).filter(x => x.pts.length >= 2) : [] };
+  const err = artErrOf(t);
+  ART = { iata, day, band:ART.band, err, tracks:Array.isArray(t) ? t.map(x => ({ dep:x.d === 1, h:Number.isInteger(x.h) ? x.h : null, pts:decodePl(String(x.p || "")) })).filter(x => x.pts.length >= 2) : [] };
   return ART.tracks;
 }
 function drawArt(ctx, x0, y0, W, tracks, center){
@@ -12740,25 +12758,28 @@ const artLabel = d => { const x = new Date(d + "T00:00:00+09:00"); return `${x.g
 async function renderArt(day){
   const iata = OPS_AP, box = $("opsArt"), def = OPS_AIRPORTS[iata]; if(!box) return;
   if(!def || !def.center){ box.hidden = true; box.innerHTML = ""; return; }
-  const today = jstToday(), yd = addDay(today, -1), dflt = artDefault();
-  const d = day || (ART.iata === iata && ART.day && ART.day <= today ? ART.day : dflt);
-  const all = await loadArt(iata, d); if(OPS_AP !== iata) return;
-  if(!all.length && !day && d !== today){ box.hidden = true; box.innerHTML = ""; return; }
+  const today = jstToday(), yd = addDay(today, -1), dflt = artDefault(), mn = artMinDay();
+  let d = day || (ART.iata === iata && ART.day && ART.day <= today ? ART.day : dflt); if(d < mn) d = mn;
+  const all = await loadArt(iata, d); if(OPS_AP !== iata) return; const aerr = ART.err;
+  if(!all.length && !day && d !== today && !aerr){ box.hidden = true; box.innerHTML = ""; return; }
   const hasH = all.some(t => t.h != null); if(!hasH) ART.band = "all";
   const tracks = artShown(), dep = tracks.filter(t => t.dep).length, name = def.name, bl = artBandLabel();
   const when = d === today ? "今日" : d === yd ? "昨日" : artLabel(d), cov = artCoveredH();
   const wait = d === today ? `今日の分は3時間ごとにまとめています。${cov ? `いまは${cov}時ごろまで。` : "0時15分のまとめのあとから見られます。"}`
     : d === yd && jstNowHM() < ART_READY_H * 60 ? "昨日の最後の数時間は、3時15分ごろのまとめでそろいます。" : "";
+  // 読めなかったわけ（ログインが要る・上限）。ログインしていない人が前の7日の端まで来たときも同じ一文
+  const lock = aerr ? artErrText(aerr) : !artLoggedIn() && d === mn && mn > ART_FIRST ? artErrText({ kind:"login_required" }) : "";
   box.hidden = false;
   box.innerHTML = `<div class="bdhead"><h3>${esc(name)}の空の道　<small>${when}${bl ? "・" + bl : ""}</small></h3>${tracks.length ? `<button class="linkbtn2 ydshare" id="artShare" type="button">画像で共有</button>` : ""}</div>
     ${hasH ? `<div class="artbands" role="group" aria-label="時間帯">${ART_BANDS.map(([k, l]) => `<button type="button" class="chip" data-art-band="${k}" aria-pressed="${ART.band === k}">${l}</button>`).join("")}</div>` : ""}
     <canvas class="artcv" id="artCv" role="img" aria-label="${esc(`${artLabel(d)}${bl ? "の" + bl : ""}に${name}を出発した${dep}便と到着した${tracks.length - dep}便の、上昇・降下の道筋`)}"></canvas>
-    <div class="artnav"><button type="button" data-art-day="${addDay(d, -1)}" ${addDay(d, -1) < ART_FIRST ? "disabled" : ""} aria-label="前の日">◀</button>
-      <label class="artdate"><span>${artLabel(d)}${bl ? " " + bl : ""}　出発 ${dep}便・到着 ${tracks.length - dep}便</span><input type="date" id="artDate" value="${d}" min="${ART_FIRST}" max="${today}" aria-label="日を選ぶ"></label>
+    <div class="artnav"><button type="button" data-art-day="${addDay(d, -1)}" ${addDay(d, -1) < mn ? "disabled" : ""} aria-label="前の日">◀</button>
+      <label class="artdate"><span>${artLabel(d)}${bl ? " " + bl : ""}　出発 ${dep}便・到着 ${tracks.length - dep}便</span><input type="date" id="artDate" value="${d}" min="${mn}" max="${today}" aria-label="日を選ぶ"></label>
       <button type="button" data-art-day="${addDay(d, 1)}" ${addDay(d, 1) > today ? "disabled" : ""} aria-label="次の日">▶</button></div>
     ${wait ? `<p class="fwnote artwait">${wait}</p>` : ""}
+    ${lock ? `<p class="fwnote artlock" id="artLock">${lock}</p>` : ""}
     <p class="artkey"><span><i style="background:#FBB03B"></i>出発</span><span><i style="background:#48BEFF"></i>到着</span><span>円は中心から20・40・60km</span></p>
-    <p class="fwnote">空港の近くで15,000ft より低く飛んでいた、航空会社の便すべての位置（${ADSB_A}・ODbL）。時間帯は、空港のいちばん近くにいた時刻（日本時間）で分けています。10月22日より前の日は JAL・ANA の便だけで、時間帯では分けられません。電波が届かない所は描かれません。記録を始めた2026年10月18日から、どの日でも見られます。</p>`;
+    <p class="fwnote">空港の近くで15,000ft より低く飛んでいた、航空会社の便すべての位置（${ADSB_A}・ODbL）。時間帯は、空港のいちばん近くにいた時刻（日本時間）で分けています。10月22日より前の日は JAL・ANA の便だけで、時間帯では分けられません。電波が届かない所は描かれません。記録を始めた2026年10月18日から、どの日でも見られます（8日より前はログインした人だけ）。</p>`;
   const cv = $("artCv"), w = Math.round(cv.clientWidth * (devicePixelRatio || 1)) || 600;
   cv.width = w; cv.height = w; drawArt(cv.getContext("2d"), 0, 0, w, tracks, def.center);
 }
