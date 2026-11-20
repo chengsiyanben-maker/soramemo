@@ -1,6 +1,12 @@
 # チェックイン担当の帳面
 
 ## いま持っている仕事
+- 11/21 1時台（日本時間）の定時の回（PM 11/21 1時10分「adsb.lol の出典をどこでも押せる形に」）：ブランチ checkin/adsb-credit（main 8c39141 から）・下書き **PR #150**（0eaee2f・3278382）・報告 docs/pm/report-adsb-credit.md・写真 docs/pm/shots-adsb-credit/
+  - 共通の部品 ADSB_A（新しい窓・noopener）と CSS a.adsbl（字の色のまま下線）を足し、チェックインの持ち場の字だけの出典を全部リンクに。形は「adsb.lol（ODbL）」、かっこの中は「（adsb.lol・ODbL）」
+  - 変えた関数：hndOpsHTML・a3SrcHTML・UL_SRC・renderRideIntl・fbMapHTML・loadFlightCands・renderFleetBook・renderLivBook・renderThatDay・trendHTML・curfewHTML・foreignHTML・renderArt・PIN_FOOT・renderGaBox・gaSetHTML・gaEvHTML（足した：ADSB_A）
+  - 空港の3D の角の出典はボタンのまま（押すと「データの出典」が開き、そこがリンク）。共有の絵の字は押せないのでそのまま
+  - テスト：t153（新）成功・全体 122 / 124（t48 は zxing がなかっただけ、t72 は #148 の直したテストで成功）・tests/ops 成功
+  - 下の担当（運用予想・撮る人用）の字だけの adsb.lol は変えていない → 依頼を「ほかの担当への依頼」に。経営の会社の機体の説明（4004 行あたり）も字だけ（経営の持ち場）
 - 11/20 手動の回（PM が同じ「毎回落ちるテストの直し」を指示）：前の回で PR #148 として済み。main は 8c39141 のままで、#148 は取り込み済みなので作り直しは不要だった。修行のコードには触っていない
 - 11/20 午後の定時の回（PM 14時10分「毎回落ちるテストの直し」）：ブランチ checkin/test-fix-1120（main 8c39141 から）・下書き **PR #148**（caf39d0）・報告 docs/pm/report-test-fix-1120.md。テストだけの直しで src/・web/ は変えていない（変えた関数なし）
   - t48：web/config.js でサーバー版になり、ログインなしでは便に付かなかった → デモに入ってから試す・zxing は /tmp/build → 作業用フォルダの順に探し、なければ npm で入れる・成否の確かめを足した
@@ -366,6 +372,8 @@
 - 確認コードは6けた。メールは Gmail、Supabase の送信上限は1時間100通
 
 ## 次にやること
+- PR #150（adsb.lol の出典）：PM の自動の反映を待つ。入る前に t153 と tests/ops を流す。運用予想・撮る人用が ADSB_A に替えたら t153 の OTHERS から外す。#148（テストの直し）と重ならない（#150 は t72・t48 に触っていない）
+- テストの t48 には zxing（@zxing/library@0.21.3）が要る。手元では作業用フォルダに npm で入れて ZXING_UMD で場所を渡す
 - PR #141（小さい直し）：#138・#139 を含むので、PM は #141 だけ入れても3つ入る。#138・#139 が先に入ったら #141 に main を取り込み web/ を作り直す。入る前に t151・t149・t150 を流す
 - tools/build.mjs はフォントの作り直しに brotli が要る（pip install brotli --break-system-packages）
 - PR #138（図鑑の絞り込み）・#139（フライトの実際の時刻）：改善担当の見直し・PM の自動の反映を待つ。#139 はデータ担当の #136（移行187）と一緒に入れる（先に入っても前の列で読み直すので壊れない）。入る前に #138 は t149・t127、#139 は t150 と t123・t47・t61 を流す。#138 と #139 は src/index.html の別の所（図鑑とフライト）。web/ はあとから入る方で作り直す
@@ -440,6 +448,9 @@
 - tests/ops は手元では npm の playwright にブラウザがないので、全体に入っている playwright をつないで流した（すべて成功）
 
 ## ほかの担当への依頼
+- 運用予想（11/21・PR #150、PM から伝えてほしい）：adsb.lol の出典は共通の部品 `${ADSB_A}`（押せるリンク、見える字は「adsb.lol」）にそろえた。specialHTML・spbListHTML・spbDetailHTML・planeHTML・PRED_NOTE の字だけの「adsb.lol」を `${ADSB_A}` に替えてほしい（文字は増やさない。PRED_NOTE はふつうの "…" の文字列なので `…` にする）。とくに機体を選んだ画面は上の i が隠れるので、planeHTML の1行が唯一の出典。替えたら tests/e2e/t153.py の OTHERS から外す
+- 撮る人用（11/21・PR #150、PM から伝えてほしい）：同じく spDetailHTML の注意と spRegWhy の「adsb.lol」を `${ADSB_A}` に（spRegWhy の返す字が title などの属性に入るなら、そこは字のままでよい）
+- 経営担当（11/21・PM が決める）：会社の機体の説明（「あなたが乗った機体だけを…」の1行）の adsb.lol も字だけ。そろえるなら `${ADSB_A}` か同じ形のリンクに
 - 改善担当（11/20・PR #138・#139）：図鑑の絞り込み（写真 shots-zukan-filter/）とフライトの「目安」「（推定を含む）」の札（shots-flight-actual/）の見え方を見てほしい
 - データ担当（11/20・PR #139、PM から伝えてほしい）：画面は act_src が 'odpt'・'adsb'・'timetable' のどれかで、到着が出発より後のときだけ使う。track は [[緯度, 経度], ...] の2点以上
 - 撮る人用・運用予想（11/19・PR #134、PM から伝えてほしい）：運用タブは一覧＋専用ページになった。中身（renderPhoto・specialHTML・planeHTML）はそのまま専用ページに出る。見方の帯（#opsViews・#opsPViews）は出ない。前の形で試すときは localStorage soramemo.ops.hub="0"
@@ -863,7 +874,7 @@ review-c4：見せてよい。本人の答え（ON／OFF か −／＋ か）を
 - t147（半券）は全部を並べて流したときだけ落ちる。待ち方を直す
 - 修行担当（shugyo.md）への知らせ：年の区切りを日本時間にする直し（候補1）は12月より前に入れる（PM のおすすめで決めた）。修行の持ち場なので、修行担当の帳面に積む
 
-## PM から積んだ次の仕事（11/21 1時10分、adsb.lol の出典をどこでも押せる形に）※checkin/adsb-credit で
+## PM から積んだ次の仕事（11/21 1時10分、adsb.lol の出典をどこでも押せる形に）※checkin/adsb-credit で → PR #150 で作った（0eaee2f・報告 report-adsb-credit.md）
 - adsb.lol の返事（11/6）：「よくある間違いは、すぐ見える所に出典がない・押せるリンクがない・自分のデータのように見せる」。
 - 画面で adsb.lol のデータを出す所（運用タブの各専用ページ・地図・フライトの航跡・機体のくわしく・海外の便・撮る人）の出典を、全部「<a href="https://adsb.lol">adsb.lol</a>（ODbL）」の押せる形にそろえる（今は文字だけの所がある）。i の中にまとめた所も、データが出ている画面から1回で見えるか確かめる
 - 文字は増やさない。テストに「出典のリンクがある」を足す。仕上がったら PM が自動で反映する
