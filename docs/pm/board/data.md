@@ -24,6 +24,7 @@
   - #81（data/speed-1113b）は main に全部入っている。**閉じてよい**
   - 確かめた結果：t122 16項目・t127 16項目・t29 通過・番号の重なりなし（179件）。SQL のテスト全部 129本 通過
   - 本人待ち（PM のおすすめで可）：history の線（3日以上・7割以上）でよいか・overnight を画面に出すか
+  - **11/20 17時46分（UTC）PR #146 は main に入った（移行188・189）**。本番に出たかを Actions で確かめ、反映のあと 2026-11-16-2-check.sql で「索引で引いた回数」が増えたか見てもらう
 - **フライトの実際の出発・到着と航跡（11/20 の回。PM の指示 11/20 1時55分。木曜で定期の回として呼ばれたが、PM の積んだ指示があったのでこちらをした）**：ブランチ data/flight-actual（main 3a71781 から）→ 下書き **PR #136**（見張りを始めた）。報告 docs/pm/report-flight-actual.md。**移行187・テスト t126 を使った**
   - 移行187：flights に act_dep_at・act_arr_at・act_src（odpt／adsb／timetable）。3つそろう決まり（flights_act_pair）・未来の時刻を空にする守り（trigger flights_act_guard）。RLS は今のまま（本人だけ読める・利用者は書けない）
   - flights_fill_actual(p_days, p_limit)：flight_history（400日）→ flight_schedule（14日、ODPT の実際の時刻）の順。同じ便名（0なし・共同運航も）・同じ区間・定刻が出発チェックインの2時間前〜到着チェックイン。欠航は使わない。実績と定刻はまぜない。確かな取り先になったときだけ書き直す。照合（8日分）と daily-archive（3日分）から呼ぶ。移行の中で400日分さかのぼる（時間切れなら止めて移行は通す）
