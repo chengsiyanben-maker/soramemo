@@ -1,6 +1,7 @@
 # チェックイン担当の帳面
 
 ## いま持っている仕事
+- 11/21 手動の回（PM が同じ「adsb.lol の出典をどこでも押せる形に」を指示）：直前の回で PR #150 として済み。main は 8c39141 のままで作り直しは不要だった。前の仕事 checkin/test-fix-1120 も PR #148 として済み（main に入るのを待つだけ）
 - 11/21 1時台（日本時間）の定時の回（PM 11/21 1時10分「adsb.lol の出典をどこでも押せる形に」）：ブランチ checkin/adsb-credit（main 8c39141 から）・下書き **PR #150**（0eaee2f・3278382）・報告 docs/pm/report-adsb-credit.md・写真 docs/pm/shots-adsb-credit/
   - 共通の部品 ADSB_A（新しい窓・noopener）と CSS a.adsbl（字の色のまま下線）を足し、チェックインの持ち場の字だけの出典を全部リンクに。形は「adsb.lol（ODbL）」、かっこの中は「（adsb.lol・ODbL）」
   - 変えた関数：hndOpsHTML・a3SrcHTML・UL_SRC・renderRideIntl・fbMapHTML・loadFlightCands・renderFleetBook・renderLivBook・renderThatDay・trendHTML・curfewHTML・foreignHTML・renderArt・PIN_FOOT・renderGaBox・gaSetHTML・gaEvHTML（足した：ADSB_A）
