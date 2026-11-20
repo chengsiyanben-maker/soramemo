@@ -17,6 +17,12 @@
 - リモートに古い `shugyo` ブランチ（10/21）があるので、`shugyo/<名前>` は push できない（ref がぶつかる）。`shugyo-<名前>` で作る
 
 ## いま持っている仕事
+- 年の区切りを日本時間に（11/20・候補1）：ブランチ shugyo-jst-year・下書き PR #147・報告 docs/pm/report-shugyo-jst-year.md・写真 docs/pm/shugyo-jst-year/
+  - 足した部品 sgJstY・sgJstM・sgNowY・sgNowM・sgMDj。変えた関数 sgMD・sgWD・sgYear・sgReach・sgMoney・sgRoadView・renderShugyoCard・sgMonthsView・sgYearPage・renderSgSum・sgBudget・sgRoad
+  - JAL の伊丹⇔関西を 175分（SG_XFER_JAL・sgXferOf 新、sgXfer は会社を受け取る）
+  - テスト t153（東京・世界時・ロサンゼルスで日本時間 2027-01-01 0:30）。修行のテスト16本成功。全体 121/124（t48・t72・t123 は main でも落ちる）
+  - 計算ルールの文書の書き換え案は docs/pm/shugyo-rules-1120.md（Project の文書への書き込みが止められた。PM か本人が写す）
+  - 端数は「今のまま。合わない声が出たらその便で見直す」に決めた（PM のおすすめ）。SQL 2本は本人に流してもらう形のまま（timetable-check.sql を main 向けに写した）
 - 見落としの片付け（11/16）：#44 を今の main と比べた。t57 の直しは PR #64 で main に入っていたので入れ直さず、main になかった SFJ の SQL だけ写した。ブランチ shugyo-redo-1116・下書き PR #105・報告 docs/pm/report-shugyo-redo-1116.md。t57・t125 成功。#44 は閉じてよいと報告に書いた
 - 修行の見方のシート（11/11 夜・帳面の次にやること1）：11/12 10時24分 本人が PR #71 を main に入れた。ブランチ shugyo-view-sheet・報告 docs/pm/report-shugyo-view-sheet.md・写真 docs/pm/shugyo-view-sheet/
   - 鉛筆→「修行の見方」シート（画面案 design/view-settings 02c-v2・02c2-v2）。見方3つ＋道のりに出すもの4つの ON／OFF（loRowHTML）。最後の1つ（案A）・道のり OFF の間は道のりに出すものを押せない・元に戻す・「表示の編集をすべて見る」
@@ -27,16 +33,15 @@
 - 決まりなしの案（11/8）：design/no-rules-1108 の ideas-shugyo.md。コードは変えていない
 - 点検（11/8）：ブランチ shugyo-check1108、下書き PR #44（t57 の直しは PR #64 にも入れた）
 - 棚卸し（11/6）：ブランチ shugyo-inventory、下書き PR #26
-- 本人の返事待ち：候補1（年の区切りを日本時間へ）を12月前に直すか／計算ルールの文書の乗り継ぎ欄を JAL の公式の値に直すか／端数をどう決めるか／SQL 2本（ANA の最後の日・SFJ の便）／候補7（端末版の古い計画の画面）を残すか消すか
+- 本人の返事待ち：SQL 2本の結果（ANA の最後の日・SFJ の便）／候補7（端末版の古い計画の画面）を残すか消すか
 
 ## 次にやること
-（11/16 の見落としの片付けは済み：PR #105）
-0. PR #71（修行の見方のシート）は main に入った（11/12）。本人の答え（全部乗せに戻すで修行も戻すか・1枚の補足）が出たら合わせる。PR #64 の本人の答えが出たら合わせる
-1. 本人の了解が出たら、候補1：sgYear・sgMain・sgMoney・renderShugyoCard・sgMonthsView の年と月を日本時間（sgJstDay）でそろえる。ブランチ shugyo-jst-year
-2. 本人の了解が出たら、計算ルールの文書の乗り継ぎの欄を JAL の公式の値に書き換える（必要なら SG_XFER を会社ごとに）
-3. SFJ の SQL の結果で NH38xx・39xx が出たら、羽田の SFJ 便への乗り継ぎを 50分に分ける
-4. 夜の画面の仕組み（data-night）が main に入ったら、修行の夜（.sgb-* と #dSgViews の夜の見た目）を本物の夜で撮り直す
-5. PR #20 が main に入ったら t62 を10回流して揺れがないか見る
+（11/20 の年の区切り・乗り継ぎ・端数は済み：PR #147。反映は PM）
+0. PR #147 が main に入ったら、本番で修行の画面の年が 2026 のまま正しく出るか見る。文書の書き換え（shugyo-rules-1120.md）が Project に写されたか確かめる
+1. PR #71（修行の見方のシート）は main に入った（11/12）。本人の答え（全部乗せに戻すで修行も戻すか・1枚の補足）が出たら合わせる。PR #64 の本人の答えが出たら合わせる
+2. SFJ の SQL の結果で NH38xx・39xx が出たら、羽田の SFJ 便への乗り継ぎを 50分に分ける
+3. 夜の画面の仕組み（data-night）が main に入ったら、修行の夜（.sgb-* と #dSgViews の夜の見た目）を本物の夜で撮り直す
+4. PR #20 が main に入ったら t62 を10回流して揺れがないか見る
 
 ## PM から積んだ次の仕事（11/11 夜、修行の見方のシート）
 - 指示「ブランチ shugyo/view-sheet で下書き PR」→ 同じ仕事を先に PR #71 で済ませていた（今の main fe13e0c を含む）。古い `shugyo` ブランチと ref がぶつかるので、ブランチは shugyo-view-sheet のまま
@@ -74,3 +79,4 @@
 ## PM から積んだ次の仕事（11/20 14時10分、年の区切りを日本時間に）
 - 候補1（年の区切りを日本時間へ）は PM のおすすめで「直す」に決めた。12月より前に入れる。ブランチ shugyo/jst-year で、テストを足す。仕上がったら PM が自動で反映する
 - 乗り継ぎ欄を JAL の公式の値に・端数の決め方・SQL 2本も PM のおすすめで進めてよい（決めた形を報告に）
+→ 済み（11/20）：PR #147（ブランチは ref のぶつかりで shugyo-jst-year）。端数は今のまま・乗り継ぎは JAL の公式の値（伊丹⇔関西 175分）・SQL は本人に流してもらう形。報告 report-shugyo-jst-year.md
