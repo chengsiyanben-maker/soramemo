@@ -1,8 +1,13 @@
 # チェックイン担当の帳面
 
 ## いま持っている仕事
-- 11/21 2時46分（日本時間）：PR #148（毎回落ちるテストの直し）も main に入った。本番の反映（Actions）が成功したかは次の回で確かめる
-- 11/21 2時46分（日本時間）：PR #150（adsb.lol の出典）が main に入った。本番の反映（Actions）が成功したかは次の回で確かめる。直しは main から新しいブランチで
+- 11/21 4時台（日本時間）の定時の回（PM 11/21 4時「空の道すじの上限に合わせる」）：ブランチ checkin/track-quota（main 17d48db ＋ data/adsblol-key2 を取り込み）・下書き **PR #157**（af801d6）・報告 docs/pm/report-track-quota.md・写真 docs/pm/shots-track-quota/
+  - airport_tracks・cold-tracks をログイン中はログインの鍵（access_token）で読む。login_required／rate_limited（cold は 401／429）で日付の下に小さな一文。未ログイン・デモは前の7日まで（端で「ログインすると見られます」の1行）。あの日の空も同じ一文。空の道の下の注に「（8日より前はログインした人だけ）」
+  - 変えた関数：loadArt・renderArt・renderThatDay（足した：ART_FREE_DAYS・artLoggedIn・artMinDay・artToken・artErrOf・artErrText）。rpcPost は変えていない
+  - tests/e2e/fake_sb.js のログインに access_token:'tok-u1' を足した
+  - テスト：t155（新・16項目）成功・全体 126／126（t48 は pdf417gen・segno を pip で入れて流し直し）・tests/ops 成功
+  - PR #157 の動き（コメント・CI）はこの回の会話で見張りを付けた
+- 11/21 2時46分（日本時間）：PR #148・#150 は PR #154（反映 11/21）で main に入り、反映の Actions 225 は成功（11/21 3時23分）→ 本番に出た。出典のテストは main で t154 に付け直された
 - 11/21 手動の回（PM が同じ「adsb.lol の出典をどこでも押せる形に」を指示）：直前の回で PR #150 として済み。main は 8c39141 のままで作り直しは不要だった。前の仕事 checkin/test-fix-1120 も PR #148 として済み（main に入るのを待つだけ）
 - 11/21 1時台（日本時間）の定時の回（PM 11/21 1時10分「adsb.lol の出典をどこでも押せる形に」）：ブランチ checkin/adsb-credit（main 8c39141 から）・下書き **PR #150**（0eaee2f・3278382）・報告 docs/pm/report-adsb-credit.md・写真 docs/pm/shots-adsb-credit/
   - 共通の部品 ADSB_A（新しい窓・noopener）と CSS a.adsbl（字の色のまま下線）を足し、チェックインの持ち場の字だけの出典を全部リンクに。形は「adsb.lol（ODbL）」、かっこの中は「（adsb.lol・ODbL）」
@@ -375,7 +380,9 @@
 - 確認コードは6けた。メールは Gmail、Supabase の送信上限は1時間100通
 
 ## 次にやること
-- PR #150（adsb.lol の出典）：PM の自動の反映を待つ。入る前に t153 と tests/ops を流す。運用予想・撮る人用が ADSB_A に替えたら t153 の OTHERS から外す。#148（テストの直し）と重ならない（#150 は t72・t48 に触っていない）
+- PR #157（空の道すじの上限）：本人の OK のあと、データ担当の #153（移行190）と**同時に**入れる（移行190だけ先だとログインした人も8日より前が見えない）。#153 に直しが来たら取り込み直す。入る前に t155・t55・t68・t130 と tests/ops を流す。本人の答え（未ログインの端の1行を出すか）で直す
+- 出典（PR #150）は本番に出た。運用予想・撮る人用が ADSB_A に替えたら t154 の OTHERS から外す
+- テストの t48 には pdf417gen・segno（pip）も要る
 - テストの t48 には zxing（@zxing/library@0.21.3）が要る。手元では作業用フォルダに npm で入れて ZXING_UMD で場所を渡す
 - PR #141（小さい直し）：#138・#139 を含むので、PM は #141 だけ入れても3つ入る。#138・#139 が先に入ったら #141 に main を取り込み web/ を作り直す。入る前に t151・t149・t150 を流す
 - tools/build.mjs はフォントの作り直しに brotli が要る（pip install brotli --break-system-packages）
@@ -451,6 +458,7 @@
 - tests/ops は手元では npm の playwright にブラウザがないので、全体に入っている playwright をつないで流した（すべて成功）
 
 ## ほかの担当への依頼
+- データ担当（11/21・PR #157）：#153 の依頼どおり作った。アプリは airport_tracks の返り値が配列でなく {error:'login_required'|'rate_limited', retry_after_min} のときに一文を出し、cold-tracks は 401／429（Retry-After）を見る。返す形を変えるなら data.md に書いてほしい。#157 と #153 は同時に入れてほしい
 - 運用予想（11/21・PR #150、PM から伝えてほしい）：adsb.lol の出典は共通の部品 `${ADSB_A}`（押せるリンク、見える字は「adsb.lol」）にそろえた。specialHTML・spbListHTML・spbDetailHTML・planeHTML・PRED_NOTE の字だけの「adsb.lol」を `${ADSB_A}` に替えてほしい（文字は増やさない。PRED_NOTE はふつうの "…" の文字列なので `…` にする）。とくに機体を選んだ画面は上の i が隠れるので、planeHTML の1行が唯一の出典。替えたら tests/e2e/t153.py の OTHERS から外す
 - 撮る人用（11/21・PR #150、PM から伝えてほしい）：同じく spDetailHTML の注意と spRegWhy の「adsb.lol」を `${ADSB_A}` に（spRegWhy の返す字が title などの属性に入るなら、そこは字のままでよい）
 - 経営担当（11/21・PM が決める）：会社の機体の説明（「あなたが乗った機体だけを…」の1行）の adsb.lol も字だけ。そろえるなら `${ADSB_A}` か同じ形のリンクに
