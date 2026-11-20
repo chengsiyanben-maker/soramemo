@@ -1,0 +1,20 @@
+const {open,vis}=require('./lib');
+const { chromium } = require('playwright');
+(async()=>{const {b,p}=await (async()=>{ // reuse lib open with dsf3
+ return await open(3);})();
+const S=n=>p.screenshot({path:'st/'+n+'.png'});
+const card=n=>p.locator('button.ohc').filter({hasText:n}).first();
+const back=async()=>{await p.locator('button').filter({hasText:/^\s*運用\s*$/}).first().click({timeout:3000}).catch(()=>p.keyboard.press('Escape')); await p.waitForTimeout(1500);};
+await S('home');
+await p.getByText('運用',{exact:true}).last().click(); await p.waitForTimeout(14000);
+await S('ops_top'); await p.mouse.move(195,500); await p.mouse.wheel(0,560); await p.waitForTimeout(1200); await S('ops_low'); await p.mouse.wheel(0,-2000); await p.waitForTimeout(800);
+await card('地図').click(); await p.waitForTimeout(6000); await S('ops_map'); await back();
+await card('特別塗装機').click(); await p.waitForTimeout(3500); await S('ops_sp'); await back();
+await card('定時').click(); await p.waitForTimeout(3500); await S('ops_ontime'); await back();
+await card('短冊').click(); await p.waitForTimeout(3500); await S('ops_strip'); await back();
+await p.getByText('図鑑',{exact:true}).last().click(); await p.waitForTimeout(3000); await S('zk_top');
+await p.mouse.wheel(0,420); await p.waitForTimeout(1200); await S('zk_region'); await p.mouse.wheel(0,-2000); await p.waitForTimeout(800);
+await p.locator('button,a').filter({hasText:'飛行場・滑空場・ヘリポートの図鑑'}).first().click(); await p.waitForTimeout(3000); await S('af_top');
+await p.mouse.wheel(0,520); await p.waitForTimeout(1200); await S('af_list'); await p.mouse.wheel(0,-2000); await p.waitForTimeout(800);
+await p.locator(':is(button,[role=tab],label)').filter({hasText:/^\s*ヘリポート\s*\d+/}).first().click({force:true}); await p.waitForTimeout(1500); await p.mouse.wheel(0,520); await p.waitForTimeout(1200); await S('af_heli');
+await b.close();})();

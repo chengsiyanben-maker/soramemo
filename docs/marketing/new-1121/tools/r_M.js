@@ -1,0 +1,11 @@
+const {openRec,drag,tab}=require('./rec');
+(async()=>{const {p,mark,done,rec,W,D}=await openRec('M');
+await tab(p,'図鑑'); await p.waitForTimeout(3000); await rec(); mark('start'); await W(1500);
+mark('tapAF'); await p.locator('button,a').filter({hasText:'飛行場・滑空場・ヘリポートの図鑑'}).first().click(); await W(2500);
+mark('glider'); await p.locator(':is(button,[role=tab],label)').filter({hasText:/^\s*滑空場\s*\d+/}).first().click({force:true}); await W(1200);
+await p.mouse.move(195,500); await p.mouse.wheel(0,450); await W(2200);
+await p.mouse.wheel(0,-2000); await W(900);
+mark('heli'); await p.locator(':is(button,[role=tab],label)').filter({hasText:/^\s*ヘリポート\s*\d+/}).first().click({force:true}); await W(1200);
+await p.mouse.wheel(0,450); await W(2200); await p.mouse.wheel(0,-2000); await W(900);
+mark('map'); await p.locator('#dZkAf [role=tab],button').filter({hasText:/^\s*地図\s*$/}).last().click({force:true}); await W(4500);
+mark('end'); await p.screenshot({path:'M_end.png'}); await done();})();

@@ -1,0 +1,11 @@
+const {openRec,drag,tab}=require('./rec');
+(async()=>{const {p,mark,done,rec,W,D}=await openRec('J');
+await tab(p,'運用'); await p.waitForTimeout(12000); await rec(); mark('start');
+await p.mouse.move(195,450); await p.mouse.wheel(0,250); await W(1500);
+mark('tapMap'); await p.locator('button.ohc').filter({hasText:'地図'}).first().click(); await W(4500);
+const back=async()=>{await p.locator('button').filter({hasText:/^\s*運用\s*$/}).first().click({timeout:3000}).catch(()=>p.keyboard.press('Escape'));};
+mark('back1'); await back(); await W(1800);
+mark('tapLate'); await p.locator('button.ohc').filter({hasText:'遅れ'}).first().click(); await W(4000);
+mark('back2'); await back(); await W(1500);
+mark('tapSp'); await p.locator('button.ohc').filter({hasText:'特別塗装機'}).first().click(); await W(3500);
+mark('end'); await done();})();

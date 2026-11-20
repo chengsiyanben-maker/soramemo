@@ -1,0 +1,10 @@
+const {openRec,drag,tab}=require('./rec');
+(async()=>{const {p,mark,done,rec,W,D}=await openRec('N');
+await tab(p,'図鑑'); await p.waitForTimeout(2500);
+await p.locator('button,a,[role=button]').filter({hasText:/HND\s*羽田\s*24/}).first().click(); await p.waitForTimeout(2500);
+const l=p.locator('text=3Dで見る').first(); await l.scrollIntoViewIfNeeded(); await p.waitForTimeout(1000); await rec(); mark('start'); await W(1200);
+mark('tap3d'); await l.click(); await W(6000);
+mark('rotate'); await D(120,330,300,330,60,30); await W(1500); await D(300,330,160,330,50,30); await W(1500);
+mark('tower'); await p.locator('dialog[open] button').filter({hasText:/^\s*管制塔\s*$/}).first().click({force:true}); await W(5000);
+mark('plane'); await p.locator('dialog[open] button').filter({hasText:/^\s*機体\s*$/}).first().click({force:true}); await W(6000);
+mark('end'); await p.screenshot({path:'N_end.png'}); await done();})();
