@@ -1,0 +1,11 @@
+const {openRec,drag}=require('./rec');
+(async()=>{const {p,mark,done,rec,W,D}=await openRec('K');
+await p.waitForTimeout(1500); await rec(); mark('start');
+const bb=await p.locator('text=右へ引いて').first().boundingBox(); console.log(bb);
+await W(1500); mark('drag');
+await D(bb.x+15,bb.y-40,385,bb.y-40,45,25);
+await W(1200);
+const tags=await p.evaluate(()=>{const d=document.querySelector('dialog[open]');if(!d)return [];return [...d.querySelectorAll('*')].filter(e=>/^(朝の印|昼の印|夜の印|夕方の印|..の訪問)$/.test(e.textContent.trim())&&e.children.length==0).map(e=>{const r=e.getBoundingClientRect();return [r.x,r.y,r.width,r.height,e.textContent.trim()]})});
+console.log(JSON.stringify(tags)); require('fs').writeFileSync('vid/K_tags.json',JSON.stringify(tags));
+await W(4000); mark('end');
+await done();})();
