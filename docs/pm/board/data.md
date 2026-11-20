@@ -10,6 +10,7 @@
   - 確かめた結果：t129 25項目・SQL 全部128本（t49 が1回揺れて流し直しで通過。main でも通る）・deno test 273本・deno check 通過
   - 本人待ち（PM のおすすめで可）：上限の数（60組・前の7日）・adsb.im の2ページを開く・反映（チェックインの直しと一緒）
   - 11/21 2回目の呼び出し（同じ指示を手で・「main を取り込み直してから」）：PR #153 で済み。main は 8c39141 のままで取り込むものはなかった。PR #149（data/adsblol-key）とは変えるファイルが重ならず、合わせてもぶつからないことを確かめた（#149 が先に入っても rebase は要らない。移行の番号も #149 は使っていない）
+  - 11/21 見張りの確認：main に PR #154（#149 adsb.lol の鍵・#146 の移行188・189）が入ったので取り込んだ。190 は付け直し不要。t122 が「188 のあとの移行ぜんぶ」で表の形を比べていて190で落ちたので、188 の直後と比べるように直した。SQL 130本・deno 279本 通過
 - **adsb.lol の鍵と使い方の守り（11/21 の回。PM の指示 11/21 1時10分。土曜で定期の回として呼ばれたが、PM の積んだ指示があったのでこちらをした）**：ブランチ data/adsblol-key（main 8c39141 から）→ 下書き **PR #149**（見張りを始めた）。報告 docs/pm/report-adsblol-key.md。**移行・テストの番号は使っていない**（表・RLS は変えない）
   - _shared/adsblol.ts（新）：秘密の設定 ADSBLOL_API_KEY があれば api.adsb.lol に鍵を付ける（なければ今までどおり）。ヘッダー名は ADSBLOL_KEY_HEADER（既定 api-auth。**案内のページを開けず未確認**）。adsb.im には付けない
   - User-Agent を `soramemo (<関数名>; https://soramemo.jp/)` に（airport-traffic・flight-live・airport-foreign の5か所）。flight-live に Retry-After の守り（429・420 のあと最長5分止める）
