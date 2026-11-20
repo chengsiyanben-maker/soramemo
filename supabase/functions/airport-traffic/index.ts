@@ -20,6 +20,7 @@ import { normCallsign } from "../_shared/flight_watch.ts";
 import { depEtaMin, dueNow, etaMin, jstDate, opsChanged, spotDepMessage, spotDepReason, spotMessage, spotReason, type SpotDep, type SpotPlane, type SpotSub } from "../_shared/spot_push.ts";
 import webpush from "npm:web-push@3.6.7";
 import { choose, readShared, writeShared } from "../_shared/edge_cache.ts";
+import { adsbImHeaders, adsbLolHeaders } from "../_shared/adsblol.ts";
 
 const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, { auth: { persistSession: false } });
 
@@ -88,7 +89,7 @@ async function fetchArea(iata: string, retry = false) {
   const hit = regionCache.get(key);
   if (hit && Date.now() - hit.at < TTL) return hit.j;
   const get = () => fetch(`https://api.adsb.lol/v2/lat/${area.at[0]}/lon/${area.at[1]}/dist/${area.nm}`,
-    { headers: { "User-Agent": "soramemo (airport-traffic)" }, signal: AbortSignal.timeout(area.nm > 100 ? 20000 : 10000) });   // 広い円は返事が大きいので長めに待つ
+    { headers: adsbLolHeaders("airport-traffic"), signal: AbortSignal.timeout(area.nm > 100 ? 20000 : 10000) });   // 広い円は返事が大きいので長めに待つ
   let r = await get();
   // 記録の処理では、回数の上限（429・420）なら1回だけ待って取り直す（Retry-After があればそれ、最長5秒）
   if (retry && (r.status === 429 || r.status === 420)) {
@@ -309,7 +310,7 @@ async function notifyInbound(list: Seen[]) {
   const ask = todo.filter((v) => !cands.has(cs(v)));
   if (ask.length) {
     try {
-      const r = await fetch(ROUTESET, { method: "POST", headers: { "Content-Type": "application/json", "User-Agent": "soramemo (airport-traffic livery)" },
+      const r = await fetch(ROUTESET, { method: "POST", headers: adsbImHeaders("airport-traffic livery"),
         body: JSON.stringify({ planes: ask.map((v) => ({ callsign: cs(v), lat: v.lat, lng: v.lon })) }), signal: AbortSignal.timeout(8000) });
       if (r.ok) for (const [k, rt] of parseRoutes(await r.json(), ask.map(cs))) cands.set(k, [{ iata: rt.arr }]);
     } catch (e) { console.error("livery routeset", e); }
