@@ -1,0 +1,10 @@
+const {openRec,drag,tab}=require('./rec');
+(async()=>{const {p,mark,done,rec,W,D}=await openRec('E');
+const sel=p.locator('select').filter({hasText:'羽田'}).first();
+await sel.selectOption({label:'岡山空港'}); await p.waitForTimeout(3000);
+await rec(); mark('start'); await W(1800);
+mark('hoka'); await p.getByText(/ほか\d+つ/).first().click(); await W(2800);
+mark('switch'); await p.getByText('閉じる',{exact:true}).first().click().catch(()=>{}); await W(600);
+await sel.selectOption({label:'吉井川滑空場'}); await W(2200);
+mark('hoka2'); await p.getByText(/ほか\d+つ/).first().click(); await W(3500);
+mark('end'); await done();})();
