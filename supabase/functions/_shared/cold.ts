@@ -16,3 +16,9 @@ export function tracksFrom(tbl: "airport_tracks_all" | "flight_tracks", rows: Re
   if (tbl === "airport_tracks_all") return rows.filter((r) => r.iata === iata).map((r) => { const h = jstHour(r.at); return h === undefined ? { d: Number(r.dep_here) ? 1 : 0, p: String(r.pts) } : { d: Number(r.dep_here) ? 1 : 0, p: String(r.pts), h }; });
   return rows.filter((r) => r.dep === iata || r.arr === iata).map((r) => ({ d: r.dep === iata ? 1 : 0, p: String(r.pts) }));
 }
+// 空の道すじの古い日はログインした人だけ（11/21・adsb.lol の「大量に配り直さない」）。Authorization の Bearer を取り出す。
+// anon の鍵（ログインしていない）と区別するのは getUser の答え。ここでは形だけ見る
+export function bearerToken(h: string | null | undefined): string | null {
+  const m = /^Bearer\s+([A-Za-z0-9._-]+)$/.exec(String(h ?? "").trim());
+  return m ? m[1] : null;
+}
