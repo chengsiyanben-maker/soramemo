@@ -3840,6 +3840,19 @@ details.pindev summary span{flex:none;color:var(--pin)}details.pindev ol{margin:
 .pinband button{flex:none;min-height:40px;padding:0 14px;border:0;border-radius:999px;background:rgba(255,255,255,.16);color:#FFFFFF;font:800 13px/1 var(--gothic);cursor:pointer}
 :root[data-night="on"] .pinpill:not(.on):not(.dark),:root[data-night="on"] .nrpin:not(.on),:root[data-night="on"] .pinbtn{background:transparent;color:#DCE3EA;box-shadow:inset 0 0 0 1.5px rgba(220,227,234,.5)}
 :root[data-night="on"] .pinhome,:root[data-night="on"] .pinapc{background:var(--h-card,#141B24);color:#DCE3EA}
+/* ---------- 閉じるはいつでも押せる（11/21 22時 PM・本人「閉じるの機能は、いつでも触れるように」） ----------
+   全画面とシートの × と ‹ 戻る は、中身を送っても上に残り（ノッチを避ける）、押せる大きさは44px以上、読み込み中の幕より上に置く */
+dialog.spfull .spctop,dialog.spfull .pintop{position:sticky;top:0;z-index:6;margin-top:-16px;margin-left:-16px;margin-right:-16px;padding:calc(16px + env(safe-area-inset-top,0px)) 16px 8px;background:var(--s-bg)}
+dialog.mypage .mp-top{position:sticky;top:0;z-index:6;margin:-18px -18px 6px;padding:calc(18px + env(safe-area-inset-top,0px)) 18px 8px;background:var(--mp-bg)}
+dialog.spfull .spctop .mp-back,dialog.spfull .pintop .mp-back,dialog.mypage .mp-top .mp-back{min-height:44px}
+dialog.spsheet .sph{position:sticky;top:0;z-index:6;margin:-12px -18px 0;padding:12px 18px 0;background:var(--s-card)}
+dialog.spsheet .sph .spx{top:2px;right:8px;width:44px;height:44px;border:6px solid transparent;background-clip:padding-box}
+.cxbar{position:sticky;top:0;z-index:6;height:0;display:flex;justify-content:flex-end;pointer-events:none}
+.cxbar .cx{pointer-events:auto;flex:none;width:44px;height:44px;margin:-14px -12px 0 0;border:0;border-radius:50%;background:var(--paper);color:var(--ink);font:700 19px/1 var(--gothic);display:grid;place-items:center;cursor:pointer;box-shadow:0 2px 10px rgba(15,22,38,.14)}
+.a3top{z-index:7}
+.a3wrap:has(#a3Load:not([hidden])) .a3top>:not([data-a3-close]){visibility:hidden}
+#v-ops[data-hub="page"] .opsbar{position:sticky;top:calc(8px + env(safe-area-inset-top,0px));z-index:30;pointer-events:none}
+#v-ops[data-hub="page"] .opsbar>*{pointer-events:auto}
 </style>
 </head>
 <body>
@@ -8736,6 +8749,65 @@ function initSheet(sheet, view){
 initSheet($("homeSheet"), "home");
 // ダイアログの「閉じる」（HTMLに直接 onclick を書かない：ページの防御設定 CSP のため）
 document.addEventListener("click", e => { const b = e.target.closest("[data-close]"); if(b) b.closest("dialog").close(); });
+/* ---------- 閉じるはいつでも押せる（11/21 22時 PM）：戻る操作で、いちばん上に開いている画面を閉じる ----------
+   ブラウザの戻る・iPhone の左の端から引く戻る・ホーム画面のアプリの戻る。開いたダイアログ（showModal）と運用の専用ページ（"ops"）を
+   開いた順に積み（CX_STACK）、開くたびに履歴を1つ足す。戻るで1枚閉じる。×などで閉じたときは足した履歴を戻して数を合わせる（その popstate は数えない）。
+   閉じさせない画面（cancel を止めている登録の途中など）は、戻るでも閉じず、履歴を足し直す */
+const CX_STACK = []; let CX_SKIP = 0, CX_BACK = 0;
+try{ history.scrollRestoration = "manual"; }catch(e){}   // 履歴を戻して数を合わせるとき、ページの送り位置を前に戻さない（年を選んで飛んだ先などを保つ）
+function cxPush(layer){
+  const i = CX_STACK.indexOf(layer); if(i >= 0) return;
+  CX_STACK.push(layer); try{ history.pushState({ cx: CX_STACK.length }, ""); }catch(e){}
+}
+function cxPop(layer){
+  const i = CX_STACK.lastIndexOf(layer); if(i < 0) return;
+  CX_STACK.splice(i, 1); CX_BACK++; queueMicrotask(cxFlush);
+}
+function cxFlush(){
+  if(!CX_BACK) return; const n = CX_BACK; CX_BACK = 0;
+  const k = Math.min(n, (history.state && history.state.cx) || 0); if(!k) return;   // 足した分より多くは戻らない（ページの外へ出ない）
+  CX_SKIP++; try{ history.go(-k); }catch(e){ CX_SKIP--; }
+}
+window.addEventListener("popstate", () => {
+  if(CX_SKIP){ CX_SKIP--; return; }
+  while(CX_STACK.length){
+    const top = CX_STACK.pop();
+    if(top === "ops"){ if(!OPS_PAGE) continue; opsHubBack(); return; }
+    if(!top.open) continue;   // もう閉じている
+    const ev = new Event("cancel", { cancelable:true }); top.dispatchEvent(ev);
+    if(ev.defaultPrevented){ CX_STACK.push(top); try{ history.pushState({ cx: CX_STACK.length }, ""); }catch(e){} return; }
+    top.close(); return;
+  }
+});
+{ const sm = HTMLDialogElement.prototype.showModal;
+  HTMLDialogElement.prototype.showModal = function(){
+    const was = this.open; sm.apply(this, arguments);
+    if(!was && this.open){ if(!this.cxOn){ this.cxOn = true; this.addEventListener("close", () => cxPop(this)); } cxPush(this); }
+  }; }
+// 3D：× のほかに、左の端（24px）から右へ引いても閉じる（指に付いて動き、3割か速くはらったら閉じる）。端から始めた指は 3D を回さない
+{ let st = null;
+  const wrap = () => document.getElementById("a3Wrap");
+  const reset = () => { const w = wrap(); if(w){ w.style.transition = "transform .2s ease"; w.style.transform = ""; setTimeout(() => { if(w) w.style.transition = ""; }, 220); } };
+  const d3 = document.getElementById("dAp3d");
+  d3.addEventListener("pointerdown", e => {
+    if(e.clientX > 24 || !e.isPrimary || e.target.closest("button")) return;
+    st = { id:e.pointerId, x:e.clientX, y:e.clientY, dx:0, on:false, pts:[] }; e.stopPropagation();   // 3D の絵（a3Drag）へ渡さない
+  }, true);
+  d3.addEventListener("pointermove", e => {
+    if(!st || e.pointerId !== st.id) return;
+    const dx = e.clientX - st.x, dy = e.clientY - st.y;
+    if(!st.on){ if(Math.hypot(dx, dy) < 10) return; if(dx <= 0 || Math.abs(dx) < Math.abs(dy)){ st = null; return; } st.on = true; }
+    e.stopPropagation(); st.dx = Math.max(0, dx); st.pts.push({ x:e.clientX, t:performance.now() }); if(st.pts.length > 8) st.pts.shift();
+    const w = wrap(); if(w){ w.style.transition = "none"; w.style.transform = `translateX(${st.dx.toFixed(0)}px)`; }
+  }, true);
+  const end = e => {
+    if(!st || e.pointerId !== st.id) return; const s = st; st = null; if(!s.on) return; e.stopPropagation();
+    const W = document.documentElement.clientWidth || innerWidth, p = s.pts, v = p.length > 1 ? (p[p.length - 1].x - p[0].x) / Math.max(1, p[p.length - 1].t - p[0].t) : 0;
+    if(e.type === "pointerup" && (s.dx > W * .3 || (v > .5 && s.dx > 40))){ track("ap3d", "edge_close"); closeAp3d(); return; }
+    reset();
+  };
+  d3.addEventListener("pointerup", end, true); d3.addEventListener("pointercancel", end, true);
+}
 document.addEventListener("click", e => { if(e.target.closest("#demoEnd") && $("toggleDemo")) $("toggleDemo").click(); });   // デモの帯の「終了」
 document.querySelectorAll("#modeSw [data-mode]").forEach(b => b.onclick = () => {
   if(b.dataset.mode === "game" && SERVER && !user && !demo){ track("mode", "game_guest"); authOpen("login", "login"); return; }   // ログインしていないときは、経営の画面ではなくログインの案内
@@ -8769,7 +8841,7 @@ function openAirport(id){
   const rgl = a.kind ? [] : zkRegionList(regionOf(a)), ri = rgl.findIndex(x => x.id === a.id), pv = ri > 0 ? rgl[ri - 1] : null, nx = ri >= 0 && ri < rgl.length - 1 ? rgl[ri + 1] : null;
   let swHint = false; if(rgl.length > 1){ try{ swHint = !localStorage.getItem("soramemo.zk.swipe"); if(swHint) localStorage.setItem("soramemo.zk.swipe", "1"); }catch(e){} }
   const rg = a.kind ? "" : regionOf(a), cd = code(a);
-  b.innerHTML = `<div class="zk-aph" style="--c:${a.kind ? "#2E4A6B" : zkCol(rg)}"${rgl.length > 1 ? ` data-zk-swipe="${a.id}"` : ""}><div class="stampbig${dt ? " wide" : ""}">${first ? insigniaSVG(a, first, {big:true, term:null}, dt) : emptySVG(a)}</div>
+  b.innerHTML = `<div class="cxbar"><button class="cx" type="button" data-close aria-label="閉じる">×</button></div><div class="zk-aph" style="--c:${a.kind ? "#2E4A6B" : zkCol(rg)}"${rgl.length > 1 ? ` data-zk-swipe="${a.id}"` : ""}><div class="stampbig${dt ? " wide" : ""}">${first ? insigniaSVG(a, first, {big:true, term:null}, dt) : emptySVG(a)}</div>
     <div class="tx"><b class="cd${/[^\x00-\x7f]/.test(cd) ? " jp" : ""}">${esc(/[^\x00-\x7f]/.test(cd) ? godShort(a) : cd)}</b><h3>${esc(a.name).replace(/（/g, "<wbr>（")}</h3><p>${a.pref}${rg ? "・" + rg : ""}${a.rare?"・離島の空港":""}${a.kind ? "・" + XKIND[a.kind].label : ""}</p></div></div>
   ${rgl.length > 1 ? `<p class="zk-dots" aria-hidden="true">${rgl.map(x => `<i${x.id === a.id ? ` class="on"` : ""}></i>`).join("")}</p>` : ""}
   ${swHint ? `<p class="zk-swhint">印のカードをはらうと、となりの空港へ</p>` : ""}
@@ -11560,7 +11632,7 @@ function opsPlHead(reg, hist, pred){
   return `<div class="opsplhd"><span><b>${esc(nm || reg)}</b><small>${esc([nm ? reg : "", type, predDay(Date.now())].filter(Boolean).join("・"))}</small></span>${live ? `<span class="opspfly"><i></i>飛行中</span>` : ""}</div>`;
 }
 async function opsPlOpen(reg){
-  if(OH_ON() && reg && !OPS_PAGE){ OPS_PAGE = "plane"; const q = $("opsPlForm"); OH_FROM = { id:"plane", rect: q ? q.getBoundingClientRect() : null, y: window.scrollY }; }   // 運用の一覧の検索窓から：機体の1日を専用ページに
+  if(OH_ON() && reg && !OPS_PAGE){ OPS_PAGE = "plane"; cxPush("ops"); const q = $("opsPlForm"); OH_FROM = { id:"plane", rect: q ? q.getBoundingClientRect() : null, y: window.scrollY }; }   // 運用の一覧の検索窓から：機体の1日を専用ページに
   opsSideSet("plane"); track("ops", "plane");
   if(!reg){ OPS_PL_REG = null; VIEW_RENDER.ops(); const q = $("opsPlQ"); if(q) q.focus(); return; }
   if($("dPlaneBody")) $("dPlaneBody").innerHTML = "";   // 同じ id（plMap・plReg）を2つ作らない
@@ -11620,7 +11692,7 @@ VIEW_RENDER.ops = () => {
 const OH_CARDS = [["runway", "滑走路", "runway", 1], ["map", "地図", "runway", 1], ["board", "案内板", "board"], ["special", "特別塗装機", null], ["late", "遅れ", "board"],
   ["strip", "短冊", "strip"], ["day", "1日の山", "day"], ["ontime", "定時", "ontime"], ["art", "空の道すじ", "art"], ["photo", "撮る人", "photo"]];
 const OH_ON = () => { try{ return localStorage.getItem("soramemo.ops.hub") !== "0"; }catch(e){ return true; } };
-let OPS_PAGE = null, OH_FROM = null, OH_BUSY = false;
+let OPS_PAGE = null, OH_FROM = null, OH_BUSY = false, OH_OPEN_T = 0;   // OH_OPEN_T：開く動きの途中（戻るを押したら動きを止めてすぐ戻る）
 const OH_LIST = () => OH_ON() && !OPS_PAGE;
 const OH_RM = () => { try{ return matchMedia("(prefers-reduced-motion: reduce)").matches; }catch(e){ return false; } };
 const OH_OPEN_MS = 460, OH_BACK_MS = 380;
@@ -11705,7 +11777,7 @@ function opsHubOpen(id, from){
   if(!OH_ON() || OH_BUSY) return; const c = OH_CARDS.find(x => x[0] === id); if(!c) return;
   const sec = $("v-ops"), card = from || document.querySelector(`[data-ohub="${id}"]`);
   OH_FROM = { id, rect: card ? card.getBoundingClientRect() : null, y: window.scrollY };
-  OPS_PAGE = id; track("ops_hub", id);
+  OPS_PAGE = id; cxPush("ops"); track("ops_hub", id);
   if(id === "special"){ opsSideSet("plane"); OPS_PL_REG = null; VIEW.opsp = "special"; }
   else if(id !== "plane"){ opsSideSet("ap"); VIEW.ops = c[2]; try{ localStorage.setItem("soramemo.view.ops", c[2]); }catch(e){} }
   VIEW_RENDER.ops(); window.scrollTo(0, 0);
@@ -11714,14 +11786,15 @@ function opsHubOpen(id, from){
   OH_BUSY = true; sec.classList.add("ohanim", "ohup"); sec.style.transition = "none"; sec.style.clipPath = ohInset(sec, r);
   void sec.offsetWidth;
   sec.style.transition = `clip-path ${OH_OPEN_MS}ms cubic-bezier(.2,.8,.2,1)`; sec.style.clipPath = "inset(0px 0px 0px 0px round 0px)";
-  setTimeout(() => { ohClear(sec); OH_BUSY = false; ohAfterOpen(); setTimeout(() => sec.classList.remove("ohup"), 60); }, OH_OPEN_MS + 20);
+  OH_OPEN_T = setTimeout(() => { OH_OPEN_T = 0; ohClear(sec); OH_BUSY = false; ohAfterOpen(); setTimeout(() => sec.classList.remove("ohup"), 60); }, OH_OPEN_MS + 20);
 }
 function ohAfterOpen(){ if(OPS_MAP && OPS_PAGE === "map"){ try{ OPS_MAP.invalidateSize(); opsFit(); }catch(e){} } const b = $("opsHubBack"); if(b) try{ b.focus({ preventScroll:true }); }catch(e){} }
 // 一覧に戻る（カードの位置へ縮む）
 function opsHubBack(){
+  if(OH_OPEN_T){ clearTimeout(OH_OPEN_T); OH_OPEN_T = 0; const s = $("v-ops"); ohClear(s); s.classList.remove("ohup"); OH_BUSY = false; OH_FROM = null; }   // 開く途中でも戻れる（閉じるはいつでも）
   if(!OH_ON() || !OPS_PAGE || OH_BUSY) return;
   const sec = $("v-ops"), f = OH_FROM && OH_FROM.id === OPS_PAGE ? OH_FROM : null, done = () => {
-    ohClear(sec); OH_BUSY = false; const id = OPS_PAGE; OPS_PAGE = null;
+    ohClear(sec); OH_BUSY = false; const id = OPS_PAGE; OPS_PAGE = null; cxPop("ops");
     if(opsSide() === "plane"){ opsSideSet("ap"); }
     VIEW_RENDER.ops(); window.scrollTo(0, f ? f.y : 0);
     const c = document.querySelector(`[data-ohub="${id}"]`); if(c) try{ c.focus({ preventScroll:true }); }catch(e){}
@@ -14650,7 +14723,7 @@ document.addEventListener("click", async e => {
 });
 // 運用のタブを開いたとき（ほかのタブへ移ったら、機体の読み込みを止める）
 async function openOps(){
-  OPS_PAGE = null;   // タブから開いたときは一覧から（決まった見方を開く入口はこのあと opsHubOpen を呼ぶ）
+  if(OPS_PAGE) cxPop("ops"); OPS_PAGE = null;   // タブから開いたときは一覧から（決まった見方を開く入口はこのあと opsHubOpen を呼ぶ）
   track("ops", "open"); OPS_MODE = "auto"; OPS_OBS = null; if(!OPS_WX) OPS_WX_WAIT = true;
   $("opsWx").textContent = "気象通報を読み込んでいます…"; renderOps();
   const [m] = await Promise.all([loadMetar(), loadLeaflet().catch(() => {})]);
