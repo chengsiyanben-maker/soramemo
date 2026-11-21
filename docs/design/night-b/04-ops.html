@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>04 運用｜そらメモ 夜の画面</title>
+<style>
+:root{
+  /* ===== 夜の画面のトークン（tokens.md と同じ値） ===== */
+  --n-bg:#05080D;        /* 地。ほぼ黒の紺 */
+  --n-panel:#0D131B;     /* カード（計器の盤面） */
+  --n-raise:#151D28;     /* 押せるもの・ピル */
+  --n-deep:#03050A;      /* タブ帯・シートの下 */
+  --n-ring:rgba(150,175,205,.10);  /* 盤面のふち（線ではなく内側の薄い光） */
+  --n-ink:#B9C4D0;       /* 本文（真っ白にしない） */
+  --n-strong:#D6DEE6;    /* 見出し・大事な字 */
+  --n-sub:#8693A3;       /* 補足・単位 */
+  --n-glow:#5BCB88;      /* 光る色1：計器の数字・選んでいるもの */
+  --n-glow-halo:rgba(91,203,136,.38);
+  --n-glow-wash:rgba(91,203,136,.12);
+  --n-amber:#E8A84A;     /* 光る色2：いまここ・注意だけ */
+  --n-amber-halo:rgba(232,168,74,.35);
+  --n-amber-wash:rgba(232,168,74,.12);
+  --n-jal:#D9707C;       /* 光らない。小さな印だけ */
+  --n-ana:#86A6E6;
+  --n-shadow:0 10px 28px -14px rgba(0,0,0,.9),inset 0 0 0 1px var(--n-ring);
+  --n-chart-sea:#060B12; --n-chart-land:#0C1219; --n-chart-coast:#283442; --n-chart-grid:rgba(120,150,190,.07); --n-chart-apt:#7E8C9C;
+  --n-mono:"DejaVu Sans Mono","SF Mono",ui-monospace,Menlo,monospace;  /* 数字だけ */
+  --gothic:"Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic UI","Yu Gothic","Meiryo","Noto Sans JP","Noto Sans CJK JP",system-ui,sans-serif;
+color-scheme:dark}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--n-bg);color:var(--n-ink);font-family:var(--gothic);font-size:15px;line-height:1.6;-webkit-text-size-adjust:100%}
+.phone{position:relative;max-width:420px;min-height:100vh;min-height:100svh;margin:0 auto;overflow:hidden;background:var(--n-bg)}
+.wrap{padding:14px 16px 130px}
+.card{background:var(--n-panel);border-radius:22px;box-shadow:var(--n-shadow)}
+.lab{font-size:13px;font-weight:700;color:var(--n-sub)}
+/* 計器の数字：等幅・光る。数字だけに使う */
+.gn{font-family:var(--n-mono);font-weight:700;color:var(--n-glow);text-shadow:0 0 10px var(--n-glow-halo);letter-spacing:-.02em;line-height:1.1;font-variant-numeric:tabular-nums}
+.gn.am{color:var(--n-amber);text-shadow:0 0 10px var(--n-amber-halo)}
+.u{font-family:var(--gothic);font-size:12px;font-weight:600;color:var(--n-sub);margin-left:3px;text-shadow:none;letter-spacing:0}
+.tn{font-variant-numeric:tabular-nums}
+h1.t{font-size:24px;line-height:1.3;color:var(--n-strong);margin:16px 4px 0}
+.lead{font-size:14px;color:var(--n-ink);margin:6px 4px 0}
+.grp-h{font-size:13px;font-weight:700;color:var(--n-sub);margin:22px 6px 0}
+.note{font-size:13px;color:var(--n-sub);margin:10px 4px 0;line-height:1.6}
+.pl{height:44px;display:inline-flex;align-items:center;justify-content:center;padding:0 16px;border-radius:999px;font-size:14px;font-weight:800;background:var(--n-raise);color:var(--n-strong);box-shadow:inset 0 0 0 1px var(--n-ring);white-space:nowrap}
+.pl.on{background:var(--n-glow-wash);color:var(--n-glow);box-shadow:inset 0 0 0 1.5px var(--n-glow)}
+.chip{display:inline-flex;align-items:center;height:24px;padding:0 10px;border-radius:999px;font-size:13px;font-weight:800;background:var(--n-raise);color:var(--n-ink)}
+.chip.am{background:var(--n-amber-wash);color:var(--n-amber)}
+.chip.ok{background:var(--n-glow-wash);color:var(--n-glow)}
+.btn{height:52px;border-radius:999px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800}
+.btn.pri{background:var(--n-glow);color:#04130A}
+.btn.sec{background:var(--n-raise);color:var(--n-strong);box-shadow:inset 0 0 0 1px var(--n-ring)}
+.btn.ghost{color:var(--n-sub);height:44px;font-size:15px}
+.ic{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
+/* 見方の帯 */
+.band{display:flex;gap:8px;overflow:hidden;margin-top:14px}
+.band .pl{flex:none}
+/* タブ帯 */
+.tabs{position:fixed;left:50%;transform:translateX(-50%);bottom:14px;width:calc(min(420px,100vw) - 28px);height:64px;border-radius:999px;background:rgba(10,15,22,.94);box-shadow:0 12px 30px -10px rgba(0,0,0,.95),inset 0 0 0 1px var(--n-ring);display:flex;align-items:stretch;padding:0 8px;z-index:30}
+.tabs b{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:13px;font-weight:700;color:var(--n-sub);position:relative}
+.tabs b.on{color:var(--n-glow)}
+.tabs b.on::after{content:"";position:absolute;bottom:7px;width:18px;height:3px;border-radius:3px;background:var(--n-glow);box-shadow:0 0 8px var(--n-glow-halo)}
+.tabs svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+/* 上の段 */
+.bar{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.back{height:44px;display:flex;align-items:center;font-size:14px;font-weight:800;color:var(--n-strong);background:var(--n-raise);box-shadow:inset 0 0 0 1px var(--n-ring);border-radius:999px;padding:0 14px 0 12px;flex:none}
+/* 地図 */
+.hmap{position:relative;margin:-14px -16px 0;overflow:hidden;height:300px}
+.hmap>svg{display:block;width:100%;height:100%}
+.topb{position:absolute;left:14px;right:14px;top:14px;display:flex;justify-content:space-between;gap:8px}
+.mode{display:flex;flex:none;background:rgba(13,19,27,.92);box-shadow:inset 0 0 0 1px var(--n-ring);border-radius:999px;padding:4px}
+.mode span{height:40px;display:flex;align-items:center;padding:0 10px;border-radius:999px;font-size:13px;white-space:nowrap;font-weight:800;color:var(--n-sub)}
+.mode span.on{background:var(--n-raise);color:var(--n-strong);box-shadow:inset 0 0 0 1px var(--n-ring)}
+.mp{height:48px;flex:none;white-space:nowrap;display:flex;align-items:center;gap:6px;padding:0 12px;border-radius:999px;background:rgba(13,19,27,.92);box-shadow:inset 0 0 0 1px var(--n-ring);font-size:14px;font-weight:800;color:var(--n-strong)}
+.gsi{position:absolute;left:14px;bottom:36px;font-size:13px;color:var(--n-sub);background:rgba(5,8,13,.8);padding:2px 8px;border-radius:8px}
+.hsheet{position:relative;margin:-26px -16px 0;background:var(--n-bg);border-radius:28px 28px 0 0;padding:10px 16px 0;box-shadow:0 -10px 30px -12px rgba(0,0,0,.9)}
+.grip{width:44px;height:5px;border-radius:999px;background:#2A3542;margin:0 auto 12px}
+/* 半券 */
+.stub{display:grid;grid-template-columns:1fr 104px;border-radius:22px;overflow:hidden;box-shadow:var(--n-shadow)}
+.stub .l{background:var(--n-panel);padding:14px 16px}
+.stub .l small{display:block;font-size:13px;color:var(--n-sub);font-weight:700}
+.flap{display:flex;gap:6px;margin:8px 0 6px}
+.flap i{font-style:normal;width:34px;height:40px;border-radius:7px;background:#18212C;display:grid;place-items:center;font-size:26px;font-weight:800;color:#E2D6B4;box-shadow:inset 0 -20px 0 rgba(0,0,0,.18)}
+.stub .l b{display:block;font-size:16px;color:var(--n-strong)}
+.stub .l .in{font-size:13px;color:var(--n-sub)}
+.stub .r{background:#111924;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;text-align:center;color:var(--n-sub);font-size:13px;font-weight:700;line-height:1.45;box-shadow:inset 1px 0 0 rgba(150,175,205,.06)}
+.stub .r.go{background:var(--n-glow-wash);color:var(--n-glow)}
+.today{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px}
+.today>div{background:var(--n-panel);border-radius:18px;box-shadow:var(--n-shadow);padding:12px 14px}
+.today .gn{font-size:30px;margin-top:2px}
+.cardp{padding:16px 18px;margin-top:12px}
+.cardp h3{margin:0;font-size:16px;color:var(--n-strong)}
+.cardp p{margin:4px 0 0;font-size:14px}
+.rowl{display:flex;align-items:center;gap:12px;min-height:56px;padding:6px 0}
+.rowl+.rowl{box-shadow:0 -1px 0 rgba(150,175,205,.06)}
+.rowl .tx{flex:1;min-width:0}
+.rowl .tx b{display:block;font-size:15px;color:var(--n-strong);line-height:1.4}
+.rowl .tx small{display:block;font-size:13px;color:var(--n-sub)}
+.rowl .ar{color:var(--n-sub);font-weight:800}
+.ii{width:40px;height:40px;border-radius:12px;background:var(--n-raise);display:grid;place-items:center;color:var(--n-ink);flex:none}
+.dot{width:8px;height:8px;border-radius:9px;display:inline-block;margin-right:6px;vertical-align:1px}
+.dim{position:fixed;inset:0;background:rgba(0,0,0,.62);z-index:50}
+.sheet{position:fixed;left:50%;transform:translateX(-50%);bottom:0;width:min(420px,100vw);background:var(--n-panel);border-radius:28px 28px 0 0;box-shadow:0 -12px 40px -8px rgba(0,0,0,.9),inset 0 1px 0 var(--n-ring);z-index:60;padding:10px 16px 28px}
+.sheet h3{margin:0;font-size:18px;color:var(--n-strong)}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:92px;width:calc(min(420px,100vw) - 28px);background:#121A24;box-shadow:0 12px 30px -8px rgba(0,0,0,.95),inset 0 0 0 1px var(--n-ring);border-radius:20px;padding:10px 10px 10px 16px;z-index:40;display:flex;align-items:center;gap:10px;font-size:14px;color:var(--n-strong)}
+.toast span{flex:1;line-height:1.5}
+.toast small{display:block;font-size:13px;color:var(--n-sub)}
+.ann{position:relative;z-index:40;max-width:392px;margin:16px auto 120px;font-size:13px;line-height:1.7;background:#2A2614;color:#E9DFB8;padding:12px 14px;border-radius:16px}
+.ann b{display:block}
+.ann ul{margin:4px 0 0;padding-left:1.2em}
+</style>
+</head>
+<body>
+<main class="phone"><div class="wrap">
+<div class="bar"><h1 class="t" style="margin:6px 4px 0">運用 ・ 羽田</h1><span class="pl">空港 ▾</span></div>
+<div class="band"><span class="pl on">滑走路</span><span class="pl">撮る人</span><span class="pl">案内板</span></div>
+<div class="card" style="padding:16px 18px;margin-top:14px">
+<div style="display:flex;justify-content:space-between;align-items:flex-start"><div><div class="lab">いまの向き</div><div style="font-size:24px;font-weight:800;color:var(--n-strong);margin-top:2px">北向き（北風）</div></div><span class="chip ok">運用中</span></div>
+<svg viewBox="0 0 340 170" style="display:block;width:100%;height:auto" role="img" aria-label="羽田の滑走路と今の向き">
+<g stroke="#2A3542" stroke-width="12" stroke-linecap="round"><path d="M70 150 L130 30"/><path d="M120 160 L180 40"/><path d="M60 80 L240 115"/><path d="M200 160 L300 70"/></g>
+<g stroke="var(--n-glow)" stroke-width="3" stroke-linecap="round" style="filter:drop-shadow(0 0 4px rgba(91,203,136,.6))"><path d="M70 150 L130 30"/><path d="M120 160 L180 40"/></g>
+<g fill="var(--n-glow)"><path d="M130 14 l-7 14 h14z"/><path d="M180 24 l-7 14 h14z"/></g>
+<text x="24" y="160" font-size="13" font-weight="800" fill="#B9C4D0">34L</text><text x="128" y="168" font-size="13" font-weight="800" fill="#B9C4D0">34R</text>
+<text x="200" y="24" font-size="13" fill="#8693A3">灰色＝使っていない</text></svg>
+<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:6px">
+<div><div class="lab">風</div><div class="gn" style="font-size:28px">340<span class="u">°</span></div></div>
+<div><div class="lab">風速</div><div class="gn" style="font-size:28px">12<span class="u">kt</span></div></div>
+<div><div class="lab">着陸 / 時</div><div class="gn" style="font-size:28px">38</div></div></div>
+</div>
+<div class="card cardp"><div class="lab">これから</div>
+<div class="rowl"><div class="tx"><b>南向きに変わるかも</b><small>予想 ・ <span class="tn">23:00</span> ごろ ・ 保証しません</small></div><span class="chip am">予想</span></div></div>
+<p class="note">最後に読み込んだ <span class="tn">21:42</span> ・ 出典は「このアプリについて」</p>
+</div><nav class="tabs"><b class=""><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 10.5 12 4l8.5 6.5"/><path d="M5.5 9v10h4.5v-5.5h4V19h4.5V9"/></svg>ホーム</b><b class=""><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5C4 4.7 4.7 4 5.5 4H11v15H5.5c-.8 0-1.5.5-1.5 1.2V5.5Z"/><path d="M20 5.5c0-.8-.7-1.5-1.5-1.5H13v15h5.5c.8 0 1.5.5 1.5 1.2V5.5Z"/></svg>図鑑</b><b class=""><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10.5 13.5 4 11l1.4-1.4 7 1.1 3.9-3.9c.8-.8 2.1-.8 2.9 0s.8 2.1 0 2.9l-3.9 3.9 1.1 7L15 22l-2.5-6.5-3 3v2.5L8 22.5l-1.3-3.2L3.5 18 5 16.5h2.5Z"/></svg>フライト</b><b class="on"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 21l1.5-9h3L15 21"/><path d="M7 8h10l-1.5 4h-7Z"/><path d="M12 8V4"/><path d="M9.5 4h5"/></svg>運用</b><b class=""><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="14" r="6"/><path d="M12 11v3l2 1.5"/><path d="M9 3h6l-1 4h-4Z"/></svg>修行</b></nav></main>
+<aside class="ann"><b>メモ（本番には出ません）</b><ul><li>運用の夜。使っている滑走路（34L・34R）だけ緑で光る線、使っていない滑走路は暗い灰色。滑走路の名前は数字だけれど図の札なので光らせない</li><li>風（340°・12kt）と1時間の着陸の数だけ計器の数字</li><li>予想は実績と分け、琥珀の「予想」の札と「保証しません」（決まりのとおり）</li><li>北風運用などを集める印・バッジは作らない（却下済み）</li></ul></aside>
+<script>if(window!==window.top){var a=document.querySelector('.ann');if(a)a.remove()}</script>
+</body>
+</html>
