@@ -71,7 +71,8 @@ for (const def of Object.values(OPS_AIRPORTS)) {
   await p.goto(`${BASE}/index.html#ops-${def.iata}`);
   // 11/19 運用タブは一覧＋専用ページ（design/ops-hub 1版）。一覧の「滑走路」のカードから専用ページを開いて確かめる（地図はこのページの下の「地図」のカードと同じ中身）
   await p.waitForSelector('[data-ohub="runway"]', { timeout: 15000 }).catch(() => {});
-  ok(await p.locator('#opsHubList [data-ohub]').count() === 10, `${def.iata}：運用の一覧に10枚のカード`);
+  const nCard = def.iata === "HND" ? 11 : 10;   // 11/21：羽田だけ「3D」のカード（地図のすぐ後）が足される
+  ok(await p.locator('#opsHubList [data-ohub]').count() === nCard, `${def.iata}：運用の一覧に${nCard}枚のカード${def.iata === "HND" ? "（3D を含む）" : "（3D は出さない）"}`);
   await p.locator('[data-ohub="map"]').click().catch(() => {}); await p.waitForTimeout(700);
   await p.waitForFunction(() => document.querySelector("#opsInfo .opssrc"), null, { timeout: 15000 }).catch(() => {});
   await p.waitForTimeout(2500);

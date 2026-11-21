@@ -71,7 +71,7 @@ async def main():
         c, pg, errs = await page(b)
         # 1 一覧
         r = await pg.evaluate("({ hub: $('v-ops').dataset.hub, n: document.querySelectorAll('#opsHubList [data-ohub]').length, ids: [...document.querySelectorAll('#opsHubList [data-ohub]')].map(x => x.dataset.ohub), txt: $('opsHubList').innerText })")
-        check('1 一覧に10枚のカード（滑走路・地図・案内板・特別塗装機・遅れ・短冊・1日の山・定時・空の道すじ・撮る人）', r['hub'] == 'list' and r['ids'] == ['runway','map','board','special','late','strip','day','ontime','art','photo'], r['ids'])
+        check('1 一覧に10枚のカード（滑走路・地図・案内板・特別塗装機・遅れ・短冊・1日の山・定時・空の道すじ・撮る人）＋羽田だけの「3D」（地図のすぐ後。11/21）', r['hub'] == 'list' and r['ids'] == ['runway','map','a3','board','special','late','strip','day','ontime','art','photo'], r['ids'])
         check('1 「空港｜機体」と見方のタブは出さない', not await visible(pg, '#opsSide') and not await visible(pg, '#opsViews') and not await visible(pg, '#opsAside'))
         check('1 頭は空港のピル＋i、検索窓は上に残す（案A）', await visible(pg, '#opsApBtn') and await visible(pg, '#opsInfoBtn') and await visible(pg, '#opsPlForm'))
         t = r['txt']
