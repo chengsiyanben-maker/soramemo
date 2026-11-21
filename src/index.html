@@ -742,7 +742,7 @@ dialog.spfull .dlg{padding:16px 16px 32px;max-width:480px;margin:0 auto;max-heig
 .atcsteps .past i{background:#9CA3AF}.atcsteps .on{color:#1D4ED8;font-weight:800}.atcsteps .on i{background:#1D4ED8;box-shadow:0 0 0 4px #E0ECFF}
 .atcnow{display:flex;justify-content:space-between;align-items:center;margin-top:12px;background:var(--hero);color:#fff;border-radius:16px;padding:10px 14px}
 .artbands{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin:6px 0 8px}.artbands .chip{flex:none}
-.artdate{position:relative;cursor:pointer}.artdate input{position:absolute;inset:0;opacity:0;width:100%;cursor:pointer}
+.artdate{position:relative;cursor:pointer;display:flex;align-items:center;min-height:44px}.artdate input{position:absolute;inset:0;opacity:0;width:100%;cursor:pointer}
 .atcnow small{display:block;font-size:11px;color:#BDBDBD}.atcnow b.f{font-size:20px;font-variant-numeric:tabular-nums}
 .atcfeed{list-style:none;margin:10px 0 0;padding:0}
 .atcfeed li{background:var(--s-card);border-radius:20px;padding:12px 14px;margin-bottom:8px}.atcfeed li.warn{box-shadow:inset 0 0 0 2px #FDE7E7}
@@ -1075,6 +1075,12 @@ dialog.tpsheet .dlg{display:flex;flex-direction:column;overflow:hidden;padding-b
 #v-ops[data-page="runway"] [data-lo="opsb:map"],#v-ops[data-page="runway"] #opsSpots{display:none!important}
 #v-ops[data-page="map"] #opsInfo,#v-ops[data-page="map"] #opsModes,#v-ops[data-page="map"] #opsAlerts,#v-ops[data-page="map"] #opsCurfew,#v-ops[data-page="map"] #opsGa{display:none!important}
 #v-ops[data-page="late"] #opsBoard,#v-ops[data-page="late"] #opsGa{display:none!important}
+#v-ops:not([data-page="late"]) #opsLate{display:none!important}
+.opslate .ltbig{display:flex;align-items:baseline;gap:6px;margin:10px 0 2px}.opslate .ltbig b{font:900 40px/1 var(--gothic);color:var(--op-ink)}.opslate .ltbig small{font-size:14px;font-weight:700;color:var(--op-sub)}
+.opslate .ltsub{margin:0;font-size:13px;color:var(--op-sub)}
+.opslate .lthrs{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0 0;padding:0;list-style:none}.opslate .lthrs li{padding:6px 10px;border-radius:999px;background:var(--op-pill);font-size:13px;font-weight:700;color:var(--op-ink)}
+.opslate .lthrs li b{font-weight:900}
+.opslate .ltnone{margin:6px 0 0;font-size:15px;font-weight:800;color:var(--op-ink)}
 .ohub{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:4px 0 0}
 .ohub[hidden]{display:none}
 .ohc{position:relative;display:flex;flex-direction:column;justify-content:space-between;min-height:126px;padding:14px 16px;border:0;border-radius:22px;background:var(--op-card);box-shadow:var(--op-shadow);color:var(--op-ink);font:inherit;text-align:left;cursor:pointer;overflow:hidden}
@@ -1084,6 +1090,7 @@ dialog.tpsheet .dlg{display:flex;flex-direction:column;overflow:hidden;padding-b
 .ohc .ohv b{font:900 34px/1 var(--gothic);letter-spacing:-.01em;color:var(--op-ink)}
 .ohc .ohv small{font-size:13px;font-weight:700;color:var(--op-sub)}
 .ohc .ohv .na{font-size:22px;color:var(--op-sub)}
+.ohc .ohv b.prev{color:var(--op-sub)}
 .ohc.dark{background:#0F1B2D;color:#fff}.ohc.dark .oht{color:#C9D2DE}.ohc.dark .ohv b{color:#fff;font-size:40px}
 .ohc .ohchips{margin-left:auto;display:flex;gap:6px}
 .ohc .ohchips i{font:800 14px/1 var(--gothic);font-style:normal;color:#fff;border:1.5px solid #fff;border-radius:8px;padding:6px 8px}
@@ -1806,7 +1813,7 @@ dialog.mypage .dlg .close{display:none}
 #v-ops .otlist small{color:var(--op-mute);text-align:right;font-variant-numeric:tabular-nums}
 #v-ops .artcv{display:block;width:100%;aspect-ratio:1;border-radius:16px;background:#0B1220;margin:4px 0 8px}
 #v-ops .artnav{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12.5px;color:var(--op-ink)}
-#v-ops .artnav button{min-height:32px;min-width:44px;padding:0 12px;border:0;border-radius:999px;background:var(--op-pill);color:var(--op-ink);font:700 12px var(--gothic)}
+#v-ops .artnav button{min-height:44px;min-width:44px;padding:0 12px;border:0;border-radius:999px;background:var(--op-pill);color:var(--op-ink);font:700 12px var(--gothic)}
 #v-ops .artnav button:disabled{opacity:.4}
 #v-ops .artkey{display:flex;gap:14px;font-size:11.5px;color:var(--op-mute);margin:6px 0 0}
 #v-ops .artkey i{display:inline-block;width:14px;height:3px;border-radius:2px;vertical-align:middle;margin-right:5px}
@@ -2143,6 +2150,7 @@ dialog.a3dlg{inset:0;margin:0;max-width:100vw;max-height:100vh;width:100vw;heigh
 .a3tag{position:absolute;left:0;top:0;white-space:nowrap;padding:5px 12px;border-radius:999px;background:#fff;color:#374151;font-size:13px;box-shadow:0 2px 8px rgba(15,22,38,.18)}
 .a3tag b{color:#111827;font-weight:800}
 .a3tag.on{background:#111827;color:#D1D5DB}.a3tag.on b{color:#fff}
+.a3tag.edge{background:rgba(255,255,255,.86);color:#4B5563}   /* 景色の外の機体の札（画面の端・向きの矢印つき） */
 .a3top{position:absolute;left:12px;right:12px;top:calc(10px + env(safe-area-inset-top));display:flex;gap:10px;align-items:center}
 .a3rnd{flex:none;width:44px;height:44px;border:0;border-radius:50%;background:rgba(255,255,255,.92);color:#111827;display:grid;place-items:center;cursor:pointer;box-shadow:0 2px 10px rgba(15,22,38,.12)}
 .a3rnd svg{width:22px;height:22px;fill:currentColor}
@@ -3494,10 +3502,10 @@ dialog.fbx .row2>button{flex:1;min-height:52px;border-radius:999px}
 :root[data-view="home"] header.top .brand>svg:not(.lg3){display:none}
 :root[data-view="home"] header.top .brand .lg3{display:block;width:36px;height:36px}
 :root[data-view="home"] header.top .brand .bt{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
-:root[data-view="home"] #openSettings.iconbtn{grid-area:mp;display:flex;align-items:center;gap:6px;height:44px;padding:0 14px 0 11px;border:0;border-radius:999px;background:var(--h3-card);box-shadow:var(--h3-shadow);color:var(--h3-strong);font-size:13px;font-weight:800;letter-spacing:0}
-:root[data-view="home"] #openSettings .mpic{display:block;width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+:root[data-view="home"] #openSettings.iconbtn{grid-area:mp;display:flex;align-items:center;gap:4px;height:44px;padding:0 12px 0 10px;white-space:nowrap;flex:none;min-width:max-content;border:0;border-radius:999px;background:var(--h3-card);box-shadow:var(--h3-shadow);color:var(--h3-strong);font-size:13px;font-weight:800;letter-spacing:0}
+:root[data-view="home"] #openSettings .mpic{display:block;flex:none;width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 :root[data-view="home"] .modesw{grid-area:sw;justify-self:start;display:flex;margin:0;padding:3px;border:0;border-radius:999px;background:var(--h3-card);box-shadow:var(--h3-shadow);-webkit-backdrop-filter:none;backdrop-filter:none}
-:root[data-view="home"] .modesw button{height:38px;padding:0 12px!important;border-radius:999px;font-size:13px;font-weight:700;color:var(--h3-sub);white-space:nowrap}
+:root[data-view="home"] .modesw button{height:38px;padding:0 10px!important;border-radius:999px;font-size:13px;font-weight:700;color:var(--h3-sub);white-space:nowrap}
 :root[data-view="home"] .modesw button[aria-selected="true"]{background:var(--h3-strong);color:#fff}
 :root[data-view="home"] .gamenote,:root[data-view="home"] .demo-banner{display:none!important}
 :root[data-view="home"] .topzone{position:relative}
@@ -3731,6 +3739,9 @@ div.viewsw>button{position:relative}div.viewsw>button::after{content:"";position
 .modesw button::after{content:"";position:absolute;inset:-4px 0}
 .demo-banner button::after{content:"";position:absolute;inset:-6px -2px}
 #homeSheet .grab::after{content:"";position:absolute;left:0;right:0;top:-20px;bottom:0}
+/* 11/19〜21 に入った所の押せる範囲（11/21 の見回り9）：運用の地図の ＋−（30→44）・出典の「くわしく」の字のリンク（見た目は変えず上下に広げる）・空の道すじの ◀ ▶ と日を選ぶ（下の .artnav・.artdate） */
+#opsMap .leaflet-control-zoom a{width:44px;height:44px;line-height:44px;font-size:22px}
+a[href="terms.html#data"]{padding:14px 2px;margin:0 -2px}
 /* ---------- 空港のピン止め（design/pin 4版）：している＝紺の塗り「ピン止め中 ›」・していない＝白地「ピン止め」 ---------- */
 :root{--pin:#1B2B4B;--pin-ink:#FFFFFF;--pin-wash:#EEF2F8}
 :root[data-night="on"]{--pin:rgba(220,227,234,.16);--pin-ink:#DCE3EA;--pin-wash:rgba(220,227,234,.08)}
@@ -4116,6 +4127,7 @@ details.pindev summary span{flex:none;color:var(--pin)}details.pindev ol{margin:
   <div class="opsboard opsart" id="opsArt" hidden data-ov="art"></div>
   <div class="opsboard opsstrip" id="opsStrip" hidden data-ov="strip"></div>
   <div class="opsboard opsphoto" id="opsPhoto" hidden data-ov="photo"></div>
+  <div class="fwbox opslate" id="opsLate" hidden data-ov="board"></div>   <!-- 運用の一覧の「遅れ」の専用ページの頭（カードと同じ数。11/21 の見回り1） -->
   <div class="lo-zone" id="opsBlocks">
   <div class="lo" data-lo="opsb:alerts">
     <div class="fwbox" id="opsAlerts" hidden data-ov="runway board"></div>
@@ -5227,8 +5239,10 @@ function a3Camera(ps){
     cam.position.set(x, A3_TOWER[2] + 2, z); cam.lookAt(x + Math.sin(h) * 3000, 0, z - Math.cos(h) * 3000); return;
   }
   // 全体：北の上空から南へ見る（空港の先に着陸に向かう機体）。指で左右に回す
-  const R = 22000, cx = 0, cz = 2500;   // 縦長の画面でも空港の先の空の機体が入るよう、遠く高くから
-  cam.position.set(cx - Math.sin(yaw) * R, 11000, cz - Math.cos(yaw) * R);
+  //   11/21 の見回り8：前（約24.6km 先・高さ11km・見る点は空港の2.5km 南）は、模型が画面の幅の約3分の2・高さの約8分の1で、下のシートの近くに小さく出ていた。
+  //   約12km まで寄せ、見る点を空港の1km 北にして、模型をシートの上の空いた所に大きく出す（390×844 で幅 約9割・高さ 約2倍）。南から着陸に向かう機体は模型の上の空に入る
+  const R = 10000, cx = 0, cz = -1000;
+  cam.position.set(cx - Math.sin(yaw) * R, 7000, cz - Math.cos(yaw) * R);
   cam.lookAt(cx, 0, cz);
 }
 // 名札：空の機体だけ。「JL 318 700m」。選んだ機体は濃い札
@@ -5237,10 +5251,27 @@ function a3Labels(ps){
   const T = A3.THREE, st = $("a3Stage"), W = st.clientWidth, H = st.clientHeight, v = new T.Vector3(), seen = new Set(), placed = [];
   const sheetTop = ($("a3Sheet").getBoundingClientRect().top - st.getBoundingClientRect().top);
   const order = [...A3.objs.entries()].sort((a, b) => (a[0] === A3.sel ? -1 : b[0] === A3.sel ? 1 : 0) || (a[1].p.dist_km || 0) - (b[1].p.dist_km || 0));
+  let edges = 0;
   for(const [id, o] of order){
     v.copy(o.g.position).project(A3.cam);
     const vis = v.z < 1 && Math.abs(v.x) <= 1.05 && Math.abs(v.y) <= 1.05;
     o.sx = vis ? (v.x + 1) / 2 * W : null; o.sy = vis ? (1 - v.y) / 2 * H : null;
+    if(!vis && a3Air(o.p) && !A3.lite && A3.view === "all" && edges < 3){   // 景色の外の空の機体は、画面の端に向きの矢印つきの札（11/21 の見回り8：寄せたので、外に出る機体がある）
+      const back = v.z > 1, ex = back ? -v.x : v.x, ey = back ? -v.y : v.y, side = Math.abs(ex) >= Math.abs(ey) ? (ex > 0 ? "r" : "l") : ey > 0 ? "t" : "b";
+      const k = Math.max(Math.abs(ex), Math.abs(ey)) || 1, px = (ex / k + 1) / 2 * W, py = (1 - ey / k) / 2 * H;
+      const ex2 = side === "r" ? W - 8 : side === "l" ? 8 : Math.max(70, Math.min(W - 70, px)), ey2 = side === "t" ? 150 : side === "b" ? sheetTop - 30 : Math.max(150, Math.min(sheetTop - 30, py));
+      const r = side === "r" ? [ex2 - 130, ey2 - 16, ex2, ey2 + 16] : side === "l" ? [ex2, ey2 - 16, ex2 + 130, ey2 + 16] : [ex2 - 65, ey2 - 16, ex2 + 65, ey2 + 16];
+      if(placed.some(q => r[0] < q[2] && r[2] > q[0] && r[1] < q[3] && r[3] > q[1])) continue;
+      placed.push(r); seen.add(id); edges++;
+      let el = A3.labels.get(id);
+      if(!el){ el = document.createElement("span"); el.className = "a3tag"; box.appendChild(el); A3.labels.set(id, el); }
+      const st0 = a3State(o.p)[0], min = /約(\d+)分/.exec(st0), ar = { r:"→", l:"←", t:"↑", b:"↓" }[side];
+      const txt = `${side === "l" ? ar + " " : ""}<b>${esc(a3No(o.p))}</b>${min ? ` ${min[1]}分` : ""}${side !== "l" ? " " + ar : ""}`;
+      if(el._t !== txt){ el.innerHTML = txt; el._t = txt; }
+      el.classList.add("edge"); el.classList.toggle("on", id === A3.sel);
+      el.style.transform = side === "r" ? `translate(${ex2}px,${ey2.toFixed(1)}px) translate(-100%,-50%)` : side === "l" ? `translate(${ex2}px,${ey2.toFixed(1)}px) translate(0,-50%)` : `translate(${ex2.toFixed(1)}px,${ey2}px) translate(-50%,-50%)`;
+      continue;
+    }
     if(!vis || !a3Air(o.p) || A3.lite || o.sy > sheetTop - 8 || o.sy < 140) continue;
     const r = [o.sx - 60, o.sy - 52, o.sx + 60, o.sy - 8];
     if(id !== A3.sel && placed.some(q => r[0] < q[2] && r[2] > q[0] && r[1] < q[3] && r[3] > q[1])) continue;   // 重なる名札は出さない（近い機体を先に）
@@ -5249,7 +5280,7 @@ function a3Labels(ps){
     if(!el){ el = document.createElement("span"); el.className = "a3tag"; box.appendChild(el); A3.labels.set(id, el); }
     const alt = a3Alt(o.p), txt = `<b>${esc(a3No(o.p))}</b>${o.p.phase === "dep" && alt != null && alt < 500 ? " 離陸" : alt != null ? ` ${alt.toLocaleString("ja-JP")}m` : ""}`;
     if(el._t !== txt){ el.innerHTML = txt; el._t = txt; }
-    el.classList.toggle("on", id === A3.sel);
+    el.classList.toggle("on", id === A3.sel); el.classList.remove("edge");
     const lx = Math.max(64, Math.min(W - 64, o.sx));   // 画面の端で名札が切れないように
     el.style.transform = `translate(${lx.toFixed(1)}px,${(o.sy - 14).toFixed(1)}px) translate(-50%,-100%)`;
   }
@@ -11115,7 +11146,9 @@ function renderOpsPside(){
   const sel = !!OPS_PL_REG, v = VIEW.opsp;
   $("opsPRecent").hidden = sel || v !== "recent"; $("opsPSpecial").hidden = sel || v !== "special"; $("opsPlDay").hidden = !sel;
   if(!sel && v === "recent") $("opsPRecent").innerHTML = opsRecentHTML();
-  if(!sel && v === "special"){ const html = specialHTML(); $("opsPSpecial").innerHTML = html || `<div class="fwlist"><p class="hint" style="margin:0">特別塗装機は、ログインしなくても見られます。いまは読み込めません。</p></div>`; }
+  if(!sel && v === "special"){ const html = specialHTML(); $("opsPSpecial").innerHTML = html || `<div class="fwlist"><p class="hint" style="margin:0">特別塗装機は、ログインしなくても見られます。いまは読み込めません。</p></div>`;
+    // 一覧のカード（いま飛んでいる特別塗装機の数）から開いたときは、その機体の欄を畳まずに出す（11/21 の見回り5の土台の側。カードの数とページの中身をそろえる）
+    if(OPS_PAGE === "special" && opsFlying().length) $("opsPSpecial").querySelectorAll("details.spnow").forEach(d => { d.open = true; }); }
 }
 // 側と、上の1行の出し分け
 function applyOpsSide(){
@@ -11221,6 +11254,11 @@ function ohBoardStats(){
 // 地図カードの絵に、今の機体（OPS_PLANES）を小さな飛行機の印で重ねる（11/19 22時45分 PM）。
 //   絵の空港（210,80）を空港の中心に、外の点線の輪（半径74）を約15km にして置く。地図の専用ページと同じく着陸・離陸の機体だけ、近い順に最大12機。絵の外の機体は描かない
 const OH_MAP_KM = 15 / 74;
+// 地図カードの数を空港ごとに少し覚えておく（11/21 の見回り7：機体の位置が届くまで約4秒かかる）。
+//   次に開いたとき、届くまでは10分以内の前の数を「約○分前」と添えて出す。覚えるのは数と時刻だけ（この端末の中だけ）
+const OH_MAP_MEMO = "soramemo.ops.mapn";
+function ohMapKeep(planes){ try{ const o = JSON.parse(localStorage.getItem(OH_MAP_MEMO) || "{}"); o[OPS_AP] = { n:planes.filter(p => p.phase === "arr" || p.phase === "dep").length, at:Date.now() }; localStorage.setItem(OH_MAP_MEMO, JSON.stringify(o)); }catch(e){} }
+function ohMapPrev(){ try{ const x = JSON.parse(localStorage.getItem(OH_MAP_MEMO) || "{}")[OPS_AP]; if(!x || !(Date.now() - x.at < 10 * 60000) || Date.now() < x.at) return null; return { n:Number(x.n) || 0, min:Math.max(1, Math.round((Date.now() - x.at) / 60000)) }; }catch(e){ return null; } }
 function ohMapPlanes(){
   const def = opsDef(); if(!def || !def.center || !(OPS_PLANES || []).length) return "";
   const [cl, cn] = def.center, kx = Math.cos(cl * Math.PI / 180) * 111.32;
@@ -11240,7 +11278,8 @@ function ohCardHTML([id, label, , wide]){
   } else if(id === "map"){
     cls += " map"; const n = (OPS_PLANES || []).filter(p => p.phase === "arr" || p.phase === "dep").length;   // 地図に出す着陸・離陸の機体だけ数える（上空を通るだけの機体は数えない。11/20 本人）
     art = `<svg class="ohart" viewBox="0 0 360 150" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><path d="M0 40 C80 30 120 70 200 60 S320 20 360 30 V0 H0Z" fill="#EEF2E6"/><g fill="none" stroke="#8C9AAE" stroke-dasharray="4 5"><circle cx="210" cy="80" r="40"/><circle cx="210" cy="80" r="74"/></g><g stroke="#374151" stroke-width="5" stroke-linecap="round"><path d="M196 62 L206 100"/><path d="M208 60 L218 98"/><path d="M214 104 L236 90"/></g>${ohMapPlanes()}</svg>`;
-    v = `<span class="ohv">${TRAFFIC_TIMER != null || n ? `<b>${n}</b><small>機</small>` : na}</span>`;
+    const pv = TRAFFIC_GOT === OPS_AP ? null : ohMapPrev();
+    v = `<span class="ohv">${TRAFFIC_GOT === OPS_AP ? `<b>${n}</b><small>機</small>` : pv ? `<b class="prev">${pv.n}</b><small>機・約${pv.min}分前</small>` : na}</span>`;
   } else if(id === "board") v = `<span class="ohv">${b && b.arr ? `<b>${ohHM(b.arr)}</b><small>着</small>` : na}</span>`;
   else if(id === "special"){ const n = SPECIAL_AT ? opsFlying().length : null;
     v = `<span class="ohv">${n == null ? na : `<b>${n}</b><small>機</small>`}<span class="ohdots" aria-hidden="true"><i style="background:#B4232A"></i><i style="background:#1C4FA0"></i></span></span>`; }
@@ -11269,6 +11308,7 @@ function opsHubApply(){
   if(OPS_PAGE) sec.dataset.page = OPS_PAGE; else sec.removeAttribute("data-page");
   $("opsHubList").hidden = !!OPS_PAGE;
   if(!OPS_PAGE) opsHubRender();
+  renderOpsLate();
 }
 // clip-path の inset：見せたい長方形 r（画面の座標）を、要素 el の中の inset にする
 function ohInset(el, r){ const s = el.getBoundingClientRect();
@@ -11555,6 +11595,7 @@ function opsFit(){
 }
 /* 今飛んでいる機体と、通ってきた線（OpenSky。10〜20秒遅れ）。地図を開いているあいだ、30秒ごとに読み直す */
 let TRAFFIC_LAYER = null, TRAFFIC_TIMER = null, TRAFFIC_FIT = false;
+let TRAFFIC_GOT = null;   // 機体の位置が一度届いた空港（届くまで一覧の地図カードは「0機」でなく「—」。11/21 の見回り4）
 const TRAFFIC_COL = { arr:"#A3166B", dep:"#2B6CB0", other:"#5C6B7A" };
 function planeIcon(p){
   const c = TRAFFIC_COL[p.phase] || TRAFFIC_COL.other, rot = p.hdg == null ? 0 : p.hdg;
@@ -11574,7 +11615,7 @@ async function loadTraffic(){
   if(!d || !Array.isArray(d.planes)){ $("trafficNote").textContent = "今飛んでいる機体を読み込めませんでした。少し待つと、もう一度読み込みます。"; return; }
   const arr = d.planes.filter(p => p.phase === "arr"), dep = d.planes.filter(p => p.phase === "dep");
   { const ob = observeOps(d.planes); if(JSON.stringify(ob) !== JSON.stringify(OPS_OBS)){ OPS_OBS = ob; if(OPS_MODE === "auto") renderOps(); } }
-  TRAFFIC_MK = []; OPS_PLANES = d.planes; if(OH_LIST()) opsHubRender();
+  TRAFFIC_MK = []; OPS_PLANES = d.planes; TRAFFIC_GOT = OPS_AP; ohMapKeep(d.planes); if(OH_LIST()) opsHubRender();
   for(const p of d.planes){
     if(p.phase !== "arr" && p.phase !== "dep") continue;   // 着陸・離陸に関係ない機体（上空を通過する機体など）は出さない
     const c = TRAFFIC_COL[p.phase] || TRAFFIC_COL.other;
@@ -11608,7 +11649,9 @@ function trafficNoteDraw(){
   const d = TRAFFIC_LAST, el = $("trafficNote"); if(!d || !el || !Array.isArray(d.planes)) return;
   const arr = d.planes.filter(p => p.phase === "arr").length, dep = d.planes.filter(p => p.phase === "dep").length, v = trafficInView();
   const out = v.inside == null ? 0 : v.all - v.inside;
-  el.innerHTML = `<i style="background:${TRAFFIC_COL.arr}"></i>着陸に向かう ${arr}機　<i style="background:${TRAFFIC_COL.dep}"></i>離陸して上昇中 ${dep}機<span>${jstHM(d.at)} 時点</span>`
+  // 地図が見えているときの数は「この範囲に ○機」の1つだけ（色の見本には数を付けない。11/21 の見回り4：「着陸に向かう 2機」と「この範囲に 0機」が並んでいた）
+  const n = k => v.inside == null ? ` ${k}機` : "";
+  el.innerHTML = `<i style="background:${TRAFFIC_COL.arr}"></i>着陸に向かう${n(arr)}　<i style="background:${TRAFFIC_COL.dep}"></i>離陸して上昇中${n(dep)}<span>${jstHM(d.at)} 時点</span>`
     + (v.inside == null ? "" : `<em class="tin" data-tin="${v.inside}">この範囲に <b>${v.inside}</b>機</em>`)
     + (out > 0 && OPS_SCOPE === "near" ? `<button type="button" class="tout" data-tout="${out}">ほかの${out}機は『経路の全体』で見られます ›</button>` : "");
 }
@@ -12324,6 +12367,7 @@ async function renderOpsAlerts(){
   const iata = OPS_AP; await loadFlightAlerts(iata); if(OPS_AP !== iata) return;
   const html = fwHTML(FW.get(iata), iata, true);
   box.hidden = !html; box.innerHTML = html;
+  renderOpsLate();
   const dt = $("opsDelayTile"); if(dt) dt.innerHTML = delayTileHTML(FW.get(iata));
 }
 setInterval(() => { if(opsOn()) renderOpsAlerts(); }, 60_000);
@@ -12594,8 +12638,30 @@ async function renderBoard(){
   // 海外の便は案内板の見方のときだけ読む（1日の山・短冊・撮る人は JAL・ANA の時刻表だけを使う）
   // 海外の空港の止まり具合は、国際線を出すとき（すべて・国際線）だけ読む
   const [d, fg] = await Promise.all([loadBoard(iata), opsNeed("foreign") ? loadForeign(iata) : FOREIGN_AP === iata ? FOREIGN : null, opsNeed("foreign") && BOARD_KIND !== "dom" ? loadWorldOps() : null]); if(OPS_AP !== iata) return;
-  if(!d){ box.hidden = true; box.innerHTML = ""; return; }
-  box.hidden = false; box.innerHTML = boardHTML(d, fg); renderOpsDerived(d);
+  if(!d){ box.hidden = true; box.innerHTML = ""; renderOpsLate(); return; }
+  box.hidden = false; box.innerHTML = boardHTML(d, fg); renderOpsDerived(d); renderOpsLate();
+}
+// 運用の一覧の「遅れ」の専用ページの頭（11/21 の見回り1：カードは「9便」なのに、開くと白紙だった）。
+//   カードと同じ数（案内板の1時間ごとの数の今日の合計：15分以上の遅れ＋欠航）を大きく出し、時間ごとの内訳を札で。
+//   便ごとのお知らせ（#opsAlerts）はログインした人だけなので、ない・見られないときはそう書く。数が0なら「いま遅れ・欠航の便はありません」の1枚
+function opsLateHTML(){
+  const b = ohBoardStats();
+  if(!b) return `<div class="opshead"><b>今日の遅れ・欠航</b></div><p class="ltsub">読み込んでいます…</p>`;
+  const n = b.late + b.cancel, fw = FW.get(OPS_AP), fwn = fw ? fwMerge(fw).length : null;   // fwn：便ごとのお知らせの数（読んでいないときは null）
+  if(!n) return `<div class="opshead"><b>今日の遅れ・欠航</b></div><p class="ltnone">いま遅れ・欠航の便はありません</p><p class="fwnote">15分以上の遅れと欠航を、JAL・ANA の時刻表の便で数えています。${ODPT_CREDIT}</p>`;
+  const hrs = b.hrs.map(h => ({ h:Number(h.h), n:Number(h.late || 0) + Number(h.cancel || 0) })).filter(h => h.n > 0);
+  const fwline = !fwOn() ? "便ごとのお知らせ（新しい時刻・理由）は、ログインすると見られます。" : fwn === 0 && !$("opsAlerts").innerHTML ? "いま出ている便ごとのお知らせはありません。" : "";
+  return `<div class="opshead"><b>今日の遅れ・欠航</b><span>15分以上の遅れ</span></div>
+    <div class="ltbig"><b>${n}</b><small>便</small></div>
+    <p class="ltsub">遅れ ${b.late}便・欠航 ${b.cancel}便（定刻の時間で数えています）</p>
+    ${hrs.length ? `<ul class="lthrs" aria-label="時間ごとの遅れ・欠航">${hrs.map(h => `<li>${h.h}時台 <b>${h.n}</b>便</li>`).join("")}</ul>` : ""}
+    ${fwline ? `<p class="ltsub" style="margin-top:12px">${fwline}</p>` : ""}
+    <p class="fwnote">JAL・ANA の時刻表に載っている便を数えています（遅れは航空会社の運航情報か機体の位置からの推定）。${ODPT_CREDIT}</p>`;
+}
+function renderOpsLate(){
+  const box = $("opsLate"); if(!box) return;
+  if(OPS_PAGE !== "late"){ box.hidden = true; return; }
+  box.hidden = false; box.innerHTML = `<div class="fwlist">${opsLateHTML()}</div>`;
 }
 document.addEventListener("click", e => { const b = e.target.closest("[data-board-dir]"); if(!b) return; BOARD_DIR = b.dataset.boardDir; if(BOARD) $("opsBoard").innerHTML = boardHTML(BOARD, FOREIGN_AP === OPS_AP ? FOREIGN : null); });
 document.addEventListener("click", e => { const b = e.target.closest("[data-board-kind]"); if(!b || b.dataset.boardKind === BOARD_KIND) return; BOARD_KIND = b.dataset.boardKind; track("board_kind", BOARD_KIND); renderBoard(); });
@@ -14194,7 +14260,7 @@ async function setOpsAirport(iata){
   if(!OPS_AIRPORTS[iata]) return;
   OPS_AP = iata; try{ localStorage.setItem("soramemo.opsAirport", iata); }catch(e){}
   SP_SPOT = null;
-  OPS_MODE = "auto"; OPS_OBS = null; OPS_WX = null; OPS_WX_WAIT = true; OPS_PLANES = []; TRAFFIC_FIT = false; OPS_SID_DIR = "all";
+  OPS_MODE = "auto"; OPS_OBS = null; OPS_WX = null; OPS_WX_WAIT = true; OPS_PLANES = []; TRAFFIC_GOT = null; TRAFFIC_FIT = false; OPS_SID_DIR = "all";
   if(TRAFFIC_LAYER){ TRAFFIC_LAYER.remove(); TRAFFIC_LAYER = null; }
   if(OPS_MAP){ OPS_MAP._opsAp = iata; OPS_MAP.setView(opsDef().center, 10, { animate:false }); }
   $("trafficNote").textContent = ""; $("opsWx").textContent = "気象通報を読み込んでいます…"; renderOps();
