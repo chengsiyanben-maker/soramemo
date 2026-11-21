@@ -1,7 +1,7 @@
 # データ担当の帳面
 
 ## いま持っている仕事
-- **行き先を便名で決めるのを本筋に（PM の指示 11/21 15時50分。土曜で定期の回として呼ばれたが、PM の積んだ指示があったのでこちらをした）**：ブランチ data/livery-dest2（main 26804a8 から）→ **PR #167（下書き。仕上がったので PM が自動で反映してよい）**。報告 docs/pm/report-livery-dest2.md。確かめの SQL docs/pm/livery-dest2-check.sql。**移行192・テスト t131 を使った**
+- **行き先を便名で決めるのを本筋に（PM の指示 11/21 15時50分。土曜で定期の回として呼ばれたが、PM の積んだ指示があったのでこちらをした）**：ブランチ data/livery-dest2（main 26804a8 から）→ **PR #167（11/21 19時43分 main に入った。本番の関数・移行192 は PM の反映の流れで確かめる。反映の後に livery-dest2-check.sql の 2、次の夜のあとに 3）**。報告 docs/pm/report-livery-dest2.md。確かめの SQL docs/pm/livery-dest2-check.sql。**移行192・テスト t131 を使った**
   - _shared/flight_dest.ts（1か所の判定）：呼び出し符号 → 便名（flightsOfCallsign。グループの別会社は親の便名でも：JAC→3X・JL、JTA→NU・JL）→ ①時刻表 flight_schedule（出発の定刻が20時間前〜1時間後の幅、出発〜到着＋6時間にいまが入る便）②いつもの時刻 foreign_usual（livery_inbound_usual。ふだんの到着がいまの前後2時間）③形の判定。束ねて1回ずつ・記憶10分・1.5秒で打ち切り
   - 使う所：運用タブの build（applyRoutes。行き先が違えば外す・この空港なら戻す・最終進入12km以内3,000ft以下はダイバートで残す・離陸は時刻表の出発地）／撮影の知らせ（build の答え）／nearAirports（便名をいつも先に）／notifyInbound（①時刻表 ②ふだん ③経路）
   - 会社を34社足した（PREFIX と airline_codes。トキエア BV・天草 MZ・エアロK・エアプレミア・貨物など）。移行192 は行を足すだけ（表の形・RLS は移行171 のまま）
