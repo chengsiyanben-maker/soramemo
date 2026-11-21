@@ -22,7 +22,7 @@ PM の指示（11/21 9時15分）：report-sweep-1121.md（kaizen/sweep-1121）�
 - ほかの処理を巻き込まないこと：裏の作り直しは見る人の呼び出しの後ろで1本だけ。記録の処理で増えるのは、置き場の読み1回と、見ている空港の数だけの書き込み
 
 ## 確かめた結果
-- t130（odpt_feed_at）11項目 通過。SQL のテスト全部（134本）：下の「全部のテスト」の行
+- t130（odpt_feed_at）11項目 通過。SQL のテスト全部 131本 通過（t130 を含む）
 - deno test 282本 通過（traffic_view_test 3本を足した）・deno check（airport-traffic）通過・deno lint は前からの4件のまま
 - 本番では測っていない（つなげないため）。反映の前と後に docs/pm/sweep-1121-check.sql の③で置き場の答えの大きさ（bytes）を、運用を開いて Server-Timing を見てもらうと効き目が分かる
 
