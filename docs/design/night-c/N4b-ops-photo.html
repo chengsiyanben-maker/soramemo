@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<title>N4b 運用・撮る人の見方（夜）｜そらメモ 夜の画面</title>
+<style>*{box-sizing:border-box}html,body{margin:0}
+:root{--gothic:"Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic UI","Noto Sans JP","Noto Sans CJK JP",system-ui,sans-serif;
+  --n-bg:#05080D;        /* 画面の地 */
+  --n-panel:#0D131B;     /* カード（計器の枠） */
+  --n-panel2:#141C26;    /* 押しボタン・入力欄・シート */
+  --n-bezel:#232E3B;     /* 枠のふち（1px・内側） */
+  --n-ink:#D3DBE4;       /* 本文（真っ白にしない） */
+  --n-strong:#E6ECF2;    /* 見出し */
+  --n-sub:#93A0B0;       /* 補足・単位 */
+  --n-g:#5EDB94;         /* 光る色1 緑：計器の数字・いま選んでいるもの・実績 */
+  --n-a:#F0AE4E;         /* 光る色2 琥珀：押してほしい所・判定範囲・予定・注意 */
+  --n-a-wash:#1D1810;    /* 琥珀の薄い地 */
+  --n-jal:#E37A86;       /* 会社の印（光らせない・細い線だけ） */
+  --n-ana:#86A8E6;
+  --n-stop:#E37A86;      /* 欠航（字と一緒にだけ使う） */
+  --n-glow:0 0 7px rgba(94,219,148,.32);   /* 数字の光り */
+  --n-glow-a:0 0 7px rgba(240,174,78,.30);
+  --n-frame:inset 0 0 0 1px var(--n-bezel);
+  --n-key:linear-gradient(#18212C,#10171F);
+  --num:ui-monospace,"SF Mono","Menlo","Roboto Mono","DejaVu Sans Mono",monospace;
+
+  }
+body{background:var(--n-bg);color:var(--n-ink);font-family:var(--gothic);font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased}
+.phone{position:relative;max-width:420px;min-height:100vh;min-height:100svh;margin:0 auto;background:var(--n-bg);overflow:hidden}
+.pg{padding:16px 16px 120px}
+.num{font-family:var(--num);font-weight:700;color:var(--n-g);text-shadow:var(--n-glow);font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.num.a{color:var(--n-a);text-shadow:var(--n-glow-a)}
+.num.w{color:var(--n-strong);text-shadow:none}
+.u{font-size:13px;color:var(--n-sub);font-weight:500;margin-left:3px;font-family:var(--gothic);text-shadow:none;letter-spacing:0}
+.card{background:var(--n-panel);border-radius:14px;box-shadow:var(--n-frame);padding:14px 16px}
+.lbl{font-size:13px;font-weight:700;color:var(--n-sub);letter-spacing:.06em;margin:22px 4px 8px}
+h1{font-size:26px;font-weight:800;color:var(--n-strong);margin:14px 4px 4px;letter-spacing:.01em}
+.sub{color:var(--n-sub);font-size:13px}
+.key{min-height:44px;display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:0 18px;border-radius:999px;background:var(--n-key);box-shadow:inset 0 0 0 1px #2C3846,inset 0 1px 0 rgba(255,255,255,.06);color:var(--n-ink);font-weight:700;font-size:15px;white-space:nowrap}
+.key.pri{color:var(--n-a);box-shadow:inset 0 0 0 1.5px var(--n-a),inset 0 1px 0 rgba(255,255,255,.06)}
+.key.on{color:var(--n-g);box-shadow:inset 0 0 0 1.5px var(--n-g)}
+.key.sm{min-height:44px;padding:0 14px;font-size:14px}
+.back{display:inline-flex;align-items:center;min-height:44px;padding:0 16px 0 12px;border-radius:999px;background:var(--n-panel);box-shadow:var(--n-frame);font-weight:700;color:var(--n-strong);font-size:15px}
+.band{display:flex;gap:6px;margin:14px 0 4px;padding:4px;background:var(--n-panel);border-radius:999px;box-shadow:var(--n-frame)}
+.band span{flex:1;min-height:44px;display:flex;align-items:center;justify-content:center;border-radius:999px;font-size:14px;font-weight:700;color:var(--n-sub)}
+.band span.on{color:var(--n-g);background:var(--n-panel2);box-shadow:inset 0 0 0 1.5px var(--n-g)}
+.row{display:flex;align-items:center;gap:12px;min-height:56px}
+.row+.row{margin-top:2px}
+.row .t{flex:1;min-width:0}
+.row .t b{display:block;font-size:16px;color:var(--n-strong)}
+.row .t small{display:block;font-size:13px;color:var(--n-sub)}
+.row .chev{color:var(--n-sub);font-size:18px}
+.ic{flex:none;width:44px;height:44px;border-radius:999px;background:var(--n-panel2);box-shadow:var(--n-frame);display:flex;align-items:center;justify-content:center}
+.ic svg{width:20px;height:20px;fill:none;stroke:var(--n-ink);stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.tag{display:inline-flex;align-items:center;height:24px;padding:0 9px;border-radius:999px;font-size:13px;font-weight:700;color:var(--n-sub);box-shadow:inset 0 0 0 1px #2C3846}
+.tag.g{color:var(--n-g);box-shadow:inset 0 0 0 1px rgba(94,219,148,.55)}
+.tag.a{color:var(--n-a);box-shadow:inset 0 0 0 1px rgba(240,174,78,.6)}
+nav.tabs{position:fixed;left:50%;transform:translateX(-50%);bottom:0;width:min(420px,100vw);display:flex;gap:6px;padding:8px 10px calc(12px + env(safe-area-inset-bottom,0));background:rgba(5,8,13,.96);box-shadow:inset 0 1px 0 var(--n-bezel);z-index:30}
+nav.tabs span{flex:1;min-height:54px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;border-radius:14px;font-size:13px;font-weight:700;color:var(--n-sub);background:var(--n-key);box-shadow:inset 0 0 0 1px #222C38}
+nav.tabs span svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+nav.tabs span.on{color:var(--n-g);box-shadow:inset 0 0 0 1.5px var(--n-g)}
+.foot{font-size:13px;color:var(--n-sub);margin:22px 4px 0}
+.ann{position:relative;z-index:90;max-width:392px;margin:16px auto 40px;font:13px/1.7 var(--gothic);background:#FFF8D6;color:#5A4A12;padding:12px 14px;border-radius:12px}.ann ul{margin:4px 0 0;padding-left:1.2em}
+
+.ap{display:flex;justify-content:space-between;align-items:center;margin-top:6px}
+.ap .key{gap:8px}
+.use{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+.use small{display:block;font-size:13px;color:var(--n-sub);font-weight:700}
+.use .num{font-size:30px;line-height:1.2}
+.hdr2{display:flex;justify-content:space-between;align-items:center}
+.hdr2 b{font-size:16px;color:var(--n-strong)}
+.rw{margin-top:10px}
+.rw svg{width:100%;height:150px;display:block}
+.wind{display:flex;align-items:baseline;gap:14px;margin-top:6px}
+.wind .num{font-size:24px}
+.spot b{font-size:16px;color:var(--n-strong)}
+.spot .num{font-size:22px}
+.strip{display:flex;align-items:center;gap:12px;min-height:64px;padding:8px 0}
+.strip+.strip{box-shadow:inset 0 1px 0 #1A232E}
+.strip .tm{width:62px}
+.strip .tm .num{font-size:20px}
+.strip .tm small{display:block;font-size:13px;color:var(--n-sub)}
+.strip .t{flex:1;min-width:0}
+.strip .t b{display:block;font-size:15px;color:var(--n-strong)}
+.strip .t small{display:block;font-size:13px;color:var(--n-sub)}
+</style></head><body>
+<main class="phone"><div class="pg">
+<h1>運用</h1>
+<div class="ap"><span class="key sm">HND 羽田 ⌄</span><span class="sub"><span class="num w" style="font-size:13px;font-weight:500">21:02</span> に読み込み</span></div>
+<div class="band"><span>滑走路</span><span>案内板</span><span class="on">撮る人</span></div>
+<div class="lbl">つぎに来る注目の機体</div>
+<div class="card" style="padding:4px 16px">
+<div class="strip"><div class="tm"><span class="num">21:14</span><small>着 予定</small></div><div class="t"><b>記念塗装機 C（見本）</b><small>JL 516 ・ B767-300ER ・ 34R（推定）</small></div><span class="tag g">特別塗装</span></div>
+<div class="strip"><div class="tm"><span class="num">21:31</span><small>着 予定</small></div><div class="t"><b>A350-1000</b><small>JL 44 ・ はじめて見る機種</small></div></div>
+<div class="strip"><div class="tm"><span class="num">21:48</span><small>発 予定</small></div><div class="t"><b>B787-10</b><small>NH 39 ・ 05（推定）</small></div></div>
+</div>
+<div class="lbl">撮影条件</div>
+<div class="card"><div class="hdr2"><b>夜の撮影</b><span class="sub">日の入り <span class="num w" style="font-size:15px">16:35</span></span></div>
+<div class="sub" style="margin-top:4px">着陸機は南から北へ降りてきます。滑走路の灯りが近いのは 34R の南側です</div></div>
+<div class="lbl">撮影地</div>
+<div class="card" style="padding:4px 16px">
+<div class="row"><div class="t"><b>第1ターミナル 展望デッキ</b><small>22:00 まで（見本）</small></div><span class="num" style="font-size:18px">0.2</span><span class="u">km</span></div>
+<div class="row"><div class="t"><b>京浜島つばさ公園</b><small>いつでも</small></div><span class="num" style="font-size:18px">6.8</span><span class="u">km</span></div>
+</div>
+<p class="foot">時刻は時刻表の予定、滑走路は推定です。保証しません。</p>
+</div><nav class="tabs" aria-label="タブ"><span class=""><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11l8-7 8 7v8a1 1 0 0 1-1 1h-4v-6h-6v6H5a1 1 0 0 1-1-1z"/></svg>ホーム</span><span class=""><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h6v14H4zM14 5h6v14h-6z"/></svg>図鑑</span><span class=""><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 13l7-1 5-7h2l-2 7 4-1 1-2h2l-1 4 1 4h-2l-1-2-4-1 2 7h-2l-5-7-7-1z"/></svg>フライト</span><span class="on"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v3M8 6h8M9 6l-2 15M15 6l2 15M8.5 13h7"/></svg>運用</span><span class=""><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="14" r="6"/><path d="M12 14V11M10 3h4M12 3v3"/></svg>修行</span></nav></main>
+<aside class="ann"><b>メモ（本番には出ません）</b><ul><li>撮る人の見方（撮る人用担当の持ち場）の中身はそのままに、夜の色をのせた形。ふだんの見方の帯の3つ目</li><li>時刻は計器の数字。特別塗装機の札は緑（図鑑の「集めた」と同じ色の意味：特別なもの）</li><li>「予定」「推定」を字で出し、いちばん下に1回だけ「保証しません」（決まりどおり）。撮影条件に天気は入れない（却下済み）</li><li>撮影地の時刻・説明の文は見本。撮る人用担当が本番の文を入れる</li></ul></aside>
+<script>if(window!==window.top){var a=document.querySelector('.ann');if(a)a.remove()}</script>
+</body></html>
