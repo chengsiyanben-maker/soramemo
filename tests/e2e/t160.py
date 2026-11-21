@@ -57,7 +57,7 @@ NOWD = {'at': iso(-20), 'weather': {'time': iso(-600), 'wdir': 170, 'wspd': 14, 
 NEW = "localStorage.setItem('soramemo.onboarded','1'); localStorage.setItem('soramemo.persona','all'); localStorage.setItem('soramemo.zk.notice','new'); localStorage.setItem('soramemo.install.later','1'); localStorage.setItem('soramemo.zk.swipe','1');"
 async def open3d(b, sky, h=844, noshape=False):
     c = await b.new_context(viewport={'width': 390, 'height': h}, device_scale_factor=1, timezone_id='Asia/Tokyo', bypass_csp=True)
-    await c.add_init_script(NEW)
+    await c.add_init_script(NEW + "Object.defineProperty(navigator, 'hardwareConcurrency', { get: () => 8 });")   # ふつうの端末として開く（試す機械は CPU が2つで、古い端末の軽い形になるため）
     await c.route('https://cdn.jsdelivr.net/npm/@supabase/**', lambda r: r.fulfill(path=os.path.join(HERE, 'fake_sb.js'), content_type='application/javascript'))
     await c.route('https://cdn.jsdelivr.net/npm/three@**', lambda r: r.fulfill(path=THREE, content_type='application/javascript', headers={'Access-Control-Allow-Origin': '*'}))
     n = {'t': 0}
