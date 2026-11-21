@@ -19,8 +19,9 @@ import { notifyRegFly as notifyRegFlyWith, wantsRegFly } from "../_shared/livery
 import { normCallsign } from "../_shared/flight_watch.ts";
 import { depEtaMin, dueNow, etaMin, jstDate, opsChanged, spotDepMessage, spotDepReason, spotMessage, spotReason, type SpotDep, type SpotPlane, type SpotSub } from "../_shared/spot_push.ts";
 import webpush from "npm:web-push@3.6.7";
-import { choose, readShared, writeShared } from "../_shared/edge_cache.ts";
+import { readShared, writeShared } from "../_shared/edge_cache.ts";
 import { adsbImHeaders, adsbLolHeaders } from "../_shared/adsblol.ts";
+import { activeAirports, slimPlanes, viewPlan } from "../_shared/traffic_view.ts";
 
 const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, { auth: { persistSession: false } });
 
@@ -52,7 +53,8 @@ const NEARBY: [number, number][] = [...Object.values(AIRPORTS).map((a) => a.at),
   [34.6328, 135.2239], [43.1161, 141.3800], [35.7485, 139.3485], [35.2550, 136.9244], [33.1497, 130.3022], [33.8459, 131.0349], [34.1440, 132.2356]];
 
 // データベースの線を読み、今回の位置を足して書き戻す。いなくなった機体と古い位置は消える
-async function syncTrails(iata: string, planes: { id: string; lat: number; lon: number }[]): Promise<Trails> {
+//   write=false（見る人の呼び出し）は読むだけ。線を書くのは記録の処理（30秒ごと）だけにする（11/21 見回り 7。書き込み2回ぶん速くなる）
+async function syncTrails(iata: string, planes: { id: string; lat: number; lon: number }[], write = true): Promise<Trails> {
   const tr: Trails = new Map();
   try {
     const { data } = await admin.from("traffic_trails").select("hex, pts").eq("iata", iata);
@@ -61,6 +63,7 @@ async function syncTrails(iata: string, planes: { id: string; lat: number; lon: 
   const before = new Set(tr.keys());
   // deno-lint-ignore no-explicit-any
   updateTrails(tr, planes as any, Date.now());
+  if (!write) return tr;
   const rows = [...tr.entries()].map(([hex, pts]) => ({ iata, hex, pts: pts.slice(-150).map((x) => [x.t, x.p[0], x.p[1]]), updated_at: new Date().toISOString() }));
   const gone = [...before].filter((h) => !tr.has(h));
   try {
@@ -124,16 +127,45 @@ async function fromLive(iata: string): Promise<{ now?: number; ac?: unknown[] } 
 // took があれば、どこに時間がかかったかを入れる（見る人の呼び出しの Server-Timing 用。11/13 速さの見直し）
 async function snapshot(iata: string, view = false, took?: string[]): Promise<string> {
   const t0 = performance.now(), mark = (k: string) => took?.push(`${k};dur=${Math.round(performance.now() - t0)}`);
+  // 入れ物の記憶は見る人の呼び出しだけが使う（記録の処理は毎回作って線を書く。見る人は線を書かなくなったため。11/21）
   const hit = cache.get(iata);
-  if (hit && Date.now() - hit.at < TTL) { mark("mem"); return hit.body; }
+  if (view && hit && Date.now() - hit.at < TTL) { mark("mem"); return hit.body; }
   // 見る人の呼び出しは、ほかの入れ物が20秒以内に作った答え（edge_cache、移行 164）をそのまま使う（11/13 全体の見回りの直し）。
-  //   前は呼ばれるたびに、位置を読み・線を読み・線を書き戻していた（入れ物ごとの記憶はすぐ消えるため、ほぼ毎回）
+  //   20秒〜60秒前の答えなら、待たせずにそれを返して裏で作り直す（11/21 見回り 7。答えの at で古さは分かる）
   if (view) {
+    markSeen(iata);
     const sh = (await readShared(admin, [SHARED(iata)])).get(SHARED(iata));
-    const { fresh } = choose(undefined, sh, TTL);
-    mark("shared");
-    if (fresh?.v) { const body = JSON.stringify(fresh.v); cache.set(iata, { at: fresh.at, body }); return body; }
+    const plan = viewPlan(sh?.v ? sh.at : null, Date.now());
+    mark(plan === "fresh" ? "shared" : plan === "stale" ? "shared-stale" : "shared-miss");
+    if (plan !== "build" && sh?.v) {
+      const body = JSON.stringify(sh.v);
+      if (plan === "fresh") cache.set(iata, { at: sh.at, body });
+      else background(rebuild(iata));
+      return body;
+    }
+    return await build(iata, true, mark);
   }
+  return await build(iata, false, mark);
+}
+// 見る人がいたしるし（置き場の 'trafficseen:HND'）。記録の処理は、これが3分以内の空港だけ置き場の答えを新しくする。
+//   入れ物ごとに1分に1回まで・裏で書く（見る人を待たせない）
+const SEEN = (iata: string) => `trafficseen:${iata}`, SEEN_AT = new Map<string, number>();
+function markSeen(iata: string) {
+  const now = Date.now();
+  if (now - (SEEN_AT.get(iata) ?? 0) < 60_000) return;
+  SEEN_AT.set(iata, now);
+  background(writeShared(admin, SEEN(iata), 1, now));
+}
+// 裏で作り直す（同じ入れ物で同じ空港を2つ同時に作らない）
+const REBUILDING = new Set<string>();
+async function rebuild(iata: string) {
+  if (REBUILDING.has(iata)) return;
+  REBUILDING.add(iata);
+  try { await build(iata, true, () => {}); } catch (e) { console.error("traffic rebuild", e); } finally { REBUILDING.delete(iata); }
+}
+// deno-lint-ignore no-explicit-any
+const background = (p: Promise<unknown>) => { const q = p.catch(() => {}); const rt = (globalThis as any).EdgeRuntime; if (rt?.waitUntil) rt.waitUntil(q); };
+async function build(iata: string, view: boolean, mark: (k: string) => void): Promise<string> {
   const a = AIRPORTS[iata];
   const live = view ? await fromLive(iata).catch(() => null) : null;
   if (view) mark("live");
@@ -141,14 +173,15 @@ async function snapshot(iata: string, view = false, took?: string[]): Promise<st
   if (!live) mark("adsb");
   // まとめて取った円から、この空港の半径の中だけを使う
   const planes = planesFromAdsb(j?.ac, a.at, 14000, NEARBY.filter((o) => o !== a.at)).filter((p) => p.dist_km <= a.nm * 1.852);
-  const tr = await syncTrails(iata, planes);
+  const tr = await syncTrails(iata, planes, !view || !live);   // 記録が止まっていて adsb.lol に聞いたときは、今までどおり見る人の呼び出しでも線を書く
   mark("trails");
+  // 線は画面が使う着陸・離陸の機体だけに付ける（ほかは空の配列。形は同じ）。11/21 見回り 7
   const body = JSON.stringify({
     iata, at: new Date(typeof j?.now === "number" ? j.now : Date.now()).toISOString(), source: "adsb.lol",
-    planes: planes.map((p) => ({ ...p, trail: (tr.get(p.id) ?? []).slice(-150).map((x) => x.p) })),
+    planes: slimPlanes(planes, tr),
   });
   cache.set(iata, { at: Date.now(), body });
-  // 見る人の呼び出しで作った答えだけ置き場に入れる（記録の処理の30秒ごとの答えまで入れると、書き込みが倍になるため）
+  // 見る人の呼び出しで作った答えは置き場に入れる。記録の処理の答えは、見ている人がいる空港だけ（Deno.serve の RECORD の最後）
   if (view) { await writeShared(admin, SHARED(iata), JSON.parse(body)); mark("put"); }
   return body;
 }
@@ -542,6 +575,12 @@ Deno.serve(async (req) => {
     }
     // 日本中の機体の最新の位置を残す（便の見張り用）
     try { await recordPositions(bodies, slot); } catch (e) { console.error("positions", e); }
+    // だれかが見ている空港（見る人のしるしが3分以内）だけ、置き場の答えを今回のものにする。見る人が待たずに新しい答えを読める（11/21 見回り 7）
+    let shared = 0;
+    try {
+      const ks = [...bodies.keys()], sh = await readShared(admin, ks.map(SEEN));
+      for (const k of activeAirports(sh, SEEN, ks, Date.now())) { await writeShared(admin, SHARED(k), JSON.parse(bodies.get(k)!)); shared++; }
+    } catch (e) { console.error("traffic shared", e); }
     // 特別塗装機：今回取った円の中に、一覧の登録記号の機体がいれば残す
     let liveries = 0;
     try { liveries = await recordLiveries(bodies); } catch (e) { console.error("livery", e); }
@@ -565,11 +604,11 @@ Deno.serve(async (req) => {
     if (logged) { try { spot += await notifyOpsChange([...bodies.keys()]); } catch (e) { console.error("ops push", e); } }
     // 知らせた記録は2日で消す（30分に1回）
     if (new Date().getUTCMinutes() % 30 === 0 && first) { try { await admin.from("spot_notified").delete().lt("notified_at", new Date(Date.now() - 2 * 864e5).toISOString()); } catch { /* 次の回に */ } }
-    return new Response(JSON.stringify({ recorded: done, logged, liveries, spot, ga, learned }), { headers: JSON_HEADERS });
+    return new Response(JSON.stringify({ recorded: done, logged, liveries, spot, ga, learned, shared }), { headers: JSON_HEADERS });
   }
   if (!AIRPORTS[iata]) return new Response(JSON.stringify({ error: "unsupported airport" }), { status: 404, headers: JSON_HEADERS });
   try {
-    // 例：Server-Timing: shared;dur=8（置き場の答えを使った）／shared;dur=8, live;dur=35, trails;dur=60, put;dur=70（作った。始めからの時間）。記録が止まっていて adsb.lol に聞いたときは adsb が出る
+    // 例：Server-Timing: shared;dur=8（置き場の答えを使った）／shared-stale;dur=8（20〜60秒前の答えを返し、裏で作り直す）／shared-miss;dur=8, live;dur=35, trails;dur=50, put;dur=60（作った。始めからの時間）。記録が止まっていて adsb.lol に聞いたときは adsb が出る
     const took: string[] = [], body = await snapshot(iata, true, took);
     return new Response(body, { headers: { ...JSON_HEADERS, "Cache-Control": "max-age=10", "Server-Timing": took.join(", "), "Access-Control-Expose-Headers": "Server-Timing" } });
   } catch (e) {

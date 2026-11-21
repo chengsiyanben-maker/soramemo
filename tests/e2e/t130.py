@@ -56,7 +56,7 @@ async def main():
             await pg.evaluate("goTab('ops')"); await pg.wait_for_timeout(2500)
             n = collections.Counter(reqs)
             check(f'{mode}：滑走路で開くと、ほかの見方の分（定時・空の道すじ・昨日・案内板・海外）を読まない', not any(n[x] for x in OTHER_VIEWS), dict(n))
-            # 11/16：特別塗装機は運用タブの「機体」の側へ（滑走路では読まない。撮る人の見方の「羽田に来る特別塗装機」はそのまま）
+            # 11/16：特別塗装機は運用タブの「機体」の側へ（滑走路では読まない。撮る人の見方の「羽田に着く・羽田を出る特別塗装機」はそのまま）
             check(f'{mode}：滑走路では特別塗装機（special_now・livery_board）を読まない', n['/rest/v1/rpc/livery_board'] == 0 and n['/rest/v1/rpc/special_now'] == 0, dict(n))
             check(f'{mode}：同じ呼び出しが2回以上ない', all(v == 1 for v in n.values()), dict(n))
             lim = 9 if mode == 'login' else 7   # ログインは flight_alerts と通知の鍵（push-subscribe。デモで呼ばないのはチェックイン担当の直し）が増える
@@ -86,7 +86,7 @@ async def main():
                 reqs.clear(); await pg.click('[data-vw="ops:photo"]'); await pg.wait_for_timeout(1500)
                 n = collections.Counter(reqs); sp = await pg.inner_text('#opsSpecial')
                 check('撮る人：livery_board は1回だけ（いま飛んでいる特別塗装機の分）', n['/rest/v1/rpc/livery_board'] == 1, dict(n))
-                check('撮る人：羽田に来る特別塗装機は今までどおり出る', 'ポケモンジェット 赤' in sp and '着陸に向かっている' in sp, sp[:80])
+                check('撮る人：羽田に着く・羽田を出る特別塗装機は今までどおり出る', 'ポケモンジェット 赤' in sp and '着陸に向かっている' in sp, sp[:80])
             allerr += errs; await c.close()
         # 2. 気象通報が届くまで
         c, pg, errs, reqs = await page(b, 'anon', metar_wait=1.5)
@@ -96,7 +96,9 @@ async def main():
         check('届く前：運用の札（風から推定）を出さない', tag == 0, tag)
         await pg.wait_for_timeout(2000)
         w = await pg.inner_text('#opsInfo .otiles .otile'); tag = await pg.inner_text('#opsInfo .opssrc')
-        check('届いたあと：風の値と札「風から推定」', '12' in w and '330' in w and tag == '風から推定', [w, tag])
+        # 深夜（23時〜6時）は「時刻と風から推定」（11/21 の見回りの6番。くわしくは t156）
+        jh = (datetime.now(timezone.utc) + timedelta(hours=9)).hour; want = '時刻と風から推定' if jh >= 23 or jh < 6 else '風から推定'
+        check(f'届いたあと：風の値と札「{want}」', '12' in w and '330' in w and tag == want, [w, tag])
         allerr += errs; await c.close()
         c, pg, errs, reqs = await page(b, 'anon')
         await pg.route('https://fake.supabase.co/functions/v1/metar**', lambda r: r.fulfill(status=500, body='{}', headers={'Access-Control-Allow-Origin':'*'}))
