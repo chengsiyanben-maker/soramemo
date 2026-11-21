@@ -9,7 +9,7 @@
   - 5（土台の側）特別塗装機のカードから開いたら details.spnow を開く（renderOpsPside）。撮る人の PR #162 も spnow のまま1〜3機なら開く形で重ねても動く
   - PR #162（撮る人）・yosoku/sweep-1121 と重ねると src は自動でまとまり、ぶつかるのは web/index.html・web/sw.js だけ（あとから入る方で組み立て直す）
   - 変えた関数：opsLateHTML・renderOpsLate・ohMapKeep・ohMapPrev（新）、renderOpsAlerts・renderBoard・opsHubApply・ohCardHTML・loadTraffic・setOpsAirport・trafficNoteDraw・renderOpsPside・a3Camera・a3Labels
-  - テスト：t156（新・26項目）・t142・tests/ops 成功・全体の e2e 127／127（401b76d）
+  - テスト：t159（新・26項目。撮る人・運用予想も t156 を足したので番号を分けた）・t142・tests/ops 成功・e2e 全体 127／127（3a9a3ad）
 - 11/21 昼：PR #157（空の道すじの上限）は #153 と一緒に PR #158（pm/release-1121c）で main に入った（08e4b84）。本番の反映（Actions）の成否はまだ見ていない
 - 11/21 6時17分（日本時間）：PR #157（空の道すじの上限）が main に入った。#153（移行190）と一緒に入ったか・本番の反映（Actions）が成功したかは次の回で確かめる。直しは main から新しいブランチで
 - 11/21 手動の回（PM が同じ「空の道すじの上限に合わせる」を指示）：前の回で PR #157 として済み。この回は main（#156 まで）と data/adsblol-key2（5dce3ac・t122 の直し）を取り込み直して push（d8a9a18）。src/・web/ の変化はなし（関数は変えていない）。t155・t55 成功
