@@ -1,7 +1,7 @@
 # データ担当の帳面
 
 ## いま持っている仕事
-- **特別塗装機の知らせの行き先の取り違え（急ぎ。PM の指示 11/21 14時40分。土曜で定期の回として呼ばれたが、PM の積んだ急ぎの指示があったのでこちらをした）**：ブランチ data/livery-dest（main 8ba15f6 から）→ **下書き PR #165**。報告 docs/pm/report-livery-dest.md。確かめの SQL docs/pm/livery-dest-check.sql。**移行・テストの番号は使っていない（表は変えない）**
+- **特別塗装機の知らせの行き先の取り違え（急ぎ。PM の指示 11/21 14時40分。土曜で定期の回として呼ばれたが、PM の積んだ急ぎの指示があったのでこちらをした）**：ブランチ data/livery-dest（main 8ba15f6 から）→ **PR #165（11/21 15時37分 main に入った。本番の関数の出し直しは PM の反映の流れで確かめる。反映の後に livery-dest-check.sql の 4 を流してもらう）**。報告 docs/pm/report-livery-dest.md。確かめの SQL docs/pm/livery-dest-check.sql。**移行・テストの番号は使っていない（表は変えない）**
   - 原因：recordLiveries が空港ごとの答えを順に回して上書き。成田の答えの「ほかの空港へ向かう機体を除く」は機体から40km以内の空港しか比べていなかったので、羽田から40km以上離れた羽田行きが成田の「着陸」になっていた
   - 直し：_shared/arr_dest.ts（refinePhases：滑走路の向き・最終進入（横3km・手前25km・向き30°・高さ）・110km以内のほかの空港との比べで arr/dep を絞る。pickAirport：便名の行き先＞最終進入に乗っている近い方＞はっきり近い方（7割）・候補1つは50km以内。決められなければ知らせない）。airport-traffic の build で絞り込み（運用タブ・撮影の知らせ・ゴーアラウンドにも効く）、recordLiveries は nearAirports で1つに決める（必要な機体だけ flight_schedule を引く）
   - 確かめた結果：arr_dest_test.ts 9本・deno test 全部291本 通過・deno check 通過・lint は前からの4件
