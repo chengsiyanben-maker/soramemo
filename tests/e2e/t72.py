@@ -1,6 +1,6 @@
 import os, sys
 HERE=os.path.dirname(os.path.abspath(__file__)); WEB=os.path.abspath(os.path.join(HERE,'..','..','web')); WORK=os.environ.get('SORAMEMO_TEST_WORK','/tmp/soramemo-e2e'); os.makedirs(WORK, exist_ok=True)
-# 特別塗装機の画面：運用の「羽田に来る特別塗装機」から開く。一覧は いま飛んでいる・今日飛んだ・この30日・しばらく見ていない。
+# 特別塗装機の画面：運用の「羽田に着く・羽田を出る特別塗装機」から開く。一覧は いま飛んでいる・今日飛んだ・この30日・しばらく見ていない。
 # 航空会社で絞り込み、機体を押すと今日の足あと（時刻表で埋めた便は「時刻表から」）と30日に来た空港。戻ると一覧へ
 import asyncio, json, threading, http.server, socketserver, functools
 from datetime import datetime, timedelta, timezone
@@ -43,10 +43,10 @@ async def main():
         pg = await c.new_page(); pg.on('pageerror', lambda e: errs.append(str(e)))
         await pg.goto(URL); await pg.wait_for_load_state('load'); await pg.wait_for_timeout(600)
         await pg.evaluate("setOpsAirport('HND'); goTab('ops')"); await pg.wait_for_timeout(1800)
-        # 11/19 から運用タブは一覧＋専用ページ（design/ops-hub）。「羽田に来る特別塗装機」の欄は「撮る人」のページにある
+        # 11/19 から運用タブは一覧＋専用ページ（design/ops-hub）。「羽田に着く・羽田を出る特別塗装機」の欄は「撮る人」のページにある
         if await pg.evaluate("$('v-ops').dataset.hub === 'list'"): await pg.evaluate("opsHubOpen('photo')"); await pg.wait_for_timeout(900)
         sp = await pg.inner_text('#opsSpecial')
-        check('運用：羽田に来る特別塗装機（飛んでいる2機のうち羽田行き1機）:', '羽田に来る特別塗装機' in sp and 'ポケモンジェット 赤' in sp and '着陸に向かっている' in sp and 'JAL Jubilee' not in sp.split('いま飛んでいる特別塗装機')[0])
+        check('運用：羽田に着く・羽田を出る特別塗装機（飛んでいる2機のうち羽田行き1機）:', '羽田に着く・羽田を出る特別塗装機' in sp and 'ポケモンジェット 赤' in sp and '着陸に向かっている' in sp and 'JAL Jubilee' not in sp.split('いま飛んでいる特別塗装機')[0])
         await pg.click('#opsSpecial [data-spb-open=""]'); await pg.wait_for_timeout(800)
         check('すべての特別塗装機を開く:', await pg.evaluate("$('dSpecial').open"))
         t = await pg.inner_text('#dSpecialBody')

@@ -1336,6 +1336,7 @@ div.viewsw>button[aria-selected="true"]{background:none;border-color:var(--vw-in
 .spin .tm{font:700 16px/1 var(--gothic);width:52px;flex-shrink:0}.spin .tm.hot{color:#92400E}
 [data-palette="board"] .spin .tm.hot{color:#E9C46A}
 .spin .tx{display:flex;flex-direction:column;gap:2px;min-width:0}.spin .tx b{font-size:14px}.spin .tx small{font-size:12px;opacity:.8}
+.spinsub{margin:8px 0 0;font-size:13px;font-weight:700;color:var(--ink-2,#4B5563)}.spinsrc{display:block;margin:2px 0 0;font-size:11px;color:#6B7280}
 .spinbtns{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;align-items:center}
 .spinall{min-height:44px;border-radius:22px;border:1px solid currentColor;background:none;color:inherit;font:700 13px/1 var(--gothic);padding:0 16px;cursor:pointer}
 .spnow{margin-top:10px}
@@ -3462,7 +3463,9 @@ dialog.fbx .row2>button{flex:1;min-height:52px;border-radius:999px}
 
 /* 滑走路の見方の地図（11-04）：撮影地の名札・着陸と離陸の向き・現在地 */
 .spotlbl{background:none;border:0}
-.spotlbl i{position:absolute;left:0;top:0;width:12px;height:12px;border-radius:50%;background:#fff;box-shadow:0 0 0 2px #0F1B2D}
+.spotlbl i{position:absolute;left:0;top:0;width:12px;height:12px;border-radius:50%;background:#fff;box-shadow:0 0 0 2px #0F1B2D;cursor:pointer}
+.spotlbl i::after{content:"";position:absolute;left:-16px;top:-16px;width:44px;height:44px;border-radius:50%}
+.spotlbl span::after{content:"";position:absolute;left:0;right:0;top:50%;height:44px;transform:translateY(-50%)}
 .spotlbl span{position:absolute;left:14px;top:-5px;white-space:nowrap;background:#fff;color:#2B2F36;border-radius:999px;padding:3px 9px;font:700 11px/1.3 var(--gothic);box-shadow:0 2px 8px rgba(15,27,45,.18),0 0 0 1px rgba(15,27,45,.08);cursor:pointer}
 .spotlbl span b{margin-right:4px;font-weight:700;color:#0F1B2D}
 .spotlbl.l span{left:auto;right:14px}.spotlbl.d span{top:12px}.spotlbl.x span{display:none}
@@ -7914,10 +7917,10 @@ function spHomeHTML(ap, def, d){
     let name = null; try{ name = localStorage.getItem("soramemo.photoSpot." + ap); }catch(e){}
     const sp = spots.find(x => x.name === name) || spots[0] || null, li = sp && sp.li;
     const dur = t => { const m = Math.max(1, Math.round((t - now) / 60000)); return m >= 60 ? `${Math.floor(m / 60)}時間${m % 60 ? m % 60 + "分" : ""}` : `${m}分`; };
-    wx = [esc(op.label), sp && li ? `${esc(sp.name.replace(/^第(\d)ターミナル /, "第$1T "))}は${LIGHT[li.cur]}${li.cur === "back" && li.until ? ` <b>あと${dur(li.until)}</b>` : ""}` : ""].filter(Boolean).map(t => `<span>${t}</span>`).join("");
+    wx = [esc(op.label), sp && li ? `${esc(sp.name.replace(/^第(\d)ターミナル /, "第$1T "))}は${lightWord(li.cur, now)}${li.cur === "back" && li.until ? ` <b>あと${dur(li.until)}</b>` : ""}` : ""].filter(Boolean).map(t => `<span>${t}</span>`).join("");
   }else if(def){
     const sd = sunDay(now, def.center[0], def.center[1]);
-    wx = sd.rise && now < sd.rise ? `日の出 <b>${spHM(sd.rise)}</b>` : sd.set && now < sd.set ? `日の入り <b>${spHM(sd.set)}</b>` : "日の入り後";
+    wx = sd.rise && now < sd.rise ? `日の出 <b>${spHM(sd.rise)}</b>` : sd.set && now < sd.set ? `日の入り <b>${spHM(sd.set)}</b>` : "日の入り後";   // 0時〜日の出は上の「日の出」の形になる
   }
   const when = x => x.dir === "arr" ? "着陸" : "離陸";
   const rare = x => x.liv ? `<span class="sprare gold">特別塗装</span>` : x.foreign ? `<span class="sprare">海外</span>` : x.intl ? `<span class="sprare">国際</span>` : "";
@@ -11804,13 +11807,26 @@ function spInboundHTML(){
   // 足あとの記録がまだ届いていなくても、着陸に向かっているのが見えている機体は出す
   for(const x of SPECIAL.values()) if(x.kind !== "alliance" && x.iata === here && x.phase === "arr" && !items.some(i => i.reg === x.reg))
     items.push({ t:null, reg:LIVERY_NAMES[x.reg] ? x.reg : null, name:x.name, hot:true, sub:`${esc(spbFl(x.callsign))}・着陸に向かっている` });
-  for(const p of SP_PLANS) if(p.arr === here && !p.cancelled && p.sta && Date.parse(p.sta) < until && Date.parse(p.sta) > Date.now() - 6e5 && !items.some(x => x.sub.startsWith(esc(p.flight))))
-    items.push({ t:Date.parse(p.sta), reg:null, name:p.livery, sub:`${esc(p.flight)}・${esc(placeShort(p.dep))}から・運航情報に特別塗装機と書かれた便` });
-  items.sort((a, b) => (a.t || 9e15) - (b.t || 9e15));
+  // いま離陸していく機体（この空港を出る）
+  for(const x of SPECIAL.values()) if(x.kind !== "alliance" && x.iata === here && x.phase === "dep" && !items.some(i => i.reg === x.reg))
+    items.push({ t:null, reg:LIVERY_NAMES[x.reg] ? x.reg : null, name:x.name, hot:true, sub:`${esc(spbFl(x.callsign))}・離陸したところ` });
+  // 3時間以内の予定（運航情報に特別塗装機と書かれた便）：この空港に着く便と、この空港を出る便
+  const plans = [], now = Date.now(), inWin = t => t && t < until && t > now - 6e5, dup = f => items.some(x => x.sub.startsWith(esc(f))) || plans.some(x => x.sub.startsWith(esc(f)));
+  for(const p of SP_PLANS) if(p.arr === here && !p.cancelled && inWin(Date.parse(p.sta)) && !dup(p.flight))
+    plans.push({ t:Date.parse(p.sta), reg:null, name:p.livery, sub:`${esc(p.flight)}・${esc(placeShort(p.dep))}から・到着の予定` });
+  for(const p of SP_PLANS) if(p.dep === here && !p.cancelled && !p.atd && inWin(Date.parse(p.std)) && !dup(p.flight))
+    plans.push({ t:Date.parse(p.std), reg:null, name:p.livery, sub:`${esc(p.flight)}・${esc(placeShort(p.arr))}へ・出発の予定` });
+  items.sort((a, b) => (a.t || 0) - (b.t || 0));   // 時刻の分からない「着陸に向かっている・離陸したところ」を先に
+  plans.sort((a, b) => a.t - b.t);
   const li = x => { const body = `<span class="tm${x.hot ? " hot" : ""}">${x.t ? spHM(x.t) : "—"}</span><span class="tx"><b>${esc(x.name)}</b><small>${x.sub}</small></span>`;
     return `<li>${x.reg ? `<button type="button" data-spb-open="${esc(x.reg)}">${body}</button>` : `<div>${body}</div>`}</li>`; };
-  return `<div class="opshead"><b>${esc(opsDef().name)}に来る特別塗装機</b><span>この3時間</span></div>`
-    + (items.length ? `<ul class="spin">${items.map(li).join("")}</ul>` : `<p class="hint" style="margin:4px 0 0">この3時間に来る特別塗装機は、いまは見つかっていません。</p>`)
+  const name = esc(opsDef().name), planNote = `<small class="spinsrc">航空会社の運航情報に特別塗装機で運航すると書かれた便。機体の変更で変わることがあります。</small>`;
+  const body = items.length
+      ? `<ul class="spin">${items.map(li).join("")}</ul>` + (plans.length ? `<p class="spinsub">3時間以内の予定</p><ul class="spin">${plans.map(li).join("")}</ul>${planNote}` : "")
+    : plans.length
+      ? `<p class="spinsub">いまは飛んでいません。3時間以内の予定</p><ul class="spin">${plans.map(li).join("")}</ul>${planNote}`
+      : `<p class="hint" style="margin:4px 0 0">この3時間に${name}に着く・${name}を出る特別塗装機は、いまは見つかっていません。</p>`;
+  return `<div class="opshead"><b>${name}に着く・${name}を出る特別塗装機</b><span>この3時間</span></div>` + body
     + `<div class="spinbtns"><button type="button" class="spinall" data-spb-open="">すべての特別塗装機</button>${spPushHTML()}</div>`;
 }
 function specialHTML(){
@@ -11830,7 +11846,7 @@ function specialHTML(){
     + (here.length ? `<ul>${here.map(planLi).join("")}</ul>` : `<p class="hint" style="margin:4px 0 0">${esc(opsDef().name)}を出発・到着する予定の便は、いまはありません。</p>`)
     + (other.length ? `<details class="spally"><summary>ほかの空港 ${other.length}便</summary><ul>${other.map(planLi).join("")}</ul></details>` : "") : "";
   if(!SERVER) return "";
-  return `<div class="fwlist splist">${spInboundHTML()}<details class="spally spnow"><summary>いま飛んでいる特別塗装機 ${list.length}機${ally.length ? `・アライアンス塗装 ${ally.length}機` : ""}</summary>${list.length ? `<ul>${list.map(x => item(x, "★")).join("")}</ul>` : `<p class="hint" style="margin:4px 0 0">キャラクター・記念塗装の機体は、いまは見つかっていません。</p>`}${allyHTML}</details>${planHTML}
+  return `<div class="fwlist splist">${spInboundHTML()}<details class="spally spnow"${list.length && list.length <= 3 ? " open" : ""}><summary>いま飛んでいる特別塗装機 ${list.length}機${ally.length ? `・アライアンス塗装 ${ally.length}機` : ""}</summary>${list.length ? `<ul>${list.map(x => item(x, "★")).join("")}</ul>` : `<p class="hint" style="margin:4px 0 0">キャラクター・記念塗装の機体は、いまは見つかっていません。</p>`}${allyHTML}</details>${planHTML}
     <p class="fwnote">直近15分に位置が届いたもの（adsb.lol）。特別塗装機の一覧は航空会社の発表などをもとに そらメモ がまとめたもので、塗装の期間や機体の入れ替えで違うことがあります。通知はキャラクター・記念塗装の機体だけで、アライアンス塗装（◇）は知らせません。「これから飛ぶ予定」は航空会社の運航情報（${ODPT_CREDIT}）の文に特別塗装機で運航すると書かれた便で、通知を申し込んでいると飛ぶ前にもお知らせします。機体の変更で変わることがあります。</p></div>`;
 }
 /* ---------- 特別塗装機の画面：一覧（いま飛んでいる・今日飛んだ・この30日・しばらく見ていない）と、機体ごとの今日の足あと ----------
@@ -13304,6 +13320,14 @@ function lightAt(t, spot, view){
   return diff >= 120 ? "back" : diff >= 60 ? "side" : "front";
 }
 const LIGHT = { back:"順光", side:"横からの光", front:"逆光", night:"日の入り後" };
+// 夜の言葉：0時〜日の出は「日の出前」、日の入り〜24時は「日の入り後」（日本時間の正午より前の夜を日の出前とみなす）
+const spNightWord = (t = Date.now()) => new Date(t + 9 * 36e5).getUTCHours() < 12 ? "日の出前" : "日の入り後";
+const lightWord = (cur, t = Date.now()) => cur === "night" ? spNightWord(t) : LIGHT[cur];
+// 見出し用：日の出前なら日の出の時刻も（「日の出前（日の出 06:20ごろ）」）
+function spNightLine(t, c){
+  if(spNightWord(t) !== "日の出前" || !c) return "日の入り後";
+  const sd = sunDay(t, c[0], c[1]); return sd.rise && t < sd.rise ? `日の出前（日の出 <b>${spHM(sd.rise)}</b>ごろ）` : "日の出前";
+}
 function lightInfo(spot, view, now = Date.now()){
   if(!view) return null;
   const cur = lightAt(now, spot, view); let until = null;
@@ -13321,7 +13345,7 @@ function renderSpots(def, op, rw){
   box.hidden = false;
   box.innerHTML = `<b>見に行くなら（${known ? esc(op.label) : "向きが分かると、よく見える順に並べます"}）</b>
     <ol>${rows.map(x => { const li = known ? lightInfo([x.lat, x.lon], x.view) : null, hm = t => new Date(t).toLocaleTimeString("ja-JP", { hour:"2-digit", minute:"2-digit" });
-      return `<li><button class="spot" type="button" data-spot="${x.lat},${x.lon}"><span class="mk">${x.mk}</span>${esc(x.name)}${li ? `<span class="lt ${li.cur}">${LIGHT[li.cur]}${li.low ? "・低い太陽" : ""}</span>` : ""}${known ? `<small>${[x.a != null && `着陸機の線まで${f(x.a)}`, x.d != null && `離陸機の線まで${f(x.d)}`].filter(Boolean).join("・")}${li && li.until ? `・${hm(li.until)}ごろから${LIGHT[lightAt(li.until, [x.lat, x.lon], x.view)]}` : ""}</small>` : ""}</button></li>`; }).join("")}</ol>
+      return `<li><button class="spot" type="button" data-spot="${x.lat},${x.lon}"><span class="mk">${x.mk}</span>${esc(x.name)}${li ? `<span class="lt ${li.cur}">${lightWord(li.cur)}${li.low ? "・低い太陽" : ""}</span>` : ""}${known ? `<small>${[x.a != null && `着陸機の線まで${f(x.a)}`, x.d != null && `離陸機の線まで${f(x.d)}`].filter(Boolean).join("・")}${li && li.until ? `・${hm(li.until)}ごろから${lightWord(lightAt(li.until, [x.lat, x.lon], x.view), li.until)}` : ""}</small>` : ""}</button></li>`; }).join("")}</ol>
     <p class="hint">着陸機の線は滑走路の手前8km、離陸機の線は滑走路の先6kmまで。◎ 線まで1km以内　○ 2.5km以内　△ 遠め。滑走路の向きと距離だけで出した目安です（建物などで見えないこともあります）。順光・逆光は、太陽の向きと、その場所から線のいちばん近い所を見る向きだけでくらべた目安です（雲・建物の影は考えていません）。開いている時間・立ち入りは各施設で確かめてください。位置：© OpenStreetMap contributors</p>`;
   if(window.L && OPS_MAP && OPS_SHOW.spots){
     let sel = SP_SPOT; if(sel == null){ try{ sel = localStorage.getItem("soramemo.photoSpot." + def.iata); }catch(e){} }
@@ -13739,7 +13763,7 @@ function renderPhoto(d){
   const best = cur && cur.op.arr.length + cur.op.dep.length ? spotRank(cur.def, cur.op, cur.rw)[0] : null, li = spot && spot.li ? spot.li : best ? lightInfo([best.lat, best.lon], best.view) : null;
   const dur = t => { const m = Math.max(1, Math.round((t - now) / 60000)); return m >= 60 ? `${Math.floor(m / 60)}時間${m % 60 ? m % 60 + "分" : ""}` : `${m}分`; };
   const facts = [op ? `<b>${esc(op.label)}</b>` : "",
-    li ? `${LIGHT[li.cur]}${li.cur === "back" && li.until ? ` <b>あと${dur(li.until)}</b>` : ""}` : "",
+    li ? (li.cur === "night" ? spNightLine(now, cur && cur.def && cur.def.center) : `${LIGHT[li.cur]}${li.cur === "back" && li.until ? ` <b>あと${dur(li.until)}</b>` : ""}`) : "",
     wx ? (wx.low_ft != null ? `雲底 <b>${spFt(wx.low_ft)}</b>ft` : "雲 なし") : "",
     vp && vp.lv >= 4 ? `ベイパー<b>${vp.label}</b>` : ""].filter(Boolean);
   const DIRJ = { arr:"着陸", dep:"離陸" };
@@ -13748,7 +13772,7 @@ function renderPhoto(d){
   const seesLine = sp => sp.sees.map(s => { const g = spGeom([sp.lat, sp.lon], s, null);
     return `<span class="sl ${s.dir}"><i class="spsw ${s.dir}" aria-hidden="true"></i><b>${esc(s.rw)} ${s.dir === "arr" ? "着陸" : "離陸"}</b>${g ? `<em>高さ 約${spRound10(g.h)}m</em><em>見上げ ${g.elev}°</em>` : ""}</span>`; }).join("");
   const spotHTML = SPOTS.length ? `<details class="spspotd"><summary class="sppill" aria-label="撮影地を選ぶ"><span>${esc(spot ? spot.name : "撮影地を選ぶ")}</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></summary>
-      <div class="spspotlist" role="group" aria-label="撮影地">${SPOTS.map(s => `<button data-spspot="${esc(s.name)}" aria-pressed="${spot === s}" ${s.sees.length ? "" : "disabled"}><span>${esc(s.name)}</span><small>${spOpenState(OPS_AP, s.name).open === false ? "いまは閉まっています" : s.sees.length ? `${cnt(s)}機　${s.li ? LIGHT[s.li.cur] : ""}` : "いまは見えない"}</small></button>`).join("")}</div></details>
+      <div class="spspotlist" role="group" aria-label="撮影地">${SPOTS.map(s => `<button data-spspot="${esc(s.name)}" aria-pressed="${spot === s}" ${s.sees.length ? "" : "disabled"}><span>${esc(s.name)}</span><small>${spOpenState(OPS_AP, s.name).open === false ? "いまは閉まっています" : s.sees.length ? `${cnt(s)}機　${s.li ? lightWord(s.li.cur, now) : ""}` : "いまは見えない"}</small></button>`).join("")}</div></details>
     ${spot ? `<p class="spsees"><span class="vh">見える：</span>${seesLine(spot)}</p>` : ""}
     ${spot && spInfoOf(OPS_AP, spot.name) ? `<button class="spinfolink" data-spinfo="${esc(spot.name)}" type="button">${spOpenState(OPS_AP, spot.name).open === false ? "いまは閉まっています　" : ""}この撮影地の情報 ›</button>` : ""}` : "";
   // 登録記号：点の形で決め方（●確認・◐前の便から・○予想）。読み上げ用に文字も持つ
@@ -13823,7 +13847,7 @@ function spDetailHTML(x){
       return `<li class="big"><div class="hd"><b>${esc(sp.name)}</b><small>${rwn}</small></div>
         <div class="g3"><div><small>高さ</small><b>${spRound10(g.h)}<small>m</small></b></div><div><small>見上げる角度</small><b>${g.elev}<small>°</small></b></div>
           <div><small>${g.len ? `${esc(g.len.code)} が横7割` : "焦点距離"}</small><b>${g.focal ? `${g.focal}<small>mm</small>` : "—"}</b></div></div>
-        ${g.light.length ? `<div class="l3">${g.light.map(l => `<span class="${l.cur}">${l.at}<b>${LIGHT[l.cur]}</b></span>`).join("")}</div>` : ""}
+        ${g.light.length ? `<div class="l3">${g.light.map(l => `<span class="${l.cur}">${l.at}<b>${lightWord(l.cur, now)}</b></span>`).join("")}</div>` : ""}
         <p class="nt">${g.len ? `焦点距離はフルサイズ換算。機体の長さ ${g.len.m}m と、撮影地からの距離 約${spRound10(g.dist)}m から。` : "機種が分からないため、焦点距離は出せません。"}高さは着陸を3°、離陸を8%として出した推定です。</p></li>`; }).join(""); })();
   const kd = x.kind && SP_KIND[x.kind], ulb = ulSpBox(x);
   return `<div class="sph"><span class="grab" aria-hidden="true"></span><button class="spx" data-close type="button" aria-label="閉じる">×</button></div>
@@ -13910,16 +13934,16 @@ function spCondHTML(){
   const best = rows.find(r => r.li && r.li.cur === "back") || null, vp = vaporOf(w);
   const dur = t => { const m = Math.max(1, Math.round((t - now) / 60000)); return m >= 60 ? `${Math.floor(m / 60)}時間${m % 60 ? m % 60 + "分" : ""}` : `${m}分`; };
   const night = sp.el < 0, poor = w && ((w.ceil_ft != null && w.ceil_ft < 1000) || (w.vis_m != null && w.vis_m < 3000) || /雨|雪|霧/.test(w.sky || ""));
-  const verdict = night ? "日の入り後" : poor ? "見えにくい" : best ? "撮りごろ" : "まずまず";
+  const verdict = night ? spNightWord(now) : poor ? "見えにくい" : best ? "撮りごろ" : "まずまず";
   const sub = night ? (sd.rise && now < sd.rise ? `日の出 ${spHM(sd.rise)}` : "明日の朝まで") : sd.eStart && now < sd.eStart ? `夕方の光まで あと${dur(sd.eStart)}` : sd.set && now < sd.set ? `いまが夕方の光・日の入り ${spHM(sd.set)}` : "";
   const tile = (k, v, s) => `<div><small>${k}</small><b>${v}</b><small>${s}</small></div>`;
   const wind = w ? (w.wspd === 0 ? "ほぼ無風" : w.wspd != null ? `${w.wdir == null ? "不定" : DIR16[Math.round(w.wdir / 22.5) % 16]} ${w.wspd}kt` : "—") : "—";
   const head = `<div class="sphero2 ${night ? "night" : ""}"><small><i></i>いまの撮影条件・${esc(def.name)}</small><b>${verdict}</b><span>${esc(sub)}</span>
-    <div class="t4">${tile("光", best ? "順光" : night ? "夜" : rows[0] && rows[0].li ? LIGHT[rows[0].li.cur] : "—", best && best.li.until ? `あと${dur(best.li.until)}` : "")}${tile("雲底", w && w.low_ft != null ? spFt(w.low_ft) + "ft" : w ? "なし" : "—", w && w.layers && w.layers[0] ? SP_COVER[w.layers[0].cover] || "" : "")}${tile("ベイパー", vp ? vp.label : "—", vp ? `湿度${vp.rh}%` : "")}${tile("風", wind, w && w.wspd ? `約${Math.round(w.wspd * 0.514)}m/s` : "")}</div></div>`;
+    <div class="t4">${tile("光", best ? "順光" : night ? "夜" : rows[0] && rows[0].li ? lightWord(rows[0].li.cur, now) : "—", best && best.li.until ? `あと${dur(best.li.until)}` : "")}${tile("雲底", w && w.low_ft != null ? spFt(w.low_ft) + "ft" : w ? "なし" : "—", w && w.layers && w.layers[0] ? SP_COVER[w.layers[0].cover] || "" : "")}${tile("ベイパー", vp ? vp.label : "—", vp ? `湿度${vp.rh}%` : "")}${tile("風", wind, w && w.wspd ? `約${Math.round(w.wspd * 0.514)}m/s` : "")}</div></div>`;
   const where = known ? `<h4 class="sph4">どこで撮る<small>${esc(cur.op.label)}</small></h4><div class="spcard nopad">${spMapSVG(def, cur.op, cur.rw, rows, sp)}
     <ol class="spspots">${rows.map((r, i) => { const l = r.li, col = { back:"#E9A14B", side:"#E7C48F" }[l && l.cur] || "#9CA3AF";
       return `<li><div class="r1"><span class="no" style="background:${col}">${i + 1}</span><span class="nm"><b>${esc(r.name)}</b><small>${[r.a != null && `着陸機の線まで約${Math.round(r.a * 10) / 10}km`, r.d != null && `離陸機の線まで約${Math.round(r.d * 10) / 10}km`].filter(Boolean).join("・")}</small></span>
-        <span class="pill ${l ? l.cur : ""}">${l ? LIGHT[l.cur] : "—"}${l && l.cur === "back" && l.until ? ` あと${dur(l.until)}` : ""}</span></div>${r.view ? spLightBar(r, sd.d0) : ""}</li>`; }).join("")}</ol>
+        <span class="pill ${l ? l.cur : ""}">${l ? lightWord(l.cur, now) : "—"}${l && l.cur === "back" && l.until ? ` あと${dur(l.until)}` : ""}</span></div>${r.view ? spLightBar(r, sd.d0) : ""}</li>`; }).join("")}</ol>
     <div class="spaxis"><span>5時</span><span>9時</span><span>13時</span><span>17時</span><span>19時</span></div>
     <a class="spgo" href="https://www.google.com/maps/dir/?api=1&amp;destination=${rows[0].lat},${rows[0].lon}" target="_blank" rel="noopener">1 ${esc(rows[0].name)}への道案内 ›</a></div>`
     : `<h4 class="sph4">どこで撮る</h4><p class="hint">いまの滑走路の向きが分からないため、撮影地を並べられません。</p>`;
