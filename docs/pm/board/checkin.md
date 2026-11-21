@@ -1,6 +1,12 @@
 # チェックイン担当の帳面
 
 ## いま持っている仕事
+- 11/21 23時台の回（PM「閉じるはいつでも押せるように」）：ブランチ checkin/close-always（main 3665d4c から）・下書き **PR #174**（4ce47de）・報告 docs/pm/report-close-always.md・写真 docs/pm/shots-close-always/01〜07。PR #174 はこの回の会話で見張りを付けた。仕上がったら PM が自動で反映
+  - 3D：.a3top を読み込み中の幕（.a3load z-index 4）より上に（z-index 7）。幕が出ているあいだは × だけ（:has で題と「…」を隠す）。左の端24pxから引いて閉じる（#dAp3d の pointer を capture で受け、端から始めた指は a3Drag へ渡さない。3割か速く）
+  - 頭の sticky：dialog.spfull の .spctop・.pintop、dialog.mypage の .mp-top、dialog.spsheet の .sph（× は見た目32pxのまま押せる所44px）。空港のページに .cxbar（右上の ×）。運用の専用ページの .opsbar を sticky
+  - 戻る操作：showModal を包んで開いた画面を CX_STACK に積み、history.pushState。popstate で上の1枚を閉じる（cancel を止めた画面は閉じない）。× で閉じたら history.go で数を合わせる（state.cx より多くは戻らない）。history.scrollRestoration = "manual"（入れないと t123 の年に飛んだ先が戻された）。運用の専用ページは "ops" として積む（opsHubOpen・opsPlOpen で積み、opsHubBack・openOps で外す）。開く動きの途中の戻るは OH_OPEN_T を止めてすぐ戻す
+  - 変えた関数：新 cxPush・cxPop・cxFlush・CX_STACK・popstate・showModal の包み・3D の端から引く操作／変えた openAirport・opsHubOpen・opsHubBack・opsPlOpen・openOps／CSS は style の最後
+  - テスト：t163（新・26項目）・t120（上の × を数えない）。e2e 全体 132件成功（運営コンソールなしの4件を除く。t48 も pdf417gen・segno で成功）・tests/ops 成功
 - 11/21 手動の回（PM が同じ「運用タブにも3D の入口を」を指示）：直前の回で PR #173（checkin/ops-3d・d10c6dd3）として済み。main は 3665d4ca のままで作り直しは不要だった。checkin/a3-lights（別の回）には触っていない
 - 11/21 夜の定時の回（PM 21時40分「運用タブにも3D の入口を」）：ブランチ checkin/ops-3d（main 3665d4ca＝#171 から）・下書き **PR #173**（d10c6dd3）・報告 docs/pm/report-ops-3d.md・写真 docs/pm/shots-ops-3d/。仕上がったので PM の自動の反映を待つ
   - 運用の一覧に「3D」のカード（羽田だけ・地図のすぐ後・見出し「3D」＋縮図の線の絵＋「約0.6MB」）。押すと openAp3d（専用ページなし）。鉛筆のシートと表示の編集の1枚に「「3D」のカード」の ON／OFF（LAYOUT.opsA3＝0。数には入れない・全部乗せで戻る）
@@ -432,6 +438,7 @@
 - 確認コードは6けた。メールは Gmail、Supabase の送信上限は1時間100通
 
 ## 次にやること
+- PR #174（閉じるはいつでも）：PM の自動の反映を待つ。本人の答え（3D の読み込み中は × だけでよいか・戻るで閉じてほしくない画面）で直す。入る前に t163・t120・t123・t160・t161・tests/ops を流す。#172（灯り）や ops-3d が先に入ったら main を取り込み web/ を作り直す（a3 の関数は触っていない。ぶつかるなら style の最後と opsHubOpen・opsHubBack の行）。運用から 3D を開く入口ができたら、戻るが 3D → 専用ページの順に閉じるかを t163 に足す
 - 次の回：PM の指示がなければ「滑走路の灯りと機体をもっと現実的に」（checkin/a3-lights。下の 11/21 21時35分の欄）を始める。始める前に origin に checkin/a3-lights がないか見る（ほかの回が持っていれば触らない）
 - PR #173（3D のカード）：PM の反映を待つ。入る前に t162・t148・t124・tests/ops を流す。a3-lights で A3_SIZE が変わってもカードの字は A3_SIZE を使うので自動で合う
 - 次の回：PM の指示がなければ「運用タブにも3D の入口を」（11/21 21時40分の積み。checkin/ops-3d で main から。a3-lights とは別の回）
@@ -521,6 +528,7 @@
 - tests/ops は手元では npm の playwright にブラウザがないので、全体に入っている playwright をつないで流した（すべて成功）
 
 ## ほかの担当への依頼
+- 撮る人用・運用予想・修行へ（11/21 PR #174・知らせだけ）：土台で、全画面の頭（.spctop・.pintop）とシートの頭（.spsheet .sph）を上に止め、戻る操作で上のダイアログを1枚閉じるようにした（showModal を包む）。それぞれのダイアログもそのまま効く。修行の dialog.sgd の頭は sticky にしていない。cancel を止めた画面は戻るでも閉じない
 - データ担当（11/21 夜・PR #169）：①外部データの確認表に「PLATEAU（3D都市モデル）大田区 2025・川崎市 2022：公共データ利用規約 第1.0版（CC BY 4.0 互換・ODbL も可）・出典『「3D都市モデル（Project PLATEAU）大田区（2025年度）・川崎市（2022年度）」（国土交通省）を加工して作成』・外形と計測高さと用途だけ使う・測量法の注意（測量には使わない）・11/21 に1回だけ取得（tools/a3_plateau.py）」を足してほしい。②airport-traffic の答えに地上の機体を `ground` の並びで足してほしい（planes と同じ id・callsign・lat・lon・hdg・type・reg。羽田だけでよい。今は _shared/traffic.ts で alt_baro "ground" を落としている）。アプリは対応済み
 - データ担当（11/21・PR #164）：外部データの確認表に「OpenStreetMap（羽田の形・3D）：ODbL 1.0・切り出したファイル web/3d/hnd.json を ODbL で公開・角に © OpenStreetMap・11/21 に API で1回だけ取得（作り方 tools/a3_shape.py）」を足してほしい
 - 撮る人（11/21・PR #161）：特別塗装機のカードから開いたページで details.spnow を開くようにした。欄の作りを変えるなら spnow の名前を残すか知らせてほしい
@@ -1017,7 +1025,7 @@ review-c4：見せてよい。本人の答え（ON／OFF か −／＋ か）を
 - テスト：羽田でカードが出る・ほかの空港では出ない・押すと3D が開く・字13px以上・はみ出しなし
 - 見た目は今のカードと同じ形なので画面案は待たない。仕上がったら PM が自動で反映する
 
-## PM から積んだ次の仕事（11/21 22時、閉じるはいつでも押せるように。本人「閉じるの機能は、いつでも触れるように」）※checkin/close-always で
+## PM から積んだ次の仕事（11/21 22時、閉じるはいつでも押せるように。本人「閉じるの機能は、いつでも触れるように」）※checkin/close-always で → PR #174 で作った（4ce47de・報告 report-close-always.md）
 - 全画面で開くもの（羽田の3D・運用の専用ページ・空港のページ・機体のくわしく・シートを広げた時・各種のダイアログ）で、閉じる（×・‹ 戻る）がいつでも見えて押せるようにする：
   1. 読み込み中・3D を指で回している最中・下のシートを上まで引いた時でも、閉じるが隠れない・反応する（重なりの順と、指の操作の取り合いを直す）
   2. 画面の上に固定（iPhone のノッチ・ダイナミックアイランドを避ける）。押せる大きさ44px以上
