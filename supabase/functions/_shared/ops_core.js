@@ -33,13 +33,20 @@ function estimateHaneda(m, now = new Date()){
     const tail34 = -m.wspd * Math.cos((m.wdir - 330) * D2R);   // 34滑走路（真方位330°）への追い風（ノット）
     south = tail34 > 7;
     why = south ? `南寄りの風（34滑走路に${Math.round(tail34)}ノットの追い風）なので、南風の運用と推定` : `34滑走路への追い風が7ノット以下なので、北風の運用と推定`;
-    whyPlain = south ? "南寄りの風なので、南風の運用と推定" : "北寄りの風か、風が弱いので、北風の運用と推定";
+    // 出している風（○°から・○kt）と食い違わない言い方にする（11/21 の見回りの6番：250°・12kt で「北寄りの風」と書いていた）
+    const cross = Math.abs(Math.cos((m.wdir - 330) * D2R)) < 0.5;   // 34滑走路の向きから60°より横の風
+    whyPlain = south ? "南寄りの風なので、南風の運用と推定"
+      : m.wspd <= 7 ? "風が弱いので、北風の運用（ふだんの向き）と推定"
+      : cross ? `横風に近く、34滑走路への追い風が7ノット以下なので、北風の運用（ふだんの向き）と推定`
+      : "北寄りの風なので、北風の運用と推定";
   } else if(m && m.wdir == null && m.wspd != null && m.wspd > 7) why = "風向きが定まらないため、北風の運用（ふだんの向き）と推定";
   // 好天時かどうか（公式の数字は公開されていないので、そらメモの目安：視程5km以上、かつ雲底2,500ft以上か雲底なし）
   const vis = m && m.vis_m != null ? m.vis_m : null, ceil = m && m.ceil_ft != null ? m.ceil_ft : null;
   const good = (vis == null || vis >= HND_GOOD.vis) && (ceil == null || ceil >= HND_GOOD.ceil);
   const city = south && h >= 15 && h < 19;   // 都心ルートは15〜19時のうち3時間程度。天候が悪いときは ILS で
   const night = h >= 23 || h < 6;   // 深夜は、深夜の優先滑走路を使う運用（深夜・北風／深夜・南風）
+  // 深夜かどうかは時刻で、北・南は風で決める。わけの文にも両方を書く（11/21 の見回りの6番）
+  if(night){ const pre = "深夜（23時〜6時）は深夜の優先滑走路を使う時間で、"; why = pre + why; whyPlain = pre + (whyPlain || why.slice(pre.length)); }
   return { mode: night ? (south ? "nightS" : "nightN") : south ? (city ? "city" : "south") : "north", why, whyPlain: whyPlain || why, good, vis, ceil, night,
     northNew: !south && ((h >= 7 && h < 11.5) || (h >= 15 && h < 19)) };
 }

@@ -96,7 +96,9 @@ async def main():
         check('届く前：運用の札（風から推定）を出さない', tag == 0, tag)
         await pg.wait_for_timeout(2000)
         w = await pg.inner_text('#opsInfo .otiles .otile'); tag = await pg.inner_text('#opsInfo .opssrc')
-        check('届いたあと：風の値と札「風から推定」', '12' in w and '330' in w and tag == '風から推定', [w, tag])
+        # 深夜（23時〜6時）は「時刻と風から推定」（11/21 の見回りの6番。くわしくは t156）
+        jh = (datetime.now(timezone.utc) + timedelta(hours=9)).hour; want = '時刻と風から推定' if jh >= 23 or jh < 6 else '風から推定'
+        check(f'届いたあと：風の値と札「{want}」', '12' in w and '330' in w and tag == want, [w, tag])
         allerr += errs; await c.close()
         c, pg, errs, reqs = await page(b, 'anon')
         await pg.route('https://fake.supabase.co/functions/v1/metar**', lambda r: r.fulfill(status=500, body='{}', headers={'Access-Control-Allow-Origin':'*'}))
