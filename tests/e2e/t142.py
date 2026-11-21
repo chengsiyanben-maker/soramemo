@@ -98,7 +98,7 @@ async def main():
         await pg.evaluate("goTab('book')"); await pg.evaluate("openAirport(IATA.HND.id)"); await pg.wait_for_timeout(500)
         r = await pg.evaluate("(() => { const b = document.querySelector('#dAirport .a3pill button'); if(!b) return null; const r = b.getBoundingClientRect(), dl = document.querySelector('#dAirport .zk-dl').getBoundingClientRect(); return {top:r.top, bottom:r.bottom, h:r.height, below:r.top >= dl.bottom, hint:document.querySelector('#dAirport .a3pill').innerText}; })()")
         check('羽田：数字のカードの下に「3Dで見る ›」（44px・844 で開いてすぐ見える）:', bool(r) and r['h'] >= 44 and r['below'] and r['bottom'] <= 844 - 80, str(r))
-        check('ピルの横に「押すと読み込みます（約0.2MB）」:', bool(r) and '押すと読み込みます（約0.2MB）' in r['hint'], str(r and r['hint']))
+        check('ピルの横に「押すと読み込みます（約0.6MB）」:', bool(r) and '押すと読み込みます（約0.6MB）' in r['hint'], str(r and r['hint']))
         check('開く前は three.js を読まない:', 'three' not in reqs)
         await pg.screenshot(path=os.path.join(SHOTS, '01-entry-pill-844.png'))
         await pg.evaluate("openAirport(IATA.CTS.id)"); await pg.wait_for_timeout(300)
