@@ -141,7 +141,10 @@ async def main():
             chips = await pg.inner_text('#a3Chips')
             check('左上に「位置を受信中」:', '位置を受信中' in chips, chips)
             tags = await pg.evaluate("[...document.querySelectorAll('.a3tag')].map(t => t.innerText)")
-            check('名札は空の機体だけ（地上の JL 109 は出さない）・高さつき:', any(x.startswith('JL 318') and 'm' in x for x in tags) and not any('JL 109' in x for x in tags), str(tags))
+            # 11/21 の見回り8 で全体の視点を寄せたので、この作り物の機体（空港の約7km 東）は景色の外。端の札（向きの矢印・着陸までの分）で出る。景色の中なら高さつき
+            check('名札は空の機体だけ（地上の JL 109 は出さない）・高さつきか、景色の外は端の矢印つき:', any(('JL 318' in x) and (('m' in x) or any(a in x for a in '←→↑↓')) for x in tags) and not any('JL 109' in x for x in tags), str(tags))
+            r = await pg.evaluate("(() => { const W = $('a3Stage').clientWidth; return [...document.querySelectorAll('.a3tag.edge')].map(t => { const r = t.getBoundingClientRect(); return [Math.round(r.left), Math.round(r.right), Math.round(r.top)]; }).every(([l, rr, t]) => l >= 0 && rr <= W && t >= 130); })()")
+            check('端の札は画面の中（上の操作の下）:', r)
             ov = await pg.evaluate("(() => { const st = document.getElementById('a3Sheet').getBoundingClientRect(); return [...document.querySelectorAll('.a3tag')].filter(t => t.getBoundingClientRect().bottom > st.top).length; })()")
             check('名札はシートに重ならない:', ov == 0, str(ov))
             small = await pg.evaluate("[...document.querySelectorAll('#dAp3d button')].filter(b => b.offsetParent && b.getBoundingClientRect().height < 40 && !b.classList.contains('a3credit')).map(b => b.innerText || b.getAttribute('aria-label'))")
