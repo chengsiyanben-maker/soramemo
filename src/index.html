@@ -4962,7 +4962,7 @@ document.addEventListener("click", e => {
    名札は空の機体だけ。特別塗装機の尾翼は昼だけ金。電池20%以下で軽い表示に自動で切り替え（「ふつうに」で戻せる）。
    天気は空の見え方にだけ使う（印や実績にはしない） */
 const A3_THREE = "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.min.js";
-const A3_SIZE = "約0.6MB";   // 届く大きさ：three.module.min.js 約166KB＋羽田の形（3d/hnd.json・街の建物つき）約0.41MB。どちらも圧縮して届く量（11/21 夜に測った。上限 1.5MB）
+const A3_SIZE = "約0.6MB";   // 届く大きさ：three.module.min.js 約166KB＋羽田の形（3d/hnd.json・街の建物つき）約0.41MB。どちらも圧縮して届く量（11/21 夜に測った。上限 2MB）。灯りと機体の形はアプリの中で作るので増えない（アプリ本体が圧縮で約2.4KB 増えるだけ）
 const A3_SHAPE = "3d/hnd.json";   // 羽田の形（OpenStreetMap のデータを加工して作成・ODbL。tools/a3_shape.py で作る）＋建物と街（PLATEAU を加工して作成・PDL1.0。tools/a3_plateau.py で足す）
 const A3_DELAY = 60e3, A3_POLL = 20e3;   // 約1分遅らせて出す・20秒ごとに読む（データ担当の調べ report-airport-3d-data.md）
 const A3_C = [35.5533, 139.7811];   // 羽田の中心（OPS_AIRPORTS.HND.center と同じ）
@@ -5108,10 +5108,14 @@ function a3Status(){
   el.innerHTML = out.join("");
 }
 /* 景色を作る */
+// 古い端末か：CPU の数が4以下、または iPhone で画面の画素が少ない（iPhone 8 まで・SE）。はじめから軽くする
+function a3Weak(){ try{ const n = navigator.hardwareConcurrency || 8, ios = /iPhone/.test(navigator.userAgent), px = screen.width * screen.height * (devicePixelRatio || 1) ** 2;
+  return n <= 4 && !ios || ios && px < 1.2e6; }catch(e){ return false; } }
 function a3Build(){
   const T = A3.THREE, cv = $("a3Cv"), st = $("a3Stage"), lite = A3.lite;
   const r = new T.WebGLRenderer({ canvas:cv, antialias:!lite, alpha:false, powerPreference:"high-performance" });
-  if(A3.q == null) A3.q = lite ? 0 : 2;   // 質：2＝影あり・細かい / 1＝影なし / 0＝影なし・粗い（重ければ自動で下げる）
+  const weak = a3Weak(); A3.seg = weak ? 10 : 18;   // 古い iPhone など：はじめから影なし・機体の丸を粗く
+  if(A3.q == null) A3.q = lite ? 0 : weak ? 1 : 2;   // 質：2＝影あり・細かい / 1＝影なし / 0＝影なし・粗い・細かい灯りなし（重ければ自動で下げる）
   r.setPixelRatio(Math.min(A3.q >= 2 ? 2 : A3.q === 1 ? 1.5 : 1, window.devicePixelRatio || 1));
   r.shadowMap.enabled = !lite && A3.q >= 2; r.shadowMap.type = T.PCFShadowMap;
   const scene = new T.Scene(), cam = new T.PerspectiveCamera(50, 1, 30, 300000);
@@ -5163,16 +5167,8 @@ function a3Build(){
     const tex = a3RwyTex(T, rw, len, lite); tex.anisotropy = Math.min(8, r.capabilities.getMaxAnisotropy());
     const mt = new T.MeshLambertMaterial({ map:tex, polygonOffset:true, polygonOffsetFactor:-8, polygonOffsetUnits:-32 });
     const m = new T.Mesh(g, mt); m.position.set((x1 + x2) / 2, 1.2, (z1 + z2) / 2); m.rotation.y = Math.atan2(-(x1 - x2), -(z1 - z2)); m.receiveShadow = true; scene.add(m);
-    if(!lite){ const ux = (x2 - x1) / len, uz = (z2 - z1) / len, nx = -uz, nz = ux;
-      for(let i = 0; i <= len; i += 60) for(const s of [-1, 1]) lights.w.push(x1 + ux * i + nx * 31 * s, 2, z1 + uz * i + nz * 31 * s);
-      for(let i = 30; i < len - 30; i += 30) lights.a.push(x1 + ux * i, 1.6, z1 + uz * i);   // 中心線の灯り（弱く）
-      for(const [ex, ez, sx] of [[x1, z1, -1], [x2, z2, 1]]) for(let j = -30; j <= 30; j += 4){
-        lights.g.push(ex + nx * j, 2, ez + nz * j); lights.r.push(ex + nx * j + ux * sx * 3, 2, ez + nz * j + uz * sx * 3);
-        if(j === -30) for(let d = 60; d <= 900; d += 30){ const ax = ex + ux * sx * d, az = ez + uz * sx * d; lights.w.push(ax, 3, az); if(d % 300 === 0) for(let c = -15; c <= 15; c += 5) lights.w.push(ax + nx * c, 3, az + nz * c); } } }
   }
-  // 誘導路の縁の青い灯り（夜）
-  if(S && !lite && night !== "day") for(const t of S.twy){ for(let i = 3; i < t.length; i += 2){ const ax = t[i - 2], az = t[i - 1], bx = t[i], bz = t[i + 1], l = Math.hypot(bx - ax, bz - az) || 1, nx = -(bz - az) / l, nz = (bx - ax) / l;
-    for(let d = 0; d < l; d += 70) for(const s of [-1, 1]) lights.b.push(ax + (bx - ax) * d / l + nx * t[0] / 2 * s, 1.5, az + (bz - az) * d / l + nz * t[0] / 2 * s); } }
+  // 滑走路・進入灯・PAPI・誘導路の灯りは a3RwyLights（AIP JAPAN の AD 2.14 の種類と長さ）。夕方と夜だけ
   // 建物：形のファイルの外形を高さどおりに立てる（空港の中は PLATEAU の計測高さ）。ターミナルはガラスの色、格納庫は大きな屋根、ほかは白っぽい。下ほど少し暗く（地面の近くの陰）
   if(S && S.bld.length){
     for(const kind of ["t", "h", "b"]){
@@ -5201,7 +5197,7 @@ function a3Build(){
   if(!lite && night !== "day"){ const pr = r.getPixelRatio(), P = (arr, c, s, op) => { if(!arr.length) return; const g = new T.BufferGeometry(); g.setAttribute("position", new T.Float32BufferAttribute(arr, 3));
       const m = new T.Points(g, new T.PointsMaterial({ color:c, size:s * pr, sizeAttenuation:false, transparent:true, opacity:op, fog:false, depthWrite:false })); m.userData.ps = s; scene.add(m); };   // 大きさは CSS の画素（画素の密度を掛ける）
     const k = night === "night" ? 1 : .55;
-    P(lights.w, 0xFFF4DE, 2.2, k); P(lights.g, 0x5BE38A, 2.4, k); P(lights.r, 0xFF5A4F, 2.2, k); P(lights.b, 0x6E9BFF, 1.6, .85 * k); P(lights.a, 0xFFFFFF, 1.2, .45 * k);
+    a3RwyLights(T, scene, S, night);
     P(lights.f, 0xFFDDA0, 1.8, .85 * k);   // 駐機場の照明（全体の視点で大きな四角に見えないよう小さく）
     if(lights.c.length){ const g = new T.BufferGeometry(); g.setAttribute("position", new T.Float32BufferAttribute(lights.c, 3)); g.setAttribute("color", new T.Float32BufferAttribute(lights.cc, 3));   // 街の灯り（窓）
       const m = new T.Points(g, new T.PointsMaterial({ size:1.2 * pr, sizeAttenuation:false, vertexColors:true, transparent:true, opacity:night === "night" ? .85 : .4, depthWrite:false })); m.userData.ps = 1.2; m.name = "cityLights"; scene.add(m); } }
@@ -5390,6 +5386,68 @@ function a3RwyTex(T, rw, len, lite){
   for(let m = a; m + 30 < b; m += 50) g.fillRect(29.5 * px, m * s, 0.9 * px, 30 * s);
   const t = new T.CanvasTexture(c); t.colorSpace = T.SRGBColorSpace; t.generateMipmaps = true; t.minFilter = T.LinearMipmapLinearFilter; return t;
 }
+// 灯火（AIP JAPAN RJTT AD 2.14 の表から。滑走路の端ごと）：進入灯の長さ m（0＝なし）・CAT II/III の横の赤い列・PAPI の側（L／R・null＝なし）と末端からの距離 m・接地帯の灯り・翼の形の緑の列（WBAR）
+//   縁の灯りの間隔と中心線の灯りの間隔は滑走路ごと（A 60／30・B 60／30・C 30／15・D 30／30）。進入灯は PALS（順に流れる閃光つき）として描く
+const A3_LGT = { "16R":{ als:900, papi:["L", 434], tdz:1, wb:1 }, "34L":{ als:900, papi:["L", 449], tdz:1, wb:1 }, "04":{ als:0, papi:["L", 369], tdz:0, wb:0 }, "22":{ als:900, papi:["L", 438], tdz:1, wb:1 },
+  "16L":{ als:900, papi:["L", 412], tdz:1, wb:1 }, "34R":{ als:900, cat3:1, papi:["R", 416], tdz:1, wb:1 }, "05":{ als:0, papi:null, tdz:0, wb:0 }, "23":{ als:870, papi:["L", 452], tdz:1, wb:1 } };
+const A3_LGT_SP = { "A滑走路":[60, 30], "B滑走路":[60, 30], "C滑走路":[30, 15], "D滑走路":[30, 30] };
+const A3_LC = { w:[1, .94, .82], y:[1, .78, .28], g:[.28, .9, .5], r:[1, .24, .2], b:[.32, .5, 1], tg:[.22, .86, .5], aw:[1, 1, 1] };
+// 点の灯りの描き方：芯＋にじみ（光の輪）。地面にめり込んで見えなくならないよう、見ている所へ少し（約4m＋距離の2%）寄せて描く（地面は重なりを避けるため手前へずらして描いているので、浅い角度ではそれより前に出す）。fx＝[種類, ずれ]：0 いつも・1 順に流れる閃光・2 赤い点滅（衝突防止灯）・3 白い閃光（2回ずつ）
+function a3LightMat(T, halo){
+  const m = new T.ShaderMaterial({ transparent:true, depthWrite:false, blending:T.AdditiveBlending, fog:false,
+    uniforms:{ uT:{ value:0 }, uPr:{ value:A3.r ? A3.r.getPixelRatio() : 1 }, uHalo:{ value:halo }, uK:{ value:A3.night === "night" ? 1 : .6 } },   // uK＝明るさ（夕方は空が明るいので控えめ）
+    vertexShader:"attribute vec3 aCol; attribute float aSize; attribute vec2 aFx; uniform float uT; uniform float uPr; varying vec3 vC; varying float vA; void main(){ vec4 mv = modelViewMatrix * vec4(position, 1.0); float dd = max(1.0, length(mv.xyz)); mv.xyz *= max(0.0, 1.0 - (4.0 + dd * 0.02) / dd); gl_Position = projectionMatrix * mv; float k = clamp(3000.0 / dd, 0.8, 2.4); float a = 1.0; float c;"
+      + " if(aFx.x > 0.5 && aFx.x < 1.5){ c = fract(uT * 2.0 - aFx.y); a = c < 0.04 ? 1.0 : 0.0; } else if(aFx.x > 1.5 && aFx.x < 2.5){ a = fract(uT * 0.9 + aFx.y) < 0.13 ? 1.0 : 0.0; } else if(aFx.x > 2.5){ c = fract(uT / 1.3 + aFx.y); a = (c < 0.03 || (c > 0.09 && c < 0.12)) ? 1.0 : 0.0; }"
+      + " vA = a; vC = aCol; gl_PointSize = a > 0.0 ? aSize * uPr * k : 0.0; }",
+    fragmentShader:"uniform float uHalo; uniform float uK; varying vec3 vC; varying float vA; void main(){ vec2 q = gl_PointCoord * 2.0 - 1.0; float r = dot(q, q); if(r > 1.0) discard; float core = exp(-r * 22.0); float halo = exp(-r * 4.0) * 0.32 * uHalo * (1.0 - r); gl_FragColor = vec4(mix(vC, vec3(1.0), core * 0.55), (core + halo) * vA * uK); }" });
+  (A3.lmats = A3.lmats || []).push(m); return m;
+}
+// 灯りの点を集める箱：add(x, y, z, 色, 大きさ px, 種類, ずれ) → pts(T, 名前) で Points にする
+function a3LightBox(){
+  const p = [], c = [], s = [], f = [];
+  return { p, add(x, y, z, col, size, fx = 0, ph = 0){ p.push(x, y, z); c.push(...col); s.push(size); f.push(fx, ph); },
+    pts(T, name, halo, mat){ if(!p.length) return null; const g = new T.BufferGeometry(); g.setAttribute("position", new T.Float32BufferAttribute(p, 3)); g.setAttribute("aCol", new T.Float32BufferAttribute(c, 3));
+      g.setAttribute("aSize", new T.Float32BufferAttribute(s, 1)); g.setAttribute("aFx", new T.Float32BufferAttribute(f, 2));
+      const m = new T.Points(g, mat || a3LightMat(T, halo)); m.name = name; m.frustumCulled = false; return m; } };
+}
+// 滑走路の灯火（夕方と夜）：縁（白・端から600m は黄）・中心線（白、端から900〜300m は赤と白、最後の300m は赤）・末端の緑と翼の形の列・終わりの赤・接地帯（900m）・進入灯（中心の列・300m の横の列・順に流れる閃光）・PAPI（4灯）・誘導路の縁の青と中心線の緑
+//   細かい灯り（接地帯・誘導路の中心線）は lightsFine に分け、いちばん軽い質では隠す
+function a3RwyLights(T, scene, S, night){
+  const main = a3LightBox(), fine = a3LightBox(), papi = [], halo = night === "night" ? 1 : .45, C = A3_LC;
+  for(const rw of HND_RWY){
+    const [ax, az] = a3XZ(rw[1], rw[2]), [bx, bz] = a3XZ(rw[5], rw[6]), len = Math.hypot(bx - ax, bz - az), ux = (bx - ax) / len, uz = (bz - az) / len, nx = -uz, nz = ux, sp = A3_LGT_SP[rw[8]] || [60, 30];
+    const at = (s, o, y = 2) => [ax + ux * s + nx * o, y, az + uz * s + nz * o];
+    for(let s = 0; s <= len + 1; s += sp[0]){ const e = Math.min(s, len - s); for(const o of [-31, 31]) main.add(...at(s, o), e < 600 ? C.y : C.w, 6); }   // 縁
+    for(let s = sp[1] / 2, i = 0; s < len; s += sp[1], i++){ const e = Math.min(s, len - s); main.add(...at(s, 0, 1.6), e < 300 || (e < 900 && i % 2) ? C.r : C.w, 4.5); }   // 中心線
+    for(const [nm, dsp, s0, dir] of [[rw[0], rw[3], 0, 1], [rw[4], rw[7], len, -1]]){
+      const L = A3_LGT[nm] || { als:0, papi:null }, th = s0 + dir * dsp * 0.3048, lx = dir * uz, lz = -dir * ux;   // 着陸の向きの左
+      for(let o = -28; o <= 28; o += 4) main.add(...at(th, o), C.g, 6.5);   // 末端の緑
+      if(L.wb) for(const sd of [-1, 1]) for(let o = 34; o <= 46; o += 3) main.add(...at(th, sd * o), C.g, 6.5);   // 翼の形の列
+      for(let o = -28; o <= 28; o += 5) main.add(...at(s0 - dir * 1.5, o), C.r, 6);   // 反対の向きの終わりの赤
+      if(L.tdz) for(let d = 60; d <= 900; d += 60) for(const sd of [-1, 1]) for(let k = 0; k < 3; k++) fine.add(...at(th + dir * d, sd * (9 + k * 1.5), 1.6), C.w, 3.5);   // 接地帯
+      if(L.als){ for(let d = 30; d <= L.als; d += 30){ const s = th - dir * d;
+          for(let o = -4; o <= 4; o += 2) main.add(...at(s, o, 4), C.w, 5.5);   // 中心の列（5灯ずつ）
+          if(d === 300) for(let o = 6; o <= 22; o += 2) for(const sd of [-1, 1]) main.add(...at(s, sd * o, 4), C.w, 5.5);   // 300m の横の列
+          if(d === 150) for(let o = 6; o <= 12; o += 2) for(const sd of [-1, 1]) main.add(...at(s, sd * o, 4), C.w, 5.5);
+          if(L.cat3 && d <= 270) for(const sd of [-1, 1]) for(let k = 0; k < 3; k++) main.add(...at(s, sd * (11 + k * 1.5), 4), C.r, 5);   // CAT III の横の赤い列
+          if(d >= 330) main.add(...at(s, 0, 5), C.aw, 10, 1, (L.als - d) / L.als * 0.45); } }   // 順に流れる閃光（遠い方から末端へ、1秒に2回）
+      if(L.papi){ const sd = L.papi[0] === "L" ? 1 : -1, tr = [3.5, 3 + 1 / 6, 2 + 5 / 6, 2.5];   // 4灯：滑走路に近い方から 3°30′・3°10′・2°50′・2°30′（3° の進入角）
+        for(let i = 0; i < 4; i++){ const x = ax + ux * (th + dir * L.papi[1]) + lx * sd * (46 + i * 9), z = az + uz * (th + dir * L.papi[1]) + lz * sd * (46 + i * 9); papi.push({ x, y:2, z, tr:tr[i] }); } }
+    }
+  }
+  if(S) for(const t of S.twy){ for(let i = 3; i < t.length; i += 2){ const ax = t[i - 2], az = t[i - 1], bx = t[i], bz = t[i + 1], l = Math.hypot(bx - ax, bz - az) || 1, nx = -(bz - az) / l, nz = (bx - ax) / l;
+    for(let d = 0; d < l; d += 90) for(const s of [-1, 1]) main.add(ax + (bx - ax) * d / l + nx * (t[0] / 2 + 1) * s, 1.5, az + (bz - az) * d / l + nz * (t[0] / 2 + 1) * s, C.b, 3);   // 縁の青
+    for(let d = 15; d < l; d += 30) fine.add(ax + (bx - ax) * d / l, 1.4, az + (bz - az) * d / l, C.tg, 3.5); } }   // 中心線の緑
+  for(const [b, nm] of [[main, "lightsMain"], [fine, "lightsFine"]]){ const m = b.pts(T, nm, halo); if(m){ scene.add(m); if(nm === "lightsFine") m.visible = (A3.q ?? 2) > 0 && A3.seg !== 10; } }   // 古い端末とても軽い質では細かい灯りを出さない
+  if(papi.length){ const b = a3LightBox(); papi.forEach(u => b.add(u.x, u.y, u.z, C.w, 8)); const m = b.pts(T, "papi", halo); scene.add(m); A3.papi = { m, u:papi }; }
+}
+// PAPI の色：見ている所（カメラ）から見上げる角度が、その灯の角度より高ければ白・低ければ赤
+function a3Papi(){
+  const P = A3 && A3.papi; if(!P) return;
+  const c = A3.cam.position, a = P.m.geometry.attributes.aCol;
+  P.u.forEach((u, i) => { const ang = Math.atan2(c.y - u.y, Math.hypot(c.x - u.x, c.z - u.z)) / D2R, col = ang > u.tr ? A3_LC.w : A3_LC.r; a.array.set(col, i * 3); });
+  a.needsUpdate = true;
+}
 function a3Night(t = Date.now()){ const el = sunPos(t, A3_C[0], A3_C[1]).el; return el < -6 ? "night" : el < 4 ? "dusk" : "day"; }
 // 色：上の空・地平・陸・空港・芝・駐機場・誘導路・滑走路・建物（屋根と壁）
 const a3Colors = n => n === "night" ? { top:0x050A14, hor:0x1C2A3C, glow:0x000000, skyL:0x8DA2C2, gndL:0x141B25, hemi:1.4, sunC:0xB7C6E0, sunI:0.45, sea:0x0C1724, seaSpec:0x1E2A3A, cloud:0x3A4556, land:0x27303B, aero:0x2C3642, grass:0x24322D, apron:0x3A4450, twy:0x343D48, twyL:0x6B6A3A, rw:0x2E343C,
@@ -5467,7 +5525,9 @@ function a3Loop(){
     if(A3.fr.length === 60 && now - (A3.qAt || A3.t0) > 4000){ const avg = A3.fr.reduce((s, x) => s + x, 0) / 60; if(avg > 45 && A3.q > 0) a3Quality(A3.q - 1); } }
   A3.drawn = now;
   const ps = a3Planes(now);
-  a3Sync(ps); a3Camera(ps); if(A3.sky) A3.sky.position.copy(A3.cam.position); A3.r.render(A3.scene, A3.cam); a3Labels(ps);
+  a3Sync(ps); a3Camera(ps); if(A3.sky) A3.sky.position.copy(A3.cam.position);
+  if(A3.lmats){ const t = (now - A3.t0) / 1000; for(const m of A3.lmats) m.uniforms.uT.value = t; } a3Papi();   // 灯りの点滅と PAPI の色
+  A3.r.render(A3.scene, A3.cam); a3Labels(ps);
 }
 // 質を下げる：2→1 は影をやめる、1→0 は細かさ（画素の密度）を下げる。作り直さずに切り替える
 function a3Quality(q){
@@ -5475,8 +5535,9 @@ function a3Quality(q){
   A3.q = q; A3.qAt = Date.now(); A3.fr = [];
   if(q < 2 && A3.r.shadowMap.enabled){ A3.r.shadowMap.enabled = false; if(A3.sun) A3.sun.castShadow = false; A3.scene.traverse(o => { if(o.material){ o.castShadow = o.receiveShadow = false; [].concat(o.material).forEach(m => m.needsUpdate = true); } }); }
   A3.r.setPixelRatio(Math.min(q >= 2 ? 2 : q === 1 ? 1.5 : 1, window.devicePixelRatio || 1));
-  for(const nm of ["citySmall", "clouds"]){ const o = A3.scene.getObjectByName(nm); if(o) o.visible = q > 0; }   // いちばん軽い質では、街の小さな建物と雲を隠す
+  for(const nm of ["citySmall", "clouds", "lightsFine"]){ const o = A3.scene.getObjectByName(nm); if(o) o.visible = q > 0; }   // いちばん軽い質では、街の小さな建物・雲・細かい灯り（接地帯・誘導路の中心線）を隠す   // いちばん軽い質では、街の小さな建物と雲を隠す
   const pr = A3.r.getPixelRatio(); A3.scene.traverse(o => { if(o.isPoints && o.material.sizeAttenuation === false) o.material.size = (o.userData.ps || 3) * pr; });
+  (A3.lmats || []).forEach(m => m.uniforms.uPr.value = pr);
   const st = $("a3Stage"); if(st) A3.r.setSize(st.clientWidth, st.clientHeight, false);
   A3.dirty = true;
 }
@@ -5489,71 +5550,102 @@ function a3Kind(t){
   if(/^(DH8|AT[47]|SF3|Q[1-4]|D328|SAAB|DHC|B350|C208|PC12)/.test(t)) return "p";
   return "n";
 }
-// 機種ごとの形（11/21 夜「機種ごとの形（B787・B777・A350・B737・A320 など）」）。長さを 1 にした割合：翼幅・胴の太さ・翼の付け根と先の幅・後退（先の前縁のずれ）・垂直尾翼の高さ・発動機（数・太さ・長さ・付け根からの位置）・翼の先の形
-//   翼の先：r＝斜めに切った先（787・777・A350）、b＝上に曲げた先（737・767）、s＝小さな縦の先（A320・A380）、v＝縦の板（747-400）
+// 機種ごとの形（11/21 夜「機体も現実的なものにしたい」）。長さを 1 にした割合：翼幅・胴の太さ・翼の付け根と先の幅・後退（先の前縁のずれ）・垂直尾翼の高さ・発動機（数・太さ・長さ・付け根からの位置）・翼の先の形・上反角
+//   flex＝翼の先の反り上がり（787 は大きく反る）・tt＝T 字の尾翼・bog＝主脚の片側の車輪の数・pr／nb＝プロペラの半径と羽根の数・hump／deck＝747／A380 の2階
+//   翼の先：r＝斜めに切った先（787・777）、c＝上へ曲がる先（A350）、b＝上に曲げた先（737・767・E170/E190）、s＝小さな縦の先（A320・A380）、v＝縦の板（747-400・A340）
 const A3_MODELS = {
-  "787":{ span:.95, rad:.046, root:.17, tip:.035, sweep:.3, fin:.17, eng:2, er:.029, el:.12, ex:.3, wl:"r", dih:.07 },
-  "777":{ span:.88, rad:.042, root:.17, tip:.04, sweep:.27, fin:.15, eng:2, er:.03, el:.12, ex:.3, wl:"r", dih:.05 },
-  "350":{ span:.97, rad:.045, root:.17, tip:.035, sweep:.29, fin:.16, eng:2, er:.029, el:.12, ex:.3, wl:"s", dih:.07 },
-  "767":{ span:.87, rad:.046, root:.18, tip:.05, sweep:.24, fin:.17, eng:2, er:.027, el:.11, ex:.3, wl:"b", dih:.06 },
-  "747":{ span:.91, rad:.046, root:.19, tip:.05, sweep:.3, fin:.18, eng:4, er:.024, el:.1, ex:.22, ex2:.42, wl:"v", dih:.05, hump:1 },
-  "380":{ span:1.1, rad:.049, root:.22, tip:.05, sweep:.3, fin:.2, eng:4, er:.027, el:.1, ex:.23, ex2:.4, wl:"s", dih:.04, deck:1 },
-  "340":{ span:.84, rad:.042, root:.17, tip:.04, sweep:.27, fin:.16, eng:4, er:.02, el:.09, ex:.23, ex2:.43, wl:"v", dih:.05 },
-  "737":{ span:.9, rad:.048, root:.2, tip:.06, sweep:.21, fin:.19, eng:2, er:.026, el:.1, ex:.29, wl:"b", dih:.07 },
-  "320":{ span:.95, rad:.052, root:.2, tip:.06, sweep:.22, fin:.17, eng:2, er:.027, el:.1, ex:.31, wl:"s", dih:.07 },
-  r:{ span:.8, rad:.042, root:.17, tip:.05, sweep:.2, fin:.19, eng:"aft", er:.024, el:.1, wl:"b", dih:.05 },
-  p:{ span:.86, rad:.042, root:.11, tip:.06, sweep:.02, fin:.2, eng:"prop", er:.02, el:.12, ex:.26, high:1, dih:0 },
-  n:{ span:.92, rad:.05, root:.2, tip:.06, sweep:.21, fin:.18, eng:2, er:.027, el:.1, ex:.3, wl:"b", dih:.07 },
-  w:{ span:.92, rad:.045, root:.17, tip:.04, sweep:.28, fin:.16, eng:2, er:.029, el:.12, ex:.3, wl:"r", dih:.06 },
-  q:{ span:.94, rad:.047, root:.19, tip:.05, sweep:.3, fin:.18, eng:4, er:.024, el:.1, ex:.22, ex2:.42, wl:"v", dih:.05 } };
-const A3_MODEL_RE = [[/^B78/, "787"], [/^B77/, "777"], [/^A35/, "350"], [/^A38/, "380"], [/^A34/, "340"], [/^(B76|A33|A30)/, "767"], [/^B74/, "747"], [/^(B73|B3[89X]M)/, "737"], [/^(A32|A31|A2|A19)/, "320"]];
+  "787":{ span:.95, rad:.046, root:.17, tip:.03, sweep:.3, fin:.17, eng:2, er:.029, el:.13, ex:.31, wl:"r", dih:.05, flex:.05, bog:4 },
+  "777":{ span:.88, rad:.042, root:.17, tip:.035, sweep:.27, fin:.15, eng:2, er:.034, el:.15, ex:.32, wl:"r", dih:.05, flex:.015, bog:6 },
+  "350":{ span:.97, rad:.045, root:.17, tip:.03, sweep:.29, fin:.16, eng:2, er:.03, el:.13, ex:.31, wl:"c", dih:.05, flex:.03, bog:4 },
+  "767":{ span:.87, rad:.046, root:.18, tip:.05, sweep:.24, fin:.17, eng:2, er:.027, el:.11, ex:.3, wl:"b", dih:.06, bog:4 },
+  "747":{ span:.91, rad:.046, root:.19, tip:.05, sweep:.3, fin:.18, eng:4, er:.024, el:.1, ex:.22, ex2:.42, wl:"v", dih:.05, hump:1, bog:4 },
+  "380":{ span:1.1, rad:.049, root:.22, tip:.05, sweep:.3, fin:.2, eng:4, er:.027, el:.1, ex:.23, ex2:.4, wl:"s", dih:.04, deck:1, bog:6 },
+  "340":{ span:.84, rad:.042, root:.17, tip:.04, sweep:.27, fin:.16, eng:4, er:.02, el:.09, ex:.23, ex2:.43, wl:"v", dih:.05, bog:4 },
+  "737":{ span:.9, rad:.048, root:.2, tip:.06, sweep:.21, fin:.19, eng:2, er:.025, el:.09, ex:.29, wl:"b", dih:.07, bog:2 },
+  "320":{ span:.95, rad:.052, root:.2, tip:.06, sweep:.22, fin:.17, eng:2, er:.027, el:.1, ex:.31, wl:"s", dih:.07, bog:2 },
+  e:{ span:.84, rad:.05, root:.2, tip:.05, sweep:.22, fin:.21, eng:2, er:.028, el:.1, ex:.3, wl:"b", dih:.07, bog:2 },
+  crj:{ span:.8, rad:.042, root:.17, tip:.05, sweep:.2, fin:.19, eng:"aft", er:.024, el:.1, wl:"b", dih:.05, tt:1, bog:2 },
+  q4:{ span:.87, rad:.043, root:.1, tip:.055, sweep:.01, fin:.21, eng:"prop", er:.03, el:.2, ex:.3, high:1, dih:0, tt:1, pr:.062, nb:6, bog:2 },
+  atr:{ span:1, rad:.05, root:.085, tip:.05, sweep:.01, fin:.2, eng:"prop", er:.025, el:.16, ex:.32, high:1, dih:0, tt:1, pr:.072, nb:6, bog:2 },
+  r:{ span:.8, rad:.042, root:.17, tip:.05, sweep:.2, fin:.19, eng:"aft", er:.024, el:.1, wl:"b", dih:.05, tt:1, bog:2 },
+  p:{ span:.86, rad:.042, root:.11, tip:.06, sweep:.02, fin:.2, eng:"prop", er:.022, el:.14, ex:.28, high:1, dih:0, tt:1, pr:.06, nb:4, bog:2 },
+  n:{ span:.92, rad:.05, root:.2, tip:.06, sweep:.21, fin:.18, eng:2, er:.027, el:.1, ex:.3, wl:"b", dih:.07, bog:2 },
+  w:{ span:.92, rad:.045, root:.17, tip:.04, sweep:.28, fin:.16, eng:2, er:.029, el:.12, ex:.3, wl:"r", dih:.06, bog:4 },
+  q:{ span:.94, rad:.047, root:.19, tip:.05, sweep:.3, fin:.18, eng:4, er:.024, el:.1, ex:.22, ex2:.42, wl:"v", dih:.05, bog:4 } };
+const A3_MODEL_RE = [[/^B78/, "787"], [/^B77/, "777"], [/^A35/, "350"], [/^A38/, "380"], [/^A34/, "340"], [/^(B76|A33|A30)/, "767"], [/^B74/, "747"], [/^(B73|B3[89X]M)/, "737"], [/^(A32|A31|A2|A19)/, "320"],
+  [/^(E1[79]|E75|E29|E2)/, "e"], [/^CRJ/, "crj"], [/^DH8/, "q4"], [/^AT[47]/, "atr"]];
 function a3Model(t){ t = String(t || "").toUpperCase(); for(const [re, m] of A3_MODEL_RE) if(re.test(t)) return m; return a3Kind(t); }
-// 機体の形（長さ1で作り、機種の長さに伸ばす。前が -z）：胴・機首・尾・主翼（後退角・上反角・翼の先）・水平尾翼・垂直尾翼・発動機と支柱・窓の帯・脚
-//   白い機体に濃いグレーの窓の帯だけ。会社の色やロゴは使わない（決まり：ロゴは提携後）
+// 機体の形（長さ1で作り、機種の長さに伸ばす。前が -z）：胴（機首から尾へ細く上がる回転体）・主翼（後退角・上反角・反り・翼の先）・水平尾翼（T 字も）・垂直尾翼・発動機と支柱（プロペラの羽根）・窓の帯・脚（車輪の数）
+//   白い機体に濃いグレーの窓の帯だけ。会社の色やロゴは使わない（決まり：ロゴは提携後）。古い iPhone では丸の細かさを下げる（A3.seg）
 function a3Geo(model){
-  const T = A3.THREE; A3.geo = A3.geo || {};
-  if(A3.geo[model]) return A3.geo[model];
+  const T = A3.THREE, seg = A3.seg || 18, key = model + "/" + seg; A3.geo = A3.geo || {};
+  if(A3.geo[key]) return A3.geo[key];
   const M = A3_MODELS[model] || A3_MODELS.n, rad = M.rad, body = [], dark = [], win = [], gear = [];
   const add = (g, list, x = 0, y = 0, z = 0) => { g.translate(x, y, z); list.push(g.index ? g.toNonIndexed() : g); };
-  // 胴：まっすぐな筒＋丸い機首＋上に上がりながら細くなる尾
-  const f = new T.CylinderGeometry(rad, rad, 0.66, 16, 1, true); f.rotateX(Math.PI / 2); add(f, body, 0, 0, -0.05);
-  const nose = new T.SphereGeometry(rad, 16, 8, 0, Math.PI * 2, 0, Math.PI / 2); nose.scale(1, 1, 2.4); nose.rotateX(-Math.PI / 2); add(nose, body, 0, 0, -0.38);
-  const tail = new T.CylinderGeometry(rad, rad * 0.22, 0.24, 16, 1, true); tail.rotateX(-Math.PI / 2); add(tail, body, 0, rad * 0.4, 0.4);
-  if(M.hump){ const h = new T.SphereGeometry(rad * .78, 14, 8); h.scale(1, .9, 5); add(h, body, 0, rad * .5, -0.28); }   // 747 の2階
-  if(M.deck){ const h = new T.CylinderGeometry(rad * .86, rad * .86, 0.6, 16, 1, true); h.rotateX(Math.PI / 2); add(h, body, 0, rad * .42, -0.06); }   // A380 の2階
+  // 胴：機首（丸く尖る）→まっすぐな筒→尾（細くなりながら上がる）
+  { const pf = [[0, -.5], [.3, -.493], [.52, -.48], [.72, -.458], [.86, -.43], [.95, -.4], [1, -.35], [1, .2], [.93, .27], [.78, .34], [.56, .41], [.34, .465], [.12, .5]];
+    const g = new T.LatheGeometry(pf.map(([r, z]) => new T.Vector2(Math.max(.001, r * rad), z)), seg); g.rotateX(Math.PI / 2);
+    const pa = g.attributes.position.array; for(let i = 0; i < pa.length; i += 3){ const z = pa[i + 2]; if(z > .18) pa[i + 1] += Math.pow((z - .18) / .32, 1.4) * rad * .85; }
+    g.computeVertexNormals(); add(g, body); }
+  if(M.hump){ const h = new T.SphereGeometry(rad * .78, seg, 8); h.scale(1, .9, 5); add(h, body, 0, rad * .5, -0.28); }   // 747 の2階
+  if(M.deck){ const h = new T.CylinderGeometry(rad * .86, rad * .86, 0.6, seg, 1, true); h.rotateX(Math.PI / 2); add(h, body, 0, rad * .42, -0.06); }   // A380 の2階
   // 窓の帯（左右）と操縦室の窓
-  for(const sx of [-1, 1]) add(new T.BoxGeometry(0.004, rad * 0.16, 0.6), win, sx * rad * 0.985, rad * 0.25, -0.06);
-  { const g = new T.BoxGeometry(rad * 1.25, rad * 0.2, 0.03); add(g, win, 0, rad * 0.5, -0.425); }
-  // 翼：上から見た台形（後退角）を薄く立てる。dih＝上反角。先の形も足す
-  const wing = (half, root, tip, sweep, th, y, z, dih, wl) => { const sh = new T.Shape(); sh.moveTo(0, 0); sh.lineTo(half, sweep); sh.lineTo(half, sweep + tip); sh.lineTo(0, root); sh.lineTo(0, 0);
-    const g = new T.ExtrudeGeometry(sh, { depth:th, bevelEnabled:false }); g.rotateX(Math.PI / 2); g.translate(0, th / 2, 0);
+  for(const sx of [-1, 1]) add(new T.BoxGeometry(0.004, rad * 0.16, 0.56), win, sx * rad * 0.99, rad * 0.25, -0.06);
+  { const g = new T.BoxGeometry(rad * 1.3, rad * 0.22, 0.03); add(g, win, 0, rad * 0.5, -0.415); }
+  // 翼：上から見た台形（後退角）を薄く立てる。dih＝上反角・flex＝先ほど反り上がる。先の形も足す
+  const wing = (half, root, tip, sweep, th, y, z, dih, wl, flex = 0) => { const sh = new T.Shape(); sh.moveTo(0, 0); sh.lineTo(half, sweep); sh.lineTo(half, sweep + tip); sh.lineTo(0, root); sh.lineTo(0, 0);
+    const g = new T.ExtrudeGeometry(sh, { depth:th, bevelEnabled:false, steps:1 }); g.rotateX(Math.PI / 2); g.translate(0, th / 2, 0);
     const m = g.clone(); m.scale(-1, 1, 1);
-    for(const x of [g, m]){ const pa = x.attributes.position.array; for(let i = 0; i < pa.length; i += 3) pa[i + 1] += Math.abs(pa[i]) * dih; x.translate(0, y, z); body.push(x.index ? x.toNonIndexed() : x); }
-    if(wl && wl !== "r") for(const sx of [-1, 1]){   // 翼の先の小さな縦の板（r＝斜めに切った先は翼の形で出す）
-      const hh = wl === "s" ? .022 : wl === "v" ? .03 : .04, s2 = new T.Shape(); s2.moveTo(0, 0); s2.lineTo(0, tip); s2.lineTo(hh * .9, tip * .95); s2.lineTo(hh * 1.05, tip * .35); s2.lineTo(0, 0);
+    for(const x of [g, m]){ const pa = x.attributes.position.array; for(let i = 0; i < pa.length; i += 3){ const a = Math.abs(pa[i]); pa[i + 1] += a * dih + Math.pow(a / half, 2) * flex; } x.computeVertexNormals(); x.translate(0, y, z); body.push(x.index ? x.toNonIndexed() : x); }
+    if(wl && wl !== "r") for(const sx of [-1, 1]){   // 翼の先の板（r＝斜めに切った先は翼の形で出す）
+      const hh = wl === "s" ? .024 : wl === "v" ? .03 : wl === "c" ? .03 : .04, s2 = new T.Shape(); s2.moveTo(0, 0); s2.lineTo(0, tip); s2.lineTo(hh * .9, tip * .95); s2.lineTo(hh * 1.05, tip * .35); s2.lineTo(0, 0);
       const e = new T.ExtrudeGeometry(s2, { depth:th * .6, bevelEnabled:false });
       e.applyMatrix4(new T.Matrix4().set(0, 0, 1, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1));   // 絵の横＝上・縦＝前後・厚み＝左右
-      if(wl === "b") e.rotateZ(-sx * 0.55);   // 上に曲げた先は外へ少し傾ける
-      e.translate(sx * half, y + half * dih, z + sweep); body.push(e.index ? e.toNonIndexed() : e); } };
-  const wz = -0.12, wy = M.high ? rad * 0.85 : -rad * 0.55, rk = M.wl === "r";
-  wing(M.span / 2, M.root, rk ? M.tip * .7 : M.tip, M.sweep * (rk ? 1.08 : 1), 0.012, wy, wz, M.dih, M.wl);
-  wing(M.span * 0.18, 0.1, 0.04, 0.09, 0.008, M.eng === "aft" ? rad * 2.9 : rad * 0.35, 0.37, 0.03, null);   // 水平尾翼（後ろに発動機の機体は T 字の尾翼）
-  // 垂直尾翼（横から見た台形）
-  { const H = M.fin, sh = new T.Shape(); sh.moveTo(0, 0); sh.lineTo(0.17, 0); sh.lineTo(0.22, H); sh.lineTo(0.15, H); sh.lineTo(0, 0);
-    const g = new T.ExtrudeGeometry(sh, { depth:0.01, bevelEnabled:false }); g.rotateY(-Math.PI / 2); g.translate(0.005, rad * 0.6, 0.28); body.push(g.index ? g.toNonIndexed() : g); }
-  // 発動機（筒＝ナセル・前の口は濃い色）と支柱。翼の前縁より少し前に吊る
-  const le = x => wz + M.sweep * Math.abs(x) / (M.span / 2);
-  const eng = (x, y, z, r, l) => { const n = new T.CylinderGeometry(r * .92, r, l, 14, 1, true); n.rotateX(Math.PI / 2); add(n, dark, x, y, z);
-    const lip = new T.CircleGeometry(r * .9, 14); add(lip, win, x, y, z - l / 2 - 0.001);
-    const py = new T.BoxGeometry(0.006, Math.abs(wy - y) + r * .2, l * .55); add(py, body, x, (wy + y) / 2, z + l * .1); };
-  if(M.eng === 2 || M.eng === 4){ for(const ex of M.eng === 4 ? [M.ex, M.ex2] : [M.ex]) for(const sx of [-1, 1]){ const x = sx * ex * M.span / 2, y = wy - M.er * 1.25 + Math.abs(x) * M.dih; eng(x, y, le(x) - M.el * .3, M.er, M.el); } }
+      if(wl === "b") e.rotateZ(-sx * 0.55); else if(wl === "c") e.rotateZ(-sx * 0.35);   // 上に曲げた先は外へ傾ける
+      e.translate(sx * half, y + half * dih + flex, z + sweep); body.push(e.index ? e.toNonIndexed() : e); } };
+  const wz = -0.12, wy = M.high ? rad * 0.85 : -rad * 0.55, rk = M.wl === "r", half = M.span / 2, flex = M.flex || 0;
+  wing(half, M.root, rk ? M.tip * .7 : M.tip, M.sweep * (rk ? 1.08 : 1), M.high ? .016 : .012, wy, wz, M.dih, M.wl, flex);
+  // 垂直尾翼（横から見た台形）と水平尾翼（T 字の尾翼は垂直尾翼の上）
+  const finY = rad * 0.6;
+  { const H = M.fin, sh = new T.Shape(); sh.moveTo(0, 0); sh.lineTo(0.17, 0); sh.lineTo(0.22, H); sh.lineTo(M.tt ? .13 : 0.15, H); sh.lineTo(0, 0);
+    const g = new T.ExtrudeGeometry(sh, { depth:0.01, bevelEnabled:false }); g.rotateY(-Math.PI / 2); g.translate(0.005, finY, 0.28); body.push(g.index ? g.toNonIndexed() : g); }
+  if(M.tt) wing(M.span * 0.17, 0.08, 0.045, 0.05, 0.008, finY + M.fin - 0.004, 0.42, 0, null);
+  else wing(M.span * 0.18, 0.1, 0.04, 0.09, 0.008, rad * 0.35, 0.37, 0.03, null);
+  // 発動機（筒＝ナセル・前の口は濃い色）と支柱。翼の前縁より少し前に吊る。プロペラは羽根
+  const le = x => wz + M.sweep * Math.abs(x) / half;
+  const tipY = x => wy + Math.abs(x) * M.dih + Math.pow(Math.abs(x) / half, 2) * flex;
+  const eng = (x, y, z, r, l) => { const n = new T.CylinderGeometry(r * .9, r, l, Math.max(10, seg - 4), 1, true); n.rotateX(Math.PI / 2); add(n, dark, x, y, z);
+    const lip = new T.CircleGeometry(r * .88, Math.max(10, seg - 4)); lip.rotateY(Math.PI); add(lip, win, x, y, z - l / 2 - 0.001);
+    const cone = new T.ConeGeometry(r * .5, l * .25, 10); cone.rotateX(Math.PI / 2); add(cone, dark, x, y, z + l / 2 + l * .1);   // 後ろの排気の先
+    const py = new T.BoxGeometry(0.006, Math.abs(tipY(x) - y) + r * .2, l * .55); add(py, body, x, (tipY(x) + y) / 2, z + l * .1); };
+  if(M.eng === 2 || M.eng === 4){ for(const ex of M.eng === 4 ? [M.ex, M.ex2] : [M.ex]) for(const sx of [-1, 1]){ const x = sx * ex * half, y = tipY(x) - M.er * 1.25; eng(x, y, le(x) - M.el * .3, M.er, M.el); } }
   else if(M.eng === "aft"){ for(const sx of [-1, 1]) eng(sx * rad * 1.55, rad * 0.5, 0.3, M.er, M.el); }
-  else for(const sx of [-1, 1]){ const x = sx * M.ex * M.span / 2; eng(x, wy - 0.002, le(x) - 0.02, M.er, M.el); const pr = new T.CircleGeometry(M.er * 2.6, 18); add(pr, win, x, wy - 0.002, le(x) - 0.02 - M.el / 2 - 0.004); }   // プロペラは薄い円
-  // 脚（着陸の前と地上だけ出す）
-  const leg = (x, z, n) => { const l = new T.CylinderGeometry(0.0035, 0.0035, rad * 1.5, 6); add(l, gear, x, -rad * 1.55, z); const w = new T.CylinderGeometry(rad * .26, rad * .26, n ? .01 : .022, 10); w.rotateZ(Math.PI / 2); add(w, gear, x, -rad * 2.3, z); };
-  leg(0, -0.39, true); for(const sx of [-1, 1]) leg(sx * rad * 0.75, -0.02 + M.sweep * .15, false);
-  const g = { body:a3Wind(a3Merge(T, body)), dark:a3Wind(a3Merge(T, dark)), win:a3Wind(a3Merge(T, win)), gear:a3Wind(a3Merge(T, gear)) };   // 左右を裏返した翼も表を外へ
-  A3.geo[model] = g; return g;
+  else for(const sx of [-1, 1]){ const x = sx * M.ex * half, z = le(x) + M.el * .2, y = wy - M.er * .7;
+    const n = new T.CylinderGeometry(M.er * .8, M.er, M.el, Math.max(10, seg - 4), 1, false); n.rotateX(Math.PI / 2); add(n, body, x, y, z);   // ナセル（翼の下に長く）
+    const sp = new T.ConeGeometry(M.er * .45, M.er * 1.2, 10); sp.rotateX(-Math.PI / 2); add(sp, dark, x, y, z - M.el / 2 - M.er * .6);   // スピナー
+    for(let k = 0; k < (M.nb || 4); k++){ const b = new T.BoxGeometry(0.007, M.pr, 0.002); b.translate(0, M.pr / 2, 0); b.rotateZ(k / (M.nb || 4) * Math.PI * 2 + sx * .3); add(b, dark, x, y, z - M.el / 2 - M.er * .5); } }
+  // 脚（着陸の前と地上だけ出す）：前の脚は2輪、主脚は片側 bog 輪（2＝1軸・4＝2軸・6＝3軸）
+  const wheel = (x, y, z, r, w) => { const c = new T.CylinderGeometry(r, r, w, 10); c.rotateZ(Math.PI / 2); add(c, gear, x, y, z); };
+  const strut = (x, z) => add(new T.CylinderGeometry(0.0035, 0.0035, rad * 1.3, 6), gear, x, -rad * 1.42, z);
+  strut(0, -0.39); for(const sx of [-1, 1]) wheel(sx * rad * .12, -rad * 2.1, -0.39, rad * .2, rad * .16);
+  { const ax = (M.bog || 2) / 2, mz = M.high ? .02 : -0.02 + M.sweep * .15, mx = M.high ? rad * .9 : rad * .75;
+    for(const sx of [-1, 1]){ strut(sx * mx, mz); for(let k = 0; k < ax; k++){ const z = mz + (k - (ax - 1) / 2) * rad * .6; for(const wx of [-1, 1]) wheel(sx * mx + wx * rad * .16, -rad * 2.05, z, rad * .25, rad * .2); } } }
+  // 灯りの位置：左翼の先（赤）・右翼の先（緑）・尾（白）・衝突防止灯（胴の上と下）・翼の先の白い閃光・着陸灯（翼の付け根）
+  const tipZ = wz + M.sweep * (rk ? 1.08 : 1) + M.tip * .4, tipYy = wy + half * M.dih + flex + .004;
+  const pts = { nav:[[-half, tipYy, tipZ, "r"], [half, tipYy, tipZ, "g"], [0, rad * .9, .5, "w"]], bcn:[[0, (M.hump || M.deck ? rad * 1.45 : rad * 1.04), -0.08], [0, -rad * 1.04, 0.02]], str:[[-half, tipYy, tipZ + .01], [half, tipYy, tipZ + .01]],
+    land:[[-rad * 1.6, wy - .004, le(rad * 1.6) - .005], [rad * 1.6, wy - .004, le(rad * 1.6) - .005], [0, -rad * 1.7, -0.385]] };
+  const g = { body:a3Wind(a3Merge(T, body)), dark:a3Wind(a3Merge(T, dark)), win:a3Wind(a3Merge(T, win)), gear:a3Wind(a3Merge(T, gear)), pts };   // 左右を裏返した翼も表を外へ
+  A3.geo[key] = g; return g;
+}
+// 機体の灯り：航空灯（左の赤・右の緑・尾の白）・衝突防止灯（赤い点滅）・白い閃光（2回ずつ）と、着陸の手前の着陸灯（脚と一緒に出す）。夕方と夜だけ
+function a3AcLights(geo, id){
+  const T = A3.THREE, C = A3_LC, b = a3LightBox(), l = a3LightBox(), ph = ((String(id).split("").reduce((s, c) => s + c.charCodeAt(0), 0)) % 97) / 97;   // 機体ごとに点滅をずらす
+  for(const [x, y, z, k] of geo.pts.nav) b.add(x, y, z, k === "r" ? [1, .18, .14] : k === "g" ? [.2, 1, .45] : [1, 1, 1], 6);
+  for(const [x, y, z] of geo.pts.bcn) b.add(x, y, z, [1, .12, .08], 9, 2, ph);
+  for(const [x, y, z] of geo.pts.str) b.add(x, y, z, C.aw, 12, 3, ph);
+  for(const [x, y, z] of geo.pts.land) l.add(x, y, z, [1, .97, .9], 16);
+  const halo = A3.night === "night" ? 1 : .5; A3.acM = A3.acM || a3LightMat(T, halo); const nav = b.pts(T, "acl", halo, A3.acM), land = l.pts(T, "land", halo, A3.acM);
+  return [nav, land];
 }
 function a3Mesh(p){
   const T = A3.THREE, g = new T.Group(), sp = a3Sp(p), day = A3.night === "day", night = A3.night === "night";
@@ -5563,9 +5655,7 @@ function a3Mesh(p){
   const b = new T.Mesh(geo.body, A3.pm.body), d = new T.Mesh(geo.dark, A3.pm.dark), w = new T.Mesh(geo.win, A3.pm.win), ge = new T.Mesh(geo.gear, A3.pm.dark);
   b.castShadow = d.castShadow = ge.castShadow = !!(A3.r && A3.r.shadowMap.enabled); ge.name = "gear"; g.add(b, d, w, ge);
   if(sp && day){ const M = A3_MODELS[a3Model(p.type)] || A3_MODELS.n, fin = new T.Mesh(new T.BoxGeometry(0.013, M.fin * .8, 0.12), A3.pm.gold); fin.position.set(0, M.rad * .6 + M.fin * .5, 0.4); g.add(fin); }   // 特別塗装機の尾翼は昼だけ金
-  if(night){ const lt = new T.Points(new T.BufferGeometry().setAttribute("position", new T.Float32BufferAttribute([0, 0, -0.5, -0.47, 0, 0.05, 0.47, 0, 0.05, 0, 0.12, 0.48], 3)),
-      new T.PointsMaterial({ size:3 * (A3.r ? A3.r.getPixelRatio() : 1), sizeAttenuation:false, vertexColors:true, fog:false, depthWrite:false }));
-    lt.geometry.setAttribute("color", new T.Float32BufferAttribute([1, 1, .9, 1, .25, .2, .3, 1, .45, 1, 1, 1], 3)); g.add(lt); }   // 夜：前の灯り・左の赤・右の緑・尾の白
+  if(!day){ const [nav, land] = a3AcLights(geo, p.id); g.add(nav); land.visible = false; g.add(land); }   // 夕方と夜：航空灯・衝突防止灯・白い閃光・着陸灯（脚と一緒に出す）
   g.userData.len = 1;
   return g;
 }
@@ -5580,10 +5670,11 @@ function a3Sync(ps){
       if(!A3.lite){ o.sh = new T.Mesh(new T.CircleGeometry(1, 16), new T.MeshBasicMaterial({ color:0x1F2937, transparent:true, opacity:.18, depthWrite:false })); o.sh.rotation.x = -Math.PI / 2; A3.scene.add(o.sh);
         o.ln = new T.Line(new T.BufferGeometry().setFromPoints([new T.Vector3(), new T.Vector3()]), new T.LineDashedMaterial({ color:A3.night === "night" ? 0x9CA3AF : 0x4B5563, dashSize:30, gapSize:24, transparent:true, opacity:.7 })); A3.scene.add(o.ln); }
       A3.objs.set(p.id, o); }
-    const air = a3Air(p), [x, z] = a3XZ(p.lat, p.lon), y = air ? p.alt_ft * 0.3048 : 4, L = (A3.lite ? 260 : a3Len(p.type)) * (air ? big : 1);
+    const air = a3Air(p), [x, z] = a3XZ(p.lat, p.lon), y = air ? p.alt_ft * 0.3048 : A3.lite ? 4 : a3Len(p.type) * (A3_MODELS[a3Model(p.type)] || A3_MODELS.n).rad * 2.3,   // 地上は車輪が地面に着く高さ
+      L = (A3.lite ? 260 : a3Len(p.type)) * (air ? big : 1);
     o.g.position.set(x, y, z); o.g.scale.setScalar(L); o.g.rotation.y = -(p.hdg || 0) * D2R; o.p = p;
     o.g.rotation.x = air && p.fpm ? Math.max(-0.12, Math.min(0.2, p.fpm / 9000)) : 0;   // 上昇は機首を上げ、降下は少し下げる
-    { const ge = o.g.getObjectByName("gear"); if(ge) ge.visible = !air || (p.alt_ft != null && p.alt_ft < 3000 && (p.phase === "arr" || (p.fpm || 0) < 0)) || (p.phase === "dep" && p.alt_ft != null && p.alt_ft < 800); }   // 脚は地上と着陸の前（約900m より下）・離陸の直後だけ
+    { const ge = o.g.getObjectByName("gear"), ld = o.g.getObjectByName("land"); if(ge) ge.visible = !air || (p.alt_ft != null && p.alt_ft < 3000 && (p.phase === "arr" || (p.fpm || 0) < 0)) || (p.phase === "dep" && p.alt_ft != null && p.alt_ft < 800); if(ld) ld.visible = !!ge && ge.visible && air; }   // 着陸灯は空で脚を出しているあいだ。脚は地上と着陸の前（約900m より下）・離陸の直後だけ
     if(o.sh){ o.sh.visible = o.ln.visible = air; if(air){ o.sh.position.set(x, 1.5, z); o.sh.scale.setScalar(L * 0.45);
       o.ln.geometry.setFromPoints([new T.Vector3(x, 1.5, z), new T.Vector3(x, y, z)]); o.ln.computeLineDistances(); } }
   }
@@ -5692,7 +5783,7 @@ function a3CardHTML(el, p){
 function a3SrcHTML(el){
   el.innerHTML = `<div class="a3grab" aria-hidden="true"></div><button type="button" class="a3x" data-a3-unsrc aria-label="閉じる">×</button><div class="a3body">
     <h3 class="a3sh1">データの出典</h3><p class="a3warn"><b>航法には使えません。形は簡単にしています。</b></p>
-    <ul class="a3src"><li><small>滑走路の端</small><b>AIP JAPAN をもとに作成</b></li><li><small>空港の形・誘導路・海岸線</small><b>${A3 && A3.shape ? "© OpenStreetMap の協力者" : "滑走路とターミナルの位置から作った仮の形"}</b><span>${A3 && A3.shape ? "OpenStreetMap のデータを加工して作成（ODbL 1.0。2026年11月の時点）" : "形のファイルを読めなかったので、仮の形を出しています"}</span></li>
+    <ul class="a3src"><li><small>滑走路の端</small><b>AIP JAPAN をもとに作成</b></li><li><small>滑走路・進入灯・PAPI の灯り</small><b>AIP JAPAN（AD 2.14）の種類と長さをもとに作成</b><span>灯りの並びと間隔はおおよそです。夕方と夜だけ出します</span></li><li><small>空港の形・誘導路・海岸線</small><b>${A3 && A3.shape ? "© OpenStreetMap の協力者" : "滑走路とターミナルの位置から作った仮の形"}</b><span>${A3 && A3.shape ? "OpenStreetMap のデータを加工して作成（ODbL 1.0。2026年11月の時点）" : "形のファイルを読めなかったので、仮の形を出しています"}</span></li>
     ${A3 && A3.shape && A3.shape.city ? `<li><small>建物（空港と大田区・川崎の海沿い）</small><b>3D都市モデル（Project PLATEAU）</b><span>「3D都市モデル（Project PLATEAU）大田区（2025年度）・川崎市（2022年度）」（国土交通省）を加工して作成（公共データ利用規約 第1.0版）。外形と高さだけを使い、小さな建物は省いています。屋根と壁の色は用途からのおおよそ</span></li>` : ""}
     <li><small>管制塔</small><b>高さ 115.7m（国土交通省）</b><span>位置は OpenStreetMap</span></li>
     <li><small>機体の位置</small><b>${ADSB_A}（ODbL）</b><span>約1分遅らせて出しています</span></li><li><small>空</small><b>気象通報（METAR）</b><span>日の出・日の入りは端末で計算</span></li><li><small>機体の形</small><b>機種ごとのおおよその形と長さ</b><span>簡単な形です。白い機体に窓の帯だけで、会社の色やロゴは付けていません</span></li><li><small>雲・星</small><b>絵として描いたもの</b><span>雲の量は気象通報の空のようすから。実際の雲の位置ではありません</span></li></ul>
