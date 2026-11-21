@@ -167,7 +167,7 @@ async def main():
             check('「この機体から見る」でピルが「JL 318」:', pills[2] == 'JL 318:true', str(pills))
             await pg.screenshot(path=os.path.join(SHOTS, '06-follow-844.png'))
             await pg.click('[data-a3-view="tower"]'); await pg.wait_for_timeout(500)
-            check('管制塔の視点（約116m）:', await pg.evaluate("Math.round(A3.cam.position.y)") == 118)
+            check('管制塔の視点（管制室の高さ 約106m・塔は 115.7m）:', await pg.evaluate("Math.round(A3.cam.position.y)") == 106)
             await pg.screenshot(path=os.path.join(SHOTS, '05-tower-844.png'))
             # 5 機体のピルを先に押す
             await pg.evaluate("A3.sel = null; A3.view = 'all'; a3Pills(); a3Sheet()")
@@ -180,12 +180,12 @@ async def main():
             # 7 出典
             await pg.click('#a3Credit'); await pg.wait_for_timeout(300)
             src = await pg.inner_text('#a3Sheet')
-            check('出典のシート：航法には使えません・AIP JAPAN・adsb.lol（ODbL）・METAR:', '航法には使えません' in src and 'AIP JAPAN' in src and 'adsb.lol（ODbL）' in src and 'METAR' in src, src[:120])
+            check('出典のシート：航法には使えません・AIP JAPAN・adsb.lol（ODbL）・METAR・OpenStreetMap:', '航法には使えません' in src and 'AIP JAPAN' in src and 'adsb.lol（ODbL）' in src and 'METAR' in src and 'OpenStreetMap' in src, src[:120])
             await pg.screenshot(path=os.path.join(SHOTS, '09-sources-844.png'))
             # 667
             await pg.set_viewport_size({'width':390,'height':667}); await pg.evaluate("A3.src = false; A3.sel = null; A3.view = 'all'; a3Pills(); a3Sheet()"); await pg.wait_for_timeout(600)
             await pg.click('[data-a3-pick="a1"]'); await pg.wait_for_timeout(500)
-            fit = await pg.evaluate("(() => { const b = document.querySelector('[data-a3-follow]').getBoundingClientRect(); return b.bottom <= innerHeight || document.getElementById('a3Sheet').scrollHeight > document.getElementById('a3Sheet').clientHeight; })()")
+            fit = await pg.evaluate("(() => { const b = document.querySelector('[data-a3-follow]').getBoundingClientRect(); const y = document.querySelector('#a3Sheet .a3body'); return b.bottom <= innerHeight || (!!y && y.scrollHeight > y.clientHeight); })()")   # 11/21：送るのはシートの中の .a3body（シートそのものは切り抜くだけ）
             check('667：カードはシートの中で送れる（押す所が隠れたままにならない）:', fit)
             await pg.screenshot(path=os.path.join(SHOTS, '04-plane-card-667.png'))
             # 閉じる
