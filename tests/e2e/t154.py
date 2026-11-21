@@ -33,7 +33,7 @@ for i, l in enumerate(src, 1):
     if 'fillText' in l: continue                       # 共有の絵（canvas）の字は押せない
     if '会社の機体として買えます' in l: continue        # 経営の画面（経営担当の持ち場）
     if cur in OTHERS: continue
-    if cur in ('a3ShellHTML', 'a3Credit'): continue       # 空港の3D の角の出典はボタン（押すと「データの出典」が開き、そこにリンク。ボタンの中にリンクは置けない）
+    if cur in ('a3ShellHTML', 'a3Credit', 'A3_CREDIT'): continue       # 空港の3D の角の出典はボタン（押すと「データの出典」が開き、そこにリンク。ボタンの中にリンクは置けない）
     plain.append((i, cur, l.strip()[:80]))
 check('チェックインの持ち場に字だけの adsb.lol がない', not plain, plain)
 check('ADSB_A はリンクで、新しい窓・noopener', any(re.search(r'const ADSB_A = `<a class="adsbl" href="https://adsb\.lol" target="_blank" rel="noopener">adsb\.lol</a>`', l) for l in src))

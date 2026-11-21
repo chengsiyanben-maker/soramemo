@@ -147,9 +147,9 @@ async def main():
         errs_all += errs; await c.close()
         # ---- 8 空港の3D の全体の視点
         c, pg, errs = await page(b)
-        r = await pg.evaluate("""(() => { const pos = {}; const cam = { position:{ set(x, y, z){ pos.x = x; pos.y = y; pos.z = z; } }, lookAt(){} };
+        r = await pg.evaluate("""(() => { const pos = {}, at = {}; const cam = { position:{ set(x, y, z){ pos.x = x; pos.y = y; pos.z = z; } }, lookAt(x, y, z){ at.x = x; at.y = y; at.z = z; }, userData:{} };
           const keep = typeof A3 === 'undefined' ? undefined : A3; A3 = { THREE:{}, cam, yaw:0, view:'all' }; a3Camera([]); A3 = keep === undefined ? null : keep;
-          return { d: Math.hypot(pos.x, pos.y, pos.z + 1000), y: pos.y }; })()""")
+          return { d: Math.hypot(pos.x - at.x, pos.y - at.y, pos.z - at.z), y: pos.y }; })()""")
         check('8 全体の視点は約12km（前の約24.6km より寄せた）', 11500 < r['d'] < 13000 and r['y'] < 11000, r)
         errs_all += errs; await c.close()
         # ---- 9 空の道すじの ◀ ▶・日を選ぶ
