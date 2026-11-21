@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>3b 空港にいる間だけ案内板（夜の画面のとき）｜そらメモ 却下した案の見直し その2</title>
+<style>*{box-sizing:border-box}html,body{margin:0}
+:root{--gothic:"Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic UI","Noto Sans JP","Noto Sans CJK JP",system-ui,sans-serif;--num:ui-monospace,"SF Mono","Menlo","DejaVu Sans Mono",monospace;--bg:#EEF1F5;--card:#FFFFFF;--strong:#1F2937;--ink:#374151;--sub:#5F6878;--pill:rgba(17,24,39,.06);--hero:#0F1B2D;--jal:#C8102E;--ana:#1C4FA0;--gold:#856620;--shadow:0 1px 2px rgba(17,24,39,.04),0 10px 30px -8px rgba(17,24,39,.10),inset 0 0 0 1px rgba(17,24,39,.07)}
+body{background:var(--bg);color:var(--ink);font-family:var(--gothic);font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased}
+.phone{position:relative;max-width:420px;min-height:100vh;min-height:100svh;margin:0 auto;background:var(--bg);overflow:hidden}
+.pg{padding:16px 16px 120px}
+.back{display:inline-flex;align-items:center;min-height:44px;padding:0 16px 0 12px;border-radius:999px;background:var(--card);box-shadow:var(--shadow);font-weight:800;color:var(--strong);font-size:15px}
+h1{font-size:26px;font-weight:800;color:var(--strong);margin:14px 4px 2px;line-height:1.35}
+.lead{color:var(--sub);font-size:13px;margin:0 4px}
+.card{background:var(--card);border-radius:20px;box-shadow:var(--shadow);padding:16px}
+.card+.card{margin-top:12px}
+.lbl{font-size:13px;font-weight:700;color:var(--sub);margin:22px 4px 8px}
+.big{font-size:32px;font-weight:800;color:var(--strong);line-height:1.15;letter-spacing:-.01em}
+.u{font-size:13px;color:var(--sub);font-weight:600;margin-left:3px}
+.sub{font-size:13px;color:var(--sub)}
+.pill{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 18px;border-radius:999px;background:var(--card);box-shadow:var(--shadow);font-weight:700;color:var(--strong);font-size:15px;white-space:nowrap}
+.pill.dk{background:var(--strong);color:#fff;box-shadow:none}
+.tag{display:inline-flex;align-items:center;height:24px;padding:0 9px;border-radius:999px;font-size:13px;font-weight:700;color:var(--ink);background:var(--pill)}
+.tag.est{background:#FFF4C2;color:#5A4A12}
+.tag.me{background:var(--hero);color:#fff}
+.band{display:flex;gap:4px;padding:4px;background:var(--card);border-radius:999px;box-shadow:var(--shadow);margin:14px 0 4px}
+.band span{flex:1;min-height:44px;display:flex;align-items:center;justify-content:center;border-radius:999px;font-size:14px;font-weight:700;color:var(--sub)}
+.band span.on{background:var(--strong);color:#fff}
+.row{display:flex;align-items:center;gap:12px;min-height:56px}
+.row .t{flex:1;min-width:0}.row .t b{display:block;font-size:16px;color:var(--strong)}.row .t small{display:block;font-size:13px;color:var(--sub)}
+.foot{font-size:13px;color:var(--sub);margin:22px 4px 0}
+.ann{position:relative;z-index:90;max-width:392px;margin:16px auto 40px;font:13px/1.7 var(--gothic);background:#FFF8D6;color:#5A4A12;padding:12px 14px;border-radius:12px}.ann ul{margin:4px 0 0;padding-left:1.2em}
+nav.tabs{position:fixed;left:50%;transform:translateX(-50%);bottom:10px;width:calc(min(420px,100vw) - 20px);display:flex;padding:6px;background:rgba(255,255,255,.94);border-radius:999px;box-shadow:0 10px 30px -8px rgba(17,24,39,.22),0 2px 6px rgba(17,24,39,.06);z-index:30}
+nav.tabs span{flex:1;min-height:52px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#6B7280}
+nav.tabs span.on{color:var(--strong)}
+
+.board{border-radius:20px;overflow:hidden;background:#0A0E17;box-shadow:0 16px 36px -18px rgba(0,0,0,.6)}
+.board .hh{display:flex;justify-content:space-between;align-items:center;padding:12px 16px 8px;color:#A7B0BC;font-size:13px;font-weight:700}
+.board .hh b{color:#FFB547;font-size:15px}
+.br{display:grid;grid-template-columns:56px 64px 1fr 82px;align-items:center;gap:6px;min-height:46px;padding:0 14px;font-family:var(--num);color:#E8ECF1;font-size:15px}
+.br:nth-child(odd){background:rgba(255,255,255,.035)}
+.br .tm{color:#FFB547;font-weight:700}
+.br .ds{font-family:var(--gothic);font-weight:700}
+.br .st{font-family:var(--gothic);font-size:13px;color:#A7B0BC;text-align:right}
+.br .st.cg{color:#FFB547}
+.br.hd{min-height:30px;font-family:var(--gothic);font-size:13px;color:#A7B0BC;font-weight:700;background:transparent!important}
+.stub{display:flex;border-radius:20px;overflow:hidden;box-shadow:var(--shadow);background:var(--card)}
+.stub .l{flex:1;background:var(--hero);color:#fff;padding:12px 16px}
+.stub .l small{font-size:13px;color:#A7B0BC}
+.stub .l b{display:block;font-size:17px}
+.stub .r{width:110px;background:#E9C46A;color:#111827;display:flex;align-items:center;justify-content:center;text-align:center;font-weight:800;font-size:14px;line-height:1.4}
+
+body,.phone{background:#05080D;color:#D3DBE4}
+.lbl,.foot{color:#93A0B0}
+.stub{box-shadow:inset 0 0 0 1px #232E3B;background:#0D131B}
+.stub .l{background:#0D131B}.stub .l small{color:#93A0B0}
+.stub .r{background:#1D1810;color:#F0AE4E;box-shadow:inset 1px 0 0 #232E3B}
+.board{background:#0D131B;box-shadow:inset 0 0 0 1px #232E3B}
+.board .hh,.br .st,.br.hd{color:#93A0B0}
+.board .hh b,.br .tm,.br .st.cg{color:#F0AE4E}
+.br{color:#D3DBE4}
+.br .tm{text-shadow:0 0 7px rgba(240,174,78,.30)}
+.pill{background:linear-gradient(#18212C,#10171F);color:#D3DBE4;box-shadow:inset 0 0 0 1px #2C3846}
+nav.tabs{background:rgba(5,8,13,.96);box-shadow:inset 0 0 0 1px #232E3B}
+nav.tabs span{color:#93A0B0}nav.tabs span.on{color:#5EDB94}
+</style></head><body>
+<main class="phone"><div class="pg">
+<div class="stub"><div class="l"><small>いまいる空港</small><b style="color:#E6ECF2">東京国際空港（羽田）</b><small>範囲の中 ・ 印をもらいました</small></div><div class="r">印<br>もらった</div></div>
+<div class="lbl">近い空港の出発（空港にいる間だけ）</div>
+<div class="board"><div class="hh"><span><b>出発</b>　羽田 第2ターミナル</span><span>20:31</span></div><div class="br hd"><span>時刻</span><span>便名</span><span>行き先・搭乗口</span><span style="text-align:right">お知らせ</span></div><div class="br"><span class="tm">20:40</span><span>NH 251</span><span class="ds">鹿児島<span style="font-family:var(--num);font-weight:400;color:#A7B0BC;font-size:13px;margin-left:6px">14番</span></span><span class="st cg">搭乗中</span></div><div class="br"><span class="tm">20:45</span><span>JL 333</span><span class="ds">福岡<span style="font-family:var(--num);font-weight:400;color:#A7B0BC;font-size:13px;margin-left:6px">8番</span></span><span class="st "></span></div><div class="br"><span class="tm">20:55</span><span>NH 247</span><span class="ds">福岡<span style="font-family:var(--num);font-weight:400;color:#A7B0BC;font-size:13px;margin-left:6px">62番</span></span><span class="st cg">あなたの便</span></div><div class="br"><span class="tm">21:00</span><span>JL 337</span><span class="ds">福岡<span style="font-family:var(--num);font-weight:400;color:#A7B0BC;font-size:13px;margin-left:6px">11番</span></span><span class="st "></span></div><div class="br"><span class="tm">21:05</span><span>NH 993</span><span class="ds">那覇<span style="font-family:var(--num);font-weight:400;color:#A7B0BC;font-size:13px;margin-left:6px">58番</span></span><span class="st cg">遅れ 21:30</span></div><div class="br"><span class="tm">21:10</span><span>JL 519</span><span class="ds">札幌<span style="font-family:var(--num);font-weight:400;color:#A7B0BC;font-size:13px;margin-left:6px">15番</span></span><span class="st "></span></div></div>
+<div style="display:flex;gap:8px;margin-top:10px"><span class="pill" style="flex:1">到着も見る</span><span class="pill" style="flex:1">運用の案内板へ</span></div>
+<p class="foot">JAL・ANA の公式の運航情報（ODPT）から。範囲を出ると、ふつうの「これから乗る便」に戻ります。</p>
+</div><nav class="tabs"><span class="on">ホーム</span><span class="">図鑑</span><span class="">フライト</span><span class="">運用</span><span class="">修行</span></nav></main>
+<aside class="ann"><b>メモ（検討用・本番には出ません。却下を外したわけではありません）</b><ul><li>夜の画面とぶつからないか：夜は案内板の地を夜のカードと同じ色にし、琥珀（夜の光る色の1つ）だけを使う。緑は使わない（緑は計器の数字・選んでいるタブのまま）</li><li>光らせるのは時刻の数字だけ（夜の画面の決まりどおり）。行き先・便名は光らせない</li><li>昼（3a）でも夜でも「カード1枚・空港にいる間だけ」は同じ。夜の画面の案（PR #49 など）の色が決まったら合わせ直す</li></ul></aside>
+<script>if(window!==window.top){var a=document.querySelector('.ann');if(a)a.remove()}</script>
+</body></html>
