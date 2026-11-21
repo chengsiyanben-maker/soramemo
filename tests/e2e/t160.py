@@ -9,7 +9,7 @@ from playwright.async_api import async_playwright
 #   形：OpenStreetMap を加工した 3d/hnd.json（ODbL）を開いたときだけ読む。建物・誘導路・駐機場・芝・海岸線・管制塔。滑走路は HND_RWY（AIP）で標示つき
 #   機体：機種で形の種類（4発・大きな2発・細い胴・小さなジェット・プロペラ）。会社の色やロゴなし
 #   光：昼・夕・夜で空の色と灯り。重いときは質を自動で下げる（影→細かさ）
-#   大きさ：three.js と形のファイルを圧縮して 0.5MB まで。入口の「約0.2MB」と合う
+#   大きさ：three.js と形のファイルを圧縮して 1.5MB まで（11/21 夜 checkin/a3-real で街の建物を足して約0.6MB）。入口の字と合う
 #   偽のサーバーを使う。本物の Supabase には接続しない
 HERE = os.path.dirname(os.path.abspath(__file__)); WEB = os.path.abspath(os.path.join(HERE, '..', '..', 'web'))
 WORK = os.path.join(os.environ.get('SORAMEMO_TEST_WORK', '/tmp/soramemo-e2e'), 'a3srv')
@@ -30,9 +30,9 @@ check('形のファイル：ターミナル（第1・第2・第3）がある', s
 tw = S['tower']; check('管制塔の位置は第1と第2のターミナルの間（中心から東に約260m）', 150 < tw[0] < 400 and 0 < tw[1] < 350, tw)
 if os.path.exists(THREE):
     tot = len(gzip.compress(raw, 9)) + len(gzip.compress(open(THREE, 'rb').read(), 9))
-    check('読み込む量は圧縮して 0.5MB まで・入口の「約0.2MB」と合う（0.15〜0.25MB）', 150_000 <= tot <= 250_000, tot)
+    check('読み込む量は圧縮して 1.5MB まで・入口の「約0.6MB」と合う（0.55〜0.65MB）', 550_000 <= tot <= 650_000, tot)
 SRC = open(os.path.join(HERE, '..', '..', 'src', 'index.html'), encoding='utf-8').read()
-check('入口の字は「約0.2MB」のまま（測った量に合う）', 'const A3_SIZE = "約0.2MB";' in SRC)
+check('入口の字は「約0.6MB」（測った量に合う）', 'const A3_SIZE = "約0.6MB";' in SRC)
 check('形のファイルは開いたときだけ読む（openAp3d の中）', 'const shape = a3Shape();' in SRC and SRC.index('const shape = a3Shape();') > SRC.index('async function openAp3d'))
 
 # ---- 画面 ----
@@ -91,7 +91,7 @@ async def main():
     async with async_playwright() as p:
         b = await p.chromium.launch(args=['--use-gl=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'])
         c, pg, errs = await open3d(b, 'day')
-        r = await pg.evaluate("({ shape: !!(A3 && A3.shape), q: A3.q, shadow: A3.r.shadowMap.enabled, rw: A3.scene.children.filter(o => o.isMesh && o.material && o.material.map).length, tower: A3.towerXZ })")
+        r = await pg.evaluate("({ shape: !!(A3 && A3.shape), q: A3.q, shadow: A3.r.shadowMap.enabled, rw: A3.scene.children.filter(o => o.isMesh && o.geometry.type === 'PlaneGeometry' && o.name !== 'clouds' && o.material && o.material.map).length, tower: A3.towerXZ })")
         check('形のファイルを読んで描く（滑走路4本は標示の絵つき・影あり・管制塔は形のファイルの位置）', r['shape'] and r['rw'] == 4 and r['shadow'] and r['q'] == 2 and r['tower'] == S['tower'], r)
         st = await pg.evaluate("(() => { const s = getComputedStyle(document.getElementById('a3Sheet')), y = document.querySelector('#a3Sheet .a3body'); return { ov: s.overflowY, body: !!y && getComputedStyle(y).overflowY }; })()")
         check('不具合1：シートは切り抜くだけ（overflow hidden）で、中の .a3body が送れる', st['ov'] == 'hidden' and st['body'] == 'auto', st)
@@ -101,8 +101,8 @@ async def main():
         await pg.evaluate("document.getElementById('dAp3d').style.background = ''")
         ov = await pg.evaluate("(() => { const c = document.getElementById('a3Credit').getBoundingClientRect(); return [...document.querySelectorAll('.a3tag')].filter(t => { const r = t.getBoundingClientRect(); return r.left < c.right && r.right > c.left && r.top < c.bottom && r.bottom > c.top; }).map(t => t.innerText); })()")
         check('不具合2：名札は出典の札に重ならない', ov == [], ov)
-        cr = await pg.inner_text('#a3Credit')
-        check('角の出典に OpenStreetMap', 'OpenStreetMap' in cr, cr)
+        cr = await pg.evaluate('A3_CREDIT()')
+        check('角の出典に OpenStreetMap と PLATEAU', 'OpenStreetMap' in cr and 'PLATEAU' in cr, cr)
         await pg.screenshot(path=os.path.join(SHOTS, 't160-all-day.png'))
         await pg.click('[data-a3-view="tower"]'); await pg.wait_for_timeout(900)
         r = await pg.evaluate("(() => { const d = new A3.THREE.Vector3(); A3.cam.getWorldDirection(d); return { y: Math.round(A3.cam.position.y), pitch: Math.asin(d.y) * 180 / Math.PI }; })()")
@@ -119,12 +119,13 @@ async def main():
         k = await pg.evaluate("['B744','A388','B789','B77W','A359','A320','B738','E190','CRJ7','DH8D','AT76'].map(a3Kind).join('')")
         check('機体の形の種類（4発・大きな2発・細い胴・小さなジェット・プロペラ）', k == 'qqwwwnnrrpp', k)
         m = await pg.evaluate("(() => { const o = A3.objs.get('a1'); const cols = new Set(); o.g.traverse(x => { if(x.material && x.material.color) cols.add(x.material.color.getHexString()); }); return [...cols]; })()")
-        check('機体は白と灰色だけ（会社の色やロゴなし。特別塗装機の尾翼は昼だけ金）', all(x in ('f4f6f8', '6b7280', 'c9a23a') for x in m), m)
+        check('機体は白と灰色だけ（会社の色やロゴなし。窓の帯は濃いグレー。特別塗装機の尾翼は昼だけ金）', all(x in ('f4f6f8', '6b7280', '374151', 'c9a23a') for x in m), m)
         await pg.evaluate("a3Quality(1)"); r1 = await pg.evaluate("[A3.r.shadowMap.enabled, A3.r.getPixelRatio()]")
         await pg.evaluate("a3Quality(0)"); r0 = await pg.evaluate("[A3.r.shadowMap.enabled, A3.r.getPixelRatio()]")
         check('重いときは質を下げる：影をやめる→細かさを下げる', r1[0] is False and r0 == [False, 1], (r1, r0))
         await pg.click('#a3Credit'); await pg.wait_for_timeout(300); src = await pg.inner_text('#a3Sheet')
         check('出典のシート：OpenStreetMap（ODbL 1.0）・管制塔の高さは国土交通省・航法には使えません', 'OpenStreetMap' in src and 'ODbL 1.0' in src and '国土交通省' in src and '航法には使えません' in src, src[:160])
+        check('出典のシート：PLATEAU（大田区・川崎市・国土交通省を加工して作成・公共データ利用規約）', 'Project PLATEAU' in src and '大田区（2025年度）' in src and '川崎市（2022年度）' in src and '加工して作成' in src and '公共データ利用規約' in src, src[160:420])
         allerr += errs; await c.close()
         # 夕方と夜：空の色・灯り
         for sky in ('dusk', 'night'):
