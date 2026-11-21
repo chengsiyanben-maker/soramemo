@@ -84,7 +84,7 @@ GREEN = "document.getElementById('dAp3d').style.background = '#00ff00'"
 async def green_px(pg, y0, y1):
     from PIL import Image; import io
     im = Image.open(io.BytesIO(await pg.screenshot(clip={'x': 0, 'y': y0, 'width': 390, 'height': y1 - y0}))).convert('RGB')
-    return sum(1 for p in im.getdata() if p[1] > 200 and p[0] < 60 and p[2] < 60)
+    d = im.tobytes(); return sum(1 for i in range(0, len(d), 3) if d[i + 1] > 200 and d[i] < 60 and d[i + 2] < 60)
 async def main():
     if not os.path.exists(THREE): print('three.js がないので画面の確かめは飛ばす（t142 を先に流すと置かれる）'); return
     allerr = []
