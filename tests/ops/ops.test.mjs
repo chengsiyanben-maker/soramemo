@@ -84,7 +84,7 @@ for (const def of Object.values(OPS_AIRPORTS)) {
   ok(errs.length === 0, `${def.iata}：画面のエラーなし`, errs.join(" / "));
   if (def.iata === "HND") {
     // 11/16 運用タブを空港と機体に分けた（PR #112・#113、画面案 design/ops-split 2版の案2）：特別塗装機のかたまりは「滑走路」から外し、
-    // 空港の側では「撮る人」の見方にだけ「羽田に来る特別塗装機」を出す。滑走路では特別塗装機を読まない（t130）ので、地図の名札に★は付かない。
+    // 空港の側では「撮る人」の見方にだけ「羽田に着く・羽田を出る特別塗装機」を出す。滑走路では特別塗装機を読まない（t130）ので、地図の名札に★は付かない。
     // 名札そのもの（便名と高度）は今までどおり出る。★を滑走路の地図に戻すかは本人の答え待ち（docs/pm/report-fix-ops-test.md）
     const sp0 = await p.locator("#opsSpecial").isVisible().catch(() => false);
     ok(!sp0, "羽田 滑走路：特別塗装機の欄は出さない（撮る人の見方と機体の側へ移した）");
@@ -93,7 +93,7 @@ for (const def of Object.values(OPS_AIRPORTS)) {
     await p.locator("#opsHubBack").click(); await p.waitForTimeout(600);
     await p.locator('[data-ohub="photo"]').click(); await p.waitForTimeout(2500);
     const sp = await p.locator("#opsSpecial").innerText().catch(() => "");
-    ok(sp.includes("羽田に来る特別塗装機") && sp.includes("ポケモンジェット 赤") && sp.includes("着陸に向かっている"), "羽田 撮る人：特別塗装機の欄が出る（羽田に来る特別塗装機）", sp.slice(0, 120));
+    ok(sp.includes("羽田に着く・羽田を出る特別塗装機") && sp.includes("ポケモンジェット 赤") && sp.includes("着陸に向かっている"), "羽田 撮る人：特別塗装機の欄が出る（羽田に着く・羽田を出る特別塗装機）", sp.slice(0, 120));
     ok(errs.length === 0, "羽田 撮る人：画面のエラーなし", errs.join(" / "));
   }
   if (def.iata === "NRT") {
