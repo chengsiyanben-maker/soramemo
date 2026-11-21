@@ -1,6 +1,7 @@
 # チェックイン担当の帳面
 
 ## いま持っている仕事
+- 11/21 手動の回（PM が同じ「運用タブにも3D の入口を」を指示）：直前の回で PR #173（checkin/ops-3d・d10c6dd3）として済み。main は 3665d4ca のままで作り直しは不要だった。checkin/a3-lights（別の回）には触っていない
 - 11/21 夜の定時の回（PM 21時40分「運用タブにも3D の入口を」）：ブランチ checkin/ops-3d（main 3665d4ca＝#171 から）・下書き **PR #173**（d10c6dd3）・報告 docs/pm/report-ops-3d.md・写真 docs/pm/shots-ops-3d/。仕上がったので PM の自動の反映を待つ
   - 運用の一覧に「3D」のカード（羽田だけ・地図のすぐ後・見出し「3D」＋縮図の線の絵＋「約0.6MB」）。押すと openAp3d（専用ページなし）。鉛筆のシートと表示の編集の1枚に「「3D」のカード」の ON／OFF（LAYOUT.opsA3＝0。数には入れない・全部乗せで戻る）
   - 変えた関数：新 opsA3On・opsA3Set・OH_A3_ROW・ohA3On・OH_A3_ART・CSS .ohc.a3／変えた OH_CARDS・ohCards・ohCardHTML・opsHubOpen・loSecDef（ops）・vsHTML・data-lo-a3・data-vs-a3 の処理
