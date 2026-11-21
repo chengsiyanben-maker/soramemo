@@ -45,7 +45,12 @@
 - 見方の帯（#opsViews・#opsPViews）は一覧の形では出ない。前の形で試すときは localStorage の soramemo.ops.hub を "0" にする。
 - 自分の持ち場で画面を足すときは、一覧のカードと専用ページの形に合わせる（くわしくは docs/pm/report-ops-hub-app.md）。
 
-## PM から積んだ次の仕事（11/21 9時15分、改善担当の見回りの指摘）※satsuei/sweep-1121 で （report-sweep-1121.md・kaizen/sweep-1121 の指摘。PM のおすすめどおりに直す。仕上がったら PM が自動で反映）
-- 5 特別塗装機のページで「見つかっていません」の下に3時間以内の予定が出る：予定があるときは「いまは飛んでいません。3時間以内の予定」の形に
-- 10 撮る人の見出し「深夜・北風運用　日の入り後」が5時41分に出る：日の出・日の入りと深夜の区切りを直す
-- 9 撮る人の所の 44px 未満
+## 済み（11/21 9時15分の PM の指示・改善担当の見回りの 5・10・9）
+- 11/21 の定時の回：ブランチ satsuei/sweep-1121（main 08e4b84 から）・下書き **PR #162**（220bba5・見張りを付けた）・報告 docs/pm/report-sweep-1121-satsuei.md・写真 docs/pm/shots-sweep-1121-satsuei/
+  - 5 特別塗装機の欄：見出し「羽田に着く・羽田を出る特別塗装機」。羽田を出る予定（SP_PLANS の dep・出発前）と離陸したところの機体も入れる。予定だけなら「いまは飛んでいません。3時間以内の予定」、何もないときだけ「見つかっていません」。「いま飛んでいる特別塗装機」は1〜3機なら開く
+  - 10 夜の言葉：0時〜日の出は「日の出前」（撮る人の上の1行は「日の出前（日の出 06:20ごろ）」）、日の入り〜24時は「日の入り後」。ホームの撮影カード・撮影条件・撮影地の一覧・機体のくわしくもそろえた
+  - 9 撮影地の印：見た目 12px のまま押せる範囲 44×44（::after）。9 のほかの所はチェックイン担当の持ち場なので触っていない
+  - 変えた関数：spInboundHTML・specialHTML・renderPhoto・spHomeHTML・spCondHTML・renderSpots・spDetailHTML（足した：spNightWord・lightWord・spNightLine）
+  - テスト：t156（新）・e2e 全体 127／127・tests/ops 成功。t72・t130・tests/ops の見出しの文を新しいものに合わせた
+  - 仕上がったので PM の自動の反映を待つ。本人に決めてほしいことはなし
+  - テストの手順メモ：組み立てには tools/ で npm ci（terser）と pip の brotli が要る。tests/ops は入れ直した playwright だとブラウザがないので、前から入っている playwright（npm root -g）を node_modules にリンクして流す。e2e 全体はほかのテストが docs/pm の写真を上書きするので、コミットの前に git checkout -- docs/pm で戻す
