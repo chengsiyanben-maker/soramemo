@@ -133,6 +133,12 @@ const PREFIX: Record<string, string[]> = {
   IT: ["TTW"], JX: ["SJX"], "5J": ["CEB"], VJ: ["VJC"], TR: ["TGW"], D7: ["XAX"], JQ: ["JST"], NZ: ["ANZ"], KL: ["KLM"], OS: ["AUA"],
   SK: ["SAS"], EY: ["ETD"], AI: ["AIC"], ET: ["ETH"], "8L": ["LKE"], MF: ["CXA"], HU: ["CHH"], SC: ["CDG"], FM: ["CSH"], GS: ["GCR"],
   OM: ["MGL"], UL: ["ALK"], WY: ["OMA"], SV: ["SVA"], "6E": ["IGO"], PG: ["BKP"], QH: ["BAV"],
+  // 11/21 行き先を便名で決めるために足した会社（日本の小さい会社・貨物と、日本に来るほかの会社）。便名の記号と呼び出し符号の記号は公開の一覧どおり
+  BV: ["TOK"], MZ: ["AHX"], KZ: ["NCA"],
+  RF: ["EOK"], YP: ["APZ"], HB: ["HGB"], NX: ["AMU"], "3U": ["CSC"], ZH: ["CSZ"], GJ: ["CDC"], Z2: ["APG"], XJ: ["TAX"], SL: ["TLM"],
+  AE: ["MDA"], AS: ["ASA"], AM: ["AMX"], VA: ["VOZ"], TN: ["THT"], SB: ["ACI"], PX: ["ANG"], HY: ["UZB"], BI: ["RBA"], IB: ["IBE"],
+  AZ: ["ITY"], LO: ["LOT"], WS: ["WJA"], FX: ["FDX"], "5X": ["UPS"], CV: ["CLX"], "5Y": ["GTI"], PO: ["PAC"], K4: ["CKS"], CK: ["CKK"],
+  LD: ["AHK"], O3: ["CSS"],
 };
 export function callsignsFor(flight: string): string[] {
   const m = /^([A-Z0-9]{2})(\d{1,4})[A-Z]?$/.exec(flight.trim().toUpperCase());
@@ -141,9 +147,12 @@ export function callsignsFor(flight: string): string[] {
   return PREFIX[m[1]].map((p) => p + n);
 }
 // 日本の航空会社（便名の記号）。海外の航空会社の便を見分けるのに使う
-export const JAPAN_CARRIERS = new Set(["JL", "NH", "BC", "HD", "6J", "7G", "NU", "MM", "GK", "IJ", "JH", "OC", "FW", "3X"]);
-const ICAO_TO_IATA = new Map<string, string>();
-for (const [iata, icaos] of Object.entries(PREFIX)) for (const c of icaos) if (!ICAO_TO_IATA.has(c) || JAPAN_CARRIERS.has(iata)) ICAO_TO_IATA.set(c, iata);
+export const JAPAN_CARRIERS = new Set(["JL", "NH", "BC", "HD", "6J", "7G", "NU", "MM", "GK", "IJ", "JH", "OC", "FW", "3X", "BV", "MZ", "KZ"]);
+const ICAO_TO_IATA = new Map<string, string>(), ICAO_TO_ALL = new Map<string, string[]>();
+for (const [iata, icaos] of Object.entries(PREFIX)) for (const c of icaos) {
+  if (!ICAO_TO_IATA.has(c) || JAPAN_CARRIERS.has(iata)) ICAO_TO_IATA.set(c, iata);
+  ICAO_TO_ALL.set(c, [...(ICAO_TO_ALL.get(c) ?? []), iata]);
+}
 // 呼び出し符号 → 海外の航空会社の便名（KAL703 → KE703）。日本の航空会社と、表にない会社は null
 export function foreignFlightOf(cs: string): { flight: string; airline: string } | null {
   const m = /^([A-Z]{3})0*(\d{1,4})([A-Z]?)$/.exec(String(cs ?? "").trim().toUpperCase());
@@ -157,6 +166,14 @@ export function flightOfCallsign(cs: string): string | null {
   if (!m) return null;
   const a = ICAO_TO_IATA.get(m[1]);
   return a ? a + m[2] : null;
+}
+// 呼び出し符号 → 便名の候補（いちばん目は flightOfCallsign と同じ）。グループの別会社が運航する便は、時刻表に親の会社の便名で
+// 載ることがあるので、その記号でも引けるように並べる（JAC3711 → 3X3711・JL3711、JTA603 → NU603・JL603）
+export function flightsOfCallsign(cs: string): string[] {
+  const m = /^([A-Z]{3})0*(\d{1,4})[A-Z]?$/.exec(String(cs ?? "").trim().toUpperCase());
+  if (!m) return [];
+  const first = ICAO_TO_IATA.get(m[1]); if (!first) return [];
+  return [...new Set([first, ...(ICAO_TO_ALL.get(m[1]) ?? [])])].map((a) => a + m[2]);
 }
 // 呼び出し符号の形をそろえる（JAL0509 → JAL509）
 export function normCallsign(cs: string): string {

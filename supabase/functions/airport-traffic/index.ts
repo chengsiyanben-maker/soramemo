@@ -16,7 +16,8 @@ import { LIVERIES, type Livery, liveryMap } from "../_shared/liveries.ts";
 import { type Dest, inboundEtaMin, inboundMessage, mergeLiveries, pickDest, type Seen, wantsInbound, wantsLiveryPush } from "../_shared/livery_extra.ts";
 import { parseRoutes } from "../_shared/foreign_now.ts";
 import { notifyRegFly as notifyRegFlyWith, wantsRegFly } from "../_shared/livery_push.ts";
-import { flightOfCallsign, normCallsign } from "../_shared/flight_watch.ts";
+import { normCallsign } from "../_shared/flight_watch.ts";
+import { applyRoutes, knownOf, lookupRoutes, type RouteSource } from "../_shared/flight_dest.ts";
 import { depEtaMin, dueNow, etaMin, jstDate, opsChanged, spotDepMessage, spotDepReason, spotMessage, spotReason, type SpotDep, type SpotPlane, type SpotSub } from "../_shared/spot_push.ts";
 import webpush from "npm:web-push@3.6.7";
 import { readShared, writeShared } from "../_shared/edge_cache.ts";
@@ -60,6 +61,22 @@ const EXTRA_APTS: Apt[] = [
   { iata: "HSG", at: [33.1497, 130.3022], rws: runwaysFor("HSG") }, { iata: "KKJ", at: [33.8459, 131.0349], rws: runwaysFor("KKJ") },
   { iata: "IWK", at: [34.1440, 132.2356], rws: runwaysFor("IWK") },
 ];
+// 便名の行き先を引く口（_shared/flight_dest.ts）。時刻表は便名と出発の定刻の索引（flight_schedule_flight_std）で引き、いつもの時刻は livery_inbound_usual（主キーで引く）。
+// どちらも1.5秒で打ち切る（見る人を待たせない。打ち切ったら形の判定だけ）
+const ROUTES: RouteSource = {
+  schedule: async (flights, from, to) => {
+    if (!flights.length) return [];
+    const { data, error } = await admin.from("flight_schedule").select("flight, dep, arr, std, sta").in("flight", flights.slice(0, 300))
+      .gte("std", from).lte("std", to).limit(1000).abortSignal(AbortSignal.timeout(1500));
+    if (error) throw new Error(error.message);
+    return data ?? [];
+  },
+  usual: async (callsigns) => {
+    const { data, error } = await admin.rpc("livery_inbound_usual", { p_callsigns: callsigns }).abortSignal(AbortSignal.timeout(1500));
+    if (error) throw new Error(error.message);
+    return (data ?? []) as { callsign: string; iata: string; mins: number }[];
+  },
+};
 const APT_OF = (iata: string): Apt => ({ iata, at: AIRPORTS[iata].at, rws: runwaysFor(iata) });
 const OTHERS_OF = (iata: string): Apt[] => [...Object.keys(AIRPORTS).filter((k) => k !== iata).map(APT_OF), ...EXTRA_APTS];
 
@@ -184,7 +201,11 @@ async function build(iata: string, view: boolean, mark: (k: string) => void): Pr
   if (!live) mark("adsb");
   // まとめて取った円から、この空港の半径の中だけを使う
   // 着陸・離陸の見分けは、滑走路の向き・最終進入の範囲・高さで絞る（ほかの空港へ降りる機体を「着陸」にしない。11/21）
-  const planes = refinePhases(planesFromAdsb(j?.ac, a.at, 14000, NEARBY.filter((o) => o !== a.at)).filter((p) => p.dist_km <= a.nm * 1.852), APT_OF(iata), OTHERS_OF(iata));
+  // 便名の行き先が分かる機体は、それで決める（形の判定より先。11/21 本人「便の名前から行き先を判別して」）。問い合わせは着陸・離陸の機体の分を1回に束ねる
+  const raw = planesFromAdsb(j?.ac, a.at, 14000, NEARBY.filter((o) => o !== a.at)).filter((p) => p.dist_km <= a.nm * 1.852);
+  const routes = await lookupRoutes(ROUTES, raw.filter((p) => p.phase !== "other").map((p) => p.callsign));
+  if (view) mark("routes");
+  const planes = applyRoutes(raw, refinePhases(raw, APT_OF(iata), OTHERS_OF(iata)), iata, runwaysFor(iata), routes);
   const tr = await syncTrails(iata, planes, !view || !live);   // 記録が止まっていて adsb.lol に聞いたときは、今までどおり見る人の呼び出しでも線を書く
   mark("trails");
   // 線は画面が使う着陸・離陸の機体だけに付ける（ほかは空の配列。形は同じ）。11/21 見回り 7
@@ -306,21 +327,13 @@ async function nearAirports(bodies: Map<string, string>, L: Map<string, unknown>
     c.cs ??= p.callsign ?? null;
     cands.set(p.reg, c);
   }
-  // 便名の行き先・出発地（時刻表 flight_schedule。いま飛んでいそうな便だけ。候補が2つ以上か、遠くて決めにくい機体だけ引く）
-  const need = [...cands.values()].filter((c) => c.cs && (c.arr.length + c.dep.length > 1 || [...c.arr, ...c.dep].some((x) => !x.aligned)));
-  const fl = [...new Set(need.map((c) => flightOfCallsign(c.cs!)).filter((f): f is string => !!f))];
-  const route = new Map<string, { dep: string; arr: string }>();
-  if (fl.length) {
-    const now = Date.now();
-    const { data } = await admin.from("flight_schedule").select("flight, dep, arr, std").in("flight", fl)
-      .gte("std", new Date(now - 6 * 3600_000).toISOString()).lte("std", new Date(now + 3600_000).toISOString()).limit(200);
-    // 同じ便名が1日に2回あるときは、出発の予定がいまにいちばん近い便
-    for (const r of (data ?? []).sort((a, b) => Math.abs(Date.parse(b.std) - now) - Math.abs(Date.parse(a.std) - now))) route.set(r.flight, { dep: r.dep, arr: r.arr });
-  }
+  // 便名の行き先・出発地（_shared/flight_dest.ts。時刻表→いつもの時刻）。便名が分かる機体はいつも先に使う（11/21 本人の決め。前は決めにくい機体だけ引いていた）。
+  // 運用タブの答えを作るときに引いた分は入れ物の記憶にあるので、ここで新しく問い合わせることはほとんどない
+  const routes = await lookupRoutes(ROUTES, [...cands.values()].map((c) => c.cs));
   const near = new Map<string, { iata: string; phase: string }>();
   for (const [reg, c] of cands) {
-    const f = c.cs ? route.get(flightOfCallsign(c.cs) ?? "") : undefined;
-    const arr = pickAirport(c.arr, f?.arr), dep = arr ? null : pickAirport(c.dep, f?.dep);
+    const f = knownOf(routes, c.cs);
+    const arr = pickAirport(c.arr, f.arr), dep = arr ? null : pickAirport(c.dep, f.dep);
     if (arr) near.set(reg, { iata: arr, phase: "arr" });
     else if (dep) near.set(reg, { iata: dep, phase: "dep" });
   }
@@ -364,7 +377,7 @@ async function notifyLivery(v: any) {
   }
 }
 
-// 海外の塗装機の早めの知らせ（案2-A）。行き先は、①ふだん着く空港（foreign_usual、外への問い合わせなし）②なければ経路のデータ（adsb.im の routeset、1回にまとめて1つ）。
+// 海外の塗装機の早めの知らせ（案2-A）。行き先は、①時刻表の便の到着の空港（flight_dest.ts）②ふだん着く空港（foreign_usual、外への問い合わせなし）③なければ経路のデータ（adsb.im の routeset、1回にまとめて1つ）。
 // 同じ便（機体・便名）は12時間に1回だけ調べる（行き先が分からなかったときは15分後にもう一度）。知らせたら livery_notified の（機体・空港）にも入れるので、
 // 着陸の数分前の知らせ（notifyLivery、6時間に1回）とは二重にならない
 const ROUTESET = "https://adsb.im/api/0/routeset";
@@ -381,7 +394,11 @@ async function notifyInbound(list: Seen[]) {
   if (!todo.length) return 0;
   const airports = await japanAirports();
   const cands = new Map<string, Dest[]>();
-  const { data: usual } = await admin.rpc("livery_inbound_usual", { p_callsigns: todo.map(cs) });
+  // ①時刻表に載っている便（日本の会社の国際線など）は、その到着の空港だけを候補にする（_shared/flight_dest.ts。11/21 便名で行き先を決める）
+  const sched = await lookupRoutes(ROUTES, todo.map(cs), now, false);
+  for (const [k, r] of sched) cands.set(k, [{ iata: r.arr }]);
+  const rest = todo.filter((v) => !cands.has(cs(v)));
+  const { data: usual } = rest.length ? await admin.rpc("livery_inbound_usual", { p_callsigns: rest.map(cs) }) : { data: [] };
   for (const u of (usual ?? []) as { callsign: string; iata: string; mins: number }[]) cands.set(u.callsign, [...(cands.get(u.callsign) ?? []), { iata: u.iata, mins: u.mins }]);
   const ask = todo.filter((v) => !cands.has(cs(v)));
   if (ask.length) {
