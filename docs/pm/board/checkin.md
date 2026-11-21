@@ -1,6 +1,16 @@
 # チェックイン担当の帳面
 
 ## いま持っている仕事
+- 11/21 昼の定時の回（PM 11/21 9時15分「改善担当の見回りの指摘」）：ブランチ checkin/sweep-1121（main 08e4b84 から）・下書き **PR #161**（925a8fe）・報告 docs/pm/report-checkin-sweep-1121.md・写真 docs/pm/shots-sweep-1121/。PR #161 の動きはこの回の会話で見張りを付けた
+  - 1 運用「遅れ」の専用ページの頭に「今日の遅れ・欠航」の1枚（#opsLate。カードと同じ数＝案内板の hours の今日の遅れ＋欠航・時間ごとの札・0便は「いま遅れ・欠航の便はありません」・未ログインは「ログインすると見られます」の1行）
+  - 3 ホームの「マイページ」を1行（nowrap・絵 18px・切り替えのピルの余白 10px）／4 地図カードは位置が届くまで「—」（TRAFFIC_GOT）・地図の凡例の数は「この範囲に ○機」だけ／7 地図カードの前の数を10分まで「約○分前」（localStorage soramemo.ops.mapn・数と時刻だけ）
+  - 8 3D の全体の視点を約12km（R 10000・高さ 7000・見る点は1km 北）＋景色の外の空の機体は端に矢印の札（.a3tag.edge・3機まで・全体の視点だけ）。t142 の名札の確かめを合わせた
+  - 9 #opsMap の ＋− 44・.artnav ◀ ▶ と .artdate 高さ44・出典の「くわしく」を上下に広げた（マイページ・終了・見方のピル・案内板のピルは前から ::after で 44 あった）
+  - 5（土台の側）特別塗装機のカードから開いたら details.spnow を開く（renderOpsPside）。撮る人の PR #162 も spnow のまま1〜3機なら開く形で重ねても動く
+  - PR #162（撮る人）・yosoku/sweep-1121 と重ねると src は自動でまとまり、ぶつかるのは web/index.html・web/sw.js だけ（あとから入る方で組み立て直す）
+  - 変えた関数：opsLateHTML・renderOpsLate・ohMapKeep・ohMapPrev（新）、renderOpsAlerts・renderBoard・opsHubApply・ohCardHTML・loadTraffic・setOpsAirport・trafficNoteDraw・renderOpsPside・a3Camera・a3Labels
+  - テスト：t156（新・26項目）・t142・tests/ops 成功・全体の e2e 127／127（401b76d）
+- 11/21 昼：PR #157（空の道すじの上限）は #153 と一緒に PR #158（pm/release-1121c）で main に入った（08e4b84）。本番の反映（Actions）の成否はまだ見ていない
 - 11/21 6時17分（日本時間）：PR #157（空の道すじの上限）が main に入った。#153（移行190）と一緒に入ったか・本番の反映（Actions）が成功したかは次の回で確かめる。直しは main から新しいブランチで
 - 11/21 手動の回（PM が同じ「空の道すじの上限に合わせる」を指示）：前の回で PR #157 として済み。この回は main（#156 まで）と data/adsblol-key2（5dce3ac・t122 の直し）を取り込み直して push（d8a9a18）。src/・web/ の変化はなし（関数は変えていない）。t155・t55 成功
 - 11/21 4時台（日本時間）の定時の回（PM 11/21 4時「空の道すじの上限に合わせる」）：ブランチ checkin/track-quota（main 17d48db ＋ data/adsblol-key2 を取り込み）・下書き **PR #157**（af801d6）・報告 docs/pm/report-track-quota.md・写真 docs/pm/shots-track-quota/
@@ -382,7 +392,9 @@
 - 確認コードは6けた。メールは Gmail、Supabase の送信上限は1時間100通
 
 ## 次にやること
-- PR #157（空の道すじの上限）：本人の OK のあと、データ担当の #153（移行190）と**同時に**入れる（移行190だけ先だとログインした人も8日より前が見えない）。#153 に直しが来たら取り込み直す。入る前に t155・t55・t68・t130 と tests/ops を流す。本人の答え（未ログインの端の1行を出すか）で直す
+- PR #161（見回りの直し）：PM の自動の反映を待つ。入る前に t159・t142・t148・t155 と tests/ops を流す。本人の答え（3D の寄せ方・遅れの数の意味・前の数を覚えるか）で直す。撮る人の PR #162 が先に入ったら main を取り込み web/ を組み立て直す
+- PR #157 は main に入った（#158）。反映の Actions が成功したかを次の回で見る
+- tests/ops は手元の node_modules の playwright だと動かない（ブラウザの版違い）。tests/ops/node_modules を作らず、全体に入っている playwright へのリンクで流す
 - 出典（PR #150）は本番に出た。運用予想・撮る人用が ADSB_A に替えたら t154 の OTHERS から外す
 - テストの t48 には pdf417gen・segno（pip）も要る
 - テストの t48 には zxing（@zxing/library@0.21.3）が要る。手元では作業用フォルダに npm で入れて ZXING_UMD で場所を渡す
@@ -460,6 +472,8 @@
 - tests/ops は手元では npm の playwright にブラウザがないので、全体に入っている playwright をつないで流した（すべて成功）
 
 ## ほかの担当への依頼
+- 撮る人（11/21・PR #161）：特別塗装機のカードから開いたページで details.spnow を開くようにした。欄の作りを変えるなら spnow の名前を残すか知らせてほしい
+- 運用予想（11/21）：見回りの6（深夜の「風から推定」の札）は運用予想の分。データ担当：見回りの2（odpt_feed_at）と7の通信の側
 - データ担当（11/21・PR #157）：#153 の依頼どおり作った。アプリは airport_tracks の返り値が配列でなく {error:'login_required'|'rate_limited', retry_after_min} のときに一文を出し、cold-tracks は 401／429（Retry-After）を見る。返す形を変えるなら data.md に書いてほしい。#157 と #153 は同時に入れてほしい
 - 運用予想（11/21・PR #150、PM から伝えてほしい）：adsb.lol の出典は共通の部品 `${ADSB_A}`（押せるリンク、見える字は「adsb.lol」）にそろえた。specialHTML・spbListHTML・spbDetailHTML・planeHTML・PRED_NOTE の字だけの「adsb.lol」を `${ADSB_A}` に替えてほしい（文字は増やさない。PRED_NOTE はふつうの "…" の文字列なので `…` にする）。とくに機体を選んだ画面は上の i が隠れるので、planeHTML の1行が唯一の出典。替えたら tests/e2e/t153.py の OTHERS から外す
 - 撮る人用（11/21・PR #150、PM から伝えてほしい）：同じく spDetailHTML の注意と spRegWhy の「adsb.lol」を `${ADSB_A}` に（spRegWhy の返す字が title などの属性に入るなら、そこは字のままでよい）
@@ -896,7 +910,7 @@ review-c4：見せてよい。本人の答え（ON／OFF か −／＋ か）を
 - report-adsblol-key2 の「チェックイン担当への依頼」のとおり：loadArt の airport_tracks と cold-tracks で、ログインしているときは Authorization にログインの鍵を付ける。返り値が login_required なら「8日より前の空の道すじはログインすると見られます」、rate_limited なら「たくさん読んだので、○分ほどあとでまた見られます」。デモと未ログインの日付の選び方は前の7日まで
 - 本人 OK 済み（11/21 4時23分）。仕上がったら PM が #153 と一緒に自動で反映する
 
-## PM から積んだ次の仕事（11/21 9時15分、改善担当の見回りの指摘）※checkin/sweep-1121 で （report-sweep-1121.md・kaizen/sweep-1121 の指摘。PM のおすすめどおりに直す。仕上がったら PM が自動で反映）
+## PM から積んだ次の仕事（11/21 9時15分、改善担当の見回りの指摘）→ PR #161 で直した（925a8fe・報告 report-checkin-sweep-1121.md）※checkin/sweep-1121 で （report-sweep-1121.md・kaizen/sweep-1121 の指摘。PM のおすすめどおりに直す。仕上がったら PM が自動で反映）
 - 1 運用「遅れ」の専用ページが空：カードの数とページの中身をそろえ、空のときは「いま遅れ・欠航の便はありません」の1枚
 - 3 ホームの上の段の「マイページ」が2行に折れる：1行に収める
 - 4 地図カードが読み込み中に「0機」：読み込み中は「—」、開いたページの数とそろえる
