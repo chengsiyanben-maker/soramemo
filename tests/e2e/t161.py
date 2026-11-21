@@ -46,7 +46,7 @@ NOWD = {'at': iso(-20), 'weather': {'time': iso(-600), 'wdir': 170, 'wspd': 14, 
 NEW = "localStorage.setItem('soramemo.onboarded','1'); localStorage.setItem('soramemo.persona','all'); localStorage.setItem('soramemo.zk.notice','new'); localStorage.setItem('soramemo.install.later','1'); localStorage.setItem('soramemo.zk.swipe','1');"
 async def open3d(b, sky, h=844, noshape=False):
     c = await b.new_context(viewport={'width': 390, 'height': h}, device_scale_factor=1, timezone_id='Asia/Tokyo', bypass_csp=True)
-    await c.add_init_script(NEW)
+    await c.add_init_script(NEW + "Object.defineProperty(navigator, 'hardwareConcurrency', { get: () => 8 });")   # ふつうの端末として開く（試す機械は CPU が2つで、古い端末の軽い形になるため）
     await c.route('https://cdn.jsdelivr.net/npm/@supabase/**', lambda r: r.fulfill(path=os.path.join(HERE, 'fake_sb.js'), content_type='application/javascript'))
     await c.route('https://cdn.jsdelivr.net/npm/three@**', lambda r: r.fulfill(path=THREE, content_type='application/javascript', headers={'Access-Control-Allow-Origin': '*'}))
     n = {'t': 0}
@@ -94,7 +94,7 @@ async def main():
           return { city: bad(A3.scene.getObjectByName('cityBig').geometry, false), twy: twy ? bad(twy.geometry, true) : null, plane: bad(a3Geo('787').body, false) }; })()""")
         check('三角の表の向きが法線とそろう（街・誘導路・機体の左右の翼）', r['city'][0] > 0 and r['city'][1] == 0 and r['twy'] and r['twy'][1] == 0 and r['plane'][1] == 0, r)
         r = await pg.evaluate("['B789','B77W','A359','B738','A20N','B763','B744','A388','B39M','A321','E190','DH8D'].map(a3Model).join(' ')")
-        check('機種ごとの形（787・777・A350・737・A320・767・747・A380）', r == '787 777 350 737 320 767 747 380 737 320 r p', r)
+        check('機種ごとの形（787・777・A350・737・A320・767・747・A380・E170/E190・Q400）', r == '787 777 350 737 320 767 747 380 737 320 e q4', r)
         r = await pg.evaluate("""(() => { const g = a3Geo('320'); const vis = id => { const o = A3.objs.get(id); return o && o.g.getObjectByName('gear').visible; };
           return { win: g.win.attributes.position.count, gearGround: vis('a4'), gearClimb: vis('a2'), gearArr: vis('a1') }; })()""")
         check('窓の帯がある・脚は地上と着陸の前だけ（上昇中はしまう）', r['win'] > 30 and r['gearGround'] and r['gearArr'] and not r['gearClimb'], r)
@@ -108,7 +108,7 @@ async def main():
         r = await pg.evaluate("Math.round(A3.cam.position.y - A3.objs.get('a4').g.position.y)")
         check('地上の機体の視点は屋根（約40m）より上から見下ろす', r >= 60, r)
         await pg.click('#a3Credit'); await pg.wait_for_timeout(300); src = await pg.inner_text('#a3Sheet')
-        check('出典のシートに PLATEAU の利用条件のリンク', await pg.locator('#a3Sheet a[href="https://www.mlit.go.jp/plateau/site-policy/"]').count() == 1 and '雲・星' in src)
+        check('出典のシートに PLATEAU の利用条件のリンク・灯りは AIP JAPAN（AD 2.14）', await pg.locator('#a3Sheet a[href="https://www.mlit.go.jp/plateau/site-policy/"]').count() == 1 and '雲・星' in src and 'AD 2.14' in src)
         allerr += errs; await c.close()
         # 夜：街の灯り・星・駐機場の照明・ターミナルは壁だけ灯す
         c, pg, errs = await open3d(b, 'night')
@@ -120,7 +120,7 @@ async def main():
         allerr += errs; await c.close()
         # 地上の機体（答えに ground があるとき）
         c = await b.new_context(viewport={'width': 390, 'height': 844}, device_scale_factor=1, timezone_id='Asia/Tokyo', bypass_csp=True)
-        await c.add_init_script(NEW)
+        await c.add_init_script(NEW + "Object.defineProperty(navigator, 'hardwareConcurrency', { get: () => 8 });")   # ふつうの端末として開く（試す機械は CPU が2つで、古い端末の軽い形になるため）
         await c.route('https://cdn.jsdelivr.net/npm/@supabase/**', lambda r: r.fulfill(path=os.path.join(HERE, 'fake_sb.js'), content_type='application/javascript'))
         await c.route('https://cdn.jsdelivr.net/npm/three@**', lambda r: r.fulfill(path=THREE, content_type='application/javascript', headers={'Access-Control-Allow-Origin': '*'}))
         async def fn(r):
