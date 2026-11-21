@@ -83,3 +83,6 @@
 - 運用タブの入り口は、カード10枚の一覧になる。押すとその見方の専用ページが開き、今の中身（renderPhoto・specialHTML・planeHTML）がそのまま出る。
 - 見方の帯（#opsViews・#opsPViews）は一覧の形では出ない。前の形で試すときは localStorage の soramemo.ops.hub を "0" にする。
 - 自分の持ち場で画面を足すときは、一覧のカードと専用ページの形に合わせる（くわしくは docs/pm/report-ops-hub-app.md）。
+
+## PM から積んだ次の仕事（11/21 9時15分、改善担当の見回りの指摘）※yosoku/sweep-1121 で （report-sweep-1121.md・kaizen/sweep-1121 の指摘。PM のおすすめどおりに直す。仕上がったら PM が自動で反映）
+- 6 滑走路の札「風から推定」と風の向きが合わない：推定のもとにした風と、出している風をそろえる（計算そのものはデータ担当。画面の側で直せないときは data.md に依頼）

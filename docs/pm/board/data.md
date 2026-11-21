@@ -589,3 +589,7 @@
 - adsb.im の条件（https://adsb.im/ と vradarserver/standing-data の LICENSE）を WebFetch で開いて確かめ、利用規約の確認表に書く。使えない条件なら経路の推定を止める案を報告に
 - first_of_day の線（3日以上・7割以上）はこのまま。overnight は今は画面に出さない
 - 本人は adhoc の鍵を申し込み済み（11/21 1時）。届いたら本人が ADSBLOL_API_KEY に入れる
+
+## PM から積んだ次の仕事（11/21 9時15分、改善担当の見回りの指摘）※data/sweep-1121 で （report-sweep-1121.md・kaizen/sweep-1121 の指摘。PM のおすすめどおりに直す。仕上がったら PM が自動で反映）
+- 2 odpt_feed_at（ODPT のデータの時刻）をサーバーから返す。画面の「○時○分時点」と毎回の 404 が消えるように。チェックイン担当に名前を渡す
+- 7 運用を開いたときの機体の位置が 3.7秒：airport-traffic の返す量と待ち時間を見直す（ほかの処理を巻き込まない）
