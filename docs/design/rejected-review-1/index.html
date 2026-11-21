@@ -1,0 +1,86 @@
+<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>却下済みの見直し｜そらメモ 画面案（検討用）</title><style>
+:root{
+  --gothic:"Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic UI","Yu Gothic","Meiryo","Noto Sans JP","Noto Sans CJK JP",system-ui,sans-serif;
+  --sign:"Barlow Condensed","Arial Narrow",var(--gothic);
+  --bg:#EEF1F5; --card:#FFFFFF; --ink:#374151; --strong:#1F2937; --sub:#5F6878; --mute:#6B7280; --line:#9CA3AF;
+  --pill:rgba(17,24,39,.06); --hero:#0F1B2D; --on-hero:#F3F4F6; --hero-sub:#A7B0BC;
+  --shadow:0 1px 2px rgba(17,24,39,.04),0 10px 30px -8px rgba(17,24,39,.10),inset 0 0 0 1px rgba(17,24,39,.07);
+  --jal:#C8102E; --ana:#1C4FA0; --stub:#E7C873; --ok:#7EE2A8; --gold:#856620; --gold-wash:#FBF3DC;
+  --chart-sea:#DCEAF3; --chart-land:#F4F2EA; --chart-coast:#A9B9AE; --chart-apt:#7A1F5C; --chart-grid:rgba(31,78,121,.10);
+}
+*{box-sizing:border-box}html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--gothic);font-size:15px;line-height:1.6;-webkit-text-size-adjust:100%}
+.phone{position:relative;max-width:420px;min-height:100vh;min-height:100svh;margin:0 auto;overflow:hidden}
+.wrap{padding:14px 16px 130px}
+.card{background:var(--card);border-radius:22px;box-shadow:var(--shadow)}
+.lab{font-size:13px;font-weight:700;color:var(--sub)}
+.num{font-weight:800;color:var(--strong);letter-spacing:-.01em;line-height:1.1;font-variant-numeric:tabular-nums}
+.u{font-size:12px;font-weight:600;color:var(--mute);margin-left:2px}
+.tn{font-variant-numeric:tabular-nums}
+h1.t{font-size:24px;line-height:1.3;color:var(--strong);margin:16px 4px 0}
+.grp-h{font-size:14px;font-weight:800;color:var(--sub);margin:22px 4px 0}
+.note{font-size:13px;color:var(--sub);margin:10px 4px 0;line-height:1.6}
+.pl{height:44px;display:inline-flex;align-items:center;justify-content:center;padding:0 16px;border-radius:999px;font-size:14px;font-weight:800;background:var(--pill);color:var(--strong);white-space:nowrap}
+.pl.dark{background:var(--strong);color:var(--card)}
+.pl.w{background:var(--card);box-shadow:var(--shadow)}
+.chip{display:inline-flex;align-items:center;height:24px;padding:0 10px;border-radius:999px;font-size:13px;font-weight:800;background:var(--pill);color:var(--strong);white-space:nowrap}
+.chip.gold{background:var(--gold-wash);color:var(--gold)}
+.chip.ok{background:#DDF5E7;color:#14532D}
+.back{height:44px;display:inline-flex;align-items:center;font-size:14px;font-weight:800;color:var(--strong);background:var(--card);box-shadow:var(--shadow);border-radius:999px;padding:0 14px 0 12px}
+.ic{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.ii{width:40px;height:40px;border-radius:999px;background:var(--pill);display:grid;place-items:center;flex:none;color:var(--strong)}
+.rowl{display:flex;align-items:center;gap:12px;min-height:56px;padding:6px 0}
+.rowl+.rowl{box-shadow:0 -1px 0 var(--pill)}
+.rowl .tx{flex:1;min-width:0}
+.rowl .tx b{display:block;font-size:15px;color:var(--strong);line-height:1.4}
+.rowl .tx small{display:block;font-size:13px;color:var(--sub)}
+.rowl .ar{color:var(--sub);font-size:18px}
+.cardp{padding:16px 18px;margin-top:12px}
+.cardp h3{margin:2px 0 0;font-size:17px;color:var(--strong);line-height:1.4}
+.cardp p{margin:4px 0 0;font-size:14px}
+.hd{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.x{width:44px;height:44px;border-radius:999px;display:grid;place-items:center;color:var(--sub);flex:none;margin:-8px -10px -8px 0}
+.bar6{height:8px;border-radius:8px;background:var(--pill);overflow:hidden;margin-top:10px}.bar6 i{display:block;height:100%;background:var(--strong);border-radius:8px}
+.tabs{position:fixed;left:50%;transform:translateX(-50%);bottom:14px;width:calc(min(420px,100vw) - 28px);height:64px;border-radius:999px;background:rgba(255,255,255,.94);box-shadow:var(--shadow);display:flex;align-items:stretch;padding:0 8px;z-index:30}
+.tabs b{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:13px;font-weight:700;color:var(--sub)}
+.tabs b.on{color:var(--strong)}
+.tabs svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.hmap{position:relative;height:250px;margin:-14px -16px 0;overflow:hidden}
+.hmap>svg{display:block;width:100%;height:100%}
+.topb{position:absolute;top:12px;left:12px;right:12px;display:flex;gap:8px;align-items:center}
+.mode{display:flex;background:var(--card);border-radius:999px;box-shadow:var(--shadow);padding:3px}
+.mode span{height:40px;display:flex;align-items:center;padding:0 12px;border-radius:999px;font-size:13px;font-weight:700;color:var(--sub);white-space:nowrap}
+.mode span.on{background:var(--strong);color:var(--card)}
+.mp{margin-left:auto;height:46px;display:flex;align-items:center;gap:6px;padding:0 14px;border-radius:999px;background:var(--card);box-shadow:var(--shadow);font-size:13px;font-weight:800;color:var(--strong);white-space:nowrap}
+.hsheet{position:relative;margin:-30px -16px 0;background:var(--bg);border-radius:28px 28px 0 0;padding:10px 16px 0;box-shadow:0 -8px 30px -12px rgba(17,24,39,.18)}
+.grip{width:44px;height:5px;border-radius:999px;background:var(--line);opacity:.6;margin:0 auto 12px}
+.today{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.today>div{background:var(--card);border-radius:18px;box-shadow:var(--shadow);padding:10px 14px}
+.today .num{font-size:24px;margin-top:2px}
+/* 印 */
+.stamp{position:relative;aspect-ratio:1;border-radius:20px;background:var(--card);box-shadow:var(--shadow);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:6px}
+.stamp b{font-family:var(--sign);font-size:28px;font-weight:700;color:var(--strong);letter-spacing:.04em;line-height:1}
+.stamp small{font-size:13px;color:var(--sub);margin-top:4px}
+.stamp.off{background:transparent;box-shadow:inset 0 0 0 1.5px rgba(17,24,39,.12)}
+.stamp.off b{color:var(--sub)}
+.wx{position:absolute;right:6px;top:6px;width:26px;height:26px;border-radius:999px;background:#E8EEF6;color:#2B4A73;display:grid;place-items:center}
+.wx svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.lim{background:var(--hero);color:var(--on-hero)}
+.lim b{color:#F3E3B0}.lim small{color:var(--hero-sub)}
+.ann{position:relative;z-index:40;max-width:392px;margin:16px auto 120px;font-size:13px;line-height:1.7;background:#FFF8D6;color:#5A4A12;padding:12px 14px;border-radius:16px}
+.ann b{display:block}.ann ul{margin:4px 0 0;padding-left:1.2em}
+.kentou{display:inline-flex;align-items:center;height:26px;padding:0 10px;border-radius:999px;background:#FDECC8;color:#6B4A00;font-size:13px;font-weight:800}
+
+.ix{max-width:1100px;margin:0 auto;padding:20px 16px 60px}
+.tw{overflow-x:auto;margin-top:14px}
+table{border-collapse:separate;border-spacing:0 8px;width:100%;min-width:900px;font-size:13px;line-height:1.6}
+th{text-align:left;font-size:13px;color:var(--sub);padding:0 10px}
+td{background:var(--card);padding:10px;vertical-align:top}
+td:first-child{border-radius:16px 0 0 16px} td:last-child{border-radius:0 16px 16px 0;white-space:nowrap}
+</style></head><body><div class="ix">
+<span class="kentou">検討用 ・ 却下を外したわけではありません</span>
+<h1 class="t" style="margin-top:10px">却下済みの見直し（1回目）</h1>
+<p class="note" style="font-size:14px">11/8 の本人「却下したやつをもう一度見直したい」による検討用の画面案。今の全部乗せ（隠せる）・夜の画面・たまった記録（天気・運用・便の実績・全機の便）がある前提で、当時より良い形を考えた。アプリには入れない。各案2枚、幅390、今の昼の見た目。</p>
+<div class="tw"><table><tr><th>元の案</th><th>元の却下の日付</th><th>今回の形</th><th>良い点</th><th>困る点</th><th>画面</th></tr><tr><td><b>1 季節のスタンプ</b></td><td>10月（日付の記録なし。11/5 に決まりへ写した時点で却下済み）</td><td>行事のときだけ出る期間限定の札（年末年始・GW・お盆・SW）。ふだんの印に札が付くだけ。経営の繁忙期と同じ期間</td><td>年に数回だけなので重くない。経営の季節の需要とつながる。数は86のまま</td><td>取り逃した人が残念に思う。行事の期間を毎年決める手間</td><td><a href="1a-event-home.html"><img src="png/1a-event-home.png" alt="" style="width:92px;border-radius:12px;box-shadow:var(--shadow)"></a> <a href="1b-event-stamps.html"><img src="png/1b-event-stamps.png" alt="" style="width:92px;border-radius:12px;box-shadow:var(--shadow)"></a></td></tr><tr><td><b>2 今日のお題</b></td><td>10月（日付の記録なし。同上）</td><td>週に1つのお題。ホームのかたまりで × で外せる。報酬なし・連続の記録なし</td><td>毎日追われない。今の記録（地方空港・夜・特別塗装機など）だけで作れる</td><td>お題の種類が少ないと飽きる。週に1回も空港に行かない人には遠い</td><td><a href="2a-weekly-home.html"><img src="png/2a-weekly-home.png" alt="" style="width:92px;border-radius:12px;box-shadow:var(--shadow)"></a> <a href="2b-weekly-list.html"><img src="png/2b-weekly-list.png" alt="" style="width:92px;border-radius:12px;box-shadow:var(--shadow)"></a></td></tr><tr><td><b>3 空のカレンダー・年間まとめ</b></td><td>10/19（入れて同じ日に取り消し）</td><td>12月の1か月だけマイページの上に出る1年のまとめ。共有できる4:5の1枚</td><td>ふだんの画面を増やさない。共有で広告にもなる（非公式アプリと明記）</td><td>乗った便が少ない人には寂しい1枚になる。12月に作る処理が要る</td><td><a href="3a-year-entry.html"><img src="png/3a-year-entry.png" alt="" style="width:92px;border-radius:12px;box-shadow:var(--shadow)"></a> <a href="3b-year-card.html"><img src="png/3b-year-card.png" alt="" style="width:92px;border-radius:12px;box-shadow:var(--shadow)"></a></td></tr><tr><td><b>4 運用を集める印・バッジ</b></td><td>10月（日付の記録なし。同上）</td><td>「見た運用」の記録の一覧。実際の機体で判定できたときだけ数え、推定は灰色で数えない。印・バッジは付けない</td><td>10/15 からチェックインのときの運用を残しているので、すぐ作れる。正直な数え方</td><td>珍しい運用を追う人が出る。14空港の外は数えられない</td><td><a href="4a-ops-seen.html"><img src="png/4a-ops-seen.png" alt="" style="width:92px;border-radius:12px;box-shadow:var(--shadow)"></a> <a href="4b-ops-checkin.html"><img src="png/4b-ops-checkin.png" alt="" style="width:92px;border-radius:12px;box-shadow:var(--shadow)"></a></td></tr><tr><td><b>5 天気の印</b></td><td>10/12（天気の実績と印に付く天気を外した）</td><td>雨・雪・霧の日に押した印にだけ、右上に小さな印。晴れ・くもりは付けない。天気の実績は作らない</td><td>METAR の記録（毎時）がある。ふつうの日の印は今のまま</td><td>空港の天気と本人の空が違うことがある。METAR のない空港は霧が分からない</td><td><a href="5a-wx-stamps.html"><img src="png/5a-wx-stamps.png" alt="" style="width:92px;border-radius:12px;box-shadow:var(--shadow)"></a> <a href="5b-wx-detail.html"><img src="png/5b-wx-detail.png" alt="" style="width:92px;border-radius:12px;box-shadow:var(--shadow)"></a></td></tr></table></div>
+<p class="note">ほかの却下（窓側の席ガイド・機体と運航の実績・出発案内板風・新造機・航空ニュース）は今回の指示の外なので描いていない。</p>
+</div></body></html>
