@@ -16,12 +16,13 @@ import { LIVERIES, type Livery, liveryMap } from "../_shared/liveries.ts";
 import { type Dest, inboundEtaMin, inboundMessage, mergeLiveries, pickDest, type Seen, wantsInbound, wantsLiveryPush } from "../_shared/livery_extra.ts";
 import { parseRoutes } from "../_shared/foreign_now.ts";
 import { notifyRegFly as notifyRegFlyWith, wantsRegFly } from "../_shared/livery_push.ts";
-import { normCallsign } from "../_shared/flight_watch.ts";
+import { flightOfCallsign, normCallsign } from "../_shared/flight_watch.ts";
 import { depEtaMin, dueNow, etaMin, jstDate, opsChanged, spotDepMessage, spotDepReason, spotMessage, spotReason, type SpotDep, type SpotPlane, type SpotSub } from "../_shared/spot_push.ts";
 import webpush from "npm:web-push@3.6.7";
 import { readShared, writeShared } from "../_shared/edge_cache.ts";
 import { adsbImHeaders, adsbLolHeaders } from "../_shared/adsblol.ts";
 import { activeAirports, slimPlanes, viewPlan } from "../_shared/traffic_view.ts";
+import { type Apt, type Cand, onClimbOut, onFinal, pickAirport, refinePhases, runwaysFor } from "../_shared/arr_dest.ts";
 
 const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, { auth: { persistSession: false } });
 
@@ -51,6 +52,16 @@ const AIRPORTS: Record<string, { at: [number, number]; nm: number }> = {
 // 着陸・離陸の見分けで「ほかの空港のほうが近い機体」を除くための、近くの空港（神戸・札幌丘珠・横田・名古屋（小牧）・佐賀・北九州・岩国も含む）
 const NEARBY: [number, number][] = [...Object.values(AIRPORTS).map((a) => a.at),
   [34.6328, 135.2239], [43.1161, 141.3800], [35.7485, 139.3485], [35.2550, 136.9244], [33.1497, 130.3022], [33.8459, 131.0349], [34.1440, 132.2356]];
+// 着陸・離陸の見分けを絞るための空港（滑走路の向きつき。11/21 急ぎ：羽田行きを成田の「着陸」にしていた）。
+//   14空港と、近くの空港（神戸 UKB・丘珠 OKD・佐賀 HSG・北九州 KKJ・岩国 IWK は滑走路の表あり。横田・小牧は表がないので位置だけ）
+const EXTRA_APTS: Apt[] = [
+  { iata: "UKB", at: [34.6328, 135.2239], rws: runwaysFor("UKB") }, { iata: "OKD", at: [43.1161, 141.3800], rws: runwaysFor("OKD") },
+  { at: [35.7485, 139.3485], rws: [] }, { at: [35.2550, 136.9244], rws: [] },
+  { iata: "HSG", at: [33.1497, 130.3022], rws: runwaysFor("HSG") }, { iata: "KKJ", at: [33.8459, 131.0349], rws: runwaysFor("KKJ") },
+  { iata: "IWK", at: [34.1440, 132.2356], rws: runwaysFor("IWK") },
+];
+const APT_OF = (iata: string): Apt => ({ iata, at: AIRPORTS[iata].at, rws: runwaysFor(iata) });
+const OTHERS_OF = (iata: string): Apt[] => [...Object.keys(AIRPORTS).filter((k) => k !== iata).map(APT_OF), ...EXTRA_APTS];
 
 // データベースの線を読み、今回の位置を足して書き戻す。いなくなった機体と古い位置は消える
 //   write=false（見る人の呼び出し）は読むだけ。線を書くのは記録の処理（30秒ごと）だけにする（11/21 見回り 7。書き込み2回ぶん速くなる）
@@ -172,7 +183,8 @@ async function build(iata: string, view: boolean, mark: (k: string) => void): Pr
   const j = live ?? await fetchArea(iata, !view);
   if (!live) mark("adsb");
   // まとめて取った円から、この空港の半径の中だけを使う
-  const planes = planesFromAdsb(j?.ac, a.at, 14000, NEARBY.filter((o) => o !== a.at)).filter((p) => p.dist_km <= a.nm * 1.852);
+  // 着陸・離陸の見分けは、滑走路の向き・最終進入の範囲・高さで絞る（ほかの空港へ降りる機体を「着陸」にしない。11/21）
+  const planes = refinePhases(planesFromAdsb(j?.ac, a.at, 14000, NEARBY.filter((o) => o !== a.at)).filter((p) => p.dist_km <= a.nm * 1.852), APT_OF(iata), OTHERS_OF(iata));
   const tr = await syncTrails(iata, planes, !view || !live);   // 記録が止まっていて adsb.lol に聞いたときは、今までどおり見る人の呼び出しでも線を書く
   mark("trails");
   // 線は画面が使う着陸・離陸の機体だけに付ける（ほかは空の配列。形は同じ）。11/21 見回り 7
@@ -251,11 +263,9 @@ async function japanAirports() {
 // 特別塗装機を livery_sightings に残す（今回取った円の機体から。運用タブの空港の着陸・離陸中なら、その空港も）
 async function recordLiveries(bodies: Map<string, string>) {
   const L = liveryMap(new Date(), await allLiveries()), seen = new Map<string, Record<string, unknown>>(), motion = new Map<string, { kt: number | null; trk: number | null }>();
-  // 空港ごとの機体（着陸・離陸の見分けが付いたもの）
-  const near = new Map<string, { iata: string; phase: string }>();
-  for (const [iata, body] of bodies) for (const p of (JSON.parse(body).planes ?? []) as { reg?: string; phase?: string }[]) {
-    if (p.reg && (p.phase === "arr" || p.phase === "dep") && L.has(p.reg)) near.set(p.reg, { iata, phase: p.phase });
-  }
+  // 空港ごとの機体（着陸・離陸の見分けが付いたもの）。1機が2つ以上の空港で着陸（離陸）になったときは、1つに決める（11/21 急ぎ）。
+  //   前は空港を順に回して上書きしていたので、羽田へ降りる機体が後の成田で上書きされ「成田に着陸に向かっています」と送っていた
+  const near = await nearAirports(bodies, L);
   const keys = new Set([...bodies.keys()].map((k) => REGION_OF[k] ?? k));
   for (const k of keys) {
     const c = regionCache.get(k); if (!c || Date.now() - c.at > TTL) continue;
@@ -282,6 +292,39 @@ async function recordLiveries(bodies: Map<string, string>) {
   // deno-lint-ignore no-explicit-any
   for (const v of seen.values()) if (wantsRegFly(v as any)) { try { await notifyRegFly(v); } catch (e) { console.error("livery reg push", e); } }
   return seen.size;
+}
+
+// 特別塗装機ごとに、着陸（離陸）に向かっている空港を1つに決める。決められない機体は入れない（知らせない）
+type BodyPlane = { reg?: string; phase?: string; lat: number; lon: number; alt_ft: number | null; hdg: number | null; dist_km: number; callsign?: string | null };
+async function nearAirports(bodies: Map<string, string>, L: Map<string, unknown>) {
+  const cands = new Map<string, { arr: Cand[]; dep: Cand[]; cs: string | null }>();
+  for (const [iata, body] of bodies) for (const p of (JSON.parse(body).planes ?? []) as BodyPlane[]) {
+    if (!p.reg || (p.phase !== "arr" && p.phase !== "dep") || !L.has(p.reg)) continue;
+    const c = cands.get(p.reg) ?? { arr: [], dep: [], cs: null };
+    const rws = runwaysFor(iata), aligned = !!(p.phase === "arr" ? onFinal(p, rws) : onClimbOut(p, rws));
+    c[p.phase].push({ iata, dist_km: p.dist_km, aligned });
+    c.cs ??= p.callsign ?? null;
+    cands.set(p.reg, c);
+  }
+  // 便名の行き先・出発地（時刻表 flight_schedule。いま飛んでいそうな便だけ。候補が2つ以上か、遠くて決めにくい機体だけ引く）
+  const need = [...cands.values()].filter((c) => c.cs && (c.arr.length + c.dep.length > 1 || [...c.arr, ...c.dep].some((x) => !x.aligned)));
+  const fl = [...new Set(need.map((c) => flightOfCallsign(c.cs!)).filter((f): f is string => !!f))];
+  const route = new Map<string, { dep: string; arr: string }>();
+  if (fl.length) {
+    const now = Date.now();
+    const { data } = await admin.from("flight_schedule").select("flight, dep, arr, std").in("flight", fl)
+      .gte("std", new Date(now - 6 * 3600_000).toISOString()).lte("std", new Date(now + 3600_000).toISOString()).limit(200);
+    // 同じ便名が1日に2回あるときは、出発の予定がいまにいちばん近い便
+    for (const r of (data ?? []).sort((a, b) => Math.abs(Date.parse(b.std) - now) - Math.abs(Date.parse(a.std) - now))) route.set(r.flight, { dep: r.dep, arr: r.arr });
+  }
+  const near = new Map<string, { iata: string; phase: string }>();
+  for (const [reg, c] of cands) {
+    const f = c.cs ? route.get(flightOfCallsign(c.cs) ?? "") : undefined;
+    const arr = pickAirport(c.arr, f?.arr), dep = arr ? null : pickAirport(c.dep, f?.dep);
+    if (arr) near.set(reg, { iata: arr, phase: "arr" });
+    else if (dep) near.set(reg, { iata: dep, phase: "dep" });
+  }
+  return near;
 }
 
 // deno-lint-ignore no-explicit-any
