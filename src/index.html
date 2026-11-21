@@ -1099,6 +1099,8 @@ dialog.tpsheet .dlg{display:flex;flex-direction:column;overflow:hidden;padding-b
 .ohc .ohart{position:absolute;inset:0;width:100%;height:100%;z-index:0;pointer-events:none}
 .ohc .ohbars{display:flex;align-items:flex-end;gap:2px;height:56px;margin-top:10px}
 .ohc .ohbars i{flex:1;background:var(--op-sub);border-radius:2px 2px 0 0;min-height:2px}.ohc .ohbars i.now{background:var(--op-ink)}
+.ohc.a3 .oh3d{position:absolute;right:6px;bottom:8px;width:50%;max-width:120px;height:auto;z-index:0;pointer-events:none}
+.ohc.a3 .ohv{margin-top:auto}
 .ohc .ohring{position:absolute;right:14px;top:12px;width:34px;height:34px}
 .ohc .ohdots{margin-left:auto;display:flex;gap:4px}.ohc .ohdots i{width:10px;height:10px;border-radius:50%}
 .ohedit{grid-column:1 / -1;justify-self:center;min-height:44px;padding:0 18px;border:0;background:none;color:var(--op-ink);font:800 14px var(--gothic);cursor:pointer}
@@ -3840,6 +3842,19 @@ details.pindev summary span{flex:none;color:var(--pin)}details.pindev ol{margin:
 .pinband button{flex:none;min-height:40px;padding:0 14px;border:0;border-radius:999px;background:rgba(255,255,255,.16);color:#FFFFFF;font:800 13px/1 var(--gothic);cursor:pointer}
 :root[data-night="on"] .pinpill:not(.on):not(.dark),:root[data-night="on"] .nrpin:not(.on),:root[data-night="on"] .pinbtn{background:transparent;color:#DCE3EA;box-shadow:inset 0 0 0 1.5px rgba(220,227,234,.5)}
 :root[data-night="on"] .pinhome,:root[data-night="on"] .pinapc{background:var(--h-card,#141B24);color:#DCE3EA}
+/* ---------- 閉じるはいつでも押せる（11/21 22時 PM・本人「閉じるの機能は、いつでも触れるように」） ----------
+   全画面とシートの × と ‹ 戻る は、中身を送っても上に残り（ノッチを避ける）、押せる大きさは44px以上、読み込み中の幕より上に置く */
+dialog.spfull .spctop,dialog.spfull .pintop{position:sticky;top:0;z-index:6;margin-top:-16px;margin-left:-16px;margin-right:-16px;padding:calc(16px + env(safe-area-inset-top,0px)) 16px 8px;background:var(--s-bg)}
+dialog.mypage .mp-top{position:sticky;top:0;z-index:6;margin:-18px -18px 6px;padding:calc(18px + env(safe-area-inset-top,0px)) 18px 8px;background:var(--mp-bg)}
+dialog.spfull .spctop .mp-back,dialog.spfull .pintop .mp-back,dialog.mypage .mp-top .mp-back{min-height:44px}
+dialog.spsheet .sph{position:sticky;top:0;z-index:6;margin:-12px -18px 0;padding:12px 18px 0;background:var(--s-card)}
+dialog.spsheet .sph .spx{top:2px;right:8px;width:44px;height:44px;border:6px solid transparent;background-clip:padding-box}
+.cxbar{position:sticky;top:0;z-index:6;height:0;display:flex;justify-content:flex-end;pointer-events:none}
+.cxbar .cx{pointer-events:auto;flex:none;width:44px;height:44px;margin:-14px -12px 0 0;border:0;border-radius:50%;background:var(--paper);color:var(--ink);font:700 19px/1 var(--gothic);display:grid;place-items:center;cursor:pointer;box-shadow:0 2px 10px rgba(15,22,38,.14)}
+.a3top{z-index:7}
+.a3wrap:has(#a3Load:not([hidden])) .a3top>:not([data-a3-close]){visibility:hidden}
+#v-ops[data-hub="page"] .opsbar{position:sticky;top:calc(8px + env(safe-area-inset-top,0px));z-index:30;pointer-events:none}
+#v-ops[data-hub="page"] .opsbar>*{pointer-events:auto}
 </style>
 </head>
 <body>
@@ -7051,6 +7066,11 @@ const vsName = k => k === "ops" || k === "opsp" ? "運用" : TAB_NAME[k];
 // 運用タブの「機体」の側を出すか（表示の編集・鉛筆のシートで OFF にできる。11/16 の決定 V3・V1c）
 const opsPlaneOn = () => !(LAYOUT && LAYOUT.opsPlane === 0);
 function opsPlaneSet(on){ const L = loEdit(); if(on) delete L.opsPlane; else L.opsPlane = 0; }
+// 運用の一覧の「3D」のカードを出すか（11/21 本人「3Dの入口がわかりにくいから、運用にも追加して」）。羽田を選んでいるときだけ出す。
+//   表示の編集・鉛筆のシートで OFF にできる（数には入れない。全部乗せに戻すと出る）
+const opsA3On = () => !(LAYOUT && LAYOUT.opsA3 === 0);
+function opsA3Set(on){ const L = loEdit(); if(on) delete L.opsA3; else L.opsA3 = 0; }
+const OH_A3_ROW = (attr) => { const on = opsA3On(); return { kind:"side", id:"a3", label:"「3D」のカード", desc:on ? "羽田を選んでいるときだけ。押すと3Dの羽田を開きます" : "ON にすると羽田の一覧に「3D」のカードが戻ります", on, nocount:true, showOff:true, attr }; };
 // いま見ている側（空港 ap／機体 plane）は端末に覚える。「機体」を隠しているときはいつも空港
 let OPS_SIDE = (() => { try{ return localStorage.getItem("soramemo.ops.side") === "plane" ? "plane" : "ap"; }catch(e){ return "ap"; } })();
 let OPS_PL_REG = null;   // 機体の側で選んでいる機体（A3）
@@ -7844,7 +7864,7 @@ function loSecDef(id){
     if(!nearX()) s.subText = "近くは民間空港だけ" + (s.hidden.length ? `・隠している：${s.hidden.join("・")}` : "");   // OFF に気づけるように（review-app-1 の6）
     return s; }
   if(id === "book" || id === "log") return loSecCount({ name:TAB_NAME[id], groups:[{ rows:loViewRows(id) }], go:[`${TAB_NAME[id]}へ`, `data-lo-goto="${id}"`], away:loAwayNote(id) });
-  if(id === "ops") return loSecCount({ name:"運用（空港）", groups:[{ title:"見方", rows:loViewRows("ops") }, { title:"滑走路の下に出すもの", rows:loBlkRows("opsb") }], go:["運用へ", 'data-lo-goto="ops"'], away:loAwayNote("ops") });
+  if(id === "ops") return loSecCount({ name:"運用（空港）", groups:[{ title:"見方", rows:loViewRows("ops") }, { title:"一覧のカード", rows:[OH_A3_ROW("data-lo-a3")] }, { title:"滑走路の下に出すもの", rows:loBlkRows("opsb") }], go:["運用へ", 'data-lo-goto="ops"'], away:loAwayNote("ops") });
   // 運用（機体）：「機体」を出す（数えない。OFF のときは見出しで言う）＋見方2つ（V2）
   if(id === "opsp"){ const on = opsPlaneOn(), rows = loViewRows("opsp").map(r => on ? r : { ...r, dis:true });
     const s = loSecCount({ name:"運用（機体）", groups:[{ rows:[{ kind:"side", id:"plane", label:"「機体」を出す", desc:on ? "OFF で運用は空港だけ（特別塗装機と機体の1日は見られません）" : "ON にすると運用タブの上に「空港｜機体」が戻ります", on, nocount:true, showOff:true, attr:"data-lo-plane" }, ...rows] }], go:["運用へ", 'data-lo-goto="ops"'], away:loAwayNote("ops") });
@@ -7966,6 +7986,7 @@ document.addEventListener("click", e => {
     if(hide) set.add(id); else set.delete(id); L.off[k] = [...set]; if(!L.off[k].length) delete L.off[k];
     const l = (LO_BLOCKS[k].find(x => x[0] === id) || [])[1] || id;
     loChanged("blk_" + k, { text:`「${l}」を${hide ? "隠しました" : "出しました"}`, snap }); return; }
+  if((b = q("[data-lo-a3]"))){ const on = opsA3On(); opsA3Set(!on); loChanged("ops_a3" + (on ? "_off" : "_on"), { text:`「3D」のカードを${on ? "隠しました" : "出しました"}`, snap }); return; }
   if((b = q("[data-lo-plane]"))){ const on = opsPlaneOn(); opsPlaneSet(!on); opsSideRefresh(); loChanged("ops_plane" + (on ? "_off" : "_on"), { text:`運用の「機体」を${on ? "隠しました" : "出しました"}`, snap }); return; }
   if((b = q("[data-lo-ap]"))){ const c = b.dataset.loAp, L = loEdit(), set = new Set(L.aps || []);
     if(set.has(c)) set.delete(c); else set.add(c); L.aps = [...set]; if(!L.aps.length) delete L.aps; loChanged("aps"); return; }
@@ -7983,9 +8004,10 @@ function vsHTML(){
   const pRow = { label:"「機体」を出す", desc:pOff ? "ON にすると運用タブの上に「空港｜機体」が戻ります" : "OFF にすると運用タブで特別塗装機と機体の1日が見られなくなります", on:!pOff, attr:"data-vs-plane" };
   const plane = k !== "opsp" ? "" : pOff ? `<ul class="tplist">${loRowHTML(pRow)}</ul><p class="vsnote">隠している間は、運用タブで特別塗装機と機体の1日が見られません。シートの「機体」のピルは残るので、ここか、マイページの「表示の編集」の同じ行で戻せます。</p>`
     : `<p class="logl">機体の側ごと隠す<small>運用は空港だけになります</small></p><ul class="tplist">${loRowHTML(pRow)}</ul>`;
+  const a3 = k === "ops" && OH_ON() ? `<p class="logl">一覧のカード</p><ul class="tplist">${loRowHTML(OH_A3_ROW("data-vs-a3"))}</ul>` : "";
   return `<div class="tptop"><div class="tphd"><h3 id="vsTitle">${vsName(k)}の見方</h3>${rows.length ? `<span class="tpcnt" aria-label="出している見方 ${on}つ（${rows.length}つのうち）"><b>${on}</b>/${rows.length}</span>` : `<span class="tpcnt"></span>`}<button type="button" class="tpdone" data-close>完了</button></div>
     <p class="tplead">OFF で見方の帯から隠れます。最後の1つは残ります。</p>${side}</div>
-    <div class="tpscroll">${rows.length ? `<ul class="tplist" aria-label="${vsName(k)}の見方">${rows.map(r => loRowHTML(sw(r)).replace('<li class="tprow vsrow', `<li data-vs="${r.id}" class="tprow vsrow`)).join("")}</ul>` : ""}${plane}
+    <div class="tpscroll">${rows.length ? `<ul class="tplist" aria-label="${vsName(k)}の見方">${rows.map(r => loRowHTML(sw(r)).replace('<li class="tprow vsrow', `<li data-vs="${r.id}" class="tprow vsrow`)).join("")}</ul>` : ""}${a3}${plane}
     <div class="tpmore"><button type="button" class="lotext" data-vs-all>表示の編集をすべて見る ›</button></div></div>${undo}`;
 }
 function vsRender(){ const d = $("dViews"); if(!d || !d.open) return; const sc = d.querySelector(".tpscroll"), y = sc ? sc.scrollTop : 0; $("dViewsBody").innerHTML = vsHTML(); const n = d.querySelector(".tpscroll"); if(n) n.scrollTop = y; }
@@ -8003,6 +8025,8 @@ document.addEventListener("click", e => {
   if((b = e.target.closest("[data-vs-all]"))){ const k = VS.k; $("dViews").close(); openLayout(k, "screen"); return; }
   if((b = e.target.closest("[data-vs-undo]"))){ if(VS.undo){ loRestore(VS.undo.snap); VS.undo = null; loChanged("undo"); opsSideRefresh(); vsRender(); } return; }
   if((b = e.target.closest("[data-vs-side]"))){ if(VS.k === b.dataset.vsSide) return; VS.k = b.dataset.vsSide; VS.undo = null; vsRender(); return; }
+  if((b = e.target.closest("[data-vs-a3]"))){ const on = opsA3On(), snap = loSnap(); opsA3Set(!on); loChanged("ops_a3" + (on ? "_off" : "_on"), null);
+    VS.undo = { text:`「3D」のカードを${on ? "隠しました" : "出しました"}`, snap }; vsRender(); return; }
   if((b = e.target.closest("[data-vs-plane]"))){ const on = opsPlaneOn(), snap = loSnap(); opsPlaneSet(!on); loChanged("ops_plane" + (on ? "_off" : "_on"), null); opsSideRefresh();
     VS.undo = { text:`運用の「機体」を${on ? "隠しました" : "出しました"}`, snap }; vsRender(); return; }
   if((b = e.target.closest("[data-vs-sw]"))){ if(b.disabled) return; const k = VS.k, id = b.dataset.vsSw, hide = !loOff(k).has(id), snap = loSnap();
@@ -8827,6 +8851,65 @@ function initSheet(sheet, view){
 initSheet($("homeSheet"), "home");
 // ダイアログの「閉じる」（HTMLに直接 onclick を書かない：ページの防御設定 CSP のため）
 document.addEventListener("click", e => { const b = e.target.closest("[data-close]"); if(b) b.closest("dialog").close(); });
+/* ---------- 閉じるはいつでも押せる（11/21 22時 PM）：戻る操作で、いちばん上に開いている画面を閉じる ----------
+   ブラウザの戻る・iPhone の左の端から引く戻る・ホーム画面のアプリの戻る。開いたダイアログ（showModal）と運用の専用ページ（"ops"）を
+   開いた順に積み（CX_STACK）、開くたびに履歴を1つ足す。戻るで1枚閉じる。×などで閉じたときは足した履歴を戻して数を合わせる（その popstate は数えない）。
+   閉じさせない画面（cancel を止めている登録の途中など）は、戻るでも閉じず、履歴を足し直す */
+const CX_STACK = []; let CX_SKIP = 0, CX_BACK = 0;
+try{ history.scrollRestoration = "manual"; }catch(e){}   // 履歴を戻して数を合わせるとき、ページの送り位置を前に戻さない（年を選んで飛んだ先などを保つ）
+function cxPush(layer){
+  const i = CX_STACK.indexOf(layer); if(i >= 0) return;
+  CX_STACK.push(layer); try{ history.pushState({ cx: CX_STACK.length }, ""); }catch(e){}
+}
+function cxPop(layer){
+  const i = CX_STACK.lastIndexOf(layer); if(i < 0) return;
+  CX_STACK.splice(i, 1); CX_BACK++; queueMicrotask(cxFlush);
+}
+function cxFlush(){
+  if(!CX_BACK) return; const n = CX_BACK; CX_BACK = 0;
+  const k = Math.min(n, (history.state && history.state.cx) || 0); if(!k) return;   // 足した分より多くは戻らない（ページの外へ出ない）
+  CX_SKIP++; try{ history.go(-k); }catch(e){ CX_SKIP--; }
+}
+window.addEventListener("popstate", () => {
+  if(CX_SKIP){ CX_SKIP--; return; }
+  while(CX_STACK.length){
+    const top = CX_STACK.pop();
+    if(top === "ops"){ if(!OPS_PAGE) continue; opsHubBack(); return; }
+    if(!top.open) continue;   // もう閉じている
+    const ev = new Event("cancel", { cancelable:true }); top.dispatchEvent(ev);
+    if(ev.defaultPrevented){ CX_STACK.push(top); try{ history.pushState({ cx: CX_STACK.length }, ""); }catch(e){} return; }
+    top.close(); return;
+  }
+});
+{ const sm = HTMLDialogElement.prototype.showModal;
+  HTMLDialogElement.prototype.showModal = function(){
+    const was = this.open; sm.apply(this, arguments);
+    if(!was && this.open){ if(!this.cxOn){ this.cxOn = true; this.addEventListener("close", () => cxPop(this)); } cxPush(this); }
+  }; }
+// 3D：× のほかに、左の端（24px）から右へ引いても閉じる（指に付いて動き、3割か速くはらったら閉じる）。端から始めた指は 3D を回さない
+{ let st = null;
+  const wrap = () => document.getElementById("a3Wrap");
+  const reset = () => { const w = wrap(); if(w){ w.style.transition = "transform .2s ease"; w.style.transform = ""; setTimeout(() => { if(w) w.style.transition = ""; }, 220); } };
+  const d3 = document.getElementById("dAp3d");
+  d3.addEventListener("pointerdown", e => {
+    if(e.clientX > 24 || !e.isPrimary || e.target.closest("button")) return;
+    st = { id:e.pointerId, x:e.clientX, y:e.clientY, dx:0, on:false, pts:[] }; e.stopPropagation();   // 3D の絵（a3Drag）へ渡さない
+  }, true);
+  d3.addEventListener("pointermove", e => {
+    if(!st || e.pointerId !== st.id) return;
+    const dx = e.clientX - st.x, dy = e.clientY - st.y;
+    if(!st.on){ if(Math.hypot(dx, dy) < 10) return; if(dx <= 0 || Math.abs(dx) < Math.abs(dy)){ st = null; return; } st.on = true; }
+    e.stopPropagation(); st.dx = Math.max(0, dx); st.pts.push({ x:e.clientX, t:performance.now() }); if(st.pts.length > 8) st.pts.shift();
+    const w = wrap(); if(w){ w.style.transition = "none"; w.style.transform = `translateX(${st.dx.toFixed(0)}px)`; }
+  }, true);
+  const end = e => {
+    if(!st || e.pointerId !== st.id) return; const s = st; st = null; if(!s.on) return; e.stopPropagation();
+    const W = document.documentElement.clientWidth || innerWidth, p = s.pts, v = p.length > 1 ? (p[p.length - 1].x - p[0].x) / Math.max(1, p[p.length - 1].t - p[0].t) : 0;
+    if(e.type === "pointerup" && (s.dx > W * .3 || (v > .5 && s.dx > 40))){ track("ap3d", "edge_close"); closeAp3d(); return; }
+    reset();
+  };
+  d3.addEventListener("pointerup", end, true); d3.addEventListener("pointercancel", end, true);
+}
 document.addEventListener("click", e => { if(e.target.closest("#demoEnd") && $("toggleDemo")) $("toggleDemo").click(); });   // デモの帯の「終了」
 document.querySelectorAll("#modeSw [data-mode]").forEach(b => b.onclick = () => {
   if(b.dataset.mode === "game" && SERVER && !user && !demo){ track("mode", "game_guest"); authOpen("login", "login"); return; }   // ログインしていないときは、経営の画面ではなくログインの案内
@@ -8860,7 +8943,7 @@ function openAirport(id){
   const rgl = a.kind ? [] : zkRegionList(regionOf(a)), ri = rgl.findIndex(x => x.id === a.id), pv = ri > 0 ? rgl[ri - 1] : null, nx = ri >= 0 && ri < rgl.length - 1 ? rgl[ri + 1] : null;
   let swHint = false; if(rgl.length > 1){ try{ swHint = !localStorage.getItem("soramemo.zk.swipe"); if(swHint) localStorage.setItem("soramemo.zk.swipe", "1"); }catch(e){} }
   const rg = a.kind ? "" : regionOf(a), cd = code(a);
-  b.innerHTML = `<div class="zk-aph" style="--c:${a.kind ? "#2E4A6B" : zkCol(rg)}"${rgl.length > 1 ? ` data-zk-swipe="${a.id}"` : ""}><div class="stampbig${dt ? " wide" : ""}">${first ? insigniaSVG(a, first, {big:true, term:null}, dt) : emptySVG(a)}</div>
+  b.innerHTML = `<div class="cxbar"><button class="cx" type="button" data-close aria-label="閉じる">×</button></div><div class="zk-aph" style="--c:${a.kind ? "#2E4A6B" : zkCol(rg)}"${rgl.length > 1 ? ` data-zk-swipe="${a.id}"` : ""}><div class="stampbig${dt ? " wide" : ""}">${first ? insigniaSVG(a, first, {big:true, term:null}, dt) : emptySVG(a)}</div>
     <div class="tx"><b class="cd${/[^\x00-\x7f]/.test(cd) ? " jp" : ""}">${esc(/[^\x00-\x7f]/.test(cd) ? godShort(a) : cd)}</b><h3>${esc(a.name).replace(/（/g, "<wbr>（")}</h3><p>${a.pref}${rg ? "・" + rg : ""}${a.rare?"・離島の空港":""}${a.kind ? "・" + XKIND[a.kind].label : ""}</p></div></div>
   ${rgl.length > 1 ? `<p class="zk-dots" aria-hidden="true">${rgl.map(x => `<i${x.id === a.id ? ` class="on"` : ""}></i>`).join("")}</p>` : ""}
   ${swHint ? `<p class="zk-swhint">印のカードをはらうと、となりの空港へ</p>` : ""}
@@ -11651,7 +11734,7 @@ function opsPlHead(reg, hist, pred){
   return `<div class="opsplhd"><span><b>${esc(nm || reg)}</b><small>${esc([nm ? reg : "", type, predDay(Date.now())].filter(Boolean).join("・"))}</small></span>${live ? `<span class="opspfly"><i></i>飛行中</span>` : ""}</div>`;
 }
 async function opsPlOpen(reg){
-  if(OH_ON() && reg && !OPS_PAGE){ OPS_PAGE = "plane"; const q = $("opsPlForm"); OH_FROM = { id:"plane", rect: q ? q.getBoundingClientRect() : null, y: window.scrollY }; }   // 運用の一覧の検索窓から：機体の1日を専用ページに
+  if(OH_ON() && reg && !OPS_PAGE){ OPS_PAGE = "plane"; cxPush("ops"); const q = $("opsPlForm"); OH_FROM = { id:"plane", rect: q ? q.getBoundingClientRect() : null, y: window.scrollY }; }   // 運用の一覧の検索窓から：機体の1日を専用ページに
   opsSideSet("plane"); track("ops", "plane");
   if(!reg){ OPS_PL_REG = null; VIEW_RENDER.ops(); const q = $("opsPlQ"); if(q) q.focus(); return; }
   if($("dPlaneBody")) $("dPlaneBody").innerHTML = "";   // 同じ id（plMap・plReg）を2つ作らない
@@ -11708,17 +11791,20 @@ VIEW_RENDER.ops = () => {
    一覧：頭は空港のピル＋i、その下に機体の検索窓（案A）、カードは見出し1語＋大きな数字か小さな絵の10枚。
    カードを押すと、今の見方の中身をそのまま専用ページとして出す（カードの位置から広がる：開く約0.46秒・戻る約0.38秒。動きを減らす設定では動きなし）。
    左端から引いて戻る。隠す・出すは今の見方の設定（鉛筆のシート）をそのまま使う。localStorage soramemo.ops.hub = "0" で前の形（試験用） */
-const OH_CARDS = [["runway", "滑走路", "runway", 1], ["map", "地図", "runway", 1], ["board", "案内板", "board"], ["special", "特別塗装機", null], ["late", "遅れ", "board"],
+const OH_CARDS = [["runway", "滑走路", "runway", 1], ["map", "地図", "runway", 1], ["a3", "3D", null], ["board", "案内板", "board"], ["special", "特別塗装機", null], ["late", "遅れ", "board"],
   ["strip", "短冊", "strip"], ["day", "1日の山", "day"], ["ontime", "定時", "ontime"], ["art", "空の道すじ", "art"], ["photo", "撮る人", "photo"]];
 const OH_ON = () => { try{ return localStorage.getItem("soramemo.ops.hub") !== "0"; }catch(e){ return true; } };
-let OPS_PAGE = null, OH_FROM = null, OH_BUSY = false;
+let OPS_PAGE = null, OH_FROM = null, OH_BUSY = false, OH_OPEN_T = 0;   // OH_OPEN_T：開く動きの途中（戻るを押したら動きを止めてすぐ戻る）
 const OH_LIST = () => OH_ON() && !OPS_PAGE;
 const OH_RM = () => { try{ return matchMedia("(prefers-reduced-motion: reduce)").matches; }catch(e){ return false; } };
 const OH_OPEN_MS = 460, OH_BACK_MS = 380;
 function ohCards(){
   const shown = new Set(viewsShown("ops").map(([id]) => id));
-  return OH_CARDS.filter(([id, , v]) => id === "special" ? opsPlaneOn() : shown.has(v));
+  return OH_CARDS.filter(([id, , v]) => id === "special" ? opsPlaneOn() : id === "a3" ? ohA3On() : shown.has(v));
 }
+// 「3D」のカード：今の3D と同じ条件（羽田・a3On）で、隠していないときだけ。押すと openAp3d（専用ページは作らない）
+const ohA3On = () => opsA3On() && a3On(IATA[OPS_AP]);
+const OH_A3_ART = `<svg class="oh3d" viewBox="0 0 120 84" aria-hidden="true"><g fill="none" stroke-linejoin="round" stroke-linecap="round"><path d="M8 52 60 26 112 52 60 78Z" fill="var(--op-pill)" stroke="var(--op-sub)" stroke-width="1.6"/><path d="M8 52v6l52 26 52-26v-6" stroke="var(--op-sub)" stroke-width="1.6"/><path d="M60 78v6" stroke="var(--op-sub)" stroke-width="1.6"/><g stroke="var(--op-ink)" stroke-width="4.5"><path d="M30 46 70 66"/><path d="M48 36 88 56"/></g><path d="M78 40 92 33 100 37 86 44Z" fill="var(--op-card)" stroke="var(--op-ink)" stroke-width="1.6"/><path d="M78 40v-6l14-7v6M92 27l8 4v6" stroke="var(--op-ink)" stroke-width="1.6"/><path d="M36 30V12" stroke="var(--op-ink)" stroke-width="2"/><path d="M31 12h10l-2-5h-6Z" fill="var(--op-ink)" stroke="var(--op-ink)" stroke-width="1.4"/></g></svg>`;
 const ohHM = t => { const d = new Date(t); return `${d.getHours()}:${String(d.getMinutes()).padStart(2, "0")}`; };
 function ohBoardStats(){
   const d = BOARD && BOARD_AP === OPS_AP ? BOARD : null; if(!d) return null;
@@ -11769,6 +11855,8 @@ function ohCardHTML([id, label, , wide]){
     v = `<span class="ohv">${pc == null ? na : `<b>${pc}</b><small>%</small>`}</span>`; }
   else if(id === "art"){ art = `<svg class="ohart" viewBox="0 0 170 126" preserveAspectRatio="none" aria-hidden="true"><g fill="none" stroke="var(--op-sub)" stroke-width="1.6"><path d="M90 124 L10 60"/><path d="M90 124 L40 20"/><path d="M90 124 L95 14"/><path d="M90 124 L150 30"/><path d="M90 124 L168 80"/><path d="M90 124 L0 104"/></g></svg>`; }
   else if(id === "photo"){ const n = (OPS_SPOTS[OPS_AP] || []).length; v = `<span class="ohv">${n ? `<b>${n}</b><small>か所</small>` : na}</span>`; }
+  else if(id === "a3"){ cls += " a3"; art = OH_A3_ART; v = `<span class="ohv"><small>${A3_SIZE}</small></span>`;
+    return `<button type="button" class="${cls}" data-ohub="a3" aria-label="3Dの羽田を開く（押すと${A3_SIZE}を読み込みます）"><span class="oht">${label}</span>${art}${v}</button>`; }
   return `<button type="button" class="${cls}" data-ohub="${id}" aria-label="${label}を開く"><span class="oht">${label}</span>${art}${v}</button>`;
 }
 function opsHubRender(){
@@ -11793,10 +11881,12 @@ function ohInset(el, r){ const s = el.getBoundingClientRect();
 function ohClear(sec){ sec.style.transition = ""; sec.style.clipPath = ""; sec.style.transform = ""; sec.style.transformOrigin = ""; sec.classList.remove("ohanim"); }
 // カードを押した：その見方に切り替えて専用ページにする
 function opsHubOpen(id, from){
-  if(!OH_ON() || OH_BUSY) return; const c = OH_CARDS.find(x => x[0] === id); if(!c) return;
+  if(!OH_ON() || OH_BUSY) return;
+  if(id === "a3"){ if(ohA3On()){ track("ops_hub", "a3"); openAp3d(); } return; }   // 3D は今の3D の画面をそのまま開く（専用ページにしない）
+  const c = OH_CARDS.find(x => x[0] === id); if(!c) return;
   const sec = $("v-ops"), card = from || document.querySelector(`[data-ohub="${id}"]`);
   OH_FROM = { id, rect: card ? card.getBoundingClientRect() : null, y: window.scrollY };
-  OPS_PAGE = id; track("ops_hub", id);
+  OPS_PAGE = id; cxPush("ops"); track("ops_hub", id);
   if(id === "special"){ opsSideSet("plane"); OPS_PL_REG = null; VIEW.opsp = "special"; }
   else if(id !== "plane"){ opsSideSet("ap"); VIEW.ops = c[2]; try{ localStorage.setItem("soramemo.view.ops", c[2]); }catch(e){} }
   VIEW_RENDER.ops(); window.scrollTo(0, 0);
@@ -11805,14 +11895,15 @@ function opsHubOpen(id, from){
   OH_BUSY = true; sec.classList.add("ohanim", "ohup"); sec.style.transition = "none"; sec.style.clipPath = ohInset(sec, r);
   void sec.offsetWidth;
   sec.style.transition = `clip-path ${OH_OPEN_MS}ms cubic-bezier(.2,.8,.2,1)`; sec.style.clipPath = "inset(0px 0px 0px 0px round 0px)";
-  setTimeout(() => { ohClear(sec); OH_BUSY = false; ohAfterOpen(); setTimeout(() => sec.classList.remove("ohup"), 60); }, OH_OPEN_MS + 20);
+  OH_OPEN_T = setTimeout(() => { OH_OPEN_T = 0; ohClear(sec); OH_BUSY = false; ohAfterOpen(); setTimeout(() => sec.classList.remove("ohup"), 60); }, OH_OPEN_MS + 20);
 }
 function ohAfterOpen(){ if(OPS_MAP && OPS_PAGE === "map"){ try{ OPS_MAP.invalidateSize(); opsFit(); }catch(e){} } const b = $("opsHubBack"); if(b) try{ b.focus({ preventScroll:true }); }catch(e){} }
 // 一覧に戻る（カードの位置へ縮む）
 function opsHubBack(){
+  if(OH_OPEN_T){ clearTimeout(OH_OPEN_T); OH_OPEN_T = 0; const s = $("v-ops"); ohClear(s); s.classList.remove("ohup"); OH_BUSY = false; OH_FROM = null; }   // 開く途中でも戻れる（閉じるはいつでも）
   if(!OH_ON() || !OPS_PAGE || OH_BUSY) return;
   const sec = $("v-ops"), f = OH_FROM && OH_FROM.id === OPS_PAGE ? OH_FROM : null, done = () => {
-    ohClear(sec); OH_BUSY = false; const id = OPS_PAGE; OPS_PAGE = null;
+    ohClear(sec); OH_BUSY = false; const id = OPS_PAGE; OPS_PAGE = null; cxPop("ops");
     if(opsSide() === "plane"){ opsSideSet("ap"); }
     VIEW_RENDER.ops(); window.scrollTo(0, f ? f.y : 0);
     const c = document.querySelector(`[data-ohub="${id}"]`); if(c) try{ c.focus({ preventScroll:true }); }catch(e){}
@@ -14741,7 +14832,7 @@ document.addEventListener("click", async e => {
 });
 // 運用のタブを開いたとき（ほかのタブへ移ったら、機体の読み込みを止める）
 async function openOps(){
-  OPS_PAGE = null;   // タブから開いたときは一覧から（決まった見方を開く入口はこのあと opsHubOpen を呼ぶ）
+  if(OPS_PAGE) cxPop("ops"); OPS_PAGE = null;   // タブから開いたときは一覧から（決まった見方を開く入口はこのあと opsHubOpen を呼ぶ）
   track("ops", "open"); OPS_MODE = "auto"; OPS_OBS = null; if(!OPS_WX) OPS_WX_WAIT = true;
   $("opsWx").textContent = "気象通報を読み込んでいます…"; renderOps();
   const [m] = await Promise.all([loadMetar(), loadLeaflet().catch(() => {})]);

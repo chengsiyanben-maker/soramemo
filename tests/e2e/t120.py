@@ -147,7 +147,7 @@ async def main():
         await pg.evaluate("document.querySelectorAll('dialog[open]').forEach(d => d.close())")
         await pg.evaluate("openAirport(IATA.NRT.id)"); await pg.wait_for_timeout(300)
         t = await pg.inner_text('#dAirportBody')
-        check('まだの空港（成田）：画像で共有・写真に押すを出さない・閉じるだけ:', '画像で共有' not in t and '写真に押す' not in t and await pg.locator('#dAirportBody [data-close]').count() == 1)
+        check('まだの空港（成田）：画像で共有・写真に押すを出さない・閉じるだけ:', '画像で共有' not in t and '写真に押す' not in t and await pg.locator('#dAirportBody [data-close]:not(.cx)').count() == 1)   # 上の × （閉じるはいつでも・t163）は数えない
         check('まだの空港（成田）：ターミナルの印は「成田 第1」「まだ」:', '成田 第1' in t and 'まだ' in t and '未訪問' not in t and 'ターミナル' in t)
         await pg.screenshot(path=os.path.join(SHOTS, '04c-844-nrt.png'))
         await pg.evaluate("document.querySelectorAll('dialog[open]').forEach(d => d.close())")
