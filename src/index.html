@@ -2175,13 +2175,15 @@ dialog.a3dlg{inset:0;margin:0;max-width:100vw;max-height:100vh;width:100vw;heigh
 .a3load{position:absolute;inset:0;z-index:4;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:24px;background:#BFD6EA;text-align:center}
 .a3load b{font-size:17px}.a3load span{font-size:13px;color:#4B5563}
 .a3load .row2{width:min(320px,100%);margin-top:8px}
-.a3sheet{position:absolute;left:0;right:0;bottom:0;max-height:40vh;overflow-y:auto;padding:8px 20px calc(16px + env(safe-area-inset-bottom));border-radius:28px 28px 0 0;background:#fff;box-shadow:0 -4px 20px rgba(15,22,38,.12)}
-.a3grab{width:40px;height:5px;border-radius:3px;background:#E5E7EB;margin:0 auto 10px}
+/* 11/21 の不具合1：シートそのものがスクロールする箱だと、3D の絵の上半分にダイアログの背景（薄い青の四角）が出る（Chrome と iPhone の Safari の重ね方の不具合）。シートは切り抜くだけにし、中の .a3body をスクロールさせる */
+.a3sheet{position:absolute;left:0;right:0;bottom:0;max-height:40vh;overflow:hidden;display:flex;flex-direction:column;padding:8px 20px 0;border-radius:28px 28px 0 0;background:#fff;box-shadow:0 -4px 20px rgba(15,22,38,.12)}
+.a3grab{flex-shrink:0;width:40px;height:5px;border-radius:3px;background:#E5E7EB;margin:0 auto 10px}
 .a3x{position:absolute;right:14px;top:14px;width:44px;height:44px;border:0;border-radius:50%;background:#EEF1F5;font-size:22px;color:#374151;cursor:pointer}
 .a3sh{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
 .a3sh h3,.a3sh1{margin:0;font-size:17px;font-weight:800;color:#111827}
 .a3sh .n b{font-size:30px;font-weight:800}.a3sh .u,.a3grid .u{font-size:13px;color:#6B7280;margin-left:2px}
 .a3range,.a3empty{margin:2px 0 8px;font-size:13px;color:#6B7280}
+.a3body{flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding-bottom:calc(16px + env(safe-area-inset-bottom))}
 .a3list{list-style:none;margin:0;padding:0}
 .a3list button{width:100%;display:grid;grid-template-columns:96px minmax(0,1fr) 16px;gap:10px;align-items:center;min-height:56px;padding:8px 0;border:0;background:transparent;font:inherit;text-align:left;color:inherit;cursor:pointer}
 .a3list .no,.a3list .st{display:flex;flex-direction:column;min-width:0}
@@ -4960,10 +4962,11 @@ document.addEventListener("click", e => {
    名札は空の機体だけ。特別塗装機の尾翼は昼だけ金。電池20%以下で軽い表示に自動で切り替え（「ふつうに」で戻せる）。
    天気は空の見え方にだけ使う（印や実績にはしない） */
 const A3_THREE = "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.min.js";
-const A3_SIZE = "約0.2MB";   // three.module.min.js を圧縮して届く大きさ（約170KB）
+const A3_SIZE = "約0.2MB";   // 届く大きさ：three.module.min.js 約166KB＋羽田の形（3d/hnd.json）約34KB。どちらも圧縮して届く量（11/21 に測った）
+const A3_SHAPE = "3d/hnd.json";   // 羽田の形（OpenStreetMap のデータを加工して作成・ODbL。tools/a3_shape.py で作る）
 const A3_DELAY = 60e3, A3_POLL = 20e3;   // 約1分遅らせて出す・20秒ごとに読む（データ担当の調べ report-airport-3d-data.md）
 const A3_C = [35.5533, 139.7811];   // 羽田の中心（OPS_AIRPORTS.HND.center と同じ）
-const A3_TOWER = [35.5537, 139.7853, 115.7];   // 管制塔（高さ 115.7m。位置はおおよそ。形のファイルが来たら置き換える）
+const A3_TOWER = [35.55173, 139.78394, 115.7];   // 管制塔（高さ 115.7m は国土交通省・位置は OpenStreetMap。形のファイルが読めたらその位置）
 const A3_TERM = [[35.549158, 139.784553, 0], [35.550821, 139.788266, 0], [35.544489, 139.767869, 0]];   // T1・T2・T3（TERMS と同じ位置）
 // 機種ごとのおおよその長さ（m）。形は共通で、大きさだけ機種どおりにする
 const A3_LEN = { B788:57, B789:63, B78X:68, B77W:74, B772:64, B773:74, B77L:64, B763:55, B762:49, B764:61, B738:40, B38M:40, B739:42, B737:34, B744:71, B748:76, A359:67, A35K:74, A388:73, A333:64, A332:59, A339:64, A321:45, A21N:45, A320:38, A20N:38, A319:34, E170:30, E75L:32, E190:36, E195:39, DH8D:33, AT76:27, AT75:27, CRJ7:33, SF34:20, B39M:42, B3XM:43, B77F:64, B74F:71 };
@@ -5037,7 +5040,9 @@ async function openAp3d(){
   if(!A3_OFF_LITE && await a3LowBattery()){ A3.lite = A3.liteAuto = true; }
   a3Head();
   let THREE;
+  const shape = a3Shape();   // 形のファイルは three.js と一緒に読む（読めなくても前の仮の島で開く）
   try{ THREE = await import(A3_THREE); }catch(e){ if(A3){ A3.err = true; a3Fail(); } return; }
+  const S = await shape; if(A3) A3.shape = S;
   if(!A3 || !d.open) return;
   A3.THREE = THREE;
   try{ a3Build(); }catch(e){ A3.err = true; a3Fail(); return; }
@@ -5045,6 +5050,12 @@ async function openAp3d(){
   a3Poll(); A3.timer = setInterval(a3Poll, A3_POLL);
   setTimeout(() => { if(A3){ A3.credit = false; a3Credit(); } }, 5000);   // 角の出典は5秒で「出典 ⓘ」に畳む
   a3Loop();
+}
+// 羽田の形のファイル（開いたときだけ読む。1回読んだらこの画面を開いているあいだ使い回す）
+let A3_SHAPE_DATA = null;
+async function a3Shape(){
+  if(A3_SHAPE_DATA) return A3_SHAPE_DATA;
+  try{ const r = await fetch(A3_SHAPE); if(!r.ok) return null; const d = await r.json(); if(!d || !Array.isArray(d.land) || !Array.isArray(d.bld)) return null; A3_SHAPE_DATA = d; return d; }catch(e){ return null; }
 }
 let A3_OFF_LITE = false;   // 「ふつうに」を押したら、この回は自動で軽くしない
 function closeAp3d(keep){
@@ -5063,7 +5074,7 @@ function a3ShellHTML(){
       <button type="button" class="a3rnd" data-a3-menu aria-label="設定と出典" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="18" cy="12" r="1.8"/></svg></button></div>
     <div class="a3pills" role="group" aria-label="視点"><button type="button" data-a3-view="all" aria-pressed="true">全体</button><button type="button" data-a3-view="tower" aria-pressed="false">管制塔</button><button type="button" data-a3-view="plane" aria-pressed="false" id="a3PlaneBtn">機体</button></div>
     <div class="a3chips" id="a3Chips"></div>
-    <button type="button" class="a3credit" id="a3Credit" data-a3-src>adsb.lol（ODbL）・AIP JAPAN <i aria-hidden="true">ⓘ</i></button>
+    <button type="button" class="a3credit" id="a3Credit" data-a3-src>${A3_CREDIT()}</button>
     <div class="a3menu" id="a3Menu" hidden><button type="button" data-a3-lite>軽い表示にする</button><button type="button" data-a3-src>データの出典</button></div>
     <div class="a3load" id="a3Load"><b>3Dを読み込み中…</b><span>${A3_SIZE}。開いたときだけ読み込みます</span><button type="button" class="btn2" data-a3-close>やめる</button></div>
     <section class="a3sheet" id="a3Sheet" aria-live="polite"></section>
@@ -5079,7 +5090,8 @@ function a3Head(){
   const m = document.querySelector("[data-a3-lite]"); if(m) m.textContent = A3.lite ? "ふつうの表示にする" : "軽い表示にする";
   a3Status();
 }
-function a3Credit(){ const c = $("a3Credit"); if(c) c.innerHTML = A3 && A3.credit ? `adsb.lol（ODbL）・AIP JAPAN <i aria-hidden="true">ⓘ</i>` : `出典 <i aria-hidden="true">ⓘ</i>`; }
+const A3_CREDIT = () => `adsb.lol・© OpenStreetMap・AIP JAPAN <i aria-hidden="true">ⓘ</i>`;
+function a3Credit(){ const c = $("a3Credit"); if(c) c.innerHTML = A3 && A3.credit ? A3_CREDIT() : `出典 <i aria-hidden="true">ⓘ</i>`; }
 // 左上の札（位置を受信中・電池・霧・雲・夜）。緑の点は「受信中」だけ
 function a3Status(){
   const el = $("a3Chips"); if(!el || !A3) return;
@@ -5097,47 +5109,178 @@ function a3Status(){
 }
 /* 景色を作る */
 function a3Build(){
-  const T = A3.THREE, cv = $("a3Cv"), st = $("a3Stage");
-  const r = new T.WebGLRenderer({ canvas:cv, antialias:!A3.lite, alpha:false });
-  r.setPixelRatio(Math.min(A3.lite ? 1 : 2, window.devicePixelRatio || 1));
-  const scene = new T.Scene(), cam = new T.PerspectiveCamera(50, 1, 20, 120000);
+  const T = A3.THREE, cv = $("a3Cv"), st = $("a3Stage"), lite = A3.lite;
+  const r = new T.WebGLRenderer({ canvas:cv, antialias:!lite, alpha:false, powerPreference:"high-performance" });
+  if(A3.q == null) A3.q = lite ? 0 : 2;   // 質：2＝影あり・細かい / 1＝影なし / 0＝影なし・粗い（重ければ自動で下げる）
+  r.setPixelRatio(Math.min(A3.q >= 2 ? 2 : A3.q === 1 ? 1.5 : 1, window.devicePixelRatio || 1));
+  r.shadowMap.enabled = !lite && A3.q >= 2; r.shadowMap.type = T.PCFShadowMap;
+  const scene = new T.Scene(), cam = new T.PerspectiveCamera(50, 1, 30, 300000);
   A3.r = r; A3.scene = scene; A3.cam = cam;
-  const night = a3Night();
-  A3.night = night;
-  const col = a3Colors(night);
-  scene.background = new T.Color(col.sky);
-  $("dAp3d").style.background = "#" + col.sky.toString(16).padStart(6, "0");   // 描く前とすき間も空の色
+  const night = a3Night(); A3.night = night;
+  const col = a3Colors(night); A3.col = col;
+  scene.background = new T.Color(col.hor);
+  $("dAp3d").style.background = "#" + col.hor.toString(16).padStart(6, "0");   // 描く前とすき間も地平の色
+  // 空：上ほど濃いグラデーションの大きな球（カメラと一緒に動かす）。11/21 の不具合1（上半分の薄い青の四角）は、海の板の端が霞の手前で見えていたもの。海を広げ、霞を地平の色にそろえて消す
+  const sky = new T.Mesh(new T.SphereGeometry(250000, 24, 12), new T.ShaderMaterial({ side:T.BackSide, depthWrite:false, fog:false,
+    uniforms:{ top:{ value:new T.Color(col.top) }, hor:{ value:new T.Color(col.hor) }, glow:{ value:new T.Color(col.glow) }, sun:{ value:a3SunDir(T) } },
+    vertexShader:"varying vec3 vd; void main(){ vd = normalize((modelMatrix * vec4(position, 1.0)).xyz - cameraPosition); gl_Position = projectionMatrix * viewMatrix * modelMatrix * vec4(position, 1.0); }",
+    fragmentShader:"uniform vec3 top; uniform vec3 hor; uniform vec3 glow; uniform vec3 sun; varying vec3 vd; void main(){ vec3 d = normalize(vd); float h = clamp(d.y, 0.0, 1.0); vec3 c = mix(hor, top, pow(h, 0.55)); float s = max(dot(d, sun), 0.0); c += glow * pow(s, 6.0) * (1.0 - h); gl_FragColor = vec4(c, 1.0);\n#include <colorspace_fragment>\n}" }));
+  sky.renderOrder = -1; scene.add(sky); A3.sky = sky;
   const w = NOW && NOW.data && NOW.data.weather;
-  if(w && w.vis_m != null && w.vis_m < 5000) scene.fog = new T.Fog(col.sky, Math.max(400, w.vis_m * 0.6), Math.max(1500, w.vis_m * 2.2));
-  else scene.fog = new T.Fog(col.sky, 26000, 60000);
-  scene.add(new T.HemisphereLight(0xffffff, night ? 0x223040 : 0xb9c6cf, night ? 1.4 : 2.6));
-  const sun = new T.DirectionalLight(0xffffff, night ? 0.5 : 1.6); sun.position.set(-3000, 8000, 4000); scene.add(sun);
-  const mat = c => new T.MeshLambertMaterial({ color:c });
-  const sea = new T.Mesh(new T.PlaneGeometry(120000, 120000), mat(col.sea)); sea.rotation.x = -Math.PI / 2; sea.position.y = -2; scene.add(sea);
-  const sh = new T.Shape(), land = a3Land(); land.forEach(([x, z], i) => i ? sh.lineTo(x, -z) : sh.moveTo(x, -z));
-  const lm = new T.Mesh(new T.ShapeGeometry(sh), mat(col.land)); lm.rotation.x = -Math.PI / 2; scene.add(lm);
-  const lights = [];
-  for(const rw of HND_RWY){
-    const [x1, z1] = a3XZ(rw[1], rw[2]), [x2, z2] = a3XZ(rw[5], rw[6]), len = Math.hypot(x2 - x1, z2 - z1), ang = Math.atan2(x2 - x1, z2 - z1);
-    const m = new T.Mesh(new T.BoxGeometry(60, 1, len), mat(col.rw)); m.position.set((x1 + x2) / 2, 0.5, (z1 + z2) / 2); m.rotation.y = ang; scene.add(m);
-    if(!A3.lite){ const c = new T.Mesh(new T.BoxGeometry(2, 1.2, len - 200), mat(0xffffff)); c.position.copy(m.position); c.position.y = 0.6; c.rotation.y = ang; c.material.transparent = true; c.material.opacity = .7; scene.add(c);
-      for(let i = 0; i <= len; i += 150) for(const s of [-1, 1]){ const t = i / len, px = x1 + (x2 - x1) * t + Math.cos(ang) * 31 * s, pz = z1 + (z2 - z1) * t - Math.sin(ang) * 31 * s; lights.push(px, 2, pz); } }
+  scene.fog = w && w.vis_m != null && w.vis_m < 5000 ? new T.Fog(col.hor, Math.max(400, w.vis_m * 0.6), Math.max(1500, w.vis_m * 2.2)) : new T.Fog(col.hor, 22000, 70000);
+  // 光：空の明るさ＋太陽（実際の太陽の向き。夜は月明かりほど）
+  scene.add(new T.HemisphereLight(col.skyL, col.gndL, col.hemi));
+  const sun = new T.DirectionalLight(col.sunC, col.sunI), sd = a3SunDir(T, true);
+  sun.position.set(sd.x * 20000, sd.y * 20000, sd.z * 20000); scene.add(sun); scene.add(sun.target); A3.sun = sun;
+  if(r.shadowMap.enabled){ sun.castShadow = true; const sc = sun.shadow.camera; sc.left = sc.bottom = -4200; sc.right = sc.top = 4200; sc.near = 1000; sc.far = 45000;
+    sun.shadow.mapSize.set(2048, 2048); sun.shadow.bias = -0.0006; sun.shadow.normalBias = 2; }
+  const L = (c, o) => { const m = new T.MeshLambertMaterial({ color:c }); if(o){ m.polygonOffset = true; m.polygonOffsetFactor = -o; m.polygonOffsetUnits = -o * 4; } return m; };
+  const flat = (rings, y, c, o, recv) => { if(!rings.length) return null; const gs = rings.map(a => { const sh = new T.Shape(); for(let i = 0; i < a.length; i += 2) i ? sh.lineTo(a[i], -a[i + 1]) : sh.moveTo(a[i], -a[i + 1]); return new T.ShapeGeometry(sh); });
+    const g = a3Merge(T, gs); g.rotateX(-Math.PI / 2); const m = new T.Mesh(g, L(c, o)); m.position.y = y; m.receiveShadow = !!recv; scene.add(m); return m; };
+  // 海はとても広く（端が霞の向こうに隠れる大きさ）
+  const sea = new T.Mesh(new T.PlaneGeometry(600000, 600000), L(col.sea)); sea.rotation.x = -Math.PI / 2; sea.position.y = -2; scene.add(sea);
+  const S = A3.shape;
+  if(S){
+    flat(S.land, 0, col.land, 1);
+    flat(S.water, 0.2, col.sea, 2);
+    flat([S.aero], 0.4, col.aero, 3, true);
+    flat(S.grass, 0.6, col.grass, 4, true);
+    flat(S.apron, 0.8, col.apron, 5, true);
+    if(S.twy.length){ const g = a3Ribbons(T, S.twy); const m = new T.Mesh(g, L(col.twy, 6)); m.material.side = T.DoubleSide; m.position.y = 1; m.receiveShadow = true; scene.add(m);
+      if(!lite && night !== "night"){ const ln = a3Lines(T, S.twy); scene.add(new T.LineSegments(ln, new T.LineBasicMaterial({ color:col.twyL, transparent:true, opacity:.75 }))); } }
+  } else {
+    flat([a3Land().flatMap(([x, z]) => [x, z])], 0.4, col.aero, 3, true);   // 形のファイルが読めないときは前の仮の島
   }
-  for(const t of A3_TERM){ const [x, z] = a3XZ(t[0], t[1]); const b = new T.Mesh(new T.BoxGeometry(520, 34, 150), mat(col.bld)); b.position.set(x, 17, z); b.rotation.y = 0.35; scene.add(b);
-    if(night && !A3.lite){ const wv = new T.Mesh(new T.BoxGeometry(524, 6, 154), new T.MeshBasicMaterial({ color:0xE9A14B })); wv.position.set(x, 20, z); wv.rotation.y = 0.35; scene.add(wv); } }
-  { const [x, z] = a3XZ(A3_TOWER[0], A3_TOWER[1]); const tw = new T.Mesh(new T.CylinderGeometry(7, 10, A3_TOWER[2], 10), mat(col.bld)); tw.position.set(x, A3_TOWER[2] / 2, z); scene.add(tw);
-    const cab = new T.Mesh(new T.CylinderGeometry(16, 12, 14, 10), mat(night ? 0x8FB3C9 : 0xC9D6DF)); cab.position.set(x, A3_TOWER[2] - 4, z); scene.add(cab); }
-  if(night && !A3.lite && lights.length){ const g = new T.BufferGeometry(); g.setAttribute("position", new T.Float32BufferAttribute(lights, 3));
-    scene.add(new T.Points(g, new T.PointsMaterial({ color:0xffffff, size:2, sizeAttenuation:false }))); }
-  A3.mat = mat; A3.col = col;
-  const resize = () => { if(!A3) return; const w2 = st.clientWidth, h2 = st.clientHeight; r.setSize(w2, h2, false); cam.aspect = w2 / Math.max(1, h2); cam.updateProjectionMatrix(); A3.dirty = true; };
+  // 滑走路（AIP JAPAN をもとにした端の位置が正）。標示（番号・中心線・末端の縞・接地帯）は絵にして貼る
+  const lights = { w:[], g:[], r:[], b:[], a:[] };
+  for(const rw of HND_RWY){
+    const [x1, z1] = a3XZ(rw[1], rw[2]), [x2, z2] = a3XZ(rw[5], rw[6]), len = Math.hypot(x2 - x1, z2 - z1);
+    const g = new T.PlaneGeometry(60, len); g.rotateX(-Math.PI / 2);
+    const tex = a3RwyTex(T, rw, len, lite); tex.anisotropy = Math.min(8, r.capabilities.getMaxAnisotropy());
+    const mt = new T.MeshLambertMaterial({ map:tex, polygonOffset:true, polygonOffsetFactor:-8, polygonOffsetUnits:-32 });
+    const m = new T.Mesh(g, mt); m.position.set((x1 + x2) / 2, 1.2, (z1 + z2) / 2); m.rotation.y = Math.atan2(-(x1 - x2), -(z1 - z2)); m.receiveShadow = true; scene.add(m);
+    if(!lite){ const ux = (x2 - x1) / len, uz = (z2 - z1) / len, nx = -uz, nz = ux;
+      for(let i = 0; i <= len; i += 60) for(const s of [-1, 1]) lights.w.push(x1 + ux * i + nx * 31 * s, 2, z1 + uz * i + nz * 31 * s);
+      for(let i = 30; i < len - 30; i += 30) lights.a.push(x1 + ux * i, 1.6, z1 + uz * i);   // 中心線の灯り（弱く）
+      for(const [ex, ez, sx] of [[x1, z1, -1], [x2, z2, 1]]) for(let j = -30; j <= 30; j += 4){
+        lights.g.push(ex + nx * j, 2, ez + nz * j); lights.r.push(ex + nx * j + ux * sx * 3, 2, ez + nz * j + uz * sx * 3);
+        if(j === -30) for(let d = 60; d <= 900; d += 30){ const ax = ex + ux * sx * d, az = ez + uz * sx * d; lights.w.push(ax, 3, az); if(d % 300 === 0) for(let c = -15; c <= 15; c += 5) lights.w.push(ax + nx * c, 3, az + nz * c); } } }
+  }
+  // 誘導路の縁の青い灯り（夜）
+  if(S && !lite && night !== "day") for(const t of S.twy){ for(let i = 3; i < t.length; i += 2){ const ax = t[i - 2], az = t[i - 1], bx = t[i], bz = t[i + 1], l = Math.hypot(bx - ax, bz - az) || 1, nx = -(bz - az) / l, nz = (bx - ax) / l;
+    for(let d = 0; d < l; d += 70) for(const s of [-1, 1]) lights.b.push(ax + (bx - ax) * d / l + nx * t[0] / 2 * s, 1.5, az + (bz - az) * d / l + nz * t[0] / 2 * s); } }
+  // 建物：形のファイルの外形を高さどおりに立てる。ターミナルはガラスの色、格納庫は大きな屋根、ほかは白っぽい
+  if(S && S.bld.length){
+    for(const kind of ["t", "h", "b"]){
+      const list = S.bld.filter(b => b[0] === kind); if(!list.length) continue;
+      const gs = list.map(b => { const a = b.slice(2), sh = new T.Shape(); for(let i = 0; i < a.length; i += 2) i ? sh.lineTo(a[i], a[i + 1]) : sh.moveTo(a[i], a[i + 1]);
+        const g = new T.ExtrudeGeometry(sh, { depth:b[1], bevelEnabled:false }); g.rotateX(Math.PI / 2); g.translate(0, b[1], 0); return g; });
+      const g = a3Merge(T, gs, kind === "t" ? [col.tRoof, col.tWall] : kind === "h" ? [col.hRoof, col.hWall] : [col.bRoof, col.bWall]);
+      const m = new T.Mesh(g, new T.MeshLambertMaterial({ vertexColors:true, emissive:kind === "t" && night === "night" ? 0x6B4A1E : 0x000000 }));
+      m.castShadow = m.receiveShadow = r.shadowMap.enabled; scene.add(m);
+    }
+  } else {
+    for(const t of A3_TERM){ const [x, z] = a3XZ(t[0], t[1]); const b = new T.Mesh(new T.BoxGeometry(520, 34, 150), L(col.bWall)); b.position.set(x, 17, z); b.rotation.y = 0.35; scene.add(b); }
+  }
+  // 管制塔（高さ 115.7m・国土交通省。位置は OpenStreetMap）：細い塔＋上の管制室（ガラス）＋屋上のアンテナ
+  { const [x, z] = S && S.tower ? S.tower : a3XZ(A3_TOWER[0], A3_TOWER[1]), H = A3_TOWER[2]; A3.towerXZ = [x, z];
+    const sh = new T.Mesh(new T.CylinderGeometry(5.5, 9, H - 16, 16), L(col.bWall)); sh.position.set(x, (H - 16) / 2, z); sh.castShadow = r.shadowMap.enabled; scene.add(sh);
+    const fl = new T.Mesh(new T.CylinderGeometry(13, 8, 4, 16), L(col.bWall)); fl.position.set(x, H - 17, z); scene.add(fl);
+    const cab = new T.Mesh(new T.CylinderGeometry(14, 12, 9, 16), new T.MeshLambertMaterial({ color:col.glass, emissive:night === "night" ? 0x2E5A44 : 0 })); cab.position.set(x, H - 10.5, z); scene.add(cab);
+    const rf = new T.Mesh(new T.CylinderGeometry(9, 15, 4, 16), L(col.bWall)); rf.position.set(x, H - 4, z); scene.add(rf);
+    const an = new T.Mesh(new T.CylinderGeometry(0.6, 0.6, 14, 6), L(0x9CA3AF)); an.position.set(x, H + 5, z); scene.add(an); }
+  // 灯り（夕方と夜）：滑走路の縁は白・端は緑と赤・進入灯は白・誘導路は青
+  if(!lite && night !== "day"){ const pr = r.getPixelRatio(), P = (arr, c, s, op) => { if(!arr.length) return; const g = new T.BufferGeometry(); g.setAttribute("position", new T.Float32BufferAttribute(arr, 3));
+      const m = new T.Points(g, new T.PointsMaterial({ color:c, size:s * pr, sizeAttenuation:false, transparent:true, opacity:op, fog:false, depthWrite:false })); m.userData.ps = s; scene.add(m); };   // 大きさは CSS の画素（画素の密度を掛ける）
+    const k = night === "night" ? 1 : .55;
+    P(lights.w, 0xFFF4DE, 2.2, k); P(lights.g, 0x5BE38A, 2.4, k); P(lights.r, 0xFF5A4F, 2.2, k); P(lights.b, 0x6E9BFF, 1.6, .85 * k); P(lights.a, 0xFFFFFF, 1.2, .45 * k); }
+  A3.mat = L;
+  const resize = () => { if(!A3) return; const w2 = st.clientWidth, h2 = st.clientHeight; r.setSize(w2, h2, false); cam.aspect = w2 / Math.max(1, h2); A3.vo = -1; a3ViewOffset(); A3.dirty = true; };
   A3.ro = new ResizeObserver(resize); A3.ro.observe(st); resize();
   a3Drag(cv);
 }
-function a3Night(t = Date.now()){ const el = sunPos(t, A3_C[0], A3_C[1]).el; return el < -6 ? "night" : el < 2 ? "dusk" : "day"; }
-const a3Colors = n => n === "night" ? { sky:0x101A27, sea:0x14212F, land:0x34404D, rw:0x4A5462, bld:0x5A6573 }
-  : n === "dusk" ? { sky:0xE9C7A8, sea:0x8FA6BC, land:0xCFCFC6, rw:0x6E747C, bld:0xB9BEC4 }
-  : { sky:0xBFD6EA, sea:0xA6C5DD, land:0xE6ECE4, rw:0x7C838C, bld:0xD3D8DE };
+// 下のシートに隠れる分だけ、絵の中心（見ている点）を上へずらす。11/21：機体の視点で地上の機体がシートの裏に入っていた
+function a3ViewOffset(){
+  const st = $("a3Stage"), sh = $("a3Sheet"); if(!A3 || !A3.cam || !st) return;
+  const W = st.clientWidth, H = st.clientHeight, s = sh ? Math.max(0, Math.min(H * 0.45, H - (sh.getBoundingClientRect().top - st.getBoundingClientRect().top))) : 0;
+  if(Math.abs(s - (A3.vo ?? -1)) < 4 && A3.voFov === A3.cam.userData.fov) return;
+  A3.vo = s; A3.voFov = A3.cam.userData.fov;
+  const cam = A3.cam, f = A3.cam.userData.fov || 50, half = Math.tan(f * D2R / 2) * (H + s) / H;   // 見えている所の縦の画角を変えない
+  cam.fov = 2 * Math.atan(half) / D2R; cam.setViewOffset(W, H + s, 0, s, W, H); cam.updateProjectionMatrix(); A3.dirty = true;
+}
+// 太陽の向き（three.js の向き：x＝東・y＝上・z＝南）。light＝影を作る光は低すぎないよう 12° 以上に
+function a3SunDir(T, light){
+  const s = sunPos(A3.t || Date.now(), A3_C[0], A3_C[1]); let el = s.el;
+  if(A3.night === "night"){ el = 40; s.az = 200; }   // 夜は月明かりほどの弱い光（南の高い所から）
+  if(light) el = Math.max(12, el);
+  const e = el * D2R, a = s.az * D2R;
+  return new T.Vector3(Math.sin(a) * Math.cos(e), Math.sin(e), -Math.cos(a) * Math.cos(e)).normalize();
+}
+// いくつもの形を1つにまとめる（描く回数を減らす）。cols＝[上向きの面の色, 横の面の色] を渡すと頂点に色を付ける
+function a3Merge(T, gs, cols){
+  const parts = gs.map(g => g.index ? g.toNonIndexed() : g); let n = 0; parts.forEach(g => n += g.attributes.position.count);
+  const pos = new Float32Array(n * 3), nor = new Float32Array(n * 3), cl = cols ? new Float32Array(n * 3) : null; let o = 0;
+  const c0 = cols && new T.Color(cols[0]), c1 = cols && new T.Color(cols[1]);
+  for(const g of parts){ if(!g.attributes.normal) g.computeVertexNormals(); const p = g.attributes.position.array, q = g.attributes.normal.array;
+    pos.set(p, o * 3); nor.set(q, o * 3);
+    if(cl) for(let i = 0; i < g.attributes.position.count; i++){ const c = q[i * 3 + 1] > 0.5 ? c0 : c1; cl[(o + i) * 3] = c.r; cl[(o + i) * 3 + 1] = c.g; cl[(o + i) * 3 + 2] = c.b; }
+    o += g.attributes.position.count; g.dispose(); }
+  const out = new T.BufferGeometry(); out.setAttribute("position", new T.BufferAttribute(pos, 3)); out.setAttribute("normal", new T.BufferAttribute(nor, 3)); if(cl) out.setAttribute("color", new T.BufferAttribute(cl, 3));
+  return out;
+}
+// 誘導路：線を幅どおりの帯にする（つなぎ目は少し重ねる）
+function a3Ribbons(T, list){
+  const pos = [];
+  for(const t of list){ const w = t[0] / 2;
+    for(let i = 3; i < t.length; i += 2){ let ax = t[i - 2], az = t[i - 1], bx = t[i], bz = t[i + 1]; const l = Math.hypot(bx - ax, bz - az); if(!l) continue;
+      const ux = (bx - ax) / l, uz = (bz - az) / l, nx = -uz * w, nz = ux * w; ax -= ux * w * .9; az -= uz * w * .9; bx += ux * w * .9; bz += uz * w * .9;
+      pos.push(ax + nx, 0, az + nz, bx - nx, 0, bz - nz, bx + nx, 0, bz + nz, ax + nx, 0, az + nz, ax - nx, 0, az - nz, bx - nx, 0, bz - nz); } }
+  const g = new T.BufferGeometry(); g.setAttribute("position", new T.Float32BufferAttribute(pos, 3));
+  const nr = new Float32Array(pos.length); for(let i = 1; i < nr.length; i += 3) nr[i] = 1; g.setAttribute("normal", new T.BufferAttribute(nr, 3));   // 面の向きがばらばらでも、光はまっすぐ上向きの面として受ける
+  return g;
+}
+// 誘導路の中心線（黄色の細い線）
+function a3Lines(T, list){
+  const pos = []; for(const t of list) for(let i = 3; i < t.length; i += 2) pos.push(t[i - 2], 1.6, t[i - 1], t[i], 1.6, t[i + 1]);
+  const g = new T.BufferGeometry(); g.setAttribute("position", new T.Float32BufferAttribute(pos, 3)); return g;
+}
+// 滑走路の標示の絵。上（0）が端A、下が端B。幅 60m を 64 こま（約1m）。番号は降りてくる側から読める向き
+function a3RwyTex(T, rw, len, lite){
+  const k = lite ? .5 : 1, W = Math.round(64 * k), H = Math.min(4096, Math.round(len * k)), s = H / len, px = W / 60;
+  const c = document.createElement("canvas"); c.width = W; c.height = H; const g = c.getContext("2d");
+  g.fillStyle = "#" + A3.col.rw.toString(16).padStart(6, "0"); g.fillRect(0, 0, W, H);
+  const night = A3.night === "night", wht = night ? "rgba(225,230,236,.55)" : "rgba(250,251,252,.92)";
+  g.fillStyle = wht;
+  g.fillRect(1.2 * px, 0, 0.9 * px, H); g.fillRect(W - 2.1 * px, 0, 0.9 * px, H);   // 縁の線
+  const ends = [{ name:rw[0], at:rw[3] * 0.3048, dir:1, y0:0 }, { name:rw[4], at:rw[7] * 0.3048, dir:-1, y0:H }];
+  const Y = (e, m) => e.y0 + e.dir * m * s;
+  const box = (e, m, l, x, w) => { const a = Y(e, m), b = Y(e, m + l); g.fillRect(x * px, Math.min(a, b), w * px, Math.abs(b - a)); };
+  for(const e of ends){
+    const th = e.at + 6;
+    if(e.at > 0){ g.fillRect(0, Math.min(Y(e, e.at), Y(e, e.at + 1.8)), W, 1.8 * s);   // ずらした末端：横の線と矢印
+      for(let m = 20; m < e.at - 30; m += 120){ box(e, m, 30, 29.5, 1); const tip = Y(e, m + 30); g.beginPath(); g.moveTo(25 * px, tip - e.dir * 8 * s); g.lineTo(30 * px, tip); g.lineTo(35 * px, tip - e.dir * 8 * s); g.lineWidth = px; g.strokeStyle = wht; g.stroke(); } }
+    for(let i = 0; i < 8; i++){ box(e, th, 30, 3 + i * 3.4, 1.8); box(e, th, 30, 57 - 1.8 - i * 3.4, 1.8); }   // 末端の縞（左右に8本ずつ）
+    // 番号：末端のすぐ先。L・R・C の字は末端に近い側、数字はその先
+    const num = e.name.replace(/[LRC]$/, ""), side = (e.name.match(/[LRC]$/) || [""])[0];
+    const draw = (txt, m, h) => { const y = Y(e, m + h / 2); g.save(); g.translate(W / 2, y); if(e.dir === 1) g.rotate(Math.PI); g.font = `700 ${Math.round(h * s)}px system-ui, sans-serif`; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText(txt, 0, 0, W * .8); g.restore(); };
+    let m0 = th + 42; if(side){ draw(side, m0, 16); m0 += 22; } draw(num, m0, 16);
+    for(const m of [150, 300, 550, 700]) if(th + m < len / 2 - 60) for(const x of [17, 40]){ box(e, th + m, 22, x, 3); }   // 接地帯
+    if(th + 400 < len / 2) for(const x of [16, 38.5]) box(e, th + 400, 45, x, 5.5);   // 目標点
+    e.cl = m0 + 16 + 20;   // 中心線は番号の先から
+  }
+  // 中心線（30m の線と 20m のすき間）
+  const a = ends[0].cl, b = len - ends[1].cl;
+  for(let m = a; m + 30 < b; m += 50) g.fillRect(29.5 * px, m * s, 0.9 * px, 30 * s);
+  const t = new T.CanvasTexture(c); t.colorSpace = T.SRGBColorSpace; t.generateMipmaps = true; t.minFilter = T.LinearMipmapLinearFilter; return t;
+}
+function a3Night(t = Date.now()){ const el = sunPos(t, A3_C[0], A3_C[1]).el; return el < -6 ? "night" : el < 4 ? "dusk" : "day"; }
+// 色：上の空・地平・陸・空港・芝・駐機場・誘導路・滑走路・建物（屋根と壁）
+const a3Colors = n => n === "night" ? { top:0x050A14, hor:0x1C2A3C, glow:0x000000, skyL:0x8DA2C2, gndL:0x141B25, hemi:1.4, sunC:0xB7C6E0, sunI:0.45, sea:0x0C1724, land:0x27303B, aero:0x2C3642, grass:0x24322D, apron:0x3A4450, twy:0x343D48, twyL:0x6B6A3A, rw:0x2E343C,
+    tRoof:0x39434F, tWall:0xC99A58, hRoof:0x353E49, hWall:0x2E3640, bRoof:0x323B46, bWall:0x2C343E, glass:0x5F8E77 }
+  : n === "dusk" ? { top:0x34466E, hor:0xF0B485, glow:0xFFB070, skyL:0xF6C9A4, gndL:0x5E5650, hemi:1.8, sunC:0xFFD3AA, sunI:1.25, sea:0x6D7D95, land:0xB4ACA2, aero:0xBDB8AD, grass:0x949F80, apron:0xAEABA6, twy:0x7C7D81, twyL:0xC9A64A, rw:0x55585E,
+    tRoof:0xD8CFC4, tWall:0x8D99A6, hRoof:0xC9C0B6, hWall:0xB1A9A0, bRoof:0xC6BDB3, bWall:0xB9B0A6, glass:0x9FB0BD }
+  : { top:0x4F8BCB, hor:0xD3E3EF, glow:0xFFFFFF, skyL:0xEAF2FA, gndL:0x9AA391, hemi:2.0, sunC:0xFFFFFF, sunI:1.9, sea:0x86AECB, land:0xD7D3C7, aero:0xDCE2D7, grass:0xAFC896, apron:0xC7CBCF, twy:0x8E939A, twyL:0xD9B53C, rw:0x60656C,
+    tRoof:0xEEF0F2, tWall:0x8FA6BA, hRoof:0xD9DDE1, hWall:0xC3C9CF, bRoof:0xE4E7EA, bWall:0xCDD2D7, glass:0xA9C3D3 };
 // 指で左右に回す（全体と管制塔）
 function a3Drag(cv){
   let x0 = null;
@@ -5191,60 +5334,123 @@ function a3Lerp(p, q, f){ const dh = (((q.hdg ?? p.hdg ?? 0) - (p.hdg ?? 0)) % 3
 function a3Ahead(p, s){ if(!p.kt || p.hdg == null || !a3Air(p)) return { ...p };
   const m = p.kt * 0.5144 * s, h = p.hdg * D2R, dn = Math.cos(h) * m, de = Math.sin(h) * m;
   return { ...p, lat:p.lat + dn / 110574, lon:p.lon + de / (111320 * Math.cos(p.lat * D2R)), alt_ft:p.alt_ft == null ? null : Math.max(0, p.alt_ft + (p.fpm || 0) * s / 60) }; }
-/* 毎こま描く */
+/* 毎こま描く。動きは約30こま／秒まで（機体はゆっくり動くので、電池と熱を抑える）。続けて重いときは質を自動で下げる */
 function a3Loop(){
   if(!A3) return;
   A3.raf = requestAnimationFrame(a3Loop);
   const now = Date.now();
   if(A3.lite && !A3.dirty && now - (A3.drawn || 0) < 20000) return;   // 軽い表示：動かしたときと20秒ごとだけ描く
-  A3.dirty = false; A3.drawn = now;
+  if(!A3.lite && !A3.dirty && now - (A3.drawn || 0) < 30) return;
+  A3.dirty = false;
+  if(!A3.lite){ const dt = now - (A3.drawn || now); A3.fr = (A3.fr || []).concat(dt).slice(-60);
+    if(A3.fr.length === 60 && now - (A3.qAt || A3.t0) > 4000){ const avg = A3.fr.reduce((s, x) => s + x, 0) / 60; if(avg > 45 && A3.q > 0) a3Quality(A3.q - 1); } }
+  A3.drawn = now;
   const ps = a3Planes(now);
-  a3Sync(ps); a3Camera(ps); A3.r.render(A3.scene, A3.cam); a3Labels(ps);
+  a3Sync(ps); a3Camera(ps); if(A3.sky) A3.sky.position.copy(A3.cam.position); A3.r.render(A3.scene, A3.cam); a3Labels(ps);
 }
-// 機体の形：胴・翼・尾翼（共通の形を機種の長さで伸ばす）
+// 質を下げる：2→1 は影をやめる、1→0 は細かさ（画素の密度）を下げる。作り直さずに切り替える
+function a3Quality(q){
+  if(!A3 || !A3.r) return;
+  A3.q = q; A3.qAt = Date.now(); A3.fr = [];
+  if(q < 2 && A3.r.shadowMap.enabled){ A3.r.shadowMap.enabled = false; if(A3.sun) A3.sun.castShadow = false; A3.scene.traverse(o => { if(o.material){ o.castShadow = o.receiveShadow = false; [].concat(o.material).forEach(m => m.needsUpdate = true); } }); }
+  A3.r.setPixelRatio(Math.min(q >= 2 ? 2 : q === 1 ? 1.5 : 1, window.devicePixelRatio || 1));
+  const pr = A3.r.getPixelRatio(); A3.scene.traverse(o => { if(o.isPoints && o.material.sizeAttenuation === false) o.material.size = (o.userData.ps || 3) * pr; });
+  const st = $("a3Stage"); if(st) A3.r.setSize(st.clientWidth, st.clientHeight, false);
+  A3.dirty = true;
+}
+// 機体の形の種類：大きな2発・4発・細い胴の2発・小さなジェット（後ろに発動機）・プロペラ（高い翼）
+function a3Kind(t){
+  t = String(t || "").toUpperCase();
+  if(/^(B74|A38|A34)/.test(t)) return "q";
+  if(/^(B76|B77|B78|A33|A35|A30|B74F|B77F)/.test(t)) return "w";
+  if(/^(CRJ|E1|E7|E9|ERJ|MRJ|BCS|CS)/.test(t)) return "r";
+  if(/^(DH8|AT[47]|SF3|Q[1-4]|D328|SAAB|DHC|B350|C208|PC12)/.test(t)) return "p";
+  return "n";
+}
+// 機体の形（長さ1で作り、機種の長さに伸ばす）：胴・機首・尾・後退した主翼・水平尾翼・垂直尾翼・発動機。会社の色やロゴは使わない（決まり：ロゴは提携後）
+function a3Geo(kind){
+  const T = A3.THREE, key = kind; A3.geo = A3.geo || {};
+  if(A3.geo[key]) return A3.geo[key];
+  const span = { q:0.94, w:0.93, n:0.92, r:0.8, p:0.86 }[kind], rad = { q:0.052, w:0.048, n:0.05, r:0.042, p:0.042 }[kind];
+  const body = [], dark = [];
+  const add = (g, list, x = 0, y = 0, z = 0) => { g.translate(x, y, z); list.push(g); };
+  // 胴（前が -z）：まっすぐな筒＋丸い機首＋細くなる尾
+  const f = new T.CylinderGeometry(rad, rad, 0.66, 14, 1, false); f.rotateX(Math.PI / 2); add(f, body, 0, 0, -0.05);
+  const nose = new T.SphereGeometry(rad, 14, 8, 0, Math.PI * 2, 0, Math.PI / 2); nose.scale(1, 1, 2.6); nose.rotateX(-Math.PI / 2); add(nose, body, 0, 0, -0.38);
+  const tail = new T.CylinderGeometry(rad, rad * 0.28, 0.24, 14, 1, false); tail.rotateX(-Math.PI / 2); add(tail, body, 0, rad * 0.35, 0.4);
+  // 翼：上から見た台形（後退角）を薄く立てる
+  const wing = (half, root, tip, sweep, th, y, z, dihed) => { const s = new T.Shape(); s.moveTo(0, 0); s.lineTo(half, sweep); s.lineTo(half, sweep + tip); s.lineTo(0, root); s.lineTo(0, 0);
+    const g = new T.ExtrudeGeometry(s, { depth:th, bevelEnabled:false }); g.rotateX(Math.PI / 2); g.translate(0, th / 2, 0);
+    const m = g.clone(); m.scale(-1, 1, 1);   // 左右の翼（裏返った面は両面で描くので向きは気にしない）
+    for(const x of [g, m]){ if(dihed){ const p = x.attributes.position.array; for(let i = 0; i < p.length; i += 3) p[i + 1] += Math.abs(p[i]) * dihed; } x.translate(0, y, z); body.push(x.index ? x.toNonIndexed() : x); } };
+  const hw = kind === "p" ? 0.85 : 1;
+  wing(span / 2, 0.2 * hw, 0.06, kind === "p" ? 0.02 : 0.17, 0.012, kind === "p" ? rad * 0.85 : -rad * 0.55, -0.1, kind === "p" ? 0 : 0.06);
+  wing(span * 0.18, 0.11, 0.045, 0.08, 0.008, rad * 0.4, 0.38, 0.02);
+  // 垂直尾翼（横から見た台形）
+  { const s = new T.Shape(); s.moveTo(0, 0); s.lineTo(0.15, 0); s.lineTo(0.2, 0.17); s.lineTo(0.13, 0.17); s.lineTo(0, 0);
+    const g = new T.ExtrudeGeometry(s, { depth:0.01, bevelEnabled:false }); g.rotateY(-Math.PI / 2); g.translate(0.005, rad * 0.6, 0.31); body.push(g.index ? g.toNonIndexed() : g); }
+  // 発動機
+  const eng = (x, y, z, r, l) => { const g = new T.CylinderGeometry(r, r * 0.85, l, 12, 1, true); g.rotateX(Math.PI / 2); add(g, dark, x, y, z); };
+  if(kind === "q") for(const x of [0.17, 0.31]) for(const s of [-1, 1]) eng(x * s, -rad * 1.4, -0.1 + x * 0.25, 0.028, 0.11);
+  else if(kind === "w" || kind === "n") for(const s of [-1, 1]) eng((kind === "w" ? 0.17 : 0.16) * s, -rad * 1.45, -0.12, kind === "w" ? 0.04 : 0.032, kind === "w" ? 0.13 : 0.11);
+  else if(kind === "r") for(const s of [-1, 1]) eng(0.15 * s, -rad * 1.35, -0.1, 0.03, 0.1);
+  else for(const s of [-1, 1]) eng(0.13 * s, rad * 0.6, -0.17, 0.022, 0.1);
+  const g = { body:a3Merge(T, body), dark:a3Merge(T, dark) };
+  A3.geo[key] = g; return g;
+}
 function a3Mesh(p){
-  const T = A3.THREE, g = new T.Group(), sp = a3Sp(p), day = A3.night === "day";
+  const T = A3.THREE, g = new T.Group(), sp = a3Sp(p), day = A3.night === "day", night = A3.night === "night";
   if(A3.lite){ const m = new T.Mesh(new T.ConeGeometry(0.35, 1, 3), new T.MeshBasicMaterial({ color:0x111827 })); m.rotation.x = Math.PI / 2; g.add(m); g.userData.len = 1; return g; }
-  const body = A3.mat(A3.night === "night" ? 0xC9D1DB : 0xF5F7FA), tailc = sp && day ? A3.mat(0xC9A23A) : A3.mat(A3.night === "night" ? 0x8792A0 : 0x9AA4B1);
-  const f = new T.Mesh(new T.CylinderGeometry(0.05, 0.05, 1, 8), body); f.rotation.x = Math.PI / 2; g.add(f);
-  const w = new T.Mesh(new T.BoxGeometry(0.95, 0.012, 0.13), body); w.position.z = 0.02; g.add(w);
-  const hs = new T.Mesh(new T.BoxGeometry(0.34, 0.01, 0.08), body); hs.position.z = 0.44; g.add(hs);
-  const vs = new T.Mesh(new T.BoxGeometry(0.012, 0.17, 0.12), tailc); vs.position.set(0, 0.1, 0.44); g.add(vs);
+  if(!A3.pm){ A3.pm = { body:A3.mat(night ? 0xB9C2CD : 0xF4F6F8), dark:A3.mat(night ? 0x4B5563 : 0x6B7280), gold:A3.mat(0xC9A23A) }; Object.values(A3.pm).forEach(m => m.side = T.DoubleSide); }
+  const geo = a3Geo(a3Kind(p.type));
+  const b = new T.Mesh(geo.body, A3.pm.body), d = new T.Mesh(geo.dark, A3.pm.dark); b.castShadow = d.castShadow = !!(A3.r && A3.r.shadowMap.enabled); g.add(b, d);
+  if(sp && day){ const fin = new T.Mesh(new T.BoxGeometry(0.012, 0.15, 0.13), A3.pm.gold); fin.position.set(0, 0.12, 0.43); g.add(fin); }   // 特別塗装機の尾翼は昼だけ金
+  if(night){ const lt = new T.Points(new T.BufferGeometry().setAttribute("position", new T.Float32BufferAttribute([0, 0, -0.5, -0.47, 0, 0.05, 0.47, 0, 0.05, 0, 0.12, 0.48], 3)),
+      new T.PointsMaterial({ size:3 * (A3.r ? A3.r.getPixelRatio() : 1), sizeAttenuation:false, vertexColors:true, fog:false, depthWrite:false }));
+    lt.geometry.setAttribute("color", new T.Float32BufferAttribute([1, 1, .9, 1, .25, .2, .3, 1, .45, 1, 1, 1], 3)); g.add(lt); }   // 夜：前の灯り・左の赤・右の緑・尾の白
   g.userData.len = 1;
   return g;
 }
 function a3Sync(ps){
   const T = A3.THREE, ids = new Set(ps.map(p => p.id));
   for(const [id, o] of A3.objs) if(!ids.has(id)){ A3.scene.remove(o.g); if(o.sh) A3.scene.remove(o.sh); if(o.ln) A3.scene.remove(o.ln); A3.objs.delete(id); }
-  const big = A3.view === "all" ? 8 : 1;   // 全体の視点だけ見つけやすいよう大きく描く
+  const big = A3.view === "all" ? 5 : 1;   // 全体の視点だけ見つけやすいよう大きく描く
   for(const p of ps){
     let o = A3.objs.get(p.id);
     if(!o || o.lite !== A3.lite){ if(o){ A3.scene.remove(o.g); if(o.sh) A3.scene.remove(o.sh); if(o.ln) A3.scene.remove(o.ln); }
-      o = { g:a3Mesh(p), lite:A3.lite }; A3.scene.add(o.g);
+      o = { g:a3Mesh(p), lite:A3.lite }; o.g.rotation.order = "YXZ"; A3.scene.add(o.g);
       if(!A3.lite){ o.sh = new T.Mesh(new T.CircleGeometry(1, 16), new T.MeshBasicMaterial({ color:0x1F2937, transparent:true, opacity:.18, depthWrite:false })); o.sh.rotation.x = -Math.PI / 2; A3.scene.add(o.sh);
-        o.ln = new T.Line(new T.BufferGeometry().setFromPoints([new T.Vector3(), new T.Vector3()]), new T.LineDashedMaterial({ color:0x4B5563, dashSize:30, gapSize:24, transparent:true, opacity:.7 })); A3.scene.add(o.ln); }
+        o.ln = new T.Line(new T.BufferGeometry().setFromPoints([new T.Vector3(), new T.Vector3()]), new T.LineDashedMaterial({ color:A3.night === "night" ? 0x9CA3AF : 0x4B5563, dashSize:30, gapSize:24, transparent:true, opacity:.7 })); A3.scene.add(o.ln); }
       A3.objs.set(p.id, o); }
-    const [x, z] = a3XZ(p.lat, p.lon), y = a3Air(p) ? p.alt_ft * 0.3048 : 3, L = (A3.lite ? 260 : a3Len(p.type)) * (a3Air(p) ? big : 1);
-    o.g.position.set(x, y, z); o.g.scale.setScalar(L); o.g.rotation.y = Math.PI - (p.hdg || 0) * D2R; o.p = p;
-    if(o.sh){ const air = a3Air(p); o.sh.visible = o.ln.visible = air; if(air){ o.sh.position.set(x, 1, z); o.sh.scale.setScalar(L * 0.45);
-      o.ln.geometry.setFromPoints([new T.Vector3(x, 1, z), new T.Vector3(x, y, z)]); o.ln.computeLineDistances(); } }
+    const air = a3Air(p), [x, z] = a3XZ(p.lat, p.lon), y = air ? p.alt_ft * 0.3048 : 4, L = (A3.lite ? 260 : a3Len(p.type)) * (air ? big : 1);
+    o.g.position.set(x, y, z); o.g.scale.setScalar(L); o.g.rotation.y = -(p.hdg || 0) * D2R; o.p = p;
+    o.g.rotation.x = air && p.fpm ? Math.max(-0.12, Math.min(0.2, p.fpm / 9000)) : 0;   // 上昇は機首を上げ、降下は少し下げる
+    if(o.sh){ o.sh.visible = o.ln.visible = air; if(air){ o.sh.position.set(x, 1.5, z); o.sh.scale.setScalar(L * 0.45);
+      o.ln.geometry.setFromPoints([new T.Vector3(x, 1.5, z), new T.Vector3(x, y, z)]); o.ln.computeLineDistances(); } }
   }
 }
 function a3Camera(ps){
   const T = A3.THREE, cam = A3.cam, yaw = A3.yaw;
   if(A3.view === "plane" && A3.sel){
     const o = A3.objs.get(A3.sel);
-    if(o){ const p = o.p, h = (p.hdg || 0) * D2R + yaw, back = 320 + a3Len(p.type) * 2, pos = o.g.position;
-      cam.position.set(pos.x - Math.sin(h) * back, pos.y + 70, pos.z + Math.cos(h) * back); cam.lookAt(pos.x + Math.sin(h) * 600, pos.y - 40, pos.z - Math.cos(h) * 600); return; }
+    if(o){ // 機体の視点：機体のすぐ後ろの少し上から、進む向きを見る（11/21：前は約450m 後ろで機体が小さく、地平だけになっていた）
+      const p = o.p, h = (p.hdg || 0) * D2R + yaw, Lm = a3Len(p.type), back = Lm * 2.4 + 30, up = Lm * 0.55 + 6, pos = o.g.position;
+      cam.userData.fov = 55; a3ViewOffset();
+      cam.position.set(pos.x - Math.sin(h) * back, pos.y + up, pos.z + Math.cos(h) * back);
+      const ahead = a3Air(p) ? 1400 : 500, drop = a3Air(p) ? Math.min(pos.y * 0.6, 900) : 0;
+      cam.lookAt(pos.x + Math.sin(h) * ahead, pos.y - drop, pos.z - Math.cos(h) * ahead); return; }
   }
   if(A3.view === "tower"){
-    const [x, z] = a3XZ(A3_TOWER[0], A3_TOWER[1]), h = Math.PI * 0.85 + yaw;   // はじめは南（C 滑走路と進入の向き）
-    cam.position.set(x, A3_TOWER[2] + 2, z); cam.lookAt(x + Math.sin(h) * 3000, 0, z - Math.cos(h) * 3000); return;
+    // 管制塔の視点：管制室の高さ（約106m）から、はじめは西（第1ターミナルと駐機場・誘導路・A 滑走路。その先に大田区）を見下ろす。8方向を撮って比べ、いちばん空港らしく見える向きにした
+    //   11/21 の不具合3：前は 3km 先の地面を水平に近く見ていて、地平と空ばかりだった。2km 先・俯角約3°にし、画角を広げる
+    const [x, z] = A3.towerXZ || a3XZ(A3_TOWER[0], A3_TOWER[1]), h = -Math.PI / 2 + yaw, eye = A3_TOWER[2] - 10;
+    cam.userData.fov = 62; a3ViewOffset();
+    cam.position.set(x, eye, z); cam.lookAt(x + Math.sin(h) * 1700, 0, z - Math.cos(h) * 1700); return;
   }
+  cam.userData.fov = 50; a3ViewOffset();
   // 全体：北の上空から南へ見る（空港の先に着陸に向かう機体）。指で左右に回す
-  //   11/21 の見回り8：前（約24.6km 先・高さ11km・見る点は空港の2.5km 南）は、模型が画面の幅の約3分の2・高さの約8分の1で、下のシートの近くに小さく出ていた。
-  //   約12km まで寄せ、見る点を空港の1km 北にして、模型をシートの上の空いた所に大きく出す（390×844 で幅 約9割・高さ 約2倍）。南から着陸に向かう機体は模型の上の空に入る
-  const R = 10000, cx = 0, cz = -1000;
+  //   11/21 の見回り8：約12km まで寄せ、見る点を空港の1km 北にして、模型をシートの上の空いた所に大きく出す
+  const R = 10000, cx = 0, cz = 300;   // 11/21：絵の中心をシートの上へずらしたので、見る点は空港の中心近くに戻す
   cam.position.set(cx - Math.sin(yaw) * R, 7000, cz - Math.cos(yaw) * R);
   cam.lookAt(cx, 0, cz);
 }
@@ -5255,16 +5461,24 @@ function a3Labels(ps){
   const sheetTop = ($("a3Sheet").getBoundingClientRect().top - st.getBoundingClientRect().top);
   const order = [...A3.objs.entries()].sort((a, b) => (a[0] === A3.sel ? -1 : b[0] === A3.sel ? 1 : 0) || (a[1].p.dist_km || 0) - (b[1].p.dist_km || 0));
   let edges = 0;
+  // 11/21 の不具合2：名札（MH691 3分）が出典の札と重なっていた。出典の札と左上の札の場所を先に「使っている所」に入れる
+  const s0 = st.getBoundingClientRect();
+  for(const el of [$("a3Credit"), ...document.querySelectorAll("#a3Chips > *")]){ if(!el || !el.offsetParent) continue; const b = el.getBoundingClientRect(); placed.push([b.left - s0.left - 6, b.top - s0.top - 6, b.right - s0.left + 6, b.bottom - s0.top + 6]); }
   for(const [id, o] of order){
     v.copy(o.g.position).project(A3.cam);
     const vis = v.z < 1 && Math.abs(v.x) <= 1.05 && Math.abs(v.y) <= 1.05;
     o.sx = vis ? (v.x + 1) / 2 * W : null; o.sy = vis ? (1 - v.y) / 2 * H : null;
-    if(!vis && a3Air(o.p) && !A3.lite && A3.view === "all" && edges < 3){   // 景色の外の空の機体は、画面の端に向きの矢印つきの札（11/21 の見回り8：寄せたので、外に出る機体がある）
-      const back = v.z > 1, ex = back ? -v.x : v.x, ey = back ? -v.y : v.y, side = Math.abs(ex) >= Math.abs(ey) ? (ex > 0 ? "r" : "l") : ey > 0 ? "t" : "b";
+    const hid = vis && (o.sy < 140 || o.sy > sheetTop - 8);   // 景色の中でも、上の操作やシートの裏に入る所
+    if((!vis || hid) && a3Air(o.p) && !A3.lite && A3.view === "all" && edges < 3){   // 景色の外（と上の操作・シートの裏）の空の機体は、画面の端に向きの矢印つきの札（11/21 の見回り8：寄せたので、外に出る機体がある）
+      const back = v.z > 1, ex = back ? -v.x : v.x, ey = back ? -v.y : v.y, side = hid ? (o.sy < 140 ? "t" : "b") : Math.abs(ex) >= Math.abs(ey) ? (ex > 0 ? "r" : "l") : ey > 0 ? "t" : "b";
       const k = Math.max(Math.abs(ex), Math.abs(ey)) || 1, px = (ex / k + 1) / 2 * W, py = (1 - ey / k) / 2 * H;
-      const ex2 = side === "r" ? W - 8 : side === "l" ? 8 : Math.max(70, Math.min(W - 70, px)), ey2 = side === "t" ? 150 : side === "b" ? sheetTop - 30 : Math.max(150, Math.min(sheetTop - 30, py));
-      const r = side === "r" ? [ex2 - 130, ey2 - 16, ex2, ey2 + 16] : side === "l" ? [ex2, ey2 - 16, ex2 + 130, ey2 + 16] : [ex2 - 65, ey2 - 16, ex2 + 65, ey2 + 16];
-      if(placed.some(q => r[0] < q[2] && r[2] > q[0] && r[1] < q[3] && r[3] > q[1])) continue;
+      const ex2 = side === "r" ? W - 8 : side === "l" ? 8 : Math.max(70, Math.min(W - 70, hid ? o.sx : px));
+      let ey2 = side === "t" ? 150 : side === "b" ? sheetTop - 30 : Math.max(150, Math.min(sheetTop - 30, py));
+      const tagBox = y => side === "r" ? [ex2 - 130, y - 16, ex2, y + 16] : side === "l" ? [ex2, y - 16, ex2 + 130, y + 16] : [ex2 - 65, y - 16, ex2 + 65, y + 16];
+      const hit = r => placed.some(q => r[0] < q[2] && r[2] > q[0] && r[1] < q[3] && r[3] > q[1]);
+      let r = tagBox(ey2);
+      if(hit(r) && (side === "r" || side === "l")){ const y0 = ey2; for(const d of [38, -38, 76, -76, 114, -114, 152, 190]){ const y = y0 + d; if(y < 150 || y > sheetTop - 30) continue; const q = tagBox(y); if(!hit(q)){ ey2 = y; r = q; break; } } }   // 出典の札や左上の札に重なるときは、上か下の空いた所へずらす
+      if(hit(r)) continue;
       placed.push(r); seen.add(id); edges++;
       let el = A3.labels.get(id);
       if(!el){ el = document.createElement("span"); el.className = "a3tag"; box.appendChild(el); A3.labels.set(id, el); }
@@ -5275,16 +5489,15 @@ function a3Labels(ps){
       el.style.transform = side === "r" ? `translate(${ex2}px,${ey2.toFixed(1)}px) translate(-100%,-50%)` : side === "l" ? `translate(${ex2}px,${ey2.toFixed(1)}px) translate(0,-50%)` : `translate(${ex2.toFixed(1)}px,${ey2}px) translate(-50%,-50%)`;
       continue;
     }
-    if(!vis || !a3Air(o.p) || A3.lite || o.sy > sheetTop - 8 || o.sy < 140) continue;
-    const r = [o.sx - 60, o.sy - 52, o.sx + 60, o.sy - 8];
-    if(id !== A3.sel && placed.some(q => r[0] < q[2] && r[2] > q[0] && r[1] < q[3] && r[3] > q[1])) continue;   // 重なる名札は出さない（近い機体を先に）
+    if(!vis || !a3Air(o.p) || A3.lite || o.sy > sheetTop - 8 || o.sy < 140 || (A3.view === "plane" && id === A3.sel)) continue;   // 追っている機体の名札は機体に重なるので出さない（ピルに便名が出ている）
+    const lx = Math.max(64, Math.min(W - 64, o.sx)), r = [lx - 60, o.sy - 52, lx + 60, o.sy - 8];   // 画面の端で名札が切れないように
+    if(placed.some(q => r[0] < q[2] && r[2] > q[0] && r[1] < q[3] && r[3] > q[1])) continue;   // 重なる名札は出さない（近い機体を先に。選んだ機体も出典の札には重ねない）
     placed.push(r); seen.add(id);
     let el = A3.labels.get(id);
     if(!el){ el = document.createElement("span"); el.className = "a3tag"; box.appendChild(el); A3.labels.set(id, el); }
     const alt = a3Alt(o.p), txt = `<b>${esc(a3No(o.p))}</b>${o.p.phase === "dep" && alt != null && alt < 500 ? " 離陸" : alt != null ? ` ${alt.toLocaleString("ja-JP")}m` : ""}`;
     if(el._t !== txt){ el.innerHTML = txt; el._t = txt; }
     el.classList.toggle("on", id === A3.sel); el.classList.remove("edge");
-    const lx = Math.max(64, Math.min(W - 64, o.sx));   // 画面の端で名札が切れないように
     el.style.transform = `translate(${lx.toFixed(1)}px,${(o.sy - 14).toFixed(1)}px) translate(-50%,-100%)`;
   }
   for(const [id, el] of A3.labels) if(!seen.has(id)){ el.remove(); A3.labels.delete(id); }
@@ -5298,29 +5511,30 @@ function a3Sheet(){
   ps.sort((a, b) => (a3Air(b) - a3Air(a)) || (a.phase === "arr" ? 0 : 1) - (b.phase === "arr" ? 0 : 1) || (a.dist_km || 0) - (b.dist_km || 0));
   const row = p => { const [s1, s2] = a3State(p), sp = a3Sp(p);
     return `<li><button type="button" data-a3-pick="${esc(p.id)}"><span class="no"><b>${esc(a3No(p))}</b><small>${esc(a3Place(p))}</small></span><span class="st"><b>${esc(s1)}</b>${sp ? `<i class="a3sp">特別塗装機</i>` : ""}${s2 ? `<small>${esc(s2)}</small>` : ""}</span><span class="ch" aria-hidden="true">›</span></button></li>`; };
-  el.innerHTML = `<div class="a3grab" aria-hidden="true"></div>${A3.picking ? `<button type="button" class="a3x" data-a3-unpick aria-label="選ぶのをやめる">×</button>` : ""}
+  el.innerHTML = `<div class="a3grab" aria-hidden="true"></div>${A3.picking ? `<button type="button" class="a3x" data-a3-unpick aria-label="選ぶのをやめる">×</button>` : ""}<div class="a3body">
     <div class="a3sh"><h3>羽田の近くの機体</h3><span class="n"><b class="num">${ps.length}</b><span class="u">機</span></span></div>
     <p class="a3range">${A3.picking ? "見たい機体を押してください" : "30km・3,000m 以下（地上の機体はまだ出ません）"}</p>
-    ${ps.length ? `<ul class="a3list">${ps.slice(0, A3.picking ? 12 : 8).map(row).join("")}</ul>` : `<p class="a3empty">${!SERVER ? "デモでは機体の位置は出ません。空港の形だけを出しています。" : A3.err === "pos" ? "機体の位置が届いていません。空港の形だけを出しています。" : A3.snaps.length ? "いま近くに機体はいません。" : "機体の位置を読み込んでいます…"}</p>`}`;
+    ${ps.length ? `<ul class="a3list">${ps.slice(0, A3.picking ? 12 : 8).map(row).join("")}</ul>` : `<p class="a3empty">${!SERVER ? "デモでは機体の位置は出ません。空港の形だけを出しています。" : A3.err === "pos" ? "機体の位置が届いていません。空港の形だけを出しています。" : A3.snaps.length ? "いま近くに機体はいません。" : "機体の位置を読み込んでいます…"}</p>`}</div>`;
 }
 function a3CardHTML(el, p){
   const sp = a3Sp(p), [s1, s2] = a3State(p), alt = a3Alt(p), arr = p.phase === "arr" && a3Air(p);
   const pl = a3Place(p), route = /から$/.test(pl) ? `${pl.replace(/から$/, "")} → 羽田` : /へ$/.test(pl) ? `羽田 → ${pl.replace(/へ$/, "")}` : pl;
   const lenTxt = p.type ? `（${esc(p.type)} 長さ${a3Len(p.type)}m）` : "";
-  el.innerHTML = `<div class="a3grab" aria-hidden="true"></div><button type="button" class="a3x" data-a3-uncard aria-label="閉じる">×</button>
+  el.innerHTML = `<div class="a3grab" aria-hidden="true"></div><button type="button" class="a3x" data-a3-uncard aria-label="閉じる">×</button><div class="a3body">
     <h3 class="a3fl">${esc(a3No(p))}</h3><p class="a3rt">${esc(route)}${sp ? ` <i class="a3sp">特別塗装機</i>` : ""}</p>${sp ? `<p class="a3spn">${esc(sp.name)}</p>` : ""}
     <div class="a3grid"><div><small>機種</small><b>${esc(p.type || "—")}</b></div><div><small>登録記号</small><b>${esc(p.reg || "—")}</b></div>
     <div><small>高さ</small><b>${alt == null || !a3Air(p) ? "地上" : `<span class="num">${alt.toLocaleString("ja-JP")}</span><span class="u">m</span>`}</b></div>
     <div><small>${arr ? "着陸まで" : "いま"}</small><b>${arr && /約(\d+)分/.test(s1) ? `約<span class="num">${s1.match(/約(\d+)分/)[1]}</span><span class="u">分</span>` : esc(s1)}</b>${s2 ? `<span>${esc(s2)}</span>` : ""}</div></div>
     <div class="a3act"><button type="button" class="btn1" data-a3-follow="${esc(p.id)}">この機体から見る</button>${sp && p.reg ? `<button type="button" class="btn2" data-a3-zukan="${esc(p.reg)}">機体図鑑 ›</button>` : ""}</div>
-    <p class="a3note">位置は約1分遅れ。高さは機体が送る気圧の高さ。形は共通で、大きさは機種どおり${lenTxt}。</p>`;
+    <p class="a3note">位置は約1分遅れ。高さは機体が送る気圧の高さ。形は簡単な共通の形で、大きさは機種どおり${lenTxt}。</p></div>`;
 }
 function a3SrcHTML(el){
-  el.innerHTML = `<div class="a3grab" aria-hidden="true"></div><button type="button" class="a3x" data-a3-unsrc aria-label="閉じる">×</button>
+  el.innerHTML = `<div class="a3grab" aria-hidden="true"></div><button type="button" class="a3x" data-a3-unsrc aria-label="閉じる">×</button><div class="a3body">
     <h3 class="a3sh1">データの出典</h3><p class="a3warn"><b>航法には使えません。形は簡単にしています。</b></p>
-    <ul class="a3src"><li><small>滑走路の端</small><b>AIP JAPAN をもとに作成</b></li><li><small>空港の形・建物</small><b>滑走路とターミナルの位置から作った仮の形</b><span>地図の形（OpenStreetMap・ODbL）と建物の高さ（PLATEAU）に置き換える予定です</span></li>
-    <li><small>機体の位置</small><b>${ADSB_A}（ODbL）</b><span>約1分遅らせて出しています</span></li><li><small>空</small><b>気象通報（METAR）</b><span>日の出・日の入りは端末で計算</span></li><li><small>機体の大きさ</small><b>機種ごとのおおよその長さ</b></li></ul>
-    <p class="a3note"><a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap の著作権と利用条件 ›</a></p>`;
+    <ul class="a3src"><li><small>滑走路の端</small><b>AIP JAPAN をもとに作成</b></li><li><small>空港の形・建物・海岸線</small><b>${A3 && A3.shape ? "© OpenStreetMap の協力者" : "滑走路とターミナルの位置から作った仮の形"}</b><span>${A3 && A3.shape ? "OpenStreetMap のデータを加工して作成（ODbL 1.0。2026年11月の時点）。建物の高さは載っているものだけ、ないものはおおよそ" : "形のファイルを読めなかったので、仮の形を出しています"}</span></li>
+    <li><small>管制塔</small><b>高さ 115.7m（国土交通省）</b><span>位置は OpenStreetMap</span></li>
+    <li><small>機体の位置</small><b>${ADSB_A}（ODbL）</b><span>約1分遅らせて出しています</span></li><li><small>空</small><b>気象通報（METAR）</b><span>日の出・日の入りは端末で計算</span></li><li><small>機体の大きさ</small><b>機種ごとのおおよその長さ</b><span>形は共通の簡単な形（会社の色やロゴは付けていません）</span></li></ul>
+    <p class="a3note"><a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap の著作権と利用条件 ›</a>　形のファイルは ODbL 1.0 で公開しています</p></div>`;
 }
 function a3Select(id, follow){
   if(!A3) return;
@@ -5359,9 +5573,9 @@ document.addEventListener("click", e => {
 });
 function a3SetLite(on){
   if(!A3) return;
-  A3.lite = on; A3.liteAuto = false;
+  A3.lite = on; A3.liteAuto = false; A3.q = on ? 0 : 2; A3.pm = null; A3.fr = [];
   // 灯り・線・アンチエイリアスは作り直す
-  const keep = { view:A3.view, sel:A3.sel, snaps:A3.snaps, lastAt:A3.lastAt };
+  const keep = { view:A3.view, sel:A3.sel, snaps:A3.snaps, lastAt:A3.lastAt, shape:A3.shape };
   if(A3.r){ cancelAnimationFrame(A3.raf); if(A3.ro) A3.ro.disconnect(); try{ A3.r.dispose(); }catch(e){}
     const cv = $("a3Cv"), nc = cv.cloneNode(false); cv.replaceWith(nc); A3.objs.clear(); A3.labels.forEach(x => x.remove()); A3.labels.clear();
     Object.assign(A3, keep); a3Build(); a3Loop(); }
