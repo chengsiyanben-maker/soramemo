@@ -1,6 +1,7 @@
 # チェックイン担当の帳面
 
 ## いま持っている仕事
+- 11/22 0時46分（日本時間）：PR #173（運用タブの3D のカード）が main に入った。本番の反映（Actions）の成否は次の回で確かめる。直しは main から新しいブランチで
 - 11/21 23時台の回（PM「閉じるはいつでも押せるように」）：ブランチ checkin/close-always（main 3665d4c から）・下書き **PR #174**（4ce47de）・報告 docs/pm/report-close-always.md・写真 docs/pm/shots-close-always/01〜07。PR #174 はこの回の会話で見張りを付けた。仕上がったら PM が自動で反映
   - 3D：.a3top を読み込み中の幕（.a3load z-index 4）より上に（z-index 7）。幕が出ているあいだは × だけ（:has で題と「…」を隠す）。左の端24pxから引いて閉じる（#dAp3d の pointer を capture で受け、端から始めた指は a3Drag へ渡さない。3割か速く）
   - 頭の sticky：dialog.spfull の .spctop・.pintop、dialog.mypage の .mp-top、dialog.spsheet の .sph（× は見た目32pxのまま押せる所44px）。空港のページに .cxbar（右上の ×）。運用の専用ページの .opsbar を sticky
