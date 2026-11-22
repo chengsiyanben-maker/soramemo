@@ -1,6 +1,7 @@
 # チェックイン担当の帳面
 
 ## いま持っている仕事
+- 11/22 21時24分（日本時間）：PR #180（地上の機体）が main に入らずに閉じられた（理由は書かれていない。中身は main にもほかのブランチにもなく、checkin/a3-ground に残っている）。自分からは開き直さない。PM か本人の指示を待つ
 - **11/22 19時台にもう1つの回（このセッション）が同じ「地上の機体」を作っていた**：ブランチ checkin/a3-ground-b・下書き **PR #181**（1546ada）・報告 docs/pm/report-a3-ground.md（a3-ground-b の中）・比べ写真 docs/pm/shots-a3-ground/cmp_*（管制塔の南東つき）。PR #180 には触っていない。**PM が #180 と #181 のどちらか一方を選ぶ**（選ばなかった方は閉じる）
   - #181 の違い：地上 5km・最小 空22px／地上16px・3km より先の地上機は平らな機体の形（縁取り。三角形約30）・向きが分からない機体はターミナルへ機首・テストは t166（#180 の t165 は #179 の t165 とぶつかる。#180 を選ぶなら t165 の番号を付け直す）・地上の位置は 11/22 19時の羽田の実データ20機・描く量 render_info.json（描く呼び出し 全体の昼 28→127）
   - 変えた関数：新 a3NoseIn・a3Moving・a3Lo・A3_MINPX／変えた a3Poll・a3State・a3Mesh・a3Sync・a3Labels・a3Sheet。関数は groundFromAdsb（_shared/traffic.ts）と supabase/tests/ground_test.ts。t160・t161 を合わせた
