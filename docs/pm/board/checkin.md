@@ -1,6 +1,9 @@
 # チェックイン担当の帳面
 
 ## いま持っている仕事
+- **11/22 19時台にもう1つの回（このセッション）が同じ「地上の機体」を作っていた**：ブランチ checkin/a3-ground-b・下書き **PR #181**（1546ada）・報告 docs/pm/report-a3-ground.md（a3-ground-b の中）・比べ写真 docs/pm/shots-a3-ground/cmp_*（管制塔の南東つき）。PR #180 には触っていない。**PM が #180 と #181 のどちらか一方を選ぶ**（選ばなかった方は閉じる）
+  - #181 の違い：地上 5km・最小 空22px／地上16px・3km より先の地上機は平らな機体の形（縁取り。三角形約30）・向きが分からない機体はターミナルへ機首・テストは t166（#180 の t165 は #179 の t165 とぶつかる。#180 を選ぶなら t165 の番号を付け直す）・地上の位置は 11/22 19時の羽田の実データ20機・描く量 render_info.json（描く呼び出し 全体の昼 28→127）
+  - 変えた関数：新 a3NoseIn・a3Moving・a3Lo・A3_MINPX／変えた a3Poll・a3State・a3Mesh・a3Sync・a3Labels・a3Sheet。関数は groundFromAdsb（_shared/traffic.ts）と supabase/tests/ground_test.ts。t160・t161 を合わせた
 - 11/22 19時台の回（PM 18時55分「羽田の3D に地上の機体・見やすく」）：ブランチ checkin/a3-ground（main 1a87bfd から）・下書き **PR #180**（161f716）・報告 docs/pm/report-a3-ground.md・比べ写真 docs/pm/shots-a3-ground/compare-{all,tower}-{day,night}.png と new-pick-ground-day.png。PR #180 はこの回の会話で見張りを付けた。本番は本人が写真を見て OK してから
   - 関数：_shared/traffic.ts に groundFromAdsb（新）。airport-traffic の build の答えに ground（中心から4km・近い順・200機まで・hdg と kt つき）。表は変えていない。live_positions は便名のある機体だけなので、便名なしの駐機機は出ない
   - 画面：新 a3Moving（地上で4kt 以上）・a3MoveArrow（琥珀の矢印）／変えた a3State（地上を移動中・止まっている）・a3Mesh（部品に名前・夜は胴に emissive・A3.pm.far＝奥行きを比べない胴）・a3Sync（見た目の下限 空22px・地上8px／地上20機より多いと全体の視点は胴だけ／止まっている地上機は灯りなし／全体の視点の地上機と影の丸は depthTest なしで上に重ねる＝地面の polygonOffset で隠れていたため）・a3Labels（地上は選んだ機体だけ札・札に data-a3-tag）・a3Sheet（空 ○機・地上 ○機、地上の見出しと6行）・クリックの受けに data-a3-tag／CSS .a3tag（pointer-events:auto）・.a3nl・.a3gh
@@ -454,6 +457,8 @@
 - 確認コードは6けた。メールは Gmail、Supabase の送信上限は1時間100通
 
 ## 次にやること
+- 同じ仕事を2つの回が重ねないよう、始める前に origin のブランチと開いている PR を見る。ブランチが main と同じ形で先にできていても、ほかの回が動いている途中のことがある（11/22 の a3-ground で重なった）
+- PR #181（地上の機体・別案）：PM が #180 と比べて選ぶのを待つ。選ばれたら入る前に t166・t164・t163・t162・t161・t160・t142・t159・tests/ops と deno の supabase/tests を流す
 - PR #180（地上の機体）：本人の答えで直す。入る前に t165・t164・t163・t162・t161・t160・t142・t159・t154・tests/ops と deno の traffic_test を流す。関数 airport-traffic の反映も要る（関数の反映を忘れると ground がなく、前と同じ「30km・3,000m 以下」で動く）。比べ写真は git archive origin/main web を取り出し A3_WEB=<web> で t165 を流すと old-*.png が撮れる
 - 「運用の『今日の遅れ』にも絞り込み」は別の回が PR #179（checkin/delay-filter・f859b1e）で作った。11/22 夜の回に同じ指示が手動で来たが、重ねて作らないことにした。#179 の直しは #179 の回か、その帳面の続きで
 - PR #172 は main に入った中身と同じなので閉じてよい（PM に任せる）
