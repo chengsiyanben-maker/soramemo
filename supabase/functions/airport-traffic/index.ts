@@ -7,7 +7,7 @@
 // 見る人の呼び出しは、記録の処理が live_positions に残した位置（75秒以内）から作る。記録が止まっているときだけ adsb.lol に問い合わせる。
 // 通ってきた線は、位置をデータベース（traffic_trails）に足していって作る（関数の呼び出しをまたいで残すため）。
 import { createClient } from "npm:@supabase/supabase-js@2.117.2";
-import { acFromLive, type LiveRow, planesFromAdsb, recordPlan, retryAfterMs, type Trails, updateTrails } from "../_shared/traffic.ts";
+import { acFromLive, groundFromAdsb, type LiveRow, planesFromAdsb, recordPlan, retryAfterMs, type Trails, updateTrails } from "../_shared/traffic.ts";
 import { fetchMetars } from "../_shared/metar.ts";
 import { OPS_AIRPORTS, observeOps, runwaysOf } from "../_shared/ops_core.js";
 import { gaStep, guessRwy, quietNow, type Watch, wxRisk } from "../_shared/go_around.ts";
@@ -212,6 +212,8 @@ async function build(iata: string, view: boolean, mark: (k: string) => void): Pr
   const body = JSON.stringify({
     iata, at: new Date(typeof j?.now === "number" ? j.now : Date.now()).toISOString(), source: "adsb.lol",
     planes: slimPlanes(planes, tr),
+    // 地上の機体（駐機場・誘導路・滑走路の上。空港の中心から4km 以内）。3D と下の一覧が使う（11/22 checkin/a3-ground。表は変えない）
+    ground: groundFromAdsb(j?.ac, a.at, 4),
   });
   cache.set(iata, { at: Date.now(), body });
   // 見る人の呼び出しで作った答えは置き場に入れる。記録の処理の答えは、見ている人がいる空港だけ（Deno.serve の RECORD の最後）

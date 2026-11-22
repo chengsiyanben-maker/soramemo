@@ -64,3 +64,18 @@ Deno.test("関西の24の進入で伊丹の近くを回る機体は、関西の�
   const q = planesFromAdsb([{ hex: "b1", flight: "KAL723", lat: 34.62, lon: 135.36, alt_baro: 2400, gs: 170, track: 202, baro_rate: -600 }], ITM, 14000, [KIX]);
   assertEquals(q[0].phase, "other");
 });
+
+import { groundFromAdsb } from "../functions/_shared/traffic.ts";
+Deno.test("地上の機体：ground だけを空港から4km 以内・近い順に、向きと速さつきで返す（11/22 a3-ground）", () => {
+  const HND: [number, number] = [35.5533, 139.7811];
+  const g = groundFromAdsb([
+    { hex: "g1", flight: "JAL123 ", t: "B763", r: "JA602J", lat: 35.55234, lon: 139.78512, alt_baro: "ground", gs: 0, track: 45 },
+    { hex: "g2", flight: "ANA59", t: "B789", lat: 35.5401, lon: 139.7702, alt_baro: "ground", gs: 14.4, track: 337.6 },
+    { hex: "g3", flight: "SKY1", lat: 35.62, lon: 139.90, alt_baro: "ground", gs: 5 },          // 遠い（ほかの所の地上）
+    { hex: "a1", flight: "JAL1", lat: 35.55, lon: 139.78, alt_baro: 800, gs: 140, track: 337 },  // 空の機体は入れない
+    { hex: "g4", lat: null, lon: 139.78, alt_baro: "ground" },
+  ], HND);
+  assertEquals(g.map((x) => [x.id, x.callsign, x.hdg, x.kt]), [["g1", "JAL123", 45, 0], ["g2", "ANA59", 338, 14]]);
+  assertEquals([g[0].lat, g[0].type, g[0].reg, g[1].reg], [35.5523, "B763", "JA602J", null]);
+  assertEquals(groundFromAdsb(null, HND), []);
+});

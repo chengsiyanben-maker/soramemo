@@ -87,6 +87,25 @@ export function planesFromAdsb(ac: unknown, apt: [number, number], maxFt = 14000
   return planesFrom(states, apt, maxFt, others).map((p) => ({ ...p, type: types.get(p.id) ?? null, reg: regs.get(p.id) ?? null }));
 }
 
+// 地上の機体（alt_baro が "ground"）だけを、3D に置ける形にする（11/22 checkin/a3-ground）。
+//   空港の中心から maxKm 以内（駐機場・誘導路・滑走路）。近い順に max 機まで。位置は約11m（小数4けた）に丸める
+export type GroundPlane = { id: string; callsign: string | null; lat: number; lon: number; hdg: number | null; kt: number | null; type: string | null; reg: string | null; dist_km: number };
+export function groundFromAdsb(ac: unknown, apt: [number, number], maxKm = 4, max = 200): GroundPlane[] {
+  if (!Array.isArray(ac)) return [];
+  const out: GroundPlane[] = [];
+  for (const a of ac) {
+    const x = a as Record<string, unknown>;
+    if (!x || typeof x !== "object" || x.alt_baro !== "ground") continue;
+    const lat = num(x.lat), lon = num(x.lon); if (lat == null || lon == null) continue;
+    const d = km(apt, [lat, lon]); if (d > maxKm) continue;
+    const hdg = num(x.track) ?? num(x.true_heading) ?? num(x.mag_heading), kt = num(x.gs);
+    out.push({ id: String(x.hex), callsign: typeof x.flight === "string" && x.flight.trim() ? x.flight.trim() : null,
+      lat: Math.round(lat * 1e4) / 1e4, lon: Math.round(lon * 1e4) / 1e4, hdg: hdg == null ? null : Math.round(hdg) % 360, kt: kt == null ? null : Math.round(kt),
+      type: typeof x.t === "string" ? x.t : null, reg: typeof x.r === "string" ? x.r : null, dist_km: Math.round(d * 10) / 10 });
+  }
+  return out.sort((a, b) => a.dist_km - b.dist_km).slice(0, max);
+}
+
 // 記録の処理（30秒ごと）が live_positions に残した日本中の機体の位置を、adsb.lol の ac と同じ形に戻す。
 //   見る人の呼び出しでは adsb.lol に問い合わせず、これを使う（adsb.lol への問い合わせを、見る人の数によらず30秒に3回に保つ）。
 //   live_positions は便名のある機体だけなので、便名のない機体（自家用機の一部など）は出ない。maxAgeMs より古い位置は使わない
