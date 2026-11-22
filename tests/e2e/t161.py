@@ -96,7 +96,7 @@ async def main():
         r = await pg.evaluate("['B789','B77W','A359','B738','A20N','B763','B744','A388','B39M','A321','E190','DH8D'].map(a3Model).join(' ')")
         check('機種ごとの形（787・777・A350・737・A320・767・747・A380・E170/E190・Q400）', r == '787 777 350 737 320 767 747 380 737 320 e q4', r)
         r = await pg.evaluate("""(() => { const g = a3Geo('320'); const vis = id => { const o = A3.objs.get(id); return o && o.g.getObjectByName('gear').visible; };
-          return { win: g.win.attributes.position.count, gearGround: vis('a4'), gearClimb: vis('a2'), gearArr: vis('a1') }; })()""")
+          return { win: g.win.attributes.position.count, gearGround: vis('a4') || !!(A3.objs.get('a4').lo && A3.objs.get('a4').lo.visible),   /* 11/22：遠い地上の機体は平らな簡単な形（脚なし） */ gearClimb: vis('a2'), gearArr: vis('a1') }; })()""")
         check('窓の帯がある・脚は地上と着陸の前だけ（上昇中はしまう）', r['win'] > 30 and r['gearGround'] and r['gearArr'] and not r['gearClimb'], r)
         r = await pg.evaluate("""(() => { const rw = A3.scene.children.find(o => o.isMesh && o.geometry.type === 'PlaneGeometry' && o.name !== 'clouds' && o.material.map); const c = rw.material.map.image, g = c.getContext('2d'), d = g.getImageData(0, Math.floor(c.height * .5), 20, 200).data;
           let s = 0, s2 = 0, n = 0; for(let i = 0; i < d.length; i += 4){ s += d[i]; s2 += d[i] * d[i]; n++; } const m = s / n; return Math.sqrt(s2 / n - m * m); })()""")
@@ -134,7 +134,7 @@ async def main():
         await pg.wait_for_function("(() => { const l = document.getElementById('a3Load'); return !!l && l.hidden; })()", timeout=30000)
         await pg.evaluate("a3Poll()"); await pg.wait_for_timeout(1500)
         r = await pg.evaluate("({ g: A3.objs.has('g1'), air: A3.objs.has('g1') && a3Air(A3.objs.get('g1').p), txt: document.querySelector('#a3Sheet .a3range').textContent, row: !!document.querySelector('[data-a3-pick=\"g1\"]') })")
-        check('答えに ground があれば地上の機体を出し、一覧にも出す', r['g'] and not r['air'] and r['row'] and '地上の機体' in r['txt'] and 'まだ出ません' not in r['txt'], r)
+        check('答えに ground があれば地上の機体を出し、一覧にも出す', r['g'] and not r['air'] and r['row'] and '地上 1機' in r['txt'] and 'まだ出ません' not in r['txt'], r)
         allerr += errs; await c.close()
         await b.close()
     check('JS のエラーなし', not allerr, allerr[:3])
