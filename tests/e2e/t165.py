@@ -11,6 +11,7 @@ HERE=os.path.dirname(os.path.abspath(__file__)); WEB=os.path.abspath(os.path.joi
 import asyncio, json, shutil
 from datetime import datetime, timedelta, timezone
 from playwright.async_api import async_playwright
+sys.path.insert(0, HERE); from keepls import goto_http   # 開き直すので http で開く（file:// だと書いた localStorage を落とすことがある。11/23 案B と合わせて毎回落ちた）
 SHOTS = os.path.abspath(os.path.join(HERE, '..', '..', 'docs', 'pm', 'shots-delay-filter')); os.makedirs(SHOTS, exist_ok=True)
 JST = timezone(timedelta(hours=9)); _d = datetime.now(timezone.utc)
 base = datetime(_d.year, _d.month, _d.day, tzinfo=JST)
@@ -54,7 +55,7 @@ async def page(b, w=390, h=844, bd=None, extra='', ctx=None):
         await c.add_init_script("localStorage.setItem('soramemo.onboarded','1'); localStorage.setItem('soramemo.install.later','1'); localStorage.setItem('soramemo.tpTaught','1'); localStorage.setItem('soramemo.zk.notice','1');"
                                 "localStorage.setItem('soramemo.persona','all'); localStorage.setItem('soramemo.opsAirport','HND');" + extra)
     pg = await c.new_page(); await pg.clock.set_fixed_time(NOW); errs = []; pg.on('pageerror', lambda e: errs.append(str(e)))
-    await pg.goto('file://' + os.path.join(WORK, 'index_server_test.html')); await pg.wait_for_load_state('load')
+    await goto_http(pg, os.path.join(WORK, 'index_server_test.html')); await pg.wait_for_load_state('load')
     await pg.wait_for_function('document.readyState === "complete" && typeof render === "function" && typeof sb !== "undefined" && !!sb'); await pg.wait_for_timeout(400)
     await pg.evaluate('__fake.login()'); await pg.wait_for_timeout(800)
     await pg.evaluate("document.querySelectorAll('dialog[open]').forEach(d => d.close())")
@@ -112,7 +113,7 @@ async def main():
         saved = await pg.evaluate("localStorage.getItem('soramemo.ops.lateFilter')")
         c2pg = await c.new_page(); await pg.close()
         pg = c2pg; await pg.clock.set_fixed_time(NOW); pg.on('pageerror', lambda e: errs.append(str(e)))
-        await pg.goto('file://' + os.path.join(WORK, 'index_server_test.html')); await pg.wait_for_load_state('load')
+        await goto_http(pg, os.path.join(WORK, 'index_server_test.html')); await pg.wait_for_load_state('load')
         await pg.wait_for_function('document.readyState === "complete" && typeof render === "function" && typeof sb !== "undefined" && !!sb'); await pg.wait_for_timeout(400)
         await pg.evaluate('__fake.login()'); await pg.wait_for_timeout(800); await pg.evaluate("document.querySelectorAll('dialog[open]').forEach(d => d.close())")
         await pg.evaluate("OPS_PICKED = true; goTab('ops')"); await pg.wait_for_timeout(2200)
