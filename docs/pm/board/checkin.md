@@ -6,7 +6,7 @@
   - 画面：新 a3Moving（地上で4kt 以上）・a3MoveArrow（琥珀の矢印）／変えた a3State（地上を移動中・止まっている）・a3Mesh（部品に名前・夜は胴に emissive・A3.pm.far＝奥行きを比べない胴）・a3Sync（見た目の下限 空22px・地上8px／地上20機より多いと全体の視点は胴だけ／止まっている地上機は灯りなし／全体の視点の地上機と影の丸は depthTest なしで上に重ねる＝地面の polygonOffset で隠れていたため）・a3Labels（地上は選んだ機体だけ札・札に data-a3-tag）・a3Sheet（空 ○機・地上 ○機、地上の見出しと6行）・クリックの受けに data-a3-tag／CSS .a3tag（pointer-events:auto）・.a3nl・.a3gh
   - テスト：t165（新・19項目）。関数は supabase/tests/traffic_test.ts に1件足した（deno は npm i -g deno で入る）。t164・t163・t162・t161・t160・t142・t159・t154・tests/ops 成功
   - 本人に聞くこと：入れてよいか・地上の大きさ（8px）と影の丸の濃さ・矢印でよいか・4km の範囲。iPhone での重さ
-- 11/22 19時（PM）の「運用の『今日の遅れ』にも絞り込み」（checkin/delay-filter）はこの回では始めていない（別の回の仕事。始める前に origin に checkin/delay-filter がないか見る）
+- 「今日の遅れ」の絞り込み：下書き PR #179（checkin/delay-filter・別の回が作った。一覧はデータ担当の 'bad' 待ち）
 - 11/22 夕方の回（PM「今日の遅れにも絞り込み」）：ブランチ checkin/delay-filter（main 1a87bfd から）・下書き **PR #179**（f859b1e）・報告 docs/pm/report-delay-filter.md・写真 docs/pm/shots-delay-filter/01〜04。PR #179 はこの回の会話で見張りを付けた
   - 遅れの専用ページ（#opsLate）に、ピルの絞り込み：種類（すべて・遅れ・欠航。数つき）・向き（すべて・出発・到着）・航空会社（便名の頭2字。一覧にいる会社だけ・横にすべる）・30分以上の遅れだけ（欠航は残す）。便ごとの行。0件は「この条件の便はありません」＋「絞り込みを戻す」。端末に覚える（soramemo.ops.lateFilter）
   - **便ごとの一覧は airport_board の 'bad' が来たときだけ**。今の本番は返さないので、データ担当が関数に 'bad' を足すまで見た目は前のまま（案 docs/pm/delay-filter-board-bad.sql。PGlite で bad 以外は前と同じ・数が hours と合うのを確かめた）
@@ -455,7 +455,7 @@
 
 ## 次にやること
 - PR #180（地上の機体）：本人の答えで直す。入る前に t165・t164・t163・t162・t161・t160・t142・t159・t154・tests/ops と deno の traffic_test を流す。関数 airport-traffic の反映も要る（関数の反映を忘れると ground がなく、前と同じ「30km・3,000m 以下」で動く）。比べ写真は git archive origin/main web を取り出し A3_WEB=<web> で t165 を流すと old-*.png が撮れる
-- 次の回：PM の指示がなく、checkin/delay-filter がまだ origin になければ「運用の『今日の遅れ』にも絞り込み」（下の 11/22 19時の欄）を始める
+- 「運用の『今日の遅れ』にも絞り込み」は別の回が PR #179（checkin/delay-filter・f859b1e）で作った。11/22 夜の回に同じ指示が手動で来たが、重ねて作らないことにした。#179 の直しは #179 の回か、その帳面の続きで
 - PR #172 は main に入った中身と同じなので閉じてよい（PM に任せる）
 - PR #179（今日の遅れの絞り込み）：データ担当の 'bad' を待つ（下の依頼）。来たら本物の形で t165 の作り物と合うかを見る。本人の答え（向きの「すべて」・30分以上でも欠航を残す・JTA を JAL にまとめるか）で直す。入る前に t165・t159・t148・tests/ops を流す
 - 次の回：PM の指示がなければ「羽田の3D に地上の機体・見やすく」（checkin/a3-ground。下の 11/22 18時55分の欄）を始める。始める前に origin に checkin/a3-ground がないか見る
