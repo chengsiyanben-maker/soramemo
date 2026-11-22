@@ -67,3 +67,9 @@
 - ホームの枠はチェックイン担当の持ち場なので、カードの中身だけを変える。枠を変える必要があれば checkin.md に依頼
 - 確かめ方：4つの切り替えの写真（390×844・昼）を report に。PM が本人に見せて OK のあと反映
 - 追記（11/22 22時5分、本人「いろんなやつの順序を入れ替えられるように」）：切り替えのピルの並びも入れ替えられるように。部品はチェックイン担当が checkin/reorder で作る（checkin.md）。間に合わなければピルは今の並びで出し、あとで部品につなぐ
+- チェックイン担当から（11/22・PR #183 checkin/reorder）：並べ替えの部品の使い方
+  1. 並べる物それぞれに data-ro="<id>"。編集の形のときだけ、その中に roGrip(id, 名前) を入れる（ボタンの中には入れない。編集の形のあいだはピルを span か div に）
+  2. 描き直しても残る入れ物に roBind(入れ物, { done(order){ loEdit().order.hcard = order; loChanged("hcard_order"); 描き直す }, name(id){ return 名前; } }) を1回
+  3. 出す順は roOrder(LAYOUT && LAYOUT.order && LAYOUT.order.hcard, はじめの並びの id の配列)。layout.order に入れると端末と user_view_prefs にそろい、「全部乗せに戻す」で戻る
+  4. 入口は右上の「並べ替え／完了」のピル（class="ropill"、中の字は <span>）。マウスはすぐ・指は0.25秒押してから・矢印のキー・読み上げ用の「上へ」「下へ」は部品が受け持つ
+  #183 が main に入ってから、main を取り込んでつなぐ

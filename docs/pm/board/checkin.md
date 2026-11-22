@@ -1,6 +1,13 @@
 # チェックイン担当の帳面
 
 ## いま持っている仕事
+- **11/22 22時台の回（PM 22時5分「いろいろな物の順番を入れ替えられるように」）**：ブランチ checkin/reorder（main 1a87bfd から。あとで main 01c6c4c＝#179 入りを取り込み）・下書き **PR #183**（9e11e12）・報告 docs/pm/report-reorder.md・写真 docs/pm/shots-reorder/01〜10。PR #183 はこの回の会話で見張りを付けた。仕上がったら PM が自動で反映
+  - 部品：roGrip（≡）・roBind（マウスはすぐ・指は0.25秒押してから・矢印のキー・読み上げ用の「上へ」「下へ」・読み上げで「○番目にしました」）・roOrder（覚えた並びに今ある物を合わせる）・roMoved・roSay・roFocus
+  - 運用の一覧：右上の「並べ替え」→編集の形（カードは div に・≡・下は「はじめの並びに戻す」）→「完了」。並びは layout.order.ohub（OH_EDIT・ohOrder・ohOrderSaved・ohReorder。隠したカードは前の場所のまま）
+  - ホームに出すもの：「並べ替え」で行のスイッチが ≡ に（HE.ro・heReorder）。並びは今までの layout.order.home。はじめの並び loOrderDef。戻したら loTidy で全部乗せのまま
+  - 変えた関数：ohCards・opsHubRender・opsHubApply・heHTML・openHomeEd・HE・rsHTML（確認のシートに「カードの並び」の行）。CSS は .ropill・.rogrip・.roh・.rokb・.rodrag・.ohtools・.hehd・.hepc.ro・.rodef
+  - テスト：t167（新・28項目）。t119・t127・t148・t154・t159・t162・t163・t124・t118・t126・t160・t161・t164・t142・t120・t123・t165・tests/ops 成功。t165 は main でも1回目だけ「開き直しても絞り込みは同じ」が落ちることがある（2回目から成功）
+  - 本人に聞くこと：ホームの半券・今日の数字・いちばん上のカードは動かさないままでよいか／入口は「ホームに出すもの」の中だけでよいか／運用の右上のピルで一覧が約30px 下がるのでよいか
 - 11/22 22時7分（日本時間）：PR #179（今日の遅れの絞り込み）が main に入った。便ごとの一覧はデータ担当が airport_board に 'bad' を足すまで出ない（それまでは前の時間ごとの札）。反映の Actions の成否は次の回で見る
 - 11/22 21時24分（日本時間）：PR #180（地上の機体）が main に入らずに閉じられた（理由は書かれていない。中身は main にもほかのブランチにもなく、checkin/a3-ground に残っている）。自分からは開き直さない。PM か本人の指示を待つ
 - **11/22 19時台にもう1つの回（このセッション）が同じ「地上の機体」を作っていた**：ブランチ checkin/a3-ground-b・下書き **PR #181**（1546ada）・報告 docs/pm/report-a3-ground.md（a3-ground-b の中）・比べ写真 docs/pm/shots-a3-ground/cmp_*（管制塔の南東つき）。PR #180 には触っていない。**PM が #180 と #181 のどちらか一方を選ぶ**（選ばなかった方は閉じる）
@@ -459,6 +466,8 @@
 - 確認コードは6けた。メールは Gmail、Supabase の送信上限は1時間100通
 
 ## 次にやること
+- PR #183（並べ替え）：PM の反映を待つ。本人の答えで直す。入る前に t167・t162・t163・t148・t124・t127・t119・tests/ops を流す。撮る人用が satsuei/home-card-switch のピルを部品につなぐとき、困ったら直す
+- PR #181（地上の機体・案B）は本人 OK（CLAUDE.md 11/22）。PM が入れる。入る前に t166・t164・t163・t162・t161・t160・t142・t159・tests/ops と deno の supabase/tests。#179 が main に入ったので、ぶつかったら main を取り込み web/ を作り直す
 - 同じ仕事を2つの回が重ねないよう、始める前に origin のブランチと開いている PR を見る。ブランチが main と同じ形で先にできていても、ほかの回が動いている途中のことがある（11/22 の a3-ground で重なった）
 - PR #181（地上の機体・別案）：PM が #180 と比べて選ぶのを待つ。選ばれたら入る前に t166・t164・t163・t162・t161・t160・t142・t159・tests/ops と deno の supabase/tests を流す
 - PR #180（地上の機体）：本人の答えで直す。入る前に t165・t164・t163・t162・t161・t160・t142・t159・t154・tests/ops と deno の traffic_test を流す。関数 airport-traffic の反映も要る（関数の反映を忘れると ground がなく、前と同じ「30km・3,000m 以下」で動く）。比べ写真は git archive origin/main web を取り出し A3_WEB=<web> で t165 を流すと old-*.png が撮れる
@@ -558,6 +567,7 @@
 - tests/ops は手元では npm の playwright にブラウザがないので、全体に入っている playwright をつないで流した（すべて成功）
 
 ## ほかの担当への依頼
+- 撮る人用（11/22・satsuei.md に書いた）：ホームの空港のカードの切り替えのピルは、並べ替えの部品（roGrip・roBind・roOrder。PR #183）で並べ替えられる。並びは layout.order.<名前> に入れると端末とサーバーにそろう。#183 が main に入ってからつなぐ
 - データ担当（11/22・PR #179、PM から伝えてほしい）：運用の「遅れ」の絞り込みのため、airport_board の返す形に 'bad'（今日・日本時間の15分以上の遅れと欠航の便。1便 {dir:'dep'|'arr', flight, other, sched, est, actual, late(分・欠航は null), cancelled, intl, aircraft}・定刻の順）を足してほしい。'hours' の late・cancel と同じ数え方で、合計が合うこと。案は checkin/delay-filter の docs/pm/delay-filter-board-bad.sql（移行 165 の関数に u・d の列と 'bad' を足しただけ。表・列・RLS・権限は変えない）。画面は 'bad' がないあいだ前のままなので、どちらが先に入ってもよい
 - 撮る人用・運用予想・修行へ（11/21 PR #174・知らせだけ）：土台で、全画面の頭（.spctop・.pintop）とシートの頭（.spsheet .sph）を上に止め、戻る操作で上のダイアログを1枚閉じるようにした（showModal を包む）。それぞれのダイアログもそのまま効く。修行の dialog.sgd の頭は sticky にしていない。cancel を止めた画面は戻るでも閉じない
 - データ担当（11/21 夜・PR #169）：①外部データの確認表に「PLATEAU（3D都市モデル）大田区 2025・川崎市 2022：公共データ利用規約 第1.0版（CC BY 4.0 互換・ODbL も可）・出典『「3D都市モデル（Project PLATEAU）大田区（2025年度）・川崎市（2022年度）」（国土交通省）を加工して作成』・外形と計測高さと用途だけ使う・測量法の注意（測量には使わない）・11/21 に1回だけ取得（tools/a3_plateau.py）」を足してほしい。②airport-traffic の答えに地上の機体を `ground` の並びで足してほしい（planes と同じ id・callsign・lat・lon・hdg・type・reg。羽田だけでよい。今は _shared/traffic.ts で alt_baro "ground" を落としている）。アプリは対応済み
