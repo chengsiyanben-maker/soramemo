@@ -59,6 +59,7 @@
   - テストの手順メモ：組み立てには tools/ で npm ci（terser）と pip の brotli が要る。tests/ops は入れ直した playwright だとブラウザがないので、前から入っている playwright（npm root -g）を node_modules にリンクして流す。e2e 全体はほかのテストが docs/pm の写真を上書きするので、コミットの前に git checkout -- docs/pm で戻す
 
 ## 済み（11/22 22時5分の PM の指示：ホームの撮影カードの切り替え。本人「離陸じゃなくて、他のやつを表示できるような機能にしてほしい」）
+- 11/22 手動の回（PM が同じ「ホームの撮影カードの切り替え」を指示）：直前の回で PR #184（bba46c1）として済み。main は 01c6c4c のままで取り込み済み、#183（並べ替えの部品）もまだ main にないので、作り直しは不要だった
 - 11/22 22時台の定時の回：ブランチ satsuei/home-card-switch（main 1a87bfd から）・下書き **PR #184**（bba46c1・main 01c6c4c を取り込み済み・見張りを付けた）・報告 docs/pm/report-home-card-switch.md・写真 docs/pm/shots-home-card-switch/（01 着陸・02 離陸・03 特別塗装機・03b なし・04 遅れ・05 i を開いた所）。本番は PM が本人に写真を見せて OK のあと
   - ピル「着陸・離陸・特別塗装機・遅れ」（横にすべる）。覚える鍵 soramemo.home.spTab。はじめは表示する機体の次の1機の向き
   - 着陸・離陸は滑走路（推定）つき（運用タブで運用が分かっているとき＝OPS_CUR）。特別塗装機はピルを選んだときだけ loadSpecial。今日（日本時間）のこのあとだけ・出発済み／欠航は出さない。なければ「今日はありません」
