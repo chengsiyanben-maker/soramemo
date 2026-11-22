@@ -1081,6 +1081,31 @@ dialog.tpsheet .dlg{display:flex;flex-direction:column;overflow:hidden;padding-b
 .opslate .lthrs{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0 0;padding:0;list-style:none}.opslate .lthrs li{padding:6px 10px;border-radius:999px;background:var(--op-pill);font-size:13px;font-weight:700;color:var(--op-ink)}
 .opslate .lthrs li b{font-weight:900}
 .opslate .ltnone{margin:6px 0 0;font-size:15px;font-weight:800;color:var(--op-ink)}
+/* 「遅れ」の専用ページの絞り込み（11/22 checkin/delay-filter。図鑑の .zx-seg と同じピル） */
+.opslate .ltfilt{display:flex;flex-direction:column;gap:8px;margin:14px 0 4px}
+.opslate .ltseg{display:flex;gap:2px;padding:3px;border-radius:999px;background:var(--op-pill)}
+.opslate .ltseg button{flex:1 1 0;min-width:0;min-height:44px;display:inline-flex;align-items:center;justify-content:center;gap:5px;padding:0 6px;border:0;border-radius:999px;background:none;color:var(--op-mute);font:700 14px/1.2 var(--gothic);white-space:nowrap;cursor:pointer}
+.opslate .ltseg button small{font:700 13px/1 var(--gothic);color:var(--op-sub)}
+.opslate .ltseg button[aria-pressed="true"]{background:var(--op-card);color:var(--op-ink);font-weight:800;box-shadow:0 2px 8px -3px rgba(15,23,42,.28)}
+.opslate .ltals{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin:0 -16px;padding:2px 16px;scroll-padding:0 16px}.opslate .ltals::-webkit-scrollbar{display:none}
+.opslate .ltals button{flex:none;min-height:44px;padding:0 16px;border:0;border-radius:999px;background:var(--op-pill);color:var(--op-mute);font:700 14px var(--gothic);white-space:nowrap;cursor:pointer}
+.opslate .ltals button[aria-pressed="true"]{background:var(--op-ink);color:var(--op-card);font-weight:800}
+.opslate .ltlong{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:44px;padding:0 4px;border:0;background:none;color:var(--op-ink);font:700 14px var(--gothic);cursor:pointer;text-align:left}
+.opslate .ltlong i{flex:none;position:relative;width:46px;height:28px;border-radius:999px;background:var(--op-pill);box-shadow:inset 0 0 0 1px rgba(17,24,39,.08);transition:background .15s}
+.opslate .ltlong i::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(15,23,42,.3);transition:transform .15s}
+.opslate .ltlong[aria-checked="true"] i{background:#1F6FD1}.opslate .ltlong[aria-checked="true"] i::after{transform:translateX(18px)}
+.opslate .ltrows{margin:8px 0 0;padding:0;list-style:none}
+.opslate .ltrows li{display:flex;align-items:center;gap:10px;padding:10px 0}
+.opslate .ltrows li+li{border-top:1px solid color-mix(in srgb,var(--op-sub) 18%,transparent)}
+.opslate .lttm{flex:none;width:86px;display:flex;flex-direction:column}.opslate .lttm b{font:900 18px/1.1 var(--gothic);color:var(--op-ink);font-variant-numeric:tabular-nums}
+.opslate .lttm small,.opslate .ltfl small{font-size:13px;font-weight:600;color:var(--op-sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.opslate .ltfl{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;gap:2px}.opslate .ltfl b{font-size:15px;font-weight:800;color:var(--op-ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.opslate .ltfl .nw{font-size:13px;font-weight:600;color:var(--op-sub);margin-left:2px}
+.opslate .ltrows em{flex:none;font-style:normal;font-size:13px;font-weight:800;padding:4px 10px;border-radius:999px;background:color-mix(in srgb,#B45309 12%,transparent);color:#9A4A06}
+.opslate .ltrows em.ltcan{background:color-mix(in srgb,#B91C1C 12%,transparent);color:#A11A1A}
+[data-palette="board"] .opslate .ltrows em{color:#F5B067}[data-palette="board"] .opslate .ltrows em.ltcan{color:#F59A9A}
+.opslate .ltzero{margin:10px 0 0;padding:18px 14px;border-radius:16px;background:var(--op-pill);text-align:center}
+.opslate .ltzero p{margin:0 0 10px;font-size:15px;font-weight:800;color:var(--op-ink)}
+.opslate .ltzero button{min-height:44px;padding:0 18px;border:0;border-radius:999px;background:var(--op-card);color:var(--op-ink);font:800 14px var(--gothic);box-shadow:0 2px 8px -3px rgba(15,23,42,.28);cursor:pointer}
 .ohub{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:4px 0 0}
 .ohub[hidden]{display:none}
 .ohc{position:relative;display:flex;flex-direction:column;justify-content:space-between;min-height:126px;padding:14px 16px;border:0;border-radius:22px;background:var(--op-card);box-shadow:var(--op-shadow);color:var(--op-ink);font:inherit;text-align:left;cursor:pointer;overflow:hidden}
@@ -13272,9 +13297,59 @@ async function renderBoard(){
 // 運用の一覧の「遅れ」の専用ページの頭（11/21 の見回り1：カードは「9便」なのに、開くと白紙だった）。
 //   カードと同じ数（案内板の1時間ごとの数の今日の合計：15分以上の遅れ＋欠航）を大きく出し、時間ごとの内訳を札で。
 //   便ごとのお知らせ（#opsAlerts）はログインした人だけなので、ない・見られないときはそう書く。数が0なら「いま遅れ・欠航の便はありません」の1枚
+// 「遅れ」の専用ページの絞り込み（11/22 19時 PM・本人「今日の遅れもフィルター機能をつけて」）。
+//   便ごとの一覧はサーバーの airport_board の bad（今日の15分以上の遅れと欠航の便。データ担当に依頼中）が来たときだけ出す。
+//   bad がないあいだ（今の本番）は前の時間ごとの札のまま。絞り込みはこの端末に覚える（種類・向き・航空会社・30分以上）
+const LT_KEY = "soramemo.ops.lateFilter";
+const LT_DEF = { kind:"all", dir:"all", al:"all", long:false };
+function ltLoad(){ try{ const o = JSON.parse(localStorage.getItem(LT_KEY) || "{}");
+    return { kind:["all", "late", "cancel"].includes(o.kind) ? o.kind : "all", dir:["all", "dep", "arr"].includes(o.dir) ? o.dir : "all", al:typeof o.al === "string" && o.al ? o.al : "all", long:o.long === true }; }catch(e){ return { ...LT_DEF }; } }
+let LT_F = ltLoad();
+function ltSave(){ try{ localStorage.setItem(LT_KEY, JSON.stringify(LT_F)); }catch(e){} }
+// 便名の頭の2字から航空会社（AIRLINES の短い名前。ない会社は UL_JP の名前、それもなければ2字のまま）
+function ltAirline(fl){ const c = (String(fl || "").toUpperCase().match(/^([A-Z0-9]{2})\d/) || [])[1]; if(!c) return "その他";
+  const a = AIRLINES.find(x => x.id === c && x.id !== "OT"); return a ? a.short : (typeof UL_JP !== "undefined" && UL_JP[c]) || c; }
+// サーバーの1便を、この画面で使う形に（遅れの分は「実際」「見込み」と定刻の差。案内板の1時間ごとの数と同じ数え方）
+function ltRow(f){ const sched = Date.parse(f.sched), t = Date.parse(f.actual || f.est || ""), cancel = f.cancelled === true;
+  const late = Number.isFinite(+f.late) ? Math.round(+f.late) : (Number.isFinite(t) && Number.isFinite(sched) ? Math.round((t - sched) / 60000) : 0);
+  return { f, dir:f.dir === "arr" ? "arr" : "dep", cancel, late, sched, t:Number.isFinite(t) ? t : null, al:ltAirline(f.flight) }; }
+function ltMatch(r, F, skip){
+  if(skip !== "kind" && F.kind === "late" && r.cancel) return false;
+  if(skip !== "kind" && F.kind === "cancel" && !r.cancel) return false;
+  if(skip !== "dir" && F.dir !== "all" && r.dir !== F.dir) return false;
+  if(skip !== "al" && F.al !== "all" && r.al !== F.al) return false;
+  if(skip !== "long" && F.long && !r.cancel && r.late < 30) return false;   // 30分以上だけ：欠航は長さがないので残す（「欠航」を選べば欠航だけ）
+  return true;
+}
+function ltListHTML(bad){
+  const rows = bad.map(ltRow).sort((a, b) => (a.sched || 0) - (b.sched || 0) || String(a.f.flight).localeCompare(String(b.f.flight)));
+  const als = [...new Set(rows.map(r => r.al))].sort((a, b) => { const o = x => { const i = AIRLINES.findIndex(y => y.short === x); return i < 0 ? 99 : i; }; return o(a) - o(b) || a.localeCompare(b); });
+  const F = { ...LT_F, al:als.includes(LT_F.al) ? LT_F.al : "all" };   // 覚えた会社が今日の一覧にいなければ「すべて」で見せる（覚えたものは消さない）
+  const shown = rows.filter(r => ltMatch(r, F));
+  const forKind = rows.filter(r => ltMatch(r, F, "kind")), nLate = forKind.filter(r => !r.cancel).length, nCan = forKind.filter(r => r.cancel).length;
+  const hm = t => new Date(t).toLocaleTimeString("ja-JP", { hour:"2-digit", minute:"2-digit", timeZone:"Asia/Tokyo" });
+  const seg = (key, opts, label) => `<div class="ltseg" role="group" aria-label="${label}">${opts.map(([v, l, n]) => `<button type="button" data-ltf="${key}" data-v="${v}" aria-pressed="${F[key] === v}">${l}${n != null ? `<small>${n}</small>` : ""}</button>`).join("")}</div>`;
+  const alPills = als.length > 1 ? `<div class="ltals" role="group" aria-label="航空会社">${[["all", "すべて"], ...als.map(a => [a, a])].map(([v, l]) => `<button type="button" data-ltf="al" data-v="${esc(v)}" aria-pressed="${F.al === v}">${esc(l)}</button>`).join("")}</div>` : "";
+  const items = shown.map(r => { const f = r.f, other = esc(placeAny(f.other) || f.other || "");
+    const tag = r.cancel ? `<em class="ltcan">欠航</em>` : `<em>${r.late}分遅れ</em>`;
+    return `<li><span class="lttm"><b>${Number.isFinite(r.sched) ? hm(r.sched) : "—"}</b>${!r.cancel && r.t ? `<small>${f.actual ? "実際" : "見込み"} ${hm(r.t)}</small>` : ""}</span>
+      <span class="ltfl"><b>${other}<span class="nw">${r.dir === "arr" ? "から" : "へ"}</span></b><small>${esc(f.flight || "")}・${esc(r.al)}</small></span>${tag}</li>`; }).join("");
+  return `<div class="ltfilt">
+      ${seg("kind", [["all", "すべて", nLate + nCan], ["late", "遅れ", nLate], ["cancel", "欠航", nCan]], "種類")}
+      ${seg("dir", [["all", "すべて"], ["dep", "出発"], ["arr", "到着"]], "向き")}
+      ${alPills}
+      <button type="button" class="ltlong" role="switch" data-ltf="long" aria-checked="${F.long}"><span>30分以上の遅れだけ</span><i aria-hidden="true"></i></button>
+    </div>
+    ${shown.length ? `<ol class="ltrows" aria-label="遅れ・欠航の便">${items}</ol>` : `<div class="ltzero"><p>この条件の便はありません</p><button type="button" data-ltf="reset">絞り込みを戻す</button></div>`}`;
+}
+document.addEventListener("click", e => { const b = e.target.closest("[data-ltf]"); if(!b) return;
+  const k = b.dataset.ltf;
+  if(k === "reset") LT_F = { ...LT_DEF }; else if(k === "long") LT_F.long = !LT_F.long; else LT_F[k] = b.dataset.v;
+  ltSave(); track("late_filter", k); renderOpsLate(); });
 function opsLateHTML(){
   const b = ohBoardStats();
   if(!b) return `<div class="opshead"><b>今日の遅れ・欠航</b></div><p class="ltsub">読み込んでいます…</p>`;
+  const bad = BOARD && Array.isArray(BOARD.bad) ? BOARD.bad : null;
   const n = b.late + b.cancel, fw = FW.get(OPS_AP), fwn = fw ? fwMerge(fw).length : null;   // fwn：便ごとのお知らせの数（読んでいないときは null）
   if(!n) return `<div class="opshead"><b>今日の遅れ・欠航</b></div><p class="ltnone">いま遅れ・欠航の便はありません</p><p class="fwnote">15分以上の遅れと欠航を、JAL・ANA の時刻表の便で数えています。${ODPT_CREDIT}</p>`;
   const hrs = b.hrs.map(h => ({ h:Number(h.h), n:Number(h.late || 0) + Number(h.cancel || 0) })).filter(h => h.n > 0);
@@ -13282,7 +13357,7 @@ function opsLateHTML(){
   return `<div class="opshead"><b>今日の遅れ・欠航</b><span>15分以上の遅れ</span></div>
     <div class="ltbig"><b>${n}</b><small>便</small></div>
     <p class="ltsub">遅れ ${b.late}便・欠航 ${b.cancel}便（定刻の時間で数えています）</p>
-    ${hrs.length ? `<ul class="lthrs" aria-label="時間ごとの遅れ・欠航">${hrs.map(h => `<li>${h.h}時台 <b>${h.n}</b>便</li>`).join("")}</ul>` : ""}
+    ${bad ? ltListHTML(bad) : hrs.length ? `<ul class="lthrs" aria-label="時間ごとの遅れ・欠航">${hrs.map(h => `<li>${h.h}時台 <b>${h.n}</b>便</li>`).join("")}</ul>` : ""}
     ${fwline ? `<p class="ltsub" style="margin-top:12px">${fwline}</p>` : ""}
     <p class="fwnote">JAL・ANA の時刻表に載っている便を数えています（遅れは航空会社の運航情報か機体の位置からの推定）。${ODPT_CREDIT}</p>`;
 }
