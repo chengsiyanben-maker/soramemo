@@ -1,6 +1,7 @@
 # チェックイン担当の帳面
 
 ## いま持っている仕事
+- 11/22 手動の回（PM が同じ「並べ替え」を指示）：直前の回で PR #183（checkin/reorder・9e11e12）と satsuei.md への使い方として済み。main は 01c6c4c のままで作り直しは不要だった
 - **11/22 22時台の回（PM 22時5分「いろいろな物の順番を入れ替えられるように」）**：ブランチ checkin/reorder（main 1a87bfd から。あとで main 01c6c4c＝#179 入りを取り込み）・下書き **PR #183**（9e11e12）・報告 docs/pm/report-reorder.md・写真 docs/pm/shots-reorder/01〜10。PR #183 はこの回の会話で見張りを付けた。仕上がったら PM が自動で反映
   - 部品：roGrip（≡）・roBind（マウスはすぐ・指は0.25秒押してから・矢印のキー・読み上げ用の「上へ」「下へ」・読み上げで「○番目にしました」）・roOrder（覚えた並びに今ある物を合わせる）・roMoved・roSay・roFocus
   - 運用の一覧：右上の「並べ替え」→編集の形（カードは div に・≡・下は「はじめの並びに戻す」）→「完了」。並びは layout.order.ohub（OH_EDIT・ohOrder・ohOrderSaved・ohReorder。隠したカードは前の場所のまま）
