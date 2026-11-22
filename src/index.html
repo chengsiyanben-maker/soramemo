@@ -993,6 +993,10 @@ dialog.tpsheet .dlg{display:flex;flex-direction:column;overflow:hidden;padding-b
 .heed .heundo{position:static;margin:12px 0 0}
 .hepc.sw{padding-right:92px}.hepc .losw{position:absolute;right:6px;top:50%;transform:translateY(-50%)}
 .hepc.off{background:#F7F8FA;box-shadow:inset 0 0 0 1.5px #D9DEE6}.hepc.off b{color:#4B5563}
+.hehd{display:flex;align-items:center;justify-content:space-between;gap:8px}.hehd .heh{margin-right:auto}
+.hepc.ro{padding-right:56px}.hepc .rogrip{top:50%;right:4px;transform:translateY(-50%)}
+.hepc.ro .roh::after{background:#F3F5F8;box-shadow:none}
+.rodef{display:block;margin:8px auto 0}.rodef:disabled{color:#9CA3AF;cursor:default}
 /* review-c4（11/9 5時40分の PM の指示・本人が ON／OFF に決めたあと）
    1 下の帯（元に戻す・入れ替え）は一覧と重ならない（一覧が縮む）。帯が出て最後の行が見えなくなったら、押した行が隠れない範囲で一覧を送って最後の行も見せる（tpKeep）
    2 全部乗せのときの「全部乗せに戻す」は押せない薄い字をやめ、押せない理由の字「いまは全部乗せです」（白と 4.8:1）
@@ -1129,6 +1133,28 @@ dialog.tpsheet .dlg{display:flex;flex-direction:column;overflow:hidden;padding-b
 .ohc .ohring{position:absolute;right:14px;top:12px;width:34px;height:34px}
 .ohc .ohdots{margin-left:auto;display:flex;gap:4px}.ohc .ohdots i{width:10px;height:10px;border-radius:50%}
 .ohedit{grid-column:1 / -1;justify-self:center;min-height:44px;padding:0 18px;border:0;background:none;color:var(--op-ink);font:800 14px var(--gothic);cursor:pointer}
+/* 並べ替えの部品（11/22 checkin/reorder）：右上のピル「並べ替え／完了」・カードや行の右上の ≡ のつまみ・読み上げ用の「上へ・下へ」（焦点が来たときだけ見える） */
+.ropill{flex:none;height:44px;padding:0 2px;border:0;background:none;font:800 13px var(--gothic);color:#374151;cursor:pointer}
+.ropill{display:inline-flex;align-items:center}.ropill>span{display:inline-flex;align-items:center;height:32px;padding:0 14px;border-radius:999px;background:#EEF0F3}
+.ropill.on>span{background:#374151;color:#fff}
+.rogrip{position:absolute;right:4px;top:4px;z-index:3;display:flex;align-items:center}
+.roh{width:44px;height:44px;border:0;border-radius:999px;background:none;color:#4B5563;display:grid;place-items:center;cursor:grab;touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+.roh svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round}
+.roh::after{content:"";position:absolute;width:34px;height:34px;border-radius:999px;background:rgba(255,255,255,.92);box-shadow:0 1px 3px rgba(17,24,39,.18);z-index:-1}
+.roh{position:relative;isolation:isolate}
+.rokb{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0;padding:0;margin:0}
+.rokb:focus-visible{position:static;width:auto;height:44px;clip:auto;overflow:visible;padding:0 12px;margin-right:4px;border-radius:999px;background:#374151;color:#fff;font:800 13px var(--gothic)}
+.rodrag{z-index:6 !important;transition:none !important;box-shadow:0 22px 40px -16px rgba(17,24,39,.5) !important}
+.rodrag .roh{cursor:grabbing}
+.rodragging,.rodragging *{-webkit-user-select:none;user-select:none}
+.ohtools{grid-column:1 / -1;display:flex;align-items:center;justify-content:flex-end;gap:8px;margin:-8px 0 -6px}
+.ohtools .ropill{color:var(--op-ink)}.ohtools .ropill>span{background:var(--op-card);box-shadow:var(--op-shadow)}
+.ohtools .ropill.on>span{background:var(--op-ink);color:var(--op-card)}
+.ohrolead{margin-right:auto;font-size:13px;font-weight:700;color:var(--op-mute)}
+.ohub.roing .ohc{cursor:default}
+.ohub.roing .ohc .ohring{display:none}
+.ohub.roing .ohc .oht{padding-right:40px}
+.ohedit:disabled{color:var(--op-sub);cursor:default}
 #v-ops.ohanim{will-change:clip-path,transform}
 #v-ops.ohup #opsAside>*:not(#opsInfo):not(#opsBoard),#v-ops.ohup #opsPside>*{animation:ohUp .46s ease both}
 @keyframes ohUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
@@ -7084,6 +7110,10 @@ function loOrder(k){
   const o = LAYOUT && LAYOUT.order && Array.isArray(LAYOUT.order[k]) ? LAYOUT.order[k].filter(x => ids.includes(x)) : po;
   return [...new Set([...o, ...ids])];
 }
+// はじめの並び（構成の決まりのまま。自分で並べ替える前）
+function loOrderDef(k){ const ids = LO_BLOCKS[k].filter(b => !b[3]).map(b => b[0]); return [...new Set([...((loP().order || {})[k] || []).filter(x => ids.includes(x)), ...ids])]; }
+// 並べ替えを戻したあと、全部乗せで中身のない入れ物を片付ける（何も変えていなければ全部乗せのまま＝loAllOn）
+function loTidy(){ if(!LAYOUT || PERSONA !== "all") return; for(const k of ["off", "order"]) if(LAYOUT[k] && typeof LAYOUT[k] === "object" && !Object.keys(LAYOUT[k]).length) delete LAYOUT[k]; if(!LAYOUT.off) delete LAYOUT.vA; if(!Object.keys(LAYOUT).length) LAYOUT = null; }
 // 下のタブ：ホームはいつも出す。2つ以上
 function loTabs(){
   const t = LAYOUT && Array.isArray(LAYOUT.tabs) ? [...new Set(LAYOUT.tabs.filter(v => TAB_ALL.includes(v)))] : null;
@@ -8187,7 +8217,7 @@ function tpSet(list, what, text){
   return true;
 }
 // ホームに出すもの（C2）
-let HE = { undo:null, from:"screen" };
+let HE = { undo:null, from:"screen", ro:false };
 const HE_FIXED = [["半券", "チェックインの半券", "いちばん近い空港"], ["today", "今日の数字", "今日の印・空港・フライト"]];
 const HE_SUB = { ride:"便名を入れると機体を調べる", event:"開いているイベント", tally:"空港・路線・距離", recent:"" };
 // 半券の中身の設定（かたまりではないので数に入れない）：半券の下の枝の行。ON＝飛行場なども出る（ほかの行と同じ向き。review-5 の1 案A）
@@ -8201,19 +8231,25 @@ function heHTML(){
   const fixed = HE_FIXED.map(([k, n, s]) => `<li class="hepc fix"><div><b>${n}</b><small>${s}</small></div><span class="helk">いつも</span></li>`
     + (k === "半券" ? heNearxHTML() : "")).join("");
   // OFF にしたかたまりも見本の中のその場に残す（11/9 1時 PM の1）
+  // 並べ替えの形（11/22）：スイッチの代わりに ≡ のつまみ。隠しているかたまりも動かせる（字で「隠しています」）
   const rows = loOrder("home").map(id => { const v = !off.has(id);
+    if(HE.ro) return `<li class="hepc sw ro${v ? "" : " off"}" data-ro="${id}"><div><b>${esc(name(id))}</b>${v ? (HE_SUB[id] ? `<small>${HE_SUB[id]}</small>` : "") : `<small>隠しています</small>`}</div>${roGrip(id, name(id))}</li>`;
     return `<li class="hepc sw${v ? "" : " off"}"><div><b>${esc(name(id))}</b>${HE_SUB[id] ? `<small>${HE_SUB[id]}</small>` : ""}</div>${loSw(v, `data-he-${v ? "off" : "on"}="${id}"`, `「${esc(name(id))}」をホームに出す`)}</li>`; }).join("");
   const undo = HE.undo ? `<div class="heundo" role="status"><span>${esc(HE.undo.text)}</span><button type="button" data-he-undo>元に戻す</button></div>` : "";
   return `<div class="spctop">${back}<span class="sp" aria-hidden="true"></span></div>
-    <h3 class="heh" id="heTitle">ホームに出すもの</h3><p class="helead">ホームのシートの見本です（並びは本物と同じ）。OFF にすると隠れます。</p>
-    <ul class="heprev" aria-label="ホームに出しているもの（見本）"><li class="hetag" aria-hidden="true">見本</li>${fixed}${rows}</ul>${undo}
+    <div class="hehd"><h3 class="heh" id="heTitle">ホームに出すもの</h3><button type="button" class="ropill${HE.ro ? " on" : ""}" data-he-ro><span>${HE.ro ? "完了" : "並べ替え"}</span></button></div>
+    <p class="helead">${HE.ro ? "≡ を押したまま上下に動かします。ホームもこの並びになります。" : "ホームのシートの見本です（並びは本物と同じ）。OFF にすると隠れます。"}</p>
+    <ul class="heprev${HE.ro ? " roing" : ""}" aria-label="ホームに出しているもの（見本）"><li class="hetag" aria-hidden="true">見本</li>${fixed}${rows}</ul>${undo}
+    ${HE.ro ? `<button type="button" class="lotext rodef" data-he-rodef${loOrder("home").join() === loOrderDef("home").join() ? " disabled" : ""}>はじめの並びに戻す</button>` : ""}
     <div class="locard heres"><div class="t"><b>ホームを全部出す</b><small>外したものを全部ホームに戻します。タブはそのまま</small></div><button type="button" class="hereset" data-he-all${out.length ? "" : " disabled"}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.3-5.6"/><path d="M4 4v4h4"/></svg>全部出す</button></div>
     <p class="losave">タブまで全部乗せに戻すときは、マイページの「表示の編集」か、タブを選ぶのいちばん下から。見方は、それぞれの画面の見方の帯の鉛筆から選べます。</p>`;
 }
+const heName = id => (LO_BLOCKS.home.find(b => b[0] === id) || [])[1] || id;
+function heReorder(order){ const snap = loSnap(); loEdit().order.home = order; loChanged("home_order"); HE.undo = { text:"ホームの並びを変えました", snap }; heRender(); }
 function heRender(){ const d = $("dHomeEd"); if(!d || !d.open) return; const y = d.scrollTop; $("dHomeEdBody").innerHTML = heHTML(); d.scrollTop = y; }
 function openHomeEd(from){
-  HE = { undo:null, from:from || "screen" };
-  $("dHomeEdBody").innerHTML = heHTML();
+  HE = { undo:null, from:from || "screen", ro:false };
+  $("dHomeEdBody").innerHTML = heHTML(); roBind($("dHomeEdBody"), { done:heReorder, name:heName });
   if(!$("dHomeEd").open){ $("dHomeEd").showModal(); track("home_ed_open", HE.from); }
   $("dHomeEd").scrollTop = 0;
 }
@@ -8238,7 +8274,7 @@ function rsHTML(){
   return `<div class="sph"><span class="grab" aria-hidden="true"></span></div><h3 id="rsTitle">全部乗せに戻しますか？</h3>
     <p class="rslead">タブを${LO_ALL_TABS().length}つ（${LO_ALL_TABS().map(v => TAB_NAME[v]).join("・")}）に戻し、外したものを全部また出します。記録はそのままです。</p>
     ${tpMini(LO_ALL_TABS())}
-    <div class="rsrows"><div class="rsrow"><b>タブ</b><span>${tabTxt}</span></div><div class="rsrow"><b>タブの順番</b><span>${order}</span></div><div class="rsrow"><b>見方</b><span>${per("view", LO_VIEW_SEC)}</span></div><div class="rsrow"><b>かたまり</b><span>${per("blk", LO_BLK_SEC.map(([k, t]) => [k, t.replace(/（.*$/, "")]))}</span></div></div>
+    <div class="rsrows"><div class="rsrow"><b>タブ</b><span>${tabTxt}</span></div><div class="rsrow"><b>タブの順番</b><span>${order}</span></div>${loOrder("home").join() !== loOrderDef("home").join() || ohOrderSaved() ? `<div class="rsrow"><b>カードの並び</b><span>元の順に</span></div>` : ""}<div class="rsrow"><b>見方</b><span>${per("view", LO_VIEW_SEC)}</span></div><div class="rsrow"><b>かたまり</b><span>${per("blk", LO_BLK_SEC.map(([k, t]) => [k, t.replace(/（.*$/, "")]))}</span></div></div>
     <button class="lobtn rsyes" type="button" data-rs-yes>全部出す</button><button class="lotext rsno" type="button" data-close>やめる</button>`;
 }
 function openReset(){ if(loAllOn()) return; $("dResetBody").innerHTML = rsHTML(); $("dReset").showModal(); const h = $("rsTitle"); if(h){ h.tabIndex = -1; h.style.outline = "none"; h.focus(); } }
@@ -8263,6 +8299,9 @@ document.addEventListener("click", e => {
     const now = loTabs().filter(x => x !== out); tpSet(tpOrder().filter(x => x === v || now.includes(x)), "tab_swap", `「${TAB_NAME[v]}」を出しました。「${TAB_NAME[out]}」は${tpWhere(out)}`); return; }
   if((b = q("[data-he-all]"))){ if(b.disabled) return; const snap = loSnap(), L = loEdit(), n = (L.off.home || []).length; if(!n) return;
     delete L.off.home; loChanged("blk_home_all"); HE.undo = { text:`かたまり${n}つをホームに戻しました`, snap }; heRender(); return; }
+  if((b = q("[data-he-ro]"))){ HE.ro = !HE.ro; HE.undo = null; heRender(); track("layout", HE.ro ? "home_order_edit" : "home_order_done"); const n = $("dHomeEd").querySelector("[data-he-ro]"); if(n) n.focus(); return; }
+  if((b = q("[data-he-rodef]"))){ if(b.disabled) return; const snap = loSnap(); if(LAYOUT && LAYOUT.order) delete LAYOUT.order.home; loTidy(); loChanged("home_order_reset");
+    HE.undo = { text:"はじめの並びに戻しました", snap }; heRender(); roSay("ホームをはじめの並びに戻しました"); return; }
   if((b = q("[data-he-off]"))){ heSet(b.dataset.heOff, true); return; }
   if((b = q("[data-he-on]"))){ heSet(b.dataset.heOn, false); return; }
 });
@@ -8341,6 +8380,71 @@ function tpTipMaybe(){
 }
 // はじめの案内や提案が開いていて出せなかったときは、閉じたあとにもう一度
 document.addEventListener("close", e => { if(e.target.tagName === "DIALOG" && !tpTaught()) setTimeout(() => { try{ tpTipMaybe(); }catch(_){} }, 700); }, true);
+/* ---------- 並べ替えの部品（11/22 本人「いろんなやつの順序を入れ替えられるように」・checkin/reorder） ----------
+   運用の一覧のカード・ホームに出すもの・（撮る人用の）ホームの空港のカードの切り替えのピルで同じ部品を使う。
+   使い方：
+     1. 並べる物それぞれに data-ro="<id>" を付け、その中に roGrip(id, 名前) を入れる（編集の形のときだけ。ボタンの中には入れない）
+     2. 入れ物（描き直しても残る要素）に roBind(入れ物, { done(order){ 保存して描き直す }, name(id){ 名前 } }) を1回
+     3. done は動かし終えたときに、新しい並び（id の配列）で1回呼ぶ。描き直したあとは roFocus(入れ物, id) でつまみに焦点を戻す
+   つまみ（≡）：マウスはすぐ、指は 0.25秒押してから動かす（格子なら上下左右）。キーは矢印。読み上げ用に「上へ」「下へ」のボタン（焦点が来たときだけ見える）
+   並びの保存は使う側で（roOrder で、覚えた並びに今ある物を合わせる） */
+const RO_HOLD = 250;
+const RO_SVG = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 7h14M5 12h14M5 17h14"/></svg>`;
+const roGrip = (id, name) => `<span class="rogrip"><button type="button" class="roh" data-ro-h="${esc(id)}" aria-label="「${esc(name)}」を並べ替える（矢印のキーで動かします）">${RO_SVG}</button>`
+  + `<button type="button" class="rokb" data-ro-mv="-1" data-ro-id="${esc(id)}">「${esc(name)}」を上へ</button><button type="button" class="rokb" data-ro-mv="1" data-ro-id="${esc(id)}">「${esc(name)}」を下へ</button></span>`;
+// 覚えた並び saved に、今ある物 ids を合わせる（消えた物は落とし、新しい物は、はじめの並びで前にある物のすぐ後に入れる）
+function roOrder(saved, ids){
+  const out = (Array.isArray(saved) ? saved : []).filter((x, i, a) => ids.includes(x) && a.indexOf(x) === i);
+  ids.forEach((id, i) => { if(out.includes(id)) return; const prev = ids.slice(0, i).reverse().find(x => out.includes(x)); out.splice(prev ? out.indexOf(prev) + 1 : 0, 0, id); });
+  return out;
+}
+const roMoved = (order, id, d) => { const o = [...order], i = o.indexOf(id), j = i + d; if(i < 0 || j < 0 || j >= o.length) return null; o.splice(j, 0, ...o.splice(i, 1)); return o; };
+function roSay(text){ let el = $("roLive"); if(!el){ el = document.createElement("p"); el.id = "roLive"; el.className = "vh"; el.setAttribute("role", "status"); el.setAttribute("aria-live", "polite"); document.body.appendChild(el); }
+  el.textContent = ""; setTimeout(() => { el.textContent = text; }, 30); }
+function roFocus(box, id, kb){ const b = box && box.querySelector(kb ? `[data-ro-mv="${kb}"][data-ro-id="${CSS.escape(id)}"]` : `[data-ro-h="${CSS.escape(id)}"]`); if(b) try{ b.focus({ preventScroll:false }); }catch(e){} }
+const RO_BOUND = new WeakSet();
+function roBind(box, opt){
+  if(!box || RO_BOUND.has(box)) return; RO_BOUND.add(box);
+  const items = () => [...box.querySelectorAll("[data-ro]")];
+  const order = () => items().map(x => x.dataset.ro);
+  const name = id => (opt.name && opt.name(id)) || id;
+  const finish = (o, id, how, kb) => { if(!o || o.join() === order().join() && how !== "drag") return; opt.done(o, id, how); roSay(`「${name(id)}」を${o.indexOf(id) + 1}番目にしました（${o.length}このうち）`); roFocus(box, id, kb); };
+  box.addEventListener("click", e => { const b = e.target.closest("[data-ro-mv]"); if(!b || !box.contains(b)) return; e.preventDefault(); e.stopPropagation();
+    const id = b.dataset.roId, o = roMoved(order(), id, +b.dataset.roMv); if(o) finish(o, id, "button", b.dataset.roMv); else roSay(+b.dataset.roMv < 0 ? "いちばん上です" : "いちばん下です"); }, true);
+  box.addEventListener("keydown", e => { const h = e.target.closest && e.target.closest("[data-ro-h]"); if(!h || !box.contains(h)) return;
+    const d = { ArrowUp:-1, ArrowLeft:-1, ArrowDown:1, ArrowRight:1 }[e.key]; if(!d) return; e.preventDefault();
+    const id = h.dataset.roH, o = roMoved(order(), id, d); if(o) finish(o, id, "key"); });
+  let g = null;
+  const start = () => { if(!g || g.on) return; g.on = true; g.el.classList.add("rodrag"); box.classList.add("rodragging"); if(navigator.vibrate) try{ navigator.vibrate(10); }catch(_){} };
+  box.addEventListener("pointerdown", e => {
+    const h = e.target.closest("[data-ro-h]"); if(!h || !box.contains(h) || e.button > 0) return;
+    const el = h.closest("[data-ro]"); if(!el) return;
+    e.preventDefault(); g = { h, el, id:el.dataset.ro, x:e.clientX, y:e.clientY, pid:e.pointerId, on:false, t:0, before:order().join() };
+    try{ h.setPointerCapture(e.pointerId); }catch(_){}
+    if(e.pointerType === "touch") g.t = setTimeout(start, RO_HOLD); else start();
+  });
+  box.addEventListener("pointermove", e => {
+    if(!g || e.pointerId !== g.pid) return;
+    if(!g.on){ if(Math.hypot(e.clientX - g.x, e.clientY - g.y) > 10){ clearTimeout(g.t); g = null; } return; }
+    e.preventDefault();
+    const list = items(), t = g.el.getBoundingClientRect(), me = { top:t.top - (g.dy || 0), left:t.left - (g.dx || 0), width:t.width };   // 動かす前の場所（ずらした分を引く）
+    for(const r of list){ if(r === g.el) continue; const b = r.getBoundingClientRect();
+      if(e.clientX < b.left || e.clientX > b.right || e.clientY < b.top || e.clientY > b.bottom) continue;
+      const before = list.indexOf(r) < list.indexOf(g.el);
+      // 相手の半分を越えたら入れ替える（行き来してばたつかないように）。同じ行の同じ幅の物は左右で、ほかは上下で見る
+      const half = b.width > me.width * 1.4 || me.width > b.width * 1.4 || Math.abs(b.top - me.top) > 4 ? (before ? e.clientY < b.top + b.height / 2 : e.clientY > b.top + b.height / 2) : (before ? e.clientX < b.left + b.width / 2 : e.clientX > b.left + b.width / 2);
+      if(!half) break;
+      g.el.style.transform = ""; r.parentNode.insertBefore(g.el, before ? r : r.nextSibling);
+      const n = g.el.getBoundingClientRect(); g.y += n.top - me.top; g.x += n.left - me.left; break; }
+    g.dx = e.clientX - g.x; g.dy = e.clientY - g.y;
+    g.el.style.transform = `translate(${g.dx}px, ${g.dy}px)`;
+  });
+  const end = e => { if(!g || e.pointerId !== g.pid) return; const s = g; g = null; clearTimeout(s.t);
+    s.el.style.transform = ""; s.el.classList.remove("rodrag"); box.classList.remove("rodragging");
+    if(s.on && order().join() !== s.before) finish(order(), s.id, "drag"); };
+  box.addEventListener("pointerup", end); box.addEventListener("pointercancel", end);
+  box.addEventListener("contextmenu", e => { if(e.target.closest("[data-ro-h]")) e.preventDefault(); });
+}
 /* ---------- 表示の設定をサーバーに保存する（表 user_view_prefs。データ担当の移行 157） ----------
    中身（fmt 2）：全部乗せのまま＝{}。それ以外＝{ base:構成, layout:表示の編集で変えたもの }。
    表がまだない（反映の前）・つながらないときは、この端末の保存だけで動く */
@@ -11870,9 +11974,18 @@ let OPS_PAGE = null, OH_FROM = null, OH_BUSY = false, OH_OPEN_T = 0;   // OH_OPE
 const OH_LIST = () => OH_ON() && !OPS_PAGE;
 const OH_RM = () => { try{ return matchMedia("(prefers-reduced-motion: reduce)").matches; }catch(e){ return false; } };
 const OH_OPEN_MS = 460, OH_BACK_MS = 380;
+// カードの並び（11/22 本人「順序を入れ替えられるように」）：layout.order.ohub に覚える（端末とサーバーの user_view_prefs）。ないときは OH_CARDS の順
+let OH_EDIT = false;   // 並べ替えの形（一覧の右上の「並べ替え」）
+const OH_IDS = () => OH_CARDS.map(c => c[0]);
+const ohOrder = () => roOrder(LAYOUT && LAYOUT.order && LAYOUT.order.ohub, OH_IDS());
+const ohOrderSaved = () => !!(LAYOUT && LAYOUT.order && Array.isArray(LAYOUT.order.ohub) && ohOrder().join() !== OH_IDS().join());
+const ohName = id => (OH_CARDS.find(c => c[0] === id) || [])[1] || id;
+// 動かせるのは見えているカードだけ。隠しているカードは前の場所のまま（見えている場所に、新しい順で入れ直す）
+function ohReorder(order){ const vis = new Set(order), nxt = [...order], full = ohOrder().map(id => vis.has(id) ? nxt.shift() : id);
+  loEdit().order.ohub = roOrder(full, OH_IDS()); loChanged("ohub_order"); opsHubRender(); }
 function ohCards(){
-  const shown = new Set(viewsShown("ops").map(([id]) => id));
-  return OH_CARDS.filter(([id, , v]) => id === "special" ? opsPlaneOn() : id === "a3" ? ohA3On() : shown.has(v));
+  const shown = new Set(viewsShown("ops").map(([id]) => id)), at = ohOrder();
+  return [...OH_CARDS].sort((a, b) => at.indexOf(a[0]) - at.indexOf(b[0])).filter(([id, , v]) => id === "special" ? opsPlaneOn() : id === "a3" ? ohA3On() : shown.has(v));
 }
 // 「3D」のカード：今の3D と同じ条件（羽田・a3On）で、隠していないときだけ。押すと openAp3d（専用ページは作らない）
 const ohA3On = () => opsA3On() && a3On(IATA[OPS_AP]);
@@ -11934,7 +12047,14 @@ function ohCardHTML([id, label, , wide]){
 function opsHubRender(){
   const el = $("opsHubList"); if(!el) return;
   const a = document.activeElement, keep = a && el.contains(a) ? a.dataset.ohub || (a.dataset.vsOpen ? "_edit" : "") : "";   // 描き直しても焦点を残す
-  el.innerHTML = ohCards().map(ohCardHTML).join("") + `<button type="button" class="ohedit" data-vs-open="ops">隠す・出す</button>`;
+  roBind(el, { done:ohReorder, name:ohName });
+  // 並べ替えの形：カードはそのままの見た目で、押しても開かない（ボタンでなく div にして ≡ のつまみを入れる）
+  const card = c => { const h = ohCardHTML(c); if(!OH_EDIT) return h;
+    return h.replace(/^<button type="button" class="([^"]*)" data-ohub="([^"]+)" aria-label="[^"]*">/, (m, cls, id) => `<div class="${cls} ro" data-ro="${id}">${roGrip(id, ohName(id))}`).replace(/<\/button>$/, "</div>"); };
+  const tools = `<div class="ohtools">${OH_EDIT ? `<span class="ohrolead">≡ を押したまま動かします</span>` : ""}<button type="button" class="ropill${OH_EDIT ? " on" : ""}" data-oh-ro><span>${OH_EDIT ? "完了" : "並べ替え"}</span></button></div>`;
+  const foot = OH_EDIT ? `<button type="button" class="ohedit" data-oh-rodef${ohOrderSaved() ? "" : " disabled"}>はじめの並びに戻す</button>` : `<button type="button" class="ohedit" data-vs-open="ops">隠す・出す</button>`;
+  el.classList.toggle("roing", OH_EDIT);
+  el.innerHTML = tools + ohCards().map(card).join("") + foot;
   if(keep){ const b = keep === "_edit" ? el.querySelector(".ohedit") : el.querySelector(`[data-ohub="${keep}"]`); if(b) try{ b.focus({ preventScroll:true }); }catch(e){} }
 }
 // 一覧か専用ページかを画面に当てる（applyOpsView から呼ぶ）
@@ -11944,7 +12064,7 @@ function opsHubApply(){
   sec.dataset.hub = OPS_PAGE ? "page" : "list";
   if(OPS_PAGE) sec.dataset.page = OPS_PAGE; else sec.removeAttribute("data-page");
   $("opsHubList").hidden = !!OPS_PAGE;
-  if(!OPS_PAGE) opsHubRender();
+  if(OPS_PAGE) OH_EDIT = false; else opsHubRender();
   renderOpsLate();
 }
 // clip-path の inset：見せたい長方形 r（画面の座標）を、要素 el の中の inset にする
@@ -11999,6 +12119,8 @@ function opsHubSrc(){
 document.addEventListener("click", e => {
   const t = e.target; if(!t.closest) return;
   const c = t.closest("[data-ohub]"); if(c){ opsHubOpen(c.dataset.ohub, c); return; }
+  if(t.closest("[data-oh-ro]")){ OH_EDIT = !OH_EDIT; opsHubRender(); track("ops_hub", OH_EDIT ? "order_edit" : "order_done"); const n = document.querySelector("#opsHubList [data-oh-ro]"); if(n) try{ n.focus({ preventScroll:true }); }catch(e){} return; }
+  const rd = t.closest("[data-oh-rodef]"); if(rd){ if(rd.disabled) return; if(LAYOUT && LAYOUT.order) delete LAYOUT.order.ohub; loTidy(); loChanged("ohub_order_reset"); opsHubRender(); roSay("運用のカードをはじめの並びに戻しました"); return; }
   if(t.closest("#opsHubBack")){ opsHubBack(); return; }
   if(t.closest("[data-oh-about]")){ $("dOpsSrc").close(); const d = document.querySelector("#v-ops .opsabout"); if(d){ d.style.setProperty("display", "block", "important"); d.open = true; d.scrollIntoView({ block:"start" }); } return; }
 });
