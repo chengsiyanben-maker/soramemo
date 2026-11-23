@@ -3,6 +3,7 @@ HERE=os.path.dirname(os.path.abspath(__file__)); WEB=os.path.abspath(os.path.joi
 # エアライン経営 v3：下のタブを「路線」と「機体」に分ける・空港の運用時間（路線の札・スケジュールで時間の外の便を知らせる）
 import asyncio
 from playwright.async_api import async_playwright
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__))); import keiei_on   # 経営の画面を出して確かめる（切り替えを true にしたときの動き）
 fails = []
 def check(label, ok):
     print(label, ok)

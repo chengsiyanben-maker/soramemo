@@ -7,6 +7,7 @@ HERE=os.path.dirname(os.path.abspath(__file__)); WORK=os.environ.get('SORAMEMO_T
 #   保存：端末とサーバー（user_view_prefs）に並べた順も残る。偽のサーバー（fake_sb.js）を使い、小さなサーバーから開く
 import asyncio, threading, http.server, socketserver, functools
 from playwright.async_api import async_playwright
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__))); import keiei_on   # 経営の画面を出して確かめる（切り替えを true にしたときの動き）
 fails = []
 def check(label, ok, detail=''):
     print(label, ok, detail if detail != '' else '')
