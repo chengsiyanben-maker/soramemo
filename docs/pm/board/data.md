@@ -8,7 +8,7 @@
   - 確かめた結果：t132 18項目 OK・t27/t42/t90/t92/t106/t117/t122/t126/t128 通過・migrations.mjs check 184件で重なりなし
   - 本人待ち（PM のおすすめで可）：反映（索引を足す・関数の中身は同じ値なので、入れたあとに知らせる区分）・check.sql を反映の前と次の日に
   - 次の候補：atc_msgs(feeder) に索引がない（atc_my_feeders が1台ごとに全部読む）。管制の交信を使い始めるなら足す
-- **AAL176（N791AN）とアメリカン航空のワンワールド塗装（11/23 月曜の定期の回として呼ばれたが、PM の積んだ依頼 11/23 があったのでこちらをした。定期の手入れは点検の結果がまだ来ていないので今回は見送り）**：ブランチ data/aal-oneworld（main 9a79def から）→ **下書き PR #187**。報告 docs/pm/report-aal176.md。確かめの SQL docs/pm/aal176-check.sql。**移行・テストの番号は使っていない（表は変えない）**
+- **AAL176（N791AN）とアメリカン航空のワンワールド塗装（11/23 月曜の定期の回として呼ばれたが、PM の積んだ依頼 11/23 があったのでこちらをした。定期の手入れは点検の結果がまだ来ていないので今回は見送り）**：ブランチ data/aal-oneworld（main 9a79def から）→ **PR #187（11/23 16時29分 main に入った。本番の関数の出し直しは PM の反映の流れで確かめる）**。報告 docs/pm/report-aal176.md。確かめの SQL docs/pm/aal176-check.sql。**移行・テストの番号は使っていない（表は変えない）**
   - liveries.ts の ALLIANCE に N791AN・N796AN（777-200ER、アメリカン航空、ワンワールド塗装・alliance＝知らせが出る）。出典 airportspotting（N791AN は World Airline News 2009 でも確認）。FR24 は不使用。737-800（N837NN・N919NN・N973AN）は日本に来ないので入れない
   - 確かめた結果：deno test 306本 通過（liveries_test に1本足した）・deno check 通過
   - live_positions は15分で消えるので、11/22 19:30〜21:30 は track_points（36時間で消える＝**11/24 朝8時半までに流す**）・reg_legs・foreign_legs・livery_notified で見る SQL にした
