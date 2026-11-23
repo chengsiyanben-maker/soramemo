@@ -7,6 +7,7 @@ HERE=os.path.dirname(os.path.abspath(__file__)); WEB=os.path.abspath(os.path.joi
 #   偽のサーバー（fake_sb.js）を使う。本物の Supabase には接続しない
 import asyncio
 from playwright.async_api import async_playwright
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__))); import keiei_on   # 経営の画面を出して確かめる（切り替えを true にしたときの動き）
 SHOTS = os.path.join(WORK, 'home_v3_shots'); os.makedirs(SHOTS, exist_ok=True)
 HND = (35.5494, 139.7798); OUT = (35.62, 139.70); FAR = (33.0, 142.2)
 fails = []
