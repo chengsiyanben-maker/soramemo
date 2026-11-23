@@ -1,6 +1,13 @@
 # データ担当の帳面
 
 ## いま持っている仕事
+- **定期の手入れ 11/23（月曜の定期の回・PM の指示なし）**：ブランチ maint/2026-11-23（main 9a79def から）→ **下書き PR #188**。報告 docs/pm/maint/2026-11-23-report.md。確かめの SQL docs/pm/maint/2026-11-23-check.sql。**移行194・テスト t132 を使った**
+  - 点検の結果がまだないので、模擬のデータベース（移行184本）で関数367個の where の列と索引の先頭の列を突き合わせ、全部読みを洗い出した（約130件、ほとんど小さな表）。効く3つを直した
+  - ① airport_day：rwy_samples・ga_events の「(at の日本時間)::date = 日」を時刻の幅に（羽田は400日分を毎回全部読んでいた）② flights_track_todo_dep：flights (dep_at desc) where track is null and flight_no is not null（毎晩の flights_track_todo・archive_user_flights）③ rot_predict：livery_plans の日付を時刻の幅に（pg_get_functiondef の1か所だけ置き換え、1か所でなければ止まる）
+  - 影響：チェックイン（空港ページ・便の航跡）と運用予想が速くなるだけ。経営は関係しない。表・列・RLS・権限は同じ
+  - 確かめた結果：t132 18項目 OK・t27/t42/t90/t92/t106/t117/t122/t126/t128 通過・migrations.mjs check 184件で重なりなし
+  - 本人待ち（PM のおすすめで可）：反映（索引を足す・関数の中身は同じ値なので、入れたあとに知らせる区分）・check.sql を反映の前と次の日に
+  - 次の候補：atc_msgs(feeder) に索引がない（atc_my_feeders が1台ごとに全部読む）。管制の交信を使い始めるなら足す
 - **AAL176（N791AN）とアメリカン航空のワンワールド塗装（11/23 月曜の定期の回として呼ばれたが、PM の積んだ依頼 11/23 があったのでこちらをした。定期の手入れは点検の結果がまだ来ていないので今回は見送り）**：ブランチ data/aal-oneworld（main 9a79def から）→ **下書き PR #187**。報告 docs/pm/report-aal176.md。確かめの SQL docs/pm/aal176-check.sql。**移行・テストの番号は使っていない（表は変えない）**
   - liveries.ts の ALLIANCE に N791AN・N796AN（777-200ER、アメリカン航空、ワンワールド塗装・alliance＝知らせが出る）。出典 airportspotting（N791AN は World Airline News 2009 でも確認）。FR24 は不使用。737-800（N837NN・N919NN・N973AN）は日本に来ないので入れない
   - 確かめた結果：deno test 306本 通過（liveries_test に1本足した）・deno check 通過
@@ -334,7 +341,7 @@
 
 ## 次にやること
 - AAL176（PR #187）：aal176-check.sql の結果（①航跡 ②reg_legs ③foreign_legs ④livery_notified）を報告に足す。① が 0 件で ③ にあれば、track_points が先に消えた／呼び出し符号が違う（AAL176 以外）かを見る。CI とレビューに答える。公式・報道でアメリカン航空のワンワールド塗装機の一覧が見つかれば出典を差し替える
-- 定期の手入れ：11/23 の回は見送り（点検の結果 docs/pm/maint/*-result.csv がまだない）。次の月曜の回で weekly-check.sql の結果があれば読む。なければ「次にやること」の最後の行の候補（関数の中の全部読みの洗い出し）
+- 定期の手入れ 11/23（PR #188・移行194・t132）：CI とレビューに答える。反映の前に main に別の移行が先なら rebase。2026-11-23-check.sql の結果（反映の前・次の日）で rwy_samples の全部読みで読んだ行の伸びが止まったか見る。次の月曜の回：結果（*-result.csv）があれば死んだ行・使われていない索引。なければ洗い出しの残り（admin_* の日付の ::date 絞り込み・atc_msgs(feeder)）か、cold-archive の1日の大きさ
 - 行き先を便名で（PR #167）：CI とレビューに答える。反映の前に main に別の移行が先なら rebase。反映のあと livery-dest2-check.sql の 2（成田が減り羽田が増えたか）、次の夜のあと 3 を見てもらう。foreign_usual にない便（エア・ドゥ・スカイマークの少ない便）が多ければ、全機の記録の reg_legs から当日の行き先を引く案。Air Japan の NQ は本人の答えで
 - 見回り 11/21 の直し（PR #159・main に入った）：反映の Actions の結果を見る。反映のあと（前の値は取れていない）に sweep-1121-check.sql を流してもらい、①で dc:date が入っているか・②の答え・③の traffic の bytes が減ったかを見る。運用を開いたときの Server-Timing（shared・shared-stale・shared-miss）を PM に見てもらい、まだ遅ければ起動の時間を測る案（記録の処理と見る人の関数を分ける。画面の URL が変わるのでチェックイン担当と一緒に）
 - 外に返す口の上限（PR #153・main に入った）：チェックイン担当の直し（checkin/track-quota・t155、ログインの鍵を付けて読む）も同じ反映（PR #158）で入ったことを確かめた。あとは本番で空の道すじの古い日がログインして見られるかを PM に見てもらう。adsb.im の条件が分かったら確認表を直し、使えなければ経路の推定を止める案を作る
