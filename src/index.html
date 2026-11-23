@@ -6646,7 +6646,7 @@ async function checkinServer(p){
   const flight = r.flight ? {id:r.flight.id, from:r.flight.from_airport, to:r.flight.to_airport, km:r.flight.distance_km} : null;
   const bon = Array.isArray(r.bonus) ? r.bonus : [];
   say((flight ? `フライトを記録しました：${BY[flight.from].name} → ${a.name}` : `${placeName(a, term)}にチェックインしました。`)
-    + bon.map(b => `　${b.name}：経営の資金 +${yen(b.amount)}${GAME_RELEASED ? "" : "（経営の公開後に受け取れます）"}`).join(""));
+    + (keieiShown() ? bon : []).map(b => `　${b.name}：経営の資金 +${yen(b.amount)}${GAME_RELEASED ? "" : "（経営の公開後に受け取れます）"}`).join(""));
   if(bon.length) EVB = null;
   showStamp(a, Date.parse(r.at), r.first_airport, flight, term, r.first_terminal);
 }
@@ -7238,7 +7238,7 @@ function renderZkKigou(){
     <div class="zk-kg"><div class="zk-ap" style="--c:${tc}"><span class="cd">${esc(code(hnd))}</span><span class="nm">${esc(godShort(hnd))}</span><span class="ft">${ZK_CHECK}<b>3</b>回</span></div><p><b>行った空港</b>✓ と、チェックインした回数。押すと空港のページを開きます。</p></div>
     <div class="zk-kg"><div class="zk-ap no" style="--c:${tc}"><span class="cd">${esc(code(oim))}</span><span class="nm">${esc(godShort(oim))}</span><span class="ft">${ZK_YET}まだ</span></div><p><b>まだの空港</b>点線の丸。名前は読めます。押すと、どこで押せるかが分かります。</p></div>
     <div class="zk-kg"><div class="zk-ap" style="--c:${tc}"><span class="cd">${esc(t1.iata)}<small class="tg">${esc(t1.tag)}</small></span><span class="nm">${esc(zkTermName(t1))}</span><span class="ft">${ZK_CHECK}<b>2</b>回</span></div><p><b>ターミナル</b>大きな6空港（${TERM_AIRPORTS.length}空港・${TERMS.length}こ）の印。86 の数に入りません。</p></div>
-    <div class="zk-kg"><div class="zk-tsm" style="--c:${tc}"><span>関東</span></div><p><b>右端のツメ</b>9つの地方。押すとその地方の扉へ飛びます。地方の色は空港の守り神の色です。</p></div>
+    <div class="zk-kg"><div class="zk-tsm" style="--c:${tc}"><span>関東</span></div><p><b>右端のツメ</b>9つの地方。押すとその地方の扉へ飛びます。${keieiShown() ? "地方の色は空港の守り神の色です。" : "地方ごとに色を分けています。"}</p></div>
     <div class="zk-kg"><div class="zk-ap dim" style="--c:${tc}"><span class="cd">${esc(code(hnd))}</span><span class="nm">${esc(godShort(hnd))}</span><span class="ft">${ZK_CHECK}<b>3</b>回</span></div><p><b>薄い枠</b>JAL・ANA だけを表示しているとき、そのグループの便で行っていない空港。</p></div>
     <p class="zk-lead">日付は「2026年11月1日」の形で書きます。</p>`;
 }
