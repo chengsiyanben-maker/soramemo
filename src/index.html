@@ -3456,6 +3456,39 @@ dialog.fbx .row2>button{flex:1;min-height:52px;border-radius:999px}
 .pcard .pnote{margin:12px 0 0;font-size:10.5px;line-height:1.55;color:var(--sumi)}
 .pcard .pgo{display:flex;justify-content:flex-end;margin-top:12px}
 .pcard .pgo button{border:0;border-radius:999px;background:var(--sky);color:var(--ink);padding:10px 18px;font:800 13px var(--gothic)}
+/* ホームの撮影カードの切り替え（11/22）：ピル（横にすべる）・「推定・出典 i」と「運用を見る ›」の1行 */
+.pcard .pctabs{display:flex;gap:8px;margin:12px -18px 12px;padding:0 18px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;scroll-padding:0 18px}
+.pcard .pctabs::-webkit-scrollbar{display:none}
+.pcard .pctabs button{position:relative;flex:none;border:0;border-radius:999px;background:var(--sky);color:var(--sumi);height:34px;padding:0 15px;font:700 13px var(--gothic);white-space:nowrap;cursor:pointer}
+.pcard .pctabs button::after{content:"";position:absolute;inset:-5px -2px}
+.pcard .pctabs button[aria-selected="true"]{background:var(--ink);color:var(--paper)}
+.pcard .pctabs-in{display:contents}
+.pcard .pctabs .pcroin{width:34px;padding:0;display:grid;place-items:center;background:none;color:var(--sumi)}
+.pcard .pcroin svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round}
+.pcard .pcro{margin-top:12px}
+.pcard .pcrohd{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:12px;color:var(--sumi)}
+.pcard .pcrolist{display:flex;flex-direction:column;gap:8px;margin-top:6px}
+.pcard .pcrorow{position:relative;display:flex;align-items:center;min-height:52px;padding:0 56px 0 16px;border-radius:16px;background:var(--sky);font-size:15px}
+.pcard .pcrorow .rogrip{top:50%;transform:translateY(-50%)}
+.pcard .pcrodef{display:block;margin:10px 0 0 auto;min-height:44px;border:0;background:none;color:var(--ink);font:700 13px var(--gothic);cursor:pointer}
+.pcard .pcrodef:disabled{color:var(--sumi);opacity:.5;cursor:default}
+.pcard .pcnone{margin:6px 0 2px;padding:18px 16px;border-radius:18px;background:var(--sky);font-size:14px;font-weight:700;color:var(--sumi)}
+.pcard .spstrip.mini .pcrw{color:var(--ink);font-weight:700}
+.pcard .spstrip.mini .big b.now{font-family:var(--gothic);font-size:30px;font-weight:900}
+.pcard .pclate{padding:14px 16px;border-radius:18px;background:var(--sky)}
+.pcard .pcbig{display:flex;align-items:baseline;gap:4px}.pcard .pcbig small{font-size:12px;font-weight:700;color:var(--sumi)}.pcard .pcbig small:first-child{margin-right:auto}
+.pcard .pcbig b{font-family:var(--sign);font-size:48px;font-weight:700;line-height:.95;font-variant-numeric:tabular-nums}
+.pcard .pcsub{margin:4px 0 0;text-align:right;font-size:12px;color:var(--sumi)}
+.pcard .pctop{display:flex;align-items:baseline;gap:8px;margin:12px 0 0;padding-top:10px;box-shadow:inset 0 1px 0 rgba(17,24,39,.08);font-size:12.5px;color:var(--sumi);min-width:0}
+.pcard .pctop small{flex:none;font-size:11px;font-weight:700}.pcard .pctop>b{flex:none;font-family:var(--sign);font-size:17px;color:var(--ink)}
+.pcard .pctop span{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pcard .pctop b.m{flex:none;font-family:var(--sign);font-size:22px;color:var(--ink)}.pcard .pctop b.m small{font-family:var(--gothic);font-size:11px;color:var(--sumi);margin-left:2px}
+.pcard .pcfoot{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:12px}
+.pcard .pcsrc{display:inline-flex;align-items:center;gap:6px;min-height:44px;border:0;background:none;padding:0 4px 0 0;color:var(--sumi);font:600 11.5px var(--gothic);cursor:pointer}
+.pcard .pcsrc i{display:inline-grid;place-items:center;width:18px;height:18px;border-radius:50%;box-shadow:inset 0 0 0 1.4px currentColor;font:800 11px/1 var(--gothic);font-style:normal}
+.pcard .pcsrc[aria-expanded="true"]{color:var(--ink)}
+.pcard .pcgo{border:0;border-radius:999px;background:var(--sky);color:var(--ink);min-height:44px;padding:0 18px;font:800 13px var(--gothic);cursor:pointer}
+.pcard .pcfoot+.pnote{margin-top:4px}
 #v-ops .splist2 li{display:block;background:none;border-radius:0;margin:0;padding:0;box-shadow:none}
 #v-ops .splist2 li+li{border-top:1px solid var(--op-pill)}
 #v-ops .opsphoto .splist2{padding:2px 0}#v-ops .sprow{background:none;padding:12px 18px;gap:12px}
@@ -8774,39 +8807,148 @@ async function renderPersonaCard(){
   box.hidden = false; box.innerHTML = `<div class="phome">${head}<p class="hint" style="margin:8px 0">読み込んでいます…</p>${pb}</div>`;
   const d = SERVER ? await Promise.resolve().then(() => apSummary(ap)).catch(() => null) : null; if(PERSONA !== "spot") return;
   if(SERVER) await spLoadRegs(ap).catch(() => false);
+  if(SERVER && pcTabGet() === "sp" && ap === OPS_AP) await loadSpecial().catch(() => {});   // 特別塗装機を選んでいるときだけ読む（いつもは読まない）
   if(PERSONA !== "spot") return;
-  box.innerHTML = `<div class="phome">${head}${spHomeHTML(ap, def, d)}${pb}</div>`;
+  PC_LAST = { ap, def, d, head };
+  box.innerHTML = `<div class="phome">${head}${spHomeHTML(ap, def, d)}</div>`;
 }
-// ホームの撮影カードの中身：運用タブと同じ「表示する機体」の選び方で、つぎに来る1機を大きく・そのあと2機。いまの運用といつもの撮影地の光を1行
+/* ---------- ホームの撮影カードの切り替え（11/22 本人「離陸じゃなくて、他のやつを表示できるような機能にしてほしい」） ----------
+   カードの上のピル：着陸・離陸・特別塗装機・遅れ。選んだものは端末に覚える（はじめは着陸と離陸のうち近い方）。
+   長い注意書きは「推定・出典 i」の中にたたむ。「運用を見る ›」は選んだものの専用ページへ */
+const PC_TABS = [["arr", "着陸"], ["dep", "離陸"], ["sp", "特別塗装機"], ["late", "遅れ"]];
+const PC_KEY = "soramemo.home.spTab";
+const PC_HUB = { arr:"photo", dep:"photo", sp:"special", late:"late" };   // 運用の一覧のカード（OH_CARDS の id）
+let PC_LAST = null, PC_INFO = false, PC_EDIT = false;   // PC_EDIT：ピルの並べ替えの形
+const pcTabGet = () => { try{ const v = localStorage.getItem(PC_KEY); return PC_TABS.some(t => t[0] === v) ? v : null; }catch(e){ return null; } };
+const pcTabSet = v => { try{ localStorage.setItem(PC_KEY, v); }catch(e){} };
+// ピルの並び（11/22 本人「いろんなやつの順序を入れ替えられるように」）：layout.order.hcard に覚える（端末とサーバーの user_view_prefs。「全部乗せに戻す」で戻る）。並べ替えの部品は checkin/reorder の roBind・roGrip・roOrder
+const PC_IDS = () => PC_TABS.map(t => t[0]);
+const pcOrder = () => roOrder(LAYOUT && LAYOUT.order && LAYOUT.order.hcard, PC_IDS());
+const pcOrderSaved = () => pcOrder().join() !== PC_IDS().join();
+const pcName = id => (PC_TABS.find(t => t[0] === id) || [, id])[1];
+function pcDraw(focus){
+  const box = $("personaCard"); if(PERSONA !== "spot" || !PC_LAST || !box) return;
+  const sc = box.querySelector(".pctabs"), sx = sc ? sc.scrollLeft : 0;
+  roBind(box, { done:pcReorder, name:pcName });
+  box.innerHTML = `<div class="phome">${PC_LAST.head}${spHomeHTML(PC_LAST.ap, PC_LAST.def, PC_LAST.d)}</div>`;
+  const s = box.querySelector(".pctabs"); if(s) s.scrollLeft = sx;
+  const b = focus && box.querySelector(focus); if(b) try{ b.focus({ preventScroll:true }); }catch(_){}
+}
+function pcReorder(order){ loEdit().order.hcard = order; loSave(); track("layout", "hcard_order"); viewPrefsPush(); pcDraw(); }
+document.addEventListener("click", async e => {
+  const r = e.target.closest("[data-pc-ro]");
+  if(r){ PC_EDIT = !PC_EDIT; track("home_sp_tab", PC_EDIT ? "order_edit" : "order_done"); pcDraw("[data-pc-ro]"); return; }
+  const rd = e.target.closest("[data-pc-rodef]");
+  if(rd){ if(rd.disabled) return; if(LAYOUT && LAYOUT.order) delete LAYOUT.order.hcard; loTidy(); loSave(); track("layout", "hcard_order_reset"); viewPrefsPush(); pcDraw("[data-pc-ro]"); roSay("切り替えのピルをはじめの並びに戻しました"); return; }
+  const t = e.target.closest("[data-pctab]");
+  if(t){
+    const v = t.dataset.pctab; if(!PC_LAST || v === pcTabGet() && t.getAttribute("aria-selected") === "true") return;
+    pcTabSet(v); track("home_sp_tab", v);
+    pcDraw(`[data-pctab="${v}"]`);
+    if(v === "sp" && SERVER && PC_LAST.ap === OPS_AP){ await loadSpecial().catch(() => {}); if(pcTabGet() === "sp") pcDraw(`[data-pctab="${v}"]`); }
+    return;
+  }
+  const i = e.target.closest("[data-pcinfo]");
+  if(i){ PC_INFO = !PC_INFO; i.setAttribute("aria-expanded", String(PC_INFO)); const p = $("pcInfo"); if(p) p.hidden = !PC_INFO; return; }
+  const g = e.target.closest("[data-pchub]");
+  if(g){
+    const id = g.dataset.pchub; track("home_sp_go", id); goTab("ops");
+    if(OH_ON()){ if(OPS_PAGE !== id) opsHubOpen(id); return; }
+    if(id === "special"){ opsSideSet("plane"); VIEW.opsp = "special"; } else { opsSideSet("ap"); VIEW.ops = id === "late" ? "board" : "photo"; }
+    VIEW_RENDER.ops();
+  }
+});
+// 特別塗装機：今日このあとこの空港に来る・出る機体（いま着陸に向かっている・離陸したところ、時刻表の便、航空会社の運航情報の予定）
+function pcSpList(ap, items){
+  const now = Date.now(), end = Math.floor((now + 9 * 36e5) / 864e5) * 864e5 + 864e5 - 9 * 36e5, out = [], has = fl => out.some(o => o.fl === fl);
+  for(const x of SPECIAL.values()) if(x.kind !== "alliance" && x.iata === ap && (x.phase === "arr" || x.phase === "dep")){
+    const fl = spNorm(spbFl(x.callsign)); if(fl && has(fl)) continue;
+    out.push({ t:null, hot:true, name:x.name, fl, dir:x.phase, reg:x.reg || null, other:null }); }
+  for(const x of items) if(x.liv && x.t != null && x.t <= end && !has(x.fl)) out.push({ t:x.t, name:x.liv, fl:x.fl, dir:x.dir, reg:x.reg, other:x.other, type:x.type });
+  for(const p of SP_PLANS || []){
+    if(p.cancelled) continue;
+    const a = p.arr === ap, dp = p.dep === ap && !p.atd; if(!a && !dp) continue;
+    const t = Date.parse(a ? p.sta : p.std), fl = spNorm(p.flight); if(!(t > now - 6e5 && t <= end) || has(fl)) continue;
+    out.push({ t, name:p.livery, fl, dir:a ? "arr" : "dep", reg:null, other:a ? p.dep : p.arr, plan:true }); }
+  return out.sort((x, y) => (x.t ?? 0) - (y.t ?? 0));
+}
+// 遅れ：今日の遅れ・欠航の数（案内板の1時間ごとの数）と、いちばん大きいもの1つ（'bad' があればそこから、なければこれからの便から）
+function pcLate(d){
+  if(!d || !Array.isArray(d.hours)) return null;
+  const late = d.hours.reduce((x, h) => x + Number(h.late || 0), 0), cancel = d.hours.reduce((x, h) => x + Number(h.cancel || 0), 0);
+  let top = null;
+  if(Array.isArray(d.bad) && d.bad.length){
+    for(const f of d.bad) if(!f.cancelled && f.late != null && (!top || Number(f.late) > top.m)) top = { fl:f.flight, dir:f.dir, other:f.other, m:Number(f.late) };
+    if(!top){ const f = d.bad.find(x => x.cancelled); if(f) top = { fl:f.flight, dir:f.dir, other:f.other, cancel:true }; }
+  }else{
+    for(const [list, dir] of [[d.next_arr || [], "arr"], [d.next_dep || [], "dep"]]) for(const f of list){
+      const t = Date.parse(f.actual || f.est || f.inferred || f.predicted || ""), s = Date.parse(f.sched), m = Math.round((t - s) / 60000);
+      if(m >= 15 && (!top || m > top.m)) top = { fl:f.flight, dir, other:f.other, m, est:!f.actual && !f.est };
+    }
+  }
+  return { late, cancel, n:late + cancel, top };
+}
+// ホームの撮影カードの中身：上のピル（着陸・離陸・特別塗装機・遅れ）で切り替える。着陸・離陸は運用タブと同じ「表示する機体」の選び方で、つぎに来る1機を大きく・そのあと2機
 function spHomeHTML(ap, def, d){
   const now = Date.now(), sel = spSel(ap);
   const items = d && ap === OPS_AP ? spItems(d) : [];
   if(items.length && !SP_ITEMS.length) SP_ITEMS = items;   // 「選ぶ」のシートの数に使う（運用タブを開くまで）
-  const list = items.filter(x => x.t != null && x.t >= now - 60000 && spMatch(x, sel)), hero = list[0] || null, rest = list.slice(1, 3);
-  // いまの運用と光（運用タブで運用が分かっているとき）。分からなければ日の出・日の入り
-  let wx = "";
+  const pick = items.filter(x => x.t != null && x.t >= now - 60000 && spMatch(x, sel));
+  const tab = pcTabGet() || (pick[0] && pick[0].dir === "dep" ? "dep" : "arr");   // はじめは着陸と離陸のうち近い方
   const cur = OPS_CUR && OPS_CUR.def && OPS_CUR.def.iata === ap ? OPS_CUR : null, op = cur && cur.op;
-  if(op && op.arr.length + op.dep.length){
-    const spots = spSees(cur.def, op, cur.rw).filter(x => x.sees.length);
-    let name = null; try{ name = localStorage.getItem("soramemo.photoSpot." + ap); }catch(e){}
-    const sp = spots.find(x => x.name === name) || spots[0] || null, li = sp && sp.li;
-    const dur = t => { const m = Math.max(1, Math.round((t - now) / 60000)); return m >= 60 ? `${Math.floor(m / 60)}時間${m % 60 ? m % 60 + "分" : ""}` : `${m}分`; };
-    wx = [esc(op.label), sp && li ? `${esc(sp.name.replace(/^第(\d)ターミナル /, "第$1T "))}は${lightWord(li.cur, now)}${li.cur === "back" && li.until ? ` <b>あと${dur(li.until)}</b>` : ""}` : ""].filter(Boolean).map(t => `<span>${t}</span>`).join("");
-  }else if(def){
-    const sd = sunDay(now, def.center[0], def.center[1]);
-    wx = sd.rise && now < sd.rise ? `日の出 <b>${spHM(sd.rise)}</b>` : sd.set && now < sd.set ? `日の入り <b>${spHM(sd.set)}</b>` : "日の入り後";   // 0時〜日の出は上の「日の出」の形になる
-  }
-  const when = x => x.dir === "arr" ? "着陸" : "離陸";
-  const rare = x => x.liv ? `<span class="sprare gold">特別塗装</span>` : x.foreign ? `<span class="sprare">海外</span>` : x.intl ? `<span class="sprare">国際</span>` : "";
+  const mins = t => Math.max(0, Math.round((t - now) / 60000));
   const parts = a => a.filter(Boolean).map(t => `<span class="pt">${t}</span>`).join("");
-  const heroHTML = hero ? `<div class="sphero spstrip mini ${hero.dir}"><span class="band" aria-hidden="true"></span>
-      <span class="c1"><small class="lbl">${when(hero)}</small><span class="flr"><b class="fl">${esc(hero.fl)}</b><span class="ty">${esc(hero.type || "")}</span></span>
-        <small class="sub">${parts([hero.reg && esc(hero.reg), hero.liv && `「${esc(hero.liv)}」`, esc(placeAny(hero.other)) + (hero.dir === "arr" ? "から" : "へ")])}</small>${spGateLine(hero) ? `<small class="sub">${spGateLine(hero)}</small>` : ""}</span>
-      <span class="c2"><span class="big"><b>${Math.max(0, Math.round((hero.t - now) / 60000))}</b><small>分</small></span><small class="at">${spHM(hero.t)}ごろ</small></span></div>`
-    : `<p class="hint" style="margin:8px 0">${d ? "この3時間に、選んだ機体は来ません。運用タブで表示する機体を変えられます。" : "いまは読み込めません。"}</p>`;
-  const rows = rest.map(x => `<li class="${x.dir}"><i class="band" aria-hidden="true"></i><b class="t">${spHM(x.t)}</b><span class="vh">${when(x)}</span><span class="n"><b>${esc(x.fl)}</b><small>${parts([esc(x.type || ""), x.reg && esc(x.reg), esc(placeAny(x.other)) + (x.dir === "arr" ? "から" : "へ")])}</small></span>${rare(x)}</li>`).join("");
-  return `${wx ? `<p class="pwx">${wx}</p>` : ""}${heroHTML}${rows ? `<ul class="ptl">${rows}</ul>` : ""}
-    <p class="pnote">表示する機体：${esc(spSelLabel(sel))}。機材は時刻表の予定、登録記号・滑走路・離陸の時刻は推定です。${ODPT_CREDIT}</p>`;
+  const where = x => x.other ? esc(placeAny(x.other)) + (x.dir === "arr" ? "から" : "へ") : "";
+  const rare = x => x.liv ? `<span class="sprare gold">特別塗装</span>` : x.foreign ? `<span class="sprare">海外</span>` : x.intl ? `<span class="sprare">国際</span>` : "";
+  const row = (x, name) => `<li class="${x.dir}"><i class="band" aria-hidden="true"></i><b class="t">${x.t ? spHM(x.t) : "いま"}</b><span class="vh">${x.dir === "arr" ? "着陸" : "離陸"}</span><span class="n"><b>${esc(name ? x.fl || "" : x.fl)}</b><small>${parts(name ? [`「${esc(x.name)}」`, where(x)] : [esc(x.type || ""), x.reg && esc(x.reg), where(x)])}</small></span>${name ? "" : rare(x)}</li>`;
+  if(PC_EDIT) return `<div class="pcro"><div class="pcrohd"><span>≡ を押したまま動かします</span><button type="button" class="ropill on" data-pc-ro><span>完了</span></button></div>
+      <div class="pcrolist">${pcOrder().map(k => `<div class="pcrorow ro" data-ro="${k}"><b>${pcName(k)}</b>${roGrip(k, pcName(k))}</div>`).join("")}</div>
+      <button type="button" class="pcrodef" data-pc-rodef${pcOrderSaved() ? "" : " disabled"}>はじめの並びに戻す</button></div>`;
+  const pills = `<div class="pctabs"><div class="pctabs-in" role="tablist" aria-label="カードに出すもの">${pcOrder().map(k => `<button type="button" role="tab" data-pctab="${k}" aria-selected="${k === tab}">${pcName(k)}</button>`).join("")}</div><button type="button" class="pcroin" data-pc-ro aria-label="切り替えのピルを並べ替える">${RO_SVG}</button></div>`;
+  let body = "", note = "";
+  if(tab === "arr" || tab === "dep"){
+    // いまの運用と光（運用タブで運用が分かっているとき）。分からなければ日の出・日の入り
+    let wx = "";
+    if(op && op.arr.length + op.dep.length){
+      const spots = spSees(cur.def, op, cur.rw).filter(x => x.sees.length);
+      let name = null; try{ name = localStorage.getItem("soramemo.photoSpot." + ap); }catch(e){}
+      const sp = spots.find(x => x.name === name) || spots[0] || null, li = sp && sp.li;
+      const dur = t => { const m = Math.max(1, Math.round((t - now) / 60000)); return m >= 60 ? `${Math.floor(m / 60)}時間${m % 60 ? m % 60 + "分" : ""}` : `${m}分`; };
+      wx = [esc(op.label), sp && li ? `${esc(sp.name.replace(/^第(\d)ターミナル /, "第$1T "))}は${lightWord(li.cur, now)}${li.cur === "back" && li.until ? ` <b>あと${dur(li.until)}</b>` : ""}` : ""].filter(Boolean).map(t => `<span>${t}</span>`).join("");
+    }else if(def){
+      const sd = sunDay(now, def.center[0], def.center[1]);
+      wx = sd.rise && now < sd.rise ? `日の出 <b>${spHM(sd.rise)}</b>` : sd.set && now < sd.set ? `日の入り <b>${spHM(sd.set)}</b>` : "日の入り後";   // 0時〜日の出は上の「日の出」の形になる
+    }
+    const list = pick.filter(x => x.dir === tab), hero = list[0] || null, rest = list.slice(1, 3), w = tab === "arr" ? "着陸" : "離陸";
+    const rws = hero && op ? spRwsOf(hero, op).rws : [];
+    const rwLine = rws.length ? `滑走路 ${rws.map(esc).join("・")}（推定）` : "";
+    const heroHTML = hero ? `<div class="sphero spstrip mini ${hero.dir}"><span class="band" aria-hidden="true"></span>
+        <span class="c1"><small class="lbl">${w}</small><span class="flr"><b class="fl">${esc(hero.fl)}</b><span class="ty">${esc(hero.type || "")}</span></span>
+          <small class="sub">${parts([hero.reg && esc(hero.reg), hero.liv && `「${esc(hero.liv)}」`, where(hero)])}</small>${spGateLine(hero) ? `<small class="sub">${spGateLine(hero)}</small>` : ""}${rwLine ? `<small class="sub pcrw">${rwLine}</small>` : ""}</span>
+        <span class="c2"><span class="big"><b>${mins(hero.t)}</b><small>分</small></span><small class="at">${spHM(hero.t)}ごろ</small></span></div>`
+      : `<p class="pcnone">${d ? `この3時間に、選んだ機体の${w}はありません` : "いまは読み込めません"}</p>`;
+    body = `${wx ? `<p class="pwx">${wx}</p>` : ""}${heroHTML}${rest.length ? `<ul class="ptl">${rest.map(x => row(x)).join("")}</ul>` : ""}`;
+    note = `表示する機体：${esc(spSelLabel(sel))}（運用タブの「撮る人」で変えられます）。機材は時刻表の予定、登録記号・滑走路・離陸の時刻は推定で、予想です。保証しません。${ODPT_CREDIT}`;
+  }else if(tab === "sp"){
+    const list = SERVER && ap === OPS_AP ? pcSpList(ap, items) : [], hero = list[0] || null;
+    const heroHTML = hero ? `<div class="sphero spstrip mini ${hero.dir}"><span class="band" aria-hidden="true"></span>
+        <span class="c1"><small class="lbl">特別塗装機・${hero.dir === "arr" ? "着陸" : "離陸"}${hero.plan ? "の予定" : ""}</small><span class="flr"><b class="fl">${esc(hero.fl || "—")}</b><span class="ty">${esc(hero.type || "")}</span></span>
+          <small class="sub">${parts([hero.reg && esc(hero.reg), `「${esc(hero.name)}」`, where(hero)])}</small></span>
+        <span class="c2">${hero.t ? `<span class="big"><b>${mins(hero.t)}</b><small>分</small></span><small class="at">${spHM(hero.t)}ごろ</small>` : `<span class="big"><b class="now">いま</b></span><small class="at">${hero.dir === "arr" ? "着陸に向かっている" : "離陸したところ"}</small>`}</span></div>`
+      : `<p class="pcnone">${!SERVER || ap !== OPS_AP ? "いまは読み込めません" : "今日はありません"}</p>`;
+    body = heroHTML + (list.length > 1 ? `<ul class="ptl">${list.slice(1, 3).map(x => row(x, true)).join("")}</ul>` : "");
+    note = `特別塗装機の一覧は航空会社の発表などをもとに そらメモ がまとめたものです。時刻は航空会社の運航情報（特別塗装機で運航すると書かれた便）と時刻表、「いま」は機体の位置（${ADSB_A}・ODbL）から。機体の変更で変わることがあり、保証しません。${ODPT_CREDIT}`;
+  }else{
+    const L = pcLate(d), top = L && L.top;
+    body = !L ? `<p class="pcnone">いまは読み込めません</p>`
+      : !L.n ? `<p class="pcnone">今日は遅れ・欠航の便はありません</p>`
+      : `<div class="pclate"><div class="pcbig"><small>今日の遅れ・欠航</small><b>${L.n}</b><small>便</small></div><p class="pcsub">遅れ ${L.late}便・欠航 ${L.cancel}便</p>
+          ${top ? `<p class="pctop"><small>${top.cancel ? "欠航" : "いちばん大きい遅れ"}</small><b>${esc(spNorm(top.fl))}</b><span>${esc(placeAny(top.other))}${top.dir === "arr" ? "から" : "へ"}</span>${top.cancel ? "" : `<b class="m">${top.m}<small>分${top.est ? "（推定）" : ""}</small></b>`}</p>` : ""}</div>`;
+    note = `15分以上の遅れと欠航を、JAL・ANA の時刻表に載っている便で数えています（定刻の時間で数えます。遅れは航空会社の運航情報か、機体の位置からの推定）。${ODPT_CREDIT}`;
+  }
+  return `${pills}${body}
+    <div class="pcfoot"><button type="button" class="pcsrc" data-pcinfo aria-expanded="${PC_INFO}" aria-controls="pcInfo">推定・出典<i aria-hidden="true">i</i></button><button type="button" class="pcgo" data-pchub="${PC_HUB[tab]}">運用を見る<span aria-hidden="true"> ›</span></button></div>
+    <p class="pnote" id="pcInfo"${PC_INFO ? "" : " hidden"}>${note}</p>`;
 }
 
 // 修行のホームのカード：ポイントの進み・予定の便を乗るといくつ、次に乗る便（あと何日・この便で何ポイント・運航の状況）、その日の行程
