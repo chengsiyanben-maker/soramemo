@@ -149,6 +149,8 @@ async def main():
         await view(pg, 'plane', 0, 'g3')
         r = await pg.evaluate("(() => { const o = A3.objs.get('g3'); const b = o.real.children.find(m => m.isMesh && m.material.map); return { em: !!b.material.emissiveMap, i: b.material.emissiveIntensity, pts: o.real.children.some(c => c.isPoints) }; })()")
         check('夜は窓が灯り、翼の先の灯りも本物に近い形に付く', r['em'] and r['i'] >= .9 and r['pts'], r)
+        r = await pg.evaluate("(() => { const o = A3.objs.get('g3'); return o.real.children.filter(m => m.isMesh).map(m => m.material).filter(m => Object.keys(A3.rm).some(k => k.startsWith('fin') && A3.rm[k] === m)).map(m => m.color.getHex()); })()")
+        check('夜は尾翼に会社の色を使わない（11/9 の決まり）', r == [0xE6E9EE], r)
         await view(pg, 'tower', 1.25 * math.pi); info['new_tower_night'] = await pg.evaluate(INFO); await pg.screenshot(path=os.path.join(SHOTS, 'new_tower_night.png'))
         await pg.evaluate(CLOSE, ['g3', 2.3, 1.9, .45]); await pg.wait_for_timeout(1200); await pg.screenshot(path=os.path.join(SHOTS, 'new_close_788_night.png'))
         await pg.evaluate(CLOSE, ['g12', 2.3, 2.0, .5]); await pg.wait_for_timeout(1200); await pg.screenshot(path=os.path.join(SHOTS, 'new_close_21N_night.png'))

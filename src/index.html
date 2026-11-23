@@ -5889,7 +5889,7 @@ function a3MeshR(p, key){
   const T = A3.THREE, g = new T.Group(), geo = a3GeoR(key), M = a3RealMats(key), day = A3.night === "day", sh = !!(A3.r && A3.r.shadowMap.enabled);
   const add = (geom, mat, name) => { if(!geom) return null; const m = new T.Mesh(geom, mat); m.castShadow = sh; if(name) m.name = name; g.add(m); return m; };
   add(geo.body, M.body); add(geo.wing, M.wing); add(geo.white, M.white); add(geo.dark, M.dark); add(geo.metal, M.metal);
-  add(geo.fin, a3FinMat(a3Sp(p) && day ? "gold" : a3TailCol(p)));   // 特別塗装機の尾翼は昼だけ金（今までどおり）
+  add(geo.fin, a3FinMat(a3Sp(p) && day ? "gold" : day ? a3TailCol(p) : 0xE6E9EE));   // 特別塗装機の尾翼は昼だけ金（今までどおり）。夕方と夜は会社の色を使わない（11/9 の決まり）
   const gr = new T.Group(); gr.name = "gear"; for(const [gm, mt] of [[geo.tire, M.tire], [geo.gear, M.gear]]) if(gm){ const m = new T.Mesh(gm, mt); m.castShadow = sh; gr.add(m); } g.add(gr);
   if(!day){ const [nav, land] = a3AcLights(geo, p.id); if(nav) g.add(nav); if(land){ land.visible = false; g.add(land); } }
   g.name = "real"; return g;
