@@ -22,7 +22,7 @@ for t in TESTS:
     r = subprocess.run([sys.executable, os.path.join(HERE, t)], capture_output=True, text=True, encoding='utf-8', errors='replace', timeout=240)
     out = (r.stdout + r.stderr).strip().splitlines()
     last = out[-1] if out else ''
-    ok = r.returncode == 0 and ('[]' in last or 'errors []' in last or 'errors: []' in last)
+    ok = r.returncode == 0 and ('[]' in last or 'errors []' in last or 'errors: []' in last or last == '全部成功')   # 「全部成功」で終わるテスト（t165・t166 など）も成功に数える
     print(('OK   ' if ok else 'FAIL ') + t)
     if not ok: fails.append(t); print('\n'.join('     ' + l for l in out[-8:]))
 print(f'\n{len(TESTS) - len(fails)} / {len(TESTS)} 件成功')

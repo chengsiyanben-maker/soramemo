@@ -993,6 +993,10 @@ dialog.tpsheet .dlg{display:flex;flex-direction:column;overflow:hidden;padding-b
 .heed .heundo{position:static;margin:12px 0 0}
 .hepc.sw{padding-right:92px}.hepc .losw{position:absolute;right:6px;top:50%;transform:translateY(-50%)}
 .hepc.off{background:#F7F8FA;box-shadow:inset 0 0 0 1.5px #D9DEE6}.hepc.off b{color:#4B5563}
+.hehd{display:flex;align-items:center;justify-content:space-between;gap:8px}.hehd .heh{margin-right:auto}
+.hepc.ro{padding-right:56px}.hepc .rogrip{top:50%;right:4px;transform:translateY(-50%)}
+.hepc.ro .roh::after{background:#F3F5F8;box-shadow:none}
+.rodef{display:block;margin:8px auto 0}.rodef:disabled{color:#9CA3AF;cursor:default}
 /* review-c4（11/9 5時40分の PM の指示・本人が ON／OFF に決めたあと）
    1 下の帯（元に戻す・入れ替え）は一覧と重ならない（一覧が縮む）。帯が出て最後の行が見えなくなったら、押した行が隠れない範囲で一覧を送って最後の行も見せる（tpKeep）
    2 全部乗せのときの「全部乗せに戻す」は押せない薄い字をやめ、押せない理由の字「いまは全部乗せです」（白と 4.8:1）
@@ -1129,6 +1133,28 @@ dialog.tpsheet .dlg{display:flex;flex-direction:column;overflow:hidden;padding-b
 .ohc .ohring{position:absolute;right:14px;top:12px;width:34px;height:34px}
 .ohc .ohdots{margin-left:auto;display:flex;gap:4px}.ohc .ohdots i{width:10px;height:10px;border-radius:50%}
 .ohedit{grid-column:1 / -1;justify-self:center;min-height:44px;padding:0 18px;border:0;background:none;color:var(--op-ink);font:800 14px var(--gothic);cursor:pointer}
+/* 並べ替えの部品（11/22 checkin/reorder）：右上のピル「並べ替え／完了」・カードや行の右上の ≡ のつまみ・読み上げ用の「上へ・下へ」（焦点が来たときだけ見える） */
+.ropill{flex:none;height:44px;padding:0 2px;border:0;background:none;font:800 13px var(--gothic);color:#374151;cursor:pointer}
+.ropill{display:inline-flex;align-items:center}.ropill>span{display:inline-flex;align-items:center;height:32px;padding:0 14px;border-radius:999px;background:#EEF0F3}
+.ropill.on>span{background:#374151;color:#fff}
+.rogrip{position:absolute;right:4px;top:4px;z-index:3;display:flex;align-items:center}
+.roh{width:44px;height:44px;border:0;border-radius:999px;background:none;color:#4B5563;display:grid;place-items:center;cursor:grab;touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+.roh svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round}
+.roh::after{content:"";position:absolute;width:34px;height:34px;border-radius:999px;background:rgba(255,255,255,.92);box-shadow:0 1px 3px rgba(17,24,39,.18);z-index:-1}
+.roh{position:relative;isolation:isolate}
+.rokb{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0;padding:0;margin:0}
+.rokb:focus-visible{position:static;width:auto;height:44px;clip:auto;overflow:visible;padding:0 12px;margin-right:4px;border-radius:999px;background:#374151;color:#fff;font:800 13px var(--gothic)}
+.rodrag{z-index:6 !important;transition:none !important;box-shadow:0 22px 40px -16px rgba(17,24,39,.5) !important}
+.rodrag .roh{cursor:grabbing}
+.rodragging,.rodragging *{-webkit-user-select:none;user-select:none}
+.ohtools{grid-column:1 / -1;display:flex;align-items:center;justify-content:flex-end;gap:8px;margin:-8px 0 -6px}
+.ohtools .ropill{color:var(--op-ink)}.ohtools .ropill>span{background:var(--op-card);box-shadow:var(--op-shadow)}
+.ohtools .ropill.on>span{background:var(--op-ink);color:var(--op-card)}
+.ohrolead{margin-right:auto;font-size:13px;font-weight:700;color:var(--op-mute)}
+.ohub.roing .ohc{cursor:default}
+.ohub.roing .ohc .ohring{display:none}
+.ohub.roing .ohc .oht{padding-right:40px}
+.ohedit:disabled{color:var(--op-sub);cursor:default}
 #v-ops.ohanim{will-change:clip-path,transform}
 #v-ops.ohup #opsAside>*:not(#opsInfo):not(#opsBoard),#v-ops.ohup #opsPside>*{animation:ohUp .46s ease both}
 @keyframes ohUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
@@ -2175,7 +2201,7 @@ dialog.a3dlg{inset:0;margin:0;max-width:100vw;max-height:100vh;width:100vw;heigh
 .a3stage{position:absolute;inset:0}
 .a3stage canvas{display:block;width:100%;height:100%;touch-action:none}
 .a3labels{position:absolute;inset:0;pointer-events:none;overflow:hidden}
-.a3tag{position:absolute;left:0;top:0;white-space:nowrap;padding:5px 12px;border-radius:999px;background:#fff;color:#374151;font-size:13px;box-shadow:0 2px 8px rgba(15,22,38,.18)}
+.a3tag{position:absolute;left:0;top:0;white-space:nowrap;padding:5px 12px;border-radius:999px;background:#fff;color:#374151;font-size:13px;box-shadow:0 2px 8px rgba(15,22,38,.18);pointer-events:auto;cursor:pointer}   /* 札を押すとその機体を選ぶ（11/22） */
 .a3tag b{color:#111827;font-weight:800}
 .a3tag.on{background:#111827;color:#D1D5DB}.a3tag.on b{color:#fff}
 .a3tag.edge{background:rgba(255,255,255,.86);color:#4B5563}   /* 景色の外の機体の札（画面の端・向きの矢印つき） */
@@ -2212,6 +2238,9 @@ dialog.a3dlg{inset:0;margin:0;max-width:100vw;max-height:100vh;width:100vw;heigh
 .a3range,.a3empty{margin:2px 0 8px;font-size:13px;color:#6B7280}
 .a3body{flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding-bottom:calc(16px + env(safe-area-inset-bottom))}
 .a3list{list-style:none;margin:0;padding:0}
+.a3range b.num{font-size:14px;font-weight:800;color:#374151}
+.a3gh{display:flex;align-items:baseline;gap:4px;margin:14px 0 2px;font-size:14px;font-weight:800;color:#374151}.a3gh b{font-size:18px}.a3gh .u{font-size:13px;color:#6B7280}
+.a3list li.on button{background:#F3F5F8;border-radius:12px}
 .a3list button{width:100%;display:grid;grid-template-columns:96px minmax(0,1fr) 16px;gap:10px;align-items:center;min-height:56px;padding:8px 0;border:0;background:transparent;font:inherit;text-align:left;color:inherit;cursor:pointer}
 .a3list .no,.a3list .st{display:flex;flex-direction:column;min-width:0}
 .a3list .no b{font-size:17px;font-weight:800}.a3list small{font-size:13px;color:#6B7280}
@@ -2235,6 +2264,7 @@ dialog.a3dlg{inset:0;margin:0;max-width:100vw;max-height:100vh;width:100vw;heigh
 :root[data-night="on"] .a3rnd,:root[data-night="on"] .a3ttl,:root[data-night="on"] .a3pills,:root[data-night="on"] .a3chip,:root[data-night="on"] .a3credit,:root[data-night="on"] .a3lite,:root[data-night="on"] .a3menu,:root[data-night="on"] .a3tag{background:rgba(20,27,36,.92);color:#E5E7EB}
 :root[data-night="on"] .a3sh h3,:root[data-night="on"] .a3sh1,:root[data-night="on"] .a3tag b,:root[data-night="on"] .a3fl,:root[data-night="on"] .a3grid b{color:#fff}
 :root[data-night="on"] .a3pills button{color:#AEB9C6}
+:root[data-night="on"] .a3range b.num,:root[data-night="on"] .a3gh{color:#E5E7EB}:root[data-night="on"] .a3gh .u{color:#AEB9C6}:root[data-night="on"] .a3list li.on button{background:rgba(255,255,255,.07)}
 :root[data-night="on"] .a3pills button[aria-pressed="true"]{background:transparent;color:#fff;box-shadow:inset 0 0 0 1.5px #F3F4F6}
 :root[data-night="on"] .a3sheet{background:#141B24;color:#E5E7EB}
 :root[data-night="on"] .a3grid div,:root[data-night="on"] .a3src li,:root[data-night="on"] .a3x,:root[data-night="on"] .a3lite button{background:#1D2530;color:#E5E7EB}
@@ -3432,6 +3462,16 @@ dialog.fbx .row2>button{flex:1;min-height:52px;border-radius:999px}
 .pcard .pctabs button{position:relative;flex:none;border:0;border-radius:999px;background:var(--sky);color:var(--sumi);height:34px;padding:0 15px;font:700 13px var(--gothic);white-space:nowrap;cursor:pointer}
 .pcard .pctabs button::after{content:"";position:absolute;inset:-5px -2px}
 .pcard .pctabs button[aria-selected="true"]{background:var(--ink);color:var(--paper)}
+.pcard .pctabs-in{display:contents}
+.pcard .pctabs .pcroin{width:34px;padding:0;display:grid;place-items:center;background:none;color:var(--sumi)}
+.pcard .pcroin svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round}
+.pcard .pcro{margin-top:12px}
+.pcard .pcrohd{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:12px;color:var(--sumi)}
+.pcard .pcrolist{display:flex;flex-direction:column;gap:8px;margin-top:6px}
+.pcard .pcrorow{position:relative;display:flex;align-items:center;min-height:52px;padding:0 56px 0 16px;border-radius:16px;background:var(--sky);font-size:15px}
+.pcard .pcrorow .rogrip{top:50%;transform:translateY(-50%)}
+.pcard .pcrodef{display:block;margin:10px 0 0 auto;min-height:44px;border:0;background:none;color:var(--ink);font:700 13px var(--gothic);cursor:pointer}
+.pcard .pcrodef:disabled{color:var(--sumi);opacity:.5;cursor:default}
 .pcard .pcnone{margin:6px 0 2px;padding:18px 16px;border-radius:18px;background:var(--sky);font-size:14px;font-weight:700;color:var(--sumi)}
 .pcard .spstrip.mini .pcrw{color:var(--ink);font-weight:700}
 .pcard .spstrip.mini .big b.now{font-family:var(--gothic);font-size:30px;font-weight:900}
@@ -5071,6 +5111,10 @@ function a3Place(p){
 }
 const a3Alt = p => p.alt_ft == null ? null : Math.max(0, Math.round(p.alt_ft * 0.3048 / 100) * 100);
 const a3Air = p => !p.ground && p.alt_ft != null && p.alt_ft > 300;
+// 向きが分からない地上の機体：近いターミナル（T1・T2・T3）の方へ機首を向ける
+function a3NoseIn(p){ let best = null, bd = 1e9; for(const t of A3_TERM){ const d = Math.hypot(t[0] - p.lat, (t[1] - p.lon) * Math.cos(p.lat * D2R)); if(d < bd){ bd = d; best = t; } }
+  return best ? Math.round(bearing([p.lat, p.lon], [best[0], best[1]])) : 0; }
+const a3Moving = p => !a3Air(p) && (p.moving === true || (p.kt || 0) >= 5);
 // 向いている先の滑走路（着陸は進入の向き、離陸は近い滑走路）
 function a3Rwy(p){
   let best = null, bd = 1e9;
@@ -5085,7 +5129,8 @@ function a3Rwy(p){
 }
 function a3State(p){
   const rw = a3Rwy(p), alt = a3Alt(p);
-  if(!a3Air(p)) return ["地上", ""];
+  if(!a3Air(p)){ const kt = p.kt || 0, kmh = kt ? `時速 ${Math.round(kt * 1.852)}km` : "";
+    return kt >= 40 ? ["滑走路を走行中", [rw && `${rw} 滑走路`, kmh].filter(Boolean).join("・")] : a3Moving(p) ? ["地上を走行中", kmh] : ["止まっている", ""]; }
   if(p.phase === "arr"){ const min = p.kt ? Math.max(1, Math.round(p.dist_km / (p.kt * 1.852 / 60))) : null;
     return [min ? `着陸まで約${min}分` : "着陸に向かう", rw ? `${rw} 滑走路へ` : ""]; }
   if(p.phase === "dep") return alt != null && alt < 500 ? ["離陸中", rw ? `${rw} 滑走路` : ""] : ["上昇中", alt != null ? `高さ ${alt.toLocaleString("ja-JP")}m` : ""];
@@ -5541,8 +5586,12 @@ async function a3Poll(){
   if(!A3) return;
   if(!d || !Array.isArray(d.planes)){ A3.err = "pos"; a3Status(); a3Sheet(); return; }
   const t = Date.parse(d.at) || Date.now();
-  // 地上の機体：答えに ground（地上の機体の並び）があれば一緒に出す（データ担当への依頼。まだ答えにないときは空の機体だけ）
-  const gp = Array.isArray(d.ground) ? d.ground.filter(p => p && p.lat != null && p.lon != null).map(p => ({ ...p, ground:true, alt_ft:0, phase:p.phase || "other" })) : [];
+  // 地上の機体：答えの ground（airport-traffic が空港の中心から5km 以内の地上の機体を返す。11/22 checkin/a3-ground）。
+  //   向き（hdg）がない機体（止まっていて送らない）は、前に分かった向き、それもなければ近いターミナルへ機首を向ける（駐機場はターミナルに機首を向けて止まるため）
+  A3.ghdg = A3.ghdg || new Map();
+  const gp = Array.isArray(d.ground) ? d.ground.filter(p => p && p.lat != null && p.lon != null).map(p => {
+    let h = p.hdg; if(h == null) h = A3.ghdg.get(p.id); if(h == null) h = a3NoseIn(p); else A3.ghdg.set(p.id, h);
+    return { ...p, hdg:h, ground:true, alt_ft:0, phase:"ground" }; }) : [];
   A3.hasGround = Array.isArray(d.ground);
   const all = d.planes.concat(gp.filter(g => !d.planes.some(p => p.id === g.id)));
   if(A3.snaps.length && t <= A3.snaps[A3.snaps.length - 1].t){ A3.snaps[A3.snaps.length - 1].planes = all; }
@@ -5713,15 +5762,37 @@ function a3AcLights(geo, id){
 function a3Mesh(p){
   const T = A3.THREE, g = new T.Group(), sp = a3Sp(p), day = A3.night === "day", night = A3.night === "night";
   if(A3.lite){ const m = new T.Mesh(new T.ConeGeometry(0.35, 1, 3), new T.MeshBasicMaterial({ color:0x111827 })); m.rotation.x = Math.PI / 2; g.add(m); g.userData.len = 1; return g; }
-  if(!A3.pm){ A3.pm = { body:A3.mat(night ? 0xB9C2CD : 0xF4F6F8), dark:A3.mat(night ? 0x4B5563 : 0x6B7280), win:A3.mat(0x374151), gold:A3.mat(0xC9A23A) }; Object.values(A3.pm).forEach(m => m.side = T.DoubleSide); }
+  if(!A3.pm){ A3.pm = { body:A3.mat(night ? 0xD3DAE2 : 0xF4F6F8), dark:A3.mat(night ? 0x5B6573 : 0x6B7280), win:A3.mat(0x374151), gold:A3.mat(0xC9A23A) }; Object.values(A3.pm).forEach(m => m.side = T.DoubleSide);
+    // 夜と夕方は胴と翼を少し自分で光らせ、暗い駐機場・海との差をつける（11/22「夜は機体の輪郭を少し明るく」）
+    if(!day){ A3.pm.body.emissive = new T.Color(night ? 0x46505E : 0x2A3038); A3.pm.dark.emissive = new T.Color(night ? 0x1F2630 : 0x14181E); }
+    A3.pm.mv = new T.MeshBasicMaterial({ color:night ? 0xFFC53D : 0xF59E0B, side:T.DoubleSide, depthWrite:false, transparent:true, opacity:.95, fog:false, polygonOffset:true, polygonOffsetFactor:-12, polygonOffsetUnits:-48 }); }
   const geo = a3Geo(a3Model(p.type));
   const b = new T.Mesh(geo.body, A3.pm.body), d = new T.Mesh(geo.dark, A3.pm.dark), w = new T.Mesh(geo.win, A3.pm.win), ge = new T.Mesh(geo.gear, A3.pm.dark);
   b.castShadow = d.castShadow = ge.castShadow = !!(A3.r && A3.r.shadowMap.enabled); ge.name = "gear"; g.add(b, d, w, ge);
   if(sp && day){ const M = A3_MODELS[a3Model(p.type)] || A3_MODELS.n, fin = new T.Mesh(new T.BoxGeometry(0.013, M.fin * .8, 0.12), A3.pm.gold); fin.position.set(0, M.rad * .6 + M.fin * .5, 0.4); g.add(fin); }   // 特別塗装機の尾翼は昼だけ金
   if(!day){ const [nav, land] = a3AcLights(geo, p.id); g.add(nav); land.visible = false; g.add(land); }   // 夕方と夜：航空灯・衝突防止灯・白い閃光・着陸灯（脚と一緒に出す）
+  g.userData.hi = g.children.slice();   // 近いときの細かい形（遠い地上の機体は a3Lo の簡単な形に替える）
+  { // 地上を動いている機体の印：機首の先の地面に小さな矢印（11/22「動いている機体は小さな矢印か光」）
+    const M = A3_MODELS[a3Model(p.type)] || A3_MODELS.n, sh = new T.Shape(); sh.moveTo(0, -0.95); sh.lineTo(0.16, -0.62); sh.lineTo(0.05, -0.66); sh.lineTo(0, -0.58); sh.lineTo(-0.05, -0.66); sh.lineTo(-0.16, -0.62); sh.lineTo(0, -0.95);
+    const ag = new T.ShapeGeometry(sh); ag.rotateX(Math.PI / 2); const ar = new T.Mesh(ag, A3.pm.mv); ar.name = "mv"; ar.position.y = -M.rad * 2.3 + 0.004; ar.visible = false; ar.renderOrder = 2; g.add(ar); }
   g.userData.len = 1;
   return g;
 }
+// 遠い地上の機体の簡単な形（11/22「遠い地上機は簡単な形に」）：地面に置いた平らな機体の形（縁取りつき）。
+//   遠くから見ると立体の胴と翼は細い線になって消えるので、上から見た形を塗りつぶして出す。三角形は約30で、細かい形（数千）より軽い
+function a3Lo(o){
+  const T = A3.THREE, M = A3_MODELS[a3Model(o.p.type)] || A3_MODELS.n, night = A3.night === "night";
+  if(!A3.loGeo){ const h = [[0, -.5], [.06, -.43], [.07, -.1], [.46, .1], [.46, .17], [.07, .08], [.06, .33], [.2, .44], [.2, .5], [0, .47]];
+    const pts = h.concat(h.slice(1, -1).reverse().map(([x, y]) => [-x, y])), sh = new T.Shape(); pts.forEach(([x, y], i) => i ? sh.lineTo(x, y) : sh.moveTo(x, y));
+    const g = new T.ShapeGeometry(sh); g.rotateX(Math.PI / 2); A3.loGeo = g;
+    A3.loFill = new T.MeshBasicMaterial({ color:night ? 0xE5EAF0 : 0xFFFFFF, side:T.DoubleSide, fog:false, polygonOffset:true, polygonOffsetFactor:-12, polygonOffsetUnits:-48 });
+    A3.loEdge = new T.MeshBasicMaterial({ color:night ? 0x0B1220 : 0x1F2937, side:T.DoubleSide, fog:false, transparent:true, opacity:night ? .85 : .7, depthWrite:false, polygonOffset:true, polygonOffsetFactor:-10, polygonOffsetUnits:-40 }); }   // 地面の層は重ね順の補正（滑走路は -8）で手前に寄せてあるので、それより強く
+  const lo = new T.Group(), f = new T.Mesh(A3.loGeo, A3.loFill), e = new T.Mesh(A3.loGeo, A3.loEdge);
+  // 地面の層（重ね順の補正つき）より上に少し浮かせる
+  e.scale.setScalar(1.45); e.position.y = 0.02; f.position.y = 0.035; f.renderOrder = 3; e.renderOrder = 2; lo.add(e, f); lo.position.y = -M.rad * 2.3 + 0.01; lo.name = "lo"; o.g.add(lo); return lo;
+}
+// 見た目の最小の大きさ（画面の高さに対する機体の長さの px）。全体の視点で実寸だと小さすぎるので、遠いほど少し大きく描く
+const A3_MINPX = { air:22, ground:16 };
 function a3Sync(ps){
   const T = A3.THREE, ids = new Set(ps.map(p => p.id));
   for(const [id, o] of A3.objs) if(!ids.has(id)){ A3.scene.remove(o.g); if(o.sh) A3.scene.remove(o.sh); if(o.ln) A3.scene.remove(o.ln); A3.objs.delete(id); }
@@ -5733,11 +5804,20 @@ function a3Sync(ps){
       if(!A3.lite){ o.sh = new T.Mesh(new T.CircleGeometry(1, 16), new T.MeshBasicMaterial({ color:0x1F2937, transparent:true, opacity:.18, depthWrite:false })); o.sh.rotation.x = -Math.PI / 2; A3.scene.add(o.sh);
         o.ln = new T.Line(new T.BufferGeometry().setFromPoints([new T.Vector3(), new T.Vector3()]), new T.LineDashedMaterial({ color:A3.night === "night" ? 0x9CA3AF : 0x4B5563, dashSize:30, gapSize:24, transparent:true, opacity:.7 })); A3.scene.add(o.ln); }
       A3.objs.set(p.id, o); }
-    const air = a3Air(p), [x, z] = a3XZ(p.lat, p.lon), y = air ? p.alt_ft * 0.3048 : A3.lite ? 4 : a3Len(p.type) * (A3_MODELS[a3Model(p.type)] || A3_MODELS.n).rad * 2.3,   // 地上は車輪が地面に着く高さ
-      L = (A3.lite ? 260 : a3Len(p.type)) * (air ? big : 1);
-    o.g.position.set(x, y, z); o.g.scale.setScalar(L); o.g.rotation.y = -(p.hdg || 0) * D2R; o.p = p;
+    const air = a3Air(p), [x, z] = a3XZ(p.lat, p.lon), M = A3_MODELS[a3Model(p.type)] || A3_MODELS.n;
+    const cd = Math.hypot(A3.cam.position.x - x, A3.cam.position.y - (air ? p.alt_ft * 0.3048 : 0), A3.cam.position.z - z);
+    const pxm = ($("a3Stage").clientHeight || 600) / (2 * cd * Math.tan((A3.cam.fov || 50) * D2R / 2)) || 1;   // その距離での 1m の px
+    const follow = A3.view === "plane" && p.id === A3.sel;
+    let L = (A3.lite ? 260 : a3Len(p.type)) * (air ? big : 1);
+    if(!A3.lite && !follow) L = Math.max(L, (air ? A3_MINPX.air : A3_MINPX.ground) / pxm);
+    const y = air ? p.alt_ft * 0.3048 : A3.lite ? 4 : L * M.rad * 2.3;   // 地上は車輪が地面に着く高さ（大きく描いても同じ割合）
+    o.g.position.set(x, y, z); o.g.scale.setScalar(L); o.g.rotation.y = -(p.hdg || 0) * D2R; o.p = p; o.cd = cd;
+    if(!A3.lite){ const far = !air && cd > 3000 && !follow && p.id !== A3.sel;   // 遠い地上の機体は簡単な形
+      if(far && !o.lo) o.lo = a3Lo(o);
+      if(o.lo) o.lo.visible = far; for(const c of o.g.userData.hi || []) if(!c.isPoints) c.visible = !far;   // 灯り（点）は遠くても出す
+      const mv = o.g.getObjectByName("mv"); if(mv) mv.visible = a3Moving(p); }
     o.g.rotation.x = air && p.fpm ? Math.max(-0.12, Math.min(0.2, p.fpm / 9000)) : 0;   // 上昇は機首を上げ、降下は少し下げる
-    { const ge = o.g.getObjectByName("gear"), ld = o.g.getObjectByName("land"); if(ge) ge.visible = !air || (p.alt_ft != null && p.alt_ft < 3000 && (p.phase === "arr" || (p.fpm || 0) < 0)) || (p.phase === "dep" && p.alt_ft != null && p.alt_ft < 800); if(ld) ld.visible = !!ge && ge.visible && air; }   // 着陸灯は空で脚を出しているあいだ。脚は地上と着陸の前（約900m より下）・離陸の直後だけ
+    { const ge = o.g.getObjectByName("gear"), ld = o.g.getObjectByName("land"); if(ge) ge.visible = (!air && !(o.lo && o.lo.visible)) || (p.alt_ft != null && p.alt_ft < 3000 && (p.phase === "arr" || (p.fpm || 0) < 0)) || (p.phase === "dep" && p.alt_ft != null && p.alt_ft < 800); if(ld) ld.visible = !!ge && ge.visible && air; }   // 着陸灯は空で脚を出しているあいだ。脚は地上と着陸の前（約900m より下）・離陸の直後だけ
     if(o.sh){ o.sh.visible = o.ln.visible = air; if(air){ o.sh.position.set(x, 1.5, z); o.sh.scale.setScalar(L * 0.45);
       o.ln.geometry.setFromPoints([new T.Vector3(x, 1.5, z), new T.Vector3(x, y, z)]); o.ln.computeLineDistances(); } }
   }
@@ -5796,7 +5876,7 @@ function a3Labels(ps){
       if(hit(r)) continue;
       placed.push(r); seen.add(id); edges++;
       let el = A3.labels.get(id);
-      if(!el){ el = document.createElement("span"); el.className = "a3tag"; box.appendChild(el); A3.labels.set(id, el); }
+      if(!el){ el = document.createElement("span"); el.className = "a3tag"; el.dataset.a3Pick = id; box.appendChild(el); A3.labels.set(id, el); }
       const st0 = a3State(o.p)[0], min = /約(\d+)分/.exec(st0), ar = { r:"→", l:"←", t:"↑", b:"↓" }[side];
       const txt = `${side === "l" ? ar + " " : ""}<b>${esc(a3No(o.p))}</b>${min ? ` ${min[1]}分` : ""}${side !== "l" ? " " + ar : ""}`;
       if(el._t !== txt){ el.innerHTML = txt; el._t = txt; }
@@ -5804,13 +5884,14 @@ function a3Labels(ps){
       el.style.transform = side === "r" ? `translate(${ex2}px,${ey2.toFixed(1)}px) translate(-100%,-50%)` : side === "l" ? `translate(${ex2}px,${ey2.toFixed(1)}px) translate(0,-50%)` : `translate(${ex2.toFixed(1)}px,${ey2}px) translate(-50%,-50%)`;
       continue;
     }
-    if(!vis || !a3Air(o.p) || A3.lite || o.sy > sheetTop - 8 || o.sy < 140 || (A3.view === "plane" && id === A3.sel)) continue;   // 追っている機体の名札は機体に重なるので出さない（ピルに便名が出ている）
+    // 地上の機体は札を出さない（押した機体だけ便名。11/22）
+    if(!vis || (!a3Air(o.p) && id !== A3.sel) || A3.lite || o.sy > sheetTop - 8 || o.sy < 140 || (A3.view === "plane" && id === A3.sel)) continue;   // 追っている機体の名札は機体に重なるので出さない（ピルに便名が出ている）
     const lx = Math.max(64, Math.min(W - 64, o.sx)), r = [lx - 60, o.sy - 52, lx + 60, o.sy - 8];   // 画面の端で名札が切れないように
     if(placed.some(q => r[0] < q[2] && r[2] > q[0] && r[1] < q[3] && r[3] > q[1])) continue;   // 重なる名札は出さない（近い機体を先に。選んだ機体も出典の札には重ねない）
     placed.push(r); seen.add(id);
     let el = A3.labels.get(id);
-    if(!el){ el = document.createElement("span"); el.className = "a3tag"; box.appendChild(el); A3.labels.set(id, el); }
-    const alt = a3Alt(o.p), txt = `<b>${esc(a3No(o.p))}</b>${o.p.phase === "dep" && alt != null && alt < 500 ? " 離陸" : alt != null ? ` ${alt.toLocaleString("ja-JP")}m` : ""}`;
+    if(!el){ el = document.createElement("span"); el.className = "a3tag"; el.dataset.a3Pick = id; box.appendChild(el); A3.labels.set(id, el); }
+    const alt = a3Alt(o.p), txt = !a3Air(o.p) ? `<b>${esc(a3No(o.p))}</b> ${a3Moving(o.p) ? "走行中" : "地上"}` : `<b>${esc(a3No(o.p))}</b>${o.p.phase === "dep" && alt != null && alt < 500 ? " 離陸" : alt != null ? ` ${alt.toLocaleString("ja-JP")}m` : ""}`;
     if(el._t !== txt){ el.innerHTML = txt; el._t = txt; }
     el.classList.toggle("on", id === A3.sel); el.classList.remove("edge");
     el.style.transform = `translate(${lx.toFixed(1)}px,${(o.sy - 14).toFixed(1)}px) translate(-50%,-100%)`;
@@ -5824,12 +5905,14 @@ function a3Sheet(){
   if(A3.sel && A3.card){ const o = A3.objs.get(A3.sel), p = o ? o.p : a3Planes().find(x => x.id === A3.sel); if(p) return a3CardHTML(el, p); A3.sel = null; A3.card = false; }
   const ps = a3Planes().filter(p => p.phase === "arr" || p.phase === "dep" || !a3Air(p));
   ps.sort((a, b) => (a3Air(b) - a3Air(a)) || (a.phase === "arr" ? 0 : 1) - (b.phase === "arr" ? 0 : 1) || (a.dist_km || 0) - (b.dist_km || 0));
+  // 空の機体と地上の機体を分ける（11/22「下の一覧に地上 ○機を分けて」）。地上は動いている機体を先に
+  const air = ps.filter(a3Air), gnd = ps.filter(p => !a3Air(p)).sort((a, b) => a3Moving(b) - a3Moving(a) || (b.kt || 0) - (a.kt || 0) || String(a3No(a)).localeCompare(String(a3No(b))));
   const row = p => { const [s1, s2] = a3State(p), sp = a3Sp(p);
-    return `<li><button type="button" data-a3-pick="${esc(p.id)}"><span class="no"><b>${esc(a3No(p))}</b><small>${esc(a3Place(p))}</small></span><span class="st"><b>${esc(s1)}</b>${sp ? `<i class="a3sp">特別塗装機</i>` : ""}${s2 ? `<small>${esc(s2)}</small>` : ""}</span><span class="ch" aria-hidden="true">›</span></button></li>`; };
+    return `<li${p.id === A3.sel ? ` class="on"` : ""}><button type="button" data-a3-pick="${esc(p.id)}"${!a3Air(p) ? ` data-a3-gnd` : ""}><span class="no"><b>${esc(a3No(p))}</b><small>${esc(a3Place(p))}</small></span><span class="st"><b>${esc(s1)}</b>${sp ? `<i class="a3sp">特別塗装機</i>` : ""}${s2 ? `<small>${esc(s2)}</small>` : ""}</span><span class="ch" aria-hidden="true">›</span></button></li>`; };
   el.innerHTML = `<div class="a3grab" aria-hidden="true"></div>${A3.picking ? `<button type="button" class="a3x" data-a3-unpick aria-label="選ぶのをやめる">×</button>` : ""}<div class="a3body">
     <div class="a3sh"><h3>羽田の近くの機体</h3><span class="n"><b class="num">${ps.length}</b><span class="u">機</span></span></div>
-    <p class="a3range">${A3.picking ? "見たい機体を押してください" : A3.hasGround ? "30km・3,000m 以下と、地上の機体" : "30km・3,000m 以下（地上の機体はまだ出ません）"}</p>
-    ${ps.length ? `<ul class="a3list">${ps.slice(0, A3.picking ? 12 : 8).map(row).join("")}</ul>` : `<p class="a3empty">${!SERVER ? "デモでは機体の位置は出ません。空港の形だけを出しています。" : A3.err === "pos" ? "機体の位置が届いていません。空港の形だけを出しています。" : A3.snaps.length ? "いま近くに機体はいません。" : "機体の位置を読み込んでいます…"}</p>`}</div>`;
+    <p class="a3range">${A3.picking ? "見たい機体を押してください" : `空 <b class="num" id="a3NAir">${air.length}</b>機（30km・3,000m 以下）・地上 <b class="num" id="a3NGnd">${gnd.length}</b>機`}</p>
+    ${ps.length ? `${air.length ? `<ul class="a3list">${air.slice(0, A3.picking ? 12 : 8).map(row).join("")}</ul>` : ""}${gnd.length ? `<h4 class="a3gh">地上 <b class="num">${gnd.length}</b><span class="u">機</span></h4><ul class="a3list a3gl">${gnd.slice(0, A3.picking ? 12 : 8).map(row).join("")}</ul>${gnd.length > 8 && !A3.picking ? `<p class="a3range">ほか ${gnd.length - 8}機は、景色の中の機体を押すと出ます</p>` : ""}` : ""}` : `<p class="a3empty">${!SERVER ? "デモでは機体の位置は出ません。空港の形だけを出しています。" : A3.err === "pos" ? "機体の位置が届いていません。空港の形だけを出しています。" : A3.snaps.length ? "いま近くに機体はいません。" : "機体の位置を読み込んでいます…"}</p>`}</div>`;
 }
 function a3CardHTML(el, p){
   const sp = a3Sp(p), [s1, s2] = a3State(p), alt = a3Alt(p), arr = p.phase === "arr" && a3Air(p);
@@ -7060,6 +7143,10 @@ function loOrder(k){
   const o = LAYOUT && LAYOUT.order && Array.isArray(LAYOUT.order[k]) ? LAYOUT.order[k].filter(x => ids.includes(x)) : po;
   return [...new Set([...o, ...ids])];
 }
+// はじめの並び（構成の決まりのまま。自分で並べ替える前）
+function loOrderDef(k){ const ids = LO_BLOCKS[k].filter(b => !b[3]).map(b => b[0]); return [...new Set([...((loP().order || {})[k] || []).filter(x => ids.includes(x)), ...ids])]; }
+// 並べ替えを戻したあと、全部乗せで中身のない入れ物を片付ける（何も変えていなければ全部乗せのまま＝loAllOn）
+function loTidy(){ if(!LAYOUT || PERSONA !== "all") return; for(const k of ["off", "order"]) if(LAYOUT[k] && typeof LAYOUT[k] === "object" && !Object.keys(LAYOUT[k]).length) delete LAYOUT[k]; if(!LAYOUT.off) delete LAYOUT.vA; if(!Object.keys(LAYOUT).length) LAYOUT = null; }
 // 下のタブ：ホームはいつも出す。2つ以上
 function loTabs(){
   const t = LAYOUT && Array.isArray(LAYOUT.tabs) ? [...new Set(LAYOUT.tabs.filter(v => TAB_ALL.includes(v)))] : null;
@@ -8163,7 +8250,7 @@ function tpSet(list, what, text){
   return true;
 }
 // ホームに出すもの（C2）
-let HE = { undo:null, from:"screen" };
+let HE = { undo:null, from:"screen", ro:false };
 const HE_FIXED = [["半券", "チェックインの半券", "いちばん近い空港"], ["today", "今日の数字", "今日の印・空港・フライト"]];
 const HE_SUB = { ride:"便名を入れると機体を調べる", event:"開いているイベント", tally:"空港・路線・距離", recent:"" };
 // 半券の中身の設定（かたまりではないので数に入れない）：半券の下の枝の行。ON＝飛行場なども出る（ほかの行と同じ向き。review-5 の1 案A）
@@ -8177,19 +8264,25 @@ function heHTML(){
   const fixed = HE_FIXED.map(([k, n, s]) => `<li class="hepc fix"><div><b>${n}</b><small>${s}</small></div><span class="helk">いつも</span></li>`
     + (k === "半券" ? heNearxHTML() : "")).join("");
   // OFF にしたかたまりも見本の中のその場に残す（11/9 1時 PM の1）
+  // 並べ替えの形（11/22）：スイッチの代わりに ≡ のつまみ。隠しているかたまりも動かせる（字で「隠しています」）
   const rows = loOrder("home").map(id => { const v = !off.has(id);
+    if(HE.ro) return `<li class="hepc sw ro${v ? "" : " off"}" data-ro="${id}"><div><b>${esc(name(id))}</b>${v ? (HE_SUB[id] ? `<small>${HE_SUB[id]}</small>` : "") : `<small>隠しています</small>`}</div>${roGrip(id, name(id))}</li>`;
     return `<li class="hepc sw${v ? "" : " off"}"><div><b>${esc(name(id))}</b>${HE_SUB[id] ? `<small>${HE_SUB[id]}</small>` : ""}</div>${loSw(v, `data-he-${v ? "off" : "on"}="${id}"`, `「${esc(name(id))}」をホームに出す`)}</li>`; }).join("");
   const undo = HE.undo ? `<div class="heundo" role="status"><span>${esc(HE.undo.text)}</span><button type="button" data-he-undo>元に戻す</button></div>` : "";
   return `<div class="spctop">${back}<span class="sp" aria-hidden="true"></span></div>
-    <h3 class="heh" id="heTitle">ホームに出すもの</h3><p class="helead">ホームのシートの見本です（並びは本物と同じ）。OFF にすると隠れます。</p>
-    <ul class="heprev" aria-label="ホームに出しているもの（見本）"><li class="hetag" aria-hidden="true">見本</li>${fixed}${rows}</ul>${undo}
+    <div class="hehd"><h3 class="heh" id="heTitle">ホームに出すもの</h3><button type="button" class="ropill${HE.ro ? " on" : ""}" data-he-ro><span>${HE.ro ? "完了" : "並べ替え"}</span></button></div>
+    <p class="helead">${HE.ro ? "≡ を押したまま上下に動かします。ホームもこの並びになります。" : "ホームのシートの見本です（並びは本物と同じ）。OFF にすると隠れます。"}</p>
+    <ul class="heprev${HE.ro ? " roing" : ""}" aria-label="ホームに出しているもの（見本）"><li class="hetag" aria-hidden="true">見本</li>${fixed}${rows}</ul>${undo}
+    ${HE.ro ? `<button type="button" class="lotext rodef" data-he-rodef${loOrder("home").join() === loOrderDef("home").join() ? " disabled" : ""}>はじめの並びに戻す</button>` : ""}
     <div class="locard heres"><div class="t"><b>ホームを全部出す</b><small>外したものを全部ホームに戻します。タブはそのまま</small></div><button type="button" class="hereset" data-he-all${out.length ? "" : " disabled"}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.3-5.6"/><path d="M4 4v4h4"/></svg>全部出す</button></div>
     <p class="losave">タブまで全部乗せに戻すときは、マイページの「表示の編集」か、タブを選ぶのいちばん下から。見方は、それぞれの画面の見方の帯の鉛筆から選べます。</p>`;
 }
+const heName = id => (LO_BLOCKS.home.find(b => b[0] === id) || [])[1] || id;
+function heReorder(order){ const snap = loSnap(); loEdit().order.home = order; loChanged("home_order"); HE.undo = { text:"ホームの並びを変えました", snap }; heRender(); }
 function heRender(){ const d = $("dHomeEd"); if(!d || !d.open) return; const y = d.scrollTop; $("dHomeEdBody").innerHTML = heHTML(); d.scrollTop = y; }
 function openHomeEd(from){
-  HE = { undo:null, from:from || "screen" };
-  $("dHomeEdBody").innerHTML = heHTML();
+  HE = { undo:null, from:from || "screen", ro:false };
+  $("dHomeEdBody").innerHTML = heHTML(); roBind($("dHomeEdBody"), { done:heReorder, name:heName });
   if(!$("dHomeEd").open){ $("dHomeEd").showModal(); track("home_ed_open", HE.from); }
   $("dHomeEd").scrollTop = 0;
 }
@@ -8214,7 +8307,7 @@ function rsHTML(){
   return `<div class="sph"><span class="grab" aria-hidden="true"></span></div><h3 id="rsTitle">全部乗せに戻しますか？</h3>
     <p class="rslead">タブを${LO_ALL_TABS().length}つ（${LO_ALL_TABS().map(v => TAB_NAME[v]).join("・")}）に戻し、外したものを全部また出します。記録はそのままです。</p>
     ${tpMini(LO_ALL_TABS())}
-    <div class="rsrows"><div class="rsrow"><b>タブ</b><span>${tabTxt}</span></div><div class="rsrow"><b>タブの順番</b><span>${order}</span></div><div class="rsrow"><b>見方</b><span>${per("view", LO_VIEW_SEC)}</span></div><div class="rsrow"><b>かたまり</b><span>${per("blk", LO_BLK_SEC.map(([k, t]) => [k, t.replace(/（.*$/, "")]))}</span></div></div>
+    <div class="rsrows"><div class="rsrow"><b>タブ</b><span>${tabTxt}</span></div><div class="rsrow"><b>タブの順番</b><span>${order}</span></div>${loOrder("home").join() !== loOrderDef("home").join() || ohOrderSaved() ? `<div class="rsrow"><b>カードの並び</b><span>元の順に</span></div>` : ""}<div class="rsrow"><b>見方</b><span>${per("view", LO_VIEW_SEC)}</span></div><div class="rsrow"><b>かたまり</b><span>${per("blk", LO_BLK_SEC.map(([k, t]) => [k, t.replace(/（.*$/, "")]))}</span></div></div>
     <button class="lobtn rsyes" type="button" data-rs-yes>全部出す</button><button class="lotext rsno" type="button" data-close>やめる</button>`;
 }
 function openReset(){ if(loAllOn()) return; $("dResetBody").innerHTML = rsHTML(); $("dReset").showModal(); const h = $("rsTitle"); if(h){ h.tabIndex = -1; h.style.outline = "none"; h.focus(); } }
@@ -8239,6 +8332,9 @@ document.addEventListener("click", e => {
     const now = loTabs().filter(x => x !== out); tpSet(tpOrder().filter(x => x === v || now.includes(x)), "tab_swap", `「${TAB_NAME[v]}」を出しました。「${TAB_NAME[out]}」は${tpWhere(out)}`); return; }
   if((b = q("[data-he-all]"))){ if(b.disabled) return; const snap = loSnap(), L = loEdit(), n = (L.off.home || []).length; if(!n) return;
     delete L.off.home; loChanged("blk_home_all"); HE.undo = { text:`かたまり${n}つをホームに戻しました`, snap }; heRender(); return; }
+  if((b = q("[data-he-ro]"))){ HE.ro = !HE.ro; HE.undo = null; heRender(); track("layout", HE.ro ? "home_order_edit" : "home_order_done"); const n = $("dHomeEd").querySelector("[data-he-ro]"); if(n) n.focus(); return; }
+  if((b = q("[data-he-rodef]"))){ if(b.disabled) return; const snap = loSnap(); if(LAYOUT && LAYOUT.order) delete LAYOUT.order.home; loTidy(); loChanged("home_order_reset");
+    HE.undo = { text:"はじめの並びに戻しました", snap }; heRender(); roSay("ホームをはじめの並びに戻しました"); return; }
   if((b = q("[data-he-off]"))){ heSet(b.dataset.heOff, true); return; }
   if((b = q("[data-he-on]"))){ heSet(b.dataset.heOn, false); return; }
 });
@@ -8317,6 +8413,71 @@ function tpTipMaybe(){
 }
 // はじめの案内や提案が開いていて出せなかったときは、閉じたあとにもう一度
 document.addEventListener("close", e => { if(e.target.tagName === "DIALOG" && !tpTaught()) setTimeout(() => { try{ tpTipMaybe(); }catch(_){} }, 700); }, true);
+/* ---------- 並べ替えの部品（11/22 本人「いろんなやつの順序を入れ替えられるように」・checkin/reorder） ----------
+   運用の一覧のカード・ホームに出すもの・（撮る人用の）ホームの空港のカードの切り替えのピルで同じ部品を使う。
+   使い方：
+     1. 並べる物それぞれに data-ro="<id>" を付け、その中に roGrip(id, 名前) を入れる（編集の形のときだけ。ボタンの中には入れない）
+     2. 入れ物（描き直しても残る要素）に roBind(入れ物, { done(order){ 保存して描き直す }, name(id){ 名前 } }) を1回
+     3. done は動かし終えたときに、新しい並び（id の配列）で1回呼ぶ。描き直したあとは roFocus(入れ物, id) でつまみに焦点を戻す
+   つまみ（≡）：マウスはすぐ、指は 0.25秒押してから動かす（格子なら上下左右）。キーは矢印。読み上げ用に「上へ」「下へ」のボタン（焦点が来たときだけ見える）
+   並びの保存は使う側で（roOrder で、覚えた並びに今ある物を合わせる） */
+const RO_HOLD = 250;
+const RO_SVG = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 7h14M5 12h14M5 17h14"/></svg>`;
+const roGrip = (id, name) => `<span class="rogrip"><button type="button" class="roh" data-ro-h="${esc(id)}" aria-label="「${esc(name)}」を並べ替える（矢印のキーで動かします）">${RO_SVG}</button>`
+  + `<button type="button" class="rokb" data-ro-mv="-1" data-ro-id="${esc(id)}">「${esc(name)}」を上へ</button><button type="button" class="rokb" data-ro-mv="1" data-ro-id="${esc(id)}">「${esc(name)}」を下へ</button></span>`;
+// 覚えた並び saved に、今ある物 ids を合わせる（消えた物は落とし、新しい物は、はじめの並びで前にある物のすぐ後に入れる）
+function roOrder(saved, ids){
+  const out = (Array.isArray(saved) ? saved : []).filter((x, i, a) => ids.includes(x) && a.indexOf(x) === i);
+  ids.forEach((id, i) => { if(out.includes(id)) return; const prev = ids.slice(0, i).reverse().find(x => out.includes(x)); out.splice(prev ? out.indexOf(prev) + 1 : 0, 0, id); });
+  return out;
+}
+const roMoved = (order, id, d) => { const o = [...order], i = o.indexOf(id), j = i + d; if(i < 0 || j < 0 || j >= o.length) return null; o.splice(j, 0, ...o.splice(i, 1)); return o; };
+function roSay(text){ let el = $("roLive"); if(!el){ el = document.createElement("p"); el.id = "roLive"; el.className = "vh"; el.setAttribute("role", "status"); el.setAttribute("aria-live", "polite"); document.body.appendChild(el); }
+  el.textContent = ""; setTimeout(() => { el.textContent = text; }, 30); }
+function roFocus(box, id, kb){ const b = box && box.querySelector(kb ? `[data-ro-mv="${kb}"][data-ro-id="${CSS.escape(id)}"]` : `[data-ro-h="${CSS.escape(id)}"]`); if(b) try{ b.focus({ preventScroll:false }); }catch(e){} }
+const RO_BOUND = new WeakSet();
+function roBind(box, opt){
+  if(!box || RO_BOUND.has(box)) return; RO_BOUND.add(box);
+  const items = () => [...box.querySelectorAll("[data-ro]")];
+  const order = () => items().map(x => x.dataset.ro);
+  const name = id => (opt.name && opt.name(id)) || id;
+  const finish = (o, id, how, kb) => { if(!o || o.join() === order().join() && how !== "drag") return; opt.done(o, id, how); roSay(`「${name(id)}」を${o.indexOf(id) + 1}番目にしました（${o.length}このうち）`); roFocus(box, id, kb); };
+  box.addEventListener("click", e => { const b = e.target.closest("[data-ro-mv]"); if(!b || !box.contains(b)) return; e.preventDefault(); e.stopPropagation();
+    const id = b.dataset.roId, o = roMoved(order(), id, +b.dataset.roMv); if(o) finish(o, id, "button", b.dataset.roMv); else roSay(+b.dataset.roMv < 0 ? "いちばん上です" : "いちばん下です"); }, true);
+  box.addEventListener("keydown", e => { const h = e.target.closest && e.target.closest("[data-ro-h]"); if(!h || !box.contains(h)) return;
+    const d = { ArrowUp:-1, ArrowLeft:-1, ArrowDown:1, ArrowRight:1 }[e.key]; if(!d) return; e.preventDefault();
+    const id = h.dataset.roH, o = roMoved(order(), id, d); if(o) finish(o, id, "key"); });
+  let g = null;
+  const start = () => { if(!g || g.on) return; g.on = true; g.el.classList.add("rodrag"); box.classList.add("rodragging"); if(navigator.vibrate) try{ navigator.vibrate(10); }catch(_){} };
+  box.addEventListener("pointerdown", e => {
+    const h = e.target.closest("[data-ro-h]"); if(!h || !box.contains(h) || e.button > 0) return;
+    const el = h.closest("[data-ro]"); if(!el) return;
+    e.preventDefault(); g = { h, el, id:el.dataset.ro, x:e.clientX, y:e.clientY, pid:e.pointerId, on:false, t:0, before:order().join() };
+    try{ h.setPointerCapture(e.pointerId); }catch(_){}
+    if(e.pointerType === "touch") g.t = setTimeout(start, RO_HOLD); else start();
+  });
+  box.addEventListener("pointermove", e => {
+    if(!g || e.pointerId !== g.pid) return;
+    if(!g.on){ if(Math.hypot(e.clientX - g.x, e.clientY - g.y) > 10){ clearTimeout(g.t); g = null; } return; }
+    e.preventDefault();
+    const list = items(), t = g.el.getBoundingClientRect(), me = { top:t.top - (g.dy || 0), left:t.left - (g.dx || 0), width:t.width };   // 動かす前の場所（ずらした分を引く）
+    for(const r of list){ if(r === g.el) continue; const b = r.getBoundingClientRect();
+      if(e.clientX < b.left || e.clientX > b.right || e.clientY < b.top || e.clientY > b.bottom) continue;
+      const before = list.indexOf(r) < list.indexOf(g.el);
+      // 相手の半分を越えたら入れ替える（行き来してばたつかないように）。同じ行の同じ幅の物は左右で、ほかは上下で見る
+      const half = b.width > me.width * 1.4 || me.width > b.width * 1.4 || Math.abs(b.top - me.top) > 4 ? (before ? e.clientY < b.top + b.height / 2 : e.clientY > b.top + b.height / 2) : (before ? e.clientX < b.left + b.width / 2 : e.clientX > b.left + b.width / 2);
+      if(!half) break;
+      g.el.style.transform = ""; r.parentNode.insertBefore(g.el, before ? r : r.nextSibling);
+      const n = g.el.getBoundingClientRect(); g.y += n.top - me.top; g.x += n.left - me.left; break; }
+    g.dx = e.clientX - g.x; g.dy = e.clientY - g.y;
+    g.el.style.transform = `translate(${g.dx}px, ${g.dy}px)`;
+  });
+  const end = e => { if(!g || e.pointerId !== g.pid) return; const s = g; g = null; clearTimeout(s.t);
+    s.el.style.transform = ""; s.el.classList.remove("rodrag"); box.classList.remove("rodragging");
+    if(s.on && order().join() !== s.before) finish(order(), s.id, "drag"); };
+  box.addEventListener("pointerup", end); box.addEventListener("pointercancel", end);
+  box.addEventListener("contextmenu", e => { if(e.target.closest("[data-ro-h]")) e.preventDefault(); });
+}
 /* ---------- 表示の設定をサーバーに保存する（表 user_view_prefs。データ担当の移行 157） ----------
    中身（fmt 2）：全部乗せのまま＝{}。それ以外＝{ base:構成, layout:表示の編集で変えたもの }。
    表がまだない（反映の前）・つながらないときは、この端末の保存だけで動く */
@@ -8450,20 +8611,34 @@ async function renderPersonaCard(){
 const PC_TABS = [["arr", "着陸"], ["dep", "離陸"], ["sp", "特別塗装機"], ["late", "遅れ"]];
 const PC_KEY = "soramemo.home.spTab";
 const PC_HUB = { arr:"photo", dep:"photo", sp:"special", late:"late" };   // 運用の一覧のカード（OH_CARDS の id）
-let PC_LAST = null, PC_INFO = false;
+let PC_LAST = null, PC_INFO = false, PC_EDIT = false;   // PC_EDIT：ピルの並べ替えの形
 const pcTabGet = () => { try{ const v = localStorage.getItem(PC_KEY); return PC_TABS.some(t => t[0] === v) ? v : null; }catch(e){ return null; } };
 const pcTabSet = v => { try{ localStorage.setItem(PC_KEY, v); }catch(e){} };
+// ピルの並び（11/22 本人「いろんなやつの順序を入れ替えられるように」）：layout.order.hcard に覚える（端末とサーバーの user_view_prefs。「全部乗せに戻す」で戻る）。並べ替えの部品は checkin/reorder の roBind・roGrip・roOrder
+const PC_IDS = () => PC_TABS.map(t => t[0]);
+const pcOrder = () => roOrder(LAYOUT && LAYOUT.order && LAYOUT.order.hcard, PC_IDS());
+const pcOrderSaved = () => pcOrder().join() !== PC_IDS().join();
+const pcName = id => (PC_TABS.find(t => t[0] === id) || [, id])[1];
+function pcDraw(focus){
+  const box = $("personaCard"); if(PERSONA !== "spot" || !PC_LAST || !box) return;
+  const sc = box.querySelector(".pctabs"), sx = sc ? sc.scrollLeft : 0;
+  roBind(box, { done:pcReorder, name:pcName });
+  box.innerHTML = `<div class="phome">${PC_LAST.head}${spHomeHTML(PC_LAST.ap, PC_LAST.def, PC_LAST.d)}</div>`;
+  const s = box.querySelector(".pctabs"); if(s) s.scrollLeft = sx;
+  const b = focus && box.querySelector(focus); if(b) try{ b.focus({ preventScroll:true }); }catch(_){}
+}
+function pcReorder(order){ loEdit().order.hcard = order; loSave(); track("layout", "hcard_order"); viewPrefsPush(); pcDraw(); }
 document.addEventListener("click", async e => {
+  const r = e.target.closest("[data-pc-ro]");
+  if(r){ PC_EDIT = !PC_EDIT; track("home_sp_tab", PC_EDIT ? "order_edit" : "order_done"); pcDraw("[data-pc-ro]"); return; }
+  const rd = e.target.closest("[data-pc-rodef]");
+  if(rd){ if(rd.disabled) return; if(LAYOUT && LAYOUT.order) delete LAYOUT.order.hcard; loTidy(); loSave(); track("layout", "hcard_order_reset"); viewPrefsPush(); pcDraw("[data-pc-ro]"); roSay("切り替えのピルをはじめの並びに戻しました"); return; }
   const t = e.target.closest("[data-pctab]");
   if(t){
-    const v = t.dataset.pctab, box = $("personaCard"); if(!PC_LAST || !box || v === pcTabGet() && t.getAttribute("aria-selected") === "true") return;
+    const v = t.dataset.pctab; if(!PC_LAST || v === pcTabGet() && t.getAttribute("aria-selected") === "true") return;
     pcTabSet(v); track("home_sp_tab", v);
-    const draw = () => { if(PERSONA !== "spot" || !PC_LAST) return; const sx = box.querySelector(".pctabs") ? box.querySelector(".pctabs").scrollLeft : 0;
-      box.innerHTML = `<div class="phome">${PC_LAST.head}${spHomeHTML(PC_LAST.ap, PC_LAST.def, PC_LAST.d)}</div>`;
-      const s = box.querySelector(".pctabs"); if(s) s.scrollLeft = sx;
-      const b = box.querySelector(`[data-pctab="${v}"]`); if(b) try{ b.focus({ preventScroll:true }); }catch(_){} };
-    draw();
-    if(v === "sp" && SERVER && PC_LAST.ap === OPS_AP){ await loadSpecial().catch(() => {}); if(pcTabGet() === "sp") draw(); }
+    pcDraw(`[data-pctab="${v}"]`);
+    if(v === "sp" && SERVER && PC_LAST.ap === OPS_AP){ await loadSpecial().catch(() => {}); if(pcTabGet() === "sp") pcDraw(`[data-pctab="${v}"]`); }
     return;
   }
   const i = e.target.closest("[data-pcinfo]");
@@ -8519,7 +8694,10 @@ function spHomeHTML(ap, def, d){
   const where = x => x.other ? esc(placeAny(x.other)) + (x.dir === "arr" ? "から" : "へ") : "";
   const rare = x => x.liv ? `<span class="sprare gold">特別塗装</span>` : x.foreign ? `<span class="sprare">海外</span>` : x.intl ? `<span class="sprare">国際</span>` : "";
   const row = (x, name) => `<li class="${x.dir}"><i class="band" aria-hidden="true"></i><b class="t">${x.t ? spHM(x.t) : "いま"}</b><span class="vh">${x.dir === "arr" ? "着陸" : "離陸"}</span><span class="n"><b>${esc(name ? x.fl || "" : x.fl)}</b><small>${parts(name ? [`「${esc(x.name)}」`, where(x)] : [esc(x.type || ""), x.reg && esc(x.reg), where(x)])}</small></span>${name ? "" : rare(x)}</li>`;
-  const pills = `<div class="pctabs" role="tablist" aria-label="カードに出すもの">${PC_TABS.map(([k, l]) => `<button type="button" role="tab" data-pctab="${k}" aria-selected="${k === tab}">${l}</button>`).join("")}</div>`;
+  if(PC_EDIT) return `<div class="pcro"><div class="pcrohd"><span>≡ を押したまま動かします</span><button type="button" class="ropill on" data-pc-ro><span>完了</span></button></div>
+      <div class="pcrolist">${pcOrder().map(k => `<div class="pcrorow ro" data-ro="${k}"><b>${pcName(k)}</b>${roGrip(k, pcName(k))}</div>`).join("")}</div>
+      <button type="button" class="pcrodef" data-pc-rodef${pcOrderSaved() ? "" : " disabled"}>はじめの並びに戻す</button></div>`;
+  const pills = `<div class="pctabs"><div class="pctabs-in" role="tablist" aria-label="カードに出すもの">${pcOrder().map(k => `<button type="button" role="tab" data-pctab="${k}" aria-selected="${k === tab}">${pcName(k)}</button>`).join("")}</div><button type="button" class="pcroin" data-pc-ro aria-label="切り替えのピルを並べ替える">${RO_SVG}</button></div>`;
   let body = "", note = "";
   if(tab === "arr" || tab === "dep"){
     // いまの運用と光（運用タブで運用が分かっているとき）。分からなければ日の出・日の入り
@@ -11938,9 +12116,18 @@ let OPS_PAGE = null, OH_FROM = null, OH_BUSY = false, OH_OPEN_T = 0;   // OH_OPE
 const OH_LIST = () => OH_ON() && !OPS_PAGE;
 const OH_RM = () => { try{ return matchMedia("(prefers-reduced-motion: reduce)").matches; }catch(e){ return false; } };
 const OH_OPEN_MS = 460, OH_BACK_MS = 380;
+// カードの並び（11/22 本人「順序を入れ替えられるように」）：layout.order.ohub に覚える（端末とサーバーの user_view_prefs）。ないときは OH_CARDS の順
+let OH_EDIT = false;   // 並べ替えの形（一覧の右上の「並べ替え」）
+const OH_IDS = () => OH_CARDS.map(c => c[0]);
+const ohOrder = () => roOrder(LAYOUT && LAYOUT.order && LAYOUT.order.ohub, OH_IDS());
+const ohOrderSaved = () => !!(LAYOUT && LAYOUT.order && Array.isArray(LAYOUT.order.ohub) && ohOrder().join() !== OH_IDS().join());
+const ohName = id => (OH_CARDS.find(c => c[0] === id) || [])[1] || id;
+// 動かせるのは見えているカードだけ。隠しているカードは前の場所のまま（見えている場所に、新しい順で入れ直す）
+function ohReorder(order){ const vis = new Set(order), nxt = [...order], full = ohOrder().map(id => vis.has(id) ? nxt.shift() : id);
+  loEdit().order.ohub = roOrder(full, OH_IDS()); loChanged("ohub_order"); opsHubRender(); }
 function ohCards(){
-  const shown = new Set(viewsShown("ops").map(([id]) => id));
-  return OH_CARDS.filter(([id, , v]) => id === "special" ? opsPlaneOn() : id === "a3" ? ohA3On() : shown.has(v));
+  const shown = new Set(viewsShown("ops").map(([id]) => id)), at = ohOrder();
+  return [...OH_CARDS].sort((a, b) => at.indexOf(a[0]) - at.indexOf(b[0])).filter(([id, , v]) => id === "special" ? opsPlaneOn() : id === "a3" ? ohA3On() : shown.has(v));
 }
 // 「3D」のカード：今の3D と同じ条件（羽田・a3On）で、隠していないときだけ。押すと openAp3d（専用ページは作らない）
 const ohA3On = () => opsA3On() && a3On(IATA[OPS_AP]);
@@ -12002,7 +12189,14 @@ function ohCardHTML([id, label, , wide]){
 function opsHubRender(){
   const el = $("opsHubList"); if(!el) return;
   const a = document.activeElement, keep = a && el.contains(a) ? a.dataset.ohub || (a.dataset.vsOpen ? "_edit" : "") : "";   // 描き直しても焦点を残す
-  el.innerHTML = ohCards().map(ohCardHTML).join("") + `<button type="button" class="ohedit" data-vs-open="ops">隠す・出す</button>`;
+  roBind(el, { done:ohReorder, name:ohName });
+  // 並べ替えの形：カードはそのままの見た目で、押しても開かない（ボタンでなく div にして ≡ のつまみを入れる）
+  const card = c => { const h = ohCardHTML(c); if(!OH_EDIT) return h;
+    return h.replace(/^<button type="button" class="([^"]*)" data-ohub="([^"]+)" aria-label="[^"]*">/, (m, cls, id) => `<div class="${cls} ro" data-ro="${id}">${roGrip(id, ohName(id))}`).replace(/<\/button>$/, "</div>"); };
+  const tools = `<div class="ohtools">${OH_EDIT ? `<span class="ohrolead">≡ を押したまま動かします</span>` : ""}<button type="button" class="ropill${OH_EDIT ? " on" : ""}" data-oh-ro><span>${OH_EDIT ? "完了" : "並べ替え"}</span></button></div>`;
+  const foot = OH_EDIT ? `<button type="button" class="ohedit" data-oh-rodef${ohOrderSaved() ? "" : " disabled"}>はじめの並びに戻す</button>` : `<button type="button" class="ohedit" data-vs-open="ops">隠す・出す</button>`;
+  el.classList.toggle("roing", OH_EDIT);
+  el.innerHTML = tools + ohCards().map(card).join("") + foot;
   if(keep){ const b = keep === "_edit" ? el.querySelector(".ohedit") : el.querySelector(`[data-ohub="${keep}"]`); if(b) try{ b.focus({ preventScroll:true }); }catch(e){} }
 }
 // 一覧か専用ページかを画面に当てる（applyOpsView から呼ぶ）
@@ -12012,7 +12206,7 @@ function opsHubApply(){
   sec.dataset.hub = OPS_PAGE ? "page" : "list";
   if(OPS_PAGE) sec.dataset.page = OPS_PAGE; else sec.removeAttribute("data-page");
   $("opsHubList").hidden = !!OPS_PAGE;
-  if(!OPS_PAGE) opsHubRender();
+  if(OPS_PAGE) OH_EDIT = false; else opsHubRender();
   renderOpsLate();
 }
 // clip-path の inset：見せたい長方形 r（画面の座標）を、要素 el の中の inset にする
@@ -12067,6 +12261,8 @@ function opsHubSrc(){
 document.addEventListener("click", e => {
   const t = e.target; if(!t.closest) return;
   const c = t.closest("[data-ohub]"); if(c){ opsHubOpen(c.dataset.ohub, c); return; }
+  if(t.closest("[data-oh-ro]")){ OH_EDIT = !OH_EDIT; opsHubRender(); track("ops_hub", OH_EDIT ? "order_edit" : "order_done"); const n = document.querySelector("#opsHubList [data-oh-ro]"); if(n) try{ n.focus({ preventScroll:true }); }catch(e){} return; }
+  const rd = t.closest("[data-oh-rodef]"); if(rd){ if(rd.disabled) return; if(LAYOUT && LAYOUT.order) delete LAYOUT.order.ohub; loTidy(); loChanged("ohub_order_reset"); opsHubRender(); roSay("運用のカードをはじめの並びに戻しました"); return; }
   if(t.closest("#opsHubBack")){ opsHubBack(); return; }
   if(t.closest("[data-oh-about]")){ $("dOpsSrc").close(); const d = document.querySelector("#v-ops .opsabout"); if(d){ d.style.setProperty("display", "block", "important"); d.open = true; d.scrollIntoView({ block:"start" }); } return; }
 });

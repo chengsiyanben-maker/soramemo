@@ -10,19 +10,21 @@ PM の指示（11/22 22時5分、本人「離陸じゃなくて、他のやつ�
   - 遅れ：今日の遅れ・欠航の数（大きな数字）と内訳、いちばん大きい遅れ1つ（便名・どこから／どこへ・何分）。データ担当の `bad`（PR #179 の案）が来たらそこから、ないあいだはこれからの便から選ぶ（その場合、機体の位置からの遅れは「（推定）」）
 - 長い注意書き（表示する機体・推定・出典・問い合わせ）は「推定・出典 ⓘ」を押すと開く形にたたんだ。カードに出るのは1行だけ
 - 「運用を見る ›」は選んだものの専用ページへ（着陸・離陸＝撮る人、特別塗装機＝特別塗装機、遅れ＝遅れ）。一覧の形でない人（soramemo.ops.hub=0）は前の見方の帯で開く
+- ピルの並べ替え（11/23 追記・本人「いろんなやつの順序を入れ替えられるように」）：ピルの右の ≡ を押すと並べ替えの形（4行・つまみ ≡・「はじめの並びに戻す」・「完了」）。部品はチェックイン担当の roBind・roGrip・roOrder（#183）。並びは layout.order.hcard に覚える（端末とサーバーの user_view_prefs、「全部乗せに戻す」で戻る）
 - ホームの枠（カードの外）は変えていない
 
 ## 変えた関数（src/index.html）
 - 変えた：renderPersonaCard（撮影の分だけ：特別塗装機を選んでいるときの読み込み・PC_LAST）・spHomeHTML（作り直し）
-- 足した：PC_TABS・PC_KEY・PC_HUB・PC_LAST・PC_INFO・pcTabGet・pcTabSet・pcSpList・pcLate・[data-pctab]／[data-pcinfo]／[data-pchub] の押す動き
+- 足した：PC_EDIT・PC_IDS・pcOrder・pcOrderSaved・pcName・pcDraw・pcReorder・[data-pc-ro]／[data-pc-rodef]・PC_TABS・PC_KEY・PC_HUB・PC_LAST・PC_INFO・pcTabGet・pcTabSet・pcSpList・pcLate・[data-pctab]／[data-pcinfo]／[data-pchub] の押す動き
 - CSS：.pcard .pctabs・.pcnone・.pclate・.pcbig・.pctop・.pcfoot・.pcsrc・.pcgo など（.pcard .pgo の下）
 
 ## 確かめた結果
-- 新しいテスト t167（23項目）成功：4つのピル・はじめは近い方・覚える・開き直しても残る・滑走路（推定）・特別塗装機の並びと除外・「今日はありません」・遅れの数といちばん大きいもの・bad からの選び方・i の開閉・運用を見る › の行き先・横にはみ出さない
+- 新しいテスト t168（30項目。main の t167 は並べ替えの部品のテストなので番号を変えた）成功：4つのピル・はじめは近い方・覚える・開き直しても残る・滑走路（推定）・特別塗装機の並びと除外・「今日はありません」・遅れの数といちばん大きいもの・bad からの選び方・i の開閉・運用を見る › の行き先・横にはみ出さない
 - t62 の撮影のホームのカードの確かめを新しい形に合わせた（着陸を見てから離陸を押す）
-- t63・t72・t130・t148・t156・t159・tests/ops 成功。e2e 全体 134／135（落ちた t48 は手元に pdf417gen がないだけで、前からの環境の都合）
+- t63・t72・t130・t148・t156・t159・tests/ops 成功。main（#186 まで）を取り込んだあと t167・t168・t62・t63 成功。取り込む前の e2e 全体 134／135（落ちた t48 は手元に pdf417gen がないだけで、前からの環境の都合）
 - 写真（390×844・昼12時）：docs/pm/shots-home-card-switch/
   - 01_arr.png 着陸／02_dep.png 離陸／03_sp.png 特別塗装機／04_late.png 遅れ
+  - 07_reorder.png 並べ替えの形／08_reordered.png 並べ替えたあとのピル
   - 03b_sp_none.png 特別塗装機がないとき／05_info.png 「推定・出典 ⓘ」を開いたところ
 
 ## 本人に決めてほしいこと
