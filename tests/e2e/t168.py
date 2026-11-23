@@ -112,7 +112,8 @@ async def main():
         await pg.click('#personaCard [data-pc-ro]'); await pg.wait_for_timeout(200)
         # 覚えたものは開き直しても残る
         await pg.reload(); await pg.wait_for_load_state('load'); await pg.wait_for_timeout(600)
-        await pg.evaluate("goTab('home')"); await pg.wait_for_timeout(300); await pg.evaluate("renderPersonaCard()"); await pg.wait_for_timeout(1000)
+        await pg.evaluate("goTab('home')"); await pg.wait_for_timeout(300); await pg.evaluate("renderPersonaCard()")
+        await pg.wait_for_selector('#personaCard [data-pctab="late"]', timeout=15000)   # 開き直した直後はログインの戻りを待つので、固定の待ち時間にしない
         check('開き直しても遅れのまま:', await pg.get_attribute('#personaCard [data-pctab="late"]', 'aria-selected') == 'true')
         await pg.screenshot(path=os.path.join(SHOTS, '06_home_late.png'))
         # 運用を見る › は遅れのページへ

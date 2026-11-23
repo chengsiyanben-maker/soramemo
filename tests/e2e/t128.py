@@ -13,6 +13,7 @@ HERE=os.path.dirname(os.path.abspath(__file__)); WEB=os.path.abspath(os.path.joi
 #   運用の見方の帯は、選んだ見方が見えているなら左端から（先頭の「案内板」を隠さない）
 #   偽のサーバー（fake_sb.js）を使う。本物の Supabase には接続しない
 from playwright.async_api import async_playwright
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__))); import keiei_on   # 上の段の経営の切り替えのピルも確かめる（切り替えを true にしたときの動き）
 fails = []
 def check(name, ok, detail=''):
     print(('OK  ' if ok else 'NG  ') + name + (('  ' + str(detail)) if detail != '' else ''))

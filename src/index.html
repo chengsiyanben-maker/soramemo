@@ -4451,6 +4451,11 @@ dialog.spsheet .sph .spx{top:2px;right:8px;width:44px;height:44px;border:6px sol
    Supabase の Project Settings → API の「Project URL」と「anon public」キーを入れる。 */
 const SORAMEMO_CONFIG = window.SORAMEMO_CONFIG || { supabaseUrl: "", supabaseAnonKey: "" };   // 値は config.js に書く
 const SERVER = !!(SORAMEMO_CONFIG.supabaseUrl && SORAMEMO_CONFIG.supabaseAnonKey);
+/* エアライン経営を画面に出すかの切り替え（11/23 本人「経営ゲームは非表示に」）。戻すときは、この1か所を true にするだけ。
+   false の間も、表・データ・毎晩の収益の計算・記録はそのまま動く（戻したら続きから遊べる）。隠すのは入口だけで、コードは消さない。
+   window.__SORAMEMO_TEST_KEIEI は e2e テストが経営の画面を確かめるときだけ立てる（tests/e2e/keiei_on.py） */
+const KEIEI_VISIBLE = false;
+const keieiShown = () => KEIEI_VISIBLE || window.__SORAMEMO_TEST_KEIEI === true;
 /* ---------- iPhone のアプリ（Capacitor）の中で開いたときだけ働く薄い入れ物（決定事項【11/18】作り方 A）。
    ブラウザで開いたときは何もしない。位置・共有・外のリンクをネイティブの部品に回す。
    呼ぶ所（navigator.geolocation など）は変えずに、中身だけ差し替える（下の担当のコードもそのまま動く） */
@@ -4888,7 +4893,7 @@ function homeFold(){
 }
 function renderEventBar(){
   const box = $("eventBar"); if(!box) return;
-  const e = EVENTS.find(x => x.open) || EVENTS[0];
+  const e = keieiShown() ? EVENTS.find(x => x.open) || EVENTS[0] : null;   // 行事のボーナスは経営の資金なので、経営を隠している間は出さない（ボーナスはサーバーで今までどおり貯まる）
   if(!e){ box.hidden = true; box.innerHTML = ""; homeFold(); return; }
   const last = new Date(Date.parse(e.ends_at) - 1), soon = !e.open;
   box.hidden = false;
@@ -7845,13 +7850,14 @@ let GAME_ON = (() => { try{ return localStorage.getItem("soramemo.game") !== "0"
 // エアライン経営の公開：サーバー版は運営の切り替え（app_status）、サーバーなしの版は config.js の gameReleased。
 // 公開前も、デモモードでは試せる（運営者の確認用）
 let GAME_RELEASED = SORAMEMO_CONFIG.gameReleased === true;
-const gameAvail = () => GAME_ON && (GAME_RELEASED || demo);
+const gameAvail = () => keieiShown() && GAME_ON && (GAME_RELEASED || demo);   // 経営を隠している間は、デモでも出さない
 let MODE = (() => { try{ return localStorage.getItem("soramemo.mode") === "game" ? "game" : "rally"; }catch(e){ return "rally"; } })();
 const LAST_TAB = {rally:"home", game:"co"};
 function goTab(v, seg){
   // 旧い呼び方：実績は図鑑の中の切り替えになった
   if(v === "ach"){ v = "book"; seg = "ach"; }
-  const b = document.querySelector(`nav.tabs button[data-v="${v}"]`); if(!b) return;
+  let b = document.querySelector(`nav.tabs button[data-v="${v}"]`); if(!b) return;
+  if(b.dataset.mode === "game" && !gameAvail()){ v = "home"; seg = undefined; b = document.querySelector('nav.tabs button[data-v="home"]'); }   // 経営を隠している間：経営の画面へ行こうとしたらホームへ
   if(b.dataset.mode !== MODE) setMode(b.dataset.mode, false);
   document.querySelectorAll("nav.tabs button").forEach(x => x.removeAttribute("aria-current"));
   b.setAttribute("aria-current","page"); LAST_TAB[MODE] = v;
@@ -7871,7 +7877,7 @@ function setMode(m, go = true){
   try{ localStorage.setItem("soramemo.mode", MODE); }catch(e){}
   document.body.classList.toggle("game", MODE === "game");
   $("modeSw").hidden = !gameAvail(); $("gameNote").hidden = MODE !== "game";
-  $("gameRow").hidden = !(GAME_RELEASED || demo);
+  $("gameRow").hidden = !keieiShown() || !(GAME_RELEASED || demo);
   document.querySelectorAll("#modeSw [data-mode]").forEach(b => b.setAttribute("aria-selected", String(b.dataset.mode === MODE)));
   document.querySelectorAll("nav.tabs button").forEach(b => b.hidden = b.dataset.mode !== MODE || (b.dataset.mode === "rally" && b.dataset.pOff === "1"));
   if(go) goTab(LAST_TAB[MODE]);
@@ -17226,6 +17232,12 @@ if(!NATIVE && "serviceWorker" in navigator && window.isSecureContext && location
 // 運用のタブへのリンク（#ops、空港つきは #ops-NRT など）。通知や共有のリンクから開いたとき
 // ゴーアラウンドの知らせから開いたとき：/ga/123（その1件）・/gawx（着陸の天気）
 function gaFromHash(s){ if(!s) return; const g = /^\/ga\/(\d+)$/.exec(s); if(g) setTimeout(() => openGa("ev", g[1]), 300); else if(s === "/gawx") setTimeout(() => openGa("wx"), 300); }
+// 経営の画面への直のリンク（#co・#routes・#fleet・#gods・#game）：経営を隠している間はホームへ戻し、リンクの印も消す
+{ const kh = () => { const m = /^#(co|routes|fleet|gods|game)$/.exec(location.hash); if(!m) return;
+    if(!keieiShown()){ history.replaceState(null, "", location.pathname + location.search); setMode("rally", false); goTab("home"); return; }
+    if(!gameAvail()) return;   // 出す設定でも、公開前・オフの人には開かない（今までどおり）
+    setMode("game", false); goTab(m[1] === "game" ? "co" : m[1]); };
+  setTimeout(kh, 0); window.addEventListener("hashchange", kh); }
 { const sp = () => { const m = /^#special-([A-Z0-9-]{2,10})$/.exec(location.hash); if(m) setTimeout(() => openSpecial(m[1]), 300); };
   sp(); window.addEventListener("hashchange", sp); }
 { const m = /^#ops(?:-([A-Z]{3}))?(\/[a-z]+(?:\/\d+)?)?$/.exec(location.hash);

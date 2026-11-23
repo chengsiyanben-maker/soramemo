@@ -12,6 +12,7 @@ HERE=os.path.dirname(os.path.abspath(__file__)); WEB=os.path.abspath(os.path.joi
 import asyncio, json, math, shutil
 from datetime import datetime, timedelta, timezone
 from playwright.async_api import async_playwright
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__))); import keiei_on   # 経営の画面を出して確かめる（切り替えを true にしたときの動き）
 SHOTS = os.path.abspath(os.path.join(HERE, '..', '..', 'docs', 'pm', 'shots-sweep-1121')); os.makedirs(SHOTS, exist_ok=True)
 JST = timezone(timedelta(hours=9)); _d = datetime.now(timezone.utc)
 base = datetime(_d.year, _d.month, _d.day, tzinfo=JST)
