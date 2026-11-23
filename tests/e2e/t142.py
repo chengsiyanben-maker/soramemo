@@ -167,7 +167,7 @@ async def main():
             check('「この機体から見る」でピルが「JL 318」:', pills[2] == 'JL 318:true', str(pills))
             await pg.screenshot(path=os.path.join(SHOTS, '06-follow-844.png'))
             await pg.click('[data-a3-view="tower"]'); await pg.wait_for_timeout(500)
-            check('管制塔の視点（管制室の高さ 約106m・塔は 115.7m）:', await pg.evaluate("Math.round(A3.cam.position.y)") == 106)
+            check('管制塔の視点（塔の上 約118m。塔は 115.7m。11/24 見回り2）:', await pg.evaluate("Math.round(A3.cam.position.y)") == 118)
             await pg.screenshot(path=os.path.join(SHOTS, '05-tower-844.png'))
             # 5 機体のピルを先に押す
             await pg.evaluate("A3.sel = null; A3.view = 'all'; a3Pills(); a3Sheet()")
