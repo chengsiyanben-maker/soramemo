@@ -69,11 +69,14 @@ export function inboundEtaMin(km: number, kt: number | null | undefined, usualMi
 
 export const hhmm = (nowMs: number, addMin: number) => new Date(nowMs + 9 * 3600_000 + addMin * 60_000).toISOString().slice(11, 16);
 
-// 知らせの中身（推定と書く）
+// 「10時42分」の形（日本時間）。知らせの文で使う
+export const jaTime = (nowMs: number, addMin: number) => { const [h, m] = hhmm(nowMs, addMin).split(":"); return `${Number(h)}時${m}分`; };
+
+// 知らせの中身（推定と書く）：「（推定）」は最後に1回だけ。近くなったときの文（airport-traffic の notifyLivery）と同じく、便名がなければ会社名だけ
 export function inboundMessage(v: Seen, dest: { iata: string }, airportName: string, etaMin: number, nowMs = Date.now()) {
   return {
     title: `そらメモ：★${v.name}`,
-    body: `${v.name}（${v.airline}・${v.callsign}）が${airportName}に向かっています（推定）。着くのは${hhmm(nowMs, etaMin)}ごろの見込みです（推定）。`,
+    body: `${v.name}（${v.airline}${v.callsign ? "・" + v.callsign : ""}）が${airportName}に向かっています。着くのは${jaTime(nowMs, etaMin)}ごろ（推定）。`,
     tag: `sp-${v.reg}`,
     url: `./#ops-${dest.iata}`,
   };
