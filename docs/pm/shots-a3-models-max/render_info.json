@@ -1,0 +1,74 @@
+{
+ "hd_tower_day": {
+  "tri": 499006,
+  "calls": 54
+ },
+ "new": {
+  "all_day": {
+   "tri": 1078652,
+   "calls": 282
+  },
+  "apron_day": {
+   "tri": 741778,
+   "calls": 153
+  },
+  "close_day": {
+   "tri": 680840,
+   "calls": 129
+  },
+  "close2_day": {
+   "tri": 437438,
+   "calls": 35
+  },
+  "all_night": {
+   "tri": 1078652,
+   "calls": 313
+  },
+  "apron_night": {
+   "tri": 741778,
+   "calls": 183
+  },
+  "close_night": {
+   "tri": 680840,
+   "calls": 159
+  },
+  "close2_night": {
+   "tri": 437438,
+   "calls": 65
+  }
+ },
+ "old": {
+  "all_day": {
+   "tri": 409344,
+   "calls": 133
+  },
+  "apron_day": {
+   "tri": 415306,
+   "calls": 85
+  },
+  "close_day": {
+   "tri": 413228,
+   "calls": 73
+  },
+  "close2_day": {
+   "tri": 174101,
+   "calls": 26
+  },
+  "all_night": {
+   "tri": 409344,
+   "calls": 163
+  },
+  "apron_night": {
+   "tri": 415306,
+   "calls": 115
+  },
+  "close_night": {
+   "tri": 413228,
+   "calls": 103
+  },
+  "close2_night": {
+   "tri": 174101,
+   "calls": 55
+  }
+ }
+}

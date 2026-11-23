@@ -14,6 +14,7 @@ BASE = os.environ.get('SORAMEMO_TEST_WORK', '/tmp/soramemo-e2e'); WORK = os.path
 SHOTS = os.path.join(ROOT, 'docs', 'pm', 'shots-a3-ground'); os.makedirs(SHOTS, exist_ok=True)
 THREE = os.path.join(BASE, 'three-0.160.0.module.min.js')
 fails = []
+MAX = 'const A3_MAX = true' in open(os.path.join(ROOT, 'src', 'index.html')).read()   # 容量の制限なしの比べる版（a3-models-max）は切り替えなし：細かい形の機種は遠くても平らな形にしない
 def check(name, ok, detail=''):
     print(('OK  ' if ok else 'NG  ') + name + (('  ' + str(detail)) if detail != '' else ''))
     if not ok: fails.append(name)
@@ -116,7 +117,8 @@ async def main():
         check('全体の視点：空の機体は 22px 以上', min(sz['air']) >= 21, sz['air'])
         check('全体の視点：地上の機体は 16px 以上（実寸だと約3px）', min(sz["gnd"]) >= 15, sz['gnd'])
         lo = await pg.evaluate("[...A3.objs.values()].filter(o => !a3Air(o.p)).filter(o => o.lo && o.lo.visible).length")
-        check('全体の視点：遠い地上の機体は簡単な形', lo == 20, lo)
+        n_hd = await pg.evaluate("[...A3.objs.values()].filter(o => !a3Air(o.p) && o.g.getObjectByName('hd')).length")
+        check('全体の視点：遠い地上の機体は簡単な形（max は細かい形の機種を除く）', lo == (20 - n_hd if MAX else 20), (lo, n_hd))
         tags = await pg.evaluate("[...document.querySelectorAll('#a3Labels .a3tag')].map(t => ({ t: t.innerText, fs: parseFloat(getComputedStyle(t).fontSize), id: t.dataset.a3Pick, r: t.getBoundingClientRect().toJSON() }))")
         check('地上の機体は札を出さない', not any(t['id'].startswith('g') for t in tags), [t['t'] for t in tags])
         check('札の字は13px以上', tags and all(t['fs'] >= 13 for t in tags), [t['fs'] for t in tags])
@@ -134,7 +136,7 @@ async def main():
         # 管制塔の視点：近い地上の機体は細かい形・押した時だけ便名
         await view(pg, 'tower')
         r = await pg.evaluate("(() => { const g = [...A3.objs.values()].filter(o => !a3Air(o.p)); return { hi: g.filter(o => !(o.lo && o.lo.visible)).length, near: g.filter(o => o.cd < 3000).length }; })()")
-        check('管制塔の視点：3km 以内の地上の機体は細かい形', r['hi'] == r['near'] and r['near'] > 0, r)
+        check('管制塔の視点：3km 以内の地上の機体は細かい形', (r['hi'] >= r['near'] if MAX else r['hi'] == r['near']) and r['near'] > 0, r)
         info['new_tower_day'] = await pg.evaluate(INFO)
         await pg.screenshot(path=os.path.join(SHOTS, 'new_tower_day.png'))
         await view(pg, 'tower', SE); info['new_towerSE_day'] = await pg.evaluate(INFO); await pg.screenshot(path=os.path.join(SHOTS, 'new_towerSE_day.png'))

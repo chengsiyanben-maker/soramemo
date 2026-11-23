@@ -1,0 +1,29 @@
+{
+ "main": {
+  "frame_ms": 341.5,
+  "n": 44,
+  "tri": 416054,
+  "calls": 91,
+  "tex": 9,
+  "geo": 74,
+  "texMB": 4
+ },
+ "a3-models": {
+  "frame_ms": 374.1,
+  "n": 41,
+  "tri": 423232,
+  "calls": 91,
+  "tex": 12,
+  "geo": 124,
+  "texMB": 21
+ },
+ "max": {
+  "frame_ms": 1093.3,
+  "n": 14,
+  "tri": 741778,
+  "calls": 153,
+  "tex": 29,
+  "geo": 107,
+  "texMB": 216
+ }
+}

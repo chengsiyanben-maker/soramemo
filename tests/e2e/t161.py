@@ -95,7 +95,7 @@ async def main():
         check('三角の表の向きが法線とそろう（街・誘導路・機体の左右の翼）', r['city'][0] > 0 and r['city'][1] == 0 and r['twy'] and r['twy'][1] == 0 and r['plane'][1] == 0, r)
         r = await pg.evaluate("['B789','B77W','A359','B738','A20N','B763','B744','A388','B39M','A321','E190','DH8D'].map(a3Model).join(' ')")
         check('機種ごとの形（787・777・A350・737・A320・767・747・A380・E170/E190・Q400）', r == '787 777 350 737 320 767 747 380 737 320 e q4', r)
-        r = await pg.evaluate("""(() => { const g = a3Geo('320'); const vis = id => { const o = A3.objs.get(id); return o && o.g.getObjectByName('gear').visible; };
+        r = await pg.evaluate("""(() => { const g = a3Geo('320'); const vis = id => { const o = A3.objs.get(id); if(!o) return false; const h = o.g.getObjectByName('gearHD'); return o.hd && h ? h.visible : o.g.getObjectByName('gear').visible; };   /* 11/23：細かい形のときはその脚 */
           return { win: g.win.attributes.position.count, gearGround: vis('a4') || !!(A3.objs.get('a4').lo && A3.objs.get('a4').lo.visible),   /* 11/22：遠い地上の機体は平らな簡単な形（脚なし） */ gearClimb: vis('a2'), gearArr: vis('a1') }; })()""")
         check('窓の帯がある・脚は地上と着陸の前だけ（上昇中はしまう）', r['win'] > 30 and r['gearGround'] and r['gearArr'] and not r['gearClimb'], r)
         r = await pg.evaluate("""(() => { const rw = A3.scene.children.find(o => o.isMesh && o.geometry.type === 'PlaneGeometry' && o.name !== 'clouds' && o.material.map); const c = rw.material.map.image, g = c.getContext('2d'), d = g.getImageData(0, Math.floor(c.height * .5), 20, 200).data;

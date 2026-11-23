@@ -15,7 +15,8 @@ from playwright.async_api import async_playwright
 #   偽のサーバーを使う。本物の Supabase には接続しない
 HERE = os.path.dirname(os.path.abspath(__file__)); ROOT = os.path.abspath(os.path.join(HERE, '..', '..')); WEB = os.path.join(ROOT, 'web')
 BASE = os.environ.get('SORAMEMO_TEST_WORK', '/tmp/soramemo-e2e'); WORK = os.path.join(BASE, 'a3m-new'); OLD = os.path.join(BASE, 'a3m-old')
-SHOTS = os.path.join(ROOT, 'docs', 'pm', 'shots-a3-models'); os.makedirs(SHOTS, exist_ok=True)
+MAX = 'const A3_MAX = true' in open(os.path.join(ROOT, 'src', 'index.html')).read()   # 容量の制限なしの比べる版（checkin/a3-models-max）：切り替えなし・細かさが上
+SHOTS = os.path.join(ROOT, 'docs', 'pm', 'shots-a3-models-max' if MAX else 'shots-a3-models'); os.makedirs(SHOTS, exist_ok=True)
 THREE = os.path.join(BASE, 'three-0.160.0.module.min.js')
 fails = []
 def check(name, ok, detail=''):
@@ -81,7 +82,7 @@ async def open3d(b, sky, port, ground=True):
     await pg.evaluate("a3Poll()"); await pg.wait_for_timeout(2000)
     return c, pg, errs
 async def view(pg, v, yaw=0):
-    await pg.evaluate("([v, y]) => { A3.view = v; A3.yaw = y; A3.card = false; a3Pills(); a3Sheet(); A3.dirty = true; }", [v, yaw]); await pg.wait_for_timeout(1200)
+    await pg.evaluate("([v, y]) => { A3.view = v; A3.yaw = y; A3.card = false; a3Pills(); a3Sheet(); A3.dirty = true; }", [v, yaw]); await pg.wait_for_timeout(9000 if MAX else 1200)
 SE = 1.25 * math.pi   # 管制塔から南東（第2ターミナルの駐機場と誘導路。この時間の地上の機体が多い側）
 INFO = "(() => { A3.r.render(A3.scene, A3.cam); const i = A3.r.info.render; return { tri: i.triangles, calls: i.calls }; })()"
 
@@ -96,7 +97,7 @@ async def shots(b, port, tag, ground=True):
             if sel:
                 if not await pg.evaluate("id => !!A3.objs.get(id)", sel): continue
                 await pg.evaluate("id => { a3Select(id, true); A3.card = false; a3Sheet(); }", sel); await pg.wait_for_timeout(300)
-                await pg.evaluate("y => { A3.view = 'plane'; A3.yaw = y; A3.dirty = true; }", 2.4); await pg.wait_for_timeout(1500)
+                await pg.evaluate("y => { A3.view = 'plane'; A3.yaw = y; A3.dirty = true; }", 2.4); await pg.wait_for_timeout(9000 if MAX else 1500)
             else: await view(pg, v, y)
             out[f'{k}_{sky}'] = await pg.evaluate(INFO); await pg.screenshot(path=os.path.join(SHOTS, f'{tag}_{k}_{sky}.png'))
         await c.close()
@@ -110,7 +111,8 @@ async def main():
         r = await pg.evaluate("['B788','B789','B78X','B77W','B763','B738','B38M','A359','A21N','A321','A320','A20N','E190','DH8D','B744'].map(t => a3HdKey(t) || '-').join(' ')")
         check('細かい形の機種（787・777・767・737・A350・A321・A320。ほかは前の形）', r == '787 787 787 777 767 737 737 350 a321 a321 320 320 - - -', r)
         r = await pg.evaluate("Object.fromEntries(Object.keys(A3_HD).map(k => [k, a3HdGeo(k).tri]))")
-        check('細かい形の三角形は1機種 3万以下（1機種で1回作り、同じ機種で使い回す）', all(5000 < v < 30000 for v in r.values()), r)
+        if MAX: check('max：細かい形の三角形は1機種 3万より多い（細かさを上げた）', all(v > 30000 for v in r.values()), r)
+        else: check('細かい形の三角形は1機種 3万以下（1機種で1回作り、同じ機種で使い回す）', all(5000 < v < 30000 for v in r.values()), r)
         # 寸法：翼幅と長さの割合（FAA の表）。形の外側の箱で測る
         r = await pg.evaluate("""Object.fromEntries(Object.keys(A3_HD).map(k => { const g = a3HdGeo(k), T = A3.THREE, bb = new T.Box3(); for(const v of Object.values(g)) if(v && v.isBufferGeometry){ v.computeBoundingBox(); bb.union(v.boundingBox); }
             return [k, [+(bb.max.x - bb.min.x).toFixed(3), +(bb.max.z - bb.min.z).toFixed(3), A3_HD[k].span]]; }))""")
@@ -118,11 +120,12 @@ async def main():
         await view(pg, 'tower', SE)
         h = await pg.evaluate(HD)
         near = [k for k, v in h.items() if v['has'] and v['cd'] < 1600]
-        check('管制塔の視点：近い7機種の機体は細かい形を出す', near and all(h[k]['vis'] for k in near), {k: h[k] for k in near})
+        check('管制塔の視点：近い7機種の機体は細かい形を出す', near and all(h[k]['vis'] for k in near), {k: h[k] for k in near} or h)
         far = [k for k, v in h.items() if v['has'] and v['cd'] > 1700 and k != await pg.evaluate("A3.sel || ''")]
-        check('遠い機体は細かい形を出さない（前の形か平らな形）', all(not h[k]['vis'] for k in far), len(far))
+        if MAX: check('max：遠い機体も細かい形（切り替えなし）', all(h[k]['vis'] for k in far), len(far))
+        else: check('遠い機体は細かい形を出さない（前の形か平らな形）', all(not h[k]['vis'] for k in far), len(far))
         r = await pg.evaluate("(() => { const o = A3.objs.get('g9'), hd = o.g.getObjectByName('hd'); const mid = o.g.userData.mid.filter(c => c.visible).length; return { hd: !!hd, mid }; })()")
-        await pg.evaluate("id => { a3Select(id, true); }", 'g3'); await pg.wait_for_timeout(1200)
+        await pg.evaluate("id => { a3Select(id, true); }", 'g3'); await pg.wait_for_timeout(9000 if MAX else 1200)
         r = await pg.evaluate("(() => { const o = A3.objs.get('g3'), hd = o.g.getObjectByName('hd'); return { vis: hd.visible, mid: o.g.userData.mid.filter(c => c.visible).length, gear: o.g.getObjectByName('gearHD').visible }; })()")
         check('追っている機体は細かい形・前の形は隠す・地上なので脚を出す', r['vis'] and r['mid'] == 0 and r['gear'], r)
         # 色：白い胴・尾翼の色は会社ごとの大まかな色（JAL 赤・ANA 紺）。特別塗装機は昼だけ金。ロゴや字の絵はない（胴の絵は窓・扉・操縦室・継ぎ目だけ）
@@ -130,7 +133,7 @@ async def main():
             return { jal: fin('g3'), ana: fin('g10'), aca: fin('g9') }; })()""")
         check('尾翼の色：JAL は赤・ANA は紺・海外の会社は白に近い灰色', r == {'jal': 'c8102e', 'ana': '13317d', 'aca': 'e9ecef'}, r)
         r = await pg.evaluate("(() => { const m = A3.hdm['787']; return { std: m.type, env: !!m.envMap, map: !!m.map, em: m.emissiveIntensity, shadow: A3.objs.get('g3').g.getObjectByName('hd').children[0].castShadow }; })()")
-        check('材質は PBR（MeshStandardMaterial）・空を映す・昼は窓を灯さない・影を落とす', r['std'] == 'MeshStandardMaterial' and r['env'] and r['map'] and r['em'] == 0 and r['shadow'], r)
+        check('材質は PBR（MeshStandardMaterial。max は上塗りつきの MeshPhysicalMaterial）・空を映す・昼は窓を灯さない・影を落とす', r['std'] == ('MeshPhysicalMaterial' if MAX else 'MeshStandardMaterial') and r['env'] and r['map'] and r['em'] == 0 and r['shadow'], r)
         info['hd_tower_day'] = await pg.evaluate(INFO)
         # 軽い表示と質0は前の形のまま
         await pg.evaluate("a3SetLite(true)"); await pg.wait_for_timeout(1500)
@@ -139,7 +142,7 @@ async def main():
         allerr += errs; await c.close()
         # 夜：窓が灯る・尾翼に会社の色を使わない
         c, pg, errs = await open3d(b, 'night', PORT)
-        await view(pg, 'tower', SE); await pg.evaluate("id => { a3Select(id, true); }", 'g3'); await pg.wait_for_timeout(1200)
+        await view(pg, 'tower', SE); await pg.evaluate("id => { a3Select(id, true); }", 'g3'); await pg.wait_for_timeout(9000 if MAX else 1200)
         r = await pg.evaluate("""(() => { const o = A3.objs.get('g3'), hd = o.g.getObjectByName('hd'), g = a3HdGeo('787'); const fin = hd.children.find(c => c.geometry === g.fin), body = hd.children.find(c => c.geometry === g.body);
             return { fin: fin.material.color.getHexString(), em: body.material.emissiveIntensity, emMap: !!body.material.emissiveMap }; })()""")
         check('夜は窓が灯る・尾翼に会社の色を使わない', r['em'] == 1 and r['emMap'] and r['fin'] == 'f0f2f5', r)

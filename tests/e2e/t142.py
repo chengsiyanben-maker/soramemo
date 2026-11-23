@@ -18,6 +18,7 @@ fails = []
 def check(name, ok, detail=''):
     print(('OK  ' if ok else 'NG  ') + name + (('  ' + str(detail)) if detail != '' else ''))
     if not ok: fails.append(name)
+MAX = 'const A3_MAX = true' in open(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', 'src', 'index.html')).read()   # max の比べる版は描くのが遅いので、札が止まるまで待つ
 THREE_URL = 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.min.js'
 THREE = os.path.join(WORK, 'three-0.160.0.module.min.js')
 def get_three():
@@ -156,7 +157,7 @@ async def main():
             ahead = await pg.evaluate("(() => { const q = a3Ahead({lat:35, lon:139, alt_ft:3000, kt:100, hdg:0, fpm:-600}, 60); return [q.lat > 35.02 && q.lat < 35.03, Math.round(q.alt_ft)]; })()")
             check('次の答えがまだのときは速さと向きで先を読む:', ahead == [True, 2400], str(ahead))
             # 4 押すとカード
-            await pg.click('[data-a3-pick="a1"]'); await pg.wait_for_timeout(400)
+            await pg.click('[data-a3-pick=\"a1\"]', force=MAX); await pg.wait_for_timeout(400)
             cd = await pg.inner_text('#a3Sheet')
             check('カード：JL 318・福岡 → 羽田・特別塗装機・A350 1号機（赤のロゴ）:', 'JL 318' in cd and '福岡 → 羽田' in cd and '特別塗装機' in cd and 'A350 1号機（赤のロゴ）' in cd, cd)
             check('カード：機種 A359・登録記号 JA01XJ・高さ・着陸まで約○分:', 'A359' in cd and 'JA01XJ' in cd and '高さ' in cd and '着陸まで' in cd and '約1分遅れ' in cd, cd)
@@ -174,7 +175,7 @@ async def main():
             await pg.click('[data-a3-view="plane"]'); await pg.wait_for_timeout(300)
             sh = await pg.inner_text('#a3Sheet')
             check('機体のピルを先に押すと「見たい機体を押してください」と ×:', '見たい機体を押してください' in sh and await pg.evaluate("!!document.querySelector('[data-a3-unpick]')"), sh[:80])
-            await pg.click('[data-a3-pick="a2"]'); await pg.wait_for_timeout(400)
+            await pg.click('[data-a3-pick=\"a2\"]', force=MAX); await pg.wait_for_timeout(400)
             pills = await pg.evaluate("[...document.querySelectorAll('[data-a3-view]')].map(b => b.innerText + ':' + b.getAttribute('aria-pressed'))")
             check('一覧から選ぶとその機体のうしろから（ピル「NH 59」）:', pills[2] == 'NH 59:true', str(pills))
             # 7 出典
@@ -184,7 +185,7 @@ async def main():
             await pg.screenshot(path=os.path.join(SHOTS, '09-sources-844.png'))
             # 667
             await pg.set_viewport_size({'width':390,'height':667}); await pg.evaluate("A3.src = false; A3.sel = null; A3.view = 'all'; a3Pills(); a3Sheet()"); await pg.wait_for_timeout(600)
-            await pg.click('[data-a3-pick="a1"]'); await pg.wait_for_timeout(500)
+            await pg.click('[data-a3-pick=\"a1\"]', force=MAX); await pg.wait_for_timeout(500)
             fit = await pg.evaluate("(() => { const b = document.querySelector('[data-a3-follow]').getBoundingClientRect(); const y = document.querySelector('#a3Sheet .a3body'); return b.bottom <= innerHeight || (!!y && y.scrollHeight > y.clientHeight); })()")   # 11/21：送るのはシートの中の .a3body（シートそのものは切り抜くだけ）
             check('667：カードはシートの中で送れる（押す所が隠れたままにならない）:', fit)
             await pg.screenshot(path=os.path.join(SHOTS, '04-plane-card-667.png'))

@@ -121,7 +121,7 @@ async def main():
         m = await pg.evaluate("(() => { const o = A3.objs.get('a1'); const cols = new Set(); o.g.traverse(x => { if(x.material && x.material.color && x.name !== 'mv' && !(x.parent && x.parent.name === 'lo')) cols.add(x.material.color.getHexString()); }); return [...cols]; })()")
         # 11/23（checkin/a3-models）：近い7機種は細かい形（PBR の白・灰色・金属・タイヤ）と尾翼の大まかな会社の色（A3_FIN）。ロゴや字の絵はない
         fins = await pg.evaluate("[...Object.values(A3_FIN), 0xE9ECEF, 0xF0F2F5].map(c => c.toString(16).padStart(6, '0'))")
-        ok_cols = ('f4f6f8', '6b7280', '374151', 'c9a23a', 'ffffff', 'f5f6f8', 'd3d7dc', 'eef0f3', 'c9ced5', '30353d', '1c1e22', 'b4bac2', *fins)
+        ok_cols = ('f4f6f8', '6b7280', '374151', 'c9a23a', 'ffffff', 'f5f6f8', 'd3d7dc', 'eef0f3', 'c9ced5', '30353d', '1c1e22', 'b4bac2', '8a9099', *fins)   # 8a9099＝max のファンの羽根
         check('機体は白と灰色と、尾翼の大まかな会社の色だけ（ロゴなし。特別塗装機の尾翼は昼だけ金。地上を動く印の矢印と遠くの平らな形は除く）', all(x in ok_cols for x in m), m)
         await pg.evaluate("a3Quality(1)"); r1 = await pg.evaluate("[A3.r.shadowMap.enabled, A3.r.getPixelRatio()]")
         await pg.evaluate("a3Quality(0)"); r0 = await pg.evaluate("[A3.r.shadowMap.enabled, A3.r.getPixelRatio()]")
