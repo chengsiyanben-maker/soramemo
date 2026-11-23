@@ -13,12 +13,12 @@
    "calls": 96
   },
   "close_day": {
-   "tri": 435640,
-   "calls": 88
+   "tri": 435624,
+   "calls": 87
   },
   "close2_day": {
-   "tri": 415200,
-   "calls": 33
+   "tri": 415216,
+   "calls": 34
   },
   "all_night": {
    "tri": 407748,
@@ -33,14 +33,14 @@
    "calls": 117
   },
   "close2_night": {
-   "tri": 415200,
-   "calls": 65
+   "tri": 415216,
+   "calls": 66
   }
  },
  "old": {
   "all_day": {
-   "tri": 408956,
-   "calls": 127
+   "tri": 409344,
+   "calls": 133
   },
   "apron_day": {
    "tri": 415306,

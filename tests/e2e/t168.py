@@ -132,10 +132,23 @@ async def main():
         r = await pg.evaluate("(() => { const m = A3.hdm['787']; return { std: m.type, env: !!m.envMap, map: !!m.map, em: m.emissiveIntensity, shadow: A3.objs.get('g3').g.getObjectByName('hd').children[0].castShadow }; })()")
         check('材質は PBR（MeshStandardMaterial）・空を映す・昼は窓を灯さない・影を落とす', r['std'] == 'MeshStandardMaterial' and r['env'] and r['map'] and r['em'] == 0 and r['shadow'], r)
         info['hd_tower_day'] = await pg.evaluate(INFO)
+        # やわらかい影（PM 11/23 22時：#191 から影だけ移す）：PCFSoft・2048・範囲 ±1.5km を見ている所に寄せる
+        r = await pg.evaluate("(() => { const s = A3.sun.shadow; return { type: A3.r.shadowMap.type, soft: A3.THREE.PCFSoftShadowMap, map: s.mapSize.x, r: s.camera.right, tx: A3.sun.target.position.x, tz: A3.sun.target.position.z }; })()")
+        check('影はやわらかい影（PCFSoft）・細かさ 2048・範囲 ±1.5km', r['type'] == r['soft'] and r['map'] == 2048 and r['r'] == 1500, r)
+        await view(pg, 'all', 0)
+        r2 = await pg.evaluate("[A3.sun.target.position.x, A3.sun.target.position.z, A3.sun.position.x - A3.sun.target.position.x, A3.sd.x * 20000]")
+        r3 = await pg.evaluate("A3.sun.shadow.camera.right")
+        check('全体の視点は前と同じ広い範囲（±4.2km・空港の真ん中）・太陽の向きは同じ', (r2[0], r2[1]) == (0, 0) and r3 == 4200 and abs(r2[2] - r2[3]) < 1, [r, r2, r3])
+        await view(pg, 'tower', 0)
+        r4 = await pg.evaluate("[A3.sun.target.position.x, A3.sun.target.position.z, A3.sun.shadow.camera.right]")
+        check('管制塔で向きを変えると影の範囲が見ている所へ動く', (r4[0], r4[1]) != (r['tx'], r['tz']) and r4[2] == 1500, [r, r4])
+        await view(pg, 'tower', SE)
         # 軽い表示と質0は前の形のまま
         await pg.evaluate("a3SetLite(true)"); await pg.wait_for_timeout(1500)
         r = await pg.evaluate("[...A3.objs.values()].some(o => o.g.getObjectByName('hd'))")
         check('「軽い」表示では細かい形を作らない（前の簡単な形のまま）', r is False, r)
+        r = await pg.evaluate("A3.r.shadowMap.enabled")
+        check('「軽い」表示では影を描かない（今のまま）', r is False, r)
         allerr += errs; await c.close()
         # 夜：窓が灯る・尾翼に会社の色を使わない
         c, pg, errs = await open3d(b, 'night', PORT)

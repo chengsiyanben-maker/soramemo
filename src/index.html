@@ -5197,7 +5197,7 @@ function a3Build(){
   const weak = a3Weak(); A3.seg = weak ? 10 : 18;   // 古い iPhone など：はじめから影なし・機体の丸を粗く
   if(A3.q == null) A3.q = lite ? 0 : weak ? 1 : 2;   // 質：2＝影あり・細かい / 1＝影なし / 0＝影なし・粗い・細かい灯りなし（重ければ自動で下げる）
   r.setPixelRatio(Math.min(A3.q >= 2 ? 2 : A3.q === 1 ? 1.5 : 1, window.devicePixelRatio || 1));
-  r.shadowMap.enabled = !lite && A3.q >= 2; r.shadowMap.type = T.PCFShadowMap;
+  r.shadowMap.enabled = !lite && A3.q >= 2; r.shadowMap.type = T.PCFSoftShadowMap;   // やわらかい影（質2のときだけ。軽い表示・質0/1は影なしのまま）
   const scene = new T.Scene(), cam = new T.PerspectiveCamera(50, 1, 30, 300000);
   A3.r = r; A3.scene = scene; A3.cam = cam;
   const night = a3Night(); A3.night = night;
@@ -5217,7 +5217,8 @@ function a3Build(){
   const sun = new T.DirectionalLight(col.sunC, col.sunI), sd = a3SunDir(T, true);
   sun.position.set(sd.x * 20000, sd.y * 20000, sd.z * 20000); scene.add(sun); scene.add(sun.target); A3.sun = sun;
   if(r.shadowMap.enabled){ sun.castShadow = true; const sc = sun.shadow.camera; sc.left = sc.bottom = -4200; sc.right = sc.top = 4200; sc.near = 1000; sc.far = 45000;
-    sun.shadow.mapSize.set(2048, 2048); sun.shadow.bias = -0.0006; sun.shadow.normalBias = 2; }
+    sun.shadow.mapSize.set(2048, 2048); sun.shadow.bias = -0.0006; sun.shadow.normalBias = 2;
+    sc.left = sc.bottom = -A3_SHADOW_R; sc.right = sc.top = A3_SHADOW_R; sc.updateProjectionMatrix(); sun.shadow.bias = -0.0004; sun.shadow.normalBias = 1; A3.sd = sd; }   // 範囲は見ている所に寄せる（a3ShadowFollow）
   const L = (c, o) => { const m = new T.MeshLambertMaterial({ color:c }); if(o){ m.polygonOffset = true; m.polygonOffsetFactor = -o; m.polygonOffsetUnits = -o * 4; } return m; };
   const flat = (rings, y, c, o, recv) => { if(!rings.length) return null; const gs = rings.map(a => { const sh = new T.Shape(); for(let i = 0; i < a.length; i += 2) i ? sh.lineTo(a[i], -a[i + 1]) : sh.moveTo(a[i], -a[i + 1]); return new T.ShapeGeometry(sh); });
     const g = a3Merge(T, gs); g.rotateX(-Math.PI / 2); const m = new T.Mesh(g, L(c, o)); m.position.y = y; m.receiveShadow = !!recv; scene.add(m); return m; };
@@ -5609,9 +5610,21 @@ function a3Loop(){
     if(A3.fr.length === 60 && now - (A3.qAt || A3.t0) > 4000){ const avg = A3.fr.reduce((s, x) => s + x, 0) / 60; if(avg > 45 && A3.q > 0) a3Quality(A3.q - 1); } }
   A3.drawn = now;
   const ps = a3Planes(now);
-  a3Sync(ps); a3Camera(ps); if(A3.sky) A3.sky.position.copy(A3.cam.position);
+  a3Sync(ps); a3Camera(ps); a3ShadowFollow(); if(A3.sky) A3.sky.position.copy(A3.cam.position);
   if(A3.lmats){ const t = (now - A3.t0) / 1000; for(const m of A3.lmats) m.uniforms.uT.value = t; } a3Papi();   // 灯りの点滅と PAPI の色
   A3.r.render(A3.scene, A3.cam); a3Labels(ps);
+}
+// 太陽の影の範囲（±1.5km・2048 の細かさ＝約1.5m）を、カメラが見ている地面の所に寄せる。全体の視点は前の広い範囲のまま
+const A3_SHADOW_R = 1500;
+function a3ShadowFollow(){
+  if(!A3.sun || !A3.sd || !A3.r || !A3.r.shadowMap.enabled) return;
+  const T = A3.THREE, c = A3.cam, d = new T.Vector3(), sc = A3.sun.shadow.camera; c.getWorldDirection(d);
+  const far = c.position.y > 1200;   // 全体の視点（高い所から）は前と同じ広い範囲（±4.2km・空港の真ん中）
+  const R = far ? 4200 : A3_SHADOW_R; if(sc.right !== R){ sc.left = sc.bottom = -R; sc.right = sc.top = R; sc.updateProjectionMatrix(); }
+  const t = d.y < -0.05 ? Math.min(2500, -c.position.y / d.y) : 1500, x = far ? 0 : c.position.x + d.x * t, z = far ? 0 : c.position.z + d.z * t;
+  const q = 4, gx = Math.round(x / q) * q, gz = Math.round(z / q) * q;   // 少し動いても影がちらつかないよう 4m ごとに
+  if(A3.sun.target.position.x === gx && A3.sun.target.position.z === gz) return;
+  A3.sun.target.position.set(gx, 0, gz); A3.sun.position.set(gx + A3.sd.x * 20000, A3.sd.y * 20000, gz + A3.sd.z * 20000); A3.sun.target.updateMatrixWorld();
 }
 // 質を下げる：2→1 は影をやめる、1→0 は細かさ（画素の密度）を下げる。作り直さずに切り替える
 function a3Quality(q){
