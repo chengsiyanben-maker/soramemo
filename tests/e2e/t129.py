@@ -8,6 +8,7 @@ HERE=os.path.dirname(os.path.abspath(__file__)); WORK=os.environ.get('SORAMEMO_T
 #   偽のサーバー（fake_sb.js）とデモを使う。本物の Supabase には接続しない
 import asyncio
 from playwright.async_api import async_playwright
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__))); import keiei_on   # 経営の画面を出して確かめる（切り替えを true にしたときの動き）
 fails = []
 def check(name, ok, detail=''):
     print(('OK  ' if ok else 'NG  ') + name + (('  ' + str(detail)) if detail != '' else ''))

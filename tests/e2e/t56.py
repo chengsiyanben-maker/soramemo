@@ -4,6 +4,7 @@ HERE=os.path.dirname(os.path.abspath(__file__)); WEB=os.path.abspath(os.path.joi
 import asyncio, json
 from datetime import datetime, timedelta, timezone
 from playwright.async_api import async_playwright
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__))); import keiei_on   # 経営の画面を出して確かめる（切り替えを true にしたときの動き）
 now = datetime.now(timezone.utc)
 EV = [{'id': 'newyear-2027', 'name': '年末年始ボーナス', 'starts_at': (now - timedelta(days=1)).isoformat(), 'ends_at': (now + timedelta(days=3)).isoformat(), 'bonus': 5000, 'rare_mult': 2, 'note': None, 'open': True}]
 async def main():
