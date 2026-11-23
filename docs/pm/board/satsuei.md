@@ -59,6 +59,7 @@
   - テストの手順メモ：組み立てには tools/ で npm ci（terser）と pip の brotli が要る。tests/ops は入れ直した playwright だとブラウザがないので、前から入っている playwright（npm root -g）を node_modules にリンクして流す。e2e 全体はほかのテストが docs/pm の写真を上書きするので、コミットの前に git checkout -- docs/pm で戻す
 
 ## 済み（11/22 22時5分の PM の指示：ホームの撮影カードの切り替え。本人「離陸じゃなくて、他のやつを表示できるような機能にしてほしい」）
+- 11/23 16時半（GitHub の「ぶつかった」の知らせ）：main（#193 まで・経営の非表示と定期の手入れ）を取り込み（8853ffc）。ぶつかったのは web/ だけで組み立て直し。t168 は開き直した直後にカードが出るのが遅くなり落ちたので、固定の待ちをやめてピルが出るまで待つ形に。t167・t168・t62・t63 成功
 - 11/23 昼（GitHub の「ぶつかった」の知らせ）：main（#186 まで、並べ替えの部品 #183 を含む）を取り込み（544324c・40a63b7）。main に同じ番号の t167（並べ替え）が入ったので、このテストは **t168** にした。あわせてピルの並べ替えをつないだ：ピルの右の ≡ → 並べ替えの形（roBind・roGrip・roOrder、4行・はじめの並びに戻す・完了）、並びは layout.order.hcard。足した関数 PC_EDIT・PC_IDS・pcOrder・pcOrderSaved・pcName・pcDraw・pcReorder。写真 07_reorder・08_reordered。t167・t168・t62・t63 成功
 - 11/22 手動の回（PM が同じ「ホームの撮影カードの切り替え」を指示）：直前の回で PR #184（bba46c1）として済み。main は 01c6c4c のままで取り込み済み、#183（並べ替えの部品）もまだ main にないので、作り直しは不要だった
 - 11/22 22時台の定時の回：ブランチ satsuei/home-card-switch（main 1a87bfd から）・下書き **PR #184**（bba46c1・main 01c6c4c を取り込み済み・見張りを付けた）・報告 docs/pm/report-home-card-switch.md・写真 docs/pm/shots-home-card-switch/（01 着陸・02 離陸・03 特別塗装機・03b なし・04 遅れ・05 i を開いた所）。本番は PM が本人に写真を見せて OK のあと
