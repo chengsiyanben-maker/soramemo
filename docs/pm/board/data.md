@@ -1,7 +1,7 @@
 # データ担当の帳面
 
 ## いま持っている仕事
-- **定期の手入れ 11/23（月曜の定期の回・PM の指示なし）**：ブランチ maint/2026-11-23（main 9a79def から）→ **下書き PR #188**。報告 docs/pm/maint/2026-11-23-report.md。確かめの SQL docs/pm/maint/2026-11-23-check.sql。**移行194・テスト t132 を使った**
+- **定期の手入れ 11/23（月曜の定期の回・PM の指示なし）**：ブランチ maint/2026-11-23（main 9a79def から）→ **PR #188（11/23 16時29分 main に入った。本番の移行194 は PM の反映の流れで確かめる）**。報告 docs/pm/maint/2026-11-23-report.md。確かめの SQL docs/pm/maint/2026-11-23-check.sql。**移行194・テスト t132 を使った**
   - 点検の結果がまだないので、模擬のデータベース（移行184本）で関数367個の where の列と索引の先頭の列を突き合わせ、全部読みを洗い出した（約130件、ほとんど小さな表）。効く3つを直した
   - ① airport_day：rwy_samples・ga_events の「(at の日本時間)::date = 日」を時刻の幅に（羽田は400日分を毎回全部読んでいた）② flights_track_todo_dep：flights (dep_at desc) where track is null and flight_no is not null（毎晩の flights_track_todo・archive_user_flights）③ rot_predict：livery_plans の日付を時刻の幅に（pg_get_functiondef の1か所だけ置き換え、1か所でなければ止まる）
   - 影響：チェックイン（空港ページ・便の航跡）と運用予想が速くなるだけ。経営は関係しない。表・列・RLS・権限は同じ
