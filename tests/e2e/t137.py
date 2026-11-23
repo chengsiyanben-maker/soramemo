@@ -3,6 +3,7 @@ HERE=os.path.dirname(os.path.abspath(__file__)); WEB=os.path.abspath(os.path.joi
 # エアライン経営：日付の表示が端末の時間帯に左右されないこと（台風の日付・発着枠の申し込みの締め切り・朝のまとめの日付と曜日）
 import asyncio
 from playwright.async_api import async_playwright
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__))); import keiei_on   # 経営の画面を出して確かめる（切り替えを true にしたときの動き）
 fails = []
 def check(label, ok):
     print(label, ok)

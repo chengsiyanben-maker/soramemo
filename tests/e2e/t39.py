@@ -3,6 +3,7 @@ HERE=os.path.dirname(os.path.abspath(__file__)); WEB=os.path.abspath(os.path.joi
 # 使われ方とエラーの送信（偽のサーバー）。利用者IDや座標が入らないこと、オフにすると送らないこと
 import asyncio, json
 from playwright.async_api import async_playwright
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__))); import keiei_on   # 経営の切り替えも押して確かめる（切り替えを true にしたときの動き）
 async def main():
     async with async_playwright() as p:
         b=await p.chromium.launch(); c=await b.new_context(viewport={'width':400,'height':860}, geolocation={'latitude':35,'longitude':135,'accuracy':20}, permissions=['geolocation'])

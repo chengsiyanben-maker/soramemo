@@ -39,3 +39,13 @@ Deno.test("11/16 出典の差し替え：Flightradar24 の出典は1つもない
   for (const r of ["B-16701", "B-KPL", "A7-BAA", "N76021", "9V-SWI", "G-YMMU"]) assertEquals(m.has(r), false, r);
   assertEquals(m.get("N91007")?.src.includes("simpleflying.com"), true);
 });
+
+Deno.test("11/23 アメリカン航空のワンワールド塗装（777-200ER）：N791AN・N796AN は海外の会社のアライアンス塗装として出る", () => {
+  const m = liveryMap(new Date("2026-11-22"));
+  for (const r of ["N791AN", "N796AN"]) {
+    assertEquals(m.get(r)?.name, "ワンワールド塗装（777-200ER）", r);
+    assertEquals(m.get(r)?.airline, "アメリカン航空", r);
+    assertEquals(m.get(r)?.kind, "alliance", r);
+  }
+  for (const r of ["N837NN", "N919NN", "N973AN"]) assertEquals(m.has(r), false, r);   // 737-800 は日本に来ないので入れていない
+});
