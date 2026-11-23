@@ -105,8 +105,9 @@ async def main():
               const at = deg => { const x = u[0].x, z = u[0].z, d = 2500; A3.cam.position.set(x + 400, Math.tan(deg * D2R) * d + 2, z + Math.sqrt(d * d - 400 * 400)); a3Papi(); return u.map((_, i) => m.geometry.attributes.aCol.array[(20 + i) * 3 + 1] > .5 ? 'W' : 'R').join(''); };
               return { tr: u.map(x => +x.tr.toFixed(2)).join(','), hi: at(6), on: at(3), lo: at(1) }; })()""")
             check(f'{sky}：PAPI は見上げる角度で色が変わる（高い＝白4・正しい＝赤2白2・低い＝赤4）', r['hi'] == 'WWWW' and r['on'] == 'RRWW' and r['lo'] == 'RRRR', r)
-            r = await pg.evaluate("""(() => { const v = (id, n) => { const o = A3.objs.get(id).g.getObjectByName(n); return !!o && o.visible; };
-              const a = A3.objs.get('a1').g.getObjectByName('acl'), C = a.geometry.attributes.aCol.array, F = a.geometry.attributes.aFx.array;
+            r = await pg.evaluate("""(() => { const shown = o => { for(let p = o; p; p = p.parent) if(!p.visible) return false; return true; };   // 11/23：近い機体は本物に近い形（real）にも同じ名前の灯りがあるので、見えている方を見る
+              const find = (id, n) => { let f = null; A3.objs.get(id).g.traverse(o => { if(o.name === n && !f && shown(o)) f = o; }); return f; }, v = (id, n) => !!find(id, n);
+              const a = find('a1', 'acl') || A3.objs.get('a1').g.getObjectByName('acl'), C = a.geometry.attributes.aCol.array, F = a.geometry.attributes.aFx.array;
               return { acl: v('a1', 'acl'), landArr: v('a1', 'land'), landClimb: v('a2', 'land'), landGround: v('a4', 'land'), red: C[0] > .9 && C[1] < .3, green: C[4] > .9 && C[3] < .3, beacon: [...F].filter((x, i) => i % 2 === 0 && x === 2).length, strobe: [...F].filter((x, i) => i % 2 === 0 && x === 3).length }; })()""")
             check(f'{sky}：機体の灯り（左の赤・右の緑・尾の白・衝突防止灯2つ・白い閃光2つ）・着陸灯は着陸の手前だけ', r['acl'] and r['red'] and r['green'] and r['beacon'] == 2 and r['strobe'] == 2 and r['landArr'] and not r['landClimb'] and not r['landGround'], r)
             # 写真：全体・管制塔・機体（進入中の a1 の後ろ）・地上

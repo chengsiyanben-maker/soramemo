@@ -119,7 +119,10 @@ async def main():
         k = await pg.evaluate("['B744','A388','B789','B77W','A359','A320','B738','E190','CRJ7','DH8D','AT76'].map(a3Kind).join('')")
         check('機体の形の種類（4発・大きな2発・細い胴・小さなジェット・プロペラ）', k == 'qqwwwnnrrpp', k)
         m = await pg.evaluate("(() => { const o = A3.objs.get('a1'); const cols = new Set(); o.g.traverse(x => { if(x.material && x.material.color && x.name !== 'mv' && !(x.parent && x.parent.name === 'lo')) cols.add(x.material.color.getHexString()); }); return [...cols]; })()")
-        check('機体は白と灰色だけ（会社の色やロゴなし。窓の帯は濃いグレー。特別塗装機の尾翼は昼だけ金。地上を動く印の矢印と遠くの平らな形は除く）', all(x in ('f4f6f8', '6b7280', '374151', 'c9a23a') for x in m), m)
+        # 11/23（checkin/a3-models）から近い機体は本物に近い形：白・灰色・金属の色に、尾翼だけ会社ごとの大まかな色（A3_TAIL）。ロゴや文字の絵は使わない（胴の絵は窓とドアだけ）
+        tails = await pg.evaluate("[...new Set(Object.values(A3_TAIL).concat(0xE6E9EE))].map(c => c.toString(16).padStart(6, '0'))")
+        grey = ('f4f6f8', '6b7280', '374151', 'c9a23a', 'ffffff', 'c3c9d0', 'f2f4f6', '2a2f36', '9ea4ab', '17191c', 'a8aeb5')
+        check('機体は白と灰色だけ＋尾翼の会社の大まかな色（ロゴなし。窓の帯は濃いグレー。特別塗装機の尾翼は昼だけ金。地上を動く印の矢印と遠くの平らな形は除く）', all(x in grey or x in tails for x in m), m)
         await pg.evaluate("a3Quality(1)"); r1 = await pg.evaluate("[A3.r.shadowMap.enabled, A3.r.getPixelRatio()]")
         await pg.evaluate("a3Quality(0)"); r0 = await pg.evaluate("[A3.r.shadowMap.enabled, A3.r.getPixelRatio()]")
         check('重いときは質を下げる：影をやめる→細かさを下げる', r1[0] is False and r0 == [False, 1], (r1, r0))
