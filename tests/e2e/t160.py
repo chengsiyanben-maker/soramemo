@@ -106,7 +106,7 @@ async def main():
         await pg.screenshot(path=os.path.join(SHOTS, 't160-all-day.png'))
         await pg.click('[data-a3-view="tower"]'); await pg.wait_for_timeout(900)
         r = await pg.evaluate("(() => { const d = new A3.THREE.Vector3(); A3.cam.getWorldDirection(d); return { y: Math.round(A3.cam.position.y), pitch: Math.asin(d.y) * 180 / Math.PI }; })()")
-        check('不具合3：管制塔の視点は管制室の高さ（約106m）から少し見下ろす（俯角 2〜10°）', r['y'] == 106 and -10 < r['pitch'] < -2, r)
+        check('不具合3：管制塔の視点は管制塔の上（約118m。11/24 見回り2）から少し見下ろす（俯角 2〜10°）', r['y'] == 118 and -10 < r['pitch'] < -2, r)
         await pg.evaluate(GREEN); await pg.wait_for_timeout(300)
         check('不具合3：管制塔の視点にも背景の緑が出ない', await green_px(pg, 0, 500) < 50)
         await pg.evaluate("document.getElementById('dAp3d').style.background = ''")
