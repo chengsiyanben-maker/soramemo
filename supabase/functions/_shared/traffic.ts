@@ -87,6 +87,29 @@ export function planesFromAdsb(ac: unknown, apt: [number, number], maxFt = 14000
   return planesFrom(states, apt, maxFt, others).map((p) => ({ ...p, type: types.get(p.id) ?? null, reg: regs.get(p.id) ?? null }));
 }
 
+// 地上の機体（11/22 PM「羽田の3D に地上の機体」）：adsb.lol の ac のうち alt_baro が "ground" で、空港の中心から km 以内のもの。
+//   planesFromAdsb は地上の機体を落とすので、別に返す（答えの ground）。空港の車両（category C1〜C3・便名 TEST）と、機種も登録記号もないものは入れない。
+//   hdg：進む向き（track。止まっていて送らないときは true_heading・mag_heading、それもなければ null）。moving：5ノット以上
+export type GroundPlane = { id: string; callsign: string | null; lat: number; lon: number; hdg: number | null; kt: number | null; type: string | null; reg: string | null; moving: boolean };
+export function groundFromAdsb(ac: unknown, apt: [number, number], km = 5): GroundPlane[] {
+  if (!Array.isArray(ac)) return [];
+  const out: GroundPlane[] = [], kx = 111.32 * Math.cos(apt[0] * Math.PI / 180);
+  for (const a of ac) {
+    const x = a as Record<string, unknown>;
+    if (!x || typeof x !== "object" || x.alt_baro !== "ground") continue;
+    const lat = num(x.lat), lon = num(x.lon); if (lat == null || lon == null) continue;
+    if (Math.hypot((lon - apt[1]) * kx, (lat - apt[0]) * 110.57) > km) continue;
+    const cs = typeof x.flight === "string" ? x.flight.trim().toUpperCase() : "";
+    const type = typeof x.t === "string" && x.t ? x.t : null, reg = typeof x.r === "string" && x.r ? x.r : null;
+    if (typeof x.category === "string" && /^C/.test(x.category)) continue;
+    if (/^TEST/.test(cs) || (!type && !reg)) continue;
+    const hdg = num(x.track) ?? num(x.true_heading) ?? num(x.mag_heading), kt = num(x.gs);
+    out.push({ id: String(x.hex ?? `cs-${cs}`), callsign: cs || null, lat: Math.round(lat * 1e5) / 1e5, lon: Math.round(lon * 1e5) / 1e5,
+      hdg: hdg == null ? null : Math.round(hdg) % 360, kt: kt == null ? null : Math.round(kt), type, reg, moving: (kt ?? 0) >= 5 });
+  }
+  return out;
+}
+
 // 記録の処理（30秒ごと）が live_positions に残した日本中の機体の位置を、adsb.lol の ac と同じ形に戻す。
 //   見る人の呼び出しでは adsb.lol に問い合わせず、これを使う（adsb.lol への問い合わせを、見る人の数によらず30秒に3回に保つ）。
 //   live_positions は便名のある機体だけなので、便名のない機体（自家用機の一部など）は出ない。maxAgeMs より古い位置は使わない
