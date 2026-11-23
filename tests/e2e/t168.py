@@ -11,7 +11,7 @@ from playwright.async_api import async_playwright
 #   地上の機体の位置は t166 と同じ（2026-11-22 19時の羽田。adsb.lol・ODbL）。偽のサーバーを使い、本物の Supabase には接続しない
 HERE = os.path.dirname(os.path.abspath(__file__)); ROOT = os.path.abspath(os.path.join(HERE, '..', '..')); WEB = os.path.join(ROOT, 'web')
 BASE = os.environ.get('SORAMEMO_TEST_WORK', '/tmp/soramemo-e2e'); WORK = os.path.join(BASE, 'a3m-new'); OLD = os.path.join(BASE, 'a3m-old')
-SHOTS = os.path.join(ROOT, 'docs', 'pm', 'shots-a3-models') if os.environ.get('A3M_SHOTS') == '1' else os.path.join(os.environ.get('SORAMEMO_TEST_WORK', '/tmp/soramemo-e2e'), 'shots-a3-models'); os.makedirs(SHOTS, exist_ok=True)
+SHOTS = os.path.join(ROOT, 'docs', 'pm', 'shots-a3-models-b') if os.environ.get('A3M_SHOTS') == '1' else os.path.join(os.environ.get('SORAMEMO_TEST_WORK', '/tmp/soramemo-e2e'), 'shots-a3-models'); os.makedirs(SHOTS, exist_ok=True)
 THREE = os.path.join(BASE, 'three-0.160.0.module.min.js')
 fails = []
 def check(name, ok, detail=''):
