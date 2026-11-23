@@ -1135,8 +1135,8 @@ dialog.tpsheet .dlg{display:flex;flex-direction:column;overflow:hidden;padding-b
 .ohedit{grid-column:1 / -1;justify-self:center;min-height:44px;padding:0 18px;border:0;background:none;color:var(--op-ink);font:800 14px var(--gothic);cursor:pointer}
 /* 並べ替えの部品（11/22 checkin/reorder）：右上のピル「並べ替え／完了」・カードや行の右上の ≡ のつまみ・読み上げ用の「上へ・下へ」（焦点が来たときだけ見える） */
 .ropill{flex:none;height:44px;padding:0 2px;border:0;background:none;font:800 13px var(--gothic);color:#374151;cursor:pointer}
-.ropill{display:inline-flex;align-items:center}.ropill>span{display:inline-flex;align-items:center;height:32px;padding:0 14px;border-radius:999px;background:#EEF0F3}
-.ropill.on>span{background:#374151;color:#fff}
+.ropill{display:inline-flex;align-items:center}.ropill>span{display:inline-flex;align-items:center;height:32px;padding:0 14px;border-radius:999px;background:#fff;box-shadow:0 12px 26px -18px rgba(15,23,42,.3),inset 0 0 0 1px rgba(17,24,39,.07)}   /* 11/24 見回り6：運用の一覧と同じ白いピル（地＋薄い影） */
+.ropill.on>span{background:#374151;color:#fff;box-shadow:none}
 .rogrip{position:absolute;right:4px;top:4px;z-index:3;display:flex;align-items:center}
 .roh{width:44px;height:44px;border:0;border-radius:999px;background:none;color:#4B5563;display:grid;place-items:center;cursor:grab;touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 .roh svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round}
@@ -2004,6 +2004,11 @@ dialog.wodlg .wodisc b{color:var(--s-ink);font-weight:800}
 #v-ops .fwlist .opshead span{border:0;background:var(--op-pill);color:var(--op-mute);padding:1px 10px}
 #v-ops .fwlist .fwk{border-radius:999px;padding:1px 8px}
 #v-ops .fwnote{color:var(--op-sub);font-size:11.5px;line-height:1.7}
+/* 11/24 見回り8：遅れの専用ページの札と出典は 13px・時間の札は押せない形（角丸の地だけ・影なし・ピルにしない）・「くわしく」はほかの出典と同じ色（字の色のまま下線） */
+#opsLate .opshead span{font-size:13px}
+#v-ops #opsLate .fwnote{font-size:13px}
+#opsLate .fwnote a{color:inherit;text-decoration:underline}
+#opsLate .lthrs li{border-radius:8px;box-shadow:none;font-weight:600}
 #v-ops .linkbtn2.fwpush{display:block;width:100%;margin-top:10px;text-decoration:none;background:var(--op-pill);color:var(--op-ink);border-radius:999px;min-height:42px}
 #v-ops .linkbtn2.fwpush[aria-pressed="true"]{background:var(--op-ink);color:var(--op-card)}
 #v-ops .hint{color:var(--op-sub)}
@@ -2210,19 +2215,19 @@ dialog.a3dlg{inset:0;margin:0;max-width:100vw;max-height:100vh;width:100vw;heigh
 .a3rnd svg{width:22px;height:22px;fill:currentColor}
 .a3ttl{flex:1;min-width:0;min-height:44px;display:flex;flex-direction:column;justify-content:center;padding:4px 16px;border-radius:999px;background:rgba(255,255,255,.92);box-shadow:0 2px 10px rgba(15,22,38,.12)}
 .a3ttl b{font-size:15px;font-weight:800}
-.a3ttl span{font-size:12px;color:#6B7280;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.a3ttl span{font-size:13px;color:#6B7280;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .a3pills{position:absolute;left:12px;right:12px;top:calc(64px + env(safe-area-inset-top));display:grid;grid-template-columns:repeat(3,1fr);gap:4px;padding:4px;border-radius:999px;background:rgba(255,255,255,.92);box-shadow:0 2px 10px rgba(15,22,38,.12)}
-.a3pills button{min-height:40px;border:0;border-radius:999px;background:transparent;color:#4B5563;font:inherit;font-weight:700;font-size:14px;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.a3pills button{min-height:44px;border:0;border-radius:999px;background:transparent;color:#4B5563;font:inherit;font-weight:700;font-size:14px;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .a3pills button[aria-pressed="true"]{background:#111827;color:#fff}
-.a3chips{position:absolute;left:12px;right:12px;top:calc(122px + env(safe-area-inset-top));display:flex;flex-direction:column;align-items:flex-start;gap:6px;pointer-events:none}
+.a3chips{position:absolute;left:12px;right:12px;top:calc(126px + env(safe-area-inset-top));display:flex;flex-direction:column;align-items:flex-start;gap:6px;pointer-events:none}
 .a3chip{display:inline-flex;align-items:center;gap:8px;padding:6px 14px;border-radius:999px;background:rgba(255,255,255,.88);font-size:13px;color:#374151}
 .a3chip .dot{width:9px;height:9px;border-radius:50%;background:#2F7D4F}
 .a3lite{pointer-events:auto;align-self:stretch;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 10px 10px 16px;border-radius:18px;background:rgba(255,255,255,.95);box-shadow:0 2px 10px rgba(15,22,38,.12)}
 .a3lite div{display:flex;flex-direction:column;gap:2px;min-width:0}
 .a3lite b{font-size:14px}.a3lite span{font-size:12px;color:#6B7280}
 .a3lite button{flex:none;min-height:44px;padding:0 16px;border:0;border-radius:999px;background:#EEF1F5;font:inherit;font-weight:700;cursor:pointer}
-.a3credit{position:absolute;right:12px;bottom:calc(40vh + 10px);min-height:32px;padding:0 12px;border:0;border-radius:999px;background:rgba(255,255,255,.85);color:#374151;font:inherit;font-size:12px;cursor:pointer}
-.a3credit::after{content:"";position:absolute;inset:-6px}
+.a3credit{position:absolute;right:12px;bottom:calc(40vh + 4px);min-height:44px;min-width:44px;padding:0 12px;border:0;border-radius:999px;background:transparent;color:#374151;font:inherit;font-size:13px;cursor:pointer;isolation:isolate}
+.a3credit::before{content:"";position:absolute;inset:6px 0;z-index:-1;border-radius:999px;background:rgba(255,255,255,.85)}   /* 11/24 見回り7：押せる所は 44px・見た目の丸は前と同じ 32px */
 .a3menu{position:absolute;right:12px;top:calc(60px + env(safe-area-inset-top));z-index:3;display:flex;flex-direction:column;padding:6px;border-radius:16px;background:#fff;box-shadow:0 6px 24px rgba(15,22,38,.2)}
 .a3menu button{min-height:44px;padding:0 16px;border:0;border-radius:10px;background:transparent;font:inherit;font-size:14px;text-align:left;cursor:pointer}
 .a3load{position:absolute;inset:0;z-index:4;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:24px;background:#BFD6EA;text-align:center}
@@ -2233,6 +2238,7 @@ dialog.a3dlg{inset:0;margin:0;max-width:100vw;max-height:100vh;width:100vw;heigh
 .a3grab{flex-shrink:0;width:40px;height:5px;border-radius:3px;background:#E5E7EB;margin:0 auto 10px}
 .a3x{position:absolute;right:14px;top:14px;width:44px;height:44px;border:0;border-radius:50%;background:#EEF1F5;font-size:22px;color:#374151;cursor:pointer}
 .a3sh{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+.a3picking .a3sh{justify-content:flex-start;padding-right:56px}   /* 11/24 見回り4：選ぶ途中は × が右上に出るので、数を見出しのすぐ横へ */
 .a3sh h3,.a3sh1{margin:0;font-size:17px;font-weight:800;color:#111827}
 .a3sh .n b{font-size:30px;font-weight:800}.a3sh .u,.a3grid .u{font-size:13px;color:#6B7280;margin-left:2px}
 .a3range,.a3empty{margin:2px 0 8px;font-size:13px;color:#6B7280}
@@ -2252,7 +2258,7 @@ dialog.a3dlg{inset:0;margin:0;max-width:100vw;max-height:100vh;width:100vw;heigh
 .a3grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px 0}
 .a3grid div{display:flex;flex-direction:column;gap:2px;padding:10px 12px;border-radius:14px;background:#EEF1F5}
 .a3grid small{font-size:12px;color:#6B7280}.a3grid b{font-size:17px;font-weight:800;color:#111827}.a3grid .num{font-size:20px}.a3grid span{font-size:12px;color:#6B7280}
-.a3act{display:flex;gap:8px}.a3act .btn1{flex:1;min-height:48px;border-radius:999px}.a3act .btn2{min-height:48px;border-radius:999px}
+.a3act{display:flex;gap:8px;margin-top:12px}   /* 11/24 見回り3：「この機体から見る」を札の上へ（375×667 でも開いてすぐ見える） */.a3act .btn1{flex:1;min-height:48px;border-radius:999px}.a3act .btn2{min-height:48px;border-radius:999px}
 .a3note{margin:8px 0 0;font-size:12px;color:#6B7280;line-height:1.6}
 .a3note a{display:inline-flex;align-items:center;min-height:44px;color:#2B6CB0}
 .a3warn{margin:8px 0;font-size:13px}
@@ -2261,12 +2267,13 @@ dialog.a3dlg{inset:0;margin:0;max-width:100vw;max-height:100vh;width:100vw;heigh
 .a3src small{font-size:12px;color:#6B7280}.a3src b{font-size:14px}.a3src span{font-size:12px;color:#6B7280}
 :root[data-night="on"] dialog.a3dlg,:root[data-night="on"] .a3load{background:#0E1622}
 :root[data-night="on"] .a3wrap{color:#E5E7EB}
-:root[data-night="on"] .a3rnd,:root[data-night="on"] .a3ttl,:root[data-night="on"] .a3pills,:root[data-night="on"] .a3chip,:root[data-night="on"] .a3credit,:root[data-night="on"] .a3lite,:root[data-night="on"] .a3menu,:root[data-night="on"] .a3tag{background:rgba(20,27,36,.92);color:#E5E7EB}
+:root[data-night="on"] .a3rnd,:root[data-night="on"] .a3ttl,:root[data-night="on"] .a3pills,:root[data-night="on"] .a3chip,:root[data-night="on"] .a3credit::before,:root[data-night="on"] .a3lite,:root[data-night="on"] .a3menu,:root[data-night="on"] .a3tag{background:rgba(20,27,36,.92);color:#E5E7EB}
 :root[data-night="on"] .a3sh h3,:root[data-night="on"] .a3sh1,:root[data-night="on"] .a3tag b,:root[data-night="on"] .a3fl,:root[data-night="on"] .a3grid b{color:#fff}
 :root[data-night="on"] .a3pills button{color:#AEB9C6}
 :root[data-night="on"] .a3range b.num,:root[data-night="on"] .a3gh{color:#E5E7EB}:root[data-night="on"] .a3gh .u{color:#AEB9C6}:root[data-night="on"] .a3list li.on button{background:rgba(255,255,255,.07)}
 :root[data-night="on"] .a3pills button[aria-pressed="true"]{background:transparent;color:#fff;box-shadow:inset 0 0 0 1.5px #F3F4F6}
 :root[data-night="on"] .a3sheet{background:#141B24;color:#E5E7EB}
+:root[data-night="on"] .a3credit{color:#E5E7EB}
 :root[data-night="on"] .a3grid div,:root[data-night="on"] .a3src li,:root[data-night="on"] .a3x,:root[data-night="on"] .a3lite button{background:#1D2530;color:#E5E7EB}
 :root[data-night="on"] .a3sp{background:transparent;color:#DCE3EA;box-shadow:inset 0 0 0 1px #66778C}
 :root[data-night="on"] .a3ttl span,:root[data-night="on"] .a3range,:root[data-night="on"] .a3empty,:root[data-night="on"] .a3note,:root[data-night="on"] .a3list small,:root[data-night="on"] .a3grid small,:root[data-night="on"] .a3src small,:root[data-night="on"] .a3src span{color:#AEB9C6}
@@ -3966,7 +3973,7 @@ dialog.spsheet .sph .spx{top:2px;right:8px;width:44px;height:44px;border:6px sol
   </div>
   <div class="statusbar" id="statusBar" hidden role="status"></div>
   <div class="focusbar" id="focusBar" hidden role="status"></div>
-  <div class="demo-banner" role="status"><span><b>デモモード中</b>（記録は本番と別・終えると消えます）</span><button type="button" id="demoEnd">終了</button></div>
+  <div class="demo-banner" role="status"><span><b>デモモード中</b>（本番とは別の記録）</span><button type="button" id="demoEnd">終了</button></div>
 
   <!-- HOME -->
   <section class="view on" id="v-home" aria-label="ホーム">
@@ -4044,7 +4051,7 @@ dialog.spsheet .sph .spx{top:2px;right:8px;width:44px;height:44px;border:6px sol
     </div>
     </div>
     <details class="hfold" id="homeFold" hidden><summary><span>まだ中身のないもの <b id="homeFoldN"></b></span><small>印をもらうと、ここから外に出ます</small></summary><div id="homeFoldBody"></div></details>
-    <button class="helink" type="button" data-he-open>ホームに出すものを選ぶ<span aria-hidden="true"> ›</span></button>
+    <button class="helink" type="button" data-he-open>並べ替え・出すものを選ぶ<span aria-hidden="true"> ›</span></button>
     <details class="dev" hidden><summary>検証用ツール</summary>
       <p class="hint">判定を確かめるための機能です。記録には残りません。</p>
       <button class="btn2" id="probe" style="width:100%">位置だけ測る（検証用・記録しない）</button>
@@ -4405,7 +4412,7 @@ dialog.spsheet .sph .spx{top:2px;right:8px;width:44px;height:44px;border:6px sol
   <section class="mp-sec" aria-labelledby="mpPersona"><h4 id="mpPersona">表示の編集</h4>
     <div class="set-row"><div><small>見たいものだけにできます。隠しても記録や機能は消えません。</small></div></div>
     <button class="lotile" type="button" data-tp-open><span class="t"><b>タブを選ぶ</b><small>下のタブ帯の長押しでも開けます</small></span><span class="n" id="tpTileN"></span></button>
-    <button class="lotile" type="button" data-he-open><span class="t"><b>ホームに出すもの</b><small>OFF にすると隠れます</small></span><span class="n" id="heTileN"></span></button>
+    <button class="lotile" type="button" data-he-open><span class="t"><b>ホームに出すもの</b><small>OFF にすると隠れます・並べ替えもここで</small></span><span class="n" id="heTileN"></span></button>
     <button class="lotile lotile2" type="button" data-lo-open="top"><span class="t"><b>全部を見直す</b><small id="personaNote"></small></span><span class="n" id="loTileN"></span></button>
     <div class="pmore" id="personaMore"></div>
   </section>
@@ -4889,7 +4896,7 @@ function homeFold(){
   }
   box.hidden = !list.length;
   $("homeFoldN").textContent = list.length;
-  $("homeFoldBody").innerHTML = list.map(([n, t]) => `<div class="hfrow"><b>${esc(n)}</b><small>${esc(t)}</small></div>`).join("") + `<p class="hfnote">要らないものは、下の「ホームに出すものを選ぶ」で外せます</p>`;
+  $("homeFoldBody").innerHTML = list.map(([n, t]) => `<div class="hfrow"><b>${esc(n)}</b><small>${esc(t)}</small></div>`).join("") + `<p class="hfnote">要らないものは、下の「並べ替え・出すものを選ぶ」で外せます</p>`;
 }
 function renderEventBar(){
   const box = $("eventBar"); if(!box) return;
@@ -5233,6 +5240,7 @@ function a3Build(){
   r.shadowMap.enabled = !lite && A3.q >= 2; r.shadowMap.type = T.PCFSoftShadowMap;   // やわらかい影（質2のときだけ。軽い表示・質0/1は影なしのまま）
   const scene = new T.Scene(), cam = new T.PerspectiveCamera(50, 1, 30, 300000);
   A3.r = r; A3.scene = scene; A3.cam = cam;
+  r.localClippingEnabled = true; A3.bldMats = []; A3.clipSet = false; A3.clip = new T.Plane(new T.Vector3(1, 0, 0), 0);   // 管制塔の視点だけ、手前の建物を切る（a3TowerClip）
   const night = a3Night(); A3.night = night;
   const col = a3Colors(night); A3.col = col;
   scene.background = new T.Color(col.hor);
@@ -5288,8 +5296,9 @@ function a3Build(){
     for(const kind of ["t", "h", "b"]){
       const list = S.bld.filter(b => b[0] === kind).map(b => ({ p:b.slice(2), h:b[1], roof:new T.Color(kind === "t" ? col.tRoof : kind === "h" ? col.hRoof : col.bRoof), wall:new T.Color(kind === "t" ? col.tWall : kind === "h" ? col.hWall : col.bWall) }));
       if(!list.length) continue;
-      const roofM = new T.MeshLambertMaterial({ vertexColors:true, side:T.DoubleSide }), wallM = kind === "t" && night !== "day" ? new T.MeshLambertMaterial({ vertexColors:true, side:T.DoubleSide, emissive:night === "night" ? 0x3A2A14 : 0x241A0E }) : roofM;   // 夜のターミナルは窓（壁）だけ灯す
-      const m = new T.Mesh(a3Extrude(T, list), [roofM, wallM]);
+      const roofM = new T.MeshLambertMaterial({ vertexColors:true, side:T.DoubleSide }), wallM = kind === "t" && night !== "day" ? new T.MeshLambertMaterial({ vertexColors:true, side:T.DoubleSide, emissive:night === "night" ? 0x0E0B07 : 0x241A0E }) : roofM;   // 夜のターミナルの壁は暗い灰色（11/24 見回り2：前は灯りの色の壁が茶色の塊に見えた）。窓は a3TermWindows の点
+      const m = new T.Mesh(a3Extrude(T, list), [roofM, wallM]); A3.bldMats.push(roofM, wallM);
+      if(kind === "t" && night === "night" && !lite) a3TermWindows(list, lights);
       m.castShadow = m.receiveShadow = r.shadowMap.enabled; scene.add(m);
     }
   } else {
@@ -5314,7 +5323,7 @@ function a3Build(){
     a3RwyLights(T, scene, S, night);
     P(lights.f, 0xFFDDA0, 1.8, .85 * k);   // 駐機場の照明（全体の視点で大きな四角に見えないよう小さく）
     if(lights.c.length){ const g = new T.BufferGeometry(); g.setAttribute("position", new T.Float32BufferAttribute(lights.c, 3)); g.setAttribute("color", new T.Float32BufferAttribute(lights.cc, 3));   // 街の灯り（窓）
-      const m = new T.Points(g, new T.PointsMaterial({ size:1.2 * pr, sizeAttenuation:false, vertexColors:true, transparent:true, opacity:night === "night" ? .85 : .4, depthWrite:false })); m.userData.ps = 1.2; m.name = "cityLights"; scene.add(m); } }
+      const m = new T.Points(g, new T.PointsMaterial({ size:1.2 * pr, sizeAttenuation:false, vertexColors:true, transparent:true, opacity:night === "night" ? .85 : .4, depthWrite:false })); m.userData.ps = 1.2; m.name = "cityLights"; A3.bldMats.push(m.material); scene.add(m); } }
   // 雲（薄く、空港の上は空ける）と夜の星
   if(!lite) a3Sky2(T, scene, col, night);
   A3.mat = L;
@@ -5417,7 +5426,7 @@ function a3City(T, city, night, lite, lights){
       let cx = 0, cz = 0; for(let i = 0; i < p.length; i += 2){ cx += p[i]; cz += p[i + 1]; } cx /= p.length / 2; cz /= p.length / 2;
       const w = warm[c[0] === 1 && rnd() < .5 ? 2 : rnd() < .6 ? 0 : 1]; lights.c.push(cx, c[1] * (.55 + rnd() * .5), cz); lights.cc.push(...w); }
   }
-  const mat = new T.MeshLambertMaterial({ vertexColors:true, side:T.DoubleSide });
+  const mat = new T.MeshLambertMaterial({ vertexColors:true, side:T.DoubleSide }); if(A3.bldMats) A3.bldMats.push(mat);
   for(const [list, nm] of [[big, "cityBig"], [small, "citySmall"]]){ if(!list.length || (lite && nm === "citySmall")) continue;
     const m = new T.Mesh(a3Extrude(T, list), mat); m.name = nm; m.receiveShadow = !!(A3.r && A3.r.shadowMap.enabled); A3.scene.add(m); }
 }
@@ -5565,7 +5574,7 @@ function a3Papi(){
 function a3Night(t = Date.now()){ const el = sunPos(t, A3_C[0], A3_C[1]).el; return el < -6 ? "night" : el < 4 ? "dusk" : "day"; }
 // 色：上の空・地平・陸・空港・芝・駐機場・誘導路・滑走路・建物（屋根と壁）
 const a3Colors = n => n === "night" ? { top:0x050A14, hor:0x1C2A3C, glow:0x000000, skyL:0x8DA2C2, gndL:0x141B25, hemi:1.4, sunC:0xB7C6E0, sunI:0.45, sea:0x0C1724, seaSpec:0x1E2A3A, cloud:0x3A4556, land:0x27303B, aero:0x2C3642, grass:0x24322D, apron:0x3A4450, twy:0x343D48, twyL:0x6B6A3A, rw:0x2E343C,
-    tRoof:0x39434F, tWall:0xC99A58, hRoof:0x353E49, hWall:0x2E3640, bRoof:0x323B46, bWall:0x2C343E, glass:0x5F8E77 }
+    tRoof:0x39434F, tWall:0x4A4E55, hRoof:0x353E49, hWall:0x2E3640, bRoof:0x323B46, bWall:0x2C343E, glass:0x5F8E77 }
   : n === "dusk" ? { top:0x34466E, hor:0xF0B485, glow:0xFFB070, skyL:0xF6C9A4, gndL:0x5E5650, hemi:1.8, sunC:0xFFD3AA, sunI:1.25, sea:0x6D7D95, seaSpec:0xFFC39A, cloud:0xF6D2B8, land:0xB4ACA2, aero:0xBDB8AD, grass:0x949F80, apron:0xAEABA6, twy:0x7C7D81, twyL:0xC9A64A, rw:0x55585E,
     tRoof:0xD8CFC4, tWall:0x8D99A6, hRoof:0xC9C0B6, hWall:0xB1A9A0, bRoof:0xC6BDB3, bWall:0xB9B0A6, glass:0x9FB0BD }
   : { top:0x4F8BCB, hor:0xD3E3EF, glow:0xFFFFFF, skyL:0xEAF2FA, gndL:0x9AA391, hemi:2.0, sunC:0xFFFFFF, sunI:1.9, sea:0x86AECB, seaSpec:0x5E7184, cloud:0xFFFFFF, land:0xD7D3C7, aero:0xDCE2D7, grass:0xAFC896, apron:0xC7CBCF, twy:0x8E939A, twyL:0xD9B53C, rw:0x60656C,
@@ -6032,7 +6041,7 @@ function a3Camera(ps){
   const T = A3.THREE, cam = A3.cam, yaw = A3.yaw;
   if(A3.view === "plane" && A3.sel){
     const o = A3.objs.get(A3.sel);
-    if(o){ // 機体の視点：機体のすぐ後ろの少し上から、進む向きを見る（11/21：前は約450m 後ろで機体が小さく、地平だけになっていた）
+    if(o){ a3TowerClip(false); // 機体の視点：機体のすぐ後ろの少し上から、進む向きを見る（11/21：前は約450m 後ろで機体が小さく、地平だけになっていた）
       const p = o.p, h = (p.hdg || 0) * D2R + yaw, Lm = a3Len(p.type), air = a3Air(p), pos = o.g.position;
       // 地上の機体は、ターミナルの屋根（PLATEAU で約40m）より上の斜め後ろから見下ろす（11/21 夜：駐機場の機体の後ろに建物が入り、壁しか見えなかった）
       const back = air ? Lm * 2.4 + 30 : Lm * 2.6 + 60, up = air ? Lm * 0.55 + 6 : Lm * 1.2 + 55;
@@ -6044,16 +6053,36 @@ function a3Camera(ps){
   if(A3.view === "tower"){
     // 管制塔の視点：管制室の高さ（約106m）から、はじめは西（第1ターミナルと駐機場・誘導路・A 滑走路。その先に大田区）を見下ろす。8方向を撮って比べ、いちばん空港らしく見える向きにした
     //   11/21 の不具合3：前は 3km 先の地面を水平に近く見ていて、地平と空ばかりだった。2km 先・俯角約3°にし、画角を広げる
-    const [x, z] = A3.towerXZ || a3XZ(A3_TOWER[0], A3_TOWER[1]), h = -Math.PI / 2 + yaw, eye = A3_TOWER[2] - 10;
+    //   11/24 の見回り2：手前のターミナルの屋根が画面の下半分をふさいでいた。目を管制塔の上（約118m）に上げて管制室の外（滑走路側へ40m）に出し、
+    //   建物だけ、カメラから A3_TOWER_CUT より手前を切る（地面・誘導路・機体・灯りは切らない）。指で回しても同じ
+    const [x, z] = A3.towerXZ || a3XZ(A3_TOWER[0], A3_TOWER[1]), h = -Math.PI / 2 + yaw, eye = A3_TOWER[2] + 2, fx = Math.sin(h), fz = -Math.cos(h);
     cam.userData.fov = 62; a3ViewOffset();
-    cam.position.set(x, eye, z); cam.lookAt(x + Math.sin(h) * 1700, 0, z - Math.cos(h) * 1700); return;
+    cam.position.set(x + fx * 40, eye, z + fz * 40); cam.lookAt(x + fx * 1700, 0, z + fz * 1700); a3TowerClip(true, fx, fz); return;
   }
+  a3TowerClip(false);
   cam.userData.fov = 50; a3ViewOffset();
   // 全体：北の上空から南へ見る（空港の先に着陸に向かう機体）。指で左右に回す
   //   11/21 の見回り8：約12km まで寄せ、見る点を空港の1km 北にして、模型をシートの上の空いた所に大きく出す
   const R = 10000, cx = 0, cz = 300;   // 11/21：絵の中心をシートの上へずらしたので、見る点は空港の中心近くに戻す
   cam.position.set(cx - Math.sin(yaw) * R, 7000, cz - Math.cos(yaw) * R);
   cam.lookAt(cx, 0, cz);
+}
+// 管制塔の視点だけ、建物の材質でカメラの前 A3_TOWER_CUT（m）より手前を切る（ほかの視点では、何も切らない向きに面を置く）
+//   面は材質にはじめに1回だけ付ける（視点を変えるたびに付け外しすると、描き方の作り直しで1コマ止まるため）
+const A3_TOWER_CUT = 420;
+function a3TowerClip(on, fx, fz){
+  if(!A3 || !A3.clip || !A3.bldMats) return;
+  if(!A3.clipSet){ for(const m of A3.bldMats){ m.clippingPlanes = [A3.clip]; m.needsUpdate = true; } A3.clipSet = true; }
+  if(on){ const c = A3.cam.position; A3.clip.normal.set(fx, 0, fz); A3.clip.constant = -(fx * c.x + fz * c.z + A3_TOWER_CUT); }
+  else { A3.clip.normal.set(0, 1, 0); A3.clip.constant = 1e9; }
+  A3.clipOn = !!on;
+}
+// 夜のターミナルの窓：壁に沿って2段の小さな点（壁そのものは暗い灰色）。長い壁ほど多く、40m おき
+function a3TermWindows(list, lights){
+  const cols = [[1, .86, .62], [1, .93, .8]];
+  for(const b of list){ const p = b.p, m = p.length / 2, h = b.h;
+    for(let i = 0; i < m; i++){ const k = (i + 1) % m, ax = p[i * 2], az = p[i * 2 + 1], bx = p[k * 2], bz = p[k * 2 + 1], l = Math.hypot(bx - ax, bz - az);
+      for(let d = 20; d < l; d += 40) for(const y of [h * .35, h * .7]){ const f = d / l; lights.c.push(ax + (bx - ax) * f, y, az + (bz - az) * f); lights.cc.push(...cols[(i + Math.round(d)) % 2]); } } }
 }
 // 名札：空の機体だけ。「JL 318 700m」。選んだ機体は濃い札
 function a3Labels(ps){
@@ -6115,24 +6144,27 @@ function a3Sheet(){
   const air = ps.filter(a3Air), gnd = ps.filter(p => !a3Air(p)).sort((a, b) => a3Moving(b) - a3Moving(a) || (b.kt || 0) - (a.kt || 0) || String(a3No(a)).localeCompare(String(a3No(b))));
   const row = p => { const [s1, s2] = a3State(p), sp = a3Sp(p);
     return `<li${p.id === A3.sel ? ` class="on"` : ""}><button type="button" data-a3-pick="${esc(p.id)}"${!a3Air(p) ? ` data-a3-gnd` : ""}><span class="no"><b>${esc(a3No(p))}</b><small>${esc(a3Place(p))}</small></span><span class="st"><b>${esc(s1)}</b>${sp ? `<i class="a3sp">特別塗装機</i>` : ""}${s2 ? `<small>${esc(s2)}</small>` : ""}</span><span class="ch" aria-hidden="true">›</span></button></li>`; };
+  el.classList.toggle("a3picking", !!A3.picking);
   el.innerHTML = `<div class="a3grab" aria-hidden="true"></div>${A3.picking ? `<button type="button" class="a3x" data-a3-unpick aria-label="選ぶのをやめる">×</button>` : ""}<div class="a3body">
     <div class="a3sh"><h3>羽田の近くの機体</h3><span class="n"><b class="num">${ps.length}</b><span class="u">機</span></span></div>
     <p class="a3range">${A3.picking ? "見たい機体を押してください" : `空 <b class="num" id="a3NAir">${air.length}</b>機（30km・3,000m 以下）・地上 <b class="num" id="a3NGnd">${gnd.length}</b>機`}</p>
     ${ps.length ? `${air.length ? `<ul class="a3list">${air.slice(0, A3.picking ? 12 : 8).map(row).join("")}</ul>` : ""}${gnd.length ? `<h4 class="a3gh">地上 <b class="num">${gnd.length}</b><span class="u">機</span></h4><ul class="a3list a3gl">${gnd.slice(0, A3.picking ? 12 : 8).map(row).join("")}</ul>${gnd.length > 8 && !A3.picking ? `<p class="a3range">ほか ${gnd.length - 8}機は、景色の中の機体を押すと出ます</p>` : ""}` : ""}` : `<p class="a3empty">${!SERVER ? "デモでは機体の位置は出ません。空港の形だけを出しています。" : A3.err === "pos" ? "機体の位置が届いていません。空港の形だけを出しています。" : A3.snaps.length ? "いま近くに機体はいません。" : "機体の位置を読み込んでいます…"}</p>`}</div>`;
 }
 function a3CardHTML(el, p){
+  el.classList.remove("a3picking");
   const sp = a3Sp(p), [s1, s2] = a3State(p), alt = a3Alt(p), arr = p.phase === "arr" && a3Air(p);
   const pl = a3Place(p), route = /から$/.test(pl) ? `${pl.replace(/から$/, "")} → 羽田` : /へ$/.test(pl) ? `羽田 → ${pl.replace(/へ$/, "")}` : pl;
   const lenTxt = p.type ? `（${esc(p.type)} 長さ${a3Len(p.type)}m）` : "";
   el.innerHTML = `<div class="a3grab" aria-hidden="true"></div><button type="button" class="a3x" data-a3-uncard aria-label="閉じる">×</button><div class="a3body">
     <h3 class="a3fl">${esc(a3No(p))}</h3><p class="a3rt">${esc(route)}${sp ? ` <i class="a3sp">特別塗装機</i>` : ""}</p>${sp ? `<p class="a3spn">${esc(sp.name)}</p>` : ""}
+    <div class="a3act"><button type="button" class="btn1" data-a3-follow="${esc(p.id)}">この機体から見る</button>${sp && p.reg ? `<button type="button" class="btn2" data-a3-zukan="${esc(p.reg)}">機体図鑑 ›</button>` : ""}</div>
     <div class="a3grid"><div><small>機種</small><b>${esc(p.type || "—")}</b></div><div><small>登録記号</small><b>${esc(p.reg || "—")}</b></div>
     <div><small>高さ</small><b>${alt == null || !a3Air(p) ? "地上" : `<span class="num">${alt.toLocaleString("ja-JP")}</span><span class="u">m</span>`}</b></div>
     <div><small>${arr ? "着陸まで" : "いま"}</small><b>${arr && /約(\d+)分/.test(s1) ? `約<span class="num">${s1.match(/約(\d+)分/)[1]}</span><span class="u">分</span>` : esc(s1)}</b>${s2 ? `<span>${esc(s2)}</span>` : ""}</div></div>
-    <div class="a3act"><button type="button" class="btn1" data-a3-follow="${esc(p.id)}">この機体から見る</button>${sp && p.reg ? `<button type="button" class="btn2" data-a3-zukan="${esc(p.reg)}">機体図鑑 ›</button>` : ""}</div>
     <p class="a3note">位置は約1分遅れ。高さは機体が送る気圧の高さ。形は機種ごとに寸法を合わせた模型で（近くの機体だけ細かい形）、大きさは機種どおり${lenTxt}。色は尾翼の大まかな色だけで、ロゴや社名は付けていません。</p></div>`;
 }
 function a3SrcHTML(el){
+  el.classList.remove("a3picking");
   el.innerHTML = `<div class="a3grab" aria-hidden="true"></div><button type="button" class="a3x" data-a3-unsrc aria-label="閉じる">×</button><div class="a3body">
     <h3 class="a3sh1">データの出典</h3><p class="a3warn"><b>航法には使えません。形は簡単にしています。</b></p>
     <ul class="a3src"><li><small>滑走路の端</small><b>AIP JAPAN をもとに作成</b></li><li><small>滑走路・進入灯・PAPI の灯り</small><b>AIP JAPAN（AD 2.14）の種類と長さをもとに作成</b><span>灯りの並びと間隔はおおよそです。夕方と夜だけ出します</span></li><li><small>空港の形・誘導路・海岸線</small><b>${A3 && A3.shape ? "© OpenStreetMap の協力者" : "滑走路とターミナルの位置から作った仮の形"}</b><span>${A3 && A3.shape ? "OpenStreetMap のデータを加工して作成（ODbL 1.0。2026年11月の時点）" : "形のファイルを読めなかったので、仮の形を出しています"}</span></li>
@@ -6149,7 +6181,8 @@ function a3Select(id, follow){
   a3Pills(); a3Sheet(); a3Status(); A3.dirty = true;
 }
 function a3Pills(){
-  document.querySelectorAll("[data-a3-view]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.a3View === A3.view)));
+  const v = A3.picking ? "plane" : A3.view;   // 11/24 見回り4：機体を選ぶ途中も「機体」を押した形（× で閉じたら前の視点に戻る）
+  document.querySelectorAll("[data-a3-view]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.a3View === v)));
   const pb = $("a3PlaneBtn"); if(pb){ const o = A3.sel && A3.objs.get(A3.sel); pb.textContent = A3.view === "plane" && o ? a3No(o.p) : "機体"; }
 }
 document.addEventListener("click", e => {
@@ -6164,10 +6197,10 @@ document.addEventListener("click", e => {
   if(menu && !menu.hidden && !t("#a3Menu")){ menu.hidden = true; }
   let b;
   if((b = t("[data-a3-view]"))){ const v = b.dataset.a3View;
-    if(v === "plane" && !A3.sel){ A3.picking = true; A3.card = false; A3.src = false; a3Sheet(); return; }
+    if(v === "plane" && !A3.sel){ A3.picking = true; A3.card = false; A3.src = false; a3Pills(); a3Sheet(); return; }
     A3.view = v; A3.yaw = 0; A3.card = false; A3.picking = false; a3Pills(); a3Sheet(); a3Status(); A3.dirty = true; return; }
   if((b = t("[data-a3-pick]"))){ a3Select(b.dataset.a3Pick, A3.picking); return; }
-  if(t("[data-a3-unpick]")){ A3.picking = false; a3Sheet(); return; }
+  if(t("[data-a3-unpick]")){ A3.picking = false; a3Pills(); a3Sheet(); return; }
   if(t("[data-a3-uncard]")){ A3.card = false; if(A3.view !== "plane") A3.sel = null; a3Sheet(); A3.dirty = true; return; }
   if((b = t("[data-a3-follow]"))){ a3Select(b.dataset.a3Follow, true); return; }
   if((b = t("[data-a3-zukan]"))){ const reg = b.dataset.a3Zukan; closeAp3d(); if(typeof openPlane === "function") openPlane(reg); return; }
@@ -12376,7 +12409,8 @@ function ohCardHTML([id, label, , wide]){
     cls += " map"; const n = (OPS_PLANES || []).filter(p => p.phase === "arr" || p.phase === "dep").length;   // 地図に出す着陸・離陸の機体だけ数える（上空を通るだけの機体は数えない。11/20 本人）
     art = `<svg class="ohart" viewBox="0 0 360 150" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><path d="M0 40 C80 30 120 70 200 60 S320 20 360 30 V0 H0Z" fill="#EEF2E6"/><g fill="none" stroke="#8C9AAE" stroke-dasharray="4 5"><circle cx="210" cy="80" r="40"/><circle cx="210" cy="80" r="74"/></g><g stroke="#374151" stroke-width="5" stroke-linecap="round"><path d="M196 62 L206 100"/><path d="M208 60 L218 98"/><path d="M214 104 L236 90"/></g>${ohMapPlanes()}</svg>`;
     const pv = TRAFFIC_GOT === OPS_AP ? null : ohMapPrev();
-    v = `<span class="ohv">${TRAFFIC_GOT === OPS_AP ? `<b>${n}</b><small>機</small>` : pv ? `<b class="prev">${pv.n}</b><small>機・約${pv.min}分前</small>` : na}</span>`;
+    // 11/24 見回り5：3D のカードは地上も数えるので、こちらは「空 ○機」と書く（空の着陸・離陸の機体だけ）
+    v = `<span class="ohv">${TRAFFIC_GOT === OPS_AP ? `<small class="pre">空</small><b>${n}</b><small>機</small>` : pv ? `<small class="pre">空</small><b class="prev">${pv.n}</b><small>機・約${pv.min}分前</small>` : na}</span>`;
   } else if(id === "board") v = `<span class="ohv">${b && b.arr ? `<b>${ohHM(b.arr)}</b><small>着</small>` : na}</span>`;
   else if(id === "special"){ const n = SPECIAL_AT ? opsFlying().length : null;
     v = `<span class="ohv">${n == null ? na : `<b>${n}</b><small>機</small>`}<span class="ohdots" aria-hidden="true"><i style="background:#B4232A"></i><i style="background:#1C4FA0"></i></span></span>`; }
