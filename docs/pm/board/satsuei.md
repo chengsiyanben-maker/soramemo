@@ -22,7 +22,7 @@
   - 本人に決めてほしいこと：撮った機体の一覧の置き場所（今のタブ帯に「記録」タブはない）／帯を入れた画像を最初の版に入れるか／1回に選べる写真の数（20枚）
 
 ## 次にやること
-- PR #184（ホームの撮影カードの切り替え）は PM が本人に写真を見せて OK を待つ。直しが来たら同じブランチで。checkin/reorder（#183）が main に入ったら、ピルの並べ替えをつなぐ
+- PR #184（ホームの撮影カードの切り替え）は PM が本人に写真を見せて OK を待つ。直しが来たら同じブランチで（ピルの並べ替えも入っている）
 - 撮影記録の画面案（design/photo-log）は 4版で改善担当が「本人に見せてよい」、データの表は data/photo-log にある（どちらも未反映）。本人の決定3つが出たら作り始める
 1. （済み・PR #24）E の仕様と依頼文
 2. デザイン担当の画面案と、データ担当の photo_log・photo_candidates、本人の決定（置き場所など3つ）を待つ。そろったら satsuei/photo-log で作る（EXIF は JPEG の APP1 だけ読む小さな関数を自分で書く。テストは EXIF 入りの小さな JPEG を手元で作る）
@@ -59,6 +59,7 @@
   - テストの手順メモ：組み立てには tools/ で npm ci（terser）と pip の brotli が要る。tests/ops は入れ直した playwright だとブラウザがないので、前から入っている playwright（npm root -g）を node_modules にリンクして流す。e2e 全体はほかのテストが docs/pm の写真を上書きするので、コミットの前に git checkout -- docs/pm で戻す
 
 ## 済み（11/22 22時5分の PM の指示：ホームの撮影カードの切り替え。本人「離陸じゃなくて、他のやつを表示できるような機能にしてほしい」）
+- 11/23 昼（GitHub の「ぶつかった」の知らせ）：main（#186 まで、並べ替えの部品 #183 を含む）を取り込み（544324c・40a63b7）。main に同じ番号の t167（並べ替え）が入ったので、このテストは **t168** にした。あわせてピルの並べ替えをつないだ：ピルの右の ≡ → 並べ替えの形（roBind・roGrip・roOrder、4行・はじめの並びに戻す・完了）、並びは layout.order.hcard。足した関数 PC_EDIT・PC_IDS・pcOrder・pcOrderSaved・pcName・pcDraw・pcReorder。写真 07_reorder・08_reordered。t167・t168・t62・t63 成功
 - 11/22 手動の回（PM が同じ「ホームの撮影カードの切り替え」を指示）：直前の回で PR #184（bba46c1）として済み。main は 01c6c4c のままで取り込み済み、#183（並べ替えの部品）もまだ main にないので、作り直しは不要だった
 - 11/22 22時台の定時の回：ブランチ satsuei/home-card-switch（main 1a87bfd から）・下書き **PR #184**（bba46c1・main 01c6c4c を取り込み済み・見張りを付けた）・報告 docs/pm/report-home-card-switch.md・写真 docs/pm/shots-home-card-switch/（01 着陸・02 離陸・03 特別塗装機・03b なし・04 遅れ・05 i を開いた所）。本番は PM が本人に写真を見せて OK のあと
   - ピル「着陸・離陸・特別塗装機・遅れ」（横にすべる）。覚える鍵 soramemo.home.spTab。はじめは表示する機体の次の1機の向き
@@ -75,4 +76,4 @@
   3. 出す順は roOrder(LAYOUT && LAYOUT.order && LAYOUT.order.hcard, はじめの並びの id の配列)。layout.order に入れると端末と user_view_prefs にそろい、「全部乗せに戻す」で戻る
   4. 入口は右上の「並べ替え／完了」のピル（class="ropill"、中の字は <span>）。マウスはすぐ・指は0.25秒押してから・矢印のキー・読み上げ用の「上へ」「下へ」は部品が受け持つ
   #183 が main に入ってから、main を取り込んでつなぐ
-  - 11/22 の回の時点で #183 はまだ main に入っていない（main 01c6c4c）。ピルは今の並び（PC_TABS）で出している。#183 が入ったら PR #184 に main を取り込み、spHomeHTML のピルに data-ro と roOrder（order.hcard）をつなぐ
+  - （済み・11/23）#183 が main に入ったので PR #184 につないだ（上の 11/23 の行）
