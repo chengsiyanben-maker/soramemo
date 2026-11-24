@@ -154,7 +154,7 @@ Deno.serve(async (req) => {
         planNew++;
         const dn = names.get(p.dep) ?? p.dep, an = names.get(p.arr) ?? p.arr;
         try {
-          await sendSpPush(admin, [p.dep, p.arr], { title: `そらメモ：★${p.livery}（予定）`, tag: `plan-${p.schedule_id}`, url: `./#ops-${p.dep}`,
+          await sendSpPush(admin, [p.dep, p.arr], { title: `★${p.livery}（予定）`, tag: `plan-${p.schedule_id}`, url: `./#ops-${p.dep}`,
             body: `${p.livery}が、${hm(p.std)} ${dn}発の${p.flight}（${an}行き）で飛ぶ予定です（航空会社の運航情報）。` });
         } catch (e) { errors.push("plan push " + String(e)); }
       }
