@@ -1,6 +1,10 @@
 # チェックイン担当の帳面
 
 ## いま持っている仕事
+- **11/24 16時台の定時の回（PM 16時の急ぎ「a3-hq を main と合わせると t168 が1件落ちる」）**：checkin/a3-hq（PR #203）に main（#201・#204 まで）を取り込み（72383db3）、テストを直して足した（**111c901e**・報告 docs/pm/report-a3-hq-t168.md）。見張りを付けた。直ったので PM の自動の反映でよい（本人 OK 済み）
+  - 原因はテスト：a3Loop は「距離（a3Sync）→ カメラ（a3Camera）」の順なので、視点を変えた最初のコマは前の視点（全体＝約10km 先）の距離。遅い手元では 1.2 秒で1コマも描けず near が空（`{}`）。1コマも描かずに読むと同じ形（最短 10,471m）を再現。アプリは次のコマで正しくなるので変えていない（src・web は変えていない）
+  - t168：frames() を足し、view() は2コマ描くまで待つ。0機のときはカメラの位置と近い順を出す。run_all.py：t168 だけ上限 1,800 秒（LIMIT の表）、上限を超えても止まらず失敗として進む
+  - 確かめ：run_all.py で t142・t16・t160〜t168・t181 の12本成功（t168 は単独約7.5分）・tests/ops 成功
 - **11/24 15時台の手動の回（PM「その2 を checkin/sweep-all-2 で」）**：checkin/sweep-all-2・下書き **PR #209**（bb226c2a・報告 docs/pm/report-sweep-all-2.md・写真 docs/pm/shots-sweep-all-2/）。見張りを付けた。テストが通ったので PM の自動の反映でよい
   - B2 案内板が読めないと遅れ・短冊・撮る人に「読み込めませんでした・もう一度」（10秒ほどで1回だけ自動で取り直す）／A補 引き上げると最近の印まで送る・近くの一覧は「ほか○つ」のときだけ／B3 カードに範囲の札（定時は専用ページと同じ30日）・特別塗装機のページは空と地上を分ける／B4「34R（C）へ」・短冊の説明・「日誌に追加」・日誌の札「手で記録」・「空の上（推定）」／B5 決め打ちの向きのとき滑走路のカード「—」・電波がないときの帯／B6 遅れは今の時刻の行へ（「いまごろ」）／B7 知らせの言い方・「乗る便を選ぶ ›」／B9 字13px・押せる所44px
   - 変えた関数：loadBoard・renderBoard・opsLateHTML・renderOpsLate・ltListHTML・ohCardHTML・opsHubRender・renderOps・specialHTML・opsFlying・renderOpsDerived・a3Rwy・a3State・initSheet の go・nearMoreSync・pinListHTML・renderPassport・passCard。足した：BOARD_ERR・BOARD_RETRY・OPS_FAIL_WAIT・opsFailHTML・opsBoardFail・ltJump・spAir・OH_OT_ASK・ohLastSave・ohNetHTML
@@ -553,6 +557,7 @@
 - 確認コードは6けた。メールは Gmail、Supabase の送信上限は1時間100通
 
 ## 次にやること
+- 【11/24 16時台】PR #203：t168 は直した（111c901e）。PM の反映を待つ。main がさらに動いたら取り込み直して t168 を run_all 経由で流す（上限 1,800 秒）。#207 が main に入ったら「その3」（checkin/stats-shugyo-card）を始めてよい
 - 【11/24 sweep-all-1】PR #207：PM の自動の反映を待つ。本人の答え（上の3つ）で直す（main から新しいブランチで）。入る前に t183・t114・t182・t8・t13・t31・t73・t110・tests/ops を流す。#207 が main に入ったら「その3」（checkin/stats-shugyo-card）を始めてよい（成績の同じ所）。その2（checkin/sweep-all-2）は別の回の持ち分。始める前に origin のブランチを見る
 - 【手元の道具】tests/ops は package.json の playwright 1.56.1 では動かない。node_modules に全体の playwright をつなぐ（ln -s $(npm root -g)/playwright tests/ops/node_modules/）と動く。e2e を流すと docs/pm の前の写真が上書きされるので、コミットの前に git checkout で戻す。pdf417gen・segno（t48）は pip で入れる
 - 【11/24 a3-hq】PR #203：本人の答え（iPhone の重さ・汚れの濃さ・映り込みの絵）で直す（main から新しいブランチで）。入る前に t142・t160〜t168・t181・tests/ops を流す。t168 は A3_QLOCK で質を止めて確かめる（画面のないソフトの描画は遅いため）。重すぎるなら、まず A3_MAX のときの胴の絵（4096→2048）と影（4096→2048）から下げる。#191（a3-models-max）のブランチは #203 に移したので閉じてよい（PM に任せる）
@@ -1288,7 +1293,7 @@ review-c4：見せてよい。本人の答え（ON／OFF か −／＋ か）を
 - 修行タブの中身は変えない（修行担当の持ち場）。修行担当の帳面 shugyo.md に一言書く
 - テスト：成績が開ける・修行のカードを押すと修行タブへ・修行の3つの見出しが成績に出ない・既存の e2e が通る
 
-## PM から積んだ急ぎの仕事（11/24 16時、a3-hq を main と合わせると t168 が1件だけ落ちる）※checkin/a3-hq に足して push（PR #203）。直ったら PM が自動で反映（本人 OK 済み）
+## PM から積んだ急ぎの仕事（11/24 16時、a3-hq を main と合わせると t168 が1件だけ落ちる）※checkin/a3-hq に足して push（PR #203）。直ったら PM が自動で反映（本人 OK 済み）→ PR #203 に足した（111c901e・報告 report-a3-hq-t168.md）
 - main（#200・#201・#204 まで）と合わせた所で、t168 の「管制塔の視点：近い7機種の機体は細かい形を出す」が単独でも2回続けて NG。中身は `{}`＝管制塔の視点で 1.6km 以内の機体が0機（near が空なので check が偽になる）
 - #199 で管制塔のカメラを上・滑走路側へ動かしたことと、テストの作り物の機体の位置（SE）が合っていない見込み。アプリが正しければテストの作り物の位置か見る距離を直し、アプリの不具合ならアプリを直す（どちらかを報告に）
 - t168 は単独で 850〜1000秒かかり、run_all.py の1本 240秒の上限を超える。t168 だけ上限を延ばすか、テストを分けて run_all で最後まで流れるように
