@@ -114,7 +114,7 @@ button{cursor:pointer}
 .wrap{max-width:560px;margin:0 auto;padding:0 20px 120px}
 
 header.top{display:flex;align-items:center;justify-content:space-between;padding:18px 0 8px}
-.brand{font-family:var(--mincho);font-weight:800;font-size:22px;letter-spacing:.08em;display:flex;align-items:center;gap:10px;margin:0;line-height:1.4}
+.brand{font-family:var(--gothic);font-weight:800;font-size:22px;letter-spacing:.08em;display:flex;align-items:center;gap:10px;margin:0;line-height:1.4}
 .brand svg{width:26px;height:26px}
 .iconbtn{background:none;border:1px solid var(--line);border-radius:999px;padding:6px 14px;font-size:14px;color:var(--sumi)}
 
@@ -216,6 +216,7 @@ dialog::backdrop{background:rgba(15,22,38,.55)}
 .ob-dots i{width:7px;height:7px;border-radius:50%;background:var(--line)}
 .ob-dots i.on{background:var(--shu)}
 .ob-nav{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.ob-nav.one{grid-template-columns:1fr}#obSkip[hidden]{display:none}
 .btn1{padding:12px 16px;border:none;border-radius:10px;background:var(--shu);color:var(--on-shu);font-weight:700}
 /* stamp press */
 .stampwrap{position:relative;width:220px;height:220px;margin:6px auto 4px}
@@ -1671,7 +1672,8 @@ dialog.sgd .dlg{padding:14px 16px 36px;max-width:480px;margin:0 auto;max-height:
 .sg-hero .ga3>span{background:#2A2A2A;color:#fff}.sg-hero .ga3 small{color:#BDBDBD}
 .sgd .ga2>div{background:var(--sg-bg);border-radius:14px;padding:10px 12px}
 /* ---------- 新規登録・ログイン・同意の全画面（画面案 docs/design/signup。色と形は画面案の値） ---------- */
-dialog.auth{--a-bg:#F4F5F7;--a-card:#FFFFFF;--a-ink:#374151;--a-strong:#1F2937;--a-sub:#6B7280;--a-mute:#9CA3AF;--a-track:#EEF0F3;--a-pill:rgba(17,24,39,.05);
+/* 補足の字（--a-sub）は白と薄い灰の地のどちらでも 4.5:1 以上（11/24 見回り sweep-all-a の7番。前の #9CA3AF は約2.4:1）。--a-mute は入力の見本の字・空のマスだけ */
+dialog.auth{--a-bg:#F4F5F7;--a-card:#FFFFFF;--a-ink:#374151;--a-strong:#1F2937;--a-sub:#646B78;--a-mute:#9CA3AF;--a-track:#EEF0F3;--a-pill:rgba(17,24,39,.05);
   --a-shadow:0 1px 2px rgba(17,24,39,.04),0 10px 30px -8px rgba(17,24,39,.10),inset 0 0 0 1px rgba(17,24,39,.07);--a-jal:#C8102E;--a-ana:#1C4FA0;--a-wash:#EEF3FB;
   --a-cta:#1F2937;--a-cta-text:#FFFFFF;--c-bg:#F7F9F4;--c-land:#E9EFE4;--c-coast:#9FB3A4;--c-apt:#1F4E79;
   inset:0;width:100vw;height:100dvh;max-width:100vw;max-height:100dvh;margin:0;border-radius:0;background:var(--a-bg);color:var(--a-ink);font-family:var(--gothic);font-size:16px;line-height:1.7;overflow-y:auto;overscroll-behavior:contain}
@@ -1680,7 +1682,7 @@ dialog.auth::backdrop{background:var(--a-bg)}
 .auth #auStep{flex:1;display:flex;flex-direction:column}
 .auth .top{display:flex;align-items:center;justify-content:space-between;min-height:44px}
 .auth .back{width:40px;height:40px;border-radius:999px;border:0;background:var(--a-pill);color:var(--a-strong);font-size:18px;display:grid;place-items:center;cursor:pointer}
-.auth .skip{border:0;background:var(--a-pill);color:var(--a-sub);font-family:inherit;font-style:normal;font-size:13px;font-weight:700;padding:8px 14px;border-radius:999px;cursor:pointer}
+.auth .skip{border:0;background:var(--a-pill);color:var(--a-sub);font-family:inherit;font-style:normal;font-size:13px;font-weight:700;padding:8px 16px;min-height:44px;border-radius:999px;cursor:pointer}
 .auth .steps{display:flex;gap:6px;align-items:center}
 .auth .steps i{display:block;width:18px;height:6px;border-radius:999px;background:var(--a-track)}
 .auth .steps i.on{background:var(--a-ana);width:28px}
@@ -1696,7 +1698,7 @@ dialog.auth::backdrop{background:var(--a-bg)}
 .auth .input{width:100%;font-family:inherit;font-style:normal;font-size:18px;color:var(--a-strong);background:var(--a-card);border:0;border-radius:18px;padding:16px 18px;box-shadow:var(--a-shadow);outline:none;box-sizing:border-box}
 .auth .input:focus{box-shadow:var(--a-shadow),0 0 0 2px var(--a-ana)}
 .auth .input::placeholder{color:var(--a-mute)}
-.auth .note{font-size:12px;color:var(--a-mute);margin:10px 4px 0}
+.auth .note{font-size:12px;color:var(--a-sub);margin:10px 4px 0}
 .auth .spacer{flex:1;min-height:24px}
 .auth .cta{display:block;width:100%;border:0;border-radius:999px;background:var(--a-cta);color:var(--a-cta-text);font-family:inherit;font-style:normal;font-size:16px;font-weight:800;padding:17px 20px;text-align:center;box-shadow:0 10px 24px -12px rgba(15,23,42,.5);cursor:pointer}
 .auth .cta[disabled]{opacity:.35;box-shadow:none;cursor:default}
@@ -1723,12 +1725,14 @@ dialog.auth::backdrop{background:var(--a-bg)}
 .auth .otp input{position:absolute;inset:0;width:100%;height:100%;opacity:0;font-size:16px;border:0;caret-color:transparent}
 .auth .resend{display:flex;justify-content:space-between;align-items:center;margin-top:22px;font-size:13px;color:var(--a-sub)}
 .auth .resend b{font-size:20px;color:var(--a-strong);font-variant-numeric:tabular-nums;margin-right:2px}
-.auth .resend small{color:var(--a-mute)}
+.auth .resend small{color:var(--a-sub)}
+/* コードの画面の「アドレスを直す」「コードを送り直す」は高さ 44px のピル（11/24 見回り sweep-all-a の9番） */
+.auth .resend .linkish{min-height:44px;padding:0 16px;border-radius:999px;background:var(--a-pill);color:var(--a-strong);font-size:13px;font-weight:700;text-decoration:none}
 .auth .prev{display:flex;align-items:center;gap:14px;margin-top:20px}
 .auth .av{width:52px;height:52px;flex:none;border-radius:999px;background:var(--a-wash);color:var(--a-ana);display:grid;place-items:center;font-size:22px;font-weight:800}
 .auth .prev b{display:block;font-size:17px;color:var(--a-strong);word-break:break-all}
-.auth .prev small{font-size:12px;color:var(--a-mute)}
-.auth .count{float:right;font-size:12px;color:var(--a-mute);margin-right:4px}
+.auth .prev small{font-size:12px;color:var(--a-sub)}
+.auth .count{float:right;font-size:12px;color:var(--a-sub);margin-right:4px}
 .auth .count b{color:var(--a-strong);font-size:14px}
 .auth .opts{display:flex;flex-direction:column;align-items:flex-start;gap:10px;margin-top:36px}
 .auth .opt{border:0;font-family:inherit;font-style:normal;font-size:15px;font-weight:700;color:var(--a-strong);background:var(--a-card);box-shadow:var(--a-shadow);border-radius:999px;padding:13px 18px;display:inline-flex;align-items:center;gap:8px;white-space:nowrap;cursor:pointer}
@@ -1736,14 +1740,14 @@ dialog.auth::backdrop{background:var(--a-bg)}
 .auth .opt[aria-checked="true"]{background:var(--a-wash);color:var(--a-ana);box-shadow:inset 0 0 0 2px var(--a-ana)}
 .auth .opt.later{background:var(--a-pill);box-shadow:none;color:var(--a-sub)}
 .auth .opt.later[aria-checked="true"]{box-shadow:inset 0 0 0 2px var(--a-sub)}
-.auth .why{margin-top:28px;font-size:12px;color:var(--a-mute);display:flex;gap:8px}
+.auth .why{margin-top:28px;font-size:12px;color:var(--a-sub);display:flex;gap:8px}
 .auth .why i{font-style:normal;width:18px;height:18px;flex:none;border-radius:999px;background:var(--a-pill);display:grid;place-items:center;font-size:11px;font-weight:800;color:var(--a-sub)}
 .auth .badge{border:0;margin:0;vertical-align:baseline;line-height:1.5;display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:800;color:var(--a-jal);background:color-mix(in srgb,var(--a-jal) 9%,transparent);padding:6px 12px;border-radius:999px}
 .auth .badge::before{content:"";width:6px;height:6px;border-radius:999px;background:var(--a-jal)}
 .auth .pts{margin:0;padding:0;list-style:none;display:grid;gap:14px}
 .auth .pts li{display:flex;gap:12px;font-size:14px;color:var(--a-ink)}
 .auth .pts li i{font-style:normal;flex:none;width:26px;height:26px;border-radius:999px;background:var(--a-pill);display:grid;place-items:center;font-size:13px;font-weight:800;color:var(--a-strong)}
-.auth .pts li small{display:block;font-size:12px;color:var(--a-mute);line-height:1.5}
+.auth .pts li small{display:block;font-size:12px;color:var(--a-sub);line-height:1.5}
 .auth .docs{display:flex;gap:8px;margin-top:16px}
 .auth .docs a{flex:1;text-align:center;text-decoration:none;font-size:13px;font-weight:700;color:var(--a-strong);background:var(--a-card);box-shadow:var(--a-shadow);border-radius:999px;padding:11px 8px}
 .auth .agree{display:flex;gap:12px;align-items:flex-start;margin-top:22px;font-size:14px;color:var(--a-strong);font-weight:700;cursor:pointer;position:relative}
@@ -1751,21 +1755,27 @@ dialog.auth::backdrop{background:var(--a-bg)}
 .auth .agree .box{flex:none;width:26px;height:26px;border-radius:9px;background:var(--a-card);box-shadow:inset 0 0 0 2px var(--a-mute);color:transparent;display:grid;place-items:center;font-size:15px}
 .auth .agree input:checked + .box{background:var(--a-strong);box-shadow:none;color:var(--a-card)}
 .auth .agree input:focus-visible + .box{outline:2px solid var(--a-ana);outline-offset:2px}
-.auth .agree small{display:block;font-weight:400;font-size:12px;color:var(--a-mute)}
+.auth .agree small{display:block;font-weight:400;font-size:12px;color:var(--a-sub)}
 .auth .ill{margin:40px auto 0;width:100%;max-width:300px;border-radius:26px;overflow:hidden;box-shadow:var(--a-shadow)}
 .auth .ill svg{display:block}
+/* 同意の画面：チェックとボタンを画面の下に固定。上の端を背景の色でぼかして、上の項目が下へ続いていると分かるように（11/24 見回り sweep-all-a の6番） */
+.auth[data-step="terms"] #auFoot{position:sticky;bottom:0;z-index:1;margin:0 -24px calc(-32px - env(safe-area-inset-bottom,0px));padding:22px 24px calc(20px + env(safe-area-inset-bottom,0px));background:linear-gradient(rgba(244,245,247,0),var(--a-bg) 22px)}
+.auth[data-step="terms"] #auFoot .agree{margin:0 0 14px}
+.auth[data-step="terms"] #auFoot .amsg{margin:0 4px 10px}
+.auth[data-step="terms"] #auFoot .amsg:empty{display:none}
 .auth .rows{display:grid;gap:12px;margin-top:28px}
 .auth .row{display:flex;gap:14px;align-items:flex-start}
 .auth .row i{font-style:normal;flex:none;width:34px;height:34px;border-radius:999px;background:var(--a-wash);color:var(--a-ana);display:grid;place-items:center;font-size:15px;font-weight:800}
 .auth .row b{display:block;font-size:15px;color:var(--a-strong)}
-.auth .row small{display:block;font-size:12px;color:var(--a-mute);line-height:1.55}
+.auth .row small{display:block;font-size:12px;color:var(--a-sub);line-height:1.55}
 /* ホーム：登録した直後だけの「ようこそ」カード */
 .welcome-card{display:flex;gap:12px;align-items:center;background:#EEF3FB;border-radius:20px;padding:14px 16px;margin:0 0 12px;font-family:var(--gothic)}
 .welcome-card[hidden]{display:none}
 .welcome-card b{display:block;color:#1F2937;font-size:15px}
 .welcome-card small{display:block;color:#6B7280;font-size:12px;line-height:1.5}
 .welcome-card .x{margin-left:auto;flex:none;width:30px;height:30px;border-radius:999px;border:0;background:#FFFFFF;color:#6B7280;font-size:15px;cursor:pointer}
-dialog.mypage{--mp-bg:#F4F5F7;--mp-card:#FFFFFF;--mp-ink:#374151;--mp-sub:#9CA3AF;--mp-mute:#6B7280;--mp-shadow:0 12px 26px -18px rgba(15,23,42,.3),inset 0 0 0 1px rgba(17,24,39,.07);
+/* マイページの補足の字も 4.5:1 以上（11/24 見回り sweep-all-a の7番） */
+dialog.mypage{--mp-bg:#F4F5F7;--mp-card:#FFFFFF;--mp-ink:#374151;--mp-sub:#646B78;--mp-mute:#5F6672;--mp-shadow:0 12px 26px -18px rgba(15,23,42,.3),inset 0 0 0 1px rgba(17,24,39,.07);
   max-width:min(460px,100vw);width:100%;max-height:100dvh;height:100dvh;margin:0 auto;border-radius:0;background:var(--mp-bg);color:var(--mp-ink)}
 [data-palette="board"] dialog.mypage{--mp-bg:#0B0D10;--mp-card:#16191F;--mp-ink:#E5E7EB;--mp-sub:#8B95A3;--mp-mute:#A7B0BC;--mp-shadow:0 12px 26px -16px rgba(0,0,0,.7)}
 dialog.mypage{inset:0;overflow-y:auto;overscroll-behavior:contain}
@@ -1782,7 +1792,7 @@ dialog.mypage .mp-av{width:56px;height:56px;border-radius:50%;display:grid;place
 [data-palette="board"] dialog.mypage .mp-av{color:#0B0D10}
 dialog.mypage .mp-who{min-width:0}
 dialog.mypage .mp-who b{display:block;font-size:18px;font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-dialog.mypage .mp-who small{display:block;font-size:12px;color:#9CA3AF;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+dialog.mypage .mp-who small{display:block;font-size:12px;color:var(--mp-sub);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 dialog.mypage .mp-chips{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
 dialog.mypage .mp-chip{font-size:11px;font-weight:700;color:#E5E7EB;background:rgba(255,255,255,.1);padding:4px 10px;border-radius:999px}
 dialog.mypage .mp-chip.ok{color:#6EE7B7;background:rgba(16,185,129,.15)}
@@ -1809,6 +1819,8 @@ dialog.mypage .swatch i{width:28px;height:28px;border-width:3px;border-color:var
 dialog.mypage .plus-list{font-size:13px;color:var(--mp-mute);margin:4px 0 6px;padding-left:1.2em}
 dialog.mypage .hint{font-size:12px;color:var(--mp-sub)}
 dialog.mypage .legal{text-align:center;font-size:11px;color:var(--mp-sub);margin-top:18px}
+dialog.mypage .legal a{display:inline-block;padding:14px 2px}   /* 押せる高さ 44px（11/24 見回り sweep-all-a の9番） */
+dialog.mypage .swatch{min-width:44px;min-height:44px;justify-content:center}
 dialog.mypage .appver{text-align:center}
 dialog.mypage .dlg .close{display:none}
 
@@ -4299,7 +4311,7 @@ dialog.spsheet .sph .spx{top:2px;right:8px;width:44px;height:44px;border:6px sol
 <dialog id="dAuth" class="auth" aria-label="ログイン・新規登録"><main class="phone"><div id="auStep"></div><div id="auCap" class="captcha"></div><div id="auFoot"></div></main></dialog>
 <dialog id="dGuide" aria-label="使い方"><div class="dlg">
   <div class="ob-step on">
-    <svg viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="50" fill="none" stroke="var(--shu)" stroke-width="4"/><circle cx="60" cy="60" r="43" fill="none" stroke="var(--shu)" stroke-width="1.2"/><text x="60" y="72" text-anchor="middle" font-family="var(--mincho)" font-weight="800" font-size="32" fill="var(--shu)">HND</text></svg>
+    <svg viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="50" fill="none" stroke="var(--shu)" stroke-width="4"/><circle cx="60" cy="60" r="43" fill="none" stroke="var(--shu)" stroke-width="1.2"/><text x="60" y="72" text-anchor="middle" style="font-family:var(--gothic)" font-weight="800" font-size="32" fill="var(--shu)">HND</text></svg>
     <h3>空港で印を押す</h3>
     <p>空港に着いたら「チェックイン」。国内86の空港に印があります。大きな6空港はターミナルにも印があります。</p>
   </div>
@@ -4312,6 +4324,7 @@ dialog.spsheet .sph .spx{top:2px;right:8px;width:44px;height:44px;border:6px sol
     <svg viewBox="0 0 120 120" aria-hidden="true"><rect x="22" y="18" width="76" height="86" rx="6" fill="none" stroke="var(--ink)" stroke-width="3"/><circle cx="45" cy="46" r="12" fill="none" stroke="var(--shu)" stroke-width="3"/><circle cx="75" cy="46" r="12" fill="none" stroke="var(--line)" stroke-width="3" stroke-dasharray="3 4"/><circle cx="45" cy="78" r="12" fill="none" stroke="var(--line)" stroke-width="3" stroke-dasharray="3 4"/><circle cx="75" cy="78" r="12" fill="none" stroke="var(--gold)" stroke-width="3"/></svg>
     <h3>図鑑と地図を埋めていく</h3>
     <p>集めた印は図鑑に、飛んだ路線は地図に残ります。離島の空港は金色の印です。位置情報は空港の判定にだけ使います。</p>
+    <p>運用（空港の今）や修行も、ログインしなくても見られます。</p>
   </div>
   <div class="ob-dots" aria-hidden="true"><i class="on"></i><i></i><i></i></div>
   <div class="ob-nav"><button class="btn2" id="obSkip">とばす</button><button class="btn1" id="obNext" autofocus>次へ</button></div>
@@ -4434,8 +4447,8 @@ dialog.spsheet .sph .spx{top:2px;right:8px;width:44px;height:44px;border:6px sol
       </div></div>
     <div class="set-row" id="gameRow"><div>エアライン経営<small>オフにすると、スタンプラリーだけのアプリとして使えます。記録はそのまま残り、オンに戻せば続きから遊べます。</small></div><button class="btn2" id="gameToggle" aria-pressed="true">使う（オン）</button></div>
   </section>
-  <section class="mp-sec" aria-labelledby="mpData"><h4 id="mpData">データ</h4>
-    <div class="set-row"><div>記録を書き出す<small>チェックイン・フライト・記録帳・国際線を書き出します（無料）。CSVは「まとめて取り込む」と同じ形です。</small></div>
+  <section class="mp-sec" aria-labelledby="mpData"><h4 id="mpData">データとバックアップ</h4>
+    <div class="set-row"><div>記録を書き出す<small id="expNote">記録はサーバーに保存されていて、機種を変えてもログインすれば戻ります。書き出しは手元の控えです。</small></div>
       <div class="exp"><button class="btn2" data-export="json">JSON</button><button class="btn2" data-export="csv">CSV</button></div></div>
     <div class="set-row" id="wipeRow"><div>記録を消す<small>この端末に保存した本番の記録をすべて消します。</small></div><button class="btn2 danger" id="wipe">消す</button></div>
   </section>
@@ -6716,12 +6729,13 @@ async function checkinServer(p){
   if(bon.length) EVB = null;
   showStamp(a, Date.parse(r.at), r.first_airport, flight, term, r.first_terminal);
 }
+// デモの時刻：前の印から移動にかかる時間を足す。見本の最後の便は昨日なので、本当の今より前にはしない（11/24 見回り sweep-all-a の5番）
 function demoNow(a){
   const last = S.checkins[S.checkins.length-1];
   if(!last) return Date.now();
-  if(last.a === a.id) return last.t + 20*60e3;
+  if(last.a === a.id) return Math.max(Date.now(), last.t + 20*60e3);
   const d = km(BY[last.a], a);
-  return last.t + Math.max(60, d/600*60 + 40)*60e3;
+  return Math.max(Date.now(), last.t + Math.max(60, d/600*60 + 40)*60e3);
 }
 function showNearest(n){
   HOME_NEAR = n; setTimeout(renderHomeMap, 0);
@@ -9559,7 +9573,12 @@ function renderMyPage(){
   const chip = (t, k) => `<span class="mp-chip${k ? " " + k : ""}">${esc(t)}</span>`;
   $("mpChips").innerHTML = (SERVER && user ? chip("ログイン中", "ok") + chip("記録はサーバーに保存") : demo ? chip("デモ・記録は別") : chip("記録はこの端末に保存"))
     + (tn ? chip(`称号 ${tn}`) : "") + (typeof PLUS !== "undefined" && PLUS ? chip("そらメモ＋", "plus") : "")
-    + chip(`${visited().size}空港・${S.flights.length}フライト`);
+    + chip(`${visited().size}空港・${flyOnly(S.flights).length}フライト`);
+  // 記録を書き出すの説明（11/24 見回り sweep-all-a の2番・PM の決定①）：バックアップは有料にしない。戻すのはログイン（書き出しは控え）
+  if($("expNote")) $("expNote").textContent = SERVER && user ? "記録はサーバーに保存されていて、機種を変えてもログインすれば戻ります。書き出しは手元の控えです。"
+    : demo ? "デモの記録を書き出します。デモの記録は本番とは別で、サーバーには保存されません。"
+    : SERVER ? "ログインすると記録はサーバーに保存され、機種を変えても戻ります。いまの記録はこの端末だけにあります。書き出しは手元の控えです。"
+    : "記録はこの端末に保存されています。書き出しは手元の控えです。";   // 車などの移動は便に入れない（11/11。ホームの今日の数字と同じ数え方）
 }
 $("closeSettings").onclick = () => $("dSettings").close();
 // お試しモードの見本：始めたときに、1年ぶんの旅（16空港・30フライト）をたまった状態で見せる。お試しの記録は本番とは別に保存される
@@ -9569,15 +9588,20 @@ function demoSeed(){
     ["HND","ITM","NH"],["ITM","HND","NH"],["HND","KMQ","JL"],["KMQ","HND","JL"],["HND","HKD","NH"],["HKD","HND","NH"],["HND","KOJ","JL"],["KOJ","HND","JL"],
     ["HND","AKJ","NH"],["AKJ","HND","NH"],["HND","KCZ","JL"],["KCZ","HND","JL"],["HND","NGS","NH"],["NGS","FUK","CAR"],["FUK","HND","NH"],["HND","SDJ","JL"],["SDJ","HND","JL"],
     ["HND","MMY","JL"],["MMY","HND","JL"],["HND","HIJ","NH"],["HIJ","HND","NH"],["HND","OIT","NH"],["OIT","HND","NH"]];
-  // 見本の便は「日本時間の今日の0時」から数えた決まった時刻（330日前の朝8時から）。開くたびに時刻が変わらない（共有の写真を本番で撮るため。11/13 見回り #11）
-  let t = Math.floor((Date.now() + 9 * 36e5) / 864e5) * 864e5 - 9 * 36e5 - 330 * 864e5 + 8 * 36e5;
+  // 見本の便は「日本時間の今日の0時」から数えた決まった時刻。開くたびに時刻が変わらない（共有の写真を本番で撮るため。11/13 見回り #11）
+  // 11/24 見回り（sweep-all-a の5番）：いちばん新しい便が日本時間の昨日に着くよう、まるごと日の単位でずらす（ホームの「今日の印」・印の日付・修行の「今日」をそろえる）
+  const day0 = Math.floor((Date.now() + 9 * 36e5) / 864e5) * 864e5 - 9 * 36e5;
+  let span = 8 * 36e5;
+  for(let i = 0; i < legs.length; i++){ const A1 = IATA[legs[i][0]], A2 = IATA[legs[i][1]]; if(!A1 || !A2) continue; const car = legs[i][2] === "CAR";
+    span += car ? 150 * 6e4 : Math.round((km(A1, A2) / 700 + 0.5) * 36e5); if(i < legs.length - 1) span += (car ? 1 : i % 2 === 0 ? 2 : 9) * 864e5 + 3 * 36e5; }
+  let t = day0 - (Math.floor(span / 864e5) + 1) * 864e5 + 8 * 36e5;
   for(let i = 0; i < legs.length; i++){ const [f, to, al] = legs[i], A1 = IATA[f], A2 = IATA[to]; if(!A1 || !A2) continue;
     const car = al === "CAR", d = km(A1, A2), dur = car ? 150 * 6e4 : Math.round((d / 700 + 0.5) * 36e5);   // 長崎→福岡は車などの移動（便に入れない見本。便は30のまま・空港も16のまま）
     if(i % 2 === 0 || S.checkins.length === 0 || S.checkins[S.checkins.length - 1].a !== A1.id) S.checkins.push({a:A1.id, t, acc:12, term:null});
     const arr = t + dur; S.checkins.push({a:A2.id, t:arr, acc:12, term:null});
     S.flights.push({id:"a" + arr, from:A1.id, to:A2.id, dep:t, arr, km:d, airline:car ? null : al, no:null, fare:null, seat:null, ...(car ? { car:true } : {})});
     t = arr + (car ? 1 : i % 2 === 0 ? 2 : 9) * 864e5 + 3 * 36e5; }
-  S.demoClock = t; save();
+  S.demoClock = null; save();   // デモの「今日」は本当の今日（見本の最後の便は昨日）
 }
 // デモを終えて表示の設定を戻したあと、覚えている値を読み直して画面に当てる
 function demoLoReload(){
@@ -11169,23 +11193,26 @@ const TYPE_NAME = { B738:"ボーイング737-800", B38M:"ボーイング737 MAX 
   B788:"ボーイング787-8", B789:"ボーイング787-9", B78X:"ボーイング787-10", A320:"エアバスA320", A20N:"エアバスA320neo", A321:"エアバスA321", A21N:"エアバスA321neo", A333:"エアバスA330-300",
   A359:"エアバスA350-900", A35K:"エアバスA350-1000", E170:"エンブラエル170", E75L:"エンブラエル175", E190:"エンブラエル190", DH8D:"ボンバルディアQ400", AT76:"ATR72-600", AT46:"ATR42-600", SF34:"サーブ340" };
 const typeName = t => TYPE_NAME[t] || t;
+// 11/24 見回り（sweep-all-a の1番）：フライト・距離・飛行時間・空港・航空会社は、ホームの今日の数字（flyOnly）と同じく、チェックインでできた便だけで数える。
+//   車などの移動（11/11 の決定）と記録帳の便は入れず、数だけ別に返す（画面では「別に数えています」の1行）
 function passStats(y){
   const inY = t => y === "all" || new Date(t).getFullYear() === y;
-  const fl = S.flights.filter(f => inY(f.dep)).map(f => ({ from:f.from, to:f.to, km:f.km, airline:f.airline }));
-  const mn = S.manual.filter(m => inY(m.d.replaceAll("-", "/"))).map(m => ({ from:m.from, to:m.to, km:km(BY[m.from], BY[m.to]), airline:m.airline || null }));
-  const all = fl.concat(mn), tot = all.reduce((x, f) => x + f.km, 0), mins = all.reduce((x, f) => x + f.km / 780 * 60 + 20, 0);
+  const inYf = S.flights.filter(f => inY(f.dep)), cars = inYf.filter(isCar);
+  const fl = flyOnly(inYf).map(f => ({ from:f.from, to:f.to, km:f.km, airline:f.airline }));
+  const mn = S.manual.filter(m => inY(m.d.replaceAll("-", "/")));
+  const all = fl, tot = all.reduce((x, f) => x + f.km, 0), mins = all.reduce((x, f) => x + f.km / 780 * 60 + 20, 0);
   const aps = new Set(), als = new Map(), rts = new Map();
   for(const f of all){ aps.add(f.from); aps.add(f.to); if(f.airline && ALBY[f.airline]) als.set(f.airline, (als.get(f.airline) || 0) + 1);
     const k = [f.from, f.to].sort((p, q) => p - q).join("-"); rts.set(k, (rts.get(k) || 0) + 1); }
   const longest = all.reduce((b, f) => !b || f.km > b.km ? f : b, null);
   const topRt = [...rts].sort((p, q) => q[1] - p[1])[0], topAl = [...als].sort((p, q) => q[1] - p[1])[0];
   // 便ごとの実績が付いたフライト：遅れ（到着の遅れの合計）と機種
-  const facts = S.flights.filter(f => inY(f.dep)).map(f => FACTS.get(factKey(f))).filter(Boolean);
+  const facts = flyOnly(inYf).map(f => FACTS.get(factKey(f))).filter(Boolean);
   // 遅れは航空会社の運航情報（実際の時刻）がある便だけで数える（機体の位置からの推定は着陸の時刻で、到着の定刻とずれるため）
   const off = facts.filter(k => k.ata_src === "odpt"), lost = off.reduce((x, k) => x + Math.max(0, Number(k.arr_delay) || 0), 0), late = off.filter(k => Number(k.arr_delay) >= 15).length;
   const tys = new Map(); for(const k of facts){ const t = k.type || k.aircraft; if(t) tys.set(t, (tys.get(t) || 0) + 1); }
   const topType = [...tys].sort((p, q) => q[1] - p[1])[0];
-  return { n:all.length, manual:mn.length, km:tot, mins, aps:aps.size, als:als.size, longest, topRt, topAl, facts:facts.length, lost, late, topType };
+  return { n:all.length, manual:mn.length, car:cars.length, carKm:cars.reduce((x, f) => x + f.km, 0), km:tot, mins, aps:aps.size, als:als.size, longest, topRt, topAl, facts:facts.length, lost, late, topType };
 }
 const passTime = m => { const d = Math.floor(m / 1440), h = Math.floor(m % 1440 / 60), mm = Math.round(m % 60); return d ? `${d}日${h}時間` : h ? `${h}時間${mm ? mm + "分" : ""}` : `${mm}分`; };
 // 乗った機体の図鑑：便名を記録したフライトに、毎日の記録の登録記号・機種を付けて集める。特別塗装機は名前を添える
@@ -11220,11 +11247,12 @@ function renderPassport(){
       <button class="pp-share" id="passShare" aria-label="パスポートを画像で共有"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M8 8l4-4 4 4"/><path d="M6 12v7h12v-7"/></svg></button></div>
     <div class="pp-tabs" role="group" aria-label="期間">${["all", ...ys].map(y => `<button data-pass-y="${y}" aria-pressed="${y === PASS_Y}">${y === "all" ? "これまで" : y + "年"}</button>`).join("")}</div>
     <div class="pp-grid">
-      <div><span class="l">フライト</span><b>${st.n}</b><span class="s">${st.manual ? `うち記録帳 ${st.manual}` : "チェックインで記録"}</span></div>
+      <div><span class="l">フライト</span><b>${st.n}</b><span class="s">チェックインで記録</span></div>
       <div><span class="l">距離</span><b>${fmtKm(st.km)}<small>km</small></b><span class="s">地球 ${laps >= 10 ? Math.round(laps) : laps.toFixed(1)} 周ぶん</span></div>
       <div><span class="l">飛行時間（推定）</span><b class="t">${passTime(st.mins)}</b></div>
       <div class="two"><div><span class="l">空港</span><b>${st.aps}</b></div><div><span class="l">航空会社</span><b>${st.als}</b></div></div>
     </div>
+    ${st.manual || st.car ? `<p class="pp-note pp-sep">${[st.manual ? `記録帳の便 ${st.manual}` : "", st.car ? `車など ${st.car}（${fmtKm(st.carKm)} km）` : ""].filter(Boolean).join("・")}は、フライト・距離・飛行時間に入れず別に数えています。</p>` : ""}
     ${st.n ? `<ul class="pp-rows">
       ${st.longest ? `<li><span>いちばん長いフライト</span><b>${godShort(BY[st.longest.from])} → ${godShort(BY[st.longest.to])}　${fmtKm(st.longest.km)} km</b></li>` : ""}
       ${st.topRt && st.topRt[1] > 1 ? `<li><span>よく飛んだ路線</span><b>${rtName(st.topRt[0])}　${st.topRt[1]}回</b></li>` : ""}
@@ -16906,7 +16934,8 @@ document.addEventListener("change", e => {
 let obIdx = 0;
 function obShow(i){ obIdx = i; document.querySelectorAll(".ob-step").forEach((el,k)=>el.classList.toggle("on", k===i));
   document.querySelectorAll(".ob-dots i").forEach((el,k)=>el.classList.toggle("on", k===i));
-  $("obNext").textContent = i === 2 ? "はじめる" : "次へ"; }
+  $("obNext").textContent = i === 2 ? "はじめる" : "次へ";
+  $("obSkip").hidden = i === 2; $("obNext").parentElement.classList.toggle("one", i === 2); }   // 3枚目は「はじめる」1つ（11/24 見回り sweep-all-a の8番）
 function obDone(){ try{ localStorage.setItem("soramemo.onboarded","1"); }catch(e){} $("dGuide").close();
   if(SERVER && sb && !user && !demo) authOpen("login"); }   // サーバー版で、まだログインしていなければ、続けてログインの画面を出す
 $("obNext").onclick = () => { if(obIdx < 2) obShow(obIdx+1); else { track("guide", "done"); obDone(); } };
@@ -16973,6 +17002,8 @@ function cardBase(){
   ctx.strokeStyle = PAL.shu; ctx.lineWidth = 7; circle(ctx, 104, 104, 30);
   ctx.fillStyle = PAL.shu; ctx.beginPath(); ctx.moveTo(84,112); ctx.lineTo(124,96); ctx.lineTo(114,121); ctx.lineTo(107,110); ctx.closePath(); ctx.fill();
   ctx.fillStyle = PAL.ink; ctx.font = `800 50px ${GOTHIC}`; ctx.textAlign = "left"; ctx.textBaseline = "middle"; ctx.fillText("そらメモ", 152, 106);
+  // ロゴの横に小さく「非公式アプリ」（フライトの搭乗券の共有画像とそろえる。11/24 見回り sweep-all-a の10番）
+  const lw = ctx.measureText("そらメモ").width; ctx.fillStyle = PAL.sumi; ctx.font = `600 26px ${GOTHIC}`; ctx.fillText("非公式アプリ", 152 + lw + 16, 108);
   ctx.textBaseline = "alphabetic";
   const tn = titleName(); if(tn){ ctx.textAlign = "right"; ctx.fillStyle = PAL.shu; ctx.font = `700 32px ${GOTHIC}`; ctx.fillText(`称号　${tn}`, 1000, 116); }
   return [cv, ctx];
@@ -17239,7 +17270,7 @@ function authRender(){
     foot = `<button class="cta" type="button" data-au="name-next"${ok && !AU.busy ? "" : " disabled"}>${R ? "保存する" : "次へ"}</button>${R ? '<button class="ghost" type="button" data-au="close">やめる</button>' : ""}`;
   } else if(s === "survey"){
     const o = (k, label, ic) => `<button class="opt${k === "unanswered" ? " later" : ""}" type="button" role="radio" aria-checked="${AU.persona === k}" data-au-persona="${k}">${ic || ""}${label}</button>`;
-    top = `${auTop("to-name", '<button class="skip" type="button" data-au="survey-skip">あとで</button>')}<div class="hero"><p class="eyebrow">ひとつだけ質問 <span style="color:var(--a-mute);font-weight:400">・飛ばしてもOK</span></p><h1>そらメモを<br>どう使いたいですか？</h1>
+    top = `${auTop("to-name", '<button class="skip" type="button" data-au="survey-skip">あとで</button>')}<div class="hero"><p class="eyebrow">ひとつだけ質問 <span style="color:var(--a-sub);font-weight:400">・飛ばしてもOK</span></p><h1>そらメモを<br>どう使いたいですか？</h1>
       <p class="lead">近いものをひとつ選んでください。</p></div>
       <div class="opts" role="radiogroup" aria-label="使い方">${o("spot", "飛行機を撮りたい", AU_ICON.spot)}${o("shugyo", "修行（マイル・ステータス）に使いたい", AU_ICON.shugyo)}${o("casual", "気軽に楽しみたい", AU_ICON.casual)}${o("unanswered", "あとで決める")}</div>
       <p class="why"><i>?</i><span>はじめは全部の機能を出しています。答えに合わせて、使わなそうなものを隠すかを1回だけ聞きます。ほかの機能が使えなくなることはありません。マイページの「表示の編集」でいつでも変えられます。</span></p>${auMsg()}<div class="spacer"></div>`;
@@ -17255,8 +17286,9 @@ function authRender(){
         <li><i>3</i><div>記録はサーバーに保存し、いつでも消せます<small>マイページの「アカウントを削除」から、すべての記録を消せます。</small></div></li>
       </ul></div>
       <div class="docs"><a href="terms.html" target="_blank" rel="noopener">利用規約を読む</a><a href="privacy.html" target="_blank" rel="noopener">プライバシーを読む</a></div>
-      <label class="agree"><input type="checkbox" id="auAgree"${AU.agree ? " checked" : ""}><span class="box" aria-hidden="true">✓</span><span>利用規約とプライバシーポリシーに同意する<small>ご本人が同意したことを記録します。</small></span></label>${auMsg()}<div class="spacer"></div>`;
-    foot = `<button class="cta" type="button" data-au="agree"${AU.agree && !AU.busy ? "" : " disabled"}>${G ? "同意して続ける" : "同意してはじめる"}</button><button class="ghost" type="button" data-au="disagree">同意しないでログアウト</button>`;
+      <div class="spacer"></div>`;
+    // 同意のチェックとボタンは下に固定（375×667 でも送らずに押せる。11/24 見回り sweep-all-a の6番）
+    foot = `<label class="agree"><input type="checkbox" id="auAgree"${AU.agree ? " checked" : ""}><span class="box" aria-hidden="true">✓</span><span>利用規約とプライバシーポリシーに同意する<small>ご本人が同意したことを記録します。</small></span></label>${auMsg()}<button class="cta" type="button" data-au="agree"${AU.agree && !AU.busy ? "" : " disabled"}>${G ? "同意して続ける" : "同意してはじめる"}</button><button class="ghost" type="button" data-au="disagree">同意しないでログアウト</button>`;
   } else if(s === "location"){
     top = `${auTop("")}<div class="ill"><svg viewBox="0 0 300 150" width="100%" role="img" aria-label="空港の円の中に自分がいる図">
       <rect width="300" height="150" fill="var(--c-bg)"/><path d="M0 110 C60 96 90 120 150 104 S250 84 300 96 V150 H0Z" fill="var(--c-land)" stroke="var(--c-coast)" stroke-width="1.2"/>
@@ -17272,7 +17304,7 @@ function authRender(){
     foot = `<button class="cta" type="button" data-au="loc-allow"${AU.busy ? " disabled" : ""}>位置情報を許可する</button><button class="ghost" type="button" data-au="loc-later">あとで</button>`;
     if(NATIVE){ top = nvLocWhyHTML(false); foot = `<button class="cta" type="button" data-au="loc-allow"${AU.busy ? " disabled" : ""}>次へ</button><p class="nvfoot">許可しなくても、図鑑・フライト・運用は見られます。<br>あとから iPhone の設定で変えられます。</p>`; }   // iPhone のアプリ（I1-v2）
   }
-  st.innerHTML = top; ft.innerHTML = foot;
+  st.innerHTML = top; ft.innerHTML = foot; $("dAuth").dataset.step = s;
   const f = st.querySelector("#auCode, #auName, #auEmail"); if(f) setTimeout(() => { try{ f.focus({ preventScroll:true }); }catch(e){} }, 30);
 }
 function auSay(t, err){ AU.msg = t; AU.err = !!err; const m = $("auMsg"); if(m){ m.textContent = t; m.className = "amsg" + (err ? " err" : ""); } }
