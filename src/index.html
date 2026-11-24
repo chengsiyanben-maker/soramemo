@@ -11269,7 +11269,7 @@ function renderPassport(){
       <div><span class="l">空の上（推定）</span><b class="t">${passTime(st.mins)}</b></div>
       <div class="two"><div><span class="l">空港</span><b>${st.aps}</b></div><div><span class="l">航空会社</span><b>${st.als}</b></div></div>
     </div>
-    ${st.manual || st.car ? `<p class="pp-note pp-sep">${[st.manual ? `記録帳の便 ${st.manual}` : "", st.car ? `車など ${st.car}（${fmtKm(st.carKm)} km）` : ""].filter(Boolean).join("・")}は、フライト・距離・飛行時間に入れず別に数えています。</p>` : ""}
+    ${st.manual || st.car ? `<p class="pp-note pp-sep">${[st.manual ? `記録帳の便 ${st.manual}` : "", st.car ? `車など ${st.car}（${fmtKm(st.carKm)} km）` : ""].filter(Boolean).join("・")}は、フライト・距離・空の上に入れず別に数えています。</p>` : ""}
     ${st.n ? `<ul class="pp-rows">
       ${st.longest ? `<li><span>いちばん長いフライト</span><b>${godShort(BY[st.longest.from])} → ${godShort(BY[st.longest.to])}　${fmtKm(st.longest.km)} km</b></li>` : ""}
       ${st.topRt && st.topRt[1] > 1 ? `<li><span>よく飛んだ路線</span><b>${rtName(st.topRt[0])}　${st.topRt[1]}回</b></li>` : ""}
