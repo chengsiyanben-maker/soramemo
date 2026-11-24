@@ -1,6 +1,7 @@
 # チェックイン担当の帳面
 
 ## いま持っている仕事
+- 11/24 手動の回（PM「その1 を checkin/sweep-all-1 で」）：PR #207（82b0084e）で済みで、main も dad55b43 のまま動いていないので作り直さなかった。その2・3D には触っていない
 - **11/24 15時台の定時の回（帳面の「その1」。checkin/sweep-all-1）**：下書き **PR #207**（ad3ed46e＋main 取り込み 82b0084e・報告 docs/pm/report-sweep-all-1.md・写真 docs/pm/shots-sweep-all-1/）。見張りを付けた。テストが通っているので PM の自動の反映でよい
   - A1 マイページの頭の札・成績のパスポート（これまで・年ごと・共有画像）は flyOnly で数える（車など・記録帳の便を外し「記録帳の便 ○・車など ○（○ km）は…別に数えています」の1行）。A2 書き出しの説明は PM の決定①（ログイン中）＋ログインしていない人・デモ・サーバーなしの文、見出し「データとバックアップ」。A5 デモの見本の最後の便を昨日に（日の単位でずらす・demoClock は null・demoNow は今より前にしない）。A6 同意の画面はチェックとボタンを下に固定（#auFoot を sticky、dAuth に data-step）。A7 補足の字 #9CA3AF→#646B78（auth の --a-sub・mypage の --mp-sub）。A8 案内の3枚目は「はじめる」1つ＋運用と修行の一文。A9 44px（resend のピル・あとで・色の丸・規約のリンク）。A10 cardBase に「非公式アプリ」。B10 .brand と案内の HND をゴシック（経営の明朝体は触らない。SVG の font-family 属性に var() は効かないので style にした）
   - 変えた関数：passStats・renderPassport・renderMyPage・demoSeed・demoNow・authRender・obShow・cardBase
