@@ -48,7 +48,7 @@ async def main():
         # パスポート（これまで）
         pp = await pg.evaluate('(() => { renderPassport(); return $("passport").innerText; })()')
         check('パスポートのフライトは 30・距離 24,017km', re.search(r'フライト\s*30(?!\d)', pp) is not None and '24,017' in pp, pp[:160].replace('\n', ' '))
-        check('パスポートに「車など 1（90 km）は…別に数えています」', re.search(r'車など 1（\d+ km）は、フライト・距離・飛行時間に入れず別に数えています', pp) is not None)
+        check('パスポートに「車など 1（90 km）は…別に数えています」', re.search(r'車など 1（\d+ km）は、フライト・距離・空の上に入れず別に数えています', pp) is not None)
         st = await pg.evaluate('JSON.stringify(passStats("all"))')
         check('パスポートの飛行時間・空港も便だけ（空港16）', json.loads(st)['aps'] == 16 and json.loads(st)['car'] == 1, st[:200])
         # 成績の航空会社別も車などを入れない（前は車などが「航空会社が未記録のフライト 1便」と出ていた。11/24 定時の回で足した）
