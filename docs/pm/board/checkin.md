@@ -1,6 +1,14 @@
 # チェックイン担当の帳面
 
 ## いま持っている仕事
+- **11/24 17時台の定時の回（PM の指示なし。帳面の「その4」＝その3 を含む。main に sweep-all-1・2・data/sweep-all が入っていた（#210・f7168964）ので始めた）**：checkin/mypage-b・下書き **PR #211**（889f484f・報告 docs/pm/report-mypage-b.md・写真 docs/pm/shots-mypage-b/）。見張りを付けた。テストが通ったので PM の自動の反映でよい
+  - マイページ案B：成績を横長の1枚（空港・便・km・車などの1行）＋修行（今のポイント・目標まで ○%）・知らせ（○ / 12 空港）。図鑑・フライト・運用はタブから外したときだけタイル。設定は5行の目次→同じダイアログの中の1枚のページ（data-mp-page。戻るは「マイページ」。中の行と id は今のまま）。データとバックアップの頭に箱・書き出しの説明は短く。デモ・サーバーなしのアカウントのページに1行（acctLocal）。openMyPage(page) でページを開いた形にできる（テストもこれを使う）
+  - その3：成績のステータスの目安・修行のまとめ・修行の計画・この路線に乗ったらを外し、入口1枚（stats:status・#stSg）＋あの日の空の行（stats:thatday）。かたまりは5つのまま。気軽に・撮影は入口を隠す（前は修行のまとめを隠していた）。renderStatus・planHTML・renderSgSum は呼ばないだけで残した
+  - ピン止め：pinsPull（reload の後）・pinsUp（0.3秒まとめて my_pins_put・rev つき）・pinsFromSrv（conflict と行があるとき）。関数がないサーバーでは端末だけ。「機種を変えると消えます」「準備中」は外した
+  - 変えた関数：openMyPage・renderMyPage・renderStats・renderPersonaSettings・pinsSave・pinRedraw・pinDeliverHTML・pinListHTML・reload（表：LO_BLOCKS.stats・PERSONAS・HS）。足した：MP_PAGES・MP_IC・MP_GO・MP_PAGE・mpPage・mpSgNow・mpStats・mpTilesHTML・mpTabNote・mpIdxHTML・renderStSg・PIN_SRV・pinsAcct・pinsClean・pinsSpotNow・pinsUpLater・pinsFromSrv・pinsUp・pinsPull
+  - テスト：t189 を足した（fake_sb.js に my_pins／my_pins_put。window.__pinRpc で出す）。前のテスト35本を合わせた（中の行は openMyPage("adv") などでページを開いてから・#dSettings .mp-back で閉じていた所は close()・t47／t51／t54／t57 は #statusBox を足して renderStatus を確かめる・t73 は入口に）。e2e 49本・tests/ops 成功
+  - 本人（PM）に聞くこと：気軽に・撮影で成績の修行の入口も隠してよいか・renderStatus／planHTML／renderSgSum を消すか・運用のタイルは「HND の今」だけでよいか
+  - 手元の注意：tests/ops は node_modules の playwright 1.56.1 だとブラウザが合わない。node_modules を消し、npm root -g の playwright をリンクすると通る
 - 11/24 17時台（PR #203 の見張り）：#210 が main に入って #203 がぶつかった → main（f7168964）を取り込み、ぶつかった web/ だけ作り直した（7cde7a3f・報告に追記 7212c44b）。t142・t16・t160〜t168・t181・t183・t184 の14本と tests/ops 成功。#207・#209（sweep-all-1・2）は #210 で main に入った見込み
 - 【11/24 17時22分】PR #207（その1・sweep-all-1）は main に入った。次の回は「その3」（checkin/stats-shugyo-card）を main から始めてよい（始める前に origin のブランチを見る）
 - 11/24 手動の回（同じ「t168 の直しを checkin/a3-hq で」の指示）：直前の回で 111c901e として済み（PR #203 の先頭のまま・main も dad55b43 のまま取り込み済み）なので作り直さなかった。sweep-all-1・sweep-all-2 には触っていない
@@ -560,6 +568,7 @@
 - 確認コードは6けた。メールは Gmail、Supabase の送信上限は1時間100通
 
 ## 次にやること
+- 【11/24 mypage-b】PR #211：PM の自動の反映を待つ。本人の答え（気軽に・撮影の入口・外した関数・運用のタイル）で直す（main から新しいブランチで）。入る前に t189・t183・t118・t119・t124・t145・t184・t73・t47・t54・t57・tests/ops を流す。マイページの中の行を押すテストは openMyPage("ページ") を先に呼ぶ
 - 【11/24 16時台】PR #203：t168 は直した（111c901e）。PM の反映を待つ。main がさらに動いたら取り込み直して t168 を run_all 経由で流す（上限 1,800 秒）。#207 が main に入ったら「その3」（checkin/stats-shugyo-card）を始めてよい
 - 【11/24 sweep-all-1】PR #207：PM の自動の反映を待つ。本人の答え（上の3つ）で直す（main から新しいブランチで）。入る前に t183・t114・t182・t8・t13・t31・t73・t110・tests/ops を流す。#207 が main に入ったら「その3」（checkin/stats-shugyo-card）を始めてよい（成績の同じ所）。その2（checkin/sweep-all-2）は別の回の持ち分。始める前に origin のブランチを見る
 - 【手元の道具】tests/ops は package.json の playwright 1.56.1 では動かない。node_modules に全体の playwright をつなぐ（ln -s $(npm root -g)/playwright tests/ops/node_modules/）と動く。e2e を流すと docs/pm の前の写真が上書きされるので、コミットの前に git checkout で戻す。pdf417gen・segno（t48）は pip で入れる
@@ -1291,7 +1300,7 @@ review-c4：見せてよい。本人の答え（ON／OFF か −／＋ か）を
 - 【小】運用の押せる所を44px・1日の山の時刻・定時の便数などの字を13px（B の9番）
 - 3D の中（checkin/a3-hq が進行中）には触らない。呼び方の「22（B）へ」だけは a3-hq とぶつからない所で
 
-## PM から積んだ次の仕事 その3（11/24 14時50分、成績の修行の部分を入口1枚に。本人 OK 済み「消してカード1枚に」）※checkin/stats-shugyo-card で。checkin/sweep-all-1 が main に入ってから始める（同じ成績の所を触るため）。テストが通れば PM が自動で反映
+## PM から積んだ次の仕事 その3 →【済み PR #211（その4 と一緒）】（11/24 14時50分、成績の修行の部分を入口1枚に。本人 OK 済み「消してカード1枚に」）※checkin/stats-shugyo-card で。checkin/sweep-all-1 が main に入ってから始める（同じ成績の所を触るため）。テストが通れば PM が自動で反映
 - マイページ → 成績の「ステータスの目安」「修行の計画」「修行のまとめ」を外し、「修行の画面を開く」のカード1枚（今のポイントの大きな数字だけ）に置き換える。「あの日の空」は成績の別の行へ（アプリ全体の見直し A の3番）
 - 修行タブの中身は変えない（修行担当の持ち場）。修行担当の帳面 shugyo.md に一言書く
 - テスト：成績が開ける・修行のカードを押すと修行タブへ・修行の3つの見出しが成績に出ない・既存の e2e が通る
@@ -1301,7 +1310,7 @@ review-c4：見せてよい。本人の答え（ON／OFF か −／＋ か）を
 - #199 で管制塔のカメラを上・滑走路側へ動かしたことと、テストの作り物の機体の位置（SE）が合っていない見込み。アプリが正しければテストの作り物の位置か見る距離を直し、アプリの不具合ならアプリを直す（どちらかを報告に）
 - t168 は単独で 850〜1000秒かかり、run_all.py の1本 240秒の上限を超える。t168 だけ上限を延ばすか、テストを分けて run_all で最後まで流れるように
 
-## PM から積んだ次の仕事 その4（11/24 16時20分、マイページを案B のタイルに＋その3＋ピン止めをアカウントへ。本人 OK 済み「案B」「アカウントにも保存する」）※checkin/mypage-b で。main に sweep-all-1・sweep-all-2・data/sweep-all が入ってから始める（PM が知らせる）。テストが通れば PM が自動で反映
+## PM から積んだ次の仕事 その4 →【済み PR #211（889f484f・報告 report-mypage-b.md）】（11/24 16時20分、マイページを案B のタイルに＋その3＋ピン止めをアカウントへ。本人 OK 済み「案B」「アカウントにも保存する」）※checkin/mypage-b で。main に sweep-all-1・sweep-all-2・data/sweep-all が入ってから始める（PM が知らせる）。テストが通れば PM が自動で反映
 - 画面案：ブランチ design/mypage-tiles の B1（成績を横長の1枚＋修行・知らせの2枚、タブにある画面はタイルにしない、設定は5行の目次＝表示の編集・データとバックアップ・表示と色・アカウント・詳しい設定、押すと1枚のページ）と B2（データとバックアップのページ）。docs/pm/report-mypage-tiles.md
 - その3（成績の修行の部分を入口1枚に）も一緒に
 - 知らせのピン止め：ログインしているときは rpc('my_pins') で読み、変えたら rpc('my_pins_put', {p_pins, p_spot, p_rev})。はじめてログインして端末にピンがありサーバーが null なら端末の分を上げる。conflict はサーバーの分を出し直す。「アカウントへの保存は準備中」「機種を変えると消えます」の文を外す（data/sweep-all の report-sweep-all-data.md）
