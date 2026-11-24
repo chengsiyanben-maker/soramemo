@@ -1,4 +1,4 @@
-import os, sys, shutil, urllib.request
+import os, sys, re, shutil, urllib.request
 HERE=os.path.dirname(os.path.abspath(__file__)); WEB=os.path.abspath(os.path.join(HERE,'..','..','web')); WORK=os.environ.get('SORAMEMO_TEST_WORK','/tmp/soramemo-e2e'); os.makedirs(WORK, exist_ok=True)
 SHOTS=os.path.abspath(os.path.join(HERE,'..','..','docs','pm','shots-airport-3d')); os.makedirs(SHOTS, exist_ok=True)
 # 空港の3D（決定事項【11/17】・画面案 design/airport-3d 4版）
@@ -135,7 +135,7 @@ async def main():
             pills = await pg.evaluate("[...document.querySelectorAll('[data-a3-view]')].map(b => b.innerText + ':' + b.getAttribute('aria-pressed'))")
             check('視点のピル（全体が選ばれている）:', pills == ['全体:true', '管制塔:false', '機体:false'], str(pills))
             sh = await pg.inner_text('#a3Sheet')
-            check('一覧：羽田の近くの機体・機の数・JL 318 福岡から・着陸まで約○分・C 滑走路へ:', '羽田の近くの機体' in sh and 'JL 318' in sh and '福岡から' in sh and '着陸まで約' in sh and 'C 滑走路へ' in sh, sh)
+            check('一覧：羽田の近くの機体・機の数・JL 318 福岡から・着陸まで約○分・34R（C）へ のように番号が先:', '羽田の近くの機体' in sh and 'JL 318' in sh and '福岡から' in sh and '着陸まで約' in sh and re.search(r'\d\d[LR]?（C）へ', sh) is not None, sh)
             check('一覧：特別塗装機の札・NH 59 新千歳へ（上昇中）:', '特別塗装機' in sh and 'NH 59' in sh and '新千歳へ' in sh and '上昇中' in sh, sh)
             check('一覧：地上の機体（JAL109）は「地上」:', 'JL 109' in sh and '地上' in sh, sh)
             chips = await pg.inner_text('#a3Chips')
