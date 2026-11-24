@@ -40,7 +40,7 @@ async def main():
             c, pg, errs = await page(b, hh)
             s = await pg.evaluate(STATE)
             check(f'{hh} はじめは「すべて」・地方別', s['pills'] == [['all', '75', 'true'], ['field', '30', 'false'], ['glider', '33', 'false'], ['heli', '12', 'false']] and s['view'] == [['region', 'true'], ['map', 'false']], s['pills'])
-            check(f'{hh} すべて：75枠・4 / 75・種類の札が見える・扉の札あり・ツメあり', s['tiles'] == 75 and s['num'] == '4' and '75' in s['u'] and s['kvis'] == 75 and s['dtag'] == 8 and s['tsume'], [s['tiles'], s['num'], s['kvis'], s['dtag']])
+            check(f'{hh} すべて：75枠・4 / 75・種類の札が見える・扉の札なし（11/25）・ツメあり', s['tiles'] == 75 and s['num'] == '4' and '75' in s['u'] and s['kvis'] == 75 and s['dtag'] == 0 and s['tsume'], [s['tiles'], s['num'], s['kvis'], s['dtag']])
             pr = await pg.evaluate(PREFS)
             truth = await pg.evaluate('Object.fromEntries(XA.map(a => [a.id, a.pref]))')
             check(f'{hh} 県名が全部の枠に出る（取っていない所も・データの県名と同じ）', len(pr) == 75 and all(x['vis'] and x['pf'] and x['pf'] == truth[str(x['id'])] for x in pr), [x for x in pr if not (x['vis'] and x['pf'])][:3])
