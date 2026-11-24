@@ -4,6 +4,7 @@ import type { SupabaseClient } from "npm:@supabase/supabase-js@2.117.2";
 import { addWorld, eligible, type MergeAlert, mergeAlerts, type MergeSched, payloadOf, type WorldSched, type WorldStatus, worldOnlyGroups } from "./alert_merge.ts";
 import { US_SERVED } from "./faa_nas.ts";
 import { tidyPush } from "./push_text.ts";
+import { awake } from "./livery_note.ts";
 
 // お知らせが入った・書き直された便（schedule_id）について、同じ便のお知らせを1件の通知にまとめて送る（alert_merge.ts）。
 // 送ってよいか（同じ中身を二度送らない）は alert_push_claim が1件ずつ決めて記録するので、flight-watch と odpt-status が同時に動いても二重にならない
@@ -68,10 +69,12 @@ export async function notifyFlights(admin: SupabaseClient, scheduleIds: number[]
 }
 
 // 特別塗装機の通知（空港ごとに申し込んだ人：push_subs.sp_airports）。iata のどれかを選んでいる人に送る
-export async function sendSpPush(admin: SupabaseClient, iata: string[], payload: { title: string; body: string; tag: string; url: string }) {
+// only：「quiet」なら夜の静かな時間を選んだ人だけ（夜に見つかった予定を朝に送り直すとき）。ふだんは夜の静かな時間を選んだ人を外す
+export async function sendSpPush(admin: SupabaseClient, iata: string[], payload: { title: string; body: string; tag: string; url: string; renotify?: boolean }, only?: "quiet") {
   const pub = Deno.env.get("VAPID_PUBLIC_KEY"), priv = Deno.env.get("VAPID_PRIVATE_KEY");
   if (!pub || !priv || !iata.length) return 0;
-  const { data: subs } = await admin.from("push_subs").select("id, endpoint, p256dh, auth").overlaps("sp_airports", iata);
+  const { data: all } = await admin.from("push_subs").select("id, endpoint, p256dh, auth, quiet_night").overlaps("sp_airports", iata);
+  const subs = only === "quiet" ? (all ?? []).filter((s) => s.quiet_night !== false) : awake(all ?? []);
   if (!subs?.length) return 0;
   webpush.setVapidDetails(Deno.env.get("VAPID_SUBJECT") || "https://soramemo.jp", pub, priv);
   let sent = 0;

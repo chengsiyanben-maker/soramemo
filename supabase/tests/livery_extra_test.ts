@@ -65,5 +65,7 @@ Deno.test("着く見込み：距離と速さから。ふだんの時刻が40分�
   assertEquals(jaTime(now, -60 * 3 + 5), "7時05分"); // 時は0を付けない・分は2けた
   const noCs = inboundMessage({ ...base, callsign: "" }, { iata: "HND" }, "羽田", 42, now);
   assertEquals(noCs.body, "ワンワールド塗装（777-200ER）（ブリティッシュ・エアウェイズ）が羽田に向かっています。着くのは10時42分ごろ（推定）。");
-  assertEquals([m.tag, m.url], ["sp-G-YMMR", "./#ops-HND"]);
+  // 1便で1つの tag（便名。予定・飛んでいる・着陸に向かっている と同じ通知の書き換え）。便名がなければ登録記号
+  assertEquals([m.tag, m.url, m.renotify], ["sp-BA5", "./#ops-HND", true]);
+  assertEquals(noCs.tag, "sp-G-YMMR");
 });
