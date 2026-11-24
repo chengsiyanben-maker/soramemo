@@ -24,6 +24,7 @@ import { readShared, writeShared } from "../_shared/edge_cache.ts";
 import { adsbImHeaders, adsbLolHeaders } from "../_shared/adsblol.ts";
 import { activeAirports, slimPlanes, viewPlan } from "../_shared/traffic_view.ts";
 import { type Apt, type Cand, onClimbOut, onFinal, pickAirport, refinePhases, runwaysFor } from "../_shared/arr_dest.ts";
+import { tidyPush } from "../_shared/push_text.ts";
 
 const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, { auth: { persistSession: false } });
 
@@ -372,7 +373,7 @@ async function notifyLivery(v: any) {
   webpush.setVapidDetails(Deno.env.get("VAPID_SUBJECT") || "https://soramemo.jp", pub, priv);
   // deno-lint-ignore no-explicit-any
   const name = (OPS_AIRPORTS as any)[v.iata]?.name ?? v.iata;
-  const body = JSON.stringify({ title: `そらメモ：★${v.name}`, body: `${v.name}（${v.airline}${v.callsign ? "・" + v.callsign : ""}）が${name}に着陸に向かっています（推定）。`, tag: `sp-${v.reg}`, url: `./#ops-${v.iata}` });
+  const body = JSON.stringify(tidyPush({ title: `★${v.name}`, body: `${v.name}（${v.airline}${v.callsign ? "・" + v.callsign : ""}）が${name}に着陸に向かっています（推定）。`, tag: `sp-${v.reg}`, url: `./#ops-${v.iata}` }));
   for (const s of subs) {
     try { await webpush.sendNotification({ endpoint: s.endpoint, keys: { p256dh: s.p256dh, auth: s.auth } }, body, { TTL: 900 }); }
     catch (e) { const code = (e as { statusCode?: number }).statusCode; if (code === 404 || code === 410) await admin.from("push_subs").delete().eq("id", s.id); }
@@ -433,7 +434,7 @@ async function notifyInbound(list: Seen[]) {
 // ---- 撮影の知らせ（いつもの空港に、選んだ種類の機体が着陸の数分前になったら。同じ機体は1日1回） ----
 const SPOT_COLS = "id, endpoint, p256dh, auth, spot_iata, spot_kinds, spot_lead, spot_regs, spot_flights, spot_fams, spot_livs";
 async function sendOne(s: { id: number; endpoint: string; p256dh: string; auth: string }, payload: Record<string, string>, ttl = 900) {
-  try { await webpush.sendNotification({ endpoint: s.endpoint, keys: { p256dh: s.p256dh, auth: s.auth } }, JSON.stringify(payload), { TTL: ttl }); return true; }
+  try { await webpush.sendNotification({ endpoint: s.endpoint, keys: { p256dh: s.p256dh, auth: s.auth } }, JSON.stringify(tidyPush(payload)), { TTL: ttl }); return true; }
   catch (e) { const code = (e as { statusCode?: number }).statusCode; if (code === 404 || code === 410) await admin.from("push_subs").delete().eq("id", s.id); return false; }
 }
 // 知らせた記録を先に入れ、入ったとき（はじめてのとき）だけ送る
@@ -501,7 +502,7 @@ async function notifyOpsChange(iatas: string[]) {
     const hour = new Date(Date.now() + 9 * 3600_000).toISOString().slice(0, 13);
     for (const s of subs.filter((x) => x.spot_iata === iata)) {
       if (!(await firstTime(s.id, `ops-${iata}-${ch.to}@${hour}`))) continue;
-      if (await sendOne(s, { title: `そらメモ：${def?.name ?? iata}の運用が変わりました`, body: `${label(ch.from)} → ${label(ch.to)}（実際の機体の動きからの推定）。`, tag: `ops-${iata}`, url: `./#ops-${iata}` })) sent++;
+      if (await sendOne(s, { title: `${def?.name ?? iata}の運用が変わりました`, body: `${label(ch.from)} → ${label(ch.to)}（実際の機体の動きからの推定）。`, tag: `ops-${iata}`, url: `./#ops-${iata}` })) sent++;
     }
   }
   return sent;
@@ -562,7 +563,7 @@ async function trackGoArounds(bodies: Map<string, string>) {
       const name = e.flight ?? e.callsign ?? "機体";
       for (const s of await gaSubs(iata, "plane")) {
         if (!(await firstTime(s.id, `ga-${ins.id}`))) continue;
-        await sendOne(s, { title: `そらメモ：${apName(iata)}で ${name} がゴーアラウンドしたようです`, body: `${rwy ? rwy + " に" : ""}降りる手前で上昇に移りました（機体の位置からの推定）${wind}。`, tag: `ga-${ins.id}`, url: `./#ops-${iata}/ga/${ins.id}` });
+        await sendOne(s, { title: `${apName(iata)}で ${name} がゴーアラウンドしたようです`, body: `${rwy ? rwy + " に" : ""}降りる手前で上昇に移りました（機体の位置からの推定）${wind}。`, tag: `ga-${ins.id}`, url: `./#ops-${iata}/ga/${ins.id}` });
       }
       // 続いたとき：1時間に2機以上
       const { count } = await admin.from("ga_events").select("id", { count: "exact", head: true }).eq("iata", iata).gt("at", new Date(now - 3600_000).toISOString());
@@ -570,7 +571,7 @@ async function trackGoArounds(bodies: Map<string, string>) {
         const hour = new Date(now + 9 * 3600_000).toISOString().slice(0, 13);
         for (const s of await gaSubs(iata, "cluster")) {
           if (!(await firstTime(s.id, `gac-${iata}@${hour}`))) continue;
-          await sendOne(s, { title: `そらメモ：${apName(iata)}でゴーアラウンドが続いています`, body: `この1時間に ${count}機（機体の位置からの推定）${wind}。`, tag: `gac-${iata}`, url: `./#ops-${iata}/ga` });
+          await sendOne(s, { title: `${apName(iata)}でゴーアラウンドが続いています`, body: `この1時間に ${count}機（機体の位置からの推定）${wind}。`, tag: `gac-${iata}`, url: `./#ops-${iata}/ga` });
         }
       }
     }
@@ -589,7 +590,7 @@ async function notifyGaWeather(def: any, m: any, mode: string | null) {
   for (const kind of risk.kinds) for (const s of await gaSubs(def.iata, kind)) {
     const key = s.ga_gap === 0 ? `gaw-${def.iata}-${kind}@${m.time}` : `gaw-${def.iata}-${kind}@${Math.floor(Date.now() / (3 * 3600_000))}`;
     if (!(await firstTime(s.id, key.slice(0, 60)))) continue;
-    if (await sendOne(s, { title: `そらメモ：${def.name}は、ゴーアラウンドが起きやすい天気です`, body: `${risk.reasons.join("・")}（気象通報からの目安。${GA_KIND_JA[kind] ?? ""}）。`, tag: `gaw-${def.iata}`, url: `./#ops-${def.iata}/gawx` })) sent++;
+    if (await sendOne(s, { title: `${def.name}は、ゴーアラウンドが起きやすい天気です`, body: `${risk.reasons.join("・")}（気象通報からの目安。${GA_KIND_JA[kind] ?? ""}）。`, tag: `gaw-${def.iata}`, url: `./#ops-${def.iata}/gawx` })) sent++;
   }
   return sent;
 }
