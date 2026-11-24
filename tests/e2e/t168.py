@@ -83,8 +83,14 @@ async def open3d(b, sky, port, ground=True):
     await pg.wait_for_function("(() => { const l = document.getElementById('a3Load'); return !!l && l.hidden; })()", timeout=40000)
     await pg.evaluate("a3Poll()"); await pg.wait_for_timeout(2000)
     return c, pg, errs
+async def frames(pg, n=2):
+    # 描いたコマを n 回待つ（11/24 PM の依頼）。a3Loop は「機体の距離（a3Sync）→ カメラ（a3Camera）」の順なので、視点を変えた直後の1コマは前の視点の距離で細かい形を決める。
+    #   遅い手元では 1.2 秒で1コマも描けず、前の視点（全体＝約10km 先）の距離のまま確かめて「近い機体が0機」になっていた。2コマ目で新しい視点の距離になる
+    for _ in range(n):
+        d = await pg.evaluate("A3.drawn || 0")
+        await pg.wait_for_function("d => !!A3 && (A3.drawn || 0) > d", arg=d, timeout=180000)
 async def view(pg, v, yaw=0):
-    await pg.evaluate("([v, y]) => { A3.view = v; A3.yaw = y; A3.card = false; a3Pills(); a3Sheet(); A3.dirty = true; }", [v, yaw]); await pg.wait_for_timeout(1200)
+    await pg.evaluate("([v, y]) => { A3.view = v; A3.yaw = y; A3.card = false; a3Pills(); a3Sheet(); A3.dirty = true; }", [v, yaw]); await pg.wait_for_timeout(1200); await frames(pg)
 SE = 1.25 * math.pi   # 管制塔から南東（第2ターミナルの駐機場と誘導路。この時間の地上の機体が多い側）
 INFO = "(() => { A3.r.render(A3.scene, A3.cam); const i = A3.r.info.render; return { tri: i.triangles, calls: i.calls }; })()"
 
@@ -132,7 +138,8 @@ async def main():
         await view(pg, 'tower', SE)
         h = await pg.evaluate(HD)
         near = [k for k, v in h.items() if v['has'] and v['cd'] < 1600]
-        check('管制塔の視点：近い7機種の機体は細かい形を出す', near and all(h[k]['vis'] for k in near), {k: h[k] for k in near})
+        cam = await pg.evaluate("[Math.round(A3.cam.position.x), Math.round(A3.cam.position.y), Math.round(A3.cam.position.z)]")
+        check('管制塔の視点：近い7機種の機体は細かい形を出す', near and all(h[k]['vis'] for k in near), {k: h[k] for k in near} if near else {'カメラ': cam, '近い順': sorted((v['cd'], k, v['has']) for k, v in h.items())[:4]})
         mid = [k for k, v in h.items() if v['has'] and 1700 < v['cd'] < 2900]
         check('最高の質：1.6km より遠くても（3km まで）細かい形を出す', all(h[k]['vis'] for k in mid), len(mid))
         far = await pg.evaluate("[...A3.objs.values()].filter(o => !a3Air(o.p) && o.cd > 3000 && o.p.id !== A3.sel).map(o => [!!(o.lo && o.lo.visible), !!(o.g.getObjectByName('hd') || {}).visible])")

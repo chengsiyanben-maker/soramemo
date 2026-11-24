@@ -18,8 +18,12 @@ if not os.path.exists(ADMIN):
     TESTS = [t for t in TESTS if t not in skip]
 if len(sys.argv) > 1: TESTS = [t for t in TESTS if any(t.startswith(a) for a in sys.argv[1:])]   # 例: run_all.py t1 t2
 fails = []
+# 1本の上限（秒）。ふつうは 240 秒。3D の細かい形のテスト（t168）は画面のないソフトの描画で 850〜1000 秒かかるので長くする（11/24 PM の依頼）
+LIMIT = {'t168.py': 1800}
 for t in TESTS:
-    r = subprocess.run([sys.executable, os.path.join(HERE, t)], capture_output=True, text=True, encoding='utf-8', errors='replace', timeout=240)
+    try: r = subprocess.run([sys.executable, os.path.join(HERE, t)], capture_output=True, text=True, encoding='utf-8', errors='replace', timeout=LIMIT.get(t, 240))
+    except subprocess.TimeoutExpired as e:   # 上限を超えたら、止めずに「失敗」として次へ進む
+        print('FAIL ' + t + f'（{LIMIT.get(t, 240)} 秒の上限を超えた）'); fails.append(t); continue
     out = (r.stdout + r.stderr).strip().splitlines()
     last = out[-1] if out else ''
     ok = r.returncode == 0 and ('[]' in last or 'errors []' in last or 'errors: []' in last or last == '全部成功')   # 「全部成功」で終わるテスト（t165・t166 など）も成功に数える
