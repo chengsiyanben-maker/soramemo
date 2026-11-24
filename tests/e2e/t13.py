@@ -10,7 +10,7 @@ async def main():
         await c.add_init_script("localStorage.setItem('soramemo.onboarded','1'); localStorage.setItem('soramemo.layout', JSON.stringify({tabs:['home','book','log','ops','stats'], off:{home:[],book:[],log:[],ops:[],stats:['sgsum']}})); Object.defineProperty(window, 'SORAMEMO_CONFIG', { configurable:true, get(){ return this.__cfg; }, set(v){ this.__cfg = Object.assign({}, v, { gameReleased: true }); } });")
         pg=await c.new_page(); errs=[]; pg.on('pageerror', lambda e: errs.append(str(e)))
         await goto_http(pg, os.path.join(WEB,'index.html')); await pg.wait_for_load_state('load'); await pg.wait_for_function('document.readyState === "complete" && typeof render === "function"'); await pg.wait_for_timeout(800)
-        await pg.evaluate('openMyPage()'); await pg.click('#toggleDemo')
+        await pg.evaluate('openMyPage("adv")'); await pg.click('#toggleDemo')
         ids = {k: await pg.evaluate(f"'a:'+A.find(a=>a.iata=='{k}').id") for k in ['CTS','OKA','ITM']}
         await pg.select_option('#demoAirport','t:HND-T1'); await pg.press('#checkin','Enter'); await pg.wait_for_timeout(700); await pg.click('#dStamp .row2 .btn2')
         for k, al, no in [('CTS','JL','501'),('OKA','NH','995'),('ITM',None,None)]:
@@ -26,7 +26,7 @@ async def main():
             await pg.click('nav.tabs button[data-v=home]')
         await snap('ALL')
         for m in ['JAL','ANA']:
-            await pg.click('#openSettings'); await pg.click(f'[data-focus={m}]'); await pg.click('#dSettings .mp-back'); await pg.wait_for_timeout(150)
+            await pg.click('#openSettings'); await pg.evaluate('openMyPage("show")'); await pg.click(f'[data-focus={m}]'); await pg.evaluate("$('dSettings').close()"); await pg.wait_for_timeout(150)
             await snap(m)
             if m=='JAL':
                 await pg.screenshot(path=os.path.join(WORK,'f_home_jal.png'))

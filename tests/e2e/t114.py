@@ -74,8 +74,8 @@ async def main():
         await pg.click('#welcomeX'); check('ようこそカードは閉じられる', not await pg.is_visible('#welcomeCard'))
         await pg.click('#openSettings'); await pg.wait_for_timeout(200)
         check('マイページの名前は表示名', await pg.inner_text('#mpName') == 'そらのたび人')
-        check('マイページにアカウント削除の入口', await pg.is_visible('#delAcct'))
-        check('マイページに表示の編集の入口（ひな形の選ぶ所はない）', await pg.is_visible('#dSettings .lotile') and await pg.locator('button[data-persona]').count() == 0)
+        await pg.evaluate('openMyPage("acct")'); check('マイページにアカウント削除の入口', await pg.is_visible('#delAcct'))
+        await pg.evaluate('openMyPage("lo")'); check('マイページに表示の編集の入口（ひな形の選ぶ所はない）', await pg.is_visible('#dSettings .lotile') and await pg.locator('button[data-persona]').count() == 0)
         check('新しい人：エラーなし', not errs, errs); await c.close()
 
         # 2. 登録済みのメールで新規登録 → ログインへ案内（新しく作らない）
@@ -147,7 +147,7 @@ async def main():
         check('サーバーの答えで構成を合わせる', await pg.evaluate('PERSONA') == 'spot' and await step(pg) == 'closed')
         await pg.click('#openSettings'); await pg.wait_for_timeout(200)
         check('マイページの表示名', await pg.inner_text('#mpName') == 'まえのな' and await pg.inner_text('#nameNow') == 'まえのな')
-        await pg.click('#nameEdit'); await pg.wait_for_timeout(100)
+        await pg.evaluate('openMyPage("acct")'); await pg.click('#nameEdit'); await pg.wait_for_timeout(100)
         check('表示名を変える画面（今の名前が入っている）', await step(pg) == 'name' and await pg.input_value('#auName') == 'まえのな')
         await pg.fill('#auName', 'あたらしいな'); await pg.click('#dAuth [data-au=name-next]'); await pg.wait_for_timeout(300)
         check('保存して戻る', await step(pg) == 'closed' and await pg.evaluate('__fake.db.user_profiles[0].display_name') == 'あたらしいな' and await pg.inner_text('#mpName') == 'あたらしいな')

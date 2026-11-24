@@ -176,7 +176,7 @@ async def main():
         check('デモ：見本の数字（16空港・30フライト）', await pg.inner_text('#hsAp') == '16' and await pg.inner_text('#hsFl') == '30')
         await measure(pg, 'デモ')
         await pg.screenshot(path=os.path.join(SHOTS, '05-home-demo.png'))
-        await pg.click('#openSettings'); await pg.wait_for_timeout(300)
+        await pg.click('#openSettings'); await pg.wait_for_timeout(300); await pg.click('#mpIdx [data-mp-page="adv"]'); await pg.wait_for_timeout(150)
         check('デモ：マイページから終えられる', await pg.is_visible('#toggleDemo'))
         await pg.click('#toggleDemo'); await pg.wait_for_timeout(800)
         check('デモを終えると、ログインの案内に戻る', not await pg.evaluate('demo') and await state(pg) == 'guest' and not await pg.is_visible('#demoPill'))

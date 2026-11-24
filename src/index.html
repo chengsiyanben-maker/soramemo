@@ -1830,6 +1830,73 @@ dialog.mypage .legal a{display:inline-block;padding:14px 2px}   /* 押せる高�
 dialog.mypage .swatch{min-width:44px;min-height:44px;justify-content:center}
 dialog.mypage .appver{text-align:center}
 dialog.mypage .dlg .close{display:none}
+/* 11/24 マイページ案B（design/mypage-tiles の B1・B2・本人 OK）：成績を横長の1枚＋修行・知らせ、タブから外した画面だけタイルが増える。設定は5行の目次で、押すと1枚のページ
+   ページは同じダイアログの中で切り替える（data-mp-page）。中の行（ログイン・書き出し・デモなど）は今のまま */
+dialog.mypage{--mt-sub:#5F6672;--mt-ic:#F3F4F6;--mt-icn:#4B5563;--mt-bar:#EEF0F3;--mt-bk:#F3F7FB;--mt-bks:#4B5563}
+[data-palette="board"] dialog.mypage{--mt-sub:#A7B0BC;--mt-ic:#232830;--mt-icn:#C9D1DB;--mt-bar:#232830;--mt-bk:#1B2230;--mt-bks:#C9D1DB}
+dialog.mypage .mt-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0 0}
+dialog.mypage .mt{position:relative;display:flex;flex-direction:column;align-items:flex-start;justify-content:space-between;min-height:112px;padding:14px 16px 13px;border:0;border-radius:22px;background:var(--mp-card);box-shadow:var(--mp-shadow);text-align:left;font-family:var(--gothic);color:var(--mp-ink);cursor:pointer;min-width:0}
+dialog.mypage .mt .k{font-size:13px;font-weight:700;color:var(--mt-sub);letter-spacing:.04em}
+dialog.mypage .mt .go{position:absolute;top:12px;right:14px;width:16px;height:16px;fill:none;stroke:var(--mt-sub);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+dialog.mypage .mt .v{display:flex;align-items:baseline;gap:3px;margin-top:10px;line-height:1.15;min-width:0}
+dialog.mypage .mt .v b{font-size:30px;font-weight:800;letter-spacing:-.01em;font-variant-numeric:tabular-nums;white-space:nowrap}
+dialog.mypage .mt .v .u{font-size:13px;font-weight:700;color:var(--mt-sub);white-space:nowrap}
+dialog.mypage .mt .s{display:block;font-size:12px;color:var(--mt-sub);margin-top:7px;line-height:1.4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+dialog.mypage .mt.wide{grid-column:1/-1;min-height:0}
+dialog.mypage .mt.wide .s{white-space:normal}
+dialog.mypage .mt.wide .row3{display:grid;grid-template-columns:1fr 1fr 1.35fr;gap:8px;width:100%;margin-top:10px}
+dialog.mypage .mt.wide .row3 .v{margin-top:0}
+dialog.mypage .mt.wide .row3 small{display:block;font-size:12px;color:var(--mt-sub);margin-top:5px;white-space:nowrap}
+@media (max-width:380px){dialog.mypage .mt .v b{font-size:26px}dialog.mypage .mt.wide .row3{grid-template-columns:.9fr .9fr 1.4fr}}
+dialog.mypage .mt .bar{width:100%;height:6px;border-radius:999px;background:var(--mt-bar);margin-top:9px;overflow:hidden}
+dialog.mypage .mt .bar i{display:block;height:100%;border-radius:999px;background:var(--ana)}
+dialog.mypage .mt .bar.jal i{background:var(--jal)}
+dialog.mypage .mt-note{display:block;font-size:12px;color:var(--mt-sub);margin:10px 4px 0;line-height:1.5}
+dialog.mypage .mt-note:empty{display:none}
+dialog.mypage .mt-sec{margin:12px 0 0;background:var(--mp-card);border-radius:22px;padding:4px 14px;box-shadow:var(--mp-shadow)}
+dialog.mypage .mt-h{font-size:13px;font-weight:700;color:var(--mt-sub);letter-spacing:.06em;margin:22px 4px 0}
+dialog.mypage .mt-menu{list-style:none;margin:0;padding:0}
+dialog.mypage .mt-menu button{display:flex;align-items:center;gap:12px;width:100%;min-height:58px;padding:8px 2px;border:0;background:none;font-family:var(--gothic);color:var(--mp-ink);text-align:left;cursor:pointer}
+dialog.mypage .mt-menu .ic{flex:none;width:36px;height:36px;border-radius:12px;background:var(--mt-ic);display:grid;place-items:center}
+dialog.mypage .mt-menu .ic svg{width:18px;height:18px;fill:none;stroke:var(--mt-icn);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+dialog.mypage .mt-menu .t{flex:1;min-width:0}
+dialog.mypage .mt-menu .t b{display:block;font-size:15px;font-weight:700}
+dialog.mypage .mt-menu .t small{display:block;font-size:12px;color:var(--mt-sub);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+dialog.mypage .mt-menu .ch{flex:none;width:16px;height:16px;fill:none;stroke:var(--mt-sub);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+dialog.mypage .mt-menu li+li{box-shadow:0 -1px 0 rgba(17,24,39,.05)}
+[data-palette="board"] dialog.mypage .mt-menu li+li{box-shadow:0 -1px 0 rgba(255,255,255,.06)}
+dialog.mypage .mt-bk{display:flex;gap:12px;align-items:flex-start;background:var(--mt-bk);border-radius:18px;padding:14px;margin:8px 0 6px}
+dialog.mypage .mt-bk svg{flex:none;width:22px;height:22px;fill:none;stroke:#2563EB;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;margin-top:2px}
+[data-palette="board"] dialog.mypage .mt-bk svg{stroke:#8FB4FF}
+dialog.mypage .mt-bk b{display:block;font-size:14px;font-weight:800;color:var(--mp-ink)}
+dialog.mypage .mt-bk small{display:block;font-size:12.5px;color:var(--mt-bks);line-height:1.55;margin-top:3px}
+dialog.mypage .mp-sec .btn2,dialog.mypage .mp-sec .btn1{min-height:44px}
+dialog.mypage .mp-sec .seg button{min-height:44px}
+dialog.mypage .mp-sec .set-row small{font-size:12px}
+/* ページの切り替え：目次のとき（data-mp-page なし）は設定の中身を隠す。ページのときはそのページの中身だけ */
+dialog.mypage:not([data-mp-page]) .mp-sec{display:none!important}
+dialog.mypage[data-mp-page] .mp-home{display:none}
+dialog.mypage[data-mp-page="acct"] .mp-sec:not([data-mp-sec="acct"]),dialog.mypage[data-mp-page="lo"] .mp-sec:not([data-mp-sec="lo"]),dialog.mypage[data-mp-page="show"] .mp-sec:not([data-mp-sec="show"]),
+dialog.mypage[data-mp-page="data"] .mp-sec:not([data-mp-sec="data"]),dialog.mypage[data-mp-page="adv"] .mp-sec:not([data-mp-sec="adv"]){display:none!important}
+dialog.mypage[data-mp-page] .mp-sec{margin-top:4px}
+dialog.mypage[data-mp-page] .mp-sec h4{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+dialog.mypage[data-mp-page] .mp-sec[data-mp-sec="acct"]+.mp-sec[data-mp-sec="acct"] h4{position:static;width:auto;height:auto;clip:auto}
+dialog.mypage[data-mp-page] .mp-top h3{font-size:16px;white-space:nowrap}
+dialog.mypage[data-mp-page] .mp-sp{width:24px}
+dialog.mypage .mp-back{white-space:nowrap;min-height:44px}
+/* 成績の修行の入口（11/24：成績の修行の部分を外し、入口1枚に）とあの日の空の行 */
+.stsg{display:flex;flex-direction:column;align-items:flex-start;width:100%;margin:14px 0 4px;padding:16px 18px;border:0;border-radius:22px;background:var(--paper,#fff);box-shadow:0 1px 3px rgba(0,0,0,.05),0 10px 24px -18px rgba(15,23,42,.3);font-family:var(--gothic);color:inherit;text-align:left;cursor:pointer;position:relative}
+.stsg .k{font-size:13px;font-weight:700;color:#5F6672;letter-spacing:.04em}
+.stsg .v{display:flex;align-items:baseline;gap:4px;margin-top:8px}.stsg .v b{font-size:34px;font-weight:800;line-height:1.1;font-variant-numeric:tabular-nums}.stsg .v .u{font-size:14px;font-weight:700;color:#5F6672}
+.stsg .s{font-size:12.5px;color:#5F6672;margin-top:6px}
+.stsg .go{position:absolute;right:16px;top:50%;margin-top:-9px;width:18px;height:18px;fill:none;stroke:#6B7280;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.stsg .s2{display:inline-flex;align-items:center;min-height:32px;margin-top:10px;padding:0 14px;border-radius:999px;background:#F3F4F6;font-size:13px;font-weight:700;color:#374151}
+.strow{display:flex;align-items:center;gap:12px;width:100%;min-height:64px;margin:10px 0 4px;padding:12px 18px;border:0;border-radius:20px;background:var(--paper,#fff);box-shadow:0 1px 3px rgba(0,0,0,.05);font-family:var(--gothic);color:inherit;text-align:left;cursor:pointer}
+.strow .t{flex:1;min-width:0}.strow b{display:block;font-size:15px;font-weight:800}.strow small{display:block;font-size:12.5px;color:#5F6672;margin-top:2px}
+.strow svg{flex:none;width:18px;height:18px;fill:none;stroke:#6B7280;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+[data-palette="board"] .stsg,[data-palette="board"] .strow{background:#16191F;color:#E5E7EB}
+[data-palette="board"] .stsg .k,[data-palette="board"] .stsg .v .u,[data-palette="board"] .stsg .s,[data-palette="board"] .strow small{color:#A7B0BC}
+[data-palette="board"] .stsg .s2{background:#232830;color:#E5E7EB}
 
 /* スタンプラリー・エアライン経営の切り替え：枠線なしのピル型 */
 .modesw{border:0;background:var(--hm-pill);padding:3px;gap:0;border-radius:999px}
@@ -4229,10 +4296,10 @@ dialog.spsheet .sph .spx{top:2px;right:8px;width:44px;height:44px;border:6px sol
     <div class="fleetbook" id="fleetBook"></div></div>
     <div class="lo" data-lo="stats:airline"><h2>航空会社別</h2>
     <div id="airlineStats"></div></div>
-    <div class="lo" data-lo="stats:sgsum"><h2>修行のまとめ</h2><div id="sgSum"></div></div>
-    <div class="lo" data-lo="stats:status"><h2>ステータスの目安</h2>
-    <div class="sgopen"><button class="btn2" data-thatday type="button">あの日の空</button><button class="btn1" data-sg-open="main" type="button">修行の画面を開く</button><button class="btn2" data-sg-open="quick" type="button">この路線に乗ったら</button></div>
-    <div class="sgrid" id="statusBox"></div></div>
+    <!-- 11/24 本人 OK「消してカード1枚に」：修行のまとめ・ステータスの目安・修行の計画は成績から外し、修行の画面への入口1枚（今のポイントの大きな数字だけ）にする。
+         あの日の空は別の行。かたまりの id は status（入口）と thatday（あの日の空）。数は前と同じ5つ -->
+    <div class="lo" data-lo="stats:status"><button class="stsg" id="stSg" type="button" data-sg-open="main" aria-label="修行の画面を開く"></button></div>
+    <div class="lo" data-lo="stats:thatday"><button class="strow" type="button" data-thatday><span class="t"><b>あの日の空</b><small>乗った日・1年前の今日の、空の道すじと運用</small></span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button></div>
   </section>
   <section class="view" id="v-sg" aria-label="修行"><div class="sgd sgtab"><div class="dlg" id="sgTabBody"></div></div></section>
   <section class="view" id="v-ops" aria-label="運用">
@@ -4409,19 +4476,29 @@ dialog.spsheet .sph .spx{top:2px;right:8px;width:44px;height:44px;border:6px sol
 <dialog id="dReset" class="psheet rssheet" aria-labelledby="rsTitle"><div class="dlg" id="dResetBody"></div></dialog>
 <dialog id="dSpecial" class="spfull" aria-label="特別塗装機"><div class="dlg" id="dSpecialBody"></div></dialog>
 <dialog id="dSettings" class="mypage"><div class="dlg">
-  <div class="mp-top"><button class="mp-back" data-close type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>ホーム</button><h3>マイページ</h3><span class="mp-sp" aria-hidden="true"></span></div>
+  <div class="mp-top"><button class="mp-back" id="mpBack" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg><span id="mpBackT">ホーム</span></button><h3 id="mpTitle">マイページ</h3><span class="mp-sp" aria-hidden="true"></span></div>
+  <!-- 11/24 マイページ案B（design/mypage-tiles の B1・B2）：成績を横長の1枚＋修行・知らせ、設定は5行の目次（押すと1枚のページ） -->
+  <div class="mp-home" id="mpHome">
   <div class="mp-prof" id="mpProf">
     <div class="mp-av" id="mpAv" aria-hidden="true"></div>
     <div class="mp-who"><b id="mpName">そらメモ</b><small id="mpMail"></small></div>
     <div class="mp-chips" id="mpChips"></div>
   </div>
-  <section class="mp-sec" aria-labelledby="mpAcct"><h4 id="mpAcct">アカウント</h4>
+  <div class="mt-grid" id="mpTiles"></div>
+  <p class="mt-note" id="mpTNote"></p>
+  <h4 class="mt-h" id="mpSetH">設定</h4>
+  <section class="mt-sec mt-idx" aria-labelledby="mpSetH"><ul class="mt-menu" id="mpIdx"></ul></section>
+  <p class="legal"><a href="terms.html" target="_blank" rel="noopener">利用規約</a>・<a href="privacy.html" target="_blank" rel="noopener">プライバシーポリシー</a>・<a href="tokushoho.html" target="_blank" rel="noopener">特定商取引法にもとづく表記</a></p>
+  <p class="hint appver" id="appVer"></p>
+  </div>
+  <section class="mp-sec" data-mp-sec="acct" aria-labelledby="mpAcct"><h4 id="mpAcct">アカウント</h4>
+    <div class="set-row" id="acctLocal" hidden><div><span id="acctLocalT">この端末の記録</span><small id="acctLocalS"></small></div><button class="btn2" type="button" data-mp-page="adv" id="acctLocalGo" hidden>詳しい設定へ</button></div>
     <div class="set-row" id="loginRow"><div>ログイン<small>記録をサーバーに保存します。メールアドレスに届くコードでログインできます。</small></div><button class="btn2" id="mpLogin">ログインする</button></div>
     <div class="set-row" id="nameRow" hidden><div>表示名<small id="nameNow"></small></div><button class="btn2" id="nameEdit">変える</button></div>
     <div class="set-row" id="acctRow" hidden><div>ログイン中<small id="acctEmail"></small></div><button class="btn2" id="logout">ログアウト</button></div>
     <div class="set-row" id="delRow" hidden><div>アカウントを削除<small>アカウントとすべての記録を消します。そらメモ＋に加入中なら解約されます。元に戻せません。</small></div><button class="btn2 danger" id="delAcct">削除</button></div>
   </section>
-  <section class="mp-sec" aria-labelledby="mpPlus" hidden><h4 id="mpPlus">そらメモ＋</h4>
+  <section class="mp-sec" data-mp-sec="acct" aria-labelledby="mpPlus" hidden><h4 id="mpPlus">そらメモ＋</h4>
     <div class="set-row"><div>プラン<small id="plusInfo"></small></div><div class="plusbtns"><button class="btn2" id="plusBtn" hidden></button><button class="btn1" id="plusBtnYear" hidden data-act="checkout" data-plan="year">年額4,800円</button></div></div>
     <p class="hint">そらメモ＋でできること</p>
     <ul class="plus-list">
@@ -4432,18 +4509,13 @@ dialog.spsheet .sph .spx{top:2px;right:8px;width:44px;height:44px;border:6px sol
     </ul>
     <p class="hint">月額500円、または年額4,800円（2か月分お得）。</p>
   </section>
-  <section class="mp-sec" aria-labelledby="mpPersona"><h4 id="mpPersona">表示の編集</h4>
+  <section class="mp-sec" data-mp-sec="lo" aria-labelledby="mpPersona"><h4 id="mpPersona">表示の編集</h4>
     <div class="set-row"><div><small>見たいものだけにできます。隠しても記録や機能は消えません。</small></div></div>
     <button class="lotile" type="button" data-tp-open><span class="t"><b>タブを選ぶ</b><small>下のタブ帯の長押しでも開けます</small></span><span class="n" id="tpTileN"></span></button>
     <button class="lotile" type="button" data-he-open><span class="t"><b>ホームに出すもの</b><small>OFF にすると隠れます・並べ替えもここで</small></span><span class="n" id="heTileN"></span></button>
     <button class="lotile lotile2" type="button" data-lo-open="top"><span class="t"><b>全部を見直す</b><small id="personaNote"></small></span><span class="n" id="loTileN"></span></button>
-    <div class="pmore" id="personaMore"></div>
   </section>
-  <section class="mp-sec" aria-labelledby="mpPins"><h4 id="mpPins">知らせ</h4>
-    <div class="set-row"><div><small>ピン止めした空港ごとに、特別塗装機・遅れ・ゴーアラウンド・撮影の知らせを選べます。</small></div></div>
-    <button class="lotile" type="button" data-pins-open><span class="t"><b>知らせ</b><small>ピン止めした空港・乗る便</small></span><span class="n" id="pinTileN"></span></button>
-  </section>
-  <section class="mp-sec" aria-labelledby="mpShow"><h4 id="mpShow">表示</h4>
+  <section class="mp-sec" data-mp-sec="show" aria-labelledby="mpShow"><h4 id="mpShow">表示</h4>
     <div class="set-row"><div><small>JAL・ANAそれぞれのフライトだけで数えた表示に切り替えます。記録は消えません。</small></div></div>
     <div class="seg" role="group" aria-label="表示">
       <button data-focus="ALL" aria-pressed="true">ノーマル</button><button data-focus="JAL" aria-pressed="false">JAL</button><button data-focus="ANA" aria-pressed="false">ANA</button>
@@ -4457,12 +4529,13 @@ dialog.spsheet .sph .spx{top:2px;right:8px;width:44px;height:44px;border:6px sol
       </div></div>
     <div class="set-row" id="gameRow"><div>エアライン経営<small>オフにすると、スタンプラリーだけのアプリとして使えます。記録はそのまま残り、オンに戻せば続きから遊べます。</small></div><button class="btn2" id="gameToggle" aria-pressed="true">使う（オン）</button></div>
   </section>
-  <section class="mp-sec" aria-labelledby="mpData"><h4 id="mpData">データとバックアップ</h4>
+  <section class="mp-sec" data-mp-sec="data" aria-labelledby="mpData"><h4 id="mpData">データとバックアップ</h4>
+    <div class="mt-bk" id="mpBk"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M8.5 12l2.5 2.5 4.5-5"/></svg><div><b id="mpBkT">記録はサーバーに保存されています</b><small id="mpBkS"></small></div></div>
     <div class="set-row"><div>記録を書き出す<small id="expNote">記録はサーバーに保存されていて、機種を変えてもログインすれば戻ります。書き出しは手元の控えです。</small></div>
       <div class="exp"><button class="btn2" data-export="json">JSON</button><button class="btn2" data-export="csv">CSV</button></div></div>
     <div class="set-row" id="wipeRow"><div>記録を消す<small>この端末に保存した本番の記録をすべて消します。</small></div><button class="btn2 danger" id="wipe">消す</button></div>
   </section>
-  <section class="mp-sec" aria-labelledby="mpAdv"><h4 id="mpAdv">詳しい設定</h4>
+  <section class="mp-sec" data-mp-sec="adv" aria-labelledby="mpAdv"><h4 id="mpAdv">詳しい設定</h4>
     <div class="set-row"><div>デモモード<small>空港を選んでチェックインを試せます。記録は本番とは別です。</small></div><button class="btn2" id="toggleDemo">開始</button></div>
     <div class="set-row"><div>判定のしくみ<small>出発と到着の空港で24時間以内にチェックインし、移動速度が時速1,000km以下ならフライトとして記録します。</small></div></div>
     <div class="set-row" id="installRow"><div>ホーム画面に追加<small>アプリのように、ホーム画面から開けるようにします。iPhone・Android・パソコンで使えます。</small></div><button class="btn2" data-install="go">追加する</button></div>
@@ -4470,8 +4543,6 @@ dialog.spsheet .sph .spx{top:2px;right:8px;width:44px;height:44px;border:6px sol
     <div class="set-row" id="dataRow"><div>データの使い方<small>統計に使うか、案内や調査に協力するかを選べます。</small></div><button class="btn2" id="openData">選ぶ</button></div>
     <div class="set-row"><div>使い方<small>はじめに出る案内をもう一度見ます。</small></div><button class="btn2" id="openGuide">見る</button></div>
   </section>
-  <p class="legal"><a href="terms.html" target="_blank" rel="noopener">利用規約</a>・<a href="privacy.html" target="_blank" rel="noopener">プライバシーポリシー</a>・<a href="tokushoho.html" target="_blank" rel="noopener">特定商取引法にもとづく表記</a></p>
-  <p class="hint appver" id="appVer"></p>
   <button class="btn2 close" id="closeSettings">閉じる</button>
 </div></dialog>
 
@@ -6482,6 +6553,7 @@ async function reload(){
   if(SERVER && !demo){ if(user) await loadServer(); else S = blank(); } else load();
   render(); updateAuthUI(); applyPlan(); renderRide();
   if(SERVER && user && !demo) authAfterLoad(); else renderWelcome();
+  try{ if(SERVER && user && !demo) pinsPull(); else { PIN_SRV.ready = false; PIN_SRV.rev = null; } }catch(e){}   // 知らせのピン止めをアカウントから読む（11/24）
   try{ renderAllinCard(); }catch(e){}
   setTimeout(() => { try{ tpTipMaybe(); }catch(e){} }, 1500);
 }
@@ -7367,7 +7439,7 @@ const TAB_ALL = ["home", "book", "log", "sg", "ops", "stats"], TAB_NAME = { home
 const LO_BLOCKS = {
   home: [["persona", "いちばん上のカード", "撮影・修行の構成のときに出るカード。いつもいちばん上", true], ["ride", "これから乗る便", "便名を入れると機体を調べる"], ["pins", "ピン止めした空港", "ピン止めが1つ以上あるときだけ出ます"], ["event", "イベントのお知らせ"], ["tally", "これまでの記録", "空港・路線・距離の数"], ["recent", "最近の印"]],
   opsb: [["alerts", "遅れ・ダイバートのお知らせ"], ["map", "地図と近くを飛ぶ機体"], ["spots", "撮影地"], ["curfew", "門限のある時間"], ["ga", "ゴーアラウンド（推定）"]],
-  stats: [["passport", "これまでのパスポート"], ["fleet", "乗った機体"], ["airline", "航空会社別"], ["status", "ステータスの目安"], ["sgsum", "修行のまとめ", "月ごとのポイント・1ポイントあたり・路線ごと"]],
+  stats: [["passport", "これまでのパスポート"], ["fleet", "乗った機体"], ["airline", "航空会社別"], ["status", "修行の画面への入口", "今のポイントだけ。押すと修行の画面"], ["thatday", "あの日の空"]],   // 11/24：修行のまとめ・ステータスの目安は外した（入口1枚に）
 };
 const LO_ZONE = { home:"homeBlocks", opsb:"opsBlocks", stats:"v-stats" };   // opsb：運用の滑走路の下（見方の ops と分ける）
 // 11/9 の決定：図鑑の見方を「地方別・地図・行った順」の3つに。id は今のまま（region・map・chron）。
@@ -7857,7 +7929,7 @@ document.addEventListener("click", async e => {
 });
 VIEW_RENDER.log = () => { FB_RT = null; renderLog(); window.scrollTo(0, 0); };
 // 成績：航空会社別とステータスの目安、年ごとの記録、航空会社別（成績の画面を開いたときだけ描く）
-function renderStats(){ renderYears(); renderPassport(); renderFleetBook(); renderAirlines(); renderStatus(); renderSgSum(); loadFacts(); }
+function renderStats(){ renderYears(); renderPassport(); renderFleetBook(); renderAirlines(); renderStSg(); loadFacts(); }   // 修行のまとめ・ステータスの目安は外した（11/24。入口1枚）
 function renderOverall(){
   if(!$("overallBox")) return;
   const fl = S.flights, km = fl.reduce((x, f) => x + f.km, 0), rt = new Set(fl.map(f => [f.from, f.to].sort((p, q) => p - q).join("-")));
@@ -8149,13 +8221,13 @@ const PERSONAS = {
   all: { name:"全部の機能", short:"全部", tabs:["home", "book", "log", "ops", "sg"], views:{}, off:{},
     note:"全部の機能を出しています。使わないものは「表示の編集」で隠せます。隠しても記録は消えません。" },
   casual: { name:"気軽に好きな人", short:"気軽に", tabs:["home", "book", "log"], views:{ book:"region", log:"diary" },
-    off:{ home:["ride"], book:["map", "chron"], log:["year"], stats:["sgsum"] },   // 気軽に：前は地図がいつも上にあったので、日誌と地図を出す
+    off:{ home:["ride"], book:["map", "chron"], log:["year"], stats:["status"] },   // 気軽に：前は地図がいつも上にあったので、日誌と地図を出す
     note:"チェックインと図鑑だけの、いちばん軽い構成です。成績と運用はマイページから開けます。" },
-  spot: { name:"撮影する人", short:"撮影", tabs:["ops", "home", "book", "log"], views:{ ops:"photo" }, off:{ stats:["sgsum"] },
+  spot: { name:"撮影する人", short:"撮影", tabs:["ops", "home", "book", "log"], views:{ ops:"photo" }, off:{ stats:["status"] },
     note:"1つの空港で長く撮る人向け。運用をいちばん左に、ホームには運用・これから来る大きな機体・今日いた時間を出します。成績はマイページから開けます。" },
   shugyo: { name:"修行する人", short:"修行", tabs:["home", "sg", "log", "stats"], views:{ log:"diary" },
-    order:{ stats:["sgsum", "status", "airline", "fleet", "passport"] },
-    note:"たくさん乗る人向け。修行のタブを置き、ホームにはポイントの進みと次に乗る便、成績には修行の数字を先に出します（1便ごとの修行の数字は修行のタブ）。図鑑と運用はマイページから開けます。" },
+    order:{ stats:["status", "airline", "fleet", "passport"] },
+    note:"たくさん乗る人向け。修行のタブを置き、ホームにはポイントの進みと次に乗る便、成績には修行の入口を先に出します（修行の数字は修行のタブ）。図鑑と運用はマイページから開けます。" },
 };
 const PERSONA_KEY = "soramemo.persona";
 // 前から使っている端末か（使った日・はじめの案内・表示の編集の跡がある）。前からの人は、ひな形を選んでいなくても今の見え方（気軽に）のまま
@@ -8193,11 +8265,8 @@ function renderPersonaSettings(){
   if($("loTileN")) $("loTileN").innerHTML = `<b>${c.on}</b><small>/${c.all}</small>`;
   if($("tpTileN")) $("tpTileN").innerHTML = `<b>${loTabs().length}</b><small>/${LO_TAB_MAX}</small>`;
   { const off = loOff("home"), n = LO_BLOCKS.home.filter(b => !b[3]); if($("heTileN")) $("heTileN").innerHTML = `<b>${n.filter(b => !off.has(b[0])).length}</b><small>/${n.length}</small>`; }
-  // タブにない画面（隠したタブ・成績）は、ここから開く
-  const off = TAB_ALL.filter(v => !loTabs().includes(v)), L = { book:"図鑑を開く", stats:"成績を開く", log:"フライトを開く", ops:"運用を開く", sg:"修行を開く" };
-  // タブにない画面（運用・修行・成績など）をタイルで出す。隠したタブへもここから行ける（改善担当の指摘2）。成績はタブにしないので、ふだんはここだけ
-  const TL = { book:"図鑑", log:"フライト", ops:"運用", sg:"修行", stats:"成績" }, TS = { book:"空港の印を見る", log:"乗った便を見る", ops:"滑走路と便を見る", sg:"ポイントの進み", stats:"空港・路線・距離" };
-  if($("personaMore")) $("personaMore").innerHTML = off.map(v => `<button class="mptile" type="button" data-persona-open="${v}" aria-label="${L[v] || v}"><b>${TL[v] || v}</b><small>${TS[v] || ""}</small></button>`).join("");
+  // タブにない画面は、マイページのタイルから開く（11/24 案B：成績・修行・知らせはいつも、図鑑・フライト・運用はタブから外したときだけ。mpTilesHTML）
+  try{ if($("dSettings").open && $("mpTiles")){ $("mpTiles").innerHTML = mpTilesHTML(); $("mpTNote").textContent = mpTabNote(); $("mpIdx").innerHTML = mpIdxHTML(); } }catch(e){}
 }
 document.addEventListener("click", e => {
   const o = e.target.closest("[data-persona-open]"); if(o){ $("dSettings").close(); goTab(o.dataset.personaOpen); return; }
@@ -8794,8 +8863,8 @@ const HS = { casual:{ label:"気軽に楽しみたい", groups:[
     ["運用のタブ", [["tab", "tabs", "ops"]]], ["修行のタブ", [["tab", "tabs", "sg"]]],
     ["フライトの見方「年のまとめ」", [["view", "log", "year"]]],   // 11/11：日誌と地図は残す（気軽にの構成と同じ）
     ["図鑑の見方", VIEWS.book.filter(([id]) => id !== "region").map(([id]) => ["view", "book", id])],
-    ["修行のまとめ", [["blk", "stats", "sgsum"]]]] },
-  spot:{ label:"飛行機を撮りたい", groups:[["修行のタブ", [["tab", "tabs", "sg"]]], ["修行のまとめ", [["blk", "stats", "sgsum"]]]] },   // フライトの見方「修行」は修行のタブへ移した（11/11）
+    ["成績の修行の入口", [["blk", "stats", "status"]]]] },
+  spot:{ label:"飛行機を撮りたい", groups:[["修行のタブ", [["tab", "tabs", "sg"]]], ["成績の修行の入口", [["blk", "stats", "status"]]]] },   // フライトの見方「修行」は修行のタブへ移した（11/11）
   shugyo:{ label:"修行（マイル・ステータス）に使いたい", groups:[["運用のタブ", [["tab", "tabs", "ops"]]], ["運用の見方「撮る人」", [["view", "ops", "photo"]]], ["運用の「撮影地」", [["blk", "opsb", "spots"]]]] } };
 let HS_CUR = null;
 const hsCount = () => HS_CUR ? HS[HS_CUR.p].groups.reduce((n, g, i) => n + (HS_CUR.keep.has(i) ? 0 : g[1].length), 0) : 0;
@@ -9577,7 +9646,76 @@ $("probe").onclick = async () => {
 };
 $("vlogClear").onclick = () => { if(confirm("検証ログを消します。")){ try{ localStorage.removeItem("soramemo.vlog"); }catch(e){} showVlog(); } };
 $("demoAirport").onchange = () => { showNearest(nearest(demoPlace())); say(""); };
-function openMyPage(){ renderBaseSel(); renderMyPage(); $("dSettings").showModal(); }
+function openMyPage(page){ renderBaseSel(); mpPage(page || null); renderMyPage(); if(!$("dSettings").open) $("dSettings").showModal(); }   // page：目次のページ（lo・data・show・acct・adv）を開いた形で
+/* ---------- マイページ案B（11/24 本人 OK・design/mypage-tiles の B1・B2） ----------
+   いちばん上は成績を横長の1枚＋修行・知らせの2枚。タブにある画面（図鑑・フライト・運用）はタイルにせず、タブから外した画面だけタイルが増える。
+   設定は5行の目次（表示の編集・データとバックアップ・表示と色・アカウント・詳しい設定）。押すと同じダイアログの中で1枚のページ（中の行は今のまま） */
+const MP_PAGES = { lo:"表示の編集", data:"データとバックアップ", show:"表示と色", acct:"アカウント", adv:"詳しい設定" };
+const MP_IC = {
+  lo:`<path d="M2 12s3.6-6 10-6 10 6 10 6-3.6 6-10 6S2 12 2 12z"/><circle cx="12" cy="12" r="2.6"/>`,
+  data:`<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M8.5 12l2.5 2.5 4.5-5"/>`,
+  show:`<circle cx="12" cy="12" r="9"/><circle cx="8" cy="10" r="1.2"/><circle cx="12" cy="7.5" r="1.2"/><circle cx="16" cy="10" r="1.2"/><path d="M12 21a2.5 2.5 0 0 1 0-5h2"/>`,
+  acct:`<circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/>`,
+  adv:`<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/>`
+};
+const MP_GO = `<svg class="go" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>`;
+let MP_PAGE = null;
+// ページを開く（null で目次に戻る）。上の戻るは、ページのときは「マイページ」、目次のときは「ホーム」
+function mpPage(p){
+  MP_PAGE = MP_PAGES[p] ? p : null; const d = $("dSettings");
+  if(MP_PAGE) d.dataset.mpPage = MP_PAGE; else delete d.dataset.mpPage;
+  $("mpTitle").textContent = MP_PAGE ? MP_PAGES[MP_PAGE] : "マイページ";
+  $("mpBackT").textContent = MP_PAGE ? "マイページ" : "ホーム";
+  d.scrollTop = 0;
+  if(MP_PAGE) track("mp", "page_" + MP_PAGE);
+}
+$("mpBack").onclick = () => { if(MP_PAGE){ const from = MP_PAGE; mpPage(null); renderMyPage(); const b = document.querySelector(`#mpIdx [data-mp-page="${from}"]`); if(b) b.focus(); return; } $("dSettings").close(); };
+$("dSettings").addEventListener("close", () => mpPage(null));
+document.addEventListener("click", e => { const b = e.target.closest && e.target.closest("[data-mp-page]"); if(b && $("dSettings").open){ mpPage(b.dataset.mpPage); renderMyPage(); } });
+// 修行の今のポイント（修行担当の数え方 sgYear・sgCar・sgGoal をそのまま読む。修行の画面の大きな数字と同じ）
+function mpSgNow(){
+  try{ const Y = sgYear(), car = sgCar(Y), goal = sgGoal(car, Y), cur = Y[car];
+    return { y:Y.y, car, pts:cur.pts, n:cur.n, unit:car === "JAL" ? "FOP" : "PP", goal, pct:goal && goal.pts ? Math.min(100, Math.floor(cur.pts / goal.pts * 100)) : 0, zero:sgZero(Y) }; }
+  catch(e){ return null; }
+}
+// 成績の数（車などと記録帳の便は入れない。ホーム・パスポートと同じ数え方）
+function mpStats(){
+  const fl = flyOnly(S.flights), cars = S.flights.filter(isCar), rts = new Set(fl.map(f => [f.from, f.to].sort((p, q) => p - q).join("-")));
+  return { aps:visited().size, n:fl.length, rt:rts.size, km:fl.reduce((x, f) => x + f.km, 0), car:cars.length, carKm:cars.reduce((x, f) => x + f.km, 0) };
+}
+function mpTilesHTML(){
+  const st = mpStats(), sg = mpSgNow(), pl = pins().length;
+  const tile = (k, attr, body, wide) => `<button class="mt${wide ? " wide" : ""}" type="button" ${attr}><span class="k">${k}</span>${MP_GO}${body}</button>`;
+  const v = (n, u) => `<span class="v"><b>${n}</b><span class="u">${u}</span></span>`;
+  const out = [tile("成績", `data-persona-open="stats" aria-label="成績を開く"`, `<span class="row3"><span>${v(st.aps, "空港")}<small>図鑑 ${st.aps}/${A.length}</small></span><span>${v(fmtKm(st.n), "便")}<small>${fmtKm(st.rt)}路線</small></span><span>${v(fmtKm(st.km), "km")}<small>飛んだ距離</small></span></span>`
+      + (st.car ? `<span class="s">車など ${st.car}（${fmtKm(st.carKm)} km）は便と距離に入れず、別に数えています</span>` : ""), true),
+    tile("修行", `data-persona-open="sg" aria-label="修行を開く"`, !sg ? `<span class="s">ポイントの進み</span>`
+      : sg.zero ? `${v(0, sg.unit)}<span class="s">まだ記録した便がありません</span>`
+      : `${v(fmtKm(sg.pts), sg.unit)}<span class="bar${sg.car === "JAL" ? " jal" : ""}" aria-hidden="true"><i style="width:${sg.pct}%"></i></span><span class="s">${sg.pct >= 100 ? `${esc(sg.goal.name)}に届いています` : `${esc(sg.goal.name)}まで ${sg.pct}%`}</span>`),
+    tile("知らせ", `data-pins-open aria-label="知らせを開く"`, `${v(pl, `/ ${PIN_MAX} 空港`)}<span class="s">ピン止めした空港</span>`)];
+  // タブから外した画面（図鑑・フライト・運用）だけタイルにする。成績・修行はいつもタイル
+  const TL = { book:["図鑑", () => `${v(st.aps, `/ ${A.length}`)}<span class="s">空港の印を見る</span>`], log:["フライト", () => `${v(fmtKm(st.n), "便")}<span class="s">乗った便を見る</span>`], ops:["運用", () => { const k = (() => { try{ return OPS_AP; }catch(e){ return "HND"; } })() || "HND"; return `${v(esc(k), "の今")}<span class="s">滑走路と便を見る</span>`; }] };
+  for(const t of ["book", "log", "ops"]) if(!loTabs().includes(t)) out.push(tile(TL[t][0], `data-persona-open="${t}" aria-label="${TL[t][0]}を開く"`, TL[t][1]()));
+  return out.join("");
+}
+function mpTabNote(){
+  const on = ["book", "log", "ops"].filter(t => loTabs().includes(t)).map(t => TAB_NAME[t]);
+  if(!on.length) return "タブから外した画面は、ここから開けます。";
+  return `${on.join("・")}は下のタブ帯から。タブから外した画面は、ここにタイルが増えます。`;
+}
+function mpIdxHTML(){
+  const c = loCount(), mail = SERVER && user ? (user.email || "") : "";
+  const base = (() => { try{ const b = homeBase(); return b && BY[b] ? `拠点 ${nearShort(BY[b]).replace(/空港$/, "")}` : ""; }catch(e){ return ""; } })();
+  const pal = { mono:"白黒", sora:"空", akashiro:"赤白" }[(() => { try{ return localStorage.getItem("soramemo.palette.chosen") || "mono"; }catch(e){ return "mono"; } })()] || "白黒";
+  const sub = {
+    lo:`タブ ${loTabs().length}/${LO_TAB_MAX}・出しているもの ${c.on}/${c.all}`,
+    data:SERVER && user && !demo ? "記録はサーバーに保存・書き出し（無料）" : demo ? "デモの記録を書き出す" : SERVER ? "ログインするとサーバーに保存・書き出し" : "記録はこの端末に保存・書き出し",
+    show:[{ ALL:"ノーマル", JAL:"JAL", ANA:"ANA" }[FOCUS] || "ノーマル", pal, base].filter(Boolean).join("・"),
+    acct:mail ? mail : demo ? "デモモード（記録は別）" : SERVER ? "ログインしていません" : "この端末の記録",
+    adv:"デモ・判定のしくみ・ホーム画面に追加 ほか"
+  };
+  return Object.keys(MP_PAGES).map(k => `<li><button type="button" data-mp-page="${k}"><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true">${MP_IC[k]}</svg></span><span class="t"><b>${MP_PAGES[k]}</b><small>${esc(sub[k])}</small></span><svg class="ch" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button></li>`).join("");
+}
 // ログインしていないときの右上は「ログイン」。押すとログインの画面（そこから「あとで」「デモで試す」も選べる）
 $("openSettings").onclick = () => { if(SERVER && !user && !demo){ track("mp", "guest"); authOpen("login", "login"); return; } openMyPage(); };
 // マイページのいちばん上のタイル：アカウント・称号・記録の保存先
@@ -9590,12 +9728,19 @@ function renderMyPage(){
   const chip = (t, k) => `<span class="mp-chip${k ? " " + k : ""}">${esc(t)}</span>`;
   $("mpChips").innerHTML = (SERVER && user ? chip("ログイン中", "ok") + chip("記録はサーバーに保存") : demo ? chip("デモ・記録は別") : chip("記録はこの端末に保存"))
     + (tn ? chip(`称号 ${tn}`) : "") + (typeof PLUS !== "undefined" && PLUS ? chip("そらメモ＋", "plus") : "")
-    + chip(`${visited().size}空港・${flyOnly(S.flights).length}フライト`);
-  // 記録を書き出すの説明（11/24 見回り sweep-all-a の2番・PM の決定①）：バックアップは有料にしない。戻すのはログイン（書き出しは控え）
-  if($("expNote")) $("expNote").textContent = SERVER && user ? "記録はサーバーに保存されていて、機種を変えてもログインすれば戻ります。書き出しは手元の控えです。"
-    : demo ? "デモの記録を書き出します。デモの記録は本番とは別で、サーバーには保存されません。"
-    : SERVER ? "ログインすると記録はサーバーに保存され、機種を変えても戻ります。いまの記録はこの端末だけにあります。書き出しは手元の控えです。"
-    : "記録はこの端末に保存されています。書き出しは手元の控えです。";   // 車などの移動は便に入れない（11/11。ホームの今日の数字と同じ数え方）
+    ;   // 空港・フライトの数は頭の札から外して成績のタイルへ（案B）
+  if($("mpTiles")){ $("mpTiles").innerHTML = mpTilesHTML(); $("mpTNote").textContent = mpTabNote(); $("mpIdx").innerHTML = mpIdxHTML(); }
+  // データとバックアップの箱（PM の決定：記録はサーバーに保存。書き出しは手元の控え。バックアップは有料にしない）
+  if($("mpBkT")){ const L = SERVER && user && !demo;
+    $("mpBkT").textContent = L ? "記録はサーバーに保存されています" : demo ? "デモの記録は本番とは別です" : SERVER ? "記録はまだこの端末だけにあります" : "記録はこの端末に保存されています";
+    $("mpBkS").textContent = L ? "機種を変えても、同じメールアドレスでログインすれば戻ります。バックアップは無料です。" : demo ? "デモの記録はサーバーには保存されません。"
+      : SERVER ? "ログインすると記録はサーバーに保存され、機種を変えても戻ります。バックアップは無料です。" : "書き出した控えを残しておくと安心です。"; }
+  // 書き出しの説明は短く（記録の置き場とバックアップの説明は上の箱。11/24 案B の B2・PM の決定①）
+  if($("expNote")) $("expNote").textContent = demo ? "デモの記録の控えです（本番とは別）。" : "手元の控えです。チェックイン・フライト・記録帳・国際線（無料）";
+  // アカウントのページ：ログインの行がないとき（デモ・サーバーなしの版）は、記録の置き場を1行で
+  if($("acctLocal")){ const show = demo || !SERVER; $("acctLocal").hidden = !show; $("acctLocalGo").hidden = !demo;
+    $("acctLocalT").textContent = demo ? "デモモード中" : "この端末の記録";
+    $("acctLocalS").textContent = demo ? "記録は本番とは別です。終えるときは「詳しい設定」のデモモードから。" : "サーバーにつながない版です。記録はこの端末に保存しています。"; }
 }
 $("closeSettings").onclick = () => $("dSettings").close();
 // お試しモードの見本：始めたときに、1年ぶんの旅（16空港・30フライト）をたまった状態で見せる。お試しの記録は本番とは別に保存される
@@ -11514,6 +11659,14 @@ function statusSummary(year){
     else if(y === year){ out.ana.pp += Math.round(mi * fr.rate * 2) + fr.bonus; out.ana.n++; if(fr.assumed) out.ana.assumed++; }
   }
   return out;
+}
+// 成績の修行の入口（11/24 本人 OK「消してカード1枚に」）：今のポイントの大きな数字だけ。押すと修行の画面（data-sg-open="main"）
+function renderStSg(){
+  const el = $("stSg"); if(!el) return; const sg = mpSgNow();
+  const name = sg ? (sg.car === "JAL" ? "JAL FLY ON ポイント" : "ANA プレミアムポイント") : "修行";
+  el.innerHTML = `<span class="k">修行・${esc(name)}</span><span class="v"><b>${sg ? fmtKm(sg.pts) : "—"}</b><span class="u">${sg ? sg.unit : ""}</span></span>`
+    + `<span class="s">${sg && !sg.zero ? `${sg.y || sgNowY()}年・記録した便から（推定）` : "まだ記録した便がありません"}</span><span class="s2">修行の画面を開く ›</span>`
+    + `<svg class="go" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>`;
 }
 function renderStatus(){
   const el = $("statusBox"); if(!el) return;
@@ -14272,7 +14425,47 @@ const pinAp = k => !k ? null : k[0] === "#" ? BY[+k.slice(1)] || null : IATA[k] 
 const pinCode = k => k && k[0] !== "#";   // 知らせを出せるのは3レターのある空港だけ
 const pinName = k => { const a = pinAp(k); return a ? nearShort(a).replace(/空港$/, "") : k; };
 function pinsLoad(){ try{ const v = JSON.parse(localStorage.getItem(PIN_KEY) || "null"); return Array.isArray(v) ? v.filter(p => p && typeof p.k === "string" && pinAp(p.k)) : null; }catch(e){ return null; } }
-function pinsSave(list){ try{ localStorage.setItem(PIN_KEY, JSON.stringify(list)); }catch(e){} }
+function pinsSave(list, from){ try{ localStorage.setItem(PIN_KEY, JSON.stringify(list)); }catch(e){} if(from !== "srv") pinsUpLater(); }
+/* ピン止めをアカウントにも保存する（11/24 本人 OK。データ担当の user_pins・my_pins／my_pins_put、data/sweep-all）
+   ログインしているときは、変えたらサーバーへ書く（端末の localStorage も今までどおり。ログインしていないとき・デモはここだけ）。
+   ログインしたら読む：サーバーに行がなく端末にピン止めがあれば、端末の分を上げる。行があればサーバーの分にそろえる。
+   別の端末が先に直していたら（conflict）サーバーの分を出し直す。撮影の知らせの空港（spot）も一緒に残す */
+const PIN_SRV = { rev:null, ready:false, t:0, busy:null };
+const pinsAcct = () => !!(SERVER && sb && user && !demo);
+const pinsClean = list => (list || []).filter(p => p && typeof p.k === "string" && /^([A-Z]{3}|#[0-9]{1,6})$/.test(p.k)).slice(0, 20).map(p => ({ k:p.k, sp:!!p.sp, dl:!!p.dl, ga:!!p.ga }))
+  .filter((p, i, a) => a.findIndex(x => x.k === p.k) === i);
+const pinsSpotNow = () => { try{ const s = pushSpot(); return spotActive(s) && s.iata && IATA[s.iata] ? s.iata : null; }catch(e){ return null; } };
+function pinsUpLater(){ if(!pinsAcct() || !PIN_SRV.ready) return; clearTimeout(PIN_SRV.t); PIN_SRV.t = setTimeout(() => { pinsUp(); }, 300); }
+// サーバーの行を端末に当てる（ピン止め・撮影の知らせの空港）。当てたら申し込みを出し直す
+async function pinsFromSrv(row){
+  const list = pinsClean(Array.isArray(row && row.pins) ? row.pins : []);
+  pinsSave(list, "srv"); PIN_SRV.rev = row && row.rev != null ? row.rev : PIN_SRV.rev;
+  try{ const sp = pushSpot(), want = row && row.spot && IATA[row.spot] ? row.spot : null;
+    if((sp.kinds || []).length && sp.iata !== want){ sp.iata = want; localStorage.setItem("soramemo.pushSpot", JSON.stringify(sp)); } }catch(e){}
+  try{ await pinSync(); }catch(e){}
+  pinRedraw(); if($("dSettings").open) renderMyPage();
+}
+async function pinsUp(){
+  if(!pinsAcct() || !PIN_SRV.ready) return;
+  if(PIN_SRV.busy){ PIN_SRV.again = true; return; }
+  const list = pinsClean(pinsLoad() || []);
+  PIN_SRV.busy = sb.rpc("my_pins_put", { p_pins:list, p_spot:pinsSpotNow(), p_rev:PIN_SRV.rev });
+  try{ const { data, error } = await PIN_SRV.busy;
+    if(!error && data && data.conflict){ await pinsFromSrv(data); uiSay("別の端末で変えたピン止めに合わせました。"); }
+    else if(!error && data && data.ok) PIN_SRV.rev = data.rev;
+  }catch(e){}
+  PIN_SRV.busy = null;
+  if(PIN_SRV.again){ PIN_SRV.again = false; pinsUp(); }
+}
+// ログインして記録を読んだあとに1回（ログインし直したときも）。関数がまだない古いサーバーでは、端末に残すだけ（今までどおり）
+async function pinsPull(){
+  PIN_SRV.ready = false; PIN_SRV.rev = null; if(!pinsAcct()) return;
+  let r; try{ r = await sb.rpc("my_pins"); }catch(e){ return; }
+  if(!r || r.error) return;
+  PIN_SRV.ready = true;
+  if(r.data && typeof r.data === "object") await pinsFromSrv(r.data);
+  else { const loc = pinsLoad(); if(loc && loc.length) await pinsUp(); }
+}
 // はじめて開いたとき：今の申し込み（特別塗装機・遅れ・ゴーアラウンド・撮影の空港）をそのままピン止めに移す（K9。上限を超えていても全部）
 function pins(){
   let list = pinsLoad();
@@ -14323,7 +14516,7 @@ function pinDeliverHTML(){
   if(d === "ask") return `<div class="pindev ask"><span>この端末には、まだ届きません</span><button type="button" class="pinallow" data-pin-allow>許可する</button></div>`;
   if(d === "denied") return `<p class="pindev ng">通知がブロックされています。端末の設定で、そらメモの通知を許可すると届きます。</p>`;
   if(d === "ios") return `<details class="pindev ios"><summary>iPhone では、ホーム画面に追加したそらメモに届きます<span>やり方 ›</span></summary>
-    <ol><li>先にログインする（ピン止めをアカウントに残すため。準備中）</li><li>Safari の共有ボタン →「ホーム画面に追加」</li><li>ホーム画面のそらメモを開き、通知を許可する</li></ol>
+    <ol><li>先にログインする（ピン止めをアカウントに残すため）</li><li>Safari の共有ボタン →「ホーム画面に追加」</li><li>ホーム画面のそらメモを開き、通知を許可する</li></ol>
     <p>ログインしていないときは、ホーム画面のそらメモでもう一度ピン止めしてください。</p></details>`;
   if(d === "demo") return `<p class="pindev">デモでは知らせは届きません（ピン止めは試せます）。</p>`;
   return `<p class="pindev">この端末のブラウザでは、知らせを受け取れません。</p>`;
@@ -14355,6 +14548,7 @@ function pinRedraw(){
   if($("dPins").open) $("dPinsBody").innerHTML = PIN_PAGE ? pinPageHTML(PIN_PAGE) : pinListHTML();
   const ap = document.querySelector("#dAirportBody [data-pin-ap]"); if(ap && $("dAirport").open) ap.outerHTML = pinApHTML(ap.dataset.pinAp);
   if(opsOn()){ try{ renderSpecial(); renderOpsAlerts(); }catch(e){} }
+  if($("dSettings").open && !MP_PAGE) renderMyPage();   // マイページの「知らせ」のタイルの数（11/24 案B）
 }
 // ピン止めする。はじめての1回はシート（許可していなければ先に K0）、2回目からは帯
 async function pinAdd(k, from){
@@ -14439,7 +14633,7 @@ function pinListHTML(){
     ${list.length > PIN_MAX ? `<p class="pinnote">前から申し込んでいた${list.length}空港をそのまま続けています。新しく足すのは${PIN_MAX}より少なくなってからです。</p>` : ""}
     ${list.map(card).join("") || `<p class="pinempty">まだありません。近くの空港・空港のページ・運用タブの「ピン止め」から足せます。</p>`}
     <label class="pinq">${PIN_SVG(false)}<input id="pinQ" type="search" placeholder="＋ 名前か HND のような3文字で探す" autocomplete="off" aria-label="ピン止めする空港を探す"></label><div id="pinQOut"></div>
-    <p class="pinnote">ピン止めはこの端末に保存しています。機種を変えると消えます。</p>
+    <p class="pinnote">${pinsAcct() ? "ピン止めはアカウントに保存しています。機種を変えても、ログインすれば戻ります。" : demo ? "デモのピン止めは、この端末だけに残ります。" : SERVER ? "ログインしていないあいだは、この端末だけに保存します。ログインするとアカウントにも残ります。" : "ピン止めはこの端末に保存しています。"}</p>
     <p class="pinsec">便</p>
     <button type="button" class="pincard" data-pin-ride><span class="h"><b>乗る便を選ぶ</b>${PIN_CHEV}</span><span class="chips"><small>${fl.length ? `${fl.map(x => { const [no, dd] = x.split("@"); return `${esc(no)}（${+dd.slice(5, 7)}/${+dd.slice(8, 10)}）`; }).join("・")}・15分の遅れから` : "「この便に乗る」で選んだ便の遅れ・ダイバートを知らせます"}</small></span></button>
     ${regs.length ? `<p class="pinsec">機体ごとの知らせ</p><div class="pincard st"><span class="h"><b>${regs.length}機</b></span><span class="chips"><small>${esc(regs.join("・"))}。前に申し込んだ機体。どの空港へ飛ぶときも届きます。新しく足すことはできません</small></span></div>` : ""}

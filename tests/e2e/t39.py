@@ -31,7 +31,7 @@ async def main():
         blob = json.dumps([x[1] for x in sent], ensure_ascii=False)
         print('利用者IDを含む:', 'u1' in blob or 'test@example.com' in blob, '| 座標を含む:', '35.69' in blob or '139.98' in blob, '| 匿名キーで送信:', all(x[2] == 'Bearer anon' for x in sent))
         # オフにすると送らない
-        n0 = len(sent); await pg.click('#openSettings'); await pg.click('#anaToggle'); await pg.click('#dSettings .mp-back')
+        n0 = len(sent); await pg.click('#openSettings'); await pg.evaluate('openMyPage("adv")'); await pg.click('#anaToggle'); await pg.evaluate("$('dSettings').close()")
         await pg.click('nav.tabs button[data-v=log]'); await pg.evaluate('flushEvents()'); await pg.evaluate('window.dispatchEvent(new ErrorEvent("error", {message:"オフのとき"}))'); await pg.wait_for_timeout(400)
         print('オフ後に送った数:', len([x for x in sent[n0:] if not (x[0]=='log_events' and any(e['e']=='analytics' for e in x[1]['p_events']))]))
         print(errs); await b.close()

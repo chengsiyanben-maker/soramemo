@@ -16,7 +16,7 @@ async def main():
         for v in ['book','log','stats']: await pg.click(f'nav.tabs button[data-v={v}]'); await pg.wait_for_timeout(150)
         await pg.evaluate("goTab('ach')"); await pg.wait_for_timeout(150)
         await pg.click('[data-mode=game]'); await pg.click('[data-mode=rally]')
-        await pg.click('#openSettings'); await pg.click('#dSettings .mp-back')
+        await pg.click('#openSettings'); await pg.evaluate("$('dSettings').close()")
         print('ふだんの操作での違反:', await pg.evaluate('window.__csp'))
         await pg.evaluate("""() => { const s = document.createElement('script'); s.textContent = 'window.__injected = true'; document.body.appendChild(s);
                                      const d = document.createElement('div'); d.innerHTML = '<img src=x onerror="window.__xss=true">'; document.body.appendChild(d); }""")

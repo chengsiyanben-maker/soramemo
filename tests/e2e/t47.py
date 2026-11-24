@@ -19,6 +19,7 @@ async def main():
         r = await pg.evaluate("""() => { const s = statusSummary(2026), rows = statusRows().map(r => { const f = fareOf(r, r.t); return [BY[r.from].iata+'-'+BY[r.to].iata, Math.round(kmToMile(r.km)), f && f.table, f && f.id, f && f.rate, f && f.bonus]; }); return {s, rows}; }""")
         print('計算:', json.dumps(r, ensure_ascii=False))
         await pg.click('nav.tabs button[data-v=stats]'); await pg.wait_for_timeout(200)
+        await pg.evaluate("(() => { if(!$('statusBox')){ const d = document.createElement('div'); d.id = 'statusBox'; d.className = 'sgrid'; $('v-stats').appendChild(d); } renderStatus(); })()")   # 11/24：ステータスの目安と修行の計画は成績から外した（入口1枚）。関数は残っているので、置き場を足して確かめる
         print('表示:', (await pg.inner_text('#statusBox')).replace('\n',' ')[:300])
         await pg.click('nav.tabs button[data-v=log]'); await pg.wait_for_timeout(200)
         # フライトの画面で運賃を選ぶ（羽田-新千歳の JAL。日誌は日付の新しい順なので id で押す）

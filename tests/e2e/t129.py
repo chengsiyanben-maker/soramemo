@@ -27,7 +27,7 @@ async def main():
         pg = await c.new_page(); errs = []; pg.on('pageerror', lambda e: errs.append(str(e)))
         await pg.goto('file://'+os.path.join(WORK,'index_server_test.html')); await pg.wait_for_load_state('load')
         await pg.wait_for_function('typeof render === "function"'); await pg.wait_for_timeout(1500)
-        await pg.evaluate('openMyPage()'); await pg.click('#toggleDemo'); await pg.wait_for_timeout(1200)
+        await pg.evaluate('openMyPage("adv")'); await pg.click('#toggleDemo'); await pg.wait_for_timeout(1200)
         await pg.evaluate('goTab("home")'); await pg.wait_for_timeout(400)
         # K6：会社を開いた時点では、路線・機体の一覧はまだ描かない
         await pg.evaluate('$("coRoutes").innerHTML = ""; $("coFleet").innerHTML = ""')
