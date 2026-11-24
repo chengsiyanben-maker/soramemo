@@ -17,6 +17,10 @@
 - リモートに古い `shugyo` ブランチ（10/21）があるので、`shugyo/<名前>` は push できない（ref がぶつかる）。`shugyo-<名前>` で作る
 
 ## いま持っている仕事
+- 記録した便が0のときの修行タブ（11/24・PM の【中】）：ブランチ shugyo-zero-flights・下書き PR #208・報告 docs/pm/report-shugyo-zero-flights.md・写真 docs/pm/shugyo-zero-flights/
+  - 条件 sgZero（今年の JAL・ANA の便0・合わせた数字なし・予定なし・計画の案なし）。形 sgZeroHTML（一文3通り＋補足＋「計画を作る」、下に「路線を入れて計算する」は残す）。変えた関数 sgTitle（zero）・sgMain。CSS .sgd .sgb-zero
+  - テスト t188（新）・修行まわり10本成功（t64 は計算の入口を残して成功）。全体で落ちるのは前からの t168（3D の影）・t48（pdf417gen なし）
+  - 本人に聞くこと：計算の入口を残したこと／ホームの修行のカードも便0の形にそろえるか（おすすめ：そろえる）／JGC の今の数を入れた人も便0なら JGC の行が見えない
 - 年の区切りを日本時間に（11/20・候補1）：ブランチ shugyo-jst-year・下書き PR #147・報告 docs/pm/report-shugyo-jst-year.md・写真 docs/pm/shugyo-jst-year/
   - 足した部品 sgJstY・sgJstM・sgNowY・sgNowM・sgMDj。変えた関数 sgMD・sgWD・sgYear・sgReach・sgMoney・sgRoadView・renderShugyoCard・sgMonthsView・sgYearPage・renderSgSum・sgBudget・sgRoad
   - JAL の伊丹⇔関西を 175分（SG_XFER_JAL・sgXferOf 新、sgXfer は会社を受け取る）
@@ -36,6 +40,8 @@
 - 本人の返事待ち：SQL 2本の結果（ANA の最後の日・SFJ の便）／候補7（端末版の古い計画の画面）を残すか消すか
 
 ## 次にやること
+（11/24 の記録0の形は済み：PR #208。反映は PM。PR #147 は main に入った）
+00. PR #208 の答えで、ホームの修行のカード（renderShugyoCard）も便0の形にそろえる（PM の OK が出たら）
 （11/20 の年の区切り・乗り継ぎ・端数は済み：PR #147。反映は PM）
 0. PR #147 が main に入ったら、本番で修行の画面の年が 2026 のまま正しく出るか見る。文書の書き換え（shugyo-rules-1120.md）が Project に写されたか確かめる
 1. PR #71（修行の見方のシート）は main に入った（11/12）。本人の答え（全部乗せに戻すで修行も戻すか・1枚の補足）が出たら合わせる。PR #64 の本人の答えが出たら合わせる
@@ -83,3 +89,4 @@
 
 ## PM から積んだ次の仕事（11/24 14時30分、アプリ全体の見直しから）※shugyo/zero-flights で。テストが通れば PM が自動で反映
 - 【中】記録した便が0のとき、修行タブを「まだ記録した便がありません」と「計画を作る」だけの形にする（目標を勝手に入れず、「届きません」の文を出さない）。確定した修行の形（11/12）は変えない
+→ 済み（11/24）：PR #208（ブランチは ref のぶつかりで shugyo-zero-flights）。報告 report-shugyo-zero-flights.md
