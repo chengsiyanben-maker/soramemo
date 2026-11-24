@@ -1,6 +1,13 @@
 # データ担当の帳面
 
 ## いま持っている仕事
+- **見直し 2回目のデータの分：特別塗装機の知らせを1便で1つに・夜の静かな時間（PM の指示 11/25 5時10分・report-sweep-1125.md の4番。11/25 水曜に定期の回として呼ばれたが、PM の積んだ指示があったのでこちらをした）**：ブランチ data/sweep-1125（main 04d22af から）→ **下書き PR #216**。報告 docs/pm/report-sweep-1125-data.md。**移行197・テスト t135 を使った**
+  - tag はどれも `sp-便名`（_shared/livery_note.ts の liveryTag。予定は機体が分からないので便名だけ。便名がなければ `sp-登録記号`）。renotify つき。前の `plan-`・`spr-`・`sp-登録記号` はやめた
+  - 移行197：push_subs.quiet_night（はじめ true）・livery_plans.quiet_push_at。夜（23〜7時）は特別塗装機・撮影・運用の知らせを quiet_night の人に送らない（awake()）。乗る便・空港の遅れは止めない。ga は ga_quiet のまま。夜に見つかった予定は7時すぎに静かな時間の人へ1回（odpt-status）
+  - 運用の知らせは spot_notified の `ops-空港@分` で「前の知らせから60分」
+  - push-subscribe：quiet_night を受け付ける（来なければ前の値のまま）
+  - 確かめ：t135 21項目・deno test 317本・deno check・migrations.mjs check 187件
+  - 本人待ち（PM のおすすめで可）：はじめ ON は今いる人にもすぐ効く（画面の行と一緒に入れるのがおすすめ）。通知の扱いの変更なので入れる前に本人に一言
 - **見直し B の回のデータの分（PM の指示 11/24 14時30分・report-sweep-all-b.md の 1・2・7①・8番。11/24 火曜に定期の回として呼ばれたが、PM の積んだ指示があったのでこちらをした）**：ブランチ data/sweep-all（main 8744f86 から）→ **PR #206（11/24 17時22分 main に入った。本番の移行196 は PM の反映の流れで確かめる。sweep-all-check.sql の 2〜4 を反映のあとに）**。報告 docs/pm/report-sweep-all-data.md。確かめの SQL docs/pm/sweep-all-check.sql。**移行196・テスト t134 を使った**
   - 移行196：airport_board の next_arr・next_dep を「先の便12便（3時間先まで）＋過ぎた便2便（20分前まで）」に。便を読む幅を「今日0時の20時間前から」に（前は8日6時間前から）。hours の ref はまとめ表 airport_hour_bad（空港・日・時の遅れ＋欠航）から、まとめがない日だけ便の表から。hours・bad は前と同じ
   - rwy_learned はまとめ表 rwy_learned_days ＋今日の分（rwy_samples）。幅は「今日を入れて p_days 日（暦の日）」。記録がファイル置き場に移った日は前のまとめを残す。毎時の仕事 board-bad-roll（7分）・rwy-learned-roll（37分）、前の日と前の前の日をまとめ直す、上限1分
@@ -348,7 +355,8 @@
 
 ## 移行とテストの番号
 - main の最新は 160（159 airport_yomi・160 airport_facts は 11/10 本番に入った）。156・157 は 11/9 本番に入った。**maint/2026-11-09 の 158 は main の 159 より前になったので、反映の前に migrations.mjs rebase が要る**。maint/2026-11-06 は 153・テスト t93（fix/co-tests の経営の移行も 153 なので、反映の前に rebase）、data/photo-log は 154・テスト t94、maint/2026-11-07 は 155・テスト t95、data/debug-1107 は 156・テスト t96（関数のテストは supabase/tests/live_view_test.ts。main に反映済み）、data/view-prefs は 157・テスト t97、maint/2026-11-09 は 158・テスト t98、maint/2026-11-10 は 161・テスト t101。data/airport-facts は 160・テスト t100。そのほか次に新しく作るものは 162 以降・テストは t102 以降。**maint/2026-11-11 は 162・テスト t102**（161 の maint/2026-11-10 より後。反映の順が変わったら rebase）。**data/heliports の 163・t103 は 11/12 main に入った（PR #75 と一緒）**。**data/speed-1113 は 164・テスト t104**。**data/speed-1113b は 165・テスト t105**（164 の上）。**data/rot-learn-hi は 166・テスト t106**（関数1つだけなので 164・165 と順番が入れ替わってもよい）。（164〜167 は 11/13 に main に入った。166 は経営の co_cron_timeout、learn_hi は 167 に付け直し）。**data/alert-merge は 168・テスト t107**（11/14 main に入った）。**data/world-ops は 169・テスト t108**。**maint/2026-11-16 は 170・テスト t109**。**data/foreign-collect は 171・テスト t110**（170 と別の関数なので順番は入れ替わってもよい）。（11/16 data/redo-1116 で手入れ6本を 173〜178・t112〜t117 に付け直し、179 odpt_feed_dates・t118、180 verify_arrivals・t119。172・t111 は経営の keiei/redo-1116）。**data/foreign-collect は 181 foreign_cold・t120、182 foreign_watch・t121**。（171〜182 は 11/16 本番に入った。経営の t128 も main にある）。**maint/2026-11-16b は 183・テスト t122**。**data/foreign-livery は 184・テスト t123**。**data/usual-late-rpc は 185・テスト t124**（183 とは別の関数なのでどちらが先でもよい）。data/atd-future は 186・テスト t125。**data/flight-actual は 187・テスト t126**。**data/redo-1120 は 188（maint_1116b の付け直し・テスト t122）・189（inbound_first_of_day・テスト t127）**。**data/adsblol-key2 は 190 track_quota・テスト t129**。**data/sweep-1121 は 191 odpt_feed_at・テスト t130**。**data/livery-dest2 は 192 airline_codes_more・テスト t131**。**193 livery_seen_midnight は main にある。maint/2026-11-23 は 194・テスト t132**。**data/board-bad は 195・テスト t133**。**次に新しく作るものは 196 以降・テストは t134 以降**（t128 は経営が使った。maint/2026-11-16b の 183 は使わない）（data/foreign-carriers・data/foreign-livery は報告だけで番号を使っていない）
-- 11/24：data/sweep-all（PR #206）が移行196・テスト t134。次は197・t135 から
+- 11/24：data/sweep-all（PR #206）が移行196・テスト t134
+- 11/25：data/sweep-1125（PR #216）が移行197・テスト t135。次は198・t136 から
 - main に別の移行が先に入ったら、反映の前にもう一度 `node tools/migrations.mjs rebase`
 - 本番は小さいプランで一時ファイルの余裕がない。本人に流してもらう SQL は、大きな中間の表・自己結合・大きな並べ替えを避け、索引で引く形にする
 - SQL のテストは全部で約35分かかる（手元で流すときは裏で流してログを見る。t92 だけで約4分。同じログに2回流すと混ざるので、ログの名前を分ける）
@@ -399,6 +407,7 @@
 8. それ以外は PM の指示を待つ（勝手に新しい機能は始めない）。毎週月曜の昼の回は、下の「定期の仕事」（次の候補：点検の結果が来たら、死んだ行や使われていない索引の整理・遅い処理。cold-day-size.sql の結果で全機の航跡の1日が 20MB を超えるなら、ファイルを空港ごとに分ける案を作る。rwy-learn と daily-archive は 11/10 に見た（PR #58）。eta-calib・taxi-out・flight-watch は 11/11 に見た（PR #70）。結果がないまま次の回が来たら、ほかの毎晩・裏の処理（timetable-sync・schedule-sync・odpt-status・co3 の SQL の文）を同じ目で見て、時間の上限のない仕事の一覧を作る）
 
 ## ほかの担当への依頼
+- チェックインへ（11/25 夜の静かな時間・PR #216。PM から checkin.md に写してほしい）：知らせの設定に「夜は知らせない（23時〜7時）」の ON／OFF を1行（はじめ ON）。push-subscribe に `quiet_night: true|false` を付けて送る。文の例「特別塗装機・撮影・運用の知らせを、夜は止めます。乗る便の遅れは届きます」。ゴーアラウンドの「知らせない時間」は別のまま
 - チェックインへ（11/24 ピン止めの保存・PR #206。PM から checkin.md に写してほしい）：ログインしているときは rpc('my_pins') で読み、変えたら rpc('my_pins_put', { p_pins, p_spot, p_rev }) で書く（返り値 {ok, rev} か {conflict, pins, spot, rev}）。localStorage はログインしていないときとデモの置き場のまま。はじめてログインしたとき端末にあってサーバーが null なら上げる。「アカウントへの保存は準備中」の文を外す（文はデザイン担当と）。運用の関数が失敗したときの「読み込めませんでした・もう一度」も引き続き要る
 - 撮る人用へ（11/24・急がない）：spot_push.ts の題の「そらメモ：」と「（機体の位置からの推定）」は送る直前（tidyPush）でそろうので、そのままでよい。手を入れるときに元の文も「（推定）」にそろえてよい
 - チェックインへ（11/21 空の道すじの上限・PR #153。PM から checkin.md に写してほしい）：loadArt の airport_tracks（rpcPost）と cold-tracks の fetch で、ログインしているときは Authorization: Bearer <session の access_token> を付ける（今は anon の鍵）。返り値が配列でないとき、error が login_required なら「8日より前の空の道すじはログインすると見られます」、rate_limited なら「たくさん読んだので、○分（retry_after_min）ほどあとでまた見られます」を小さく出す。未ログインとデモの日付は前の7日までにしてよい。データ側（移行190）と同時に反映する
@@ -685,6 +694,6 @@
 - 【中】知らせのピン止めをアカウントに保存する（今は端末だけ）。表を足すなら移行と RLS をセットで、自分の行だけ読める・書ける形に。チェックイン担当が画面から読めるよう関数の名前を報告に（B の7番）
 - 【小】通知の題から「そらメモ：」を外し、推定は本文の最後に「（推定）」1つにそろえる（B の8番）
 
-## PM から積んだ次の仕事（11/25 5時10分、アプリ全体の見直し 2回目から。ブランチ kaizen/sweep-1125 の docs/pm/report-sweep-1125.md）※data/sweep-1125 で。テストが通れば PM が自動で反映
+## PM から積んだ次の仕事（11/25 5時10分、アプリ全体の見直し 2回目から。ブランチ kaizen/sweep-1125 の docs/pm/report-sweep-1125.md）※data/sweep-1125 で。テストが通れば PM が自動で反映【4番は済み：PR #216・report-sweep-1125-data.md。2番は本人の確認待ち】
 - 【中】特別塗装機の知らせを1機・1便で1つの tag にまとめ、予定 → 飛んでいる → 着陸に向かっている を同じ通知の書き換えにする。夜の静かな時間（23〜7時）をゴーアラウンド以外にも選べるように（はじめ ON）。運用が変わった知らせは「前の知らせから60分」で数える。設定を足すなら移行と RLS をセットで（4番）
 - 「空の上」を adsb の離陸〜着陸にする件（2番）は本人の確認待ち。PM が知らせるまで始めない
