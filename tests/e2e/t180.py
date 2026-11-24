@@ -5,6 +5,7 @@ HERE=os.path.dirname(os.path.abspath(__file__)); WEB=os.path.abspath(os.path.joi
 import asyncio, json
 from datetime import datetime, timedelta, timezone
 from playwright.async_api import async_playwright
+sys.path.insert(0, HERE); from keepls import goto_http   # 開き直すので http で開く（file:// だと開き直したとき書いた localStorage を毎回落とし、ログインと選んだピルが消えた。11/24）
 _d = datetime.now(timezone.utc); now = datetime(_d.year, _d.month, _d.day, 3, 0, tzinfo=timezone.utc)   # 日本時間の昼12時
 iso = lambda m: (now + timedelta(minutes=m)).isoformat()
 SHOTS = os.path.abspath(os.path.join(HERE, '..', '..', 'docs', 'pm', 'shots-home-card-switch')); os.makedirs(SHOTS, exist_ok=True)
@@ -36,7 +37,7 @@ async def main():
             await r.fulfill(status=200, body=json.dumps(body), content_type='application/json', headers={'Access-Control-Allow-Origin':'*'})
         await c.route('https://fake.supabase.co/rest/v1/rpc/**', rpc)
         pg=await c.new_page(); await pg.clock.set_fixed_time(now); errs=[]; pg.on('pageerror', lambda e: errs.append(str(e) + ' @ ' + (e.stack or '')[:300]))
-        await pg.goto('file://'+os.path.join(WORK,'index_server_test.html')); await pg.wait_for_load_state('load'); await pg.wait_for_timeout(600)
+        await goto_http(pg, os.path.join(WORK,'index_server_test.html')); await pg.wait_for_load_state('load'); await pg.wait_for_timeout(600)
         await pg.evaluate('__fake.login()'); await pg.wait_for_timeout(800)
         await pg.evaluate("setPersona('spot', 'test')"); await pg.wait_for_timeout(1500)   # 撮影の構成（運用タブを先に開く＝いまの運用が分かる）
         await pg.evaluate("goTab('home')"); await pg.wait_for_timeout(300)
