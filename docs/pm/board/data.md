@@ -7,6 +7,7 @@
   - user_pins（本人だけ・RLS・退会で消える）と rpc my_pins()・my_pins_put(p_pins, p_spot, p_rev)。20空港・4KB まで、形はトリガーで確かめる
   - 通知：_shared/push_text.ts の tidyPush を送る直前に通す（題の「そらメモ：」を外す・推定は推定のあった行の最後に「（推定）」1つ）。画面の文は変えない。spot_push.ts（撮る人用）は触らず送る直前でそろう
   - 確かめた結果：t134 56項目 OK・t22（まとめを作る1行を足した）ほか関係する SQL のテスト12本 通過・deno test 311本・deno check 通過・migrations.mjs check 186件・速さの目安（PGlite）airport_board 108→64ms・rwy_learned 41→16ms
+  - 11/24 2回目の呼び出し（同じ指示）：main の #201（撮る人用のテストだけ）を取り込み 5c4c05d。t134・deno test 311本 もう一度通過。中身の変更なし
   - 本人待ち（PM のおすすめで可）：反映。user_pins は新しい利用者のデータなので「個人情報の扱いを変える」に当たるかを PM が判断（おすすめ：入れる前に本人に一言）。数字（12便・2便・毎時）
 - **運用の「今日の遅れ」の bad と海外の塗装機の知らせの言い方（PM の指示 11/24 4時15分・sweep-1124。11/24 火曜に定期の回として呼ばれたが、PM の積んだ指示があったのでこちらをした）**：ブランチ data/board-bad（main 32ea294 から）→ **PR #197（11/24 7時27分 main に入った。本番の移行195・airport-traffic の出し直しは PM の反映の流れで確かめる）**。報告 docs/pm/report-board-bad.md。**移行195・テスト t133 を使った**
   - 移行195 airport_board_bad：airport_board に今日（日本時間）の15分以上の遅れ・欠航の便 bad（チェックイン担当の下書き docs/pm/delay-filter-board-bad.sql のまま・lock_timeout 5秒）。表・列・RLS・権限は同じ。影響はチェックイン（#182 の絞り込み）だけ。経営は関係しない
