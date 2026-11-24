@@ -1,6 +1,11 @@
 # チェックイン担当の帳面
 
 ## いま持っている仕事
+- **11/24 15時台のもう1つの定時の回（PM の指示なし。帳面の「その1」を始めた）**：手元で同じ「その1」を作り終えて push しようとしたら、別の回が2分先に PR #207 で出していたので、こちらの版（手元のみ・aca4dca3）は push せず #207 に任せた。#207 に無かった所だけを **#207 に足した（49726687）**：
+  - 成績の「航空会社別」（renderAirlines）が車などを「航空会社が未記録のフライト 1便あります」と出していた（デモでも出る）→ flyOnly で数える。使い方の勧め（personaSuggestion）の「この90日で○便」も車などを入れない
+  - t183 に航空会社別の確かめを足した。t183・tests/ops 成功。報告 report-sweep-all-1.md に追記
+  - renderYears・renderOverall も車などを数えるが、置き場（yrTabs・overallBox）が画面に無く使われていないので変えていない（消してよいかは PM へ）
+  - 手元の注意：run_all.py の名前の指定は前方一致（t11 で t110〜t119 も流れる）。e2e を流すと docs/pm/shots-* の前の写真18枚ほどが上書きされるので、コミットの前に `git diff --name-only | grep '^docs/pm/shots-' | xargs git checkout --` で戻す。t48 は pdf417gen・segno が要る
 - 11/24 手動の回（PM「その1 を checkin/sweep-all-1 で」）：PR #207（82b0084e）で済みで、main も dad55b43 のまま動いていないので作り直さなかった。その2・3D には触っていない
 - **11/24 15時台の定時の回（帳面の「その1」。checkin/sweep-all-1）**：下書き **PR #207**（ad3ed46e＋main 取り込み 82b0084e・報告 docs/pm/report-sweep-all-1.md・写真 docs/pm/shots-sweep-all-1/）。見張りを付けた。テストが通っているので PM の自動の反映でよい
   - A1 マイページの頭の札・成績のパスポート（これまで・年ごと・共有画像）は flyOnly で数える（車など・記録帳の便を外し「記録帳の便 ○・車など ○（○ km）は…別に数えています」の1行）。A2 書き出しの説明は PM の決定①（ログイン中）＋ログインしていない人・デモ・サーバーなしの文、見出し「データとバックアップ」。A5 デモの見本の最後の便を昨日に（日の単位でずらす・demoClock は null・demoNow は今より前にしない）。A6 同意の画面はチェックとボタンを下に固定（#auFoot を sticky、dAuth に data-step）。A7 補足の字 #9CA3AF→#646B78（auth の --a-sub・mypage の --mp-sub）。A8 案内の3枚目は「はじめる」1つ＋運用と修行の一文。A9 44px（resend のピル・あとで・色の丸・規約のリンク）。A10 cardBase に「非公式アプリ」。B10 .brand と案内の HND をゴシック（経営の明朝体は触らない。SVG の font-family 属性に var() は効かないので style にした）
