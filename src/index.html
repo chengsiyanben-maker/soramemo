@@ -7874,7 +7874,7 @@ document.addEventListener("click", e => { const b = e.target.closest("[data-year
 function renderAirlines(){
   const st = Object.fromEntries(GROUPS.map(([g]) => [g, {n:0, km:0, r:new Set()}]));
   let unset = 0;
-  for(const f of S.flights){
+  for(const f of flyOnly(S.flights)){   // 車などは便に入れない（11/11）
     if(!f.airline){ unset++; continue; }
     const g = (ALBY[f.airline] || {group:"OTHER"}).group, x = st[g];
     x.n++; x.km += f.km; x.r.add([f.from,f.to].sort((p,q)=>p-q).join("-"));
@@ -7886,7 +7886,7 @@ function renderAirlines(){
       <div class="sub"><b>${x.n}</b> 便・<b>${x.r.size}</b> 路線</div>
       <div class="bar" aria-hidden="true"><i style="width:${x.km >= next[0] ? 100 : pct}%"></i></div>
       <div class="goal">${x.km >= next[0] ? `${next[1]}を達成` : `${next[1]}まで<br>あと <b>${fmtKm(next[0] - x.km)}</b> km${prev ? `<br><span class="done">${prev[1]}達成</span>` : ""}`}</div></div>`; };
-  const total = S.flights.length;
+  const total = flyOnly(S.flights).length;
   if(FOCUS !== "ALL"){
     const x = st[FOCUS], label = GROUPS.find(([g]) => g === FOCUS)[1];
     $("airlineStats").innerHTML = total ? `<div class="alstats" style="grid-template-columns:1fr">${card([FOCUS, label])}</div>`
@@ -9069,7 +9069,7 @@ function personaSuggestion(){
   for(const day of Object.values(u.ops || {})) for(const [ap, m] of Object.entries(day)) if(m >= 30){ byAp[ap] = byAp[ap] || { days:0, min:0 }; byAp[ap].days++; byAp[ap].min += m; }
   const top = Object.entries(byAp).sort((x, y) => y[1].min - x[1].min)[0];
   if(top && top[1].days >= 3) return { p:"spot", why:`この2週間、${OPS_AIRPORTS[top[0]] ? OPS_AIRPORTS[top[0]].name : top[0]}で運用の画面を長く開いています（${top[1].days}日・あわせて${Math.round(top[1].min / 60)}時間）。` };
-  const n90 = S.flights.filter(f => f.dep >= Date.now() - 90 * 864e5).length;
+  const n90 = flyOnly(S.flights).filter(f => f.dep >= Date.now() - 90 * 864e5).length;
   if(n90 >= 6) return { p:"shugyo", why:`この90日で${n90}便に乗っています。` };
   if(u.plan) return { p:"shugyo", why:"修行の計画を使っています。" };
   return null;

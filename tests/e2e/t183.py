@@ -51,6 +51,13 @@ async def main():
         check('パスポートに「車など 1（90 km）は…別に数えています」', re.search(r'車など 1（\d+ km）は、フライト・距離・飛行時間に入れず別に数えています', pp) is not None)
         st = await pg.evaluate('JSON.stringify(passStats("all"))')
         check('パスポートの飛行時間・空港も便だけ（空港16）', json.loads(st)['aps'] == 16 and json.loads(st)['car'] == 1, st[:200])
+        # 成績の航空会社別も車などを入れない（前は車などが「航空会社が未記録のフライト 1便」と出ていた。11/24 定時の回で足した）
+        o = await pg.evaluate("""(() => { const ys = [...new Set(S.flights.map(f => new Date(f.arr).getFullYear()))]; let yr = 0;
+          for(const y of ys){ YEAR = y; renderYears(); const m = ($('yrBody') ? $('yrBody').innerText : '').match(/(\\d+)\\s*フライト/); yr += m ? +m[1] : 0; }
+          renderAirlines(); const al = $('airlineStats') ? $('airlineStats').innerText : '';
+          const n = [...al.matchAll(/(\\d+)\\s*便/g)].reduce((x, m) => x + +m[1], 0);
+          return { yr, al:n, ys:ys.length, unset:/未記録/.test(al) }; })()""")
+        check('航空会社別の便は合わせて 30・「未記録のフライト」が出ない（車などを入れない）', o['al'] == 30 and not o['unset'], o)
         # 記録帳の便を足しても、フライトの数は変わらず別の行に
         await pg.evaluate("S.manual.push({d:'2026-01-05', from:A.find(a=>a.iata==='HND').id, to:A.find(a=>a.iata==='CTS').id, airline:'JL'});")
         pp2 = await pg.evaluate('(() => { renderPassport(); return $("passport").innerText; })()')
