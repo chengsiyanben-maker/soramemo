@@ -1,7 +1,7 @@
 import os, sys
 HERE=os.path.dirname(os.path.abspath(__file__)); WEB=os.path.abspath(os.path.join(HERE,'..','..','web')); WORK=os.environ.get('SORAMEMO_TEST_WORK','/tmp/soramemo-e2e'); os.makedirs(WORK, exist_ok=True)
 # iPhone のアプリだけの画面（決定事項【11/19】design/ios-app 2版・ブランチ checkin/ios-app）
-#   1 ブラウザ（Capacitor なし）では何も出ない：位置の説明・許可しなかった人のカード・電波がない帯・小さい説明。ホーム画面に追加の帯は今のまま
+#   1 ブラウザ（Capacitor なし）では何も出ない：位置の説明・許可しなかった人のカード・図鑑などの電波がない帯・小さい説明（ホームの帯は 11/25 からウェブでも出す）。ホーム画面に追加の帯は今のまま
 #   2 アプリ：ログインか「デモで試す」のあと、はじめてホームを開くと位置の説明（I1）。「次へ」で iPhone の確認（requestPermissions）。2回目は出ない
 #   3 アプリ：許可しなかった人は半券の代わりに I1c のカード（設定の道・デモで試す・設定を開く）。デモで試すとカードが消えて半券に戻る
 #   4 アプリ：半券を押して許可がないと分かったら I1e の小さいシート。代わりの1行（I3）
@@ -61,8 +61,8 @@ async def main():
         c, pg = await open_page(b, '', errs)
         await pg.evaluate('__fake.login()'); await pg.wait_for_timeout(800); await close_auth(pg)
         await c.set_offline(True); await pg.evaluate("window.dispatchEvent(new Event('offline'))"); await pg.wait_for_timeout(200)
-        r = await pg.evaluate("({ why: $('dLocWhy').open, off: $('nvLocOff').hidden, net: ['nvNetHome','nvNetOps','nvNetBook','nvNetLog'].every(id => $(id).hidden), bp: $('bpass').hidden, push: PUSH_NG_TXT(), mic: MIC_NG_TXT() })")
-        check('1 ブラウザでは位置の説明・I1c・電波がない帯を出さない', r['why'] is False and r['off'] and r['net'] and r['bp'] is False, r)
+        r = await pg.evaluate("({ why: $('dLocWhy').open, off: $('nvLocOff').hidden, net: ['nvNetOps','nvNetBook','nvNetLog'].every(id => $(id).hidden), home: $('nvNetHome').hidden === false && $('nvNetHome').innerText.includes('チェックインは保留して'), bp: $('bpass').hidden, push: PUSH_NG_TXT(), mic: MIC_NG_TXT() })")
+        check('1 ブラウザでは位置の説明・I1c・図鑑などの電波がない帯を出さない（ホームの帯は 11/25 からウェブでも出す）', r['why'] is False and r['off'] and r['net'] and r['home'] and r['bp'] is False, r)
         check('1 ブラウザの通知・マイクの文は今のまま', 'ブラウザでは使えません' in r['push'] and 'ブラウザの設定' in r['mic'], r)
         await c.set_offline(False)
         inst = await pg.evaluate("(() => { localStorage.removeItem('soramemo.install.later'); renderInstall(); return { row: $('installRow').hidden }; })()")

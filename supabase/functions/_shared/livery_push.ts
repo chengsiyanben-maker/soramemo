@@ -1,9 +1,10 @@
 // 機体ごとの通知：選んだ特別塗装機が新しい便（便名）で飛んでいるのを見つけたら、その機体を選んでいる人に1便に1回知らせる。
 // 送る・記録するところは外から渡す（airport-traffic はデータベースと web-push、テストは作り物）
 import { tidyPush } from "./push_text.ts";
+import { awake, liveryTag } from "./livery_note.ts";
 
 export type RegFlySeen = { reg: string; name: string; airline: string; callsign: string | null; alt_ft: number | null; kind?: string };
-export type RegFlySub = { id: number; endpoint: string; p256dh: string; auth: string };
+export type RegFlySub = { id: number; endpoint: string; p256dh: string; auth: string; quiet_night?: boolean | null };
 export type RegFlyDeps = {
   notifiedSince: (reg: string, key: string, sinceIso: string) => Promise<boolean>;   // この便をもう知らせたか
   markNotified: (reg: string, key: string, atIso: string) => Promise<void>;
@@ -18,17 +19,18 @@ export const regFlyKey = (callsign: string) => `F:${callsign}`;
 export const regFlyMessage = (v: RegFlySeen) => tidyPush({
   title: `★${v.name}`,
   body: `${v.name}（${v.airline}・${v.callsign}）が飛んでいます（推定）。`,
-  tag: `spr-${v.reg}`,
+  tag: liveryTag({ callsign: v.callsign, reg: v.reg }),   // 予定・着陸に向かっている と同じ tag（同じ通知の書き換え）
+  renotify: true,
   url: `./#special-${v.reg}`,
 });
 
-// 送った数を返す。同じ便は12時間のうちに1回だけ（便名が変われば新しい便）
+// 送った数を返す。同じ便は12時間のうちに1回だけ（便名が変われば新しい便）。夜の静かな時間を選んだ人には送らない
 export async function notifyRegFly(v: RegFlySeen, deps: RegFlyDeps, now = Date.now()): Promise<number> {
   if (!wantsRegFly(v)) return 0;
   const key = regFlyKey(v.callsign!);
   if (await deps.notifiedSince(v.reg, key, new Date(now - 12 * 3600_000).toISOString())) return 0;
   await deps.markNotified(v.reg, key, new Date(now).toISOString());
-  const subs = await deps.subsFor(v.reg);
+  const subs = awake(await deps.subsFor(v.reg), now);
   if (!subs.length) return 0;
   const payload = JSON.stringify(regFlyMessage(v));
   let sent = 0;

@@ -11,6 +11,7 @@ import { acFromLive, groundFromAdsb, type LiveRow, planesFromAdsb, recordPlan, r
 import { fetchMetars } from "../_shared/metar.ts";
 import { OPS_AIRPORTS, observeOps, runwaysOf } from "../_shared/ops_core.js";
 import { gaStep, guessRwy, quietNow, type Watch, wxRisk } from "../_shared/go_around.ts";
+import { awake, liveryTag } from "../_shared/livery_note.ts";
 import { type ArrWatch, arrStep } from "../_shared/rwy_learn.ts";
 import { LIVERIES, type Livery, liveryMap } from "../_shared/liveries.ts";
 import { type Dest, inboundEtaMin, inboundMessage, mergeLiveries, pickDest, type Seen, wantsInbound, wantsLiveryPush } from "../_shared/livery_extra.ts";
@@ -351,7 +352,7 @@ async function notifyRegFly(v: any) {
   await notifyRegFlyWith(v, {
     notifiedSince: async (reg, key, since) => { const { data } = await admin.from("livery_notified").select("reg").eq("reg", reg).eq("iata", key).gt("notified_at", since); return !!data?.length; },
     markNotified: async (reg, key, at) => { await admin.from("livery_notified").upsert({ reg, iata: key, notified_at: at }); },
-    subsFor: async (reg) => { const { data } = await admin.from("push_subs").select("id, endpoint, p256dh, auth").contains("sp_regs", [reg]); return data ?? []; },
+    subsFor: async (reg) => { const { data } = await admin.from("push_subs").select("id, endpoint, p256dh, auth, quiet_night").contains("sp_regs", [reg]); return data ?? []; },
     send: async (s, payload) => { try { await webpush.sendNotification({ endpoint: s.endpoint, keys: { p256dh: s.p256dh, auth: s.auth } }, payload, { TTL: 900 }); return null; } catch (e) { return (e as { statusCode?: number }).statusCode ?? 0; } },
     drop: async (id) => { await admin.from("push_subs").delete().eq("id", id); },
   });
@@ -365,15 +366,16 @@ async function notifyLivery(v: any) {
   const { data: done } = await admin.from("livery_notified").select("reg").eq("reg", v.reg).eq("iata", v.iata).gt("notified_at", since);
   if (done?.length) return;
   await admin.from("livery_notified").upsert({ reg: v.reg, iata: v.iata, notified_at: new Date().toISOString() });
-  const { data: all } = await admin.from("push_subs").select("id, endpoint, p256dh, auth, spot_iata, spot_kinds").contains("sp_airports", [v.iata]);
+  const { data: all } = await admin.from("push_subs").select("id, endpoint, p256dh, auth, spot_iata, spot_kinds, quiet_night").contains("sp_airports", [v.iata]);
   // 撮影の知らせで同じ空港の特別塗装機を選んでいる人には、そちら（着陸の数分前）で知らせるので、ここでは送らない
   // （撮影の知らせはアライアンス塗装を出さないので、アライアンス塗装のときは撮影の知らせを選んでいる人にもここで送る）
-  const subs = (all ?? []).filter((s) => !(v.kind !== "alliance" && s.spot_iata === v.iata && (s.spot_kinds ?? []).includes("special")));
+  // 夜の静かな時間（23〜7時）を選んだ人には送らない（livery_note.ts）
+  const subs = awake((all ?? []).filter((s) => !(v.kind !== "alliance" && s.spot_iata === v.iata && (s.spot_kinds ?? []).includes("special"))));
   if (!subs.length) return;
   webpush.setVapidDetails(Deno.env.get("VAPID_SUBJECT") || "https://soramemo.jp", pub, priv);
   // deno-lint-ignore no-explicit-any
   const name = (OPS_AIRPORTS as any)[v.iata]?.name ?? v.iata;
-  const body = JSON.stringify(tidyPush({ title: `★${v.name}`, body: `${v.name}（${v.airline}${v.callsign ? "・" + v.callsign : ""}）が${name}に着陸に向かっています（推定）。`, tag: `sp-${v.reg}`, url: `./#ops-${v.iata}` }));
+  const body = JSON.stringify(tidyPush({ title: `★${v.name}`, body: `${v.name}（${v.airline}${v.callsign ? "・" + v.callsign : ""}）が${name}に着陸に向かっています（推定）。`, tag: liveryTag({ callsign: v.callsign, reg: v.reg }), renotify: true, url: `./#ops-${v.iata}` }));
   for (const s of subs) {
     try { await webpush.sendNotification({ endpoint: s.endpoint, keys: { p256dh: s.p256dh, auth: s.auth } }, body, { TTL: 900 }); }
     catch (e) { const code = (e as { statusCode?: number }).statusCode; if (code === 404 || code === 410) await admin.from("push_subs").delete().eq("id", s.id); }
@@ -421,8 +423,9 @@ async function notifyInbound(list: Seen[]) {
     const { data: dup } = await admin.from("livery_notified").select("reg").eq("reg", v.reg).eq("iata", dest.iata).gt("notified_at", since);
     if (dup?.length) continue;
     await admin.from("livery_notified").upsert({ reg: v.reg, iata: dest.iata, notified_at: new Date(now).toISOString() });
-    const { data: subs } = await admin.from("push_subs").select("id, endpoint, p256dh, auth").contains("sp_airports", [dest.iata]);
-    if (!subs?.length) continue;
+    const { data: all } = await admin.from("push_subs").select("id, endpoint, p256dh, auth, quiet_night").contains("sp_airports", [dest.iata]);
+    const subs = awake(all ?? [], now);
+    if (!subs.length) continue;
     // deno-lint-ignore no-explicit-any
     const name = (OPS_AIRPORTS as any)[dest.iata]?.name ?? airports.get(dest.iata)?.name ?? dest.iata;
     const m = inboundMessage(v, dest, name, inboundEtaMin(dest.km, v.kt, dest.mins, now), now);
@@ -432,8 +435,9 @@ async function notifyInbound(list: Seen[]) {
 }
 
 // ---- 撮影の知らせ（いつもの空港に、選んだ種類の機体が着陸の数分前になったら。同じ機体は1日1回） ----
-const SPOT_COLS = "id, endpoint, p256dh, auth, spot_iata, spot_kinds, spot_lead, spot_regs, spot_flights, spot_fams, spot_livs";
-async function sendOne(s: { id: number; endpoint: string; p256dh: string; auth: string }, payload: Record<string, string>, ttl = 900) {
+const OPS_GAP = 60 * 60_000;   // 運用の知らせの間（前の知らせから）
+const SPOT_COLS = "id, endpoint, p256dh, auth, spot_iata, spot_kinds, spot_lead, spot_regs, spot_flights, spot_fams, spot_livs, quiet_night";
+async function sendOne(s: { id: number; endpoint: string; p256dh: string; auth: string }, payload: Record<string, string | boolean>, ttl = 900) {
   try { await webpush.sendNotification({ endpoint: s.endpoint, keys: { p256dh: s.p256dh, auth: s.auth } }, JSON.stringify(tidyPush(payload)), { TTL: ttl }); return true; }
   catch (e) { const code = (e as { statusCode?: number }).statusCode; if (code === 404 || code === 410) await admin.from("push_subs").delete().eq("id", s.id); return false; }
 }
@@ -445,8 +449,9 @@ async function firstTime(sub_id: number, key: string) {
 async function notifySpot(bodies: Map<string, string>) {
   const pub = Deno.env.get("VAPID_PUBLIC_KEY"), priv = Deno.env.get("VAPID_PRIVATE_KEY");
   if (!pub || !priv) return 0;
-  const { data: subs } = await admin.from("push_subs").select(SPOT_COLS).not("spot_iata", "is", null);
-  if (!subs?.length) return 0;
+  const { data: all } = await admin.from("push_subs").select(SPOT_COLS).not("spot_iata", "is", null);
+  const subs = awake(all ?? []);   // 夜の静かな時間を選んだ人には送らない
+  if (!subs.length) return 0;
   webpush.setVapidDetails(Deno.env.get("VAPID_SUBJECT") || "https://soramemo.jp", pub, priv);
   const L = liveryMap(new Date(), await allLiveries()), planesOf = new Map<string, SpotPlane[]>(), today = jstDate();
   let sent = 0;
@@ -469,7 +474,7 @@ async function notifySpotDep() {
   const pub = Deno.env.get("VAPID_PUBLIC_KEY"), priv = Deno.env.get("VAPID_PRIVATE_KEY");
   if (!pub || !priv) return 0;
   const { data: subs } = await admin.from("push_subs").select(SPOT_COLS).not("spot_iata", "is", null);
-  const want = ((subs ?? []) as (SpotSub & { endpoint: string; p256dh: string; auth: string })[])
+  const want = awake((subs ?? []) as (SpotSub & { endpoint: string; p256dh: string; auth: string; quiet_night?: boolean | null })[])
     .filter((s) => (s.spot_kinds ?? []).includes("dep") || (s.spot_flights ?? []).length > 0);
   if (!want.length) return 0;
   const { data: deps, error } = await admin.rpc("spot_departures", { p_iatas: [...new Set(want.map((s) => s.spot_iata!))] });
@@ -486,12 +491,14 @@ async function notifySpotDep() {
   }
   return sent;
 }
-// 運用が変わったら、「運用が変わったとき」を選んでいる人に知らせる（ops_log の新しい4回から。同じ変化は1時間に1回）
+// 運用が変わったら、「運用が変わったとき」を選んでいる人に知らせる（ops_log の新しい4回から）。
+// その空港の運用の知らせは、前の知らせから60分たつまで送らない（北⇔南の行き来や時をまたいでも続けて届かない。11/25 見直し2回目の4番）
 async function notifyOpsChange(iatas: string[]) {
   const pub = Deno.env.get("VAPID_PUBLIC_KEY"), priv = Deno.env.get("VAPID_PRIVATE_KEY");
   if (!pub || !priv || !iatas.length) return 0;
-  const { data: subs } = await admin.from("push_subs").select(SPOT_COLS).in("spot_iata", iatas).contains("spot_kinds", ["ops"]);
-  if (!subs?.length) return 0;
+  const { data: all } = await admin.from("push_subs").select(SPOT_COLS).in("spot_iata", iatas).contains("spot_kinds", ["ops"]);
+  const subs = awake(all ?? []);   // 夜の静かな時間を選んだ人には送らない
+  if (!subs.length) return 0;
   webpush.setVapidDetails(Deno.env.get("VAPID_SUBJECT") || "https://soramemo.jp", pub, priv);
   let sent = 0;
   for (const iata of new Set(subs.map((s) => s.spot_iata as string))) {
@@ -499,9 +506,14 @@ async function notifyOpsChange(iatas: string[]) {
     const ch = opsChanged(rows ?? []); if (!ch) continue;
     // deno-lint-ignore no-explicit-any
     const def = (OPS_AIRPORTS as any)[iata], label = (k: string) => def?.modes?.[k]?.label ?? k;
-    const hour = new Date(Date.now() + 9 * 3600_000).toISOString().slice(0, 13);
-    for (const s of subs.filter((x) => x.spot_iata === iata)) {
-      if (!(await firstTime(s.id, `ops-${iata}-${ch.to}@${hour}`))) continue;
+    const mine = subs.filter((x) => x.spot_iata === iata), now = Date.now();
+    const { data: recent } = await admin.from("spot_notified").select("sub_id").in("sub_id", mine.map((x) => x.id))
+      .like("key", `ops-${iata}%`).gt("notified_at", new Date(now - OPS_GAP).toISOString());
+    const quiet = new Set((recent ?? []).map((r) => r.sub_id));
+    const minute = new Date(now + 9 * 3600_000).toISOString().slice(0, 16);
+    for (const s of mine) {
+      if (quiet.has(s.id)) continue;
+      if (!(await firstTime(s.id, `ops-${iata}@${minute}`))) continue;
       if (await sendOne(s, { title: `${def?.name ?? iata}の運用が変わりました`, body: `${label(ch.from)} → ${label(ch.to)}（実際の機体の動きからの推定）。`, tag: `ops-${iata}`, url: `./#ops-${iata}` })) sent++;
     }
   }

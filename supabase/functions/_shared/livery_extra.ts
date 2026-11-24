@@ -2,6 +2,7 @@
 // 取得・送信とは分けて、テストしやすくしている（airport-traffic が使う）
 import type { Livery } from "./liveries.ts";
 import { kmBetween } from "./foreign_now.ts";
+import { liveryTag } from "./livery_note.ts";
 
 export type ExtraRow = { reg: string; name: string; airline: string; kind?: string | null; src: string; from_day?: string | null; until_day?: string | null };
 
@@ -77,7 +78,8 @@ export function inboundMessage(v: Seen, dest: { iata: string }, airportName: str
   return {
     title: `★${v.name}`,
     body: `${v.name}（${v.airline}${v.callsign ? "・" + v.callsign : ""}）が${airportName}に向かっています。着くのは${jaTime(nowMs, etaMin)}ごろ（推定）。`,
-    tag: `sp-${v.reg}`,
+    tag: liveryTag({ callsign: v.callsign, reg: v.reg }),
+    renotify: true,
     url: `./#ops-${dest.iata}`,
   };
 }
