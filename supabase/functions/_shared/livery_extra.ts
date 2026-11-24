@@ -75,7 +75,7 @@ export const jaTime = (nowMs: number, addMin: number) => { const [h, m] = hhmm(n
 // 知らせの中身（推定と書く）：「（推定）」は最後に1回だけ。近くなったときの文（airport-traffic の notifyLivery）と同じく、便名がなければ会社名だけ
 export function inboundMessage(v: Seen, dest: { iata: string }, airportName: string, etaMin: number, nowMs = Date.now()) {
   return {
-    title: `そらメモ：★${v.name}`,
+    title: `★${v.name}`,
     body: `${v.name}（${v.airline}${v.callsign ? "・" + v.callsign : ""}）が${airportName}に向かっています。着くのは${jaTime(nowMs, etaMin)}ごろ（推定）。`,
     tag: `sp-${v.reg}`,
     url: `./#ops-${dest.iata}`,

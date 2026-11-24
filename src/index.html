@@ -114,7 +114,7 @@ button{cursor:pointer}
 .wrap{max-width:560px;margin:0 auto;padding:0 20px 120px}
 
 header.top{display:flex;align-items:center;justify-content:space-between;padding:18px 0 8px}
-.brand{font-family:var(--mincho);font-weight:800;font-size:22px;letter-spacing:.08em;display:flex;align-items:center;gap:10px;margin:0;line-height:1.4}
+.brand{font-family:var(--gothic);font-weight:800;font-size:22px;letter-spacing:.08em;display:flex;align-items:center;gap:10px;margin:0;line-height:1.4}
 .brand svg{width:26px;height:26px}
 .iconbtn{background:none;border:1px solid var(--line);border-radius:999px;padding:6px 14px;font-size:14px;color:var(--sumi)}
 
@@ -216,6 +216,7 @@ dialog::backdrop{background:rgba(15,22,38,.55)}
 .ob-dots i{width:7px;height:7px;border-radius:50%;background:var(--line)}
 .ob-dots i.on{background:var(--shu)}
 .ob-nav{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.ob-nav.one{grid-template-columns:1fr}#obSkip[hidden]{display:none}
 .btn1{padding:12px 16px;border:none;border-radius:10px;background:var(--shu);color:var(--on-shu);font-weight:700}
 /* stamp press */
 .stampwrap{position:relative;width:220px;height:220px;margin:6px auto 4px}
@@ -741,7 +742,7 @@ dialog.spfull .dlg{padding:16px 16px 32px;max-width:480px;margin:0 auto;max-heig
 .atcsteps i{display:block;width:12px;height:12px;border-radius:50%;margin:0 auto 6px;background:var(--s-line)}
 .atcsteps .past i{background:#9CA3AF}.atcsteps .on{color:#1D4ED8;font-weight:800}.atcsteps .on i{background:#1D4ED8;box-shadow:0 0 0 4px #E0ECFF}
 .atcnow{display:flex;justify-content:space-between;align-items:center;margin-top:12px;background:var(--hero);color:#fff;border-radius:16px;padding:10px 14px}
-.artbands{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin:6px 0 8px}.artbands .chip{flex:none}
+.artbands{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin:6px 0 8px}.artbands .chip{flex:none;min-height:44px}
 .artdate{position:relative;cursor:pointer;display:flex;align-items:center;min-height:44px}.artdate input{position:absolute;inset:0;opacity:0;width:100%;cursor:pointer}
 .atcnow small{display:block;font-size:11px;color:#BDBDBD}.atcnow b.f{font-size:20px;font-variant-numeric:tabular-nums}
 .atcfeed{list-style:none;margin:10px 0 0;padding:0}
@@ -1100,6 +1101,7 @@ dialog.tpsheet .dlg{display:flex;flex-direction:column;overflow:hidden;padding-b
 .opslate .ltlong[aria-checked="true"] i{background:#1F6FD1}.opslate .ltlong[aria-checked="true"] i::after{transform:translateX(18px)}
 .opslate .ltrows{margin:8px 0 0;padding:0;list-style:none}
 .opslate .ltrows li{display:flex;align-items:center;gap:10px;padding:10px 0}
+.opslate .ltrows li.ltnowrow{position:relative;margin-top:22px}.opslate .ltrows li.ltnowrow::before{content:"いまごろ";position:absolute;top:-18px;left:0;font-size:13px;font-weight:800;color:#C2410C}
 .opslate .ltrows li+li{border-top:1px solid color-mix(in srgb,var(--op-sub) 18%,transparent)}
 .opslate .lttm{flex:none;width:86px;display:flex;flex-direction:column}.opslate .lttm b{font:900 18px/1.1 var(--gothic);color:var(--op-ink);font-variant-numeric:tabular-nums}
 .opslate .lttm small,.opslate .ltfl small{font-size:13px;font-weight:600;color:var(--op-sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -1120,6 +1122,12 @@ dialog.tpsheet .dlg{display:flex;flex-direction:column;overflow:hidden;padding-b
 .ohc .ohv small{font-size:13px;font-weight:700;color:var(--op-sub)}
 .ohc .ohv .na{font-size:22px;color:var(--op-sub)}
 .ohc .ohv b.prev{color:var(--op-sub)}
+.opsstrip .stripwhat{margin:2px 0 10px;font-size:13px;color:var(--op-sub);line-height:1.6}
+.ohnet{grid-column:1/-1;margin:0 0 4px;padding:12px 16px;border-radius:18px;background:var(--op-pill);font-size:14px;color:var(--op-ink);display:flex;flex-wrap:wrap;gap:4px 10px;align-items:baseline}
+.ohnet span{font-size:13px;color:var(--op-sub)}
+.opsfail{padding:4px 0 8px}.opsfail p{margin:6px 0 10px;font-size:15px;font-weight:700;color:var(--op-ink)}.opsfail small{display:block;margin-top:8px;font-size:13px;color:var(--op-sub)}
+.opsretry{min-height:44px;padding:0 22px;border:0;border-radius:999px;background:var(--op-ink);color:var(--op-card);font:800 15px var(--gothic);cursor:pointer}
+.ohc .ohrng{position:relative;z-index:1;display:block;margin-top:2px;font-size:13px;font-weight:600;color:var(--op-sub)}
 .ohc.dark{background:#0F1B2D;color:#fff}.ohc.dark .oht{color:#C9D2DE}.ohc.dark .ohv b{color:#fff;font-size:40px}
 .ohc .ohchips{margin-left:auto;display:flex;gap:6px}
 .ohc .ohchips i{font:800 14px/1 var(--gothic);font-style:normal;color:#fff;border:1.5px solid #fff;border-radius:8px;padding:6px 8px}
@@ -1671,7 +1679,8 @@ dialog.sgd .dlg{padding:14px 16px 36px;max-width:480px;margin:0 auto;max-height:
 .sg-hero .ga3>span{background:#2A2A2A;color:#fff}.sg-hero .ga3 small{color:#BDBDBD}
 .sgd .ga2>div{background:var(--sg-bg);border-radius:14px;padding:10px 12px}
 /* ---------- 新規登録・ログイン・同意の全画面（画面案 docs/design/signup。色と形は画面案の値） ---------- */
-dialog.auth{--a-bg:#F4F5F7;--a-card:#FFFFFF;--a-ink:#374151;--a-strong:#1F2937;--a-sub:#6B7280;--a-mute:#9CA3AF;--a-track:#EEF0F3;--a-pill:rgba(17,24,39,.05);
+/* 補足の字（--a-sub）は白と薄い灰の地のどちらでも 4.5:1 以上（11/24 見回り sweep-all-a の7番。前の #9CA3AF は約2.4:1）。--a-mute は入力の見本の字・空のマスだけ */
+dialog.auth{--a-bg:#F4F5F7;--a-card:#FFFFFF;--a-ink:#374151;--a-strong:#1F2937;--a-sub:#646B78;--a-mute:#9CA3AF;--a-track:#EEF0F3;--a-pill:rgba(17,24,39,.05);
   --a-shadow:0 1px 2px rgba(17,24,39,.04),0 10px 30px -8px rgba(17,24,39,.10),inset 0 0 0 1px rgba(17,24,39,.07);--a-jal:#C8102E;--a-ana:#1C4FA0;--a-wash:#EEF3FB;
   --a-cta:#1F2937;--a-cta-text:#FFFFFF;--c-bg:#F7F9F4;--c-land:#E9EFE4;--c-coast:#9FB3A4;--c-apt:#1F4E79;
   inset:0;width:100vw;height:100dvh;max-width:100vw;max-height:100dvh;margin:0;border-radius:0;background:var(--a-bg);color:var(--a-ink);font-family:var(--gothic);font-size:16px;line-height:1.7;overflow-y:auto;overscroll-behavior:contain}
@@ -1680,7 +1689,7 @@ dialog.auth::backdrop{background:var(--a-bg)}
 .auth #auStep{flex:1;display:flex;flex-direction:column}
 .auth .top{display:flex;align-items:center;justify-content:space-between;min-height:44px}
 .auth .back{width:40px;height:40px;border-radius:999px;border:0;background:var(--a-pill);color:var(--a-strong);font-size:18px;display:grid;place-items:center;cursor:pointer}
-.auth .skip{border:0;background:var(--a-pill);color:var(--a-sub);font-family:inherit;font-style:normal;font-size:13px;font-weight:700;padding:8px 14px;border-radius:999px;cursor:pointer}
+.auth .skip{border:0;background:var(--a-pill);color:var(--a-sub);font-family:inherit;font-style:normal;font-size:13px;font-weight:700;padding:8px 16px;min-height:44px;border-radius:999px;cursor:pointer}
 .auth .steps{display:flex;gap:6px;align-items:center}
 .auth .steps i{display:block;width:18px;height:6px;border-radius:999px;background:var(--a-track)}
 .auth .steps i.on{background:var(--a-ana);width:28px}
@@ -1696,7 +1705,7 @@ dialog.auth::backdrop{background:var(--a-bg)}
 .auth .input{width:100%;font-family:inherit;font-style:normal;font-size:18px;color:var(--a-strong);background:var(--a-card);border:0;border-radius:18px;padding:16px 18px;box-shadow:var(--a-shadow);outline:none;box-sizing:border-box}
 .auth .input:focus{box-shadow:var(--a-shadow),0 0 0 2px var(--a-ana)}
 .auth .input::placeholder{color:var(--a-mute)}
-.auth .note{font-size:12px;color:var(--a-mute);margin:10px 4px 0}
+.auth .note{font-size:12px;color:var(--a-sub);margin:10px 4px 0}
 .auth .spacer{flex:1;min-height:24px}
 .auth .cta{display:block;width:100%;border:0;border-radius:999px;background:var(--a-cta);color:var(--a-cta-text);font-family:inherit;font-style:normal;font-size:16px;font-weight:800;padding:17px 20px;text-align:center;box-shadow:0 10px 24px -12px rgba(15,23,42,.5);cursor:pointer}
 .auth .cta[disabled]{opacity:.35;box-shadow:none;cursor:default}
@@ -1723,12 +1732,14 @@ dialog.auth::backdrop{background:var(--a-bg)}
 .auth .otp input{position:absolute;inset:0;width:100%;height:100%;opacity:0;font-size:16px;border:0;caret-color:transparent}
 .auth .resend{display:flex;justify-content:space-between;align-items:center;margin-top:22px;font-size:13px;color:var(--a-sub)}
 .auth .resend b{font-size:20px;color:var(--a-strong);font-variant-numeric:tabular-nums;margin-right:2px}
-.auth .resend small{color:var(--a-mute)}
+.auth .resend small{color:var(--a-sub)}
+/* コードの画面の「アドレスを直す」「コードを送り直す」は高さ 44px のピル（11/24 見回り sweep-all-a の9番） */
+.auth .resend .linkish{min-height:44px;padding:0 16px;border-radius:999px;background:var(--a-pill);color:var(--a-strong);font-size:13px;font-weight:700;text-decoration:none}
 .auth .prev{display:flex;align-items:center;gap:14px;margin-top:20px}
 .auth .av{width:52px;height:52px;flex:none;border-radius:999px;background:var(--a-wash);color:var(--a-ana);display:grid;place-items:center;font-size:22px;font-weight:800}
 .auth .prev b{display:block;font-size:17px;color:var(--a-strong);word-break:break-all}
-.auth .prev small{font-size:12px;color:var(--a-mute)}
-.auth .count{float:right;font-size:12px;color:var(--a-mute);margin-right:4px}
+.auth .prev small{font-size:12px;color:var(--a-sub)}
+.auth .count{float:right;font-size:12px;color:var(--a-sub);margin-right:4px}
 .auth .count b{color:var(--a-strong);font-size:14px}
 .auth .opts{display:flex;flex-direction:column;align-items:flex-start;gap:10px;margin-top:36px}
 .auth .opt{border:0;font-family:inherit;font-style:normal;font-size:15px;font-weight:700;color:var(--a-strong);background:var(--a-card);box-shadow:var(--a-shadow);border-radius:999px;padding:13px 18px;display:inline-flex;align-items:center;gap:8px;white-space:nowrap;cursor:pointer}
@@ -1736,14 +1747,14 @@ dialog.auth::backdrop{background:var(--a-bg)}
 .auth .opt[aria-checked="true"]{background:var(--a-wash);color:var(--a-ana);box-shadow:inset 0 0 0 2px var(--a-ana)}
 .auth .opt.later{background:var(--a-pill);box-shadow:none;color:var(--a-sub)}
 .auth .opt.later[aria-checked="true"]{box-shadow:inset 0 0 0 2px var(--a-sub)}
-.auth .why{margin-top:28px;font-size:12px;color:var(--a-mute);display:flex;gap:8px}
+.auth .why{margin-top:28px;font-size:12px;color:var(--a-sub);display:flex;gap:8px}
 .auth .why i{font-style:normal;width:18px;height:18px;flex:none;border-radius:999px;background:var(--a-pill);display:grid;place-items:center;font-size:11px;font-weight:800;color:var(--a-sub)}
 .auth .badge{border:0;margin:0;vertical-align:baseline;line-height:1.5;display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:800;color:var(--a-jal);background:color-mix(in srgb,var(--a-jal) 9%,transparent);padding:6px 12px;border-radius:999px}
 .auth .badge::before{content:"";width:6px;height:6px;border-radius:999px;background:var(--a-jal)}
 .auth .pts{margin:0;padding:0;list-style:none;display:grid;gap:14px}
 .auth .pts li{display:flex;gap:12px;font-size:14px;color:var(--a-ink)}
 .auth .pts li i{font-style:normal;flex:none;width:26px;height:26px;border-radius:999px;background:var(--a-pill);display:grid;place-items:center;font-size:13px;font-weight:800;color:var(--a-strong)}
-.auth .pts li small{display:block;font-size:12px;color:var(--a-mute);line-height:1.5}
+.auth .pts li small{display:block;font-size:12px;color:var(--a-sub);line-height:1.5}
 .auth .docs{display:flex;gap:8px;margin-top:16px}
 .auth .docs a{flex:1;text-align:center;text-decoration:none;font-size:13px;font-weight:700;color:var(--a-strong);background:var(--a-card);box-shadow:var(--a-shadow);border-radius:999px;padding:11px 8px}
 .auth .agree{display:flex;gap:12px;align-items:flex-start;margin-top:22px;font-size:14px;color:var(--a-strong);font-weight:700;cursor:pointer;position:relative}
@@ -1751,21 +1762,27 @@ dialog.auth::backdrop{background:var(--a-bg)}
 .auth .agree .box{flex:none;width:26px;height:26px;border-radius:9px;background:var(--a-card);box-shadow:inset 0 0 0 2px var(--a-mute);color:transparent;display:grid;place-items:center;font-size:15px}
 .auth .agree input:checked + .box{background:var(--a-strong);box-shadow:none;color:var(--a-card)}
 .auth .agree input:focus-visible + .box{outline:2px solid var(--a-ana);outline-offset:2px}
-.auth .agree small{display:block;font-weight:400;font-size:12px;color:var(--a-mute)}
+.auth .agree small{display:block;font-weight:400;font-size:12px;color:var(--a-sub)}
 .auth .ill{margin:40px auto 0;width:100%;max-width:300px;border-radius:26px;overflow:hidden;box-shadow:var(--a-shadow)}
 .auth .ill svg{display:block}
+/* 同意の画面：チェックとボタンを画面の下に固定。上の端を背景の色でぼかして、上の項目が下へ続いていると分かるように（11/24 見回り sweep-all-a の6番） */
+.auth[data-step="terms"] #auFoot{position:sticky;bottom:0;z-index:1;margin:0 -24px calc(-32px - env(safe-area-inset-bottom,0px));padding:22px 24px calc(20px + env(safe-area-inset-bottom,0px));background:linear-gradient(rgba(244,245,247,0),var(--a-bg) 22px)}
+.auth[data-step="terms"] #auFoot .agree{margin:0 0 14px}
+.auth[data-step="terms"] #auFoot .amsg{margin:0 4px 10px}
+.auth[data-step="terms"] #auFoot .amsg:empty{display:none}
 .auth .rows{display:grid;gap:12px;margin-top:28px}
 .auth .row{display:flex;gap:14px;align-items:flex-start}
 .auth .row i{font-style:normal;flex:none;width:34px;height:34px;border-radius:999px;background:var(--a-wash);color:var(--a-ana);display:grid;place-items:center;font-size:15px;font-weight:800}
 .auth .row b{display:block;font-size:15px;color:var(--a-strong)}
-.auth .row small{display:block;font-size:12px;color:var(--a-mute);line-height:1.55}
+.auth .row small{display:block;font-size:12px;color:var(--a-sub);line-height:1.55}
 /* ホーム：登録した直後だけの「ようこそ」カード */
 .welcome-card{display:flex;gap:12px;align-items:center;background:#EEF3FB;border-radius:20px;padding:14px 16px;margin:0 0 12px;font-family:var(--gothic)}
 .welcome-card[hidden]{display:none}
 .welcome-card b{display:block;color:#1F2937;font-size:15px}
 .welcome-card small{display:block;color:#6B7280;font-size:12px;line-height:1.5}
 .welcome-card .x{margin-left:auto;flex:none;width:30px;height:30px;border-radius:999px;border:0;background:#FFFFFF;color:#6B7280;font-size:15px;cursor:pointer}
-dialog.mypage{--mp-bg:#F4F5F7;--mp-card:#FFFFFF;--mp-ink:#374151;--mp-sub:#9CA3AF;--mp-mute:#6B7280;--mp-shadow:0 12px 26px -18px rgba(15,23,42,.3),inset 0 0 0 1px rgba(17,24,39,.07);
+/* マイページの補足の字も 4.5:1 以上（11/24 見回り sweep-all-a の7番） */
+dialog.mypage{--mp-bg:#F4F5F7;--mp-card:#FFFFFF;--mp-ink:#374151;--mp-sub:#646B78;--mp-mute:#5F6672;--mp-shadow:0 12px 26px -18px rgba(15,23,42,.3),inset 0 0 0 1px rgba(17,24,39,.07);
   max-width:min(460px,100vw);width:100%;max-height:100dvh;height:100dvh;margin:0 auto;border-radius:0;background:var(--mp-bg);color:var(--mp-ink)}
 [data-palette="board"] dialog.mypage{--mp-bg:#0B0D10;--mp-card:#16191F;--mp-ink:#E5E7EB;--mp-sub:#8B95A3;--mp-mute:#A7B0BC;--mp-shadow:0 12px 26px -16px rgba(0,0,0,.7)}
 dialog.mypage{inset:0;overflow-y:auto;overscroll-behavior:contain}
@@ -1782,7 +1799,7 @@ dialog.mypage .mp-av{width:56px;height:56px;border-radius:50%;display:grid;place
 [data-palette="board"] dialog.mypage .mp-av{color:#0B0D10}
 dialog.mypage .mp-who{min-width:0}
 dialog.mypage .mp-who b{display:block;font-size:18px;font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-dialog.mypage .mp-who small{display:block;font-size:12px;color:#9CA3AF;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+dialog.mypage .mp-who small{display:block;font-size:12px;color:var(--mp-sub);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 dialog.mypage .mp-chips{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
 dialog.mypage .mp-chip{font-size:11px;font-weight:700;color:#E5E7EB;background:rgba(255,255,255,.1);padding:4px 10px;border-radius:999px}
 dialog.mypage .mp-chip.ok{color:#6EE7B7;background:rgba(16,185,129,.15)}
@@ -1809,6 +1826,8 @@ dialog.mypage .swatch i{width:28px;height:28px;border-width:3px;border-color:var
 dialog.mypage .plus-list{font-size:13px;color:var(--mp-mute);margin:4px 0 6px;padding-left:1.2em}
 dialog.mypage .hint{font-size:12px;color:var(--mp-sub)}
 dialog.mypage .legal{text-align:center;font-size:11px;color:var(--mp-sub);margin-top:18px}
+dialog.mypage .legal a{display:inline-block;padding:14px 2px}   /* 押せる高さ 44px（11/24 見回り sweep-all-a の9番） */
+dialog.mypage .swatch{min-width:44px;min-height:44px;justify-content:center}
 dialog.mypage .appver{text-align:center}
 dialog.mypage .dlg .close{display:none}
 
@@ -1864,7 +1883,7 @@ dialog.mypage .dlg .close{display:none}
 #v-ops .otlist .bar i.mid{background:#F59E0B}
 #v-ops .otlist .bar i.low{background:#EF4444}
 #v-ops .otlist b{text-align:right;font-variant-numeric:tabular-nums}
-#v-ops .otlist small{color:var(--op-mute);text-align:right;font-variant-numeric:tabular-nums}
+#v-ops .otlist small{font-size:13px;color:var(--op-mute);text-align:right;font-variant-numeric:tabular-nums}
 #v-ops .artcv{display:block;width:100%;aspect-ratio:1;border-radius:16px;background:#0B1220;margin:4px 0 8px}
 #v-ops .artnav{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12.5px;color:var(--op-ink)}
 #v-ops .artnav button{min-height:44px;min-width:44px;padding:0 12px;border:0;border-radius:999px;background:var(--op-pill);color:var(--op-ink);font:700 12px var(--gothic)}
@@ -1891,7 +1910,7 @@ dialog.mypage .dlg .close{display:none}
 #v-ops .bdhead+.bdhead,#v-ops .bdseq+.bdhead,#v-ops .opsboard .hint+.bdhead{margin-top:16px}
 #v-ops .bdhead h3{margin:0;font-size:14px;font-weight:800;color:var(--op-ink)}
 #v-ops .bdtabs{display:flex;gap:4px;background:var(--op-pill);padding:3px;border-radius:999px}
-#v-ops .bdtabs button{border:0;background:none;border-radius:999px;padding:5px 12px;font:700 12px var(--gothic);color:var(--op-mute)}
+#v-ops .bdtabs button{border:0;background:none;border-radius:999px;padding:5px 12px;font:700 13px var(--gothic);color:var(--op-mute)}
 #v-ops .bdtabs button[aria-pressed="true"]{background:var(--op-card);color:var(--op-ink);box-shadow:0 2px 6px -2px rgba(15,23,42,.25)}
 #v-ops .bdkind{display:inline-flex;margin:0 0 8px}
 #v-ops .bdseq .fl .intl{font-style:normal;font-size:10.5px;font-weight:700;color:#1D4ED8;background:#DBEAFE;border-radius:4px;padding:0 5px;margin-right:5px}
@@ -2735,7 +2754,7 @@ dialog.psheet .btn1,dialog.psheet .btn2{display:block;width:100%;margin-top:10px
 #v-ops .opsday .hb{display:flex;align-items:flex-end;gap:3px;height:150px;margin-top:12px}
 #v-ops .opsday .hb>span{flex:1;display:flex;flex-direction:column;justify-content:flex-end;height:100%}
 #v-ops .opsday .hb i{display:block}
-#v-ops .opsday .hx{display:flex;justify-content:space-between;font-size:10px;color:var(--op-mute);margin-top:6px}
+#v-ops .opsday .hx{display:flex;justify-content:space-between;font-size:13px;color:var(--op-mute);margin-top:6px}
 #v-ops .opsday .big{font-size:44px;font-weight:900;line-height:1;color:var(--op-ink)}
 #v-ops .opsstrip ol{list-style:none;margin:10px 0 0;padding:0;display:flex;flex-direction:column;gap:7px}
 #v-ops .opsstrip li{display:flex;border-radius:6px;overflow:hidden;background:var(--op-pill);min-height:50px}
@@ -3678,7 +3697,7 @@ dialog.fbx .row2>button{flex:1;min-height:52px;border-radius:999px}
 #v-home .nmore:focus-visible{outline:3px solid #93C5FD;outline-offset:2px}
 #v-home .bp-main .nearest .dist .nbook{display:block;margin-top:2px}
 #v-home .nlist{margin-top:8px;border-radius:22px;background:#fff;box-shadow:var(--h3-shadow);padding:4px 0 6px}
-#homeSheet:not([data-snap="full"]) .nlist{display:none}
+#homeSheet:not([data-snap="full"]) .nlist,#homeSheet:not(.nearopen) .nlist{display:none}   /* 近くの一覧は「ほか○つ」を押したときだけ（引き上げただけでは開かない。11/24 見直し B の A の補い） */
 #v-home .nlh{display:flex;align-items:center;gap:8px;min-height:52px;padding:0 6px 0 16px}
 #v-home .nlh b{font-size:15px;font-weight:800;color:var(--h3-strong,#1F2937)}
 #v-home .nlh small{font-size:13px;font-weight:600;color:var(--h3-sub,#5F6878)}
@@ -3790,7 +3809,8 @@ dialog.ckconfirm button.go{background:#E9C46A;color:#111827}
 .sgd .sgb-in{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:10px}.sgd .sgb-in label{display:block;background:#EEF1F5;border-radius:14px;padding:8px 12px}
 .sgd .sgb-in input{display:block;width:100%;box-sizing:border-box;border:0;background:transparent;color:var(--sg-ink);font:800 17px var(--gothic);min-height:32px;padding:0}
 .sgd .sgb-btns{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.sgd .sgb-btns .sg-btn{margin-top:10px}
-.sgd .sgb-n{font-size:12.5px;color:var(--sg-mute);margin:10px 2px 0;line-height:1.6}.sgd .sgb-n0{font-size:14px;margin:2px 0;line-height:1.7}
+.sgd .sgb-n{font-size:12.5px;color:var(--sg-mute);margin:10px 2px 0;line-height:1.6}
+.sgd .sgb-zero{padding:28px 20px 20px;text-align:center}.sgd .sgb-zero .t{margin:0 0 8px;font-size:18px;font-weight:800;line-height:1.5}.sgd .sgb-zero small{display:block;font-size:13px;color:var(--sg-mute);line-height:1.6}.sgd .sgb-zero .sg-btn{margin-top:18px;width:100%}.sgd .sgb-n0{font-size:14px;margin:2px 0;line-height:1.7}
 .sgd .sgb-h{display:flex;align-items:center;gap:8px;margin:22px 2px 2px}.sgd .sgb-h>b{font-size:16px;font-weight:900}.sgd .sgb-h small{display:inline;font-size:12.5px;color:var(--sg-mute)}.sgd .sgb-h .sg-a{margin-left:auto;min-height:44px;font-size:13px}
 .sgd .sgb-rr{display:flex;align-items:center;gap:10px;border-radius:16px;padding:12px 12px;margin-top:8px}.sgd .sgb-rr:first-child{margin-top:0}.sgd .sgb-rr>span{flex:1;min-width:0}.sgd .sgb-rr>span>b{display:block;font-size:14px;line-height:1.7}.sgd .sgb-rr .sgb-k{padding:4px 8px;font-size:11.5px}
 .sgd .sgb-rr .n{flex:none;font-size:18px;font-weight:900}.sgd .sgb-rr.p{background:#FBF6EC}.sgd .sgb-rr.p .sgb-k{background:#F3E4BF}.sgd .sgb-rr.c{background:#EEF3FA}.sgd .sgb-rr.c .sgb-k{background:#D9E4F2}
@@ -3840,6 +3860,8 @@ div.viewsw>button{position:relative}div.viewsw>button::after{content:"";position
 .topzone .iconbtn::after{content:"";position:absolute;inset:-5px 0}
 .modesw button::after{content:"";position:absolute;inset:-4px 0}
 .demo-banner button::after{content:"";position:absolute;inset:-6px -2px}
+/* 押せる所は44px（11/24 見直し B の9）：上の「マイページ」は見た目の高さのまま押せる所だけ広げる */
+#openSettings.iconbtn{position:relative}#openSettings.iconbtn::after{content:"";position:absolute;left:0;right:0;top:50%;height:44px;transform:translateY(-50%)}
 #homeSheet .grab::after{content:"";position:absolute;left:0;right:0;top:-20px;bottom:0}
 /* 11/19〜21 に入った所の押せる範囲（11/21 の見回り9）：運用の地図の ＋−（30→44）・出典の「くわしく」の字のリンク（見た目は変えず上下に広げる）・空の道すじの ◀ ▶ と日を選ぶ（下の .artnav・.artdate） */
 #opsMap .leaflet-control-zoom a{width:44px;height:44px;line-height:44px;font-size:22px}
@@ -3905,7 +3927,7 @@ details.pindev summary span{flex:none;color:var(--pin)}details.pindev ol{margin:
 .pinfoot{margin:10px 0 0;font-size:12.5px;line-height:1.65;color:var(--s-mute)}
 .pinbot{display:flex;justify-content:flex-end;margin-top:12px}
 .pinoff{display:block;width:100%;min-height:48px;margin-top:16px;border:0;border-radius:999px;background:var(--s-card);color:var(--s-ink);font:800 14px/1 var(--gothic);box-shadow:0 6px 16px -10px rgba(15,23,42,.35),inset 0 0 0 1px rgba(17,24,39,.08);cursor:pointer}
-.pinnote{margin:8px 0 0;font-size:12.5px;line-height:1.6;color:var(--s-mute);text-align:left}
+.pinnote{margin:8px 0 0;font-size:13px;line-height:1.6;color:var(--s-mute);text-align:left}
 .pinbell{width:48px;height:48px;margin:8px 0 12px;border-radius:999px;display:grid;place-items:center;background:var(--pin-wash);color:var(--pin)}.pinbell svg{width:22px;height:22px}
 .pin2b{display:grid;grid-template-columns:1fr 1.6fr;gap:10px;margin-top:16px}
 .pintop{display:flex;align-items:center;justify-content:space-between;margin:2px 0 12px}
@@ -4148,7 +4170,7 @@ dialog.spsheet .sph .spx{top:2px;right:8px;width:44px;height:44px;border:6px sol
         <h2>フライト</h2>
         <div class="lbtns">
           <button class="lbtn" id="bpCam" aria-label="搭乗券を読み取る" title="搭乗券を読み取る"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8V5.5C4 4.7 4.7 4 5.5 4H8M16 4h2.5c.8 0 1.5.7 1.5 1.5V8M20 16v2.5c0 .8-.7 1.5-1.5 1.5H16M8 20H5.5C4.7 20 4 19.3 4 18.5V16"/><path d="M8 12h8"/></svg></button>
-          <button class="lbtn dark" id="flAdd" aria-label="過去のフライトを記録帳に追加" title="過去のフライトを記録帳に追加"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
+          <button class="lbtn dark" id="flAdd" aria-label="過去のフライトを日誌に追加" title="過去のフライトを日誌に追加"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
         </div>
       </div>
       <div class="nvnet" id="nvNetLog" hidden role="status"></div>
@@ -4162,8 +4184,8 @@ dialog.spsheet .sph .spx{top:2px;right:8px;width:44px;height:44px;border:6px sol
     </div>
     <div id="lsBook" hidden>
     <button class="fbback" id="fbBack" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 5-7 7 7 7"/></svg>フライト</button>
-    <h2>過去のフライトを記録帳に残す</h2>
-    <p class="hint">現地でチェックインしていないフライトも記録できます。印や路線の数には入らず、記録帳にだけ残ります。</p>
+    <h2>過去のフライトを日誌に残す</h2>
+    <p class="hint">現地でチェックインしていないフライトも記録できます。印や路線の数には入らず、日誌にだけ残ります。</p>
     <div class="manual">
       <div class="row">
         <select id="mFrom" aria-label="出発空港"></select>
@@ -4172,7 +4194,7 @@ dialog.spsheet .sph .spx{top:2px;right:8px;width:44px;height:44px;border:6px sol
       <div class="row"><input type="date" id="mDate" aria-label="搭乗日"><select id="mAirline" aria-label="航空会社（任意）"></select></div>
       <div id="mFareSeat"></div><select id="mFare" aria-label="運賃（ステータスの目安の計算用）" hidden></select><div class="flist2" role="radiogroup" aria-label="運賃の区分"></div>
       <input id="mPrice" type="number" inputmode="numeric" min="0" step="100" placeholder="払った金額（円・任意）" aria-label="払った金額（円・任意）">
-      <button class="btn2" id="mAdd">記録帳に追加</button>
+      <button class="btn2" id="mAdd">日誌に追加</button>
       <p class="msg" id="mMsg" role="status" aria-live="polite"></p>
     </div>
     <details class="plusbox" id="importBox" hidden><summary>まとめて取り込む <span class="plustag">そらメモ＋</span></summary>
@@ -4183,7 +4205,7 @@ dialog.spsheet .sph .spx{top:2px;right:8px;width:44px;height:44px;border:6px sol
     </details>
     <div id="manualList"></div>
     <h2 id="intlH">国際線を記録する</h2>
-    <p class="hint">日本の空港と海外の空港を結ぶフライトを残せます。記録帳と同じく、印・路線の数・図鑑には入りません。空港は「ソウル」「ICN」のように入れます。</p>
+    <p class="hint">日本の空港と海外の空港を結ぶフライトを残せます。上の欄と同じく、印・路線の数・図鑑には入りません。空港は「ソウル」「ICN」のように入れます。</p>
     <div class="manual" id="intlForm">
       <div class="row"><input id="iFrom" list="intlApts" placeholder="出発（例：羽田）" aria-label="出発空港" autocomplete="off"><input id="iTo" list="intlApts" placeholder="到着（例：ソウル）" aria-label="到着空港" autocomplete="off"></div>
       <div class="row"><input type="date" id="iDate" aria-label="搭乗日"><input id="iNo" placeholder="便名（任意）" aria-label="便名（任意）" autocapitalize="characters" autocomplete="off" maxlength="7"></div>
@@ -4299,7 +4321,7 @@ dialog.spsheet .sph .spx{top:2px;right:8px;width:44px;height:44px;border:6px sol
 <dialog id="dAuth" class="auth" aria-label="ログイン・新規登録"><main class="phone"><div id="auStep"></div><div id="auCap" class="captcha"></div><div id="auFoot"></div></main></dialog>
 <dialog id="dGuide" aria-label="使い方"><div class="dlg">
   <div class="ob-step on">
-    <svg viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="50" fill="none" stroke="var(--shu)" stroke-width="4"/><circle cx="60" cy="60" r="43" fill="none" stroke="var(--shu)" stroke-width="1.2"/><text x="60" y="72" text-anchor="middle" font-family="var(--mincho)" font-weight="800" font-size="32" fill="var(--shu)">HND</text></svg>
+    <svg viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="50" fill="none" stroke="var(--shu)" stroke-width="4"/><circle cx="60" cy="60" r="43" fill="none" stroke="var(--shu)" stroke-width="1.2"/><text x="60" y="72" text-anchor="middle" style="font-family:var(--gothic)" font-weight="800" font-size="32" fill="var(--shu)">HND</text></svg>
     <h3>空港で印を押す</h3>
     <p>空港に着いたら「チェックイン」。国内86の空港に印があります。大きな6空港はターミナルにも印があります。</p>
   </div>
@@ -4312,6 +4334,7 @@ dialog.spsheet .sph .spx{top:2px;right:8px;width:44px;height:44px;border:6px sol
     <svg viewBox="0 0 120 120" aria-hidden="true"><rect x="22" y="18" width="76" height="86" rx="6" fill="none" stroke="var(--ink)" stroke-width="3"/><circle cx="45" cy="46" r="12" fill="none" stroke="var(--shu)" stroke-width="3"/><circle cx="75" cy="46" r="12" fill="none" stroke="var(--line)" stroke-width="3" stroke-dasharray="3 4"/><circle cx="45" cy="78" r="12" fill="none" stroke="var(--line)" stroke-width="3" stroke-dasharray="3 4"/><circle cx="75" cy="78" r="12" fill="none" stroke="var(--gold)" stroke-width="3"/></svg>
     <h3>図鑑と地図を埋めていく</h3>
     <p>集めた印は図鑑に、飛んだ路線は地図に残ります。離島の空港は金色の印です。位置情報は空港の判定にだけ使います。</p>
+    <p>運用（空港の今）や修行も、ログインしなくても見られます。</p>
   </div>
   <div class="ob-dots" aria-hidden="true"><i class="on"></i><i></i><i></i></div>
   <div class="ob-nav"><button class="btn2" id="obSkip">とばす</button><button class="btn1" id="obNext" autofocus>次へ</button></div>
@@ -4434,8 +4457,8 @@ dialog.spsheet .sph .spx{top:2px;right:8px;width:44px;height:44px;border:6px sol
       </div></div>
     <div class="set-row" id="gameRow"><div>エアライン経営<small>オフにすると、スタンプラリーだけのアプリとして使えます。記録はそのまま残り、オンに戻せば続きから遊べます。</small></div><button class="btn2" id="gameToggle" aria-pressed="true">使う（オン）</button></div>
   </section>
-  <section class="mp-sec" aria-labelledby="mpData"><h4 id="mpData">データ</h4>
-    <div class="set-row"><div>記録を書き出す<small>チェックイン・フライト・記録帳・国際線を書き出します（無料）。CSVは「まとめて取り込む」と同じ形です。</small></div>
+  <section class="mp-sec" aria-labelledby="mpData"><h4 id="mpData">データとバックアップ</h4>
+    <div class="set-row"><div>記録を書き出す<small id="expNote">記録はサーバーに保存されていて、機種を変えてもログインすれば戻ります。書き出しは手元の控えです。</small></div>
       <div class="exp"><button class="btn2" data-export="json">JSON</button><button class="btn2" data-export="csv">CSV</button></div></div>
     <div class="set-row" id="wipeRow"><div>記録を消す<small>この端末に保存した本番の記録をすべて消します。</small></div><button class="btn2 danger" id="wipe">消す</button></div>
   </section>
@@ -5130,22 +5153,23 @@ const a3Moving = p => !a3Air(p) && (p.moving === true || (p.kt || 0) >= 5);
 // 向いている先の滑走路（着陸は進入の向き、離陸は近い滑走路）
 function a3Rwy(p){
   let best = null, bd = 1e9;
-  for(const r of HND_RWY) for(const [la, lo, la2, lo2] of [[r[1], r[2], r[5], r[6]], [r[5], r[6], r[1], r[2]]]){
+  // 名前は番号を先に「22（B）」（ほかの画面の番号とそろえる。11/24 見直し B の4）。端A→端B の向きなら端Aの番号
+  for(const r of HND_RWY) for(const [la, lo, la2, lo2, no] of [[r[1], r[2], r[5], r[6], r[0]], [r[5], r[6], r[1], r[2], r[4]]]){
     const crs = bearing([la, lo], [la2, lo2]), diff = p.hdg == null ? 0 : Math.abs(((p.hdg - crs) % 360 + 540) % 360 - 180);
     if(diff > 35) continue;
     const [px, pz] = a3XZ(p.lat, p.lon), [ax, az] = a3XZ(la, lo), [bx, bz] = a3XZ(la2, lo2), L = Math.hypot(bx - ax, bz - az) || 1;
     const d = Math.abs((px - ax) * (bz - az) - (pz - az) * (bx - ax)) / L;   // 滑走路の延長線からの横のずれ
-    if(d < bd){ bd = d; best = r[8].replace("滑走路", ""); }
+    if(d < bd){ bd = d; best = `${no}（${r[8].replace("滑走路", "")}）`; }
   }
   return best;
 }
 function a3State(p){
   const rw = a3Rwy(p), alt = a3Alt(p);
   if(!a3Air(p)){ const kt = p.kt || 0, kmh = kt ? `時速 ${Math.round(kt * 1.852)}km` : "";
-    return kt >= 40 ? ["滑走路を走行中", [rw && `${rw} 滑走路`, kmh].filter(Boolean).join("・")] : a3Moving(p) ? ["地上を走行中", kmh] : ["止まっている", ""]; }
+    return kt >= 40 ? ["滑走路を走行中", [rw && `${rw}`, kmh].filter(Boolean).join("・")] : a3Moving(p) ? ["地上を走行中", kmh] : ["止まっている", ""]; }
   if(p.phase === "arr"){ const min = p.kt ? Math.max(1, Math.round(p.dist_km / (p.kt * 1.852 / 60))) : null;
-    return [min ? `着陸まで約${min}分` : "着陸に向かう", rw ? `${rw} 滑走路へ` : ""]; }
-  if(p.phase === "dep") return alt != null && alt < 500 ? ["離陸中", rw ? `${rw} 滑走路` : ""] : ["上昇中", alt != null ? `高さ ${alt.toLocaleString("ja-JP")}m` : ""];
+    return [min ? `着陸まで約${min}分` : "着陸に向かう", rw ? `${rw}へ` : ""]; }
+  if(p.phase === "dep") return alt != null && alt < 500 ? ["離陸中", rw ? `${rw}から` : ""] : ["上昇中", alt != null ? `高さ ${alt.toLocaleString("ja-JP")}m` : ""];
   return ["通過中", alt != null ? `高さ ${alt.toLocaleString("ja-JP")}m` : ""];
 }
 const a3Sp = p => p.reg && (SPECIAL.get(p.reg) || (LIVERY_NAMES[p.reg] ? { name:LIVERY_NAMES[p.reg], kind:"special" } : null));
@@ -6849,12 +6873,13 @@ async function checkinServer(p){
   if(bon.length) EVB = null;
   showStamp(a, Date.parse(r.at), r.first_airport, flight, term, r.first_terminal);
 }
+// デモの時刻：前の印から移動にかかる時間を足す。見本の最後の便は昨日なので、本当の今より前にはしない（11/24 見回り sweep-all-a の5番）
 function demoNow(a){
   const last = S.checkins[S.checkins.length-1];
   if(!last) return Date.now();
-  if(last.a === a.id) return last.t + 20*60e3;
+  if(last.a === a.id) return Math.max(Date.now(), last.t + 20*60e3);
   const d = km(BY[last.a], a);
-  return last.t + Math.max(60, d/600*60 + 40)*60e3;
+  return Math.max(Date.now(), last.t + Math.max(60, d/600*60 + 40)*60e3);
 }
 function showNearest(n){
   HOME_NEAR = n; setTimeout(renderHomeMap, 0);
@@ -6876,7 +6901,7 @@ function showNearest(n){
 // 半券の右上のピル：最初の位置は「ほか○つ ›」（20km 以内に民間空港がなく足したときだけなら「近くの民間空港 ›」）、引き上げた位置は「閉じる ⌄」
 function nearMoreSync(){
   const b = $("nearMore"), n = HOME_NEAR; if(!b) return;
-  const has = !!(n && n.others && (n.others.length || n.civ)), full = $("homeSheet").dataset.snap === "full";
+  const sh = $("homeSheet"), has = !!(n && n.others && (n.others.length || n.civ)), full = sh.dataset.snap === "full" && sh.classList.contains("nearopen");
   b.hidden = !has; if(!has) return;
   b.innerHTML = full ? `閉じる<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>`
     : `${n.others.length ? `ほか${n.others.length}つ` : "近くの民間空港"}<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>`;
@@ -6920,7 +6945,8 @@ function openNearAll(){
 document.addEventListener("click", e => {
   if(e.target.closest("[data-near-all]")){ openNearAll(); return; }
   const b = e.target.closest("#nearMore"); if(!b) return;
-  const sh = $("homeSheet"), full = sh.dataset.snap === "full"; track("near_more", full ? "close" : "open");
+  const sh = $("homeSheet"), full = sh.dataset.snap === "full" && sh.classList.contains("nearopen"); track("near_more", full ? "close" : "open");
+  sh.classList.toggle("nearopen", !full);
   if(sh.sheetGo) sh.sheetGo(full ? "half" : "full");
   if(!full) setTimeout(() => { const l = $("nearList"), bd = sh.querySelector(".sbody"); if(l && bd) bd.scrollTop = 0; }, 0);
 });
@@ -7695,11 +7721,11 @@ function fbYrHTML(ys, withNums){
 function fbRowHTML(e){
   const d = new Date(e.t), a = BY[e.from], b = BY[e.to], g = e.kind === "car" ? "CAR" : e.airline ? (ALBY[e.airline] || {}).group || "OTHER" : "NONE";
   const sub = e.kind === "car" ? `<span class="fbcar">車など</span>`
-    : e.kind === "book" ? `<span class="sub">記録帳${e.airline ? "・" + esc(fbAlName(e.airline)) : ""}</span>`
+    : e.kind === "book" ? `<span class="sub">手で記録${e.airline ? "・" + esc(fbAlName(e.airline)) : ""}</span>`
     : `<span class="sub"><b>${hmOf(fbDepAt(e.f))}</b> 発・${esc(lgNo(e.f))}${statusBadge(e.f)}</span>`;
   const right = e.kind === "fly" ? `${fbDur(e.min)}${e.src ? "" : `<small class="fbmeyasu">目安</small>`}<small>${fmtKm(e.km)} km</small>`
     : `<span class="dur"><b>${fmtKm(e.km)}</b><small>km</small></span><small>${e.kind === "car" ? "空の上なし" : "時刻なし"}</small>`;
-  const what = e.kind === "car" ? "車などの移動" : e.kind === "book" ? "記録帳の便" : (e.f.no || "便");
+  const what = e.kind === "car" ? "車などの移動" : e.kind === "book" ? "手で記録した便" : (e.f.no || "便");
   return `<li><button type="button" class="fbrow" data-g="${g}" data-fbv="${e.key}" aria-label="${d.getMonth() + 1}月${d.getDate()}日、${esc(godShort(a))}から${esc(godShort(b))}、${what}">
     <span class="d"><b>${d.getDate()}</b><small>${FB_WD[d.getDay()]}</small></span>
     <span class="m"><span class="rt">${esc(godShort(a))}<i aria-hidden="true">→</i>${esc(godShort(b))}</span>${sub}</span><span class="r">${right}</span></button></li>`;
@@ -7821,7 +7847,7 @@ function renderLog(){
   $("flights").style.paddingBottom = "";
   const mlAll = [...S.manual].sort((x,y)=>y.d.localeCompare(x.d)), ml = mlAll.slice(0, ML_SHOW);
   const mkm = mlAll.reduce((s,m)=>s+km(BY[m.from],BY[m.to]),0);
-  $("manualList").innerHTML = ml.length ? `<h3>記録帳のみのフライト　${mlAll.length}件 ${fmtKm(mkm)}km</h3>` + ml.map(m => passHTML({ from:m.from, to:m.to, airline:m.airline && ALBY[m.airline] ? m.airline : null, km:km(BY[m.from],BY[m.to]),
+  $("manualList").innerHTML = ml.length ? `<h3>手で記録したフライト　${mlAll.length}件 ${fmtKm(mkm)}km</h3>` + ml.map(m => passHTML({ from:m.from, to:m.to, airline:m.airline && ALBY[m.airline] ? m.airline : null, km:km(BY[m.from],BY[m.to]),
         badges:`<span class="badge">手入力</span>${m.airline && ALBY[m.airline] ? `<span class="alb">${ALBY[m.airline].short}</span>` : ""}`, stub:stubDate(m.d.replaceAll("-","/")) })).join("") + (mlAll.length > ml.length ? `<button class="btn2" id="mlMore" style="width:100%;margin-top:10px">もっと見る（残り${mlAll.length - ml.length}件）</button>` : "") : "";
   renderIntl();
 }
@@ -7993,7 +8019,7 @@ document.addEventListener("click", e => { const b = e.target.closest("[data-year
 function renderAirlines(){
   const st = Object.fromEntries(GROUPS.map(([g]) => [g, {n:0, km:0, r:new Set()}]));
   let unset = 0;
-  for(const f of S.flights){
+  for(const f of flyOnly(S.flights)){   // 車などは便に入れない（11/11）
     if(!f.airline){ unset++; continue; }
     const g = (ALBY[f.airline] || {group:"OTHER"}).group, x = st[g];
     x.n++; x.km += f.km; x.r.add([f.from,f.to].sort((p,q)=>p-q).join("-"));
@@ -8005,7 +8031,7 @@ function renderAirlines(){
       <div class="sub"><b>${x.n}</b> 便・<b>${x.r.size}</b> 路線</div>
       <div class="bar" aria-hidden="true"><i style="width:${x.km >= next[0] ? 100 : pct}%"></i></div>
       <div class="goal">${x.km >= next[0] ? `${next[1]}を達成` : `${next[1]}まで<br>あと <b>${fmtKm(next[0] - x.km)}</b> km${prev ? `<br><span class="done">${prev[1]}達成</span>` : ""}`}</div></div>`; };
-  const total = S.flights.length;
+  const total = flyOnly(S.flights).length;
   if(FOCUS !== "ALL"){
     const x = st[FOCUS], label = GROUPS.find(([g]) => g === FOCUS)[1];
     $("airlineStats").innerHTML = total ? `<div class="alstats" style="grid-template-columns:1fr">${card([FOCUS, label])}</div>`
@@ -8130,7 +8156,7 @@ $("mAdd").onclick = async () => {
   const f=+$("mFrom").value, t=+$("mTo").value, d=$("mDate").value, m=$("mMsg");
   if(!f || !t || !d){ m.textContent="出発空港、到着空港、搭乗日をすべて選んでください。"; m.className="msg err"; return; }
   if(f===t){ m.textContent="出発と到着に同じ空港は選べません。"; m.className="msg err"; return; }
-  const done = () => { m.textContent=`${BY[f].name} → ${BY[t].name} を記録帳に追加しました。`; m.className="msg"; };
+  const done = () => { m.textContent=`${BY[f].name} → ${BY[t].name} を日誌に追加しました。`; m.className="msg"; };
   if(SERVER && !demo){
     if(!user){ m.textContent="ログインしてください。"; m.className="msg err"; return; }
     const { error } = await sb.from("manual_flights").insert({from_airport:f, to_airport:t, flown_on:d, airline:$("mAirline").value || null, fare: $("mFare").hidden ? null : ($("mFare").value || null), price:priceOf($("mPrice").value)});
@@ -8191,7 +8217,7 @@ $("iAdd").onclick = async () => {
   const err = t => { m.textContent = t; m.className = "msg err"; };
   if(!dep || !arr) return err(!dep && !arr ? "出発と到着の空港が見つかりません。「羽田」「ソウル」「ICN」のように入れてください。" : `${!dep ? "出発" : "到着"}の空港が見つかりません。候補から選ぶか、空港の記号（3文字）を入れてください。`);
   if(!d) return err("搭乗日を選んでください。");
-  if(!!IATA[dep] === !!IATA[arr]) return err(IATA[dep] ? "日本の空港どうしは、上の記録帳に追加してください。" : "日本の空港をどちらかに入れてください（そらメモは日本発着の便を記録します）。");
+  if(!!IATA[dep] === !!IATA[arr]) return err(IATA[dep] ? "日本の空港どうしは、上の欄から日誌に追加してください。" : "日本の空港をどちらかに入れてください（そらメモは日本発着の便を記録します）。");
   if(no && !/^[A-Z0-9]{2}\d{1,4}[A-Z]?$/.test(no)) return err("便名は「NH106」のように、航空会社の2文字と数字で入れてください。");
   const e = await addIntl({ dep, arr, d, no:no || null, km:intlKm(dep, arr), depAt:null, arrAt:null });
   if(e) return err(e);
@@ -9188,7 +9214,7 @@ function personaSuggestion(){
   for(const day of Object.values(u.ops || {})) for(const [ap, m] of Object.entries(day)) if(m >= 30){ byAp[ap] = byAp[ap] || { days:0, min:0 }; byAp[ap].days++; byAp[ap].min += m; }
   const top = Object.entries(byAp).sort((x, y) => y[1].min - x[1].min)[0];
   if(top && top[1].days >= 3) return { p:"spot", why:`この2週間、${OPS_AIRPORTS[top[0]] ? OPS_AIRPORTS[top[0]].name : top[0]}で運用の画面を長く開いています（${top[1].days}日・あわせて${Math.round(top[1].min / 60)}時間）。` };
-  const n90 = S.flights.filter(f => f.dep >= Date.now() - 90 * 864e5).length;
+  const n90 = flyOnly(S.flights).filter(f => f.dep >= Date.now() - 90 * 864e5).length;
   if(n90 >= 6) return { p:"shugyo", why:`この90日で${n90}便に乗っています。` };
   if(u.plan) return { p:"shugyo", why:"修行の計画を使っています。" };
   return null;
@@ -9481,7 +9507,12 @@ function initSheet(sheet, view){
       body.style.maxHeight = s === "half" && tb && tb.offsetHeight ? Math.max(0, Math.round(tb.getBoundingClientRect().top - 4 - top - (gz ? gz.offsetHeight : 28))) + "px" : "";
       document.documentElement.style.setProperty("--home-sheet", Math.round(s === "half" ? top : sheetTop(view, "half")) + "px");
       setTimeout(() => { if(document.documentElement.dataset.view === "home" && sheet.dataset.snap === s) renderHomeMap(); }, 360);   // 引き上げたときも寄せ直す（review-app-1 の1）
+      if(s !== "full") sheet.classList.remove("nearopen");
       if(typeof nearMoreSync === "function"){ nearMoreSync(); nearGapSync(); }
+      // 引き上げたら「最近の印」が見える位置まで送る（近くの一覧を開いたときは上のまま。11/24 見直し B の A の補い）
+      if(s === "full" && !sheet.classList.contains("nearopen")) setTimeout(() => { if(sheet.dataset.snap !== "full" || sheet.classList.contains("nearopen")) return;
+        const rz = [...sheet.querySelectorAll(".boardzone, #homeFold")].find(x => x.offsetHeight); if(!rz) return;
+        body.scrollTop = Math.max(0, Math.round(rz.getBoundingClientRect().top - body.getBoundingClientRect().top + body.scrollTop - 8)); }, 380);
     }
     if(document.documentElement.dataset.view === view) document.documentElement.dataset.sheet = s;   // 地図だけのときは下のメニューを隠す
     if(s !== "full") body.scrollTop = 0;
@@ -9692,7 +9723,12 @@ function renderMyPage(){
   const chip = (t, k) => `<span class="mp-chip${k ? " " + k : ""}">${esc(t)}</span>`;
   $("mpChips").innerHTML = (SERVER && user ? chip("ログイン中", "ok") + chip("記録はサーバーに保存") : demo ? chip("デモ・記録は別") : chip("記録はこの端末に保存"))
     + (tn ? chip(`称号 ${tn}`) : "") + (typeof PLUS !== "undefined" && PLUS ? chip("そらメモ＋", "plus") : "")
-    + chip(`${visited().size}空港・${S.flights.length}フライト`);
+    + chip(`${visited().size}空港・${flyOnly(S.flights).length}フライト`);
+  // 記録を書き出すの説明（11/24 見回り sweep-all-a の2番・PM の決定①）：バックアップは有料にしない。戻すのはログイン（書き出しは控え）
+  if($("expNote")) $("expNote").textContent = SERVER && user ? "記録はサーバーに保存されていて、機種を変えてもログインすれば戻ります。書き出しは手元の控えです。"
+    : demo ? "デモの記録を書き出します。デモの記録は本番とは別で、サーバーには保存されません。"
+    : SERVER ? "ログインすると記録はサーバーに保存され、機種を変えても戻ります。いまの記録はこの端末だけにあります。書き出しは手元の控えです。"
+    : "記録はこの端末に保存されています。書き出しは手元の控えです。";   // 車などの移動は便に入れない（11/11。ホームの今日の数字と同じ数え方）
 }
 $("closeSettings").onclick = () => $("dSettings").close();
 // お試しモードの見本：始めたときに、1年ぶんの旅（16空港・30フライト）をたまった状態で見せる。お試しの記録は本番とは別に保存される
@@ -9702,15 +9738,20 @@ function demoSeed(){
     ["HND","ITM","NH"],["ITM","HND","NH"],["HND","KMQ","JL"],["KMQ","HND","JL"],["HND","HKD","NH"],["HKD","HND","NH"],["HND","KOJ","JL"],["KOJ","HND","JL"],
     ["HND","AKJ","NH"],["AKJ","HND","NH"],["HND","KCZ","JL"],["KCZ","HND","JL"],["HND","NGS","NH"],["NGS","FUK","CAR"],["FUK","HND","NH"],["HND","SDJ","JL"],["SDJ","HND","JL"],
     ["HND","MMY","JL"],["MMY","HND","JL"],["HND","HIJ","NH"],["HIJ","HND","NH"],["HND","OIT","NH"],["OIT","HND","NH"]];
-  // 見本の便は「日本時間の今日の0時」から数えた決まった時刻（330日前の朝8時から）。開くたびに時刻が変わらない（共有の写真を本番で撮るため。11/13 見回り #11）
-  let t = Math.floor((Date.now() + 9 * 36e5) / 864e5) * 864e5 - 9 * 36e5 - 330 * 864e5 + 8 * 36e5;
+  // 見本の便は「日本時間の今日の0時」から数えた決まった時刻。開くたびに時刻が変わらない（共有の写真を本番で撮るため。11/13 見回り #11）
+  // 11/24 見回り（sweep-all-a の5番）：いちばん新しい便が日本時間の昨日に着くよう、まるごと日の単位でずらす（ホームの「今日の印」・印の日付・修行の「今日」をそろえる）
+  const day0 = Math.floor((Date.now() + 9 * 36e5) / 864e5) * 864e5 - 9 * 36e5;
+  let span = 8 * 36e5;
+  for(let i = 0; i < legs.length; i++){ const A1 = IATA[legs[i][0]], A2 = IATA[legs[i][1]]; if(!A1 || !A2) continue; const car = legs[i][2] === "CAR";
+    span += car ? 150 * 6e4 : Math.round((km(A1, A2) / 700 + 0.5) * 36e5); if(i < legs.length - 1) span += (car ? 1 : i % 2 === 0 ? 2 : 9) * 864e5 + 3 * 36e5; }
+  let t = day0 - (Math.floor(span / 864e5) + 1) * 864e5 + 8 * 36e5;
   for(let i = 0; i < legs.length; i++){ const [f, to, al] = legs[i], A1 = IATA[f], A2 = IATA[to]; if(!A1 || !A2) continue;
     const car = al === "CAR", d = km(A1, A2), dur = car ? 150 * 6e4 : Math.round((d / 700 + 0.5) * 36e5);   // 長崎→福岡は車などの移動（便に入れない見本。便は30のまま・空港も16のまま）
     if(i % 2 === 0 || S.checkins.length === 0 || S.checkins[S.checkins.length - 1].a !== A1.id) S.checkins.push({a:A1.id, t, acc:12, term:null});
     const arr = t + dur; S.checkins.push({a:A2.id, t:arr, acc:12, term:null});
     S.flights.push({id:"a" + arr, from:A1.id, to:A2.id, dep:t, arr, km:d, airline:car ? null : al, no:null, fare:null, seat:null, ...(car ? { car:true } : {})});
     t = arr + (car ? 1 : i % 2 === 0 ? 2 : 9) * 864e5 + 3 * 36e5; }
-  S.demoClock = t; save();
+  S.demoClock = null; save();   // デモの「今日」は本当の今日（見本の最後の便は昨日）
 }
 // デモを終えて表示の設定を戻したあと、覚えている値を読み直して画面に当てる
 function demoLoReload(){
@@ -11302,23 +11343,26 @@ const TYPE_NAME = { B738:"ボーイング737-800", B38M:"ボーイング737 MAX 
   B788:"ボーイング787-8", B789:"ボーイング787-9", B78X:"ボーイング787-10", A320:"エアバスA320", A20N:"エアバスA320neo", A321:"エアバスA321", A21N:"エアバスA321neo", A333:"エアバスA330-300",
   A359:"エアバスA350-900", A35K:"エアバスA350-1000", E170:"エンブラエル170", E75L:"エンブラエル175", E190:"エンブラエル190", DH8D:"ボンバルディアQ400", AT76:"ATR72-600", AT46:"ATR42-600", SF34:"サーブ340" };
 const typeName = t => TYPE_NAME[t] || t;
+// 11/24 見回り（sweep-all-a の1番）：フライト・距離・飛行時間・空港・航空会社は、ホームの今日の数字（flyOnly）と同じく、チェックインでできた便だけで数える。
+//   車などの移動（11/11 の決定）と記録帳の便は入れず、数だけ別に返す（画面では「別に数えています」の1行）
 function passStats(y){
   const inY = t => y === "all" || new Date(t).getFullYear() === y;
-  const fl = S.flights.filter(f => inY(f.dep)).map(f => ({ from:f.from, to:f.to, km:f.km, airline:f.airline }));
-  const mn = S.manual.filter(m => inY(m.d.replaceAll("-", "/"))).map(m => ({ from:m.from, to:m.to, km:km(BY[m.from], BY[m.to]), airline:m.airline || null }));
-  const all = fl.concat(mn), tot = all.reduce((x, f) => x + f.km, 0), mins = all.reduce((x, f) => x + f.km / 780 * 60 + 20, 0);
+  const inYf = S.flights.filter(f => inY(f.dep)), cars = inYf.filter(isCar);
+  const fl = flyOnly(inYf).map(f => ({ from:f.from, to:f.to, km:f.km, airline:f.airline }));
+  const mn = S.manual.filter(m => inY(m.d.replaceAll("-", "/")));
+  const all = fl, tot = all.reduce((x, f) => x + f.km, 0), mins = all.reduce((x, f) => x + f.km / 780 * 60 + 20, 0);
   const aps = new Set(), als = new Map(), rts = new Map();
   for(const f of all){ aps.add(f.from); aps.add(f.to); if(f.airline && ALBY[f.airline]) als.set(f.airline, (als.get(f.airline) || 0) + 1);
     const k = [f.from, f.to].sort((p, q) => p - q).join("-"); rts.set(k, (rts.get(k) || 0) + 1); }
   const longest = all.reduce((b, f) => !b || f.km > b.km ? f : b, null);
   const topRt = [...rts].sort((p, q) => q[1] - p[1])[0], topAl = [...als].sort((p, q) => q[1] - p[1])[0];
   // 便ごとの実績が付いたフライト：遅れ（到着の遅れの合計）と機種
-  const facts = S.flights.filter(f => inY(f.dep)).map(f => FACTS.get(factKey(f))).filter(Boolean);
+  const facts = flyOnly(inYf).map(f => FACTS.get(factKey(f))).filter(Boolean);
   // 遅れは航空会社の運航情報（実際の時刻）がある便だけで数える（機体の位置からの推定は着陸の時刻で、到着の定刻とずれるため）
   const off = facts.filter(k => k.ata_src === "odpt"), lost = off.reduce((x, k) => x + Math.max(0, Number(k.arr_delay) || 0), 0), late = off.filter(k => Number(k.arr_delay) >= 15).length;
   const tys = new Map(); for(const k of facts){ const t = k.type || k.aircraft; if(t) tys.set(t, (tys.get(t) || 0) + 1); }
   const topType = [...tys].sort((p, q) => q[1] - p[1])[0];
-  return { n:all.length, manual:mn.length, km:tot, mins, aps:aps.size, als:als.size, longest, topRt, topAl, facts:facts.length, lost, late, topType };
+  return { n:all.length, manual:mn.length, car:cars.length, carKm:cars.reduce((x, f) => x + f.km, 0), km:tot, mins, aps:aps.size, als:als.size, longest, topRt, topAl, facts:facts.length, lost, late, topType };
 }
 const passTime = m => { const d = Math.floor(m / 1440), h = Math.floor(m % 1440 / 60), mm = Math.round(m % 60); return d ? `${d}日${h}時間` : h ? `${h}時間${mm ? mm + "分" : ""}` : `${mm}分`; };
 // 乗った機体の図鑑：便名を記録したフライトに、毎日の記録の登録記号・機種を付けて集める。特別塗装機は名前を添える
@@ -11353,11 +11397,12 @@ function renderPassport(){
       <button class="pp-share" id="passShare" aria-label="パスポートを画像で共有"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M8 8l4-4 4 4"/><path d="M6 12v7h12v-7"/></svg></button></div>
     <div class="pp-tabs" role="group" aria-label="期間">${["all", ...ys].map(y => `<button data-pass-y="${y}" aria-pressed="${y === PASS_Y}">${y === "all" ? "これまで" : y + "年"}</button>`).join("")}</div>
     <div class="pp-grid">
-      <div><span class="l">フライト</span><b>${st.n}</b><span class="s">${st.manual ? `うち記録帳 ${st.manual}` : "チェックインで記録"}</span></div>
+      <div><span class="l">フライト</span><b>${st.n}</b><span class="s">チェックインで記録</span></div>
       <div><span class="l">距離</span><b>${fmtKm(st.km)}<small>km</small></b><span class="s">地球 ${laps >= 10 ? Math.round(laps) : laps.toFixed(1)} 周ぶん</span></div>
-      <div><span class="l">飛行時間（推定）</span><b class="t">${passTime(st.mins)}</b></div>
+      <div><span class="l">空の上（推定）</span><b class="t">${passTime(st.mins)}</b></div>
       <div class="two"><div><span class="l">空港</span><b>${st.aps}</b></div><div><span class="l">航空会社</span><b>${st.als}</b></div></div>
     </div>
+    ${st.manual || st.car ? `<p class="pp-note pp-sep">${[st.manual ? `記録帳の便 ${st.manual}` : "", st.car ? `車など ${st.car}（${fmtKm(st.carKm)} km）` : ""].filter(Boolean).join("・")}は、フライト・距離・空の上に入れず別に数えています。</p>` : ""}
     ${st.n ? `<ul class="pp-rows">
       ${st.longest ? `<li><span>いちばん長いフライト</span><b>${godShort(BY[st.longest.from])} → ${godShort(BY[st.longest.to])}　${fmtKm(st.longest.km)} km</b></li>` : ""}
       ${st.topRt && st.topRt[1] > 1 ? `<li><span>よく飛んだ路線</span><b>${rtName(st.topRt[0])}　${st.topRt[1]}回</b></li>` : ""}
@@ -11374,7 +11419,7 @@ async function passCard(y){
   try{ await document.fonts.ready; }catch(e){}
   const st = passStats(y), [cv, ctx] = cardBase(), laps = st.km / 40075;
   ctx.textAlign = "left"; ctx.fillStyle = PAL.ink; ctx.font = `800 72px ${GOTHIC}`; ctx.fillText(y === "all" ? "これまでのパスポート" : `${y}年のパスポート`, 80, 270);
-  const cells = [[String(st.n), "フライト"], [fmtKm(st.km), `km（地球 ${laps >= 10 ? Math.round(laps) : laps.toFixed(1)} 周ぶん）`], [passTime(st.mins), "飛行時間（推定）"], [`${st.aps}・${st.als}`, "空港・航空会社"]];
+  const cells = [[String(st.n), "フライト"], [fmtKm(st.km), `km（地球 ${laps >= 10 ? Math.round(laps) : laps.toFixed(1)} 周ぶん）`], [passTime(st.mins), "空の上（推定）"], [`${st.aps}・${st.als}`, "空港・航空会社"]];
   cells.forEach(([n, u], i) => { const x = 80 + (i % 2) * 460, yy = 420 + Math.floor(i / 2) * 200;
     ctx.fillStyle = PAL.ink; ctx.font = `800 ${n.length > 7 ? 64 : 84}px ${GOTHIC}`; ctx.fillText(n, x, yy);
     ctx.fillStyle = PAL.sumi; ctx.font = `500 30px ${GOTHIC}`; ctx.fillText(u, x, yy + 50); });
@@ -12346,7 +12391,8 @@ function renderOps(){
     </div>
     <details class="opswhy"><summary>くわしく</summary><p>${why ? why + "<br>" : ""}${op.note}${mode === "north" && est.northNew && OPS_MODE === "auto" ? "　この時間帯は、C滑走路（34R）から北へ離陸して荒川沿いを上昇する新しいルートが使われることがあります。" : ""}</p></details>`;
   $("opsLegend").textContent = !def.detail && def.app ? `${def.name}は、滑走路の位置（AIP JAPAN 2026年10月1日版の AD 2.12）と、風・実際の機体から「どちら向きに使っているか」を出しています。太い点線は、その向きで使う ILS の進入経路、白い点はその上のフィックスです。細かい点線は、その進入につながる標準到着経路（RNAV STAR）で、入口のフィックスの名前を付けています。経路は、AIP JAPAN（2026年10月1日版）の進入・到着チャートの座標をもとに そらメモ が作ったもので、国が作ったものではなく、最新でない場合があります。実際は管制の指示で途中を短くすることが多く、線はおおよそです。${def.sid ? `青の点線は、標準出発経路（RNAV SID。行き先の方向ごと）です。${def.rwy.length > 1 ? `${def.name}は、どちらの滑走路から離陸するかを管制がその都度決めるため、両方の滑走路からの経路を出しています（主な方向のものだけ）。` : ""}` : "出発経路はまだ入れていません（滑走路の向きに短い線だけ）。"}${def.noObs ? "伊丹の14運用は、32Lの進入で近づいて空港の西側を回り14Rに降りる「周回進入」で、回る部分の線は そらメモ が滑走路の位置から作ったおおよその線です。14運用でも着陸機は32Lの進入の線を通るため、伊丹は、着陸機の線では向きを見分けられないため、離陸した機体を最初に見た位置が空港のどちら側か（8km以内・まだ低い機体）で判定し、そろわないときは風から推定しています。" : ""}航空機の運航には使えません。` : !def.detail ? `${def.name}は、滑走路の位置（AIP JAPAN 2026年10月1日版の AD 2.12）と、風・実際の機体から「どちら向きに使っているか」を出しています。太い点線は、今の向きの最終進入（滑走路の延長線、約10海里）で、実際の経路ではありません。平行な滑走路は、どちらも着陸・離陸に使う前提の表示です。進入・出発・到着の経路は、空港ごとに AIP から足していきます。航空機の運航には使えません。` : "太い点線は、いまの運用と天気で使うと推定した進入の経路、白い点はその上のフィックスです。経路は、AIP JAPAN（2026年10月1日版）の進入チャートの座標をもとに そらメモ が作ったもので、国が作ったものではなく、最新でない場合があります。実際は管制の指示で途中を短くすることが多く、LDA の最後の曲がる部分は目で見て飛ぶため、線はおおよそです。航空機の運航には使えません。青の点線は、その運用で使う主な標準出発経路（RNAV SID。AIP の同じ版から作成）で、行き先の方向ごとに分かれます。時間帯によって経路が変わるもの（ROVER・BEKLA）は、いまの時刻のものを出しています。細かい点線は、その進入につながる標準到着経路（RNAV STAR）で、入口の名前を付けています（深夜早朝の経路は出していません）。";
-  OPS_CUR = { def, op, rw }; if(OH_LIST()) opsHubRender();
+  // prov：気象通報も実際の機体もなく、決め打ちの向きを出しているとき（一覧のカードは「—」にする。11/24 見直し B の5）
+  OPS_CUR = { def, op, rw, prov: OPS_MODE === "auto" && !obs && !OPS_WX }; if(OPS_WX) ohLastSave(); if(OH_LIST()) opsHubRender();
   opsScopeChips(); drawOpsMap(rw, op, plus, mode, est.good); opsLegendKey(); renderSpots(def, op, rw); if(LOC_LAST && OPS_MAP) opsLocDraw(); applyOpsView(); if(VIEW.ops === "runway" && LOC_WATCH == null) opsLocStart();
 }
 // 見方の帯：はじめは左端（案内板）から。選んでいる見方が画面の外のときだけ、見えるところまで送る（11/13 の見回り：開くと滑走路まで送られていた）
@@ -12366,7 +12412,9 @@ function opsRecentAdd(reg){ if(!/^[A-Z0-9-]{3,10}$/.test(reg || "")) return; try
 // 運用タブを見ていて、ほかのシートを開いていないとき：機体の1日はタブの中に出す
 const opsPlaneInTab = () => opsOn() && opsPlaneOn() && !document.querySelector("dialog[open]");
 // 飛んでいる特別塗装機（地上の機体は入れない。アライアンス塗装は数が多いので入れない。review-1 の2）
-const opsFlying = () => [...SPECIAL.values()].filter(x => x.kind !== "alliance" && !(x.alt_ft != null && Number(x.alt_ft) <= 100))
+// 空にいる（高度100ft より上か、高度が分からない）。一覧のカードと専用ページの「いま飛んでいる」で同じ数え方（11/24 見直し B の3）
+const spAir = x => !(x.alt_ft != null && Number(x.alt_ft) <= 100);
+const opsFlying = () => [...SPECIAL.values()].filter(x => x.kind !== "alliance" && spAir(x))
   .sort((a, b) => (b.iata === OPS_AP) - (a.iata === OPS_AP) || (!!b.iata) - (!!a.iata));
 const OPS_CHEV_R = `<svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>`;
 function opsPlRow(reg, x){
@@ -12525,11 +12573,24 @@ function ohMapPlanes(){
   if(!pts.length) return "";
   return `<g class="ohplanes">${pts.map(({ p, x, y }) => `<path data-ohpl="${esc(p.callsign || p.id || "")}" transform="translate(${x.toFixed(1)} ${y.toFixed(1)}) rotate(${Math.round(+p.hdg || 0)}) scale(.62) translate(-12 -12)" d="M12 2l1.6 7.2 7.4 4.3v2l-7.4-2.1-.4 5.1 2.4 1.8v1.6L12 21l-3.6.9v-1.6l2.4-1.8-.4-5.1L3 15.5v-2l7.4-4.3z" fill="${TRAFFIC_COL[p.phase]}" stroke="#fff" stroke-width="1.2"/>`).join("")}</g>`;
 }
+// 電波がないとき：一覧の上に「電波がありません・最後に読んだ ○時○分」（iPhone のアプリは前からの帯 nvNetOps があるので出さない。11/24 見直し B の5）
+const OH_LAST = "soramemo.ops.lastread";
+function ohLastSave(){ try{ const o = JSON.parse(localStorage.getItem(OH_LAST) || "{}"); o[OPS_AP] = Date.now(); localStorage.setItem(OH_LAST, JSON.stringify(o)); }catch(e){} }
+function ohNetHTML(){
+  if(NATIVE || navigator.onLine !== false) return "";
+  let at = 0; try{ at = Number(JSON.parse(localStorage.getItem(OH_LAST) || "{}")[OPS_AP]) || 0; }catch(e){}
+  const d = new Date(at), today = d.toDateString() === new Date().toDateString();
+  const last = at ? `最後に読んだ ${today ? "" : `${d.getMonth() + 1}月${d.getDate()}日 `}${d.getHours()}時${String(d.getMinutes()).padStart(2, "0")}分` : "";
+  return `<p class="ohnet" role="status"><b>電波がありません</b>${last ? `<span>${last}</span>` : ""}</p>`;
+}
+window.addEventListener("offline", () => { if(typeof OH_LIST === "function" && OH_LIST()) opsHubRender(); });
+window.addEventListener("online", () => { if(typeof OH_LIST === "function" && OH_LIST()) opsHubRender(); });
+const OH_OT_ASK = new Set();   // 定時のカードのために直近30日を読みに行った空港（1回だけ）
 function ohCardHTML([id, label, , wide]){
   const b = ohBoardStats(), na = `<b class="na">—</b>`;
-  let cls = "ohc" + (wide ? " wide" : ""), v = "", art = "";
+  let cls = "ohc" + (wide ? " wide" : ""), v = "", art = "", rng = "";   // rng：数の範囲の札（専用ページと数え方が違うもの。11/24 見直し B の3）
   if(id === "runway"){
-    cls += " dark"; const op = OPS_CUR && OPS_CUR.op, lb = op && op.label ? String(op.label).replace(/運用$/, "") : "";
+    cls += " dark"; const op = OPS_CUR && !OPS_CUR.prov && OPS_CUR.op, lb = op && op.label ? String(op.label).replace(/運用$/, "") : "";
     const rws = op ? [...new Set([...(op.arr || []), ...(op.dep || [])])].slice(0, 3) : [];
     v = `<span class="ohv">${lb ? `<b>${esc(lb)}</b>` : na}${rws.length ? `<span class="ohchips">${rws.map(r => `<i>${esc(r)}</i>`).join("")}</span>` : ""}</span>`;
   } else if(id === "map"){
@@ -12538,20 +12599,26 @@ function ohCardHTML([id, label, , wide]){
     const pv = TRAFFIC_GOT === OPS_AP ? null : ohMapPrev();
     // 11/24 見回り5：3D のカードは地上も数えるので、こちらは「空 ○機」と書く（空の着陸・離陸の機体だけ）
     v = `<span class="ohv">${TRAFFIC_GOT === OPS_AP ? `<small class="pre">空</small><b>${n}</b><small>機</small>` : pv ? `<small class="pre">空</small><b class="prev">${pv.n}</b><small>機・約${pv.min}分前</small>` : na}</span>`;
+    if(TRAFFIC_GOT === OPS_AP || pv) rng = "着陸・離陸の機体";   // 3D は地上も・30km の範囲で数えるので、範囲を書く
   } else if(id === "board") v = `<span class="ohv">${b && b.arr ? `<b>${ohHM(b.arr)}</b><small>着</small>` : na}</span>`;
-  else if(id === "special"){ const n = SPECIAL_AT ? opsFlying().length : null;
+  else if(id === "special"){ const n = SPECIAL_AT ? opsFlying().length : null; if(n != null) rng = "飛行中";
     v = `<span class="ohv">${n == null ? na : `<b>${n}</b><small>機</small>`}<span class="ohdots" aria-hidden="true"><i style="background:#B4232A"></i><i style="background:#1C4FA0"></i></span></span>`; }
-  else if(id === "late") v = `<span class="ohv">${b && b.tot ? `<b>${b.late + b.cancel}</b><small>便</small>` : na}</span>`;
+  else if(id === "late"){ v = `<span class="ohv">${b && b.tot ? `<b>${b.late + b.cancel}</b><small>便</small>` : na}</span>`; if(b && b.tot) rng = "今日"; }
   else if(id === "strip") v = `<span class="ohv">${b && b.next ? `<b>${Math.max(0, Math.round((b.next - Date.now()) / 60000))}</b><small>分後</small>` : na}</span>`;
   else if(id === "day"){ const top = b ? Math.max(1, ...b.hrs.map(h => Number(h.flights || 0))) : 1, nh = new Date().getHours();
     v = b && b.hrs.length ? `<span class="ohbars" aria-hidden="true">${b.hrs.map((h, i) => `<i class="${i === nh ? "now" : ""}" style="height:${Math.round(Number(h.flights || 0) / top * 100)}%"></i>`).join("")}</span>` : `<span class="ohv">${na}</span>`; }
-  else if(id === "ontime"){ const pc = b && b.tot ? Math.max(0, Math.round((b.tot - b.late - b.cancel) / b.tot * 100)) : null;
+  else if(id === "ontime"){   // 専用ページと同じ数（出発便の直近30日。airport_ontime）。まだ読んでいないときは読みに行き、それまでは今日の数に「今日」の札（11/24 見直し B の3）
+    const ot = SERVER && OT_CACHE.get(`a|${OPS_AP}`), ok30 = !!(ot && Number(ot.measured) >= 20);
+    if(SERVER && !OT_CACHE.has(`a|${OPS_AP}`) && !OH_OT_ASK.has(OPS_AP)){ const ap = OPS_AP; OH_OT_ASK.add(ap); loadOntime(`a|${ap}`, "airport_ontime", { p_iata:ap, p_days:30 }).then(() => { if(ap === OPS_AP && OH_LIST()) opsHubRender(); }); }
+    const pc = ok30 ? pct(ot.ontime, ot.measured) : b && b.tot ? Math.max(0, Math.round((b.tot - b.late - b.cancel) / b.tot * 100)) : null;
+    rng = pc == null ? "" : ok30 ? "30日" : "今日";
     art = pc == null ? "" : `<svg class="ohring" viewBox="0 0 36 36" aria-hidden="true"><circle cx="18" cy="18" r="14" fill="none" stroke="var(--op-pill)" stroke-width="5"/><circle cx="18" cy="18" r="14" fill="none" stroke="var(--op-ink)" stroke-width="5" stroke-dasharray="${(pc / 100 * 88).toFixed(1)} 88" transform="rotate(-90 18 18)" stroke-linecap="round"/></svg>`;
     v = `<span class="ohv">${pc == null ? na : `<b>${pc}</b><small>%</small>`}</span>`; }
   else if(id === "art"){ art = `<svg class="ohart" viewBox="0 0 170 126" preserveAspectRatio="none" aria-hidden="true"><g fill="none" stroke="var(--op-sub)" stroke-width="1.6"><path d="M90 124 L10 60"/><path d="M90 124 L40 20"/><path d="M90 124 L95 14"/><path d="M90 124 L150 30"/><path d="M90 124 L168 80"/><path d="M90 124 L0 104"/></g></svg>`; }
   else if(id === "photo"){ const n = (OPS_SPOTS[OPS_AP] || []).length; v = `<span class="ohv">${n ? `<b>${n}</b><small>か所</small>` : na}</span>`; }
   else if(id === "a3"){ cls += " a3"; art = OH_A3_ART; v = `<span class="ohv"><small>${A3_SIZE}</small></span>`;
     return `<button type="button" class="${cls}" data-ohub="a3" aria-label="3Dの羽田を開く（押すと${A3_SIZE}を読み込みます）"><span class="oht">${label}</span>${art}${v}</button>`; }
+  if(rng) v += `<span class="ohrng">${rng}</span>`;
   return `<button type="button" class="${cls}" data-ohub="${id}" aria-label="${label}を開く"><span class="oht">${label}</span>${art}${v}</button>`;
 }
 function opsHubRender(){
@@ -12564,7 +12631,7 @@ function opsHubRender(){
   const tools = `<div class="ohtools">${OH_EDIT ? `<span class="ohrolead">≡ を押したまま動かします</span>` : ""}<button type="button" class="ropill${OH_EDIT ? " on" : ""}" data-oh-ro><span>${OH_EDIT ? "完了" : "並べ替え"}</span></button></div>`;
   const foot = OH_EDIT ? `<button type="button" class="ohedit" data-oh-rodef${ohOrderSaved() ? "" : " disabled"}>はじめの並びに戻す</button>` : `<button type="button" class="ohedit" data-vs-open="ops">隠す・出す</button>`;
   el.classList.toggle("roing", OH_EDIT);
-  el.innerHTML = tools + ohCards().map(card).join("") + foot;
+  el.innerHTML = ohNetHTML() + tools + ohCards().map(card).join("") + foot;
   if(keep){ const b = keep === "_edit" ? el.querySelector(".ohedit") : el.querySelector(`[data-ohub="${keep}"]`); if(b) try{ b.focus({ preventScroll:true }); }catch(e){} }
 }
 // 一覧か専用ページかを画面に当てる（applyOpsView から呼ぶ）
@@ -12683,6 +12750,7 @@ function renderOpsDerived(d){
     const list = all.filter(f => Date.parse(f.t) >= now - 15 * 60000).slice(0, 14);
     $("opsStrip").hidden = false;
     $("opsStrip").innerHTML = `<div class="bdhead"><h3>${esc(def.name)}の短冊</h3><span class="bdsum">上ほど早い</span></div>
+      <p class="stripwhat">これから動く便（着く・出る）を、時刻の順に短冊のように1本ずつ並べたものです。</p>
       ${list.length ? `<ol>${list.map(f => { const t = kind(f), late = Math.round((Date.parse(t) - Date.parse(f.sched)) / 60000), st = f.actual ? (f.dir === "arr" ? "着いた" : "出た") : late >= 15 ? `${late}分遅れ` : "定刻ごろ";
         return `<li><i style="background:${f.dir === "arr" ? "#6CC3E8" : "#F08A3E"}" aria-hidden="true"></i><div class="n">${esc(f.flight)}<small>${esc(f.aircraft || (f.intl ? "国際線" : ""))}</small></div>
           <div class="p">${esc(placeAny(f.other))}${f.dir === "arr" ? "から" : "へ"}<small>${f.dir === "arr" ? "到着" : "出発"}${f.intl ? "・国際線" : ""}</small></div><div class="t">${hm(t)}<small style="color:${late >= 15 ? "#C2410C" : "var(--op-mute)"}">${st}</small></div></li>`; }).join("")}</ol>` : `<p class="hint">この3時間の JAL・ANA の便はありません。</p>`}
@@ -13108,7 +13176,7 @@ function specialHTML(){
     + (here.length ? `<ul>${here.map(planLi).join("")}</ul>` : `<p class="hint" style="margin:4px 0 0">${esc(opsDef().name)}を出発・到着する予定の便は、いまはありません。</p>`)
     + (other.length ? `<details class="spally"><summary>ほかの空港 ${other.length}便</summary><ul>${other.map(planLi).join("")}</ul></details>` : "") : "";
   if(!SERVER) return "";
-  return `<div class="fwlist splist">${spInboundHTML()}<details class="spally spnow"${list.length && list.length <= 3 ? " open" : ""}><summary>いま飛んでいる特別塗装機 ${list.length}機${ally.length ? `・アライアンス塗装 ${ally.length}機` : ""}</summary>${list.length ? `<ul>${list.map(x => item(x, "★")).join("")}</ul>` : `<p class="hint" style="margin:4px 0 0">キャラクター・記念塗装の機体は、いまは見つかっていません。</p>`}${allyHTML}</details>${planHTML}
+  return `<div class="fwlist splist">${spInboundHTML()}<details class="spally spnow"${list.length && list.length <= 3 ? " open" : ""}><summary>いま飛んでいる特別塗装機 ${list.filter(spAir).length}機${list.some(x => !spAir(x)) ? `・地上 ${list.filter(x => !spAir(x)).length}機` : ""}${ally.length ? `・アライアンス塗装 ${ally.length}機` : ""}</summary>${list.length ? `<ul>${list.map(x => item(x, "★")).join("")}</ul>` : `<p class="hint" style="margin:4px 0 0">キャラクター・記念塗装の機体は、いまは見つかっていません。</p>`}${allyHTML}</details>${planHTML}
     <p class="fwnote">直近15分に位置が届いたもの（adsb.lol）。特別塗装機の一覧は航空会社の発表などをもとに そらメモ がまとめたもので、塗装の期間や機体の入れ替えで違うことがあります。通知はキャラクター・記念塗装の機体だけで、アライアンス塗装（◇）は知らせません。「これから飛ぶ予定」は航空会社の運航情報（${ODPT_CREDIT}）の文に特別塗装機で運航すると書かれた便で、通知を申し込んでいると飛ぶ前にもお知らせします。機体の変更で変わることがあります。</p></div>`;
 }
 /* ---------- 特別塗装機の画面：一覧（いま飛んでいる・今日飛んだ・この30日・しばらく見ていない）と、機体ごとの今日の足あと ----------
@@ -13733,9 +13801,29 @@ async function loadBoard(iata){
   if(BOARD && BOARD_AP === iata && BOARD.kind === BOARD_KIND && opsFresh(BOARD_AT, 110_000)) return BOARD;
   try{ const r = await fetch(SORAMEMO_CONFIG.supabaseUrl.replace(/\/$/, "") + "/rest/v1/rpc/airport_board", { method:"POST",
       headers:{ "Content-Type":"application/json", apikey:SORAMEMO_CONFIG.supabaseAnonKey, Authorization:"Bearer " + SORAMEMO_CONFIG.supabaseAnonKey }, body:JSON.stringify({ p_iata:iata, p_kind:BOARD_KIND }) });
-    if(r.ok){ BOARD = await r.json(); BOARD_AP = iata; BOARD.kind = BOARD_KIND; BOARD_AT = Date.now(); if(OH_LIST()) setTimeout(opsHubRender, 0); return BOARD; } }catch(e){}
-  return BOARD_AP === iata ? BOARD : null;
+    if(r.ok){ BOARD = await r.json(); BOARD_AP = iata; BOARD.kind = BOARD_KIND; BOARD_AT = Date.now(); BOARD_ERR = null; BOARD_RETRY.delete(iata); if(OH_LIST()) setTimeout(opsHubRender, 0); return BOARD; } }catch(e){}
+  if(BOARD_AP === iata && BOARD) return BOARD;
+  BOARD_ERR = iata; return null;   // 読めなかった（時間切れ・電波なし）：遅れ・短冊・撮る人のページに「読み込めませんでした・もう一度」
 }
+// 案内板のデータが読めなかったとき（11/24 見直し B の2）：遅れ・短冊・撮る人のページに「読み込めませんでした・もう一度」のピル。
+//   10秒ほどで1回だけ自動で取り直す（読めたら次の失敗のときにまた1回）
+let BOARD_ERR = null;
+const BOARD_RETRY = new Set();
+const opsFailHTML = (title, auto) => `<div class="opsfail" role="status">${title ? `<div class="bdhead"><h3>${esc(title)}</h3></div>` : ""}<p>読み込めませんでした。</p>
+  <button type="button" class="opsretry" data-ops-retry>もう一度</button>${auto ? `<small>10秒ほどで、もう一度読みに行きます</small>` : ""}</div>`;
+function opsBoardFail(iata){
+  if(BOARD_ERR !== iata || OPS_AP !== iata) return;
+  const auto = !BOARD_RETRY.has(iata);
+  if(auto){ BOARD_RETRY.add(iata); OPS_FAIL_WAIT = true; setTimeout(() => { OPS_FAIL_WAIT = false; if(OPS_AP === iata && BOARD_ERR === iata) renderBoard(); }, 10000); }
+  const def = opsDef(), v = VIEW.ops;
+  if(v === "strip" && $("opsStrip")){ $("opsStrip").hidden = false; $("opsStrip").innerHTML = opsFailHTML(`${def.name}の短冊`, OPS_FAIL_WAIT); }
+  if(v === "photo" && $("opsPhoto")){ $("opsPhoto").hidden = false; $("opsPhoto").innerHTML = opsFailHTML("撮る人", OPS_FAIL_WAIT); }
+}
+let OPS_FAIL_WAIT = false;   // 自動の取り直しを待っているあいだ（「10秒ほどで、もう一度読みに行きます」を出す）
+document.addEventListener("click", e => { if(!e.target.closest("[data-ops-retry]")) return; BOARD_ERR = null; track("ops_retry", VIEW.ops);
+  ["opsStrip", "opsPhoto"].forEach(id => { const el = $(id); if(el && el.querySelector(".opsfail")) el.innerHTML = `<p class="hint">読み込んでいます…</p>`; });
+  if(OPS_PAGE === "late") $("opsLate").innerHTML = `<div class="fwlist"><div class="opshead"><b>今日の遅れ・欠航</b></div><p class="ltsub">読み込んでいます…</p></div>`;
+  renderBoard(); });
 // 海外の航空会社の便（推定）：時刻表がないので、空港の近くにいる機体の位置と経路のデータから（airport-foreign）
 let FOREIGN = null, FOREIGN_AP = null, FOREIGN_AT = 0;
 const FOREIGN_JA = { KE:"大韓航空", OZ:"アシアナ航空", "7C":"チェジュ航空", LJ:"ジンエアー", TW:"ティーウェイ航空", ZE:"イースター航空", BX:"エアプサン", RS:"エアソウル",
@@ -13923,7 +14011,7 @@ async function renderBoard(){
   // 海外の便は案内板の見方のときだけ読む（1日の山・短冊・撮る人は JAL・ANA の時刻表だけを使う）
   // 海外の空港の止まり具合は、国際線を出すとき（すべて・国際線）だけ読む
   const [d, fg] = await Promise.all([loadBoard(iata), opsNeed("foreign") ? loadForeign(iata) : FOREIGN_AP === iata ? FOREIGN : null, opsNeed("foreign") && BOARD_KIND !== "dom" ? loadWorldOps() : null]); if(OPS_AP !== iata) return;
-  if(!d){ box.hidden = true; box.innerHTML = ""; renderOpsLate(); return; }
+  if(!d){ box.hidden = true; box.innerHTML = ""; opsBoardFail(iata); renderOpsLate(); return; }
   box.hidden = false; box.innerHTML = boardHTML(d, fg); renderOpsDerived(d); renderOpsLate();
 }
 // 運用の一覧の「遅れ」の専用ページの頭（11/21 の見回り1：カードは「9便」なのに、開くと白紙だった）。
@@ -13962,9 +14050,10 @@ function ltListHTML(bad){
   const hm = t => new Date(t).toLocaleTimeString("ja-JP", { hour:"2-digit", minute:"2-digit", timeZone:"Asia/Tokyo" });
   const seg = (key, opts, label) => `<div class="ltseg" role="group" aria-label="${label}">${opts.map(([v, l, n]) => `<button type="button" data-ltf="${key}" data-v="${v}" aria-pressed="${F[key] === v}">${l}${n != null ? `<small>${n}</small>` : ""}</button>`).join("")}</div>`;
   const alPills = als.length > 1 ? `<div class="ltals" role="group" aria-label="航空会社">${[["all", "すべて"], ...als.map(a => [a, a])].map(([v, l]) => `<button type="button" data-ltf="al" data-v="${esc(v)}" aria-pressed="${F.al === v}">${esc(l)}</button>`).join("")}</div>` : "";
-  const items = shown.map(r => { const f = r.f, other = esc(placeAny(f.other) || f.other || "");
+  const nowI = shown.findIndex(r => Number.isFinite(r.sched) && r.sched >= Date.now() - 30 * 60000);   // 「いまごろ」の印を付ける行（前に行があるときだけ。11/24 見直し B の6）
+  const items = shown.map((r, i) => { const f = r.f, other = esc(placeAny(f.other) || f.other || "");
     const tag = r.cancel ? `<em class="ltcan">欠航</em>` : `<em>${r.late}分遅れ</em>`;
-    return `<li><span class="lttm"><b>${Number.isFinite(r.sched) ? hm(r.sched) : "—"}</b>${!r.cancel && r.t ? `<small>${f.actual ? "実際" : "見込み"} ${hm(r.t)}</small>` : ""}</span>
+    return `<li data-lt-t="${Number.isFinite(r.sched) ? r.sched : ""}"${i === nowI && i > 0 ? ` class="ltnowrow"` : ""}><span class="lttm"><b>${Number.isFinite(r.sched) ? hm(r.sched) : "—"}</b>${!r.cancel && r.t ? `<small>${f.actual ? "実際" : "見込み"} ${hm(r.t)}</small>` : ""}</span>
       <span class="ltfl"><b>${other}<span class="nw">${r.dir === "arr" ? "から" : "へ"}</span></b><small>${esc(f.flight || "")}・${esc(r.al)}</small></span>${tag}</li>`; }).join("");
   return `<div class="ltfilt">
       ${seg("kind", [["all", "すべて", nLate + nCan], ["late", "遅れ", nLate], ["cancel", "欠航", nCan]], "種類")}
@@ -13980,7 +14069,7 @@ document.addEventListener("click", e => { const b = e.target.closest("[data-ltf]
   ltSave(); track("late_filter", k); renderOpsLate(); });
 function opsLateHTML(){
   const b = ohBoardStats();
-  if(!b) return `<div class="opshead"><b>今日の遅れ・欠航</b></div><p class="ltsub">読み込んでいます…</p>`;
+  if(!b) return BOARD_ERR === OPS_AP ? `<div class="opshead"><b>今日の遅れ・欠航</b></div>${opsFailHTML("", OPS_FAIL_WAIT)}` : `<div class="opshead"><b>今日の遅れ・欠航</b></div><p class="ltsub">読み込んでいます…</p>`;
   const bad = BOARD && Array.isArray(BOARD.bad) ? BOARD.bad : null;
   const n = b.late + b.cancel, fw = FW.get(OPS_AP), fwn = fw ? fwMerge(fw).length : null;   // fwn：便ごとのお知らせの数（読んでいないときは null）
   if(!n) return `<div class="opshead"><b>今日の遅れ・欠航</b></div><p class="ltnone">いま遅れ・欠航の便はありません</p><p class="fwnote">15分以上の遅れと欠航を、JAL・ANA の時刻表の便で数えています。${ODPT_CREDIT}</p>`;
@@ -13993,10 +14082,22 @@ function opsLateHTML(){
     ${fwline ? `<p class="ltsub" style="margin-top:12px">${fwline}</p>` : ""}
     <p class="fwnote">JAL・ANA の時刻表に載っている便を数えています（遅れは航空会社の運航情報か機体の位置からの推定）。${ODPT_CREDIT}</p>`;
 }
+// 開いたら今の時刻の行へ送る（0時からの古い順なので、今の便まで遠かった。11/24 見直し B の6）。開くたびに1回だけ
+let LT_JUMPED = false;
+function ltJump(){
+  if(OPS_PAGE !== "late" || LT_JUMPED) return;
+  const rows = [...document.querySelectorAll("#opsLate .ltrows li[data-lt-t]")]; if(!rows.length) return;
+  LT_JUMPED = true;
+  const now = Date.now(), i = rows.findIndex(li => Number(li.dataset.ltT) >= now - 30 * 60000);
+  const li = i < 0 ? rows[rows.length - 1] : rows[i]; if(i === 0) return;
+  const top = li.getBoundingClientRect().top + window.scrollY - Math.round(innerHeight * .3);
+  window.scrollTo({ top:Math.max(0, top), behavior:"auto" });
+}
 function renderOpsLate(){
   const box = $("opsLate"); if(!box) return;
-  if(OPS_PAGE !== "late"){ box.hidden = true; return; }
+  if(OPS_PAGE !== "late"){ box.hidden = true; LT_JUMPED = false; return; }
   box.hidden = false; box.innerHTML = `<div class="fwlist">${opsLateHTML()}</div>`;
+  if(!LT_JUMPED) setTimeout(ltJump, OH_BUSY ? OH_OPEN_MS + 80 : 40);
 }
 document.addEventListener("click", e => { const b = e.target.closest("[data-board-dir]"); if(!b) return; BOARD_DIR = b.dataset.boardDir; if(BOARD) $("opsBoard").innerHTML = boardHTML(BOARD, FOREIGN_AP === OPS_AP ? FOREIGN : null); });
 document.addEventListener("click", e => { const b = e.target.closest("[data-board-kind]"); if(!b || b.dataset.boardKind === BOARD_KIND) return; BOARD_KIND = b.dataset.boardKind; track("board_kind", BOARD_KIND); renderBoard(); });
@@ -14466,16 +14567,16 @@ function pinListHTML(){
     return `<button type="button" class="pincard" data-pin-page="${esc(p.k)}"><span class="h">${pinCode(p.k) ? `<i class="pincd">${esc(p.k)}</i>` : ""}<b>${esc(pinName(p.k))}</b>${PIN_CHEV}</span>
       <span class="chips">${on.map(kind => `<i class="pinchip">✓ ${PIN_KN[kind]}</i>`).join("")}${!pinCode(p.k) ? `<small>知らせは出せません（ピン止めだけ）</small>` : offN ? `<small>${on.length ? `ほか${offN}つは OFF` : "知らせはすべて OFF"}</small>` : ""}</span></button>`; };
   return `<div class="pintop"><button class="mp-back" data-close type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>${$("dSettings").open ? "マイページ" : "閉じる"}</button><h3 id="pinsT">知らせ</h3><span class="pinsp" aria-hidden="true"></span></div>
-    ${pinDeliverHTML()}
+    ${pinDeliverHTML()}${d === "ok" || d === "demo" ? "" : `<p class="pinnote">ON にしていても、この端末に届かないあいだは知らせは来ません。</p>`}
     <div class="pinlh">${PIN_SVG(true)}<b>ピン止めした空港</b><small>${list.length} / ${PIN_MAX}</small></div>
     ${list.length > PIN_MAX ? `<p class="pinnote">前から申し込んでいた${list.length}空港をそのまま続けています。新しく足すのは${PIN_MAX}より少なくなってからです。</p>` : ""}
     ${list.map(card).join("") || `<p class="pinempty">まだありません。近くの空港・空港のページ・運用タブの「ピン止め」から足せます。</p>`}
-    <label class="pinq">${PIN_SVG(false)}<input id="pinQ" type="search" placeholder="＋ 空港をピン止め（名前か3レター）" autocomplete="off" aria-label="ピン止めする空港を探す"></label><div id="pinQOut"></div>
-    <p class="pinnote">ピン止めは、いまはこの端末に保存します（アカウントへの保存は準備中）。</p>
+    <label class="pinq">${PIN_SVG(false)}<input id="pinQ" type="search" placeholder="＋ 名前か HND のような3文字で探す" autocomplete="off" aria-label="ピン止めする空港を探す"></label><div id="pinQOut"></div>
+    <p class="pinnote">ピン止めはこの端末に保存しています。機種を変えると消えます。</p>
     <p class="pinsec">便</p>
-    <div class="pincard st"><span class="h"><b>乗る便</b></span><span class="chips"><small>${fl.length ? `${fl.map(x => { const [no, dd] = x.split("@"); return `${esc(no)}（${+dd.slice(5, 7)}/${+dd.slice(8, 10)}）`; }).join("・")}・15分の遅れから` : "「この便に乗る」で選んだ便の遅れ・ダイバートを知らせます"}</small></span></div>
+    <button type="button" class="pincard" data-pin-ride><span class="h"><b>乗る便を選ぶ</b>${PIN_CHEV}</span><span class="chips"><small>${fl.length ? `${fl.map(x => { const [no, dd] = x.split("@"); return `${esc(no)}（${+dd.slice(5, 7)}/${+dd.slice(8, 10)}）`; }).join("・")}・15分の遅れから` : "「この便に乗る」で選んだ便の遅れ・ダイバートを知らせます"}</small></span></button>
     ${regs.length ? `<p class="pinsec">機体ごとの知らせ</p><div class="pincard st"><span class="h"><b>${regs.length}機</b></span><span class="chips"><small>${esc(regs.join("・"))}。前に申し込んだ機体。どの空港へ飛ぶときも届きます。新しく足すことはできません</small></span></div>` : ""}
-    ${d === "ok" || d === "demo" ? "" : `<p class="pinnote">ON にしていても、この端末に届かないあいだは知らせは来ません。</p>`}`;
+`;
 }
 // 1空港の知らせ（知らせの画面の中・K6）
 function pinPageHTML(k){
@@ -14545,6 +14646,10 @@ document.addEventListener("click", async e => {
   const sp = t.closest("[data-pin-spot]"); if(sp){ pinSpotSet(sp.dataset.pinSpot); return; }
   const pg = t.closest("[data-pin-page]"); if(pg){ PIN_PAGE = pg.dataset.pinPage; $("dPinsBody").innerHTML = pinPageHTML(PIN_PAGE); $("dPins").scrollTop = 0; return; }
   if(t.closest("[data-pin-back]")){ PIN_PAGE = null; $("dPinsBody").innerHTML = pinListHTML(); return; }
+  // 「乗る便を選ぶ ›」：ホームの「これから乗る便」へ（11/24 見直し B の7）
+  if(t.closest("[data-pin-ride]")){ $("dPins").close(); if($("dSettings").open) $("dSettings").close(); goTab("home");
+    setTimeout(() => { const f = $("rideAdd"), i = $("rideNo"); if(f && !f.hidden && i){ const sh = $("homeSheet"); if(sh && sh.sheetGo) sh.sheetGo("full"); setTimeout(() => { try{ i.scrollIntoView({ block:"center" }); i.focus({ preventScroll:true }); }catch(e){} }, 400); } }, 60);
+    track("pin", "ride"); return; }
   if(t.closest("[data-pin-list]") || t.closest("#pinHome") || t.closest("[data-pins-open]")){ document.querySelectorAll(".pinband").forEach(x => x.remove()); pinListOpen(); return; }
 }, true);
 document.addEventListener("input", e => { if(e.target.id === "pinQ") pinQOut(); });
@@ -15902,14 +16007,31 @@ function sgLeftText(D, A){
 const SG_PEN = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16v4z"/><path d="M14 6l4 4"/></svg>`;
 const SG_CV = `<svg class="cv" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>`;
 // 題の行（修行・ANA｜JAL・会員情報）と、見方のピル（道のり・1便ごと・月ごと・✎）
-function sgTitle(car){
-  const v = sgShow().views, cur = sgViewNow();
-  const top = sgTabOn() ? `<div class="sgb-hd"><h2>修行</h2>${sgSeg("car", [["ANA", "ANA"], ["JAL", "JAL"]], car)}<span class="sgb-sp"></span><button class="sg-back" data-sg-go="profile" type="button">会員情報</button></div>`
-    : `<div class="sgb-hd"><button class="sg-back" data-close type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>閉じる</button><h2>修行</h2>${sgSeg("car", [["ANA", "ANA"], ["JAL", "JAL"]], car)}<span class="sgb-sp"></span><button class="sg-back" data-sg-go="profile" type="button">会員情報</button></div>`;
+//   zero：記録した便が0の形（会社の切り替えと見方のピルは出さない）
+function sgTitle(car, zero){
+  const v = sgShow().views, cur = sgViewNow(), seg = zero ? "" : sgSeg("car", [["ANA", "ANA"], ["JAL", "JAL"]], car);
+  const top = sgTabOn() ? `<div class="sgb-hd"><h2>修行</h2>${seg}<span class="sgb-sp"></span><button class="sg-back" data-sg-go="profile" type="button">会員情報</button></div>`
+    : `<div class="sgb-hd"><button class="sg-back" data-close type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>閉じる</button><h2>修行</h2>${seg}<span class="sgb-sp"></span><button class="sg-back" data-sg-go="profile" type="button">会員情報</button></div>`;
+  if(zero) return top;
   return `${top}<div class="sgb-views" role="tablist" aria-label="修行の見方">${SG_VIEWS.filter(x => v[x[0]]).map(([k, l]) => `<button type="button" role="tab" data-sg-view="${k}" aria-selected="${k === cur}">${l}</button>`).join("")}<span class="sgb-sp"></span><button class="sgb-pen" type="button" data-sgvs-open aria-label="修行の見方を変える">${SG_PEN}</button></div>`;
+}
+// 記録した便が0の形にするか（11/24 PM：アプリ全体の見直しから）。今年の JAL・ANA の記録した便が0で、会社のサイトに合わせた数字も、
+//   これから乗る予定も、残した計画の案もないとき。目標を勝手に入れず、「届きません」の文も出さない（確定した修行の形は、便を記録してから）
+//   「路線を入れて計算する」は目標を使わない道具なので残す（機能を消すのは本人の OK が要るため）
+function sgZero(Y = sgYear()){
+  return !Y.ANA.n && !Y.JAL.n && !Y.ANA.sync && !Y.JAL.sync && !sgFuture().length && !sgDrafts().length;
+}
+function sgZeroHTML(){
+  const rows = statusRows(), ever = rows.some(r => fareOf(r, r.t)), y = sgNowY();   // ever：前の年に JAL・ANA の便がある
+  const t = ever ? `${y}年は、まだ記録した便がありません` : rows.length ? "JAL・ANA の便は、まだ記録がありません" : "まだ記録した便がありません";
+  return `<div class="sgb-card sgb-zero"><p class="t">${t}</p>
+    <small>JAL・ANA の便を記録すると、ここに今年のポイントと道のりを出します。</small>
+    <button class="sg-btn main" data-sg-go="${SERVER ? "find" : "planner"}" type="button">計画を作る</button></div>
+    <button class="sgb-card sgb-link" data-sg-go="quick" type="button"><span><b>路線を入れて計算する</b><small>乗る前にポイントを確かめる</small></span>${SG_CV}</button>`;
 }
 function sgMain(){
   const car = sgCar(), v = sgViewNow();
+  if(sgZero()) return `${sgTitle(car, true)}${sgConfirmHTML()}${sgZeroHTML()}`;
   return `${sgTitle(car)}${sgConfirmHTML()}${v === "flights" ? sgFlightsView() : v === "months" ? sgMonthsView() : sgRoadView()}`;
 }
 // E1 道のり
@@ -17039,7 +17161,8 @@ document.addEventListener("change", e => {
 let obIdx = 0;
 function obShow(i){ obIdx = i; document.querySelectorAll(".ob-step").forEach((el,k)=>el.classList.toggle("on", k===i));
   document.querySelectorAll(".ob-dots i").forEach((el,k)=>el.classList.toggle("on", k===i));
-  $("obNext").textContent = i === 2 ? "はじめる" : "次へ"; }
+  $("obNext").textContent = i === 2 ? "はじめる" : "次へ";
+  $("obSkip").hidden = i === 2; $("obNext").parentElement.classList.toggle("one", i === 2); }   // 3枚目は「はじめる」1つ（11/24 見回り sweep-all-a の8番）
 function obDone(){ try{ localStorage.setItem("soramemo.onboarded","1"); }catch(e){} $("dGuide").close();
   if(SERVER && sb && !user && !demo) authOpen("login"); }   // サーバー版で、まだログインしていなければ、続けてログインの画面を出す
 $("obNext").onclick = () => { if(obIdx < 2) obShow(obIdx+1); else { track("guide", "done"); obDone(); } };
@@ -17106,6 +17229,8 @@ function cardBase(){
   ctx.strokeStyle = PAL.shu; ctx.lineWidth = 7; circle(ctx, 104, 104, 30);
   ctx.fillStyle = PAL.shu; ctx.beginPath(); ctx.moveTo(84,112); ctx.lineTo(124,96); ctx.lineTo(114,121); ctx.lineTo(107,110); ctx.closePath(); ctx.fill();
   ctx.fillStyle = PAL.ink; ctx.font = `800 50px ${GOTHIC}`; ctx.textAlign = "left"; ctx.textBaseline = "middle"; ctx.fillText("そらメモ", 152, 106);
+  // ロゴの横に小さく「非公式アプリ」（フライトの搭乗券の共有画像とそろえる。11/24 見回り sweep-all-a の10番）
+  const lw = ctx.measureText("そらメモ").width; ctx.fillStyle = PAL.sumi; ctx.font = `600 26px ${GOTHIC}`; ctx.fillText("非公式アプリ", 152 + lw + 16, 108);
   ctx.textBaseline = "alphabetic";
   const tn = titleName(); if(tn){ ctx.textAlign = "right"; ctx.fillStyle = PAL.shu; ctx.font = `700 32px ${GOTHIC}`; ctx.fillText(`称号　${tn}`, 1000, 116); }
   return [cv, ctx];
@@ -17372,7 +17497,7 @@ function authRender(){
     foot = `<button class="cta" type="button" data-au="name-next"${ok && !AU.busy ? "" : " disabled"}>${R ? "保存する" : "次へ"}</button>${R ? '<button class="ghost" type="button" data-au="close">やめる</button>' : ""}`;
   } else if(s === "survey"){
     const o = (k, label, ic) => `<button class="opt${k === "unanswered" ? " later" : ""}" type="button" role="radio" aria-checked="${AU.persona === k}" data-au-persona="${k}">${ic || ""}${label}</button>`;
-    top = `${auTop("to-name", '<button class="skip" type="button" data-au="survey-skip">あとで</button>')}<div class="hero"><p class="eyebrow">ひとつだけ質問 <span style="color:var(--a-mute);font-weight:400">・飛ばしてもOK</span></p><h1>そらメモを<br>どう使いたいですか？</h1>
+    top = `${auTop("to-name", '<button class="skip" type="button" data-au="survey-skip">あとで</button>')}<div class="hero"><p class="eyebrow">ひとつだけ質問 <span style="color:var(--a-sub);font-weight:400">・飛ばしてもOK</span></p><h1>そらメモを<br>どう使いたいですか？</h1>
       <p class="lead">近いものをひとつ選んでください。</p></div>
       <div class="opts" role="radiogroup" aria-label="使い方">${o("spot", "飛行機を撮りたい", AU_ICON.spot)}${o("shugyo", "修行（マイル・ステータス）に使いたい", AU_ICON.shugyo)}${o("casual", "気軽に楽しみたい", AU_ICON.casual)}${o("unanswered", "あとで決める")}</div>
       <p class="why"><i>?</i><span>はじめは全部の機能を出しています。答えに合わせて、使わなそうなものを隠すかを1回だけ聞きます。ほかの機能が使えなくなることはありません。マイページの「表示の編集」でいつでも変えられます。</span></p>${auMsg()}<div class="spacer"></div>`;
@@ -17388,8 +17513,9 @@ function authRender(){
         <li><i>3</i><div>記録はサーバーに保存し、いつでも消せます<small>マイページの「アカウントを削除」から、すべての記録を消せます。</small></div></li>
       </ul></div>
       <div class="docs"><a href="terms.html" target="_blank" rel="noopener">利用規約を読む</a><a href="privacy.html" target="_blank" rel="noopener">プライバシーを読む</a></div>
-      <label class="agree"><input type="checkbox" id="auAgree"${AU.agree ? " checked" : ""}><span class="box" aria-hidden="true">✓</span><span>利用規約とプライバシーポリシーに同意する<small>ご本人が同意したことを記録します。</small></span></label>${auMsg()}<div class="spacer"></div>`;
-    foot = `<button class="cta" type="button" data-au="agree"${AU.agree && !AU.busy ? "" : " disabled"}>${G ? "同意して続ける" : "同意してはじめる"}</button><button class="ghost" type="button" data-au="disagree">同意しないでログアウト</button>`;
+      <div class="spacer"></div>`;
+    // 同意のチェックとボタンは下に固定（375×667 でも送らずに押せる。11/24 見回り sweep-all-a の6番）
+    foot = `<label class="agree"><input type="checkbox" id="auAgree"${AU.agree ? " checked" : ""}><span class="box" aria-hidden="true">✓</span><span>利用規約とプライバシーポリシーに同意する<small>ご本人が同意したことを記録します。</small></span></label>${auMsg()}<button class="cta" type="button" data-au="agree"${AU.agree && !AU.busy ? "" : " disabled"}>${G ? "同意して続ける" : "同意してはじめる"}</button><button class="ghost" type="button" data-au="disagree">同意しないでログアウト</button>`;
   } else if(s === "location"){
     top = `${auTop("")}<div class="ill"><svg viewBox="0 0 300 150" width="100%" role="img" aria-label="空港の円の中に自分がいる図">
       <rect width="300" height="150" fill="var(--c-bg)"/><path d="M0 110 C60 96 90 120 150 104 S250 84 300 96 V150 H0Z" fill="var(--c-land)" stroke="var(--c-coast)" stroke-width="1.2"/>
@@ -17400,12 +17526,12 @@ function authRender(){
       <div class="rows">
         <div class="row"><i>1</i><div><b>押したときだけ測ります</b><small>半券を切ってチェックインした一瞬だけ。いつも追いかけることはしません。</small></div></div>
         <div class="row"><i>2</i><div><b>空港にいるかを確かめるため</b><small>空港の範囲の中にいるときに、その空港の印が押せます。</small></div></div>
-        <div class="row"><i>3</i><div><b>あとからでも許可できます</b><small>いま断っても、地図を見たり記録帳に書いたりはできます。</small></div></div>
+        <div class="row"><i>3</i><div><b>あとからでも許可できます</b><small>いま断っても、地図を見たり日誌に書いたりはできます。</small></div></div>
       </div>${auMsg()}<div class="spacer"></div>`;
     foot = `<button class="cta" type="button" data-au="loc-allow"${AU.busy ? " disabled" : ""}>位置情報を許可する</button><button class="ghost" type="button" data-au="loc-later">あとで</button>`;
     if(NATIVE){ top = nvLocWhyHTML(false); foot = `<button class="cta" type="button" data-au="loc-allow"${AU.busy ? " disabled" : ""}>次へ</button><p class="nvfoot">許可しなくても、図鑑・フライト・運用は見られます。<br>あとから iPhone の設定で変えられます。</p>`; }   // iPhone のアプリ（I1-v2）
   }
-  st.innerHTML = top; ft.innerHTML = foot;
+  st.innerHTML = top; ft.innerHTML = foot; $("dAuth").dataset.step = s;
   const f = st.querySelector("#auCode, #auName, #auEmail"); if(f) setTimeout(() => { try{ f.focus({ preventScroll:true }); }catch(e){} }, 30);
 }
 function auSay(t, err){ AU.msg = t; AU.err = !!err; const m = $("auMsg"); if(m){ m.textContent = t; m.className = "amsg" + (err ? " err" : ""); } }

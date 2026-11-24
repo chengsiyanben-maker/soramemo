@@ -51,7 +51,7 @@ async def run(b, now, tag):
         await pg.evaluate("goTab('log')"); await pg.wait_for_timeout(500)
         await pg.click('#flAdd'); await pg.wait_for_timeout(200)
         await pg.fill('#iFrom', '羽田'); await pg.fill('#iTo', 'HND'); await pg.fill('#iDate', '2026-08-01'); await pg.click('#iAdd'); await pg.wait_for_timeout(200)
-        check('国内どうしは断る:', '記録帳' in (await pg.inner_text('#iMsg')))
+        check('国内どうしは断る:', '日誌' in (await pg.inner_text('#iMsg')))
         await pg.fill('#iTo', 'ソウル'); await pg.fill('#iNo', 'nh 863'); await pg.click('#iAdd'); await pg.wait_for_timeout(800)
         check('足せた:', '国際線に追加しました' in (await pg.inner_text('#iMsg')))
         row = await pg.evaluate("__fake.db.intl_flights[0]")

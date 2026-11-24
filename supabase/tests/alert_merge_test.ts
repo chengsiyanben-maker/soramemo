@@ -113,7 +113,7 @@ Deno.test("同じ遅れの繰り返しは送らず、重くなった・運航情
 
 Deno.test("通知は同じ便を同じ tag にし、上書きでも鳴らす。更新は【更新】を付ける", () => {
   const g = mergeAlerts(S, [A(3, "delay_dep", 40, true)])[0];
-  assertEquals(payloadOf(g, false), { title: "そらメモ：JL503", body: "delay_dep40公式", tag: "fw-JL503@2026-11-13@HND", renotify: true, url: "./#ops-HND" });
+  assertEquals(payloadOf(g, false), { title: "JL503", body: "delay_dep40公式", tag: "fw-JL503@2026-11-13@HND", renotify: true, url: "./#ops-HND" });
   assertEquals(payloadOf(g, true).body, "【更新】delay_dep40公式");
 });
 

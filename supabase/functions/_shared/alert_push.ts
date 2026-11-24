@@ -3,6 +3,7 @@ import webpush from "npm:web-push@3.6.7";
 import type { SupabaseClient } from "npm:@supabase/supabase-js@2.117.2";
 import { addWorld, eligible, type MergeAlert, mergeAlerts, type MergeSched, payloadOf, type WorldSched, type WorldStatus, worldOnlyGroups } from "./alert_merge.ts";
 import { US_SERVED } from "./faa_nas.ts";
+import { tidyPush } from "./push_text.ts";
 
 // お知らせが入った・書き直された便（schedule_id）について、同じ便のお知らせを1件の通知にまとめて送る（alert_merge.ts）。
 // 送ってよいか（同じ中身を二度送らない）は alert_push_claim が1件ずつ決めて記録するので、flight-watch と odpt-status が同時に動いても二重にならない
@@ -75,7 +76,7 @@ export async function sendSpPush(admin: SupabaseClient, iata: string[], payload:
   webpush.setVapidDetails(Deno.env.get("VAPID_SUBJECT") || "https://soramemo.jp", pub, priv);
   let sent = 0;
   for (const s of subs) {
-    try { await webpush.sendNotification({ endpoint: s.endpoint, keys: { p256dh: s.p256dh, auth: s.auth } }, JSON.stringify(payload), { TTL: 3600 }); sent++; }
+    try { await webpush.sendNotification({ endpoint: s.endpoint, keys: { p256dh: s.p256dh, auth: s.auth } }, JSON.stringify(tidyPush(payload)), { TTL: 3600 }); sent++; }
     catch (e) { const code = (e as { statusCode?: number }).statusCode; if (code === 404 || code === 410) await admin.from("push_subs").delete().eq("id", s.id); }
   }
   return sent;
