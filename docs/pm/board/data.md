@@ -1,7 +1,7 @@
 # データ担当の帳面
 
 ## いま持っている仕事
-- **見直し B の回のデータの分（PM の指示 11/24 14時30分・report-sweep-all-b.md の 1・2・7①・8番。11/24 火曜に定期の回として呼ばれたが、PM の積んだ指示があったのでこちらをした）**：ブランチ data/sweep-all（main 8744f86 から）→ **下書き PR #206**。報告 docs/pm/report-sweep-all-data.md。確かめの SQL docs/pm/sweep-all-check.sql。**移行196・テスト t134 を使った**
+- **見直し B の回のデータの分（PM の指示 11/24 14時30分・report-sweep-all-b.md の 1・2・7①・8番。11/24 火曜に定期の回として呼ばれたが、PM の積んだ指示があったのでこちらをした）**：ブランチ data/sweep-all（main 8744f86 から）→ **PR #206（11/24 17時22分 main に入った。本番の移行196 は PM の反映の流れで確かめる。sweep-all-check.sql の 2〜4 を反映のあとに）**。報告 docs/pm/report-sweep-all-data.md。確かめの SQL docs/pm/sweep-all-check.sql。**移行196・テスト t134 を使った**
   - 移行196：airport_board の next_arr・next_dep を「先の便12便（3時間先まで）＋過ぎた便2便（20分前まで）」に。便を読む幅を「今日0時の20時間前から」に（前は8日6時間前から）。hours の ref はまとめ表 airport_hour_bad（空港・日・時の遅れ＋欠航）から、まとめがない日だけ便の表から。hours・bad は前と同じ
   - rwy_learned はまとめ表 rwy_learned_days ＋今日の分（rwy_samples）。幅は「今日を入れて p_days 日（暦の日）」。記録がファイル置き場に移った日は前のまとめを残す。毎時の仕事 board-bad-roll（7分）・rwy-learned-roll（37分）、前の日と前の前の日をまとめ直す、上限1分
   - user_pins（本人だけ・RLS・退会で消える）と rpc my_pins()・my_pins_put(p_pins, p_spot, p_rev)。20空港・4KB まで、形はトリガーで確かめる
