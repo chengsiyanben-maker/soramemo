@@ -3790,7 +3790,8 @@ dialog.ckconfirm button.go{background:#E9C46A;color:#111827}
 .sgd .sgb-in{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:10px}.sgd .sgb-in label{display:block;background:#EEF1F5;border-radius:14px;padding:8px 12px}
 .sgd .sgb-in input{display:block;width:100%;box-sizing:border-box;border:0;background:transparent;color:var(--sg-ink);font:800 17px var(--gothic);min-height:32px;padding:0}
 .sgd .sgb-btns{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.sgd .sgb-btns .sg-btn{margin-top:10px}
-.sgd .sgb-n{font-size:12.5px;color:var(--sg-mute);margin:10px 2px 0;line-height:1.6}.sgd .sgb-n0{font-size:14px;margin:2px 0;line-height:1.7}
+.sgd .sgb-n{font-size:12.5px;color:var(--sg-mute);margin:10px 2px 0;line-height:1.6}
+.sgd .sgb-zero{padding:28px 20px 20px;text-align:center}.sgd .sgb-zero .t{margin:0 0 8px;font-size:18px;font-weight:800;line-height:1.5}.sgd .sgb-zero small{display:block;font-size:13px;color:var(--sg-mute);line-height:1.6}.sgd .sgb-zero .sg-btn{margin-top:18px;width:100%}.sgd .sgb-n0{font-size:14px;margin:2px 0;line-height:1.7}
 .sgd .sgb-h{display:flex;align-items:center;gap:8px;margin:22px 2px 2px}.sgd .sgb-h>b{font-size:16px;font-weight:900}.sgd .sgb-h small{display:inline;font-size:12.5px;color:var(--sg-mute)}.sgd .sgb-h .sg-a{margin-left:auto;min-height:44px;font-size:13px}
 .sgd .sgb-rr{display:flex;align-items:center;gap:10px;border-radius:16px;padding:12px 12px;margin-top:8px}.sgd .sgb-rr:first-child{margin-top:0}.sgd .sgb-rr>span{flex:1;min-width:0}.sgd .sgb-rr>span>b{display:block;font-size:14px;line-height:1.7}.sgd .sgb-rr .sgb-k{padding:4px 8px;font-size:11.5px}
 .sgd .sgb-rr .n{flex:none;font-size:18px;font-weight:900}.sgd .sgb-rr.p{background:#FBF6EC}.sgd .sgb-rr.p .sgb-k{background:#F3E4BF}.sgd .sgb-rr.c{background:#EEF3FA}.sgd .sgb-rr.c .sgb-k{background:#D9E4F2}
@@ -15769,14 +15770,31 @@ function sgLeftText(D, A){
 const SG_PEN = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16v4z"/><path d="M14 6l4 4"/></svg>`;
 const SG_CV = `<svg class="cv" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>`;
 // 題の行（修行・ANA｜JAL・会員情報）と、見方のピル（道のり・1便ごと・月ごと・✎）
-function sgTitle(car){
-  const v = sgShow().views, cur = sgViewNow();
-  const top = sgTabOn() ? `<div class="sgb-hd"><h2>修行</h2>${sgSeg("car", [["ANA", "ANA"], ["JAL", "JAL"]], car)}<span class="sgb-sp"></span><button class="sg-back" data-sg-go="profile" type="button">会員情報</button></div>`
-    : `<div class="sgb-hd"><button class="sg-back" data-close type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>閉じる</button><h2>修行</h2>${sgSeg("car", [["ANA", "ANA"], ["JAL", "JAL"]], car)}<span class="sgb-sp"></span><button class="sg-back" data-sg-go="profile" type="button">会員情報</button></div>`;
+//   zero：記録した便が0の形（会社の切り替えと見方のピルは出さない）
+function sgTitle(car, zero){
+  const v = sgShow().views, cur = sgViewNow(), seg = zero ? "" : sgSeg("car", [["ANA", "ANA"], ["JAL", "JAL"]], car);
+  const top = sgTabOn() ? `<div class="sgb-hd"><h2>修行</h2>${seg}<span class="sgb-sp"></span><button class="sg-back" data-sg-go="profile" type="button">会員情報</button></div>`
+    : `<div class="sgb-hd"><button class="sg-back" data-close type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>閉じる</button><h2>修行</h2>${seg}<span class="sgb-sp"></span><button class="sg-back" data-sg-go="profile" type="button">会員情報</button></div>`;
+  if(zero) return top;
   return `${top}<div class="sgb-views" role="tablist" aria-label="修行の見方">${SG_VIEWS.filter(x => v[x[0]]).map(([k, l]) => `<button type="button" role="tab" data-sg-view="${k}" aria-selected="${k === cur}">${l}</button>`).join("")}<span class="sgb-sp"></span><button class="sgb-pen" type="button" data-sgvs-open aria-label="修行の見方を変える">${SG_PEN}</button></div>`;
+}
+// 記録した便が0の形にするか（11/24 PM：アプリ全体の見直しから）。今年の JAL・ANA の記録した便が0で、会社のサイトに合わせた数字も、
+//   これから乗る予定も、残した計画の案もないとき。目標を勝手に入れず、「届きません」の文も出さない（確定した修行の形は、便を記録してから）
+//   「路線を入れて計算する」は目標を使わない道具なので残す（機能を消すのは本人の OK が要るため）
+function sgZero(Y = sgYear()){
+  return !Y.ANA.n && !Y.JAL.n && !Y.ANA.sync && !Y.JAL.sync && !sgFuture().length && !sgDrafts().length;
+}
+function sgZeroHTML(){
+  const rows = statusRows(), ever = rows.some(r => fareOf(r, r.t)), y = sgNowY();   // ever：前の年に JAL・ANA の便がある
+  const t = ever ? `${y}年は、まだ記録した便がありません` : rows.length ? "JAL・ANA の便は、まだ記録がありません" : "まだ記録した便がありません";
+  return `<div class="sgb-card sgb-zero"><p class="t">${t}</p>
+    <small>JAL・ANA の便を記録すると、ここに今年のポイントと道のりを出します。</small>
+    <button class="sg-btn main" data-sg-go="${SERVER ? "find" : "planner"}" type="button">計画を作る</button></div>
+    <button class="sgb-card sgb-link" data-sg-go="quick" type="button"><span><b>路線を入れて計算する</b><small>乗る前にポイントを確かめる</small></span>${SG_CV}</button>`;
 }
 function sgMain(){
   const car = sgCar(), v = sgViewNow();
+  if(sgZero()) return `${sgTitle(car, true)}${sgConfirmHTML()}${sgZeroHTML()}`;
   return `${sgTitle(car)}${sgConfirmHTML()}${v === "flights" ? sgFlightsView() : v === "months" ? sgMonthsView() : sgRoadView()}`;
 }
 // E1 道のり
