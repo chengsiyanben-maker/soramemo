@@ -37,7 +37,7 @@ async def main():
         await pg.goto('file://'+os.path.join(WORK,'index_server_test.html')); await pg.wait_for_load_state('load'); await pg.wait_for_timeout(600)
         await pg.evaluate('__fake.login()'); await pg.wait_for_timeout(900)
         await pg.evaluate("goTab('stats')"); await pg.wait_for_timeout(300)
-        await pg.click('#v-stats [data-sg-open="main"]'); await pg.wait_for_timeout(400)
+        await pg.evaluate("openShugyo('main')"); await pg.wait_for_timeout(400)   # 11/24：「気軽に」では成績の修行の入口も隠すので、窓を直接開く
         check('修行の画面が開く:', await pg.evaluate("$('dShugyo').open") and '年の修行' in await pg.inner_text('#dShugyo'))
         await pg.wait_for_timeout(500)
         t = await pg.inner_text('#dShugyo'); check('路線の運航状況（今日の便・遅れ・欠航）:', '今日 4便' in t and '遅れ 1便' in t and '欠航 1便' in t)

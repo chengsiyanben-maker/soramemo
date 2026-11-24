@@ -86,18 +86,16 @@ async def main():
         check('1便の内訳から便の窓を開ける（運賃を選び直す）:', await pg.evaluate("$('dFlight').open"))
         await pg.evaluate("$('dFlight').close()")
         await pg.evaluate("sgGo('main')"); await pg.wait_for_timeout(200)
-        # 成績：修行のまとめがいちばん上
+        # 成績：11/24 本人 OK で修行のまとめ・ステータスの目安は外し、修行の入口1枚（今のポイント）に。修行の人は入口がいちばん上
         await pg.click('nav.tabs button[data-v="stats"]'); await pg.wait_for_timeout(500)
-        t = await pg.inner_text('#sgSum'); print('SUM', t.replace('\n', ' | ')[:300])
-        check('成績：修行のまとめ（月ごと・払った・1PPあたり・路線ごと）:', '月ごとのプレミアムポイント' in t and '払った' in t and '1PPあたり' in t and '路線ごと' in t)
-        check('成績：グラフは実績だけ、予定は「これからの月」に分ける:', await pg.locator('#sgSum .bars i.p').count() == 0 and 'これからの月' in t and '2便' in t)
-        check('成績：まとめがパスポートより上:', await pg.evaluate("""() => { const a = document.querySelector('.lo[data-lo="stats:sgsum"]'), b = document.querySelector('.lo[data-lo="stats:passport"]'); return !!(a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING); }"""))
-        await pg.locator('#sgSum').screenshot(path=os.path.join(WORK, 't73_stats.png'))
+        t = await pg.inner_text('#stSg'); print('SG', t.replace('\n', ' | ')[:200])
+        check('成績：修行の入口（今のポイント）・まとめは出さない:', 'PP' in t and '修行の画面を開く' in t and await pg.locator('#sgSum').count() == 0)
+        check('成績：入口がパスポートより上:', await pg.evaluate("""() => { const a = document.querySelector('.lo[data-lo="stats:status"]'), b = document.querySelector('.lo[data-lo="stats:passport"]'); return !!(a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING); }"""))
         # 気軽にでは、修行のまとめは隠し、修行のタブもない。修行の画面は窓で開く
         await pg.evaluate("setPersona('casual', 'test')"); await pg.wait_for_timeout(500)
-        check('気軽に：修行のまとめは隠す・修行のタブはない:', await pg.evaluate("document.querySelector('.lo[data-lo=\"stats:sgsum\"]').classList.contains('lo-off')") and 'sg' not in (await pg.evaluate(TABS)).split(','))
+        check('気軽に：成績の修行の入口は隠す・修行のタブはない:', await pg.evaluate("document.querySelector('.lo[data-lo=\"stats:status\"]').classList.contains('lo-off')") and 'sg' not in (await pg.evaluate(TABS)).split(','))
         await pg.evaluate("goTab('stats')"); await pg.wait_for_timeout(300)
-        await pg.click('#v-stats .lo[data-lo="stats:status"] [data-sg-open="main"]'); await pg.wait_for_timeout(400)
+        await pg.evaluate("openShugyo('main')"); await pg.wait_for_timeout(400)   # 気軽にでは成績の入口も隠すので、窓を直接開く
         check('気軽に：修行の画面は窓で開く:', await pg.evaluate("$('dShugyo').open") and '閉じる' in await pg.inner_text('#dShugyo'))
         print('errors', errs, 'fails', fails); await b.close()
         sys.exit(1 if fails or errs else 0)

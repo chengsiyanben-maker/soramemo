@@ -38,7 +38,7 @@ async def main():
         await pg.evaluate("setPersona('spot', 'test')"); await pg.wait_for_timeout(1200)   # 11/8 からマイページでひな形は選ばない（前からの人の構成はそのまま動く）
         check('撮影：タブ:', await pg.evaluate(TABS) == 'ops,home,book,log')
         check('撮影：運用から・撮る人:', await pg.evaluate("currentView()") == 'ops' and await pg.evaluate("VIEW.ops") == 'photo')
-        await pg.evaluate("renderPersonaSettings()"); check('撮影：成績はマイページから:', await pg.locator('#personaMore [data-persona-open="stats"]').count() == 1)
+        await pg.evaluate("renderPersonaSettings()"); check('撮影：成績はマイページから:', 'data-persona-open="stats"' in await pg.evaluate("mpTilesHTML()"))
         await pg.evaluate("goTab('home')"); await pg.wait_for_timeout(1200)
         t = await pg.inner_text('#personaCard')
         check('撮影：ホームのカード:', '羽田' in t and 'NH212' in t and 'BC101' not in t)   # 11/22 から着陸・離陸などをピルで切り替える（はじめは近い方＝着陸）

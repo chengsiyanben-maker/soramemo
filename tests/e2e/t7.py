@@ -26,6 +26,6 @@ async def main():
         await pg.click('nav.tabs button[data-v=log]')
         await pg.evaluate("goTab('log')"); await pg.click('#flAdd'); await pg.wait_for_timeout(450); await pg.select_option('#mFrom', label='新千歳空港'); await pg.select_option('#mTo', label='那覇空港'); await pg.fill('#mDate','2025-08-01')
         await pg.click('#mAdd'); await pg.wait_for_timeout(400); print('manual:', await pg.inner_text('#mMsg'), await pg.evaluate('__fake.db.manual_flights.length'))
-        await pg.click('#openSettings'); print('acct:', await pg.is_visible('#acctRow'), await pg.inner_text('#acctEmail'), '| wipe visible', await pg.is_visible('#wipeRow'))
+        await pg.click('#openSettings'); await pg.evaluate('openMyPage("acct")'); print('acct:', await pg.is_visible('#acctRow'), await pg.inner_text('#acctEmail'), '| wipe visible', await pg.is_visible('#wipeRow'))
         print(errs); await b.close()
 asyncio.run(main())

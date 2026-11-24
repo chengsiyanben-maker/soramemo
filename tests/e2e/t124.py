@@ -62,7 +62,7 @@ async def main():
         allerr += errs; await c.close()
         # 3) 表示の編集の1枚（畳んだカード）
         c, pg, errs = await open_app(b)
-        await pg.evaluate("$('dSettings').showModal(); renderMyPage()"); await pg.wait_for_timeout(300)
+        await pg.evaluate("openMyPage('lo')"); await pg.wait_for_timeout(300)
         await pg.click('#dSettings .lotile[data-lo-open="top"]'); await pg.wait_for_timeout(300)
         secs = await pg.eval_on_selector_all('#dLayout .losec', 'e => e.map(x => x.dataset.loSec)')
         check('畳んだカードが画面ごとに並ぶ（修行のカードは修行担当の LO_EXT.sg）:', secs == ['tabs', 'home', 'book', 'log', 'sg', 'ops', 'opsp', 'stats', 'aps'], str(secs))
@@ -81,7 +81,7 @@ async def main():
         check('OFF にすると見出しに「隠している：短冊」・元に戻す:', '隠している：短冊' in await pg.inner_text('#dLayout [data-lo-sec="ops"] .losh') and '「短冊」を隠しました' in await pg.inner_text('#dLayout .loundo'))
         await pg.click('#dLayout [data-lo-fold="ops"]'); await pg.wait_for_timeout(200)
         check('もう一度押すと畳む:', await pg.locator('#dLayout .losec.open').count() == 0)
-        await pg.click('#dLayout [data-lo-fold="stats"]'); await pg.click('#dLayout [data-lo-blk="stats:sgsum"]'); await pg.wait_for_timeout(200)
+        await pg.click('#dLayout [data-lo-fold="stats"]'); await pg.click('#dLayout [data-lo-blk="stats:thatday"]'); await pg.wait_for_timeout(200)
         await pg.click('#dLayout [data-lo-filter="off"]'); await pg.wait_for_timeout(250)
         check('隠しているもので絞る：隠したカードだけ開いて、隠した行だけ:', await pg.eval_on_selector_all('#dLayout .losec', 'e => e.map(x => x.dataset.loSec)') == ['ops', 'stats'] and await pg.locator('#dLayout .losw').count() == 2 and '2' in await pg.inner_text('#dLayout [data-lo-filter="off"]'))
         await shot(pg, '12-844-layout-hidden.png')

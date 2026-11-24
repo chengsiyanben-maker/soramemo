@@ -18,13 +18,14 @@ async def main():
             if await pg.evaluate('typeof S !== "undefined" && S.flights.length > 0'): break
             await pg.wait_for_timeout(200)
         await pg.click('#openSettings')
+        await pg.evaluate('openMyPage("data")')
         async with pg.expect_download() as d: await pg.click('[data-export=json]')
         dl = await d.value; path = await dl.path(); j = json.load(open(path)); print('json:', dl.suggested_filename, len(j['checkins']), len(j['flights']), len(j['manual']), j['flights'][0]['flight_no'])
         async with pg.expect_download() as d: await pg.click('[data-export=csv]')
         dl = await d.value; csv = open(await dl.path(), encoding='utf-8-sig').read(); print('csv:', dl.suggested_filename); print(csv)
         # 取り込み形式と互換か（デモで取り込んでみる）
         # そらメモ＋の入口は隠してあるので、テストでは出して試す
-        await pg.click('#toggleDemo'); await pg.wait_for_timeout(800); await pg.click('nav.tabs button[data-v=log]'); await pg.click('#flAdd'); await pg.wait_for_timeout(450)
+        await pg.evaluate('openMyPage("adv")'); await pg.click('#toggleDemo'); await pg.wait_for_timeout(800); await pg.click('nav.tabs button[data-v=log]'); await pg.click('#flAdd'); await pg.wait_for_timeout(450)
         await pg.evaluate('PLUS = true; const x = document.getElementById("importBox"); x.hidden = false; x.open = true');   await pg.fill('#impText', csv); await pg.click('#impCheck'); await pg.wait_for_selector('#impPreview .hint, #impPreview .msg')
         print('reimport preview:', ((await pg.text_content('#impPreview')) or '').strip().splitlines()[0])
         print('legal links:', await pg.locator('.legal a').count(), '| errors', errs); await c.close()
@@ -36,7 +37,7 @@ async def main():
         pg.on('dialog', lambda dg: asyncio.ensure_future(dg.accept(next(answers, '')) if dg.type == 'prompt' else dg.accept()))
         await goto_http(pg, os.path.join(WORK,'index_server_test.html')); await pg.wait_for_load_state('load'); await pg.wait_for_function('document.readyState === "complete" && typeof render === "function"'); await pg.wait_for_timeout(500)
         await pg.evaluate('__fake.login()'); await pg.wait_for_timeout(500)
-        await pg.click('#openSettings'); print('del row visible:', await pg.is_visible('#delRow'))
+        await pg.click('#openSettings'); await pg.evaluate('openMyPage("acct")'); print('del row visible:', await pg.is_visible('#delRow'))
         await pg.click('#delAcct'); await pg.wait_for_timeout(300); print('wrong word -> called:', await pg.evaluate('!!window.__deleted'))
         await pg.click('#delAcct'); await pg.wait_for_timeout(600)
         print('deleted:', await pg.evaluate('JSON.stringify(window.__deleted)'), '| user:', await pg.evaluate('user'), '|', await pg.inner_text('#msg'))

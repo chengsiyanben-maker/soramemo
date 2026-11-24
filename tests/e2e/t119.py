@@ -162,7 +162,7 @@ async def main():
         check('ここからも全部乗せに戻す画面（かたまり ホーム 2）:', 'ホーム 2' in await pg.inner_text('#dReset .rsrows'))
         await pg.click('#dReset [data-rs-yes]'); await pg.wait_for_timeout(300)
         # マイページの入口
-        await pg.evaluate("$('dSettings').showModal(); renderMyPage()"); await pg.wait_for_timeout(300)
+        await pg.evaluate("openMyPage('lo')"); await pg.wait_for_timeout(300)
         check('マイページ：タブを選ぶ・ホームに出すもの・全部を見直す:', await pg.locator('#dSettings [data-tp-open]').count() == 1 and await pg.locator('#dSettings .lotile[data-he-open]').count() == 1 and await pg.locator('#dSettings [data-lo-open="top"]').count() == 1)
         check('数（タブ 5/5・ホーム 5/5）:', (await pg.inner_text('#tpTileN')).replace('\n', '') == '5/5' and (await pg.inner_text('#heTileN')).replace('\n', '') == '5/5')
         await pg.locator('#dSettings [aria-labelledby="mpPersona"]').screenshot(path=os.path.join(SHOTS, '06-mypage.png'))
@@ -251,7 +251,7 @@ async def main():
         await c.close()
         # 7. 画面の文に「× で外し」「−」で外し がない（11/9 1時 ON／OFF にした）
         c = await ctx(b, NEW); pg = await page(c, errs, True)
-        await pg.evaluate("$('dSettings').showModal(); renderMyPage()"); await pg.wait_for_timeout(300)
+        await pg.evaluate("openMyPage('lo')"); await pg.wait_for_timeout(300)
         txt = await pg.evaluate("document.body.innerText + [...document.querySelectorAll('dialog')].map(d => d.innerHTML).join('')")
         await pg.evaluate("$('dSettings').close(); openTabPicker('screen')"); await pg.wait_for_timeout(200); txt += await pg.inner_text('#dTabs')
         await pg.evaluate("$('dTabs').close(); openHomeEd('screen')"); await pg.wait_for_timeout(200); txt += await pg.inner_text('#dHomeEd')

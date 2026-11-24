@@ -153,7 +153,7 @@ async def main():
         await pg.evaluate("pinListOpen()"); await pg.wait_for_timeout(300)
         pt = await pg.evaluate("({ ph: $('pinQ').placeholder, txt: $('dPinsBody').innerText, ride: !!document.querySelector('#dPinsBody button[data-pin-ride]') })")
         check('B7 「名前か HND のような3文字」（3レターを使わない）', 'HND のような3文字' in pt['ph'] and '3レター' not in pt['ph'], pt['ph'])
-        check('B7 ピン止めは端末に保存・機種を変えると消える', '機種を変えると消えます' in pt['txt'] and '準備中' not in pt['txt'])
+        check('B7 ピン止めの保存先を書く（11/24 アカウントにも保存。ログインしていない・デモは端末だけ）', ('この端末' in pt['txt'] or 'アカウントに保存' in pt['txt']) and '機種を変えると消えます' not in pt['txt'] and '準備中' not in pt['txt'])
         check('B7 「乗る便を選ぶ」は押せるボタン', pt['ride'] and '乗る便を選ぶ' in pt['txt'])
         await pg.screenshot(path=os.path.join(WORK, 't184_pins.png'))
         await pg.evaluate("document.querySelector('#dPinsBody [data-pin-ride]').click()"); await pg.wait_for_timeout(700)

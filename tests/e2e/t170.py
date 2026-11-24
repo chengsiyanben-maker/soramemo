@@ -78,7 +78,7 @@ async def main():
         await c.route('**/web/config.js', lambda r: r.fulfill(body='window.SORAMEMO_CONFIG = { supabaseUrl: "", supabaseAnonKey: "" };', content_type='application/javascript'))
         pg = await c.new_page(); pg.on('pageerror', lambda e: errs.append(str(e)))
         await pg.goto('file://'+os.path.join(WEB,'index.html')); await pg.wait_for_load_state('load'); await pg.wait_for_function('typeof render === "function"')
-        await pg.evaluate('openMyPage()'); await pg.click('#toggleDemo'); await pg.evaluate('S = blank(); save(); render()')
+        await pg.evaluate('openMyPage("adv")'); await pg.click('#toggleDemo'); await pg.evaluate('S = blank(); save(); render()')
         check('デモ: 切り替えのピルが出ない', await pg.evaluate("$('modeSw').hidden"))
         check('デモ: 経営のオン／オフの行が出ない', await pg.evaluate("$('gameRow').hidden"))
         await pg.select_option('#demoAirport', 't:HND-T1'); await pg.press('#checkin', 'Enter'); await pg.wait_for_timeout(600)

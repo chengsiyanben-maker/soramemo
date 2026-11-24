@@ -25,6 +25,10 @@
       if(name === 'set_flight_details'){ const r = db.flights.find(x => x.id === a.p_flight_id); if(!r) return {data:null, error:{message:'flight not found'}}; r.fare = a.p_fare; r.seat = a.p_seat; window.__details = a; return {data:null, error:null}; }
       if(name === 'set_flight_price'){ const r = db.flights.find(x => x.id === a.p_flight_id); if(!r) return {data:null, error:{message:'flight not found'}}; r.price = a.p_price; return {data:null, error:null}; }
       if(name === 'atc_new_feeder'){ window.__atcFeeder = a; if(!a.p_consent) return {data:null, error:{message:'consent required'}}; return {data:{id:'f1', token:'a'.repeat(64)}, error:null}; }
+      if(name === 'my_pins'){ if(!window.__pinRpc) return {data:null, error:{message:'function public.my_pins does not exist'}}; window.__pinReads = (window.__pinReads||0) + 1; return {data: window.__pinRow ? JSON.parse(JSON.stringify(window.__pinRow)) : null, error:null}; }
+      if(name === 'my_pins_put'){ if(!window.__pinRpc) return {data:null, error:{message:'function public.my_pins_put does not exist'}}; window.__pinPuts = (window.__pinPuts||[]).concat([JSON.parse(JSON.stringify(a))]); const r = window.__pinRow;
+        if(r && a.p_rev != null && a.p_rev !== r.rev) return {data:{conflict:true, pins:r.pins, spot:r.spot, rev:r.rev}, error:null};
+        window.__pinRow = {pins:a.p_pins, spot:a.p_spot, rev:r ? r.rev + 1 : 1, updated_at:new Date().toISOString()}; return {data:{ok:true, rev:window.__pinRow.rev}, error:null}; }
       if(name === 'my_data_prefs'){ return {data: window.__dp || {stats:true, offers:false, research:false}, error:null}; }
       if(name === 'set_data_prefs'){ window.__dp = {stats:a.p_stats, offers:a.p_offers, research:a.p_research}; return {data: window.__dp, error:null}; }
       if(name === 'my_livery_seen'){ return {data: window.__livSeen || [], error:null}; }

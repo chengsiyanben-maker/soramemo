@@ -63,7 +63,7 @@ async def main():
         # タブ：隠れている運用のタブを出す（成績は隠れたまま）
         await pg.click('[data-lo-tab="ops"]')
         check('タブ：運用を出す（成績は隠れたまま）:', await pg.evaluate(TABS) == 'home,book,log,ops')
-        check('隠したタブはマイページから開ける:', await pg.locator('#personaMore [data-persona-open="stats"]').count() == 1)
+        check('隠したタブはマイページから開ける:', 'data-persona-open="stats"' in await pg.evaluate("mpTilesHTML()"))
         await pg.click('[data-lo-tab="book"]'); await pg.click('[data-lo-tab="log"]')
         check('タブは2つより減らせない:', await pg.evaluate(TABS) == 'home,ops' and await pg.locator('[data-lo-tab="ops"]').is_disabled())
         await pg.click('[data-lo-tab="book"]'); await pg.click('[data-lo-tab="log"]'); await pg.click('[data-lo-tab="sg"]')

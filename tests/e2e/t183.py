@@ -29,7 +29,7 @@ async def main():
         b = await p.chromium.launch()
         # ---- デモ：数と日付 ----
         c, pg, errs = await newpage(b, 390, 844)
-        await pg.evaluate('openMyPage()'); await pg.click('#toggleDemo'); await pg.wait_for_timeout(600)
+        await pg.evaluate('openMyPage("adv")'); await pg.click('#toggleDemo'); await pg.wait_for_timeout(600)
         r = await pg.evaluate("""(() => { const day = t => new Date(t + 9*36e5).toISOString().slice(0,10), now = Date.now();
           const last = S.flights[S.flights.length - 1];
           return { n:S.flights.length, fly:flyOnly(S.flights).length, lastDay:day(last.arr), yday:day(now - 864e5), today:day(now), hsToday:$('hsToday').textContent, hsFl:$('hsFl').textContent, km:fmtKm(focusKm()), clock:S.demoClock }; })()""")
@@ -38,13 +38,13 @@ async def main():
         check('ホームのフライトは 30・距離 24,017km（車などを入れない）', r['hsFl'] == '30' and r['km'] == '24,017', (r['hsFl'], r['km']))
         # マイページの頭の札
         await pg.evaluate('openMyPage()'); await pg.wait_for_timeout(200)
-        chips = await pg.inner_text('#mpChips')
-        check('マイページの頭の札は「16空港・30フライト」', '16空港・30フライト' in chips, chips.replace('\n', ' '))
+        chips = (await pg.inner_text('#mpTiles .mt.wide')).replace('\n', ' ')   # 11/24 案B：数は頭の札から成績のタイルへ
+        check('マイページの成績のタイルは「16 空港・30 便」', '16 空港' in chips and '30 便' in chips, chips)
         check('データの欄の見出しは「データとバックアップ」', (await pg.inner_text('#mpData')).strip() == 'データとバックアップ')
         en = await pg.inner_text('#expNote')
         check('書き出しの説明に「まとめて取り込む」がない（デモの言い方）', 'まとめて取り込む' not in en and 'デモ' in en, en)
         await pg.screenshot(path=os.path.join(SHOTS, '01-mypage.png'), full_page=False)
-        await pg.click('#dSettings .mp-back'); await pg.wait_for_timeout(150)
+        await pg.evaluate("$('dSettings').close()"); await pg.wait_for_timeout(150)
         # パスポート（これまで）
         pp = await pg.evaluate('(() => { renderPassport(); return $("passport").innerText; })()')
         check('パスポートのフライトは 30・距離 24,017km', re.search(r'フライト\s*30(?!\d)', pp) is not None and '24,017' in pp, pp[:160].replace('\n', ' '))
@@ -121,10 +121,12 @@ async def main():
         await pg.evaluate("authClose()"); await pg.wait_for_timeout(100)
         # マイページ
         await pg.evaluate('openMyPage()'); await pg.wait_for_timeout(200)
-        cr = await pg.evaluate(CONTRAST, '#dSettings .set-row small, #dSettings .legal, #dSettings .mp-sec h4')
+        cr = await pg.evaluate(CONTRAST, '#dSettings .set-row small, #dSettings .legal, #dSettings .mp-sec h4, #dSettings .mt .s, #dSettings .mt .k, #dSettings .mt-note, #dSettings .mt-menu small, #dSettings .mt-h')
         check('マイページの補足の字は 4.5:1 以上', cr and min(cr) >= 4.5, (min(cr) if cr else None, len(cr)))
+        await pg.evaluate('openMyPage("show")')
         sw = await pg.evaluate("[...document.querySelectorAll('#dSettings .swatch')].map(e => { const r = e.getBoundingClientRect(); return [Math.round(r.width), Math.round(r.height)]; })")
         check('マイページの色の丸は 44px 以上', sw and all(w >= 44 and h >= 44 for w, h in sw), sw)
+        await pg.evaluate('openMyPage()')
         lg = await pg.evaluate("[...document.querySelectorAll('#dSettings .legal a')].map(e => Math.round(e.getBoundingClientRect().height))")
         check('規約のリンクは高さ 44px 以上', lg and min(lg) >= 44, lg)
         en = await pg.inner_text('#expNote')
