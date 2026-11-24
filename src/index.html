@@ -3042,9 +3042,11 @@ dialog.psheet .btn1,dialog.psheet .btn2{display:block;width:100%;margin-top:10px
 /* 扉の札「飛行場・滑空場・ヘリポート」（11/12 本人「A」）：入らない地方（北海道など）は「・」のあとで2行に。上へのボタンは隠さない */
 #v-book .zx-dtag{flex:0 1 auto;min-width:0;flex-wrap:wrap;column-gap:0;height:auto;min-height:26px;padding:3px 9px;font-size:12px;line-height:1.2;border-radius:13px;margin-left:6px}
 #bookAir .zk-door h3,#bookAir .zk-door .u{white-space:nowrap}#bookAir .zk-door{gap:4px;padding-right:12px}
-#v-book .zx-ap{gap:4px;height:auto;min-height:104px}
-#v-book .zx-ap .zx-nm{font-size:16px;font-weight:800;line-height:1.25;color:var(--bk-ink);word-break:keep-all;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-#v-book .zx-ap.long .zx-nm{font-size:13px;-webkit-line-clamp:3}
+/* 11/25 見直し2回目の7番：名前は言葉の切れ目（<wbr>）で折り、字の途中で折らない。どの枠も同じ字の大きさ。2行まで（8字以上の名前は、入らないときだけ3行）。
+   overflow-wrap:anywhere は、1語が1行に入らない狭い画面（幅360未満）のときだけ効く最後の手 */
+#v-book .zx-ap{gap:4px;height:auto;min-height:104px;padding-left:8px;padding-right:8px}
+#v-book .zx-ap .zx-nm{font-size:15px;font-weight:800;line-height:1.3;color:var(--bk-ink);word-break:keep-all;overflow-wrap:anywhere;line-break:strict;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+#v-book .zx-ap.long .zx-nm{-webkit-line-clamp:3}
 #v-book .zx-ap.no .zx-nm{color:var(--zk-pale)}
 #v-book .zx-k{align-self:flex-start;display:inline-flex;align-items:center;height:24px;padding:0 7px;border-radius:999px;font-size:13px;font-weight:700;white-space:nowrap;letter-spacing:0}
 #v-book .zx-k.fd{background:#DCEBDF;color:#24502F}#v-book .zx-k.gl{background:#D7EAF6;color:#134F72}#v-book .zx-k.hp{background:#F1E7D8;color:#5E4114}
@@ -3063,7 +3065,8 @@ dialog.psheet .btn1,dialog.psheet .btn2{display:block;width:100%;margin-top:10px
 #v-book .zx-ap .zx-pf{font-size:13px;font-weight:600;line-height:1.2;color:var(--bk-sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
 #v-book .zx-one .zx-ap .zx-k{display:none}
 #v-book .zx-hero .ht .lab i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px;vertical-align:1px}
-#bookAir .zk-main>.vwrow{margin-top:4px}#zkxViews button{min-height:44px}
+#bookAir .zk-main>.vwrow{margin-top:4px}
+:root[data-bookseg="air"][data-zxview="region"] #bookAir .book-head{margin-right:60px}:root[data-zxview="region"] #bookAir .zx-seg{margin-right:8px}#zkxViews button{min-height:44px}
 :root[data-bookseg="air"][data-zxview="map"] #bookAir .zk-main{margin-right:0}
 #v-book .zx-bigmap{margin-top:12px;padding:12px 12px 10px;border-radius:22px;background:var(--bk-card);box-shadow:var(--bk-shadow)}
 #v-book .zx-bigmap svg{display:block;width:100%;height:auto;max-height:380px}
@@ -4039,6 +4042,8 @@ dialog.spsheet .sph .spx{top:2px;right:8px;width:44px;height:44px;border:6px sol
 .a3wrap:has(#a3Load:not([hidden])) .a3top>:not([data-a3-close]){visibility:hidden}
 #v-ops[data-hub="page"] .opsbar{position:sticky;top:calc(8px + env(safe-area-inset-top,0px));z-index:30;pointer-events:none}
 #v-ops[data-hub="page"] .opsbar>*{pointer-events:auto}
+/* 11/25 見直し2回目の3番：専用ページで中身を送ったら、上のボタンの帯に背景（紙の色＋薄い影）を付け、中身がボタンの下にもぐって見えないようにする */
+#v-ops[data-hub="page"][data-stuck] .opsbar::before{content:"";position:absolute;z-index:-1;left:-20px;right:-20px;top:calc(-8px - env(safe-area-inset-top,0px));bottom:-8px;background:var(--sky);box-shadow:0 10px 14px -12px rgba(15,23,42,.28);pointer-events:none}
 </style>
 </head>
 <body>
@@ -4071,7 +4076,7 @@ dialog.spsheet .sph .spx{top:2px;right:8px;width:44px;height:44px;border:6px sol
     <p class="maplegend"><span><i class="lg" style="background:var(--jal)"></i>JAL</span><span><i class="lg" style="background:var(--ana)"></i>ANA</span><span><i class="lg" style="background:#8B95A3"></i>そのほか</span><span><i class="lg dash"></i>航路なし</span><span class="mcred">地図：国土地理院</span></p>
     <div class="grabzone"><button class="grab" type="button" aria-label="シートの大きさを変える"></button></div>
     <div class="sbody">
-    <div class="nvnet" id="nvNetHome" hidden role="status"></div>   <!-- iPhone のアプリ：電波がないとき（I2-v2） -->
+    <div class="nvnet" id="nvNetHome" hidden role="status"></div>   <!-- 電波がないとき（I2-v2。11/25 からウェブでも） -->
     <div class="ridetop" id="rideTop" hidden></div>
     <div class="welcome-card" id="welcomeCard" hidden role="status"></div>
     <div class="pcard lo" data-lo="home:persona" id="personaCard" hidden aria-live="polite"></div>
@@ -4728,11 +4733,13 @@ function nvLastText(){
   const d = new Date(o.at), now = new Date(), day = d.toDateString() === now.toDateString() ? "" : `${d.getMonth() + 1}月${d.getDate()}日 `;
   return `最後に読んだのは ${day}${d.getHours()}:${String(d.getMinutes()).padStart(2, "0")}${o.label ? `（${String(o.label).replace(/[<>&"]/g, "")}）` : ""}`;
 }
+// 11/25 見直し2回目の9番：ホームの帯はウェブでも出す（チェックインはウェブでも保留して送る）。保留した印の数を1行で添える
 function nvNetRender(){
-  if(!NATIVE) return;
   const off = navigator.onLine === false;
   const set = (id, sub, extra) => { const el = $(id); if(!el) return; el.hidden = !off; if(off) el.innerHTML = `<span class="wi">${NV_SVG.net}</span><div class="tx"><b>電波がありません</b>${sub}${extra ? `<small>${extra}</small>` : ""}</div>`; };
-  set("nvNetHome", "チェックインは保留して、電波が戻ったら送ります");
+  let q = 0; try{ q = SERVER && !demo ? qLoad().length : 0; }catch(e){}
+  set("nvNetHome", "チェックインは保留して、電波が戻ったら送ります", q ? `送っていない印 ${q}` : "");
+  if(!NATIVE) return;
   set("nvNetOps", "戻ると、自動で読み直します", nvLastText());
   set("nvNetBook", "図鑑とフライトは、この iPhone の記録で見られます");
   set("nvNetLog", "図鑑とフライトは、この iPhone の記録で見られます");
@@ -4743,6 +4750,11 @@ async function nvNetBack(){
   const ap = OPS_AP, m = await loadMetar(); if(!m || ap !== OPS_AP) return;
   OPS_WX = m; OPS_WX_WAIT = false; $("opsWx").textContent = wxText(m); renderOps(); renderOpsAlerts(); nvLastSave();
   if(opsNeed("traffic")) startTraffic();
+}
+if(!NATIVE){   // ウェブ：ホームの帯だけ（運用はウェブでも前から「電波がありません」を出している）
+  setTimeout(nvNetRender, 0);
+  window.addEventListener("offline", () => nvNetRender());
+  window.addEventListener("online", () => nvNetRender());
 }
 if(NATIVE){
   setTimeout(() => { nvNetRender(); renderInstall(); }, 0);
@@ -7406,7 +7418,9 @@ const zkxCut = a => a.name.replace(/(滑空場|飛行場|ヘリポート|空港)
 // 同じ短い名前が2つあるとき（大利根滑空場と大利根飛行場）は、両方とも正式な名前で出す（review-app-2 の5・11/17 の直し）
 let ZKX_DUP = null;
 const zkxShort = a => { if(!ZKX_DUP){ const n = new Map(); for(const x of XA) n.set(zkxCut(x), (n.get(zkxCut(x)) || 0) + 1); ZKX_DUP = n; } return ZKX_DUP.get(zkxCut(a)) > 1 ? a.name : zkxCut(a); };
-const zkxBreak = t => esc(t).replace(/(エアポート|エアパーク|エアロパーク|スカイポート|スカイパーク|フライト|パーク|航空公園|多目的)/g, "<wbr>$1").replace(/^<wbr>/, "").replace(/<wbr>(パーク)/g, (m, x, i, all) => all.slice(0, i).endsWith("スカイ") || all.slice(0, i).endsWith("エア") || all.slice(0, i).endsWith("エアロ") ? x : m).replace(/(スカイポート|アップルポート)(?=[一-龥])/g, "$1<wbr>").replace(/(.)(滑空場|飛行場|ヘリポート)$/, "$1<wbr>$2");   // 正式な名前で出すとき（大利根滑空場）は「大利根／滑空場」で折る
+const zkxBreak = t => esc(t).replace(/(エアポート|エアパーク|エアロパーク|スカイポート|スカイパーク|フライト|パーク|航空公園|多目的)/g, "<wbr>$1").replace(/^<wbr>/, "").replace(/<wbr>(パーク)/g, (m, x, i, all) => all.slice(0, i).endsWith("スカイ") || all.slice(0, i).endsWith("エア") || all.slice(0, i).endsWith("エアロ") ? x : m).replace(/(スカイポート|アップルポート)(?=[一-龥])/g, "$1<wbr>").replace(/(.)(滑空場|飛行場|ヘリポート)$/, "$1<wbr>$2")
+  .replace(/(スカイ|エアロ|エア|フライト|アップル)(パーク|ポート)/g, "$1<wbr>$2")   // 11/25：2行に収まらないときだけ「スカイ／パーク」で折る（字の途中では折らない）
+  .replace(/([ァ-ヶー])(?=[一-龥])/g, "$1<wbr>").replace(/([一-龥])(?=[ァ-ヶぁ-ゖ])/g, "$1<wbr>").replace(/(<wbr>)+/g, "<wbr>");   // 正式な名前で出すとき（大利根滑空場）は「大利根／滑空場」で折る
 function zkxCounts(){
   const xv = visitedExtra(), list = zkxList(), got = list.filter(a => xv.has(a.id));
   const kind = ZKX_KINDS.map(k => [k, got.filter(a => a.kind === k).length, list.filter(a => a.kind === k).length]);
@@ -7444,7 +7458,7 @@ function zkAirEntryHTML(){
 // 1つの枠：短い名前・県名（11/20 design/zukan-filter 1版・取っていない所も）・種類の札（1つの種類に絞ったときは CSS で外す）・行った（✓ と回数）／まだ
 function zkxTile(a, on, n){
   const nm = zkxShort(a), [kn, kc] = nearKind(a);
-  return `<button class="zk-ap zx-ap${on ? "" : " no"}${nm.length >= 7 ? " long" : ""}" type="button" data-zka="${a.id}" style="--c:${zkCol(regionOf(a))}" aria-label="${esc(a.name)}、${esc(a.pref || "")}、${esc(kn)}、${on ? n + "回" : "まだ"}">
+  return `<button class="zk-ap zx-ap${on ? "" : " no"}${nm.length >= 8 ? " long" : ""}" type="button" data-zka="${a.id}" style="--c:${zkCol(regionOf(a))}" aria-label="${esc(a.name)}、${esc(a.pref || "")}、${esc(kn)}、${on ? n + "回" : "まだ"}">
     <span class="zx-nm">${zkxBreak(nm)}</span><span class="zx-pf">${esc(a.pref || "")}</span><span class="zx-k ${kc}">${esc(kn)}</span><span class="ft">${on ? `${ZK_CHECK}<b>${n}</b>回` : `${ZK_YET}まだ`}</span></button>`;
 }
 /* 種類の絞り込みと見方（11/20 本人「飛行場、滑空場、ヘリポートのフィルター機能、すべてに何県か表示して」・画面案 design/zukan-filter 1版 F1〜F3）
@@ -7482,7 +7496,7 @@ function zkAirBookHTML(){
       <div class="zx-list">${yet.length ? `<h4>まだ ${yet.length}</h4>` : `<p class="zk-lead">${one ? ZKX_LAB[kind] + "は" : ""}全部行きました。</p>`}${(ZKX_YET_OPEN ? yet : yet.slice(0, ZKX_YET_N)).map(a => `<button type="button" class="r" data-zka="${a.id}"><i class="k-${a.kind}"></i><b>${esc(zkxShort(a))}</b><span class="pf">${esc(a.pref || "")}</span></button>`).join("")}
         ${!ZKX_YET_OPEN && yet.length > ZKX_YET_N ? `<button type="button" class="more" id="zkxYetMore" aria-expanded="false">残り${yet.length - ZKX_YET_N}か所<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>` : ""}</div>`;
   } else {
-    const dt = one ? "" : `<span class="zx-dtag"><span class="nw">飛行場・</span><span class="nw">滑空場・</span><span class="nw">ヘリポート</span></span>`;
+    const dt = "";   // 11/25 見直し2回目の7番：地方の見出しの「飛行場・滑空場・ヘリポート」の札は外す（題で分かる）
     body = `${hero}${one ? "" : `<p class="zk-lead">集めた空港（${A.length}）とは別に数えます。自衛隊の飛行場（基地）は、今までどおり「ほかの図鑑・実績」の中にあります。</p>`}` + rgs.filter(r => r.list.length).map(r => `<section class="zk-rg" id="zkxrg-${r.rg}" data-rg="${r.rg}" style="--c:${zkCol(r.rg)}">
     <div class="zk-door"><h3>${r.rg}</h3><b class="num">${r.got}</b><span class="u">/ ${r.list.length}</span>${dt}<button class="zk-up" type="button" data-zk-up aria-label="図鑑の上へ"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 14l6-6 6 6"/></svg></button></div>
     <div class="zk-grid">${r.list.map(a => zkxTile(a, c.xv.has(a.id), vc.get(a.id) || 0)).join("")}</div></section>`).join("");
@@ -7591,8 +7605,12 @@ function zkFixLayout(L){
   return L;
 }
 // 今の人へ1回だけのお知らせ（見方が3つになった）。はじめての人には出さない
+//   11/25 見直し2回目の5番：前の見方（タイル・案内標・年代記）を選んでいた・並べていた人にだけ出す。2026年12月末で出さない
+const ZK_NOTICE_END = Date.parse("2027-01-01T00:00:00+09:00");
 const ZK_OLD_VIEW = (() => { try{ if(localStorage.getItem("soramemo.zk.notice")) return false;
-  const old = !!(localStorage.getItem("soramemo.view.book") || localStorage.getItem(LO_KEY) || localStorage.getItem("soramemo.onboarded") || localStorage.getItem("soramemo.usage"));
+  if(Date.now() >= ZK_NOTICE_END) return false;
+  const v = localStorage.getItem("soramemo.view.book") || "", lo = localStorage.getItem(LO_KEY) || "";
+  const old = ["tiles", "signs", "chron"].includes(v) || /"(tiles|signs)"/.test(lo);
   if(!old) localStorage.setItem("soramemo.zk.notice", "new");
   return old; }catch(e){ return false; } })();
 let LAYOUT = (() => { try{ const o = JSON.parse(localStorage.getItem(LO_KEY) || "null"); return o && typeof o === "object" && !Array.isArray(o) ? zkFixLayout(o) : null; }catch(e){ return null; } })();
@@ -7847,6 +7865,9 @@ function fbYearHTML(es){
 const fbW = n => +(1.4 + Math.min(n, 10) * .55).toFixed(2);
 function fbMapHTML(es){
   const rts = fbRoutes(es), top = rts.find(r => r.fly.length), sel = FB_RT && rts.find(r => r.k === FB_RT), hasCar = rts.some(r => r.car.length);
+  // 11/25 見直し2回目の6番：「乗った区間」は便のある区間だけ（日誌の路線の数と合う）。車などだけの区間は下に別の一覧
+  const flyRts = rts.filter(r => r.fly.length), carRts = rts.filter(r => !r.fly.length && r.car.length);
+  const fbRtRow = r => `<li><button type="button" data-fbrt="${r.k}" aria-pressed="${r.k === FB_RT}"><i class="w${r.fly.length ? "" : " dash"}" style="height:${fbW(r.fly.length || r.car.length)}px" aria-hidden="true"></i><span><b>${fbRtName(r.k)}</b><small>${esc(r.k.split("-").map(id => code(BY[+id])).join(" ⇄ "))}・${fmtKm((r.fly[0] || r.car[0]).km)} km${r.car.length ? `・車など ${r.car.length}` : ""}</small></span><em>${r.fly.length || r.car.length}<small>回</small></em></button></li>`;
   let selHTML = "";
   if(sel){ const [a, b] = sel.k.split("-").map(Number), mi = routeMiles(a, b, (sel.fly[0] || sel.car[0]).km), mins = sel.fly.reduce((x, e) => x + e.min, 0);
     selHTML = `<div class="fbcard fbsel"><div class="hd"><b>${fbRtName(sel.k)}</b><button type="button" class="linkbtn" data-fbrt="">ほかの区間も見る</button></div>
@@ -7857,8 +7878,10 @@ function fbMapHTML(es){
     <div class="fbcard fblg"><div class="lgrow"><small>太さ＝回数</small>${[2, 4, 6].map(n => `<span><i style="height:${fbW(n)}px"></i>${n}回</span>`).join("")}${hasCar ? `<span><i class="dash"></i>車など</span>` : ""}</div>
       <div class="lgbot">${top ? `<div><small>いちばん太い線</small><b>${fbRtName(top.k)}（${top.fly.length}回）</b></div>` : `<div><small>この年に飛んだ線はまだありません</small></div>`}<button class="fbpill" id="shareMap" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15V3"/><path d="m7 8 5-5 5 5"/><path d="M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/></svg>画像で共有</button></div></div>
     ${selHTML}
-    ${rts.length ? `<h3 class="fbh">乗った区間<small>${rts.length}区間・太い順</small></h3>
-      <div class="fbcard"><ul class="fbrts">${rts.map(r => `<li><button type="button" data-fbrt="${r.k}" aria-pressed="${r.k === FB_RT}"><i class="w${r.fly.length ? "" : " dash"}" style="height:${fbW(r.fly.length || r.car.length)}px" aria-hidden="true"></i><span><b>${fbRtName(r.k)}</b><small>${esc(r.k.split("-").map(id => code(BY[+id])).join(" ⇄ "))}・${fmtKm((r.fly[0] || r.car[0]).km)} km${r.car.length ? `・車など ${r.car.length}` : ""}</small></span><em>${r.fly.length || r.car.length}<small>回</small></em></button></li>`).join("")}</ul></div>` : ""}`;
+    ${flyRts.length ? `<h3 class="fbh">乗った区間<small>${flyRts.length}区間・太い順</small></h3>
+      <div class="fbcard"><ul class="fbrts">${flyRts.map(fbRtRow).join("")}</ul></div>` : ""}
+    ${carRts.length ? `<h3 class="fbh">車など<small>${carRts.length}区間・点線（便に入れず別に数えています）</small></h3>
+      <div class="fbcard"><ul class="fbrts" data-fbcar>${carRts.map(fbRtRow).join("")}</ul></div>` : ""}`;
 }
 // 区間の線に使う航跡（11/20 PM）：その区間でいちばん新しい航跡のある便の track（[[緯度, 経度], ...]・adsb.lol）。なければ null（今の弧の線）
 function fbTrackOf(r){ const e = [...r.fly].sort((x, y) => y.t - x.t).find(e => e.f && Array.isArray(e.f.track) && e.f.track.length >= 2 && e.f.track.every(p => Array.isArray(p) && isFinite(p[0]) && isFinite(p[1]))); return e ? e.f.track : null; }
@@ -11357,6 +11380,7 @@ function enqueue(p){
   say(`電波が届かないため、${placeName(n.a, n.term)}のチェックインを保留しました。電波が戻ったら自動で送ります（24時間以内）。`);
 }
 function renderQueue(){
+  nvNetRender();   // ホームの「電波がありません」の帯の「送っていない印 ○」
   const q = SERVER && !demo ? qLoad() : [], el = $("queueBar");
   el.hidden = !q.length;
   if(!q.length){ el.innerHTML = ""; return; }
@@ -11469,7 +11493,8 @@ document.addEventListener("click", async e => {
   if(e.target.id === "yrShare" && plusOn()) openShare(await yearCard(YEAR), `soramemo-${YEAR}.png`);
 });
 // パスポート：これまで（または年ごと）のフライトの数・距離・推定の飛行時間・空港・航空会社と、いちばん長いフライト・よく飛んだ路線。
-// チェックインでできたフライトと、記録帳のフライトの両方を数える。飛行時間は距離からの推定（時速780km＋上昇・着陸の20分）
+// チェックインでできたフライトを数える。空の上はフライトの画面（fbMin・fbSum）と同じ数え方（11/25 見直し2回目の1番）：
+//   実際の出発・到着がある便はその差、ない便はチェックインの時刻の差。航空会社の運航情報（odpt）以外がまじったら「推定を含む」
 let PASS_Y = "all";
 // 毎日の記録（便ごとの実績）を、便名を記録したフライトに付ける：遅れ・機種・登録記号（サーバーの flight_facts）
 let FACTS = new Map(), FACTS_KEY = "";
@@ -11493,9 +11518,9 @@ const typeName = t => TYPE_NAME[t] || t;
 function passStats(y){
   const inY = t => y === "all" || new Date(t).getFullYear() === y;
   const inYf = S.flights.filter(f => inY(f.dep)), cars = inYf.filter(isCar);
-  const fl = flyOnly(inYf).map(f => ({ from:f.from, to:f.to, km:f.km, airline:f.airline }));
+  const fl = flyOnly(inYf).map(f => ({ from:f.from, to:f.to, km:f.km, airline:f.airline, min:fbMin(f), est:f.actSrc !== "odpt" }));
   const mn = S.manual.filter(m => inY(m.d.replaceAll("-", "/")));
-  const all = fl, tot = all.reduce((x, f) => x + f.km, 0), mins = all.reduce((x, f) => x + f.km / 780 * 60 + 20, 0);
+  const all = fl, tot = all.reduce((x, f) => x + f.km, 0), mins = all.reduce((x, f) => x + f.min, 0), est = all.some(f => f.est);
   const aps = new Set(), als = new Map(), rts = new Map();
   for(const f of all){ aps.add(f.from); aps.add(f.to); if(f.airline && ALBY[f.airline]) als.set(f.airline, (als.get(f.airline) || 0) + 1);
     const k = [f.from, f.to].sort((p, q) => p - q).join("-"); rts.set(k, (rts.get(k) || 0) + 1); }
@@ -11507,7 +11532,7 @@ function passStats(y){
   const off = facts.filter(k => k.ata_src === "odpt"), lost = off.reduce((x, k) => x + Math.max(0, Number(k.arr_delay) || 0), 0), late = off.filter(k => Number(k.arr_delay) >= 15).length;
   const tys = new Map(); for(const k of facts){ const t = k.type || k.aircraft; if(t) tys.set(t, (tys.get(t) || 0) + 1); }
   const topType = [...tys].sort((p, q) => q[1] - p[1])[0];
-  return { n:all.length, manual:mn.length, car:cars.length, carKm:cars.reduce((x, f) => x + f.km, 0), km:tot, mins, aps:aps.size, als:als.size, longest, topRt, topAl, facts:facts.length, lost, late, topType };
+  return { n:all.length, manual:mn.length, car:cars.length, carKm:cars.reduce((x, f) => x + f.km, 0), km:tot, mins, est, aps:aps.size, als:als.size, longest, topRt, topAl, facts:facts.length, lost, late, topType };
 }
 const passTime = m => { const d = Math.floor(m / 1440), h = Math.floor(m % 1440 / 60), mm = Math.round(m % 60); return d ? `${d}日${h}時間` : h ? `${h}時間${mm ? mm + "分" : ""}` : `${mm}分`; };
 // 乗った機体の図鑑：便名を記録したフライトに、毎日の記録の登録記号・機種を付けて集める。特別塗装機は名前を添える
@@ -11544,7 +11569,7 @@ function renderPassport(){
     <div class="pp-grid">
       <div><span class="l">フライト</span><b>${st.n}</b><span class="s">チェックインで記録</span></div>
       <div><span class="l">距離</span><b>${fmtKm(st.km)}<small>km</small></b><span class="s">地球 ${laps >= 10 ? Math.round(laps) : laps.toFixed(1)} 周ぶん</span></div>
-      <div><span class="l">空の上（推定）</span><b class="t">${passTime(st.mins)}</b></div>
+      <div><span class="l">空の上</span><b class="t">${fbDurTxt(st.mins)}</b>${st.est ? `<span class="s">推定を含む</span>` : ""}</div>
       <div class="two"><div><span class="l">空港</span><b>${st.aps}</b></div><div><span class="l">航空会社</span><b>${st.als}</b></div></div>
     </div>
     ${st.manual || st.car ? `<p class="pp-note pp-sep">${[st.manual ? `記録帳の便 ${st.manual}` : "", st.car ? `車など ${st.car}（${fmtKm(st.carKm)} km）` : ""].filter(Boolean).join("・")}は、フライト・距離・空の上に入れず別に数えています。</p>` : ""}
@@ -11564,7 +11589,7 @@ async function passCard(y){
   try{ await document.fonts.ready; }catch(e){}
   const st = passStats(y), [cv, ctx] = cardBase(), laps = st.km / 40075;
   ctx.textAlign = "left"; ctx.fillStyle = PAL.ink; ctx.font = `800 72px ${GOTHIC}`; ctx.fillText(y === "all" ? "これまでのパスポート" : `${y}年のパスポート`, 80, 270);
-  const cells = [[String(st.n), "フライト"], [fmtKm(st.km), `km（地球 ${laps >= 10 ? Math.round(laps) : laps.toFixed(1)} 周ぶん）`], [passTime(st.mins), "空の上（推定）"], [`${st.aps}・${st.als}`, "空港・航空会社"]];
+  const cells = [[String(st.n), "フライト"], [fmtKm(st.km), `km（地球 ${laps >= 10 ? Math.round(laps) : laps.toFixed(1)} 周ぶん）`], [fbDurTxt(st.mins), st.est ? "空の上（推定を含む）" : "空の上"], [`${st.aps}・${st.als}`, "空港・航空会社"]];
   cells.forEach(([n, u], i) => { const x = 80 + (i % 2) * 460, yy = 420 + Math.floor(i / 2) * 200;
     ctx.fillStyle = PAL.ink; ctx.font = `800 ${n.length > 7 ? 64 : 84}px ${GOTHIC}`; ctx.fillText(n, x, yy);
     ctx.fillStyle = PAL.sumi; ctx.font = `500 30px ${GOTHIC}`; ctx.fillText(u, x, yy + 50); });
@@ -12793,6 +12818,7 @@ function opsHubApply(){
   if(!OH_ON()){ sec.removeAttribute("data-hub"); sec.removeAttribute("data-page"); $("opsHubList").hidden = true; return; }
   sec.dataset.hub = OPS_PAGE ? "page" : "list";
   if(OPS_PAGE) sec.dataset.page = OPS_PAGE; else sec.removeAttribute("data-page");
+  opsStuck();
   $("opsHubList").hidden = !!OPS_PAGE;
   if(OPS_PAGE) OH_EDIT = false; else opsHubRender();
   renderOpsLate();
@@ -14239,13 +14265,20 @@ function opsLateHTML(){
 let LT_JUMPED = false;
 function ltJump(){
   if(OPS_PAGE !== "late" || LT_JUMPED) return;
+  { const sec = $("v-ops"); if(OH_BUSY || (sec && sec.classList.contains("ohup"))){ setTimeout(ltJump, 80); return; } }   // 開く動きが終わって上の段が落ち着いてから送る
   const rows = [...document.querySelectorAll("#opsLate .ltrows li[data-lt-t]")]; if(!rows.length) return;
   LT_JUMPED = true;
   const now = Date.now(), i = rows.findIndex(li => Number(li.dataset.ltT) >= now - 30 * 60000);
   const li = i < 0 ? rows[rows.length - 1] : rows[i]; if(i === 0) return;
-  const top = li.getBoundingClientRect().top + window.scrollY - Math.round(innerHeight * .3);
-  window.scrollTo({ top:Math.max(0, top), behavior:"auto" });
+  if(rows.length < 10) return;   // 11/25 見直し2回目の3番：便が少ない（10行未満）なら送らず、題・大きな数・絞り込みから見せる
+  // 「いまごろ」の札（行の上 約22px）が上の浮いたボタンの帯（上から 8px＋帯の高さ）の下に来る位置へ
+  const bar = document.querySelector("#v-ops .opsbar"), barB = 8 + (bar ? bar.offsetHeight : 44) + 12;
+  const go = () => window.scrollTo({ top:Math.max(0, li.getBoundingClientRect().top + window.scrollY - barB - 22), behavior:"auto" });
+  go(); requestAnimationFrame(() => { if(Math.abs(li.getBoundingClientRect().top - barB - 22) > 2) go(); });   // 送ると上の段が縮むことがあるので、1こま後に合わせ直す
 }
+// 専用ページを送ったかどうか（上のボタンの帯に背景を付ける）
+function opsStuck(){ const sec = $("v-ops"); if(sec) sec.toggleAttribute("data-stuck", !!OPS_PAGE && window.scrollY > 4); }
+window.addEventListener("scroll", opsStuck, { passive:true });
 function renderOpsLate(){
   const box = $("opsLate"); if(!box) return;
   if(OPS_PAGE !== "late"){ box.hidden = true; LT_JUMPED = false; return; }

@@ -162,7 +162,7 @@ async def main():
         nm = await pg.evaluate("({ add: $('mAdd').textContent, h: document.querySelector('#lsBook h2, #flAdd') ? $('flAdd').getAttribute('aria-label') : '', loc: document.body.innerHTML.includes('記録帳に書いたり') })")
         check('B4 フライトの ＋ は「日誌に追加」', nm['add'] == '日誌に追加' and '日誌' in nm['h'] and not nm['loc'], nm)
         pp = await pg.evaluate("(() => { renderPassport(); return $('passport').innerText; })()")
-        check('B4 成績は「空の上（推定）」（飛行時間と書かない）', '空の上（推定）' in pp and '飛行時間' not in pp, pp[:120])
+        check('B4 成績は「空の上」（飛行時間と書かない。推定の札はフライトと同じ決め方・11/25）', '空の上' in pp and '飛行時間' not in pp, pp[:120])
         check('ページのエラーがない（ホーム・知らせ）', not errs, errs[:3])
         await b.close()
     print('errors', fails); sys.exit(1 if fails else 0)
