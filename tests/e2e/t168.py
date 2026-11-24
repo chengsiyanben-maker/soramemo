@@ -2,6 +2,9 @@ import os, sys, json, shutil, asyncio, threading, functools, http.server, math, 
 from datetime import datetime, timedelta, timezone
 from playwright.async_api import async_playwright
 # 羽田の3D の機体を細かい3Dモデルに（PM 11/23 14時20分・checkin/a3-models。本人「３Dモデルをリアルなものにして」）
+# 11/24 checkin/a3-hq（本人「３Dモデルはもっと容量を気にせず，高いクオリティにして」）：はじめの質は 3（最高）。細かい形は全部の機体・1機種3万より多い三角形・4096 の影・上塗り・
+#   ふちのギザギザ消し（MSAA 4）・物の隙間の影・灯りのにじみ・昼は Poly Haven（CC0）の映り込み。重いとき（質を2に下げる）は前の細かさに作り直す。写真は docs/pm/shots-a3-hq/
+#   画面のないソフトの描画は遅く、質が勝手に下がるので、写真と確かめの間は A3_QLOCK で止める（下げる仕組みは a3Quality(2) で別に確かめる）
 #   7機種（787・777・767・737・A350・A321neo・A320）は近いとき細かい形（a3HdMesh）。遠くは前の形、もっと遠い地上の機体は平らな形。「軽い」と質0は前の形のまま
 #   色は白い胴と尾翼の大まかな色だけ（夜は会社の色を使わない）。材質は PBR で空を映す。夜は窓が灯る
 #   比べ写真：今の本番（origin/main の web）と同じ視点（全体・駐機場・寄り・夜）で撮る（docs/pm/shots-a3-models/）
@@ -15,7 +18,7 @@ from playwright.async_api import async_playwright
 #   偽のサーバーを使う。本物の Supabase には接続しない
 HERE = os.path.dirname(os.path.abspath(__file__)); ROOT = os.path.abspath(os.path.join(HERE, '..', '..')); WEB = os.path.join(ROOT, 'web')
 BASE = os.environ.get('SORAMEMO_TEST_WORK', '/tmp/soramemo-e2e'); WORK = os.path.join(BASE, 'a3m-new'); OLD = os.path.join(BASE, 'a3m-old')
-SHOTS = os.path.join(ROOT, 'docs', 'pm', 'shots-a3-models'); os.makedirs(SHOTS, exist_ok=True)
+SHOTS = os.path.join(ROOT, 'docs', 'pm', 'shots-a3-hq'); os.makedirs(SHOTS, exist_ok=True)
 THREE = os.path.join(BASE, 'three-0.160.0.module.min.js')
 fails = []
 def check(name, ok, detail=''):
@@ -58,7 +61,7 @@ NOWD = {'at': iso(-20), 'weather': {'time': iso(-600), 'wdir': 170, 'wspd': 14, 
 NEW = "localStorage.setItem('soramemo.onboarded','1'); localStorage.setItem('soramemo.persona','all'); localStorage.setItem('soramemo.zk.notice','new'); localStorage.setItem('soramemo.install.later','1'); localStorage.setItem('soramemo.zk.swipe','1');"
 async def open3d(b, sky, port, ground=True):
     c = await b.new_context(viewport={'width': 390, 'height': 844}, device_scale_factor=1, timezone_id='Asia/Tokyo', bypass_csp=True)
-    await c.add_init_script(NEW + "Object.defineProperty(navigator, 'hardwareConcurrency', { get: () => 8 });")
+    await c.add_init_script(NEW + "window.A3_QLOCK = true; setInterval(() => { try{ if(typeof A3 !== 'undefined' && A3) A3.qAt = Date.now(); }catch(e){} }, 300); Object.defineProperty(navigator, 'hardwareConcurrency', { get: () => 8 });")   # 今の本番は A3_QLOCK がないので qAt で止める
     await c.route('https://cdn.jsdelivr.net/npm/@supabase/**', lambda r: r.fulfill(path=os.path.join(HERE, 'fake_sb.js'), content_type='application/javascript'))
     await c.route('https://cdn.jsdelivr.net/npm/three@**', lambda r: r.fulfill(path=THREE, content_type='application/javascript', headers={'Access-Control-Allow-Origin': '*'}))
     async def fn(r):
@@ -80,8 +83,14 @@ async def open3d(b, sky, port, ground=True):
     await pg.wait_for_function("(() => { const l = document.getElementById('a3Load'); return !!l && l.hidden; })()", timeout=40000)
     await pg.evaluate("a3Poll()"); await pg.wait_for_timeout(2000)
     return c, pg, errs
+async def frames(pg, n=2):
+    # 描いたコマを n 回待つ（11/24 PM の依頼）。a3Loop は「機体の距離（a3Sync）→ カメラ（a3Camera）」の順なので、視点を変えた直後の1コマは前の視点の距離で細かい形を決める。
+    #   遅い手元では 1.2 秒で1コマも描けず、前の視点（全体＝約10km 先）の距離のまま確かめて「近い機体が0機」になっていた。2コマ目で新しい視点の距離になる
+    for _ in range(n):
+        d = await pg.evaluate("A3.drawn || 0")
+        await pg.wait_for_function("d => !!A3 && (A3.drawn || 0) > d", arg=d, timeout=180000)
 async def view(pg, v, yaw=0):
-    await pg.evaluate("([v, y]) => { A3.view = v; A3.yaw = y; A3.card = false; a3Pills(); a3Sheet(); A3.dirty = true; }", [v, yaw]); await pg.wait_for_timeout(1200)
+    await pg.evaluate("([v, y]) => { A3.view = v; A3.yaw = y; A3.card = false; a3Pills(); a3Sheet(); A3.dirty = true; }", [v, yaw]); await pg.wait_for_timeout(1200); await frames(pg)
 SE = 1.25 * math.pi   # 管制塔から南東（第2ターミナルの駐機場と誘導路。この時間の地上の機体が多い側）
 INFO = "(() => { A3.r.render(A3.scene, A3.cam); const i = A3.r.info.render; return { tri: i.triangles, calls: i.calls }; })()"
 
@@ -101,6 +110,17 @@ async def shots(b, port, tag, ground=True):
             out[f'{k}_{sky}'] = await pg.evaluate(INFO); await pg.screenshot(path=os.path.join(SHOTS, f'{tag}_{k}_{sky}.png'))
         await c.close()
     return out
+# 寄り（11/24 a3-hq）：選んだ機体のすぐ横から（カメラを近くに置く写真用。アプリの視点は変えない）
+ZOOM = [('g3', '787'), ('g2', '350'), ('g4', '737'), ('g9', '777'), ('g12', 'a321'), ('g1', '767')]
+async def zoom(b, port, tag):
+    for sky in ('day', 'night'):
+        c, pg, errs = await open3d(b, sky, port)
+        await pg.evaluate("a3Camera = function(){ const o = A3.objs.get(A3.zid); if(!o) return; const p = o.g.position, L = o.g.scale.x, a = -(o.p.hdg || 0) * D2R + A3.zang; A3.cam.near = 1; A3.cam.fov = 40; A3.cam.updateProjectionMatrix(); A3.cam.position.set(p.x + Math.sin(a) * L * A3.zd, p.y + L * .2, p.z - Math.cos(a) * L * A3.zd); A3.cam.lookAt(p.x, p.y + L * .03, p.z); }")
+        for gid, nm in ZOOM:
+            for ang, an, zd in ((2.3, 'f', 1.0), (4.0, 'r', 1.0), (2.6, 'w', 1.9)):
+                await pg.evaluate("([g, a, d]) => { A3.zid = g; A3.zang = a; A3.zd = d; A3.sel = g; A3.view = 'plane'; A3.dirty = true; }", [gid, ang, zd]); await pg.wait_for_timeout(2500)
+                await pg.screenshot(path=os.path.join(SHOTS, f'{tag}_z_{nm}_{an}_{sky}.png'), clip={'x': 0, 'y': 110, 'width': 390, 'height': 390})
+        await c.close()
 async def main():
     if not os.path.exists(THREE): print('three.js がないので飛ばす（t142 を先に流すと置かれる）'); sys.exit(1)
     allerr = []; info = {}
@@ -110,7 +130,7 @@ async def main():
         r = await pg.evaluate("['B788','B789','B78X','B77W','B763','B738','B38M','A359','A21N','A321','A320','A20N','E190','DH8D','B744'].map(t => a3HdKey(t) || '-').join(' ')")
         check('細かい形の機種（787・777・767・737・A350・A321・A320。ほかは前の形）', r == '787 787 787 777 767 737 737 350 a321 a321 320 320 - - -', r)
         r = await pg.evaluate("Object.fromEntries(Object.keys(A3_HD).map(k => [k, a3HdGeo(k).tri]))")
-        check('細かい形の三角形は1機種 3万以下（1機種で1回作り、同じ機種で使い回す）', all(5000 < v < 30000 for v in r.values()), r)
+        check('最高の質：細かい形の三角形は1機種 3万より多い（1機種で1回作り、同じ機種で使い回す）', all(30000 < v < 60000 for v in r.values()), r)
         # 寸法：翼幅と長さの割合（FAA の表）。形の外側の箱で測る
         r = await pg.evaluate("""Object.fromEntries(Object.keys(A3_HD).map(k => { const g = a3HdGeo(k), T = A3.THREE, bb = new T.Box3(); for(const v of Object.values(g)) if(v && v.isBufferGeometry){ v.computeBoundingBox(); bb.union(v.boundingBox); }
             return [k, [+(bb.max.x - bb.min.x).toFixed(3), +(bb.max.z - bb.min.z).toFixed(3), A3_HD[k].span]]; }))""")
@@ -118,9 +138,12 @@ async def main():
         await view(pg, 'tower', SE)
         h = await pg.evaluate(HD)
         near = [k for k, v in h.items() if v['has'] and v['cd'] < 1600]
-        check('管制塔の視点：近い7機種の機体は細かい形を出す', near and all(h[k]['vis'] for k in near), {k: h[k] for k in near})
-        far = [k for k, v in h.items() if v['has'] and v['cd'] > 1700 and k != await pg.evaluate("A3.sel || ''")]
-        check('遠い機体は細かい形を出さない（前の形か平らな形）', all(not h[k]['vis'] for k in far), len(far))
+        cam = await pg.evaluate("[Math.round(A3.cam.position.x), Math.round(A3.cam.position.y), Math.round(A3.cam.position.z)]")
+        check('管制塔の視点：近い7機種の機体は細かい形を出す', near and all(h[k]['vis'] for k in near), {k: h[k] for k in near} if near else {'カメラ': cam, '近い順': sorted((v['cd'], k, v['has']) for k, v in h.items())[:4]})
+        mid = [k for k, v in h.items() if v['has'] and 1700 < v['cd'] < 2900]
+        check('最高の質：1.6km より遠くても（3km まで）細かい形を出す', all(h[k]['vis'] for k in mid), len(mid))
+        far = await pg.evaluate("[...A3.objs.values()].filter(o => !a3Air(o.p) && o.cd > 3000 && o.p.id !== A3.sel).map(o => [!!(o.lo && o.lo.visible), !!(o.g.getObjectByName('hd') || {}).visible])")
+        check('3km より遠い地上の機体は平らな形（遠くから見つけやすい形のまま）', all(a and not b for a, b in far), far)
         r = await pg.evaluate("(() => { const o = A3.objs.get('g9'), hd = o.g.getObjectByName('hd'); const mid = o.g.userData.mid.filter(c => c.visible).length; return { hd: !!hd, mid }; })()")
         await pg.evaluate("id => { a3Select(id, true); }", 'g3'); await pg.wait_for_timeout(1200)
         r = await pg.evaluate("(() => { const o = A3.objs.get('g3'), hd = o.g.getObjectByName('hd'); return { vis: hd.visible, mid: o.g.userData.mid.filter(c => c.visible).length, gear: o.g.getObjectByName('gearHD').visible }; })()")
@@ -130,11 +153,18 @@ async def main():
             return { jal: fin('g3'), ana: fin('g10'), aca: fin('g9') }; })()""")
         check('尾翼の色：JAL は赤・ANA は紺・海外の会社は白に近い灰色', r == {'jal': 'c8102e', 'ana': '13317d', 'aca': 'e9ecef'}, r)
         r = await pg.evaluate("(() => { const m = A3.hdm['787']; return { std: m.type, env: !!m.envMap, map: !!m.map, em: m.emissiveIntensity, shadow: A3.objs.get('g3').g.getObjectByName('hd').children[0].castShadow }; })()")
-        check('材質は PBR（MeshStandardMaterial）・空を映す・昼は窓を灯さない・影を落とす', r['std'] == 'MeshStandardMaterial' and r['env'] and r['map'] and r['em'] == 0 and r['shadow'], r)
+        check('材質は PBR（最高の質は上塗りつきの MeshPhysicalMaterial）・空を映す・昼は窓を灯さない・影を落とす', r['std'] == 'MeshPhysicalMaterial' and r['env'] and r['map'] and r['em'] == 0 and r['shadow'], r)
+        # 最高の質の仕上げ
+        r = await pg.evaluate("(() => { const P = A3.post; return { max: A3_MAX, q: A3.q, post: !!P, samples: P && P.main.samples, depth: !!(P && P.main.depthTexture), ao: !!(P && P.aoM), bloom: !!(P && P.brM), envDay: !!A3.envDay, envI: A3.hdm['787'].envMapIntensity, rough: !!A3.hdm['787'].roughnessMap, lin: (A3.lmats || []).every(m => m.uniforms.uLin.value === 1) }; })()")
+        check('最高の質：ふちのギザギザ消し（MSAA 4）・物の隙間の影・灯りのにじみ・昼の映り込みの絵（CC0）・窓のつや', r['max'] and r['q'] == 3 and r['post'] and r['samples'] == 4 and r['depth'] and r['ao'] and r['bloom'] and r['envDay'] and r['envI'] >= .9 and r['rough'] and r['lin'], r)
+        r = await pg.evaluate("(() => { const g = a3HdGeo('737').wing; g.computeBoundingBox(); const P = g.attributes.position.array; let tipLow = 1, inLow = 1; for(let i = 0; i < P.length; i += 3){ const x = Math.abs(P[i]); if(x > .445) tipLow = Math.min(tipLow, P[i + 1]); else if(x > .40 && x < .43) inLow = Math.min(inLow, P[i + 1]); } return { tipLow: +tipLow.toFixed(4), inLow: +inLow.toFixed(4) }; })()")
+        check('737：翼の先の下に伸びる板（スプリットシミタール）', r['tipLow'] < r['inLow'] - .01, r)
+        r = await pg.evaluate("(() => { const t = a3HdTex('787'); return { w: t.map.image.width, h: t.map.image.height, wing: A3.hdWing && A3.hdWing.image.width }; })()")
+        check('胴の絵は 4096×1024（汚れ・板の線・窓の枠つき）・翼の絵 2048', r == {'w': 4096, 'h': 1024, 'wing': 2048}, r)
         info['hd_tower_day'] = await pg.evaluate(INFO)
         # やわらかい影（PM 11/23 22時：#191 から影だけ移す）：PCFSoft・2048・範囲 ±1.5km を見ている所に寄せる
         r = await pg.evaluate("(() => { const s = A3.sun.shadow; return { type: A3.r.shadowMap.type, soft: A3.THREE.PCFSoftShadowMap, map: s.mapSize.x, r: s.camera.right, tx: A3.sun.target.position.x, tz: A3.sun.target.position.z }; })()")
-        check('影はやわらかい影（PCFSoft）・細かさ 2048・範囲 ±1.5km', r['type'] == r['soft'] and r['map'] == 2048 and r['r'] == 1500, r)
+        check('影はやわらかい影（PCFSoft）・最高の質は細かさ 4096・範囲 ±1.5km', r['type'] == r['soft'] and r['map'] == 4096 and r['r'] == 1500, r)
         await view(pg, 'all', 0)
         r2 = await pg.evaluate("[A3.sun.target.position.x, A3.sun.target.position.z, A3.sun.position.x - A3.sun.target.position.x, A3.sd.x * 20000]")
         r3 = await pg.evaluate("A3.sun.shadow.camera.right")
@@ -143,6 +173,10 @@ async def main():
         r4 = await pg.evaluate("[A3.sun.target.position.x, A3.sun.target.position.z, A3.sun.shadow.camera.right]")
         check('管制塔で向きを変えると影の範囲が見ている所へ動く', (r4[0], r4[1]) != (r['tx'], r['tz']) and r4[2] == 1500, [r, r4])
         await view(pg, 'tower', SE)
+        # 重いとき：質を2に下げると、仕上げをやめて前の細かさ（3万以下）で作り直す・影は 2048
+        await pg.evaluate("a3Quality(2)"); await pg.wait_for_timeout(1500)
+        r = await pg.evaluate("(() => { const o = [...A3.objs.values()].find(o => o.g.getObjectByName('hd')); const hd = o && o.g.getObjectByName('hd'); return { max: A3_MAX, post: !!A3.post, tri: hd ? hd.userData.tri : 0, map: A3.sun.shadow.mapSize.x, shadow: A3.r.shadowMap.enabled, lin: (A3.lmats || []).every(m => m.uniforms.uLin.value === 0), n: A3.objs.size }; })()")
+        check('質2に下げる：仕上げなし・機体は前の細かさ（3万以下）で作り直す・影は 2048 のまま描く', not r['max'] and not r['post'] and 5000 < r['tri'] < 30000 and r['map'] == 2048 and r['shadow'] and r['lin'] and r['n'] > 20, r)
         # 軽い表示と質0は前の形のまま
         await pg.evaluate("a3SetLite(true)"); await pg.wait_for_timeout(1500)
         r = await pg.evaluate("[...A3.objs.values()].some(o => o.g.getObjectByName('hd'))")
@@ -154,12 +188,15 @@ async def main():
         c, pg, errs = await open3d(b, 'night', PORT)
         await view(pg, 'tower', SE); await pg.evaluate("id => { a3Select(id, true); }", 'g3'); await pg.wait_for_timeout(1200)
         r = await pg.evaluate("""(() => { const o = A3.objs.get('g3'), hd = o.g.getObjectByName('hd'), g = a3HdGeo('787'); const fin = hd.children.find(c => c.geometry === g.fin), body = hd.children.find(c => c.geometry === g.body);
-            return { fin: fin.material.color.getHexString(), em: body.material.emissiveIntensity, emMap: !!body.material.emissiveMap }; })()""")
+            return { fin: fin.material.color.getHexString(), em: body.material.emissiveIntensity, emMap: !!body.material.emissiveMap, envDay: !!A3.envDay, post: !!A3.post, bk: A3.post && A3.post.outM.uniforms.bk.value }; })()""")
         check('夜は窓が灯る・尾翼に会社の色を使わない', r['em'] == 1 and r['emMap'] and r['fin'] == 'f0f2f5', r)
+        check('夜は昼の映り込みの絵を使わない・灯りのにじみは強め', not r['envDay'] and r['post'] and r['bk'] > .5, r)
         allerr += errs; await c.close()
         # 比べ写真：同じ視点（全体・駐機場・寄り・夜）
         info['new'] = await shots(b, PORT, 'new')
         if PORT_OLD: info['old'] = await shots(b, PORT_OLD, 'old')
+        await zoom(b, PORT, 'new')
+        if PORT_OLD: await zoom(b, PORT_OLD, 'old')
         try:
             from PIL import Image
             for k in ('all_day', 'apron_day', 'close_day', 'close2_day', 'all_night', 'apron_night', 'close_night', 'close2_night'):
@@ -167,6 +204,13 @@ async def main():
                 if not (os.path.exists(a) and os.path.exists(n)): continue
                 A, N = Image.open(a), Image.open(n); im = Image.new('RGB', (A.width + N.width + 12, max(A.height, N.height)), 'white'); im.paste(A, (0, 0)); im.paste(N, (A.width + 12, 0))
                 im.save(os.path.join(SHOTS, f'cmp_{k}.png'))
+            for sky in ('day', 'night'):   # 寄り：左が今の本番・右がこの版（機種ごとに 前・後ろ・全体）
+                for nm in [z[1] for z in ZOOM]:
+                    ims = [(Image.open(os.path.join(SHOTS, f'old_z_{nm}_{an}_{sky}.png')), Image.open(os.path.join(SHOTS, f'new_z_{nm}_{an}_{sky}.png'))) for an in 'frw' if os.path.exists(os.path.join(SHOTS, f'old_z_{nm}_{an}_{sky}.png'))]
+                    if not ims: continue
+                    im = Image.new('RGB', (390 * 2 + 12, 390 * len(ims) + 8 * (len(ims) - 1)), 'white')
+                    for i, (o, n) in enumerate(ims): im.paste(o, (0, i * 398)); im.paste(n, (402, i * 398))
+                    im.save(os.path.join(SHOTS, f'cmpz_{nm}_{sky}.png'))
         except Exception as e: print('並べた写真を作れない', e)
         print('描く量（三角形・呼び出し）', json.dumps(info))
         json.dump(info, open(os.path.join(SHOTS, 'render_info.json'), 'w'), indent=1)
