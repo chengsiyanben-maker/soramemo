@@ -1,6 +1,10 @@
 # チェックイン担当の帳面
 
 ## いま持っている仕事
+- **11/25 22時台の定時の回（同じ「電波・位置が悪いときの続き」・重なった）**：始めたときは origin に checkin/stamp-edge がなかったが、作っている間に別の回が PR #238 を出していた。押そうとして気づいたので、こちらは **checkin/stamp-edge-b**（dbeb1cdd・報告 docs/pm/report-stamp-edge-b.md・写真 docs/pm/shots-stamp-edge/）に別案として置いた。**PR は出していない**。PM が #238 を選べば消してよい
+  - #238 との主な違い：大まかな位置のカードに「もう一度位置を確かめる」（取り直すだけ）と設定から戻ったときの自動の取り直し・ホームの静かな見張り（精度を下げた位置）ではカードを出さない・札は半券のすぐ下（#qPills）・送れず保存の札は 3.5 秒・範囲の外は誤差 300m 超で「建物の中」を添える
+  - テスト：t196（別案の版）・t195・t146 を合わせた。e2e 全部（t168 以外）と tests/ops 成功
+  - 本人（PM）に聞くこと（報告の5つ）：カードが出るまで10秒（位置の取り方を変えないため）・「本日のチェックインは完了」と30分の決まり・1km の線・Safari の道順・375 でカードが長い
 - **11/26 0時台の定時の回（帳面に積まれた 11/25 23時「電波・位置が悪いときの続き」）**：checkin/stamp-edge・下書き **PR #238**（9eb14811・報告 docs/pm/report-stamp-edge.md・写真 docs/pm/shots-stamp-edge/）。main（4844f048・stamp-fast 入り）から。見張りを付けた。テストが通れば PM が自動で反映
   - 1 正確な位置情報 OFF（iPhone で誤差 1km 以上）→ ckLocCard("precise")：道順つきのカード・送らない・ハンコなし・ボタンは「閉じる」だけ。ウェブで許可がない → ckLocCard("denied")＋ nvGeoApply をウェブにも（CK_GEO_NG。半券の代わりのカード・「デモで試す」だけ。設定から戻って許可なら戻す）
   - 2 送信待ち：loadServer の最後に qMerge（端末の判定で通る見込みの分だけ S.checkins に pending・queued で足す）。renderQueue は札（qTagHTML「羽田空港 送信待ち（14:22 記録）」）、図鑑は qTagsFor と記録の行の「送信待ち」。札は data-flush で送り直し。enqueue(p, why, ok) に変えた（ok:false は範囲の外などで、送るまで印にしない）
@@ -638,6 +642,8 @@
 - 確認コードは6けた。メールは Gmail、Supabase の送信上限は1時間100通
 
 ## 次にやること
+- 【11/25 stamp-edge-b】#238 と同じ仕事の別案（ブランチだけ）。PM が #238 を選んだら checkin/stamp-edge-b は消す。#238 にない所（取り直しのボタン・設定から戻ったときの取り直し）を使うなら #238 に移す
+- 【重なり防止・再】始めるときだけでなく、push の前にも origin のブランチと開いた PR を見る（11/25 22時台は作っている途中で別の回が同じ仕事を出した）
 - 【11/26 stamp-edge】PR #238：PM の自動の反映を待つ。本人の答え（上の4つ）で直す。入る前に t196・t195・t144・t24・t171・t11・t13・t15・t19・t30・t193・t189・tests/ops を流す。#226（micro）とは say・CSS の最後・toast の所が近い（src/index.html）。あとから入る方で web/ を作り直す。micro の mxToast と1つにまとめるときは、確定の札（flushQueue の toast）も含める
 - 【次の回】PM の指示がなければ「乗る便の候補から1回で記録」（checkin/flight-suggest。下の 11/25 23時05分の欄）を main から始める。始める前に origin のブランチと開いた PR を見る
 - 【11/25 stamp-fast】PR #229：PM の反映を待つ。本人の答え（上の4つ）で直す。入る前に t195・t24・t171・t11・t13・t15・t19・t30・t193・t189・tests/ops を流す。checkin/micro（763673a1）と src/index.html の say・CSS でぶつかる見込み。stamp-fast が先（PM の指示）。micro を入れるときは札を mxToast と toast（.smtoast）の1つにまとめ、t194（micro）と t195（stamp-fast）は両方残す
