@@ -1,6 +1,14 @@
 # チェックイン担当の帳面
 
 ## いま持っている仕事
+- **11/25 17時台の定時の回（帳面に積まれた 11/25 17時25分「小さな動き13個」）**：checkin/micro・下書き **PR #226**（763673a1・報告 docs/pm/report-micro-app.md・写真 docs/pm/shots-micro/）。main（4354656c）から。見張りを付けた。テストが通れば PM が自動で反映
+  - 入れた：01・02・03・04・05・06・07・09・10・11・12・13。08 は修行担当が PR #224（shugyo-micro-bar）で作り済みなので触っていない
+  - 作り：style の最後に「小さな動き」の CSS、script の最後に「小さな動き」の JS。01 は scale（transform とぶつけない）。05 は say・uiSay（運用）で最初の文が「〜ました」だけを札（mxToast）に、#msg の字は見た目だけ隠して読み上げ用に残す。ピンの帯も下から出す（translate で。transform にすると帯が横にずれて t145 が落ちた）
+  - 10 の部品 mxCopyHTML は「この便の記録」の登録記号だけに付けた。11 の部品 mxBell はピンの「通知を許可する」だけ（撮る人用の .spbell は依頼にした）
+  - 変えた関数：say・uiSay・render（今日の数字）・pinAdd・showFacts・opsFailHTML・roBind・タブを選ぶシートの並べ替え・「もう一度」の処理・遅れのページの読み込み中・ピン止めの「通知を許可する」。足した：mxRM・mxDone・mxToast・mxDot・mxPinGo・mxSkel・mxNums・mxFlip・mxCopyHTML・mxBell・mxRetrySvg・mxSpin・mxRetryBox
+  - render から先に呼ばれるので、script の最後の変数は var か function にする（let にすると最初の表示で止まった）
+  - テスト：t194 を足した。e2e 全部・tests/ops 成功（3D の5本は t142 と同じ作業用フォルダで）
+  - 本人（PM）に聞くこと：札にする知らせの決め方・コピーをほかにも付けるか・ホームの札が半券の下の端に少しかかる
 - 【11/25 16時42分】PR #219（元日の印を外す）は main に入った。本人の答え（分類の名前「時間帯」か「時間」）が来たら main から新しいブランチで直す
 - 【11/25 16時42分】PR #221（t30 の直し）は main に入った。見張りは外れた
 - 11/25 手動の回（同じ「t30 を checkin/t30-fix で」の指示）：直前の回で PR #221（242a214b）として済み。main も 663576a8 のままで取り込み済みなので作り直さなかった。drop-newyear には触っていない。PM の自動の反映を待つ
@@ -611,6 +619,7 @@
 - 確認コードは6けた。メールは Gmail、Supabase の送信上限は1時間100通
 
 ## 次にやること
+- 【11/25 micro】PR #226：PM の自動の反映を待つ。答え（札の決め方・コピーを付ける所・札の高さ）で直す。入る前に t194・t145・t183・t167・t184・t120・t123・tests/ops を流す。#224（修行の帯）とは src/index.html の別の所。あとから入る方で web/ を作り直す
 - 【11/25 t30-fix】PR #221：main に入った（済み）。元は「PM の自動の反映を待つ。入る前に t30・t193・t189・t163・t120・t123 を流す。#219（drop-newyear）・#217・#215 とは src/index.html の別の所（マイページの close と CX の close）。あとから入る方で web/ を作り直す
 - 【11/25 drop-newyear】PR #219：PM の自動の反映を待つ。答え（分類の名前「時間帯」か「時間」）で直す。入る前に t192・t182・t17・t141・t145・t118・t119・t124 を流す。#215（a3-free）とは src/index.html の別の所（実績と 3D）でぶつからない見込み。あとから入る方で web/ を作り直す
 - 【11/25 sweep-1125】PR #217：PM の自動の反映を待つ。答え（長い名前の行数・帯の背景の範囲）で直す（main から新しいブランチ、または #217 に足す）。入る前に t191・t127・t140・t149・t146・t184・t120・t189・t183・tests/ops を流す
@@ -732,6 +741,7 @@
 - tests/ops は手元では npm の playwright にブラウザがないので、全体に入っている playwright をつないで流した（すべて成功）
 
 ## ほかの担当への依頼
+- 【11/25 撮る人用へ】知らせの鈴（.spbell・data-spnote）を ON にしたとき、mxBell(押したボタン) を呼んでほしい（PR #226 の 11「鈴が揺れる」。描き直しの前に呼ぶ）。コピーの部品 mxCopyHTML(文字, 名前) も使える
 - 撮る人用（11/22・satsuei.md に書いた）：ホームの空港のカードの切り替えのピルは、並べ替えの部品（roGrip・roBind・roOrder。PR #183）で並べ替えられる。並びは layout.order.<名前> に入れると端末とサーバーにそろう。#183 が main に入ってからつなぐ
 - データ担当（11/22・PR #179、PM から伝えてほしい）：運用の「遅れ」の絞り込みのため、airport_board の返す形に 'bad'（今日・日本時間の15分以上の遅れと欠航の便。1便 {dir:'dep'|'arr', flight, other, sched, est, actual, late(分・欠航は null), cancelled, intl, aircraft}・定刻の順）を足してほしい。'hours' の late・cancel と同じ数え方で、合計が合うこと。案は checkin/delay-filter の docs/pm/delay-filter-board-bad.sql（移行 165 の関数に u・d の列と 'bad' を足しただけ。表・列・RLS・権限は変えない）。画面は 'bad' がないあいだ前のままなので、どちらが先に入ってもよい
 - 撮る人用・運用予想・修行へ（11/21 PR #174・知らせだけ）：土台で、全画面の頭（.spctop・.pintop）とシートの頭（.spsheet .sph）を上に止め、戻る操作で上のダイアログを1枚閉じるようにした（showModal を包む）。それぞれのダイアログもそのまま効く。修行の dialog.sgd の頭は sticky にしていない。cancel を止めた画面は戻るでも閉じない
