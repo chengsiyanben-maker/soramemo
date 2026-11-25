@@ -1,11 +1,18 @@
 # データ担当の帳面
 
 ## いま持っている仕事
+- **空港の形と滑走路の線のデータ（PM の指示 11/26 0時15分。11/26 1時ごろ手動で呼ばれ data/ap-shape を指定された）**：ブランチ data/ap-shape（main dfc945c から）→ **下書き PR #243**。報告 docs/pm/report-ap-shape.md。比べる表 docs/pm/ap-shape-compare.md。作り方 docs/pm/airport-data-howto.md。読むだけの SQL docs/pm/ap-shape-check.sql。**移行・SQL のテストの番号は使っていない（表は変えない・判定は変えない）**
+  - data/ap_shape/runway_lines.json（約42KB・194か所）：AIP（ops_core.js の14空港。仙台は OurAirports の 12/30 を足した）→ OurAirports の両端 → 長さと向きからの推定（新島・神津島・静岡・粟国・調布）。0.15〜0.85 の [u1,v1,u2,v2]・cos 補正・縦横の比は実物どおり。86空港すべてに線。番外編66か所は線なし。preview.html で目で見た
+  - 道具：tools/ap_master_dump.mjs（模擬のデータベースから airports・terminals と AIP の線）・tools/ap_shape.py（subset・build・compare）。手で直すのは data/ap_shape/overrides.json だけ。テスト tests/tools/test_ap_shape.py（16本 通過）
+  - 規約：OurAirports はパブリックドメイン（前の確認どおり。今回ページは開けず）。国土数値情報 C28 は説明の文が「国土情報利用約款を参照」で、約款は未読 → 配るデータに使わず、比べる表の数字だけ（元のファイルは置かない）。OSM は使っていない
+  - 比べた結果：**三沢（ターミナルビル 1,821m・半径 1,500m）と岩国（1,779m・1,500m）はターミナルが円の外**。ほか84空港は中。重なりは長崎×大村基地・新千歳×千歳基地・新千歳×千歳空港の3組（民間空港を先に見るので問題なし）。案：三沢・岩国だけ terminals に1行（stamp_m 1）。radius_m は経営の airport_size に効くので広げない。画面の TERMS も同じ行が要る
+  - 気づいたこと：airports に RJCJ が2行（91 千歳空港・1001 千歳基地）
+  - 本人待ち（PM のおすすめで可）：三沢・岩国の行を足すか（先に ap-shape-check.sql の 1）・国土数値情報の約款・番外編の線・画面に入れる形（画面の中か表か。表なら移行と RLS）
 - **二重にならない仕組み【別の回の案。#240 と同じ仕事】（PM の指示 11/26 0時10分。11/26 木曜 0時すぎに定期の回として呼ばれ、積んであったこの指示をした。同じ時刻に別のデータ担当の回が data/idem・PR #240 を先に仕上げていたのを、push のときに知った）**：ブランチ data/idem-b（main dfc945c から）→ **下書き PR #241**。報告 docs/pm/report-idem-b.md。確かめの SQL docs/pm/idem-b-check.sql。**#240 と同じく移行200・テスト t138 を使っているので、両方は入れない**
   - おすすめ：#240 を本筋にし #241 は閉じる。#240 にない2つ（A：前からある索引 flights_arr_checkin（移行188）を同じ名前のまま一意に置き換え、ID のない古い画面の便でも「1つの到着から便は1つ」を表で守る。重なった行があれば移行は止まらず置き換えだけしない／B：送り直しの返事の first_airport・first_terminal を1回目と同じ値に）は、PM が要ると決めたら #240 のあとに移行201・t139 で足す
   - 気づいたこと：新しい一意の索引を flights (arr_checkin) に別名で足すと t122 の「同じ形の索引はほかにない」に当たる（188 に同じ形の索引がある）。足すなら置き換えの形で
   - 確かめ：t138 28項目・SQL のテスト全部138本 通過・t122・deno test 331本（checkin_idem_test 4本）・deno check・migrations.mjs check 189件
-  - 次の仕事 data/ap-shape（PM の指示 11/26 0時15分）は、#240 の回のように PM が手で呼ぶ見込みがあり重ねないため、この回では始めていない
+  - 次の仕事 data/ap-shape は、このあと手動で呼ばれて PR #243 にした
 - **印と便の「送り直しても二重にならない」仕組み（PM の指示 11/26 0時10分。11/26 木曜に定期の回として呼ばれたが、PM の積んだ指示があったのでこちらをした）**：ブランチ data/idem（main dfc945c から）→ **下書き PR #240**。報告 docs/pm/report-idem.md（Gemini の案と今の作りの突き合わせの表・チェックイン担当への依頼）。読むだけの SQL docs/pm/idem-check.sql（3つ）。**移行200・テスト t138 を使った**
   - 移行200：checkins・flights・manual_flights・intl_flights に client_id uuid（null 可）と一意の索引 (user_id, client_id)（条件なし＝画面の upsert の on conflict で使える）。RLS と権限は前のまま
   - 関数 checkin：本文の cid（UUID の形だけ。_shared/idem.ts の parseCid）を受け取り、前の印と並べて同じ ID の印を読む。あれば判定をやり直さず againBody（ok・again: true・初めての演出とボーナスなし）。新しい印・便に client_id。同時の2回は 23505 で先の方を返す。ID なしは前と同じ
@@ -403,7 +410,8 @@
 - SQL のテストは全部で約35分かかる（手元で流すときは裏で流してログを見る。t92 だけで約4分。同じログに2回流すと混ざるので、ログの名前を分ける）
 
 ## 次にやること
-- 二重防止（#240／#241）：PM がどちらを本筋にするか決めたら、もう片方を閉じる。#241 の A・B を足すと決まれば #240 の上に移行201・t139 で。次は data/ap-shape（まだ誰も始めていない）
+- 二重防止（#240／#241）：PM がどちらを本筋にするか決めたら、もう片方を閉じる。#241 の A・B を足すと決まれば #240 の上に移行201・t139 で
+- 空港の形（PR #243）：ap-shape-check.sql の結果で三沢・岩国の断りを見る。本人が行を足すと決めたら terminals の移行（RLS はそのまま・SQL のテスト）とチェックイン担当への依頼（TERMS に同じ行）。印のカードの画面案が決まったら、線を画面に持つか表にするか。OurAirports は年に一度取り直す（airport-data-howto.md の6）
 - 二重にならない仕組み（PR #240・移行200・t138）：CI とレビューに答える。反映の前に main に別の移行（#230 の199 など）が先なら番号を確かめ、重なれば rebase。反映の前後に idem-check.sql の 1・2、チェックイン担当の画面の直しが入った次の日に 3（ID 付きの割合）を見てもらう。1 で今までの二重が多ければ、消さずに印へ印（flags）を付ける案を PM に。本人がメモ・予定の画面案を選んだら、メモは印と別の表（印の数・経営の路線に入らない）で移行201 以降
 - 羽田・成田の細かいデータ（PR #230・移行199・t137）：向き先は main に直した。反映の前に main に別の移行が先なら rebase。反映のあと hnd-nrt-more-check.sql の 1（次の日）で ground_moves の lost の割合・with_taxi の割合を見て、判定の幅（15kt・2回・5分）を直す。本人の答えでアメダス（よければ表と取り込み・移行200）。次の回の候補は帳面の上の「次の回の候補」
 - 羽田・成田の優先（PR #227・移行198・t136）：CI とレビューに答える。反映の前に main に別の移行が先なら rebase。反映のあと hnd-nrt-priority-check.sql の 1 で wx_taf が増え、さかのぼりが 10/15 まで来たか（2日後）。2〜5（実況）と 7（TAF）の結果で、羽田の追い風の上限・粘りの案を PM に。次は data/hnd-nrt-more（PM の指示 11/25 18時50分。一覧 report-hnd-nrt-more.md から。wx_taf はできたので SPECI・アメダス・NOTAM・ODPT のゲート・地上の動きの候補を調べる）
@@ -454,6 +462,8 @@
 8. それ以外は PM の指示を待つ（勝手に新しい機能は始めない）。毎週月曜の昼の回は、下の「定期の仕事」（次の候補：点検の結果が来たら、死んだ行や使われていない索引の整理・遅い処理。cold-day-size.sql の結果で全機の航跡の1日が 20MB を超えるなら、ファイルを空港ごとに分ける案を作る。rwy-learn と daily-archive は 11/10 に見た（PR #58）。eta-calib・taxi-out・flight-watch は 11/11 に見た（PR #70）。結果がないまま次の回が来たら、ほかの毎晩・裏の処理（timetable-sync・schedule-sync・odpt-status・co3 の SQL の文）を同じ目で見て、時間の上限のない仕事の一覧を作る）
 
 ## ほかの担当への依頼
+- チェックインへ（11/26 空港の形・PR #243。本人が決めたら）：三沢・岩国のターミナルが判定の円の外。terminals に行を足すと決まったら、src/index.html の TERMS にも同じ行（MSJ-T 40.696583,141.387750／IWK-T 34.158808,132.235052・ターミナルの印は出さない）。滑走路の線は data/ap_shape/runway_lines.json（id は airports の id）
+- デザインへ（11/26 同上）：印のカードの案A の滑走路の線は data/ap_shape/runway_lines.json の lines（0.15〜0.85。160 の箱なら ×160）。確かめ用のページ data/ap_shape/preview.html
 - **チェックイン担当へ（11/26・data/idem #240。詳しくは report-idem.md）**：印を押したときに crypto.randomUUID() で cid を1つ作って保留の p に持たせ、sendCheckin の本文に cid を足す（flushQueue の送り直しでも同じ cid）。返事の again: true は成功として扱う（ハンコを取り消さない・初めての演出なし）。manual_flights・intl_flights の追加は upsert(row, { onConflict: "user_id,client_id", ignoreDuplicates: true }) に client_id を付けて。関数 checkin を先に出せば、画面が後でも壊れない
 - チェックイン担当（checkin/stamp-fast）へ（11/25）：関数 checkin の名前・送る中身・戻り値は変えていない（PR #225）。画面側の待ち（位置の取得の最大12秒など）はそちらで。反映のあと、印の時間は Edge Functions の checkin のログ「checkin_ms」で見られる
 - チェックインへ（11/25 夜の静かな時間・PR #216。PM から checkin.md に写してほしい）：知らせの設定に「夜は知らせない（23時〜7時）」の ON／OFF を1行（はじめ ON）。push-subscribe に `quiet_night: true|false` を付けて送る。文の例「特別塗装機・撮影・運用の知らせを、夜は止めます。乗る便の遅れは届きます」。ゴーアラウンドの「知らせない時間」は別のまま
