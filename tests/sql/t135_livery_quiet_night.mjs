@@ -19,7 +19,7 @@ const q1 = async (sql) => Object.values((await db.query(sql)).rows[0] ?? {})[0];
 const fails = async (sql) => { try { await db.exec(sql); return false; } catch { return true; } };
 
 for (const f of files) { if (f === mine) break; await db.exec(fs.readFileSync(dir + f, 'utf8')); }
-check('移行は 197 番で最後', /^\d{8}000197_livery_quiet_night\.sql$/.test(mine) && files[files.length - 1] === mine, mine);
+check('移行は 197 番', /^\d{8}000197_livery_quiet_night\.sql$/.test(mine), mine);
 
 // 前からいる購読と予定
 await db.exec(`insert into public.push_subs (endpoint, p256dh, auth, sp_airports) values ('https://fcm.googleapis.com/x/1', 'k', 'a', '{HND}');

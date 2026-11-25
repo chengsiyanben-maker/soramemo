@@ -204,10 +204,14 @@ async function build(iata: string, view: boolean, mark: (k: string) => void): Pr
   // まとめて取った円から、この空港の半径の中だけを使う
   // 着陸・離陸の見分けは、滑走路の向き・最終進入の範囲・高さで絞る（ほかの空港へ降りる機体を「着陸」にしない。11/21）
   // 便名の行き先が分かる機体は、それで決める（形の判定より先。11/21 本人「便の名前から行き先を判別して」）。問い合わせは着陸・離陸の機体の分を1回に束ねる
-  const raw = planesFromAdsb(j?.ac, a.at, 14000, NEARBY.filter((o) => o !== a.at)).filter((p) => p.dist_km <= a.nm * 1.852);
+  //   記録の処理では、羽田・成田は学習用に 60海里まで見る（LEARN_NM。11/25 成田も羽田と同じ細かさに）。画面に出す機体は今までどおり a.nm まで
+  const rnm = view ? a.nm : Math.max(a.nm, LEARN_NM[iata] ?? 0);
+  const raw = planesFromAdsb(j?.ac, a.at, 14000, NEARBY.filter((o) => o !== a.at)).filter((p) => p.dist_km <= rnm * 1.852);
   const routes = await lookupRoutes(ROUTES, raw.filter((p) => p.phase !== "other").map((p) => p.callsign));
   if (view) mark("routes");
-  const planes = applyRoutes(raw, refinePhases(raw, APT_OF(iata), OTHERS_OF(iata)), iata, runwaysFor(iata), routes);
+  const wide = applyRoutes(raw, refinePhases(raw, APT_OF(iata), OTHERS_OF(iata)), iata, runwaysFor(iata), routes);
+  if (!view && LEARN_NM[iata]) LEARN_PLANES.set(iata, { at: Date.now(), planes: wide });
+  const planes = rnm === a.nm ? wide : wide.filter((p) => p.dist_km <= a.nm * 1.852);
   const tr = await syncTrails(iata, planes, !view || !live);   // 記録が止まっていて adsb.lol に聞いたときは、今までどおり見る人の呼び出しでも線を書く
   mark("trails");
   // 線は画面が使う着陸・離陸の機体だけに付ける（ほかは空の配列。形は同じ）。11/21 見回り 7
@@ -523,6 +527,11 @@ async function notifyOpsChange(iatas: string[]) {
 
 // ---- 着陸する滑走路の学習用の記録（羽田・成田）：来た方面と途中のルート、着陸した滑走路を残す（運営の分析用） ----
 const LEARN_APS = ["HND", "NRT"];
+// 学習に使う半径（海里）。羽田は画面と同じ 60、成田は画面は 40 のまま学習だけ 60（11/25 PM の指示「成田も羽田と同じ細かさで」）。
+//   どちらも東の円（250海里）の中なので、adsb.lol に問い合わせる回数は変わらない
+const LEARN_NM: Record<string, number> = { HND: 60, NRT: 60 };
+// deno-lint-ignore no-explicit-any
+const LEARN_PLANES = new Map<string, { at: number; planes: any[] }>();   // 記録の処理の今回の回で作った、学習用の広い機体の一覧
 async function learnRunways(bodies: Map<string, string>) {
   const aps = LEARN_APS.filter((k) => bodies.has(k)); if (!aps.length) return 0;
   const { data: rows } = await admin.from("arr_watch").select("*").in("iata", aps).gt("updated_at", new Date(Date.now() - 10 * 60_000).toISOString());
@@ -531,7 +540,8 @@ async function learnRunways(bodies: Map<string, string>) {
     // deno-lint-ignore no-explicit-any
     const def = (OPS_AIRPORTS as any)[iata]; if (!def) continue;
     const w = new Map<string, ArrWatch>(); for (const r of (rows ?? []) as ArrWatch[]) if (r.iata === iata) w.set(r.hex, r);
-    const r = arrStep(iata, def.center, runwaysOf(def), JSON.parse(bodies.get(iata)!).planes ?? [], w, now);
+    const wide = LEARN_PLANES.get(iata), planes = wide && now - wide.at < 60_000 ? wide.planes : JSON.parse(bodies.get(iata)!).planes ?? [];
+    const r = arrStep(iata, def.center, runwaysOf(def), planes, w, now);
     if (r.upserts.length) await admin.from("arr_watch").upsert(r.upserts);
     if (r.samples.length) { const { error } = await admin.from("rwy_samples").insert(r.samples); if (error) console.error("rwy_samples", error.message); else n += r.samples.length; }
     if (r.deletes.length) await admin.from("arr_watch").delete().eq("iata", iata).in("hex", r.deletes);
