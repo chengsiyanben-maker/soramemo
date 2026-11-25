@@ -5,6 +5,7 @@
   - おすすめ：#227 を本筋にし #228 は閉じる。#227 にない2つ（A：東の円が断られた回は同じ円を取り直さず新千歳・那覇を休む recordStep／B：追い風の上限×粘り×戻り幅の30組を切り替えを待つ動きで数える関数 rwy_wx_eval）は、PM が要ると決めたら #227 のあとに移行199・t137 で足す
   - 確かめ：t136 33項目・deno test 327本（taf_test 5本）・deno check・migrations.mjs check 188件・模擬90日で rwy_wx_eval 約4.3秒（PGlite）
   - 次の仕事 data/hnd-nrt-more（11/25 18時50分）は、#227 の回が続けて受け持っている見込みなので、この回では始めていない（重ねないため）
+  - 11/25 18時58分にもう一度呼ばれた（同じ指示・data/hnd-nrt-priority で、と指定）：#227 がその名前のブランチで仕上がっているので、手元で確かめただけ（migrations.mjs check 188件・t136・t135・deno test 322本・deno check 通過）。#227 の回がまだ動いているかもしれないので、そのブランチには push していない
 - **印を押すときのロードを短く（PM の最優先の指示 11/25 17時45分。11/25 水曜に定期の回として呼ばれたが、PM の積んだ指示があったのでこちらをした）**：ブランチ data/stamp-fast（main 4354656 から）→ **下書き PR #225**。報告 docs/pm/report-stamp-fast.md。本人用の読むだけの SQL docs/pm/stamp-fast-check.sql。**移行・テスト番号は使っていない（表を変えていない）**
   - 調べた結果：データベース側に重い処理はない（checkins にトリガーなし・集計は保存の中で走らない・索引は足りている）。重いのは関数 checkin の待ち方（毎回 aviationweather.gov へ最大2.5秒・往復約9回が順番）
   - 直し：天気は 記憶 → edge_cache（now:wx）→ wx_obs（75分まで）で決め、決まらなければ空で記録して返したあとに書き足す（_shared/checkin_wx.ts）。前半の読み5つを同時に、ボーナスとフライトも同時に。ログ checkin_ms（read・total・wx）
