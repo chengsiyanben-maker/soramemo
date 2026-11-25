@@ -3,8 +3,10 @@ HERE=os.path.dirname(os.path.abspath(__file__)); WEB=os.path.abspath(os.path.joi
 import asyncio
 from playwright.async_api import async_playwright
 async def geo_checkin(pg, c, lat, lon):
+    await pg.evaluate('S.checkins.forEach(x => x.t -= 25000); HOME_POS = null; POS_LAST = null')   # 11/25 stamp-fast：端末でも「20秒あける」を先に見る・30秒以内の位置は使い回すので、前の印と位置を古くする（偽のサーバーは間隔を見ない）
     await pg.press('#checkin','Enter'); await pg.wait_for_timeout(300)
     await c.set_geolocation({'latitude':lat,'longitude':lon,'accuracy':20}); await pg.wait_for_timeout(1200)
+    await pg.evaluate("$('dStamp').open && $('dStamp').close()")   # 11/25 stamp-fast：保留のときも先にハンコが出るので閉じる
 async def main():
     async with async_playwright() as p:
         b=await p.chromium.launch(); c=await b.new_context(viewport={'width':400,'height':860}, geolocation={'latitude':35,'longitude':135,'accuracy':20}, permissions=['geolocation'])
