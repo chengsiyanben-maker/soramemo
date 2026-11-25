@@ -1,0 +1,236 @@
+<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>印のカード 一覧</title><style>/* そらメモ 印をもらったときのカード：見た目（main の web/ の色と文字、design/micro の動きの長さにそろえる） */
+:root{
+  --gothic:"Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic UI","Yu Gothic","Meiryo","Noto Sans JP","Noto Sans CJK JP",system-ui,sans-serif;
+  --bg:#F4F5F7; --card:#FFFFFF; --ink:#374151; --strong:#1F2937; --sub:#646B78; --mute:#6B7280;
+  --pill:rgba(17,24,39,.05); --panel:#F4F5F7; --hero:#0F1B2D; --bar:#E3E7ED; --ok:#15803D;
+  --shu:#111111; --gold:#A9822E; --first-bg:#1F2937; --first-ink:#FFFFFF; --mark-ring:#A9822E;
+  --scrim:rgba(15,22,38,.38);
+  --shadow:0 1px 2px rgba(17,24,39,.04),0 10px 30px -8px rgba(17,24,39,.10),inset 0 0 0 1px rgba(17,24,39,.07);
+  --card-drop:drop-shadow(0 18px 30px rgba(15,22,38,.28)) drop-shadow(0 2px 4px rgba(15,22,38,.10));
+  --t-tap:.12s; --t-fast:.15s; --t-mid:.25s; --t-slow:.4s;
+  --ease:cubic-bezier(.2,.8,.2,1); --ease-in:cubic-bezier(.4,0,1,1);
+}
+:root[data-night=on]{
+  --bg:#0F141B; --card:#1B1F26; --ink:#E5E7EB; --strong:#F3F4F6; --sub:#AEB9C6; --mute:#AEB9C6;
+  --pill:rgba(220,227,234,.08); --panel:#232830; --hero:#4ADE80; --bar:#323843; --ok:#4ADE80;
+  --shu:#E5E7EB; --gold:#AEB9C6; --first-bg:transparent; --first-ink:#4ADE80; --mark-ring:#DCE3EA;
+  --scrim:rgba(0,0,0,.45);
+  --shadow:0 12px 26px -16px rgba(0,0,0,.7),inset 0 0 0 1px rgba(255,255,255,.06);
+  --card-drop:drop-shadow(0 18px 30px rgba(0,0,0,.6));
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:var(--bg);color:var(--ink);font-family:var(--gothic);-webkit-text-size-adjust:100%}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.num{font-weight:800;font-variant-numeric:tabular-nums;color:var(--strong);letter-spacing:-.01em}
+.u{font-size:13px;color:var(--mute);font-weight:600;margin-left:3px}
+svg.ic{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+
+/* 画面 */
+.phone{position:relative;height:100vh;min-height:600px;max-width:430px;margin:0 auto;overflow:hidden;background:var(--bg)}
+.bgmap{position:absolute;inset:0;background-size:cover;background-position:center top}
+.scrim{position:absolute;inset:0;background:var(--scrim)}
+
+/* カード（浮かぶ白い角丸。外側の影は包みに、半券の切り欠きは中身の型抜きで） */
+.scw{position:absolute;left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom));filter:var(--card-drop)}
+.sc{position:relative;max-height:calc(100vh - 64px);overflow:auto;background:var(--card);border-radius:28px;padding:10px 20px 18px;
+  --ny:300px;
+  -webkit-mask:radial-gradient(circle 11px at 0 var(--ny),transparent 10.5px,#000 11px) left/51% 100% no-repeat,radial-gradient(circle 11px at 100% var(--ny),transparent 10.5px,#000 11px) right/51% 100% no-repeat;
+  mask:radial-gradient(circle 11px at 0 var(--ny),transparent 10.5px,#000 11px) left/51% 100% no-repeat,radial-gradient(circle 11px at 100% var(--ny),transparent 10.5px,#000 11px) right/51% 100% no-repeat}
+.grab{width:40px;height:5px;border-radius:3px;background:var(--bar);margin:0 auto 6px}
+.top{display:flex;align-items:center;gap:10px;min-height:44px}
+.st{display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 14px;border-radius:999px;font-size:13px;font-weight:800;letter-spacing:.04em;white-space:nowrap}
+.st.first{background:var(--first-bg);color:var(--first-ink)}
+:root[data-night=on] .st.first{box-shadow:inset 0 0 0 1.5px #4ADE80}
+.st.calm{background:var(--pill);color:var(--sub)}
+.st.wait{background:transparent;color:var(--sub);box-shadow:inset 0 0 0 1.5px var(--bar)}
+.st.wait svg{width:16px;height:16px}
+.st.ms{background:transparent;color:var(--strong);box-shadow:inset 0 0 0 1.5px var(--mark-ring)}
+.top time{font-size:13px;color:var(--mute);font-weight:600;font-variant-numeric:tabular-nums;margin-left:auto;white-space:nowrap}
+.x{flex:none;display:flex;align-items:center;justify-content:center;width:44px;height:44px;margin-right:-10px;border-radius:999px;color:var(--sub)}
+.x:active{background:var(--pill)}
+
+/* 印の場所 */
+.mark{position:relative;display:flex;align-items:center;justify-content:center;height:176px;margin:4px 0 2px}
+.mark .stamp{position:relative;width:164px;height:164px}
+.mark .stamp svg{position:absolute;inset:0;width:100%;height:100%}
+.mark.tier .stamp{width:300px;height:178px}
+.mark .ring{position:absolute;left:50%;top:50%;width:150px;height:150px;margin:-75px 0 0 -75px;border-radius:50%;border:3px solid var(--shu);opacity:0;pointer-events:none}
+.mark.tier .ring{top:44%}
+.mark .memo{position:absolute;left:50%;top:50%;width:150px;height:150px;margin:-75px 0 0 -75px;opacity:0}
+.mark .memo svg{width:100%;height:100%}
+.mark .memo circle{fill:none;stroke:var(--sub);stroke-width:2;stroke-dasharray:5 5;opacity:.7}
+.mark .memo text{fill:var(--sub);font-family:var(--gothic);font-weight:800;opacity:.7}
+.mark.pale .stamp{opacity:.36;filter:grayscale(1)}
+/* 案A：コード＋滑走路の線 */
+.rwy{width:176px;height:176px;border-radius:32px;background:var(--panel)}
+.rwy line{stroke:var(--strong);stroke-width:3;stroke-linecap:round;opacity:.75}
+.rwy text{font-family:var(--gothic);font-weight:800;font-size:40px;fill:var(--strong);letter-spacing:.02em}
+
+.name{text-align:center;font-size:21px;font-weight:800;color:var(--strong);line-height:1.35;letter-spacing:.02em}
+.pref{text-align:center;font-size:13px;color:var(--mute);font-weight:600;margin-top:2px}
+.note{margin:10px auto 0;max-width:300px;text-align:center;font-size:13px;color:var(--sub);line-height:1.6}
+.note b{color:var(--strong)}
+
+/* 数字（切り欠きの下） */
+.mx{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:22px}
+.mx > div{text-align:center}
+.mx .k{display:block;font-size:13px;font-weight:700;color:var(--sub)}
+.mx .v{display:flex;align-items:baseline;justify-content:center;gap:0;height:40px;line-height:40px}
+.mx .num{font-size:34px}
+.mx .num.sm{font-size:26px}
+.roll{display:inline-block;overflow:hidden;height:40px;line-height:40px;vertical-align:bottom}
+.roll .col{display:flex;flex-direction:column;transform:translateY(-40px)}
+.roll .col span{height:40px}
+.plus{position:relative;top:-14px;margin-left:4px;font-size:13px;font-weight:800;color:var(--ok);opacity:0}
+
+/* 次の小目標 */
+.goal{margin-top:16px;padding:12px 16px 14px;border-radius:18px;background:var(--panel)}
+.goal .gl{display:flex;align-items:baseline;gap:6px}
+.goal .gl b{font-size:14px;font-weight:800;color:var(--strong)}
+.goal .gl .gv{margin-left:auto;white-space:nowrap}.goal .gl .num{font-size:20px}
+.goal .bar{position:relative;height:8px;margin-top:8px;border-radius:4px;background:var(--bar);overflow:hidden}
+.goal .bar i{position:absolute;left:0;top:0;bottom:0;border-radius:4px;background:var(--hero)}
+.goal p{margin-top:8px;font-size:13px;color:var(--sub);font-weight:600}
+.more{margin-top:12px;display:grid;gap:8px}
+.more div{display:flex;align-items:center;gap:10px;min-height:44px;padding:8px 14px;border-radius:16px;background:var(--panel);font-size:13px;color:var(--sub)}
+.more div b{display:block;font-size:14px;color:var(--strong)}
+.more svg{flex:none;width:20px;height:20px}
+
+/* ボタン */
+.acts{margin-top:16px;display:grid;gap:10px}
+.pill{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 18px;border-radius:999px;background:var(--card);box-shadow:var(--shadow);font-weight:700;font-size:14px;color:var(--strong);transition:transform var(--t-tap) var(--ease)}
+.pill:active{transform:scale(.97)}
+.pill.main{min-height:52px;font-size:16px;font-weight:800;background:var(--strong);color:#fff;box-shadow:none}
+:root[data-night=on] .pill.main{background:transparent;color:#fff;box-shadow:inset 0 0 0 1.5px #fff}
+.pill svg{width:18px;height:18px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.hint{text-align:center;font-size:12px;color:var(--mute);font-weight:600}
+
+/* 見本の操作（デザインには入らない） */
+.replay{position:absolute;left:50%;bottom:40%;transform:translateX(-50%);display:none;min-height:44px;padding:0 18px;border-radius:999px;background:var(--card);box-shadow:var(--shadow);font-size:14px;font-weight:700;color:var(--strong)}
+.closed .replay{display:inline-flex;align-items:center}
+
+/* ── 動き（はじめの形は keyframes の from、止まった形がふだんの形。動きを減らすと最後の形だけ） ── */
+@keyframes fadeIn{from{opacity:0}}
+@keyframes rise{from{transform:translateY(calc(100% + 24px))}}
+@keyframes press{0%{transform:scale(1.8) rotate(-16deg);opacity:0}55%{opacity:1;transform:scale(.94) rotate(1deg)}100%{transform:scale(1) rotate(0);opacity:1}}
+@keyframes ring{0%{transform:scale(.85);opacity:.55}100%{transform:scale(1.35);opacity:0}}
+@keyframes rollUp{from{transform:translateY(0)}}
+@keyframes plusUp{0%{opacity:0;transform:translateY(4px)}20%,70%{opacity:1;transform:none}100%{opacity:0;transform:translateY(-4px)}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}}
+@keyframes memoOut{0%{opacity:1;transform:none}100%{opacity:0;transform:scale(.92)}}
+@keyframes draw{from{stroke-dashoffset:var(--len)}}
+@keyframes settle{0%{opacity:0;transform:scale(1.06)}100%{opacity:1;transform:none}}
+@keyframes paleIn{from{opacity:0;transform:scale(.96)}}
+@keyframes barGrow{from{width:var(--from)}}
+@keyframes sink{to{transform:translateY(calc(100% + 24px))}}
+@keyframes fadeOut{to{opacity:0}}
+
+.go .scrim{animation:fadeIn var(--t-mid) var(--ease) both}
+.go .scw{animation:rise .3s var(--ease) both}
+.go .mark .stamp{animation:press .5s .2s cubic-bezier(.2,1.5,.4,1) both}
+.go .mark .ring{animation:ring .7s .48s ease-out}
+.go .mark.pale .stamp{animation:paleIn var(--t-mid) .2s var(--ease) both}
+.go .mark .memo{animation:memoOut .2s .2s var(--ease-in) both}
+.go .mark.memo-on .stamp{animation-delay:.32s}
+.go .mark.memo-on .ring{animation-delay:.6s}
+.go .rwy line{animation:draw var(--t-slow) .2s var(--ease) both}
+.go .rwy text{animation:settle .3s .4s var(--ease) both}
+.go .roll .col{animation:rollUp .35s .7s var(--ease) both}
+.go .plus{animation:plusUp 1.2s .7s var(--ease) both}
+.go .goal .bar i{animation:barGrow var(--t-slow) .75s var(--ease) both}
+.go .acts{animation:fadeUp var(--t-mid) .9s var(--ease) both}
+.go .more{animation:fadeUp var(--t-mid) .85s var(--ease) both}
+.closing .scw{animation:sink var(--t-fast) var(--ease-in) both}
+.closing .scrim{animation:fadeOut var(--t-fast) var(--ease-in) both}
+.closed .scw,.closed .scrim{display:none}
+
+@media (max-height:700px){
+  .mark{height:132px}.mark .stamp{width:124px;height:124px}.mark.tier .stamp{width:228px;height:134px}
+  .mark .ring,.mark .memo{width:112px;height:112px;margin:-56px 0 0 -56px}
+  .rwy{width:132px;height:132px;border-radius:26px}
+  .mx{margin-top:16px}.goal{margin-top:12px;padding:10px 14px 12px}.acts{margin-top:12px;gap:8px}
+  .sc{padding-bottom:14px}
+}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+:root.rm *,:root.rm *::before,:root.rm *::after{animation:none!important;transition:none!important}
+
+
+
+body{max-width:820px;margin:0 auto;padding:0 16px 80px;line-height:1.6;font-size:15px}
+.hd{padding:28px 0 8px}
+h1{font-size:22px;font-weight:800;color:var(--strong)}
+.lead{font-size:13px;color:var(--sub);margin-top:6px}
+.ctl{position:sticky;top:0;z-index:5;display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:10px 0;background:var(--bg)}
+.seg{display:inline-flex;padding:4px;border-radius:999px;background:var(--pill)}
+.seg button{min-height:44px;min-width:60px;padding:0 14px;border-radius:999px;font-size:13px;font-weight:800;color:var(--sub)}
+.seg button[aria-pressed=true]{background:var(--card);color:var(--strong);box-shadow:var(--shadow)}
+.sec{margin-top:28px}
+.sec > h2{font-size:18px;font-weight:800;color:var(--strong)}
+.sec > p{font-size:13px;color:var(--sub);margin-top:4px}
+.rec{display:inline-block;margin-left:8px;padding:2px 10px;border-radius:999px;background:var(--strong);color:#fff;font-size:12px;font-weight:800;vertical-align:3px}
+:root[data-night=on] .rec{background:transparent;color:#4ADE80;box-shadow:inset 0 0 0 1.5px #4ADE80}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:14px;margin-top:12px}
+.sh{background:var(--card);border-radius:20px;box-shadow:var(--shadow);padding:10px 10px 12px}
+.sh .fr{position:relative;width:100%;aspect-ratio:390/844;border-radius:14px;overflow:hidden;background:var(--bg)}
+.sh iframe,.sh img{position:absolute;left:0;top:0;width:390px;height:844px;border:0;transform-origin:0 0}
+.sh img{width:100%;height:100%;transform:none}
+.sh h3{font-size:14px;font-weight:800;color:var(--strong);margin-top:8px}
+.sh p{font-size:12px;color:var(--sub);line-height:1.6}
+.sh .row{display:flex;gap:6px;margin-top:6px}
+.sh .pill{min-height:44px;font-size:13px;padding:0 12px;flex:1}
+.sh .pill svg{width:16px;height:16px}
+.box{margin-top:12px;padding:14px 18px;background:var(--card);border-radius:20px;box-shadow:var(--shadow);font-size:14px}
+.box li{margin:4px 0 4px 18px}
+.box li small{display:block;font-size:12px;color:var(--mute)}
+table.tl{width:100%;border-collapse:collapse;font-size:13px}
+table.tl th{font-size:12px;color:var(--mute);font-weight:700;text-align:left;padding:6px 8px}
+table.tl td{padding:8px;vertical-align:top}
+table.tl tr:nth-child(even) td{background:var(--panel)}
+table.tl td:first-child{white-space:nowrap;font-weight:800;color:var(--strong);font-variant-numeric:tabular-nums;border-radius:10px 0 0 10px}
+table.tl td:last-child{border-radius:0 10px 10px 0;color:var(--sub)}
+</style></head><body><div class="hd"><h1>印をもらったときのカード 1版</h1><p class="lead">本人が貼った Gemini の案（docs/pm/ext/gemini-stamp-1125.txt）をもとにした画面案です。アプリにはまだ入れません。押すと動き、「もう一度」で最初から。</p></div><div class="ctl"><div class="seg" role="group" aria-label="昼と夜"><button type="button" data-n="0" aria-pressed="true">昼</button><button type="button" data-n="1" aria-pressed="false">夜</button></div><div class="seg" role="group" aria-label="動き"><button type="button" data-rm="0" aria-pressed="true">動きあり</button><button type="button" data-rm="1" aria-pressed="false">動きを減らす</button></div></div><section class="sec"><h2>今の画面</h2><p>半券の上にハンコが押され、階級の羽根と帯、名前、ボタン3つ。ダイアログが画面の真ん中に出ます。</p><div class="grid"><div class="sh"><div class="fr"><img src="png/00-now.png" alt="今"></div><h3>今</h3><p>今の印の画面（デモの羽田）</p></div></div></section><section class="sec"><h2>案B　今のハンコを活かす<span class="rec">おすすめ</span></h2><p>地図を薄く残したまま、下から角丸カード。印の場所には今のハンコ（押される動き press と墨の輪 ring もそのまま）。図鑑・共有画像・写真に押すと同じ印のままです。半券は、カードの左右の切り欠きで残します。</p><div class="grid"><div class="sh"><div class="fr"><iframe src="b1-first.html" data-src="b1-first.html" title="B1 はじめての印" loading="lazy" tabindex="-1"></iframe></div><h3>B1 はじめての印</h3><p>訪問1回目・集めた空港 16→17／86・関東 3/9</p><div class="row"><button class="pill" type="button" data-again><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 0113.7-5.6L20 8.5M20 4v4.5h-4.5M20 12a8 8 0 01-13.7 5.6L4 15.5M4 20v-4.5h4.5"/></svg>もう一度</button><a class="pill" href="b1-first.html" target="_blank">開く</a></div></div><div class="sh"><div class="fr"><iframe src="b2-memo.html" data-src="b2-memo.html" title="B2 メモから印へ" loading="lazy" tabindex="-1"></iframe></div><h3>B2 メモから印へ</h3><p>点線のメモが消えて現地の印に。メモの数は1つ減る</p><div class="row"><button class="pill" type="button" data-again><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 0113.7-5.6L20 8.5M20 4v4.5h-4.5M20 12a8 8 0 01-13.7 5.6L4 15.5M4 20v-4.5h4.5"/></svg>もう一度</button><a class="pill" href="b2-memo.html" target="_blank">開く</a></div></div><div class="sh"><div class="fr"><iframe src="b3-repeat.html" data-src="b3-repeat.html" title="B3 2回目以降" loading="lazy" tabindex="-1"></iframe></div><h3>B3 2回目以降</h3><p>12回目・前回から38日ぶり。階級の羽根はそのまま</p><div class="row"><button class="pill" type="button" data-again><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 0113.7-5.6L20 8.5M20 4v4.5h-4.5M20 12a8 8 0 01-13.7 5.6L4 15.5M4 20v-4.5h4.5"/></svg>もう一度</button><a class="pill" href="b3-repeat.html" target="_blank">開く</a></div></div><div class="sh"><div class="fr"><iframe src="b5-offline.html" data-src="b5-offline.html" title="B5 電波がないとき" loading="lazy" tabindex="-1"></iframe></div><h3>B5 電波がないとき</h3><p>淡い印・送信待ち。確定まで数に入れない</p><div class="row"><button class="pill" type="button" data-again><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 0113.7-5.6L20 8.5M20 4v4.5h-4.5M20 12a8 8 0 01-13.7 5.6L4 15.5M4 20v-4.5h4.5"/></svg>もう一度</button><a class="pill" href="b5-offline.html" target="_blank">開く</a></div></div></div></section><section class="sec"><h2>5・10・20回目の縁取り　あり／なし</h2><p>今のアプリには「階級」（3・5・20・100・365回で羽根と帯が増える）がすでにあります。縁取りを足すと、節目の見せ方が2つになります。おすすめは「なし」（階級だけ）。</p><div class="grid"><div class="sh"><div class="fr"><iframe src="b4a-mark-on.html" data-src="b4a-mark-on.html" title="B4a 縁取りあり" loading="lazy" tabindex="-1"></iframe></div><h3>B4a 縁取りあり</h3><p>上の札を「5回目の訪問」にして細い縁</p><div class="row"><button class="pill" type="button" data-again><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 0113.7-5.6L20 8.5M20 4v4.5h-4.5M20 12a8 8 0 01-13.7 5.6L4 15.5M4 20v-4.5h4.5"/></svg>もう一度</button><a class="pill" href="b4a-mark-on.html" target="_blank">開く</a></div></div><div class="sh"><div class="fr"><iframe src="b4b-mark-off.html" data-src="b4b-mark-off.html" title="B4b 縁取りなし" loading="lazy" tabindex="-1"></iframe></div><h3>B4b 縁取りなし</h3><p>札はふつう。階級が上がった行だけ</p><div class="row"><button class="pill" type="button" data-again><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 0113.7-5.6L20 8.5M20 4v4.5h-4.5M20 12a8 8 0 01-13.7 5.6L4 15.5M4 20v-4.5h4.5"/></svg>もう一度</button><a class="pill" href="b4b-mark-off.html" target="_blank">開く</a></div></div></div></section><section class="sec"><h2>案A　Gemini の案どおり（コード＋滑走路の線）</h2><p>印を新しく「3文字のコード＋滑走路の向きと本数」の絵にします。空港ごとの滑走路の形を86空港ぶん描く必要があり、図鑑や共有画像の印とも見た目が分かれます。</p><div class="grid"><div class="sh"><div class="fr"><iframe src="a1-first.html" data-src="a1-first.html" title="A1 はじめての印" loading="lazy" tabindex="-1"></iframe></div><h3>A1 はじめての印</h3><p>羽田は4本の滑走路</p><div class="row"><button class="pill" type="button" data-again><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 0113.7-5.6L20 8.5M20 4v4.5h-4.5M20 12a8 8 0 01-13.7 5.6L4 15.5M4 20v-4.5h4.5"/></svg>もう一度</button><a class="pill" href="a1-first.html" target="_blank">開く</a></div></div><div class="sh"><div class="fr"><iframe src="a3-repeat.html" data-src="a3-repeat.html" title="A3 2回目以降" loading="lazy" tabindex="-1"></iframe></div><h3>A3 2回目以降</h3><p>伊丹は平行の2本</p><div class="row"><button class="pill" type="button" data-again><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 0113.7-5.6L20 8.5M20 4v4.5h-4.5M20 12a8 8 0 01-13.7 5.6L4 15.5M4 20v-4.5h4.5"/></svg>もう一度</button><a class="pill" href="a3-repeat.html" target="_blank">開く</a></div></div></div></section><section class="sec"><h2>共有画像</h2><div class="grid"><div class="sh"><div class="fr"><iframe src="b6-share.html" data-src="b6-share.html" title="B6 画像で保存・共有" loading="lazy" tabindex="-1"></iframe></div><h3>B6 画像で保存・共有</h3><p>4:5。位置・時刻・座席・便名は入れない</p><div class="row"><button class="pill" type="button" data-again><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 0113.7-5.6L20 8.5M20 4v4.5h-4.5M20 12a8 8 0 01-13.7 5.6L4 15.5M4 20v-4.5h4.5"/></svg>もう一度</button><a class="pill" href="b6-share.html" target="_blank">開く</a></div></div></div></section><section class="sec"><h2>動きの時間割（約1.2秒・いつでも閉じられる）</h2><div class="box"><table class="tl"><tr><th>時刻</th><th>動き</th><th>そろえたもの</th></tr><tr><td>0.00</td><td>地図が薄く暗くなり、カードが下から上がる（行き過ぎない）</td><td>micro の 13 シート 0.3秒</td></tr><tr><td>0.20</td><td>ハンコが押される（案A は線が引かれ、コードが落ち着く）</td><td>今の press 0.5秒</td></tr><tr><td>0.48</td><td>墨の輪が1回広がって消える</td><td>今の ring 0.7秒</td></tr><tr><td>0.70</td><td>数字が1つ繰り上がり「＋1」、小目標の帯が伸びる</td><td>micro の 07・08（0.35〜0.4秒）</td></tr><tr><td>0.90</td><td>ボタンが静かに出る</td><td>0.25秒</td></tr><tr><td>いつでも</td><td>✕・カードの外・下へなでるで閉じる（0.15秒）</td><td>動きを減らす設定では、最後の形がすぐ出る</td></tr></table></div></section><section class="sec"><h2>入れないもの</h2><div class="box"><ul><li>天気・季節の飾り、ロゴ、案内板風の黒い背景、紙吹雪</li><li>地図のピンの波紋（micro で入れないと決めた「波紋」に当たる）</li><li>地方ごとの色分け（Gemini の案）<small>色は1色（昼は紺、夜は緑）。会社の色と金は使わない</small></li><li>振動<small>決定事項【11/25】で「振動と音はなし」。今のアプリには印のときの軽い振動（navigator.vibrate）が残っているので、どうするか本人に聞く</small></li></ul></div></section><script>/* 見本の動かし方：?n=1 夜／?rm=1 動きを減らす／?t=0.5 その時刻で止める（撮影用） */
+(function(){
+  const q = new URLSearchParams(location.search), R = document.documentElement;
+  if(q.get('n') === '1') R.dataset.night = 'on';
+  if(q.get('rm') === '1') R.classList.add('rm');
+  const ph = document.querySelector('.phone');
+  // 半券の切り欠き：印の場所と数字の間（数字のかたまりの少し上）
+  function notch(){ const sc = document.querySelector('.sc'), mx = document.querySelector('.mx'); if(sc && mx) sc.style.setProperty('--ny', (mx.offsetTop - 11) + 'px'); }
+  function play(){ if(!ph) return; ph.classList.remove('go', 'closing', 'closed'); void ph.offsetWidth; ph.classList.add('go'); }
+  function close(){ if(!ph || ph.classList.contains('closed')) return; ph.classList.remove('go'); ph.classList.add('closing');
+    setTimeout(() => { ph.classList.remove('closing'); ph.classList.add('closed'); }, R.classList.contains('rm') || matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 160); }
+  window.play = play; window.closeCard = close;
+  window.__freeze = function(t){ play(); document.getAnimations().forEach(a => { a.pause(); a.currentTime = t * 1000; }); };
+  addEventListener('load', () => {
+    notch();
+    const t = q.get('t');
+    if(t != null) window.__freeze(parseFloat(t)); else play();
+  });
+  addEventListener('resize', notch);
+  document.addEventListener('click', e => {
+    if(e.target.closest('.x') || e.target.classList.contains('scrim')) close();
+    if(e.target.closest('.replay')) play();
+  });
+  // 下へなでて閉じる（見本は 60px 以上で閉じる）
+  let y0 = null;
+  document.addEventListener('pointerdown', e => { if(e.target.closest('.grab, .top')) y0 = e.clientY; });
+  document.addEventListener('pointerup', e => { if(y0 != null && e.clientY - y0 > 60) close(); y0 = null; });
+})();
+
+
+(function(){
+  let N = '0', RM = '0';
+  const fit = () => document.querySelectorAll('.sh iframe').forEach(f => { f.style.transform = 'scale(' + (f.parentNode.clientWidth / 390) + ')'; });
+  const src = f => f.dataset.src + '?n=' + N + '&rm=' + RM;
+  const reload = () => document.querySelectorAll('.sh iframe').forEach(f => { f.src = src(f) + '&r=' + Date.now(); });
+  addEventListener('resize', fit); fit();
+  document.addEventListener('click', e => {
+    const a = e.target.closest('[data-again]'); if(a){ const f = a.closest('.sh').querySelector('iframe'); f.src = src(f) + '&r=' + Date.now(); return; }
+    const n = e.target.closest('[data-n]'), m = e.target.closest('[data-rm]');
+    if(n){ N = n.dataset.n; document.documentElement.dataset.night = N === '1' ? 'on' : ''; document.querySelectorAll('[data-n]').forEach(b => b.setAttribute('aria-pressed', String(b === n))); reload(); }
+    if(m){ RM = m.dataset.rm; document.querySelectorAll('[data-rm]').forEach(b => b.setAttribute('aria-pressed', String(b === m))); reload(); }
+  });
+  const q = new URLSearchParams(location.search); if(q.get('n') === '1'){ N = '1'; document.documentElement.dataset.night = 'on'; document.querySelectorAll('[data-n]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.n === '1'))); reload(); }
+})();
+</script></body></html>

@@ -1,0 +1,266 @@
+{
+ "b1-first": {
+  "small": [],
+  "tap": [],
+  "over": false,
+  "cut": [],
+  "scroll": false,
+  "cardTop": 201,
+  "err": [],
+  "rm_moving": 0
+ },
+ "b1-first-n": {
+  "small": [],
+  "tap": [],
+  "over": false,
+  "cut": [],
+  "scroll": false,
+  "cardTop": 201,
+  "err": []
+ },
+ "b1-first-667": {
+  "small": [],
+  "tap": [],
+  "over": false,
+  "cut": [],
+  "scroll": false,
+  "cardTop": 92,
+  "err": []
+ },
+ "b2-memo": {
+  "small": [],
+  "tap": [],
+  "over": false,
+  "cut": [],
+  "scroll": false,
+  "cardTop": 170,
+  "err": [],
+  "rm_moving": 0
+ },
+ "b2-memo-n": {
+  "small": [],
+  "tap": [],
+  "over": false,
+  "cut": [],
+  "scroll": false,
+  "cardTop": 170,
+  "err": []
+ },
+ "b2-memo-667": {
+  "small": [],
+  "tap": [],
+  "over": false,
+  "cut": [],
+  "scroll": false,
+  "cardTop": 61,
+  "err": []
+ },
+ "b3-repeat": {
+  "small": [],
+  "tap": [],
+  "over": false,
+  "cut": [],
+  "scroll": false,
+  "cardTop": 174,
+  "err": [],
+  "rm_moving": 0
+ },
+ "b3-repeat-n": {
+  "small": [],
+  "tap": [],
+  "over": false,
+  "cut": [],
+  "scroll": false,
+  "cardTop": 174,
+  "err": []
+ },
+ "b3-repeat-667": {
+  "small": [],
+  "tap": [],
+  "over": false,
+  "cut": [],
+  "scroll": false,
+  "cardTop": 67,
+  "err": []
+ },
+ "b4a-mark-on": {
+  "small": [],
+  "tap": [],
+  "over": false,
+  "cut": [],
+  "scroll": false,
+  "cardTop": 248,
+  "err": [],
+  "rm_moving": 0
+ },
+ "b4a-mark-on-n": {
+  "small": [],
+  "tap": [],
+  "over": false,
+  "cut": [],
+  "scroll": false,
+  "cardTop": 248,
+  "err": []
+ },
+ "b4a-mark-on-667": {
+  "small": [],
+  "tap": [],
+  "over": false,
+  "cut": [],
+  "scroll": false,
+  "cardTop": 111,
+  "err": []
+ },
+ "b4b-mark-off": {
+  "small": [],
+  "tap": [],
+  "over": false,
+  "cut": [],
+  "scroll": false,
+  "cardTop": 248,
+  "err": [],
+  "rm_moving": 0
+ },
+ "b4b-mark-off-n": {
+  "small": [],
+  "tap": [],
+  "over": false,
+  "cut": [],
+  "scroll": false,
+  "cardTop": 248,
+  "err": []
+ },
+ "b4b-mark-off-667": {
+  "small": [],
+  "tap": [],
+  "over": false,
+  "cut": [],
+  "scroll": false,
+  "cardTop": 111,
+  "err": []
+ },
+ "b5-offline": {
+  "small": [],
+  "tap": [],
+  "over": false,
+  "cut": [],
+  "scroll": false,
+  "cardTop": 290,
+  "err": [],
+  "rm_moving": 0
+ },
+ "b5-offline-n": {
+  "small": [],
+  "tap": [],
+  "over": false,
+  "cut": [],
+  "scroll": false,
+  "cardTop": 290,
+  "err": []
+ },
+ "b5-offline-667": {
+  "small": [],
+  "tap": [],
+  "over": false,
+  "cut": [],
+  "scroll": false,
+  "cardTop": 173,
+  "err": []
+ },
+ "a1-first": {
+  "small": [],
+  "tap": [],
+  "over": false,
+  "cut": [],
+  "scroll": false,
+  "cardTop": 201,
+  "err": [],
+  "rm_moving": 0
+ },
+ "a1-first-n": {
+  "small": [],
+  "tap": [],
+  "over": false,
+  "cut": [],
+  "scroll": false,
+  "cardTop": 201,
+  "err": []
+ },
+ "a1-first-667": {
+  "small": [],
+  "tap": [],
+  "over": false,
+  "cut": [],
+  "scroll": false,
+  "cardTop": 92,
+  "err": []
+ },
+ "a3-repeat": {
+  "small": [],
+  "tap": [],
+  "over": false,
+  "cut": [],
+  "scroll": false,
+  "cardTop": 174,
+  "err": [],
+  "rm_moving": 0
+ },
+ "a3-repeat-n": {
+  "small": [],
+  "tap": [],
+  "over": false,
+  "cut": [],
+  "scroll": false,
+  "cardTop": 174,
+  "err": []
+ },
+ "a3-repeat-667": {
+  "small": [],
+  "tap": [],
+  "over": false,
+  "cut": [],
+  "scroll": false,
+  "cardTop": 67,
+  "err": []
+ },
+ "b6-share": {
+  "small": [],
+  "tap": [],
+  "over": false,
+  "cut": [],
+  "err": [],
+  "rm_moving": 0
+ },
+ "b6-share-n": {
+  "small": [],
+  "tap": [],
+  "over": false,
+  "cut": [],
+  "err": []
+ },
+ "b6-share-667": {
+  "small": [],
+  "tap": [],
+  "over": false,
+  "cut": [],
+  "err": []
+ },
+ "index": {
+  "small": [],
+  "tap": [],
+  "over": false,
+  "cut": []
+ },
+ "index-390": {
+  "small": [],
+  "tap": [],
+  "over": false,
+  "cut": []
+ },
+ "index-n": {
+  "small": [],
+  "tap": [],
+  "over": false,
+  "cut": []
+ }
+}
