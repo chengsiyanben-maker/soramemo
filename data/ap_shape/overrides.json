@@ -1,0 +1,4 @@
+{
+ "about": "滑走路の線を手で直す所（tools/ap_shape.py build が読む）。キーは ICAO（なければ airports の id）。exclude：外す線の名前（runway_lines.json の names と同じ字）、add：足す線 [緯度1, 経度1, 緯度2, 経度2, 名前]、note：理由。元のデータ（raw/）は手で直さない",
+ "airports": {}
+}
