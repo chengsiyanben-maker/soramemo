@@ -1,6 +1,14 @@
 # チェックイン担当の帳面
 
 ## いま持っている仕事
+- **11/26 手動の回（PM の指示「11/25 23時05分 乗る便の候補から1回で記録 を checkin/flight-suggest で」）**：checkin/flight-suggest・下書き **PR #239**（22b6bbbe・報告 docs/pm/report-flight-suggest.md・写真 docs/pm/shots-flight-suggest/）。main（dfc945cc）から。checkin/stamp-edge には触っていない。見張りを付けた。テストが通れば PM が自動で反映
+  - 候補：fsugAirport（今日チェックインした空港→判定範囲の中の空港）・fsugFetch（airport-now を2分覚える・8秒で区切る・電波なしは off）・fsugList（出る便6・着いた便4。欠航・出発済み・国際線を除く）。入口はフライトの「＋」（#fsugBook）と showStamp の「今日の便を記録」（data-fsug-open → シート #dFsug）
+  - 記録：fsugPlan → "plan"（savePlan。出る便・まだチェックインしていない到着）・"set"（今日の同じ区間のフライトに set_flight_airline）・"manual"（日誌。mfInsert は flight_no を付けて、列がなければ外して入れ直す）。確認は fsugConfirm、押すのは fsugGo
+  - 過去：#mNo（数字だけでも）→ mNoFill（plan_timetable を JAL・ANA で。前日より前の日付は今日の時刻表で推定と書く）→ mNoApply（出発・到着・航空会社を入れ、flight_facts で実際の時刻と機体）。同じ番号は #mNoPick で選ぶ。change の二重を MNO_LAST で止める
+  - 便名の読み：数字だけの「509」を「50」＋「9」と読まないよう、航空会社の2文字は英字を1つ含む形（[A-Z][A-Z0-9]|[0-9][A-Z]）
+  - jstDay は前からある関数（12351 行あたり）を使う（重ねて宣言すると組み立てが止まる）
+  - テスト：t197 を足した（run_all の上限 600）。fake_sb.js に __mfNoCol。e2e 全部・tests/ops 成功（t195 は同時に流すと 100ms を少し超えることがあり、main の版でも同じ）
+  - 本人（PM）に聞くこと：出る便は乗る便として覚えるだけ（その場で日誌にしない）でよいか・札の色・JAL・ANA だけ・デザイン担当／改善担当の見直しを通すか
 - 【11/25 23時台 手動の回（同じ「電波・位置が悪いときの続き を checkin/stamp-edge で」の指示）】仕事は PR #238（9eb14811）で済んでいたので作り直さなかった。#233（小さな動き）が main に入って #238 の web/ がぶつかっていたので、main（dfc945cc）を取り込み web/ だけ作り直した（809776a6。src はぶつからなかった）。t196・t24・t146・t194・t145・t183・t11・t13 成功、t195 は1本で成功（同時に流すと長い処理 258ms）。札は toast と mxToast の2つのまま（重ねない2行は main に入っていない）
 - 【11/25 23時台】PR #226 は閉じられた（中身の12個は #233 で main に入った）。見張りは外れた。「2つの札を重ねない」（toast と mxToast・ブランチ checkin/micro の 85a7ec37）は main に入っていない。PM が要ると言えば main から新しいブランチで2行を入れ直す
 - **11/25 22時台の定時の回（同じ「電波・位置が悪いときの続き」・重なった）**：始めたときは origin に checkin/stamp-edge がなかったが、作っている間に別の回が PR #238 を出していた。押そうとして気づいたので、こちらは **checkin/stamp-edge-b**（dbeb1cdd・報告 docs/pm/report-stamp-edge-b.md・写真 docs/pm/shots-stamp-edge/）に別案として置いた。**PR は出していない**。PM が #238 を選べば消してよい
@@ -647,7 +655,8 @@
 - 【11/25 stamp-edge-b】#238 と同じ仕事の別案（ブランチだけ）。PM が #238 を選んだら checkin/stamp-edge-b は消す。#238 にない所（取り直しのボタン・設定から戻ったときの取り直し）を使うなら #238 に移す
 - 【重なり防止・再】始めるときだけでなく、push の前にも origin のブランチと開いた PR を見る（11/25 22時台は作っている途中で別の回が同じ仕事を出した）
 - 【11/26 stamp-edge】PR #238：PM の自動の反映を待つ。本人の答え（上の4つ）で直す。入る前に t196・t195・t144・t24・t171・t11・t13・t15・t19・t30・t193・t189・tests/ops を流す。#226（micro）とは say・CSS の最後・toast の所が近い（src/index.html）。あとから入る方で web/ を作り直す。micro の mxToast と1つにまとめるときは、確定の札（flushQueue の toast）も含める
-- 【次の回】PM の指示がなければ「乗る便の候補から1回で記録」（checkin/flight-suggest。下の 11/25 23時05分の欄）を main から始める。始める前に origin のブランチと開いた PR を見る
+- 【11/26 flight-suggest】PR #239：PM の自動の反映を待つ。本人の答え（上の4つ）で直す。入る前に t197・t195・t24・t144・t13・t47・t61・t123・tests/ops を流す。#238（stamp-edge）とは src/index.html の別の所（印の判定・保留と、便の記録・日誌）で、showStamp の同じ行は触っていない。CSS の最後の所が近いので、あとから入る方で web/ を作り直す。データ担当が manual_flights.flight_no を足したら、loadServer で読んで日誌に便名を出す
+- 【次の回】PM の指示がなければ、帳面の積みで残っているものを上から見る（いまは新しい積みなし）
 - 【11/25 stamp-fast】PR #229：PM の反映を待つ。本人の答え（上の4つ）で直す。入る前に t195・t24・t171・t11・t13・t15・t19・t30・t193・t189・tests/ops を流す。checkin/micro（763673a1）と src/index.html の say・CSS でぶつかる見込み。stamp-fast が先（PM の指示）。micro を入れるときは札を mxToast と toast（.smtoast）の1つにまとめ、t194（micro）と t195（stamp-fast）は両方残す
 - 【手元の道具】e2e を流したあと docs/pm の写真の戻しは `git diff --name-only -- docs/pm | xargs git checkout --`（シェルの * は untracked のフォルダも拾って失敗する）。run_all.py の引数は前方一致なので、分けて流すときは t1.py のように .py まで付ける
 - 【11/25 micro】PR #226：閉じられた（12個は main に入った）。札を重ねない2行は未反映（PM の判断待ち）。元は「PM の自動の反映を待つ。答え（札の決め方・コピーを付ける所・札の高さ）で直す。入る前に t194・t145・t183・t167・t184・t120・t123・tests/ops を流す。#224（修行の帯）とは src/index.html の別の所。あとから入る方で web/ を作り直す
@@ -772,6 +781,7 @@
 - tests/ops は手元では npm の playwright にブラウザがないので、全体に入っている playwright をつないで流した（すべて成功）
 
 ## ほかの担当への依頼
+- 【11/26 データ担当へ（flight-suggest・PR #239）】(1) manual_flights に便名の列 flight_no（text・任意）を足してほしい（移行と RLS をセット。本人の行だけ書ける今の決まりのまま）。アプリは列があれば入れ、なければ外して入れる形にしてある (2) 「日付＋便名 → 出発・到着・時刻・機体」を flight_history から返す読むだけの関数（例 flight_lookup(p_date date, p_flight text)）。今は今の時刻表から推定している
 - 【11/25 checkin/micro の回へ（自分の持ち分の別の回）】stamp-fast（PR #229）で toast()・.smtoast（05 の札の形）を足した。micro の mxToast と1つにまとめてほしい。テストは micro が t194、stamp-fast が t195
 - 【11/25 撮る人用へ】知らせの鈴（.spbell・data-spnote）を ON にしたとき、mxBell(押したボタン) を呼んでほしい（PR #226 の 11「鈴が揺れる」。描き直しの前に呼ぶ）。コピーの部品 mxCopyHTML(文字, 名前) も使える
 - 撮る人用（11/22・satsuei.md に書いた）：ホームの空港のカードの切り替えのピルは、並べ替えの部品（roGrip・roBind・roOrder。PR #183）で並べ替えられる。並びは layout.order.<名前> に入れると端末とサーバーにそろう。#183 が main に入ってからつなぐ
@@ -1462,7 +1472,7 @@ review-c4：見せてよい。本人の答え（ON／OFF か −／＋ か）を
 - 入れないもの：位置が取れていない・範囲の外なのに「羽田空港として保存する」で通す案（印は現地で押したものだけ・最後の判定はサーバー）。「もう一度位置を確かめる」は今のまま
 - テスト：正確な位置 OFF のカード・送信待ちの札と送り直し・確定の札・時刻順・文の言い方。390・375
 
-## PM から積んだ次の仕事（11/25 23時05分、乗る便の候補から1回で記録。本人が貼った Gemini の案の7番）※checkin/flight-suggest で。テストが通れば PM が自動で反映
+## PM から積んだ次の仕事 →【済み PR #239（22b6bbbe・報告 report-flight-suggest.md）】（11/25 23時05分、乗る便の候補から1回で記録。本人が貼った Gemini の案の7番）※checkin/flight-suggest で。テストが通れば PM が自動で反映
 - フライトの「＋記録」と印のあとの「今日の便を記録」で、いまいる空港（または今日チェックインした空港）の今日の運航情報から、これから出る便・いま着いた便を候補として上に並べ、押せば便名・区間・時刻・機材が入った状態で記録できる（確認の1回だけ）
 - 過去の便は「日付＋便名（数字だけでも）」で区間と時刻を補う（flight_history・timetable から）
 - 便の一覧の航空会社コードは小さな札（彩度を落とした色・事実の記録として。ロゴは使わない）
