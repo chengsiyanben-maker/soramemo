@@ -20,13 +20,9 @@ def check(name, ok, detail=''):
     if not ok: fails.append(name)
 THREE_URL = 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.min.js'
 THREE = os.path.join(WORK, 'three-0.160.0.module.min.js')
-def get_three():
-    if os.path.exists(THREE) and os.path.getsize(THREE) > 100000: return True
-    try:
-        with urllib.request.urlopen(THREE_URL, timeout=30) as r: open(THREE, 'wb').write(r.read())
-        return os.path.getsize(THREE) > 100000
-    except Exception as e:
-        print('three.js を取れない:', e); return False
+def get_three():   # 共通の部品で用意する（同時に流しても壊れない・11/26 test-steady）
+    sys.path.insert(0, HERE); from three_local import ensure_three
+    return ensure_three(THREE)
 now = datetime.now(timezone.utc); iso = lambda s: (now + timedelta(seconds=s)).isoformat()
 P1 = [  # 1つめの答え（90秒前）
   {'id':'a1','callsign':'JAL318','lat':35.47,'lon':139.8550,'alt_ft':2400,'kt':150,'hdg':331,'fpm':-700,'phase':'arr','dist_km':14,'type':'A359','reg':'JA01XJ','trail':[]},
