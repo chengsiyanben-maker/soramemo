@@ -17739,8 +17739,32 @@ function renderShugyo(){
   const tab = sgTabOn(), body = tab ? $("sgTabBody") : $("dShugyoBody"), other = tab ? $("dShugyoBody") : $("sgTabBody"); if(!body) return;
   if(other) other.innerHTML = "";   // 同じ id が2つにならないように、使っていないほうは空にする
   const y = sgScroller().scrollTop; body.dataset.car = sgCar(); body.innerHTML = (SG_PAGES[SG_PAGE] || sgMain)(); SG_MSG = "";
-  if(SG_PAGE === "main") sgFillNext(); if(SG_PAGE === "ops") sgFillOps(); if(SG_PAGE === "find") sgFillFind();
+  if(SG_PAGE === "main"){ sgFillNext(); sgMicroBar(body); } if(SG_PAGE === "ops") sgFillOps(); if(SG_PAGE === "find") sgFillFind();
   return y;
+}
+// 小さな動き 08「道のりの帯が伸びる」（11/25 本人 OK・design/micro の 08）
+//   道のりの1枚の太い帯（ポイント）が 0 から今の所まで 0.4 秒で伸び、大きな数字が数え上がる。その日（日本時間）はじめて道のりを見たときだけ。
+//   2回目からは動かさない（この端末に日付を覚える。覚えられない端末でも、開いている間は1回だけ）。動きを減らす設定では動かさない。
+//   1年の細い帯・JGC の帯は動かさない。記録0の形（sgZero）には帯がないので何もしない
+let SG_BAR_DAY = null;
+function sgMicroBar(body){
+  const hero = body && body.querySelector(".sgb-hero"); if(!hero) return;
+  const day = sgToday(); let seen = SG_BAR_DAY === day; try{ seen = seen || localStorage.getItem("soramemo.sgbar") === day; }catch(e){}
+  if(seen || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  requestAnimationFrame(() => {   // 窓（dShugyo）は描いたあとに開くので、次の描画で見えているかを確かめる
+    if(!hero.isConnected || !hero.getClientRects().length) return;
+    SG_BAR_DAY = day; try{ localStorage.setItem("soramemo.sgbar", day); }catch(e){}
+    const ease = "cubic-bezier(.2,.8,.2,1)", i = hero.querySelector(".sgb-bar:not(.thin) i"), n = hero.querySelector(".sgb-act");
+    if(i && i.style.width) i.animate([{ width:"0%" }, { width:i.style.width }], { duration:400, easing:ease });
+    const to = n ? Number(n.textContent.replace(/[^\d]/g, "")) : 0; if(!n || !to) return;
+    const txt = n.textContent, a = n.animate([{ opacity:1 }, { opacity:1 }], { duration:400 }), f = t => 1 - Math.pow(1 - t, 3);
+    n.setAttribute("aria-label", txt);   // 読み上げは数え上げの途中の数字でなく、今の数字
+    (function step(){
+      if(!n.isConnected) return;
+      if(a.playState === "finished"){ n.textContent = txt; return; }
+      n.textContent = fmtKm(Math.round(to * f(Math.min(1, (a.currentTime || 0) / 400)))); requestAnimationFrame(step);
+    })();
+  });
 }
 function openShugyo(page = "main"){
   SG_PAGE = page; track("shugyo", page);
