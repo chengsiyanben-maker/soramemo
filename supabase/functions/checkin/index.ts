@@ -6,6 +6,7 @@ import { weather, wxCode } from "../_shared/airport_now.ts";
 import { OPS_AIRPORTS } from "../_shared/ops_core.js";
 import { type CheckinWx, pickWx, WX_NONE } from "../_shared/checkin_wx.ts";
 import { readShared } from "../_shared/edge_cache.ts";
+import { type CheckinRow, type FlightRow, isUniqueViolation, parseClientId, replayBody } from "../_shared/checkin_idem.ts";
 
 const URL = Deno.env.get("SUPABASE_URL")!;
 const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -93,6 +94,24 @@ async function opsAt(iata: string | null | undefined): Promise<string | null> {
   } catch { return null; }
 }
 
+// 同じ ID の印がもう記録してあれば、1回目と同じ形の返事（dup: true）を作る。なければ null（data/idem・移行200）
+async function replay(userId: string, cid: string) {
+  const { data: rows, error } = await admin.from("checkins").select("id,airport_id,terminal_id,created_at,flags,weather,wind_kt,ops")
+    .eq("user_id", userId).eq("client_id", cid).limit(1);
+  if (error) throw error;
+  const row = rows?.[0] as CheckinRow | undefined;
+  if (!row) return null;
+  const [fl, ea, et] = await Promise.all([
+    admin.from("flights").select("id,from_airport,to_airport,dep_at,arr_at,distance_km").eq("arr_checkin", row.id).order("id").limit(1),
+    admin.from("checkins").select("id", { count: "exact", head: true }).eq("user_id", userId).eq("airport_id", row.airport_id).lt("id", row.id),
+    row.terminal_id
+      ? admin.from("checkins").select("id", { count: "exact", head: true }).eq("user_id", userId).eq("terminal_id", row.terminal_id).lt("id", row.id)
+      : Promise.resolve({ count: 0, error: null }),
+  ]);
+  if (fl.error) throw fl.error;
+  return replayBody(row, (fl.data?.[0] ?? null) as FlightRow, ea.count ?? 1, et.count ?? 1);
+}
+
 // 空港とターミナルはほぼ変わらないので、関数のインスタンスごとに一度だけ読む
 let master: { airports: Airport[]; terminals: Terminal[] } | null = null;
 async function loadMaster() {
@@ -127,9 +146,18 @@ Deno.serve(async (req) => {
     admin.rpc("rl_check", { p_key: "checkin:" + userId, p_limit: 20, p_window_sec: 60 }),
     req.json().then((v) => ({ ok: true as const, v }), () => ({ ok: false as const, v: null })),
     loadMaster().then((v) => ({ v, e: null }), (e) => ({ v: null, e })),
-    admin.from("checkins").select("id,airport_id,terminal_id,created_at").eq("user_id", userId)
+    admin.from("checkins").select("id,airport_id,terminal_id,created_at,client_id").eq("user_id", userId)
       .order("created_at", { ascending: false }).limit(1),
   ]);
+  // 送り直し（data/idem）：前の印と同じ ID なら、判定も記録もせず1回目と同じ形の成功を返す（往復は増やさない。
+  // 前の印より古い ID は、判定で断るときと記録で一意の索引にぶつかったときだけ探す）。止まっているときも、記録済みの印は成功で返す
+  const cid = bodyR.ok ? parseClientId((bodyR.v as { cid?: unknown } | null)?.cid) : null;
+  if (cid && !lastR.error && lastR.data?.[0]?.client_id === cid) {
+    try {
+      const r = await replay(userId, cid);
+      if (r) { console.log(JSON.stringify({ ev: "checkin_dup", where: "last" })); return json(r); }
+    } catch (e) { console.error(e); }
+  }
   if (!allowed) {
     return json({ ok: false, reason: "paused", message: "ただいまチェックインを一時停止しています。しばらくしてからもう一度お試しください。" }, 503);
   }
@@ -150,6 +178,11 @@ Deno.serve(async (req) => {
     const now = Date.now();
     const d = decide({ lat: Number(body.lat), lon: Number(body.lon), acc: Number(body.acc), ts: Number(body.ts) }, now, last, airports, terminals, body.queued === true);
     if (!d.ok) {
+      // 断る前に、同じ ID の印がもう記録してあれば成功で返す（保留の送り直しで、そのあとに別の印がある場合など）
+      if (cid) {
+        const r = await replay(userId, cid);
+        if (r) { console.log(JSON.stringify({ ev: "checkin_dup", where: "decide" })); return json(r); }
+      }
       // 判定ルールの見直し用に、断った理由を記録する（利用者IDと座標は残さず、最寄り空港・距離・誤差の目安だけ）
       if (["out_of_range", "low_accuracy", "stale_position", "too_soon", "already"].includes(d.reason)) {
         const acc = Number(body.acc);
@@ -181,8 +214,13 @@ Deno.serve(async (req) => {
       user_id: userId, airport_id: d.place.airport.id, terminal_id: d.place.terminal?.id ?? null,
       lat: body.lat, lon: body.lon, accuracy_m: body.acc, position_at: new Date(Number(body.ts)).toISOString(),
       created_at: new Date(d.at).toISOString(), flags: d.flags,
-      weather: w.weather, wind_kt: w.wind_kt, ops,
+      weather: w.weather, wind_kt: w.wind_kt, ops, client_id: cid,
     }).select("id,created_at").single();
+    if (ie && cid && isUniqueViolation(ie)) {
+      // 同じ ID が同時に2回届いた：先に入った方の印を返す
+      const r = await replay(userId, cid);
+      if (r) { console.log(JSON.stringify({ ev: "checkin_dup", where: "insert" })); return json(r); }
+    }
     if (ie) throw ie;
     // データベースの中で天気が決まらなかったときだけ、返したあとで配信元から書き足す
     // deno-lint-ignore no-explicit-any
