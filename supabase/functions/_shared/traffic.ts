@@ -140,3 +140,12 @@ export function recordPlan(key: string, slot: number): { track: boolean; legs: b
   if (key === "NORTH") return { track: true, legs: slot % 4 === 0 };
   return { track: slot % 2 === 0, legs: slot % 4 === 0 };
 }
+
+// 記録の処理で、その空港を今回取りに行くか（11/25 本人「羽田、成田は優先的に取って」）。
+//   go：取りに行く／skip：同じ円がこの回すでに失敗した（同じ円を空港の数だけ取り直さない。前は東の円が断られると6空港ぶん問い合わせていた）
+//   yield：東の円（羽田・成田）がこの回取れなかったので、新千歳・那覇の円はこの回は休む（adsb.lol の負担を減らし、次の回の羽田・成田を通す）
+export function recordStep(key: string, isThird: boolean, failed: ReadonlySet<string>): "go" | "skip" | "yield" {
+  if (failed.has(key)) return "skip";
+  if (isThird && failed.has("EAST")) return "yield";
+  return "go";
+}

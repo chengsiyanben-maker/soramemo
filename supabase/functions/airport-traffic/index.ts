@@ -7,7 +7,7 @@
 // 見る人の呼び出しは、記録の処理が live_positions に残した位置（75秒以内）から作る。記録が止まっているときだけ adsb.lol に問い合わせる。
 // 通ってきた線は、位置をデータベース（traffic_trails）に足していって作る（関数の呼び出しをまたいで残すため）。
 import { createClient } from "npm:@supabase/supabase-js@2.117.2";
-import { acFromLive, groundFromAdsb, type LiveRow, planesFromAdsb, recordPlan, retryAfterMs, type Trails, updateTrails } from "../_shared/traffic.ts";
+import { acFromLive, groundFromAdsb, type LiveRow, planesFromAdsb, recordPlan, recordStep, retryAfterMs, type Trails, updateTrails } from "../_shared/traffic.ts";
 import { fetchMetars } from "../_shared/metar.ts";
 import { OPS_AIRPORTS, observeOps, runwaysOf } from "../_shared/ops_core.js";
 import { gaStep, guessRwy, quietNow, type Watch, wxRisk } from "../_shared/go_around.ts";
@@ -37,7 +37,8 @@ const TTL = 20_000;
 const AIRPORTS: Record<string, { at: [number, number]; nm: number }> = {
   HND: { at: [35.5533, 139.7811], nm: 60 },
   // ほかの空港：滑走路の向きの判定と、近づいてくる機体の表示（線は、地図を開いている人がいるあいだに伸びる）
-  NRT: { at: [35.7772, 140.3823], nm: 40 },
+  // 成田も羽田と同じ60海里（11/25 本人「羽田、成田は優先的に取って」。前は40海里で、着陸の学習の ent120（120km の入口）が取れなかった）
+  NRT: { at: [35.7772, 140.3823], nm: 60 },
   ITM: { at: [34.7856, 135.4380], nm: 40 },
   KIX: { at: [34.4336, 135.2336], nm: 40 },
   CTS: { at: [42.7752, 141.6923], nm: 40 },
@@ -641,12 +642,14 @@ Deno.serve(async (req) => {
     const started = Date.now(), slot = Math.floor(started / 30_000), first = slot % 2 === 0;   // first：毎分の前半の回
     // 問い合わせは1回に3つまで：東の円・西の円と、新千歳か那覇
     const list = [...Object.keys(REGION_OF).filter((k) => k !== "CTS" && k !== "OKA"), first ? "CTS" : "OKA"];
-    const done: Record<string, string> = {}, bodies = new Map<string, string>();
-    // adsb.lol は同時にたくさん問い合わせると断る（429・420）ので、3秒ずつあけて1つずつ
+    const done: Record<string, string> = {}, bodies = new Map<string, string>(), failed = new Set<string>(), third = first ? "CTS" : "OKA";
+    // adsb.lol は同時にたくさん問い合わせると断る（429・420）ので、3秒ずつあけて1つずつ。
+    // 羽田・成田（東の円）を優先：東の円が断られた回は、同じ円を取り直さず、新千歳・那覇も休む（recordStep。11/25）
     for (const [i, k] of list.entries()) {
-      const key = REGION_OF[k] ?? k, cached = regionCache.get(key);
+      const key = REGION_OF[k] ?? k, cached = regionCache.get(key), step = recordStep(key, k === third, failed);
+      if (step !== "go") { done[k] = step; continue; }
       if (i && !(cached && Date.now() - cached.at < TTL)) await new Promise((r) => setTimeout(r, 3000));
-      try { bodies.set(k, await snapshot(k)); done[k] = "ok"; } catch (e) { done[k] = e instanceof Error ? e.message.slice(0, 40) : "error"; }
+      try { bodies.set(k, await snapshot(k)); done[k] = "ok"; } catch (e) { failed.add(key); done[k] = e instanceof Error ? e.message.slice(0, 40) : "error"; }
     }
     // 日本中の機体の最新の位置を残す（便の見張り用）
     try { await recordPositions(bodies, slot); } catch (e) { console.error("positions", e); }
