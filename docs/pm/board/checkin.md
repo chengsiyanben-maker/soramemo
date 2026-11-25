@@ -1,6 +1,21 @@
 # チェックイン担当の帳面
 
 ## いま持っている仕事
+- **11/26 手動の回（PM の指示「3時20分 perf-ios と 6時40分 小さな2つ、時間があれば 3時55分 test-steady」）**：両方とも済み
+  - checkin/perf-ios・下書き **PR #255**（917cd487・報告 docs/pm/report-perf-ios.md・写真 docs/pm/shots-perf-ios/）。main（96a52fff）から。見張りを付けた。見た目は変えていないので、テストが通れば PM が自動で反映してよい
+    - ① style の最後に「iPhone の画面の高さとセーフエリア」：spfull・sgd を 100dvh（100vh の後ろ）・a3dlg の max-height も・spsheet・spfull・sgd・mypage の下に safe-area-inset-bottom・spsheet .dlg は 86dvh・dialog は overscroll contain・html:has(dialog[open]) は none・地図の右上ボタンも 100dvh。今までシートの下の余白は 24px でホームバー 34px に10px かかっていた
+    - ② 3D は前から開いたときだけ import（変えていない）。裏に回ったら描かない（A3.paused・a3Loop が止まる）・a3Poll は取りに行かない・戻ると描き直して1回取る。closeAp3d で a3PostOff と a3Free（形・材質・絵。羽田で約77個）。形のファイル A3_SHAPE_DATA は残す
+    - ③ loadTraffic は document.hidden なら取らない・戻ったら1回。遅れのお知らせの60秒ごとも見ているときだけ。裏10分で 20回・30回・10回 → 0回。経営の renderV3 の60秒ごとは触っていない
+    - 小さな2つ：renderInstall は installReady（印がある・3回目に開いた。soramemo.install.opens を開くたびに足す・var）。showStamp の先頭で renderInstall。ckWhyText は queued かつ out_of_range で CK_TXT.book を足す。flushQueue はかっこの中から外して最後に1回
+    - 変えた関数：closeAp3d・a3Poll・a3Loop・loadTraffic・遅れのお知らせの60秒ごと・renderInstall・showStamp・ckWhyText・flushQueue・CK_TXT。足した：a3Free・installReady・visibilitychange の受け手2つ
+    - テスト：t202 を足した（iPhone 14 の形でセーフエリアを CDP の Emulation.setSafeAreaInsetsOverride でまねる）。t50 は opens=2 で始める。関係する e2e 36本・tests/ops 成功（t168 は流していない）
+    - 本人（PM）に聞くこと：帯は「最初の印」か「3回目」の早い方でよいか・3D の形のファイルを閉じても残すか
+  - checkin/test-steady・下書き **PR #257**（cdca7d24・報告 docs/pm/report-test-steady.md）。テストだけ（src・web は変えていない）。見張りを付けた
+    - run_all.py：run1 に分け、落ちたものを最後に1本ずつ流し直す。2回目で通ったら「不安定」として flaky.txt に書き、失敗から外す。SORAMEMO_NO_RETRY=1 で流し直さない
+    - tests/e2e/three_local.py の ensure_three(path)（別名で書いてから os.replace）。t142・t160〜t164・t166・t168・t181・t190 から呼ぶ
+    - t195 は決まりだけ（返事を待たずにハンコ・位置を待たない・3秒より前に確定せず10秒を待たない・8.5秒では区切らない）。速さは t203（0.8 秒・150ms・3回でいちばんよい回）
+    - 確かめ：空の作業用フォルダで4本同時 すべて成功。仮のテストで流し直しを確かめた
+    - 本人（PM）に聞くこと：2回目で通ったら成功に数えてよいか・t203 の上限
 - **11/26 定時の回（帳面の「次にやること」：flight_lookup につなぐ）**：PR #239（checkin/flight-suggest）に足した（678b7fb6・報告 docs/pm/report-flight-lookup.md・写真 docs/pm/shots-flight-suggest/lookup-*.png）。main（96a52fff）は取り込み済み。見張りを付けた。画面は文の中身だけで形は変えていないので、テストが通れば PM が自動で反映してよい
   - mNoFill：日付があればまず flight_lookup（数字だけなら JL・NH の両方。航空会社を選んでいればその会社。JAL・ANA 以外も）→ 見つかれば mNoHits（1つは mNoApply・いくつかは選ぶ）。null（関数なし）か [] なら今の時刻表（plan_timetable）へ。mNoApply は h.fact があれば flight_facts を呼ばない。書き分け「その日の記録から」「その日の時刻表から」
   - loadServer：manual_flights を flight_no つきで読む（エラーなら前の列で読み直す）→ S.manual の no。日誌の1行（fbRowHTML）は「手で記録・JL 509」、記録帳の一覧に便名の札
@@ -672,6 +687,10 @@
 - 確認コードは6けた。メールは Gmail、Supabase の送信上限は1時間100通
 
 ## 次にやること
+- 【11/26 perf-ios】PR #255：PM の自動の反映を待つ。入る前に t202・t50・t142・t159〜t167・t181・t190・t195・t196・t24・t144〜t146・t183・t189・tests/ops を流す。#239（flight-suggest）・#257（test-steady）とは src の別の所（#257 はテストだけ）。#257 が先に入ったら t202 の three.js の用意も three_local.ensure_three にそろえる。あとから入る方で web/ を作り直す
+- 【11/26 test-steady】PR #257：PM の自動の反映を待つ。入ったら、run_all の「2回目で通った」の名前を見て、既知の落ちの一覧を書き直す（PM の帳面にも）
+- 【手元の道具】iPhone のセーフエリアは Playwright の CDP で Emulation.setSafeAreaInsetsOverride（{insets:{top:47,bottom:34,left:0,right:0}}）でまねられる（t202）
+- 【次の回】撮る人用の依頼①②（3D を登録記号で開く入口・図鑑の運航中／終了）と、修行の sgRecordPlan の依頼を見る
 - 【11/26 flight-lookup】PR #239 に足した（678b7fb6）。PM の自動の反映を待つ。入る前に t197・t200・t196・t195・t24・t144・t13・t47・t61・t123・tests/ops を流す。本人の答え（JL・NH の両方で引く・書き方）で直す。残り：修行の sgRecordPlan の依頼（修行担当へ・前から）・撮る人用の依頼①②（下の担当からの依頼。3D を登録記号で開く入口・図鑑の運航中／終了）は次の回で見る
 - 【11/26 idem-cid】PR #248：PM の自動の反映を待つ。入る前に t200・t196・t195・t24・t44・t48・tests/ops を流す。#239（flight-suggest）とどちらかが先に入ったら、あとの方で mfInsert を idemInsert につなぐ（client_id は formCid で）。修行の sgRecordPlan は下の依頼（修行担当へ）
 - 【11/26 t190-fix】PR #244：main に入った（済み・見張りは外れた）。3D のテストで「消えた機体」を確かめるときは、偽のサーバーからも外す（20秒ごとの読み直しで戻る）。ほかの 3D のテスト（t163・t165 など）で決まった時間の待ちが落ちるときも同じ直し方（条件待ち）でよい
