@@ -8,7 +8,8 @@
       then(res){ const d = {data: rows(), error:null}; if(window.__netDelay) setTimeout(() => res(d), window.__netDelay); else res(d); },   /* __netDelay：遅い電波のテスト（11/25 stamp-fast） */
       maybeSingle(){ if(!db[table]) return Promise.resolve({data:null, error:{message:'relation does not exist'}}); return Promise.resolve({data: db[table][0] || null, error:null}); },
       upsert(row){ db[table] = db[table].filter(r => r.user_id !== row.user_id); db[table].push(JSON.parse(JSON.stringify(row))); window.__upserts = (window.__upserts||0) + 1; return Promise.resolve({error:null}); },
-      insert(row){ (Array.isArray(row) ? row : [row]).forEach(r => db[table].push(Object.assign({id: db[table].length+1}, r))); window.__inserts = (window.__inserts||0) + 1; return Promise.resolve({error:null}); },
+      insert(row){ if(window.__mfNoCol && table === 'manual_flights' && (Array.isArray(row) ? row : [row]).some(r => 'flight_no' in r)) return Promise.resolve({error:{message:'column "flight_no" of relation "manual_flights" does not exist'}});   /* 便名の列がまだないサーバー（11/25 flight-suggest） */
+      (Array.isArray(row) ? row : [row]).forEach(r => db[table].push(Object.assign({id: db[table].length+1}, r))); window.__inserts = (window.__inserts||0) + 1; return Promise.resolve({error:null}); },
       delete(){ return { eq(k, v){ db[table] = db[table].filter(r => r[k] !== v); return Promise.resolve({error:null}); } }; } };
     return api; }
   window.supabase = { createClient(){ return {
