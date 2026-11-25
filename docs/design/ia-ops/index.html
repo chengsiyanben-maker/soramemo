@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>タブの組み替えと「いまの空港」</title>
+<style>
+:root{--gothic:"Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic UI","Noto Sans JP",system-ui,sans-serif;--bg:#F4F5F7;--card:#fff;--ink:#374151;--strong:#1F2937;--mute:#646B78;--shadow:0 1px 2px rgba(17,24,39,.04),0 10px 30px -8px rgba(17,24,39,.10),inset 0 0 0 1px rgba(17,24,39,.07)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--gothic);line-height:1.7;font-size:15px;padding:24px 16px 80px;max-width:1180px;margin:0 auto}
+h1{font-size:24px;font-weight:800;color:var(--strong)}
+h2{font-size:19px;font-weight:800;color:var(--strong);margin:36px 0 10px}
+p.lead{color:var(--mute);font-size:14px;margin-top:6px}
+.card{background:var(--card);border-radius:20px;box-shadow:var(--shadow);padding:16px 18px;margin-top:12px}
+.card li{margin-left:1.2em;font-size:14px}
+.row{display:flex;gap:16px;overflow-x:auto;padding:4px 2px 12px}
+figure{flex:none;width:260px}
+figure img{width:260px;border-radius:22px;box-shadow:var(--shadow);display:block;background:#fff}
+figcaption{font-size:13px;margin-top:8px;color:var(--strong);font-weight:700}
+figcaption span{display:block;font-weight:500;color:var(--mute);font-size:12px}
+a{color:#1C4FA0}
+table{border-collapse:separate;border-spacing:0 6px;width:100%;font-size:14px}
+td{background:#fff;padding:10px 12px;vertical-align:top}
+td:first-child{border-radius:14px 0 0 14px;font-weight:800;color:var(--strong);white-space:nowrap}
+td:last-child{border-radius:0 14px 14px 0}
+</style></head><body>
+<h1>タブの組み替えと「いまの空港」</h1>
+<p class="lead">画面案 1版（11/25）。本人が貼った Gemini の案（docs/pm/ext/gemini-ia-1125.txt）をもとに、2つの案を並べた。アプリには入れていない。押すとその画面の HTML が開く。</p>
+
+<div class="card"><b>選んでほしいこと</b><ul>
+<li>案A（下のタブを4つ：ホーム／いまの空港／記録／マイページ）か、案B（タブは今のまま、「運用」の名前だけ「いまの空港」に）か。おすすめは<b>案B</b>（理由は報告に）</li>
+<li>「いまの空港」の中身（要約カード＋3つのピルのタブ）は、どちらの案でも同じ</li>
+</ul></div>
+
+<h2>今と、2つの案</h2>
+<div class="row">
+<figure><img src="png/00-now.png" alt="今の運用タブ"><figcaption>00 今の運用タブ<span>カードの一覧（滑走路・地図・3D・案内板…）</span></figcaption></figure>
+<figure><a href="A1.html"><img src="png/A1.png" alt="案A いまの空港"></a><figcaption>A1 案A いまの空港<span>下のタブ4つ。マイページもタブに</span></figcaption></figure>
+<figure><a href="A2.html"><img src="png/A2.png" alt="案A 記録"></a><figcaption>A2 案A 記録<span>上のピルでフライト｜図鑑｜修行</span></figcaption></figure>
+<figure><a href="B1.html"><img src="png/B1.png" alt="案B いまの空港"></a><figcaption>B1 案B いまの空港<span>タブは今のまま5つ。マイページは右上</span></figcaption></figure>
+</div>
+
+<h2>「いまの空港」の中身（どちらの案でも同じ）</h2>
+<div class="row">
+<figure><a href="A1.html"><img src="png/A1-full.png" alt="今日の便 全体"></a><figcaption>今日の便（全体）<span>1時間ごとに1枚・線でなく余白で区切る</span></figcaption></figure>
+<figure><a href="C1.html"><img src="png/C1.png" alt="滑走路・3D"></a><figcaption>C1 滑走路・3D<span>3D は押したときだけ開く</span></figcaption></figure>
+<figure><a href="C2.html"><img src="png/C2.png" alt="特別塗装機"></a><figcaption>C2 特別塗装機<span>「図鑑に記録」ボタンは置かない</span></figcaption></figure>
+<figure><a href="C3.html"><img src="png/C3.png" alt="便を押したとき"></a><figcaption>C3 便を押したとき<span>この便をフライト記録に追加</span></figcaption></figure>
+<figure><a href="C4.html"><img src="png/C4.png" alt="山形"></a><figcaption>C4 データが少ない空港（山形）<span>出せない欄・ピルは出さない</span></figcaption></figure>
+<figure><a href="C5.html"><img src="png/C5.png" alt="空港を選ぶ"></a><figcaption>C5 空港を選ぶ<span>いまいる・ピン止め・次のフライト</span></figcaption></figure>
+</div>
+
+<h2>375 幅（iPhone SE）</h2>
+<div class="row">
+<figure><img src="png/A1-667.png" alt=""><figcaption>A1</figcaption></figure>
+<figure><img src="png/A2-667.png" alt=""><figcaption>A2</figcaption></figure>
+<figure><img src="png/B1-667.png" alt=""><figcaption>B1</figcaption></figure>
+<figure><img src="png/C1-667.png" alt=""><figcaption>C1</figcaption></figure>
+<figure><img src="png/C2-667.png" alt=""><figcaption>C2</figcaption></figure>
+<figure><img src="png/C3-667.png" alt=""><figcaption>C3</figcaption></figure>
+</div>
+
+<h2>今の決まりとの合わせ方</h2>
+<table>
+<tr><td>運用のカードの並べ替え（11/22）</td><td>案A・案B とも：今のカードを3つのピルに分けて入れ、ピルの中で並べ替えられる形を残す（今日の便＝案内板・遅れ・1日の山・定時／滑走路・3D＝滑走路・地図・3D・空の道すじ・撮る人／特別塗装機＝特別塗装機・この先（予想））</td></tr>
+<tr><td>マイページ案B（11/24）</td><td>案A：マイページが下のタブになり、右上のボタンはなくなる（中身は案B のまま）。案B：今のまま右上</td></tr>
+<tr><td>3D の4つの見方（11/25）</td><td>案A・案B とも：「滑走路・3D」のピルの中の 3D のカードから開く。開いたあとの自由・追う・立つ・飛ぶは変えない</td></tr>
+<tr><td>全部乗せで始める（11/8）</td><td>案A：修行のピルを「はじめ OFF」にすると、11/8 の決まりを変えることになる（報告で本人に聞く）。案B：今のまま</td></tr>
+</table>
+
+<h2>入れていないもの</h2>
+<div class="card"><ul>
+<li>「図鑑に記録」ボタン（機体図鑑は乗った・見た記録から。決定事項【11/25】）</li>
+<li>搭乗口（データの規約を確かめ中）。右の列は「定刻・遅れ・欠航・出発済み」</li>
+<li>天気の印・運用を集めるバッジ・案内板風を全体に（却下済み）</li>
+<li>航空会社のロゴ（2文字のコードを小さなピルで。JAL赤・ANA青はうすく）</li>
+</ul></div>
+<p class="lead" style="margin-top:24px">作り方：make/build.py → make/shoot.py（390×844 と 375×667、2倍）。測った値：12px 未満の字 0・44px 未満の押す所 0・横のはみ出し 0（make/measure.json）。特別塗装機の名前と登録記号は例。</p>
+</body></html>
