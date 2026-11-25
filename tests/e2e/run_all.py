@@ -19,7 +19,7 @@ if not os.path.exists(ADMIN):
 if len(sys.argv) > 1: TESTS = [t for t in TESTS if any(t.startswith(a) for a in sys.argv[1:])]   # 例: run_all.py t1 t2
 fails = []
 # 1本の上限（秒）。ふつうは 240 秒。3D の細かい形のテスト（t168）は画面のないソフトの描画で 850〜1000 秒かかるので長くする（11/24 PM の依頼）
-LIMIT = {'t168.py': 1800, 't190.py': 900}  # t190（3D を自由に動かす）は単独で約265秒・同時に流すと240秒を超える
+LIMIT = {'t168.py': 1800, 't190.py': 900, 't196.py': 600}  # t190（3D を自由に動かす）は単独で約265秒・同時に流すと240秒を超える
 for t in TESTS:
     try: r = subprocess.run([sys.executable, os.path.join(HERE, t)], capture_output=True, text=True, encoding='utf-8', errors='replace', timeout=LIMIT.get(t, 240))
     except subprocess.TimeoutExpired as e:   # 上限を超えたら、止めずに「失敗」として次へ進む
