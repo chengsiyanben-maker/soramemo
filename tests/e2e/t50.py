@@ -6,7 +6,7 @@ sys.path.insert(0, HERE); from keepls import reload_keep, goto_http   # 読み�
 UA_A='Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0 Mobile Safari/537.36'
 UA_I='Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1'
 async def run(b, ua, label):
-    c=await b.new_context(viewport={'width':400,'height':860}, user_agent=ua); await c.add_init_script("localStorage.setItem('soramemo.onboarded','1')")
+    c=await b.new_context(viewport={'width':400,'height':860}, user_agent=ua); await c.add_init_script("localStorage.setItem('soramemo.onboarded','1'); if(!localStorage.getItem('soramemo.install.opens')) localStorage.setItem('soramemo.install.opens','2')")   # 11/26 perf-ios：帯は3回目に開いたときから（初めての瞬間の帯は t202）
     pg=await c.new_page(); errs=[]; pg.on('pageerror', lambda e: errs.append(str(e)))
     await goto_http(pg, os.path.join(WEB,'index.html')); await pg.wait_for_load_state('load'); await pg.wait_for_timeout(400)
     print(label, '案内:', await pg.is_visible('#installBar'))
