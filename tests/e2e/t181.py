@@ -10,6 +10,7 @@ from playwright.async_api import async_playwright
 HERE = os.path.dirname(os.path.abspath(__file__)); ROOT = os.path.abspath(os.path.join(HERE, '..', '..')); WEB = os.path.join(ROOT, 'web')
 BASE = os.environ.get('SORAMEMO_TEST_WORK', '/tmp/soramemo-e2e'); WORK = os.path.join(BASE, 'a3-sweep1124')
 THREE = os.path.join(BASE, 'three-0.160.0.module.min.js')
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__))); from three_local import ensure_three; ensure_three(THREE)   # 自分で用意する（t142 に頼らない・11/26 test-steady）
 fails = []
 def check(name, ok, detail=''):
     print(('OK  ' if ok else 'NG  ') + name + (('  ' + str(detail)) if detail != '' else ''))
@@ -50,7 +51,7 @@ async def open3d(b, port, sky='day', w=390, h=844):
     return c, pg, errs
 PRESSED = "[...document.querySelectorAll('[data-a3-view]')].map(b => b.getAttribute('aria-pressed') === 'true' ? b.dataset.a3View : '').join('')"
 async def main():
-    if not os.path.exists(THREE): print('three.js がないので飛ばす（t142 を先に流すと置かれる）'); sys.exit(1)
+    if not os.path.exists(THREE): print('three.js がないので飛ばす（CDN から取れなかった）'); sys.exit(1)
     port = serve(); allerr = []
     async with async_playwright() as p:
         b = await p.chromium.launch(args=['--use-gl=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'])

@@ -28,6 +28,10 @@ jobs:
           deno-version: v2.x
       - name: SQLの番号の重なりがないか
         run: node tools/migrations.mjs check
+      - name: 秘密の文字列の直書きと、ログに位置・メール・鍵を出していないか
+        run: |
+          node tools/check_secrets.mjs --self-test
+          node tools/check_secrets.mjs
       - name: チェックインの判定・便の照合のテスト
         run: deno test --allow-read supabase/tests/
       - uses: actions/setup-node@v4

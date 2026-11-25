@@ -4242,6 +4242,19 @@ nav.tabs .mxdot.mxnow{transition:none}
   .mxskel i::after{display:none}
   .rodrag,.tprow.tpdrag,.lol li.lodragging{scale:none}
 }
+
+/* ---------- iPhone の画面の高さとセーフエリア（11/26 perf-ios。見た目は変えない） ----------
+   Safari では 100vh が「下のバーを隠したときの高さ」になり、まるごとの画面の下がバーの裏に入る → 100dvh（見えている高さ）にする。古い端末は 100vh のまま
+   下から出るシートと、まるごとの画面の最後は、ホームバー（safe-area-inset-bottom）の分だけ上げる（ダイアログの地の色のまま）
+   シートやダイアログを下に引いても、ページの「引っ張って更新」が起きないようにする */
+dialog.spfull,dialog.sgd{height:100vh;height:100dvh;max-height:100vh;max-height:100dvh;padding-bottom:env(safe-area-inset-bottom,0px);box-sizing:border-box}
+dialog.a3dlg{max-height:100vh;max-height:100dvh}
+dialog.mypage{padding-bottom:env(safe-area-inset-bottom,0px);box-sizing:border-box}
+dialog.spsheet{padding-bottom:env(safe-area-inset-bottom,0px)}
+dialog.spsheet .dlg{max-height:86vh;max-height:86dvh}
+dialog{overscroll-behavior:contain}
+html:has(dialog[open]),html:has(dialog[open]) body{overscroll-behavior:none}
+:root[data-view="home"] .hmap .leaflet-top.leaflet-right{bottom:calc(100dvh - var(--home-sheet,520px) + 52px)}
 </style>
 </head>
 <body>
@@ -5488,6 +5501,28 @@ async function openAp3d(){
   setTimeout(() => { if(A3){ A3.credit = false; a3Credit(); } }, 5000);   // 角の出典は5秒で「出典 ⓘ」に畳む
   a3Loop();
 }
+// 3D の形・材質・絵を捨てる（同じものは1回だけ）。返した数を返す
+function a3Free(root){
+  if(!root || !root.traverse) return 0;
+  const seen = new Set(), tex = v => { if(v && v.isTexture && !seen.has(v)){ seen.add(v); v.dispose(); } };
+  tex(root.environment); tex(root.background);
+  root.traverse(o => {
+    if(o.geometry && !seen.has(o.geometry)){ seen.add(o.geometry); o.geometry.dispose(); }
+    for(const m of (Array.isArray(o.material) ? o.material : o.material ? [o.material] : [])){
+      if(seen.has(m)) continue; seen.add(m);
+      for(const k in m) tex(m[k]);
+      if(m.uniforms) for(const k in m.uniforms) tex(m.uniforms[k] && m.uniforms[k].value);
+      m.dispose();
+    }
+  });
+  return seen.size;
+}
+// 裏に回ったら描かない・取りに行かない。戻ったらすぐ描き直して、新しい位置を取りに行く（11/26 perf-ios）
+document.addEventListener("visibilitychange", () => {
+  if(!A3 || !A3.r) return;
+  if(document.hidden){ cancelAnimationFrame(A3.raf); A3.paused = true; return; }
+  if(A3.paused){ A3.paused = false; A3.dirty = true; cancelAnimationFrame(A3.raf); a3Loop(); a3Poll(); }
+});
 // 羽田の形のファイル（開いたときだけ読む。1回読んだらこの画面を開いているあいだ使い回す）
 let A3_SHAPE_DATA = null;
 async function a3Shape(){
@@ -5499,7 +5534,12 @@ function closeAp3d(keep){
   if(!A3) return;
   cancelAnimationFrame(A3.raf); clearInterval(A3.timer);
   if(A3.ro) A3.ro.disconnect();
-  if(A3.r){ try{ A3.r.dispose(); A3.r.forceContextLoss && A3.r.forceContextLoss(); }catch(e){} }
+  // 閉じたらメモリを返す（11/26 perf-ios）：後処理の描き先・形・材質・絵を捨ててから描き手を捨てる。形のファイル（A3_SHAPE_DATA）は開き直しを速くするため残す
+  try{ if(A3.post && A3.r) a3PostOff(); }catch(e){}
+  try{ A3.freed = a3Free(A3.scene); }catch(e){}
+  if(A3.r){ try{ A3.r.renderLists && A3.r.renderLists.dispose(); A3.r.dispose(); A3.r.forceContextLoss && A3.r.forceContextLoss(); }catch(e){} }
+  if(A3.labels) A3.labels.forEach(x => x.remove && x.remove());
+  window.__a3Freed = A3.freed || 0;   // テスト用：返した数
   A3 = null;
   const d = $("dAp3d"); if(d && d.open && !keep) d.close();
 }
@@ -5967,6 +6007,7 @@ function a3Tap(e){
 }
 /* 機体の位置を読む */
 async function a3Poll(){
+  if(A3 && document.hidden) return;   // 裏に回っているあいだは取りに行かない（戻ったときに取る）
   if(!A3 || !SERVER) { a3Status(); a3Sheet(); return; }
   let d = null;
   try{ const r = await fetch(SORAMEMO_CONFIG.supabaseUrl.replace(/\/$/, "") + "/functions/v1/airport-traffic?iata=HND", { headers:{ apikey:SORAMEMO_CONFIG.supabaseAnonKey, Authorization:"Bearer " + SORAMEMO_CONFIG.supabaseAnonKey } });
@@ -6015,7 +6056,7 @@ function a3Ahead(p, s){ if(!p.kt || p.hdg == null || !a3Air(p)) return { ...p };
   return { ...p, lat:p.lat + dn / 110574, lon:p.lon + de / (111320 * Math.cos(p.lat * D2R)), alt_ft:p.alt_ft == null ? null : Math.max(0, p.alt_ft + (p.fpm || 0) * s / 60) }; }
 /* 毎こま描く。動きは約30こま／秒まで（機体はゆっくり動くので、電池と熱を抑える）。続けて重いときは質を自動で下げる */
 function a3Loop(){
-  if(!A3) return;
+  if(!A3 || A3.paused) return;
   A3.raf = requestAnimationFrame(a3Loop);
   const now = Date.now();
   const fi = A3.view === "fly" && A3.fin; if(fi && (fi.jx || fi.jy || fi.up || fi.turn) && now - (A3.drawn || 0) >= 30) A3.dirty = true;
@@ -7562,7 +7603,8 @@ const CK_TXT = {
   driftHint: "窓の近くか屋外で、もう一度押してください。",
   already: "本日のチェックインは完了しています。続けて今日の便を記録できます。",
   clock: "端末の日時がずれているようです。設定で『自動設定』をオンにしてください。",
-  server: "サーバーで問題が起きました。少し待ってからもう一度押してください。"
+  server: "サーバーで問題が起きました。少し待ってからもう一度押してください。",
+  book: "乗った便は、フライトの ＋ から記録帳に足せます。"   // 範囲の外で断られた保留の印のあと（11/26 6時40分 PM・kaizen-gemini-1126）
 };
 // 範囲の外：いちばん近い空港（判定の決まりの空港）までの残り。誤差が残りより大きいときは「ずれている」の文
 function ckOutText(p){
@@ -7572,6 +7614,7 @@ function ckOutText(p){
 }
 // サーバーが断った理由 → 画面の文（queued：保留していた分を送ったとき）
 function ckWhyText(reason, p, msg, queued){
+  if(reason === "out_of_range" && queued) return ckWhyText(reason, p, msg, false) + CK_TXT.book;   // 保留の印が範囲の外で断られた：記録帳への道を添える
   if(reason === "low_accuracy") return CK_TXT.drift + CK_TXT.driftHint;
   if(reason === "out_of_range" && p) return ckOutText(p);
   if(reason === "already") return CK_TXT.already;
@@ -7803,6 +7846,7 @@ function homeState(){
   if((layoutChanged || was !== st) && $("homeSheet").sheetGo) $("homeSheet").sheetGo($("homeSheet").dataset.snap || "half");
 }
 function showStamp(a, t, first, flight, term, firstTerm){
+  try{ renderInstall(); }catch(e){}   // 最初の印のあとから「ホーム画面に追加」の帯を出す（11/26）
   const b = $("dStampBody");
   const visitsNow = S.checkins.filter(c => c.a === a.id).length, tierNow = tierOf(visitsNow), tierUp = tierNow > tierOf(visitsNow - 1);
   const marks = timeMarks(t);   // 季節の印（「○の訪問」「四季がそろった」）は 11/24 に外した（却下済み「季節のスタンプ」とそろえる）
@@ -12170,7 +12214,8 @@ async function flushQueue(silent){
     const name = x => placeName(BY[x.a], x.term ? TBY[x.term] : null);
     const parts = [];
     if(sent.length) parts.push(`保留していたチェックイン${sent.length}件を送りました：${sent.map(({x, r}) => name(x) + (r.flight ? "（フライトを記録）" : "")).join("、")}`);
-    if(rejected.length) parts.push(`${rejected.length}件は送れませんでした：${rejected.map(({x, r}) => `${name(x)}（${ckWhyText(r.reason, x, r.message, true).replace(/。$/, "")}）`).join("、")}`);
+    if(rejected.length) parts.push(`${rejected.length}件は送れませんでした：${rejected.map(({x, r}) => `${name(x)}（${ckWhyText(r.reason, x, r.message, true).replace(CK_TXT.book, "").replace(/。$/, "")}）`).join("、")}`);
+    if(rejected.some(({r}) => r.reason === "out_of_range")) parts.push(CK_TXT.book.replace(/。$/, ""));   // 記録帳への道は、かっこの中でなく最後に1回
     // 送れて確定したら札（design/micro の 05 の形・2秒）。範囲の外などで保留した分（ok:false）は札にしない
     const fin = sent.filter(({x}) => x.ok !== false), last = fin[fin.length - 1];
     if(last){ const a = BY[last.r.airport_id] || BY[last.x.a], nm = a ? nearShort(a) : name(last.x); toast(fin.length > 1 ? `${nm}など${fin.length}件の印が確定しました` : `${nm}の印が確定しました`); }
@@ -12798,8 +12843,12 @@ function renderInstall(){
   const inst = isStandalone();
   $("installRow").hidden = inst;
   let later = false; try{ later = !!localStorage.getItem("soramemo.install.later"); }catch(e){}
-  $("installBar").hidden = inst || later || !(INSTALL_EVT || IS_IOS || IS_ANDROID);
+  $("installBar").hidden = inst || later || !(INSTALL_EVT || IS_IOS || IS_ANDROID) || !installReady();
 }
+// 「ホーム画面に追加」の帯は、最初の印を押したあとか、3回目に開いたときから（11/26 6時40分 PM・kaizen-gemini-1126。マイページの行はいつも出す）
+var INSTALL_OPENS = "soramemo.install.opens";
+function installReady(){ if((S.checkins || []).length) return true; try{ return +localStorage.getItem(INSTALL_OPENS) >= 3; }catch(e){ return true; } }
+try{ localStorage.setItem(INSTALL_OPENS, String(Math.min(99, (+localStorage.getItem(INSTALL_OPENS) || 0) + 1))); }catch(e){}
 async function doInstall(){
   if(NATIVE) return;
   if(INSTALL_EVT){ INSTALL_EVT.prompt(); try{ const r = await INSTALL_EVT.userChoice; track("install", r && r.outcome); }catch(e){} INSTALL_EVT = null; renderInstall(); return; }
@@ -13893,7 +13942,7 @@ function planeIcon(p){
     html:`<svg viewBox="0 0 24 24" width="22" height="22" style="transform:rotate(${rot}deg)" aria-hidden="true"><path d="M12 2l1.6 7.2 7.4 4.3v2l-7.4-2.1-.4 5.1 2.4 1.8v1.6L12 21l-3.6.9v-1.6l2.4-1.8-.4-5.1L3 15.5v-2l7.4-4.3z" fill="${c}" stroke="#fff" stroke-width=".8"/></svg>${label}` });
 }
 async function loadTraffic(){
-  if(!opsOn() || !window.L || !OPS_MAP || !SERVER) return;
+  if(!opsOn() || !window.L || !OPS_MAP || !SERVER || document.hidden) return;   // 見ていないあいだ（別のタブ・画面が消えた・アプリが裏）は取りに行かない
   let d = null;
   try{ const r = await fetch(SORAMEMO_CONFIG.supabaseUrl.replace(/\/$/, "") + "/functions/v1/airport-traffic?iata=" + OPS_AP, { headers:{ apikey:SORAMEMO_CONFIG.supabaseAnonKey, Authorization:"Bearer " + SORAMEMO_CONFIG.supabaseAnonKey } });
     if(r.ok) d = await r.json(); }catch(e){}
@@ -13960,6 +14009,8 @@ function declutterLabels(){
 }
 function startTraffic(){ stopTraffic(); TRAFFIC_FIT = false; loadTraffic(); TRAFFIC_TIMER = setInterval(loadTraffic, 30_000); }
 function stopTraffic(){ if(TRAFFIC_TIMER) clearInterval(TRAFFIC_TIMER); TRAFFIC_TIMER = null; }
+// 見る画面に戻ったら、間隔を待たずに1回読む（11/26 perf-ios）
+document.addEventListener("visibilitychange", () => { if(!document.hidden && TRAFFIC_TIMER && opsOn()) loadTraffic(); });
 const opsOn = () => $("v-ops").classList.contains("on");
 /* ---------- 遅れ・ダイバートのお知らせ（推定） ----------
    サーバーの flight-watch が、予定の便（ダイヤ）と今飛んでいる機体を照らし合わせて見つけたもの。直近12時間ぶん。
@@ -14740,7 +14791,7 @@ async function renderOpsAlerts(){
   renderOpsLate();
   const dt = $("opsDelayTile"); if(dt) dt.innerHTML = delayTileHTML(FW.get(iata));
 }
-setInterval(() => { if(opsOn()) renderOpsAlerts(); }, 60_000);
+setInterval(() => { if(opsOn() && !document.hidden) renderOpsAlerts(); }, 60_000);
 
 /* ---------- 門限チャレンジ（伊丹・福岡） ----------
    運用時間の終わり（門限。伊丹21時・福岡22時。AIP JAPAN AD 2.3）までに、遅れた便が着けるか・出られるか。

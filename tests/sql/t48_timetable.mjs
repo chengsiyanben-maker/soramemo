@@ -31,7 +31,11 @@ check('その日の曜日・期間に合う便だけ', r && r.f.length === 1 && 
 check('時刻表が出ている最後の日', r && r.until === day(30), r);
 r = await as('anon', `select public.plan_timetable('${day(500)}', 'ANA')`);
 check('遠すぎる日は返さない', r === null, r);
+// 移行 203 から：空の返事では入れ替えず、前の時刻表を残す（t142）。中身のある返事で入れ替えると前の行は消える
 r = await as('service_role', `select public.timetable_replace('ANA', 'HND', '[]'::jsonb)`);
+check('空の返事では前の時刻表を残す', String(r).includes('kept previous timetable'), r);
+const rows2 = JSON.stringify([{ operator: 'ANA', dep: 'HND', arr: 'CTS', flight: 'NH55', days: other, valid_from: day(0), valid_to: day(30), dep_time: '09:00', arr_time: '10:30', arr_day: 0, aircraft: null }]);
+r = await as('service_role', `select public.timetable_replace('ANA', 'HND', '${rows2}'::jsonb)`);
 r = await as('anon', `select public.plan_timetable('${d0}', 'ANA')`);
 check('入れ替えると前の行は消える', r && r.f.length === 0, r);
 if (bad) process.exit(1);
