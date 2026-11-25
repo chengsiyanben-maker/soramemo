@@ -1,6 +1,8 @@
 # チェックイン担当の帳面
 
 ## いま持っている仕事
+- 11/26 4時半ごろ（#239 の見張り）：#253（送るときの ID・data/flight-no 移行202）が main に入って #239 がぶつかった → main（96a52fff）を取り込んだ（348d4493）。mAdd は main の idemInsert（client_id）と便名をあわせ、mfInsert(row, no, key) を「client_id つきで便名も → 便名の列がなければ外す」にした。候補からの日誌も formCid("fsug")。fake_sb.js は upsert（idem）と insert の両方に __mfNoCol。t196・t197・t198〜t200・t24・t144・t13・t47・t61・t123・t195 成功
+  - データ担当の flight_lookup(p_date, p_flight)（移行202・flight_history と時刻表から）ができた。次に #239 の mNoFill を「便名が分かったら flight_lookup、だめなら今の時刻表」に変える（PR #239 に足すか、入ったあと新しいブランチで）。loadServer で manual_flights の flight_no を読んで日誌に出すのも
 - 【11/26 4時25分】PR #248（idem-cid）は main に入った。見張りは外れた。残り：#239 の mfInsert を idemInsert につなぐ（あとから入る方で）・修行の sgRecordPlan の依頼（下）
 - 11/26 手動の回（同じ「checkin/idem-cid を進めて」の指示）：直前の回で PR #248（181cd6ed）として済み。main も f18b2eb2 のままで取り込み済みなので作り直さなかった。PM の自動の反映を待つ
 - **11/26 定時の回（帳面の積み「11/26 1時30分 PM から：checkin/idem-cid」）**：checkin/idem-cid・下書き **PR #248**（181cd6ed・報告 docs/pm/report-idem-cid.md）。main（f18b2eb2・#240 data/idem 入り）を取り込み済み。見張りを付けた。画面の見た目は変えていないので、テストが通れば PM が自動で反映してよい
