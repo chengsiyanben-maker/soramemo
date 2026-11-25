@@ -5,6 +5,8 @@
 #   3 印のあとの「今日の便を記録」：シートで候補
 #   4 電波がないときは候補なしで手入力へ（出発に今の空港を入れる）
 #   5 過去の便：日付＋便名（数字だけでも）で区間と時刻を補う。同じ番号がいくつかあれば選ぶ。日誌に便名も残す
+#   6 その日の記録 flight_lookup（移行202）：見つかればそれで補い（実際の時刻と機体も）、時刻表は読まない。JAL・ANA 以外の会社も。
+#     見つからなければ今の時刻表へ。日誌の1行と記録帳に便名が出る（manual_flights.flight_no を読む）
 #   390・375 で撮る（docs/pm/shots-flight-suggest/）
 import os, sys, json, shutil, re
 from datetime import datetime, timedelta, timezone
@@ -25,6 +27,14 @@ NOWD = {'weather': None, 'taf': None, 'flights': {
     'dc_date': None}}
 TT = {'JAL': [['JL0509', 'HND', 'CTS', '08:00', '09:35', 0, '738'], ['JL0241', 'ITM', 'HND', '10:00', '11:05', 0, '767']],
       'ANA': [['NH0241', 'HND', 'FUK', '07:30', '09:20', 0, '772']]}
+# flight_lookup の返し方：None＝関数がまだない（null）・'on'＝LK の行を返す・'empty'＝見つからない
+LKM = [None]; CALLS = []
+def lk_rows(d, fn):
+    if fn == 'JL509': return [{'flight': 'JL0509', 'dep': 'HND', 'arr': 'CTS', 'std': d + 'T08:10:00+09:00', 'sta': d + 'T09:45:00+09:00', 'atd': d + 'T08:22:00+09:00', 'ata': d + 'T09:50:00+09:00',
+                               'aircraft': '738', 'type': 'B738', 'reg': 'JA302J', 'cancelled': False, 'src': 'history'}]
+    if fn == '7G71': return [{'flight': '7G0071', 'dep': 'HND', 'arr': 'KKJ', 'std': d + 'T07:20:00+09:00', 'sta': d + 'T09:05:00+09:00', 'atd': None, 'ata': None,
+                              'aircraft': None, 'type': 'A320', 'reg': 'JA07MC', 'cancelled': False, 'src': 'history'}]
+    return []
 fails = []
 def ok(cond, msg):
     print(('ok   ' if cond else 'FAIL ') + msg)
@@ -41,7 +51,10 @@ async def page(p, w, h):
     await c.route('https://fake.supabase.co/functions/v1/airport-now**', lambda r: r.fulfill(status=200, body=json.dumps(NOWD), content_type='application/json', headers={'Access-Control-Allow-Origin':'*'}))
     async def rpc(r):
         name = r.request.url.rsplit('/', 1)[-1]; body = json.loads(r.request.post_data or '{}')
-        if name == 'plan_timetable': data = {'date': body.get('p_date'), 'operator': body.get('p_operator'), 'f': TT.get(body.get('p_operator'), [])}
+        if name == 'plan_timetable': CALLS.append(('tt', body.get('p_operator'))); data = {'date': body.get('p_date'), 'operator': body.get('p_operator'), 'f': TT.get(body.get('p_operator'), [])}
+        elif name == 'flight_lookup':
+            CALLS.append(('lookup', body.get('p_flight')))
+            data = None if LKM[0] is None else {'date': body.get('p_date'), 'flight': body.get('p_flight'), 'rows': lk_rows(body.get('p_date'), body.get('p_flight')) if LKM[0] == 'on' else []}
         elif name == 'flight_facts': data = [{'f': x['f'], 'd': x['d'], 'a': x['a'], 'atd': x['d'] + 'T08:04:00+09:00', 'ata': x['d'] + 'T09:31:00+09:00', 'reg': 'JA301J', 'cancelled': False} for x in body]
         else: data = None
         await r.fulfill(status=200, body=json.dumps(data), content_type='application/json', headers={'Access-Control-Allow-Origin':'*'})
@@ -145,6 +158,37 @@ async def main():
             await c.set_offline(True); await pg.fill('#mNo', '509'); await pg.dispatch_event('#mNo', 'change'); await pg.wait_for_timeout(400)
             ok('電波がないため補えませんでした' in await pg.inner_text('#mNoHint'), f'{sz} 5 電波がないときの文')
             await c.set_offline(False)
+            # 6 その日の記録 flight_lookup
+            LKM[0] = 'on'; CALLS.clear()
+            past2 = (datetime.now(JST) - timedelta(days=30)).strftime('%Y-%m-%d')
+            await pg.evaluate(f"$('mFrom').value = ''; $('mTo').value = ''; $('mAirline').value = ''; $('mDate').value = '{past2}'; $('mNoPick').hidden = true")
+            await pg.fill('#mNo', '509'); await pg.dispatch_event('#mNo', 'change'); await pg.wait_for_timeout(900)
+            r = await pg.evaluate("({f: $('mFrom').value, t: $('mTo').value, al: $('mAirline').value, no: $('mNo').value, hint: $('mNoHint').textContent})")
+            ok(r['f'] == str(await pg.evaluate(ID % 'HND')) and r['t'] == str(await pg.evaluate(ID % 'CTS')) and r['al'] == 'JL' and r['no'] == 'JL509', f'{sz} 6 その日の記録で補う（{r}）')
+            ok('08:10→09:45' in r['hint'] and 'その日の記録から' in r['hint'] and '実際 08:22→09:50' in r['hint'] and 'JA302J' in r['hint'], f'{sz} 6 その日の時刻と実際の時刻・機体（{r["hint"]}）')
+            ok(('lookup', 'JL509') in CALLS and ('lookup', 'NH509') in CALLS and not any(k == 'tt' for k, _ in CALLS), f'{sz} 6 数字だけは JL・NH で引き、時刻表は読まない（{CALLS}）')
+            await pg.evaluate("$('mNoHint').scrollIntoView({block:'center'})"); await pg.wait_for_timeout(200)
+            await pg.screenshot(path=os.path.join(SHOTS, f'lookup-{w}.png'))
+            # JAL・ANA 以外の会社も
+            CALLS.clear(); await pg.evaluate("$('mFrom').value = ''; $('mTo').value = ''; $('mAirline').value = ''")
+            await pg.fill('#mNo', '7G71'); await pg.dispatch_event('#mNo', 'change'); await pg.wait_for_timeout(900)
+            r = await pg.evaluate("({f: $('mFrom').value, t: $('mTo').value, al: $('mAirline').value, hint: $('mNoHint').textContent})")
+            ok(r['t'] == str(await pg.evaluate(ID % 'KKJ')) and r['al'] == '7G' and 'JA07MC' in r['hint'] and '機材 A320' in r['hint'] and CALLS == [('lookup', '7G71')], f'{sz} 6 JAL・ANA 以外の会社も補う（{r}・{CALLS}）')
+            # 見つからない → 今の時刻表へ
+            LKM[0] = 'empty'; CALLS.clear(); await pg.evaluate("$('mFrom').value = ''; $('mTo').value = ''; $('mAirline').value = ''")
+            await pg.fill('#mNo', 'JL509'); await pg.dispatch_event('#mNo', 'change'); await pg.wait_for_timeout(900)
+            r = await pg.evaluate("({t: $('mTo').value, hint: $('mNoHint').textContent})")
+            ok(r['t'] == str(await pg.evaluate(ID % 'CTS')) and '今の時刻表から' in r['hint'] and ('tt', 'JAL') in CALLS, f'{sz} 6 見つからなければ今の時刻表へ（{r}・{CALLS}）')
+            # 日誌に便名が出る（サーバーから読み直しても）
+            LKM[0] = 'on'; await pg.evaluate("$('mAirline').value = ''; $('mNoPick').hidden = true"); await pg.fill('#mNo', '509'); await pg.dispatch_event('#mNo', 'change'); await pg.wait_for_timeout(900)
+            await pg.click('#mAdd'); await pg.wait_for_timeout(700)
+            await pg.evaluate('reload()'); await pg.wait_for_timeout(900)
+            m = await pg.evaluate(f"(S.manual.find(x => x.d === '{past2}') || {{}}).no || null")
+            ok(m == 'JL509', f'{sz} 6 読み直しても記録帳の便名がある（{m}）')
+            await pg.evaluate("document.querySelectorAll('dialog[open]').forEach(d => d.close()); goTab('log'); setLogSeg('list')"); await pg.wait_for_timeout(500)
+            rows = await pg.evaluate("[...document.querySelectorAll('.fbrow')].map(b => b.innerText.replace(/\\s+/g, ' ')).filter(t => t.includes('手で記録'))")
+            ok(any('JL 509' in t for t in rows), f'{sz} 6 日誌の1行に便名（{rows[:3]}）')
+            LKM[0] = None
             allerrs += errs; await b.close()
     print('errors', allerrs if not fails else fails + allerrs)
 if __name__ == "__main__": asyncio.run(main())
