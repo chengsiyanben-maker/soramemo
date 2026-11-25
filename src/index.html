@@ -649,6 +649,19 @@ body.game nav.tabs button[aria-current="page"] svg{color:#7FB3FF}
 .nvbt{display:flex;gap:8px;margin-top:12px}
 .nvbt button{flex:1;min-height:44px;border:0;border-radius:999px;display:flex;align-items:center;justify-content:center;font:800 14px/1.3 var(--gothic);background:#EEF0F3;color:#374151;white-space:nowrap;cursor:pointer}
 .nvbt button.pri{background:#16233A;color:#fff}
+/* 位置が足りないときのカード（11/25 stamp-edge）：ウェブでも出す。手順の1行と「正確な位置情報」の語 */
+.nvloc .nvstep{margin-top:8px;font-size:13px;line-height:1.6;color:#4B5563}
+.nvloc .nvstep b{color:#24292F;font-weight:800}
+/* 送信待ちの小さな札（11/25 stamp-edge）：押すと送り直す。数字（時刻）は太く、ほかは小さく */
+.qpills{display:flex;flex-wrap:wrap;gap:6px;margin:2px 0 10px}
+.qpills[hidden]{display:none}
+.qpill{display:inline-flex;align-items:center;gap:6px;min-height:32px;padding:0 12px;border:0;border-radius:999px;background:#EEF2F7;color:#374151;font:700 12px/1.2 var(--gothic);cursor:pointer;box-shadow:inset 0 0 0 1px rgba(17,24,39,.06)}
+.qpill i{width:7px;height:7px;border-radius:50%;background:#D97706;flex:none}
+.qpill b{font-size:13px;font-weight:800;color:#24292F}
+.qpill small{font-size:11px;color:#6B7280;font-weight:700}
+.qpill[disabled]{opacity:.6;cursor:default}
+:root[data-night=on] .qpill{background:#262B33;color:#C9D1D9;box-shadow:inset 0 0 0 1px rgba(255,255,255,.1)}
+:root[data-night=on] .qpill b{color:#E6EDF3}
 .nvnet{display:flex;align-items:center;gap:10px;background:#FFF7E6;border-radius:18px;padding:10px 12px;margin:0 0 10px;box-shadow:inset 0 0 0 1px rgba(146,64,14,.12)}
 .nvnet .wi{width:32px;height:32px}.nvnet .wi svg{width:18px;height:18px}
 .nvnet .tx{flex:1;font-size:13px;line-height:1.55;color:#5B3A0A}
@@ -4171,7 +4184,8 @@ dialog.spsheet .sph .spx{top:2px;right:8px;width:44px;height:44px;border:6px sol
       <button class="bp-stub" id="checkin" aria-label="チェックイン（半券を右へ引いて切ります。押すと確かめてから切ります）"><span class="v">チェックイン</span><span class="s" id="stubSub"><i aria-hidden="true">→</i> 右へ引いて<br>印をもらう</span></button>
     </div>
     <p class="stubmsg" id="stubMsg" hidden aria-hidden="true"></p>
-    <div class="nvloc" id="nvLocOff" hidden role="status"></div>   <!-- iPhone のアプリ：位置を許可しなかった人（design/ios-app 2版 I1c） -->
+    <div class="qpills" id="qPills" hidden aria-label="送信待ちの記録"></div>   <!-- 送信待ちの札（11/25 stamp-edge）。押すと送り直す -->
+    <div class="nvloc" id="nvLocOff" hidden role="status"></div>   <!-- 位置を許可しなかった人（design/ios-app 2版 I1c）・正確な位置情報が OFF（11/25 stamp-edge・ウェブでも） -->
     <div class="nlist" id="nearList" hidden aria-label="近くの空港・飛行場の一覧"></div>
     <div class="hstrip" id="homeStrip" aria-label="今日の数字">
       <div><span class="lab">今日の印</span><b id="hsToday">0</b></div>
@@ -4769,14 +4783,65 @@ async function nvLocNext(){
 }
 async function nvGeoRefresh(){ if(!NATIVE) return; NV_GEO = await geoPermState(); nvGeoApply(); }
 // I1c：位置が使えない人のホーム。黒いカード（半券）の代わりに出す。デモ中は出さない
+// 11/25 stamp-edge：ウェブでも、位置の許可がないとき（LOC_ISSUE.kind "denied"）と、大まかな位置しか届かないとき（"approx"・iOS の「正確な位置情報」が OFF など）に
+//   何が足りないかと直し方のカードを出し、押しても判定できない半券は隠す。デモ中とログインしていないときは出さない
+let LOC_ISSUE = null;
+const locAccTxt = acc => acc >= 1000 ? `${(acc / 1000).toFixed(1)}km` : `${Math.round(acc)}m`;
+const LOC_IOS = /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+const locPathHTML = parts => `<div class="nvpath" aria-label="${parts.join(" › ")}">${parts.map(x => `<span>${x}</span>`).join("<i>›</i>")}</div>`;
+function locCardHTML(){
+  const deniedN = NATIVE && NV_GEO === "denied", k = deniedN ? "denied" : LOC_ISSUE && LOC_ISSUE.kind;
+  if(k === "denied"){
+    if(NATIVE) return `<div class="t"><span class="wi">${NV_SVG.pin}</span><b>位置が使えないので、チェックインできません</b></div><p>設定でそらメモの位置情報を「このアプリの使用中」にすると使えます。</p>${nvPathHTML("位置情報")}<div class="nvbt"><button type="button" data-nv="demo">デモで試す</button><button type="button" class="pri" data-nv="settings">設定を開く</button></div>`;
+    return `<div class="t"><span class="wi">${NV_SVG.pin}</span><b>位置が使えないので、チェックインできません</b></div><p>このページの位置情報が許可されていません。</p>`
+      + (LOC_IOS ? `${locPathHTML(["設定", "アプリ", "Safari", "位置情報"])}<p class="nvstep">「確認」か「許可」にしてから、このページを開き直してください。</p>`
+        : `<p class="nvstep">アドレス欄の左のマークから、位置情報を<b>「許可」</b>にしてから、このページを開き直してください。</p>`)
+      + `<div class="nvbt"><button type="button" data-locdemo>デモで試す</button></div>`;
+  }
+  if(k === "approx"){
+    const d = locAccTxt(LOC_ISSUE.acc);
+    return `<div class="t"><span class="wi">${NV_SVG.pin}</span><b>空港の判定に「正確な位置情報」が必要です</b></div><p>いまは大まかな位置（誤差 約${d}）しか届いていないため、空港の中にいるか判定できません。</p>`
+      + (NATIVE ? `${locPathHTML(["設定", "アプリ", "そらメモ", "位置情報"])}<p class="nvstep"><b>「正確な位置情報」</b>をオンにしてください。</p>`
+        : LOC_IOS ? `${locPathHTML(["設定", "アプリ", "Safari", "位置情報"])}<p class="nvstep"><b>「正確な位置情報」</b>をオンにしてください。</p>`
+        : `<p class="nvstep">端末とブラウザの位置情報の設定で、<b>「正確な位置情報」</b>をオンにしてください。</p>`)
+      + `<div class="nvbt"><button type="button" data-locre>もう一度位置を確かめる</button>${NATIVE ? `<button type="button" class="pri" data-nv="settings">設定を開く</button>` : ""}</div>`;
+  }
+  return "";
+}
 function nvGeoApply(){
   const el = $("nvLocOff"), bp = $("bpass"); if(!el || !bp) return;
-  const on = NATIVE && NV_GEO === "denied" && !demo && (user || !SERVER);
-  if(on){
-    el.innerHTML = `<div class="t"><span class="wi">${NV_SVG.pin}</span><b>位置が使えないので、チェックインできません</b></div><p>設定でそらメモの位置情報を「このアプリの使用中」にすると使えます。</p>${nvPathHTML("位置情報")}<div class="nvbt"><button type="button" data-nv="demo">デモで試す</button><button type="button" class="pri" data-nv="settings">設定を開く</button></div>`;
+  const html = !demo && (user || !SERVER) ? locCardHTML() : "";
+  if(html){
+    if(el.innerHTML !== html) el.innerHTML = html;
     el.hidden = false; bp.hidden = true; bp.dataset.nvHide = "1";
   } else { el.hidden = true; if(bp.dataset.nvHide){ bp.hidden = false; delete bp.dataset.nvHide; } }
 }
+// 届いた位置を見て、カードを出す・消す。approx は高い精度で取った位置（印を押すときの getPos）だけで出す（ホームの静かな見張りは精度を下げて取るため）
+function locSeen(p, precise){
+  if(!p || demo) return;
+  const was = LOC_ISSUE && LOC_ISSUE.kind;
+  if(p.acc > RULE.maxAccuracy){ if(precise) LOC_ISSUE = { kind:"approx", acc:p.acc }; }
+  else if(was) LOC_ISSUE = null;
+  if((LOC_ISSUE && LOC_ISSUE.kind) !== was || (LOC_ISSUE && LOC_ISSUE.kind === "approx")) nvGeoApply();
+}
+function locDenied(on){
+  const was = LOC_ISSUE && LOC_ISSUE.kind === "denied";
+  if(on && !NATIVE) LOC_ISSUE = { kind:"denied" }; else if(!on && was) LOC_ISSUE = null;
+  if(was !== (LOC_ISSUE && LOC_ISSUE.kind === "denied")) nvGeoApply();
+}
+// 「もう一度位置を確かめる」：高い精度で取り直すだけ（判定はしない）。良い位置が届けばカードが消えて半券に戻る
+async function locRecheck(){
+  const b = document.querySelector("#nvLocOff [data-locre]"); if(b){ b.disabled = true; b.textContent = "位置を確かめています…"; }
+  try{ const p = await geoWarm(); if(p) locSeen(p, true); if(p && p.acc <= RULE.maxAccuracy){ HOME_POS = p; showNearest(nearest(p)); } }
+  catch(e){ if(e && e.code === 1) locDenied(true); }
+  const b2 = document.querySelector("#nvLocOff [data-locre]"); if(b2){ b2.disabled = false; b2.textContent = "もう一度位置を確かめる"; }
+}
+document.addEventListener("click", e => {
+  if(e.target.closest("#nvLocOff [data-locre]")) return locRecheck();
+  if(e.target.closest("#nvLocOff [data-locdemo]")){ track("loc_card", "demo"); if(!demo) $("toggleDemo").click(); }
+});
+document.addEventListener("visibilitychange", () => { if(!document.hidden && LOC_ISSUE && LOC_ISSUE.kind === "approx") locRecheck(); });   // 設定から戻ったとき
+if(!NATIVE) try{ navigator.permissions.query({ name:"geolocation" }).then(ps => ps.addEventListener("change", () => { locDenied(ps.state === "denied"); if(ps.state === "granted") homeLocStart(); }), () => {}); }catch(e){}
 // I1e：半券を押して、許可がないと分かったとき（小さいシート）
 function nvLocOffSheet(){
   if(!NATIVE) return false;
@@ -7098,6 +7163,7 @@ async function loadServer(){
     // 国際線の記録（読めなくてもほかの記録は出す。表がまだない古いサーバーでも動くように）
     intl: (g.data || []).map(r => ({id:r.id, dep:r.dep, arr:r.arr, d:r.flown_on, no:r.flight_no, airline:r.airline, seat:r.seat, km:r.distance_km != null ? r.distance_km : intlKm(r.dep, r.arr),
       depAt:r.dep_at ? Date.parse(r.dep_at) : null, arrAt:r.arr_at ? Date.parse(r.arr_at) : null})) };
+  qMerge();   // 送信待ちの記録も仮の印として見せる（11/25 stamp-edge）
 }
 async function reload(){
   if(SERVER && !demo){ if(user) await loadServer(); else S = blank(); } else load();
@@ -7209,7 +7275,7 @@ function geoWarm(){
   if(demo || !("geolocation" in navigator)) return null;
   if(GEO_WARM && !GEO_WARM.done) return GEO_WARM.p;   // 取っている途中なら、それを待つ（取れた位置は POS_LAST から使う）
   const w = { start:Date.now(), done:false };
-  w.p = getPos().then(v => { w.done = true; POS_LAST = v; return v; }, e => { w.done = true; throw e; });
+  w.p = getPos().then(v => { w.done = true; POS_LAST = v; locSeen(v, true); return v; }, e => { w.done = true; if(e && e.code === 1) locDenied(true); throw e; });
   w.p.catch(() => {}); GEO_WARM = w; return w.p;
 }
 async function geoWarmIfGranted(){ try{ if(!demo && await geoPermState() === "granted") geoWarm(); }catch(e){} }
@@ -7227,14 +7293,14 @@ function ckLater(steps){
 // render() を分けて呼ぶ形（中身は render() と同じ）
 const renderSteps = () => [renderHome, () => { for(const k in DIRTY) DIRTY[k] = true; applyPendingBP(); }, () => coLoad(), () => { renderQueue(); renderPlusSettings(); renderMigrate(); }, renderVisible];
 // 下から出る札（design/micro の 05）。2秒で下がる。エラーは今までどおり #msg と半券の下
-function toast(msg){
+function toast(msg, ms){
   let t = $("smToast");
   if(!t){ t = document.createElement("div"); t.id = "smToast"; t.className = "smtoast"; t.setAttribute("role", "status"); t.setAttribute("aria-live", "polite"); document.body.appendChild(t); }
   t.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.2 4L19 7"/></svg><span></span>`;
   t.querySelector("span").textContent = msg;
   const host = document.querySelector("dialog[open]"); if(host && t.parentNode !== host) host.appendChild(t); else if(!host && t.parentNode !== document.body) document.body.appendChild(t);   // 開いているダイアログの上に出す
   t.classList.remove("show"); void t.offsetWidth; t.classList.add("show");
-  clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove("show"), 2000);
+  clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove("show"), ms || 2000);
 }
 
 /* ---------- helpers ---------- */
@@ -7357,12 +7423,12 @@ async function checkinRun(){
   }catch(e){
     btn.disabled = false;
     track("geo_fail", e && e.code);
-    if(e && e.code === 1){ if(NATIVE){ nvLocOffSheet(); return say(NV_TXT.locDenied, true); } return say("位置情報の利用が許可されていません。ブラウザかアプリの設定で、このページの位置情報を許可してください。", true); }
-    if(e && e.code === 3) return say("位置を取得できないまま時間切れになりました。電波のよい場所でもう一度押してください。", true);
-    if(e && e.code === "stale") return say("10秒待っても位置を確かめられませんでした。地下などでは位置が更新されないことがあります。地上や窓の近くでもう一度押してください。", true);
+    if(e && e.code === 1){ if(NATIVE){ nvLocOffSheet(); return say(NV_TXT.locDenied, true); } locDenied(true); return say("位置情報の利用が許可されていません。ブラウザかアプリの設定で、このページの位置情報を許可してください。", true); }
+    if(e && (e.code === 3 || e.code === "stale")) return say(CK_TXT.indoor + "10秒待っても位置を確かめられませんでした。窓の近くか屋外で、もう一度押してください。", true);
     return say(NATIVE ? NV_TXT.locNone : "この画面では位置情報を使えません。ブラウザで直接開くか、設定のデモモードで試してください。", true);
   }
   btn.disabled = false;
+  if(!demo && p.acc > RULE.maxAccuracy){ locSeen(p, true); track("geo_fail", "approx"); return say(`空港の判定に「正確な位置情報」が必要です。いまは大まかな位置（誤差 約${locAccTxt(p.acc)}）しか届いていません。`, true); }   // 判定できない位置は送らず、直し方のカード（11/25 stamp-edge）
   await new Promise(r => setTimeout(r, 0));   // 押した処理とハンコを出す処理を分ける（1回の止まりを 100ms 未満に）
   const n = nearest(p); HOME_POS = p;
   // 半券の「いちばん近い」と記録の帳面：ハンコを出すときはそのあとに回す（ckLater）。出さないときはすぐ
@@ -7374,14 +7440,14 @@ async function checkinRun(){
 let CK_NEAR = () => {};
 async function checkinDecide(p, n){
   if(SERVER && !demo) return checkinServer(p, n);
-  if(p.acc > RULE.maxAccuracy) return say(`位置の精度が低すぎます（誤差 約${fmtKm(p.acc)}m）。窓の近くか屋外でもう一度押してください。`, true);
+  if(p.acc > RULE.maxAccuracy) return say(CK_TXT.indoor + "窓の近くか屋外で、もう一度押してください。", true);
   const within = n.within;
-  if(!within) return say(`${n.a.name}の判定範囲の外です。あと約${(n.km - n.a.radius/1000).toFixed(1)}km近づいてください。`, true);
+  if(!within) return say(ckOutText(p), true);
 
   const now = demo ? demoNow(n.a) : Date.now();
   const last = S.checkins[S.checkins.length-1];
   const tid = n.term ? n.term.id : null;
-  if(last && last.a === n.a.id && (last.term||null) === tid && (now - last.t) < RULE.sameAirportMin*60e3) return say(`${placeName(n.a, n.term)}にはチェックイン済みです。`);
+  if(last && last.a === n.a.id && (last.term||null) === tid && (now - last.t) < RULE.sameAirportMin*60e3) return say(CK_TXT.already);
   const firstTerm = n.term ? !visitedTerms().has(n.term.id) : false;
 
   const first = n.a.kind ? !visitedExtra().has(n.a.id) : !visited().has(n.a.id);
@@ -7406,6 +7472,28 @@ async function sendCheckin(p, queued){
     try{ return await error.context.json(); }catch(_){ return null; }   // null = サーバーに届かなかった
   }catch(e){ return null; }
 }
+// 文の言い方（11/25 stamp-edge・本人が貼った案から PM が決めた文）。エラーの番号や英語は出さない
+const CK_TXT = {
+  busy: "通信が混み合っているため、いまの記録を端末に保存しました。つながり次第送ります。",
+  offline: "電波が届かないため、いまの記録を端末に保存しました。つながり次第送ります。",
+  indoor: "建物の中のため、現在地が少しずれているようです。",
+  already: "本日のチェックインは完了しています。続けて今日の便を記録できます。",
+  clock: "端末の日時がずれているようです。設定で『自動設定』をオンにしてください。"
+};
+// 範囲の外：判定の決まりの空港（nearestBase）までの残り。誤差が大きい（300m 超）ときは、ずれているかもしれないと先に添える
+function ckOutText(p){
+  const nb = nearestBase(p), rest = Math.max(0.1, nb.km - nb.a.radius / 1000);
+  return `${p.acc > FRESH.okAcc ? CK_TXT.indoor : ""}いちばん近い${nearShort(nb.a)}まであと ${rest.toFixed(1)} km です。空港に入るとチェックインできます。`;
+}
+// サーバーが断った理由を、そろえた文にする（決まった理由だけ。ほかはサーバーの文のまま）
+function ckMsg(r, p, queued){
+  const why = r && r.reason;
+  if(why === "out_of_range" && p) return ckOutText(p);
+  if(why === "low_accuracy") return CK_TXT.indoor + "窓の近くか屋外で、もう一度押してください。";
+  if(why === "already") return CK_TXT.already;
+  if(why === "stale_position" && !queued) return CK_TXT.clock;   // いま取った位置が古い・先の時刻と言われる＝端末の時計のずれ
+  return (r && r.message) || "サーバーで問題が起きました。少し待ってからもう一度押してください。";
+}
 // 端末での先の判定（サーバーの judge.ts の decide と同じ順・同じ数字）。通るときは null
 function ckJudge(p, n, now){
   if(!(p.acc > 0) || p.acc > RULE.maxAccuracy) return "low_accuracy";
@@ -7419,7 +7507,7 @@ async function checkinServer(p, n){
   if(!user) return say("ログインしてください。", true);
   n = n || nearest(p);
   const why = ckJudge(p, n, Date.now());
-  if(why === "already") return say(`${placeName(n.a, n.term)}にはチェックイン済みです。`);
+  if(why === "already") return say(CK_TXT.already);
   if(why === "too_soon") return say("少し時間をおいてからもう一度押してください。");
   if(why){ CK_NEAR(); return ckChain(() => checkinServerWait(p)); }   // 範囲の外・誤差が大きい：今までどおりサーバーの判定を待つ（断った理由を記録するため）
   const o = ckOptimistic(p, n, Date.now());
@@ -7453,13 +7541,13 @@ function ckFlightBtn(flight, st, id){
 }
 async function ckSend(p, o){
   if(qLoad().length) await flushQueue(true);           // 保留分を先に送る（順番が逆にならないように）
-  const r = navigator.onLine === false ? null : await sendCheckin(p, false);
-  if(!r){ track("checkin_queued"); enqueue(p); o.rec.queued = true; ckFlightBtn(o.flight, "queue"); toast("電波が戻ったら、あとで送ります"); return; }
+  const off = navigator.onLine === false, r = off ? null : await sendCheckin(p, false);
+  if(!r){ track("checkin_queued"); o.rec.queued = true; enqueue(p, o.rec.t, true); ckFlightBtn(o.flight, "queue"); toast(off ? CK_TXT.offline : CK_TXT.busy, 3500); ckLater(renderSteps()); return; }   // 長い文なので 3.5 秒（11/25 stamp-edge）
   if(!r.ok){
     track("checkin_fail", r.reason); if(r.reason === "server") reportClientError("checkin", r.message);
     S.checkins = S.checkins.filter(x => x !== o.rec); if(o.flight) S.flights = S.flights.filter(x => x !== o.flight);   // 先に出したハンコを取り消す（サーバーには何も残っていない）
     if($("dStamp").open) $("dStamp").close();
-    say(`印を記録できませんでした。${r.message}`, true); ckNote();
+    say(`印を記録できませんでした。${ckMsg(r, p)}`, true); ckNote();
     ckLater(renderSteps()); return;
   }
   track("checkin_ok", r.flight ? "flight" : r.terminal_id ? "terminal" : "airport");
@@ -7486,7 +7574,7 @@ async function checkinServerWait(p){
   const r = await sendCheckin(p, false);
   btn.disabled = false;
   if(!r){ track("checkin_queued"); return enqueue(p); }
-  if(!r.ok){ track("checkin_fail", r.reason); if(r.reason === "server") reportClientError("checkin", r.message); return say(r.message, true); }
+  if(!r.ok){ track("checkin_fail", r.reason); if(r.reason === "server") reportClientError("checkin", r.message); return say(ckMsg(r, p), true); }
   track("checkin_ok", r.flight ? "flight" : r.terminal_id ? "terminal" : "airport");
   await reload();
   const a = BY[r.airport_id], term = r.terminal_id ? TBY[r.terminal_id] : null;
@@ -7597,7 +7685,7 @@ function homeState(){
   ck.setAttribute("aria-label", st === "guest" ? "チェックイン（ログインすると使えます。押すとログインの画面を開きます）" : st === "out" ? "チェックイン（判定範囲に入ると切れます。押すと位置を調べ直します）"
     : st === "paused" ? "チェックイン（一時停止中）" : "チェックイン（半券を右へ引いて切ります。押すと確かめてから切ります）");
   $("stubSub").innerHTML = st === "guest" ? "ログイン<br>すると使える" : st === "out" ? "範囲に入る<br>と切れる" : st === "paused" ? "一時停止中" : '<i aria-hidden="true">→</i> 右へ引いて<br>印をもらう';
-  if(NATIVE){ nvGeoApply(); if(!NV_LW_DONE) nvLocWhyMaybe(); }   // iPhone のアプリ：位置の説明（I1）を1回・許可しなかった人は半券の代わりに I1c
+  nvGeoApply(); if(NATIVE && !NV_LW_DONE) nvLocWhyMaybe();   // iPhone のアプリ：位置の説明（I1）を1回・許可しなかった人は半券の代わりに I1c。位置が足りないカードはウェブでも（11/25 stamp-edge）
   const gate = $("homeGate"), strip = $("homeStrip"), layoutChanged = gate.hidden === guest;
   gate.hidden = !guest; strip.hidden = guest;
   $("mpLabel").textContent = guest ? "ログイン" : "マイページ";
@@ -9947,7 +10035,8 @@ function ckNote(t){
   const el = $("stubMsg"), m = $("msg"); if(!el) return;
   clearTimeout(CK_NOTE_T);
   const txt = t === undefined ? (m ? m.textContent.trim() : "") : t;
-  el.textContent = txt; el.hidden = !txt; el.classList.toggle("err", t === undefined && !!m && m.classList.contains("err"));
+  const card = $("bpass") && $("bpass").dataset.nvHide;   // 半券の代わりにカードを出しているときは、同じ字を重ねない（11/25 stamp-edge）
+  el.textContent = txt; el.hidden = !txt || !!card; el.classList.toggle("err", t === undefined && !!m && m.classList.contains("err"));
   if(txt) CK_NOTE_T = setTimeout(() => { el.hidden = true; }, 8000);
 }
 // 範囲の外で押したとき：位置を新しく調べ直す（範囲に入っていれば、そのまま切れる形に変わる）
@@ -10093,11 +10182,12 @@ let HOME_WATCH = null;
 async function homeLocStart(){
   if(demo || HOME_WATCH != null || !navigator.geolocation || document.documentElement.dataset.view !== "home" || document.hidden) return;
   const st = await geoPermState(); if(st == null) return;   // アプリは @capacitor/geolocation の許可、ブラウザは Permissions API
+  if(!NATIVE) locDenied(st === "denied");   // ウェブで許可がないと分かっていれば、半券の代わりにカード（11/25 stamp-edge）
   if(st !== "granted" || HOME_WATCH != null || demo) return;
   HOME_WATCH = navigator.geolocation.watchPosition(x => {
     if(demo || document.documentElement.dataset.view !== "home"){ homeLocStop(); return; }
     const p = { lat:x.coords.latitude, lon:x.coords.longitude, acc:x.coords.accuracy, ts:x.timestamp, at:Date.now() }, prev = HOME_POS, n = nearest(p);
-    HOME_POS = p;
+    HOME_POS = p; locSeen(p, false);
     if(!prev || !HOME_NEAR || n.a !== HOME_NEAR.a || n.within !== HOME_NEAR.within || (n.term || null) !== (HOME_NEAR.term || null) || km(prev, p) > 0.05) showNearest(n);
   }, () => homeLocStop(), { enableHighAccuracy:false, maximumAge:30000, timeout:30000 });
 }
@@ -10284,8 +10374,9 @@ function openTermStamp(aId, tId){
   $("dStamp").showModal();
 }
 // 空港ページ：印・記章・階級・ターミナル・訪問の記録・守り神・羽田の運用・写真・共有
+let AP_CUR = null;   // 開いている空港（送信待ちを送れたら開き直すため。11/25 stamp-edge）
 function openAirport(id){
-  const a = BY[id], b = $("dAirportBody");
+  const a = BY[id], b = $("dAirportBody"); AP_CUR = id;
   const visits = S.checkins.filter(c => c.a === a.id), times = visits.length, first = visited().get(a.id);
   const dt = tierOf(times), vt = visitedTerms();
   const ts = TERMS.filter(t => t.a === a.id), got = ts.filter(t => vt.has(t.id)).length;
@@ -10302,6 +10393,7 @@ function openAirport(id){
     <div class="tx"><b class="cd${/[^\x00-\x7f]/.test(cd) ? " jp" : ""}">${esc(/[^\x00-\x7f]/.test(cd) ? godShort(a) : cd)}</b><h3>${esc(a.name).replace(/（/g, "<wbr>（")}</h3><p>${a.pref}${rg ? "・" + rg : ""}${a.rare?"・離島の空港":""}${a.kind ? "・" + XKIND[a.kind].label : ""}</p></div></div>
   ${rgl.length > 1 ? `<p class="zk-dots" aria-hidden="true">${rgl.map(x => `<i${x.id === a.id ? ` class="on"` : ""}></i>`).join("")}</p>` : ""}
   ${swHint ? `<p class="zk-swhint">印のカードをはらうと、となりの空港へ</p>` : ""}
+  ${(qv => qv.length ? `<div class="qpills">${qv.map(c => qPillHTML({ t:c.t, ts:c.t, a:c.a }, false)).join("")}</div>` : "")(SERVER && !demo ? visits.filter(c => c.queued) : [])}
   ${a.kind === "mil" || a.kind === "secret" ? "" : pinApHTML(pinKey(a))}
   ${first ? `<div class="zk-dl"><div><span class="k">押した回数</span><span class="v"><b class="num">${times}</b><span class="u">回</span></span></div><div><span class="k">はじめて押した日</span><span class="v s">${(d => `<b class="num">${d.getFullYear()}</b><span class="u">年</span><b class="num">${d.getMonth() + 1}</b><span class="u">月</span><b class="num">${d.getDate()}</b><span class="u">日</span>`)(new Date(first))}</span></div></div>`
     : `<div class="zk-yet"><b>ここでチェックインすると印が付きます</b><span>判定の範囲 <b class="num">${a.radius >= 1000 ? (a.radius / 1000).toFixed(a.radius % 1000 ? 1 : 0) : a.radius}</b><span class="u">${a.radius >= 1000 ? "km" : "m"}</span>（空港の中心から）</span>${typeof HOME_POS !== "undefined" && HOME_POS ? `<span>いまの場所から <b class="num">${fmtKm(km(HOME_POS, a))}</b><span class="u">km</span></span>` : ""}</div>`}
@@ -11912,18 +12004,36 @@ const QMAX_MS = 24 * 36e5;
 const qKey = () => "soramemo.queue." + (user ? user.id : "anon");
 function qLoad(){ try{ return JSON.parse(localStorage.getItem(qKey()) || "[]"); }catch(e){ return []; } }
 function qSave(q){ try{ localStorage.setItem(qKey(), JSON.stringify(q)); }catch(e){} renderQueue(); }
-function enqueue(p){
+// t＝記録した時刻（先にハンコを出したときの時刻。札の「14:22 記録」に使う）。quiet＝一言は札で出すので #msg は書かない（11/25 stamp-edge）
+function enqueue(p, t, quiet){
   const n = nearestBase(p), q = qLoad();   // 保留は判定の決まりの空港で（近い順の先頭ではなく）
-  q.push({lat:p.lat, lon:p.lon, acc:p.acc, ts:p.ts || Date.now(), a:n.a.id, term:n.term ? n.term.id : null});
+  const ts = p.ts || Date.now();
+  q.push({lat:p.lat, lon:p.lon, acc:p.acc, ts, t:t || ts, a:n.a.id, term:n.term ? n.term.id : null});
   qSave(q);
-  say(`電波が届かないため、${placeName(n.a, n.term)}のチェックインを保留しました。電波が戻ったら自動で送ります（24時間以内）。`);
+  if(!quiet) say(navigator.onLine === false ? CK_TXT.offline : CK_TXT.busy);
 }
+// 送信待ちの記録を、読み直した記録に仮の印として足す（地図のピン・図鑑・数はその場で増える。判定の範囲の中のものだけ）
+function qMerge(){
+  if(!SERVER || demo || !user || !S || !S.checkins) return;
+  const q = qLoad(); if(!q.length) return;
+  for(const x of q){
+    const t = x.t || x.ts, nb = nearestBase(x);
+    if(!nb.within || !(x.acc > 0) || x.acc > RULE.maxAccuracy || S.checkins.some(c => c.queued && c.t === t)) continue;
+    S.checkins.push({a:nb.a.id, term:nb.term ? nb.term.id : null, t, acc:Math.round(x.acc), pending:true, queued:true});
+  }
+  S.checkins.sort((u, v) => u.t - v.t);
+}
+// 札の字：今日なら「14:22」、ほかの日は「11/24 14:22」
+const qHM = t => { const d = new Date(t), hm = `${d.getHours()}:${String(d.getMinutes()).padStart(2, "0")}`; return d.toDateString() === new Date().toDateString() ? hm : `${d.getMonth() + 1}/${d.getDate()} ${hm}`; };
+const qPillHTML = (x, name) => { const t = x.t || x.ts, nm = name ? nearShort(BY[x.a]) : "";
+  return `<button type="button" class="qpill" data-flush="1" aria-label="${esc(nm)}${nm ? "の" : ""}送信待ち（${qHM(t)} 記録）。押すと送り直します"><i aria-hidden="true"></i><span>${nm ? `${esc(nm)}の` : ""}送信待ち<small>（</small><b>${qHM(t)}</b><small> 記録）</small></span></button>`; };
 function renderQueue(){
   nvNetRender();   // ホームの「電波がありません」の帯の「送っていない印 ○」
-  const q = SERVER && !demo ? qLoad() : [], el = $("queueBar");
+  const q = SERVER && !demo ? qLoad().slice().sort((x, y) => x.ts - y.ts) : [], el = $("queueBar"), pl = $("qPills");
+  if(pl){ pl.hidden = !q.length; pl.innerHTML = q.length ? q.slice(0, 3).map(x => qPillHTML(x, true)).join("") + (q.length > 3 ? `<button type="button" class="qpill" data-flush="1"><span><small>ほか</small><b>${q.length - 3}</b><small>件</small></span></button>` : "") : ""; }
   el.hidden = !q.length;
   if(!q.length){ el.innerHTML = ""; return; }
-  el.innerHTML = `<b>送信待ちのチェックイン ${q.length}件</b>${q.map(x => `${placeName(BY[x.a], x.term ? TBY[x.term] : null)}（${fmtDT(x.ts)}）`).join("、")}<br><button class="btn2" data-flush="1">今すぐ送る</button>`;
+  el.innerHTML = `<b>送信待ちのチェックイン ${q.length}件</b>${q.map(x => `${placeName(BY[x.a], x.term ? TBY[x.term] : null)}（${fmtDT(x.t || x.ts)} 記録）`).join("、")}<br><span class="hint">つながり次第、記録した時刻の順に送ります。</span><br><button class="btn2" data-flush="1">今すぐ送る</button>`;
 }
 let flushing = false;
 async function flushQueue(silent){
@@ -11945,14 +12055,17 @@ async function flushQueue(silent){
     const name = x => placeName(BY[x.a], x.term ? TBY[x.term] : null);
     const parts = [];
     if(sent.length) parts.push(`保留していたチェックイン${sent.length}件を送りました：${sent.map(({x, r}) => name(x) + (r.flight ? "（フライトを記録）" : "")).join("、")}`);
-    if(rejected.length) parts.push(`${rejected.length}件は送れませんでした：${rejected.map(({x, r}) => `${name(x)}（${r.message}）`).join("、")}`);
+    if(rejected.length) parts.push(`${rejected.length}件は送れませんでした：${rejected.map(({x, r}) => `${name(x)}（${ckMsg(r, x, true).replace(/。$/, "")}）`).join("、")}`);
+    if(sent.length){ const a0 = BY[sent[0].r.airport_id] || BY[sent[0].x.a]; toast(sent.length === 1 ? `${nearShort(a0)}の印が確定しました` : `${nearShort(a0)}など${sent.length}件の印が確定しました`); }   // 確定の札（design/micro の 05・2秒。11/25 stamp-edge）
     if(expired.length) parts.push(`${expired.length}件は24時間を過ぎたため送れませんでした`);
+    if(AP_CUR && $("dAirport").open) openAirport(AP_CUR);   // 図鑑の詳しい所の「送信待ち」を消す
     say(parts.join("。") + "。", !sent.length);
   } else if(!silent && q.length) say("まだサーバーにつながりません。電波のよい場所で、もう一度試してください。", true);
 }
 window.addEventListener("online", () => flushQueue());
 document.addEventListener("visibilitychange", () => { if(document.visibilityState === "visible") flushQueue(true); });
-document.addEventListener("click", e => { if(e.target.closest("[data-flush]")) flushQueue(); });
+document.addEventListener("click", async e => { if(!e.target.closest("[data-flush]")) return;
+  await flushQueue(); if(qLoad().length && currentView() === "home" && !document.querySelector("dialog[open]")) ckNote(); });   // 送れなかったら、理由を半券の下にも
 
 
 /* ---------- そらメモ＋（年間まとめ・一括取り込み・羽田の運用の詳しい理由） ---------- */

@@ -110,7 +110,7 @@
       const fl = db.flights.find(x=>x.id===a.p_flight_id); if(!fl) return {error:{message:'not found'}}; fl.airline=a.p_airline; fl.flight_no=a.p_flight_no; fl.status=a.p_airline?'with_flight_no':'provisional'; window.__lastRpc=a; return {error:null}; },
     functions:{ invoke: async (name, {body}) => {
       if(window.__netDelay) await new Promise(r => setTimeout(r, window.__netDelay * (window.__fnMul || 1)));
-      if(window.__fnFail) return {data:null, error:{context:{json: async()=>({ok:false, reason:'low_accuracy', message:'位置の精度が低すぎます（サーバー判定）'})}}};
+      if(window.__fnFail) return {data:null, error:{context:{json: async()=>(typeof window.__fnFail === 'object' ? {ok:false, ...window.__fnFail} : {ok:false, reason:'low_accuracy', message:'位置の精度が低すぎます（サーバー判定）'})}}};   /* 11/25 stamp-edge：{reason, message} で理由を選べる */
       if(name === 'delete-account'){ window.__deleted = body; return {data:{ok: body.confirm === '削除'}, error:null}; }
       if(window.__offline) return {data:null, error:{name:'FunctionsFetchError', context:{}}};
       window.__calls = (window.__calls||[]).concat([{queued:body.queued, ts:body.ts}]);

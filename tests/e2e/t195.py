@@ -2,7 +2,7 @@
 #   1 遅い電波（1回 2秒）でも、押してからハンコまで 0.5 秒以内・その間の長い処理は 100ms 未満。返事のあとで本物の記録に入れ替わる
 #   2 便ができるとき、印の画面の「乗った便を記録する」は返事までは押せず、返事のあとサーバーの便の番号で押せる
 #   3 二重に押しても、サーバーに送るのは1回・印は1つ
-#   4 サーバーに届かない → 今の保留に入り、「あとで送ります」の札（2秒で消える）
+#   4 サーバーに届かない → 今の保留に入り、「端末に保存しました」の札（11/25 stamp-edge で文をそろえ、3.5 秒）
 #   5 サーバーが断る → 先に出したハンコを取り消し、理由を出す（記録は増えない）
 #   6 直近の位置（30秒以内・誤差50m以内・範囲の中）があれば位置を待たない。なければ「位置を確かめています」を出し、10秒で区切る。誤差300m以内なら3秒で確定
 #   7 範囲の外は今までどおりサーバーの判定を待つ（ハンコは出さない）
@@ -69,7 +69,7 @@ async def main():
         await pg.wait_for_timeout(3500)
         calls = await pg.evaluate('window.__calls.length'); added = await pg.evaluate('__fake.db.checkins.length') - n0
         ok(calls == 1 and added == 1, f'3 二重に押しても送るのは1回・印は1つ（送った {calls}回・増えた {added}）')
-        m = await pg.inner_text('#msg'); ok(any(k in m for k in ('チェックイン済み', '少し時間をおいて', 'チェックインしました')), f'3 あとから押すと「チェックイン済み」か「少し時間をおいて」（{m}）')
+        m = await pg.inner_text('#msg'); ok(any(k in m for k in ('本日のチェックインは完了', '少し時間をおいて', 'チェックインしました')), f'3 あとから押すと「チェックイン済み」か「少し時間をおいて」（{m}）')
         allerrs += errs; await b.close()
         # 4 サーバーに届かない → 保留と札
         b, c, pg, errs = await page(p)
@@ -79,10 +79,10 @@ async def main():
         t = await pg.evaluate("(() => { const t = $('smToast'); return t ? {show: t.classList.contains('show'), txt: t.textContent} : null; })()")
         st = await pg.evaluate('__stampAt != null')
         ok(st and q == 1, f'4 届かないときもハンコは出て、保留に入る（保留 {q}）')
-        ok(t and t['show'] and 'あとで送ります' in t['txt'], f'4 「あとで送ります」の札（{t}）')
+        ok(t and t['show'] and '端末に保存しました' in t['txt'], f'4 「端末に保存しました」の札（{t}・11/25 stamp-edge で文をそろえた）')
         await pg.screenshot(path=os.path.join(WORK, 'stamp_queue_390.png'))
-        await pg.wait_for_timeout(2300)
-        ok(not await pg.evaluate("$('smToast').classList.contains('show')"), '4 札は2秒で消える')
+        await pg.wait_for_timeout(3700)
+        ok(not await pg.evaluate("$('smToast').classList.contains('show')"), '4 札は消える（長い文なので 3.5 秒・11/25 stamp-edge）')
         await pg.evaluate("document.querySelectorAll('dialog[open]').forEach(d => d.close())")
         ok(not await pg.is_hidden('#queueBar'), '4 送信待ちの帯が出る')
         await pg.evaluate('window.__offline = false; window.dispatchEvent(new Event("online"))'); await pg.wait_for_timeout(1200)
@@ -94,7 +94,7 @@ async def main():
         await press(pg); await pg.wait_for_timeout(1500)
         ok(await pg.evaluate('__stampAt != null') and not await pg.evaluate("$('dStamp').open"), '5 断られたら、先に出したハンコの画面を閉じる')
         ok(await pg.evaluate('S.checkins.length') == n0, '5 端末の記録も元のまま（仮の印を取り消す）')
-        m = await pg.inner_text('#msg'); ok('印を記録できませんでした' in m and 'サーバー判定' in m, f'5 理由を出す（{m}）')
+        m = await pg.inner_text('#msg'); ok('印を記録できませんでした' in m and '建物の中のため' in m, f'5 理由を出す（{m}・11/25 stamp-edge でそろえた文）')
         allerrs += errs; await b.close()
         # 6 直近の位置を使う・位置を待つときの札・10秒で区切る
         b, c, pg, errs = await page(p)
@@ -122,7 +122,7 @@ async def main():
         # 7 範囲の外は今までどおり
         b, c, pg, errs = await page(p)
         await at(pg, OUT); await press(pg); await pg.wait_for_timeout(1500)
-        m = await pg.inner_text('#msg'); ok(await pg.evaluate('__stampAt == null') and 'サーバー判定' in m, f'7 範囲の外はサーバーの判定を待つ（{m}）')
+        m = await pg.inner_text('#msg'); ok(await pg.evaluate('__stampAt == null') and 'まであと' in m and await pg.evaluate('window.__calls.length') == 1, f'7 範囲の外はサーバーの判定を待つ（{m}）')
         allerrs += errs; await b.close()
         # 8 動きを減らす設定
         b, c, pg, errs = await page(p, reduced=True)
