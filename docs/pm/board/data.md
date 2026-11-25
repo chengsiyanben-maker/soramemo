@@ -1,6 +1,14 @@
 # データ担当の帳面
 
 ## いま持っている仕事
+- **羽田・成田を優先して取る＋滑走路の予想の当たり具合（PM の指示 11/25 18時45分。11/25 水曜に定期の回として呼ばれたが、PM の積んだ指示があったのでこちらをした）**：ブランチ data/hnd-nrt-priority（main 4354656 から）→ **下書き PR #227**。報告 docs/pm/report-hnd-nrt-priority.md。本人用の読むだけの SQL docs/pm/hnd-nrt-priority-check.sql（7つ）。**移行198・テスト t136 を使った**
+  - 調べた結果：羽田・成田はもともと同じ東の円で30秒ごと・track_points・ops_log・rwy_samples もそろっていた。違いは学習の半径だけ（羽田60・成田40海里）
+  - airport-traffic：記録の処理だけ成田の学習を60海里に（LEARN_NM・LEARN_PLANES）。画面は40海里のまま。adsb.lol の回数は同じ（1日約8,640回）
+  - 移行198：wx_taf（原文）・wx_taf_hours（毎時の風・TEMPO/PROB・est_mode＝画面と同じ推定）。RLS ON・方針なし。cron wx-hnd-nrt（毎時41分・30秒の上限）
+  - wx-archive：7分の回でも TAF。41分の回（?part=hnt）で TAF・METAR 6時間・過去の TAF のさかのぼり（置き場 tafback:RJTT/RJAA、3時間ずつ8回＝1日ぶん、10/15 まで約41時間）。過去の TAF は date の指定で取れると確かめた
+  - 規約：aviationweather.gov はパブリックドメイン・1分100回まで・User-Agent（API の案内で確かめた）
+  - 確かめ：deno test 322本（taf_test 5本）・deno check・lint は前からの4件・t136・SQL のテスト全部 通過・migrations.mjs check 188件。t135 の「最後の移行」の確かめを「197番」に直した
+  - 本人待ち（PM のおすすめで可）：反映・羽田の追い風の上限と粘りの合わせ込み（結果のあと。推定の式は画面と共通なのでチェックイン担当と）・成田の画面の半径を60にするか
 - **羽田・成田を優先して取る＋当たり具合【別の回の案。#227 と同じ仕事】（PM の指示 11/25 18時45分。11/25 水曜に定期の回として呼ばれ、積んであったこの指示をした。同じ時刻に別のデータ担当の回が data/hnd-nrt-priority・PR #227 を先に仕上げていたのを、push のときに知った）**：ブランチ data/hnd-nrt-priority-b（main 4354656 から）→ **下書き PR #228**。報告 docs/pm/report-hnd-nrt-priority-b.md。本人用の読むだけの SQL docs/pm/hnd-nrt-priority-b-check.sql。**#227 と同じく移行198・テスト t136 を使っているので、両方は入れない**
   - おすすめ：#227 を本筋にし #228 は閉じる。#227 にない2つ（A：東の円が断られた回は同じ円を取り直さず新千歳・那覇を休む recordStep／B：追い風の上限×粘り×戻り幅の30組を切り替えを待つ動きで数える関数 rwy_wx_eval）は、PM が要ると決めたら #227 のあとに移行199・t137 で足す
   - 確かめ：t136 33項目・deno test 327本（taf_test 5本）・deno check・migrations.mjs check 188件・模擬90日で rwy_wx_eval 約4.3秒（PGlite）
@@ -367,13 +375,15 @@
 ## 移行とテストの番号
 - main の最新は 160（159 airport_yomi・160 airport_facts は 11/10 本番に入った）。156・157 は 11/9 本番に入った。**maint/2026-11-09 の 158 は main の 159 より前になったので、反映の前に migrations.mjs rebase が要る**。maint/2026-11-06 は 153・テスト t93（fix/co-tests の経営の移行も 153 なので、反映の前に rebase）、data/photo-log は 154・テスト t94、maint/2026-11-07 は 155・テスト t95、data/debug-1107 は 156・テスト t96（関数のテストは supabase/tests/live_view_test.ts。main に反映済み）、data/view-prefs は 157・テスト t97、maint/2026-11-09 は 158・テスト t98、maint/2026-11-10 は 161・テスト t101。data/airport-facts は 160・テスト t100。そのほか次に新しく作るものは 162 以降・テストは t102 以降。**maint/2026-11-11 は 162・テスト t102**（161 の maint/2026-11-10 より後。反映の順が変わったら rebase）。**data/heliports の 163・t103 は 11/12 main に入った（PR #75 と一緒）**。**data/speed-1113 は 164・テスト t104**。**data/speed-1113b は 165・テスト t105**（164 の上）。**data/rot-learn-hi は 166・テスト t106**（関数1つだけなので 164・165 と順番が入れ替わってもよい）。（164〜167 は 11/13 に main に入った。166 は経営の co_cron_timeout、learn_hi は 167 に付け直し）。**data/alert-merge は 168・テスト t107**（11/14 main に入った）。**data/world-ops は 169・テスト t108**。**maint/2026-11-16 は 170・テスト t109**。**data/foreign-collect は 171・テスト t110**（170 と別の関数なので順番は入れ替わってもよい）。（11/16 data/redo-1116 で手入れ6本を 173〜178・t112〜t117 に付け直し、179 odpt_feed_dates・t118、180 verify_arrivals・t119。172・t111 は経営の keiei/redo-1116）。**data/foreign-collect は 181 foreign_cold・t120、182 foreign_watch・t121**。（171〜182 は 11/16 本番に入った。経営の t128 も main にある）。**maint/2026-11-16b は 183・テスト t122**。**data/foreign-livery は 184・テスト t123**。**data/usual-late-rpc は 185・テスト t124**（183 とは別の関数なのでどちらが先でもよい）。data/atd-future は 186・テスト t125。**data/flight-actual は 187・テスト t126**。**data/redo-1120 は 188（maint_1116b の付け直し・テスト t122）・189（inbound_first_of_day・テスト t127）**。**data/adsblol-key2 は 190 track_quota・テスト t129**。**data/sweep-1121 は 191 odpt_feed_at・テスト t130**。**data/livery-dest2 は 192 airline_codes_more・テスト t131**。**193 livery_seen_midnight は main にある。maint/2026-11-23 は 194・テスト t132**。**data/board-bad は 195・テスト t133**。**次に新しく作るものは 196 以降・テストは t134 以降**（t128 は経営が使った。maint/2026-11-16b の 183 は使わない）（data/foreign-carriers・data/foreign-livery は報告だけで番号を使っていない）
 - 11/24：data/sweep-all（PR #206）が移行196・テスト t134
-- 11/25：data/sweep-1125（PR #216）が移行197・テスト t135。次は198・t136 から（data/stamp-fast #225 は移行なし）
+- 11/25：data/sweep-1125（PR #216）が移行197・テスト t135（data/stamp-fast #225 は移行なし）
 - 11/25：data/hnd-nrt-priority（#227）と data/hnd-nrt-priority-b（#228・別の回の案）がどちらも移行198・t136。入れるのは片方だけ。#228 の A・B を足すなら199・t137
+- 次は199・t137 から（#228 の A・B を足すときも、data/hnd-nrt-more も）
 - main に別の移行が先に入ったら、反映の前にもう一度 `node tools/migrations.mjs rebase`
 - 本番は小さいプランで一時ファイルの余裕がない。本人に流してもらう SQL は、大きな中間の表・自己結合・大きな並べ替えを避け、索引で引く形にする
 - SQL のテストは全部で約35分かかる（手元で流すときは裏で流してログを見る。t92 だけで約4分。同じログに2回流すと混ざるので、ログの名前を分ける）
 
 ## 次にやること
+- 羽田・成田の優先（PR #227・移行198・t136）：CI とレビューに答える。反映の前に main に別の移行が先なら rebase。反映のあと hnd-nrt-priority-check.sql の 1 で wx_taf が増え、さかのぼりが 10/15 まで来たか（2日後）。2〜5（実況）と 7（TAF）の結果で、羽田の追い風の上限・粘りの案を PM に。次は data/hnd-nrt-more（PM の指示 11/25 18時50分。一覧 report-hnd-nrt-more.md から。wx_taf はできたので SPECI・アメダス・NOTAM・ODPT のゲート・地上の動きの候補を調べる）
 - 羽田・成田（#227／#228）：PM がどちらを本筋にするか決めたら、もう片方を閉じる。#228 の A・B を足すと決まれば #227 の上に移行199 で。当たり具合の結果（check.sql）が貼られたら、羽田の追い風の上限と粘りの案をまとめる
 - 印の速さ（PR #225）：反映のあと、本人に stamp-fast-check.sql の 1・2 と Edge Functions の checkin のログ「checkin_ms」を見てもらい、まだ遅ければ getClaims（本人の OK のあと）と初訪問の数の2本を1本にまとめる案を見る
 - 見直し B のデータの分（PR #206・移行196・t134）：CI とレビューに答える。反映の前に main に別の移行が先なら rebase。sweep-all-check.sql の 1 を反映の前、2〜4 を反映のあと、4 を次の日（毎時の仕事の時間・失敗）。反映のあと羽田の昼に案内板・短冊・撮る人で先の便が出るか、運用を開いたときの 500（57014）が減ったかを PM に見てもらう。まだ時間切れが出るなら、airport_board の残り（flight_watch の結合・taxi_out_min）を見る
@@ -718,7 +728,7 @@
 - 重い集計は保存と切り離す（あとで回す・軽くする）。記録の中身と RLS は変えない。表を変えるなら移行と RLS をセットで
 - チェックイン担当（checkin/stamp-fast）が画面側を直すので、関数の名前と戻り値は変えない
 
-## PM から積んだ次の仕事（11/25 18時45分、羽田・成田を優先して取る＋滑走路の予想の当たり具合。本人「羽田、成田の滑走路の使い方を気象と関連付けて予想できそう？」→「羽田、成田は優先的に取って」）※data/hnd-nrt-priority で。表を足すだけなら PM が自動で反映（足した後に本人へ報告）。画面には出さない（構想段階）
+## PM から積んだ次の仕事（11/25 18時45分、羽田・成田を優先して取る＋滑走路の予想の当たり具合。本人「羽田、成田の滑走路の使い方を気象と関連付けて予想できそう？」→「羽田、成田は優先的に取って」）※data/hnd-nrt-priority で。表を足すだけなら PM が自動で反映（足した後に本人へ報告）。画面には出さない（構想段階）【済み：PR #227・report-hnd-nrt-priority.md】
 - 1. 成田（RJAA）も羽田と同じ細かさで機体の位置を取る（traffic-record-hnd と同じ形。track_points・rwy_samples・ops_log・arr_watch）。adsb.lol の回数の上限（track_quota・ADSBLOL_API_KEY の有無）に収まるよう、ほかの空港の間隔を延ばして割り振る。1日の回数の見積もりを表で
 - 2. 羽田・成田の TAF（aviationweather.gov。今 METAR を取っているのと同じ所）を1時間ごとに取り込んで残す（原文と、時間ごとの風向・風速・突風に分けた形）。METAR も2空港は取りこぼさないように。規約の確認を report に一行
 - 3. 当たり具合を測る：ops_log（推定と実機）と wx_obs（METAR）・TAF で、「その時刻の風（実況）から滑走路を当てる」「数時間前の TAF から当てる」の2つを、過去の日で何％当たるか。時刻別（深夜・南風の午後 15〜19時を分ける）・風の強さ別・切り替わりの前後の表。羽田は追い風の上限と「すぐ切り替えない粘り」を合わせ込む。成田は運用時間と A/B 滑走路の使い分け
