@@ -1,6 +1,12 @@
 # データ担当の帳面
 
 ## いま持っている仕事
+- **印を押すときのロードを短く（PM の最優先の指示 11/25 17時45分。11/25 水曜に定期の回として呼ばれたが、PM の積んだ指示があったのでこちらをした）**：ブランチ data/stamp-fast（main 4354656 から）→ **下書き PR #225**。報告 docs/pm/report-stamp-fast.md。本人用の読むだけの SQL docs/pm/stamp-fast-check.sql。**移行・テスト番号は使っていない（表を変えていない）**
+  - 調べた結果：データベース側に重い処理はない（checkins にトリガーなし・集計は保存の中で走らない・索引は足りている）。重いのは関数 checkin の待ち方（毎回 aviationweather.gov へ最大2.5秒・往復約9回が順番）
+  - 直し：天気は 記憶 → edge_cache（now:wx）→ wx_obs（75分まで）で決め、決まらなければ空で記録して返したあとに書き足す（_shared/checkin_wx.ts）。前半の読み5つを同時に、ボーナスとフライトも同時に。ログ checkin_ms（read・total・wx）
+  - 関数の名前・送る中身・戻り値・記録の中身・RLS は同じ
+  - 確かめ：deno test 322本（新しい checkin_wx_test 5本）・deno check・deno lint・migrations.mjs check 187件
+  - 本人待ち（PM のおすすめで可）：記録のない空港は天気が数秒あとに入る。さらに1往復減らすなら auth.getUser → getClaims（ログインの扱いの変更なので本人の OK が要る）
 - **見直し 2回目のデータの分：特別塗装機の知らせを1便で1つに・夜の静かな時間（PM の指示 11/25 5時10分・report-sweep-1125.md の4番。11/25 水曜に定期の回として呼ばれたが、PM の積んだ指示があったのでこちらをした）**：ブランチ data/sweep-1125（main 04d22af から）→ **PR #216（11/25 8時16分 main に入った。本番の移行197 は PM の反映の流れで確かめる。今いる購読ははじめ ON なので、チェックインの「夜は知らせない」の行が入るまで夜は止まる）**。報告 docs/pm/report-sweep-1125-data.md。**移行197・テスト t135 を使った**
   - tag はどれも `sp-便名`（_shared/livery_note.ts の liveryTag。予定は機体が分からないので便名だけ。便名がなければ `sp-登録記号`）。renotify つき。前の `plan-`・`spr-`・`sp-登録記号` はやめた
   - 移行197：push_subs.quiet_night（はじめ true）・livery_plans.quiet_push_at。夜（23〜7時）は特別塗装機・撮影・運用の知らせを quiet_night の人に送らない（awake()）。乗る便・空港の遅れは止めない。ga は ga_quiet のまま。夜に見つかった予定は7時すぎに静かな時間の人へ1回（odpt-status）
@@ -356,12 +362,13 @@
 ## 移行とテストの番号
 - main の最新は 160（159 airport_yomi・160 airport_facts は 11/10 本番に入った）。156・157 は 11/9 本番に入った。**maint/2026-11-09 の 158 は main の 159 より前になったので、反映の前に migrations.mjs rebase が要る**。maint/2026-11-06 は 153・テスト t93（fix/co-tests の経営の移行も 153 なので、反映の前に rebase）、data/photo-log は 154・テスト t94、maint/2026-11-07 は 155・テスト t95、data/debug-1107 は 156・テスト t96（関数のテストは supabase/tests/live_view_test.ts。main に反映済み）、data/view-prefs は 157・テスト t97、maint/2026-11-09 は 158・テスト t98、maint/2026-11-10 は 161・テスト t101。data/airport-facts は 160・テスト t100。そのほか次に新しく作るものは 162 以降・テストは t102 以降。**maint/2026-11-11 は 162・テスト t102**（161 の maint/2026-11-10 より後。反映の順が変わったら rebase）。**data/heliports の 163・t103 は 11/12 main に入った（PR #75 と一緒）**。**data/speed-1113 は 164・テスト t104**。**data/speed-1113b は 165・テスト t105**（164 の上）。**data/rot-learn-hi は 166・テスト t106**（関数1つだけなので 164・165 と順番が入れ替わってもよい）。（164〜167 は 11/13 に main に入った。166 は経営の co_cron_timeout、learn_hi は 167 に付け直し）。**data/alert-merge は 168・テスト t107**（11/14 main に入った）。**data/world-ops は 169・テスト t108**。**maint/2026-11-16 は 170・テスト t109**。**data/foreign-collect は 171・テスト t110**（170 と別の関数なので順番は入れ替わってもよい）。（11/16 data/redo-1116 で手入れ6本を 173〜178・t112〜t117 に付け直し、179 odpt_feed_dates・t118、180 verify_arrivals・t119。172・t111 は経営の keiei/redo-1116）。**data/foreign-collect は 181 foreign_cold・t120、182 foreign_watch・t121**。（171〜182 は 11/16 本番に入った。経営の t128 も main にある）。**maint/2026-11-16b は 183・テスト t122**。**data/foreign-livery は 184・テスト t123**。**data/usual-late-rpc は 185・テスト t124**（183 とは別の関数なのでどちらが先でもよい）。data/atd-future は 186・テスト t125。**data/flight-actual は 187・テスト t126**。**data/redo-1120 は 188（maint_1116b の付け直し・テスト t122）・189（inbound_first_of_day・テスト t127）**。**data/adsblol-key2 は 190 track_quota・テスト t129**。**data/sweep-1121 は 191 odpt_feed_at・テスト t130**。**data/livery-dest2 は 192 airline_codes_more・テスト t131**。**193 livery_seen_midnight は main にある。maint/2026-11-23 は 194・テスト t132**。**data/board-bad は 195・テスト t133**。**次に新しく作るものは 196 以降・テストは t134 以降**（t128 は経営が使った。maint/2026-11-16b の 183 は使わない）（data/foreign-carriers・data/foreign-livery は報告だけで番号を使っていない）
 - 11/24：data/sweep-all（PR #206）が移行196・テスト t134
-- 11/25：data/sweep-1125（PR #216）が移行197・テスト t135。次は198・t136 から
+- 11/25：data/sweep-1125（PR #216）が移行197・テスト t135。次は198・t136 から（data/stamp-fast #225 は移行なし）
 - main に別の移行が先に入ったら、反映の前にもう一度 `node tools/migrations.mjs rebase`
 - 本番は小さいプランで一時ファイルの余裕がない。本人に流してもらう SQL は、大きな中間の表・自己結合・大きな並べ替えを避け、索引で引く形にする
 - SQL のテストは全部で約35分かかる（手元で流すときは裏で流してログを見る。t92 だけで約4分。同じログに2回流すと混ざるので、ログの名前を分ける）
 
 ## 次にやること
+- 印の速さ（PR #225）：反映のあと、本人に stamp-fast-check.sql の 1・2 と Edge Functions の checkin のログ「checkin_ms」を見てもらい、まだ遅ければ getClaims（本人の OK のあと）と初訪問の数の2本を1本にまとめる案を見る
 - 見直し B のデータの分（PR #206・移行196・t134）：CI とレビューに答える。反映の前に main に別の移行が先なら rebase。sweep-all-check.sql の 1 を反映の前、2〜4 を反映のあと、4 を次の日（毎時の仕事の時間・失敗）。反映のあと羽田の昼に案内板・短冊・撮る人で先の便が出るか、運用を開いたときの 500（57014）が減ったかを PM に見てもらう。まだ時間切れが出るなら、airport_board の残り（flight_watch の結合・taxi_out_min）を見る
 - 今日の遅れの bad（PR #197・移行195・t133。main に入った）：反映の Actions の結果を見る。反映のあと、本番の運用タブで「遅れ」の絞り込みが出るかを PM に見てもらう。本人が「今日」を一日中にすると決めたら見る幅を広げる（hours も変わる）
 - AAL176（PR #187）：aal176-check.sql の結果（①航跡 ②reg_legs ③foreign_legs ④livery_notified）を報告に足す。① が 0 件で ③ にあれば、track_points が先に消えた／呼び出し符号が違う（AAL176 以外）かを見る。CI とレビューに答える。公式・報道でアメリカン航空のワンワールド塗装機の一覧が見つかれば出典を差し替える
@@ -407,6 +414,7 @@
 8. それ以外は PM の指示を待つ（勝手に新しい機能は始めない）。毎週月曜の昼の回は、下の「定期の仕事」（次の候補：点検の結果が来たら、死んだ行や使われていない索引の整理・遅い処理。cold-day-size.sql の結果で全機の航跡の1日が 20MB を超えるなら、ファイルを空港ごとに分ける案を作る。rwy-learn と daily-archive は 11/10 に見た（PR #58）。eta-calib・taxi-out・flight-watch は 11/11 に見た（PR #70）。結果がないまま次の回が来たら、ほかの毎晩・裏の処理（timetable-sync・schedule-sync・odpt-status・co3 の SQL の文）を同じ目で見て、時間の上限のない仕事の一覧を作る）
 
 ## ほかの担当への依頼
+- チェックイン担当（checkin/stamp-fast）へ（11/25）：関数 checkin の名前・送る中身・戻り値は変えていない（PR #225）。画面側の待ち（位置の取得の最大12秒など）はそちらで。反映のあと、印の時間は Edge Functions の checkin のログ「checkin_ms」で見られる
 - チェックインへ（11/25 夜の静かな時間・PR #216。PM から checkin.md に写してほしい）：知らせの設定に「夜は知らせない（23時〜7時）」の ON／OFF を1行（はじめ ON）。push-subscribe に `quiet_night: true|false` を付けて送る。文の例「特別塗装機・撮影・運用の知らせを、夜は止めます。乗る便の遅れは届きます」。ゴーアラウンドの「知らせない時間」は別のまま
 - チェックインへ（11/24 ピン止めの保存・PR #206。PM から checkin.md に写してほしい）：ログインしているときは rpc('my_pins') で読み、変えたら rpc('my_pins_put', { p_pins, p_spot, p_rev }) で書く（返り値 {ok, rev} か {conflict, pins, spot, rev}）。localStorage はログインしていないときとデモの置き場のまま。はじめてログインしたとき端末にあってサーバーが null なら上げる。「アカウントへの保存は準備中」の文を外す（文はデザイン担当と）。運用の関数が失敗したときの「読み込めませんでした・もう一度」も引き続き要る
 - 撮る人用へ（11/24・急がない）：spot_push.ts の題の「そらメモ：」と「（機体の位置からの推定）」は送る直前（tidyPush）でそろうので、そのままでよい。手を入れるときに元の文も「（推定）」にそろえてよい
@@ -698,7 +706,7 @@
 - 【中】特別塗装機の知らせを1機・1便で1つの tag にまとめ、予定 → 飛んでいる → 着陸に向かっている を同じ通知の書き換えにする。夜の静かな時間（23〜7時）をゴーアラウンド以外にも選べるように（はじめ ON）。運用が変わった知らせは「前の知らせから60分」で数える。設定を足すなら移行と RLS をセットで（4番）
 - 「空の上」を adsb の離陸〜着陸にする件（2番）は本人の決定で「やらない」（出発〜到着のまま・11/25）
 
-## PM から積んだ最優先の仕事（11/25 17時45分、印を押すときロードが長い。本人の声）※data/stamp-fast で。テストが通れば PM がすぐ反映
+## PM から積んだ最優先の仕事（11/25 17時45分、印を押すときロードが長い。本人の声）※data/stamp-fast で。テストが通れば PM がすぐ反映【済み：PR #225・report-stamp-fast.md】
 - 印を記録する関数（checkin の保存・その後の集計やトリガー）の重さを調べる。トリガーで重い集計（成績・図鑑・経営など）を同じ処理の中で走らせていないか、索引が足りているか。読むだけの SQL で本番の時間を測れるなら本人用に用意（EXPLAIN は書かずに pg_stat_statements の読むだけ）
 - 重い集計は保存と切り離す（あとで回す・軽くする）。記録の中身と RLS は変えない。表を変えるなら移行と RLS をセットで
 - チェックイン担当（checkin/stamp-fast）が画面側を直すので、関数の名前と戻り値は変えない
