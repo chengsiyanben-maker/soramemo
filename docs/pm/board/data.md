@@ -1,11 +1,11 @@
 # データ担当の帳面
 
 ## いま持っている仕事
-- **記録帳の便名と flight_lookup（PM の指示 11/26 1時30分。#239 の依頼 ①②）**：ブランチ data/flight-no → **下書き PR #247**。報告 docs/pm/report-flight-no.md。確かめの SQL docs/pm/flight-no-check.sql。**移行202・テスト t140**
+- **記録帳の便名と flight_lookup（PM の指示 11/26 1時30分。#239 の依頼 ①②）**：ブランチ data/flight-no → **PR #247（11/26 main に入った。本番の移行202 は PM の反映の流れで確かめる。反映のあと flight-no-check.sql）**。報告 docs/pm/report-flight-no.md。確かめの SQL docs/pm/flight-no-check.sql。**移行202・テスト t140**
   - ① manual_flights.flight_no（text・任意・形は flight_history と同じ）。RLS は今のまま本人の行だけ。直せる列に flight_no を足した（PM のおすすめで決めた）
   - ② flight_lookup(p_date, p_flight)：flight_history（約400日）から。ない日は flight_schedule（src = schedule・登録記号なし）。前の 0・小文字・共同運航の also で見つける。区間が2つの日は最大6まで定刻の順。権限は flight_facts と同じ（anon・authenticated）。その日の行だけを主キーと一意の索引の先頭で読む
   - t140 33項目・関係するテスト62本 通過。列を足すだけなので PM の自動の反映でよい。三沢・岩国の terminals は本人の OK まで足さない
-- **定期の手入れ 11/26（木。PM の指示なしの定期の回）**：ブランチ maint/2026-11-26（main 4a128ee から）→ **下書き PR #246**。報告 docs/pm/maint/2026-11-26-report.md。確かめの SQL docs/pm/maint/2026-11-26-check.sql。**移行201・テスト t139**（#230・#240 が main に入ったあとの番号。重なりなし。#241 は閉じた）
+- **定期の手入れ 11/26（木。PM の指示なしの定期の回）**：ブランチ maint/2026-11-26（main 4a128ee から）→ **PR #246（11/26 main に入った。本番の移行201 は PM の反映の流れで確かめる。反映の前後に 2026-11-26-check.sql）**。報告 docs/pm/maint/2026-11-26-report.md。確かめの SQL docs/pm/maint/2026-11-26-check.sql。**移行201・テスト t139**（#230・#240 が main に入ったあとの番号。重なりなし。#241 は閉じた）
   - やり方：SQL の関数 約200個を `enable_seqscan off` の汎用の計画にかけ、それでも全部読みになる所を機械で洗い出した（次の回も同じ形で使える）。先頭が重なる索引は0本。新しい cron 3つは上限あり
   - 直したもの：rwy_sample_counts（rwy_samples を毎回まるごと数える・どこからも呼ばれていない）を anon・authenticated から外す（service_role に明示で付けた。関数は残す）／airports (iata) の部分索引 airports_iata（airport_board・verify_arrivals・world_flight_counts・is_japan_iata）
   - t35 の「数は anon から読める」を「anon からは呼べない・持ち主からは読める」に合わせた。t105・t122・t132・t134〜t136 通過
