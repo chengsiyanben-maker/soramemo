@@ -7,9 +7,15 @@
       update(patch){ return { eq(k, v){ if(window.__profileFail && table === 'user_profiles') return Promise.resolve({error:{message:'fail'}}); (db[table] || []).forEach(r => { if(r[k] === v) Object.assign(r, JSON.parse(JSON.stringify(patch))); }); window.__updates = (window.__updates||[]).concat([{table, patch}]); return Promise.resolve({error:null}); } }; }, range(a, b){ lo = a; hi = b; return api; },
       then(res){ const d = {data: rows(), error:null}; if(window.__netDelay) setTimeout(() => res(d), window.__netDelay); else res(d); },   /* __netDelay：遅い電波のテスト（11/25 stamp-fast） */
       maybeSingle(){ if(!db[table]) return Promise.resolve({data:null, error:{message:'relation does not exist'}}); return Promise.resolve({data: db[table][0] || null, error:null}); },
-      upsert(row){ db[table] = db[table].filter(r => r.user_id !== row.user_id); db[table].push(JSON.parse(JSON.stringify(row))); window.__upserts = (window.__upserts||0) + 1; return Promise.resolve({error:null}); },
-      insert(row){ if(window.__mfNoCol && table === 'manual_flights' && (Array.isArray(row) ? row : [row]).some(r => 'flight_no' in r)) return Promise.resolve({error:{message:'column "flight_no" of relation "manual_flights" does not exist'}});   /* 便名の列がまだないサーバー（11/25 flight-suggest） */
-      (Array.isArray(row) ? row : [row]).forEach(r => db[table].push(Object.assign({id: db[table].length+1}, r))); window.__inserts = (window.__inserts||0) + 1; return Promise.resolve({error:null}); },
+      upsert(row, opt){ if(opt && opt.onConflict === 'user_id,client_id'){   /* 送り直しの二重防止（data/idem）。__noCidCol：移行200 の前のサーバー */
+          window.__idemUps = (window.__idemUps||0) + 1; if(window.__mfNoCol && table === 'manual_flights' && (Array.isArray(row) ? row : [row]).some(r => 'flight_no' in r)) return Promise.resolve({error:{code:'PGRST204', message:"Could not find the 'flight_no' column of 'manual_flights' in the schema cache"}});   /* 便名の列がまだないサーバー（11/25 flight-suggest） */
+          if(window.__noCidCol) return Promise.resolve({error:{code:'PGRST204', message:"Could not find the 'client_id' column of '" + table + "' in the schema cache"}});
+          (Array.isArray(row) ? row : [row]).forEach(r => { if(r.client_id && db[table].some(x => x.client_id === r.client_id)) return; db[table].push(Object.assign({id: db[table].length+1}, r)); });
+          if(window.__upLost){ window.__upLost--; return Promise.resolve({error:{message:'Failed to fetch'}}); }   /* 書けたのに返事だけ届かない */
+          return Promise.resolve({error:null}); }
+        db[table] = db[table].filter(r => r.user_id !== row.user_id); db[table].push(JSON.parse(JSON.stringify(row))); window.__upserts = (window.__upserts||0) + 1; return Promise.resolve({error:null}); },
+      insert(row){ if(window.__mfNoCol && table === 'manual_flights' && (Array.isArray(row) ? row : [row]).some(r => 'flight_no' in r)) return Promise.resolve({error:{message:'column "flight_no" of relation "manual_flights" does not exist'}});
+        if(window.__noCidCol && (Array.isArray(row) ? row : [row]).some(r => 'client_id' in r)) return Promise.resolve({error:{code:'PGRST204', message:'no client_id'}}); (Array.isArray(row) ? row : [row]).forEach(r => db[table].push(Object.assign({id: db[table].length+1}, r))); window.__inserts = (window.__inserts||0) + 1; return Promise.resolve({error:null}); },
       delete(){ return { eq(k, v){ db[table] = db[table].filter(r => r[k] !== v); return Promise.resolve({error:null}); } }; } };
     return api; }
   window.supabase = { createClient(){ return {
@@ -114,12 +120,17 @@
       if(window.__fnFail) return {data:null, error:{context:{json: async()=>({ok:false, reason:'low_accuracy', message:'位置の精度が低すぎます（サーバー判定）'})}}};
       if(name === 'delete-account'){ window.__deleted = body; return {data:{ok: body.confirm === '削除'}, error:null}; }
       if(window.__offline) return {data:null, error:{name:'FunctionsFetchError', context:{}}};
-      window.__calls = (window.__calls||[]).concat([{queued:body.queued, ts:body.ts}]);
+      window.__calls = (window.__calls||[]).concat([{queued:body.queued, ts:body.ts, cid:body.cid}]);
+      /* 同じ client_id の印がもうある＝送り直し：1回目の印を ok・again で返す（data/idem）。__noIdem：前の関数（cid を無視） */
+      const dup = body.cid && !window.__noIdem && db.checkins.find(c => c.client_id === body.cid);
+      if(dup) return {data:{ok:true, again:true, at:dup.created_at, airport_id:dup.airport_id, terminal_id:dup.terminal_id, first_airport:false, first_terminal:false, flight:null, flags:[], bonus:[]}, error:null};
       const n = nearest({lat:body.lat, lon:body.lon});
       if(!n.within) return {data:null, error:{context:{json: async()=>({ok:false, reason:'out_of_range', message:'範囲外（サーバー判定）'})}}};
       const at = new Date(body.queued ? body.ts : Date.now()).toISOString();
       const first = !db.checkins.some(c=>c.airport_id===n.a.id);
-      db.checkins.push({airport_id:n.a.id, terminal_id:n.term?n.term.id:null, created_at:at, accuracy_m:body.acc});
+      if(window.__tooSoon && db.checkins.length && Date.now() - Date.parse(db.checkins[db.checkins.length-1].created_at) < 20e3) return {data:null, error:{context:{json: async()=>({ok:false, reason:'too_soon', message:'間を置いて'})}}};
+      db.checkins.push({airport_id:n.a.id, terminal_id:n.term?n.term.id:null, created_at:at, accuracy_m:body.acc, client_id: window.__noIdem ? undefined : body.cid});
+      if(window.__lostReply){ window.__lostReply--; return {data:null, error:{name:'FunctionsFetchError', context:{}}}; }   /* 記録できたのに返事だけ届かない */
       let flight = null;   /* __mkFlight：前の空港からの便も作る（11/25 stamp-fast のテストだけ） */
       if(window.__mkFlight){ const prev = db.checkins[db.checkins.length - 2]; if(prev && prev.airport_id !== n.a.id){ flight = {id:770 + db.flights.length, from_airport:prev.airport_id, to_airport:n.a.id, distance_km:800}; db.flights.push({id:flight.id, from_airport:prev.airport_id, to_airport:n.a.id, dep_at:prev.created_at, arr_at:at, distance_km:800, status:'provisional', airline:null, flight_no:null}); } }
       return {data:{ok:true, at, airport_id:n.a.id, terminal_id:n.term?n.term.id:null, first_airport:first, first_terminal:true, flight, flags:[], bonus: window.__bonus || []}, error:null};

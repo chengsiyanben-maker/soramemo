@@ -7546,9 +7546,30 @@ async function checkinDecide(p, n){
   showStamp(n.a, now, first, flight, n.term, firstTerm);
   CK_NEAR.later = true; ckLater([CK_NEAR, save, ...renderSteps()]);   // 半券・保存・描き直しはハンコの動きのあと
 }
+/* 送り直しても二重にならない ID（data/idem・移行200）：押すたびに1つ作り、保留から送り直すときも同じ ID を送る。
+   サーバーに同じ ID の印があれば、判定をやり直さず「もう記録済み」（ok:true・again:true）が返る */
+function ckCid(){
+  try{ if(crypto.randomUUID) return crypto.randomUUID(); }catch(e){}
+  const b = crypto.getRandomValues(new Uint8Array(16)); b[6] = b[6] & 15 | 64; b[8] = b[8] & 63 | 128;   // v4 の形
+  const h = [...b].map(x => x.toString(16).padStart(2, "0")).join("");
+  return `${h.slice(0, 8)}-${h.slice(8, 12)}-${h.slice(12, 16)}-${h.slice(16, 20)}-${h.slice(20)}`;
+}
+// 記録帳・国際線の「足す」：同じ中身をもう一度押したときは同じ ID（返事が届かず押し直しても1行）。保存できたら忘れる
+const CID_FORM = {};
+function formCid(key, row){ const sig = JSON.stringify(row), c = CID_FORM[key]; if(c && c.sig === sig) return c.id; const id = ckCid(); CID_FORM[key] = {sig, id}; return id; }
+const formCidDone = key => { delete CID_FORM[key]; };
+// client_id の列か一意の索引がまだない（移行200 の前）
+const idemNoCol = e => !!e && (["42P10", "PGRST204", "42703"].includes(e.code) || /client_id|on conflict/i.test(String(e.message || "")));
+// client_id を付けて足す（同じ ID はサーバーで1行だけ）。移行200 の前のサーバーなら、付けずに前と同じ insert
+async function idemInsert(table, rows){
+  const arr = Array.isArray(rows) ? rows : [rows];
+  const r = await sb.from(table).upsert(arr, { onConflict:"user_id,client_id", ignoreDuplicates:true });
+  if(r && r.error && idemNoCol(r.error)) return sb.from(table).insert(arr.map(({client_id, ...x}) => x));
+  return r;
+}
 async function sendCheckin(p, queued){
   try{
-    const { data, error } = await sb.functions.invoke("checkin", { body:{ lat:p.lat, lon:p.lon, acc:p.acc, ts:p.ts, queued } });
+    const { data, error } = await sb.functions.invoke("checkin", { body:{ lat:p.lat, lon:p.lon, acc:p.acc, ts:p.ts, queued, ...(p.cid ? {cid:p.cid} : {}) } });
     if(!error) return data;
     try{ return await error.context.json(); }catch(_){ return null; }   // null = サーバーに届かなかった
   }catch(e){ return null; }
@@ -7613,6 +7634,7 @@ function ckJudge(p, n, now){
 async function checkinServer(p, n){
   if(!user) return say("ログインしてください。", true);
   n = n || nearest(p);
+  p = {...p, cid:ckCid()};   // 押すたびに新しい ID（使い回した位置でも別の印として送る。data/idem）
   const why = ckJudge(p, n, Date.now());
   if(why === "already") return say(CK_TXT.already);
   if(why === "too_soon") return say("少し時間をおいてからもう一度押してください。");
@@ -7658,7 +7680,7 @@ async function ckSend(p, o){
     say(`印を記録できませんでした。${ckWhyText(r.reason, p, r.message)}`, true); ckNote();
     ckLater(renderSteps()); return;
   }
-  track("checkin_ok", r.flight ? "flight" : r.terminal_id ? "terminal" : "airport");
+  track(r.again ? "checkin_again" : "checkin_ok", r.flight ? "flight" : r.terminal_id ? "terminal" : "airport");   // again：返事だけ届かなかった送り直し（成功として扱う）
   // 一言はサーバーの返事で書き直す（便ができたか・場所・行事のボーナス）。今までの checkinServer と同じ文
   const bon = Array.isArray(r.bonus) ? r.bonus : [], a = BY[r.airport_id] || BY[o.rec.a], term = r.terminal_id ? TBY[r.terminal_id] : null;
   say((r.flight && BY[r.flight.from_airport] ? `フライトを記録しました：${BY[r.flight.from_airport].name} → ${a.name}` : `${placeName(a, term)}にチェックインしました。`)
@@ -7683,7 +7705,7 @@ async function checkinServerWait(p){
   btn.disabled = false;
   if(!r){ track("checkin_queued"); return enqueue(p, "busy", false); }
   if(!r.ok){ track("checkin_fail", r.reason); if(r.reason === "server") reportClientError("checkin", r.message); return say(ckWhyText(r.reason, p, r.message), true); }
-  track("checkin_ok", r.flight ? "flight" : r.terminal_id ? "terminal" : "airport");
+  track(r.again ? "checkin_again" : "checkin_ok", r.flight ? "flight" : r.terminal_id ? "terminal" : "airport");
   await reload();
   const a = BY[r.airport_id], term = r.terminal_id ? TBY[r.terminal_id] : null;
   const flight = r.flight ? {id:r.flight.id, from:r.flight.from_airport, to:r.flight.to_airport, km:r.flight.distance_km} : null;
@@ -9069,8 +9091,8 @@ async function fsugGo(){
   } else {
     if(S.manual.some(y => y.from === from.id && y.to === to.id && y.d === day && (!y.airline || y.airline === x.airline))) return fail("この便は、もう日誌にあります。");
     if(SERVER && !demo){ if(navigator.onLine === false) return fail("電波がないため記録できませんでした。つながってからもう一度押してください。");
-      const { error } = await mfInsert({ from_airport:from.id, to_airport:to.id, flown_on:day, airline:x.airline, fare:null, price:null }, x.no); if(error) return fail("記録できませんでした。電波のよい場所でもう一度押してください。");
-      await reload(); }
+      const { error } = await mfInsert({ from_airport:from.id, to_airport:to.id, flown_on:day, airline:x.airline, fare:null, price:null }, x.no, "fsug"); if(error) return fail("記録できませんでした。電波のよい場所でもう一度押してください。");
+      formCidDone("fsug"); await reload(); }
     else { S.manual.push({ from:from.id, to:to.id, d:day, airline:x.airline, fare:null, seat:null, price:null, no:x.no }); save(); }
   }
   track("fsug_go", p.how);
@@ -9083,10 +9105,11 @@ function mNoValue(){
   const m = /^([A-Z][A-Z0-9]|[0-9][A-Z])?(\d{1,4})$/.exec(raw); if(!m) return null;
   const a = m[1] || (al && al !== "OT" ? al : null); return a ? a + String(+m[2]) : null;
 }
-// 日誌に入れる（便名の列 flight_no がまだないサーバーでは、便名を外して入れ直す）
-async function mfInsert(row, no){
-  if(no){ const r = await sb.from("manual_flights").insert({ ...row, flight_no:no }); if(!r.error || !/flight_no|column/i.test(String(r.error.message || ""))) return r; }
-  return sb.from("manual_flights").insert(row);
+// 日誌に入れる：送り直しても1行（idemInsert・client_id）。便名の列 flight_no（移行202）がまだないサーバーでは、便名を外して入れ直す
+async function mfInsert(row, no, key){
+  const cid = formCid(key || "mf", { ...row, no });
+  if(no){ const r = await idemInsert("manual_flights", { ...row, flight_no:no, client_id:cid }); if(!r.error || !/flight_no/i.test(String(r.error.message || ""))) return r; }
+  return idemInsert("manual_flights", { ...row, client_id:cid });
 }
 // 過去の便：日付＋便名（数字だけでも）から、区間と時刻を時刻表（JAL・ANA）で補う。その日の実際の時刻と機体は毎日の記録（flight_facts）から
 const fsugOp = al => ["JL", "NU"].includes(al) ? "JAL" : al === "NH" ? "ANA" : null;
@@ -9186,9 +9209,9 @@ $("mAdd").onclick = async () => {
   if(SERVER && !demo){
     if(!user){ m.textContent="ログインしてください。"; m.className="msg err"; return; }
     const row = {from_airport:f, to_airport:t, flown_on:d, airline:$("mAirline").value || null, fare: $("mFare").hidden ? null : ($("mFare").value || null), price:priceOf($("mPrice").value)}, no = mNoValue();
-    const { error } = await mfInsert(row, no);
+    const { error } = await mfInsert(row, no, "mAdd");   // 押し直しても1行（data/idem）・便名つき（移行202）
     if(error){ m.textContent="保存できませんでした。もう一度試してください。"; m.className="msg err"; return; }
-    await reload(); return done();
+    formCidDone("mAdd"); await reload(); return done();
   }
   S.manual.push({from:f,to:t,d,airline:$("mAirline").value || null, fare: $("mFare").hidden ? null : ($("mFare").value || null), price:priceOf($("mPrice").value), no:mNoValue()}); save(); render(); done();
 };
@@ -9231,10 +9254,11 @@ const intlKey = g => String(g.id ?? g.d + g.dep + g.arr);
 async function addIntl(g){
   if(SERVER && !demo){
     if(!user) return "ログインしてください。";
-    const { error } = await sb.from("intl_flights").insert({ flown_on:g.d, dep:g.dep, arr:g.arr, flight_no:g.no || null, airline:g.no ? g.no.slice(0, 2) : null, seat:g.seat || null,
-      dep_at:g.depAt ? new Date(g.depAt).toISOString() : null, arr_at:g.arrAt ? new Date(g.arrAt).toISOString() : null, distance_km:g.km || null });
+    const row = { flown_on:g.d, dep:g.dep, arr:g.arr, flight_no:g.no || null, airline:g.no ? g.no.slice(0, 2) : null, seat:g.seat || null,
+      dep_at:g.depAt ? new Date(g.depAt).toISOString() : null, arr_at:g.arrAt ? new Date(g.arrAt).toISOString() : null, distance_km:g.km || null };
+    const { error } = await idemInsert("intl_flights", {...row, client_id:formCid("intl", row)});   // 押し直しても1行（data/idem）
     if(error) return "保存できませんでした。もう一度試してください。";
-    await reload(); return null;
+    formCidDone("intl"); await reload(); return null;
   }
   (S.intl = S.intl || []).push(g); save(); render(); return null;
 }
@@ -12308,7 +12332,7 @@ function qSave(q){ try{ localStorage.setItem(qKey(), JSON.stringify(q)); }catch(
 // why："offline"（電波がない）・"busy"（電波はあるのに届かない）。ok：端末の判定で通る見込みの印か（false は範囲の外などで、送るまで印として見せない）
 function enqueue(p, why, ok){
   const n = nearestBase(p), q = qLoad();   // 保留は判定の決まりの空港で（近い順の先頭ではなく）
-  q.push({lat:p.lat, lon:p.lon, acc:p.acc, ts:p.ts || Date.now(), a:n.a.id, term:n.term ? n.term.id : null, ...(ok === false ? {ok:false} : {})});
+  q.push({lat:p.lat, lon:p.lon, acc:p.acc, ts:p.ts || Date.now(), a:n.a.id, term:n.term ? n.term.id : null, cid:p.cid || ckCid(), ...(ok === false ? {ok:false} : {})});
   qSave(q);
   say(why === "busy" ? CK_TXT.busy : CK_TXT.offline);
 }
@@ -12347,6 +12371,7 @@ async function flushQueue(silent){
   flushing = true;
   const now = Date.now(), expired = q.filter(x => now - x.ts > QMAX_MS);
   q = q.filter(x => now - x.ts <= QMAX_MS).sort((x, y) => x.ts - y.ts);
+  if(q.some(x => !x.cid)){ q.forEach(x => { if(!x.cid) x.cid = ckCid(); }); try{ localStorage.setItem(qKey(), JSON.stringify(q)); }catch(e){} }   // 前の版で積んだ分にも ID（次の送り直しから同じ ID）
   const sent = [], rejected = [];
   while(q.length){
     const r = await sendCheckin(q[0], true);
@@ -12710,10 +12735,10 @@ document.addEventListener("click", async e => {
   b.disabled = true;
   const have = new Set(S.manual.map(m => `${m.from}-${m.to}-${m.d}`));
   const rows = lr.rows.filter(r => !have.has(`${r.from}-${r.to}-${r.date}`)).slice(0, 1000)
-    .map(r => ({ user_id:user.id, from_airport:r.from, to_airport:r.to, flown_on:r.date, airline:r.airline }));
+    .map(r => { const row = { user_id:user.id, from_airport:r.from, to_airport:r.to, flown_on:r.date, airline:r.airline }; return {...row, client_id:formCid(`mig:${r.from}-${r.to}-${r.date}`, row)}; });   // 途中で止まって押し直しても同じ ID（data/idem）
   let ok = 0, err = null;
   for(let i = 0; i < rows.length && !err; i += 200){
-    const { error } = await sb.from("manual_flights").insert(rows.slice(i, i + 200)); if(error) err = error; else ok += Math.min(200, rows.length - i);
+    const { error } = await idemInsert("manual_flights", rows.slice(i, i + 200)); if(error) err = error; else ok += Math.min(200, rows.length - i);
   }
   if(err){ say(`引き継ぎの途中で止まりました（${ok}件まで完了）。電波のよい場所でもう一度押してください。`, true); b.disabled = false; return; }
   try{ localStorage.setItem(migKey(), "done"); }catch(_){}
@@ -12944,7 +12969,8 @@ document.addEventListener("click", async e => {
     list.push({ fromId:l.fromId, toId:l.toId, airline:l.airline, no:l.no, seat:l.seat, date:l.date }); bpSavePending(list); b.textContent = "覚えました"; renderBPPending(); }
   else if(act === "manual"){
     const d = new Date(l.date), ds = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
-    if(SERVER && !demo){ const { error } = await sb.from("manual_flights").insert({ from_airport:l.fromId, to_airport:l.toId, flown_on:ds, airline:l.airline, seat:l.seat || null }); b.textContent = error ? "保存できませんでした" : "追加しました"; if(!error) await reload(); }
+    if(SERVER && !demo){ const row = { from_airport:l.fromId, to_airport:l.toId, flown_on:ds, airline:l.airline, seat:l.seat || null };
+      const { error } = await idemInsert("manual_flights", {...row, client_id:formCid("bp", row)}); b.textContent = error ? "保存できませんでした" : "追加しました"; if(!error){ formCidDone("bp"); await reload(); } }
     else { S.manual.push({ from:l.fromId, to:l.toId, d:ds, airline:l.airline, fare:null, seat:l.seat || null }); save(); render(); b.textContent = "追加しました"; }
   }
 });

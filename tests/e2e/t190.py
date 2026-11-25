@@ -28,16 +28,18 @@ def pl(i, cs, lat, lon, alt, kt, hdg, fpm, ph, dist, typ, reg): return {'id': i,
 AIR = [pl('a1', 'JAL318', 35.512, 139.8340, 1300, 145, 337, -700, 'arr', 6, 'A359', 'JA01XJ'), pl('a2', 'ANA59', 35.585, 139.7560, 2600, 190, 337, 2200, 'dep', 4, 'B789', 'JA871A'),
        pl('a3', 'ANA36', 35.470, 139.880, 3500, 200, 320, -800, 'arr', 13, 'B78X', 'JA933A'), pl('a8', 'ANA12', 35.430, 139.950, 5200, 220, 320, -900, 'arr', 20, 'B77W', 'JA781A')]
 GROUND = [{'id': 'g0', 'callsign': 'JAL98', 'lat': 35.54807, 'lon': 139.77256, 'hdg': 240, 'kt': 10, 'type': 'B789', 'reg': 'JA877J', 'moving': True}]
+DROP = set()   # 偽のサーバーから外す機体（「機体が消えた」の確かめ用。20秒ごとの読み直しで戻らないように）
 NOWD = {'at': iso(-20), 'weather': {'time': iso(-600), 'wdir': 170, 'wspd': 14, 'wgst': None, 'vis_m': 10000, 'vis_plus': True, 'sky': '晴れ', 'ceil_ft': None}, 'taf': None, 'flights': {'arr': [], 'dep': []}}
 NEW = "localStorage.setItem('soramemo.onboarded','1'); localStorage.setItem('soramemo.persona','all'); localStorage.setItem('soramemo.zk.notice','new'); localStorage.setItem('soramemo.install.later','1'); localStorage.setItem('soramemo.zk.swipe','1');"
 async def open3d(b, port, sky='day', w=390, h=844, guide=False):
+    DROP.clear()
     c = await b.new_context(viewport={'width': w, 'height': h}, device_scale_factor=1, timezone_id='Asia/Tokyo', bypass_csp=True)
     await c.add_init_script(NEW + "Object.defineProperty(navigator, 'hardwareConcurrency', { get: () => 8 });" + ("window.A3_GUIDE = true;" if guide else ""))
     await c.route('https://cdn.jsdelivr.net/npm/@supabase/**', lambda r: r.fulfill(path=os.path.join(HERE, 'fake_sb.js'), content_type='application/javascript'))
     await c.route('https://cdn.jsdelivr.net/npm/three@**', lambda r: r.fulfill(path=THREE, content_type='application/javascript', headers={'Access-Control-Allow-Origin': '*'}))
     async def fn(r):
         name = r.request.url.split('/functions/v1/')[1].split('?')[0]
-        body = {'iata': 'HND', 'at': iso(-30), 'source': 'adsb.lol', 'planes': AIR, 'ground': GROUND} if name == 'airport-traffic' else NOWD if name == 'airport-now' else {}
+        body = {'iata': 'HND', 'at': iso(-30), 'source': 'adsb.lol', 'planes': [q for q in AIR if q['id'] not in DROP], 'ground': GROUND} if name == 'airport-traffic' else NOWD if name == 'airport-now' else {}
         await r.fulfill(body=json.dumps(body), content_type='application/json', headers={'Access-Control-Allow-Origin': '*'})
     await c.route('https://fake.supabase.co/functions/v1/**', fn)
     pg = await c.new_page(); errs = []; pg.on('pageerror', lambda e: errs.append(str(e)))
@@ -64,6 +66,14 @@ async def touch(pg, a, b): await pg.evaluate(TOUCH, [[a, b]]); await pg.wait_for
 SMALL = "[...document.querySelectorAll('#dAp3d button')].filter(b => b.offsetParent && !b.closest('[hidden]') && (b.getBoundingClientRect().height < 44 || b.getBoundingClientRect().width < 44) && !b.classList.contains('a3peekb')).map(b => (b.innerText || b.getAttribute('aria-label') || '').trim() + ':' + Math.round(b.getBoundingClientRect().width) + 'x' + Math.round(b.getBoundingClientRect().height))"
 OVER = "(() => { const W = document.documentElement.clientWidth; return [...document.querySelectorAll('#dAp3d *')].filter(e => e.offsetParent && !e.closest('.a3labels') && !e.closest('canvas') && (e.getBoundingClientRect().right > W + 1 || e.getBoundingClientRect().left < -1)).map(e => e.className || e.tagName).slice(0, 5); })()"
 FLYGAP = "(() => { const m = $('a3Modes').getBoundingClientRect(); return [...document.querySelectorAll('#a3Fly .a3joy, #a3Fly .a3vrt, #a3Fly .a3turn, #a3Fly .a3cap')].map(e => e.getBoundingClientRect()).every(r => r.bottom <= m.top - 4); })()"
+async def until(pg, cond, ms=30000):
+    # 3D はこまが進んだときだけ判定・移動する。同時に流す・t142 のあとなど重いときはこまが少ないので、決まった時間ではなく条件で待つ（11/26 t190 の直し）
+    try: await pg.wait_for_function(cond, timeout=ms); return True
+    except Exception: return False
+async def hold(pg, sel, cond, ms=15000):
+    # ボタンを押したまま、条件が満たされるまで待ってから離す
+    xy = await pg.evaluate("(s => { const r = document.querySelector(s).getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height / 2]; })", sel)
+    await pg.mouse.move(xy[0], xy[1]); await pg.mouse.down(); ok = await until(pg, cond, ms); await pg.mouse.up(); return ok
 async def shot(pg, name): await pg.wait_for_timeout(700); await pg.screenshot(path=os.path.join(SHOTS, name + '.png'))
 async def main():
     if not os.path.exists(THREE): print('three.js がないので飛ばす（t142 を先に流すと置かれる）'); sys.exit(1)
@@ -173,7 +183,9 @@ async def main():
                 k0 = await pg.evaluate("A3.fk || 1"); await touch(pg, [[150, 300], [240, 300]], [[180, 300], [210, 300]])
                 check('追う：2本指でつまむと離れる', await pg.evaluate("A3.fk") > k0 * 1.5)
                 # 機体が消えた
-                await pg.evaluate("for(const s of A3.snaps) s.planes = s.planes.filter(p => p.id !== 'a1'); A3.dirty = true"); await pg.wait_for_timeout(2600)
+                DROP.add('a1')   # 本物と同じく、サーバーからも届かなくする（11/26：重いと20秒ごとの読み直しが先に来て a1 が戻り、いつまでも「追う」のままだった）
+                await pg.evaluate("for(const s of A3.snaps) s.planes = s.planes.filter(p => p.id !== 'a1'); A3.dirty = true"); await pg.wait_for_timeout(1600)
+                await until(pg, "A3 && A3.view === 'all' && !$('a3Toast').hidden && !!document.querySelector('[data-a3-other]')")
                 r = await pg.evaluate("({ v: A3.view, mode: %s, toast: $('a3Toast').hidden ? '' : $('a3Toast').innerText, y: A3.cam.position.y })" % MODE)
                 check('追う：機体が消えたら今の位置のまま自由へ（7,000m の全体へ飛ばない）・下に一言と「ほかを追う」', r['v'] == 'all' and r['mode'] == 'free' and 'JL 318' in r['toast'] and 'ほかを追う' in r['toast'] and r['y'] < 3000, r)
                 await shot(pg, '09-follow-lost-390x844')
@@ -192,7 +204,8 @@ async def main():
             await shot(pg, f'10-fly-{tag}')
             f0 = await pg.evaluate("({ ...A3.fl })")
             jb = await pg.evaluate("(() => { const r = $('a3Joy').getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height / 2, r.width]; })()")
-            await pg.mouse.move(jb[0], jb[1]); await pg.mouse.down(); await pg.mouse.move(jb[0], jb[1] - jb[2] * 0.45, steps=4); await pg.wait_for_timeout(1500); await pg.mouse.up()
+            await pg.mouse.move(jb[0], jb[1]); await pg.mouse.down(); await pg.mouse.move(jb[0], jb[1] - jb[2] * 0.45, steps=4); await pg.wait_for_timeout(1500)
+            await until(pg, "Math.hypot(A3.fl.x - (%r), A3.fl.z - (%r)) > 50" % (f0['x'], f0['z']), 15000); await pg.mouse.up()
             f1 = await pg.evaluate("({ ...A3.fl })")
 
             import math as m2
@@ -200,19 +213,18 @@ async def main():
             await pg.evaluate("A3.fl.y = 990; A3.dirty = true")
             ub = await pg.evaluate("(() => { const r = document.querySelector('[data-a3-hold=\"up\"]').getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height / 2]; })()")
             await pg.mouse.move(ub[0], ub[1]); await pg.mouse.down(); await pg.wait_for_timeout(1500)
+            await until(pg, "A3.fl.y >= 1000 && $('a3AltN').textContent === '1,000' && /これより上には行けません/.test($('a3Chips').innerText)", 15000)
             r = await pg.evaluate("({ y: A3.fl.y, alt: $('a3AltN').textContent, chips: $('a3Chips').innerText })")
             check(f'{tag} 飛ぶ：上限 1,000m で止まり「これより上には行けません」', r['y'] <= 1000 and r['alt'] == '1,000' and 'これより上には行けません' in r['chips'], r)
             if w == 390: await shot(pg, '11-fly-limit-390x844')
             await pg.mouse.up(); await pg.wait_for_timeout(200)
             await pg.evaluate("A3.fl.y = 30; A3.dirty = true")
-            db = await pg.evaluate("(() => { const r = document.querySelector('[data-a3-hold=\"down\"]').getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height / 2]; })()")
-            await pg.mouse.move(db[0], db[1]); await pg.mouse.down(); await pg.wait_for_timeout(1500); await pg.mouse.up()
+            await hold(pg, '[data-a3-hold="down"]', "A3.fl.y <= 15.01", 15000); await pg.wait_for_timeout(300)
             check(f'{tag} 飛ぶ：地面の下には行かない（15m で止まる）', await pg.evaluate("A3.fl.y") >= 15)
             h0 = await pg.evaluate("A3.fl.h")
-            rb = await pg.evaluate("(() => { const r = document.querySelector('[data-a3-hold=\"right\"]').getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height / 2]; })()")
-            await pg.mouse.move(rb[0], rb[1]); await pg.mouse.down(); await pg.wait_for_timeout(800); await pg.mouse.up()
+            await hold(pg, '[data-a3-hold="right"]', "A3.fl.h - (%r) > 0.2" % h0, 15000)
             check(f'{tag} 飛ぶ：右のボタンで向きが変わる', await pg.evaluate("A3.fl.h") - h0 > 0.2)
-            await pg.evaluate("A3.fl.x = 20000; A3.fin.jy = -1"); await pg.wait_for_timeout(500); await pg.evaluate("A3.fin.jy = 0")
+            await pg.evaluate("A3.fl.x = 20000; A3.fin.jy = -1"); await until(pg, "Math.hypot(A3.fl.x, A3.fl.z) <= 8000.5", 15000); await pg.evaluate("A3.fin.jy = 0")
             check(f'{tag} 飛ぶ：空港から 8km より遠くには行かない', await pg.evaluate("Math.hypot(A3.fl.x, A3.fl.z)") <= 8000.5)
             # 閉じるはいつでも押せる
             for m in ('free', 'fly'):
