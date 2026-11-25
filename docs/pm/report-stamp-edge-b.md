@@ -1,4 +1,6 @@
-# 電波・位置が悪いときの続き（checkin/stamp-edge）
+# 電波・位置が悪いときの続き・別案（checkin/stamp-edge-b）
+
+※ 同じ指示を別の回が PR #238（checkin/stamp-edge）で先に出していた。重ねて作ってしまったので、こちらは比べる用の別案（PR は出していない）。PM が #238 を選べばこのブランチは消してよい
 
 PM の指示（11/25 23時）：本人が貼った Gemini の案（docs/pm/ext/gemini-offline-1125.txt）から、stamp-fast の上に4つだけ足す。位置の取り方は変えない。
 
