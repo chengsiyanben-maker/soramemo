@@ -1,6 +1,7 @@
 # チェックイン担当の帳面
 
 ## いま持っている仕事
+- 【11/26 8時25分ごろ】PR #255（perf-ios）と #257（test-steady）は main に入った（7d664c6d・release-1126d）。見張りは外れた。#239（flight-suggest）が run_all.py と web/ でぶつかったので main を取り込んだ（132d9818）：run_all は流し直しの形（run1）に t197 の上限 600 を残し、web/ は組み立て直した。t197・t202・t50・t200・t195・t203・t24・t144・t13・t47・t61・t123・t196 成功。#239 は見張り中
 - **11/26 手動の回（PM の指示「3時20分 perf-ios と 6時40分 小さな2つ、時間があれば 3時55分 test-steady」）**：両方とも済み
   - checkin/perf-ios・下書き **PR #255**（917cd487・報告 docs/pm/report-perf-ios.md・写真 docs/pm/shots-perf-ios/）。main（96a52fff）から。見張りを付けた。見た目は変えていないので、テストが通れば PM が自動で反映してよい
     - ① style の最後に「iPhone の画面の高さとセーフエリア」：spfull・sgd を 100dvh（100vh の後ろ）・a3dlg の max-height も・spsheet・spfull・sgd・mypage の下に safe-area-inset-bottom・spsheet .dlg は 86dvh・dialog は overscroll contain・html:has(dialog[open]) は none・地図の右上ボタンも 100dvh。今までシートの下の余白は 24px でホームバー 34px に10px かかっていた
