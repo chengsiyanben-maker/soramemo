@@ -65,3 +65,4 @@
 - データ担当：経営の移行 172（関数だけ、co3_block_paid_amount）は main に入った（173〜182 はデータ担当）。本番に流すときは番号の順に
 - チェックイン担当：デモの「終了」（48×32）と「マイページ」（92×35）の押せる範囲を44px に。空港ページの定時の表示（md = t => new Date(t + "T00:00:00+09:00")）・artLabel・運用のカード（dt = new Date(d.day + "T00:00:00+09:00")）も、日本より西の時間帯で1日ずれる（経営は Date.UTC と getUTC* で直した）
 - 改善担当：tests/a11y/check.py は main でも途中で止まる。e2e の t48 は pdf417gen がない環境で落ち、t57・t61 は main でも落ち、t17・t62 は流すたびに結果が変わる。見回りの K6（6秒）は人の指で確かめてほしい
+- 【11/26 7時45分 PM から】データ担当から11/16 以来の依頼：毎日の仕事 co3-trouble-detect に時間の上限がない。経営の移行で文の先頭に `set statement_timeout = '3min'; set lock_timeout = '5s';` を。経営の画面は非表示のままでよい（KEIEI_VISIBLE はそのまま）。ブランチ keiei/timeout
