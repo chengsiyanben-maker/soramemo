@@ -792,3 +792,4 @@
 - 3. 今の判定（関数 checkin・judge.ts の範囲の決め方。円か面か・半径）と国土数値情報の面を比べる表：今の範囲から外れる展望デッキ・ターミナルの端・地下駅がないか、近い空港（羽田と調布・伊丹と神戸 など）の重なり。外れる所があれば「範囲をどう直すか」の案だけ出す（判定は変えない。変えるのは本人の OK のあと）
 - 4. 空港のデータの作り方（元のデータ／手で直す所／作る手順／確かめ）を docs に1枚。今の airports の表とのつなぎ
 - 【11/26 0時10分 追記・data/ap-shape へ】本人が Gemini の作る手順の見本（Python・shapely と pyproj）を貼った：docs/pm/ext/gemini-buildscript-1125.txt。参考にしてよい（中身はうのみにしない：例の座標や福岡の滑走路の数字は確かめていない）。配る判定の範囲は変えず、今回は滑走路の線と「比べる表」と確かめ用のページまで
+- 【11/26 1時30分 PM から】#240（idem）を本筋にして #241 は閉じた。#240・#243（ap-shape）・#230（hnd-nrt-more）は次の出す枝 pm/release-1126a に入れた。次の仕事：checkin/flight-suggest（#239）の依頼 ① manual_flights に flight_no（text・任意）を足す（移行と RLS をセット・本人の行だけ書ける今の決まりのまま）② flight_lookup(p_date date, p_flight text)：flight_history から出発・到着・時刻・機体を返す読むだけの関数（RLS／権限は今の flight_history の読み方に合わせる）。ブランチ data/flight-no。三沢・岩国の terminals の行は本人の OK まで足さない
