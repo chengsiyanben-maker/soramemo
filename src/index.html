@@ -2350,6 +2350,76 @@ dialog.a3dlg{inset:0;margin:0;max-width:100vw;max-height:100vh;width:100vw;heigh
 .a3warn{margin:8px 0;font-size:13px}
 .a3src{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
 .a3src li{display:flex;flex-direction:column;gap:1px;padding:8px 12px;border-radius:12px;background:#F4F6F8}
+/* 11/25 羽田の3D を自由に動かす（checkin/a3-free・画面案 design/a3-free の案B）：下の4つのボタン・右上の札・追うの札・飛ぶのつまみ・はじめての案内 */
+.a3modes{position:absolute;left:12px;right:12px;bottom:calc(var(--a3sb,40vh) + 8px);z-index:2;display:grid;grid-template-columns:repeat(4,1fr);gap:4px;padding:5px;border-radius:26px;background:rgba(255,255,255,.95);box-shadow:0 2px 12px rgba(15,22,38,.14)}
+.a3modes button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-height:54px;border:0;border-radius:21px;background:transparent;color:#4B5563;font:inherit;font-size:13px;font-weight:700;cursor:pointer}
+.a3modes button svg{width:22px;height:22px}
+.a3modes button[aria-pressed="true"]{background:#111827;color:#fff}
+.a3credit{bottom:calc(var(--a3sb,40vh) + 78px)}
+.a3wrap[data-mode="fly"] .a3credit{bottom:auto;top:calc(196px + env(safe-area-inset-top))}
+.a3wrap.a3hasside .a3credit{bottom:calc(var(--a3sb,40vh) + 136px)}.a3wrap.a3hastoast .a3credit{bottom:calc(var(--a3sb,40vh) + 160px)}
+.a3tr{position:absolute;right:12px;top:calc(122px + env(safe-area-inset-top));z-index:1;display:flex;flex-direction:column;align-items:flex-end}
+.a3pbtn{display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:0 16px;border:0;border-radius:999px;background:rgba(255,255,255,.95);color:#111827;font:inherit;font-size:14px;font-weight:800;cursor:pointer;box-shadow:0 2px 10px rgba(15,22,38,.12)}
+.a3pbtn svg{width:18px;height:18px}
+.a3alt{min-width:112px;padding:8px 14px;border-radius:18px;background:rgba(255,255,255,.95);box-shadow:0 2px 10px rgba(15,22,38,.12);text-align:right}
+.a3alt p{margin:0;line-height:1}.a3alt b{font-size:28px;font-weight:800;color:#111827}.a3alt .u{font-size:13px;color:#6B7280;margin-left:2px}.a3alt small{display:block;margin-top:2px;font-size:12px;color:#6B7280}
+.a3hasact .a3chips{right:140px}
+.a3hasban .a3chips{top:calc(196px + env(safe-area-inset-top))}
+.a3ban{position:absolute;left:12px;right:12px;top:calc(122px + env(safe-area-inset-top));z-index:1;display:flex;align-items:center;gap:10px;padding:8px 8px 8px 16px;border-radius:20px;background:rgba(255,255,255,.95);box-shadow:0 2px 10px rgba(15,22,38,.12)}
+.a3ban div{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}.a3ban b{font-size:16px;font-weight:800;color:#111827}.a3ban span{font-size:13px;color:#6B7280;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.a3ban .a3rnd{background:#EEF1F5;box-shadow:none}.a3ban .a3rnd svg{width:18px;height:18px}
+.a3fside,.a3toast,.a3fly,.a3guide{position:absolute;left:12px;right:12px;bottom:calc(var(--a3sb,40vh) + 80px);z-index:2}
+.a3fside{display:flex;justify-content:space-between;align-items:flex-end;gap:8px;pointer-events:none}
+.a3fside > *{pointer-events:auto}
+.a3seg{display:flex;gap:2px;padding:4px;border-radius:999px;background:rgba(255,255,255,.95);box-shadow:0 2px 10px rgba(15,22,38,.12)}
+.a3seg button{min-width:56px;min-height:44px;border:0;border-radius:999px;background:transparent;color:#4B5563;font:inherit;font-size:14px;font-weight:800;cursor:pointer}
+.a3seg button[aria-pressed="true"]{background:#111827;color:#fff}
+.a3toast{z-index:3;display:flex;align-items:center;gap:10px;padding:12px 12px 12px 16px;border-radius:18px;background:rgba(31,41,55,.95);color:#E5E7EB;box-shadow:0 6px 20px rgba(15,22,38,.25)}
+.a3toast p{flex:1;margin:0;font-size:13px;line-height:1.5}.a3toast b{color:#fff}
+.a3toast button{flex:none;min-height:44px;padding:0 16px;border:0;border-radius:999px;background:rgba(255,255,255,.16);color:#fff;font:inherit;font-size:14px;font-weight:800;cursor:pointer}
+.a3fly{display:flex;justify-content:space-between;align-items:flex-end;pointer-events:none}
+.a3fly > *{pointer-events:auto}
+.a3joyw,.a3ctl{display:flex;flex-direction:column;align-items:center;gap:6px}
+.a3joy{position:relative;width:132px;height:132px;border-radius:50%;background:rgba(255,255,255,.6);box-shadow:inset 0 0 0 2px rgba(255,255,255,.9),0 2px 12px rgba(15,22,38,.14);touch-action:none;cursor:grab;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+.a3joy span{position:absolute;font-size:12px;font-weight:800;color:#374151;pointer-events:none}
+.a3joy .jf{top:8px;left:50%;transform:translateX(-50%)}.a3joy .jb{bottom:8px;left:50%;transform:translateX(-50%)}.a3joy .jl{left:9px;top:50%;transform:translateY(-50%)}.a3joy .jr{right:9px;top:50%;transform:translateY(-50%)}
+.a3joy #a3Knob{position:absolute;left:50%;top:50%;width:54px;height:54px;border-radius:50%;background:#fff;box-shadow:0 3px 10px rgba(15,22,38,.25);transform:translate(-50%,-50%);pointer-events:none}
+.a3cap{margin:0;font-size:12px;font-weight:700;color:#1F2937;text-shadow:0 0 4px #fff,0 0 8px #fff}
+.a3vrt{display:flex;flex-direction:column;align-items:center;gap:6px;padding:5px;border-radius:30px;background:rgba(255,255,255,.95);box-shadow:0 2px 12px rgba(15,22,38,.14)}
+.a3vrt button,.a3turn button{width:48px;height:48px;border:0;border-radius:50%;background:#F3F4F6;color:#111827;display:grid;place-items:center;cursor:pointer;touch-action:none}
+.a3vrt button.on,.a3turn button.on{background:#111827;color:#fff}
+.a3vrt svg,.a3turn svg{width:22px;height:22px}
+.a3vbar{position:relative;width:4px;height:44px;border-radius:2px;background:#E5E7EB}
+.a3vbar i{position:absolute;left:50%;width:14px;height:14px;border-radius:50%;background:#111827;transform:translate(-50%,-50%)}
+.a3turn{display:flex;gap:6px;padding:5px;border-radius:30px;background:rgba(255,255,255,.95);box-shadow:0 2px 12px rgba(15,22,38,.14)}
+.a3stc{display:flex;align-items:center;gap:10px;padding:6px 16px 6px 6px;border-radius:24px;background:rgba(255,255,255,.95);box-shadow:0 2px 10px rgba(15,22,38,.12);max-width:100%}
+.a3stc div{display:flex;flex-direction:column;gap:1px;min-width:0}.a3stc b{font-size:15px;font-weight:800;color:#111827}.a3stc span{font-size:12px;color:#6B7280;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.a3stc .cmp{flex:none;position:relative;width:36px;height:36px;border-radius:50%;background:#EEF1F5}
+.a3stc .cmp i{position:absolute;left:50%;top:50%;width:4px;height:24px;margin:-12px 0 0 -2px;border-radius:2px;background:linear-gradient(#C8102E 50%,#9CA3AF 50%);transform:rotate(calc(0deg - var(--r)))}   /* 北を指す針（見ている向きの分だけ回す） */
+.a3guide{z-index:3;padding:18px 16px 14px;border-radius:24px;background:#fff;box-shadow:0 8px 28px rgba(15,22,38,.22)}
+.a3guide h3{margin:0;font-size:18px;font-weight:800;color:#111827}.a3guide > p{margin:4px 0 12px;font-size:13px;color:#4B5563}
+.a3guide ul{list-style:none;margin:0 0 12px;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.a3guide li{display:grid;grid-template-columns:30px 1fr;grid-template-rows:auto auto;column-gap:8px;align-items:center;padding:10px;border-radius:16px;background:#F3F5F8}
+.a3guide li i{grid-row:1/3;position:relative;width:30px;height:30px}
+.a3guide li i::before,.a3guide li i::after{content:"";position:absolute;width:11px;height:11px;border-radius:50%;background:#111827}
+.a3guide .g1::before{left:9px;top:6px}.a3guide .g1::after{left:2px;top:20px;width:26px;height:4px;border-radius:2px;background:#9CA3AF}
+.a3guide .g2::before{left:2px;top:16px}.a3guide .g2::after{left:17px;top:3px}
+.a3guide .g3::before{left:2px;top:9px}.a3guide .g3::after{left:15px;top:9px}
+.a3guide .g4::before{left:2px;top:14px}.a3guide .g4::after{left:16px;top:4px}
+.a3guide li b{font-size:14px;font-weight:800;color:#111827}.a3guide li span{font-size:12px;color:#6B7280}
+.a3guide .btn1{width:100%;min-height:48px;border-radius:999px}
+.a3guide small{display:block;margin-top:8px;font-size:12px;color:#6B7280;text-align:center}
+.a3pin{position:absolute;left:0;top:0;min-height:44px;padding:0 16px;margin-top:-16px;border:0;border-radius:999px;background:#fff;color:#111827;font:inherit;font-size:14px;font-weight:800;box-shadow:0 3px 10px rgba(15,22,38,.22);pointer-events:auto;cursor:pointer;white-space:nowrap}
+.a3pin.here{background:#111827;color:#fff}
+.a3pin i{position:absolute;left:50%;top:100%;width:2px;height:14px;margin-left:-1px;background:#111827}
+.a3pin i::after{content:"";position:absolute;left:50%;bottom:-6px;width:12px;height:12px;margin-left:-6px;border-radius:50%;background:#111827;box-shadow:0 0 0 2px #fff}
+.a3sheet.a3peek{max-height:calc(64px + env(safe-area-inset-bottom))}
+.a3peek .a3body{overflow:hidden}
+.a3peekb{position:absolute;left:0;right:0;top:0;height:60px;z-index:1;border:0;background:transparent;cursor:pointer}
+.a3shx{padding-right:56px}
+.a3spots button{grid-template-columns:40px minmax(0,1fr) 16px}
+.a3spots .ic{display:grid;place-items:center;width:40px;height:40px;border-radius:12px;background:#EEF1F5;color:#374151}.a3spots .ic svg{width:22px;height:22px}
+.a3rnd.sm{width:44px;height:44px}
 .a3src small{font-size:12px;color:#6B7280}.a3src b{font-size:14px}.a3src span{font-size:12px;color:#6B7280}
 :root[data-night="on"] dialog.a3dlg,:root[data-night="on"] .a3load{background:#0E1622}
 :root[data-night="on"] .a3wrap{color:#E5E7EB}
@@ -5275,6 +5345,9 @@ async function openAp3d(){
   try{ a3Build(); }catch(e){ A3.err = true; a3Fail(); return; }
   if(A3_MAX){ await a3EnvDay(); if(!A3 || !d.open) return; }   // 最高の質：映り込みの絵を読むあいだも「読み込み中」を出したまま（最大6秒）
   $("a3Load").hidden = true;
+  // はじめての1回だけ、指の動きの案内（11/25 a3-free）。自動のテスト（webdriver）では、テストが A3_GUIDE を立てたときだけ出す（ほかのテストの写真と押す所をふさがないため）
+  try{ if(!localStorage.getItem(A3_GUIDE_KEY) && (!navigator.webdriver || window.A3_GUIDE)) A3.guide = true; }catch(e){}
+  a3Pills(); a3Status();
   a3Poll(); A3.timer = setInterval(a3Poll, A3_POLL);
   setTimeout(() => { if(A3){ A3.credit = false; a3Credit(); } }, 5000);   // 角の出典は5秒で「出典 ⓘ」に畳む
   a3Loop();
@@ -5302,8 +5375,12 @@ function a3ShellHTML(){
       <button type="button" class="a3rnd" data-a3-menu aria-label="設定と出典" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="18" cy="12" r="1.8"/></svg></button></div>
     <div class="a3pills" role="group" aria-label="視点"><button type="button" data-a3-view="all" aria-pressed="true">全体</button><button type="button" data-a3-view="tower" aria-pressed="false">管制塔</button><button type="button" data-a3-view="plane" aria-pressed="false" id="a3PlaneBtn">機体</button></div>
     <div class="a3chips" id="a3Chips"></div>
+    <div class="a3tr" id="a3Act"></div><div class="a3ban" id="a3Ban" hidden></div>
+    <div class="a3fly" id="a3Fly" hidden>${a3FlyHTML()}</div><div class="a3fside" id="a3Side" hidden></div><div class="a3toast" id="a3Toast" hidden></div>
+    <nav class="a3modes" id="a3Modes" aria-label="見方">${A3_MODES.map(([k, l, ic]) => `<button type="button" data-a3-mode="${k}" aria-pressed="${k === "free"}"><svg viewBox="0 0 24 24" aria-hidden="true">${ic}</svg><span>${l}</span></button>`).join("")}</nav>
+    <div class="a3guide" id="a3Guide" hidden></div>
     <button type="button" class="a3credit" id="a3Credit" data-a3-src>${A3_CREDIT()}</button>
-    <div class="a3menu" id="a3Menu" hidden><button type="button" data-a3-lite>軽い表示にする</button><button type="button" data-a3-src>データの出典</button></div>
+    <div class="a3menu" id="a3Menu" hidden><button type="button" data-a3-lite>軽い表示にする</button><button type="button" data-a3-guide>指の動きの案内</button><button type="button" data-a3-src>データの出典</button></div>
     <div class="a3load" id="a3Load"><b>3Dを読み込み中…</b><span>${A3_SIZE}。開いたときだけ読み込みます</span><button type="button" class="btn2" data-a3-close>やめる</button></div>
     <section class="a3sheet" id="a3Sheet" aria-live="polite"></section>
   </div>`;
@@ -5328,12 +5405,17 @@ function a3Status(){
   const w = NOW && NOW.data && NOW.data.weather, at = w && w.time ? jstHM(w.time) : "";
   if(w && w.vis_m != null && w.vis_m < 1500) out.push(`<span class="a3chip">霧${at ? `（${at} の通報）` : ""}</span>`);
   else if(w && w.ceil_ft != null && w.ceil_ft < 1500) out.push(`<span class="a3chip">雲が低い${at ? `（${at} の通報）` : ""}</span>`);
+  const md = a3Mode(), calm = md === "stand" || md === "fly";   // 立つ・飛ぶは上の札を少なく（受信中の札は出さない。届かないときだけ出す）
+  if(md === "stand") out.unshift(a3StandCardHTML());
   if(!SERVER) out.push(`<span class="a3chip">デモでは機体の位置は出ません</span>`);
   else if(A3.err === "pos") out.push(`<span class="a3chip">機体の位置が届いていません${A3.lastAt ? `（最後は ${jstHM(new Date(A3.lastAt).toISOString())}）` : ""}</span>`);
+  else if(calm) {}
   else if(A3.snaps.length) out.push(`<span class="a3chip"><i class="dot" aria-hidden="true"></i>位置を受信中</span>`);
   else out.push(`<span class="a3chip">位置を受信しています…</span>`);
-  if(!A3.lite && A3.snaps.length && !A3.sel && A3.view === "all" && Date.now() - A3.t0 < 15000) out.push(`<span class="a3chip">指で左右に回せます</span>`);
+  if(!A3.lite && md === "free" && !A3.sel && !A3.orbMoved && Date.now() - A3.t0 < 15000) out.push(`<span class="a3chip">1本指で回す・2本指で寄る</span>`);
+  if(md === "fly") out.push(`<span class="a3chip" id="a3FlyMsg">${A3.flTop ? "これより上には行けません" : A3.flEdge ? "これより遠くには行けません" : "左で進む・右で高さと向き"}</span>`);
   el.innerHTML = out.join("");
+  a3Aux();
 }
 /* 景色を作る */
 // 古い端末か：CPU の数が4以下、または iPhone で画面の画素が少ない（iPhone 8 まで・SE）。はじめから軽くする
@@ -5445,7 +5527,8 @@ function a3Build(){
 // 下のシートに隠れる分だけ、絵の中心（見ている点）を上へずらす。11/21：機体の視点で地上の機体がシートの裏に入っていた
 function a3ViewOffset(){
   const st = $("a3Stage"), sh = $("a3Sheet"); if(!A3 || !A3.cam || !st) return;
-  const W = st.clientWidth, H = st.clientHeight, s = sh ? Math.max(0, Math.min(H * 0.45, H - (sh.getBoundingClientRect().top - st.getBoundingClientRect().top))) : 0;
+  const md = $("a3Modes"), top = Math.min(sh ? sh.getBoundingClientRect().top : 1e9, md && md.offsetParent ? md.getBoundingClientRect().top : 1e9);   // 11/25：下の4つのボタンも隠す分に入れる
+  const W = st.clientWidth, H = st.clientHeight, s = top < 1e9 ? Math.max(0, Math.min(H * 0.45, H - (top - st.getBoundingClientRect().top))) : 0;
   if(Math.abs(s - (A3.vo ?? -1)) < 4 && A3.voFov === A3.cam.userData.fov) return;
   A3.vo = s; A3.voFov = A3.cam.userData.fov;
   const cam = A3.cam, f = A3.cam.userData.fov || 50, half = Math.tan(f * D2R / 2) * (H + s) / H;   // 見えている所の縦の画角を変えない
@@ -5690,16 +5773,59 @@ const a3Colors = n => n === "night" ? { top:0x050A14, hor:0x1C2A3C, glow:0x00000
     tRoof:0xD8CFC4, tWall:0x8D99A6, hRoof:0xC9C0B6, hWall:0xB1A9A0, bRoof:0xC6BDB3, bWall:0xB9B0A6, glass:0x9FB0BD }
   : { top:0x4F8BCB, hor:0xD3E3EF, glow:0xFFFFFF, skyL:0xEAF2FA, gndL:0x9AA391, hemi:2.0, sunC:0xFFFFFF, sunI:1.9, sea:0x86AECB, seaSpec:0x5E7184, cloud:0xFFFFFF, land:0xD7D3C7, aero:0xDCE2D7, grass:0xAFC896, apron:0xC7CBCF, twy:0x8E939A, twyL:0xD9B53C, rw:0x60656C,
     tRoof:0xEEF0F2, tWall:0x8FA6BA, hRoof:0xD9DDE1, hWall:0xC3C9CF, bRoof:0xE4E7EA, bWall:0xCDD2D7, glass:0xA9C3D3 };
-// 指で左右に回す（全体と管制塔）
+// 指の操作（11/25 checkin/a3-free）：1本指＝回す（立つ・飛ぶ・追うは見回す）・2本指＝つまんで寄る離れる（立つはズーム）・なぞってずらす・上下に傾ける（自由だけ）。ホイールでも寄る
+//   2本指の動きは、はじめの動きで「ずらす」か「傾ける」に決める（指が横に並んで縦に動いたら傾ける）
 function a3Drag(cv){
-  let x0 = null;
-  cv.addEventListener("pointerdown", e => { x0 = e.clientX; cv.setPointerCapture(e.pointerId); A3.moved = false; });
-  cv.addEventListener("pointermove", e => { if(x0 == null || !A3) return; const dx = e.clientX - x0; if(Math.abs(dx) > 4) A3.moved = true; A3.yaw += dx * 0.006; x0 = e.clientX; A3.dirty = true; });
-  cv.addEventListener("pointerup", e => { const tap = !A3 || !A3.moved; x0 = null; if(tap && A3) a3Tap(e); });
+  const P = new Map(); let g = null;
+  const mid = () => { const a = [...P.values()]; return [(a[0].x + a[1].x) / 2, (a[0].y + a[1].y) / 2, Math.hypot(a[0].x - a[1].x, a[0].y - a[1].y), Math.abs(a[0].x - a[1].x) > Math.abs(a[0].y - a[1].y)]; };
+  cv.addEventListener("pointerdown", e => { if(!A3) return; P.set(e.pointerId, { x:e.clientX, y:e.clientY }); try{ cv.setPointerCapture(e.pointerId); }catch(er){}
+    if(P.size === 1){ A3.moved = false; g = { n:1, x:e.clientX, y:e.clientY, x0:e.clientX, y0:e.clientY }; }
+    else if(P.size === 2){ A3.moved = true; const [mx, my, d, side] = mid(); g = { n:2, mx, my, d, side, lock:null, ax:0, ay:0 }; } });
+  cv.addEventListener("pointermove", e => { if(!A3 || !P.has(e.pointerId) || !g) return; P.set(e.pointerId, { x:e.clientX, y:e.clientY });
+    if(g.n === 1 && P.size === 1){ const dx = e.clientX - g.x, dy = e.clientY - g.y; if(Math.hypot(e.clientX - g.x0, e.clientY - g.y0) > 4) A3.moved = true; g.x = e.clientX; g.y = e.clientY; a3Look(dx, dy); }
+    else if(g.n === 2 && P.size === 2){ const [mx, my, d] = mid(), dx = mx - g.mx, dy = my - g.my;
+      if(g.d > 10 && d > 10) a3Zoom(d / g.d);
+      if(!g.lock){ g.ax += dx; g.ay += dy; if(Math.hypot(g.ax, g.ay) > 8) g.lock = Math.abs(g.ay) > Math.abs(g.ax) * 2 && g.side ? "tilt" : "pan"; }
+      if(g.lock === "tilt") a3Tilt(dy); else if(g.lock === "pan") a3Pan(dx, dy);
+      g.mx = mx; g.my = my; g.d = d; } });
+  const up = e => { if(!P.has(e.pointerId)) return; P.delete(e.pointerId); const tap = g && g.n === 1 && A3 && !A3.moved && e.type === "pointerup"; if(!P.size) g = null; else if(g && g.n === 2) g = null; if(tap) a3Tap(e); };
+  cv.addEventListener("pointerup", up); cv.addEventListener("pointercancel", up);
+  cv.addEventListener("wheel", e => { if(!A3) return; e.preventDefault(); a3Zoom(Math.exp(-e.deltaY * 0.0015)); }, { passive:false });
 }
-// 名札または機体を押したらカード
+// 1本指：自由と管制塔は左右に回す（前と同じ A3.yaw）。立つ・飛ぶは見回す（上下も）。追うは機体のまわりを回る
+function a3Look(dx, dy){
+  const md = a3Mode();
+  A3.yaw += dx * (md === "stand" ? 0.004 / (A3.zoom || 1) : 0.006);
+  if(md === "stand") A3.lp = Math.max(-0.75, Math.min(0.45, (A3.lp || 0) + dy * 0.004 / (A3.zoom || 1)));
+  else if(md === "fly" && A3.fl) A3.fl.p = Math.max(-1.2, Math.min(0.35, A3.fl.p + dy * 0.004));
+  else if(md === "follow") A3.fup = Math.max(0.3, Math.min(3, (A3.fup || 1) * Math.exp(dy * 0.004)));
+  A3.dirty = true;
+  if(md === "stand"){ const d = a3Dir(a3StandH()); if(A3._dir !== d){ A3._dir = d; a3Status(); } }   // 「西を見ています」を向きに合わせる
+}
+// つまむ：自由は寄る離れる・立つはズーム（目の位置は動かない）・追うは近づく離れる。飛ぶは何もしない（つまみで動く）
+function a3Zoom(k){
+  if(!(k > 0) || !isFinite(k)) return;
+  const md = a3Mode();
+  if(md === "free"){ const o = a3Orb(); o.d = o.d / k; A3.orbMoved = true; a3Clamp(); a3Pills(); }
+  else if(md === "stand") A3.zoom = Math.max(1, Math.min(5, (A3.zoom || 1) * k));
+  else if(md === "follow") A3.fk = Math.max(0.35, Math.min(4, (A3.fk || 1) / k));
+  else return;
+  A3.dirty = true; if(md === "stand") a3Status(); else a3Aux();
+}
+// 2本指でなぞる：見ている点をずらす（自由だけ）
+function a3Pan(dx, dy){
+  if(a3Mode() !== "free") return;
+  const o = a3Orb(), H = ($("a3Stage") || {}).clientHeight || 700, k = o.d * 0.93 / H, sy = Math.sin(A3.yaw), cy = Math.cos(A3.yaw);
+  o.tx += (cy * dx - sy * dy / Math.max(0.35, Math.sin(o.p))) * k; o.tz += (-sy * dx - cy * dy / Math.max(0.35, Math.sin(o.p))) * k;   // 右へなぞる＝景色が右へ（見る点は左へ）。下へなぞる＝景色が手前へ（見る点は奥へ）
+  A3.orbMoved = true; a3Clamp(); a3Pills(); a3Aux(); A3.dirty = true;
+}
+// 2本指で上下：傾ける（上へなぞると地平に近く）
+function a3Tilt(dy){ if(a3Mode() !== "free") return; const o = a3Orb(); o.p += dy * 0.005; A3.orbMoved = true; a3Clamp(); a3Pills(); a3Aux(); A3.dirty = true; }
+// 名札または機体を押したらカード。立つ場所を選んでいるときは、押した地面に「ここに立つ」
 function a3Tap(e){
-  const st = $("a3Stage").getBoundingClientRect(); let best = null, bd = 40;
+  const st = $("a3Stage").getBoundingClientRect();
+  if(A3.standPick){ const p = a3GroundAt(e.clientX - st.left, e.clientY - st.top); if(p){ A3.here = p; A3.dirty = true; } return; }
+  let best = null, bd = 40;
   for(const [id, o] of A3.objs){ if(o.sx == null) continue; const d = Math.hypot(o.sx - (e.clientX - st.left), o.sy - (e.clientY - st.top)); if(d < bd){ bd = d; best = id; } }
   if(best) a3Select(best, false);
 }
@@ -5756,11 +5882,13 @@ function a3Loop(){
   if(!A3) return;
   A3.raf = requestAnimationFrame(a3Loop);
   const now = Date.now();
+  const fi = A3.view === "fly" && A3.fin; if(fi && (fi.jx || fi.jy || fi.up || fi.turn) && now - (A3.drawn || 0) >= 30) A3.dirty = true;
   if(A3.lite && !A3.dirty && now - (A3.drawn || 0) < 20000) return;   // 軽い表示：動かしたときと20秒ごとだけ描く
   if(!A3.lite && !A3.dirty && now - (A3.drawn || 0) < 30) return;
   A3.dirty = false;
   if(!A3.lite){ const dt = now - (A3.drawn || now); A3.fr = (A3.fr || []).concat(dt).slice(-60);
     if(A3.fr.length === 60 && now - (A3.qAt || A3.t0) > 4000){ const avg = A3.fr.reduce((s, x) => s + x, 0) / 60; if(avg > 45 && A3.q > 0 && !window.A3_QLOCK) a3Quality(A3.q - 1); } }   // A3_QLOCK はテストの写真用（画面のないソフトの描画は遅いので）
+  if(A3.view === "fly" && a3FlyStep((now - (A3.drawn || now)) / 1000)){ A3.dirty = true; a3FlyAlt(); }   // 飛ぶ：つまみを動かしているあいだは毎こま描く
   A3.drawn = now;
   const ps = a3Planes(now);
   a3Sync(ps); a3Camera(ps); a3ShadowFollow(); if(A3.sky) A3.sky.position.copy(A3.cam.position);
@@ -6248,7 +6376,7 @@ const A3_MINPX = { air:22, ground:16 };
 function a3Sync(ps){
   const T = A3.THREE, ids = new Set(ps.map(p => p.id));
   for(const [id, o] of A3.objs) if(!ids.has(id)){ A3.scene.remove(o.g); if(o.sh) A3.scene.remove(o.sh); if(o.ln) A3.scene.remove(o.ln); A3.objs.delete(id); }
-  const big = A3.view === "all" ? 5 : 1;   // 全体の視点だけ見つけやすいよう大きく描く
+  const big = A3.view === "all" ? Math.max(1, Math.min(5, a3Orb().d / 2400)) : 1;   // 全体の視点だけ見つけやすいよう大きく描く（11/25：自由で寄ったら本当の大きさに近づける。はじめの位置は前と同じ5倍）
   for(const p of ps){
     let o = A3.objs.get(p.id);
     if(!o || o.lite !== A3.lite){ if(o){ A3.scene.remove(o.g); if(o.sh) A3.scene.remove(o.sh); if(o.ln) A3.scene.remove(o.ln); }
@@ -6277,35 +6405,155 @@ function a3Sync(ps){
       o.ln.geometry.setFromPoints([new T.Vector3(x, 1.5, z), new T.Vector3(x, y, z)]); o.ln.computeLineDistances(); } }
   }
 }
+/* 見方（11/25 checkin/a3-free・本人「案B、管制塔もピルに残す」）：下の4つのボタン「自由・追う・立つ・飛ぶ」で切り替える。
+   A3.view は前の名前のまま使う：all＝自由（はじめは前の「全体」と同じ位置）・tower＝管制塔に立つ・stand＝ほかの所に立つ・plane＝追う・fly＝飛ぶ */
+const A3_MODES = [
+  ["free", "自由", `<path d="M20 12a8 8 0 1 1-2.6-5.9M20 4v4.5h-4.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>`],
+  ["follow", "追う", `<path d="M3 17l7-3 4 4 2-1-2-5 5-3c1-.6.6-2-.6-1.8L13 8.5 8 5l-1.5.6L9 10l-3 1.5L4 10l-1 .5 1.5 3z" fill="currentColor"/>`],
+  ["stand", "立つ", `<circle cx="12" cy="4.5" r="2" fill="currentColor"/><path d="M12 8v6m0 0-3 7m3-7 3 7M7.5 11h9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>`],
+  ["fly", "飛ぶ", `<circle cx="6" cy="6" r="2.6" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="18" cy="6" r="2.6" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="6" cy="18" r="2.6" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="18" cy="18" r="2.6" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M8 8l8 8M16 8l-8 8" stroke="currentColor" stroke-width="2"/>`]];
+const a3Mode = () => !A3 ? "free" : A3.view === "plane" && A3.sel ? "follow" : A3.view === "tower" || A3.view === "stand" ? "stand" : A3.view === "fly" ? "fly" : "free";
+// 自由：見る点（tx, tz）・距離 d・見下ろす角 p。向きは A3.yaw（前の「全体」と同じ）。はじめは前の「全体」の位置（約10km 北・7,000m）
+const A3_ORB0 = { tx:0, tz:300, d:Math.hypot(10000, 7000), p:Math.atan2(7000, 10000) };
+const A3_LIM = { r:6000, dMin:200, dMax:16000, pMin:6 * Math.PI / 180, pMax:88 * Math.PI / 180, flyTop:1000, flyLow:15, flyR:8000, eye:1.6 };   // 地面の下と空港から遠すぎる所には行かない
+const a3Orb = () => A3.orb || (A3.orb = { ...A3_ORB0 });
+function a3Clamp(){
+  const o = a3Orb(), r = Math.hypot(o.tx, o.tz);
+  if(r > A3_LIM.r){ o.tx *= A3_LIM.r / r; o.tz *= A3_LIM.r / r; }
+  o.d = Math.max(A3_LIM.dMin, Math.min(A3_LIM.dMax, o.d)); o.p = Math.max(A3_LIM.pMin, Math.min(A3_LIM.pMax, o.p));
+}
+// 立つ：おすすめの場所。管制塔は今の「管制塔」の視点（高さ 約118m・管制室の外 40m）。ほかは目の高さ 約1.6m（屋上なら屋上の上）。b＝はじめに見る向き（北0・東90）
+//   展望デッキの位置は、3D の形のターミナルの屋上の端で、滑走路側（T1 は西の A 滑走路・T2 は東の C 滑走路）の見通しがよい所を探して決めた（手前に高い屋根がない所）。実際のデッキの位置とは少し違う
+const A3_SPOTS = [
+  { id:"tower", name:"管制塔", sub:"いまの「管制塔」の視点。高さ 約118m", ic:"tower" },
+  { id:"t1", name:"第1ターミナル 展望デッキ", sub:"A 滑走路と駐機場", lat:35.548236, lon:139.782867, b:-75, ic:"deck" },
+  { id:"t2", name:"第2ターミナル 展望デッキ", sub:"C 滑走路と駐機場", lat:35.551853, lon:139.789050, b:80, ic:"deck" },
+  { id:"c34", name:"C 滑走路の南の端", sub:"着陸する機体を正面から", rwy:"34R", b:null, ic:"rwy" }];
+function a3SpotXZ(s){
+  if(s.id === "tower") return A3.towerXZ || a3XZ(A3_TOWER[0], A3_TOWER[1]);
+  if(s.rwy){ const r = HND_RWY.find(x => x[4] === s.rwy || x[0] === s.rwy), e = r[4] === s.rwy ? [r[5], r[6]] : [r[1], r[2]], o = r[4] === s.rwy ? [r[1], r[2]] : [r[5], r[6]];
+    const [ex, ez] = a3XZ(e[0], e[1]), [ox, oz] = a3XZ(o[0], o[1]), L = Math.hypot(ox - ex, oz - ez), ux = (ox - ex) / L, uz = (oz - ez) / L;
+    return [ex + ux * 60 + uz * 130, ez + uz * 60 - ux * 130]; }   // 端から 60m 内・滑走路の横 130m（滑走路の上には立たない）
+  return a3XZ(s.lat, s.lon);
+}
+function a3SpotB(s){
+  if(s.id === "tower") return -Math.PI / 2;
+  if(s.rwy){ const r = HND_RWY.find(x => x[4] === s.rwy || x[0] === s.rwy), e = r[4] === s.rwy ? [r[5], r[6]] : [r[1], r[2]], o = r[4] === s.rwy ? [r[1], r[2]] : [r[5], r[6]]; return (bearing(o, e)) * D2R; }   // 着陸の機体が来る向き（滑走路の外）を見る
+  return s.b * D2R;
+}
+// その所の地面か屋上の高さ（上から下へ光を当てて、最初に当たった建物や地面。機体・空・線は除く）
+function a3RoofY(x, z){
+  try{ const T = A3.THREE, rc = new T.Raycaster(new T.Vector3(x, 900, z), new T.Vector3(0, -1, 0), 0, 1000), planes = new Set([...A3.objs.values()].map(o => o.g));
+    const skip = o => { for(let q = o; q; q = q.parent){ if(q === A3.sky || planes.has(q)) return true; } return false; };
+    for(const h of rc.intersectObjects(A3.scene.children, true)){ if(!h.object.isMesh || h.object.isInstancedMesh && false || skip(h.object) || h.point.y > 400 || h.point.y < -5) continue; return Math.max(0, h.point.y); } }catch(e){}
+  return 0;
+}
+// 形のファイルの建物（ターミナル・格納庫など）のうち、その所を含むいちばん高い屋根の高さ（屋上の端を探すのに使う。軽い計算）
+function a3BldH(x, z){
+  const S = A3.shape; if(!S || !S.bld) return 0; let best = 0;
+  for(const b of S.bld){ const h = b[1]; if(h <= best) continue; const n = (b.length - 2) / 2; let c = false;
+    for(let i = 0, j = n - 1; i < n; j = i++){ const xi = b[2 + i * 2], zi = b[3 + i * 2], xj = b[2 + j * 2], zj = b[3 + j * 2];
+      if((zi > z) !== (zj > z) && x < (xj - xi) * (z - zi) / (zj - zi) + xi) c = !c; }
+    if(c) best = h; }
+  return best;
+}
+// 画面の点 → 地面（y=0）の点
+function a3GroundAt(sx, sy){
+  const T = A3.THREE, st = $("a3Stage"), W = st.clientWidth, H = st.clientHeight, rc = new T.Raycaster();
+  rc.setFromCamera(new T.Vector2(sx / W * 2 - 1, -(sy / H) * 2 + 1), A3.cam);
+  const d = rc.ray.direction, o = rc.ray.origin; if(d.y > -1e-4) return null;
+  const t = -o.y / d.y, x = o.x + d.x * t, z = o.z + d.z * t;
+  return Math.hypot(x, z) > A3_LIM.flyR ? null : [x, z];
+}
+function a3StandAt(spot, xz){
+  if(!A3) return;
+  A3.standPick = false; A3.here = null; A3.sel = A3.view === "plane" ? A3.sel : A3.sel; A3.card = false; A3.picking = false; A3.src = false; A3.lp = 0; A3.zoom = 1; A3.yaw = 0; A3.sheetOpen = false;
+  if(spot && spot.id === "tower"){ A3.view = "tower"; A3.st = null; }
+  else { let [x, z] = xz || a3SpotXZ(spot), y = a3RoofY(x, z);
+    let b = spot ? a3SpotB(spot) : null;
+    if(b == null){ const c = A3.cam.position; b = Math.atan2(x - c.x, -(z - c.z)); }   // 押した所：そこへ向かう向きのまま
+    if(y > 3 && !spot){ const fx = Math.sin(b), fz = -Math.cos(b), h0 = Math.max(y, a3BldH(x, z)) - 3;   // 押した所が屋上：見る向きの屋上の端まで出る（屋根の真ん中だと屋根しか見えないため。おすすめの場所ははじめから端）
+      for(let d = 4; d <= 400; d += 4){ if(a3BldH(x + fx * d, z + fz * d) < h0){ x += fx * Math.max(0, d - 6); z += fz * Math.max(0, d - 6); break; } } }
+    A3.view = "stand"; A3.st = { x, z, eye:y + A3_LIM.eye, b, name:spot ? spot.name : "押した所", roof:y > 3 }; }
+  a3Pills(); a3Sheet(); a3Status(); A3.dirty = true;
+}
+// 飛ぶ：今見ている所から始める（高さ 約380m、上限 1,000m）
+function a3FlyStart(){
+  const c = A3.cam, d = new A3.THREE.Vector3(); c.getWorldDirection(d);
+  let h = Math.atan2(d.x, -d.z), x, z, y;
+  if(a3Mode() === "free"){ const o = a3Orb(), r0 = Math.hypot(o.tx, o.tz), k = r0 > 2500 ? 2500 / r0 : 1;   // 空港の方を向いて始める（見ている点は空港から 2.5km まで）
+    x = o.tx * k - Math.sin(A3.yaw) * 1800; z = o.tz * k - Math.cos(A3.yaw) * 1800; y = 380; }
+  else { x = c.position.x; z = c.position.z; y = Math.max(60, Math.min(A3_LIM.flyTop, c.position.y)); }
+  const r = Math.hypot(x, z); if(r > A3_LIM.flyR){ x *= A3_LIM.flyR / r; z *= A3_LIM.flyR / r; }
+  A3.fl = { x, y, z, h, p:-0.28 }; A3.fin = { jx:0, jy:0, up:0, turn:0 };
+  A3.view = "fly"; A3.card = false; A3.picking = false; A3.standPick = false; A3.src = false; A3.sheetOpen = false; A3.flTop = A3.flEdge = false;
+  a3Pills(); a3Sheet(); a3Status(); A3.dirty = true;
+}
+// 毎こま：つまみとボタンで動かす（高いほど速い）
+function a3FlyStep(dt){
+  const f = A3.fl, i = A3.fin; if(!f || !i) return false;
+  if(!i.jx && !i.jy && !i.up && !i.turn) return false;
+  dt = Math.min(dt, 0.1);
+  const v = 40 + f.y * 0.6, fx = Math.sin(f.h), fz = -Math.cos(f.h);
+  f.x += (fx * -i.jy + -fz * i.jx) * v * dt; f.z += (fz * -i.jy + fx * i.jx) * v * dt;
+  f.h += i.turn * 0.9 * dt;
+  const want = f.y + i.up * (40 + f.y * 0.35) * dt;
+  const top = i.up > 0 && want >= A3_LIM.flyTop; f.y = Math.max(A3_LIM.flyLow, Math.min(A3_LIM.flyTop, want));
+  const r = Math.hypot(f.x, f.z), edge = r > A3_LIM.flyR; if(edge){ f.x *= A3_LIM.flyR / r; f.z *= A3_LIM.flyR / r; }
+  if(top !== !!A3.flTop || edge !== !!A3.flEdge){ A3.flTop = top; A3.flEdge = edge; a3Status(); }
+  return true;
+}
+// 追う機体が見えなくなった（駐機場に入った・範囲の外へ出た）：今の位置のまま自由に（全体へは飛ばない）
+function a3Lose(){
+  const c = A3.cam.position, d = new A3.THREE.Vector3(); A3.cam.getWorldDirection(d);
+  const t = d.y < -0.05 ? Math.min(6000, -c.y / d.y) : 1500, tx = c.x + d.x * t, tz = c.z + d.z * t, D = Math.max(A3_LIM.dMin, Math.hypot(tx - c.x, c.y, tz - c.z));
+  const o = a3Orb(); o.tx = tx; o.tz = tz; o.d = D; o.p = Math.asin(Math.min(1, c.y / D)); A3.yaw = Math.atan2(tx - c.x, tz - c.z); a3Clamp();
+  const p = A3.objs.get(A3.sel); A3.lost = { no:A3.lostNo || "機体", at:Date.now() };
+  A3.view = "all"; A3.sel = null; A3.card = false; A3.orbMoved = true; A3.lostT = 0;
+  a3Pills(); a3Sheet(); a3Status(); A3.dirty = true;
+}
+function a3Near(n){ const c = A3.cam; if(c.near !== n && c.updateProjectionMatrix){ c.near = n; c.updateProjectionMatrix(); A3.vo = -1; } }
 function a3Camera(ps){
   const T = A3.THREE, cam = A3.cam, yaw = A3.yaw;
   if(A3.view === "plane" && A3.sel){
     const o = A3.objs.get(A3.sel);
-    if(o){ a3TowerClip(false); // 機体の視点：機体のすぐ後ろの少し上から、進む向きを見る（11/21：前は約450m 後ろで機体が小さく、地平だけになっていた）
-      const p = o.p, h = (p.hdg || 0) * D2R + yaw, Lm = a3Len(p.type), air = a3Air(p), pos = o.g.position;
+    if(!o){ if(!A3.lostT) A3.lostT = Date.now(); else if(Date.now() - A3.lostT > 1500) a3Lose(); if(A3.view === "plane") return; }   // 1.5秒届かなければ自由へ（そのあいだは今の見え方のまま）
+    else { A3.lostT = 0; A3.lostNo = a3No(o.p); a3TowerClip(false); a3Near(30); // 機体の視点：機体のすぐ後ろの少し上から、進む向きを見る（11/21：前は約450m 後ろで機体が小さく、地平だけになっていた）
+      const p = o.p, side = [0, Math.PI / 2, Math.PI][A3.fside || 0], h = (p.hdg || 0) * D2R + yaw + side, Lm = a3Len(p.type), air = a3Air(p), pos = o.g.position, k = A3.fk || 1, u = A3.fup || 1;
       // 地上の機体は、ターミナルの屋根（PLATEAU で約40m）より上の斜め後ろから見下ろす（11/21 夜：駐機場の機体の後ろに建物が入り、壁しか見えなかった）
-      const back = air ? Lm * 2.4 + 30 : Lm * 2.6 + 60, up = air ? Lm * 0.55 + 6 : Lm * 1.2 + 55;
+      // 付く位置（11/25）：後ろ・横・前（A3.fside）。指で角度（A3.yaw・A3.fup）と距離（A3.fk）
+      const back = (air ? Lm * 2.4 + 30 : Lm * 2.6 + 60) * k, up = (air ? Lm * 0.55 + 6 : Lm * 1.2 + 55) * k * u;
       cam.userData.fov = 55; a3ViewOffset();
       cam.position.set(pos.x - Math.sin(h) * back, pos.y + up, pos.z + Math.cos(h) * back);
+      if(A3.fside){ cam.lookAt(pos.x, pos.y, pos.z); return; }   // 横・前は機体そのものを見る
       const ahead = air ? 1400 : 160, drop = air ? Math.min(pos.y * 0.6, 900) : 0;
       cam.lookAt(pos.x + Math.sin(h) * ahead, pos.y - drop, pos.z - Math.cos(h) * ahead); return; }
   }
-  if(A3.view === "tower"){
+  if(A3.view === "tower" || A3.view === "stand" && A3.st){
     // 管制塔の視点：管制室の高さ（約106m）から、はじめは西（第1ターミナルと駐機場・誘導路・A 滑走路。その先に大田区）を見下ろす。8方向を撮って比べ、いちばん空港らしく見える向きにした
     //   11/21 の不具合3：前は 3km 先の地面を水平に近く見ていて、地平と空ばかりだった。2km 先・俯角約3°にし、画角を広げる
     //   11/24 の見回り2：手前のターミナルの屋根が画面の下半分をふさいでいた。目を管制塔の上（約118m）に上げて管制室の外（滑走路側へ40m）に出し、
     //   建物だけ、カメラから A3_TOWER_CUT より手前を切る（地面・誘導路・機体・灯りは切らない）。指で回しても同じ
-    const [x, z] = A3.towerXZ || a3XZ(A3_TOWER[0], A3_TOWER[1]), h = -Math.PI / 2 + yaw, eye = A3_TOWER[2] + 2, fx = Math.sin(h), fz = -Math.cos(h);
-    cam.userData.fov = 62; a3ViewOffset();
-    cam.position.set(x + fx * 40, eye, z + fz * 40); cam.lookAt(x + fx * 1700, 0, z + fz * 1700); a3TowerClip(true, fx, fz); return;
+    //   11/25（a3-free）：立つの一つにした。指で見回す（上下 A3.lp も）・2本指でズーム（A3.zoom。目の位置は動かない）。ほかの所は目の高さ 約1.6m
+    const tw = A3.view === "tower", S = tw ? null : A3.st, [x, z] = tw ? (A3.towerXZ || a3XZ(A3_TOWER[0], A3_TOWER[1])) : [S.x, S.z];
+    const h = (tw ? -Math.PI / 2 : S.b) + yaw, eye = tw ? A3_TOWER[2] + 2 : S.eye, fx = Math.sin(h), fz = -Math.cos(h), out = tw ? 40 : 0;
+    const p0 = tw ? -Math.atan2(eye, 1700 - out) : S.roof ? -Math.atan2(S.eye, 900) : 0.02, pt = p0 + (A3.lp || 0), z0 = A3.zoom || 1;
+    a3Near(tw ? 30 : 1.5); cam.userData.fov = 2 * Math.atan(Math.tan(31 * D2R) / z0) / D2R; a3ViewOffset();
+    cam.position.set(x + fx * out, eye, z + fz * out);
+    cam.lookAt(cam.position.x + fx * Math.cos(pt) * 1000, eye + Math.sin(pt) * 1000, cam.position.z + fz * Math.cos(pt) * 1000);
+    a3TowerClip(tw, fx, fz); return;
   }
   a3TowerClip(false);
+  if(A3.view === "fly" && A3.fl){ const f = A3.fl, fx = Math.sin(f.h), fz = -Math.cos(f.h);
+    a3Near(f.y < 120 ? 3 : 30); cam.userData.fov = 60; a3ViewOffset();
+    cam.position.set(f.x, f.y, f.z); cam.lookAt(f.x + fx * Math.cos(f.p) * 1000, f.y + Math.sin(f.p) * 1000, f.z + fz * Math.cos(f.p) * 1000); return; }
+  a3Near(30);
   cam.userData.fov = 50; a3ViewOffset();
-  // 全体：北の上空から南へ見る（空港の先に着陸に向かう機体）。指で左右に回す
+  // 自由（前の「全体」）：はじめは北の上空から南へ見る（空港の先に着陸に向かう機体）。1本指で回す・2本指で寄る／ずらす／傾ける
   //   11/21 の見回り8：約12km まで寄せ、見る点を空港の1km 北にして、模型をシートの上の空いた所に大きく出す
-  const R = 10000, cx = 0, cz = 300;   // 11/21：絵の中心をシートの上へずらしたので、見る点は空港の中心近くに戻す
-  cam.position.set(cx - Math.sin(yaw) * R, 7000, cz - Math.cos(yaw) * R);
-  cam.lookAt(cx, 0, cz);
+  const o = a3Orb(), c = Math.cos(o.p);
+  cam.position.set(o.tx - Math.sin(yaw) * o.d * c, o.d * Math.sin(o.p), o.tz - Math.cos(yaw) * o.d * c);
+  cam.lookAt(o.tx, 0, o.tz);
 }
 // 管制塔の視点だけ、建物の材質でカメラの前 A3_TOWER_CUT（m）より手前を切る（ほかの視点では、何も切らない向きに面を置く）
 //   面は材質にはじめに1回だけ付ける（視点を変えるたびに付け外しすると、描き方の作り直しで1コマ止まるため）
@@ -6328,7 +6576,7 @@ function a3TermWindows(list, lights){
 function a3Labels(ps){
   const box = $("a3Labels"); if(!box) return;
   const T = A3.THREE, st = $("a3Stage"), W = st.clientWidth, H = st.clientHeight, v = new T.Vector3(), seen = new Set(), placed = [];
-  const sheetTop = ($("a3Sheet").getBoundingClientRect().top - st.getBoundingClientRect().top);
+  const sheetTop = a3Floor();   // 11/25：シートと下の4つのボタン（飛ぶはつまみ）の上まで
   const order = [...A3.objs.entries()].sort((a, b) => (a[0] === A3.sel ? -1 : b[0] === A3.sel ? 1 : 0) || (a[1].p.dist_km || 0) - (b[1].p.dist_km || 0));
   let edges = 0;
   // 11/21 の不具合2：名札（MH691 3分）が出典の札と重なっていた。出典の札と左上の札の場所を先に「使っている所」に入れる
@@ -6372,11 +6620,33 @@ function a3Labels(ps){
     el.style.transform = `translate(${lx.toFixed(1)}px,${(o.sy - 14).toFixed(1)}px) translate(-50%,-100%)`;
   }
   for(const [id, el] of A3.labels) if(!seen.has(id)){ el.remove(); A3.labels.delete(id); }
+  a3SpotTags(W, H, sheetTop);
+}
+// 下のシートと4つのボタン（飛ぶはつまみも）のいちばん上（景色の中の y）
+function a3Floor(){
+  const st = $("a3Stage").getBoundingClientRect(); let y = $("a3Sheet").getBoundingClientRect().top;
+  for(const el of [$("a3Modes"), $("a3Fly"), $("a3Side"), $("a3Toast")]) if(el && !el.hidden && el.offsetParent) y = Math.min(y, el.getBoundingClientRect().top);
+  return y - st.top;
+}
+// 立つ場所を選んでいるあいだ：おすすめの場所の札と、押した所の「ここに立つ」
+function a3SpotTags(W, H, floor){
+  const box = $("a3Labels"), T = A3.THREE, v = new T.Vector3(), want = [];
+  if(A3.standPick){ for(const s of A3_SPOTS){ const [x, z] = a3SpotXZ(s); want.push({ k:"s-" + s.id, x, y:s.id === "tower" ? A3_TOWER[2] : 0, z, html:esc(s.name.replace(/ 展望デッキ$/, " デッキ").replace(/^第(\d)ターミナル/, "T$1")), attr:`data-a3-spot="${s.id}"` }); }
+    if(A3.here) want.push({ k:"here", x:A3.here[0], y:0, z:A3.here[1], html:"ここに立つ", attr:"data-a3-here", cls:"here" }); }
+  A3.spotEls = A3.spotEls || new Map(); const seen = new Set();
+  for(const w of want){ v.set(w.x, w.y, w.z).project(A3.cam); if(v.z >= 1 || Math.abs(v.x) > 1 || Math.abs(v.y) > 1) continue;
+    const sx = (v.x + 1) / 2 * W, sy = (1 - v.y) / 2 * H; if(sy < 150 || sy > floor - 4) continue;
+    let el = A3.spotEls.get(w.k); if(!el){ el = document.createElement("button"); el.type = "button"; el.className = "a3pin" + (w.cls ? " " + w.cls : ""); el.innerHTML = `<b>${w.html}</b><i aria-hidden="true"></i>`; const [an, av] = w.attr.split("="); el.setAttribute(an, av ? av.replace(/"/g, "") : ""); box.appendChild(el); A3.spotEls.set(w.k, el); }
+    el.style.transform = `translate(${sx.toFixed(1)}px,${sy.toFixed(1)}px) translate(-50%,-100%)`; seen.add(w.k); }
+  for(const [k, el] of A3.spotEls) if(!seen.has(k)){ el.remove(); A3.spotEls.delete(k); }
 }
 /* 下のシート：近くの機体の一覧／押した機体のカード／出典 */
-function a3Sheet(){
+function a3Sheet(){ a3SheetIn(); if(A3) a3Layout(); }
+function a3SheetIn(){
   const el = $("a3Sheet"); if(!el || !A3) return;
+  el.classList.remove("a3peek");
   if(A3.src) return a3SrcHTML(el);
+  if(A3.standPick) return a3SpotsHTML(el);
   if(A3.sel && A3.card){ const o = A3.objs.get(A3.sel), p = o ? o.p : a3Planes().find(x => x.id === A3.sel); if(p) return a3CardHTML(el, p); A3.sel = null; A3.card = false; }
   const ps = a3Planes().filter(p => p.phase === "arr" || p.phase === "dep" || !a3Air(p));
   ps.sort((a, b) => (a3Air(b) - a3Air(a)) || (a.phase === "arr" ? 0 : 1) - (b.phase === "arr" ? 0 : 1) || (a.dist_km || 0) - (b.dist_km || 0));
@@ -6385,9 +6655,11 @@ function a3Sheet(){
   const row = p => { const [s1, s2] = a3State(p), sp = a3Sp(p);
     return `<li${p.id === A3.sel ? ` class="on"` : ""}><button type="button" data-a3-pick="${esc(p.id)}"${!a3Air(p) ? ` data-a3-gnd` : ""}><span class="no"><b>${esc(a3No(p))}</b><small>${esc(a3Place(p))}</small></span><span class="st"><b>${esc(s1)}</b>${sp ? `<i class="a3sp">特別塗装機</i>` : ""}${s2 ? `<small>${esc(s2)}</small>` : ""}</span><span class="ch" aria-hidden="true">›</span></button></li>`; };
   el.classList.toggle("a3picking", !!A3.picking);
-  el.innerHTML = `<div class="a3grab" aria-hidden="true"></div>${A3.picking ? `<button type="button" class="a3x" data-a3-unpick aria-label="選ぶのをやめる">×</button>` : ""}<div class="a3body">
-    <div class="a3sh"><h3>羽田の近くの機体</h3><span class="n"><b class="num">${ps.length}</b><span class="u">機</span></span></div>
-    <p class="a3range">${A3.picking ? "見たい機体を押してください" : `空 <b class="num" id="a3NAir">${air.length}</b>機（30km・3,000m 以下）・地上 <b class="num" id="a3NGnd">${gnd.length}</b>機`}</p>
+  const peek = !A3.picking && (a3Mode() !== "free" && !A3.sheetOpen || !!A3.guide);   // はじめての案内のあいだも畳む   // 11/25：追う・立つ・飛ぶは一覧を畳む（見出しを押すと開く）
+  el.classList.toggle("a3peek", peek);
+  el.innerHTML = `<div class="a3grab" aria-hidden="true"></div>${A3.picking ? `<button type="button" class="a3x" data-a3-unpick aria-label="選ぶのをやめる">×</button>` : ""}${a3Mode() !== "free" && !A3.picking ? `<button type="button" class="a3peekb" data-a3-peek aria-expanded="${!peek}" aria-label="${peek ? "一覧を開く" : "一覧を畳む"}"></button>` : ""}<div class="a3body">
+    <div class="a3sh"><h3>${A3.picking ? "どの機体を追いますか" : "羽田の近くの機体"}</h3><span class="n"><b class="num">${ps.length}</b><span class="u">機</span></span></div>
+    <p class="a3range">${A3.picking ? "見たい機体を押してください。後ろに付いて一緒に動きます" : `空 <b class="num" id="a3NAir">${air.length}</b>機（30km・3,000m 以下）・地上 <b class="num" id="a3NGnd">${gnd.length}</b>機`}</p>
     ${ps.length ? `${air.length ? `<ul class="a3list">${air.slice(0, A3.picking ? 12 : 8).map(row).join("")}</ul>` : ""}${gnd.length ? `<h4 class="a3gh">地上 <b class="num">${gnd.length}</b><span class="u">機</span></h4><ul class="a3list a3gl">${gnd.slice(0, A3.picking ? 12 : 8).map(row).join("")}</ul>${gnd.length > 8 && !A3.picking ? `<p class="a3range">ほか ${gnd.length - 8}機は、景色の中の機体を押すと出ます</p>` : ""}` : ""}` : `<p class="a3empty">${!SERVER ? "デモでは機体の位置は出ません。空港の形だけを出しています。" : A3.err === "pos" ? "機体の位置が届いていません。空港の形だけを出しています。" : A3.snaps.length ? "いま近くに機体はいません。" : "機体の位置を読み込んでいます…"}</p>`}</div>`;
 }
 function a3CardHTML(el, p){
@@ -6415,16 +6687,121 @@ function a3SrcHTML(el){
 }
 function a3Select(id, follow){
   if(!A3) return;
-  A3.sel = id; A3.picking = false; A3.src = false;
-  if(follow){ A3.view = "plane"; A3.card = false; A3.yaw = 0; }
+  A3.sel = id; A3.picking = false; A3.src = false; A3.standPick = false; A3.here = null;
+  if(follow){ A3.view = "plane"; A3.card = false; A3.yaw = 0; A3.fside = 0; A3.fk = 1; A3.fup = 1; A3.lost = null; A3.lostT = 0; A3.sheetOpen = false; }
   else { A3.card = true; }
   a3Pills(); a3Sheet(); a3Status(); A3.dirty = true;
 }
 function a3Pills(){
-  const v = A3.picking ? "plane" : A3.view;   // 11/24 見回り4：機体を選ぶ途中も「機体」を押した形（× で閉じたら前の視点に戻る）
+  // 11/24 見回り4：機体を選ぶ途中も「機体」を押した形（× で閉じたら前の視点に戻る）
+  // 11/25（a3-free）：上のピルは近道（全体＝自由のはじめの位置・管制塔＝管制塔に立つ・機体＝追う）。自由で動かしたら「全体」は押していない形
+  const v = A3.picking ? "plane" : A3.standPick ? "" : A3.view === "all" && A3.orbMoved ? "" : A3.view === "plane" && !A3.sel ? "all" : A3.view;
   document.querySelectorAll("[data-a3-view]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.a3View === v)));
+  const m = A3.picking ? "follow" : A3.standPick ? "stand" : a3Mode();
+  document.querySelectorAll("[data-a3-mode]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.a3Mode === m)));
+  const wr = $("a3Wrap"); if(wr) wr.dataset.mode = m;
   const pb = $("a3PlaneBtn"); if(pb){ const o = A3.sel && A3.objs.get(A3.sel); pb.textContent = A3.view === "plane" && o ? a3No(o.p) : "機体"; }
 }
+/* 見方の部品（11/25 checkin/a3-free。画面案 design/a3-free の案B） */
+const A3_DIRS = ["北", "北東", "東", "南東", "南", "南西", "西", "北西"];
+const a3Dir = h => A3_DIRS[Math.round((((h / D2R) % 360) + 360) % 360 / 45) % 8];
+const a3StandH = () => (A3.view === "tower" ? -Math.PI / 2 : A3.st ? A3.st.b : 0) + A3.yaw;
+const A3_SPOT_IC = { tower:`<path d="M10 21h4l-.6-11h-2.8zM8.5 10h7l-1-4h-5zM12 3v3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>`,
+  deck:`<path d="M4 14h16M6 14v6m12-6v6M8 10h8l1 4H7zM12 6v4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>`,
+  rwy:`<path d="M9 21 10.5 3h3L15 21zM12 6v2m0 3v2m0 3v2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>` };
+function a3StandCardHTML(){
+  if(!A3 || (A3.view !== "tower" && !A3.st)) return "";
+  const h = a3StandH(), tw = A3.view === "tower", S = A3.st;
+  const sub = tw ? "管制塔・高さ 約118m" : `${S.name}・${S.roof ? "屋上で" : ""}目の高さ 約1.6m`;
+  return `<div class="a3stc" id="a3Stc"><i class="cmp" aria-hidden="true" style="--r:${(h / D2R).toFixed(0)}deg"><i></i></i><div><b>${a3Dir(h)}を見ています</b><span>${esc(sub)}${(A3.zoom || 1) > 1.05 ? `・${(A3.zoom).toFixed(1)}倍` : ""}</span></div></div>`;
+}
+function a3SpotsHTML(el){
+  el.classList.remove("a3picking");
+  el.innerHTML = `<div class="a3grab" aria-hidden="true"></div><button type="button" class="a3x" data-a3-unspots aria-label="立つ場所を選ぶのをやめる">×</button><div class="a3body">
+    <div class="a3sh a3shx"><h3>どこに立ちますか</h3></div><p class="a3range">${A3.here ? "押した所に「ここに立つ」を出しました。ほかの所も押せます" : "3D の地面を押した所にも立てます（目の高さ 約1.6m）"}</p>
+    <ul class="a3list a3spots">${A3_SPOTS.map(s => `<li><button type="button" data-a3-spot="${s.id}"><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true">${A3_SPOT_IC[s.ic]}</svg></span><span class="no"><b>${esc(s.name)}</b><small>${esc(s.sub)}</small></span><span class="ch" aria-hidden="true">›</span></button></li>`).join("")}</ul></div>`;
+}
+function a3FlyHTML(){
+  const ar = d => `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="${d}" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+  return `<div class="a3joyw"><div class="a3joy" id="a3Joy" aria-label="なぞって前後左右に進む"><span class="jf">前</span><span class="jb">後ろ</span><span class="jl">左</span><span class="jr">右</span><i id="a3Knob"></i></div><p class="a3cap">なぞって進む</p></div>
+    <div class="a3ctl"><div class="a3vrt"><button type="button" data-a3-hold="up" aria-label="上がる">${ar("M6 15l6-6 6 6")}</button><i class="a3vbar" aria-hidden="true"><i id="a3VDot"></i></i><button type="button" data-a3-hold="down" aria-label="下がる">${ar("M6 9l6 6 6-6")}</button></div>
+    <div class="a3turn"><button type="button" data-a3-hold="left" aria-label="左に向く">${ar("M4 12a8 8 0 1 0 2.6-5.9M4 4v4.5h4.5")}</button><button type="button" data-a3-hold="right" aria-label="右に向く">${ar("M20 12a8 8 0 1 1-2.6-5.9M20 4v4.5h-4.5")}</button></div><p class="a3cap">高さ・向き</p></div>`;
+}
+// 飛ぶの高さ（大きな数字）と縦の目盛り
+function a3FlyAlt(){
+  const n = $("a3AltN"), f = A3 && A3.fl; if(!n || !f) return;
+  const t = Math.round(f.y / 10) * 10, s = t.toLocaleString("ja-JP"); if(n.textContent !== s) n.textContent = s;
+  const d = $("a3VDot"); if(d) d.style.top = `${(100 - (f.y - A3_LIM.flyLow) / (A3_LIM.flyTop - A3_LIM.flyLow) * 100).toFixed(1)}%`;
+}
+// 上・右上・下の補いの部品（見方ごと）
+function a3Aux(){
+  if(!A3) return;
+  const md = a3Mode(), act = $("a3Act"), ban = $("a3Ban"), fly = $("a3Fly"), side = $("a3Side"), toast = $("a3Toast"), gd = $("a3Guide"), wr = $("a3Wrap");
+  if(!act) return;
+  let a = "";
+  if(A3.standPick) a = "";
+  else if(md === "free" && A3.orbMoved) a = `<button type="button" class="a3pbtn" data-a3-home><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.6-5.9M4 4v4.5h4.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>全体に戻す</button>`;
+  else if(md === "stand") a = `<button type="button" class="a3pbtn" data-a3-spots><svg viewBox="0 0 24 24" aria-hidden="true">${A3_MODES[2][2]}</svg>場所</button>`;
+  else if(md === "fly") a = `<div class="a3alt"><p><b class="num" id="a3AltN">${Math.round(((A3.fl && A3.fl.y) || 0) / 10) * 10}</b><span class="u">m</span></p><small>高さ・上限 1,000m</small></div>`;
+  if(act._h !== a){ act.innerHTML = a; act._h = a; }
+  // 追う：上の札「○○ を追っています」と ×・下の「後ろ・横・前」
+  const o = md === "follow" && A3.objs.get(A3.sel), p = o ? o.p : null;
+  ban.hidden = !p;
+  if(p){ const [s1] = a3State(p), alt = a3Alt(p), t = `<div><b>${esc(a3No(p))} を追っています</b><span>${esc([s1, a3Air(p) && alt != null ? `高さ 約${alt.toLocaleString("ja-JP")}m` : "地上"].filter(Boolean).join("・"))}</span></div><button type="button" class="a3rnd sm" data-a3-unfollow aria-label="追うのをやめる"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg></button>`;
+    if(ban._h !== t){ ban.innerHTML = t; ban._h = t; } }
+  side.hidden = !p;
+  if(p){ const t = `<span class="a3chip">指で回す・寄る</span><div class="a3seg" role="group" aria-label="付く位置">${["後ろ", "横", "前"].map((l, i) => `<button type="button" data-a3-side="${i}" aria-pressed="${(A3.fside || 0) === i}">${l}</button>`).join("")}</div>`; if(side._h !== t){ side.innerHTML = t; side._h = t; } }
+  fly.hidden = md !== "fly" || !!A3.standPick; if(md === "fly") a3FlyAlt();
+  // 追う機体が見えなくなった：下に一言と「ほかを追う」（10秒）
+  const lost = A3.lost && Date.now() - A3.lost.at < 10000;
+  toast.hidden = !lost;
+  if(lost){ const t = `<p><b>${esc(A3.lost.no)}</b> の位置が届かなくなりました。今の所から自由に動かせます</p><button type="button" data-a3-other>ほかを追う</button>`; if(toast._h !== t){ toast.innerHTML = t; toast._h = t; }
+    clearTimeout(A3.lostTm); A3.lostTm = setTimeout(() => { if(A3){ A3.lost = null; a3Aux(); A3.dirty = true; } }, 10000 - (Date.now() - A3.lost.at) + 50); }
+  // はじめての1回だけの案内
+  gd.hidden = !(A3.guide && md === "free");
+  if(!gd.hidden && !gd._h){ gd._h = 1; gd.innerHTML = `<h3>指で自由に動かせます</h3><p>空港のどこへでも。地面の下と遠すぎる所には行きません</p>
+    <ul><li><i class="g1" aria-hidden="true"></i><b>回す</b><span>1本指でなぞる</span></li><li><i class="g2" aria-hidden="true"></i><b>寄る・離れる</b><span>2本指でつまむ</span></li><li><i class="g3" aria-hidden="true"></i><b>ずらす</b><span>2本指でなぞる</span></li><li><i class="g4" aria-hidden="true"></i><b>傾ける</b><span>2本指で上下に</span></li></ul>
+    <button type="button" class="btn1" data-a3-guide-ok>わかった</button><small>はじめての1回だけ。右上の … からもう一度見られます</small>`; }
+  if(wr){ wr.classList.toggle("a3hasban", !!p); wr.classList.toggle("a3hasact", !!a); wr.classList.toggle("a3hasside", !!p); wr.classList.toggle("a3hastoast", !!lost); }
+  a3Layout();
+}
+// シートの高さを CSS へ（下の4つのボタンをシートのすぐ上に置く）
+function a3Layout(){
+  const wr = $("a3Wrap"), sh = $("a3Sheet"); if(!wr || !sh) return;
+  const h = Math.round(sh.offsetHeight); if(wr._sb !== h){ wr._sb = h; wr.style.setProperty("--a3sb", h + "px"); if(A3){ A3.vo = -1; A3.dirty = true; } }
+}
+// 自由へ（今の見え方のまま）
+function a3ToFree(){
+  const c = A3.cam && A3.cam.position; if(!c){ A3.view = "all"; return; }
+  if(A3.view === "all" || A3.view === "plane" && !A3.sel){ A3.view = "all"; A3.standPick = false; A3.picking = false; a3Pills(); a3Sheet(); a3Status(); return; }
+  const d = new A3.THREE.Vector3(); A3.cam.getWorldDirection(d);
+  const t = d.y < -0.05 ? Math.min(6000, -c.y / d.y) : 1500, tx = c.x + d.x * t, tz = c.z + d.z * t, D = Math.hypot(tx - c.x, c.y, tz - c.z);
+  const o = a3Orb(); o.tx = tx; o.tz = tz; o.d = D; o.p = Math.asin(Math.min(1, c.y / Math.max(1, D))); A3.yaw = Math.atan2(tx - c.x, tz - c.z); a3Clamp();
+  A3.view = "all"; A3.sel = null; A3.card = false; A3.picking = false; A3.standPick = false; A3.orbMoved = true; A3.sheetOpen = false;
+  a3Pills(); a3Sheet(); a3Status(); A3.dirty = true;
+}
+function a3Home(){ A3.view = "all"; A3.orb = null; A3.orbMoved = false; A3.yaw = 0; A3.card = false; A3.picking = false; A3.standPick = false; A3.here = null; if(A3.view !== "plane") A3.sel = null; a3Pills(); a3Sheet(); a3Status(); A3.dirty = true; }
+const A3_GUIDE_KEY = "soramemo_a3_guide";
+function a3GuideOk(){ A3.guide = false; try{ localStorage.setItem(A3_GUIDE_KEY, "1"); }catch(e){} a3Aux(); a3Sheet(); }
+// 飛ぶのつまみと押し続けるボタン
+(function(){
+  let joy = null;
+  const setJoy = e => { const el = $("a3Joy"), k = $("a3Knob"); if(!el || !A3 || !A3.fin) return; const r = el.getBoundingClientRect(), R = r.width / 2;
+    let x = (e.clientX - r.left - R) / (R * 0.7), y = (e.clientY - r.top - R) / (R * 0.7); const m = Math.hypot(x, y); if(m > 1){ x /= m; y /= m; }
+    A3.fin.jx = Math.abs(x) < 0.12 ? 0 : x; A3.fin.jy = Math.abs(y) < 0.12 ? 0 : y; if(k) k.style.transform = `translate(calc(-50% + ${(x * R * 0.55).toFixed(1)}px), calc(-50% + ${(y * R * 0.55).toFixed(1)}px))`; A3.dirty = true; };
+  const endJoy = () => { joy = null; if(A3 && A3.fin){ A3.fin.jx = A3.fin.jy = 0; } const k = $("a3Knob"); if(k) k.style.transform = ""; };
+  document.addEventListener("pointerdown", e => {
+    if(!A3 || !e.target.closest || !e.target.closest("#a3Fly")) return;
+    if(e.target.closest("#a3Joy")){ joy = e.pointerId; try{ e.target.closest("#a3Joy").setPointerCapture(e.pointerId); }catch(er){} setJoy(e); e.preventDefault(); return; }
+    const b = e.target.closest("[data-a3-hold]"); if(!b || !A3.fin) return; const h = b.dataset.a3Hold;
+    if(h === "up" || h === "down") A3.fin.up = h === "up" ? 1 : -1; else A3.fin.turn = h === "left" ? -1 : 1;
+    try{ b.setPointerCapture(e.pointerId); }catch(er){} b.classList.add("on"); A3.dirty = true; e.preventDefault();
+  });
+  document.addEventListener("pointermove", e => { if(joy != null && e.pointerId === joy) setJoy(e); });
+  const up = e => { if(joy != null && e.pointerId === joy) endJoy();
+    const b = e.target.closest && e.target.closest("[data-a3-hold]"); if(b && A3 && A3.fin){ const h = b.dataset.a3Hold; if(h === "up" || h === "down") A3.fin.up = 0; else A3.fin.turn = 0; b.classList.remove("on"); } };
+  document.addEventListener("pointerup", up); document.addEventListener("pointercancel", up);
+})();
 document.addEventListener("click", e => {
   if(e.target.closest("[data-ap3d]")){ e.preventDefault(); openAp3d(); return; }
   if(!e.target.closest("#dAp3d")) return;
@@ -6436,9 +6813,28 @@ document.addEventListener("click", e => {
   if(mb){ menu.hidden = !menu.hidden; mb.setAttribute("aria-expanded", String(!menu.hidden)); return; }
   if(menu && !menu.hidden && !t("#a3Menu")){ menu.hidden = true; }
   let b;
-  if((b = t("[data-a3-view]"))){ const v = b.dataset.a3View;
-    if(v === "plane" && !A3.sel){ A3.picking = true; A3.card = false; A3.src = false; a3Pills(); a3Sheet(); return; }
-    A3.view = v; A3.yaw = 0; A3.card = false; A3.picking = false; a3Pills(); a3Sheet(); a3Status(); A3.dirty = true; return; }
+  if((b = t("[data-a3-view]"))){ const v = b.dataset.a3View;   // 上のピル（近道）：全体＝自由のはじめの位置・管制塔＝管制塔に立つ・機体＝追う
+    if(v === "plane" && !A3.sel){ A3.picking = true; A3.card = false; A3.src = false; A3.standPick = false; a3Pills(); a3Sheet(); return; }
+    if(v === "all") return a3Home();
+    if(v === "tower") return a3StandAt(A3_SPOTS[0]);
+    A3.view = v; A3.yaw = 0; A3.card = false; A3.picking = false; A3.standPick = false; A3.fside = 0; A3.fk = 1; A3.fup = 1; A3.sheetOpen = false; a3Pills(); a3Sheet(); a3Status(); A3.dirty = true; return; }
+  if((b = t("[data-a3-mode]"))){ const m = b.dataset.a3Mode;   // 下の4つのボタン
+    A3.src = false; A3.card = A3.card && m === "free";
+    if(m === "free"){ A3.standPick = false; A3.picking = false; A3.here = null; a3ToFree(); return; }
+    if(m === "follow"){ A3.standPick = false; if(A3.sel && A3.objs.has(A3.sel)) return a3Select(A3.sel, true); A3.picking = true; A3.card = false; a3Pills(); a3Sheet(); return; }
+    if(m === "stand"){ A3.picking = false; A3.standPick = true; A3.here = null; A3.card = false; a3Pills(); a3Sheet(); a3Status(); A3.dirty = true; return; }
+    if(m === "fly"){ return a3FlyStart(); } }
+  if(t("[data-a3-home]")) return a3Home();
+  if(t("[data-a3-spots]")){ A3.standPick = true; A3.here = null; A3.card = false; A3.picking = false; a3Pills(); a3Sheet(); a3Status(); return; }
+  if((b = t("[data-a3-spot]"))){ return a3StandAt(A3_SPOTS.find(s => s.id === b.dataset.a3Spot)); }
+  if(t("[data-a3-here]")){ if(A3.here) a3StandAt(null, A3.here); return; }
+  if(t("[data-a3-unspots]")){ A3.standPick = false; A3.here = null; a3Pills(); a3Sheet(); a3Status(); A3.dirty = true; return; }
+  if(t("[data-a3-unfollow]")) return a3ToFree();
+  if((b = t("[data-a3-side]"))){ A3.fside = +b.dataset.a3Side; A3.yaw = 0; a3Aux(); A3.dirty = true; return; }
+  if(t("[data-a3-other]")){ A3.lost = null; A3.picking = true; A3.card = false; a3Pills(); a3Sheet(); a3Aux(); return; }
+  if(t("[data-a3-peek]")){ A3.sheetOpen = !A3.sheetOpen; a3Sheet(); return; }
+  if(t("[data-a3-guide]")){ if(menu) menu.hidden = true; if(a3Mode() !== "free") a3Home(); A3.guide = true; const g = $("a3Guide"); if(g) g._h = 0; a3Sheet(); a3Aux(); return; }
+  if(t("[data-a3-guide-ok]")) return a3GuideOk();
   if((b = t("[data-a3-pick]"))){ a3Select(b.dataset.a3Pick, A3.picking); return; }
   if(t("[data-a3-unpick]")){ A3.picking = false; a3Pills(); a3Sheet(); return; }
   if(t("[data-a3-uncard]")){ A3.card = false; if(A3.view !== "plane") A3.sel = null; a3Sheet(); A3.dirty = true; return; }
