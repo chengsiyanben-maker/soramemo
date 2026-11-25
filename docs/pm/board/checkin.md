@@ -1,6 +1,7 @@
 # チェックイン担当の帳面
 
 ## いま持っている仕事
+- 11/25 手動の回（同じ「stamp-fast を checkin/stamp-fast で」の指示）：直前の回で PR #229（987f3b04）として済み。main も 4354656c のままで取り込み済みなので作り直さなかった。checkin/micro には触っていない。PM の反映を待つ
 - **11/25 18時台の定時の回（帳面に積まれた 11/25 17時45分の最優先「印を押すときに待たせない」）**：checkin/stamp-fast・下書き **PR #229**（987f3b04・報告 docs/pm/report-stamp-fast.md・写真 docs/pm/shots-stamp-fast/）。main（4354656c）から。見張りを付けた。テストが通れば PM がすぐ反映
   - 端末の判定（ckJudge。judge.ts と同じ順・数字）で通る見込みなら先にハンコ（ckOptimistic）、送るのは後ろで1つずつ（ckSend・CK_CHAIN）。届かない→今の保留＋札「電波が戻ったら、あとで送ります」。断られた→ハンコを閉じて仮の印を取り消し理由を出す。範囲の外・誤差が大きいは今までどおり待つ（checkinServerWait）
   - 位置：recentPos（30秒・50m・範囲の中）・半券の pointerdown と確かめの画面で geoWarmIfGranted・getPos は3秒で誤差300m以内なら確定・10秒で区切る（FRESH）。0.3秒すぎから「位置を確かめています…」
