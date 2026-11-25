@@ -9667,7 +9667,8 @@ document.addEventListener("click", e => { const b = e.target.closest("[data-clos
 /* ---------- 閉じるはいつでも押せる（11/21 22時 PM）：戻る操作で、いちばん上に開いている画面を閉じる ----------
    ブラウザの戻る・iPhone の左の端から引く戻る・ホーム画面のアプリの戻る。開いたダイアログ（showModal）と運用の専用ページ（"ops"）を
    開いた順に積み（CX_STACK）、開くたびに履歴を1つ足す。戻るで1枚閉じる。×などで閉じたときは足した履歴を戻して数を合わせる（その popstate は数えない）。
-   閉じさせない画面（cancel を止めている登録の途中など）は、戻るでも閉じず、履歴を足し直す */
+   閉じさせない画面（cancel を止めている登録の途中など）は、戻るでも閉じず、履歴を足し直す。
+   閉じた知らせ（close）はあとから届くので、閉じてすぐ開き直した画面は積んだままにする（11/25 t30） */
 const CX_STACK = []; let CX_SKIP = 0, CX_BACK = 0;
 try{ history.scrollRestoration = "manual"; }catch(e){}   // 履歴を戻して数を合わせるとき、ページの送り位置を前に戻さない（年を選んで飛んだ先などを保つ）
 function cxPush(layer){
@@ -9697,7 +9698,7 @@ window.addEventListener("popstate", () => {
 { const sm = HTMLDialogElement.prototype.showModal;
   HTMLDialogElement.prototype.showModal = function(){
     const was = this.open; sm.apply(this, arguments);
-    if(!was && this.open){ if(!this.cxOn){ this.cxOn = true; this.addEventListener("close", () => cxPop(this)); } cxPush(this); }
+    if(!was && this.open){ if(!this.cxOn){ this.cxOn = true; this.addEventListener("close", () => { if(!this.open) cxPop(this); }); } cxPush(this); }
   }; }
 // 3D：× のほかに、左の端（24px）から右へ引いても閉じる（指に付いて動き、3割か速くはらったら閉じる）。端から始めた指は 3D を回さない
 { let st = null;
@@ -9826,7 +9827,7 @@ function mpPage(p){
   if(MP_PAGE) track("mp", "page_" + MP_PAGE);
 }
 $("mpBack").onclick = () => { if(MP_PAGE){ const from = MP_PAGE; mpPage(null); renderMyPage(); const b = document.querySelector(`#mpIdx [data-mp-page="${from}"]`); if(b) b.focus(); return; } $("dSettings").close(); };
-$("dSettings").addEventListener("close", () => mpPage(null));
+$("dSettings").addEventListener("close", () => { if(!$("dSettings").open) mpPage(null); });   // 閉じた知らせ（close）はあとから届くので、閉じてすぐ開き直したとき（openMyPage("adv") など）は目次に戻さない
 document.addEventListener("click", e => { const b = e.target.closest && e.target.closest("[data-mp-page]"); if(b && $("dSettings").open){ mpPage(b.dataset.mpPage); renderMyPage(); } });
 // 修行の今のポイント（修行担当の数え方 sgYear・sgCar・sgGoal をそのまま読む。修行の画面の大きな数字と同じ）
 function mpSgNow(){
