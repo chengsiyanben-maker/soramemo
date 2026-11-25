@@ -1,14 +1,14 @@
 # データ担当の帳面
 
 ## いま持っている仕事
-- **空港の形と滑走路の線のデータ（PM の指示 11/26 0時15分。11/26 1時ごろ手動で呼ばれ data/ap-shape を指定された）**：ブランチ data/ap-shape（main dfc945c から）→ **下書き PR #243**。報告 docs/pm/report-ap-shape.md。比べる表 docs/pm/ap-shape-compare.md。作り方 docs/pm/airport-data-howto.md。読むだけの SQL docs/pm/ap-shape-check.sql。**移行・SQL のテストの番号は使っていない（表は変えない・判定は変えない）**
+- **空港の形と滑走路の線のデータ（PM の指示 11/26 0時15分。11/26 1時ごろ手動で呼ばれ data/ap-shape を指定された）**：ブランチ data/ap-shape（main dfc945c から）→ **PR #243（11/26 1時36分 main に入った。データと道具だけで本番の表は変わらない）**。報告 docs/pm/report-ap-shape.md。比べる表 docs/pm/ap-shape-compare.md。作り方 docs/pm/airport-data-howto.md。読むだけの SQL docs/pm/ap-shape-check.sql。**移行・SQL のテストの番号は使っていない（表は変えない・判定は変えない）**
   - data/ap_shape/runway_lines.json（約42KB・194か所）：AIP（ops_core.js の14空港。仙台は OurAirports の 12/30 を足した）→ OurAirports の両端 → 長さと向きからの推定（新島・神津島・静岡・粟国・調布）。0.15〜0.85 の [u1,v1,u2,v2]・cos 補正・縦横の比は実物どおり。86空港すべてに線。番外編66か所は線なし。preview.html で目で見た
   - 道具：tools/ap_master_dump.mjs（模擬のデータベースから airports・terminals と AIP の線）・tools/ap_shape.py（subset・build・compare）。手で直すのは data/ap_shape/overrides.json だけ。テスト tests/tools/test_ap_shape.py（16本 通過）
   - 規約：OurAirports はパブリックドメイン（前の確認どおり。今回ページは開けず）。国土数値情報 C28 は説明の文が「国土情報利用約款を参照」で、約款は未読 → 配るデータに使わず、比べる表の数字だけ（元のファイルは置かない）。OSM は使っていない
   - 比べた結果：**三沢（ターミナルビル 1,821m・半径 1,500m）と岩国（1,779m・1,500m）はターミナルが円の外**。ほか84空港は中。重なりは長崎×大村基地・新千歳×千歳基地・新千歳×千歳空港の3組（民間空港を先に見るので問題なし）。案：三沢・岩国だけ terminals に1行（stamp_m 1）。radius_m は経営の airport_size に効くので広げない。画面の TERMS も同じ行が要る
   - 気づいたこと：airports に RJCJ が2行（91 千歳空港・1001 千歳基地）
   - 本人待ち（PM のおすすめで可）：三沢・岩国の行を足すか（先に ap-shape-check.sql の 1）・国土数値情報の約款・番外編の線・画面に入れる形（画面の中か表か。表なら移行と RLS）
-- **二重にならない仕組み【別の回の案。#240 と同じ仕事】（PM の指示 11/26 0時10分。11/26 木曜 0時すぎに定期の回として呼ばれ、積んであったこの指示をした。同じ時刻に別のデータ担当の回が data/idem・PR #240 を先に仕上げていたのを、push のときに知った）**：ブランチ data/idem-b（main dfc945c から）→ **下書き PR #241**。報告 docs/pm/report-idem-b.md。確かめの SQL docs/pm/idem-b-check.sql。**#240 と同じく移行200・テスト t138 を使っているので、両方は入れない**
+- **二重にならない仕組み【別の回の案。#240 と同じ仕事】（PM の指示 11/26 0時10分。11/26 木曜 0時すぎに定期の回として呼ばれ、積んであったこの指示をした。同じ時刻に別のデータ担当の回が data/idem・PR #240 を先に仕上げていたのを、push のときに知った）**：ブランチ data/idem-b（main dfc945c から）→ **PR #241（11/26 1時26分 閉じた。#240 が本筋）**。報告 docs/pm/report-idem-b.md。確かめの SQL docs/pm/idem-b-check.sql。**#240 と同じく移行200・テスト t138 を使っているので、両方は入れない**
   - おすすめ：#240 を本筋にし #241 は閉じる。#240 にない2つ（A：前からある索引 flights_arr_checkin（移行188）を同じ名前のまま一意に置き換え、ID のない古い画面の便でも「1つの到着から便は1つ」を表で守る。重なった行があれば移行は止まらず置き換えだけしない／B：送り直しの返事の first_airport・first_terminal を1回目と同じ値に）は、PM が要ると決めたら #240 のあとに移行201・t139 で足す
   - 気づいたこと：新しい一意の索引を flights (arr_checkin) に別名で足すと t122 の「同じ形の索引はほかにない」に当たる（188 に同じ形の索引がある）。足すなら置き換えの形で
   - 確かめ：t138 28項目・SQL のテスト全部138本 通過・t122・deno test 331本（checkin_idem_test 4本）・deno check・migrations.mjs check 189件
