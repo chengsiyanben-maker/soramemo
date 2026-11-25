@@ -143,6 +143,15 @@ section.view.on{display:block}
 .hint{font-size:13px;color:var(--sumi);margin:0 0 6px}
 .msg{min-height:1.7em;font-size:15px;margin:6px 0 0}
 .msg.err{color:var(--shu-text)}
+/* 下から出る札（design/micro の 05・11/25 stamp-fast で「あとで送ります」に使い始めた）。動きを減らす設定では動かさず出し消しだけ */
+.smtoast{position:fixed;left:50%;bottom:calc(104px + env(safe-area-inset-bottom));z-index:60;display:flex;align-items:center;gap:8px;min-height:44px;width:max-content;max-width:calc(100vw - 32px);padding:0 18px;border-radius:999px;background:#1F2937;color:#fff;font-size:14px;font-weight:700;box-shadow:0 12px 30px -8px rgba(17,24,39,.4);transform:translate(-50%,16px);opacity:0;pointer-events:none;transition:transform .15s cubic-bezier(.4,0,1,1),opacity .15s cubic-bezier(.4,0,1,1)}
+.smtoast.show{transform:translate(-50%,0);opacity:1;transition:transform .25s cubic-bezier(.2,.8,.2,1),opacity .25s cubic-bezier(.2,.8,.2,1)}
+.smtoast svg{width:18px;height:18px;flex:none;fill:none;stroke:#86EFAC;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+.smtoast span{white-space:normal}
+#dStamp [data-flight]:disabled{opacity:.55;cursor:default}   /* 便の番号が来るまで（stamp-fast） */
+:root[data-night=on] .smtoast{background:#262B33;box-shadow:inset 0 0 0 1px rgba(255,255,255,.12)}
+:root[data-night=on] .smtoast svg{stroke:#4ADE80}
+@media (prefers-reduced-motion:reduce){.smtoast,.smtoast.show{transition:none;transform:translate(-50%,0)}}
 
 .demo-pick{display:none;margin-top:14px}
 body.demo .demo-pick{display:block}
@@ -4114,6 +4123,91 @@ dialog.spsheet .sph .spx{top:2px;right:8px;width:44px;height:44px;border:6px sol
 #v-ops[data-hub="page"] .opsbar>*{pointer-events:auto}
 /* 11/25 見直し2回目の3番：専用ページで中身を送ったら、上のボタンの帯に背景（紙の色＋薄い影）を付け、中身がボタンの下にもぐって見えないようにする */
 #v-ops[data-hub="page"][data-stuck] .opsbar::before{content:"";position:absolute;z-index:-1;left:-20px;right:-20px;top:calc(-8px - env(safe-area-inset-top,0px));bottom:-8px;background:var(--sky);box-shadow:0 10px 14px -12px rgba(15,23,42,.28);pointer-events:none}
+/* ---------- 小さな動き（11/25 本人 OK「全部」・見本 design/micro）。長さは 0.12〜0.4 秒・行き過ぎない曲がり方。
+   動きを減らす設定（prefers-reduced-motion）では状態だけ変え、動きはなし。振動と音は入れない。
+   印のハンコ・半券・運用の広がり・パタパタは変えない（ここでは触らない） ---------- */
+:root{--mx-ease:cubic-bezier(.2,.8,.2,1);--mx-ease-in:cubic-bezier(.4,0,1,1)}
+/* 01 押すと少し縮む（0.97 倍・0.12 秒）。transform を使う部品とぶつけないよう scale で。半券・タブ帯・スイッチ・つまみ・3D・地図は除く */
+@media (prefers-reduced-motion:no-preference){
+  :where(button,.btn1,.btn2,summary):where(:not(:disabled,.losw,.bp-stub,.grab,.lodrag,.roh,.tph,[data-ro-h],[data-tp-h],nav.tabs button,.a3wrap *,.leaflet-container *)){transition:scale .12s var(--mx-ease)}
+  :where(button,.btn1,.btn2,summary):where(:not(:disabled,.losw,.bp-stub,.grab,.lodrag,.roh,.tph,[data-ro-h],[data-tp-h],nav.tabs button,.a3wrap *,.leaflet-container *)):active{scale:.97}
+}
+/* 02 タブの点がすべる（0.25 秒）。点は1つだけにして、押したタブの下へ動かす */
+nav.tabs .in{position:relative}
+nav.tabs .mxdot{position:absolute;left:0;bottom:9px;width:5px;height:5px;border-radius:50%;background:var(--nav-acc);box-shadow:0 0 8px var(--nav-acc);pointer-events:none;opacity:0;transition:transform .25s var(--mx-ease)}
+nav.tabs.mxdot-on .mxdot{opacity:1}
+nav.tabs.mxdot-on button[aria-current="page"]::before{opacity:0}
+nav.tabs .mxdot.mxnow{transition:none}
+/* 03 ON／OFF のつまみ（0.25 秒・押している間は少し伸びる） */
+.losw i{transition:background .25s var(--mx-ease),box-shadow .25s var(--mx-ease)}
+.losw i::before{transition:left .25s var(--mx-ease),width .15s var(--mx-ease)}
+.losw:active:not(:disabled) i::before{width:30px}
+.losw[aria-checked="true"]:active:not(:disabled) i::before{left:34px}
+/* 04 ピンが刺さる（付けるときだけ・0.4 秒） */
+.mxpin .pinic{transform-origin:50% 90%;animation:mxPinIn .4s var(--mx-ease) both}
+@keyframes mxPinIn{0%{transform:translateY(-7px) rotate(-28deg);opacity:.2}60%{transform:translateY(1px) rotate(4deg);opacity:1}100%{transform:none}}
+/* 05 下から出る札（出る 0.25 秒・下がる 0.15 秒・2 秒で消える）。「できた」の知らせだけ。エラーは今までどおり画面の字 */
+.mxtoast{position:fixed;left:50%;bottom:calc(104px + env(safe-area-inset-bottom,0px));z-index:80;display:flex;align-items:center;gap:8px;width:max-content;max-width:calc(100vw - 32px);min-height:44px;padding:10px 18px;border-radius:22px;
+  background:#1F2937;color:#fff;font:700 14px/1.45 var(--gothic);box-shadow:0 12px 30px -8px rgba(17,24,39,.4);transform:translate(-50%,16px);opacity:0;pointer-events:none;
+  transition:transform .15s var(--mx-ease-in),opacity .15s var(--mx-ease-in)}
+.mxtoast.in{bottom:calc(24px + env(safe-area-inset-bottom,0px))}
+.mxtoast.show{transform:translate(-50%,0);opacity:1;transition:transform .25s var(--mx-ease),opacity .25s var(--mx-ease)}
+.mxtoast svg{flex:none;width:18px;height:18px;fill:none;stroke:#86EFAC;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.mxtoast span{overflow-wrap:anywhere}
+[data-palette="board"] .mxtoast,:root[data-night="on"] .mxtoast{background:#262B33;box-shadow:inset 0 0 0 1px rgba(255,255,255,.12)}
+[data-palette="board"] .mxtoast svg,:root[data-night="on"] .mxtoast svg{stroke:#4ADE80}
+.msg.mxsr{position:absolute;width:1px;height:1px;min-height:0;margin:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.pinband{animation:mxUp .25s var(--mx-ease)}   /* 帯は transform で真ん中に置いているので、動きは translate で */
+@keyframes mxUp{from{opacity:0;translate:0 16px}to{opacity:1;translate:0 0}}
+/* 06 骨組みの読み込み（0.3 秒より早く読めたら出さない・光は 1.4 秒） */
+.mxskel{display:grid;gap:10px;margin:8px 0;opacity:0;animation:mxShow 0s .3s forwards}
+.mxskel i{position:relative;display:block;height:56px;border-radius:16px;background:#E9ECF0;overflow:hidden}
+.mxskel i:nth-child(3n+2){height:44px;width:82%}
+.mxskel i::after{content:"";position:absolute;inset:0;transform:translateX(-100%);background:linear-gradient(90deg,transparent,#F5F7F9,transparent);animation:mxShine 1.4s ease-in-out infinite}
+[data-palette="board"] .mxskel i,:root[data-night="on"] .mxskel i{background:#232830}
+[data-palette="board"] .mxskel i::after,:root[data-night="on"] .mxskel i::after{background:linear-gradient(90deg,transparent,#2C323B,transparent)}
+@keyframes mxShow{to{opacity:1}}
+@keyframes mxShine{to{transform:translateX(100%)}}
+/* 07 数字の繰り上がり＋「＋1」（ホームの今日の数字・0.35 秒）。案内板風（パタパタ）に寄せず、すっと上がるだけ */
+.hstrip>div{position:relative}
+.mxup{display:inline-block;animation:mxRoll .35s var(--mx-ease) both}
+@keyframes mxRoll{from{transform:translateY(.6em);opacity:0}to{transform:none;opacity:1}}
+.mxplus{position:absolute;right:4px;top:-2px;font:800 12px/1 var(--gothic);font-style:normal;color:#15803D;pointer-events:none;animation:mxPlus 1.2s var(--mx-ease) both}
+[data-palette="board"] .mxplus,:root[data-night="on"] .mxplus{color:#4ADE80}
+@keyframes mxPlus{0%{opacity:0;transform:translateY(4px)}20%,70%{opacity:1;transform:none}100%{opacity:0;transform:translateY(-4px)}}
+/* 09 並べ替えで持ち上がる（1.02 倍・影が深く）。ほかの行は JS ですっと場所をあける */
+.rodrag,.tprow.tpdrag,.lol li.lodragging{scale:1.02;box-shadow:0 2px 4px rgba(17,24,39,.06),0 22px 40px -10px rgba(17,24,39,.28),inset 0 0 0 1px rgba(17,24,39,.07) !important}
+@media (prefers-reduced-motion:no-preference){[data-ro],.tprow[data-tp]{transition:scale .15s var(--mx-ease),box-shadow .25s var(--mx-ease)}}
+/* 10 コピーが ✓ に（1.5 秒で戻る） */
+.mxcopy{position:relative;display:inline-grid;place-items:center;flex:none;width:44px;height:44px;margin:-10px 0 -10px 4px;border:0;border-radius:999px;background:rgba(17,24,39,.05);color:#646B78;vertical-align:middle;cursor:pointer}
+.mxcopy svg{grid-area:1/1;width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;transition:transform .15s var(--mx-ease),opacity .15s var(--mx-ease)}
+.mxcopy .ck{opacity:0;transform:scale(.5);stroke:#15803D;stroke-width:2.4}
+.mxcopy.done .cp{opacity:0;transform:scale(.5)}.mxcopy.done .ck{opacity:1;transform:none}
+[data-palette="board"] .mxcopy,:root[data-night="on"] .mxcopy{background:rgba(220,227,234,.08);color:#AEB9C6}
+[data-palette="board"] .mxcopy .ck,:root[data-night="on"] .mxcopy .ck{stroke:#4ADE80}
+/* 11 鈴が揺れる（ON にしたときだけ・0.4 秒） */
+.mxbell svg{transform-origin:50% 12%;animation:mxBell .4s ease-in-out both}
+@keyframes mxBell{0%,100%{transform:none}20%{transform:rotate(14deg)}45%{transform:rotate(-10deg)}70%{transform:rotate(5deg)}85%{transform:rotate(-2deg)}}
+/* 12 「もう一度」の矢印が1回回る（0.6 秒） */
+.opsretry{display:inline-flex;align-items:center;justify-content:center;gap:6px}
+.opsretry svg{flex:none;width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.opsretry.go svg{animation:mxSpin .6s var(--mx-ease) 1}
+@keyframes mxSpin{to{transform:rotate(360deg)}}
+/* 13 シートが上がる（0.3 秒・行き過ぎない）。後ろの幕はふわっと */
+@media (prefers-reduced-motion:no-preference){
+  dialog.psheet[open],dialog.spsheet[open]{animation:mxSheet .3s var(--mx-ease)}
+  dialog.psheet[open]::backdrop,dialog.spsheet[open]::backdrop{animation:mxFade .25s var(--mx-ease)}
+}
+@keyframes mxSheet{from{transform:translateY(100%)}to{transform:none}}
+@keyframes mxFade{from{opacity:0}to{opacity:1}}
+.sheet{transition-duration:.3s,.2s}
+/* 動きを減らす設定：ここで足した動きはすべて止める（状態は変わる）。骨組みは光らない灰色で、0.3 秒たってから出す */
+@media (prefers-reduced-motion:reduce){
+  nav.tabs .mxdot,nav.tabs button,nav.tabs button svg,.losw i,.losw i::before,.mxtoast,.mxtoast.show,.mxcopy svg,[data-ro],.tprow[data-tp]{transition:none !important}
+  .mxpin .pinic,.pinband,.mxup,.mxplus,.mxbell svg,.opsretry.go svg,.mxskel i::after{animation:none !important}
+  .mxskel i::after{display:none}
+  .rodrag,.tprow.tpdrag,.lol li.lodragging{scale:none}
+}
 </style>
 </head>
 <body>
@@ -7166,20 +7260,66 @@ function nearestCivil(p){
   // ターミナルの印は、そのターミナルから TERM_STAMP 以内のときだけ。遠いときは空港の印だけ
   return {a:best, km:Math.min(d, km(p,best)), term: (term && tk*1000 <= (term.r || TERM_STAMP)) ? term : null, within};
 }
-/* 最新の位置だけを使う：押した時刻より前に取られた位置（使い回し）は捨て、新しい位置が届くまで最大12秒待つ */
-const FRESH = {waitMs:12000, goodAcc:50};
+/* 新しい位置を取る：取り始めた時刻より前に取られた位置（使い回し）は捨て、新しい位置が届くまで最大10秒待つ（11/25 stamp-fast で12秒→10秒） */
+const FRESH = {waitMs:10000, goodAcc:50, okAfterMs:3000, okAcc:300};
+// 誤差50m以内が届いたらすぐ確定。届かなくても3秒たって誤差300m以内（サーバーが「誤差が大きい」の印を付けない範囲）があれば、それで確定（屋内で10秒待たせない）
 function getPos(){
   return new Promise((res, rej) => {
     if(!("geolocation" in navigator)) return rej({code:"none"});
     const start = Date.now(); let best = null, done = false, wid = null;
-    const finish = (ok, v) => { if(done) return; done = true; if(wid !== null) navigator.geolocation.clearWatch(wid); clearTimeout(timer); ok ? res(v) : rej(v); };
+    const finish = (ok, v) => { if(done) return; done = true; if(wid !== null) navigator.geolocation.clearWatch(wid); clearTimeout(timer); clearTimeout(soon); ok ? res(v) : rej(v); };
     const timer = setTimeout(() => best ? finish(true, best) : finish(false, {code:"stale"}), FRESH.waitMs);
+    const soon = setTimeout(() => { if(best && best.acc <= FRESH.okAcc) finish(true, best); }, FRESH.okAfterMs);
     wid = navigator.geolocation.watchPosition(p => {
-      if(p.timestamp < start - 500) return;               // 押す前の位置は使わない
-      best = {lat:p.coords.latitude, lon:p.coords.longitude, acc:p.coords.accuracy, ts:p.timestamp, wait:Date.now()-start};
-      if(p.coords.accuracy <= FRESH.goodAcc) finish(true, best);   // 十分な精度ならすぐ確定
+      if(p.timestamp < start - 500) return;               // 取り始める前の位置は使わない
+      const q = {lat:p.coords.latitude, lon:p.coords.longitude, acc:p.coords.accuracy, ts:p.timestamp, wait:Date.now()-start};
+      if(!best || q.acc <= best.acc) best = q;
+      if(best.acc <= FRESH.goodAcc || (best.acc <= FRESH.okAcc && Date.now() - start >= FRESH.okAfterMs)) finish(true, best);   // 十分な精度ならすぐ確定
     }, e => { if(e.code === 1) finish(false, e); /* 一時的な取得失敗（地下など）は無視して待ち続ける */ }, {enableHighAccuracy:true, maximumAge:0});
   });
+}
+
+/* 印を押す前から位置を温める（11/25 stamp-fast・本人「印を押す時、ロードが長くて不安になるし、画面が固まる」）
+   ・直近の位置（30秒以内・誤差50m以内・判定範囲の中）があれば、待たずにそれを使う（サーバーは5分以内の位置を受け付ける）
+   ・半券に指を置いたとき（許可がもうある人だけ）・「印をもらいますか」を出したときに、新しい位置を取り始める
+   ・待つときは「位置を確かめています」と出し、10秒で区切る */
+const POS_REUSE = {ms:30000, acc:50};
+let POS_LAST = null, GEO_WARM = null;
+function recentPos(){
+  for(const q of [POS_LAST, typeof HOME_POS === "undefined" ? null : HOME_POS])
+    if(q && q.ts && q.acc > 0 && q.acc <= POS_REUSE.acc && Date.now() - q.ts <= POS_REUSE.ms && q.ts - Date.now() < 60e3) return q;
+  return null;
+}
+function geoWarm(){
+  if(demo || !("geolocation" in navigator)) return null;
+  if(GEO_WARM && !GEO_WARM.done) return GEO_WARM.p;   // 取っている途中なら、それを待つ（取れた位置は POS_LAST から使う）
+  const w = { start:Date.now(), done:false };
+  w.p = getPos().then(v => { w.done = true; POS_LAST = v; return v; }, e => { w.done = true; throw e; });
+  w.p.catch(() => {}); GEO_WARM = w; return w.p;
+}
+async function geoWarmIfGranted(){ try{ if(!demo && await geoPermState() === "granted") geoWarm(); }catch(e){} }
+async function ckPos(){
+  const r = recentPos(); if(r && nearestBase(r).within) return { ...r, wait:0, reuse:true };   // 範囲の外と出ていたら、新しい位置で確かめ直す
+  const t = setTimeout(() => { say("位置を確かめています…"); ckNote("位置を確かめています…"); }, 300);   // すぐ取れたときは出さない
+  try{ return await geoWarm(); } finally { clearTimeout(t); }
+}
+// 印の動きのあとに回す仕事：1こま描いてから、1つずつ空いた時間に（画面が止まる時間を短くする）
+function ckLater(steps){
+  const next = () => { const f = steps.shift(); if(!f) return; try{ f(); }catch(e){ console.error(e); }
+    if(steps.length){ if(window.requestIdleCallback) requestIdleCallback(next, { timeout:150 }); else setTimeout(next, 16); } };
+  requestAnimationFrame(() => setTimeout(next, 0));
+}
+// render() を分けて呼ぶ形（中身は render() と同じ）
+const renderSteps = () => [renderHome, () => { for(const k in DIRTY) DIRTY[k] = true; applyPendingBP(); }, () => coLoad(), () => { renderQueue(); renderPlusSettings(); renderMigrate(); }, renderVisible];
+// 下から出る札（design/micro の 05）。2秒で下がる。エラーは今までどおり #msg と半券の下
+function toast(msg){
+  let t = $("smToast");
+  if(!t){ t = document.createElement("div"); t.id = "smToast"; t.className = "smtoast"; t.setAttribute("role", "status"); t.setAttribute("aria-live", "polite"); document.body.appendChild(t); }
+  t.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.2 4L19 7"/></svg><span></span>`;
+  t.querySelector("span").textContent = msg;
+  const host = document.querySelector("dialog[open]"); if(host && t.parentNode !== host) host.appendChild(t); else if(!host && t.parentNode !== document.body) document.body.appendChild(t);   // 開いているダイアログの上に出す
+  t.classList.remove("show"); void t.offsetWidth; t.classList.add("show");
+  clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove("show"), 2000);
 }
 
 /* ---------- helpers ---------- */
@@ -7188,7 +7328,7 @@ const code = a => a.iata !== "—" ? a.iata : a.name.slice(0,2);
 const fmtKm = n => Math.round(n).toLocaleString("ja-JP");
 const fmtDT = t => new Date(t).toLocaleString("ja-JP",{month:"numeric",day:"numeric",hour:"2-digit",minute:"2-digit"});
 const fmtD = t => new Date(t).toLocaleDateString("ja-JP",{year:"numeric",month:"numeric",day:"numeric"});
-function say(t, err){ const m=$("msg"); m.textContent=t; m.classList.toggle("err", !!err); }
+function say(t, err){ const m=$("msg"), ok = !err && mxDone(t); m.textContent=t; m.classList.toggle("err", !!err); m.classList.toggle("mxsr", ok); if(ok) mxToast(t); }   // 「できた」は下から出る札（05）。字は読み上げ用に残す
 function homeBase(){
   try{ const v = +localStorage.getItem("soramemo.base"); if(v && BY[v] && !IS_EXTRA(v)) return v; }catch(e){}
   const first = [...S.checkins].sort((x, y) => x.t - y.t)[0]; return first ? first.a : null;
@@ -7281,26 +7421,44 @@ function stripesMini(tier){
 function emptySVG(a, t){ return `<svg viewBox="0 0 120 120" class="empty-slot" aria-label="${t ? placeName(a,t) : a.name}（未訪問）" role="img"><circle cx="60" cy="60" r="50"/><text x="60" y="${t?64:70}" text-anchor="middle" font-size="${/[^\x00-\x7f]/.test(code(a)) ? 20 : code(a).length > 3 ? 23 : 28}">${code(a)}</text>${t?`<text x="60" y="88" text-anchor="middle" font-size="16">${t.tag}</text>`:""}</svg>`; }
 
 /* ---------- check-in ---------- */
-async function checkin(){
+// 押してからハンコまでを短く（11/25 stamp-fast）：位置は直近のものか温めておいたもの（ckPos）。
+//   サーバー版は、端末の判定（ckJudge。サーバーの judge.ts と同じ決まり）で通る見込みなら、返事を待たずにハンコを出し（ckOptimistic）、送るのは後ろで（ckSend）。
+//   電波がなく送れなければ今の保留に入れて「あとで送ります」の札、サーバーが断ったらハンコを取り消して理由を出す。重い描き直しはハンコの動きのあと（ckLater）
+//   二重に押しても1回だけ（CK_BUSY）。送るのは1つずつ順に（CK_CHAIN）
+let CK_BUSY = null, CK_CHAIN = Promise.resolve();
+function checkin(){
+  if(CK_BUSY) return CK_BUSY;
+  CK_BUSY = checkinRun().finally(() => { CK_BUSY = null; });
+  return CK_BUSY;
+}
+const ckChain = f => (CK_CHAIN = CK_CHAIN.catch(() => {}).then(f));
+async function checkinRun(){
   pendingSnap = unlockedIds();
-  const btn = $("checkin"); btn.disabled = true; say("新しい位置を取得しています…（最大12秒）");
+  const btn = $("checkin"); btn.disabled = true;
   let p;
   try{
     if(demo){ const o = demoPlace(); p = {lat:o.lat, lon:o.lon, acc:10}; }
-    else p = await getPos();
+    else p = await ckPos();
   }catch(e){
     btn.disabled = false;
     track("geo_fail", e && e.code);
     if(e && e.code === 1){ if(NATIVE){ nvLocOffSheet(); return say(NV_TXT.locDenied, true); } return say("位置情報の利用が許可されていません。ブラウザかアプリの設定で、このページの位置情報を許可してください。", true); }
     if(e && e.code === 3) return say("位置を取得できないまま時間切れになりました。電波のよい場所でもう一度押してください。", true);
-    if(e && e.code === "stale") return say("新しい位置を取得できませんでした。地下などでは位置が更新されないことがあります。地上や窓の近くでもう一度押してください。", true);
+    if(e && e.code === "stale") return say("10秒待っても位置を確かめられませんでした。地下などでは位置が更新されないことがあります。地上や窓の近くでもう一度押してください。", true);
     return say(NATIVE ? NV_TXT.locNone : "この画面では位置情報を使えません。ブラウザで直接開くか、設定のデモモードで試してください。", true);
   }
   btn.disabled = false;
-  const n = nearest(p);
-  HOME_POS = p; showNearest(n);
-  if(!demo) vlog("チェックイン", p, n);
-  if(SERVER && !demo) return checkinServer(p);   // サーバー版は範囲・誤差の判断もサーバーに任せる（断った理由を記録するため）
+  await new Promise(r => setTimeout(r, 0));   // 押した処理とハンコを出す処理を分ける（1回の止まりを 100ms 未満に）
+  const n = nearest(p); HOME_POS = p;
+  // 半券の「いちばん近い」と記録の帳面：ハンコを出すときはそのあとに回す（ckLater）。出さないときはすぐ
+  let shown = false;
+  CK_NEAR = () => { if(shown) return; shown = true; showNearest(n); if(!demo) vlog("チェックイン", p, n); };
+  CK_NEAR.later = false;
+  try{ return await checkinDecide(p, n); } finally { if(!CK_NEAR.later) CK_NEAR(); }
+}
+let CK_NEAR = () => {};
+async function checkinDecide(p, n){
+  if(SERVER && !demo) return checkinServer(p, n);
   if(p.acc > RULE.maxAccuracy) return say(`位置の精度が低すぎます（誤差 約${fmtKm(p.acc)}m）。窓の近くか屋外でもう一度押してください。`, true);
   const within = n.within;
   if(!within) return say(`${n.a.name}の判定範囲の外です。あと約${(n.km - n.a.radius/1000).toFixed(1)}km近づいてください。`, true);
@@ -7322,9 +7480,9 @@ async function checkin(){
   }
   S.checkins.push({a:n.a.id, t:now, acc:Math.round(p.acc), term:tid});
   if(demo) S.demoClock = now;
-  save(); render();
-  say(flight ? `フライトを記録しました：${BY[flight.from].name} → ${n.a.name}` : `${placeName(n.a, n.term)}にチェックインしました。`);
+  say(flight ? `フライトを記録しました：${BY[flight.from].name} → ${n.a.name}` : `${placeName(n.a, n.term)}にチェックインしました。`); ckNote("");
   showStamp(n.a, now, first, flight, n.term, firstTerm);
+  CK_NEAR.later = true; ckLater([CK_NEAR, save, ...renderSteps()]);   // 半券・保存・描き直しはハンコの動きのあと
 }
 async function sendCheckin(p, queued){
   try{
@@ -7333,8 +7491,79 @@ async function sendCheckin(p, queued){
     try{ return await error.context.json(); }catch(_){ return null; }   // null = サーバーに届かなかった
   }catch(e){ return null; }
 }
-async function checkinServer(p){
+// 端末での先の判定（サーバーの judge.ts の decide と同じ順・同じ数字）。通るときは null
+function ckJudge(p, n, now){
+  if(!(p.acc > 0) || p.acc > RULE.maxAccuracy) return "low_accuracy";
+  const last = S.checkins[S.checkins.length - 1];
+  if(last && now - last.t < 20e3) return "too_soon";
+  if(!n.within) return "out_of_range";
+  if(last && last.a === n.a.id && (last.term || null) === (n.term ? n.term.id : null) && now - last.t < RULE.sameAirportMin * 60e3) return "already";
+  return null;
+}
+async function checkinServer(p, n){
   if(!user) return say("ログインしてください。", true);
+  n = n || nearest(p);
+  const why = ckJudge(p, n, Date.now());
+  if(why === "already") return say(`${placeName(n.a, n.term)}にはチェックイン済みです。`);
+  if(why === "too_soon") return say("少し時間をおいてからもう一度押してください。");
+  if(why){ CK_NEAR(); return ckChain(() => checkinServerWait(p)); }   // 範囲の外・誤差が大きい：今までどおりサーバーの判定を待つ（断った理由を記録するため）
+  const o = ckOptimistic(p, n, Date.now());
+  ckChain(() => new Promise(r => setTimeout(r, 0)).then(() => ckSend(p, o)));   // 送るのはハンコを出した処理のあと（返事の読み込みが同じ止まりに入らないように）
+}
+// 先にハンコを出す：記録は端末の中だけに仮に足す（pending）。サーバーの返事のあとで読み直して本物に入れ替える
+function ckOptimistic(p, n, now){
+  const last = S.checkins[S.checkins.length - 1], tid = n.term ? n.term.id : null;
+  const firstTerm = n.term ? !visitedTerms().has(n.term.id) : false;
+  const first = n.a.kind ? !visitedExtra().has(n.a.id) : !visited().has(n.a.id);
+  let flight = null;
+  if(last && last.a !== n.a.id && !IS_EXTRA(last.a) && !n.a.kind){
+    const h = (now - last.t) / 36e5, d = km(BY[last.a], n.a);
+    if(h <= RULE.maxGapH && h > 0 && d / h <= RULE.maxKmh){ flight = {id:"tmp" + now, from:last.a, to:n.a.id, dep:last.t, arr:now, km:d, airline:null, no:null, pending:true}; S.flights.push(flight); }
+  }
+  const rec = {a:n.a.id, t:now, acc:Math.round(p.acc), term:tid, pending:true};
+  S.checkins.push(rec);
+  showStamp(n.a, now, first, flight, n.term, firstTerm);   // 先にハンコ（字の書き換えはそのあと。描き直しの量を減らす）
+  ckFlightBtn(flight, "wait");
+  say(flight ? `フライトを記録しました：${BY[flight.from].name} → ${n.a.name}` : `${placeName(n.a, n.term)}にチェックインしました。`); ckNote("");
+  track("checkin_fast", p.reuse ? "reuse" : "fresh");
+  CK_NEAR.later = true; ckLater([CK_NEAR, renderHome]);   // 半券と、うしろのホームの数字だけ先に（ほかは返事のあと）
+  return {rec, flight};
+}
+// 印の画面の「乗った便を記録する」：サーバーの便の番号が来るまでは押せない
+function ckFlightBtn(flight, st, id){
+  if(!flight) return;
+  const b = document.querySelector(`#dStamp [data-flight="${fid(flight)}"]`); if(!b) return;
+  if(st === "ok"){ b.dataset.flight = String(id); b.disabled = false; b.textContent = "乗った便を記録する"; return; }
+  b.disabled = true; b.textContent = st === "queue" ? "電波が戻って送れたら、便を記録できます" : "便を記録しています…";
+}
+async function ckSend(p, o){
+  if(qLoad().length) await flushQueue(true);           // 保留分を先に送る（順番が逆にならないように）
+  const r = navigator.onLine === false ? null : await sendCheckin(p, false);
+  if(!r){ track("checkin_queued"); enqueue(p); o.rec.queued = true; ckFlightBtn(o.flight, "queue"); toast("電波が戻ったら、あとで送ります"); return; }
+  if(!r.ok){
+    track("checkin_fail", r.reason); if(r.reason === "server") reportClientError("checkin", r.message);
+    S.checkins = S.checkins.filter(x => x !== o.rec); if(o.flight) S.flights = S.flights.filter(x => x !== o.flight);   // 先に出したハンコを取り消す（サーバーには何も残っていない）
+    if($("dStamp").open) $("dStamp").close();
+    say(`印を記録できませんでした。${r.message}`, true); ckNote();
+    ckLater(renderSteps()); return;
+  }
+  track("checkin_ok", r.flight ? "flight" : r.terminal_id ? "terminal" : "airport");
+  // 一言はサーバーの返事で書き直す（便ができたか・場所・行事のボーナス）。今までの checkinServer と同じ文
+  const bon = Array.isArray(r.bonus) ? r.bonus : [], a = BY[r.airport_id] || BY[o.rec.a], term = r.terminal_id ? TBY[r.terminal_id] : null;
+  say((r.flight && BY[r.flight.from_airport] ? `フライトを記録しました：${BY[r.flight.from_airport].name} → ${a.name}` : `${placeName(a, term)}にチェックインしました。`)
+    + (keieiShown() ? bon : []).map(b => `　${b.name}：経営の資金 +${yen(b.amount)}${GAME_RELEASED ? "" : "（経営の公開後に受け取れます）"}`).join(""));
+  if(bon.length) EVB = null;
+  await ckRefresh();
+  ckFlightBtn(o.flight, r.flight ? "ok" : "none", r.flight && r.flight.id);
+  if(o.flight && !r.flight){ const b = document.querySelector(`#dStamp [data-flight="${fid(o.flight)}"]`); if(b) b.hidden = true; }
+}
+// 返事のあとの読み直し：読むのを待ってから、描き直しは分けて空いた時間に
+async function ckRefresh(){
+  if(SERVER && user && !demo) await loadServer();
+  ckLater([...renderSteps(), updateAuthUI, applyPlan, renderRide, () => { try{ renderAllinCard(); }catch(e){} }]);
+}
+// 範囲の外・誤差が大きいときの今までの形：サーバーの判定を待ってから
+async function checkinServerWait(p){
   const btn = $("checkin"); btn.disabled = true;
   if(qLoad().length) await flushQueue(true);           // 保留分を先に送る（順番が逆にならないように）
   if(navigator.onLine === false){ btn.disabled = false; return enqueue(p); }
@@ -7562,8 +7791,8 @@ function renderHome(){
   $("focusBar").innerHTML = FOCUS === "ALL" ? "" : `<b>${FOCUS_LABEL[FOCUS]}</b>を表示中。${FOCUS}グループのフライトだけで数えています。<button class="linkbtn" id="focusOff">ノーマルに戻す</button>`;
   $("tRoutes").textContent = r.size; $("tKm").textContent = fmtKm(totalKm);
   { const nowT = demo && S.demoClock ? S.demoClock : Date.now(), d0 = new Date(nowT).toDateString();
-    $("hsToday").textContent = S.checkins.filter(c => new Date(c.t).toDateString() === d0).length;
-    $("hsAp").textContent = shownAirports().size; $("hsApT").textContent = A.length; $("hsFl").textContent = flyOnly(focusFlights()).length; }
+    mxNums([[$("hsToday"), S.checkins.filter(c => new Date(c.t).toDateString() === d0).length], [$("hsAp"), shownAirports().size], [$("hsFl"), flyOnly(focusFlights()).length]]);   // 印が増えたら繰り上がり（07）
+    $("hsApT").textContent = A.length; }
   homeState(); homeLocStart();
 
   const last = S.checkins[S.checkins.length-1], now = demo && S.demoClock ? S.demoClock : Date.now();
@@ -8586,6 +8815,7 @@ async function showFacts(f){
   if(x.diverted_to) parts.push(`${placeShort(x.diverted_to)}へダイバート`);
   if(!parts.length) return;
   box.textContent = "この便の記録：" + parts.join("　");
+  if(x.reg) box.insertAdjacentHTML("beforeend", mxCopyHTML(x.reg, x.reg));   // 登録記号のコピー（10）
   box.hidden = false;
 }
 // 出発・到着の時刻（チェックインの時刻）にいちばん近い予定の便を出し、押すと航空会社と便名に入れる
@@ -9251,8 +9481,8 @@ document.addEventListener("keydown", e => {
       g.row.style.transform = `translateY(${e.clientY - g.y}px)`;
       for(const r of rows){ if(r === g.row) continue; const b = r.getBoundingClientRect(), mid = b.top + b.height / 2, me = g.row.getBoundingClientRect();
         const before = rows.indexOf(r) < rows.indexOf(g.row);
-        if(before && e.clientY < mid){ const top0 = me.top; list.insertBefore(g.row, r); g.y += g.row.getBoundingClientRect().top - top0; g.moved = true; break; }
-        if(!before && e.clientY > mid){ const top0 = me.top; list.insertBefore(g.row, r.nextSibling); g.y += g.row.getBoundingClientRect().top - top0; g.moved = true; break; } }
+        if(before && e.clientY < mid){ const top0 = me.top; mxFlip(rows, g.row, () => list.insertBefore(g.row, r)); g.y += g.row.getBoundingClientRect().top - top0; g.moved = true; break; }
+        if(!before && e.clientY > mid){ const top0 = me.top; mxFlip(rows, g.row, () => list.insertBefore(g.row, r.nextSibling)); g.y += g.row.getBoundingClientRect().top - top0; g.moved = true; break; } }
       g.row.style.transform = `translateY(${e.clientY - g.y}px)`;
       return;
     }
@@ -9263,7 +9493,7 @@ document.addEventListener("keydown", e => {
   const end = e => {
     if(!g || e.pointerId !== g.id) return;
     const s = g; g = null; s.row.style.transform = ""; s.row.classList.remove("tpdrag", "tpout");
-    if(s.kind === "drag"){ if(s.moved) tpReorder([...s.row.parentElement.querySelectorAll(".tprow[data-tp]")].map(r => r.dataset.tp)); return; }
+    if(s.kind === "drag"){ if(s.moved){ tpReorder([...s.row.parentElement.querySelectorAll(".tprow[data-tp]")].map(r => r.dataset.tp)); mxToast("並びを保存しました"); } return; }
     if(e.type === "pointerup" && s.dx < -72) tpSet(loTabs().filter(x => x !== s.v), "tab_" + s.v + "_off", tpOffText(s.v));
   };
   document.addEventListener("pointerup", end); document.addEventListener("pointercancel", end);
@@ -9353,14 +9583,14 @@ function roBind(box, opt){
       // 相手の半分を越えたら入れ替える（行き来してばたつかないように）。同じ行の同じ幅の物は左右で、ほかは上下で見る
       const half = b.width > me.width * 1.4 || me.width > b.width * 1.4 || Math.abs(b.top - me.top) > 4 ? (before ? e.clientY < b.top + b.height / 2 : e.clientY > b.top + b.height / 2) : (before ? e.clientX < b.left + b.width / 2 : e.clientX > b.left + b.width / 2);
       if(!half) break;
-      g.el.style.transform = ""; r.parentNode.insertBefore(g.el, before ? r : r.nextSibling);
+      g.el.style.transform = ""; mxFlip(list, g.el, () => r.parentNode.insertBefore(g.el, before ? r : r.nextSibling));   // ほかはすっと場所をあける（09）
       const n = g.el.getBoundingClientRect(); g.y += n.top - me.top; g.x += n.left - me.left; break; }
     g.dx = e.clientX - g.x; g.dy = e.clientY - g.y;
     g.el.style.transform = `translate(${g.dx}px, ${g.dy}px)`;
   });
   const end = e => { if(!g || e.pointerId !== g.pid) return; const s = g; g = null; clearTimeout(s.t);
     s.el.style.transform = ""; s.el.classList.remove("rodrag"); box.classList.remove("rodragging");
-    if(s.on && order().join() !== s.before) finish(order(), s.id, "drag"); };
+    if(s.on && order().join() !== s.before){ finish(order(), s.id, "drag"); mxToast("並びを保存しました"); } };
   box.addEventListener("pointerup", end); box.addEventListener("pointercancel", end);
   box.addEventListener("contextmenu", e => { if(e.target.closest("[data-ro-h]")) e.preventDefault(); });
 }
@@ -9754,7 +9984,7 @@ const tearAt = room => Math.max(TEAR_MIN, Math.min(TEAR_AT, Math.round(room / 2)
   const speed = () => { if(pts.length < 2) return 0; const z = pts[pts.length - 1], r = pts.filter(q => z.t - q.t <= 100), a = r[0]; return z.t > a.t ? (z.x - a.x) / (z.t - a.t) : 0; };
   b.addEventListener("pointerdown", e => { if(b.disabled) return; drag = true; moved = false; x0 = e.clientX; y0 = e.clientY; dx = 0; axis = ""; pts = [{ x:e.clientX, t:e.timeStamp }];
     need = tearAt((document.documentElement.clientWidth || innerWidth) - e.clientX);
-    try{ b.setPointerCapture(e.pointerId); }catch(_){} if(!off()) b.classList.add("dragging"); });
+    try{ b.setPointerCapture(e.pointerId); }catch(_){} if(!off()){ b.classList.add("dragging"); geoWarmIfGranted(); } });   // 指を置いたら位置を取り始める（11/25 stamp-fast）
   b.addEventListener("pointermove", e => { if(!drag) return;
     const mx = e.clientX - x0, my = e.clientY - y0, d = Math.hypot(mx, my);
     pts.push({ x:e.clientX, t:e.timeStamp }); if(pts.length > 12) pts.shift();
@@ -9784,6 +10014,7 @@ const tearAt = room => Math.max(TEAR_MIN, Math.min(TEAR_AT, Math.round(room / 2)
     if(s === "out"){ track("tear", "out"); homeRecheck(); return; }
     const d = $("dCkConfirm"), n = HOME_NEAR;
     $("ckcSub").textContent = n && n.within ? `${placeName(n.a, n.term)}でチェックインします。` : "いまいる場所を調べて、チェックインします。";
+    geoWarmIfGranted();   // 確かめている間に位置を取り始める（11/25 stamp-fast）
     d.returnValue = ""; d.showModal();
     d.onclose = () => { d.onclose = null; if(d.returnValue === "yes"){ track("tear", "confirm"); tear(); } };
   }
@@ -14383,7 +14614,7 @@ async function loadBoard(iata){
 let BOARD_ERR = null;
 const BOARD_RETRY = new Set();
 const opsFailHTML = (title, auto) => `<div class="opsfail" role="status">${title ? `<div class="bdhead"><h3>${esc(title)}</h3></div>` : ""}<p>読み込めませんでした。</p>
-  <button type="button" class="opsretry" data-ops-retry>もう一度</button>${auto ? `<small>10秒ほどで、もう一度読みに行きます</small>` : ""}</div>`;
+  <button type="button" class="opsretry" data-ops-retry>${mxRetrySvg()}もう一度</button>${auto ? `<small>10秒ほどで、もう一度読みに行きます</small>` : ""}</div>`;
 function opsBoardFail(iata){
   if(BOARD_ERR !== iata || OPS_AP !== iata) return;
   const auto = !BOARD_RETRY.has(iata);
@@ -14393,9 +14624,12 @@ function opsBoardFail(iata){
   if(v === "photo" && $("opsPhoto")){ $("opsPhoto").hidden = false; $("opsPhoto").innerHTML = opsFailHTML("撮る人", OPS_FAIL_WAIT); }
 }
 let OPS_FAIL_WAIT = false;   // 自動の取り直しを待っているあいだ（「10秒ほどで、もう一度読みに行きます」を出す）
+// 押したら矢印が1回まわり（12）、その場で「読み込んでいます…」に。読めたら中身に、だめならまた「読み込めませんでした」
+const mxRetryBox = el => { const f = el && el.querySelector(".opsfail"); if(!f) return false; const p = f.querySelector("p"), b = f.querySelector(".opsretry"), sm = f.querySelector("small");
+  if(p) p.textContent = "読み込んでいます…"; if(sm) sm.remove(); mxSpin(b); return true; };
 document.addEventListener("click", e => { if(!e.target.closest("[data-ops-retry]")) return; BOARD_ERR = null; track("ops_retry", VIEW.ops);
-  ["opsStrip", "opsPhoto"].forEach(id => { const el = $(id); if(el && el.querySelector(".opsfail")) el.innerHTML = `<p class="hint">読み込んでいます…</p>`; });
-  if(OPS_PAGE === "late") $("opsLate").innerHTML = `<div class="fwlist"><div class="opshead"><b>今日の遅れ・欠航</b></div><p class="ltsub">読み込んでいます…</p></div>`;
+  ["opsStrip", "opsPhoto"].forEach(id => mxRetryBox($(id)));
+  if(OPS_PAGE === "late" && !mxRetryBox($("opsLate"))) $("opsLate").innerHTML = `<div class="fwlist"><div class="opshead"><b>今日の遅れ・欠航</b></div>${mxSkel(4)}</div>`;
   renderBoard(); });
 // 海外の航空会社の便（推定）：時刻表がないので、空港の近くにいる機体の位置と経路のデータから（airport-foreign）
 let FOREIGN = null, FOREIGN_AP = null, FOREIGN_AT = 0;
@@ -14642,7 +14876,7 @@ document.addEventListener("click", e => { const b = e.target.closest("[data-ltf]
   ltSave(); track("late_filter", k); renderOpsLate(); });
 function opsLateHTML(){
   const b = ohBoardStats();
-  if(!b) return BOARD_ERR === OPS_AP ? `<div class="opshead"><b>今日の遅れ・欠航</b></div>${opsFailHTML("", OPS_FAIL_WAIT)}` : `<div class="opshead"><b>今日の遅れ・欠航</b></div><p class="ltsub">読み込んでいます…</p>`;
+  if(!b) return BOARD_ERR === OPS_AP ? `<div class="opshead"><b>今日の遅れ・欠航</b></div>${opsFailHTML("", OPS_FAIL_WAIT)}` : `<div class="opshead"><b>今日の遅れ・欠航</b></div>${mxSkel(4)}`;   // 骨組み（06）
   const bad = BOARD && Array.isArray(BOARD.bad) ? BOARD.bad : null;
   const n = b.late + b.cancel, fw = FW.get(OPS_AP), fwn = fw ? fwMerge(fw).length : null;   // fwn：便ごとのお知らせの数（読んでいないときは null）
   if(!n) return `<div class="opshead"><b>今日の遅れ・欠航</b></div><p class="ltnone">いま遅れ・欠航の便はありません</p><p class="fwnote">15分以上の遅れと欠航を、JAL・ANA の時刻表の便で数えています。${ODPT_CREDIT}</p>`;
@@ -14915,7 +15149,7 @@ async function loadPushKey(){
 const b64u = s => { const p = "=".repeat((4 - s.length % 4) % 4), b = atob((s + p).replace(/-/g, "+").replace(/_/g, "/")); return Uint8Array.from(b, c => c.charCodeAt(0)); };
 // いま見ている画面に短い知らせを出す（運用のタブ・空港のページ・ホーム）
 function uiSay(t){
-  if(opsOn()){ $("opsMsg").textContent = t; return; }
+  if(opsOn()){ const m = $("opsMsg"), ok = mxDone(t); m.textContent = t; m.classList.toggle("mxsr", ok); if(ok) mxToast(t); return; }
   if(NOW && $("dAirport").open){ NOW.msg = esc(t); renderNow(); return; }
   say(t);
 }
@@ -15116,11 +15350,11 @@ async function pinAdd(k, from){
   if(list.length >= PIN_MAX){ pinBand(`ピン止めは${PIN_MAX}空港までです。外してから足してください`, "知らせの設定", "data-pin-list"); return; }
   list.push({ k, sp:pinCode(k), dl:false, ga:false }); pinsSave(list); track("pin", "add_" + (from || ""));
   let first = false; try{ first = !localStorage.getItem("soramemo.pins.first"); localStorage.setItem("soramemo.pins.first", "1"); }catch(e){}
-  if(first && pinDeliver() === "ask" && pinCode(k)){ PIN_SHEET = { k, mode:"ask" }; $("dPinBody").innerHTML = pinAskHTML(k); if(!$("dPin").open) $("dPin").showModal(); pinRedraw(); return; }
+  if(first && pinDeliver() === "ask" && pinCode(k)){ PIN_SHEET = { k, mode:"ask" }; $("dPinBody").innerHTML = pinAskHTML(k); if(!$("dPin").open) $("dPin").showModal(); pinRedraw(); mxPinGo(k); return; }
   await pinSync();
   if(first){ PIN_SHEET = { k, mode:"new" }; $("dPinBody").innerHTML = pinSheetHTML(k, "new"); if(!$("dPin").open) $("dPin").showModal(); }
   else pinBand(`${pinName(k)}をピン止めしました`, "知らせの設定", `data-pin-open="${esc(k)}"`);
-  pinRedraw();
+  pinRedraw(); mxPinGo(k);   // ピンが刺さる（04）
 }
 // 外す（知らせもすべて止まる）。すぐあとなら元に戻せる
 async function pinRemove(k){
@@ -15260,7 +15494,7 @@ document.addEventListener("click", async e => {
   const rm = t.closest("[data-pin-remove]"); if(rm){ pinRemove(rm.dataset.pinRemove); return; }
   const cc = t.closest("[data-pin-cancel]"); if(cc){ const k = cc.dataset.pinCancel; pinsSave(pins().filter(p => p.k !== k)); $("dPin").close(); await pinSync(); pinRedraw(); track("pin", "cancel"); return; }
   if(t.closest("[data-pin-undo]")){ pinUndo(); return; }
-  const al = t.closest("[data-pin-allow]"); if(al){ const k = al.dataset.pinAllow; const r = await pinSync(true); track("pin", "allow_" + r);
+  const al = t.closest("[data-pin-allow]"); if(al){ const k = al.dataset.pinAllow; mxBell(al.closest(".dlg") && al.closest(".dlg").querySelector(".pinbell")); const r = await pinSync(true); track("pin", "allow_" + r);
     if(k && PIN_SHEET && PIN_SHEET.mode === "ask"){ PIN_SHEET = { k, mode:"new" }; $("dPinBody").innerHTML = pinSheetHTML(k, "new"); }
     pinRedraw(); return; }
   const lt = t.closest("[data-pin-later]"); if(lt){ const k = lt.dataset.pinLater; $("dPin").close(); pinBand(`${pinName(k)}をピン止めしました`, "知らせの設定", `data-pin-open="${esc(k)}"`); return; }
@@ -17504,8 +17738,32 @@ function renderShugyo(){
   const tab = sgTabOn(), body = tab ? $("sgTabBody") : $("dShugyoBody"), other = tab ? $("dShugyoBody") : $("sgTabBody"); if(!body) return;
   if(other) other.innerHTML = "";   // 同じ id が2つにならないように、使っていないほうは空にする
   const y = sgScroller().scrollTop; body.dataset.car = sgCar(); body.innerHTML = (SG_PAGES[SG_PAGE] || sgMain)(); SG_MSG = "";
-  if(SG_PAGE === "main") sgFillNext(); if(SG_PAGE === "ops") sgFillOps(); if(SG_PAGE === "find") sgFillFind();
+  if(SG_PAGE === "main"){ sgFillNext(); sgMicroBar(body); } if(SG_PAGE === "ops") sgFillOps(); if(SG_PAGE === "find") sgFillFind();
   return y;
+}
+// 小さな動き 08「道のりの帯が伸びる」（11/25 本人 OK・design/micro の 08）
+//   道のりの1枚の太い帯（ポイント）が 0 から今の所まで 0.4 秒で伸び、大きな数字が数え上がる。その日（日本時間）はじめて道のりを見たときだけ。
+//   2回目からは動かさない（この端末に日付を覚える。覚えられない端末でも、開いている間は1回だけ）。動きを減らす設定では動かさない。
+//   1年の細い帯・JGC の帯は動かさない。記録0の形（sgZero）には帯がないので何もしない
+let SG_BAR_DAY = null;
+function sgMicroBar(body){
+  const hero = body && body.querySelector(".sgb-hero"); if(!hero) return;
+  const day = sgToday(); let seen = SG_BAR_DAY === day; try{ seen = seen || localStorage.getItem("soramemo.sgbar") === day; }catch(e){}
+  if(seen || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  requestAnimationFrame(() => {   // 窓（dShugyo）は描いたあとに開くので、次の描画で見えているかを確かめる
+    if(!hero.isConnected || !hero.getClientRects().length) return;
+    SG_BAR_DAY = day; try{ localStorage.setItem("soramemo.sgbar", day); }catch(e){}
+    const ease = "cubic-bezier(.2,.8,.2,1)", i = hero.querySelector(".sgb-bar:not(.thin) i"), n = hero.querySelector(".sgb-act");
+    if(i && i.style.width) i.animate([{ width:"0%" }, { width:i.style.width }], { duration:400, easing:ease });
+    const to = n ? Number(n.textContent.replace(/[^\d]/g, "")) : 0; if(!n || !to) return;
+    const txt = n.textContent, a = n.animate([{ opacity:1 }, { opacity:1 }], { duration:400 }), f = t => 1 - Math.pow(1 - t, 3);
+    n.setAttribute("aria-label", txt);   // 読み上げは数え上げの途中の数字でなく、今の数字
+    (function step(){
+      if(!n.isConnected) return;
+      if(a.playState === "finished"){ n.textContent = txt; return; }
+      n.textContent = fmtKm(Math.round(to * f(Math.min(1, (a.currentTime || 0) / 400)))); requestAnimationFrame(step);
+    })();
+  });
 }
 function openShugyo(page = "main"){
   SG_PAGE = page; track("shugyo", page);
@@ -18373,6 +18631,79 @@ function syncNotices(){
 const noticeObs = new MutationObserver(syncNotices); NOTICES.forEach(id => noticeObs.observe($(id), { attributes:true, attributeFilter:["hidden"] }));
 syncNotices();
 $("mpLogin").onclick = () => { $("dSettings").close(); authOpen("login"); };
+/* ---------- 小さな動き（11/25 本人 OK「全部」・見本 design/micro・CSS は style の最後の「小さな動き」） ----------
+   01 押す縮み・03 つまみ・13 シートは CSS だけ。ここは 02 タブの点・04 ピン・05 札・06 骨組み・07 数字・09 並べ替え・10 コピー・11 鈴・12 もう一度。
+   動きを減らす設定では状態だけ変える（CSS 側で動きを止める）。振動と音は入れない */
+function mxRM(){ try{ return matchMedia("(prefers-reduced-motion: reduce)").matches; }catch(e){ return false; } }
+// 「できた」の知らせか：最初の文が「〜ました」（「〜ませんでした」と読み込み中の「…」は入れない）
+function mxDone(t){ t = String(t || "").trim(); if(!t || /…$/.test(t)) return false; const s = t.split("。")[0]; return /ました/.test(s) && !/ませんでした/.test(s); }
+// 05 下から出る札：開いているシートがあればその中に出す。2 秒で下がる。読み上げは元の字（#msg など）に任せる
+function mxToast(text){
+  const open = [...document.querySelectorAll("dialog[open]")].pop(), host = open ? (open.querySelector(".dlg") || open) : document.body;
+  let t = host.querySelector(":scope > .mxtoast");
+  document.querySelectorAll(".mxtoast").forEach(x => { if(x !== t) x.remove(); });
+  if(!t){ t = document.createElement("div"); t.className = "mxtoast" + (open ? " in" : ""); t.setAttribute("aria-hidden", "true"); host.appendChild(t); }
+  t.innerHTML = `<svg viewBox="0 0 24 24"><path d="M5 12.5l4.2 4L19 7"/></svg><span></span>`; t.querySelector("span").textContent = text;
+  t.classList.remove("show"); void t.offsetWidth; t.classList.add("show");
+  clearTimeout(mxToast.h); mxToast.h = setTimeout(() => t.classList.remove("show"), 2000);
+  return t;
+}
+// 02 タブの点：点は1つ。押したタブの下へすべる（はじめと画面の幅が変わったときは動かさずに置く）
+function mxDot(now){
+  const nav = document.querySelector("nav.tabs"), inr = nav && nav.querySelector(".in"); if(!inr) return;
+  let d = inr.querySelector(":scope > .mxdot"); if(!d){ d = document.createElement("span"); d.className = "mxdot"; d.setAttribute("aria-hidden", "true"); inr.appendChild(d); }
+  const cur = inr.querySelector('button[aria-current="page"]:not([hidden])');
+  if(!cur || !cur.offsetWidth){ nav.classList.remove("mxdot-on"); return; }
+  const jump = !!now || !nav.classList.contains("mxdot-on");
+  d.classList.toggle("mxnow", jump);
+  d.style.transform = `translateX(${Math.round(cur.offsetLeft + cur.offsetWidth / 2 - 2.5)}px)`;
+  nav.classList.add("mxdot-on");
+  if(jump){ void d.offsetWidth; d.classList.remove("mxnow"); }
+}
+{ const inr = document.querySelector("nav.tabs .in");
+  if(inr){ let raf = 0; const go = now => { cancelAnimationFrame(raf); raf = requestAnimationFrame(() => mxDot(now)); };
+    new MutationObserver(ms => { if(ms.some(m => m.target !== inr.querySelector(".mxdot"))) go(false); }).observe(inr, { subtree:true, childList:true, attributes:true, attributeFilter:["aria-current", "hidden"] });
+    addEventListener("resize", () => go(true)); go(true); } }
+// 04 ピンが刺さる（付けたときだけ）：その空港のピンの印を動かす
+function mxPinGo(k){
+  if(!k) return; const q = CSS.escape(k);
+  requestAnimationFrame(() => document.querySelectorAll(`[data-pin-remove="${q}"]:not(.pinoff),[data-pin-open="${q}"]`).forEach(b => {
+    if(!b.querySelector(".pinic")) return; b.classList.remove("mxpin"); void b.offsetWidth; b.classList.add("mxpin"); setTimeout(() => b.classList.remove("mxpin"), 500); }));
+}
+// 06 骨組み：0.3 秒より早く中身が来たら見えないまま入れ替わる（CSS の animation-delay）。読み上げは「読み込んでいます…」
+function mxSkel(n, label){ return `<div class="mxskel" role="status"><span class="vh">${esc(label || "読み込んでいます…")}</span>${"<i></i>".repeat(n || 3)}</div>`; }
+// 07 数字の繰り上がり＋「＋1」：印が増えたときだけ（はじめの表示・見本の入れ直し・絞り込みの切り替えでは動かさない）
+var MX_CK = null;   // render から先に呼ばれるので var
+function mxNums(list){
+  const n = (S && S.checkins || []).length, grew = MX_CK != null && n > MX_CK && n - MX_CK <= 3; MX_CK = n;
+  for(const [el, v] of list){ if(!el) continue; const old = +el.textContent; el.textContent = v;
+    if(!grew || !(+v > old)) continue;
+    el.classList.remove("mxup"); void el.offsetWidth; el.classList.add("mxup");
+    const box = el.parentElement; if(!box) continue; box.querySelectorAll(".mxplus").forEach(x => x.remove());
+    const p = document.createElement("i"); p.className = "mxplus"; p.setAttribute("aria-hidden", "true"); p.textContent = "+" + (v - old); box.appendChild(p); setTimeout(() => p.remove(), 1300); }
+}
+// 09 並べ替え：持ち上げた行のほかは、すっと場所をあける（入れ替える前と後の位置の差を 0.25 秒で戻す）
+function mxFlip(items, skip, fn){
+  if(mxRM()){ fn(); return; }
+  const kids = [...items].filter(x => x !== skip), at = new Map(kids.map(x => [x, x.getBoundingClientRect()]));
+  fn();
+  for(const x of kids){ const a = at.get(x), b = x.getBoundingClientRect(), dx = a.left - b.left, dy = a.top - b.top; if(Math.abs(dx) < 1 && Math.abs(dy) < 1) continue;
+    try{ x.animate([{ translate:`${dx}px ${dy}px` }, { translate:"0 0" }], { duration:250, easing:"cubic-bezier(.2,.8,.2,1)" }); }catch(e){} }
+}
+// 10 コピーが ✓ に（1.5 秒で戻る）。写せないときは字を画面に出す
+function mxCopyHTML(text, label){ return `<button type="button" class="mxcopy" data-mx-copy="${esc(text)}" aria-label="${esc(label || text)}をコピー"><svg class="cp" viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2.5"/><path d="M16 8V6.5A2.5 2.5 0 0 0 13.5 4h-7A2.5 2.5 0 0 0 4 6.5v7A2.5 2.5 0 0 0 6.5 16H8"/></svg><svg class="ck" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.2 4L19 7"/></svg></button>`; }
+document.addEventListener("click", async e => {
+  const c = e.target.closest("[data-mx-copy]"); if(!c) return; e.preventDefault();
+  const text = c.dataset.mxCopy, label = c.getAttribute("aria-label");
+  try{ await navigator.clipboard.writeText(text); }catch(er){ uiSay(text); return; }
+  c.classList.add("done"); c.setAttribute("aria-label", "コピーしました"); mxToast("コピーしました");
+  clearTimeout(c._mx); c._mx = setTimeout(() => { c.classList.remove("done"); c.setAttribute("aria-label", label); }, 1500);
+});
+// 11 鈴が揺れる（ON にしたときだけ）。撮る人用の知らせの鈴（.spbell）からも呼べる
+function mxBell(el){ if(!el) return; el.classList.remove("mxbell"); void el.offsetWidth; el.classList.add("mxbell"); setTimeout(() => el.classList.remove("mxbell"), 500); }
+// 12 「もう一度」の矢印（1回だけ回る）
+function mxRetrySvg(){ return `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19.5 12a7.5 7.5 0 1 1-2.2-5.3"/><path d="M19.5 4.5v4h-4"/></svg>`; }
+function mxSpin(b){ if(!b) return; b.classList.remove("go"); void b.offsetWidth; b.classList.add("go"); setTimeout(() => b.classList.remove("go"), 700); }
 </script>
 </body>
 </html>
