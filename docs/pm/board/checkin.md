@@ -1,6 +1,11 @@
 # チェックイン担当の帳面
 
 ## いま持っている仕事
+- **11/26 定時の回（帳面の積み「11/26 1時30分 PM から：checkin/idem-cid」）**：checkin/idem-cid・下書き **PR #248**（181cd6ed・報告 docs/pm/report-idem-cid.md）。main（f18b2eb2・#240 data/idem 入り）を取り込み済み。見張りを付けた。画面の見た目は変えていないので、テストが通れば PM が自動で反映してよい
+  - 印：checkinServer で押すたびに p.cid（ckCid・UUID）。sendCheckin の本文に cid。enqueue は cid を残す。flushQueue は前の版の ID なしの保留にも送る前に付けて保存。返事の again は成功のまま（記録の名前だけ checkin_again）
+  - 記録帳・国際線：idemInsert（upsert onConflict "user_id,client_id"・ignoreDuplicates。42P10・PGRST204・42703 なら client_id を外して insert）。formCid(key,row) は同じ中身の押し直しで同じ ID・保存できたら formCidDone で忘れる。使った所：mAdd・addIntl・搭乗券 data-bp-act="manual"・data-migrate（1行ごとに区間と日付で ID）
+  - 変えた関数：checkinServer・sendCheckin・ckSend・checkinServerWait・enqueue・flushQueue・mAdd の onclick・addIntl・data-bp-act と data-migrate の click 処理。足した：ckCid・formCid・formCidDone・idemNoCol・idemInsert
+  - テスト：t200 を足した。fake_sb.js に __lostReply（記録できたのに返事なし）・__noIdem（前の関数）・__upLost・__noCidCol、upsert の onConflict "user_id,client_id"、__calls に cid。e2e 全部（3D を除く）144/144・tests/ops 成功
 - **11/26 定時の回（帳面の積み「11/26 0時40分 PM から：t190 が main でも落ちる」）**：checkin/t190-fix・下書き **PR #244**（4775df69・報告 docs/pm/report-t190-fix.md）→ **11/26 1時36分 main に入った**。main（4a128eec）から。見張りを付けた。テストだけの直しなので、通れば PM が自動で反映してよい
   - 原因はテストの作り：3D は20秒ごとに読み直す（A3_POLL）が、偽のサーバーが消したはずの a1 を返し続け、重いと「消えた」判定の前に a1 が戻って「追う」のままだった（負荷2つ＋4本同時で再現）。向きのボタンは 0.8 秒だけ押す作りで、こまが少ないと 0.2 に届かなかった
   - 直し：tests/e2e/t190.py に DROP（偽のサーバーから外す機体）と until・hold（条件待ち）。src/index.html・web/ は変えていない（変えた関数なし）
@@ -657,6 +662,7 @@
 - 確認コードは6けた。メールは Gmail、Supabase の送信上限は1時間100通
 
 ## 次にやること
+- 【11/26 idem-cid】PR #248：PM の自動の反映を待つ。入る前に t200・t196・t195・t24・t44・t48・tests/ops を流す。#239（flight-suggest）とどちらかが先に入ったら、あとの方で mfInsert を idemInsert につなぐ（client_id は formCid で）。修行の sgRecordPlan は下の依頼（修行担当へ）
 - 【11/26 t190-fix】PR #244：main に入った（済み・見張りは外れた）。3D のテストで「消えた機体」を確かめるときは、偽のサーバーからも外す（20秒ごとの読み直しで戻る）。ほかの 3D のテスト（t163・t165 など）で決まった時間の待ちが落ちるときも同じ直し方（条件待ち）でよい
 - 【11/25 stamp-edge-b】#238 と同じ仕事の別案（ブランチだけ）。PM が #238 を選んだら checkin/stamp-edge-b は消す。#238 にない所（取り直しのボタン・設定から戻ったときの取り直し）を使うなら #238 に移す
 - 【重なり防止・再】始めるときだけでなく、push の前にも origin のブランチと開いた PR を見る（11/25 22時台は作っている途中で別の回が同じ仕事を出した）
@@ -787,6 +793,7 @@
 - tests/ops は手元では npm の playwright にブラウザがないので、全体に入っている playwright をつないで流した（すべて成功）
 
 ## ほかの担当への依頼
+- 【11/26 修行担当へ（PM 経由）】修行の「乗った」（sgRecordPlan）の manual_flights の insert を、`idemInsert("manual_flights", {...row, client_id: formCid("sg:" + p.id, row)})` にしてほしい（送り直しで二重にしない。data/idem・移行200。PR #248 が main に入ってから）。列がまだないサーバーでは idemInsert が前と同じ insert にする
 - 【11/26 データ担当へ（flight-suggest・PR #239）】(1) manual_flights に便名の列 flight_no（text・任意）を足してほしい（移行と RLS をセット。本人の行だけ書ける今の決まりのまま）。アプリは列があれば入れ、なければ外して入れる形にしてある (2) 「日付＋便名 → 出発・到着・時刻・機体」を flight_history から返す読むだけの関数（例 flight_lookup(p_date date, p_flight text)）。今は今の時刻表から推定している
 - 【11/25 checkin/micro の回へ（自分の持ち分の別の回）】stamp-fast（PR #229）で toast()・.smtoast（05 の札の形）を足した。micro の mxToast と1つにまとめてほしい。テストは micro が t194、stamp-fast が t195
 - 【11/25 撮る人用へ】知らせの鈴（.spbell・data-spnote）を ON にしたとき、mxBell(押したボタン) を呼んでほしい（PR #226 の 11「鈴が揺れる」。描き直しの前に呼ぶ）。コピーの部品 mxCopyHTML(文字, 名前) も使える
@@ -1484,4 +1491,4 @@ review-c4：見せてよい。本人の答え（ON／OFF か −／＋ か）を
 - 便の一覧の航空会社コードは小さな札（彩度を落とした色・事実の記録として。ロゴは使わない）
 - テスト：候補が出る・1回で記録・数字だけの便名で補える・電波がないときは候補なしで手入力へ
 - 【11/26 0時40分 PM から →【済み PR #244（4775df69・報告 report-t190-fix.md）】】t190（3D の「飛ぶ」）が main でも落ちる：t142 のあとに流しても `[data-a3-other]` を待って 30 秒で切れる／「375x667 飛ぶ：右のボタンで向きが変わる」が落ちる回もある。テストの組み方か本物の不具合かを見て、直す枝を出して（3D の見た目は変えない）
-- 【11/26 1時30分 PM から】#244（t190 の直し）は pm/release-1126a に入れた。#239（flight-suggest）は画面が変わるので本人に写真を見せて OK 待ち（入れるまで待って、次は帳面の次の仕事へ）。data/idem（#240）が入るので、印の保留（enqueue）に client_id（UUID）を持たせて関数 checkin に cid で送る依頼を受けて：ブランチ checkin/idem-cid（画面の見た目は変えない）
+- 【11/26 1時30分 PM から →【済み PR #248（報告 report-idem-cid.md）】】#244（t190 の直し）は pm/release-1126a に入れた。#239（flight-suggest）は画面が変わるので本人に写真を見せて OK 待ち（入れるまで待って、次は帳面の次の仕事へ）。data/idem（#240）が入るので、印の保留（enqueue）に client_id（UUID）を持たせて関数 checkin に cid で送る依頼を受けて：ブランチ checkin/idem-cid（画面の見た目は変えない）
