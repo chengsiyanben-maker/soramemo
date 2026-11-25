@@ -856,7 +856,9 @@ dialog.spfull .dlg{padding:16px 16px 32px;max-width:480px;margin:0 auto;max-heig
 .rtl .tag .rcf{flex-direction:column;align-items:flex-end;gap:1px}.rcf>span{display:inline-flex;align-items:center;gap:5px}
 .rcf .d{display:inline-flex;gap:3px}.rcf .d i{width:9px;height:9px;border-radius:50%;background:var(--r-dot)}
 .rcf.c3 .d i,.rcf.c2 .d i:nth-child(-n+2),.rcf.c1 .d i:nth-child(1){background:var(--r-pred)}
-.rcf .n{font-weight:600;color:var(--r-sub);margin-left:4px}
+.rcf .n{display:inline;font-weight:600;color:var(--r-sub);margin-left:4px}.rcf .n b{font-weight:800;color:var(--r-ink2)}
+.rbasis{font-size:13px;line-height:1.6;color:var(--r-sub);margin:10px 0 0}.rbasis b{color:var(--r-ink2);font-weight:800;margin-right:6px}
+.rtl li.skip.miss .tx{color:var(--r-ink2)}.rtl li.skip.miss .tx small{display:block;color:var(--r-sub);font-size:13px}
 .rsrc{display:inline-flex;align-items:center;height:24px;padding:0 9px;border-radius:999px;background:var(--r-card);box-shadow:inset 0 0 0 1.5px #9AA3AE;font-size:13px;font-weight:800;color:var(--r-ink2);white-space:nowrap}
 .rtl.mini .tx .rsrc,.rtl.mini .tx .rcf{margin-top:3px}
 .rwarn{display:flex;gap:8px;align-items:flex-start;font-size:13px;line-height:1.6;color:var(--r-ink2);background:var(--r-wash);border-radius:14px;padding:10px 12px;margin-top:10px}
@@ -14223,7 +14225,7 @@ function spbPredHTML(reg){
   const pm = pd === undefined ? null : predModel(pd, predLiveCtx(reg, SPB));
   const body = pm === null ? `<p class="hint">予想を読み込んでいます…</p>`
     : pm.none || !pm.steps.length ? predWarn(pm)
-    : `<ul class="rtl">${predRows(lastLive ? { ...pm, skip:null } : pm, false)}</ul>${predWarn(pm)}`;
+    : `<ul class="rtl">${predRows(lastLive ? { ...pm, skip:null } : pm, false)}</ul>${predBasis(pm)}${predWarn(pm)}`;
   return `${body}<div class="rbtns"><button type="button" class="rbtn line" data-plane="${esc(reg)}">機体の1日 ›</button><button type="button" class="rbtn" data-rot-conf>確からしさとは</button></div>
     <p class="rnote">${PRED_NOTE}<b>予想です。保証しません。</b></p>${predOdpt(pm)}`;
 }
@@ -14333,7 +14335,7 @@ function planeHTML(reg, hist, pred){
     `<div class="rtlw"><div class="spcard"><div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px"><span><b style="font-size:22px">${esc(reg)}</b><small style="display:block;font-size:13px">${[type, nm && "★" + nm].filter(Boolean).map(esc).join("・") || "　"}</small></span>${live ? `<em class="pill" style="font-style:normal;background:var(--r-now-wash);color:var(--r-now);border-radius:999px;padding:6px 12px;font-size:13px;font-weight:800">飛行中</em>` : ""}</div></div>
       <div class="rsec"><b>今日</b><span>${predDay(Date.now())}</span></div>
       ${tl || `<p class="hint">今日この機体が飛んだ記録は、まだありません（日本の上空を飛んだ航空会社の便だけ記録しています）。</p>`}
-      ${m.none && tl ? predWarn({ steps:[] }) : predWarn(m)}
+      ${m.none ? "" : predBasis(m)}${m.none && tl ? predWarn({ steps:[] }) : predWarn(m)}
       <div class="rbtns"><button type="button" class="rbtn" data-rot-conf>確からしさとは</button>${/^JA[0-9A-Z]{3,5}$/.test(reg) && SERVER ? `<button class="rbtn line" data-plpush="${esc(reg)}" type="button">近づいたら知らせる</button>` : ""}</div>
       ${hasMap ? `<div class="rmap"><b>今日の地図</b><div class="plmap" id="plMap" role="img" aria-label="今日飛んだ道すじと予想の地図"></div><div class="rlegend"><span><i></i>飛んだ</span><span><i class="p"></i>予想</span></div></div>` : ""}
       <p class="rnote">飛んだ便は機体の位置の記録（adsb.lol）から。出発・到着の空港は毎晩の航跡から入るので、今日の便は空いていることがあります。${PRED_NOTE}${pred && pred.method ? "特別塗装機は、航空会社の運航情報にある予定の便も使っています。" : ""}<b>予想です。保証しません。</b></p>${predOdpt(m)}</div>`}`;
@@ -14503,8 +14505,10 @@ function predSteps(d){
     const sh = Number(n.share), seen = Number(n.seen), plan = n.src === "livery";
     // 時刻表の予想（predict_rotation）の seen は同じ曜日を2回と数えた点数なので、回数は少なめ（半分）に見て、画面には出さない
     const cnt = n.seen == null || !Number.isFinite(seen) ? null : reg ? seen : Math.ceil(seen / 2);
+    // 分母（前の便のあとを見た回数・重みなし）：データ担当が seen_of を返したときだけ「12回中11回」にする（返さないうちは「11回見た」）
+    const of = reg && n.seen_of != null && Number.isFinite(Number(n.seen_of)) && cnt != null && Number(n.seen_of) >= cnt ? Number(n.seen_of) : null;
     const st = { fl:reg ? csFlight(n.callsign) : n.flight, dep:n.dep, arr:n.arr, t:Number.isFinite(t) ? t : null, plan,
-      share:n.share != null && Number.isFinite(sh) ? sh : null, cnt, shown:reg && cnt != null ? cnt : null };
+      share:n.share != null && Number.isFinite(sh) ? sh : null, cnt, shown:reg && cnt != null ? cnt : null, of };
     if(!plan && !(st.share >= 0.4 && st.cnt >= 3)) break;
     out.push(st); if(st.t) prev = st.t;
   }
@@ -14521,20 +14525,26 @@ function predModel(d, ctx){
   const cur = { fl:reg ? csFlight(k.callsign) : k.flight, dep:k.dep, arr:k.arr, t:Date.parse(reg ? k.first : k.std) || null, end:Date.parse(reg ? k.last : k.sta) || null };
   cur.live = live ? predKey(live.fl) === predKey(cur.fl) : reg ? !!cur.end && now - cur.end < 6 * 60_000 : k.phase !== "landed" && !!cur.t && cur.t <= now && !!cur.end && now < cur.end;
   if(cur.live && live) cur.eta = live.eta || null;
-  let steps = predSteps(d), skip = null;
+  let steps = predSteps(d), skip = null, miss = null;
   if(live && !cur.live){
     const i = steps.findIndex(s => predKey(s.fl) === predKey(live.fl));
     if(i >= 0){ skip = { ...steps[i], dep:steps[i].dep || live.dep, arr:steps[i].arr || live.arr }; steps = steps.slice(i + 1); }
-    else{ skip = { fl:live.fl, dep:live.dep, arr:live.arr, t:live.t || null }; if(live.t) steps = steps.filter(s => !s.t || s.t > live.t); }
+    else{
+      // 外れ：予想の1便目と同じころ（前後90分）に、違う便で飛んでいる。隠さず「当時の予想」と並べる（出発の時刻が分かるときだけ）
+      const s0 = steps[0];
+      if(s0 && s0.t && live.t && Math.abs(s0.t - live.t) <= 90 * 60_000) miss = { fl:s0.fl, dep:s0.dep, arr:s0.arr, t:s0.t, plan:s0.plan };
+      skip = { fl:live.fl, dep:live.dep, arr:live.arr, t:live.t || null }; if(live.t) steps = steps.filter(s => !s.t || s.t > live.t);
+    }
   }
   steps = steps.filter(s => s.t == null || s.t > now);
-  return { cur, live, stale:!!(live && !cur.live), skip, steps, plan:steps.some(s => s.plan) };
+  return { cur, live, stale:!!(live && !cur.live), skip, miss, steps, plan:steps.some(s => s.plan), method:d.method || null, src:d.src || null };
 }
 const PRED_EDGE = `<li class="edge"><b>ここから予想</b><small>予想です。保証しません</small></li>`;
 function predConf(s){
   if(s.plan) return `<span class="rsrc">運航情報</span>`;
   const lv = predLevel(s), w = ["", "低い", "中くらい", "高い"][lv];
-  return `<span class="rcf c${lv}" aria-label="確からしさ ${w}${s.shown != null ? `・${s.shown}回見た` : ""}"><span><span class="d" aria-hidden="true"><i></i><i></i><i></i></span>${w}</span>${s.shown != null ? `<span class="n">${s.shown}回見た</span>` : ""}</span>`;
+  const n = s.shown == null ? "" : s.of != null ? `${s.of}回中<b>${s.shown}</b>回` : `<b>${s.shown}</b>回見た`;
+  return `<span class="rcf c${lv}" aria-label="確からしさ ${w}${n ? "・" + n.replace(/<\/?b>/g, "") : ""}"><span><span class="d" aria-hidden="true"><i></i><i></i><i></i></span>${w}</span>${n ? `<span class="n">${n}</span>` : ""}</span>`;
 }
 // 1行ずつ。mini＝カードの中の小さい線（便名と区間を1行に、確からしさは下）、そうでなければ機体の1日の大きい線（区間は2行目、確からしさは右）
 function predCurRow(c, mini){
@@ -14545,7 +14555,8 @@ function predCurRow(c, mini){
 }
 function predRows(m, mini, limit){
   const rows = [], today = jstDay(Date.now());
-  if(m.skip) rows.push(`<li class="skip"><div></div><div class="dot"></div><div class="tx">${m.skip.t ? spHM(m.skip.t) + " " : ""}${esc(m.skip.fl || "")} ${predRoute(m.skip.dep, m.skip.arr)}は、いま飛んでいるので予想に出しません</div></li>`);
+  if(m.miss) rows.push(`<li class="skip miss"><div></div><div class="dot"></div><div class="tx">いま実際は <b>${esc(m.live.fl)}</b> ${predRoute(m.live.dep, m.live.arr)}<small>当時の予想：${m.miss.t ? spHM(m.miss.t) + " " : ""}${esc(m.miss.fl || "")}</small></div></li>`);
+  else if(m.skip) rows.push(`<li class="skip"><div></div><div class="dot"></div><div class="tx">${m.skip.t ? spHM(m.skip.t) + " " : ""}${esc(m.skip.fl || "")} ${predRoute(m.skip.dep, m.skip.arr)}は、いま飛んでいるので予想に出しません</div></li>`);
   let day = today;
   const list = limit ? m.steps.slice(0, limit) : m.steps;
   for(const s of list){
@@ -14560,8 +14571,18 @@ function predRows(m, mini, limit){
 // 予想が出ないとき・いまの便が古いときの書き方
 function predWarn(m){
   if(m.none) return `<div class="rwarn"><span>…</span><span>${m.live ? `<b>いま飛んでいる ${esc(m.live.fl)} が記録に入ると</b>、そのあとの便を予想します` : `<b>今日この機体はまだ見えていません</b>。見えたら、そのあとの便を予想します（いまの便が、まだ分かっていません）`}</span></div>`;
-  return (m.stale ? `<div class="rwarn"><span>!</span><span><b>いま飛んでいる ${esc(m.live.fl)} が記録に入るまで</b>、${esc(m.cur.fl || "")} からの予想を出しています。</span></div>` : "")
+  return (m.miss ? `<div class="rwarn"><span>!</span><span><b>いま飛んでいる ${esc(m.live.fl)} は予想と違いました</b>（機体の入れ替えなどで変わることがあります）。記録に入るまで ${esc(m.cur.fl || "")} からたどった予想を出しているので、この先は外れやすくなっています。</span></div>`
+    : m.stale ? `<div class="rwarn"><span>!</span><span><b>いま飛んでいる ${esc(m.live.fl)} が記録に入るまで</b>、${esc(m.cur.fl || "")} からの予想を出しています。</span></div>` : "")
     + (m.steps.length ? "" : `<div class="rwarn"><span>…</span><span>この先の便は、<b>まだ記録が足りず予想できません</b>（同じ便を3回見ると出ます）</span></div>`);
+}
+// 根拠の1行：どの便から（記録の最後の時刻）・前の何日の記録でたどったか。先の便ほど外れやすい（予想の元の時刻と、先ほど外れやすいことを書く）
+//   learn・learn_hi（predict_rotation_v2）は前の42日、時刻表の predict_rotation と predict_rotation_reg は前の60日
+function predBasis(m){
+  if(!m || m.none || !m.steps.length) return "";
+  const c = m.cur, days = /^learn/.test(m.method || "") ? 42 : 60, end = c.end || c.t;
+  const from = c.live ? "（いま飛んでいる便）" : end ? `（${spHM(end)} ${c.arr ? "着" : "に見えた"}）` : "";
+  const learned = m.steps.some(s => !s.plan);
+  return `<p class="rbasis"><b>根拠</b>${learned ? `${esc(c.fl || "")}${from}から、前の${days}日の記録で続いた便をたどっています。` : ""}${m.plan ? "運航情報の便は、航空会社の予定から。" : ""}先の便ほど外れやすくなります。</p>`;
 }
 const predOdpt = m => m && m.plan ? `<p class="rodpt">運航情報の${ODPT_CREDIT}</p>` : "";
 const PRED_NOTE = "予想は、この機体が前の記録でいまの便のあとに飛んだ便から出しています（全機の位置の記録・adsb.lol）。機体の入れ替えで違うことがあります。";
@@ -14571,7 +14592,7 @@ function predictionHTML(d, ctx, o = {}){
   if(m.none) return `<div class="rtlw">${predWarn(m)}</div>`;
   const more = o.limit && m.steps.length > o.limit ? m.steps.length - o.limit : 0;
   const btns = o.reg ? `<div class="rbtns">${more ? `<small class="more">あと${more}便の予想</small>` : ""}<button type="button" class="rbtn line" data-plane="${esc(o.reg)}">機体の1日 ›</button>${o.conf ? `<button type="button" class="rbtn" data-rot-conf>確からしさとは</button>` : ""}</div>` : "";
-  return `<div class="rtlw"><ul class="rtl mini">${predCurRow(m.cur, true)}${PRED_EDGE}${predRows(m, true, o.limit)}</ul>${predWarn(m)}${btns}
+  return `<div class="rtlw"><ul class="rtl mini">${predCurRow(m.cur, true)}${PRED_EDGE}${predRows(m, true, o.limit)}</ul>${predBasis(m)}${predWarn(m)}${btns}
     <p class="rnote">${PRED_NOTE}<b>予想です。保証しません。</b></p>${predOdpt(m)}</div>`;
 }
 // 確からしさとは（シート）。割合の数字はここだけに出す
@@ -14584,6 +14605,7 @@ function predConfHTML(){
       ${ex(2, .7, 10, "<b>6〜8割</b>の日に続いた。または8割以上でも見たのが5回より少ない")}
       ${ex(1, .45, 5, "<b>4〜6割</b>の日に続いた。4割より少ない便は出しません")}</ul>
     <ul class="rlv"><li><h4>航空会社の運航情報にある便</h4><span class="rsrc">運航情報</span><p>運航情報に「この塗装機で運航」とある便。記録からの予想とは別の物差しで、機体の入れ替えで変わることがあります</p></li></ul>
+    <ul class="rlv"><li><h4>根拠と外れたとき</h4><p>予想の下の「根拠」に、どの便からたどったかと、前の何日の記録を使ったかを書きます。<b>先の便ほど外れやすくなります。</b>いま飛んでいる便が予想と違ったときは、隠さず「当時の予想」と並べます</p></li></ul>
     <ul class="rlv"><li><h4>予想に出さない便</h4><p>出発の時刻が過ぎた便と、いま飛んでいる便・それより前の便は、運航情報にあっても予想に出しません</p></li></ul>
     <p class="rodpt">運航情報の${ODPT_CREDIT}</p>
     <div class="rbtns" style="justify-content:flex-end"><button type="button" class="btn1" data-close>閉じる</button></div>`;
