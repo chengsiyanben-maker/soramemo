@@ -1,6 +1,14 @@
 # チェックイン担当の帳面
 
 ## いま持っている仕事
+- **11/26 0時台の定時の回（帳面に積まれた 11/25 23時「電波・位置が悪いときの続き」）**：checkin/stamp-edge・下書き **PR #238**（9eb14811・報告 docs/pm/report-stamp-edge.md・写真 docs/pm/shots-stamp-edge/）。main（4844f048・stamp-fast 入り）から。見張りを付けた。テストが通れば PM が自動で反映
+  - 1 正確な位置情報 OFF（iPhone で誤差 1km 以上）→ ckLocCard("precise")：道順つきのカード・送らない・ハンコなし・ボタンは「閉じる」だけ。ウェブで許可がない → ckLocCard("denied")＋ nvGeoApply をウェブにも（CK_GEO_NG。半券の代わりのカード・「デモで試す」だけ。設定から戻って許可なら戻す）
+  - 2 送信待ち：loadServer の最後に qMerge（端末の判定で通る見込みの分だけ S.checkins に pending・queued で足す）。renderQueue は札（qTagHTML「羽田空港 送信待ち（14:22 記録）」）、図鑑は qTagsFor と記録の行の「送信待ち」。札は data-flush で送り直し。enqueue(p, why, ok) に変えた（ok:false は範囲の外などで、送るまで印にしない）
+  - 3 flushQueue で送れたら toast「羽田空港の印が確定しました」（2件以上は「など○件」）
+  - 4 文は CK_TXT・ckWhyText（サーバーの理由→文）・ckOutText（範囲の外。誤差が残りより大きければずれの文）。stale_position（保留でない）は時計のずれ。英字のエラーは CK_TXT.server
+  - 変えた関数：checkinRun・checkinDecide・checkinServer・ckSend・checkinServerWait・enqueue・renderQueue・flushQueue・loadServer・openAirport・nvGeoApply（足した関数は報告に）
+  - テスト：t196 を足した（単独で約100秒・run_all の上限 600）。文を変えたので t195・t144 を合わせた。e2e 全部・tests/ops 成功（手元だけの t168・t166・t190 を除く。t195 は4本同時だと長い処理 155ms で落ち、1本なら成功）
+  - 本人（PM）に聞くこと：正確な位置の見分け（誤差 1km 以上・10秒待ってから。早くするなら位置の取り方を変える）・「本日のチェックインは完了」と30分の決まりのずれ・ずれの文に足した1文・送信待ちの帯の点線のふち
 - 11/25 22時台（PR #226 の見張り）：#233（release-1125e）で #226 の最初の版（763673a1）と修行の #224 が main に入った。あとから足した「2つの札を重ねない」（85a7ec37）はまだ main にないので、main（dfc945cc）を取り込み web/ を作り直した（4e4fdcb7）。#226 に残る差は src の2行と web/ だけ。t194・t195・t198・t24・t77・t145 成功。PM が残りを入れるか #226 を閉じるかを決める
 - 11/25 21時台（PR #226 の見張り）：#231（stamp-fast）が main に入って #226 がぶつかった → main（4844f048）を取り込み、web/ を作り直した（85a7ec37。src はぶつからなかった）。stamp-fast の札 toast()（#smToast）と小さな動きの札 mxToast が重ならないよう、出すときにもう片方を下げるようにした。t194・t195・t24・t145・t183・t184・t167・t120・t123 成功。PR がぶつかりなしなので見張りの予約は入れていない（次の GitHub の知らせで戻る）
 - 11/25 手動の回（同じ「stamp-fast を checkin/stamp-fast で」の指示）：直前の回で PR #229（987f3b04）として済み。main も 4354656c のままで取り込み済みなので作り直さなかった。checkin/micro には触っていない。PM の反映を待つ
@@ -630,6 +638,8 @@
 - 確認コードは6けた。メールは Gmail、Supabase の送信上限は1時間100通
 
 ## 次にやること
+- 【11/26 stamp-edge】PR #238：PM の自動の反映を待つ。本人の答え（上の4つ）で直す。入る前に t196・t195・t144・t24・t171・t11・t13・t15・t19・t30・t193・t189・tests/ops を流す。#226（micro）とは say・CSS の最後・toast の所が近い（src/index.html）。あとから入る方で web/ を作り直す。micro の mxToast と1つにまとめるときは、確定の札（flushQueue の toast）も含める
+- 【次の回】PM の指示がなければ「乗る便の候補から1回で記録」（checkin/flight-suggest。下の 11/25 23時05分の欄）を main から始める。始める前に origin のブランチと開いた PR を見る
 - 【11/25 stamp-fast】PR #229：PM の反映を待つ。本人の答え（上の4つ）で直す。入る前に t195・t24・t171・t11・t13・t15・t19・t30・t193・t189・tests/ops を流す。checkin/micro（763673a1）と src/index.html の say・CSS でぶつかる見込み。stamp-fast が先（PM の指示）。micro を入れるときは札を mxToast と toast（.smtoast）の1つにまとめ、t194（micro）と t195（stamp-fast）は両方残す
 - 【手元の道具】e2e を流したあと docs/pm の写真の戻しは `git diff --name-only -- docs/pm | xargs git checkout --`（シェルの * は untracked のフォルダも拾って失敗する）。run_all.py の引数は前方一致なので、分けて流すときは t1.py のように .py まで付ける
 - 【11/25 micro】PR #226：PM の自動の反映を待つ。答え（札の決め方・コピーを付ける所・札の高さ）で直す。入る前に t194・t145・t183・t167・t184・t120・t123・tests/ops を流す。#224（修行の帯）とは src/index.html の別の所。あとから入る方で web/ を作り直す
@@ -1435,7 +1445,7 @@ review-c4：見せてよい。本人の答え（ON／OFF か −／＋ か）を
 - テスト：遅い電波で押してからハンコまで 0.5 秒以内・長い処理 100ms 未満・保存の失敗で保留に入る・二重押し。直す前と後の数字を報告に。checkin/micro（小さな動き）とぶつかる所は、こちらを先に
 - 【11/25 18時20分 追記・本人の答え】固まるのは「ブラウザで、空港で実際に押したとき」（iPhone アプリ・デモではない）。本物の位置の取得（watchPosition／getCurrentPosition の待ち・高い精度の要求）と、ログインしているときのサーバーへの保存・その後の読み直しを特に疑う。ウェブの Service Worker・本番の通信の遅さも測る
 
-## PM から積んだ次の仕事（11/25 23時、電波・位置が悪いときの続き。本人が Gemini の案を貼った：docs/pm/ext/gemini-offline-1125.txt）※checkin/stamp-edge で（stamp-fast の上・main から）。テストが通れば PM が自動で反映（位置の取り方は変えない。変える所が出たら本人の OK）
+## PM から積んだ次の仕事 →【済み PR #238（9eb14811・報告 report-stamp-edge.md）】（11/25 23時、電波・位置が悪いときの続き。本人が Gemini の案を貼った：docs/pm/ext/gemini-offline-1125.txt）※checkin/stamp-edge で（stamp-fast の上・main から）。テストが通れば PM が自動で反映（位置の取り方は変えない。変える所が出たら本人の OK）
 - すでに stamp-fast で入ったもの（押したらすぐ・保留・断られたら取り消し・位置の使い回し）は変えない。足すのは次だけ：
   1. iOS の「正確な位置情報」が OFF・位置の許可がないとき：何が足りないかと直し方（設定 ＞ そらメモ（または Safari）＞ 位置情報 ＞ 正確な位置情報）を出すカード。押しても判定できないボタンは出さない
   2. 送信待ちの間：地図のピン・図鑑・数はその場で増やし、図鑑の詳しい所とホームのシートに「送信待ち（14:22 記録）」の小さな札。押すと送り直す。いくつ溜まっても時刻の順に送る（今の保留の仕組みの見せ方）
