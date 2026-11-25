@@ -1,0 +1,338 @@
+<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>空港ページの動き</title><style>/* そらメモ 小さな動きの見本：共通の見た目（main の web/index.html の色と文字に合わせる） */
+:root{
+  --gothic:"Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic UI","Yu Gothic","Meiryo","Noto Sans JP","Noto Sans CJK JP",system-ui,sans-serif;
+  --bg:#F4F5F7; --card:#FFFFFF; --ink:#374151; --strong:#1F2937; --sub:#646B78; --mute:#6B7280;
+  --track:#EEF0F3; --pill:rgba(17,24,39,.05); --jal:#C8102E; --ana:#1C4FA0; --acc:#2563EB;
+  --ok:#15803D; --hero:#0F1B2D; --bar:#E3E7ED; --pin:#1B2B4B; --pin-wash:#EEF2F8;
+  --sw-on-bg:#16233A; --sw-off-bg:#E5E8EE; --sw-off-ring:#768090; --sw-on-ink:#FFFFFF; --sw-off-ink:#4B5563;
+  --shadow:0 1px 2px rgba(17,24,39,.04),0 10px 30px -8px rgba(17,24,39,.10),inset 0 0 0 1px rgba(17,24,39,.07);
+  --shadow-lift:0 2px 4px rgba(17,24,39,.06),0 22px 40px -10px rgba(17,24,39,.28),inset 0 0 0 1px rgba(17,24,39,.07);
+  --nav-glass:rgba(255,255,255,.82); --nav-ink:#6B7280; --nav-shadow:0 10px 30px -8px rgba(17,24,39,.22),0 2px 6px rgba(17,24,39,.06);
+  --skel:#E9ECF0; --skel-hi:#F5F7F9;
+  /* 動きの長さ（0.15〜0.4秒）と曲がり方 */
+  --t-tap:.12s; --t-fast:.15s; --t-mid:.25s; --t-slow:.4s;
+  --ease:cubic-bezier(.2,.8,.2,1); --ease-in:cubic-bezier(.4,0,1,1);
+}
+:root[data-night=on]{
+  --bg:#0F141B; --card:#1B1F26; --ink:#E5E7EB; --strong:#F3F4F6; --sub:#AEB9C6; --mute:#AEB9C6;
+  --track:#262B33; --pill:rgba(220,227,234,.08); --acc:#DCE3EA; --ok:#4ADE80; --hero:#4ADE80; --bar:#262B33;
+  --pin:#DCE3EA; --pin-wash:rgba(220,227,234,.08);
+  --sw-on-bg:rgba(220,227,234,.16); --sw-off-bg:transparent; --sw-off-ring:#66778C; --sw-on-ink:#DCE3EA; --sw-off-ink:#AEB9C6;
+  --shadow:0 12px 26px -16px rgba(0,0,0,.7),inset 0 0 0 1px rgba(255,255,255,.06);
+  --shadow-lift:0 22px 40px -12px rgba(0,0,0,.85),inset 0 0 0 1px rgba(255,255,255,.12);
+  --nav-glass:rgba(22,25,31,.86); --nav-ink:#8B95A3; --nav-shadow:0 10px 30px -6px rgba(0,0,0,.6);
+  --skel:#232830; --skel-hi:#2C323B; --amber:#FBBF24;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--bg);color:var(--ink);font-family:var(--gothic);-webkit-text-size-adjust:100%}
+body{max-width:430px;margin:0 auto;min-height:100vh;padding:0 16px 120px;line-height:1.6;font-size:15px}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.num{font-weight:800;font-variant-numeric:tabular-nums;color:var(--strong);letter-spacing:-.01em}
+.u{font-size:12px;color:var(--mute);font-weight:600;margin-left:2px}
+.card{background:var(--card);border-radius:20px;box-shadow:var(--shadow);padding:16px}
+.pill{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px;padding:0 18px;border-radius:999px;background:var(--card);box-shadow:var(--shadow);font-weight:700;font-size:14px;color:var(--strong)}
+.pill.dark{background:var(--strong);color:#fff;box-shadow:none}
+:root[data-night=on] .pill.dark{background:transparent;color:#fff;box-shadow:inset 0 0 0 1.5px #fff}
+.lead{font-size:13px;color:var(--sub)}
+h1{font-size:22px;font-weight:800;color:var(--strong);letter-spacing:.02em}
+h2{font-size:17px;font-weight:800;color:var(--strong)}
+svg.ic{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+
+/* ── M01 押すと少し縮む ── */
+.tap{transition:transform var(--t-tap) var(--ease)}
+.tap:active,.tap.is-down{transform:scale(.97)}
+
+/* ── M02 タブの点がすべる ── */
+.tabs{position:relative;display:grid;grid-template-columns:repeat(5,1fr);padding:6px;border-radius:999px;background:var(--nav-glass);box-shadow:var(--nav-shadow)}
+.tabs button{display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 0 14px;min-height:56px;border-radius:999px;font-size:12px;font-weight:700;color:var(--nav-ink);transition:color var(--t-mid) var(--ease)}
+.tabs button svg{transition:transform var(--t-fast) var(--ease)}
+.tabs button:active svg{transform:scale(.88)}
+.tabs button[aria-current=page]{color:var(--acc)}
+.tabs .dot{position:absolute;bottom:9px;left:0;width:5px;height:5px;border-radius:50%;background:var(--acc);transition:transform var(--t-mid) var(--ease)}
+
+/* ── M03 ON／OFF のつまみ ── */
+.sw{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 4px}
+.sw .tr{position:relative;width:52px;height:30px;border-radius:999px;background:var(--sw-off-bg);box-shadow:inset 0 0 0 1.5px var(--sw-off-ring);transition:background var(--t-mid) var(--ease),box-shadow var(--t-mid) var(--ease)}
+.sw .kn{position:absolute;top:4px;left:4px;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25),inset 0 0 0 1.5px var(--sw-off-ring);transition:transform var(--t-mid) var(--ease)}
+.sw .lb{min-width:30px;font-size:12px;font-weight:800;color:var(--sw-off-ink);text-align:right}
+.sw[aria-checked=true] .tr{background:var(--sw-on-bg);box-shadow:inset 0 0 0 1.5px var(--sw-on-bg)}
+.sw[aria-checked=true] .kn{transform:translateX(22px);box-shadow:0 1px 3px rgba(0,0,0,.25)}
+.sw[aria-checked=true] .lb{color:var(--strong)}
+.sw:active .kn{width:26px}
+.sw[aria-checked=true]:active .kn{transform:translateX(18px)}
+
+/* ── M04 ピンが刺さる ── */
+.pinbtn{display:inline-flex;align-items:center;gap:5px;min-height:44px;padding:0 14px;border-radius:999px;background:var(--card);color:var(--pin);font-weight:800;font-size:13px;box-shadow:inset 0 0 0 1.5px var(--pin);transition:background var(--t-mid) var(--ease),color var(--t-mid) var(--ease)}
+.pinbtn svg{width:18px;height:18px;transform-origin:50% 90%}
+.pinbtn.on{background:var(--pin);color:#fff}
+:root[data-night=on] .pinbtn.on{background:rgba(220,227,234,.16);color:#DCE3EA}
+.pinbtn.on.go svg{animation:pinIn var(--t-slow) var(--ease) both}
+@keyframes pinIn{0%{transform:translateY(-7px) rotate(-28deg);opacity:.2}60%{transform:translateY(1px) rotate(4deg);opacity:1}100%{transform:none}}
+
+/* ── M05 下から出る札 ── */
+.toast{position:absolute;left:50%;bottom:104px;display:flex;align-items:center;gap:8px;min-height:44px;padding:0 18px;border-radius:999px;background:#1F2937;color:#fff;font-size:14px;font-weight:700;white-space:nowrap;box-shadow:0 12px 30px -8px rgba(17,24,39,.4);transform:translate(-50%,16px);opacity:0;pointer-events:none;transition:transform var(--t-fast) var(--ease-in),opacity var(--t-fast) var(--ease-in)}
+.toast.show{transform:translate(-50%,0);opacity:1;transition:transform var(--t-mid) var(--ease),opacity var(--t-mid) var(--ease)}
+.toast svg{width:18px;height:18px;stroke:#86EFAC}
+:root[data-night=on] .toast{background:#262B33;box-shadow:inset 0 0 0 1px rgba(255,255,255,.12)}
+:root[data-night=on] .toast svg{stroke:#4ADE80}
+
+/* ── M06 骨組みの読み込み ── */
+.skel{position:relative;overflow:hidden;background:var(--skel);border-radius:10px}
+.skel::after{content:"";position:absolute;inset:0;transform:translateX(-100%);background:linear-gradient(90deg,transparent,var(--skel-hi),transparent);animation:shine 1.4s ease-in-out infinite}
+@keyframes shine{to{transform:translateX(100%)}}
+.fadein{animation:fadeIn var(--t-mid) var(--ease) both}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+
+/* ── M07 数字の繰り上がり ── */
+.roll{display:inline-flex;overflow:hidden;height:1.2em;line-height:1.2em;vertical-align:bottom}
+.roll .col{display:flex;flex-direction:column;transition:transform .35s var(--ease)}
+.roll .col span{height:1.2em}
+.roll.up .col{transform:translateY(-1.2em)}
+.plus{display:inline-block;font-size:12px;font-weight:800;color:var(--ok);opacity:0;transform:translateY(4px)}
+.plus.show{animation:plusUp 1.2s var(--ease) both}
+@keyframes plusUp{0%{opacity:0;transform:translateY(4px)}20%,70%{opacity:1;transform:none}100%{opacity:0;transform:translateY(-4px)}}
+
+/* ── M08 道のりの帯が伸びる ── */
+.bar{position:relative;height:12px;border-radius:6px;background:var(--bar);overflow:hidden}
+.bar i{position:absolute;left:0;top:0;bottom:0;border-radius:6px;background:var(--hero);width:0;transition:width var(--t-slow) var(--ease)}
+
+/* ── M09 並べ替えで持ち上がる ── */
+.sortlist{position:relative}
+.srow{position:relative;display:flex;align-items:center;gap:12px;min-height:60px;padding:0 8px 0 16px;margin-bottom:10px;background:var(--card);border-radius:18px;box-shadow:var(--shadow);transition:transform var(--t-mid) var(--ease),box-shadow var(--t-mid) var(--ease)}
+.srow b{flex:1;font-weight:700;color:var(--strong)}
+.srow .grip{display:flex;align-items:center;justify-content:center;width:44px;height:44px;color:var(--mute);touch-action:none;cursor:grab}
+.srow.lift{transform:scale(1.02);box-shadow:var(--shadow-lift);z-index:2;transition:box-shadow var(--t-mid) var(--ease),transform var(--t-fast) var(--ease)}
+
+/* ── M10 コピーが ✓ に ── */
+.copy{position:relative;display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:999px;background:var(--pill);color:var(--sub)}
+.copy svg{position:absolute;width:20px;height:20px;transition:transform var(--t-fast) var(--ease),opacity var(--t-fast) var(--ease)}
+.copy .ck{opacity:0;transform:scale(.5);stroke:var(--ok);stroke-width:2.4}
+.copy.done .cp{opacity:0;transform:scale(.5)}
+.copy.done .ck{opacity:1;transform:none}
+
+/* ── M11 鈴が揺れる ── */
+.bell svg{transform-origin:50% 12%}
+.bell.go svg{animation:bell var(--t-slow) ease-in-out both}
+@keyframes bell{0%,100%{transform:none}20%{transform:rotate(14deg)}45%{transform:rotate(-10deg)}70%{transform:rotate(5deg)}85%{transform:rotate(-2deg)}}
+
+/* ── M12 「もう一度」の矢印が回る ── */
+.retry svg{transition:none}
+.retry.go svg{animation:spin .6s var(--ease) 1}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── M13 シートが上がる ── */
+.scrim{position:absolute;inset:0;background:rgba(17,24,39,.32);opacity:0;pointer-events:none;transition:opacity var(--t-mid) var(--ease)}
+.sheet{position:absolute;left:0;right:0;bottom:0;background:var(--card);border-radius:24px 24px 0 0;box-shadow:0 -10px 30px -10px rgba(17,24,39,.25);padding:10px 20px 28px;transform:translateY(102%);transition:transform var(--t-fast) var(--ease-in)}
+.sheet .grab{width:40px;height:5px;border-radius:3px;background:var(--track);margin:0 auto 14px}
+.open .scrim{opacity:1;pointer-events:auto}
+.open .sheet{transform:none;transition:transform .3s var(--ease)}
+
+/* 動きを減らす：iPhone の設定、または見本の切り替え。状態は変わるが、動きはなし */
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+:root.rm *,:root.rm *::before,:root.rm *::after{animation:none!important;transition:none!important}
+
+
+body{padding:0;max-width:430px}
+.phone{position:relative;min-height:100vh;overflow:hidden}
+.demo{position:relative;z-index:9;display:flex;gap:6px;flex-wrap:wrap;padding:10px 16px;background:repeating-linear-gradient(135deg,transparent 0 8px,rgba(100,107,120,.06) 8px 16px)}
+.demo .lab{width:100%;font-size:12px;font-weight:700;color:var(--mute)}
+.demo button{min-height:44px;padding:0 14px;border-radius:999px;font-size:13px;font-weight:700;color:var(--sub);background:transparent;box-shadow:inset 0 0 0 1.5px rgba(100,107,120,.45);border:0}
+.bottomnav{position:absolute;left:14px;right:14px;bottom:14px;z-index:6}
+.hd{display:flex;align-items:center;justify-content:space-between;padding:14px 16px 6px}
+.hd .brand{font-size:20px;font-weight:800;color:var(--strong)}
+.wrap{padding:0 16px}
+.sec-t{margin:22px 4px 8px;font-size:13px;font-weight:800;color:var(--sub)}
+
+.aphd{display:flex;align-items:center;gap:10px;padding:14px 16px}
+.aphd .bk{display:inline-flex;width:44px;height:44px;align-items:center;justify-content:center;border-radius:999px;background:var(--card);box-shadow:var(--shadow)}
+.aphd h1{font-size:18px}
+.hero{display:flex;gap:16px;align-items:center}
+.stamp{width:88px;height:88px;border-radius:50%;box-shadow:inset 0 0 0 3px var(--jal);display:flex;align-items:center;justify-content:center;color:var(--jal);font-size:24px;font-weight:800;letter-spacing:.04em}
+.hero .tx b{display:block;font-size:30px;font-weight:800;color:var(--strong);line-height:1}
+.hero .tx h2{margin-top:6px}
+.hero .tx p{font-size:13px;color:var(--sub)}
+.acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
+.belbtn{display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:0 16px;border-radius:999px;background:var(--card);box-shadow:var(--shadow);font-size:13px;font-weight:800;color:var(--strong)}
+.belbtn svg{width:20px;height:20px}
+.belbtn[aria-pressed=true]{background:var(--pin-wash);box-shadow:inset 0 0 0 1.5px var(--pin)}
+.dl{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+.dl .card{padding:14px}
+.dl .k{font-size:12px;font-weight:700;color:var(--sub)}
+.dl .num{font-size:26px}
+.regs .r{display:flex;align-items:center;gap:10px;min-height:56px}
+.regs .r b{font-size:17px;font-weight:800;color:var(--strong);letter-spacing:.04em}
+.regs .r small{font-size:12px;color:var(--mute);flex:1}
+</style></head><body><div class="phone" data-toast-host><div class="demo"><span class="lab">見本の操作（アプリには出ません）</span><button type="button" onclick="document.querySelector('.pinbtn').click()">ピン止め（04）</button><button type="button" onclick="document.querySelector('.bell').click()">知らせ（11）</button><button type="button" onclick="document.querySelector('.copy').click()">コピー（10）</button></div><div class="aphd"><span class="bk"><svg class="ic i-back" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg></span><h1>空港</h1></div><div class="wrap"><div class="card"><div class="hero"><div class="stamp">HND</div><div class="tx"><b>HND</b><h2>東京国際空港（羽田）</h2><p>東京都・関東</p></div></div><div class="acts"><button type="button" class="pinbtn tap" aria-pressed="false"><svg class="ic i-pin" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3.5h6l-1 5.5 3 3H7l3-3zM12 12v8.5"/></svg><span>ピン止め</span></button><button type="button" class="belbtn bell tap" aria-pressed="false"><svg class="ic i-bell" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 16v-5a6 6 0 0 1 12 0v5l1.5 2h-15zM10 20.5a2 2 0 0 0 4 0"/></svg><span>知らせ OFF</span></button></div><div class="dl"><div class="card"><span class="k">押した回数</span><div><b class="num">12</b><span class="u">回</span></div></div><div class="card"><span class="k">はじめて押した日</span><div><b class="num" style="font-size:18px">2026</b><span class="u">年</span><b class="num" style="font-size:18px">4</b><span class="u">月</span><b class="num" style="font-size:18px">3</b><span class="u">日</span></div></div></div></div><p class="sec-t">いまいる特別塗装機</p><div class="card regs"><div class="r"><b>JA8089</b><small>B767-300・特別塗装</small><button type="button" class="copy tap" data-copy="JA8089" aria-label="コピー"><svg class="ic cp i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="8.5" y="8.5" width="11" height="11" rx="2.5"/><path d="M15.5 8.5V6.5a2 2 0 0 0-2-2h-7a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h2"/></svg><svg class="ic ck i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.2 4L19 7"/></svg></button></div><div class="r"><b>JA602A</b><small>B767-300ER・特別塗装</small><button type="button" class="copy tap" data-copy="JA602A" aria-label="コピー"><svg class="ic cp i-copy" viewBox="0 0 24 24" aria-hidden="true"><rect x="8.5" y="8.5" width="11" height="11" rx="2.5"/><path d="M15.5 8.5V6.5a2 2 0 0 0-2-2h-7a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h2"/></svg><svg class="ic ck i-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.2 4L19 7"/></svg></button></div></div></div><div class="bottomnav"><nav class="tabs" aria-label="下のタブ"><button type="button" class="tap"><svg class="ic i-home" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11l8-7 8 7v8a1 1 0 0 1-1 1h-4v-6H9v6H5a1 1 0 0 1-1-1z"/></svg>ホーム</button><button type="button" class="tap" aria-current="page"><svg class="ic i-book" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5c3-1.3 5.5-1 8 1 2.5-2 5-2.3 8-1v13c-3-1.3-5.5-1-8 1-2.5-2-5-2.3-8-1zM12 6.5v13"/></svg>図鑑</button><button type="button" class="tap"><svg class="ic i-plane" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 4.5c-.6-.6-2-.5-2.9.4L14 9 5.5 7 4 8.5l7 3.5-3.2 3.2-2.6-.4L4 16l3.3 1.7L9 21l1.2-1.2-.4-2.6L13 14l3.5 7 1.5-1.5L16 11l4.1-4.1c.9-.9 1-2.3.4-2.9z"/></svg>フライト</button><button type="button" class="tap"><svg class="ic i-ops" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3.5"/><path d="M12 12l5.5-5.5"/></svg>運用</button><button type="button" class="tap"><svg class="ic i-stairs" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19h4v-4h4v-4h4V7h3"/></svg>修行</button><i class="dot" aria-hidden="true"></i></nav></div></div><script>/* そらメモ 小さな動きの見本：共通の動き。どれも 0.15〜0.4 秒。動きを減らす設定では状態だけ変える */
+(function(){
+const R = document.documentElement;
+const q = new URLSearchParams(location.search);
+if (q.get('night') === '1') R.dataset.night = 'on';
+if (q.get('rm') === '1') R.classList.add('rm');
+const reduced = () => R.classList.contains('rm') || matchMedia('(prefers-reduced-motion: reduce)').matches;
+window.SM = {reduced};
+
+/* M05 下から出る札。いちばん近い [data-toast-host] の中に出す。2 秒で下がる */
+function toast(from, msg){
+  const host = (from && from.closest && from.closest('[data-toast-host]')) || document.querySelector('[data-toast-host]') || document.body;
+  let t = host.querySelector(':scope > .toast');
+  if (!t){ t = document.createElement('div'); t.className = 'toast'; t.setAttribute('role','status'); host.appendChild(t); }
+  t.innerHTML = '<svg class="ic" viewBox="0 0 24 24"><path d="M5 12.5l4.2 4L19 7"/></svg><span></span>';
+  t.querySelector('span').textContent = msg;
+  t.classList.remove('show'); void t.offsetWidth; t.classList.add('show');
+  clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove('show'), 2000);
+}
+SM.toast = toast;
+
+/* M02 タブの点：押したタブの下へすべる */
+function placeDot(nav){
+  const cur = nav.querySelector('[aria-current=page]'), dot = nav.querySelector('.dot');
+  if (!cur || !dot) return;
+  const x = cur.offsetLeft + cur.offsetWidth / 2 - 2.5;
+  dot.style.transform = 'translateX(' + x + 'px)';
+}
+document.querySelectorAll('.tabs').forEach(nav => {
+  placeDot(nav);
+  nav.addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b) return;
+    nav.querySelectorAll('button').forEach(x => x.removeAttribute('aria-current'));
+    b.setAttribute('aria-current', 'page'); placeDot(nav);
+  });
+});
+addEventListener('resize', () => document.querySelectorAll('.tabs').forEach(placeDot));
+
+/* M03 ON／OFF */
+document.addEventListener('click', e => {
+  const s = e.target.closest('.sw[role=switch]'); if (!s) return;
+  const on = s.getAttribute('aria-checked') !== 'true';
+  s.setAttribute('aria-checked', on); const lb = s.querySelector('.lb'); if (lb) lb.textContent = on ? 'ON' : 'OFF';
+});
+
+/* M04 ピン止め */
+document.addEventListener('click', e => {
+  const p = e.target.closest('.pinbtn'); if (!p) return;
+  const on = !p.classList.contains('on');
+  p.classList.toggle('on', on); p.classList.remove('go'); void p.offsetWidth; if (on) p.classList.add('go');
+  p.setAttribute('aria-pressed', on);
+  p.querySelector('span').textContent = on ? 'ピン止め中' : 'ピン止め';
+  if (p.dataset.toast !== 'no') toast(p, on ? 'ピン止めしました' : 'ピン止めを外しました');
+});
+
+/* M10 コピー */
+document.addEventListener('click', e => {
+  const c = e.target.closest('.copy'); if (!c) return;
+  try { navigator.clipboard && navigator.clipboard.writeText(c.dataset.copy || '').catch(() => {}); } catch(_){}
+  c.classList.add('done'); c.setAttribute('aria-label', 'コピーしました');
+  clearTimeout(c._h); c._h = setTimeout(() => { c.classList.remove('done'); c.setAttribute('aria-label', 'コピー'); }, 1500);
+  if (c.dataset.toast !== 'no') toast(c, 'コピーしました');
+});
+
+/* M11 知らせの鈴 */
+document.addEventListener('click', e => {
+  const b = e.target.closest('.bell'); if (!b) return;
+  const on = b.getAttribute('aria-pressed') !== 'true';
+  b.setAttribute('aria-pressed', on); b.classList.remove('go'); void b.offsetWidth; if (on) b.classList.add('go');
+  const t = b.querySelector('span'); if (t) t.textContent = on ? '知らせ ON' : '知らせ OFF';
+  toast(b, on ? '羽田の知らせを受け取ります' : '羽田の知らせを止めました');
+});
+
+/* M12 もう一度 */
+document.addEventListener('click', e => {
+  const r = e.target.closest('.retry'); if (!r) return;
+  const box = r.closest('[data-retry-box]');
+  r.classList.remove('go'); void r.offsetWidth; r.classList.add('go');
+  if (box){
+    box.querySelector('[data-st]').textContent = '読み込み中…';
+    setTimeout(() => { box.dataset.ok = '1'; box.querySelector('[data-st]').textContent = '読めました・最後に読んだ 14時32分'; }, reduced() ? 300 : 600);
+  }
+});
+
+/* M13 シート */
+document.addEventListener('click', e => {
+  const o = e.target.closest('[data-sheet-open]');
+  if (o){ document.getElementById(o.dataset.sheetOpen).classList.add('open'); return; }
+  const c = e.target.closest('[data-sheet-close]');
+  if (c){ c.closest('.sheetwrap').classList.remove('open'); }
+});
+
+/* M07 数字の繰り上がり：<span class="roll" data-v="16"></span> */
+function rollSet(el, v){
+  el.innerHTML = '<span class="col"><span>' + v + '</span></span>'; el.dataset.v = v; el.classList.remove('up');
+}
+function rollTo(el, v){
+  const old = el.dataset.v;
+  el.innerHTML = '<span class="col"><span>' + old + '</span><span>' + v + '</span></span>';
+  el.classList.remove('up'); void el.offsetWidth; el.classList.add('up'); el.dataset.v = v;
+  el.setAttribute('aria-label', v);
+}
+document.querySelectorAll('.roll').forEach(el => rollSet(el, el.dataset.v));
+SM.rollTo = rollTo; SM.rollSet = rollSet;
+
+/* M08 数え上げ（0.4 秒）。止めた動きで撮れるように、時間は Web Animations の currentTime から読む */
+function countUp(el, to, ms){
+  ms = ms || 400; const from = +(el.dataset.from || 0);
+  const fmt = n => Math.round(n).toLocaleString('ja-JP');
+  if (reduced()){ el.textContent = fmt(to); return; }
+  const a = el.animate([{opacity:1},{opacity:1}], {duration: ms, fill: 'none'});
+  const ease = t => 1 - Math.pow(1 - t, 3);
+  (function f(){
+    const t = Math.min(1, (a.currentTime || 0) / ms);
+    el.textContent = fmt(from + (to - from) * ease(a.playState === 'finished' ? 1 : t));
+    if (a.playState !== 'finished') requestAnimationFrame(f);
+  })();
+}
+SM.countUp = countUp;
+function grow(bar, pct){ const i = bar.querySelector('i'); i.style.transition = 'none'; i.style.width = '0%'; void i.offsetWidth; i.style.transition = ''; void i.offsetWidth; i.style.width = pct + '%'; }
+SM.grow = grow;
+
+/* M06 骨組み：300ms より早く読めたら骨組みは出さない。見本では 1.2 秒かかる読み込み */
+function loadInto(box, ms){
+  const sk = box.querySelector('[data-skel]'), real = box.querySelector('[data-real]');
+  real.hidden = true; sk.hidden = true;
+  const t300 = setTimeout(() => { sk.hidden = false; }, 300);
+  setTimeout(() => { clearTimeout(t300); sk.hidden = true; real.hidden = false; real.classList.remove('fadein'); void real.offsetWidth; real.classList.add('fadein'); }, ms || 1500);
+}
+SM.loadInto = loadInto;
+
+/* M09 並べ替え：つまみを押さえて上下に。ほかの行はすっと場所をあける */
+document.querySelectorAll('.sortlist').forEach(list => {
+  let row = null, y0 = 0, rows = [], idx = 0, step = 0, to = 0;
+  const gap = 10;
+  list.addEventListener('pointerdown', e => {
+    const g = e.target.closest('.grip'); if (!g) return;
+    row = g.closest('.srow'); rows = [...list.querySelectorAll('.srow')]; idx = rows.indexOf(row); to = idx;
+    step = row.offsetHeight + gap; y0 = e.clientY; row.classList.add('lift'); g.setPointerCapture(e.pointerId); e.preventDefault();
+  });
+  list.addEventListener('pointermove', e => {
+    if (!row) return; const dy = e.clientY - y0;
+    row.style.transform = 'translateY(' + dy + 'px) scale(1.02)';
+    to = Math.max(0, Math.min(rows.length - 1, idx + Math.round(dy / step)));
+    rows.forEach((r, i) => { if (r === row) return;
+      let s = 0; if (to > idx && i > idx && i <= to) s = -step; if (to < idx && i < idx && i >= to) s = step;
+      r.style.transform = s ? 'translateY(' + s + 'px)' : ''; });
+  });
+  const end = () => {
+    if (!row) return; const r0 = row; row = null;
+    rows.forEach(r => { r.style.transition = 'none'; r.style.transform = ''; });
+    r0.classList.remove('lift');
+    const ref = rows[to]; if (to > idx) ref.after(r0); else if (to < idx) ref.before(r0);
+    void list.offsetWidth; rows.forEach(r => r.style.transition = '');
+    if (to !== idx) toast(list, '並びを保存しました');
+  };
+  list.addEventListener('pointerup', end); list.addEventListener('pointercancel', end);
+});
+/* 撮影や「試す」のための、並べ替えの自動の見本 */
+SM.sortDemo = function(list, phase){
+  const rows = [...list.querySelectorAll('.srow')]; const r = rows[2], step = r.offsetHeight + 10;
+  rows.forEach(x => { x.style.transform = ''; x.classList.remove('lift'); });
+  if (phase >= 1){ r.classList.add('lift'); }
+  if (phase >= 2){ r.style.transform = 'translateY(' + (-step) + 'px) scale(1.02)'; rows[1].style.transform = 'translateY(' + step + 'px)'; }
+};
+
+/* M01 押す縮み：撮影用にクラスでも */
+SM.press = el => { el.classList.add('is-down'); setTimeout(() => el.classList.remove('is-down'), 160); };
+
+/* 撮影用：動いているものをすべて止めて、t ミリ秒の所にする */
+window.__freeze = function(t){ document.getAnimations().forEach(a => { a.pause(); try { a.currentTime = t; } catch(_){} }); };
+})();
+
+</script></body></html>

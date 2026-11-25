@@ -1,0 +1,132 @@
+/* そらメモ 小さな動きの見本：共通の見た目（main の web/index.html の色と文字に合わせる） */
+:root{
+  --gothic:"Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic UI","Yu Gothic","Meiryo","Noto Sans JP","Noto Sans CJK JP",system-ui,sans-serif;
+  --bg:#F4F5F7; --card:#FFFFFF; --ink:#374151; --strong:#1F2937; --sub:#646B78; --mute:#6B7280;
+  --track:#EEF0F3; --pill:rgba(17,24,39,.05); --jal:#C8102E; --ana:#1C4FA0; --acc:#2563EB;
+  --ok:#15803D; --hero:#0F1B2D; --bar:#E3E7ED; --pin:#1B2B4B; --pin-wash:#EEF2F8;
+  --sw-on-bg:#16233A; --sw-off-bg:#E5E8EE; --sw-off-ring:#768090; --sw-on-ink:#FFFFFF; --sw-off-ink:#4B5563;
+  --shadow:0 1px 2px rgba(17,24,39,.04),0 10px 30px -8px rgba(17,24,39,.10),inset 0 0 0 1px rgba(17,24,39,.07);
+  --shadow-lift:0 2px 4px rgba(17,24,39,.06),0 22px 40px -10px rgba(17,24,39,.28),inset 0 0 0 1px rgba(17,24,39,.07);
+  --nav-glass:rgba(255,255,255,.82); --nav-ink:#6B7280; --nav-shadow:0 10px 30px -8px rgba(17,24,39,.22),0 2px 6px rgba(17,24,39,.06);
+  --skel:#E9ECF0; --skel-hi:#F5F7F9;
+  /* 動きの長さ（0.15〜0.4秒）と曲がり方 */
+  --t-tap:.12s; --t-fast:.15s; --t-mid:.25s; --t-slow:.4s;
+  --ease:cubic-bezier(.2,.8,.2,1); --ease-in:cubic-bezier(.4,0,1,1);
+}
+:root[data-night=on]{
+  --bg:#0F141B; --card:#1B1F26; --ink:#E5E7EB; --strong:#F3F4F6; --sub:#AEB9C6; --mute:#AEB9C6;
+  --track:#262B33; --pill:rgba(220,227,234,.08); --acc:#DCE3EA; --ok:#4ADE80; --hero:#4ADE80; --bar:#262B33;
+  --pin:#DCE3EA; --pin-wash:rgba(220,227,234,.08);
+  --sw-on-bg:rgba(220,227,234,.16); --sw-off-bg:transparent; --sw-off-ring:#66778C; --sw-on-ink:#DCE3EA; --sw-off-ink:#AEB9C6;
+  --shadow:0 12px 26px -16px rgba(0,0,0,.7),inset 0 0 0 1px rgba(255,255,255,.06);
+  --shadow-lift:0 22px 40px -12px rgba(0,0,0,.85),inset 0 0 0 1px rgba(255,255,255,.12);
+  --nav-glass:rgba(22,25,31,.86); --nav-ink:#8B95A3; --nav-shadow:0 10px 30px -6px rgba(0,0,0,.6);
+  --skel:#232830; --skel-hi:#2C323B; --amber:#FBBF24;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--bg);color:var(--ink);font-family:var(--gothic);-webkit-text-size-adjust:100%}
+body{max-width:430px;margin:0 auto;min-height:100vh;padding:0 16px 120px;line-height:1.6;font-size:15px}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.num{font-weight:800;font-variant-numeric:tabular-nums;color:var(--strong);letter-spacing:-.01em}
+.u{font-size:12px;color:var(--mute);font-weight:600;margin-left:2px}
+.card{background:var(--card);border-radius:20px;box-shadow:var(--shadow);padding:16px}
+.pill{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px;padding:0 18px;border-radius:999px;background:var(--card);box-shadow:var(--shadow);font-weight:700;font-size:14px;color:var(--strong)}
+.pill.dark{background:var(--strong);color:#fff;box-shadow:none}
+:root[data-night=on] .pill.dark{background:transparent;color:#fff;box-shadow:inset 0 0 0 1.5px #fff}
+.lead{font-size:13px;color:var(--sub)}
+h1{font-size:22px;font-weight:800;color:var(--strong);letter-spacing:.02em}
+h2{font-size:17px;font-weight:800;color:var(--strong)}
+svg.ic{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+
+/* ── M01 押すと少し縮む ── */
+.tap{transition:transform var(--t-tap) var(--ease)}
+.tap:active,.tap.is-down{transform:scale(.97)}
+
+/* ── M02 タブの点がすべる ── */
+.tabs{position:relative;display:grid;grid-template-columns:repeat(5,1fr);padding:6px;border-radius:999px;background:var(--nav-glass);box-shadow:var(--nav-shadow)}
+.tabs button{display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 0 14px;min-height:56px;border-radius:999px;font-size:12px;font-weight:700;color:var(--nav-ink);transition:color var(--t-mid) var(--ease)}
+.tabs button svg{transition:transform var(--t-fast) var(--ease)}
+.tabs button:active svg{transform:scale(.88)}
+.tabs button[aria-current=page]{color:var(--acc)}
+.tabs .dot{position:absolute;bottom:9px;left:0;width:5px;height:5px;border-radius:50%;background:var(--acc);transition:transform var(--t-mid) var(--ease)}
+
+/* ── M03 ON／OFF のつまみ ── */
+.sw{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 4px}
+.sw .tr{position:relative;width:52px;height:30px;border-radius:999px;background:var(--sw-off-bg);box-shadow:inset 0 0 0 1.5px var(--sw-off-ring);transition:background var(--t-mid) var(--ease),box-shadow var(--t-mid) var(--ease)}
+.sw .kn{position:absolute;top:4px;left:4px;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25),inset 0 0 0 1.5px var(--sw-off-ring);transition:transform var(--t-mid) var(--ease)}
+.sw .lb{min-width:30px;font-size:12px;font-weight:800;color:var(--sw-off-ink);text-align:right}
+.sw[aria-checked=true] .tr{background:var(--sw-on-bg);box-shadow:inset 0 0 0 1.5px var(--sw-on-bg)}
+.sw[aria-checked=true] .kn{transform:translateX(22px);box-shadow:0 1px 3px rgba(0,0,0,.25)}
+.sw[aria-checked=true] .lb{color:var(--strong)}
+.sw:active .kn{width:26px}
+.sw[aria-checked=true]:active .kn{transform:translateX(18px)}
+
+/* ── M04 ピンが刺さる ── */
+.pinbtn{display:inline-flex;align-items:center;gap:5px;min-height:44px;padding:0 14px;border-radius:999px;background:var(--card);color:var(--pin);font-weight:800;font-size:13px;box-shadow:inset 0 0 0 1.5px var(--pin);transition:background var(--t-mid) var(--ease),color var(--t-mid) var(--ease)}
+.pinbtn svg{width:18px;height:18px;transform-origin:50% 90%}
+.pinbtn.on{background:var(--pin);color:#fff}
+:root[data-night=on] .pinbtn.on{background:rgba(220,227,234,.16);color:#DCE3EA}
+.pinbtn.on.go svg{animation:pinIn var(--t-slow) var(--ease) both}
+@keyframes pinIn{0%{transform:translateY(-7px) rotate(-28deg);opacity:.2}60%{transform:translateY(1px) rotate(4deg);opacity:1}100%{transform:none}}
+
+/* ── M05 下から出る札 ── */
+.toast{position:absolute;left:50%;bottom:104px;display:flex;align-items:center;gap:8px;min-height:44px;padding:0 18px;border-radius:999px;background:#1F2937;color:#fff;font-size:14px;font-weight:700;white-space:nowrap;box-shadow:0 12px 30px -8px rgba(17,24,39,.4);transform:translate(-50%,16px);opacity:0;pointer-events:none;transition:transform var(--t-fast) var(--ease-in),opacity var(--t-fast) var(--ease-in)}
+.toast.show{transform:translate(-50%,0);opacity:1;transition:transform var(--t-mid) var(--ease),opacity var(--t-mid) var(--ease)}
+.toast svg{width:18px;height:18px;stroke:#86EFAC}
+:root[data-night=on] .toast{background:#262B33;box-shadow:inset 0 0 0 1px rgba(255,255,255,.12)}
+:root[data-night=on] .toast svg{stroke:#4ADE80}
+
+/* ── M06 骨組みの読み込み ── */
+.skel{position:relative;overflow:hidden;background:var(--skel);border-radius:10px}
+.skel::after{content:"";position:absolute;inset:0;transform:translateX(-100%);background:linear-gradient(90deg,transparent,var(--skel-hi),transparent);animation:shine 1.4s ease-in-out infinite}
+@keyframes shine{to{transform:translateX(100%)}}
+.fadein{animation:fadeIn var(--t-mid) var(--ease) both}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+
+/* ── M07 数字の繰り上がり ── */
+.roll{display:inline-flex;overflow:hidden;height:1.2em;line-height:1.2em;vertical-align:bottom}
+.roll .col{display:flex;flex-direction:column;transition:transform .35s var(--ease)}
+.roll .col span{height:1.2em}
+.roll.up .col{transform:translateY(-1.2em)}
+.plus{display:inline-block;font-size:12px;font-weight:800;color:var(--ok);opacity:0;transform:translateY(4px)}
+.plus.show{animation:plusUp 1.2s var(--ease) both}
+@keyframes plusUp{0%{opacity:0;transform:translateY(4px)}20%,70%{opacity:1;transform:none}100%{opacity:0;transform:translateY(-4px)}}
+
+/* ── M08 道のりの帯が伸びる ── */
+.bar{position:relative;height:12px;border-radius:6px;background:var(--bar);overflow:hidden}
+.bar i{position:absolute;left:0;top:0;bottom:0;border-radius:6px;background:var(--hero);width:0;transition:width var(--t-slow) var(--ease)}
+
+/* ── M09 並べ替えで持ち上がる ── */
+.sortlist{position:relative}
+.srow{position:relative;display:flex;align-items:center;gap:12px;min-height:60px;padding:0 8px 0 16px;margin-bottom:10px;background:var(--card);border-radius:18px;box-shadow:var(--shadow);transition:transform var(--t-mid) var(--ease),box-shadow var(--t-mid) var(--ease)}
+.srow b{flex:1;font-weight:700;color:var(--strong)}
+.srow .grip{display:flex;align-items:center;justify-content:center;width:44px;height:44px;color:var(--mute);touch-action:none;cursor:grab}
+.srow.lift{transform:scale(1.02);box-shadow:var(--shadow-lift);z-index:2;transition:box-shadow var(--t-mid) var(--ease),transform var(--t-fast) var(--ease)}
+
+/* ── M10 コピーが ✓ に ── */
+.copy{position:relative;display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:999px;background:var(--pill);color:var(--sub)}
+.copy svg{position:absolute;width:20px;height:20px;transition:transform var(--t-fast) var(--ease),opacity var(--t-fast) var(--ease)}
+.copy .ck{opacity:0;transform:scale(.5);stroke:var(--ok);stroke-width:2.4}
+.copy.done .cp{opacity:0;transform:scale(.5)}
+.copy.done .ck{opacity:1;transform:none}
+
+/* ── M11 鈴が揺れる ── */
+.bell svg{transform-origin:50% 12%}
+.bell.go svg{animation:bell var(--t-slow) ease-in-out both}
+@keyframes bell{0%,100%{transform:none}20%{transform:rotate(14deg)}45%{transform:rotate(-10deg)}70%{transform:rotate(5deg)}85%{transform:rotate(-2deg)}}
+
+/* ── M12 「もう一度」の矢印が回る ── */
+.retry svg{transition:none}
+.retry.go svg{animation:spin .6s var(--ease) 1}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── M13 シートが上がる ── */
+.scrim{position:absolute;inset:0;background:rgba(17,24,39,.32);opacity:0;pointer-events:none;transition:opacity var(--t-mid) var(--ease)}
+.sheet{position:absolute;left:0;right:0;bottom:0;background:var(--card);border-radius:24px 24px 0 0;box-shadow:0 -10px 30px -10px rgba(17,24,39,.25);padding:10px 20px 28px;transform:translateY(102%);transition:transform var(--t-fast) var(--ease-in)}
+.sheet .grab{width:40px;height:5px;border-radius:3px;background:var(--track);margin:0 auto 14px}
+.open .scrim{opacity:1;pointer-events:auto}
+.open .sheet{transform:none;transition:transform .3s var(--ease)}
+
+/* 動きを減らす：iPhone の設定、または見本の切り替え。状態は変わるが、動きはなし */
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+:root.rm *,:root.rm *::before,:root.rm *::after{animation:none!important;transition:none!important}
