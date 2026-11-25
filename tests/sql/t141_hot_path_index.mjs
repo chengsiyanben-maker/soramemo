@@ -1,4 +1,4 @@
-// 定期の手入れ 11/26 の2回目：よく呼ばれる関数が「大きくなる表」を全部読みしないことの見張り（移行はなし）
+// 定期の手入れ 11/26 の2回目（3回目で死活の記録と時刻表の入れ替えを足した）：よく呼ばれる関数が「大きくなる表」を全部読みしないことの見張り（移行はなし）
 //   画面・Edge Functions・毎分〜毎時の処理から呼ばれる関数（SQL と plpgsql）を、全部読みを禁じて（enable_seqscan off）実際に呼び、
 //   その取引の中で全部読みになった表を pg_stat_xact_user_tables の差で数える。全部読みしてよいのは、行の数が増えない小さな表だけ。
 //   新しい移行で索引が使えない形になったら、ここで落ちて気づける（本番では表が大きくなってから遅くなるので、先に止める）
@@ -17,7 +17,9 @@ let bad = 0; const check = (label, ok, v) => { console.log((ok ? 'OK ' : 'NG ') 
 const SMALL = new Set(['public.airports', 'public.airline_codes', 'public.game_events', 'public.odpt_feed_dates', 'public.eta_calib',
   'public.eta_calib_mode', 'ops.airport_notices', 'public.atc_feeders',
   // 通知の購読：1端末1行。今は小さい。利用者が数千を超えたら、配列の GIN 索引（airports・flights・sp_airports・ga_airports）を足す
-  'public.push_subs']);
+  'public.push_subs',
+  // 処理ごとの最後に動いた時刻（1行だけ・空港の数だけ・366日まで）。死活の記録（ops.data_health）が読む
+  'public.schedule_sync_runs', 'public.timetable_sync_runs', 'public.flight_watch_runs', 'public.odpt_status_runs', 'public.archive_runs']);
 
 // 種：関数が早く戻らず、中の文まで進むだけの行
 const U = '00000000-0000-0000-0000-0000000000a1';
@@ -41,7 +43,10 @@ insert into public.live_positions (callsign, hex, lat, lon, alt_ft, ground, seen
 insert into public.push_subs (endpoint, p256dh, auth, flights, airports) values ('https://e/1', 'k', 'a', array['BA5@' || current_date, 'NH102@' || current_date], array['HND']);
 insert into public.airport_tracks_all (iata, day, callsign, at, dep_here, pts)
 select 'HND', current_date - k, 'ANA' || (100 + i), now() - make_interval(days => k, mins => i), 1, 'x' from generate_series(0, 9) k, generate_series(1, 8) i;
-insert into public.flight_tracks (svc_date, flight, dep, pts) select svc_date, flight, dep, 'x' from public.flight_history;`);
+insert into public.flight_tracks (svc_date, flight, dep, pts) select svc_date, flight, dep, 'x' from public.flight_history;
+insert into ops.client_errors (session, platform, version, kind, message) select 's', 'web', 'v', 'js', 'm' || g from generate_series(1, 50) g;
+insert into public.timetable (operator, dep, arr, flight, days, valid_from, valid_to, dep_time, arr_time)
+select 'JAL', 'HND', 'ITM', 'JL' || g, 127, current_date - 10, current_date + 30, '08:00', '09:10' from generate_series(1, 30) g;`);
 
 // よく呼ばれる所（呼ぶ元）
 const CALLS = [
@@ -74,6 +79,10 @@ const CALLS = [
   [`select public.flight_alerts_put(jsonb_build_array(jsonb_build_object('flight', 'NH102', 'dep', 'HND', 'arr', 'ITM', 'svc_date', current_date, 'kind', 'delay', 'late', 30, 'message', 'x', 'gkey', 'NH102@' || current_date || '@HND', 'rank', 1)))`, 'お知らせを書く'],
   [`select public.alert_push_claim(jsonb_build_array(jsonb_build_object('sub_id', (select min(id) from public.push_subs), 'gkey', 'NH102@' || current_date || '@HND', 'svc_date', current_date, 'rank', 1, 'late', 30, 'body', 'x')))`, '送る前の印'],
   [`select public.reg_legs_touch(jsonb_build_array(jsonb_build_object('reg', 'JA811A', 'cs', 'ANA102', 'type', 'B788', 'at', now(), 'iata', 'HND', 'dir', 'dep')))`, '機体の区間'],
+  // 11/26 の3回目で足した：死活の記録（毎時23分）と時刻表の入れ替え（毎日・空港×航空会社ごと）
+  [`select ops.data_health_watch()`, '死活の記録（毎時）'],
+  [`select ops.data_health()`, '死活の記録の中身'],
+  [`select public.timetable_replace('JAL', 'HND', (select jsonb_agg(jsonb_build_object('operator', 'JAL', 'dep', 'HND', 'arr', 'ITM', 'flight', 'JL' || g, 'days', 127, 'valid_from', current_date, 'valid_to', current_date + 30, 'dep_time', '08:00', 'arr_time', '09:10')) from generate_series(1, 25) g))`, '時刻表の入れ替え（毎日）'],
   [`select public.airport_hour_bad_roll(current_date - 2, current_date)`, '遅れの集計（毎時）'],
   [`select public.rwy_learned_roll(current_date - 2, current_date)`, '滑走路の集計（毎時）'],
   [`select public.flights_fill_actual(3, 2000)`, '実際の時刻を埋める（毎晩）'],
