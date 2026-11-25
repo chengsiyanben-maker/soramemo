@@ -1,6 +1,7 @@
 # チェックイン担当の帳面
 
 ## いま持っている仕事
+- 11/26 手動の回（同じ「checkin/idem-cid を進めて」の指示）：直前の回で PR #248（181cd6ed）として済み。main も f18b2eb2 のままで取り込み済みなので作り直さなかった。PM の自動の反映を待つ
 - **11/26 定時の回（帳面の積み「11/26 1時30分 PM から：checkin/idem-cid」）**：checkin/idem-cid・下書き **PR #248**（181cd6ed・報告 docs/pm/report-idem-cid.md）。main（f18b2eb2・#240 data/idem 入り）を取り込み済み。見張りを付けた。画面の見た目は変えていないので、テストが通れば PM が自動で反映してよい
   - 印：checkinServer で押すたびに p.cid（ckCid・UUID）。sendCheckin の本文に cid。enqueue は cid を残す。flushQueue は前の版の ID なしの保留にも送る前に付けて保存。返事の again は成功のまま（記録の名前だけ checkin_again）
   - 記録帳・国際線：idemInsert（upsert onConflict "user_id,client_id"・ignoreDuplicates。42P10・PGRST204・42703 なら client_id を外して insert）。formCid(key,row) は同じ中身の押し直しで同じ ID・保存できたら formCidDone で忘れる。使った所：mAdd・addIntl・搭乗券 data-bp-act="manual"・data-migrate（1行ごとに区間と日付で ID）
