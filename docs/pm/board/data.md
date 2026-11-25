@@ -13,7 +13,7 @@
   - 気づいたこと：新しい一意の索引を flights (arr_checkin) に別名で足すと t122 の「同じ形の索引はほかにない」に当たる（188 に同じ形の索引がある）。足すなら置き換えの形で
   - 確かめ：t138 28項目・SQL のテスト全部138本 通過・t122・deno test 331本（checkin_idem_test 4本）・deno check・migrations.mjs check 189件
   - 次の仕事 data/ap-shape は、このあと手動で呼ばれて PR #243 にした
-- **印と便の「送り直しても二重にならない」仕組み（PM の指示 11/26 0時10分。11/26 木曜に定期の回として呼ばれたが、PM の積んだ指示があったのでこちらをした）**：ブランチ data/idem（main dfc945c から）→ **下書き PR #240**。報告 docs/pm/report-idem.md（Gemini の案と今の作りの突き合わせの表・チェックイン担当への依頼）。読むだけの SQL docs/pm/idem-check.sql（3つ）。**移行200・テスト t138 を使った**
+- **印と便の「送り直しても二重にならない」仕組み（PM の指示 11/26 0時10分。11/26 木曜に定期の回として呼ばれたが、PM の積んだ指示があったのでこちらをした）**：ブランチ data/idem（main dfc945c から）→ **PR #240（11/26 1時36分 main に入った。本番の移行200 と関数 checkin は PM の反映の流れで確かめる）**。報告 docs/pm/report-idem.md（Gemini の案と今の作りの突き合わせの表・チェックイン担当への依頼）。読むだけの SQL docs/pm/idem-check.sql（3つ）。**移行200・テスト t138 を使った**
   - 移行200：checkins・flights・manual_flights・intl_flights に client_id uuid（null 可）と一意の索引 (user_id, client_id)（条件なし＝画面の upsert の on conflict で使える）。RLS と権限は前のまま
   - 関数 checkin：本文の cid（UUID の形だけ。_shared/idem.ts の parseCid）を受け取り、前の印と並べて同じ ID の印を読む。あれば判定をやり直さず againBody（ok・again: true・初めての演出とボーナスなし）。新しい印・便に client_id。同時の2回は 23505 で先の方を返す。ID なしは前と同じ
   - 入れなかったもの：同じ日・同じ空港の一意（印の決まりが変わる）・端末を正にする作り・端末の判定での印・救済・圏外の予約保存。メモと予定の表は本人の画面案待ち
