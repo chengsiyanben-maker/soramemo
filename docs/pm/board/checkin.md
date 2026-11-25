@@ -1,6 +1,12 @@
 # チェックイン担当の帳面
 
 ## いま持っている仕事
+- **11/26 定時の回（帳面の「次にやること」：flight_lookup につなぐ）**：PR #239（checkin/flight-suggest）に足した（678b7fb6・報告 docs/pm/report-flight-lookup.md・写真 docs/pm/shots-flight-suggest/lookup-*.png）。main（96a52fff）は取り込み済み。見張りを付けた。画面は文の中身だけで形は変えていないので、テストが通れば PM が自動で反映してよい
+  - mNoFill：日付があればまず flight_lookup（数字だけなら JL・NH の両方。航空会社を選んでいればその会社。JAL・ANA 以外も）→ 見つかれば mNoHits（1つは mNoApply・いくつかは選ぶ）。null（関数なし）か [] なら今の時刻表（plan_timetable）へ。mNoApply は h.fact があれば flight_facts を呼ばない。書き分け「その日の記録から」「その日の時刻表から」
+  - loadServer：manual_flights を flight_no つきで読む（エラーなら前の列で読み直す）→ S.manual の no。日誌の1行（fbRowHTML）は「手で記録・JL 509」、記録帳の一覧に便名の札
+  - 変えた関数：mNoFill・mNoApply・loadServer・fbRowHTML・記録帳の一覧（manualList）。足した：mNoLookup・mNoHits・mNoHM
+  - テスト：t197 に 6 を足した。記録帳・日誌を使う e2e 36本・tests/ops 成功（t195 は4本同時で 128ms、1本で成功）
+  - 本人（PM）に聞くこと：数字だけを JL・NH の両方で引いて選ばせる形でよいか・「その日の記録から」の書き方
 - 11/26 4時半ごろ（#239 の見張り）：#253（送るときの ID・data/flight-no 移行202）が main に入って #239 がぶつかった → main（96a52fff）を取り込んだ（348d4493）。mAdd は main の idemInsert（client_id）と便名をあわせ、mfInsert(row, no, key) を「client_id つきで便名も → 便名の列がなければ外す」にした。候補からの日誌も formCid("fsug")。fake_sb.js は upsert（idem）と insert の両方に __mfNoCol。t196・t197・t198〜t200・t24・t144・t13・t47・t61・t123・t195 成功
   - データ担当の flight_lookup(p_date, p_flight)（移行202・flight_history と時刻表から）ができた。次に #239 の mNoFill を「便名が分かったら flight_lookup、だめなら今の時刻表」に変える（PR #239 に足すか、入ったあと新しいブランチで）。loadServer で manual_flights の flight_no を読んで日誌に出すのも
 - 【11/26 4時25分】PR #248（idem-cid）は main に入った。見張りは外れた。残り：#239 の mfInsert を idemInsert につなぐ（あとから入る方で）・修行の sgRecordPlan の依頼（下）
@@ -666,6 +672,7 @@
 - 確認コードは6けた。メールは Gmail、Supabase の送信上限は1時間100通
 
 ## 次にやること
+- 【11/26 flight-lookup】PR #239 に足した（678b7fb6）。PM の自動の反映を待つ。入る前に t197・t200・t196・t195・t24・t144・t13・t47・t61・t123・tests/ops を流す。本人の答え（JL・NH の両方で引く・書き方）で直す。残り：修行の sgRecordPlan の依頼（修行担当へ・前から）・撮る人用の依頼①②（下の担当からの依頼。3D を登録記号で開く入口・図鑑の運航中／終了）は次の回で見る
 - 【11/26 idem-cid】PR #248：PM の自動の反映を待つ。入る前に t200・t196・t195・t24・t44・t48・tests/ops を流す。#239（flight-suggest）とどちらかが先に入ったら、あとの方で mfInsert を idemInsert につなぐ（client_id は formCid で）。修行の sgRecordPlan は下の依頼（修行担当へ）
 - 【11/26 t190-fix】PR #244：main に入った（済み・見張りは外れた）。3D のテストで「消えた機体」を確かめるときは、偽のサーバーからも外す（20秒ごとの読み直しで戻る）。ほかの 3D のテスト（t163・t165 など）で決まった時間の待ちが落ちるときも同じ直し方（条件待ち）でよい
 - 【11/25 stamp-edge-b】#238 と同じ仕事の別案（ブランチだけ）。PM が #238 を選んだら checkin/stamp-edge-b は消す。#238 にない所（取り直しのボタン・設定から戻ったときの取り直し）を使うなら #238 に移す
