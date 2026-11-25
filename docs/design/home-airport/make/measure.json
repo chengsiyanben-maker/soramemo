@@ -1,0 +1,265 @@
+{
+ "n1-futsu": {
+  "small": [],
+  "tiny": [],
+  "cut": [
+   "card near いちばん近い空港"
+  ],
+  "over": [],
+  "hscroll": 0
+ },
+ "n1-futsu-667": {
+  "small": [],
+  "tiny": [],
+  "cut": [
+   "card near いちばん近い空港"
+  ],
+  "over": [],
+  "hscroll": 0
+ },
+ "n1-futsu-n": {
+  "small": [],
+  "tiny": [],
+  "cut": [
+   "card near いちばん近い空港"
+  ],
+  "over": [],
+  "hscroll": 0
+ },
+ "n1-futsu-ta": {
+  "small": [],
+  "tiny": [],
+  "cut": [
+   "card near いちばん近い空港"
+  ],
+  "over": [],
+  "hscroll": 0
+ },
+ "n2-noplan": {
+  "small": [],
+  "tiny": [],
+  "cut": [
+   "card near いちばん近い空港"
+  ],
+  "over": [],
+  "hscroll": 0
+ },
+ "n2-noplan-667": {
+  "small": [],
+  "tiny": [],
+  "cut": [
+   "card nf 次のフライト予定を入"
+  ],
+  "over": [],
+  "hscroll": 0
+ },
+ "n3-small": {
+  "small": [],
+  "tiny": [],
+  "cut": [],
+  "over": [],
+  "hscroll": 0
+ },
+ "n3-small-667": {
+  "small": [],
+  "tiny": [],
+  "cut": [],
+  "over": [],
+  "hscroll": 0
+ },
+ "n4-large": {
+  "small": [],
+  "tiny": [],
+  "cut": [
+   "card goal 地方ごとの進み関"
+  ],
+  "over": [],
+  "hscroll": 0
+ },
+ "n4-large-667": {
+  "small": [],
+  "tiny": [],
+  "cut": [
+   "card goal 地方ごとの進み関"
+  ],
+  "over": [],
+  "hscroll": 0
+ },
+ "n5-near": {
+  "small": [],
+  "tiny": [],
+  "cut": [
+   "card nf 次のフライト予定あと"
+  ],
+  "over": [],
+  "hscroll": 0
+ },
+ "n5-near-667": {
+  "small": [],
+  "tiny": [],
+  "cut": [
+   "card nf 次のフライト予定あと"
+  ],
+  "over": [],
+  "hscroll": 0
+ },
+ "a1-pill": {
+  "small": [],
+  "tiny": [],
+  "cut": [
+   "card 今日の便を記録ほかの便JL"
+  ],
+  "over": [],
+  "hscroll": 0
+ },
+ "a1-pill-667": {
+  "small": [],
+  "tiny": [],
+  "cut": [
+   "card 羽田のいま詳しく平均の遅れ"
+  ],
+  "over": [],
+  "hscroll": 0
+ },
+ "a1-pill-n": {
+  "small": [],
+  "tiny": [],
+  "cut": [
+   "card 今日の便を記録ほかの便JL"
+  ],
+  "over": [],
+  "hscroll": 0
+ },
+ "b1-stub": {
+  "small": [],
+  "tiny": [],
+  "cut": [
+   "card 羽田のいま詳しく平均の遅れ"
+  ],
+  "over": [],
+  "hscroll": 0
+ },
+ "b1-stub-667": {
+  "small": [],
+  "tiny": [],
+  "cut": [
+   "card 羽田のいま詳しく平均の遅れ"
+  ],
+  "over": [],
+  "hscroll": 0
+ },
+ "b1-stub-n": {
+  "small": [],
+  "tiny": [],
+  "cut": [
+   "card 羽田のいま詳しく平均の遅れ"
+  ],
+  "over": [],
+  "hscroll": 0
+ },
+ "b1-stub-ta": {
+  "small": [],
+  "tiny": [],
+  "cut": [
+   "card 羽田のいま詳しく平均の遅れ"
+  ],
+  "over": [],
+  "hscroll": 0
+ },
+ "b1-first": {
+  "small": [],
+  "tiny": [],
+  "cut": [
+   "card 羽田のいま詳しく平均の遅れ"
+  ],
+  "over": [],
+  "hscroll": 0
+ },
+ "b1-first-667": {
+  "small": [],
+  "tiny": [],
+  "cut": [
+   "card 羽田のいま詳しく平均の遅れ"
+  ],
+  "over": [],
+  "hscroll": 0
+ },
+ "b2-offline": {
+  "small": [],
+  "tiny": [],
+  "cut": [
+   "card 羽田のいま平均の遅れ+12"
+  ],
+  "over": [],
+  "hscroll": 0
+ },
+ "b2-offline-667": {
+  "small": [],
+  "tiny": [],
+  "cut": [
+   "card 羽田のいま平均の遅れ+12"
+  ],
+  "over": [],
+  "hscroll": 0
+ },
+ "b3-done": {
+  "small": [],
+  "tiny": [],
+  "cut": [
+   "card 今日の便を記録ほかの便JL"
+  ],
+  "over": [],
+  "hscroll": 0
+ },
+ "b3-done-667": {
+  "small": [],
+  "tiny": [],
+  "cut": [
+   "card 今日の便を記録ほかの便JL"
+  ],
+  "over": [],
+  "hscroll": 0
+ },
+ "b3-done-n": {
+  "small": [],
+  "tiny": [],
+  "cut": [
+   "card 今日の便を記録ほかの便JL"
+  ],
+  "over": [],
+  "hscroll": 0
+ },
+ "b4-small": {
+  "small": [],
+  "tiny": [],
+  "cut": [],
+  "over": [],
+  "hscroll": 0
+ },
+ "b4-small-667": {
+  "small": [],
+  "tiny": [],
+  "cut": [],
+  "over": [],
+  "hscroll": 0
+ },
+ "b5-large": {
+  "small": [],
+  "tiny": [],
+  "cut": [
+   "card 羽田のいま詳しく平均の遅れ"
+  ],
+  "over": [],
+  "hscroll": 0
+ },
+ "b5-large-667": {
+  "small": [],
+  "tiny": [],
+  "cut": [
+   "card 今日の便を記録JL14:3"
+  ],
+  "over": [],
+  "hscroll": 0
+ },
+ "errors": []
+}
