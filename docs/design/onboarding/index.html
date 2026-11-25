@@ -1,0 +1,50 @@
+<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>はじめての流れの画面案</title><style>/* そらメモ 小さな動きの見本：共通の見た目（main の web/index.html の色と文字に合わせる） */
+:root{
+  --gothic:"Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic UI","Yu Gothic","Meiryo","Noto Sans JP","Noto Sans CJK JP",system-ui,sans-serif;
+  --bg:#F4F5F7; --card:#FFFFFF; --ink:#374151; --strong:#1F2937; --sub:#646B78; --mute:#6B7280;
+  --track:#EEF0F3; --pill:rgba(17,24,39,.05); --jal:#C8102E; --ana:#1C4FA0; --acc:#2563EB;
+  --ok:#15803D; --hero:#0F1B2D; --bar:#E3E7ED; --pin:#1B2B4B; --pin-wash:#EEF2F8;
+  --sw-on-bg:#16233A; --sw-off-bg:#E5E8EE; --sw-off-ring:#768090; --sw-on-ink:#FFFFFF; --sw-off-ink:#4B5563;
+  --shadow:0 1px 2px rgba(17,24,39,.04),0 10px 30px -8px rgba(17,24,39,.10),inset 0 0 0 1px rgba(17,24,39,.07);
+  --shadow-lift:0 2px 4px rgba(17,24,39,.06),0 22px 40px -10px rgba(17,24,39,.28),inset 0 0 0 1px rgba(17,24,39,.07);
+  --nav-glass:rgba(255,255,255,.82); --nav-ink:#6B7280; --nav-shadow:0 10px 30px -8px rgba(17,24,39,.22),0 2px 6px rgba(17,24,39,.06);
+  --skel:#E9ECF0; --skel-hi:#F5F7F9;
+  /* 動きの長さ（0.15〜0.4秒）と曲がり方 */
+  --t-tap:.12s; --t-fast:.15s; --t-mid:.25s; --t-slow:.4s;
+  --ease:cubic-bezier(.2,.8,.2,1); --ease-in:cubic-bezier(.4,0,1,1);
+}
+:root[data-night=on]{
+  --bg:#0F141B; --card:#1B1F26; --ink:#E5E7EB; --strong:#F3F4F6; --sub:#AEB9C6; --mute:#AEB9C6;
+  --track:#262B33; --pill:rgba(220,227,234,.08); --acc:#DCE3EA; --ok:#4ADE80; --hero:#4ADE80; --bar:#262B33;
+  --pin:#DCE3EA; --pin-wash:rgba(220,227,234,.08);
+  --sw-on-bg:rgba(220,227,234,.16); --sw-off-bg:transparent; --sw-off-ring:#66778C; --sw-on-ink:#DCE3EA; --sw-off-ink:#AEB9C6;
+  --shadow:0 12px 26px -16px rgba(0,0,0,.7),inset 0 0 0 1px rgba(255,255,255,.06);
+  --shadow-lift:0 22px 40px -12px rgba(0,0,0,.85),inset 0 0 0 1px rgba(255,255,255,.12);
+  --nav-glass:rgba(22,25,31,.86); --nav-ink:#8B95A3; --nav-shadow:0 10px 30px -6px rgba(0,0,0,.6);
+  --skel:#232830; --skel-hi:#2C323B; --amber:#FBBF24;
+}
+
+
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--gothic);max-width:1200px;margin:0 auto;padding:28px 16px 80px;line-height:1.6;font-size:15px}
+h1{font-size:24px;font-weight:800;color:var(--strong)}
+h2{font-size:18px;font-weight:800;color:var(--strong);margin:36px 0 4px}
+.lead{margin-top:6px;font-size:14px;color:var(--sub)}
+.flow{margin-top:12px;background:var(--card);border-radius:22px;box-shadow:var(--shadow);padding:16px}
+.flow b.t{font-size:16px;color:var(--strong)}
+.flow p{font-size:13px;color:var(--sub)}
+.steps{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:10px}
+.steps span{display:inline-flex;align-items:center;min-height:36px;padding:0 14px;border-radius:999px;background:var(--track);font-size:13px;font-weight:800;color:var(--strong)}
+.steps span.now{background:transparent;box-shadow:inset 0 0 0 1.5px #B4BBC5;color:var(--sub)}
+.steps i{font-style:normal;color:var(--mute);font-weight:800}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:16px;margin-top:14px}
+.it{background:var(--card);border-radius:22px;box-shadow:var(--shadow);padding:12px;display:flex;flex-direction:column;gap:8px}
+.it img{width:100%;border-radius:14px;display:block}
+.it b{font-size:15px;color:var(--strong)}
+.it p{font-size:13px;color:var(--sub)}
+.vs{display:flex;flex-wrap:wrap;gap:6px}
+.vs a{display:inline-flex;align-items:center;min-height:44px;padding:0 14px;border-radius:999px;background:var(--pill);font-size:13px;font-weight:800;color:var(--strong);text-decoration:none}
+.box{margin-top:12px;background:var(--card);border-radius:22px;box-shadow:var(--shadow);padding:16px 18px 16px 34px;font-size:14px}
+.box li{margin:6px 0}
+.box li small{display:block;font-size:13px;color:var(--mute)}
+</style></head><body><h1>はじめて開いたときの流れ</h1><p class="lead">60〜90秒で「自分の地図に色がつき、次に開く理由がホームにある」状態にする。390 と 375、O1・O3・O6 は夜も。各 HTML は押して試せる（空港を選ぶと数字が増える）。枠だけのピルは今の画面のまま</p><h2>ログインをどこに置くか（2案）</h2><div class="flow"><b class="t">案A　今の流れを残す（ログインの流れは変えない）</b><p>導入のあと、今の登録（メール・6けたのコード・同意・名前は空でよい）をしてから、使い方・行った空港・予定・許可へ。メモは最初からサーバーに入る</p><div class="steps"><span class="">O1 導入</span><i>›</i><span class="now">今のログイン・登録</span><i>›</i><span class="">O2 使い方</span><i>›</i><span class="">O3 行った空港</span><i>›</i><span class="">O4 予定</span><i>›</i><span class="">O5 許可</span><i>›</i><span class="">O6 ホーム</span></div></div><div class="flow"><b class="t">案B　端末の中で始めて、あとで登録（本人の OK が要る）</b><p>登録なしで O2〜O6 まで進む。印はサーバーで確かめるので、初めてのチェックインのときに登録（b1）。マイページの「データとバックアップ」からも登録できる。バックアップは無料</p><div class="steps"><span class="">O1 導入</span><i>›</i><span class="">O2 使い方</span><i>›</i><span class="">O3 行った空港</span><i>›</i><span class="">O4 予定</span><i>›</i><span class="">O5 許可</span><i>›</i><span class="">O6 ホーム</span><i>›</i><span class="">初めてのチェックインで登録（b1）</span></div></div><ul class="box"><li>今のはじめの案内（3枚）は O1〜O5 に置き換えて、なくす<small>3枚の中身（印を押す・半券を切る・図鑑）は、ホームで初めて空港に入ったときの1行の案内へ移す</small></li><li>今いる利用者には出さない<small>出すのは新しく始める人だけ。今いる人の「一度だけの同意」は今のまま</small></li></ul><h2>画面</h2><div class="grid"><div class="it"><a href="o1-intro.html"><img src="png/o1-intro.png" alt="O1 導入" loading="lazy"></a><b>O1 導入</b><p>専門の言葉なしで1行。「はじめる」と、ログイン・デモで試す（残す）</p><div class="vs"><a href="o1-intro.html">開く</a><a href="png/o1-intro-667.png">375 幅</a><a href="png/o1-intro-n.png">夜</a></div></div><div class="it"><a href="o2-persona.html"><img src="png/o2-persona.png" alt="O2 使い方" loading="lazy"></a><b>O2 使い方</b><p>今の使い方のアンケート（撮る・修行・気軽・あとで決める）をここへ。最初の構成を決める</p><div class="vs"><a href="o2-persona.html">開く</a><a href="png/o2-persona-667.png">375 幅</a></div></div><div class="it"><a href="o3-visited.html"><img src="png/o3-visited.png" alt="O3 行ったことがある空港" loading="lazy"></a><b>O3 行ったことがある空港</b><p>押すと数字がその場で増える。地方ごとに開く。選んだ空港は淡いピン（メモ）で、印とは別</p><div class="vs"><a href="o3-visited.html">開く</a><a href="png/o3-visited-667.png">375 幅</a><a href="png/o3-visited-n.png">夜</a><a href="png/o3-visited-end.png">下まで送る</a></div></div><div class="it"><a href="o3b-zero.html"><img src="png/o3b-zero.png" alt="O3b 0件" loading="lazy"></a><b>O3b 0件</b><p>0% は出さず「これから最初の1空港へ」。ボタンは「まだない・次へ」</p><div class="vs"><a href="o3b-zero.html">開く</a><a href="png/o3b-zero-667.png">375 幅</a><a href="png/o3b-zero-end.png">下まで送る</a><a href="png/o3b-zero-move1.png">押したとき</a></div></div><div class="it"><a href="o4-plan.html"><img src="png/o4-plan.png" alt="O4 次のフライト" loading="lazy"></a><b>O4 次のフライト</b><p>出発・到着・日付の3つだけ。便名はあとから</p><div class="vs"><a href="o4-plan.html">開く</a><a href="png/o4-plan-667.png">375 幅</a><a href="png/o4-plan-end.png">下まで送る</a></div></div><div class="it"><a href="o4b-myap.html"><img src="png/o4b-myap.png" alt="O4b 予定なし" loading="lazy"></a><b>O4b 予定なし</b><p>いちばん身近な空港を1つ。ホームからその空港のいまを見られる</p><div class="vs"><a href="o4b-myap.html">開く</a><a href="png/o4b-myap-667.png">375 幅</a><a href="png/o4b-myap-end.png">下まで送る</a></div></div><div class="it"><a href="o5-ready.html"><img src="png/o5-ready.png" alt="O5 できた記録と許可の理由" loading="lazy"></a><b>O5 できた記録と許可の理由</b><p>先に理由を書いてから許可を聞く。位置の文は iPhone の画面案（ios-app）と同じ。通知は入れなくても使える</p><div class="vs"><a href="o5-ready.html">開く</a><a href="png/o5-ready-667.png">375 幅</a></div></div><div class="it"><a href="o6-home.html"><img src="png/o6-home.png" alt="O6 ホームに着いた" loading="lazy"></a><b>O6 ホームに着いた</b><p>メモの淡いピンが地図に並ぶ。初回だけ「いま空港にいなくても試せます」（閉じたら出さない）</p><div class="vs"><a href="o6-home.html">開く</a><a href="png/o6-home-667.png">375 幅</a><a href="png/o6-home-n.png">夜</a></div></div><div class="it"><a href="b1-backup.html"><img src="png/b1-backup.png" alt="案B 初めてのチェックインで登録" loading="lazy"></a><b>案B 初めてのチェックインで登録</b><p>印はサーバーで確かめるので、ここで登録が要る。メモと予定もいっしょに保存。無料</p><div class="vs"><a href="b1-backup.html">開く</a><a href="png/b1-backup-667.png">375 幅</a></div></div></div><h2>守ったこと</h2><ul class="box"><li>行ったことがあるは「メモ」で、印とは別の記録・別の見た目（淡いピン）。現地で押すと印に変わる</li><li>空港の数は実際の数（86）。0% は出さない</li><li>天気・案内板風を全体に・ロゴは使わない（便名の前も字だけ）</li><li>バックアップは有料にしない</li></ul></body></html>
