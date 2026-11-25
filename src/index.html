@@ -9955,7 +9955,7 @@ const EXTREMES = (() => { const by = f => A.reduce((x, a) => f(a, x) ? a : x);
 const SEASONS = ["春","夏","秋","冬"];
 const seasonOf = t => { const m = new Date(t).getMonth(); return m >= 2 && m <= 4 ? 0 : m >= 5 && m <= 7 ? 1 : m >= 8 && m <= 10 ? 2 : 3; };
 const timeMarks = t => { const d = new Date(t), h = d.getHours(), out = [];
-  if(h >= 5 && h < 7) out.push("朝の印"); if(h >= 22 || h < 5) out.push("夜の印"); if(d.getMonth() === 0 && d.getDate() === 1) out.push("元日の印"); return out; };
+  if(h >= 5 && h < 7) out.push("朝の印"); if(h >= 22 || h < 5) out.push("夜の印"); return out; };   // 「元日の印」は 11/25 に外した（却下済み「季節のスタンプ」とそろえる）
 const dayKey = t => { const d = new Date(t); return d.getFullYear()*10000 + (d.getMonth()+1)*100 + d.getDate(); };
 const monthKey = t => { const d = new Date(t); return d.getFullYear()*12 + d.getMonth(); };
 const RARE_TOTAL = A.filter(a => a.rare).length;
@@ -10010,11 +10010,10 @@ const ACH = [
   ["路線と距離","km10k","1万km","累計の飛行距離が1万km",10000,"km"],
   ["路線と距離","km40k","地球一周","累計の飛行距離が地球一周（40,075km）",40075,"km"],
   ["路線と距離","both","二刀流","JALグループとANAグループの両方のフライトを記録する",2,"bothGroups"],
-  ["時間と季節","morn1","朝の印","朝5〜7時にチェックインする",1,"morning"],
-  ["時間と季節","morn10","早起きの旅人","朝の印を10回集める",10,"morning"],
-  ["時間と季節","night1","夜の印","夜22時〜朝5時にチェックインする",1,"night"],
-  ["時間と季節","night10","夜ふかしの旅人","夜の印を10回集める",10,"night"],
-  ["時間と季節","ny","元日の印","1月1日にチェックインする",1,"newyear"],
+  ["時間帯","morn1","朝の印","朝5〜7時にチェックインする",1,"morning"],
+  ["時間帯","morn10","早起きの旅人","朝の印を10回集める",10,"morning"],
+  ["時間帯","night1","夜の印","夜22時〜朝5時にチェックインする",1,"night"],
+  ["時間帯","night10","夜ふかしの旅人","夜の印を10回集める",10,"night"],
   ["連続と年間","st3","3か月連続","3か月続けて、毎月どこかでチェックインする",3,"streak"],
   ["連続と年間","st6","半年連続","6か月続けて、毎月どこかでチェックインする",6,"streak"],
   ["連続と年間","st12","1年連続","12か月続けて、毎月どこかでチェックインする",12,"streak"],
@@ -10050,7 +10049,7 @@ function achState(){
   const days = new Map(), years = new Map(), dir = new Set(), round = new Set(), ends = new Set();
   const endIds = new Set(EXTREMES.map(([, a]) => a.id));
   const regionCnt = {}, lapCnt = {}, termCnt = {}, xset = { mil:new Set(), glider:new Set(), field:new Set(), secret:new Set(), heli:new Set() };
-  let ci = 0, km = 0, maxV = 0, morning = 0, night = 0, newyear = 0, lastMonth = null, streak = 0, bestStreak = 0, maxDay = 0, ns = 0, yearAp = 0, yearKm = 0;
+  let ci = 0, km = 0, maxV = 0, morning = 0, night = 0, lastMonth = null, streak = 0, bestStreak = 0, maxDay = 0, ns = 0, yearAp = 0, yearKm = 0;
   // 種類ごとに、まだ達成していない実績を目標の小さい順に並べておく
   const pending = new Map();
   for(const x of ACH){ if(!pending.has(x.kind)) pending.set(x.kind, []); pending.get(x.kind).push(x); }
@@ -10068,7 +10067,6 @@ function achState(){
       const tm = timeMarks(t);
       if(tm.includes("朝の印")) hit("morning", ++morning, t);
       if(tm.includes("夜の印")) hit("night", ++night, t);
-      if(tm.includes("元日の印")) hit("newyear", ++newyear, t);
       const mk = monthKey(t); if(mk !== lastMonth){ streak = lastMonth !== null && mk === lastMonth + 1 ? streak + 1 : 1; lastMonth = mk; bestStreak = Math.max(bestStreak, streak); hit("streak", bestStreak, t); }
     } else if(e.c){
       const id = e.c.a, rg = AIRPORT_REGION[id];
@@ -10089,7 +10087,6 @@ function achState(){
       const tm = timeMarks(t);
       if(tm.includes("朝の印")) hit("morning", ++morning, t);
       if(tm.includes("夜の印")) hit("night", ++night, t);
-      if(tm.includes("元日の印")) hit("newyear", ++newyear, t);
       const mk = monthKey(t); if(mk !== lastMonth){ streak = lastMonth !== null && mk === lastMonth + 1 ? streak + 1 : 1; lastMonth = mk; bestStreak = Math.max(bestStreak, streak); hit("streak", bestStreak, t); }
       const dk = dayKey(t); if(!days.has(dk)) days.set(dk, new Set()); const ds = days.get(dk); ds.add(id);
       if(ds.size > maxDay){ maxDay = ds.size; hit("dayAirports", maxDay, t); }
@@ -10107,7 +10104,7 @@ function achState(){
     }
   }
   // 最終的な値（進み具合の表示と、後から記録された航空会社の反映に使う）
-  const val = k => k === "secret" ? xset.secret.size : k === "mil" ? xset.mil.size : k === "glider" ? xset.glider.size : k === "field" ? xset.field.size : k === "morning" ? morning : k === "night" ? night : k === "newyear" ? newyear
+  const val = k => k === "secret" ? xset.secret.size : k === "mil" ? xset.mil.size : k === "glider" ? xset.glider.size : k === "field" ? xset.field.size : k === "morning" ? morning : k === "night" ? night
     : k === "streak" ? bestStreak : k === "yearAirports" ? yearAp : k === "yearKm" ? yearKm : k === "dayAirports" ? maxDay
     : k === "roundTrips" ? round.size : k === "ends" ? ends.size : k === "northSouth" ? ns
     : k === "airports" ? ap.size : k === "checkins" ? ci : k === "maxVisit" ? maxV : k === "rare" ? rare.size
