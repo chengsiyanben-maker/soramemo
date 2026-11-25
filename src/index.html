@@ -16823,8 +16823,16 @@ function sgFixApply(L, fx){
 }
 const SG_FIX_TAG = `<span class="sgb-k m">自分で直した</span>`;
 // 予定の便のうち、記録した便（日本時間で同じ日・同じ区間）があるものは「乗った」として予定から外す（実績と二重に数えない）
-function sgDoneKeys(){ const k = new Set(); for(const r of statusRows()) k.add(`${sgJstDay(r.t)}|${r.from}|${r.to}`); return k; }
-const sgPlanDone = (p, keys = sgDoneKeys()) => keys.has(`${p.d}|${p.from}|${p.to}`);
+//   11/26（Gemini の案の2）：記録した便1つで外す予定は1つだけ。同じ日に同じ区間を2回乗る予定（羽田⇄伊丹を2往復など）で、1便だけ記録したときに
+//   残りの予定まで消えて見込みが減らないように、記録の数だけ・時刻の早い予定から外す。返すのは外す予定（予定そのもの）の集まり
+function sgDoneKeys(plans = sgGet().plans){
+  const cnt = new Map(); for(const r of statusRows()){ const k = `${sgJstDay(r.t)}|${r.from}|${r.to}`; cnt.set(k, (cnt.get(k) || 0) + 1); }
+  const out = new Set(), hm = p => p.hm || "99:99";
+  for(const p of [...plans].sort((a, b) => a.d < b.d ? -1 : a.d > b.d ? 1 : hm(a) < hm(b) ? -1 : hm(a) > hm(b) ? 1 : 0)){
+    const k = `${p.d}|${p.from}|${p.to}`, c = cnt.get(k) || 0; if(c > 0){ out.add(p); cnt.set(k, c - 1); } }
+  return out;
+}
+const sgPlanDone = (p, keys = sgDoneKeys()) => keys.has(p);
 const sgFuture = () => { const t = sgToday(), keys = sgDoneKeys(); return sgGet().plans.filter(p => p.d >= t && !sgPlanDone(p, keys)).sort((a, b) => { const x = a.d + " " + (a.hm || "99:99"), y = b.d + " " + (b.hm || "99:99"); return x < y ? -1 : x > y ? 1 : 0; }); };
 const sgPlanLeg = p => sgLeg(p.car, p.from, p.to, p.fare, sgDayT(p.d), p.price);
 // 使う航空会社（選んだもの、なければ今年よく乗っているほう）
@@ -16974,6 +16982,18 @@ function sgLS(){
   const after = rows.filter(r => sgJstDay(r.t) > e.at);
   return { v:e.v + after.length * 5, n:after.length, entered:e };
 }
+// 根拠の1行（11/26 Gemini の案の3）：区間マイル × 積算率 × 2 ＋ 搭乗ボーナス ＝ ポイント。各社の公開情報からの目安（航空会社の確定の数ではない）
+//   直した便は、自動で数えた数（auto）までの式。ANA は端数を掛けたあとに丸め、JAL は積算のマイルを丸めてから2倍するので、1ずれることがある
+const sgWhy = L => `${fmtKm(L.mi)}マイル × ${Math.round(L.fr.rate * 100)}% × 2 ＋ ${fmtKm(L.bonus)} ＝ ${fmtKm(L.auto)}`;
+// 今年あと何日と、届くための月あたりの目安（11/26 Gemini の案の9）。今日を入れて 12月31日まで（日本時間）。
+//   残りが1か月より長いときは月あたり、1か月以内は1週間あたり、1週間以内は残りの数そのもの。100 で切り上げた目安
+function sgPace(left, y = sgNowY()){
+  const t = sgToday(), days = Math.max(0, Math.round((Date.UTC(y, 11, 31) - Date.parse(t + "T00:00:00Z")) / 864e5) + 1), up = v => Math.ceil(v / 100) * 100;
+  if(!days || +t.slice(0, 4) !== y) return null;
+  if(days > 31) return { days, per:"月あたり", v:up(left / (days / (365.25 / 12))) };
+  if(days > 7) return { days, per:"1週間あたり", v:up(left / (days / 7)) };
+  return { days, per:"", v:left };
+}
 // 予定・計画を足したときの残り（実績とは別に、順に足す）
 function sgAfter(goal, F, N){
   if(goal.car === "ANA") return { left:Math.max(0, goal.pts - F), over:Math.max(0, F - goal.pts), done:F >= goal.pts };
@@ -17077,7 +17097,7 @@ function sgRoadView(){
   const nL = next && sgPlanLeg(next);
   const nx = !sh.next || !next ? "" : `<div class="sgb-h"><b>次に乗る便</b><button class="sg-a" data-sg-go="plan" type="button">予定と計画 ›</button></div>
     <button class="sgb-card sgb-next" data-sg-go="plan" type="button"><span class="m"><small>${sgMDj(next.d)}（${sgWD(next.d)}）${next.hm ? "　" + esc(next.hm) + "発" : ""}</small><b>${esc(placeShort(BY[next.from].iata))} → ${esc(placeShort(BY[next.to].iata))}</b>
-      <small>${[next.no || next.car, nL ? nL.fr.label.split("：").pop().split("・")[0] : ""].filter(Boolean).map(esc).join("・")}　<span class="sgb-k p">予定</span></small></span><span class="r"><b class="sgb-nx">＋${nL ? fmtKm(nL.pts) : "—"}</b><small>${sgUnit(next.car)}</small></span>
+      <small>${[next.no || next.car, nL ? nL.fr.label.split("：").pop().split("・")[0] : ""].filter(Boolean).map(esc).join("・")}　<span class="sgb-k p">予定</span></small>${nL ? `<small class="sgwhy">根拠 ${sgWhy(nL)}（目安）</small>` : ""}</span><span class="r"><b class="sgb-nx">＋${nL ? fmtKm(nL.pts) : "—"}</b><small>${sgUnit(next.car)}</small></span>
       <small class="t" id="sgNxRt">${SERVER ? "この路線の今日：読み込んでいます…" : "この路線の今日の便数は、サーバー版で出ます"}</small></button>`;
   const more = !sh.reach || !(P.n || C) ? "" : `<button class="sg-btn ghost" data-sg-go="${SERVER ? "find" : "planner"}" type="button">計画を作る</button>`;
   return `${hero}${two}${jgc}${reach}${nx}${more}
@@ -17159,11 +17179,12 @@ function sgMonthsView(){
   const D = sgRoadData(), { Y, car, goal, unit, cur, P, C, A0, A1, A2, fut } = D, nowM = +sgToday().slice(5, 7) - 1, nowY = +sgToday().slice(0, 4);
   const cnt = A => car === "JAL" ? `<small class="c">回数 あと ${A.leftN}回</small>` : "";
   const val = A => `<b>${fmtKm(A.left)}</b><small> ${unit}</small>`;
-  const dates = fut.map(p => sgMD(p.d)).filter((x, i, a) => a.indexOf(x) === i);
+  const dates = fut.map(p => sgMD(p.d)).filter((x, i, a) => a.indexOf(x) === i), pc = !A0.done && A0.left > 0 ? sgPace(A0.left, Y.y) : null;
   const end = `<div class="sgb-card sgb-end"><p class="t">12月31日の残り（${esc(goal.name)}まで・推定）</p>
     <div class="r"><span><b>実績のまま</b><small>このあと乗らなければ</small></span><span class="v">${A0.done ? `<b>0</b><small> ${unit}</small>` : val(A0)}${A0.done ? `<small class="c">届いています</small>` : cnt(A0)}</span></div>
     ${P.n ? `<div class="r p"><span><b>予定の${P.n}便に乗ると</b><small>${esc(dates.slice(0, 3).join("・"))}${dates.length > 3 ? " ほか" : ""}</small></span><span class="v">${val(A1)}${A1.done ? `<small class="c">${A1.over ? `${fmtKm(A1.over)} あまって届く` : "届く"}</small>` : cnt(A1)}</span></div>` : ""}
-    ${C ? `<div class="r c"><span><b>計画の${C.n}便${P.n ? "にも" : "に"}乗ると</b><small>${A2.done ? (A2.byF || car === "ANA" ? `${fmtKm(A2.over)} ${unit} あまって届く` : "回数の道で届く") : "まだ届かない"}</small></span><span class="v">${val(A2)}${cnt(A2)}</span></div>` : ""}</div>`;
+    ${C ? `<div class="r c"><span><b>計画の${C.n}便${P.n ? "にも" : "に"}乗ると</b><small>${A2.done ? (A2.byF || car === "ANA" ? `${fmtKm(A2.over)} ${unit} あまって届く` : "回数の道で届く") : "まだ届かない"}</small></span><span class="v">${val(A2)}${cnt(A2)}</span></div>` : ""}
+    ${pc ? `<p class="sgb-n sgb-pace">今年あと <b>${pc.days}日</b>。実績のままの残りに${car === "JAL" ? "、FOP だけで" : ""}届くには ${pc.per ? `${pc.per} 約 <b>${fmtKm(pc.v)}</b> ${unit}` : `あと <b>${fmtKm(pc.v)}</b> ${unit}`}（目安）</p>` : ""}</div>`;
   // 月末の残り：目標から、実績の月を順にひく。予定と計画は、そのあとに別のカードで足す
   const rows = Y.rows.filter(r => r.car === car), mo = Array.from({ length:12 }, () => 0);
   for(const r of rows) mo[sgJstM(r.t)] += r.L.pts;
@@ -17258,7 +17279,7 @@ function sgPlan(){
     <p class="sgverd">${sgPlanVerdict(car, Y, goal)}</p>
     ${byDay.map(({ d, rows: rs }) => { const tot = rs.reduce((x, r) => x + (r.L ? r.L.pts : 0), 0);
       return `<div class="sg-card sgpd"><div class="h"><i class="sgsw p" aria-hidden="true"></i><b>${+d.slice(5, 7)}月${+d.slice(8)}日（${sgWD(d)}）</b><span>${esc(dayLabel(rs))}</span><b class="n">+${fmtKm(tot)}</b></div>
-        ${rs.map(({ p, L }) => `<div class="r"><b class="t">${p.hm ? esc(p.hm) : "—"}</b><span><b>${esc(placeShort(BY[p.from].iata))} → ${esc(placeShort(BY[p.to].iata))}</b><small>${[p.no || (p.car !== car ? p.car : ""), L ? L.fr.label.split("：").pop().split("・")[0] : "", p.price && SG_MONEY ? sgYen(p.price) : ""].filter(Boolean).map(esc).join("　")}</small></span><b class="n">+${L ? fmtKm(L.pts) : "—"}</b><button class="sg-x" data-sg-unplan="${esc(p.id)}" aria-label="この予定を消す" type="button">×</button></div>`).join("")}</div>`; }).join("")
+        ${rs.map(({ p, L }) => `<div class="r"><b class="t">${p.hm ? esc(p.hm) : "—"}</b><span><b>${esc(placeShort(BY[p.from].iata))} → ${esc(placeShort(BY[p.to].iata))}</b><small>${[p.no || (p.car !== car ? p.car : ""), L ? L.fr.label.split("：").pop().split("・")[0] : "", p.price && SG_MONEY ? sgYen(p.price) : ""].filter(Boolean).map(esc).join("　")}</small>${L ? `<small class="sgwhy">根拠 ${sgWhy(L)}（目安）</small>` : ""}</span><b class="n">+${L ? fmtKm(L.pts) : "—"}</b><button class="sg-x" data-sg-unplan="${esc(p.id)}" aria-label="この予定を消す" type="button">×</button></div>`).join("")}</div>`; }).join("")
       || `<div class="sg-card"><p class="sg-note">予定の便はまだありません。</p></div>`}
     <button class="sg-btn main" data-sg-go="${SERVER ? "find" : "planner"}" type="button">計画を作って予定に足す</button>
     ${drafts.length ? `<div class="sg-h"><b class="hh">${SG_TAG_C}残した案（まだ予定ではない）</b><button class="sg-a" data-sg-go="compare" type="button">くらべる ›</button></div>
@@ -17500,7 +17521,8 @@ function sgQuick(){
         ${ML.bonusPct ? `<div><span>${esc(ML.bonusWhy)}のボーナス ＋${ML.bonusPct}%<small>ステイタスとカードのボーナスは重ならず、多いほうだけ</small></span><b>+${fmtKm(ML.bonusMi * x2)}</b></div>` : ""}
         ${ML.payMi ? `<div><span>${mc}カードで払う<small>${sgYen(mine.price)}${mc === "JAL" ? "・JAL の航空券は2倍" : "・ANAカードマイルプラスとカードのポイント"}</small></span><b>+${fmtKm(ML.payMi * x2)}</b></div>` : ""}</div>
         <div class="sg-sp2"><b>たまるマイル</b><span><b class="xxl">${fmtKm(ML.totalMi * x2)}</b> マイル</span></div>
-        <div class="sg-3 c"><span><small>${mc === "JAL" ? "FOP" : "PP"}</small><b class="${mc === "JAL" ? "redt" : ""}">${fmtKm(ML.pts * x2)}</b></span><span><small>搭乗回数</small><b>+${x2}</b></span><span><small>Life Status</small><b>${mc === "JAL" ? "+" + 5 * x2 : "—"}</b>${mc === "JAL" && ML.payMi ? `<small>カード分 ${fmtKm(ML.payMi * x2)}/2,000</small>` : ""}</span></div></div>` : `<p class="sg-note">この区間は計算できません。</p>`}
+        <div class="sg-3 c"><span><small>${mc === "JAL" ? "FOP" : "PP"}</small><b class="${mc === "JAL" ? "redt" : ""}">${fmtKm(ML.pts * x2)}</b></span><span><small>搭乗回数</small><b>+${x2}</b></span><span><small>Life Status</small><b>${mc === "JAL" ? "+" + 5 * x2 : "—"}</b>${mc === "JAL" && ML.payMi ? `<small>カード分 ${fmtKm(ML.payMi * x2)}/2,000</small>` : ""}</span></div>
+        <p class="sg-note sgwhy">${mc === "JAL" ? "FOP" : "PP"} の根拠 ${sgWhy(ML)}${x2 > 1 ? "（片道。往復はこの2倍）" : ""}（目安）</p></div>` : `<p class="sg-note">この区間は計算できません。</p>`}
     <div class="sg-h"><b>いちばん貯まる運賃なら</b><small>${SG_QSIDE === "round" ? "往復" : "片道"}・ボーナスなし</small></div>
     <div class="sg-2c">${card("ANA")}${card("JAL")}</div>
     <div class="sg-h"><b>運賃ごと</b>${sgSeg("qcar", [["ANA", "ANA"], ["JAL", "JAL"]], SG_QCAR)}</div>
@@ -17879,7 +17901,7 @@ document.addEventListener("click", async e => {
   if(k === "flew" && p){ if(!(await sgRecordPlan(p))){ b.disabled = false; b.textContent = "保存できませんでした"; return; } g.plans = g.plans.filter(x => x.id !== id); }
   else if(k === "no") g.plans = g.plans.filter(x => x.id !== id);
   else if(k === "later" && p) p.later = sgToday();
-  else if(k === "ok") g.plans = g.plans.filter(x => x.d !== id || !sgPlanDone(x));
+  else if(k === "ok"){ const keys = sgDoneKeys(); g.plans = g.plans.filter(x => x.d !== id || !sgPlanDone(x, keys)); }
   await sgSave(); if(k === "flew" && SERVER && !demo) await reload(); else render();
   for(const kk in DIRTY) DIRTY[kk] = true; renderPersonaCard(); if(currentView() === "sg" || $("dShugyo").open) sgKeep(() => {});
 });
