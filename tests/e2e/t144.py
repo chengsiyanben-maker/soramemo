@@ -89,7 +89,7 @@ async def main():
             check(f'{w}x{h} 2回目は印が増えない:', await pg.evaluate("S.checkins.length") == n0 + 1)
             check(f'{w}x{h} 押せなかったときは切れて飛ぶ動きをしない:', not any('210px' in x for x in tf))
             check(f'{w}x{h} 半券は元の位置に戻る:', await pg.evaluate("$('checkin').style.transform") == '' and await pg.evaluate("$('checkin').style.opacity") == '')
-            check(f'{w}x{h} 理由を半券のすぐ下に出す:', await pg.is_visible('#stubMsg') and 'チェックイン済み' in await pg.inner_text('#stubMsg'))
+            check(f'{w}x{h} 理由を半券のすぐ下に出す:', await pg.is_visible('#stubMsg') and 'チェックインは完了しています' in await pg.inner_text('#stubMsg'))   # 11/25 stamp-edge で文をそろえた
             g = await pg.evaluate("(() => { const a = $('bpass').getBoundingClientRect(), m = $('stubMsg').getBoundingClientRect(); return { gap: m.top - a.bottom, bottom: m.bottom, h: innerHeight }; })()")
             check(f'{w}x{h} 理由は半券の真下で画面の中（すき間 {round(g["gap"])}px）:', 0 <= g['gap'] <= 16 and g['bottom'] <= g['h'])
             await pg.screenshot(path=os.path.join(WORK, f't144_stub_{w}x{h}.png'))
