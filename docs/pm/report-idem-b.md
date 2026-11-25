@@ -8,7 +8,7 @@ PM の指示 11/26 0時10分。11/26 木曜に定期の回として呼ばれ、�
 
 - 変えたファイル：`supabase/migrations/20261126000200_checkin_idem.sql`（移行200）・`supabase/functions/checkin/index.ts`・`supabase/functions/_shared/checkin_idem.ts`（新）・`supabase/tests/checkin_idem_test.ts`（新）・`tests/sql/t138_checkin_idem.mjs`（新）・`docs/pm/idem-b-check.sql`
 - 手順：端末が作る ID を印と記録帳の便に持たせ、同じ ID の2回目は「もう記録済み」として成功で返す
-- 確かめ：t138 28項目・deno test 331本・deno check・migrations.mjs check 189件 通過
+- 確かめ：t138 28項目・SQL のテスト全部138本・deno test 331本・deno check・migrations.mjs check 189件 通過
 
 ## 1. Gemini の案と今の作りの突き合わせ
 
@@ -46,7 +46,7 @@ PM の指示 11/26 0時10分。11/26 木曜に定期の回として呼ばれ、�
 ### 確かめた結果
 - t138 28項目 OK（同じ人・同じ ID は2つ入らない／別の人ならよい／null は何件でも／到着1つに便1つ／重なりがあっても移行は止まらず行は消さない・片付けたあと流し直すと索引を作る／記録帳は on conflict do nothing の送り直しで1行・client_id は直せない・price と seat は直せる／RLS ON・利用者は checkins と flights に書けない／2回流しても同じ・lock_timeout は戻る）
 - deno test 331本（新しい checkin_idem_test 4本）・deno check（checkin）・migrations.mjs check 189件で重なりなし
-- SQL のテスト全部：下の「SQL のテスト全部」の行
+- SQL のテスト全部（138本）通過
 
 ## 3. チェックイン担当への依頼（PM から checkin.md に写してほしい）
 1. 印：押したとき（`ckOptimistic`／`checkinServerWait` の前）に `crypto.randomUUID()` で ID を1つ作り、`sendCheckin` の body に `cid` で付ける。返事が来ずに保留するとき（`enqueue`）は**同じ ID を保留の行に入れ**、`flushQueue` の送り直しでもその ID を送る。返事の `dup: true` は成功として扱う（印の数・便は1回目のもの）。ID は1回押すごとに新しく作る（同じ ID を別の印に使い回さない）
