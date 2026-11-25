@@ -373,6 +373,19 @@ dialog.fsugd .dlg{padding:6px 20px calc(22px + env(safe-area-inset-bottom,0px))}
 :root[data-night="on"] .fsrow .fsno,:root[data-night="on"] .fsbig,:root[data-night="on"] .fscard dd,:root[data-night="on"] .fsh b{color:#F3F4F6}
 :root[data-night="on"] .altag,:root[data-night="on"] .altag.jl,:root[data-night="on"] .altag.nh{background:transparent;color:#D1D5DB;box-shadow:inset 0 0 0 1px rgba(255,255,255,.25)}
 @media (prefers-reduced-motion: reduce){ .fsrow:active{transform:none} }
+/* 送信待ちの札（11/25 stamp-edge）：ピル型・薄いグレー。押すと送り直す */
+.qtags{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 0}
+.qtag{display:inline-flex;align-items:center;gap:6px;min-height:32px;padding:5px 12px;border:0;border-radius:999px;background:#EEF1F5;color:#374151;font:inherit;font-size:12.5px;font-weight:700;cursor:pointer}
+.qtag b{font-weight:800;color:#1F2937}
+.qtag span{color:#4B5563;font-variant-numeric:tabular-nums}
+.qtag svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;color:#6B7280}
+.qtag:active{transform:scale(.97)}
+.queuebar small.qnote{display:block;margin-top:6px;font-size:12px;color:#6B7280}
+.wxtag.qw{background:#EEF1F5;color:#4B5563}
+:root[data-night="on"] .qtag{background:rgba(255,255,255,.08);color:#D1D5DB}
+:root[data-night="on"] .qtag b{color:#F3F4F6}
+:root[data-night="on"] .qtag span,:root[data-night="on"] .qtag svg{color:#9CA3AF}
+@media (prefers-reduced-motion: reduce){ .qtag:active{transform:none} }
 .acs{display:grid;gap:10px}
 .ac{display:grid;grid-template-columns:58px 1fr auto;gap:2px 12px;align-items:center;background:var(--paper);border-radius:12px;padding:12px 14px}
 .ac svg{grid-row:1/3;width:58px;height:34px}
@@ -3975,6 +3988,15 @@ dialog.ckconfirm button.go{background:#E9C46A;color:#111827}
 @media (max-height:700px){.sgd .sgb-hd{margin-bottom:6px}.sgd .sgb-views{margin-bottom:4px}.sgd .sgb-hero{padding:12px 16px}.sgd .sgb-hero .big{margin:2px 0 0}.sgd .sgb-hero .big>b{font-size:38px}.sgd .sgb-hero .sgb-bar{margin-top:6px;height:10px}.sgd .sgb-hero .sgb-bar.thin{margin-top:8px;height:6px}.sgd .sgb-hero .sgb-ax{margin-top:3px;font-size:12px}.sgd .sgb-verd{margin-top:8px;font-size:14px;line-height:1.5}.sgd .sgb-two .sgb-card{padding:10px 14px}.sgd .sgb-two p{margin:2px 0}.sgd .sgb-two p b{font-size:24px}}
 .sgd .sgb-bar{position:relative;height:12px;border-radius:6px;background:#E3E7ED;overflow:hidden;margin-top:10px}.sgd .sgb-bar i{position:absolute;left:0;top:0;bottom:0;background:var(--hero,#0F1B2D);border-radius:6px}
 .sgd .sgb-bar.thin{height:7px;margin-top:12px}.sgd .sgb-bar.thin i{background:#9AA3AF}.sgd .sgb-bar.ls{height:8px}.sgd .sgb-bar.ls i.e{background:#B8C0CC}.sgd .sgb-bar.ls i:not(.e){border-radius:0 6px 6px 0}.sgd .sgb-bar.ls i:only-child{border-radius:6px}
+.sgd .sgb-bar i.p{background:#E9D49B;border-radius:0 6px 6px 0}.sgd .sgb-hero .sgb-bar:not(.thin) i:first-child:not(:only-child){border-radius:6px 0 0 6px}
+.sgd .sgb-lg{display:flex;flex-wrap:wrap;gap:4px 14px;margin-top:6px;font-size:12px;color:var(--sg-mute);font-weight:600}.sgd .sgb-lg b{color:var(--sg-ink);font-weight:800;margin-left:2px}.sgd .sgb-lg i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px;background:var(--hero,#0F1B2D)}.sgd .sgb-lg i.p{background:#E9D49B}
+.sgd .sgb-k.m{background:#E8F1EC;color:#1F5136}
+.sgd .sgb-fix .h{display:flex;align-items:center;gap:4px;flex-wrap:wrap}.sgd .sgb-fix .h small{font-size:12.5px;color:var(--sg-mute)}.sgd .sgb-fix .sgb-ft{margin-top:0}.sgd .sgb-fix .sgb-ft b{display:block;font-size:15px}.sgd .sgb-fix .sgb-ft small{display:block;font-size:12.5px;color:var(--sg-mute);line-height:1.6;margin-top:2px}
+.sgd .sgb-fx2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:10px}.sgd .sgb-fx2>span{background:#EEF1F5;border-radius:14px;padding:10px 12px}.sgd .sgb-fx2 small{font-size:12px;color:var(--sg-mute)}.sgd .sgb-fx2>span>small:first-child{display:block}.sgd .sgb-fx2 b{font-size:22px;font-weight:900;font-variant-numeric:tabular-nums}.sgd .sgb-fx2 b.m{color:var(--sg-mute)}.sgd .sgb-fx2 b+small{display:inline;margin-left:3px}
+.sgd .sgb-sel{display:block;background:#EEF1F5;border-radius:14px;padding:8px 12px;margin-top:10px}.sgd .sgb-sel small{display:block;font-size:12px;color:var(--sg-mute)}.sgd .sgb-sel select{display:block;width:100%;border:0;background:transparent;color:var(--sg-ink);font:800 15px var(--gothic);min-height:36px;padding:0}
+.sgd .sgb-lb{display:block;font-size:12px;color:var(--sg-mute);margin:12px 2px 6px}.sgd .sgb-chips{display:flex;flex-wrap:wrap;gap:6px}.sgd .sgb-chip{border:0;border-radius:999px;background:#EEF1F5;color:var(--sg-ink);font:700 13px var(--gothic);min-height:40px;padding:0 14px}.sgd .sgb-chip[aria-pressed="true"]{background:var(--hero,#0F1B2D);color:#fff}
+.sgd .sgb-in.one{grid-template-columns:1fr}
+.sgd .sgb-calc .eq.auto>b{color:var(--sg-mute);text-decoration:line-through;text-decoration-thickness:1px}.sgd .sgb-calc .eq span small{display:block;font-size:12px;color:var(--sg-mute)}.sgd .sgb-calc .eq .sgb-k{margin-left:6px;margin-right:0;padding:4px 8px;font-size:11px}
 .sgd .sgb-ax{display:flex;justify-content:space-between;font-size:13px;color:var(--sg-mute);margin-top:6px;font-weight:600}
 .sgd .sgb-verd{margin:12px 0 0;font-size:15px;font-weight:700;line-height:1.6}
 .sgd .sgb-two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.sgd .sgb-two.one{grid-template-columns:1fr}.sgd .sgb-two .sgb-card{margin-top:10px}
@@ -4022,6 +4044,7 @@ dialog.ckconfirm button.go{background:#E9C46A;color:#111827}
 :is([data-night="on"],[data-palette="board"]) .sgd .sgb-rr .sgb-k{background:#262B33}:is([data-night="on"],[data-palette="board"]) .sgd .sgb-next small.t{color:var(--sg-mute);border-top-color:#262B33}
 :is([data-night="on"],[data-palette="board"]) .sgd .sgb-end .r.p .v b,:is([data-night="on"],[data-palette="board"]) .sgd .sgb-end .r.c .v b{color:var(--sg-ink)}
 :is([data-night="on"],[data-palette="board"]) .sgd .sgb-fl+.sgb-fl,:is([data-night="on"],[data-palette="board"]) .sgd .sgb-rt+.sgb-rt,:is([data-night="on"],[data-palette="board"]) .sgd .sgb-calc>div+div,:is([data-night="on"],[data-palette="board"]) .sgd .sgb-end .r+.r,:is([data-night="on"],[data-palette="board"]) .sgd .sgb-sw+.sgb-sw{box-shadow:0 -1px 0 #262B33}
+:is([data-night="on"],[data-palette="board"]) .sgd .sgb-bar i.p,:is([data-night="on"],[data-palette="board"]) .sgd .sgb-lg i.p{background:rgba(74,222,128,.35)}:is([data-night="on"],[data-palette="board"]) .sgd .sgb-lg i.a{background:#4ADE80}:is([data-night="on"],[data-palette="board"]) .sgd .sgb-k.m{background:#262B33;color:#E5E7EB}:is([data-night="on"],[data-palette="board"]) .sgd .sgb-fx2>span,:is([data-night="on"],[data-palette="board"]) .sgd .sgb-sel,:is([data-night="on"],[data-palette="board"]) .sgd .sgb-chip{background:#0E1014;color:var(--sg-ink)}:is([data-night="on"],[data-palette="board"]) .sgd .sgb-chip[aria-pressed="true"]{background:#262B33;color:#fff;box-shadow:inset 0 0 0 1px #8B95A3}:is([data-night="on"],[data-palette="board"]) .sgd .sgb-sel select{color:var(--sg-ink)}
 :is([data-night="on"],[data-palette="board"]) .sgd .sgb-in label{background:#0E1014}:is([data-night="on"],[data-palette="board"]) .sgd .sgb-pill{background:#262B33;color:#fff;box-shadow:inset 0 0 0 1px #8B95A3}
 :is([data-night="on"],[data-palette="board"]) .sgd .sgb-sw button{background:#262B33;color:#A7B0BC}:is([data-night="on"],[data-palette="board"]) .sgd .sgb-sw button[aria-checked="true"]{background:#E5E7EB;color:#111}
 :is([data-night="on"],[data-palette="board"]) .sgd .sgb-hd .sg-seg button[aria-pressed="true"]{background:#262B33;color:#fff}
@@ -4887,9 +4910,12 @@ async function nvGeoRefresh(){ if(!NATIVE) return; NV_GEO = await geoPermState()
 // I1c：位置が使えない人のホーム。黒いカード（半券）の代わりに出す。デモ中は出さない
 function nvGeoApply(){
   const el = $("nvLocOff"), bp = $("bpass"); if(!el || !bp) return;
-  const on = NATIVE && NV_GEO === "denied" && !demo && (user || !SERVER);
+  const web = !NATIVE && typeof CK_GEO_NG !== "undefined" && CK_GEO_NG === "denied";   // 11/25 stamp-edge：ウェブでも、許可がないと分かったら半券の代わりにカード（押しても判定できないため）
+  const on = (NATIVE && NV_GEO === "denied" || web) && !demo && (user || !SERVER);
   if(on){
-    el.innerHTML = `<div class="t"><span class="wi">${NV_SVG.pin}</span><b>位置が使えないので、チェックインできません</b></div><p>設定でそらメモの位置情報を「このアプリの使用中」にすると使えます。</p>${nvPathHTML("位置情報")}<div class="nvbt"><button type="button" data-nv="demo">デモで試す</button><button type="button" class="pri" data-nv="settings">設定を開く</button></div>`;
+    el.innerHTML = web
+      ? `<div class="t"><span class="wi">${NV_SVG.pin}</span><b>位置が使えないので、チェックインできません</b></div><p>${ckIOS() ? "設定で Safari の位置情報を「確認」か「許可」にしてから、このページを開き直してください。" : "ブラウザのアドレス欄の左の印から、このページの位置情報を許可してください。"}</p>${ckIOS() ? `<div class="nvpath" aria-label="設定 › Safari › 位置情報"><span>設定</span><i>›</i><span>Safari</span><i>›</i><span>位置情報</span></div>` : ""}<div class="nvbt"><button type="button" class="pri" data-nv="demo">デモで試す</button></div>`
+      : `<div class="t"><span class="wi">${NV_SVG.pin}</span><b>位置が使えないので、チェックインできません</b></div><p>設定でそらメモの位置情報を「このアプリの使用中」にすると使えます。</p>${nvPathHTML("位置情報")}<div class="nvbt"><button type="button" data-nv="demo">デモで試す</button><button type="button" class="pri" data-nv="settings">設定を開く</button></div>`;
     el.hidden = false; bp.hidden = true; bp.dataset.nvHide = "1";
   } else { el.hidden = true; if(bp.dataset.nvHide){ bp.hidden = false; delete bp.dataset.nvHide; } }
 }
@@ -4965,6 +4991,11 @@ if(NATIVE){
     if(k === "perm-next"){ $("dNvSheet").close(); return; }
     if(k === "demo"){ if($("dNvSheet").open) $("dNvSheet").close(); track("native", "denied_demo"); if(!demo) $("toggleDemo").click(); return; }
   });
+}
+// ウェブ：位置の許可がないカードの「デモで試す」と、設定から戻ったときの確かめ直し（11/25 stamp-edge）
+if(!NATIVE){
+  document.addEventListener("click", e => { const b = e.target.closest && e.target.closest('[data-nv="demo"]'); if(!b) return; if($("dNvSheet").open) $("dNvSheet").close(); track("ck_loccard", "demo"); if(!demo) $("toggleDemo").click(); });
+  document.addEventListener("visibilitychange", async () => { if(document.hidden || !CK_GEO_NG) return; const st = await geoPermState(); if(st && st !== "denied"){ CK_GEO_NG = null; nvGeoApply(); } });
 }
 const SUPABASE_JS = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2/dist/umd/supabase.js";
 let sb = null, user = null;
@@ -7214,6 +7245,7 @@ async function loadServer(){
     // 国際線の記録（読めなくてもほかの記録は出す。表がまだない古いサーバーでも動くように）
     intl: (g.data || []).map(r => ({id:r.id, dep:r.dep, arr:r.arr, d:r.flown_on, no:r.flight_no, airline:r.airline, seat:r.seat, km:r.distance_km != null ? r.distance_km : intlKm(r.dep, r.arr),
       depAt:r.dep_at ? Date.parse(r.dep_at) : null, arrAt:r.arr_at ? Date.parse(r.arr_at) : null})) };
+  qMerge();   // まだ送れていない印も、地図・図鑑・数に出す（11/25 stamp-edge）
 }
 async function reload(){
   if(SERVER && !demo){ if(user) await loadServer(); else S = blank(); } else load();
@@ -7473,9 +7505,8 @@ async function checkinRun(){
   }catch(e){
     btn.disabled = false;
     track("geo_fail", e && e.code);
-    if(e && e.code === 1){ if(NATIVE){ nvLocOffSheet(); return say(NV_TXT.locDenied, true); } return say("位置情報の利用が許可されていません。ブラウザかアプリの設定で、このページの位置情報を許可してください。", true); }
-    if(e && e.code === 3) return say("位置を取得できないまま時間切れになりました。電波のよい場所でもう一度押してください。", true);
-    if(e && e.code === "stale") return say("10秒待っても位置を確かめられませんでした。地下などでは位置が更新されないことがあります。地上や窓の近くでもう一度押してください。", true);
+    if(e && e.code === 1){ if(NATIVE){ nvLocOffSheet(); return say(NV_TXT.locDenied, true); } ckLocCard("denied"); return say("位置情報の利用が許可されていません。設定で、このページの位置情報を許可してください。", true); }
+    if(e && (e.code === 3 || e.code === "stale")) return say(CK_TXT.drift + CK_TXT.driftHint, true);   // 11/25 stamp-edge：位置が定まらないときの文をそろえる
     return say(NATIVE ? NV_TXT.locNone : "この画面では位置情報を使えません。ブラウザで直接開くか、設定のデモモードで試してください。", true);
   }
   btn.disabled = false;
@@ -7490,14 +7521,14 @@ async function checkinRun(){
 let CK_NEAR = () => {};
 async function checkinDecide(p, n){
   if(SERVER && !demo) return checkinServer(p, n);
-  if(p.acc > RULE.maxAccuracy) return say(`位置の精度が低すぎます（誤差 約${fmtKm(p.acc)}m）。窓の近くか屋外でもう一度押してください。`, true);
+  if(p.acc > RULE.maxAccuracy){ if(ckCoarse(p)) ckLocCard("precise", p); return say(CK_TXT.drift + CK_TXT.driftHint, true); }
   const within = n.within;
-  if(!within) return say(`${n.a.name}の判定範囲の外です。あと約${(n.km - n.a.radius/1000).toFixed(1)}km近づいてください。`, true);
+  if(!within) return say(ckOutText(p), true);
 
   const now = demo ? demoNow(n.a) : Date.now();
   const last = S.checkins[S.checkins.length-1];
   const tid = n.term ? n.term.id : null;
-  if(last && last.a === n.a.id && (last.term||null) === tid && (now - last.t) < RULE.sameAirportMin*60e3) return say(`${placeName(n.a, n.term)}にはチェックイン済みです。`);
+  if(last && last.a === n.a.id && (last.term||null) === tid && (now - last.t) < RULE.sameAirportMin*60e3) return say(CK_TXT.already);
   const firstTerm = n.term ? !visitedTerms().has(n.term.id) : false;
 
   const first = n.a.kind ? !visitedExtra().has(n.a.id) : !visited().has(n.a.id);
@@ -7522,6 +7553,54 @@ async function sendCheckin(p, queued){
     try{ return await error.context.json(); }catch(_){ return null; }   // null = サーバーに届かなかった
   }catch(e){ return null; }
 }
+/* 文の言い方をそろえる（11/25 stamp-edge・本人が貼った案の文）。エラーの番号や英語は出さない */
+const CK_TXT = {
+  busy: "通信が混み合っているため、いまの記録を端末に保存しました。つながり次第送ります。",
+  offline: "電波が届かないため、いまの記録を端末に保存しました。つながり次第送ります。",
+  drift: "建物の中のため、現在地が少しずれているようです。",
+  driftHint: "窓の近くか屋外で、もう一度押してください。",
+  already: "本日のチェックインは完了しています。続けて今日の便を記録できます。",
+  clock: "端末の日時がずれているようです。設定で『自動設定』をオンにしてください。",
+  server: "サーバーで問題が起きました。少し待ってからもう一度押してください。"
+};
+// 範囲の外：いちばん近い空港（判定の決まりの空港）までの残り。誤差が残りより大きいときは「ずれている」の文
+function ckOutText(p){
+  const n = nearestBase(p), rest = Math.max(0, n.km - n.a.radius / 1000);
+  if(p.acc >= 100 && p.acc / 1000 >= rest) return CK_TXT.drift + CK_TXT.driftHint;
+  return `いちばん近い${nearShort(n.a)}まであと ${rest < 10 ? rest.toFixed(1) : fmtKm(rest)} km です。空港に入るとチェックインできます。`;
+}
+// サーバーが断った理由 → 画面の文（queued：保留していた分を送ったとき）
+function ckWhyText(reason, p, msg, queued){
+  if(reason === "low_accuracy") return CK_TXT.drift + CK_TXT.driftHint;
+  if(reason === "out_of_range" && p) return ckOutText(p);
+  if(reason === "already") return CK_TXT.already;
+  if(reason === "stale_position" && !queued) return CK_TXT.clock;   // 使い回すのは30秒以内の位置だけなので、古い・先の時刻と言われたら端末の時計のずれ
+  if(reason === "server" || !msg || /[A-Za-z]{3,}/.test(msg)) return CK_TXT.server;
+  return msg;
+}
+// iOS の「正確な位置情報」が OFF のときは、誤差が数km の大まかな位置しか届かない
+const ckCoarse = p => !!p && p.acc >= RULE.maxAccuracy;
+const ckIOS = () => NATIVE || /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+var CK_GEO_NG = null;   // ウェブで位置が使えないと分かったとき："denied"（開き直すか、許可に戻ると消える）
+// 何が足りないかと直し方のカード（押しても判定できないボタンは出さない）。kind："denied"（許可がない）・"precise"（正確な位置情報が OFF）
+function ckLocCard(kind, p){
+  if(kind === "denied"){ CK_GEO_NG = "denied"; try{ nvGeoApply(); }catch(e){} }
+  const ios = ckIOS(), app = NATIVE ? "そらメモ" : "Safari";
+  const path = kind === "precise"
+    ? (ios ? `<div class="nvpath" aria-label="設定 › ${app} › 位置情報 › 正確な位置情報"><span>設定</span><i>›</i><span>${app}</span><i>›</i><span>位置情報</span><i>›</i><span>正確な位置情報</span></div>` : `<div class="nvpath" aria-label="設定 › 位置情報 › 正確な位置情報"><span>設定</span><i>›</i><span>位置情報</span><i>›</i><span>正確な位置情報</span></div>`)
+    : (ios ? `<div class="nvpath" aria-label="設定 › ${app} › 位置情報"><span>設定</span><i>›</i><span>${app}</span><i>›</i><span>位置情報</span></div>` : "");
+  const t = kind === "precise" ? "空港の判定に「正確な位置情報」が必要です" : "印を押すには、位置の許可が要ります";
+  const body = kind === "precise"
+    ? `いまは大まかな位置${p && p.acc ? `（誤差 約${p.acc >= 1000 ? (p.acc / 1000).toFixed(1) + "km" : fmtKm(p.acc) + "m"}）` : ""}しか届いていないため、空港の中にいるか判定できません。${ios ? "" : "端末やブラウザの設定で、正確な位置を使えるようにしてください。"}`
+    : `いまは位置の使用が許可されていません。${ios ? (NATIVE ? "" : "設定で「確認」か「許可」にしてから、このページを開き直してください。") : "ブラウザのアドレス欄の左の印から、このページの位置情報を許可してください。"}`;
+  const how = ios ? (kind === "precise" ? `<p class="nvnote">${NATIVE ? "" : "ホーム画面に追加したそらメモも、Safari の設定を使います。"}「正確な位置情報」をオンにしてください。</p>` : "") : "";
+  $("dNvSheetBody").innerHTML = `<div class="sph"><span class="grab" aria-hidden="true"></span></div><div class="t"><span class="wi">${NV_SVG.pin}</span><h3 id="nvShT">${t}</h3></div>
+    <p>${body}</p>${path}${how}
+    <div class="nvbt">${NATIVE ? `<button type="button" data-close>あとで</button><button type="button" class="pri" data-nv="settings">設定を開く</button>` : `<button type="button" class="pri" data-close>閉じる</button>`}</div>`;
+  $("dNvSheetBody").dataset.ck = kind;
+  if(!$("dNvSheet").open) $("dNvSheet").showModal(); nvFocusTitle("nvShT");
+  track("ck_loccard", kind);
+}
 // 端末での先の判定（サーバーの judge.ts の decide と同じ順・同じ数字）。通るときは null
 function ckJudge(p, n, now){
   if(!(p.acc > 0) || p.acc > RULE.maxAccuracy) return "low_accuracy";
@@ -7535,8 +7614,9 @@ async function checkinServer(p, n){
   if(!user) return say("ログインしてください。", true);
   n = n || nearest(p);
   const why = ckJudge(p, n, Date.now());
-  if(why === "already") return say(`${placeName(n.a, n.term)}にはチェックイン済みです。`);
+  if(why === "already") return say(CK_TXT.already);
   if(why === "too_soon") return say("少し時間をおいてからもう一度押してください。");
+  if(why === "low_accuracy" && ckCoarse(p) && ckIOS()){ CK_NEAR(); ckLocCard("precise", p); return say(CK_TXT.drift + CK_TXT.driftHint, true); }   // 判定できない位置は送らない（11/25 stamp-edge）
   if(why){ CK_NEAR(); return ckChain(() => checkinServerWait(p)); }   // 範囲の外・誤差が大きい：今までどおりサーバーの判定を待つ（断った理由を記録するため）
   const o = ckOptimistic(p, n, Date.now());
   ckChain(() => new Promise(r => setTimeout(r, 0)).then(() => ckSend(p, o)));   // 送るのはハンコを出した処理のあと（返事の読み込みが同じ止まりに入らないように）
@@ -7570,12 +7650,12 @@ function ckFlightBtn(flight, st, id){
 async function ckSend(p, o){
   if(qLoad().length) await flushQueue(true);           // 保留分を先に送る（順番が逆にならないように）
   const r = navigator.onLine === false ? null : await sendCheckin(p, false);
-  if(!r){ track("checkin_queued"); enqueue(p); o.rec.queued = true; ckFlightBtn(o.flight, "queue"); toast("電波が戻ったら、あとで送ります"); return; }
+  if(!r){ track("checkin_queued"); const off = navigator.onLine === false; enqueue(p, off ? "offline" : "busy"); o.rec.queued = true; ckFlightBtn(o.flight, "queue"); toast("端末に保存しました。つながり次第送ります"); return; }
   if(!r.ok){
     track("checkin_fail", r.reason); if(r.reason === "server") reportClientError("checkin", r.message);
     S.checkins = S.checkins.filter(x => x !== o.rec); if(o.flight) S.flights = S.flights.filter(x => x !== o.flight);   // 先に出したハンコを取り消す（サーバーには何も残っていない）
     if($("dStamp").open) $("dStamp").close();
-    say(`印を記録できませんでした。${r.message}`, true); ckNote();
+    say(`印を記録できませんでした。${ckWhyText(r.reason, p, r.message)}`, true); ckNote();
     ckLater(renderSteps()); return;
   }
   track("checkin_ok", r.flight ? "flight" : r.terminal_id ? "terminal" : "airport");
@@ -7597,12 +7677,12 @@ async function ckRefresh(){
 async function checkinServerWait(p){
   const btn = $("checkin"); btn.disabled = true;
   if(qLoad().length) await flushQueue(true);           // 保留分を先に送る（順番が逆にならないように）
-  if(navigator.onLine === false){ btn.disabled = false; return enqueue(p); }
+  if(navigator.onLine === false){ btn.disabled = false; return enqueue(p, "offline", false); }
   say("サーバーで判定しています…");
   const r = await sendCheckin(p, false);
   btn.disabled = false;
-  if(!r){ track("checkin_queued"); return enqueue(p); }
-  if(!r.ok){ track("checkin_fail", r.reason); if(r.reason === "server") reportClientError("checkin", r.message); return say(r.message, true); }
+  if(!r){ track("checkin_queued"); return enqueue(p, "busy", false); }
+  if(!r.ok){ track("checkin_fail", r.reason); if(r.reason === "server") reportClientError("checkin", r.message); return say(ckWhyText(r.reason, p, r.message), true); }
   track("checkin_ok", r.flight ? "flight" : r.terminal_id ? "terminal" : "airport");
   await reload();
   const a = BY[r.airport_id], term = r.terminal_id ? TBY[r.terminal_id] : null;
@@ -10605,7 +10685,7 @@ function openAirport(id){
     ? `<div class="apitem got">${stampSVG(a, vt.get(t.id), {term:t})}<span>${esc(zkTermName(t))}<small>${zkYMD(vt.get(t.id))}</small></span></div>`
     : `<div class="apitem">${emptySVG(a, t)}<span>${esc(zkTermName(t))}<small>まだ</small></span></div>`).join("");
   const hist = visits.slice().sort((x, y) => y.t - x.t).slice(0, 12)
-    .map(c => `<li>${zkYMD(c.t)}　${c.term && TBY[c.term] ? TBY[c.term].name : "空港"}${c.wx ? `　<span class="wxtag">${WX_LABEL[c.wx]}${c.wind != null && c.wind >= STRONG_WIND ? "・強風" : ""}</span>` : ""}${c.ops ? `　<span class="wxtag" title="チェックインしたときの運用（推定）">${esc(c.ops)}</span>` : ""}</li>`);   // 新しい3回を出し、残りは「すべて見る」
+    .map(c => `<li>${zkYMD(c.t)}　${c.term && TBY[c.term] ? TBY[c.term].name : "空港"}${c.queued ? `　<span class="wxtag qw">送信待ち</span>` : ""}${c.wx ? `　<span class="wxtag">${WX_LABEL[c.wx]}${c.wind != null && c.wind >= STRONG_WIND ? "・強風" : ""}</span>` : ""}${c.ops ? `　<span class="wxtag" title="チェックインしたときの運用（推定）">${esc(c.ops)}</span>` : ""}</li>`);   // 新しい3回を出し、残りは「すべて見る」
   // 図鑑の前／次：同じ地方の北から南（86空港だけ）
   const rgl = a.kind ? [] : zkRegionList(regionOf(a)), ri = rgl.findIndex(x => x.id === a.id), pv = ri > 0 ? rgl[ri - 1] : null, nx = ri >= 0 && ri < rgl.length - 1 ? rgl[ri + 1] : null;
   let swHint = false; if(rgl.length > 1){ try{ swHint = !localStorage.getItem("soramemo.zk.swipe"); if(swHint) localStorage.setItem("soramemo.zk.swipe", "1"); }catch(e){} }
@@ -10617,6 +10697,7 @@ function openAirport(id){
   ${a.kind === "mil" || a.kind === "secret" ? "" : pinApHTML(pinKey(a))}
   ${first ? `<div class="zk-dl"><div><span class="k">押した回数</span><span class="v"><b class="num">${times}</b><span class="u">回</span></span></div><div><span class="k">はじめて押した日</span><span class="v s">${(d => `<b class="num">${d.getFullYear()}</b><span class="u">年</span><b class="num">${d.getMonth() + 1}</b><span class="u">月</span><b class="num">${d.getDate()}</b><span class="u">日</span>`)(new Date(first))}</span></div></div>`
     : `<div class="zk-yet"><b>ここでチェックインすると印が付きます</b><span>判定の範囲 <b class="num">${a.radius >= 1000 ? (a.radius / 1000).toFixed(a.radius % 1000 ? 1 : 0) : a.radius}</b><span class="u">${a.radius >= 1000 ? "km" : "m"}</span>（空港の中心から）</span>${typeof HOME_POS !== "undefined" && HOME_POS ? `<span>いまの場所から <b class="num">${fmtKm(km(HOME_POS, a))}</b><span class="u">km</span></span>` : ""}</div>`}
+  ${qTagsFor(a.id)}
   ${ap3dPillHTML(a)}
   ${first ? `<p>${visitTier(times) ? `<span class="rankbadge">${visitTier(times)}</span>` : ""}</p>
   <p class="hint">${dt < TOP ? `次の${RANKS[dt+1]}まであと${RANK_AT[dt+1] - times}回` : "最高の階級です"}</p>` : ""}
@@ -12224,18 +12305,40 @@ const QMAX_MS = 24 * 36e5;
 const qKey = () => "soramemo.queue." + (user ? user.id : "anon");
 function qLoad(){ try{ return JSON.parse(localStorage.getItem(qKey()) || "[]"); }catch(e){ return []; } }
 function qSave(q){ try{ localStorage.setItem(qKey(), JSON.stringify(q)); }catch(e){} renderQueue(); }
-function enqueue(p){
+// why："offline"（電波がない）・"busy"（電波はあるのに届かない）。ok：端末の判定で通る見込みの印か（false は範囲の外などで、送るまで印として見せない）
+function enqueue(p, why, ok){
   const n = nearestBase(p), q = qLoad();   // 保留は判定の決まりの空港で（近い順の先頭ではなく）
-  q.push({lat:p.lat, lon:p.lon, acc:p.acc, ts:p.ts || Date.now(), a:n.a.id, term:n.term ? n.term.id : null});
+  q.push({lat:p.lat, lon:p.lon, acc:p.acc, ts:p.ts || Date.now(), a:n.a.id, term:n.term ? n.term.id : null, ...(ok === false ? {ok:false} : {})});
   qSave(q);
-  say(`電波が届かないため、${placeName(n.a, n.term)}のチェックインを保留しました。電波が戻ったら自動で送ります（24時間以内）。`);
+  say(why === "busy" ? CK_TXT.busy : CK_TXT.offline);
+}
+/* 送信待ちの見せ方（11/25 stamp-edge）：地図のピン・図鑑・数はその場で増やし（読み直しても qMerge で残す）、
+   ホームのシートと図鑑の詳しい所に「送信待ち（14:22 記録）」の小さな札。押すと送り直す。いくつ溜まっても記録した順に送る（flushQueue） */
+const qShown = x => x.ok !== false && Date.now() - x.ts <= QMAX_MS && !!BY[x.a];
+const qHM = t => { const d = new Date(t), now = new Date(), hm = `${d.getHours()}:${String(d.getMinutes()).padStart(2, "0")}`; return d.toDateString() === now.toDateString() ? hm : `${d.getMonth() + 1}/${d.getDate()} ${hm}`; };
+const qTagHTML = (x, name) => `<button type="button" class="qtag" data-flush="1" aria-label="${name ? esc(name) + "、" : ""}送信待ち、${qHM(x.ts)}に記録。押すと送り直します">${name ? `<b>${esc(name)}</b>` : ""}<span>送信待ち（${qHM(x.ts)} 記録）</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 0 1 14-5.3M20 4v4h-4M20 12a8 8 0 0 1-14 5.3M4 20v-4h4"/></svg></button>`;
+function qTagsFor(aid){
+  if(!SERVER || demo) return "";
+  const q = qLoad().filter(x => x.a === aid && qShown(x)).sort((u, v) => u.ts - v.ts);
+  return q.length ? `<div class="qtags">${q.map(x => qTagHTML(x)).join("")}</div>` : "";
+}
+// 読み直した記録に、まだ送れていない印を足す（端末の判定で通る見込みのものだけ。送れたら次の読み直しで本物に入れ替わる）
+function qMerge(){
+  if(!SERVER || demo || !S || !Array.isArray(S.checkins)) return;
+  let add = false;
+  for(const x of qLoad()){
+    if(!qShown(x) || !(x.acc <= RULE.maxAccuracy) || !nearestBase(x).within) continue;
+    if(S.checkins.some(c => c.a === x.a && Math.abs(c.t - x.ts) < 60e3)) continue;
+    S.checkins.push({a:x.a, term:x.term || null, t:x.ts, acc:Math.round(x.acc), pending:true, queued:true}); add = true;
+  }
+  if(add) S.checkins.sort((u, v) => u.t - v.t);
 }
 function renderQueue(){
   nvNetRender();   // ホームの「電波がありません」の帯の「送っていない印 ○」
-  const q = SERVER && !demo ? qLoad() : [], el = $("queueBar");
+  const q = SERVER && !demo ? qLoad().slice().sort((u, v) => u.ts - v.ts) : [], el = $("queueBar");
   el.hidden = !q.length;
   if(!q.length){ el.innerHTML = ""; return; }
-  el.innerHTML = `<b>送信待ちのチェックイン ${q.length}件</b>${q.map(x => `${placeName(BY[x.a], x.term ? TBY[x.term] : null)}（${fmtDT(x.ts)}）`).join("、")}<br><button class="btn2" data-flush="1">今すぐ送る</button>`;
+  el.innerHTML = `<b>送信待ち ${q.length}件</b><div class="qtags">${q.map(x => qTagHTML(x, nearShort(BY[x.a]) + (x.term && TBY[x.term] ? " " + TBY[x.term].name : ""))).join("")}</div><small class="qnote">押すと送り直します。いくつあっても記録した順に送ります。</small>`;
 }
 let flushing = false;
 async function flushQueue(silent){
@@ -12257,7 +12360,10 @@ async function flushQueue(silent){
     const name = x => placeName(BY[x.a], x.term ? TBY[x.term] : null);
     const parts = [];
     if(sent.length) parts.push(`保留していたチェックイン${sent.length}件を送りました：${sent.map(({x, r}) => name(x) + (r.flight ? "（フライトを記録）" : "")).join("、")}`);
-    if(rejected.length) parts.push(`${rejected.length}件は送れませんでした：${rejected.map(({x, r}) => `${name(x)}（${r.message}）`).join("、")}`);
+    if(rejected.length) parts.push(`${rejected.length}件は送れませんでした：${rejected.map(({x, r}) => `${name(x)}（${ckWhyText(r.reason, x, r.message, true).replace(/。$/, "")}）`).join("、")}`);
+    // 送れて確定したら札（design/micro の 05 の形・2秒）。範囲の外などで保留した分（ok:false）は札にしない
+    const fin = sent.filter(({x}) => x.ok !== false), last = fin[fin.length - 1];
+    if(last){ const a = BY[last.r.airport_id] || BY[last.x.a], nm = a ? nearShort(a) : name(last.x); toast(fin.length > 1 ? `${nm}など${fin.length}件の印が確定しました` : `${nm}の印が確定しました`); }
     if(expired.length) parts.push(`${expired.length}件は24時間を過ぎたため送れませんでした`);
     say(parts.join("。") + "。", !sent.length);
   } else if(!silent && q.length) say("まだサーバーにつながりません。電波のよい場所で、もう一度試してください。", true);
@@ -16804,12 +16910,12 @@ document.addEventListener("click", e => { const b = e.target.closest("[data-ops-
    予定の便・会員情報・予算・乗れる日は、サーバー版は shugyo_prefs（本人だけ）、端末版はこの端末に保存する */
 const SG_OK = Symbol("sg");
 const SG_DEF = () => ({ v:1, car:null, jal:{ status:"none", jgc:false, card:"none", smp:false, pay:false }, ana:{ status:"none", yr:1, card:"none", pay:false, conv:0 },
-  goal:{ ANA:null, JAL:null }, budget:null, month:null, days:[], plans:[], trip:null, recent:[], routes:[], fp:{} });
+  goal:{ ANA:null, JAL:null }, budget:null, month:null, days:[], plans:[], trip:null, recent:[], routes:[], fp:{}, fix:{} });
 // 修行の保存を、決まった形にそろえて返す。そろえた入れ物はそのまま使い回す（毎回作り直すと、手元で持っている入れ物への書き込みが消える）
 function sgGet(){ if(S.shugyo && S.shugyo[SG_OK]) return S.shugyo;
   const d = SG_DEF(), s = S.shugyo || {};
   S.shugyo = Object.assign(d, s, { jal:Object.assign(d.jal, s.jal || {}), ana:Object.assign(d.ana, s.ana || {}), goal:Object.assign(d.goal, s.goal || {}),
-    days:Array.isArray(s.days) ? s.days : [], plans:Array.isArray(s.plans) ? s.plans : [], recent:Array.isArray(s.recent) ? s.recent : [], routes:Array.isArray(s.routes) ? s.routes : [], fp:s.fp && typeof s.fp === "object" ? s.fp : {} });
+    days:Array.isArray(s.days) ? s.days : [], plans:Array.isArray(s.plans) ? s.plans : [], recent:Array.isArray(s.recent) ? s.recent : [], routes:Array.isArray(s.routes) ? s.routes : [], fp:s.fp && typeof s.fp === "object" ? s.fp : {}, fix:s.fix && typeof s.fix === "object" && !Array.isArray(s.fix) ? s.fix : {} });
   Object.defineProperty(S.shugyo, SG_OK, { value:true, enumerable:false }); return S.shugyo; }
 let SG_SAVING = null;
 async function sgSave(){
@@ -16864,7 +16970,7 @@ function sgLeg(car, fromId, toId, fare, t, price, g = sgGet()){
   const rm = routeMiles(fromId, toId, km(A1, B1)), mi = rm.mi, fm = Math.floor(mi * fr.rate);
   const pts = car === "JAL" ? Math.round(mi * fr.rate) * 2 + fr.bonus : Math.round(mi * fr.rate * 2) + fr.bonus;
   const b = sgBonus(car, g), bonusMi = Math.floor(fm * b.pct / 100), payMi = sgPay(car, g, price);
-  return { car, fr, mi, official:rm.official, fm, pts, bonusPct:b.pct, bonusWhy:b.why, bonusMi, payMi, totalMi:fm + bonusMi + payMi, ls:car === "JAL" ? 5 : 0, price:price || null };
+  return { car, fr, mi, official:rm.official, fm, pts, bonus:fr.bonus, auto:pts, bonusPct:b.pct, bonusWhy:b.why, bonusMi, payMi, totalMi:fm + bonusMi + payMi, ls:car === "JAL" ? 5 : 0, price:price || null };
 }
 const sgFareKey = (car, t) => car === "JAL" ? "JAL" : (t || Date.now()) >= ANA_NEW_FROM ? "ANA" : "ANAO";
 const sgCode = (car, id, t) => `${sgFareKey(car, t)}:${id}`;
@@ -16883,13 +16989,14 @@ function sgYear(y = sgNowY()){
     const fr = fareOf(r, r.t); if(!fr) continue; const car = fr.table === "JAL" ? "JAL" : "ANA";
     if(car === "JAL") out.ls += 5;
     if(sgJstY(r.t) !== y) continue;
-    const L = sgLeg(car, r.from, r.to, r.fare || sgCode(car, fr.id, r.t), r.t, r.price, g); if(!L) continue;
-    const o = out[car]; o.pts += L.pts; o.n++; o.mi += L.mi; if(r.price){ o.price += r.price; o.priced++; } if(fr.assumed) o.assumed++;
+    const fx = sgFixOf(r, g), L = sgFixApply(sgLeg(car, r.from, r.to, sgFixFare(r, fr, fx), r.t, r.price, g), fx); if(!L) continue;
+    const assumed = fr.assumed && !(fx && (fx.fare || fx.pts != null));   // 運賃を選んだ便・数を直した便は、推定にしない
+    const o = out[car]; o.pts += L.pts; o.n++; o.mi += L.mi; if(r.price){ o.price += r.price; o.priced++; } if(assumed) o.assumed++;
     const m = out.months[sgJstM(r.t)]; m[car] += L.pts; m.n++; m.price += r.price || 0;
     const key = [BY[r.from].iata, BY[r.to].iata].sort().join("⇄"), rt = out.routes.get(key) || { key, n:0, ANA:0, JAL:0 }; rt.n++; rt[car] += L.pts; out.routes.set(key, rt);
     const dk = sgJstDay(r.t), dd = out.days.get(dk) || { d:dk, n:0, pts:0, legs:[] }; dd.n++; dd.pts += L.pts; dd.legs.push(BY[r.from].iata, BY[r.to].iata); out.days.set(dk, dd);
     if(!out.longest || L.mi > out.longest.mi) out.longest = { mi:L.mi, from:r.from, to:r.to };
-    out.rows.push({ ...r, car, L, assumed:fr.assumed });   // assumed：運賃が分からず、よく使われる運賃で数えた便（推定）
+    out.rows.push({ ...r, car, L, assumed, fix:fx || null });   // assumed：運賃が分からず、よく使われる運賃で数えた便（推定）
   }
   // 会社のサイトの数字に合わせたとき：その日の数字 ＋ そのあとに記録した便（記録だけの数字は rec に残す）
   for(const car of ["ANA", "JAL"]){ const s = g.sync && g.sync[car]; out[car].rec = { pts:out[car].pts, n:out[car].n };
@@ -16901,6 +17008,20 @@ function sgYear(y = sgNowY()){
     out[car].sync = { at:s.at, pts:s.pts }; }
   return out;
 }
+// ---- 自分で直した便（11/25 PM：ポイントを自分で直せる欄）----
+//   修行の計算に入る記録した便ごとに、運賃の種類・搭乗ボーナス・確定のポイントを上書きできる。修行の保存（shugyo_prefs の data.fix）に入れ、便の記録は書き換えない
+//   形：fix[キー] = { fare?:"JAL:Y_FLEX", bonus?:400, pts?:1840, at:"YYYY-MM-DD" }。キーは便の記録なら f＋番号、手で足した便なら m＋番号（なければ日付と区間）
+const sgFixKey = r => r.kind === "flight" ? "f" + fid(r.ref) : "m" + (r.ref && r.ref.id != null ? r.ref.id : `${r.ref ? r.ref.d : ""}|${r.from}|${r.to}`);
+const sgFixOf = (r, g = sgGet()) => { const x = g.fix && g.fix[sgFixKey(r)]; return x && (x.fare || x.bonus != null || x.pts != null) ? x : null; };
+// 数える運賃：直した運賃（その便の表の運賃のときだけ）→ 記録した運賃 → よく使われる運賃
+const sgFixFare = (r, fr, fx) => fx && fx.fare && fx.fare.startsWith(fr.table + ":") && FARES[fr.table].some(x => x[0] === fx.fare.slice(fr.table.length + 1)) ? fx.fare : r.fare || sgCode(fr.table === "JAL" ? "JAL" : "ANA", fr.id, r.t);
+// 搭乗ボーナスを選び直した数（auto）と、確定の数を上書きした数（pts）。auto は「自動で数えた数」として残す
+function sgFixApply(L, fx){
+  if(!L || !fx) return L;
+  const bonus = fx.bonus != null ? fx.bonus : L.fr.bonus, auto = L.pts - L.fr.bonus + bonus;
+  return { ...L, bonus, auto, pts:fx.pts != null ? fx.pts : auto, fixed:true, ptsFixed:fx.pts != null, bonusFixed:fx.bonus != null, fareFixed:!!fx.fare };
+}
+const SG_FIX_TAG = `<span class="sgb-k m">自分で直した</span>`;
 // 予定の便のうち、記録した便（日本時間で同じ日・同じ区間）があるものは「乗った」として予定から外す（実績と二重に数えない）
 function sgDoneKeys(){ const k = new Set(); for(const r of statusRows()) k.add(`${sgJstDay(r.t)}|${r.from}|${r.to}`); return k; }
 const sgPlanDone = (p, keys = sgDoneKeys()) => keys.has(`${p.d}|${p.from}|${p.to}`);
@@ -17121,10 +17242,12 @@ function sgRoadView(){
   // 運賃を推定した便（運賃が分からず、よく使われる運賃で数えた便）があるときは、大きな数字の横に数を出す。押すと1便ごと
   const est = !cur.assumed ? "" : sgShow().views.flights ? `<button class="sgb-est" type="button" data-sg-view="flights" aria-label="運賃を推定した便 ${cur.assumed}便。1便ごとを見る"><span><small>運賃を推定した便</small><b>${cur.assumed}<small>便</small></b></span>${SG_CV}</button>`
     : `<span class="sgb-est"><span><small>運賃を推定した便</small><b>${cur.assumed}<small>便</small></b></span></span>`;
-  const pp = sgPct(cur.pts, goal.pts), src = cur.sync ? `${sgMD(cur.sync.at)}に合わせた数字＋そのあとの便` : `${Y.y}年・記録した便`;
+  // 2色の帯（11/25 PM）：確定（実績・濃い色）と、予約済みの見込み（これから乗る予定の便・うすい色）。数字は足さず、帯の長さだけ並べる。計画は入れない
+  const pp = sgPct(cur.pts, goal.pts), pw = P.n && !A0.done ? Math.max(1, Math.min(100 - pp, Math.round(P.pts / goal.pts * 100))) : 0, src = cur.sync ? `${sgMD(cur.sync.at)}に合わせた数字＋そのあとの便` : `${Y.y}年・記録した便`;
   const hero = `<div class="sgb-card sgb-hero"><div class="h"><span><span class="sgb-k a">実績</span>${esc(src)}</span><span>目標 <b>${esc(goal.name)}</b></span></div>
     <div class="big"><b class="sgb-act">${fmtKm(cur.pts)}</b><small>${unit}</small>${est}</div>
-    <div class="sgb-bar" role="img" aria-label="ポイント ${pp}%。${esc(goal.name)}は ${fmtKm(goal.pts)} ${unit}"><i style="width:${pp}%"></i></div><div class="sgb-ax"><span>ポイント ${pp}%</span><span>${sgMan(goal.pts)}</span></div>
+    <div class="sgb-bar" role="img" aria-label="確定 ${fmtKm(cur.pts)} ${unit}・ポイント ${pp}%${pw ? `。予約済みの見込み（予定）＋${fmtKm(P.pts)} ${unit}` : ""}。${esc(goal.name)}は ${fmtKm(goal.pts)} ${unit}"><i style="width:${pp}%"></i>${pw ? `<i class="p" style="left:${pp}%;width:${pw}%"></i>` : ""}</div><div class="sgb-ax"><span>ポイント ${pp}%</span><span>${sgMan(goal.pts)}</span></div>
+    ${pw ? `<div class="sgb-lg" aria-hidden="true"><span><i class="a"></i>確定 <b>${fmtKm(cur.pts)}</b></span><span><i class="p"></i>予約済みの見込み（予定）<b>＋${fmtKm(P.pts)}</b></span></div>` : ""}
     <div class="sgb-bar thin" role="img" aria-label="1年の ${yp.pct}% が過ぎました"><i style="width:${yp.pct}%"></i></div><div class="sgb-ax"><span>1年 ${yp.pct}%（今日 ${yp.md}）</span><span>12/31</span></div>
     <p class="sgb-verd">${sgVerdict(D)}</p></div>`;
   const two = !sh.two ? "" : car === "JAL" ? `<div class="sgb-two"><div class="sgb-card"><small>FOP だけで</small><p>あと <b>${fmtKm(A0.left)}</b><small> FOP</small></p><small>${A0.byF ? "届いています" : `${sgMan(goal.tier.fop)} FOP で届く`}</small></div>
@@ -17177,27 +17300,60 @@ function sgFlightsView(){
   return `<p class="sgb-src"><span class="sgb-k a">実績</span>${Y.y}年・記録した便　${rows.length}便</p>${by.map(({ m, rows: rs }) => `<div class="sgb-mh"><b>${m + 1}月</b><small>${rs.length}便・＋${fmtKm(rs.reduce((x, r) => x + r.L.pts, 0))} ${unit}</small></div>
     <div class="sgb-card list">${rs.map(r => { const d = new Date(r.t + 9 * 36e5), no = r.kind === "flight" && r.ref && r.ref.no ? lgNo(r.ref) : car;
       return `<button class="sgb-fl" type="button" data-sg-fl="${r.t}|${r.from}|${r.to}"><span class="d"><b>${d.getUTCDate()}</b><small>${"日月火水木金土"[d.getUTCDay()]}</small></span>
-        <span class="m"><b>${esc(placeShort(BY[r.from].iata))} → ${esc(placeShort(BY[r.to].iata))}</b><small>${esc(no)}・${esc(r.L.fr.label.split("：").pop().split("・")[0])}${r.assumed ? "（推定）" : ""}</small></span><b class="n">＋${fmtKm(r.L.pts)}</b>${SG_CV}</button>`; }).join("")}</div>`).join("")}
-    <p class="sg-foot">運賃が分からない便は、よく使われる運賃で数えています。便を押すと数え方が見られます。</p>`;
+        <span class="m"><b>${esc(placeShort(BY[r.from].iata))} → ${esc(placeShort(BY[r.to].iata))}</b><small>${esc(no)}・${esc(r.L.fr.label.split("：").pop().split("・")[0])}${r.assumed ? "（推定）" : ""}${r.L.fixed ? " " + SG_FIX_TAG : ""}</small></span><b class="n">＋${fmtKm(r.L.pts)}</b>${SG_CV}</button>`; }).join("")}</div>`).join("")}
+    <p class="sg-foot">運賃が分からない便は、よく使われる運賃で数えています。便を押すと数え方が見られ、運賃・搭乗ボーナス・確定の数を自分で直せます。</p>`;
 }
-// E2 1便の内訳
+// E2 1便の内訳。下に「自分で直す」（運賃の種類・搭乗ボーナス・確定の数）
+let SG_FIXD = null;   // 直している途中の値 { k, fare?, bonus?（null＝運賃どおり） }。保存するまでは修行の数に入れない
 function sgFlightPage(){
   const Y = sgYear(), r = Y.rows.find(x => `${x.t}|${x.from}|${x.to}` === SG_FL);
   if(!r) return `${sgHead("1便の内訳", "main", "1便ごと")}<div class="sgb-card"><p class="sgb-n0">この便は見つかりませんでした。</p></div>`;
-  const L = r.L, car = r.car, unit = sgUnit(car), d = new Date(r.t + 9 * 36e5), fr = fareOf(r, r.t), no = r.kind === "flight" && r.ref && r.ref.no ? lgNo(r.ref) : car;
+  const L = r.L, car = r.car, unit = sgUnit(car), d = new Date(r.t + 9 * 36e5), no = r.kind === "flight" && r.ref && r.ref.no ? lgNo(r.ref) : car;
   const ac = r.kind === "flight" && r.ref ? [r.ref.ac || r.ref.aircraft || "", r.ref.reg || ""] : ["", ""], fn = L.fr.label.split("：").pop(), rate = Math.round(L.fr.rate * 100);
-  const steps = car === "JAL" ? [["", "区間マイル", fmtKm(L.mi)], ["×", `積算率 <b>${rate}%</b>（${esc(fn.split("・")[0])}）`, fmtKm(Math.round(L.mi * L.fr.rate))], ["×", "2", fmtKm(Math.round(L.mi * L.fr.rate) * 2)], ["＋", `搭乗ボーナス（${esc(fn.split("・")[0])}）`, fmtKm(L.fr.bonus)]]
-    : [["", "区間マイル", fmtKm(L.mi)], ["×", `積算率 <b>${rate}%</b>（${esc(fn.split("・")[0])}）× 2`, fmtKm(Math.round(L.mi * L.fr.rate * 2))], ["＋", `搭乗ポイント（${esc(fn.split("・")[0])}）`, fmtKm(L.fr.bonus)]];
+  const bl = `${car === "JAL" ? "搭乗ボーナス" : "搭乗ポイント"}（${L.bonusFixed ? "自分で選んだ" : esc(fn.split("・")[0])}）`;
+  const steps = car === "JAL" ? [["", "区間マイル", fmtKm(L.mi)], ["×", `積算率 <b>${rate}%</b>（${esc(fn.split("・")[0])}）`, fmtKm(Math.round(L.mi * L.fr.rate))], ["×", "2", fmtKm(Math.round(L.mi * L.fr.rate) * 2)], ["＋", bl, fmtKm(L.bonus)]]
+    : [["", "区間マイル", fmtKm(L.mi)], ["×", `積算率 <b>${rate}%</b>（${esc(fn.split("・")[0])}）× 2`, fmtKm(Math.round(L.mi * L.fr.rate * 2))], ["＋", bl, fmtKm(L.bonus)]];
+  const how = L.fareFixed ? "自分で選んだ運賃" : r.assumed ? "運賃が分からないので、よく使われる運賃で数えています" : "記録した運賃";
+  const eq = L.ptsFixed ? `<div class="eq auto"><i>＝</i><span>${L.fareFixed || L.bonusFixed ? "選んだ運賃とボーナスで数えた数" : "自動で数えた数"}</span><b>${fmtKm(L.auto)}</b></div><div class="eq"><i></i><span><b>この便の ${unit}</b>${SG_FIX_TAG}<small>自分で直した数</small></span><b class="v">${fmtKm(L.pts)}<small> ${unit}</small></b></div>`
+    : `<div class="eq"><i>＝</i><span><b>この便の ${unit}</b></span><b class="v">${fmtKm(L.pts)}<small> ${unit}</small></b></div>`;
   return `${sgHead("", "main", "1便ごと")}
     <div class="sgb-card sgb-f1"><small>${d.getUTCFullYear()}年${d.getUTCMonth() + 1}月${d.getUTCDate()}日（${"日月火水木金土"[d.getUTCDay()]}）・${esc(no)}${ac[0] ? "・" + esc(ac[0]) : ""}</small><b class="rt">${esc(placeShort(BY[r.from].iata))} → ${esc(placeShort(BY[r.to].iata))}</b>
-      <small>${esc(fn)}（${fr && fr.assumed ? "運賃が分からないので、よく使われる運賃で数えています" : "記録した運賃"}）${ac[1] ? "・" + esc(ac[1]) : ""}</small></div>
-    <div class="sgb-h"><b>${unit} の数え方</b></div>
-    <div class="sgb-card sgb-calc">${steps.map(([o, l, v]) => `<div><i>${o}</i><span>${l}</span><b>${v}</b></div>`).join("")}<div class="eq"><i>＝</i><span><b>この便の ${unit}</b></span><b class="v">${fmtKm(L.pts)}<small> ${unit}</small></b></div></div>
+      <small>${esc(fn)}（${how}）${ac[1] ? "・" + esc(ac[1]) : ""}</small></div>
+    <div class="sgb-h"><b>${unit} の数え方</b>${L.fixed ? SG_FIX_TAG : ""}</div>
+    <div class="sgb-card sgb-calc">${steps.map(([o, l, v]) => `<div><i>${o}</i><span>${l}</span><b>${v}</b></div>`).join("")}${eq}</div>
     <div class="sgb-two">${car === "JAL" ? `<div class="sgb-card"><small>回数</small><p><b>＋1</b><small> 回</small></p><small>JAL グループ便</small></div><div class="sgb-card"><small>JGC（Life Status）</small><p><b>＋5</b></p><small>国内線は1回 5</small></div>`
       : `<div class="sgb-card"><small>回数</small><p><b>＋1</b><small> 回</small></p><small>ANA グループ便</small></div><div class="sgb-card"><small>フライトマイル</small><p><b>＋${fmtKm(L.fm)}</b><small> マイル</small></p><small>ボーナスは含みません</small></div>`}</div>
-    ${r.kind === "flight" ? `<button class="sg-btn" type="button" data-flight="${fid(r.ref)}">運賃を選び直す</button>` : ""}
-    <p class="sg-foot">式は各社の公開ページ（2026年10月に確認）。キャンペーンのボーナスは含みません。</p>`;
+    ${sgFixHTML(r)}
+    ${r.kind === "flight" ? `<button class="sg-btn ghost" type="button" data-flight="${fid(r.ref)}">便の記録を開く</button>` : ""}
+    <p class="sg-foot">式は各社の公開ページ（2026年10月に確認）。キャンペーンのボーナスは含みません。直した数は修行の画面だけに使い、便の記録は書き換えません。</p>`;
 }
+// 自分で直す欄。閉じているときは今の直しと「直す」、開いているときは運賃・搭乗ボーナス・確定の数
+function sgFixHTML(r){
+  const L = r.L, unit = sgUnit(r.car), k = sgFixKey(r), fx = r.fix, tb = L.fr.table;
+  if(!SG_FIXD || SG_FIXD.k !== k){
+    if(!L.fixed) return `<div class="sgb-card sgb-fix"><div class="sgb-ft"><span><b>数を自分で直す</b><small>会社のサイトの数と違うとき、運賃の種類・搭乗ボーナス・確定の数を直せます</small></span><button class="sgb-pill" type="button" data-sg-fixedit="1">直す</button></div></div>`;
+    const what = [L.fareFixed && "運賃", L.bonusFixed && "搭乗ボーナス", L.ptsFixed && "確定の数"].filter(Boolean).join("・");
+    return `<div class="sgb-card sgb-fix"><div class="h">${SG_FIX_TAG}<small>${fx && fx.at ? sgMD(fx.at) + "に" : ""}${esc(what)}を直しました</small></div>
+      <div class="sgb-fx2"><span><small>直した数</small><b>${fmtKm(L.pts)}</b><small> ${unit}</small></span><span><small>自動で数えた数</small><b class="m">${fmtKm(sgFixAuto0(r))}</b><small> ${unit}</small></span></div>
+      <div class="sgb-btns"><button class="sg-btn" type="button" data-sg-fixedit="1">直す</button><button class="sg-btn ghost" type="button" data-sg-fixclear>元に戻す</button></div>
+      <p class="sgb-n">「元に戻す」で直しを消し、自動で数えた数に戻します。</p></div>`;
+  }
+  const D = SG_FIXD, fare = D.fare !== undefined ? D.fare : sgFixFare(r, fareOf(r, r.t), fx), bonus = D.bonus !== undefined ? D.bonus : fx && fx.bonus != null ? fx.bonus : null;
+  const P = sgLeg(r.car, r.from, r.to, fare, r.t, r.price), fb = P ? P.fr.bonus : 0, auto = P ? P.pts - fb + (bonus != null ? bonus : fb) : 0;
+  const bs = [...new Set(FARES[tb].map(x => x[3]))].sort((a, b) => a - b), bn = r.car === "JAL" ? "搭乗ボーナス" : "搭乗ポイント";
+  const chip = (v, l) => `<button type="button" class="sgb-chip" data-sg-fixb="${v == null ? "" : v}" aria-pressed="${bonus === v}">${l}</button>`;
+  return `<div class="sgb-card sgb-fix on"><div class="h"><b>数を自分で直す</b></div>
+    <label class="sgb-sel"><small>運賃の種類</small><select id="sgFixFare">${FARES[tb].map(x => `<option value="${tb}:${x[0]}"${`${tb}:${x[0]}` === fare ? " selected" : ""}>${esc(x[1].split("：")[0] + "：" + x[1].split("：").pop().split("・")[0])}（${Math.round(x[2] * 100)}%）</option>`).join("")}</select></label>
+    <small class="sgb-lb">${bn}</small><div class="sgb-chips" role="group" aria-label="${bn}">${chip(null, `運賃どおり（${fmtKm(fb)}）`)}${bs.map(v => chip(v, fmtKm(v))).join("")}</div>
+    <div class="sgb-in one"><label><small>確定の ${unit}（空けると自動で数えた数）</small><input id="sgFixPts" type="number" inputmode="numeric" min="0" max="20000" step="1" value="${D.pts !== undefined ? D.pts == null ? "" : D.pts : fx && fx.pts != null ? fx.pts : ""}" placeholder="${fmtKm(auto).replace(/,/g, "")}"></label></div>
+    <p class="sgb-n">自動で数えた数：<b>${fmtKm(auto)} ${unit}</b>（選んだ運賃と${bn}で）</p>
+    <div class="sgb-btns"><button class="sg-btn" type="button" data-sg-fixsave>この数にする</button><button class="sg-btn ghost" type="button" data-sg-fixedit="0">やめる</button></div></div>`;
+}
+const sgFixRow = () => sgYear().rows.find(x => `${x.t}|${x.from}|${x.to}` === SG_FL) || null;
+// 入れかけの確定の数を、描き直しても消えないように覚える
+const sgFixKeepPts = () => { const el = $("sgFixPts"); if(SG_FIXD && el){ const v = el.value.trim(); SG_FIXD.pts = v === "" ? null : v; } };
+// 直す前の、自動で数えた数（記録した運賃・よく使われる運賃で）
+function sgFixAuto0(r){ const fr = fareOf(r, r.t), L = fr && sgLeg(r.car, r.from, r.to, r.fare || sgCode(r.car, fr.id, r.t), r.t, r.price); return L ? L.pts : 0; }
 // E3 月ごと：12月31日の残り（推定）・月末の残り・路線ごと
 function sgMonthsView(){
   const D = sgRoadData(), { Y, car, goal, unit, cur, P, C, A0, A1, A2, fut } = D, nowM = +sgToday().slice(5, 7) - 1, nowY = +sgToday().slice(0, 4);
@@ -18010,7 +18166,17 @@ document.addEventListener("click", async e => {
   const g = sgGet();
   // 作り直した修行（見方・1便の内訳・Life Status・見方を選ぶ）
   const vw = t.closest("[data-sg-view]"); if(vw){ SG_VIEW = vw.dataset.sgView; try{ localStorage.setItem("soramemo.sgview", SG_VIEW); }catch(e){} track("shugyo_view", SG_VIEW); sgKeep(() => {}); return; }
-  const fl = t.closest("[data-sg-fl]"); if(fl){ SG_FL = fl.dataset.sgFl; sgGo("flight"); return; }
+  const fl = t.closest("[data-sg-fl]"); if(fl){ SG_FL = fl.dataset.sgFl; SG_FIXD = null; sgGo("flight"); return; }
+  // 自分で直す（運賃の種類・搭乗ボーナス・確定の数）。保存するまでは修行の数に入れない
+  const fe = t.closest("[data-sg-fixedit]"); if(fe){ const r = sgFixRow(); SG_FIXD = fe.dataset.sgFixedit === "1" && r ? { k:sgFixKey(r) } : null; sgKeep(() => {}); return; }
+  const fb = t.closest("[data-sg-fixb]"); if(fb){ if(!SG_FIXD) return; sgFixKeepPts(); SG_FIXD.bonus = fb.dataset.sgFixb === "" ? null : +fb.dataset.sgFixb; sgKeep(() => {}); return; }
+  if(t.closest("[data-sg-fixsave]")){ const r = sgFixRow(); if(!r || !SG_FIXD) return; const k = sgFixKey(r), D = SG_FIXD, old = g.fix[k] || {}, el = $("sgFixPts"), v = el ? el.value.trim() : "";
+    const pts = v === "" ? null : Math.round(Number(v)); if(v !== "" && !(pts >= 0 && pts <= 20000)){ el.focus(); return; }
+    const fare = D.fare !== undefined ? D.fare : old.fare || null, bonus = D.bonus !== undefined ? D.bonus : old.bonus != null ? old.bonus : null, fx = {};
+    if(fare && (fare !== r.fare || old.fare)) fx.fare = fare; if(bonus != null) fx.bonus = bonus; if(pts != null) fx.pts = pts;
+    if(Object.keys(fx).length){ fx.at = sgToday(); g.fix[k] = fx; } else delete g.fix[k];
+    SG_FIXD = null; track("shugyo_fix", Object.keys(fx).join(",")); await sgSave(); sgKeep(() => {}); return; }
+  if(t.closest("[data-sg-fixclear]")){ const r = sgFixRow(); if(!r) return; delete g.fix[sgFixKey(r)]; SG_FIXD = null; await sgSave(); sgKeep(() => {}); return; }
   const le = t.closest("[data-sg-lsedit]"); if(le){ SG_LSEDIT = le.dataset.sgLsedit === "1"; sgKeep(() => {}); return; }
   if(t.closest("[data-sg-lssave]")){ const v = Math.round(Number($("sgLsV").value)), d = $("sgLsD").value || sgToday();
     if($("sgLsV").value === "" || !(v >= 0 && v < 100000)){ $("sgLsV").focus(); return; }
@@ -18051,6 +18217,8 @@ document.addEventListener("change", e => {
   const t = e.target; if(!t.closest || !t.closest("#dShugyo, #v-sg")) return;
   const g = sgGet(), num = v => { const n = Math.round(Number(v)); return v !== "" && n >= 0 && n < 100_000_000 ? n : null; };
   const tr = () => sgTrip(sgCar());
+  if(t.id === "sgFixPts"){ sgFixKeepPts(); return; }
+  if(t.id === "sgFixFare"){ if(SG_FIXD){ sgFixKeepPts(); SG_FIXD.fare = t.value; } sgKeep(() => {}); return; }
   if(t.id === "sgGoal"){ const car = sgCar(); g.goal[car] = car === "ANA" ? +t.value : t.value; }
   else if(t.id === "sgTripD"){ tr().d = t.value || null; }
   else if(t.dataset.sgLegf != null){ tr().legs[+t.dataset.sgLegf].from = +t.value; }
