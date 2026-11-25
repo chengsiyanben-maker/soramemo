@@ -51,18 +51,18 @@ check('2 前が少ない（5行）なら、2行への減りも入れ替える', 
 check('2 前が0行のときの空の返事はそのまま（0行）', await one(`select public.timetable_replace('JAL', 'ITM', '[]'::jsonb)`) === 0);
 check('2 おかしな入力は今までどおり bad input', /bad input/.test(await tryq(`select public.timetable_replace('XXX', 'HND', '[]'::jsonb)`)));
 
-// 2-2 いつもの時刻
+// 2-2 いつもの時刻（種の日付と時刻は日本時間で作る。テストを流す所の時間帯（手元は日本・GitHub は UTC）に左右されないように）
 await db.exec(`insert into public.foreign_legs (day, callsign, iata, dep_here, at)
-  select d::date, 'BAW' || i, 'HND', 0, d + time '10:00' + make_interval(mins => i)
-    from generate_series(current_date - 30, current_date - 1, interval '1 day') d, generate_series(1, 10) i`);
+  select d, 'BAW' || i, 'HND', 0, (d + time '10:00' + make_interval(mins => i)) at time zone 'Asia/Tokyo'
+    from generate_series(0, 29) k, lateral (select (now() at time zone 'Asia/Tokyo')::date - 30 + k as d) x, generate_series(1, 10) i`);
 const n1 = await one(`select public.foreign_usual_build()`);
 const fu = () => one(`select count(*)::int from public.foreign_usual`);
 check('2 いつもの時刻を作る', n1 >= 20 && await fu() === n1, [n1]);
 await db.exec(`delete from public.foreign_legs where callsign <> 'BAW1'`);
 check('2 記録が減って作り直しが半分未満なら前のまま', await one(`select public.foreign_usual_build()`) === 0 && await fu() === n1);
 await db.exec(`insert into public.foreign_legs (day, callsign, iata, dep_here, at)
-  select d::date, 'BAW' || i, 'HND', 0, d + time '11:00' + make_interval(mins => i)
-    from generate_series(current_date - 30, current_date - 1, interval '1 day') d, generate_series(2, 10) i`);
+  select d, 'BAW' || i, 'HND', 0, (d + time '11:00' + make_interval(mins => i)) at time zone 'Asia/Tokyo'
+    from generate_series(0, 29) k, lateral (select (now() at time zone 'Asia/Tokyo')::date - 30 + k as d) x, generate_series(2, 10) i`);
 const n2 = await one(`select public.foreign_usual_build()`);
 check('2 記録が戻れば作り直す（時刻も新しく）', n2 === n1 && await one(`select mins from public.foreign_usual where callsign = 'BAW2' and dow = -1`) === 11 * 60 + 2, [n2]);
 
