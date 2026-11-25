@@ -58,7 +58,7 @@ async def main():
         t = await pg.inner_text('#v-sg'); check('ちがいを出す:', f"+{36200 - rec:,} PP" in t and 'サイトの数字を実績にしました' in t)
         d = await pg.evaluate("__fake.db.shugyo_prefs[0].data.sync.ANA")
         check('保存される（日付つき）:', d['pts'] == 36200 and d['at'] == J(0) and d['use'] is True)
-        await pg.evaluate("sgGo('main')"); await pg.wait_for_timeout(300)
+        await pg.evaluate("sgGo('main')"); await pg.wait_for_timeout(700)   # その日はじめての道のりは数字が 0.4 秒で数え上がる（小さな動き 08）ので、終わるのを待つ
         check('修行のまとめ：合わせた数字と出どころ:', '36,200' in await pg.inner_text('#v-sg') and 'に合わせた数字' in await pg.inner_text('#v-sg'))
         await pg.screenshot(path=os.path.join(WORK, 't77_main.png'))
         await pg.evaluate("sgGo('profile')"); await pg.wait_for_timeout(300)
