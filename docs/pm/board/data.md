@@ -1,14 +1,14 @@
 # データ担当の帳面
 
 ## いま持っている仕事
-- **羽田・成田はいろいろなデータを細かく取る（PM の指示 11/25 18時50分。手動の呼び出しで data/hnd-nrt-more を指定された）**：ブランチ data/hnd-nrt-more（data/hnd-nrt-priority #227 の上）→ **下書き PR #230**（向き先は data/hnd-nrt-priority。#227 が main に入ったら main に向け直す）。報告 docs/pm/report-hnd-nrt-more.md（候補ごとの規約の一覧）。読むだけの SQL docs/pm/hnd-nrt-more-check.sql（5つ）。**移行199・テスト t137 を使った**
+- **羽田・成田はいろいろなデータを細かく取る（PM の指示 11/25 18時50分。手動の呼び出しで data/hnd-nrt-more を指定された）**：ブランチ data/hnd-nrt-more（data/hnd-nrt-priority #227 の上）→ **下書き PR #230**（11/25 22時半 #227 が main に入ったので、向き先を main に直し main を取り込んだ（24407b4）。deno test 332本・t136・t137 通過。移行199 は main と重ならない）。報告 docs/pm/report-hnd-nrt-more.md（候補ごとの規約の一覧）。読むだけの SQL docs/pm/hnd-nrt-more-check.sql（5つ）。**移行199・テスト t137 を使った**
   - 規約：adsb.lol（ODbL）・ODPT（基本ライセンス・公開しない）・aviationweather.gov は「よい」。アメダスは商用可・出典要だが JSON の自動取得の頻度は書いていない（本人に）。空港会社のサイト（サイトポリシーは読めなかった）・SWIM の NOTAM（二次利用の条件が資料にない）・雷（有料）は「分からない」で使わない。FR24 は使わない
   - 移行199：ground_watch（見張り・6時間・毎日の cleanup 30秒）・ground_moves（着陸→スポット・動き出し→離陸・地上の時間。ずっと残す）・flight_changes とトリガー（羽田・成田の便のゲート・機材・状態・見込みの時刻5分以上）。RLS ON・方針なし
   - airport-traffic：recordGround（_shared/ground_moves.ts。止まっている機体は10分に1回・動いている機体は2分に1回か状態が変わったときだけ書く）。adsb.lol の回数は同じ
   - 確かめ：deno test 327本（ground_moves_test 5本）・deno check・t137・SQL のテスト全部 通過・migrations.mjs check 189件
   - 次の回の候補：進入の線・待機を rwy_samples.pts から数える／緊急の squawk だけ残す表／遅れの理由の文を flight_changes に（odpt-status の変更）／ターミナルの列
   - 本人待ち：反映（#227 のあと）・アメダス・空港会社のサイト・SWIM の規約・量（1年で百万行前後→半年で cold-archive の案）
-- **羽田・成田を優先して取る＋滑走路の予想の当たり具合（PM の指示 11/25 18時45分。11/25 水曜に定期の回として呼ばれたが、PM の積んだ指示があったのでこちらをした）**：ブランチ data/hnd-nrt-priority（main 4354656 から）→ **下書き PR #227**。報告 docs/pm/report-hnd-nrt-priority.md。本人用の読むだけの SQL docs/pm/hnd-nrt-priority-check.sql（7つ）。**移行198・テスト t136 を使った**
+- **羽田・成田を優先して取る＋滑走路の予想の当たり具合（PM の指示 11/25 18時45分。11/25 水曜に定期の回として呼ばれたが、PM の積んだ指示があったのでこちらをした）**：ブランチ data/hnd-nrt-priority（main 4354656 から）→ **PR #227（11/25 22時39分 main に入った。本番の移行198 は PM の反映の流れで確かめる）**。報告 docs/pm/report-hnd-nrt-priority.md。本人用の読むだけの SQL docs/pm/hnd-nrt-priority-check.sql（7つ）。**移行198・テスト t136 を使った**
   - 調べた結果：羽田・成田はもともと同じ東の円で30秒ごと・track_points・ops_log・rwy_samples もそろっていた。違いは学習の半径だけ（羽田60・成田40海里）
   - airport-traffic：記録の処理だけ成田の学習を60海里に（LEARN_NM・LEARN_PLANES）。画面は40海里のまま。adsb.lol の回数は同じ（1日約8,640回）
   - 移行198：wx_taf（原文）・wx_taf_hours（毎時の風・TEMPO/PROB・est_mode＝画面と同じ推定）。RLS ON・方針なし。cron wx-hnd-nrt（毎時41分・30秒の上限）
@@ -390,7 +390,7 @@
 - SQL のテストは全部で約35分かかる（手元で流すときは裏で流してログを見る。t92 だけで約4分。同じログに2回流すと混ざるので、ログの名前を分ける）
 
 ## 次にやること
-- 羽田・成田の細かいデータ（PR #230・移行199・t137）：#227 が入ったら main に向け直し、rebase。反映のあと hnd-nrt-more-check.sql の 1（次の日）で ground_moves の lost の割合・with_taxi の割合を見て、判定の幅（15kt・2回・5分）を直す。本人の答えでアメダス（よければ表と取り込み・移行200）。次の回の候補は帳面の上の「次の回の候補」
+- 羽田・成田の細かいデータ（PR #230・移行199・t137）：向き先は main に直した。反映の前に main に別の移行が先なら rebase。反映のあと hnd-nrt-more-check.sql の 1（次の日）で ground_moves の lost の割合・with_taxi の割合を見て、判定の幅（15kt・2回・5分）を直す。本人の答えでアメダス（よければ表と取り込み・移行200）。次の回の候補は帳面の上の「次の回の候補」
 - 羽田・成田の優先（PR #227・移行198・t136）：CI とレビューに答える。反映の前に main に別の移行が先なら rebase。反映のあと hnd-nrt-priority-check.sql の 1 で wx_taf が増え、さかのぼりが 10/15 まで来たか（2日後）。2〜5（実況）と 7（TAF）の結果で、羽田の追い風の上限・粘りの案を PM に。次は data/hnd-nrt-more（PM の指示 11/25 18時50分。一覧 report-hnd-nrt-more.md から。wx_taf はできたので SPECI・アメダス・NOTAM・ODPT のゲート・地上の動きの候補を調べる）
 - 羽田・成田（#227／#228）：PM がどちらを本筋にするか決めたら、もう片方を閉じる。#228 の A・B を足すと決まれば #227 の上に移行199 で。当たり具合の結果（check.sql）が貼られたら、羽田の追い風の上限と粘りの案をまとめる
 - 印の速さ（PR #225）：反映のあと、本人に stamp-fast-check.sql の 1・2 と Edge Functions の checkin のログ「checkin_ms」を見てもらい、まだ遅ければ getClaims（本人の OK のあと）と初訪問の数の2本を1本にまとめる案を見る
