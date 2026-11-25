@@ -1,6 +1,7 @@
 # チェックイン担当の帳面
 
 ## いま持っている仕事
+- 11/26 0時半ごろ（PR の見張り）：#242 で stamp-edge（9eb14811）が main に入った。#238 は中身が main に入ったので閉じてよい（PM に任せる。809776a6 の取り込みは別の回）。#239（flight-suggest）は main（4a128eec）とぶつかったので取り込み、CSS の最後（.fsug と .qtag）と run_all の上限（t196・t197）は両方残し、web/ を作り直した（b415311a）。t196・t197・t24・t144・t13・t47・t61・t123・t194 成功
 - **11/26 手動の回（PM の指示「11/25 23時05分 乗る便の候補から1回で記録 を checkin/flight-suggest で」）**：checkin/flight-suggest・下書き **PR #239**（22b6bbbe・報告 docs/pm/report-flight-suggest.md・写真 docs/pm/shots-flight-suggest/）。main（dfc945cc）から。checkin/stamp-edge には触っていない。見張りを付けた。テストが通れば PM が自動で反映
   - 候補：fsugAirport（今日チェックインした空港→判定範囲の中の空港）・fsugFetch（airport-now を2分覚える・8秒で区切る・電波なしは off）・fsugList（出る便6・着いた便4。欠航・出発済み・国際線を除く）。入口はフライトの「＋」（#fsugBook）と showStamp の「今日の便を記録」（data-fsug-open → シート #dFsug）
   - 記録：fsugPlan → "plan"（savePlan。出る便・まだチェックインしていない到着）・"set"（今日の同じ区間のフライトに set_flight_airline）・"manual"（日誌。mfInsert は flight_no を付けて、列がなければ外して入れ直す）。確認は fsugConfirm、押すのは fsugGo
