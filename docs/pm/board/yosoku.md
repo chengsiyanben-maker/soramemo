@@ -105,3 +105,4 @@
 - 変えた関数：predSteps・predConf・predModel・predRows・predWarn・predictionHTML・spbPredHTML・planeHTML・predConfHTML、足した predBasis
 - テスト t200（新・27項目×2の高さ）・t134・t131・t68・t72・tests/ops 成功
 - データ担当へ：seen_of の名前と、割れるときの2番目の候補（data.md の依頼に書いた）
+- 23往復目（PM が 4時20分に足した訂正版）も表の下に突き合わせた：4 根拠1行・5 外れたら並べる・6 の更新の時刻（根拠の記録の時刻）は今回の分で入っている。1 の「先の便ほど薄く」は画面案で、2 全体の一致率と 6 苦手な条件の数字は rot_eval_summary（data.md 11/6 の依頼 (3)）、3 第2候補まで（最大3便）は data.md 11/26 の依頼 (2) と画面案が要る
