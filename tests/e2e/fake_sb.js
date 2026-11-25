@@ -5,7 +5,7 @@
     const rows = () => db[table].slice(lo, Math.min(hi, lo + 999) + 1);   // 本物と同じく1回に1,000行まで
     const api = { select(){ return api; }, order(){ return api; }, eq(){ return api; },
       update(patch){ return { eq(k, v){ if(window.__profileFail && table === 'user_profiles') return Promise.resolve({error:{message:'fail'}}); (db[table] || []).forEach(r => { if(r[k] === v) Object.assign(r, JSON.parse(JSON.stringify(patch))); }); window.__updates = (window.__updates||[]).concat([{table, patch}]); return Promise.resolve({error:null}); } }; }, range(a, b){ lo = a; hi = b; return api; },
-      then(res){ res({data: rows(), error:null}); },
+      then(res){ const d = {data: rows(), error:null}; if(window.__netDelay) setTimeout(() => res(d), window.__netDelay); else res(d); },   /* __netDelay：遅い電波のテスト（11/25 stamp-fast） */
       maybeSingle(){ if(!db[table]) return Promise.resolve({data:null, error:{message:'relation does not exist'}}); return Promise.resolve({data: db[table][0] || null, error:null}); },
       upsert(row){ db[table] = db[table].filter(r => r.user_id !== row.user_id); db[table].push(JSON.parse(JSON.stringify(row))); window.__upserts = (window.__upserts||0) + 1; return Promise.resolve({error:null}); },
       insert(row){ (Array.isArray(row) ? row : [row]).forEach(r => db[table].push(Object.assign({id: db[table].length+1}, r))); window.__inserts = (window.__inserts||0) + 1; return Promise.resolve({error:null}); },
@@ -109,6 +109,8 @@
       if(name === 'co_rename'){ C.name = a.p_name.trim(); return {data:{...C}, error:null}; }
       const fl = db.flights.find(x=>x.id===a.p_flight_id); if(!fl) return {error:{message:'not found'}}; fl.airline=a.p_airline; fl.flight_no=a.p_flight_no; fl.status=a.p_airline?'with_flight_no':'provisional'; window.__lastRpc=a; return {error:null}; },
     functions:{ invoke: async (name, {body}) => {
+      if(window.__netDelay) await new Promise(r => setTimeout(r, window.__netDelay * (window.__fnMul || 1)));
+      if(window.__fnFail) return {data:null, error:{context:{json: async()=>({ok:false, reason:'low_accuracy', message:'位置の精度が低すぎます（サーバー判定）'})}}};
       if(name === 'delete-account'){ window.__deleted = body; return {data:{ok: body.confirm === '削除'}, error:null}; }
       if(window.__offline) return {data:null, error:{name:'FunctionsFetchError', context:{}}};
       window.__calls = (window.__calls||[]).concat([{queued:body.queued, ts:body.ts}]);
@@ -117,7 +119,9 @@
       const at = new Date(body.queued ? body.ts : Date.now()).toISOString();
       const first = !db.checkins.some(c=>c.airport_id===n.a.id);
       db.checkins.push({airport_id:n.a.id, terminal_id:n.term?n.term.id:null, created_at:at, accuracy_m:body.acc});
-      return {data:{ok:true, at, airport_id:n.a.id, terminal_id:n.term?n.term.id:null, first_airport:first, first_terminal:true, flight:null, flags:[], bonus: window.__bonus || []}, error:null};
+      let flight = null;   /* __mkFlight：前の空港からの便も作る（11/25 stamp-fast のテストだけ） */
+      if(window.__mkFlight){ const prev = db.checkins[db.checkins.length - 2]; if(prev && prev.airport_id !== n.a.id){ flight = {id:770 + db.flights.length, from_airport:prev.airport_id, to_airport:n.a.id, distance_km:800}; db.flights.push({id:flight.id, from_airport:prev.airport_id, to_airport:n.a.id, dep_at:prev.created_at, arr_at:at, distance_km:800, status:'provisional', airline:null, flight_no:null}); } }
+      return {data:{ok:true, at, airport_id:n.a.id, terminal_id:n.term?n.term.id:null, first_airport:first, first_terminal:true, flight, flags:[], bonus: window.__bonus || []}, error:null};
     }}
   }; } };
 })();
