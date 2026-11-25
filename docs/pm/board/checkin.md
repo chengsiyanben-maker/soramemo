@@ -1,6 +1,7 @@
 # チェックイン担当の帳面
 
 ## いま持っている仕事
+- 11/25 手動の回（同じ「元日の印を外す を checkin/drop-newyear で」の指示）：直前の回で PR #219（7a39dcb9）として済み。main も c5a008e5 のままで取り込み済みなので作り直さなかった。3D には触っていない。PM の自動の反映を待つ
 - **11/25 13時台の定時の回（PM の指示なし。帳面に積まれた 11/25 13時「元日の印を外す」を進めた）**：checkin/drop-newyear・下書き **PR #219**（7a39dcb9・報告 docs/pm/report-drop-newyear.md・写真 docs/pm/shots-drop-newyear/）。main（c5a008e5）から。見張りを付けた。テストが通れば PM が自動で反映
   - 実績の「元日の印」（ny）と timeMarks の「元日の印」を外した。分類「時間と季節」は「時間帯」に（中身は朝の印・早起きの旅人・夜の印・夜ふかしの旅人）。achState の newyear の数えを外した
   - 変えた関数・表：timeMarks・ACH・achState。経営の行事「年末年始ボーナス」（newyear-2027）は経営の持ち分なので触っていない
