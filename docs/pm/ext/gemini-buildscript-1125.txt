@@ -1,0 +1,603 @@
+国土数値情報（C28 GeoJSON）と OurAirports（airports.csv / runways.csv）を入力とし、空間照合 → バッファ拡張 → RDP簡略化 → コサイン補正による滑走路正規化 → 自動検証 → 配布用JSON・マニフェスト・検品HTML出力までを一括実行するPythonビルドスクリプトの実装例です。
+1. 事前準備とディレクトリ構成
+依存ライブラリはジオメトリ演算の shapely と投影変換の pyproj の2つのみです。
+pip install shapely pyproj
+
+airport-master/
+├── raw/                             # 公開データ原本（手編集しない）
+│   ├── mlit_c28_airports.geojson    # 国土数値情報 C28（WGS84/JGD2011）
+│   ├── ourairports_airports.csv     # 標点座標の参照用
+│   └── ourairports_runways.csv      # 滑走路両端座標の参照用
+├── overrides/                       # 人間が管理するパッチ＆検証定義
+│   ├── airport_overrides.json       # 対象空港・和名・地方区分・個別補正
+│   └── test_points.json             # ターミナル実測テスト座標
+├── scripts/
+│   └── build_master.py              # 本ビルドスクリプト
+└── dist/                            # 自動生成物
+    ├── airports_master.json         # アプリ同梱マスター（最小化JSON）
+    ├── master_manifest.json         # 差分配信用バージョン＆SHA-256
+    └── preview_100.html             # 全空港の目視検品シート
+
+2. 入力パッチ・テスト定義の例
+overrides/airport_overrides.json
+生データの名称揺れ（例：「東京国際空港」と「羽田空港」）や新設滑走路の未反映は、原本をいじらずこのファイルで上書きします。
+{
+  "master_version": 202611,
+  "airports": [
+    {
+      "code": "HND",
+      "icao": "RJTT",
+      "name_ja": "羽田空港",
+      "name_en": "Tokyo Haneda",
+      "region_code": "kanto",
+      "category": "scheduled",
+      "buffer_m": 250
+    },
+    {
+      "code": "FUK",
+      "icao": "RJFF",
+      "name_ja": "福岡空港",
+      "name_en": "Fukuoka",
+      "region_code": "kyushu_okinawa",
+      "category": "scheduled",
+      "runways_override": [
+        [33.5997, 130.4437, 33.5748, 130.4573],
+        [33.5968, 130.4420, 33.5754, 130.4536]
+      ]
+    }
+  ]
+}
+
+overrides/test_points.json
+簡略化や座標丸めによってターミナル端が圏外に落ちる事故を防ぐための自動テスト座標です。
+{
+  "HND": [
+    {"label": "第1ターミナル中央", "lat": 35.5494, "lng": 139.7845},
+    {"label": "第2ターミナル南端", "lat": 35.5476, "lng": 139.7889},
+    {"label": "第3ターミナル展望デッキ", "lat": 35.5446, "lng": 139.7676}
+  ],
+  "FUK": [
+    {"label": "国内線ターミナル", "lat": 33.5963, "lng": 130.4461}
+  ]
+}
+
+3. ビルド＆自動検証スクリプト（scripts/build_master.py）
+#!/usr/bin/env python3
+"""
+そらメモ 空港マスターデータ（airports_master.json）一括ビルド＆自動検証スクリプト
+
+処理フロー:
+1. 国土数値情報 C28 GeoJSON / OurAirports CSV / 手動パッチを読み込み
+2. 標点座標とC28ポリゴンの最短距離による空間照合（海上・複数ポリゴン統合対応）
+3. 空港中心ごとの正距方位図法（AEQD）でメートル単位バッファ拡張 → RDP簡略化 → 桁丸め＆重複頂点除去
+4. OurAirports runways.csv からヘリパッド除外・コサイン補正による正規化滑走路ベクターを生成
+5. 代表地点IN判定・隣接空港の重複干渉・滑走路座標域のCI自動検証
+6. 本番JSON・SHA-256マニフェスト・目視検品HTML（エラー時も出力）を生成
+"""
+
+from __future__ import annotations
+
+import argparse
+import csv
+import gzip
+import hashlib
+import json
+import math
+import sys
+from pathlib import Path
+from typing import Any
+
+from pyproj import CRS, Transformer
+from shapely.geometry import MultiPolygon, Point, Polygon, shape
+from shapely.ops import nearest_points, unary_union
+from shapely.ops import transform as shapely_transform
+
+# デフォルトのジオメトリ・軽量化パラメータ
+DEFAULT_BUFFER_M = 200.0        # 屋内GPSブレ吸収用の標準バッファ（m）
+DEFAULT_RDP_TOLERANCE_M = 40.0  # RDP簡略化の許容誤差（m）
+DEFAULT_COORD_DECIMALS = 4      # ジオフェンス座標の丸め桁数（4桁 ≒ 約11m）
+RUNWAY_MARGIN = 0.15            # 印カード内の安全マージン（描画域 0.15〜0.85）
+C28_EDGE_MAX_KM = 1.5           # 標点からC28ポリゴン境界までの空間照合上限（km）
+FALLBACK_RADIUS_M = 800.0       # C28未収録の小規模離島空港用フォールバック半径（m）
+
+
+# ===== 1. ユーティリティ＆生データ読み込み =====
+def haversine_km(lat1: float, lng1: float, lat2: float, lng2: float) -> float:
+    r = 6371.0
+    p1, p2 = math.radians(lat1), math.radians(lat2)
+    dp = math.radians(lat2 - lat1)
+    dl = math.radians(lng2 - lng1)
+    a = math.sin(dp / 2) ** 2 + math.cos(p1) * math.cos(p2) * math.sin(dl / 2) ** 2
+    return 2.0 * r * math.asin(math.sqrt(a))
+
+
+def load_ourairports_airports(path: Path) -> dict[str, dict[str, Any]]:
+    result: dict[str, dict[str, Any]] = {}
+    with path.open("r", encoding="utf-8-sig", newline="") as f:
+        for row in csv.DictReader(f):
+            icao = (row.get("ident") or "").strip().upper()
+            if not icao:
+                continue
+            try:
+                lat = float(row["latitude_deg"])
+                lng = float(row["longitude_deg"])
+            except (KeyError, TypeError, ValueError):
+                continue
+            result[icao] = {
+                "icao": icao,
+                "iata": (row.get("iata_code") or "").strip().upper(),
+                "lat": lat,
+                "lng": lng,
+            }
+    return result
+
+
+def load_ourairports_runways(
+    path: Path,
+) -> dict[str, list[tuple[float, float, float, float]]]:
+    """有効な滑走路の両端座標 [(le_lat, le_lng, he_lat, he_lng), ...] をICAO別に集計"""
+    runways: dict[str, list[tuple[float, float, float, float]]] = {}
+    with path.open("r", encoding="utf-8-sig", newline="") as f:
+        for row in csv.DictReader(f):
+            if row.get("closed") == "1":
+                continue
+            le_ident = (row.get("le_ident") or "").strip().upper()
+            # ヘリパッド（H1等）は印カードの滑走路ラインから除外
+            if le_ident.startswith("H"):
+                continue
+
+            icao = (row.get("airport_ident") or "").strip().upper()
+            try:
+                le_lat = float(row["le_latitude_deg"])
+                le_lng = float(row["le_longitude_deg"])
+                he_lat = float(row["he_latitude_deg"])
+                he_lng = float(row["he_longitude_deg"])
+            except (KeyError, TypeError, ValueError):
+                continue
+            if le_lat == 0.0 or he_lat == 0.0:
+                continue
+
+            runways.setdefault(icao, []).append((le_lat, le_lng, he_lat, he_lng))
+    return runways
+
+
+def load_c28_polygons(path: Path) -> list[Polygon | MultiPolygon]:
+    """国土数値情報 C28 GeoJSON から有効な面ジオメトリのみ抽出"""
+    data = json.loads(path.read_text(encoding="utf-8"))
+    geoms: list[Polygon | MultiPolygon] = []
+    for feat in data.get("features", []):
+        geom_raw = feat.get("geometry")
+        if not geom_raw:
+            continue
+        geom = shape(geom_raw)
+        if not geom.is_valid:
+            geom = geom.buffer(0)
+        if geom.is_empty or not isinstance(geom, (Polygon, MultiPolygon)):
+            continue
+        geoms.append(geom)
+    return geoms
+
+
+# ===== 2. 空間照合＆ジオフェンス軽量化 =====
+def match_c28_geometry(
+    center_lat: float,
+    center_lng: float,
+    c28_geoms: list[Polygon | MultiPolygon],
+) -> Polygon | MultiPolygon | None:
+    """
+    名称表記揺れを避けるため、標点座標からポリゴン外周までの実距離（Haversine）で照合。
+    複数地物に分かれている海上空港・拡張滑走路は近傍を統合する。
+    """
+    pt = Point(center_lng, center_lat)
+    matched: list[Polygon | MultiPolygon] = []
+
+    for geom in c28_geoms:
+        # 高速粗フィルタ（緯度経度±0.1度 ≒ 約10km外を即時除外）
+        minx, miny, maxx, maxy = geom.bounds
+        if not (minx - 0.1 <= center_lng <= maxx + 0.1 and miny - 0.1 <= center_lat <= maxy + 0.1):
+            continue
+
+        if geom.covers(pt):
+            matched.append(geom)
+            continue
+
+        nearest_on_geom, _ = nearest_points(geom, pt)
+        edge_km = haversine_km(center_lat, center_lng, nearest_on_geom.y, nearest_on_geom.x)
+        if edge_km <= C28_EDGE_MAX_KM:
+            matched.append(geom)
+
+    if not matched:
+        return None
+    return unary_union(matched)
+
+
+def dedupe_and_round_ring(
+    coords: Any,
+    decimals: int,
+) -> list[list[float]]:
+    """丸め処理で生じた連続重複頂点を除去し、閉じた外周リングを返す"""
+    ring: list[list[float]] = []
+    for x, y in coords:
+        pt = [round(x, decimals), round(y, decimals)]
+        if not ring or ring[-1] != pt:
+            ring.append(pt)
+    if len(ring) >= 3 and ring[0] != ring[-1]:
+        ring.append(ring[0])
+    return ring
+
+
+def build_geofence(
+    raw_geom: Polygon | MultiPolygon | None,
+    center_lat: float,
+    center_lng: float,
+    buffer_m: float,
+    rdp_tolerance_m: float,
+    coord_decimals: int,
+) -> tuple[Polygon | MultiPolygon, list[list[list[float]]], list[float], int]:
+    """
+    空港中心を原点とする正距方位図法（AEQD）へ変換し、
+    メートル単位でバッファ拡張 → RDP簡略化 → WGS84逆変換 → 桁丸め後の再構築を行う。
+    """
+    wgs84 = CRS.from_epsg(4326)
+    aeqd = CRS.from_proj4(
+        f"+proj=aeqd +lat_0={center_lat} +lon_0={center_lng} +datum=WGS84 +units=m +no_defs"
+    )
+    to_m = Transformer.from_crs(wgs84, aeqd, always_xy=True).transform
+    to_deg = Transformer.from_crs(aeqd, wgs84, always_xy=True).transform
+
+    if raw_geom is None:
+        # C28に面データが存在しない小規模飛行場等は簡易12角形でフォールバック
+        geom_m = Point(0.0, 0.0).buffer(FALLBACK_RADIUS_M, quad_segs=3)
+    else:
+        geom_m = shapely_transform(to_m, raw_geom)
+        geom_m = geom_m.buffer(buffer_m, quad_segs=3)
+        geom_m = geom_m.simplify(rdp_tolerance_m, preserve_topology=True)
+
+    geom_wgs = shapely_transform(to_deg, geom_m)
+    if not geom_wgs.is_valid:
+        geom_wgs = geom_wgs.buffer(0)
+
+    polys = [geom_wgs] if isinstance(geom_wgs, Polygon) else list(geom_wgs.geoms)
+    rings_out: list[list[list[float]]] = []
+    rebuilt_polys: list[Polygon] = []
+    vertex_count = 0
+
+    for poly in polys:
+        ring = dedupe_and_round_ring(poly.exterior.coords, coord_decimals)
+        if len(ring) < 4:
+            continue
+        rebuilt = Polygon(ring)
+        if not rebuilt.is_valid:
+            rebuilt = rebuilt.buffer(0)
+        if rebuilt.is_empty:
+            continue
+
+        # buffer(0)で分割された場合も安全に取り込む
+        sub_polys = [rebuilt] if isinstance(rebuilt, Polygon) else list(rebuilt.geoms)
+        for sp in sub_polys:
+            sp_ring = dedupe_and_round_ring(sp.exterior.coords, coord_decimals)
+            if len(sp_ring) >= 4:
+                rings_out.append(sp_ring)
+                rebuilt_polys.append(Polygon(sp_ring))
+                vertex_count += len(sp_ring) - 1
+
+    final_geom = unary_union(rebuilt_polys)
+    minx, miny, maxx, maxy = final_geom.bounds
+    bbox = [
+        round(minx, coord_decimals),
+        round(miny, coord_decimals),
+        round(maxx, coord_decimals),
+        round(maxy, coord_decimals),
+    ]
+    return final_geom, rings_out, bbox, vertex_count
+
+
+# ===== 3. コサイン補正による滑走路ベクター正規化 =====
+def normalize_runways(
+    segments: list[tuple[float, float, float, float]],
+    margin: float = RUNWAY_MARGIN,
+) -> list[list[float]]:
+    """
+    滑走路端点群をコサイン補正で局所平面投影し、[margin, 1-margin] の正方形へ正規化。
+    SVG/Canvas座標系に合わせてY軸を反転し、小数3桁 [u1, v1, u2, v2] を返す。
+    """
+    if not segments:
+        return []
+
+    lats = [val for seg in segments for val in (seg[0], seg[2])]
+    lngs = [val for seg in segments for val in (seg[1], seg[3])]
+    lat0 = sum(lats) / len(lats)
+    lng0 = sum(lngs) / len(lngs)
+    cos_lat0 = math.cos(math.radians(lat0))
+
+    projected: list[tuple[float, float, float, float]] = []
+    xs: list[float] = []
+    ys: list[float] = []
+
+    for le_lat, le_lng, he_lat, he_lng in segments:
+        x1 = (le_lng - lng0) * cos_lat0
+        y1 = le_lat - lat0
+        x2 = (he_lng - lng0) * cos_lat0
+        y2 = he_lat - lat0
+        projected.append((x1, y1, x2, y2))
+        xs.extend([x1, x2])
+        ys.extend([y1, y2])
+
+    min_x, max_x = min(xs), max(xs)
+    min_y, max_y = min(ys), max(ys)
+    span = max(max_x - min_x, max_y - min_y)
+    if span <= 1e-9:
+        return []
+
+    mid_x = (min_x + max_x) / 2.0
+    mid_y = (min_y + max_y) / 2.0
+    usable = 1.0 - (margin * 2.0)
+
+    normalized: list[list[float]] = []
+    for x1, y1, x2, y2 in projected:
+        u1 = 0.5 + ((x1 - mid_x) / span) * usable
+        v1 = 0.5 - ((y1 - mid_y) / span) * usable
+        u2 = 0.5 + ((x2 - mid_x) / span) * usable
+        v2 = 0.5 - ((y2 - mid_y) / span) * usable
+        normalized.append([round(u1, 3), round(v1, 3), round(u2, 3), round(v2, 3)])
+
+    return normalized
+
+
+# ===== 4. CI自動バリデーション =====
+def validate_master(
+    records: list[dict[str, Any]],
+    geoms_by_code: dict[str, Polygon | MultiPolygon],
+    test_points: dict[str, list[dict[str, Any]]],
+) -> list[str]:
+    errors: list[str] = []
+
+    # 検証1: ジオフェンスと滑走路ベクターの健全性
+    for rec in records:
+        code = rec["code"]
+        geom = geoms_by_code.get(code)
+        if geom is None or geom.is_empty or not geom.is_valid:
+            errors.append(f"[GEOM_INVALID] {code} ({rec['name_ja']}): ジオフェンスが不正または空です")
+
+        rws = rec["runway_lines"]
+        if not rws:
+            errors.append(f"[RUNWAY_EMPTY] {code} ({rec['name_ja']}): 有効な滑走路ラインがありません")
+        else:
+            for idx, line in enumerate(rws):
+                if any(val < 0.10 or val > 0.90 for val in line):
+                    errors.append(
+                        f"[RUNWAY_BOUNDS] {code} runway#{idx}: 安全域(0.10-0.90)を超過 {line}"
+                    )
+
+    # 検証2: 代表地点IN判定（丸め後の最終ポリゴンでテスト）
+    for code, points in test_points.items():
+        geom = geoms_by_code.get(code)
+        if geom is None:
+            errors.append(f"[TEST_UNKNOWN_CODE] test_pointsの {code} が対象空港に存在しません")
+            continue
+        for tp in points:
+            pt = Point(tp["lng"], tp["lat"])
+            if not geom.covers(pt):
+                errors.append(
+                    f"[POINT_OUTSIDE] {code}「{tp['label']}」({tp['lat']}, {tp['lng']}) がジオフェンス外です"
+                )
+
+    # 検証3: 隣接空港のジオフェンス干渉チェック
+    codes = list(geoms_by_code.keys())
+    for i in range(len(codes)):
+        for j in range(i + 1, len(codes)):
+            c1, c2 = codes[i], codes[j]
+            if geoms_by_code[c1].intersects(geoms_by_code[c2]):
+                errors.append(f"[OVERLAP] 隣接空港のジオフェンスが重なっています: {c1} ⇄ {c2}")
+
+    return errors
+
+
+# ===== 5. 目視検品用HTMLプレビュー生成 =====
+def render_preview_html(records: list[dict[str, Any]], out_path: Path) -> None:
+    cards: list[str] = []
+    for rec in records:
+        rw_lines = "\n".join(
+            f'<line x1="{u1 * 100:.1f}" y1="{v1 * 100:.1f}" '
+            f'x2="{u2 * 100:.1f}" y2="{v2 * 100:.1f}" '
+            f'stroke="#1C4FA0" stroke-width="2.2" stroke-linecap="round" opacity="0.35"/>'
+            for u1, v1, u2, v2 in rec["runway_lines"]
+        )
+
+        minx, miny, maxx, maxy = rec["bbox"]
+        cos_m = math.cos(math.radians((miny + maxy) / 2.0))
+        w = max((maxx - minx) * cos_m, 1e-6)
+        h = max(maxy - miny, 1e-6)
+        span = max(w, h)
+
+        poly_svgs: list[str] = []
+        for ring in rec["geofence_polygons"]:
+            pts = []
+            for lng, lat in ring:
+                px = 10.0 + (((lng - minx) * cos_m) / span) * 80.0 + (80.0 - (w / span) * 80.0) / 2.0
+                py = 90.0 - ((lat - miny) / span) * 80.0 - (80.0 - (h / span) * 80.0) / 2.0
+                pts.append(f"{px:.1f},{py:.1f}")
+            poly_svgs.append(
+                f'<polygon points="{" ".join(pts)}" fill="rgba(28,79,160,0.14)" '
+                f'stroke="#1C4FA0" stroke-width="1.5"/>'
+            )
+
+        fallback_tag = " / 簡易円" if rec["_is_fallback"] else ""
+        cards.append(
+            f"""
+            <div class="card">
+              <div class="head"><strong>{rec['code']}</strong><span>{rec['name_ja']}</span></div>
+              <div class="row">
+                <svg viewBox="0 0 100 100" class="box">
+                  {rw_lines}
+                  <text x="50" y="56" text-anchor="middle" font-size="22" font-weight="700" fill="#111827">{rec['code']}</text>
+                </svg>
+                <svg viewBox="0 0 100 100" class="box">{''.join(poly_svgs)}</svg>
+              </div>
+              <div class="meta">頂点: {rec['_vertex_count']} ／ 滑走路: {len(rec['runway_lines'])}本{fallback_tag}</div>
+            </div>
+            """
+        )
+
+    html = f"""<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><title>そらメモ 空港マスター目視検品</title>
+<style>
+  body {{ margin: 0; padding: 20px; background: #F2F4F7; font-family: -apple-system, BlinkMacSystemFont, sans-serif; color: #111827; }}
+  h1 {{ font-size: 18px; margin: 0 0 16px; }}
+  .grid {{ display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; }}
+  .card {{ background: #fff; border: 1px solid #DCE1E8; border-radius: 16px; padding: 12px; box-shadow: 0 2px 8px rgba(17,24,39,0.05); }}
+  .head {{ font-size: 14px; margin-bottom: 8px; display: flex; justify-content: space-between; }}
+  .row {{ display: flex; gap: 8px; }}
+  .box {{ width: 92px; height: 92px; background: #F8FAFC; border-radius: 10px; }}
+  .meta {{ font-size: 11px; color: #4B5563; margin-top: 8px; font-variant-numeric: tabular-nums; }}
+</style></head>
+<body>
+  <h1>そらメモ 空港マスター目視検品（{len(records)} 空港）</h1>
+  <div class="grid">{''.join(cards)}</div>
+</body></html>
+"""
+    out_path.write_text(html, encoding="utf-8")
+
+
+# ===== CLIエントリポイント =====
+def parse_args() -> argparse.Namespace:
+    root = Path(__file__).resolve().parent.parent
+    parser = argparse.ArgumentParser(description="そらメモ 空港マスターデータビルド＆検証")
+    parser.add_argument("--raw-dir", type=Path, default=root / "raw")
+    parser.add_argument("--overrides-dir", type=Path, default=root / "overrides")
+    parser.add_argument("--dist-dir", type=Path, default=root / "dist")
+    parser.add_argument("--buffer-m", type=float, default=DEFAULT_BUFFER_M)
+    parser.add_argument("--rdp-m", type=float, default=DEFAULT_RDP_TOLERANCE_M)
+    parser.add_argument("--decimals", type=int, default=DEFAULT_COORD_DECIMALS)
+    return parser.parse_args()
+
+
+def main() -> None:
+    args = parse_args()
+    args.dist_dir.mkdir(parents=True, exist_ok=True)
+
+    overrides_cfg = json.loads(
+        (args.overrides_dir / "airport_overrides.json").read_text(encoding="utf-8")
+    )
+    tp_path = args.overrides_dir / "test_points.json"
+    test_points = json.loads(tp_path.read_text(encoding="utf-8")) if tp_path.exists() else {}
+
+    oa_airports = load_ourairports_airports(args.raw_dir / "ourairports_airports.csv")
+    oa_runways = load_ourairports_runways(args.raw_dir / "ourairports_runways.csv")
+    c28_geoms = load_c28_polygons(args.raw_dir / "mlit_c28_airports.geojson")
+
+    records: list[dict[str, Any]] = []
+    geoms_by_code: dict[str, Polygon | MultiPolygon] = {}
+
+    for item in overrides_cfg["airports"]:
+        code = item["code"].upper()
+        icao = item["icao"].upper()
+
+        oa = oa_airports.get(icao)
+        if not oa and ("center_lat" not in item or "center_lng" not in item):
+            print(f"[FATAL] {code} ({icao}) の標点座標が見つかりません", file=sys.stderr)
+            sys.exit(1)
+
+        center_lat = float(item.get("center_lat", oa["lat"]))
+        center_lng = float(item.get("center_lng", oa["lng"]))
+        buffer_m = float(item.get("buffer_m", args.buffer_m))
+
+        raw_geom = match_c28_geometry(center_lat, center_lng, c28_geoms)
+        final_geom, rings, bbox, vertex_count = build_geofence(
+            raw_geom=raw_geom,
+            center_lat=center_lat,
+            center_lng=center_lng,
+            buffer_m=buffer_m,
+            rdp_tolerance_m=args.rdp_m,
+            coord_decimals=args.decimals,
+        )
+        geoms_by_code[code] = final_geom
+
+        rw_segments = (
+            [tuple(seg) for seg in item["runways_override"]]
+            if "runways_override" in item
+            else oa_runways.get(icao, [])
+        )
+        runway_lines = normalize_runways(rw_segments)
+
+        records.append(
+            {
+                "code": code,
+                "icao": icao,
+                "name_ja": item["name_ja"],
+                "name_en": item["name_en"],
+                "region_code": item["region_code"],
+                "category": item.get("category", "scheduled"),
+                "center_lat": round(center_lat, 5),
+                "center_lng": round(center_lng, 5),
+                "bbox": bbox,
+                "geofence_polygons": rings,
+                "runway_lines": runway_lines,
+                "_vertex_count": vertex_count,
+                "_is_fallback": raw_geom is None,
+            }
+        )
+
+    # 検品HTMLはエラー原因の目視確認に使えるよう、検証より先に出力
+    preview_path = args.dist_dir / "preview_100.html"
+    render_preview_html(records, preview_path)
+
+    errors = validate_master(records, geoms_by_code, test_points)
+    if errors:
+        print(f"\n❌ バリデーション失敗（{len(errors)}件）:", file=sys.stderr)
+        for err in errors:
+            print(f"  - {err}", file=sys.stderr)
+        print(f"※ 目視検品HTMLを確認してください: {preview_path}", file=sys.stderr)
+        sys.exit(1)
+
+    # 内部メタキーを除いて最小化JSONと差分配信用マニフェストを出力
+    export_records = [
+        {k: v for k, v in rec.items() if not k.startswith("_")}
+        for rec in records
+    ]
+    payload = {
+        "master_version": overrides_cfg["master_version"],
+        "airport_count": len(export_records),
+        "airports": export_records,
+    }
+    json_bytes = json.dumps(payload, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
+    out_json = args.dist_dir / "airports_master.json"
+    out_json.write_bytes(json_bytes)
+
+    gz_bytes = gzip.compress(json_bytes)
+    sha256_hex = hashlib.sha256(json_bytes).hexdigest()
+    manifest = {
+        "version": overrides_cfg["master_version"],
+        "airport_count": len(export_records),
+        "sha256": sha256_hex,
+        "raw_bytes": len(json_bytes),
+        "gzip_bytes": len(gz_bytes),
+    }
+    out_manifest = args.dist_dir / "master_manifest.json"
+    out_manifest.write_text(json.dumps(manifest, indent=2, ensure_ascii=False), encoding="utf-8")
+
+    avg_v = sum(r["_vertex_count"] for r in records) / max(len(records), 1)
+    print(f"✅ ビルド＆検証完了: {len(export_records)} 空港")
+    print(
+        f"   平均頂点数: {avg_v:.1f} ／ 生JSON: {len(json_bytes) / 1024:.1f} KB "
+        f"／ gzip: {len(gz_bytes) / 1024:.1f} KB"
+    )
+    print(f"   SHA-256: {sha256_hex[:16]}...")
+    print(f"   出力: {out_json} / {out_manifest}")
+    print(f"   検品: {preview_path}")
+
+
+if __name__ == "__main__":
+    main()
+
+4. 実行方法とスクリプト内の安全設計
+# 標準パラメータ（バッファ200m / RDP 40m / 小数4桁）で実行
+python scripts/build_master.py
+
+# バッファや簡略化強度をチューニングして試す場合
+python scripts/build_master.py --buffer-m 250 --rdp-m 35 --decimals 4
+
+ * 正確な距離計算による空間照合： nearest_points と Haversine 距離で C28 ポリゴン境界との実距離を測るため、和名表記の差や海上滑走路の分割ポリゴンでも取りこぼしなく統合できます。
+ * 空港ごとの正距方位図法（+proj=aeqd）： 日本列島は複数のUTMゾーンをまたぎますが、各空港の中心を原点にした AEQD へ一時投影することで、北海道から沖縄まで一律に誤差のないメートル単位バッファと RDP 簡略化が効きます。
+ * 丸め後の重複頂点除去と再構築検証： round(x, 4) で近接頂点が同じ座標に潰れても dedupe_and_round_ring で不正リングを防ぎ、丸めた後の最終ポリゴンに対して test_points.json の内外判定と隣接干渉チェックを実行します。
+ * ヘリパッドの自動除外とマニフェスト出力： OurAirports に混在しがちなヘリパッド（H1等）を弾いて印カードの見た目を保ちつつ、将来のリモート緊急更新にそのまま使える master_manifest.json（SHA-256付き）も同時に生成します。
