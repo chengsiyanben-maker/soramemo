@@ -1,6 +1,10 @@
 # データ担当の帳面
 
 ## いま持っている仕事
+- **羽田・成田を優先して取る＋当たり具合【別の回の案。#227 と同じ仕事】（PM の指示 11/25 18時45分。11/25 水曜に定期の回として呼ばれ、積んであったこの指示をした。同じ時刻に別のデータ担当の回が data/hnd-nrt-priority・PR #227 を先に仕上げていたのを、push のときに知った）**：ブランチ data/hnd-nrt-priority-b（main 4354656 から）→ **下書き PR #228**。報告 docs/pm/report-hnd-nrt-priority-b.md。本人用の読むだけの SQL docs/pm/hnd-nrt-priority-b-check.sql。**#227 と同じく移行198・テスト t136 を使っているので、両方は入れない**
+  - おすすめ：#227 を本筋にし #228 は閉じる。#227 にない2つ（A：東の円が断られた回は同じ円を取り直さず新千歳・那覇を休む recordStep／B：追い風の上限×粘り×戻り幅の30組を切り替えを待つ動きで数える関数 rwy_wx_eval）は、PM が要ると決めたら #227 のあとに移行199・t137 で足す
+  - 確かめ：t136 33項目・deno test 327本（taf_test 5本）・deno check・migrations.mjs check 188件・模擬90日で rwy_wx_eval 約4.3秒（PGlite）
+  - 次の仕事 data/hnd-nrt-more（11/25 18時50分）は、#227 の回が続けて受け持っている見込みなので、この回では始めていない（重ねないため）
 - **印を押すときのロードを短く（PM の最優先の指示 11/25 17時45分。11/25 水曜に定期の回として呼ばれたが、PM の積んだ指示があったのでこちらをした）**：ブランチ data/stamp-fast（main 4354656 から）→ **下書き PR #225**。報告 docs/pm/report-stamp-fast.md。本人用の読むだけの SQL docs/pm/stamp-fast-check.sql。**移行・テスト番号は使っていない（表を変えていない）**
   - 調べた結果：データベース側に重い処理はない（checkins にトリガーなし・集計は保存の中で走らない・索引は足りている）。重いのは関数 checkin の待ち方（毎回 aviationweather.gov へ最大2.5秒・往復約9回が順番）
   - 直し：天気は 記憶 → edge_cache（now:wx）→ wx_obs（75分まで）で決め、決まらなければ空で記録して返したあとに書き足す（_shared/checkin_wx.ts）。前半の読み5つを同時に、ボーナスとフライトも同時に。ログ checkin_ms（read・total・wx）
@@ -363,11 +367,13 @@
 - main の最新は 160（159 airport_yomi・160 airport_facts は 11/10 本番に入った）。156・157 は 11/9 本番に入った。**maint/2026-11-09 の 158 は main の 159 より前になったので、反映の前に migrations.mjs rebase が要る**。maint/2026-11-06 は 153・テスト t93（fix/co-tests の経営の移行も 153 なので、反映の前に rebase）、data/photo-log は 154・テスト t94、maint/2026-11-07 は 155・テスト t95、data/debug-1107 は 156・テスト t96（関数のテストは supabase/tests/live_view_test.ts。main に反映済み）、data/view-prefs は 157・テスト t97、maint/2026-11-09 は 158・テスト t98、maint/2026-11-10 は 161・テスト t101。data/airport-facts は 160・テスト t100。そのほか次に新しく作るものは 162 以降・テストは t102 以降。**maint/2026-11-11 は 162・テスト t102**（161 の maint/2026-11-10 より後。反映の順が変わったら rebase）。**data/heliports の 163・t103 は 11/12 main に入った（PR #75 と一緒）**。**data/speed-1113 は 164・テスト t104**。**data/speed-1113b は 165・テスト t105**（164 の上）。**data/rot-learn-hi は 166・テスト t106**（関数1つだけなので 164・165 と順番が入れ替わってもよい）。（164〜167 は 11/13 に main に入った。166 は経営の co_cron_timeout、learn_hi は 167 に付け直し）。**data/alert-merge は 168・テスト t107**（11/14 main に入った）。**data/world-ops は 169・テスト t108**。**maint/2026-11-16 は 170・テスト t109**。**data/foreign-collect は 171・テスト t110**（170 と別の関数なので順番は入れ替わってもよい）。（11/16 data/redo-1116 で手入れ6本を 173〜178・t112〜t117 に付け直し、179 odpt_feed_dates・t118、180 verify_arrivals・t119。172・t111 は経営の keiei/redo-1116）。**data/foreign-collect は 181 foreign_cold・t120、182 foreign_watch・t121**。（171〜182 は 11/16 本番に入った。経営の t128 も main にある）。**maint/2026-11-16b は 183・テスト t122**。**data/foreign-livery は 184・テスト t123**。**data/usual-late-rpc は 185・テスト t124**（183 とは別の関数なのでどちらが先でもよい）。data/atd-future は 186・テスト t125。**data/flight-actual は 187・テスト t126**。**data/redo-1120 は 188（maint_1116b の付け直し・テスト t122）・189（inbound_first_of_day・テスト t127）**。**data/adsblol-key2 は 190 track_quota・テスト t129**。**data/sweep-1121 は 191 odpt_feed_at・テスト t130**。**data/livery-dest2 は 192 airline_codes_more・テスト t131**。**193 livery_seen_midnight は main にある。maint/2026-11-23 は 194・テスト t132**。**data/board-bad は 195・テスト t133**。**次に新しく作るものは 196 以降・テストは t134 以降**（t128 は経営が使った。maint/2026-11-16b の 183 は使わない）（data/foreign-carriers・data/foreign-livery は報告だけで番号を使っていない）
 - 11/24：data/sweep-all（PR #206）が移行196・テスト t134
 - 11/25：data/sweep-1125（PR #216）が移行197・テスト t135。次は198・t136 から（data/stamp-fast #225 は移行なし）
+- 11/25：data/hnd-nrt-priority（#227）と data/hnd-nrt-priority-b（#228・別の回の案）がどちらも移行198・t136。入れるのは片方だけ。#228 の A・B を足すなら199・t137
 - main に別の移行が先に入ったら、反映の前にもう一度 `node tools/migrations.mjs rebase`
 - 本番は小さいプランで一時ファイルの余裕がない。本人に流してもらう SQL は、大きな中間の表・自己結合・大きな並べ替えを避け、索引で引く形にする
 - SQL のテストは全部で約35分かかる（手元で流すときは裏で流してログを見る。t92 だけで約4分。同じログに2回流すと混ざるので、ログの名前を分ける）
 
 ## 次にやること
+- 羽田・成田（#227／#228）：PM がどちらを本筋にするか決めたら、もう片方を閉じる。#228 の A・B を足すと決まれば #227 の上に移行199 で。当たり具合の結果（check.sql）が貼られたら、羽田の追い風の上限と粘りの案をまとめる
 - 印の速さ（PR #225）：反映のあと、本人に stamp-fast-check.sql の 1・2 と Edge Functions の checkin のログ「checkin_ms」を見てもらい、まだ遅ければ getClaims（本人の OK のあと）と初訪問の数の2本を1本にまとめる案を見る
 - 見直し B のデータの分（PR #206・移行196・t134）：CI とレビューに答える。反映の前に main に別の移行が先なら rebase。sweep-all-check.sql の 1 を反映の前、2〜4 を反映のあと、4 を次の日（毎時の仕事の時間・失敗）。反映のあと羽田の昼に案内板・短冊・撮る人で先の便が出るか、運用を開いたときの 500（57014）が減ったかを PM に見てもらう。まだ時間切れが出るなら、airport_board の残り（flight_watch の結合・taxi_out_min）を見る
 - 今日の遅れの bad（PR #197・移行195・t133。main に入った）：反映の Actions の結果を見る。反映のあと、本番の運用タブで「遅れ」の絞り込みが出るかを PM に見てもらう。本人が「今日」を一日中にすると決めたら見る幅を広げる（hours も変わる）
