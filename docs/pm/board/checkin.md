@@ -1,6 +1,7 @@
 # チェックイン担当の帳面
 
 ## いま持っている仕事
+- 【11/26 4時25分】PR #248（idem-cid）は main に入った。見張りは外れた。残り：#239 の mfInsert を idemInsert につなぐ（あとから入る方で）・修行の sgRecordPlan の依頼（下）
 - 11/26 手動の回（同じ「checkin/idem-cid を進めて」の指示）：直前の回で PR #248（181cd6ed）として済み。main も f18b2eb2 のままで取り込み済みなので作り直さなかった。PM の自動の反映を待つ
 - **11/26 定時の回（帳面の積み「11/26 1時30分 PM から：checkin/idem-cid」）**：checkin/idem-cid・下書き **PR #248**（181cd6ed・報告 docs/pm/report-idem-cid.md）。main（f18b2eb2・#240 data/idem 入り）を取り込み済み。見張りを付けた。画面の見た目は変えていないので、テストが通れば PM が自動で反映してよい
   - 印：checkinServer で押すたびに p.cid（ckCid・UUID）。sendCheckin の本文に cid。enqueue は cid を残す。flushQueue は前の版の ID なしの保留にも送る前に付けて保存。返事の again は成功のまま（記録の名前だけ checkin_again）
