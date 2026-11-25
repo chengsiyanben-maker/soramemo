@@ -2,6 +2,7 @@ import os, sys
 HERE=os.path.dirname(os.path.abspath(__file__)); WEB=os.path.abspath(os.path.join(HERE,'..','..','web')); WORK=os.environ.get('SORAMEMO_TEST_WORK','/tmp/soramemo-e2e'); os.makedirs(WORK, exist_ok=True)
 SHOTS=os.path.abspath(os.path.join(HERE,'..','..','docs','pm','shots-ops-3d')); os.makedirs(SHOTS, exist_ok=True)
 THREE=os.path.join(WORK, 'three-0.160.0.module.min.js')
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__))); from three_local import ensure_three; ensure_three(THREE)   # 自分で用意する（t142 に頼らない・11/26 test-steady）
 # 運用タブの一覧に「3D」のカード（11/21 本人「3Dの入口がわかりにくいから、運用にも追加して」・ブランチ checkin/ops-3d）
 #   1 羽田を選んでいるときだけ、「地図」のカードのすぐ後に「3D」のカード（見出し1語＋小さな絵＋「約○MB」を小さく薄いグレー）
 #   2 ほかの空港（伊丹）では出ない

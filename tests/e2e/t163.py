@@ -10,6 +10,7 @@ HERE = os.path.dirname(os.path.abspath(__file__)); WEB = os.path.abspath(os.path
 WORK = os.path.join(os.environ.get('SORAMEMO_TEST_WORK', '/tmp/soramemo-e2e'), 'cxsrv')
 SHOTS = os.path.abspath(os.path.join(HERE, '..', '..', 'docs', 'pm', 'shots-close-always')); os.makedirs(SHOTS, exist_ok=True)
 THREE = os.path.join(os.environ.get('SORAMEMO_TEST_WORK', '/tmp/soramemo-e2e'), 'three-0.160.0.module.min.js')
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__))); from three_local import ensure_three; ensure_three(THREE)   # 自分で用意する（t142 に頼らない・11/26 test-steady）
 fails = []
 def check(name, ok, detail=''):
     print(('OK  ' if ok else 'NG  ') + name + (('  ' + str(detail)) if detail != '' else ''))
@@ -163,7 +164,7 @@ async def main():
             check('3D：戻る操作で閉じる', not await pg.evaluate(OPEN, 'dAp3d') and await pg.evaluate("A3 === null"))
             allerr += errs; await c.close()
         else:
-            print('three.js がないので、3D を回している途中・左の端の確かめは飛ばす（t142 を先に流すと置かれる）')
+            print('three.js がないので、3D を回している途中・左の端の確かめは飛ばす（CDN から取れなかった）')
 
         # ---- 閉じさせない画面（cancel を止めている）は戻る操作でも閉じない ----
         c, pg, errs = await page(b)
