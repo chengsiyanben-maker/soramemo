@@ -1,7 +1,11 @@
 # データ担当の帳面
 
 ## いま持っている仕事
-- **定期の手入れ 11/26（木。PM の指示なしの定期の回）**：ブランチ maint/2026-11-26（main 4a128ee から）→ **下書き PR #246**。報告 docs/pm/maint/2026-11-26-report.md。確かめの SQL docs/pm/maint/2026-11-26-check.sql。**移行201・テスト t139**（#230・#240 が main に入ったあとの番号。重なりなし。#241 の A・B を足すなら202・t140 に）
+- **記録帳の便名と flight_lookup（PM の指示 11/26 1時30分。#239 の依頼 ①②）**：ブランチ data/flight-no → **下書き PR #247**。報告 docs/pm/report-flight-no.md。確かめの SQL docs/pm/flight-no-check.sql。**移行202・テスト t140**
+  - ① manual_flights.flight_no（text・任意・形は flight_history と同じ）。RLS は今のまま本人の行だけ。直せる列に flight_no を足した（PM のおすすめで決めた）
+  - ② flight_lookup(p_date, p_flight)：flight_history（約400日）から。ない日は flight_schedule（src = schedule・登録記号なし）。前の 0・小文字・共同運航の also で見つける。区間が2つの日は最大6まで定刻の順。権限は flight_facts と同じ（anon・authenticated）。その日の行だけを主キーと一意の索引の先頭で読む
+  - t140 33項目・関係するテスト62本 通過。列を足すだけなので PM の自動の反映でよい。三沢・岩国の terminals は本人の OK まで足さない
+- **定期の手入れ 11/26（木。PM の指示なしの定期の回）**：ブランチ maint/2026-11-26（main 4a128ee から）→ **下書き PR #246**。報告 docs/pm/maint/2026-11-26-report.md。確かめの SQL docs/pm/maint/2026-11-26-check.sql。**移行201・テスト t139**（#230・#240 が main に入ったあとの番号。重なりなし。#241 は閉じた）
   - やり方：SQL の関数 約200個を `enable_seqscan off` の汎用の計画にかけ、それでも全部読みになる所を機械で洗い出した（次の回も同じ形で使える）。先頭が重なる索引は0本。新しい cron 3つは上限あり
   - 直したもの：rwy_sample_counts（rwy_samples を毎回まるごと数える・どこからも呼ばれていない）を anon・authenticated から外す（service_role に明示で付けた。関数は残す）／airports (iata) の部分索引 airports_iata（airport_board・verify_arrivals・world_flight_counts・is_japan_iata）
   - t35 の「数は anon から読める」を「anon からは呼べない・持ち主からは読める」に合わせた。t105・t122・t132・t134〜t136 通過
@@ -409,14 +413,15 @@
 - 11/25：data/sweep-1125（PR #216）が移行197・テスト t135（data/stamp-fast #225 は移行なし）
 - 11/25：data/hnd-nrt-priority（#227）と data/hnd-nrt-priority-b（#228・別の回の案）がどちらも移行198・t136。入れるのは片方だけ。#228 の A・B を足すなら199・t137
 - data/hnd-nrt-more（PR #230）が移行199・テスト t137。#228 の A・B を足すなら200 以降に付け直す
-- 11/26：data/idem（PR #240）が移行200・テスト t138。data/idem-b（#241・別の回の案）も200・t138 なので入れるのは片方だけ。maint/2026-11-26（PR #246）が移行201・t139。次は202・t140 から
+- 11/26：data/idem（PR #240）が移行200・テスト t138。data/idem-b（#241・別の回の案）も200・t138 なので入れるのは片方だけ。maint/2026-11-26（PR #246）が移行201・t139。data/flight-no（PR #247）が202・t140。次は203・t141 から
 - main に別の移行が先に入ったら、反映の前にもう一度 `node tools/migrations.mjs rebase`
 - 本番は小さいプランで一時ファイルの余裕がない。本人に流してもらう SQL は、大きな中間の表・自己結合・大きな並べ替えを避け、索引で引く形にする
 - SQL のテストは全部で約35分かかる（手元で流すときは裏で流してログを見る。t92 だけで約4分。同じログに2回流すと混ざるので、ログの名前を分ける）
 
 ## 次にやること
+- 記録帳の便名と flight_lookup（PR #247・移行202・t140）：CI とレビューに答える。反映の前に main に別の移行が先なら rebase。反映のあと flight-no-check.sql を1回（③ 前の日の便・④ 今日の分が src = schedule で返るか）。チェックイン担当が画面につないだあと、呼ばれる回数が多ければ返す形を軽くする
 - 定期の手入れ 11/26（PR #246・移行201・t139）：CI とレビューに答える。反映の前に main に別の移行が先なら rebase。2026-11-26-check.sql の結果（① anon が f・② airports の全部読みの伸び・④ 全体の大きさと上位10）で無料枠・プランまでの見込みを出す。次の定期の回は plpgsql の関数（約170個）を呼ばれる回数の多いものから手で見る。管制の交信を使い始めるなら atc_msgs (feeder) の索引
-- 二重防止（#240／#241）：PM がどちらを本筋にするか決めたら、もう片方を閉じる。#241 の A・B を足すと決まれば #240 の上に移行202・t140 で（201・t139 は定期の手入れ #246）
+- 二重防止（#240／#241）：PM がどちらを本筋にするか決めたら、もう片方を閉じる。#241 は閉じた（11/26 1時30分 PM）
 - 空港の形（PR #243）：ap-shape-check.sql の結果で三沢・岩国の断りを見る。本人が行を足すと決めたら terminals の移行（RLS はそのまま・SQL のテスト）とチェックイン担当への依頼（TERMS に同じ行）。印のカードの画面案が決まったら、線を画面に持つか表にするか。OurAirports は年に一度取り直す（airport-data-howto.md の6）
 - 二重にならない仕組み（PR #240・移行200・t138）：CI とレビューに答える。反映の前に main に別の移行（#230 の199 など）が先なら番号を確かめ、重なれば rebase。反映の前後に idem-check.sql の 1・2、チェックイン担当の画面の直しが入った次の日に 3（ID 付きの割合）を見てもらう。1 で今までの二重が多ければ、消さずに印へ印（flags）を付ける案を PM に。本人がメモ・予定の画面案を選んだら、メモは印と別の表（印の数・経営の路線に入らない）で移行201 以降
 - 羽田・成田の細かいデータ（PR #230・移行199・t137。11/26 main に入った）：反映の Actions の結果を見る。反映のあと hnd-nrt-more-check.sql の 1（次の日）で ground_moves の lost の割合・with_taxi の割合を見て、判定の幅（15kt・2回・5分）を直す。本人の答えでアメダス（よければ表と取り込み・移行200）。次の回の候補は帳面の上の「次の回の候補」
@@ -468,6 +473,7 @@
 8. それ以外は PM の指示を待つ（勝手に新しい機能は始めない）。毎週月曜の昼の回は、下の「定期の仕事」（次の候補：点検の結果が来たら、死んだ行や使われていない索引の整理・遅い処理。cold-day-size.sql の結果で全機の航跡の1日が 20MB を超えるなら、ファイルを空港ごとに分ける案を作る。rwy-learn と daily-archive は 11/10 に見た（PR #58）。eta-calib・taxi-out・flight-watch は 11/11 に見た（PR #70）。結果がないまま次の回が来たら、ほかの毎晩・裏の処理（timetable-sync・schedule-sync・odpt-status・co3 の SQL の文）を同じ目で見て、時間の上限のない仕事の一覧を作る）
 
 ## ほかの担当への依頼
+- チェックインへ（11/26・data/flight-no #247。詳しくは report-flight-no.md の4）：記録帳の flight_no は大文字・空白なしの形（JL123）で送る。過去の便は `sb.rpc("flight_lookup", { p_date, p_flight })`。rows が2つ以上なら区間を選んでもらう。src = schedule の行は登録記号なし。400日より前は空
 - 経営へ（11/16 から残ったまま。11/26 にも確かめた）：毎日の仕事 co3-trouble-detect（20261028000116）に時間の上限がない。経営の移行で `set statement_timeout = '3min'; set lock_timeout = '5s';` を文の先頭に
 - チェックインへ（11/26 空港の形・PR #243。本人が決めたら）：三沢・岩国のターミナルが判定の円の外。terminals に行を足すと決まったら、src/index.html の TERMS にも同じ行（MSJ-T 40.696583,141.387750／IWK-T 34.158808,132.235052・ターミナルの印は出さない）。滑走路の線は data/ap_shape/runway_lines.json（id は airports の id）
 - デザインへ（11/26 同上）：印のカードの案A の滑走路の線は data/ap_shape/runway_lines.json の lines（0.15〜0.85。160 の箱なら ×160）。確かめ用のページ data/ap_shape/preview.html
