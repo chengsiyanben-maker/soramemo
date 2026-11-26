@@ -125,6 +125,8 @@ async def main():
         check('札の字は13px以上', tags and all(t['fs'] >= 13 for t in tags), [t['fs'] for t in tags])
         ov = any(a['r']['left'] < b2['r']['right'] and a['r']['right'] > b2['r']['left'] and a['r']['top'] < b2['r']['bottom'] and a['r']['bottom'] > b2['r']['top'] for i, a in enumerate(tags) for b2 in tags[i + 1:])
         check('札は重ならない', not ov, [(t['t'], [round(t['r'][k]) for k in ('left', 'top', 'right', 'bottom')]) for t in tags])
+        hs = await pg.evaluate("[...document.querySelectorAll('#a3Labels .a3tag')].map(t => t.getBoundingClientRect().height)")
+        check('札の高さは置き方の見積もり（36px）に収まる（11/27：32px の見積もりで端の札が接して重なった）', hs and max(hs) <= 36, hs)
         info['new_all_day'] = await pg.evaluate(INFO)
         await pg.screenshot(path=os.path.join(SHOTS, 'new_all_day.png'))
         # 札を押すとその機体を選ぶ（下のシートもその機体のカード）
