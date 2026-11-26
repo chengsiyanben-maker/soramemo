@@ -1,6 +1,13 @@
 # チェックイン担当の帳面
 
 ## いま持っている仕事
+- **11/26 定時の回（帳面の「次にやること」：撮る人用の依頼①②）**：checkin/a3-reg・下書き **PR #263**（ed373df4・報告 docs/pm/report-a3-reg.md・写真 docs/pm/shots-a3-reg/）。main（594dd3ee）から。見張りを付けた。見た目は一言の欄の文だけなので、テストが通れば PM が自動で反映してよい
+  - ①：openAp3dReg(reg) で羽田の3D を開き、位置が届いたらその登録記号の機体を「追う」で開く（空・地上とも。a3RegKey で大文字・英数字だけにそろえる）。ボタンは data-ap3d-reg="JA01XJ" だけで動く。いない機体は全体のまま、下の一言の欄（A3.lost に miss:true）に「○○ はいま羽田の近くにいません。全体を出しています」と「ほかを追う」。デモは全体のまま
+  - 変えた関数：a3Poll（最後に a3WantReg）・a3Loop（A3.regAux：形ができたら a3Pills と a3Aux を1回）・a3Aux（一言の文）・3D を開くクリックの受け手。足した：a3RegKey・openAp3dReg・a3WantReg
+  - ②（図鑑の特別塗装機に運航中／終了の切り替え）は画面が変わるので作っていない。画面案待ち（PM へ）
+  - テスト：t205 を足した（全部成功）。t142・t159〜t163・t165・t166・t181・t190・t202 成功
+  - 本人（PM）に聞くこと：いない機体の書き方・「3Dで見る」をいるときだけ出すか・②の画面案を作るか
+  - #239（flight-suggest）は 11/26 の回のときも mergeable clean のまま。見張り中
 - 【11/26 8時25分ごろ】PR #255（perf-ios）と #257（test-steady）は main に入った（7d664c6d・release-1126d）。見張りは外れた。#239（flight-suggest）が run_all.py と web/ でぶつかったので main を取り込んだ（132d9818）：run_all は流し直しの形（run1）に t197 の上限 600 を残し、web/ は組み立て直した。t197・t202・t50・t200・t195・t203・t24・t144・t13・t47・t61・t123・t196 成功。#239 は見張り中
 - **11/26 手動の回（PM の指示「3時20分 perf-ios と 6時40分 小さな2つ、時間があれば 3時55分 test-steady」）**：両方とも済み
   - checkin/perf-ios・下書き **PR #255**（917cd487・報告 docs/pm/report-perf-ios.md・写真 docs/pm/shots-perf-ios/）。main（96a52fff）から。見張りを付けた。見た目は変えていないので、テストが通れば PM が自動で反映してよい
@@ -688,6 +695,8 @@
 - 確認コードは6けた。メールは Gmail、Supabase の送信上限は1時間100通
 
 ## 次にやること
+- 【11/26 a3-reg】PR #263：PM の自動の反映を待つ。入る前に t205・t142・t159〜t163・t165・t166・t181・t190・t202・tests/ops を流す。本人の答え（いない機体の書き方・いるときだけ出すか）で直す。撮る人用が「3Dで見る」に data-ap3d-reg を付けたら t205 の作り物のボタンと同じ形か見る。②（図鑑の運航中／終了）は画面案が来たら作る（spbTerm(reg) が { st, txt, tag } を返す・LIVERY_TERM）
+- 【次の回】PM の指示がなければ、帳面の積みで残っているものを上から見る（いまは新しい積みなし。修行の sgRecordPlan は修行担当の分）
 - 【11/26 perf-ios】PR #255：PM の自動の反映を待つ。入る前に t202・t50・t142・t159〜t167・t181・t190・t195・t196・t24・t144〜t146・t183・t189・tests/ops を流す。#239（flight-suggest）・#257（test-steady）とは src の別の所（#257 はテストだけ）。#257 が先に入ったら t202 の three.js の用意も three_local.ensure_three にそろえる。あとから入る方で web/ を作り直す
 - 【11/26 test-steady】PR #257：PM の自動の反映を待つ。入ったら、run_all の「2回目で通った」の名前を見て、既知の落ちの一覧を書き直す（PM の帳面にも）
 - 【手元の道具】iPhone のセーフエリアは Playwright の CDP で Emulation.setSafeAreaInsetsOverride（{insets:{top:47,bottom:34,left:0,right:0}}）でまねられる（t202）
@@ -824,6 +833,8 @@
 - tests/ops は手元では npm の playwright にブラウザがないので、全体に入っている playwright をつないで流した（すべて成功）
 
 ## ほかの担当への依頼
+- 【11/26 撮る人用へ（PM から satsuei.md に写してほしい・PR #263）】依頼①の入口を作った：`openAp3dReg(reg)`、ボタンなら属性 `data-ap3d-reg="JA01XJ"` を付けるだけ（クリックの受け手は土台にある）。位置が届いたらその機体を「追う」で開く。いない機体は全体のまま一言と「ほかを追う」。#263 が main に入ってからつなぐ。依頼②（図鑑の運航中／終了）は画面案を待つ
+- 【11/26 デザイン担当へ（PM が決める）】図鑑の特別塗装機に「運航中／終了」の切り替えを足すなら画面案がほしい（撮る人用の spbTerm を使う形）
 - 【11/26 修行担当へ（PM 経由）】修行の「乗った」（sgRecordPlan）の manual_flights の insert を、`idemInsert("manual_flights", {...row, client_id: formCid("sg:" + p.id, row)})` にしてほしい（送り直しで二重にしない。data/idem・移行200。PR #248 が main に入ってから）。列がまだないサーバーでは idemInsert が前と同じ insert にする
 - 【11/26 データ担当へ（flight-suggest・PR #239）】(1) manual_flights に便名の列 flight_no（text・任意）を足してほしい（移行と RLS をセット。本人の行だけ書ける今の決まりのまま）。アプリは列があれば入れ、なければ外して入れる形にしてある (2) 「日付＋便名 → 出発・到着・時刻・機体」を flight_history から返す読むだけの関数（例 flight_lookup(p_date date, p_flight text)）。今は今の時刻表から推定している
 - 【11/25 checkin/micro の回へ（自分の持ち分の別の回）】stamp-fast（PR #229）で toast()・.smtoast（05 の札の形）を足した。micro の mxToast と1つにまとめてほしい。テストは micro が t194、stamp-fast が t195
@@ -936,7 +947,7 @@
 - feat/ops-v3 で運用の画面を作り直すときは、撮る人の見方（satsuei.md）と予想の出し方（yosoku.md）の部分の並べ方を変えない。場所が動くなら、その担当の帳面に書く
 
 ## 下の担当からの依頼
-- 撮る人用（11/26・PR #251 satsuei/gemini-small、急がない）：① 羽田の3D に「この登録記号の機体を選んで開く」入口があれば、特別塗装機のくわしくの「3Dで見る」に使いたい（今は「地図で見る」だけ）。作れるなら関数の名前を satsuei.md に書いてほしい ② 図鑑（特別塗装機）に「運航中／終了」の切り替えを足すなら、spbTerm(reg) が { st:"on"|"end", txt, tag } を返すので使ってよい（期間は LIVERY_TERM。組み立てで liveries.ts から入る）。撮る人の側は特別塗装機の一覧とくわしくにだけ出した
+- 【①は済み PR #263・②は画面案待ち】撮る人用（11/26・PR #251 satsuei/gemini-small、急がない）：① 羽田の3D に「この登録記号の機体を選んで開く」入口があれば、特別塗装機のくわしくの「3Dで見る」に使いたい（今は「地図で見る」だけ）。作れるなら関数の名前を satsuei.md に書いてほしい ② 図鑑（特別塗装機）に「運航中／終了」の切り替えを足すなら、spbTerm(reg) が { st:"on"|"end", txt, tag } を返すので使ってよい（期間は LIVERY_TERM。組み立てで liveries.ts から入る）。撮る人の側は特別塗装機の一覧とくわしくにだけ出した
 - 【済み 11/21 夜】修行（11/20・PR #147 shugyo-jst-year）：修行の年と月を日本時間にした（チェックイン側の関数は変えていない）。全体を流したとき t72・t123（フライトの共有の画面。#dShare の字が押す所をふさぐ）が今の main でも落ちた。チェックイン側で見てほしい → 今の main（3665d4ca）では caf39d0f・220bba55 で直っていた。t72・t123 とも 4/4 成功（報告 report-fix-t72-t123.md）
 - 運用予想（11/13・PR #83）への答え（11/13 定時の回）：setViewsw は PR #84 で「選んだ見方が帯の中に見えていれば左端から、外のときだけ送る」にした（図鑑・フライトも同じ）。loadPushKey はデモでは呼ばない形に直した（PR #84）。#83 と #84 を重ねると src/index.html は自動で重なり、ぶつかるのは組み立てた web/ だけ（作り直せばよい）。重ねた版で t128・t130・t60 が成功。opsViewsReveal はそのままで動く
 - 運用予想（11/13・PR #83 yosoku/fix-sweep-1113）：運用の見方の帯は opsViewsReveal で「はじめ左端・選んだ見方が外のときだけ送る」にした（共通の setViewsw は変えていない）。図鑑・フライトの帯も同じ送り方にするなら setViewsw に入れてほしい。デモの push-subscribe は運用からは呼ばなくなった（遅れのお知らせを出さないため）が、loadPushKey そのものの直し（見回りの9）はそちらで。src/index.html で変えた関数は報告 docs/pm/report-yosoku-fix-sweep-1113.md に
