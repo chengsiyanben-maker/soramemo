@@ -4732,6 +4732,7 @@ html:has(dialog[open]),html:has(dialog[open]) body{overscroll-behavior:none}
         <button class="swatch" data-pal="sora" aria-pressed="false"><i style="background:#233F9A"></i>空</button>
         <button class="swatch" data-pal="akashiro" aria-pressed="false"><i style="background:#D63131"></i>赤白</button>
       </div></div>
+    <div class="set-row" id="vibRow"><div>印のときに振動<small>印がサーバーで確定したときに、短く1回だけ振動します。音は鳴りません。端末の振動の設定に従います。</small></div><span id="vibSw"></span></div>
     <div class="set-row" id="gameRow"><div>エアライン経営<small>オフにすると、スタンプラリーだけのアプリとして使えます。記録はそのまま残り、オンに戻せば続きから遊べます。</small></div><button class="btn2" id="gameToggle" aria-pressed="true">使う（オン）</button></div>
   </section>
   <section class="mp-sec" data-mp-sec="data" aria-labelledby="mpData"><h4 id="mpData">データとバックアップ</h4>
@@ -7693,6 +7694,7 @@ async function ckSend(p, o){
     ckLater(renderSteps()); return;
   }
   track(r.again ? "checkin_again" : "checkin_ok", r.flight ? "flight" : r.terminal_id ? "terminal" : "airport");   // again：返事だけ届かなかった送り直し（成功として扱う）
+  stampBuzz();   // サーバーで確定した
   // 一言はサーバーの返事で書き直す（便ができたか・場所・行事のボーナス）。今までの checkinServer と同じ文
   const bon = Array.isArray(r.bonus) ? r.bonus : [], a = BY[r.airport_id] || BY[o.rec.a], term = r.terminal_id ? TBY[r.terminal_id] : null;
   say((r.flight && BY[r.flight.from_airport] ? `フライトを記録しました：${BY[r.flight.from_airport].name} → ${a.name}` : `${placeName(a, term)}にチェックインしました。`)
@@ -7718,6 +7720,7 @@ async function checkinServerWait(p){
   if(!r){ track("checkin_queued"); return enqueue(p, "busy", false); }
   if(!r.ok){ track("checkin_fail", r.reason); if(r.reason === "server") reportClientError("checkin", r.message); return say(ckWhyText(r.reason, p, r.message), true); }
   track(r.again ? "checkin_again" : "checkin_ok", r.flight ? "flight" : r.terminal_id ? "terminal" : "airport");
+  stampBuzz();   // サーバーで確定した
   await reload();
   const a = BY[r.airport_id], term = r.terminal_id ? TBY[r.terminal_id] : null;
   const flight = r.flight ? {id:r.flight.id, from:r.flight.from_airport, to:r.flight.to_airport, km:r.flight.distance_km} : null;
@@ -7834,6 +7837,16 @@ function homeState(){
   $("openSettings").setAttribute("aria-label", guest ? "ログイン・登録" : "マイページ");
   if((layoutChanged || was !== st) && $("homeSheet").sheetGo) $("homeSheet").sheetGo($("homeSheet").dataset.snap || "half");
 }
+// 印のときの振動（11/26 本人「消音モードじゃないなら振動」・PM の決め方）：ブラウザから消音モードは読めないので、
+//   印がサーバーで確定したときだけ短く1回（Android の Chrome など。端末の振動の設定に従う）。iPhone の Safari は仕組みがないので何もしない。
+//   マイページの「表示と色」の「印のときに振動」で切れる（はじめは ON・この端末だけ）。音は入れない。動きを減らす設定とは別
+const VIB_KEY = "soramemo.stamp.vibrate";
+const vibCan = () => typeof navigator !== "undefined" && typeof navigator.vibrate === "function";
+function vibOn(){ try{ return localStorage.getItem(VIB_KEY) !== "0"; }catch(e){ return true; } }
+function vibRender(){ const row = $("vibRow"); if(!row) return; row.hidden = !vibCan(); $("vibSw").innerHTML = loSw(vibOn(), "data-vib", "印のときに振動"); }
+function stampBuzz(){ if(!vibCan() || !vibOn()) return; try{ navigator.vibrate(20); }catch(e){} }
+document.addEventListener("click", e => { const b = e.target.closest && e.target.closest("[data-vib]"); if(!b) return;
+  const on = !vibOn(); try{ localStorage.setItem(VIB_KEY, on ? "1" : "0"); }catch(_){} vibRender(); track("stamp_vibrate", on ? "on" : "off"); });
 function showStamp(a, t, first, flight, term, firstTerm){
   try{ renderInstall(); }catch(e){}   // 最初の印のあとから「ホーム画面に追加」の帯を出す（11/26）
   const b = $("dStampBody");
@@ -7863,7 +7876,7 @@ function showStamp(a, t, first, flight, term, firstTerm){
   <button class="btn2" style="width:100%;margin-top:8px" data-photo-a="${a.id}" data-photo-t="${term?term.id:""}" data-photo-at="${t}" data-photo-f="${flight ? fid(flight) : ""}">写真に押す</button></div>`;
   $("dStamp").showModal();
   const w = b.querySelector(".stampwrap"); requestAnimationFrame(() => w.classList.add("press-on"));
-  // 11/26 本人「B」：振動と音は入れない決まりのとおり、印の振動は外した（navigator.vibrate を呼ばない）
+  // 11/26 13時50分 PM（本人「消音モードじゃないなら振動」）：ハンコを出したときは振動しない。サーバーで確定したときだけ stampBuzz（下）
 }
 
 /* ---------- map ---------- */
@@ -10579,7 +10592,7 @@ $("probe").onclick = async () => {
 };
 $("vlogClear").onclick = () => { if(confirm("検証ログを消します。")){ try{ localStorage.removeItem("soramemo.vlog"); }catch(e){} showVlog(); } };
 $("demoAirport").onchange = () => { showNearest(nearest(demoPlace())); say(""); };
-function openMyPage(page){ renderBaseSel(); mpPage(page || null); renderMyPage(); if(!$("dSettings").open) $("dSettings").showModal(); }   // page：目次のページ（lo・data・show・acct・adv）を開いた形で
+function openMyPage(page){ renderBaseSel(); vibRender(); mpPage(page || null); renderMyPage(); if(!$("dSettings").open) $("dSettings").showModal(); }   // page：目次のページ（lo・data・show・acct・adv）を開いた形で
 /* ---------- マイページ案B（11/24 本人 OK・design/mypage-tiles の B1・B2） ----------
    いちばん上は成績を横長の1枚＋修行・知らせの2枚。タブにある画面（図鑑・フライト・運用）はタイルにせず、タブから外した画面だけタイルが増える。
    設定は5行の目次（表示の編集・データとバックアップ・表示と色・アカウント・詳しい設定）。押すと同じダイアログの中で1枚のページ（中の行は今のまま） */
@@ -12207,7 +12220,7 @@ async function flushQueue(silent){
     if(rejected.some(({r}) => r.reason === "out_of_range")) parts.push(CK_TXT.book.replace(/。$/, ""));   // 記録帳への道は、かっこの中でなく最後に1回
     // 送れて確定したら札（design/micro の 05 の形・2秒）。範囲の外などで保留した分（ok:false）は札にしない
     const fin = sent.filter(({x}) => x.ok !== false), last = fin[fin.length - 1];
-    if(last){ const a = BY[last.r.airport_id] || BY[last.x.a], nm = a ? nearShort(a) : name(last.x); toast(fin.length > 1 ? `${nm}など${fin.length}件の印が確定しました` : `${nm}の印が確定しました`); }
+    if(last){ const a = BY[last.r.airport_id] || BY[last.x.a], nm = a ? nearShort(a) : name(last.x); toast(fin.length > 1 ? `${nm}など${fin.length}件の印が確定しました` : `${nm}の印が確定しました`); stampBuzz(); }
     if(expired.length) parts.push(`${expired.length}件は24時間を過ぎたため送れませんでした`);
     say(parts.join("。") + "。", !sent.length);
   } else if(!silent && q.length) say("まだサーバーにつながりません。電波のよい場所で、もう一度試してください。", true);

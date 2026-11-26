@@ -1,7 +1,8 @@
-# 下のタブ5つと「運用」→「いまの空港」の名前替え・印の振動を外す（11/26 checkin/tabs-b・本人「B」・画面案 design/ia-ops 案B）
+# 下のタブ5つと「運用」→「いまの空港」の名前替え・印の振動（11/26 checkin/tabs-b・本人「B」・画面案 design/ia-ops 案B）
 #   1 はじめの全部乗せのタブは今のまま5つ（ホーム・図鑑・フライト・いまの空港・修行）。「運用」の字は下のタブ帯に出ない
 #   2 いまの空港の画面の名前（aria-label）・専用ページの戻る「いまの空港」・表示の編集の名前（いまの空港（空港）・（機体））
-#   3 印を押しても、タブを長押ししても navigator.vibrate を呼ばない
+#   3 タブの長押しでは振動しない。印はハンコを出したときでなく、サーバーで確定したときだけ短く1回（11/26 13時50分 PM・本人「消音モードじゃないなら振動」）
+#     マイページ「表示と色」の「印のときに振動」（はじめは ON）を OFF にすると振動しない
 #   4 390／375 幅で下のタブ帯の字が1行に収まり、はみ出さない（写真 docs/pm/shots-tabs-b/）
 import os, sys, shutil
 HERE=os.path.dirname(os.path.abspath(__file__)); WEB=os.path.abspath(os.path.join(HERE,'..','..','web')); WORK=os.environ.get('SORAMEMO_TEST_WORK','/tmp/soramemo-e2e'); os.makedirs(WORK, exist_ok=True)
@@ -11,8 +12,8 @@ from playwright.async_api import async_playwright
 shutil.copy(os.path.join(WEB, 'index.html'), os.path.join(WORK, 'index_tabsb_test.html'))
 open(os.path.join(WORK, 'config.js'), 'w', encoding='utf-8').write('window.SORAMEMO_CONFIG = { supabaseUrl: "https://fake.supabase.co", supabaseAnonKey: "anon" };')
 sys.path.insert(0, HERE); from stamp_perf import GEO
-CTS = (42.7752, 141.6923)
-VIB = "window.__vib = 0; try{ Object.defineProperty(navigator, 'vibrate', {configurable:true, value:function(){ window.__vib++; return true; }}); }catch(e){}"
+CTS = (42.7752, 141.6923); ITM = (34.7855, 135.4382)
+VIB = "window.__vib = 0; window.__vibA = []; try{ Object.defineProperty(navigator, 'vibrate', {configurable:true, value:function(a){ window.__vib++; window.__vibA.push(a); return true; }}); }catch(e){}"
 fails = []
 def ok(cond, msg, extra=''):
     print(('ok   ' if cond else 'FAIL ') + msg + (f'  {extra}' if (extra and not cond) else ''))
@@ -62,18 +63,35 @@ async def main():
         ok(await pg.evaluate("$('dTabs').open"), '3 長押しでタブを選ぶシートが開く')
         ok(await pg.evaluate("window.__vib") == 0, '3 長押しで振動しない', await pg.evaluate("window.__vib"))
         await pg.evaluate("document.querySelectorAll('dialog[open]').forEach(d => d.close())")
-        # 3 振動を呼ばない：印
-        await pg.evaluate("__fake.db.checkins.forEach(x => x.created_at = new Date(Date.parse(x.created_at) - 3*36e5).toISOString()); S.checkins.forEach(x => x.t -= 3*36e5)")
-        await pg.evaluate(f'__geo.lat = {CTS[0]}; __geo.lon = {CTS[1]}; __geo.delay = 100; __geo.acc = 20; HOME_POS = null; POS_LAST = null; GEO_WARM = null')
-        n0 = await pg.evaluate('S.checkins.length')
-        await pg.evaluate("document.getElementById('checkin').dispatchEvent(new MouseEvent('click', {detail:0, bubbles:true}))")
+        # 3 印：ハンコでは振動せず、サーバーで確定したら1回
+        SHIFT = "__fake.db.checkins.forEach(x => x.created_at = new Date(Date.parse(x.created_at) - 3*36e5).toISOString()); S.checkins.forEach(x => x.t -= 3*36e5)"
+        async def press(ll):
+            await pg.evaluate(SHIFT)
+            await pg.evaluate(f'__geo.lat = {ll[0]}; __geo.lon = {ll[1]}; __geo.delay = 100; __geo.acc = 20; HOME_POS = null; POS_LAST = null; GEO_WARM = null')
+            n0 = await pg.evaluate('S.checkins.length')
+            await pg.evaluate("document.querySelectorAll('dialog[open]').forEach(d => d.close()); document.getElementById('checkin').dispatchEvent(new MouseEvent('click', {detail:0, bubbles:true}))")
+            for _ in range(60):
+                if await pg.evaluate("$('dStamp').open"): break
+                await pg.wait_for_timeout(100)
+            return await pg.evaluate("$('dStamp').open") and await pg.evaluate('S.checkins.length') > n0
+        await pg.evaluate('window.__netDelay = 1500')
+        ok(await press(CTS), '3 印が押せた（ハンコの画面）')
+        ok(await pg.evaluate("window.__vib") == 0, '3 ハンコを出したとき（返事の前）は振動しない', await pg.evaluate("window.__vib"))
         for _ in range(60):
-            if await pg.evaluate("$('dStamp').open"): break
+            if await pg.evaluate("window.__vib") > 0: break
             await pg.wait_for_timeout(100)
-        ok(await pg.evaluate("$('dStamp').open") and await pg.evaluate('S.checkins.length') > n0, '3 印が押せた（ハンコの画面）')
-        await pg.wait_for_timeout(500)
-        ok(await pg.evaluate("window.__vib") == 0, '3 印を押しても振動しない', await pg.evaluate("window.__vib"))
-        ok(await pg.evaluate("[...document.scripts].every(s => !/navigator\\.vibrate\\s*\\(/.test(s.textContent))"), '3 アプリの中に navigator.vibrate( の呼び出しがない')
+        await pg.wait_for_timeout(600)
+        ok(await pg.evaluate("window.__vib") == 1 and await pg.evaluate("window.__vibA[0]") == 20, '3 サーバーで確定したら短く1回（20ms）', await pg.evaluate("window.__vibA"))
+        await pg.evaluate("document.querySelectorAll('dialog[open]').forEach(d => d.close()); openMyPage('show')"); await pg.wait_for_timeout(400)
+        ok(await pg.locator('#vibRow').is_visible() and await pg.get_attribute('#vibRow [data-vib]', 'aria-checked') == 'true', '3 マイページ「表示と色」に「印のときに振動」（はじめは ON）')
+        await pg.screenshot(path=os.path.join(SHOTS, '08-mypage-vib-390.png'))
+        await pg.click('#vibRow [data-vib]'); await pg.wait_for_timeout(200)
+        ok(await pg.get_attribute('#vibRow [data-vib]', 'aria-checked') == 'false' and await pg.evaluate("localStorage.getItem('soramemo.stamp.vibrate')") == '0', '3 OFF にできる（この端末に覚える）')
+        await pg.evaluate('window.__netDelay = 0')
+        ok(await press(ITM), '3 OFF のあとも印は押せる')
+        await pg.wait_for_timeout(2500)
+        ok(await pg.evaluate("window.__vib") == 1, '3 OFF なら確定しても振動しない', await pg.evaluate("window.__vibA"))
+        ok(await pg.evaluate("window.__vib") == 1, '3 タブの長押し・並べ替えは振動しない（長押しのあとも数は増えていない）')
         allerrs += errs; await b.close()
         # 4 幅ごとのタブ帯
         for w, h in [(390, 844), (375, 667)]:
