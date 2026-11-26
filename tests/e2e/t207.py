@@ -1,138 +1,114 @@
-import os, sys, json, shutil, asyncio, threading, functools, http.server
+import os, sys
+HERE=os.path.dirname(os.path.abspath(__file__)); WEB=os.path.abspath(os.path.join(HERE,'..','..','web')); WORK=os.environ.get('SORAMEMO_TEST_WORK','/tmp/soramemo-e2e'); os.makedirs(WORK, exist_ok=True)
+# 運用予想の小さな足し（11/26 PM の指示・Gemini 22往復目の考え方を機体の運用予想に当てはめたもの。docs/pm/yosoku-gemini-1126.md）
+#   1 確からしさの回数：数字を太く。データ担当が seen_of（分母・重みなし）を返したら「12回中11回」、返さないうちは「11回見た」。時刻表の予想は回数を出さない
+#   3・8 根拠の1行：どの便から（記録の最後の時刻）・前の何日の記録から（learn_hi は42日、ほかは60日）・先の便ほど外れやすい
+#   4 外れたとき：いま飛んでいる便が予想の1便目と違う（同じころ・前後90分）ときは、隠さず「当時の予想」と並べ、この先は外れやすいと書く
+#   どれも「予想です。保証しません」は今のまま。偽のサーバー（fake_sb.js）を使い、本物の Supabase には接続しない
+import asyncio, json
 from datetime import datetime, timedelta, timezone
 from playwright.async_api import async_playwright
-# 羽田の空港ページの不合格の直し（11/26 checkin/hnd-fix・改善担当 kaizen-hnd-done-1126 の 7・6・3）。並びは変えない
-#   7：375幅で「もっと見る」が縦書きにならない・天気の枠の字が切れない・12px より小さい字がない・押す所が 44px・送ったら × の後ろをぼかす
-#   6：airport-now が読めないとき、見出しごと消さずに前の値と「○時○分に読んだ情報です」「もう一度」。前の値がなくても見出しと「もう一度」
-#      運用の一覧のカードは、読めていないあいだ前の数に「約○分前」（同じ日・6時間まで。過ぎた時刻は出さない）
-#   3：特別塗装機の行（ボタンの行）で、時刻と名前が縦に落ちない
-#   偽のサーバーを使う。本物の Supabase には接続しない
-HERE = os.path.dirname(os.path.abspath(__file__)); ROOT = os.path.abspath(os.path.join(HERE, '..', '..')); WEB = os.path.join(ROOT, 'web')
-BASE = os.environ.get('SORAMEMO_TEST_WORK', '/tmp/soramemo-e2e'); WORK = os.path.join(BASE, 'hnd-fix')
+_d = datetime.now(timezone.utc)
+JST = timezone(timedelta(hours=9))
+base = datetime(_d.year, _d.month, _d.day, tzinfo=JST)
+at = lambda h, m: (base + timedelta(hours=h, minutes=m)).astimezone(timezone.utc)
+iso = lambda h, m: at(h, m).isoformat()
+ms = lambda h, m: int(at(h, m).timestamp() * 1000)
+today = base.strftime('%Y-%m-%d')
+V2 = {'reg': 'JA339J', 'src': 'reg', 'method': 'learn_hi', 'estimate': True, 'type': 'B738',
+      'known': {'callsign': 'JAL148', 'dep': 'AOJ', 'arr': 'HND', 'first': iso(18, 35), 'last': iso(19, 36)}, 'next': [
+    {'callsign': 'JAL599', 'dep': 'HND', 'arr': 'CTS', 'time': '20:30', 'seen': 12, 'share': 0.92, 'src': 'learn'},
+    {'callsign': 'JAL502', 'dep': 'CTS', 'arr': 'HND', 'time': '07:30', 'seen': 5, 'share': 0.62, 'src': 'learn'}]}
+HIST = [{'day': today, 'callsign': cs, 'dep': d, 'arr': a, 'first': iso(*f), 'last': iso(*l), 'type': 'B738'} for cs, d, a, f, l in [
+    ('JAL147', 'HND', 'AOJ', (16, 15), (17, 30)), ('JAL148', 'AOJ', 'HND', (18, 35), (19, 36)), ('JAL517', 'HND', 'CTS', (20, 40), (20, 49))]]
 fails = []
-def check(name, ok, detail=''):
-    print(('OK  ' if ok else 'NG  ') + name + (('  ' + str(detail)) if detail != '' else ''))
-    if not ok: fails.append(name)
-def serve():
-    shutil.rmtree(WORK, ignore_errors=True); shutil.copytree(WEB, WORK)
-    open(os.path.join(WORK, 'config.js'), 'w').write('window.SORAMEMO_CONFIG = { supabaseUrl: "https://fake.supabase.co", supabaseAnonKey: "anon" };')
-    class Q(http.server.SimpleHTTPRequestHandler):
-        def log_message(self, *a): pass
-    srv = http.server.ThreadingHTTPServer(('127.0.0.1', 0), functools.partial(Q, directory=WORK))
-    threading.Thread(target=srv.serve_forever, daemon=True).start(); return srv.server_address[1]
-now = datetime.now(timezone.utc); iso = lambda s: (now + timedelta(seconds=s)).isoformat()
-PL = ['SIN', 'PVG', 'BKK', 'DEL', 'CTS', 'FUK', 'OKA']
-FL = [{'no': f'JL {30 + i}', 'airline': 'JAL', 'place': PL[i % 7], 'sched': iso(600 * i), 'est': None, 'kind': 'ontime', 'term': 'T3', 'type': '77W'} for i in range(8)]
-NOWD = {'at': iso(-20), 'weather': {'time': iso(-600), 'wdir': None, 'wspd': 14, 'wgst': None, 'vis_m': 10000, 'vis_plus': True, 'sky': '晴れ', 'ceil_ft': None}, 'taf': None, 'flights': {'arr': FL, 'dep': FL}}
-MODE = {'now': 'ok'}   # ok・fail（airport-now を 500 にする）
-NEW = "localStorage.setItem('soramemo.onboarded','1'); localStorage.setItem('soramemo.persona','all'); localStorage.setItem('soramemo.zk.notice','new'); localStorage.setItem('soramemo.install.later','1'); localStorage.setItem('soramemo.zk.swipe','1');"
-async def page(b, port, w=375, h=667):
-    c = await b.new_context(viewport={'width': w, 'height': h}, device_scale_factor=1, timezone_id='Asia/Tokyo', bypass_csp=True)
-    await c.add_init_script(NEW)
-    await c.route('https://cdn.jsdelivr.net/npm/@supabase/**', lambda r: r.fulfill(path=os.path.join(HERE, 'fake_sb.js'), content_type='application/javascript'))
-    async def fn(r):
-        name = r.request.url.split('/functions/v1/')[1].split('?')[0]
-        if name == 'airport-now' and MODE['now'] == 'fail': return await r.fulfill(status=500, body='{}', content_type='application/json', headers={'Access-Control-Allow-Origin': '*'})
-        body = NOWD if name == 'airport-now' else {'planes': [], 'ground': [], 'at': iso(-30)} if name == 'airport-traffic' else {}
-        await r.fulfill(body=json.dumps(body), content_type='application/json', headers={'Access-Control-Allow-Origin': '*'})
-    await c.route('https://fake.supabase.co/functions/v1/**', fn)
-    pg = await c.new_page(); errs = []; pg.on('pageerror', lambda e: errs.append(str(e)))
-    await pg.goto(f'http://127.0.0.1:{port}/index.html')
-    await pg.wait_for_function('document.readyState === "complete" && typeof render === "function"'); await pg.wait_for_timeout(600)
-    return c, pg, errs
-async def open_hnd(pg):
-    await pg.evaluate("$('dAirport').open && $('dAirport').close()")
-    await pg.evaluate("openAirport(IATA.HND.id)")
-    await pg.wait_for_function("(() => { const b = document.getElementById('apNow'); return b && (b.hidden || !/読み込み中/.test(b.innerText)); })()", timeout=15000)
-    await pg.wait_for_timeout(300)
-SMALL = """(() => { const out = []; for(const e of document.querySelectorAll('#dAirport *')){ if(!e.offsetParent) continue; const t = [...e.childNodes].filter(n => n.nodeType === 3).map(n => n.textContent.trim()).join(''); if(!t) continue; const fs = parseFloat(getComputedStyle(e).fontSize); if(fs < 12) out.push(e.tagName + '.' + e.className + ':' + fs + ':' + t.slice(0, 12)); } return out; })()"""
-# 押せる所：ボタンの上下2px の所を押してもそのボタンに当たるか（見た目の高さ36px のピルも、当たりは44px）
-HIT = """(() => [...document.querySelectorAll('#dAirport .nowterms button, #dAirport .pinpill')].filter(b => b.offsetParent).map(b => { b.scrollIntoView({ block:'center' }); const r = b.getBoundingClientRect(), x = r.left + r.width / 2;
-  const up = document.elementFromPoint(x, r.top - 2), dn = document.elementFromPoint(x, r.bottom + 2); return [b.innerText.trim(), Math.round(r.height), !!up && b.contains(up), !!dn && b.contains(dn)]; }))()"""
-SHOTS = os.path.join(ROOT, 'docs', 'pm', 'shots-hnd-fix'); os.makedirs(SHOTS, exist_ok=True)
-async def shot(pg, name): await pg.wait_for_timeout(300); await pg.screenshot(path=os.path.join(SHOTS, name + '.png'))
+def check(label, ok, detail=''):
+    print(label, ok, detail if not ok else '')
+    if not ok: fails.append(label)
 async def main():
-    port = serve(); allerr = []
     async with async_playwright() as p:
         b = await p.chromium.launch()
-        for (w, h) in ((375, 667), (390, 844)):
-            tag = f'{w}x{h}'
-            MODE['now'] = 'ok'
-            c, pg, errs = await page(b, port, w, h)
-            await open_hnd(pg)
-            # ---- 7：375幅の崩れ
-            r = await pg.evaluate("(() => { const m = document.querySelector('[data-now-more]'); const rr = m.getBoundingClientRect(); return [Math.round(rr.width), Math.round(rr.height), m.innerText]; })()")
-            check(f'{tag} 「もっと見る」は横に1行（縦書きにならない）', r[0] > r[1] and r[1] <= 48 and r[2] == 'もっと見る', r)
-            r = await pg.evaluate("[...document.querySelectorAll('#apNow .wxgrid b')].map(e => [e.innerText.replace(/\\n/g, '/'), e.scrollWidth <= e.clientWidth + 1])")
-            check(f'{tag} 天気の枠の字が切れない（風向きが決まらない「変わりやすい」・10km以上）', all(x[1] for x in r) and any('変わり' in x[0] for x in r), r)
-            check(f'{tag} 見通しの単位は小さく（10 と km以上 を分ける）', await pg.evaluate("!!document.querySelector('#apNow .wxgrid b .wxu') && document.querySelector('#apNow .wxgrid b .wxu').innerText === 'km以上'"))
-            r = await pg.evaluate(SMALL)
-            check(f'{tag} 空港ページに 12px より小さい字がない', r == [], r)
-            await pg.evaluate("document.querySelector('[data-now-more]').scrollIntoView({ block:'center' })"); await shot(pg, f'1-more-{tag}')
-            r = await pg.evaluate(HIT)
-            check(f'{tag} ターミナルの絞り込みとピン止めのピル：当たりは上下に4px 広い（見た目は36px のまま）', len(r) >= 1 and all(x[2] and x[3] for x in r), r)
-            # 送ったら × の後ろをぼかす（上に戻ったら消す）
-            await pg.evaluate("$('dAirportBody').scrollTop = 900"); await pg.wait_for_timeout(400)
-            r = await pg.evaluate("({ sc: $('dAirportBody').classList.contains('cxsc'), op: getComputedStyle(document.querySelector('#dAirportBody .cxbar'), '::before').opacity })")
-            check(f'{tag} 送ると × の後ろに紙の色のぼかし', r['sc'] and float(r['op']) > 0.9, r)
-            await shot(pg, f'2-x-scrolled-{tag}')
-            await pg.evaluate("$('dAirportBody').scrollTop = 0"); await pg.wait_for_timeout(400)
-            check(f'{tag} 上に戻るとぼかしは消える', not await pg.evaluate("$('dAirportBody').classList.contains('cxsc')"))
-            # ---- 6：airport-now が読めない
-            check(f'{tag} 読めた答えを空港ごとに残す', await pg.evaluate("!!nowPrev('HND')"))
-            MODE['now'] = 'fail'
-            await open_hnd(pg)
-            r = await pg.evaluate("({ hid: $('apNow').hidden, t: $('apNow').innerText, wx: !!document.querySelector('#apNow .wxgrid'), retry: !!document.querySelector('#apNow [data-now-retry]') })")
-            check(f'{tag} 読めないとき：見出しを残し、前の値（天気・便）と「○時○分に読んだ情報です」「もう一度」', not r['hid'] and '空港の今' in r['t'] and 'に読んだ情報です' in r['t'] and 'いまは読み込めませんでした' in r['t'] and r['wx'] and r['retry'], r['t'][:120])
-            await pg.evaluate("$('apNow').scrollIntoView({ block:'start' })"); await shot(pg, f'3-now-fail-prev-{tag}')
-            MODE['now'] = 'ok'
-            await pg.click('#apNow [data-now-retry]')
-            ok = False
-            try: await pg.wait_for_function("!document.querySelector('#apNow .nowfail') && !!document.querySelector('#apNow .wxgrid')", timeout=10000); ok = True
-            except Exception: pass
-            check(f'{tag} 「もう一度」で読み直し、読めたら一言は消える', ok)
-            MODE['now'] = 'fail'
-            await pg.evaluate("localStorage.removeItem(NOW_MEMO)")
-            await open_hnd(pg)
-            r = await pg.evaluate("({ hid: $('apNow').hidden, t: $('apNow').innerText, retry: !!document.querySelector('#apNow [data-now-retry]') })")
-            check(f'{tag} 前の値もないとき：見出しと「いまは読み込めませんでした」「もう一度」（消さない）', not r['hid'] and '空港の今' in r['t'] and 'いまは読み込めませんでした' in r['t'] and r['retry'], r['t'][:80])
-            await shot(pg, f'4-now-fail-none-{tag}')
-            MODE['now'] = 'ok'
-            if w == 375:
-                # 前の日の答えは使わない（24時間より前）
-                r = await pg.evaluate("(() => { const o = { HND:{ at:Date.now() - 25 * 36e5, d:{ weather:{ sky:'晴れ' } } } }; localStorage.setItem(NOW_MEMO, JSON.stringify(o)); return nowPrev('HND'); })()")
-                check('24時間より前の答えは前の値に使わない', r is None, r)
-                # ---- 6：運用の一覧のカード（読めていないあいだは前の数に「約○分前」）
-                await pg.evaluate("$('dAirport').close()")
-                r = await pg.evaluate("""(() => { localStorage.removeItem(OH_STAT_MEMO); OPS_AP = 'HND';
-                  const t = Date.now(); BOARD = { next_arr:[{ sched:new Date(t + 20 * 60000).toISOString() }, { sched:new Date(t - 30 * 60000).toISOString() }], next_dep:[{ sched:new Date(t + 9 * 60000).toISOString() }],
-                    hours:[{ flights:10, late:2, cancel:1 }, { flights:12, late:0, cancel:0 }] }; BOARD_AP = 'HND';
-                  OPS_CUR = { op:{ label:'北風運用', arr:['34L', '34R'], dep:['05'] }, prov:false }; SPECIAL_AT = t;
-                  ohStatKeep(); const kept = JSON.parse(localStorage.getItem(OH_STAT_MEMO)).HND;
-                  // 電波がない：答えを手放す（数字は覚えた分だけ）
-                  BOARD = null; BOARD_AP = null; OPS_CUR = null; SPECIAL_AT = 0;
-                  const o = JSON.parse(localStorage.getItem(OH_STAT_MEMO)); for(const k of ['bAt', 'rwAt', 'spAt']) o.HND[k] -= 5 * 60000; localStorage.setItem(OH_STAT_MEMO, JSON.stringify(o));
-                  const ids = ['runway', 'board', 'special', 'late', 'strip', 'day', 'ontime'];
-                  return { kept:!!kept.b && !!kept.rw && kept.sp != null, cards:ids.map(id => { const c = OH_CARDS.find(x => x[0] === id), d = document.createElement('div'); d.innerHTML = ohCardHTML(c); return [id, !d.querySelector('.na'), d.innerText.replace(/\\s+/g, ' ')]; }) }; })()""")
-                check('一覧のカードの数を覚える（案内板・滑走路・特別塗装機）', r['kept'], r)
-                for cid, ok, txt in r['cards']:
-                    check(f'電波がないとき {cid} のカード：「—」でなく前の数と「約5分前」', ok and ('約5分前' in txt or cid == 'ontime' and '約5分前' in txt), txt)
-                bd = [x for x in r['cards'] if x[0] == 'board'][0][2]
-                check('案内板のカード：過ぎた時刻は出さず、次の着（20分後）を出す', '着' in bd, bd)
-                r = await pg.evaluate("""(() => { const o = JSON.parse(localStorage.getItem(OH_STAT_MEMO)); for(const k of ['bAt', 'rwAt', 'spAt']) o.HND[k] -= 7 * 36e5; localStorage.setItem(OH_STAT_MEMO, JSON.stringify(o));
-                  const d = document.createElement('div'); d.innerHTML = ohCardHTML(OH_CARDS.find(x => x[0] === 'late')); return !!d.querySelector('.na'); })()""")
-                check('6時間より前の数は使わない（「—」に戻る）', r)
-                # ---- 3：特別塗装機のボタンの行は横に並ぶ
-                await pg.evaluate("document.querySelectorAll('nav.tabs button')[3].click()"); await pg.wait_for_timeout(1200)
-                await pg.evaluate("opsHubOpen('special')"); await pg.wait_for_timeout(1200)
-                r = await pg.evaluate("""(() => { const d = document.createElement('div'); d.className = 'fwbox'; d.innerHTML = '<ul class="spin"><li><button type="button"><span class="tm hot">—</span><span class="tx"><b>テスト塗装B</b><small>JL456・着陸に向かっている</small></span></button></li><li><div><span class="tm hot">—</span><span class="tx"><b>テスト塗装C</b><small>NH78</small></span></div></li></ul>';
-                  ($('opsPSpecial').querySelector('.fwlist') || $('opsPSpecial')).appendChild(d); const rows = [...d.querySelectorAll('li')].map(li => { const tm = li.querySelector('.tm').getBoundingClientRect(), tx = li.querySelector('.tx').getBoundingClientRect(); return [Math.round(tm.left), Math.round(tx.left), Math.round(tm.top - tx.top)]; }); d.remove(); return rows; })()""")
-                check('特別塗装機：ボタンの行も時刻と名前が横に並び、2行の左がそろう', len(r) == 2 and r[0][1] == r[1][1] and r[0][1] > r[0][0], r)
-            allerr += errs; await c.close()
+        for H in (844, 667):
+            c = await b.new_context(viewport={'width': 390, 'height': H}, timezone_id='Asia/Tokyo')
+            await c.add_init_script("localStorage.setItem('soramemo.onboarded','1'); localStorage.setItem('soramemo.install.later','1')")
+            await c.route('https://cdn.jsdelivr.net/npm/@supabase/**', lambda r: r.fulfill(path=os.path.join(HERE,'fake_sb.js'), content_type='application/javascript'))
+            mode = {'v2': V2, 'hist': HIST}
+            async def rpc(r):
+                name = r.request.url.rsplit('/', 1)[-1]; body = json.loads(r.request.post_data or '{}')
+                out = {'reg_history': mode['hist'], 'predict_rotation': {'reg': body.get('p_reg'), 'known': None, 'next': []},
+                       'predict_rotation_v2': mode['v2'], 'predict_rotation_reg': {'reg': body.get('p_reg'), 'known': None, 'next': [], 'src': 'reg'},
+                       'livery_board': []}.get(name, [])
+                await r.fulfill(status=200, body=json.dumps(out), content_type='application/json', headers={'Access-Control-Allow-Origin': '*'})
+            await c.route('https://fake.supabase.co/rest/v1/rpc/**', rpc)
+            await c.route('https://fake.supabase.co/functions/v1/**', lambda r: r.fulfill(status=200, body='{}', content_type='application/json', headers={'Access-Control-Allow-Origin': '*'}))
+            await c.route('https://cyberjapandata.gsi.go.jp/**', lambda r: r.fulfill(status=404, body=''))
+            pg = await c.new_page(); await pg.clock.set_fixed_time(at(19, 50)); errs = []; pg.on('pageerror', lambda e: errs.append(str(e)))
+            await pg.goto('file://' + os.path.join(WORK, 'index_server_test.html')); await pg.wait_for_load_state('load'); await pg.wait_for_timeout(600)
+            await pg.evaluate('__fake.login()'); await pg.wait_for_timeout(500)
+            tag = f'[{H}]'
+
+            # 1 回数：数字は太く、分母がないうちは「12回見た」、seen_of があれば「14回中12回」
+            h = await pg.evaluate("d => predictionHTML(d, {}, {})", V2)
+            check(tag + ' 回数の数字は太い:', '<b>12</b>回見た' in h, h[:300])
+            v = json.loads(json.dumps(V2)); v['next'][0]['seen_of'] = 14; v['next'][1]['seen_of'] = 3
+            h = await pg.evaluate("d => predictionHTML(d, {}, {})", v)
+            check(tag + ' 分母があれば「14回中12回」:', '14回中<b>12</b>回' in h and 'aria-label="確からしさ 高い・14回中12回"' in h)
+            check(tag + ' 分母が回数より小さいときは使わない:', '<b>5</b>回見た' in h and '3回中' not in h)
+            tt = {'reg': 'JA1', 'src': 'odpt', 'known': {'flight': 'JL148', 'dep': 'AOJ', 'arr': 'HND', 'std': iso(18, 35), 'sta': iso(19, 36), 'phase': 'landed'},
+                  'next': [{'flight': 'JL599', 'dep': 'HND', 'arr': 'CTS', 'std': iso(20, 30), 'seen': 20, 'of': 22, 'share': 0.9, 'seen_of': 30}]}
+            h = await pg.evaluate("d => predictionHTML(d, {}, {})", tt)
+            check(tag + ' 時刻表の予想は回数を出さない:', '回見た' not in h and '回中' not in h and '高い' in h)
+
+            # 3・8 根拠の1行
+            h = await pg.evaluate("d => predictionHTML(d, {}, {})", V2)
+            check(tag + ' 根拠は便と時刻と42日:', 'class="rbasis"' in h and 'JL148（19:36 着）から、前の42日の記録で続いた便をたどっています' in h)
+            check(tag + ' 先の便ほど外れやすい:', '先の便ほど外れやすくなります' in h)
+            check(tag + ' 保証しないは今のまま:', '予想です。保証しません' in h)
+            h = await pg.evaluate("d => predictionHTML(d, {}, {})", tt)
+            check(tag + ' 時刻表の予想は60日:', '前の60日の記録' in h)
+            v = json.loads(json.dumps(V2)); v['next'] = [{'callsign': 'JAL599', 'dep': 'HND', 'arr': 'CTS', 'time': '20:30', 'seen': None, 'share': None, 'src': 'livery'}]
+            h = await pg.evaluate("d => predictionHTML(d, {}, {})", v)
+            check(tag + ' 運航情報の便だけなら航空会社の予定から:', '運航情報の便は、航空会社の予定から' in h and '日の記録' not in h)
+            h = await pg.evaluate("d => predictionHTML(d, {}, {})", dict(V2, next=[]))
+            check(tag + ' 予想がないときは根拠を出さない:', 'rbasis' not in h)
+
+            # 4 外れたとき：予想は 20:30 の JL599、いま 20:40 発の JL517 で飛んでいる
+            await pg.clock.set_fixed_time(at(20, 50))
+            h = await pg.evaluate("d => predictionHTML(d, { live:{ fl:'JL517', dep:'HND', arr:'CTS', t:%d } }, {})" % ms(20, 40), V2)
+            check(tag + ' いま実際は・当時の予想と並べる:', 'class="skip miss"' in h and 'いま実際は <b>JL517</b>' in h and '当時の予想：20:30 JL599</small>' in h)
+            check(tag + ' 機体の入れ替えなどで変わる:', '機体の入れ替えなどで変わることがあります' in h)
+            check(tag + ' この先は外れやすいと書く:', 'いま飛んでいる JL517 は予想と違いました' in h and 'この先は外れやすくなっています' in h)
+            check(tag + ' いま飛んでいるので…の行は重ねない:', 'いま飛んでいるので予想に出しません' not in h)
+            check(tag + ' 予想の便そのものは出さない（過ぎた）:', h.count('JL599') == 1 and 'JL502' in h)
+            # 時刻が離れている（前後90分より外）・時刻が分からないときは外れと言わない
+            h = await pg.evaluate("d => predictionHTML(d, { live:{ fl:'JL517', dep:'HND', arr:'CTS', t:%d } }, {})" % ms(22, 30), V2)
+            check(tag + ' 時刻が離れていれば外れと言わない:', 'miss' not in h and 'いま飛んでいるので予想に出しません' in h)
+            h = await pg.evaluate("d => predictionHTML(d, { live:{ fl:'JL517', dep:'HND', arr:'CTS' } }, {})", V2)
+            check(tag + ' 出発の時刻が分からなければ外れと言わない:', 'miss' not in h)
+            # 当たっているときは今までどおり
+            h = await pg.evaluate("d => predictionHTML(d, { live:{ fl:'JL599', dep:'HND', arr:'CTS', t:%d } }, {})" % ms(20, 32), V2)
+            check(tag + ' 当たっているときは外れの行なし:', 'miss' not in h and 'いま飛んでいるので予想に出しません' in h)
+
+            # 機体の1日：記録（reg_history）で JL517 が飛んでいる → 外れの行・根拠・この先は外れやすい
+            await pg.evaluate("openPlane('JA339J')"); await pg.wait_for_timeout(900)
+            t = (await pg.inner_text('#dPlane')).replace('\n', ' ')
+            check(tag + ' 機体の1日に外れの行:', await pg.locator('#dPlane li.skip.miss').count() == 1 and '当時の予想：20:30 JL599' in t, t[:400])
+            check(tag + ' 機体の1日に根拠:', '根拠' in t and 'から、前の42日の記録で続いた便をたどっています' in t)
+            box = await pg.locator('#dPlane li.p').first.bounding_box()
+            check(tag + ' 予想の1便目が画面の中:', box is not None and box['y'] + box['height'] <= H, box)
+            await pg.screenshot(path=os.path.join(WORK, f't200_plane_miss_{H}.png'))
+            # シートの説明
+            await pg.click('#dPlane [data-rot-conf]'); await pg.wait_for_timeout(150)
+            s = await pg.inner_text('#dRotConf')
+            check(tag + ' シートに根拠と外れたとき:', '根拠と外れたとき' in s and '当時の予想' in s and '先の便ほど外れやすくなります' in s)
+            await pg.click('#dRotConf .btn1'); await pg.evaluate("$('dPlane').close()")
+            # 夜の画面でも読める（色は変数）
+            await pg.evaluate("document.documentElement.dataset.night = 'on'; openPlane('JA339J')"); await pg.wait_for_timeout(900)
+            col = await pg.evaluate("getComputedStyle(document.querySelector('#dPlane .rbasis')).color")
+            check(tag + ' 夜は根拠の字が明るい:', col in ('rgb(167, 176, 188)',), col)
+            if H == 844: await pg.screenshot(path=os.path.join(WORK, 't200_plane_night.png'))
+            await c.close()
+            check(tag + ' ページのエラーなし:', not errs, errs)
         await b.close()
-    print('JS のエラー', allerr)
-    if allerr: fails.append('JS のエラー')
-    print('fails', fails)
-    print('全部成功' if not fails else 'errors ' + str(fails))
-    sys.exit(1 if fails else 0)
+    print('errors', fails)
 asyncio.run(main())
