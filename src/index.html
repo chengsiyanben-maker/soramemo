@@ -4507,9 +4507,9 @@ html:has(dialog[open]),html:has(dialog[open]) body{overscroll-behavior:none}
     <div class="lo" data-lo="stats:thatday"><button class="strow" type="button" data-thatday><span class="t"><b>あの日の空</b><small>乗った日・1年前の今日の、空の道すじと運用</small></span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button></div>
   </section>
   <section class="view" id="v-sg" aria-label="修行"><div class="sgd sgtab"><div class="dlg" id="sgTabBody"></div></div></section>
-  <section class="view" id="v-ops" aria-label="運用">
+  <section class="view" id="v-ops" aria-label="いまの空港">
   <h2 id="opsTitle" class="srt">羽田の今の運用</h2>
-  <div class="opsbar"><button class="opshback" id="opsHubBack" type="button" aria-label="運用の一覧に戻る"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>運用</button><div class="opsside" id="opsSide" role="group" aria-label="空港を見るか機体を見るか"><button type="button" data-ops-side="ap" aria-pressed="true">空港</button><button type="button" data-ops-side="plane" aria-pressed="false">機体</button></div><button class="opsapbtn" id="opsApBtn" type="button" aria-haspopup="dialog" aria-label="運用を見る空港を選ぶ（いまは羽田）"><span class="c">HND</span><b>羽田</b><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
+  <div class="opsbar"><button class="opshback" id="opsHubBack" type="button" aria-label="いまの空港の一覧に戻る"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>いまの空港</button><div class="opsside" id="opsSide" role="group" aria-label="空港を見るか機体を見るか"><button type="button" data-ops-side="ap" aria-pressed="true">空港</button><button type="button" data-ops-side="plane" aria-pressed="false">機体</button></div><button class="opsapbtn" id="opsApBtn" type="button" aria-haspopup="dialog" aria-label="運用を見る空港を選ぶ（いまは羽田）"><span class="c">HND</span><b>羽田</b><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
     <form class="opsplq" id="opsPlForm" role="search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4"/></svg><input id="opsPlQ" type="search" placeholder="登録記号・便名" aria-label="登録記号か便名で機体を探す" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="10" enterkeyhint="search"></form>
     <button class="opsplback" id="opsPlBack" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>戻る</button><button class="opsplreg" id="opsPlReg" type="button" aria-label="別の機体を探す"><b></b><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button><span class="sp"></span>
     <button class="opsic" id="opsInfoBtn" type="button" aria-label="この画面について・出典"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><path d="M12 8h.01"/></svg></button><button class="opsic" id="opsShare" type="button" aria-label="共有"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15V3"/><path d="m7 8 5-5 5 5"/><path d="M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/></svg></button></div>
@@ -4576,7 +4576,7 @@ html:has(dialog[open]),html:has(dialog[open]) body{overscroll-behavior:none}
   <button data-v="home" data-mode="rally" aria-current="page"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 10.5 12 4l8.5 6.5"/><path d="M5.5 9v10h4.5v-5.5h4V19h4.5V9"/></svg><span>ホーム</span></button>
   <button data-v="book" data-mode="rally"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5C4 4.7 4.7 4 5.5 4H11v15H5.5c-.8 0-1.5.5-1.5 1.2V5.5Z"/><path d="M20 5.5c0-.8-.7-1.5-1.5-1.5H13v15h5.5c.8 0 1.5.5 1.5 1.2V5.5Z"/></svg><span>図鑑</span></button>
   <button data-v="log" data-mode="rally"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10.5 13.5 4 11l1.4-1.4 7 1.1 3.9-3.9c.8-.8 2.1-.8 2.9 0s.8 2.1 0 2.9l-3.9 3.9 1.1 7L15 22l-2.5-6.5-3 3v2.5L8 22.5l-1.3-3.2L3.5 18 5 16.5h2.5Z"/></svg><span>フライト</span></button>
-  <button data-v="ops" data-mode="rally"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.5"/><path d="M12 12 18 6"/><circle cx="12" cy="12" r="1" fill="currentColor"/></svg><span>運用</span></button>
+  <button data-v="ops" data-mode="rally"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.5"/><path d="M12 12 18 6"/><circle cx="12" cy="12" r="1" fill="currentColor"/></svg><span>いまの空港</span></button>
   <button data-v="sg" data-mode="rally"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 19.5h5v-5h5v-5h5v-5"/><path d="M15.5 4.5h3v3"/></svg><span>修行</span></button>
   <button data-v="stats" data-mode="rally"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h16"/><path d="M7 16v-4"/><path d="M12 16V8"/><path d="M17 16v-6"/></svg><span>成績</span></button>
   <button data-v="co" data-mode="game" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V8l6-3v15"/><path d="M10 20V10l10 3v7"/><path d="M3 20h18"/></svg><span>会社</span></button>
@@ -4606,7 +4606,7 @@ html:has(dialog[open]),html:has(dialog[open]) body{overscroll-behavior:none}
     <svg viewBox="0 0 120 120" aria-hidden="true"><rect x="22" y="18" width="76" height="86" rx="6" fill="none" stroke="var(--ink)" stroke-width="3"/><circle cx="45" cy="46" r="12" fill="none" stroke="var(--shu)" stroke-width="3"/><circle cx="75" cy="46" r="12" fill="none" stroke="var(--line)" stroke-width="3" stroke-dasharray="3 4"/><circle cx="45" cy="78" r="12" fill="none" stroke="var(--line)" stroke-width="3" stroke-dasharray="3 4"/><circle cx="75" cy="78" r="12" fill="none" stroke="var(--gold)" stroke-width="3"/></svg>
     <h3>図鑑と地図を埋めていく</h3>
     <p>集めた印は図鑑に、飛んだ路線は地図に残ります。離島の空港は金色の印です。位置情報は空港の判定にだけ使います。</p>
-    <p>運用（空港の今）や修行も、ログインしなくても見られます。</p>
+    <p>いまの空港（滑走路・便）や修行も、ログインしなくても見られます。</p>
   </div>
   <div class="ob-dots" aria-hidden="true"><i class="on"></i><i></i><i></i></div>
   <div class="ob-nav"><button class="btn2" id="obSkip">とばす</button><button class="btn1" id="obNext" autofocus>次へ</button></div>
@@ -4870,7 +4870,7 @@ function nvLocWhyHTML(foot){
       <div class="nvrow"><i>1</i><div><b>空港にいるかを確かめて、印を押すために使います</b><small>空港ごとに決めた判定範囲の中でだけ、チェックインの印を押せます</small></div></div>
       <div class="nvrow"><i>2</i><div><b>いる場所を送るのは、印を押すときだけです</b><small>近くの空港を近い順に並べるのは、この iPhone の中で計算します</small></div></div>
       <div class="nvrow"><i>3</i><div><b>使うのは、そらメモを開いている間だけです</b><small>いる場所を、ほかの人に見せることはありません</small></div></div>
-    </div><div class="spacer"></div>${foot === false ? "" : `<div><button class="cta" type="button" data-nv="loc-next">次へ</button><p class="nvfoot">許可しなくても、図鑑・フライト・運用は見られます。<br>あとから iPhone の設定で変えられます。</p></div>`}`;
+    </div><div class="spacer"></div>${foot === false ? "" : `<div><button class="cta" type="button" data-nv="loc-next">次へ</button><p class="nvfoot">許可しなくても、図鑑・フライト・いまの空港は見られます。<br>あとから iPhone の設定で変えられます。</p></div>`}`;
 }
 let NV_GEO = null, NV_LOCWHY_ON = false, NV_LW_DONE = false, NV_LW_BUSY = false;
 // ホームを開いたとき（ログインか「デモで試す」のあと）：まだ聞いていなければ I1 を1回だけ出す。許可しなかった人は I1c のカード
@@ -7863,7 +7863,7 @@ function showStamp(a, t, first, flight, term, firstTerm){
   <button class="btn2" style="width:100%;margin-top:8px" data-photo-a="${a.id}" data-photo-t="${term?term.id:""}" data-photo-at="${t}" data-photo-f="${flight ? fid(flight) : ""}">写真に押す</button></div>`;
   $("dStamp").showModal();
   const w = b.querySelector(".stampwrap"); requestAnimationFrame(() => w.classList.add("press-on"));
-  try{ if(navigator.vibrate) navigator.vibrate(isFirst ? [18, 60, 28] : 18); }catch(e){}
+  // 11/26 本人「B」：振動と音は入れない決まりのとおり、印の振動は外した（navigator.vibrate を呼ばない）
 }
 
 /* ---------- map ---------- */
@@ -8353,7 +8353,7 @@ function demoLoRestore(){ try{ const raw = localStorage.getItem(DEMO_LO_BAK); if
   for(const k of DEMO_LO_KEYS()){ if(!(k in o)) continue; if(o[k] == null) localStorage.removeItem(k); else localStorage.setItem(k, o[k]); }
   localStorage.removeItem(DEMO_LO_BAK); return true; }catch(e){ return false; } }
 demoLoRestore();
-const TAB_ALL = ["home", "book", "log", "sg", "ops", "stats"], TAB_NAME = { home:"ホーム", book:"図鑑", log:"フライト", sg:"修行", ops:"運用", stats:"成績" };
+const TAB_ALL = ["home", "book", "log", "sg", "ops", "stats"], TAB_NAME = { home:"ホーム", book:"図鑑", log:"フライト", sg:"修行", ops:"いまの空港", stats:"成績" };
 const LO_BLOCKS = {
   home: [["persona", "いちばん上のカード", "撮影・修行の構成のときに出るカード。いつもいちばん上", true], ["ride", "これから乗る便", "便名を入れると機体を調べる"], ["pins", "ピン止めした空港", "ピン止めが1つ以上あるときだけ出ます"], ["event", "イベントのお知らせ"], ["tally", "これまでの記録", "空港・路線・距離の数"], ["recent", "最近の印"]],
   opsb: [["alerts", "遅れ・ダイバートのお知らせ"], ["map", "地図と近くを飛ぶ機体"], ["spots", "撮影地"], ["curfew", "門限のある時間"], ["ga", "ゴーアラウンド（推定）"]],
@@ -8455,7 +8455,7 @@ function viewOf(k){ const sh = viewsShown(k); try{ let v = localStorage.getItem(
   if(sh.some(x => x[0] === v)) return v; }catch(e){} return sh.some(x => x[0] === VIEW_DEF[k]) ? VIEW_DEF[k] : sh[0][0]; }
 const VIEW = { book:viewOf("book"), log:viewOf("log"), ops:viewOf("ops"), opsp:viewOf("opsp") };
 // 見方のシートの題などで使う画面の名前（運用の空港・機体は「運用」）
-const vsName = k => k === "ops" || k === "opsp" ? "運用" : TAB_NAME[k];
+const vsName = k => k === "ops" || k === "opsp" ? "いまの空港" : TAB_NAME[k];
 // 運用タブの「機体」の側を出すか（表示の編集・鉛筆のシートで OFF にできる。11/16 の決定 V3・V1c）
 const opsPlaneOn = () => !(LAYOUT && LAYOUT.opsPlane === 0);
 function opsPlaneSet(on){ const L = loEdit(); if(on) delete L.opsPlane; else L.opsPlane = 0; }
@@ -9152,9 +9152,9 @@ const PERSONAS = {
     note:"全部の機能を出しています。使わないものは「表示の編集」で隠せます。隠しても記録は消えません。" },
   casual: { name:"気軽に好きな人", short:"気軽に", tabs:["home", "book", "log"], views:{ book:"region", log:"diary" },
     off:{ home:["ride"], book:["map", "chron"], log:["year"], stats:["status"] },   // 気軽に：前は地図がいつも上にあったので、日誌と地図を出す
-    note:"チェックインと図鑑だけの、いちばん軽い構成です。成績と運用はマイページから開けます。" },
+    note:"チェックインと図鑑だけの、いちばん軽い構成です。成績といまの空港はマイページから開けます。" },
   spot: { name:"撮影する人", short:"撮影", tabs:["ops", "home", "book", "log"], views:{ ops:"photo" }, off:{ stats:["status"] },
-    note:"1つの空港で長く撮る人向け。運用をいちばん左に、ホームには運用・これから来る大きな機体・今日いた時間を出します。成績はマイページから開けます。" },
+    note:"1つの空港で長く撮る人向け。いまの空港をいちばん左に、ホームには運用・これから来る大きな機体・今日いた時間を出します。成績はマイページから開けます。" },
   shugyo: { name:"修行する人", short:"修行", tabs:["home", "sg", "log", "stats"], views:{ log:"diary" },
     order:{ stats:["status", "airline", "fleet", "passport"] },
     note:"たくさん乗る人向け。修行のタブを置き、ホームにはポイントの進みと次に乗る便、成績には修行の入口を先に出します（修行の数字は修行のタブ）。図鑑と運用はマイページから開けます。" },
@@ -9208,8 +9208,8 @@ document.addEventListener("click", e => {
    ログインしていればアカウントに保存（別の端末でも同じ）、していなければこの端末に保存。並べ替えは1月の公開のあと */
 let LO_PAGE = "top", LO_FROM = "settings", LO_FILTER = "all", LO_UNDO = null, LO_CONFIRM = false;
 const LO_TAB_ITEMS = ["book", "log", "ops", "sg"];   // ホームはいつも出す。成績はマイページのタイル（タブに出しているときだけ並べる）
-const LO_VIEW_SEC = [["book", "図鑑"], ["log", "フライト"], ["ops", "運用（空港）"], ["opsp", "運用（機体）"]];
-const LO_BLK_SEC = [["home", "ホーム", "チェックインの半券はいつも出す"], ["opsb", "運用（滑走路の見方の下）"], ["stats", "成績"]];
+const LO_VIEW_SEC = [["book", "図鑑"], ["log", "フライト"], ["ops", "いまの空港（空港）"], ["opsp", "いまの空港（機体）"]];
+const LO_BLK_SEC = [["home", "ホーム", "チェックインの半券はいつも出す"], ["opsb", "いまの空港（滑走路の見方の下）"], ["stats", "成績"]];
 const LO_TAB_MAX = 5, LO_TAB_MIN = 2;
 // 全部の項目と、いま出しているか（数え方は画面案と同じ：タブ4・見方19・かたまり15＝38こ（図鑑の見方は 11/9 に3つ））
 function loItems(){
@@ -9222,7 +9222,7 @@ function loItems(){
 }
 function loCount(){ const it = loItems(); return { all:it.length, on:it.filter(x => x.on).length, off:it.filter(x => !x.on) }; }
 // 戻した数を種類ごとに言う（PM 11/9 0時40分：「4こ」でなく「タブ1つ・かたまり3つ」）
-const loOffText = off => [["tab", "タブ"], ["view", "見方"], ["side", "運用の「機体」"], ["blk", "かたまり"]].map(([k, t]) => [t, off.filter(x => x.kind === k).length]).filter(x => x[1]).map(([t, n]) => `${t}${n}つ`).join("・");
+const loOffText = off => [["tab", "タブ"], ["view", "見方"], ["side", "いまの空港の「機体」"], ["blk", "かたまり"]].map(([k, t]) => [t, off.filter(x => x.kind === k).length]).filter(x => x[1]).map(([t, n]) => `${t}${n}つ`).join("・");
 const loAllOn = () => PERSONA === "all" && !LAYOUT;
 /* ---------- 表示の編集の1枚（11/11 13時 本人「すべてよい」。画面案 design/view-settings の 03*-v2） ----------
    画面ごとのカードを畳んで1行（「フライト 2/3 隠している：年のまとめ」）。押すとその場で開き、中は ON／OFF のスイッチ（各画面の鉛筆のシートと同じ部品）。
@@ -9263,10 +9263,10 @@ function loSecDef(id){
     if(!nearX()) s.subText = "近くは民間空港だけ" + (s.hidden.length ? `・隠している：${s.hidden.join("・")}` : "");   // OFF に気づけるように（review-app-1 の6）
     return s; }
   if(id === "book" || id === "log") return loSecCount({ name:TAB_NAME[id], groups:[{ rows:loViewRows(id) }], go:[`${TAB_NAME[id]}へ`, `data-lo-goto="${id}"`], away:loAwayNote(id) });
-  if(id === "ops") return loSecCount({ name:"運用（空港）", groups:[{ title:"見方", rows:loViewRows("ops") }, { title:"一覧のカード", rows:[OH_A3_ROW("data-lo-a3")] }, { title:"滑走路の下に出すもの", rows:loBlkRows("opsb") }], go:["運用へ", 'data-lo-goto="ops"'], away:loAwayNote("ops") });
+  if(id === "ops") return loSecCount({ name:"いまの空港（空港）", groups:[{ title:"見方", rows:loViewRows("ops") }, { title:"一覧のカード", rows:[OH_A3_ROW("data-lo-a3")] }, { title:"滑走路の下に出すもの", rows:loBlkRows("opsb") }], go:["いまの空港へ", 'data-lo-goto="ops"'], away:loAwayNote("ops") });
   // 運用（機体）：「機体」を出す（数えない。OFF のときは見出しで言う）＋見方2つ（V2）
   if(id === "opsp"){ const on = opsPlaneOn(), rows = loViewRows("opsp").map(r => on ? r : { ...r, dis:true });
-    const s = loSecCount({ name:"運用（機体）", groups:[{ rows:[{ kind:"side", id:"plane", label:"「機体」を出す", desc:on ? "OFF で運用は空港だけ（特別塗装機と機体の1日は見られません）" : "ON にすると運用タブの上に「空港｜機体」が戻ります", on, nocount:true, showOff:true, attr:"data-lo-plane" }, ...rows] }], go:["運用へ", 'data-lo-goto="ops"'], away:loAwayNote("ops") });
+    const s = loSecCount({ name:"いまの空港（機体）", groups:[{ rows:[{ kind:"side", id:"plane", label:"「機体」を出す", desc:on ? "OFF でいまの空港は空港だけ（特別塗装機と機体の1日は見られません）" : "ON にするといまの空港のタブの上に「空港｜機体」が戻ります", on, nocount:true, showOff:true, attr:"data-lo-plane" }, ...rows] }], go:["いまの空港へ", 'data-lo-goto="ops"'], away:loAwayNote("ops") });
     if(!on) s.subText = "「機体」を隠しています"; return s; }
   if(id === "stats") return loSecCount({ name:"成績", groups:[{ rows:loBlkRows("stats") }], go:["成績へ", 'data-lo-goto="stats"'], away:loAwayNote("stats") });
   if(id === "sg"){ const X = LO_EXT.sg; let g = []; try{ g = X.groups() || []; }catch(e){}
@@ -9386,7 +9386,7 @@ document.addEventListener("click", e => {
     const l = (LO_BLOCKS[k].find(x => x[0] === id) || [])[1] || id;
     loChanged("blk_" + k, { text:`「${l}」を${hide ? "隠しました" : "出しました"}`, snap }); return; }
   if((b = q("[data-lo-a3]"))){ const on = opsA3On(); opsA3Set(!on); loChanged("ops_a3" + (on ? "_off" : "_on"), { text:`「3D」のカードを${on ? "隠しました" : "出しました"}`, snap }); return; }
-  if((b = q("[data-lo-plane]"))){ const on = opsPlaneOn(); opsPlaneSet(!on); opsSideRefresh(); loChanged("ops_plane" + (on ? "_off" : "_on"), { text:`運用の「機体」を${on ? "隠しました" : "出しました"}`, snap }); return; }
+  if((b = q("[data-lo-plane]"))){ const on = opsPlaneOn(); opsPlaneSet(!on); opsSideRefresh(); loChanged("ops_plane" + (on ? "_off" : "_on"), { text:`いまの空港の「機体」を${on ? "隠しました" : "出しました"}`, snap }); return; }
   if((b = q("[data-lo-ap]"))){ const c = b.dataset.loAp, L = loEdit(), set = new Set(L.aps || []);
     if(set.has(c)) set.delete(c); else set.add(c); L.aps = [...set]; if(!L.aps.length) delete L.aps; loChanged("aps"); return; }
 });
@@ -9400,9 +9400,9 @@ function vsHTML(){
   const undo = VS.undo ? `<div class="tpbot"><div class="loundo tpundo" role="status"><span>${esc(VS.undo.text)}</span><button type="button" data-vs-undo>元に戻す</button></div></div>` : "";
   // 運用は、シートの中でも「空港｜機体」を切り替える（V1・V1b）。「機体」を隠しているときもピルは残し「隠し中」（V1c）
   const side = ops ? `<div class="vsside" role="group" aria-label="空港と機体"><button type="button" data-vs-side="ops" aria-pressed="${k === "ops"}">空港</button><button type="button" data-vs-side="opsp" aria-pressed="${k === "opsp"}">機体${pOff ? `<span class="vshid">隠し中</span>` : ""}</button></div>` : "";
-  const pRow = { label:"「機体」を出す", desc:pOff ? "ON にすると運用タブの上に「空港｜機体」が戻ります" : "OFF にすると運用タブで特別塗装機と機体の1日が見られなくなります", on:!pOff, attr:"data-vs-plane" };
-  const plane = k !== "opsp" ? "" : pOff ? `<ul class="tplist">${loRowHTML(pRow)}</ul><p class="vsnote">隠している間は、運用タブで特別塗装機と機体の1日が見られません。シートの「機体」のピルは残るので、ここか、マイページの「表示の編集」の同じ行で戻せます。</p>`
-    : `<p class="logl">機体の側ごと隠す<small>運用は空港だけになります</small></p><ul class="tplist">${loRowHTML(pRow)}</ul>`;
+  const pRow = { label:"「機体」を出す", desc:pOff ? "ON にするといまの空港のタブの上に「空港｜機体」が戻ります" : "OFF にするといまの空港のタブで特別塗装機と機体の1日が見られなくなります", on:!pOff, attr:"data-vs-plane" };
+  const plane = k !== "opsp" ? "" : pOff ? `<ul class="tplist">${loRowHTML(pRow)}</ul><p class="vsnote">隠している間は、いまの空港のタブで特別塗装機と機体の1日が見られません。シートの「機体」のピルは残るので、ここか、マイページの「表示の編集」の同じ行で戻せます。</p>`
+    : `<p class="logl">機体の側ごと隠す<small>いまの空港は空港だけになります</small></p><ul class="tplist">${loRowHTML(pRow)}</ul>`;
   const a3 = k === "ops" && OH_ON() ? `<p class="logl">一覧のカード</p><ul class="tplist">${loRowHTML(OH_A3_ROW("data-vs-a3"))}</ul>` : "";
   return `<div class="tptop"><div class="tphd"><h3 id="vsTitle">${vsName(k)}の見方</h3>${rows.length ? `<span class="tpcnt" aria-label="出している見方 ${on}つ（${rows.length}つのうち）"><b>${on}</b>/${rows.length}</span>` : `<span class="tpcnt"></span>`}<button type="button" class="tpdone" data-close>完了</button></div>
     <p class="tplead">OFF で見方の帯から隠れます。最後の1つは残ります。</p>${side}</div>
@@ -9427,7 +9427,7 @@ document.addEventListener("click", e => {
   if((b = e.target.closest("[data-vs-a3]"))){ const on = opsA3On(), snap = loSnap(); opsA3Set(!on); loChanged("ops_a3" + (on ? "_off" : "_on"), null);
     VS.undo = { text:`「3D」のカードを${on ? "隠しました" : "出しました"}`, snap }; vsRender(); return; }
   if((b = e.target.closest("[data-vs-plane]"))){ const on = opsPlaneOn(), snap = loSnap(); opsPlaneSet(!on); loChanged("ops_plane" + (on ? "_off" : "_on"), null); opsSideRefresh();
-    VS.undo = { text:`運用の「機体」を${on ? "隠しました" : "出しました"}`, snap }; vsRender(); return; }
+    VS.undo = { text:`いまの空港の「機体」を${on ? "隠しました" : "出しました"}`, snap }; vsRender(); return; }
   if((b = e.target.closest("[data-vs-sw]"))){ if(b.disabled) return; const k = VS.k, id = b.dataset.vsSw, hide = !loOff(k).has(id), snap = loSnap();
     if(!loToggleOff(k, id, hide)) return;
     const l = (VIEWS[k].find(x => x[0] === id) || [])[1] || id;
@@ -9653,7 +9653,7 @@ document.addEventListener("keydown", e => {
   nav.addEventListener("pointerdown", e => {
     const b = e.target.closest('button[data-mode="rally"]'); if(!b || MODE !== "rally") return;
     fired = false; at = [e.clientX, e.clientY]; stop();
-    t = setTimeout(() => { t = null; fired = true; track("tab_pick", "longpress"); tpTipDone(); if(navigator.vibrate) try{ navigator.vibrate(10); }catch(_){} openTabPicker("longpress"); }, 550);
+    t = setTimeout(() => { t = null; fired = true; track("tab_pick", "longpress"); tpTipDone(); openTabPicker("longpress"); }, 550);
   });
   nav.addEventListener("pointermove", e => { if(t && at && Math.hypot(e.clientX - at[0], e.clientY - at[1]) > 10) stop(); });
   nav.addEventListener("pointerup", stop); nav.addEventListener("pointercancel", stop); nav.addEventListener("pointerleave", stop);
@@ -9712,7 +9712,7 @@ function roBind(box, opt){
     const d = { ArrowUp:-1, ArrowLeft:-1, ArrowDown:1, ArrowRight:1 }[e.key]; if(!d) return; e.preventDefault();
     const id = h.dataset.roH, o = roMoved(order(), id, d); if(o) finish(o, id, "key"); });
   let g = null;
-  const start = () => { if(!g || g.on) return; g.on = true; g.el.classList.add("rodrag"); box.classList.add("rodragging"); if(navigator.vibrate) try{ navigator.vibrate(10); }catch(_){} };
+  const start = () => { if(!g || g.on) return; g.on = true; g.el.classList.add("rodrag"); box.classList.add("rodragging"); };
   box.addEventListener("pointerdown", e => {
     const h = e.target.closest("[data-ro-h]"); if(!h || !box.contains(h) || e.button > 0) return;
     const el = h.closest("[data-ro]"); if(!el) return;
@@ -9790,12 +9790,12 @@ async function viewPrefsLoad(p){
 }
 /* ---------- 新規登録のアンケートの答えから「これを隠しますか？」を1回だけ（11/8）。今いる人（ひな形の人）には出さない ---------- */
 const HS = { casual:{ label:"気軽に楽しみたい", groups:[
-    ["運用のタブ", [["tab", "tabs", "ops"]]], ["修行のタブ", [["tab", "tabs", "sg"]]],
+    ["いまの空港のタブ", [["tab", "tabs", "ops"]]], ["修行のタブ", [["tab", "tabs", "sg"]]],
     ["フライトの見方「年のまとめ」", [["view", "log", "year"]]],   // 11/11：日誌と地図は残す（気軽にの構成と同じ）
     ["図鑑の見方", VIEWS.book.filter(([id]) => id !== "region").map(([id]) => ["view", "book", id])],
     ["成績の修行の入口", [["blk", "stats", "status"]]]] },
   spot:{ label:"飛行機を撮りたい", groups:[["修行のタブ", [["tab", "tabs", "sg"]]], ["成績の修行の入口", [["blk", "stats", "status"]]]] },   // フライトの見方「修行」は修行のタブへ移した（11/11）
-  shugyo:{ label:"修行（マイル・ステータス）に使いたい", groups:[["運用のタブ", [["tab", "tabs", "ops"]]], ["運用の見方「撮る人」", [["view", "ops", "photo"]]], ["運用の「撮影地」", [["blk", "opsb", "spots"]]]] } };
+  shugyo:{ label:"修行（マイル・ステータス）に使いたい", groups:[["いまの空港のタブ", [["tab", "tabs", "ops"]]], ["いまの空港の見方「撮る人」", [["view", "ops", "photo"]]], ["いまの空港の「撮影地」", [["blk", "opsb", "spots"]]]] } };
 let HS_CUR = null;
 const hsCount = () => HS_CUR ? HS[HS_CUR.p].groups.reduce((n, g, i) => n + (HS_CUR.keep.has(i) ? 0 : g[1].length), 0) : 0;
 // 案3（C4）：提案は「いま」と「こうなります」の2本のタブ帯で見せる。見方・かたまりは1文にまとめる。ボタンは同じ白・同じ大きさ
@@ -9860,7 +9860,7 @@ async function renderPersonaCard(){
   // 白いカード1枚：空港の名前と今日いた時間・運用と光の1行・つぎに来る機体（黒い面はここだけ）・次の2機・運用を見る
   const stay = since ? `${hm(since)}から <b>${Math.floor((now - since) / 36e5)}時間${Math.round((now - since) / 6e4) % 60}分</b>` : "今日はまだチェックインしていません";
   const head = `<div class="phd"><span class="v">${esc(def ? def.name : ap)}</span><span class="st">${stay}</span></div>`;
-  const pb = `<div class="pgo"><button data-pgo="ops" type="button">運用を見る<span aria-hidden="true"> ›</span></button></div>`;
+  const pb = `<div class="pgo"><button data-pgo="ops" type="button">いまの空港を見る<span aria-hidden="true"> ›</span></button></div>`;
   box.hidden = false; box.innerHTML = `<div class="phome">${head}<p class="hint" style="margin:8px 0">読み込んでいます…</p>${pb}</div>`;
   const d = SERVER ? await Promise.resolve().then(() => apSummary(ap)).catch(() => null) : null; if(PERSONA !== "spot") return;
   if(SERVER) await spLoadRegs(ap).catch(() => false);
@@ -10092,7 +10092,7 @@ function maybeSuggestPersona(){
   if((u.days || []).length < 3) return;
   const s = personaSuggestion(); if(!s) return;
   PERSONA_ASKED = true; track("persona_suggest", s.p);
-  const P = PERSONAS[s.p], TAB = { home:"ホーム", book:"図鑑", log:"フライト", ops:"運用", stats:"成績" };
+  const P = PERSONAS[s.p], TAB = { home:"ホーム", book:"図鑑", log:"フライト", ops:"いまの空港", stats:"成績" };
   const V = { ops:{ photo:"撮る人" }, log:{ month:"月ごと" }, book:{ tiles:"タイル" } }, [vk, vv] = Object.entries(P.views)[0];
   $("dPersonaBody").innerHTML = `<p class="hint" style="margin:0">そらメモの使い方から</p><h3 id="pTitle">${P.name}の構成にしますか？</h3>
     <p style="font-size:13.5px;line-height:1.8;margin:10px 0 0">${esc(s.why)}${esc(P.note)}</p>
@@ -10627,7 +10627,7 @@ function mpTilesHTML(){
       : `${v(fmtKm(sg.pts), sg.unit)}<span class="bar${sg.car === "JAL" ? " jal" : ""}" aria-hidden="true"><i style="width:${sg.pct}%"></i></span><span class="s">${sg.pct >= 100 ? `${esc(sg.goal.name)}に届いています` : `${esc(sg.goal.name)}まで ${sg.pct}%`}</span>`),
     tile("知らせ", `data-pins-open aria-label="知らせを開く"`, `${v(pl, `/ ${PIN_MAX} 空港`)}<span class="s">ピン止めした空港</span>`)];
   // タブから外した画面（図鑑・フライト・運用）だけタイルにする。成績・修行はいつもタイル
-  const TL = { book:["図鑑", () => `${v(st.aps, `/ ${A.length}`)}<span class="s">空港の印を見る</span>`], log:["フライト", () => `${v(fmtKm(st.n), "便")}<span class="s">乗った便を見る</span>`], ops:["運用", () => { const k = (() => { try{ return OPS_AP; }catch(e){ return "HND"; } })() || "HND"; return `${v(esc(k), "の今")}<span class="s">滑走路と便を見る</span>`; }] };
+  const TL = { book:["図鑑", () => `${v(st.aps, `/ ${A.length}`)}<span class="s">空港の印を見る</span>`], log:["フライト", () => `${v(fmtKm(st.n), "便")}<span class="s">乗った便を見る</span>`], ops:["いまの空港", () => { const k = (() => { try{ return OPS_AP; }catch(e){ return "HND"; } })() || "HND"; return `${v(esc(k), "の今")}<span class="s">滑走路と便を見る</span>`; }] };
   for(const t of ["book", "log", "ops"]) if(!loTabs().includes(t)) out.push(tile(TL[t][0], `data-persona-open="${t}" aria-label="${TL[t][0]}を開く"`, TL[t][1]()));
   return out.join("");
 }
@@ -14509,7 +14509,7 @@ document.addEventListener("change", e => { if(e.target && e.target.id === "tdPic
 const TR_SEC = { N:"北の風", E:"東の風", S:"南の風", W:"西の風", calm:"弱い風" };
 async function openTrend(){
   track("ops", "trend"); const iata = OPS_AP, def = opsDef();
-  $("dTrendBody").innerHTML = `<div class="spctop"><button class="mp-back" data-close type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>運用</button><h3>${esc(def.name)}の傾向</h3><span class="sp" aria-hidden="true"></span></div><p class="hint">読み込んでいます…</p>`;
+  $("dTrendBody").innerHTML = `<div class="spctop"><button class="mp-back" data-close type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>いまの空港</button><h3>${esc(def.name)}の傾向</h3><span class="sp" aria-hidden="true"></span></div><p class="hint">読み込んでいます…</p>`;
   if(!$("dTrend").open) $("dTrend").showModal();
   const [t, l] = await Promise.all([rpcPost("airport_trend", { p_iata:iata, p_days:30 }), spLoadLearn(iata), SP_WX_AP === iata && SP_WX ? null : loadSpWx(iata)]);
   if(iata !== OPS_AP || !$("dTrend").open) return;
@@ -14535,7 +14535,7 @@ function trendHTML(def, t, l){
     return `<div class="r"><span>${name}</span><span class="bar">${modes.filter(x => m[x]).map(x => `<i style="width:${m[x] / tot * 100}%;background:${col[modes.indexOf(x) % col.length]}"></i>`).join("")}</span><span>${esc(lab(top[0]).replace(/（.*$/, ""))} ${Math.round(top[1] / tot * 100)}%</span></div>`; }).join("");
   const H = t && t.hours ? t.hours : {}, hv = Array.from({ length:18 }, (_, i) => Number(H[i + 6] || 0)), hmax = Math.max(1, ...hv), hi = hv.indexOf(hmax);
   const ga = t && t.ga ? t.ga : null;
-  return `<div class="spctop"><button class="mp-back" data-close type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>運用</button><h3>${esc(def.name)}の傾向</h3><span class="sp" aria-hidden="true"></span></div>
+  return `<div class="spctop"><button class="mp-back" data-close type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>いまの空港</button><h3>${esc(def.name)}の傾向</h3><span class="sp" aria-hidden="true"></span></div>
     ${hero}
     <div class="spcard"><b>風の向きごとの運用</b><small>この30日、5分ごとの記録から</small>
       ${rows ? `<div class="trbars">${rows}</div><div class="trleg">${modes.map((m, i) => Object.values(W).some(x => x[m]) ? `<span><i style="background:${col[i % col.length]}"></i>${esc(lab(m))}</span>` : "").join("")}</div>` : `<p class="hint">まだ記録がありません。</p>`}</div>
@@ -18130,7 +18130,7 @@ async function renderGaBox(){
 }
 function gaSetHTML(){
   const d = GA_DRAFT, sw = (k, l, sub) => `<button class="sg-sw" type="button" role="switch" data-ga-kind="${k}" aria-checked="${d.kinds.includes(k)}"><span><b>${l}</b><small>${sub}</small></span><i aria-hidden="true"></i></button>`;
-  return `<div class="sg-top"><button class="sg-back" data-close type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>運用</button><h3>ゴーアラウンドを知らせる</h3><span class="sg-sp"></span></div>
+  return `<div class="sg-top"><button class="sg-back" data-close type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>いまの空港</button><h3>ゴーアラウンドを知らせる</h3><span class="sg-sp"></span></div>
     ${!pushOK() ? `<p class="sg-note">スマホへの通知は、この端末のブラウザでは使えません（iPhone はホーム画面に追加したそらメモから使えます）。</p>` : ""}
     <div class="sg-h"><b>知らせる空港</b><small>いくつでも</small></div>
     <div class="sg-chips">${GA_ORDER.filter(i => OPS_AIRPORTS[i]).map(i => `<button type="button" data-ga-ap="${i}" aria-pressed="${d.airports.includes(i)}">${esc(OPS_AIRPORTS[i].name)}</button>`).join("")}</div>
@@ -18143,7 +18143,7 @@ function gaSetHTML(){
     <p class="sg-foot">ゴーアラウンドは、着陸に向かう機体が空港の近くで 1,000ft 以下まで降りてから、着陸せずに 500ft 以上上がったことを、機体の位置（${ADSB_A}・ODbL）から見つけた推定です。航空会社や管制の発表ではありません。天気の知らせは気象通報（METAR）からの目安で、実際に着陸できるかどうかは機体と乗員と管制が決めます。航法には使えません。</p>`;
 }
 function gaEvHTML(e, list){
-  if(!e) return `<div class="sg-top"><button class="sg-back" data-close type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>運用</button><h3>ゴーアラウンド（推定）</h3><span class="sg-sp"></span></div><p class="sg-note">${GA_EV === "loading" ? "読み込んでいます…" : "見つかりませんでした（30日より前のものは消えています）。"}</p>`;
+  if(!e) return `<div class="sg-top"><button class="sg-back" data-close type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>いまの空港</button><h3>ゴーアラウンド（推定）</h3><span class="sg-sp"></span></div><p class="sg-note">${GA_EV === "loading" ? "読み込んでいます…" : "見つかりませんでした（30日より前のものは消えています）。"}</p>`;
   const def = OPS_AIRPORTS[e.iata] || { name:e.iata }, pts = Array.isArray(e.pts) ? e.pts : [], w = e.wx || null;
   let chart = "";
   if(pts.length >= 2){ const t0 = pts[0][0], t1 = pts[pts.length - 1][0], top = Math.max(1000, ...pts.map(p => p[1])), X = t => 10 + (t - t0) / Math.max(1, t1 - t0) * 300, Y = a => 110 - a / top * 95;
@@ -18155,7 +18155,7 @@ function gaEvHTML(e, list){
       <text x="10" y="126" font-size="9" fill="#6B7280">${gaHM(t0 * 1000)}</text><text x="316" y="126" font-size="9" fill="#6B7280" text-anchor="end">${gaHM(t1 * 1000)}</text><text x="8" y="12" font-size="9" fill="#6B7280">${fmtKm(top)}ft</text></svg>`; }
   const ceil = w && w.raw ? (String(w.raw).match(/\b(?:BKN|OVC|VV)(\d{3})\b/g) || []).map(x => Number(x.slice(-3)) * 100).sort((a, b) => a - b)[0] : null;
   const today = (list || []).filter(x => Date.parse(x.at) > Date.now() - 24 * 36e5);
-  return `<div class="sg-top"><button class="sg-back" data-close type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>運用</button><h3>ゴーアラウンド（推定）</h3><span class="sg-sp"></span></div>
+  return `<div class="sg-top"><button class="sg-back" data-close type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>いまの空港</button><h3>ゴーアラウンド（推定）</h3><span class="sg-sp"></span></div>
     <div class="sg-hero"><div class="h"><span>${esc(def.name)}・${new Date(e.at).toLocaleDateString("ja-JP", { month:"long", day:"numeric" })} ${gaHM(e.at)}</span><span>機体の位置から</span></div>
       <div class="sg-sp2"><span><b class="xl">${esc(e.flight || e.callsign || "")}</b><small>${[e.callsign && e.flight ? esc(e.callsign) : "", e.type && esc(e.type), e.reg && esc(e.reg)].filter(Boolean).join("・")}</small></span>${sgTag("ゴーアラウンド", "#C2410C")}</div>
       <div class="sg-3 c ga3"><span><small>いちばん低く</small><b>${fmtKm(e.low_ft)}ft</b></span><span><small>空港まで</small><b>${e.low_km != null ? `約${e.low_km}km` : "—"}</b></span><span><small>${e.again_at ? "もう一度進入" : "滑走路"}</small><b>${e.again_at ? gaHM(e.again_at) : e.rwy ? esc(e.rwy) + "（推定）" : "—"}</b></span></div></div>
@@ -18168,7 +18168,7 @@ function gaEvHTML(e, list){
     <p class="sg-foot">機体の位置は ${ADSB_A}（ODbL）。空港の近くで 1,000ft 以下まで降りてから、着陸せずに 500ft 以上上がった機体を「ゴーアラウンド（推定）」としています。航空会社・管制の発表ではありません。</p>`;
 }
 function gaWxHTML(rows){
-  return `<div class="sg-top"><button class="sg-back" data-close type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>運用</button><h3>着陸の天気</h3><span class="sg-sp"></span></div>
+  return `<div class="sg-top"><button class="sg-back" data-close type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>いまの空港</button><h3>着陸の天気</h3><span class="sg-sp"></span></div>
     <p class="sg-note">${gaActive(pushGa()) ? "知らせる空港" : "いま見ている空港"}の、ゴーアラウンドが起きやすい天気かどうか（気象通報・予報からの目安）。</p>
     ${rows.map(r => { if(!r.w) return `<div class="sg-card"><b>${esc(r.name)}</b><p class="sg-note">${r.loading ? "読み込んでいます…" : "気象通報を読み込めませんでした。"}</p></div>`;
       const lv = GA_LV[r.risk.level], it = (k, v, l) => `<span class="${GA_LV[l][1]}"><small>${k}</small><b>${v}</b></span>`, R = r.risk;
@@ -18653,7 +18653,7 @@ function authRender(){
         <div class="row"><i>3</i><div><b>あとからでも許可できます</b><small>いま断っても、地図を見たり日誌に書いたりはできます。</small></div></div>
       </div>${auMsg()}<div class="spacer"></div>`;
     foot = `<button class="cta" type="button" data-au="loc-allow"${AU.busy ? " disabled" : ""}>位置情報を許可する</button><button class="ghost" type="button" data-au="loc-later">あとで</button>`;
-    if(NATIVE){ top = nvLocWhyHTML(false); foot = `<button class="cta" type="button" data-au="loc-allow"${AU.busy ? " disabled" : ""}>次へ</button><p class="nvfoot">許可しなくても、図鑑・フライト・運用は見られます。<br>あとから iPhone の設定で変えられます。</p>`; }   // iPhone のアプリ（I1-v2）
+    if(NATIVE){ top = nvLocWhyHTML(false); foot = `<button class="cta" type="button" data-au="loc-allow"${AU.busy ? " disabled" : ""}>次へ</button><p class="nvfoot">許可しなくても、図鑑・フライト・いまの空港は見られます。<br>あとから iPhone の設定で変えられます。</p>`; }   // iPhone のアプリ（I1-v2）
   }
   st.innerHTML = top; ft.innerHTML = foot; $("dAuth").dataset.step = s;
   const f = st.querySelector("#auCode, #auName, #auEmail"); if(f) setTimeout(() => { try{ f.focus({ preventScroll:true }); }catch(e){} }, 30);

@@ -74,7 +74,7 @@ async def main():
         await shot(pg, '10-844-layout-top.png')
         await pg.click('#dLayout [data-lo-fold="ops"]'); await pg.wait_for_timeout(250)
         check('押すとその場で開く（運用（空港）：見方7＋一覧のカード「3D」1（11/21・数には入れない）＋滑走路の下5。特別塗装機は機体の側へ）:', await pg.locator('#dLayout [data-lo-sec="ops"].open .losw').count() == 13 and await pg.get_attribute('#dLayout [data-lo-fold="ops"]', 'aria-expanded') == 'true' and await pg.locator('#dLayout .losec.open').count() == 1)
-        check('開いたカードの見出し「見方」「滑走路の下に出すもの」と行き先「運用へ ›」:', '滑走路の下に出すもの' in await pg.inner_text('#dLayout [data-lo-sec="ops"]') and '運用へ ›' in await pg.inner_text('#dLayout [data-lo-sec="ops"] .logo'))
+        check('開いたカードの見出し「見方」「滑走路の下に出すもの」と行き先「運用へ ›」:', '滑走路の下に出すもの' in await pg.inner_text('#dLayout [data-lo-sec="ops"]') and 'いまの空港へ ›' in await pg.inner_text('#dLayout [data-lo-sec="ops"] .logo'))
         await pg.evaluate("loScrollTo('ops')"); await pg.wait_for_timeout(150)
         await shot(pg, '11-844-layout-ops.png')
         await pg.click('#dLayout [data-lo-view="ops:strip"]'); await pg.wait_for_timeout(250)
