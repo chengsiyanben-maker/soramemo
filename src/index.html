@@ -2354,6 +2354,9 @@ dialog.a3dlg{inset:0;margin:0;max-width:100vw;max-height:100vh;width:100vw;heigh
 .a3tag{position:absolute;left:0;top:0;white-space:nowrap;padding:5px 12px;border-radius:999px;background:#fff;color:#374151;font-size:13px;box-shadow:0 2px 8px rgba(15,22,38,.18);pointer-events:auto;cursor:pointer}   /* 札を押すとその機体を選ぶ（11/22） */
 .a3tag b{color:#111827;font-weight:800}
 .a3tag.on{background:#111827;color:#D1D5DB}.a3tag.on b{color:#fff}
+.a3tag .a3est{font-style:normal;font-size:12px;color:#6B7280;margin-left:6px;padding:1px 6px;border-radius:999px;border:1px dashed #9CA3AF}.a3tag.on .a3est{color:#D1D5DB;border-color:#6B7280}   /* 位置を推定している機体（途切れた・先を読んだ・誘導路に寄せた。11/26 3d-real） */
+:root[data-night="on"] .a3tag .a3est{color:#9CA3AF;border-color:#4B5563}
+.a3note.a3estn{color:#4B5563}
 .a3tag.edge{background:rgba(255,255,255,.86);color:#4B5563}   /* 景色の外の機体の札（画面の端・向きの矢印つき） */
 .a3top{position:absolute;left:12px;right:12px;top:calc(10px + env(safe-area-inset-top));display:flex;gap:10px;align-items:center}
 .a3rnd{flex:none;width:44px;height:44px;border:0;border-radius:50%;background:rgba(255,255,255,.92);color:#111827;display:grid;place-items:center;cursor:pointer;box-shadow:0 2px 10px rgba(15,22,38,.12)}
@@ -5953,11 +5956,13 @@ const A3_LGT = { "16R":{ als:900, papi:["L", 434], tdz:1, wb:1 }, "34L":{ als:90
 const A3_LGT_SP = { "A滑走路":[60, 30], "B滑走路":[60, 30], "C滑走路":[30, 15], "D滑走路":[30, 30] };
 const A3_LC = { w:[1, .94, .82], y:[1, .78, .28], g:[.28, .9, .5], r:[1, .24, .2], b:[.32, .5, 1], tg:[.22, .86, .5], aw:[1, 1, 1] };
 // 点の灯りの描き方：芯＋にじみ（光の輪）。地面にめり込んで見えなくならないよう、見ている所へ少し（約4m＋距離の2%）寄せて描く（地面は重なりを避けるため手前へずらして描いているので、浅い角度ではそれより前に出す）。fx＝[種類, ずれ]：0 いつも・1 順に流れる閃光・2 赤い点滅（衝突防止灯）・3 白い閃光（2回ずつ）
+const a3Still = () => { try{ return matchMedia("(prefers-reduced-motion: reduce)").matches; }catch(e){ return false; } };
 function a3LightMat(T, halo){
   const m = new T.ShaderMaterial({ transparent:true, depthWrite:false, blending:T.AdditiveBlending, fog:false,
-    uniforms:{ uT:{ value:0 }, uPr:{ value:A3.r ? A3.r.getPixelRatio() : 1 }, uHalo:{ value:halo }, uK:{ value:A3.night === "night" ? 1 : .6 }, uLin:{ value:A3.post ? 1 : 0 } },   // uLin＝最高の質の仕上げ（線形の色で描く）のとき 1。uK＝明るさ（夕方は空が明るいので控えめ）
-    vertexShader:"attribute vec3 aCol; attribute float aSize; attribute vec2 aFx; uniform float uT; uniform float uPr; varying vec3 vC; varying float vA; void main(){ vec4 mv = modelViewMatrix * vec4(position, 1.0); float dd = max(1.0, length(mv.xyz)); mv.xyz *= max(0.0, 1.0 - (4.0 + dd * 0.02) / dd); gl_Position = projectionMatrix * mv; float k = clamp(3000.0 / dd, 0.8, 2.4); float a = 1.0; float c;"
+    uniforms:{ uT:{ value:0 }, uPr:{ value:A3.r ? A3.r.getPixelRatio() : 1 }, uHalo:{ value:halo }, uK:{ value:A3.night === "night" ? 1 : .6 }, uLin:{ value:A3.post ? 1 : 0 }, uStill:{ value:a3Still() ? 1 : 0 } },   // uLin＝最高の質の仕上げ（線形の色で描く）のとき 1。uK＝明るさ（夕方は空が明るいので控えめ）
+    vertexShader:"attribute vec3 aCol; attribute float aSize; attribute vec2 aFx; uniform float uT; uniform float uPr; uniform float uStill; varying vec3 vC; varying float vA; void main(){ vec4 mv = modelViewMatrix * vec4(position, 1.0); float dd = max(1.0, length(mv.xyz)); mv.xyz *= max(0.0, 1.0 - (4.0 + dd * 0.02) / dd); gl_Position = projectionMatrix * mv; float k = clamp(3000.0 / dd, 0.8, 2.4); float a = 1.0; float c;"
       + " if(aFx.x > 0.5 && aFx.x < 1.5){ c = fract(uT * 2.0 - aFx.y); a = c < 0.04 ? 1.0 : 0.0; } else if(aFx.x > 1.5 && aFx.x < 2.5){ a = fract(uT * 0.9 + aFx.y) < 0.13 ? 1.0 : 0.0; } else if(aFx.x > 2.5){ c = fract(uT / 1.3 + aFx.y); a = (c < 0.03 || (c > 0.09 && c < 0.12)) ? 1.0 : 0.0; }"
+      + " if(uStill > 0.5) a = 1.0;"   // 動きを減らす設定：点滅させずに灯したまま（11/26 3d-real）
       + " vA = a; vC = aCol; gl_PointSize = a > 0.0 ? aSize * uPr * k : 0.0; }",
     fragmentShader:"uniform float uHalo; uniform float uK; uniform float uLin; varying vec3 vC; varying float vA; void main(){ vec2 q = gl_PointCoord * 2.0 - 1.0; float r = dot(q, q); if(r > 1.0) discard; float core = exp(-r * 22.0); float halo = exp(-r * 4.0) * 0.32 * uHalo * (1.0 - r); vec3 c = mix(vC, vec3(1.0), core * 0.55); float al = (core + halo) * vA * uK; if(uLin > 0.5){ c = pow(c, vec3(2.2)); al = pow(clamp(al, 0.0, 1.0), 1.6) * 1.3; } gl_FragColor = vec4(c, al); }" });
   (A3.lmats = A3.lmats || []).push(m); return m;
@@ -6096,21 +6101,171 @@ async function a3Poll(){
   A3.err = Date.now() - t > 5 * 60e3 ? "pos" : false; A3.lastAt = t;
   a3Status(); a3Sheet(); A3.dirty = true;
 }
-// 見せる時刻（約1分前）の位置。前後の答えがあればその間をつなぎ、なければ速さと向きで先を読む（前後90秒まで）
+/*@A3_KIN@*/
+// 動きの推測（11/26 本人「3Dモデルをもっとリアルに、動きも推測を加えて」・checkin/3d-real）。three.js も画面も使わない計算だけ（tests/kin/a3kin.test.mjs で単体テスト）。
+//   推測は実データのあいだを埋めるだけ：次の答えが来たら実データに合わせる。位置を推測した機体は est に理由（ahead＝先を読んだ・gap＝途切れた・twy＝誘導路の線に寄せた）を入れ、名札に「推定」と出す
+//   向き・速さ・高さ・上昇率は adsb.lol（ODbL）の値。傾き・機首の上げ下げ・脚・フラップ・着陸灯は、その変わり方からの推定（本物の操作の記録ではない）
+const A3K = (() => {
+  const D = Math.PI / 180, G = 9.81, KT = 0.5144, FT = 0.3048, MLAT = 110574;
+  const mlon = lat => 111320 * Math.cos(lat * D);
+  const dh = (a, b) => ((((b - a) % 360) + 540) % 360) - 180;   // a から b への向きの差（-180〜180）
+  const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+  const vel = p => p && p.kt && p.hdg != null ? [Math.sin(p.hdg * D) * p.kt * KT, Math.cos(p.hdg * D) * p.kt * KT] : null;   // 東・北の速さ（m/s）
+  // 曲がり方（度/秒）：前後の答えの向きの差を時間で割る（地上の止まった機体や、間が長すぎる答えは 0）
+  function turnRate(a, b){
+    if(!a || !b || a.p.hdg == null || b.p.hdg == null) return 0;
+    const dt = (b.t - a.t) / 1000; if(dt < 2 || dt > 120) return 0;
+    return clamp(dh(a.p.hdg, b.p.hdg) / dt, -6, 6);
+  }
+  // 2つの答えのあいだ（f＝0〜1）：両端の速さと向きを使った3次の曲線（エルミート）でつなぐので、旋回の途中も角が立たない。
+  //   速さ×時間が2点の距離と合わない（地上をゆっくり・データの乱れ）ときは前と同じ直線。高さも上昇率を使って曲線に
+  function between(a, b, f){
+    const p = a.p, q = b.p, dt = (b.t - a.t) / 1000, ml = mlon(p.lat);
+    const ex = (q.lon - p.lon) * ml, ny = (q.lat - p.lat) * MLAT, chord = Math.hypot(ex, ny), va = vel(p), vb = vel(q);
+    const fit = v => { const s = Math.hypot(v[0], v[1]) * dt; return s > chord * .6 && s < chord * 1.6; };
+    const lerp = (u, v) => u == null || v == null ? v : u + (v - u) * f;
+    let x, y, hdg;
+    if(va && vb && dt > 0 && chord > 60 && fit(va) && fit(vb)){
+      const f2 = f * f, f3 = f2 * f, h10 = f3 - 2 * f2 + f, h01 = -2 * f3 + 3 * f2, h11 = f3 - f2;
+      x = h10 * va[0] * dt + h01 * ex + h11 * vb[0] * dt; y = h10 * va[1] * dt + h01 * ny + h11 * vb[1] * dt;
+      const d10 = 3 * f2 - 4 * f + 1, d01 = -6 * f2 + 6 * f, d11 = 3 * f2 - 2 * f;
+      const tx = d10 * va[0] * dt + d01 * ex + d11 * vb[0] * dt, ty = d10 * va[1] * dt + d01 * ny + d11 * vb[1] * dt;
+      hdg = (Math.atan2(tx, ty) / D + 360) % 360;   // 向きは曲線の進む向き
+    } else {
+      x = ex * f; y = ny * f;
+      const h0 = p.hdg ?? q.hdg ?? 0, h1 = q.hdg ?? p.hdg ?? 0; hdg = (h0 + dh(h0, h1) * f + 360) % 360;
+    }
+    let alt = lerp(p.alt_ft, q.alt_ft);
+    if(p.alt_ft != null && q.alt_ft != null && p.fpm != null && q.fpm != null && dt > 0){
+      const da = q.alt_ft - p.alt_ft, sa = p.fpm / 60 * dt, sb = q.fpm / 60 * dt;
+      if(Math.abs(sa - da) < Math.abs(da) + 400 && Math.abs(sb - da) < Math.abs(da) + 400){   // 上昇率が高さの差とおおよそ合うときだけ
+        const f2 = f * f, f3 = f2 * f; alt = Math.max(0, p.alt_ft + (f3 - 2 * f2 + f) * sa + (-2 * f3 + 3 * f2) * da + (f3 - f2) * sb); }
+    }
+    return { ...q, lat:p.lat + y / MLAT, lon:p.lon + x / ml, alt_ft:alt, hdg, kt:lerp(p.kt, q.kt), fpm:lerp(p.fpm, q.fpm), dist_km:lerp(p.dist_km, q.dist_km) };
+  }
+  // s 秒先（負なら前）：いまの速さで、いまの曲がり方のまま（向きは90度まで）。高さは上昇率で
+  function ahead(p, s, rate = 0){
+    if(!p.kt || p.hdg == null) return { ...p };
+    if(Math.abs(rate * s) > 90) rate = Math.sign(rate) * 90 / Math.abs(s);
+    const v = p.kt * KT, n = Math.max(1, Math.ceil(Math.abs(s) / 2)), st = s / n; let x = 0, y = 0, h = p.hdg;
+    for(let i = 0; i < n; i++){ const hm = h + rate * st / 2; x += Math.sin(hm * D) * v * st; y += Math.cos(hm * D) * v * st; h += rate * st; }
+    return { ...p, lat:p.lat + y / MLAT, lon:p.lon + x / mlon(p.lat), hdg:(h % 360 + 360) % 360, alt_ft:p.alt_ft == null ? null : Math.max(0, p.alt_ft + (p.fpm || 0) * s / 60) };
+  }
+  const onGround = p => !!p.ground || p.alt_ft == null || p.alt_ft <= 0;
+  // 傾き（度・右に曲がると正）：釣り合った旋回の傾き＝atan(速さ×曲がり方÷重力)。30度まで。空の上だけ
+  function bank(p, rate){ if(onGround(p) || (p.alt_ft || 0) < 100 || !p.kt || Math.abs(rate) < .25) return 0; return clamp(Math.atan(p.kt * KT * rate * D / G) / D, -30, 30); }
+  // 機首の上げ下げ（度・上が正）：空は上昇の角度＋迎え角。地上は離陸の引き起こしと、着陸のあと前輪を下ろすまで
+  function pitch(p, fl = 0){
+    const kt = p.kt || 0, a = p.alt_ft;
+    if(onGround(p)){
+      if(p.phase === "dep" && kt >= 125) return clamp((kt - 125) / 25 * 8, 0, 8);   // 引き起こし（約125ノットから）
+      if(p.phase === "arr" && kt >= 95) return clamp((kt - 95) / 25 * 4, 0, 4);   // 接地の直後は機首が上がったまま、遅くなると前輪を下ろす
+      return 0; }
+    const v = Math.max(70, kt) * KT, gam = Math.atan((p.fpm || 0) * FT / 60 / v) / D;
+    if(a <= 300 && p.phase === "arr") return clamp(gam + 3 + (1 - a / 300) * 3, 0, 7);   // 引き起こし（フレア）：地面が近いほど機首を上げる
+    if(a <= 300 && p.phase === "dep") return clamp(Math.max(8, gam + 4), 8, 15);
+    return clamp(gam + (p.phase === "arr" && a < 5000 ? 3 + fl * 1.5 : 2.2), -5, 17);
+  }
+  // 脚（1＝出す）：地上・高さ 300ft まで・着陸の前（約900m より下）・離陸の直後（約240m まで）
+  function gear(p){
+    if(onGround(p) || p.alt_ft <= 300) return 1;
+    if(p.phase === "dep") return p.alt_ft < 800 ? 1 : 0;
+    return p.alt_ft < 3000 && (p.phase === "arr" || (p.fpm || 0) < 0) ? 1 : 0;
+  }
+  // フラップ（0〜1）：離陸と上昇のはじめは少し、着陸の前は高さと速さで段々に。地上は滑走路を走るとき（40ノットより速い）だけ
+  function flaps(p){
+    const a = p.alt_ft, kt = p.kt || 0;
+    if(onGround(p)) return kt >= 40 ? (p.phase === "arr" ? 1 : .35) : 0;
+    if(p.phase === "dep") return a < 1500 ? .35 : a < 3000 ? .15 : 0;
+    if(p.phase === "arr" || (p.fpm || 0) < -300){ if(a < 2000) return 1; if(a < 4000) return .6; if(a < 7000 && kt < 230) return .25; }
+    return 0;
+  }
+  // 着陸灯：脚を出して空にいる間と、滑走路を走っている間（離陸滑走・着陸の減速）
+  const landLight = p => onGround(p) ? (p.kt || 0) >= 40 : gear(p) === 1;
+  // 後ろ向きに動いている（プッシュバック）：地上でゆっくり、動いた向きが機首と反対。機首の向きは動いた向きの反対にする
+  function pushback(prev, cur){
+    if(!prev || !cur || !onGround(cur) || (cur.kt || 0) > 12) return null;
+    const dx = (cur.lon - prev.lon) * mlon(cur.lat), dy = (cur.lat - prev.lat) * MLAT, d = Math.hypot(dx, dy);
+    if(d < 3 || d > 400) return null;
+    const mv = (Math.atan2(dx, dy) / D + 360) % 360, h = prev.hdg ?? cur.hdg;
+    return h != null && Math.abs(dh(h, mv)) > 120 ? (mv + 180) % 360 : null;
+  }
+  // 誘導路の線（形のファイルの twy：[幅, x, z, x, z, …]・x＝東・z＝南の m）を、短い線分の並び [ax, az, bx, bz, …] にする
+  function segs(twy){ const out = []; for(const t of twy || []) for(let i = 3; i + 1 < t.length; i += 2) out.push(t[i - 2], t[i - 1], t[i], t[i + 1]); return out; }
+  // 地上を走っている機体を、いちばん近い誘導路の中心線（maxD m 以内）に寄せ、向きを線にそろえる（線と50度より違う向きなら横切っているので向きはそのまま）
+  function snap(x, z, hdg, S, maxD = 35){
+    let bd = maxD * maxD, best = null;
+    for(let i = 0; i < S.length; i += 4){ const ax = S[i], az = S[i + 1], bx = S[i + 2], bz = S[i + 3], vx = bx - ax, vz = bz - az, L2 = vx * vx + vz * vz || 1;
+      const t = clamp(((x - ax) * vx + (z - az) * vz) / L2, 0, 1), px = ax + vx * t, pz = az + vz * t, d2 = (x - px) ** 2 + (z - pz) ** 2;
+      if(d2 < bd){ bd = d2; best = [px, pz, vx, vz]; } }
+    if(!best) return null;
+    let h = (Math.atan2(best[2], -best[3]) / D + 360) % 360;   // z は南が正なので、北向き＝-z
+    if(hdg != null){ if(Math.abs(dh(hdg, h)) > 90) h = (h + 180) % 360; if(Math.abs(dh(hdg, h)) > 50) h = hdg; }
+    return { x:best[0], z:best[1], hdg:h, d:Math.sqrt(bd) };
+  }
+  // 途切れた着陸機：最後の答えから s 秒。向きが合う滑走路の延長線（rw：[[緯度, 経度, 向こうの端の緯度, 経度], …]）に寄せながら、
+  //   その速さで3度の角度で降ろす。10秒を過ぎたら薄くし、60秒か滑走路の端で消す（null）。合う滑走路がなければまっすぐ先へ、20秒で消す
+  function approach(p, s, rw){
+    if(s < 0 || !p.kt || p.hdg == null) return null;
+    const arr = p.phase === "arr" || (p.fpm || 0) < -200, op = clamp(1 - (s - 10) / 50, 0, 1);
+    if(arr && p.alt_ft != null && p.alt_ft < 5000) for(const [la, lo, la2, lo2] of rw || []){
+      const ml = mlon(la), ux = (lo2 - lo) * ml, uy = (la2 - la) * MLAT, L = Math.hypot(ux, uy) || 1, cx = ux / L, cy = uy / L, crs = (Math.atan2(cx, cy) / D + 360) % 360;
+      if(Math.abs(dh(p.hdg, crs)) > 30) continue;
+      const px = (p.lon - lo) * ml, py = (p.lat - la) * MLAT, along = -(px * cx + py * cy), cross = px * -cy + py * cx;   // along＝端の手前の距離（m）・cross＝延長線からの横のずれ
+      if(along < 300 || along > 25000 || Math.abs(cross) > 2500) continue;
+      const left = along - p.kt * KT * s; if(left <= 0 || op <= 0) return null;
+      const k = clamp(1 - s / 40, 0, 1), cr = cross * k, x = -cx * left + -cy * cr, y = -cy * left + cx * cr;
+      const glide = left * Math.tan(3 * D) / FT, alt = Math.max(0, Math.min(p.alt_ft + (p.fpm || -700) * s / 60, Math.max(glide, p.alt_ft * k)));
+      return { ...p, lat:la + y / MLAT, lon:lo + x / ml, alt_ft:alt, hdg:(p.hdg + dh(p.hdg, crs) * clamp(s / 10, 0, 1) + 360) % 360, fpm:Math.min(-300, p.fpm || -700), est:"gap", op };
+    }
+    if(s > 20) return null;
+    return { ...ahead(p, s), est:"gap", op:clamp(1 - s / 20, 0, 1) };
+  }
+  // 大きく跳んだとき（先を読んだ位置に次の答えが来て食い違った・誘導路に寄せた・寄せるのをやめた）は、その差を少しずつ（約1.5秒）0 にして、瞬間移動させない
+  function smooth(st, r, now, tau = 1500){
+    if(!st || now - st.t > 5000 || now < st.t) return { x:r.x, z:r.z, y:r.y, ox:0, oz:0, oy:0, t:now };
+    const dt = (now - st.t) / 1000, k = Math.exp(-(now - st.t) / tau);
+    let ox = st.ox * k, oz = st.oz * k, oy = st.oy * k;
+    const v = (r.vx || 0) * dt, w = (r.vz || 0) * dt, jump = Math.hypot(r.x - (st.x - st.ox + v), r.z - (st.z - st.oz + w));   // 前の計算の位置（差を足す前）から、速さどおりに動いたか
+    if(jump > 12 + Math.hypot(v, w) * .5 && jump < 3000){ ox = st.x + v - r.x; oz = st.z + w - r.z; oy = st.y - r.y; }   // 跳んだら、いま描いている所の続きから。3km より大きい差は別の機体の入れ替えなので合わせない
+    return { x:r.x + ox, z:r.z + oz, y:r.y + oy, ox, oz, oy, t:now };
+  }
+  // 姿勢を少しずつ目標へ（tau 秒）：答えが変わる所で傾きがかくっと変わらないように
+  const ease = (cur, to, dt, tau = 1.2) => cur == null || !isFinite(cur) ? to : cur + (to - cur) * (1 - Math.exp(-Math.max(0, dt) / tau));
+  return { dh, turnRate, between, ahead, bank, pitch, gear, flaps, landLight, pushback, segs, snap, approach, smooth, ease };
+})();
+/*@A3_KIN_END@*/
+// 見せる時刻（約1分前）の位置。前後の答えがあればその間を曲線でつなぎ（A3K.between）、なければ速さ・向き・曲がり方で先を読む（前後90秒まで）。
+//   途切れた着陸機は最終進入の道すじで少し進めて薄くして消す（A3K.approach）。地上を走る機体は誘導路の中心線に寄せ、後ろ向きに動く機体（プッシュバック）は機首をそのままにする
+//   k＝推測の材料（曲がり方 rate・推定の理由 est・薄さ op）。姿勢は a3Sync で A3K から
 function a3Planes(now = Date.now()){
   if(!A3 || !A3.snaps.length) return [];
   const rt = now - A3_DELAY, out = [], seen = new Set();
+  if(!A3.lite && A3.shape && !A3.tws) A3.tws = A3K.segs(A3.shape.twy);
   for(let i = A3.snaps.length - 1; i >= 0; i--) for(const p of A3.snaps[i].planes){
     if(seen.has(p.id)) continue; seen.add(p.id);
     const hist = A3.snaps.map(s => ({ t:s.t, p:s.planes.find(x => x.id === p.id) })).filter(x => x.p);
-    let a = null, b = null;
-    for(const h of hist){ if(h.t <= rt) a = h; else if(!b) b = h; }
-    let q;
+    let a = null, b = null, ia = -1;
+    hist.forEach((h, k) => { if(h.t <= rt){ a = h; ia = k; } else if(!b) b = h; });
+    const last = hist[hist.length - 1], gone = i < A3.snaps.length - 1;   // gone＝いちばん新しい答えにいない
+    let q, rate = 0, est = null;
     if(A3.lite){ q = { ...(a || b).p }; }
-    else if(a && b){ const f = (rt - a.t) / (b.t - a.t); q = a3Lerp(a.p, b.p, f); }
-    else { const h = a || b, dt = Math.max(-90, Math.min(90, (rt - h.t) / 1000)); q = a3Ahead(h.p, dt); }
-    const last = hist[hist.length - 1].t;
-    if(i < A3.snaps.length - 1 && rt > last + 10e3) continue;   // 届かなくなった機体は、最後の位置を過ぎたら止めずに消す
+    else if(a && b){ q = A3K.between(a, b, (rt - a.t) / (b.t - a.t)); rate = A3K.turnRate(a, b); }
+    else {
+      const h = a || b, prev = a && ia > 0 ? hist[ia - 1] : null; rate = prev ? A3K.turnRate(prev, a) : 0;
+      const dt = Math.max(-90, Math.min(90, (rt - h.t) / 1000));
+      if(gone && a && rt > last.t){   // 途切れた機体
+        if(!a3Air(last.p)){ if(rt > last.t + 10e3) continue; q = { ...last.p }; }
+        else { q = A3K.approach(last.p, (rt - last.t) / 1000, A3.rwEnds || (A3.rwEnds = HND_RWY.flatMap(r => [[r[1], r[2], r[5], r[6]], [r[5], r[6], r[1], r[2]]]))); if(!q) continue; est = "gap"; }
+      } else { q = a3Air(h.p) ? A3K.ahead(h.p, dt, rate) : { ...h.p }; if(Math.abs(dt) > 5 && a3Air(h.p)) est = "ahead"; }
+    }
+    if(!A3.lite && !a3Air(q)){
+      const prev = a && ia > 0 ? hist[ia - 1].p : null, pb = A3K.pushback(prev || (a && b ? a.p : null), a && b ? b.p : q);
+      if(pb != null){ q.hdg = pb; q.push = true; }
+      else if(A3.tws && A3.tws.length && (q.kt || 0) >= 3 && (q.kt || 0) < 35){ const [x, z] = a3XZ(q.lat, q.lon), sn = A3K.snap(x, z, q.hdg, A3.tws);
+        if(sn && sn.d > 1){ q.lat = A3_C[0] - sn.z / 110574; q.lon = A3_C[1] + sn.x / (111320 * Math.cos(A3_C[0] * D2R)); q.hdg = sn.hdg; est = est || "twy"; } }
+    }
+    q.k = { rate, est, op:q.op == null ? 1 : q.op }; q.est = est;
     out.push(q);
   }
   return out;
@@ -6135,7 +6290,7 @@ function a3Loop(){
   if(A3.view === "fly" && a3FlyStep((now - (A3.drawn || now)) / 1000)){ A3.dirty = true; a3FlyAlt(); }   // 飛ぶ：つまみを動かしているあいだは毎こま描く
   A3.drawn = now;
   const ps = a3Planes(now);
-  a3Sync(ps); a3Camera(ps); a3ShadowFollow(); if(A3.sky) A3.sky.position.copy(A3.cam.position);
+  a3Sync(ps, now); a3Camera(ps); a3ShadowFollow(); if(A3.sky) A3.sky.position.copy(A3.cam.position);
   if(A3.lmats){ const t = (now - A3.t0) / 1000; for(const m of A3.lmats) m.uniforms.uT.value = t; } a3Papi();   // 灯りの点滅と PAPI の色
   if(A3.post) a3PostRender(); else A3.r.render(A3.scene, A3.cam); a3Labels(ps);
 }
@@ -6323,7 +6478,10 @@ function a3Geo(model){
   const tipZ = wz + M.sweep * (rk ? 1.08 : 1) + M.tip * .4, tipYy = wy + half * M.dih + flex + .004;
   const pts = { nav:[[-half, tipYy, tipZ, "r"], [half, tipYy, tipZ, "g"], [0, rad * .9, .5, "w"]], bcn:[[0, (M.hump || M.deck ? rad * 1.45 : rad * 1.04), -0.08], [0, -rad * 1.04, 0.02]], str:[[-half, tipYy, tipZ + .01], [half, tipYy, tipZ + .01]],
     land:[[-rad * 1.6, wy - .004, le(rad * 1.6) - .005], [rad * 1.6, wy - .004, le(rad * 1.6) - .005], [0, -rad * 1.7, -0.385]] };
-  const g = { body:a3Wind(a3Merge(T, body)), dark:a3Wind(a3Merge(T, dark)), win:a3Wind(a3Merge(T, win)), gear:a3Wind(a3Merge(T, gear)), pts };   // 左右を裏返した翼も表を外へ
+  // フラップ（11/26 3d-real）：内側の後ろの縁（付け根の外から翼の約6割まで）
+  const flaps = (() => { const tp = rk ? M.tip * .7 : M.tip, sw = M.sweep * (rk ? 1.08 : 1), te = x => wz + M.root + (sw + tp - M.root) * x / half, ch = x => M.root + (tp - M.root) * x / half;
+    const x0 = rad * 1.15, x1 = half * (M.high ? .55 : .62), th = .006; return [[x0, x1, te(x0) - ch(x0) * .12, wy + x0 * M.dih - th, (sw + tp - M.root) / half, M.dih, ch((x0 + x1) / 2) * .3, th]]; })();
+  const g = { body:a3Wind(a3Merge(T, body)), dark:a3Wind(a3Merge(T, dark)), win:a3Wind(a3Merge(T, win)), gear:a3Wind(a3Merge(T, gear)), pts, flaps };   // 左右を裏返した翼も表を外へ
   A3.geo[key] = g; return g;
 }
 // 細かい3Dモデル（11/23 本人「３Dモデルをリアルなものにして」）：羽田に多い7機種（787-8/9・777-300ER・767-300・737-800・A350-900・A321neo・A320）。
@@ -6340,8 +6498,11 @@ const A3_HD = {
   "737":{ L:39.5, span:.906, rad:.048, root:.19, tip:.05, sw:25, kink:.36, nose:.12, nk:1.8, tail:.25, fin:.19, finR:.17, hs:.17, er:.027, el:.1, ex:.3, wl:"blend", wlh:.063, dih:6, flex:.01, bog:2, flat:1, win:[.51, .25, .36], doors:[.12, .86], exits:[.47, .5] },
   "350":{ L:66.8, span:.967, rad:.045, root:.18, tip:.03, sw:31.9, kink:.32, nose:.085, nk:2.4, tail:.22, fin:.14, finR:.15, hs:.15, er:.029, el:.095, ex:.32, wl:"curl", wlh:.035, dih:5.5, flex:.04, bog:4, mask:1, win:[.53, .28, .4], doors:[.11, .3, .62, .87] },
   "a321":{ L:44.5, span:.805, rad:.045, root:.17, tip:.045, sw:25, kink:.34, nose:.1, nk:1.9, tail:.24, fin:.14, finR:.15, hs:.14, er:.028, el:.09, ex:.34, wl:"shark", wlh:.054, dih:5, flex:.01, bog:2, win:[.53, .23, .33], doors:[.1, .33, .7, .88] },
-  "320":{ L:37.6, span:.952, rad:.053, root:.2, tip:.055, sw:25, kink:.34, nose:.115, nk:1.9, tail:.25, fin:.165, finR:.18, hs:.165, er:.033, el:.105, ex:.34, wl:"shark", wlh:.064, dih:5, flex:.01, bog:2, win:[.53, .23, .33], doors:[.11, .87], exits:[.47] } };
-const A3_HD_RE = [[/^B78/, "787"], [/^B77/, "777"], [/^B76/, "767"], [/^(B73|B3[89X]M)/, "737"], [/^A35/, "350"], [/^(A321|A21N)/, "a321"], [/^(A32|A20N|A319|A19N)/, "320"]];
+  "320":{ L:37.6, span:.952, rad:.053, root:.2, tip:.055, sw:25, kink:.34, nose:.115, nk:1.9, tail:.25, fin:.165, finR:.18, hs:.165, er:.033, el:.105, ex:.34, wl:"shark", wlh:.064, dih:5, flex:.01, bog:2, win:[.53, .23, .33], doors:[.11, .87], exits:[.47] },
+  // 小型のジェット（11/26 3d-real・本人「小型＝E170/E190 も」）：E170（長さ29.9m・翼幅26.0m）と E190（36.2m・28.7m）。胴の直径 3.01m・発動機 CF34（ナセル約1.5m）・翼の先は上に曲げた板。寸法は FAA の機体の大きさの表とメーカーの空港計画の資料の割合
+  "e170":{ L:29.9, span:.87, rad:.05, root:.2, tip:.055, sw:23.5, kink:.34, nose:.13, nk:1.8, tail:.26, fin:.2, finR:.19, hs:.18, er:.025, el:.11, ex:.31, wl:"blend", wlh:.055, dih:5, flex:.01, bog:2, win:[.48, .3, .36], doors:[.11, .87], exits:[.46] },
+  "e190":{ L:36.2, span:.793, rad:.0416, root:.18, tip:.05, sw:23.5, kink:.34, nose:.11, nk:1.8, tail:.24, fin:.17, finR:.16, hs:.155, er:.021, el:.095, ex:.31, wl:"blend", wlh:.046, dih:5, flex:.01, bog:2, win:[.48, .25, .3], doors:[.1, .88], exits:[.48] } };
+const A3_HD_RE = [[/^B78/, "787"], [/^B77/, "777"], [/^B76/, "767"], [/^(B73|B3[89X]M)/, "737"], [/^A35/, "350"], [/^(A321|A21N)/, "a321"], [/^(A32|A20N|A319|A19N)/, "320"], [/^(E17|E75)/, "e170"], [/^(E19|E29|E95)/, "e190"]];
 const a3HdKey = t => { t = String(t || "").toUpperCase(); for(const [re, k] of A3_HD_RE) if(re.test(t)) return k; return null; };
 let A3_MAX = false;   // 最高の質（11/24 本人「３Dモデルはもっと容量を気にせず，高いクオリティにして」・checkin/a3-hq）：質3 のとき true。細かい形・4096 の絵・上塗り・影 4096・物の隙間の影・灯りのにじみ。重ければ a3Quality で質2 に下げ、軽い形で作り直す
 const a3HdNear = () => A3_MAX ? Infinity : 1600;   // カメラからこの距離（m）より近い機体と、選んだ・追っている機体だけ細かい形（最高の質では全部の機体。遠い地上の機体は平らな形）
@@ -6543,8 +6704,11 @@ function a3HdGeo(key){
     { const ap = new T.CircleGeometry(R * .05, 20); ap.translate(0, R * 1.03 * .9 - R * .1, .5 - .0005); push("dark", ap); }   // 尾の APU の口
     for(const sx of [-1, 1]){ const pt = new T.CylinderGeometry(R * .008, R * .008, R * .25, 6); pt.rotateX(Math.PI / 2); pt.translate(sx * R * .55, R * .15, -.5 + M.nose * .55); push("metal", pt); } }   // ピトー管
   const mg = list => list.length ? a3Merge(T, list) : null;
-  const g = { body:out.body, paint:mg(out.paint), wing:mg(out.wing), metal:mg(out.metal), dark:mg(out.dark), fin:mg(out.fin), nac:mg(out.nac), tire:mg(out.tire), gear:mg(out.gear), blade:mg(out.blade || []) };
-  let n = 0; for(const v of Object.values(g)) if(v) n += (v.index ? v.index.count : v.attributes.position.count) / 3; g.tri = Math.round(n);
+  // フラップ（11/26 3d-real）：内側（付け根の外〜折れ）と外側（折れ〜翼の約7割）の後ろの縁
+  const flaps = [[R * 1.15, rootX + (half - rootX) * M.kink], [rootX + (half - rootX) * M.kink, rootX + (half - rootX) * .72]].map(([x0, x1]) => { const te = x => zAt(x) + cAt(x), xm = (x0 + x1) / 2, th = cAt(xm) * .04;
+    return [x0, x1, te(x0) - cAt(x0) * .15, yAt(x0) - th, (te(x1) - te(x0)) / (x1 - x0), (yAt(x1) - yAt(x0)) / (x1 - x0), cAt(xm) * .3, th]; });
+  const g = { flaps, body:out.body, paint:mg(out.paint), wing:mg(out.wing), metal:mg(out.metal), dark:mg(out.dark), fin:mg(out.fin), nac:mg(out.nac), tire:mg(out.tire), gear:mg(out.gear), blade:mg(out.blade || []) };
+  let n = 0; for(const v of Object.values(g)) if(v && v.attributes) n += (v.index ? v.index.count : v.attributes.position.count) / 3; g.tri = Math.round(n);
   return (A3.hdGeo[ck] = g);
 }
 // 細かい形の材質（PBR）：塗装（少しつや）・翼（明るい灰色）・金属（口の縁・脚）・濃い部分（ファン・排気）・タイヤ。空を映す。夜は窓を灯す
@@ -6567,6 +6731,8 @@ function a3HdMesh(p){
     if(k === "tire" || k === "gear"){ ms.name = "gearH"; } hd.add(ms); }
   // 脚の部品はまとめて出し入れする
   const gh = new T.Group(); gh.name = "gearHD"; hd.children.filter(c => c.name === "gearH").forEach(c => gh.add(c)); hd.add(gh);
+  if(!A3.hdm.flap){ A3.hdm.flap = m.wing.clone(); A3.hdm.flap.side = T.DoubleSide; }
+  for(const f of a3FlapPieces(T, g.flaps || [], A3.hdm.flap)) hd.add(f);   // フラップ（11/26 3d-real）
   // 長さは機種の実寸を 1 にしているので、前の形（a3Geo）の地上の高さ（-rad×2.3）にそろえる：脚の下の端を同じ高さに
   const old = A3_MODELS[a3Model(p.type)] || A3_MODELS.n, A = A3_HD[key]; hd.position.y = -old.rad * 2.3 + A.rad * (A.flat ? 1.6 : 1.72);
   hd.name = "hd"; hd.userData.tri = g.tri; return hd;
@@ -6591,6 +6757,7 @@ function a3Mesh(p){
   const geo = a3Geo(a3Model(p.type));
   const b = new T.Mesh(geo.body, A3.pm.body), d = new T.Mesh(geo.dark, A3.pm.dark), w = new T.Mesh(geo.win, A3.pm.win), ge = new T.Mesh(geo.gear, A3.pm.dark);
   b.castShadow = d.castShadow = ge.castShadow = !!(A3.r && A3.r.shadowMap.enabled); ge.name = "gear"; g.add(b, d, w, ge);
+  for(const f of a3FlapPieces(T, geo.flaps || [], A3.pm.body)) g.add(f);   // フラップ（出しているときだけ見える）
   if(sp && day){ const M = A3_MODELS[a3Model(p.type)] || A3_MODELS.n, fin = new T.Mesh(new T.BoxGeometry(0.013, M.fin * .8, 0.12), A3.pm.gold); fin.position.set(0, M.rad * .6 + M.fin * .5, 0.4); g.add(fin); }   // 特別塗装機の尾翼は昼だけ金
   g.userData.mid = g.children.slice();   // 前の形（中くらいの距離）
   { const hd = a3HdMesh(p); if(hd){ hd.visible = false; g.add(hd); } }   // 細かい形（近いときだけ。a3Sync で切り替える）
@@ -6615,9 +6782,31 @@ function a3Lo(o){
   // 地面の層（重ね順の補正つき）より上に少し浮かせる
   e.scale.setScalar(1.45); e.position.y = 0.02; f.position.y = 0.035; f.renderOrder = 3; e.renderOrder = 2; lo.add(e, f); lo.position.y = -M.rad * 2.3 + 0.01; lo.name = "lo"; o.g.add(lo); return lo;
 }
+// フラップ（11/26 3d-real）：後ろの縁の内側と外側の板を、ちょうつがいの線（後退した線）のまわりに下げる。しまっているときは隠す（翼の中に入るので）
+//   x0・x1＝片側の付け根からの横の位置・z0／y0＝x0 のちょうつがいの前後と高さ・sz／sy＝外へ行くほどのずれ・c＝板の幅（前後）。左右で1組ずつ
+function a3FlapPieces(T, list, mat){
+  const out = [];
+  for(const [x0, x1, z0, y0, sz, sy, c, th] of list) for(const sd of [1, -1]){
+    const w = x1 - x0, g = new T.BoxGeometry(1, 1, 1), pa = g.attributes.position.array;
+    for(let i = 0; i < pa.length; i += 3){ const u = (pa[i] + .5) * w, v = (pa[i + 2] + .5) * c; pa[i] = sd * u; pa[i + 1] = u * sy + pa[i + 1] * th; pa[i + 2] = u * sz + v; }
+    g.computeVertexNormals();
+    const m = new T.Mesh(g, mat), pv = new T.Group(); pv.add(m); pv.position.set(sd * x0, y0, z0); pv.name = "flap"; pv.visible = false;
+    pv.userData.ax = new T.Vector3(1, sy * sd, sz * sd).normalize();   // 右の翼は外向き、左の翼は内向きの軸で回すと、どちらも後ろの縁が下がる
+    m.castShadow = !!(A3.r && A3.r.shadowMap.enabled); out.push(pv); }
+  return out;
+}
+const a3FlapList = g => { const l = []; g.traverse(c => { if(c.name === "flap") l.push(c); }); return l; };
+// 薄くする（途切れた機体）：その機体だけ材質を写して透明に。灯りの点は半分より薄くなったら消す
+function a3Fade(o, op){
+  if(op >= 1 && !o.faded) return;
+  if(!o.faded){ o.faded = []; o.g.traverse(c => { if(c.isMesh && c.material && !c.isPoints){ const m = c.material.clone(); m.transparent = true; o.faded.push(m); c.material = m; } }); }
+  for(const m of o.faded) m.opacity = op;
+  o.g.traverse(c => { if(c.isPoints) c.visible = op > .5 && c.visible; });
+  if(o.sh) o.sh.material.opacity = .18 * op;
+}
 // 見た目の最小の大きさ（画面の高さに対する機体の長さの px）。全体の視点で実寸だと小さすぎるので、遠いほど少し大きく描く
 const A3_MINPX = { air:22, ground:16 };
-function a3Sync(ps){
+function a3Sync(ps, now = Date.now()){
   const T = A3.THREE, ids = new Set(ps.map(p => p.id));
   for(const [id, o] of A3.objs) if(!ids.has(id)){ A3.scene.remove(o.g); if(o.sh) A3.scene.remove(o.sh); if(o.ln) A3.scene.remove(o.ln); A3.objs.delete(id); }
   const big = A3.view === "all" ? Math.max(1, Math.min(5, a3Orb().d / 2400)) : 1;   // 全体の視点だけ見つけやすいよう大きく描く（11/25：自由で寄ったら本当の大きさに近づける。はじめの位置は前と同じ5倍）
@@ -6634,17 +6823,27 @@ function a3Sync(ps){
     const follow = A3.view === "plane" && p.id === A3.sel;
     let L = (A3.lite ? 260 : a3Len(p.type)) * (air ? big : 1);
     if(!A3.lite && !follow) L = Math.max(L, (air ? A3_MINPX.air : A3_MINPX.ground) / pxm);
-    const y = air ? p.alt_ft * 0.3048 : A3.lite ? 4 : L * M.rad * 2.3;   // 地上は車輪が地面に着く高さ（大きく描いても同じ割合）
-    o.g.position.set(x, y, z); o.g.scale.setScalar(L); o.g.rotation.y = -(p.hdg || 0) * D2R; o.p = p; o.cd = cd;
+    const gy = L * M.rad * 2.3, low = !air && !p.ground && p.alt_ft != null && p.alt_ft > 0;   // low＝高さ 300ft までの空（引き起こし・離陸の直後）は地面から浮かせる（11/26 3d-real）
+    let y = air ? p.alt_ft * 0.3048 : A3.lite ? 4 : gy + (low ? p.alt_ft * 0.3048 : 0);   // 地上は車輪が地面に着く高さ（大きく描いても同じ割合）
+    let px = x, pz = z;
+    if(!A3.lite){ const v = (p.kt || 0) * 0.5144, h = (p.hdg || 0) * D2R; o.sm = A3K.smooth(o.sm, { x, z, y, vx:Math.sin(h) * v, vz:-Math.cos(h) * v }, now); px = o.sm.x; pz = o.sm.z; if(air) y = o.sm.y; }   // 跳んだ所は少しずつ合わせる
+    o.g.position.set(px, y, pz); o.g.scale.setScalar(L); o.g.rotation.y = -(p.hdg || 0) * D2R; o.p = p; o.cd = cd;
     if(!A3.lite){ const far = !air && cd > 3000 && !follow && p.id !== A3.sel;   // 遠い地上の機体は簡単な形
       if(far && !o.lo) o.lo = a3Lo(o);
       const hd = o.g.getObjectByName("hd"), near = !!hd && !far && (follow || p.id === A3.sel || cd < a3HdNear()); o.hd = near;   // 近い機体は細かい形（11/23）
       if(o.lo) o.lo.visible = far; for(const c of o.g.userData.hi || []) if(!c.isPoints) c.visible = c === hd ? near : !far && !(near && (o.g.userData.mid || []).includes(c));   // 灯り（点）は遠くても出す
       const mv = o.g.getObjectByName("mv"); if(mv) mv.visible = a3Moving(p); }
-    o.g.rotation.x = air && p.fpm ? Math.max(-0.12, Math.min(0.2, p.fpm / 9000)) : 0;   // 上昇は機首を上げ、降下は少し下げる
-    { const ge = o.g.getObjectByName("gear"), ld = o.g.getObjectByName("land"); const gv = (!air && !(o.lo && o.lo.visible)) || (p.alt_ft != null && p.alt_ft < 3000 && (p.phase === "arr" || (p.fpm || 0) < 0)) || (p.phase === "dep" && p.alt_ft != null && p.alt_ft < 800);
-      if(ge) ge.visible = gv && !o.hd; if(ld) ld.visible = !!ge && gv && air;
-      const gh = o.g.getObjectByName("gearHD"); if(gh) gh.visible = gv; }   // 細かい形のときは、その脚を出す（前の形の脚は隠す）   // 着陸灯は空で脚を出しているあいだ。脚は地上と着陸の前（約900m より下）・離陸の直後だけ
+    // 姿勢（11/26 3d-real・推定）：傾きは曲がり方から、機首は上昇の角度と迎え角・離陸の引き起こし・着陸の引き起こしから。少しずつ目標へ
+    const dts = o.kt0 ? (now - o.kt0) / 1000 : 0; o.kt0 = now;
+    if(A3.lite){ o.g.rotation.x = 0; o.g.rotation.z = 0; }
+    else { const fl = A3K.flaps(p); o.fl = A3K.ease(o.fl, fl, dts, 2.5); o.pt = A3K.ease(o.pt, A3K.pitch(p, fl), dts, 1.5); o.bk = A3K.ease(o.bk, A3K.bank(p, p.k ? p.k.rate : 0), dts, 1.2);
+      o.g.rotation.x = o.pt * D2R; o.g.rotation.z = -o.bk * D2R;   // 右に曲がると右の翼が下がる（右＝+x）
+      if(!air && o.pt > 0) o.g.position.y += L * 0.05 * Math.sin(o.pt * D2R);   // 機首を上げたときは主脚を軸に（尾を地面にめり込ませない）
+      for(const f of o.flaps || (o.flaps = a3FlapList(o.g))){ const ang = o.fl * 35 * D2R; f.visible = o.fl > .02 && (f.parent !== o.g || (!o.hd && !(o.lo && o.lo.visible))); f.quaternion.setFromAxisAngle(f.userData.ax, ang); } }
+    { const ge = o.g.getObjectByName("gear"), ld = o.g.getObjectByName("land"); const gv = A3K.gear(p) === 1 && !(!air && o.lo && o.lo.visible);
+      if(ge) ge.visible = gv && !o.hd; if(ld) ld.visible = !!ge && A3K.landLight(p) && !(o.lo && o.lo.visible);
+      const gh = o.g.getObjectByName("gearHD"); if(gh) gh.visible = gv; }   // 細かい形のときは、その脚を出す（前の形の脚は隠す）。着陸灯は空で脚を出しているあいだと、滑走路を走っているあいだ
+    if(!A3.lite) a3Fade(o, p.k ? p.k.op : 1);   // 途切れた機体は薄くして消す
     if(o.sh){ o.sh.visible = o.ln.visible = air; if(air){ o.sh.position.set(x, 1.5, z); o.sh.scale.setScalar(L * 0.45);
       o.ln.geometry.setFromPoints([new T.Vector3(x, 1.5, z), new T.Vector3(x, y, z)]); o.ln.computeLineDistances(); } }
   }
@@ -6858,7 +7057,7 @@ function a3Labels(ps){
     placed.push(r); seen.add(id);
     let el = A3.labels.get(id);
     if(!el){ el = document.createElement("span"); el.className = "a3tag"; el.dataset.a3Pick = id; box.appendChild(el); A3.labels.set(id, el); }
-    const alt = a3Alt(o.p), txt = !a3Air(o.p) ? `<b>${esc(a3No(o.p))}</b> ${a3Moving(o.p) ? "走行中" : "地上"}` : `<b>${esc(a3No(o.p))}</b>${o.p.phase === "dep" && alt != null && alt < 500 ? " 離陸" : alt != null ? ` ${alt.toLocaleString("ja-JP")}m` : ""}`;
+    const alt = a3Alt(o.p), es = o.p.est && o.p.est !== "ahead" ? `<i class="a3est">推定</i>` : "", txt = (!a3Air(o.p) ? `<b>${esc(a3No(o.p))}</b> ${o.p.push ? "後ろへ" : a3Moving(o.p) ? "走行中" : "地上"}` : `<b>${esc(a3No(o.p))}</b>${o.p.phase === "dep" && alt != null && alt < 500 ? " 離陸" : alt != null ? ` ${alt.toLocaleString("ja-JP")}m` : ""}`) + es;   // 推定：途切れた機体と誘導路の線に寄せた機体（11/26 3d-real）
     if(el._t !== txt){ el.innerHTML = txt; el._t = txt; }
     el.classList.toggle("on", id === A3.sel); el.classList.remove("edge");
     el.style.transform = `translate(${lx.toFixed(1)}px,${(o.sy - 14).toFixed(1)}px) translate(-50%,-100%)`;
@@ -6917,7 +7116,8 @@ function a3CardHTML(el, p){
     <div class="a3grid"><div><small>機種</small><b>${esc(p.type || "—")}</b></div><div><small>登録記号</small><b>${esc(p.reg || "—")}</b></div>
     <div><small>高さ</small><b>${alt == null || !a3Air(p) ? "地上" : `<span class="num">${alt.toLocaleString("ja-JP")}</span><span class="u">m</span>`}</b></div>
     <div><small>${arr ? "着陸まで" : "いま"}</small><b>${arr && /約(\d+)分/.test(s1) ? `約<span class="num">${s1.match(/約(\d+)分/)[1]}</span><span class="u">分</span>` : esc(s1)}</b>${s2 ? `<span>${esc(s2)}</span>` : ""}</div></div>
-    <p class="a3note">位置は約1分遅れ。高さは機体が送る気圧の高さ。形は機種ごとに寸法を合わせた模型で（近くの機体だけ細かい形）、大きさは機種どおり${lenTxt}。色は尾翼の大まかな色だけで、ロゴや社名は付けていません。</p></div>`;
+    <p class="a3note">位置は約1分遅れ。高さは機体が送る気圧の高さ。形は機種ごとに寸法を合わせた模型で（近くの機体だけ細かい形）、大きさは機種どおり${lenTxt}。色は尾翼の大まかな色だけで、ロゴや社名は付けていません。</p>
+    <p class="a3note a3estn">${p.est === "gap" ? "<b>この機体の位置は推定です。</b>データが途切れたので、最終進入の道すじに沿って進め、少しずつ薄くしています。" : p.est === "twy" ? "<b>地上の道すじは推定です。</b>誘導路の中心線に寄せて描いています。" : ""}傾き・機首の上げ下げ・脚・フラップ・着陸灯は、速さ・向き・高さの変わり方からの推定です（実際の操作の記録ではありません）。</p></div>`;
 }
 function a3SrcHTML(el){
   el.classList.remove("a3picking");
@@ -6926,7 +7126,7 @@ function a3SrcHTML(el){
     <ul class="a3src"><li><small>滑走路の端</small><b>AIP JAPAN をもとに作成</b></li><li><small>滑走路・進入灯・PAPI の灯り</small><b>AIP JAPAN（AD 2.14）の種類と長さをもとに作成</b><span>灯りの並びと間隔はおおよそです。夕方と夜だけ出します</span></li><li><small>空港の形・誘導路・海岸線</small><b>${A3 && A3.shape ? "© OpenStreetMap の協力者" : "滑走路とターミナルの位置から作った仮の形"}</b><span>${A3 && A3.shape ? "OpenStreetMap のデータを加工して作成（ODbL 1.0。2026年11月の時点）" : "形のファイルを読めなかったので、仮の形を出しています"}</span></li>
     ${A3 && A3.shape && A3.shape.city ? `<li><small>建物（空港と大田区・川崎の海沿い）</small><b>3D都市モデル（Project PLATEAU）</b><span>「3D都市モデル（Project PLATEAU）大田区（2025年度）・川崎市（2022年度）」（国土交通省）を加工して作成（公共データ利用規約 第1.0版）。外形と高さだけを使い、小さな建物は省いています。屋根と壁の色は用途からのおおよそ</span></li>` : ""}
     <li><small>管制塔</small><b>高さ 115.7m（国土交通省）</b><span>位置は OpenStreetMap</span></li>
-    <li><small>機体の位置</small><b>${ADSB_A}（ODbL）</b><span>約1分遅らせて出しています</span></li><li><small>空</small><b>気象通報（METAR）</b><span>日の出・日の入りは端末で計算</span></li><li><small>機体の形</small><b>機種ごとの寸法に合わせて手で作った模型</b><span>787・777・767・737・A350・A320・A321 は近くで細かい形（翼の断面・翼の先・発動機・脚・窓と扉）。寸法は FAA の機体の大きさの表とメーカーの空港計画の資料の割合から。ほかの機種と遠くの機体は簡単な形です。色は白い胴と尾翼の大まかな色だけで、ロゴ・社名・公式の塗装の絵は付けていません</span></li><li><small>雲・星</small><b>絵として描いたもの</b><span>雲の量は気象通報の空のようすから。実際の雲の位置ではありません</span></li></ul>
+    <li><small>機体の位置</small><b>${ADSB_A}（ODbL）</b><span>約1分遅らせて出しています</span></li><li><small>機体の動き</small><b>推定</b><span>答えのあいだは速さと向きでなめらかにつなぎます。傾き・機首の上げ下げ・脚・フラップ・着陸灯・プッシュバック・誘導路の道すじ・途切れた着陸機の最終進入は、位置・速さ・向き・高さの変わり方からの推定です</span></li><li><small>空</small><b>気象通報（METAR）</b><span>日の出・日の入りは端末で計算</span></li><li><small>機体の形</small><b>機種ごとの寸法に合わせて手で作った模型</b><span>787・777・767・737・A350・A320・A321・E170・E190 は近くで細かい形（翼の断面・翼の先・発動機・脚・窓と扉）。寸法は FAA の機体の大きさの表とメーカーの空港計画の資料の割合から。ほかの機種と遠くの機体は簡単な形です。色は白い胴と尾翼の大まかな色だけで、ロゴ・社名・公式の塗装の絵は付けていません</span></li><li><small>雲・星</small><b>絵として描いたもの</b><span>雲の量は気象通報の空のようすから。実際の雲の位置ではありません</span></li></ul>
     <p class="a3note"><a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap の著作権と利用条件 ›</a>　<a href="https://www.mlit.go.jp/plateau/site-policy/" target="_blank" rel="noopener">PLATEAU の利用条件 ›</a>　形のファイルは ODbL 1.0 で公開しています</p></div>`;
 }
 function a3Select(id, follow){
