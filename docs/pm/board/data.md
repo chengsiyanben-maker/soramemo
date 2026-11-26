@@ -1,6 +1,11 @@
 # データ担当の帳面
 
 ## いま持っている仕事
+- **定期の手入れ 11/26 の4回目（木。PM の指示なしの定期の回）**：ブランチ maint/2026-11-26-4（main 594dd3e から）→ **PR #265（下書き）**。報告 docs/pm/maint/2026-11-26-4-report.md。**移行205・テスト t144**
+  - 3回目のあとに入った移行は 204（経営の上限・関数なし）だけ。代わりに今の関数全部から「(列 at time zone …)::date で絞る」所を機械で洗い出した → admin_metrics と airport_hour_bad_roll の2つ。後者は先に範囲で絞るので問題なし
+  - admin_metrics（管理の画面の日別）を、日ごとに4つの表をまるごと数える形から、期間で1回読んで日ごとにまとめる形に。返す形・権限・RLS は同じ。全部読み 121回 → 8回（模擬）
+  - t144 19項目：前と後で8通りの返り値が完全に同じ（UTC・日本時間・ロサンゼルス）。t11・t12 は出力が同じ。影響なし（管理者の画面だけ）。PM の自動の反映でよい
+- （済み）t142 の直し PR #261・定期の3回目 PR #260 は 11/26 main に入った（pm/release-1126e）
 - **【急ぎ・済み】t142 が GitHub で落ちる件（PM の指示 11/26 8時40分）**：ブランチ data/ops-guard-fix（main 7d664c6 から）→ **PR #261（下書き）**。報告 docs/pm/report-ops-guard-fix.md。テストだけ・移行なし
   - 原因：PGlite は流す所の時間帯を使う（手元 TZ=Asia/Tokyo・GitHub は UTC）。種の `d + time '11:00'` が GitHub では日本時間20時2分になり、mins = 662 の確かめが落ちた（n2 = n1 = 80 で合っていた）。関数は正しい
   - 直し：種の日付と時刻を日本時間で作る。期待は同じ。UTC・東京・ロサンゼルス・+14・−11 の5つで31項目 OK。t138〜t141・t48 も UTC で NG 0
@@ -431,14 +436,15 @@
 - 11/25：data/sweep-1125（PR #216）が移行197・テスト t135（data/stamp-fast #225 は移行なし）
 - 11/25：data/hnd-nrt-priority（#227）と data/hnd-nrt-priority-b（#228・別の回の案）がどちらも移行198・t136。入れるのは片方だけ。#228 の A・B を足すなら199・t137
 - data/hnd-nrt-more（PR #230）が移行199・テスト t137。#228 の A・B を足すなら200 以降に付け直す
-- 11/26：data/idem（PR #240）が移行200・テスト t138。data/idem-b（#241・別の回の案）も200・t138 なので入れるのは片方だけ。maint/2026-11-26（PR #246）が移行201・t139。data/flight-no（PR #247）が202・t140。maint/2026-11-26-2（PR #254）は移行なし・t141。data/ops-guard（PR #256）が203・t142（11/26 main に入った）。maint/2026-11-26-3（PR #260）は移行なし・t141 に足しただけ。次は204・t143 から
+- 11/26：data/idem（PR #240）が移行200・テスト t138。data/idem-b（#241・別の回の案）も200・t138 なので入れるのは片方だけ。maint/2026-11-26（PR #246）が移行201・t139。data/flight-no（PR #247）が202・t140。maint/2026-11-26-2（PR #254）は移行なし・t141。data/ops-guard（PR #256）が203・t142（11/26 main に入った）。maint/2026-11-26-3（PR #260）は移行なし・t141 に足しただけ（main に入った）。経営の keiei/timeout が204・t143（main に入った）。maint/2026-11-26-4（PR #265）が205・t144。次は206・t145 から
 - main に別の移行が先に入ったら、反映の前にもう一度 `node tools/migrations.mjs rebase`
 - 本番は小さいプランで一時ファイルの余裕がない。本人に流してもらう SQL は、大きな中間の表・自己結合・大きな並べ替えを避け、索引で引く形にする
 - PGlite は流す所の時間帯を使う（手元は日本時間・GitHub は UTC）。テストの種の日付と時刻は日本時間で作り、手元でも TZ=UTC で流して確かめる
 - SQL のテストは全部で約35分かかる（手元で流すときは裏で流してログを見る。t92 だけで約4分。同じログに2回流すと混ざるので、ログの名前を分ける）
 
 ## 次にやること
-- t142 の直し（PR #261）：PM が出したら GitHub の SQL のテストが通ったかを見る。まだ落ちるなら時間帯以外（実行の時刻）を疑う
+- 定期の手入れ 11/26 の4回目（PR #265・移行205・t144）：CI とレビューに答える。反映の前に main に別の移行が先なら rebase。反映のあと管理の画面の「使われ方」が出るかを PM に見てもらう。次の定期の回：結果（*-result.csv）があれば死んだ行・使われていない索引・大きさの見込み。なければ main に新しく入った移行の関数だけを probe_seqscan.mjs で呼ぶ（洗い出しの残りの候補：atc_msgs (feeder)・cold-archive の1日の大きさ・push_subs の GIN）
+- t142 の直し（PR #261・main に入った）：反映の Actions で SQL のテストが通ったかを見る
 - 定期の手入れ 11/26 の3回目（PR #260・t141）：CI とレビューに答える。次の定期の回：結果（*-result.csv、2026-11-26-check.sql・2026-11-26-2 の ①）があれば死んだ行・使われていない索引・大きさの見込み。なければ main に新しく入った移行の関数だけを probe_seqscan.mjs で呼び、よく呼ばれるものを t141 に足す
 - 裏側の守り（PR #256・移行203・t142）：CI とレビューに答える。反映の前に main に別の移行が先なら rebase。反映のあと報告の 6 の SQL（data_health の一覧）を流してもらい、ng が本番の動きの違いなら上限（limit_min）を直す。本人が通知の送り先を決めたら watch から送る形を作る。5・7・8 は本人の OK が出たら（5 はチェックイン担当と）
 - 定期の手入れ 11/26 の2回目（PR #254・t141）：CI とレビューに答える。本人が push_subs の行の数（報告の ①）を流したら、数千を超えていれば GIN 索引の移行（203 以降）。次の定期の回：結果（*-result.csv）があれば死んだ行・使われていない索引。なければ probe_seqscan.mjs をもう一度流して、新しく入った関数を t141 に足す
@@ -497,7 +503,7 @@
 
 ## ほかの担当への依頼
 - チェックインへ（11/26・data/flight-no #247。詳しくは report-flight-no.md の4）：記録帳の flight_no は大文字・空白なしの形（JL123）で送る。過去の便は `sb.rpc("flight_lookup", { p_date, p_flight })`。rows が2つ以上なら区間を選んでもらう。src = schedule の行は登録記号なし。400日より前は空
-- 経営へ（11/16 から残ったまま。11/26 にも確かめた）：毎日の仕事 co3-trouble-detect（20261028000116）に時間の上限がない。経営の移行で `set statement_timeout = '3min'; set lock_timeout = '5s';` を文の先頭に
+- （済み）経営へ：co3-trouble-detect の時間の上限は経営の移行204（keiei/timeout）で入った（11/26 main）
 - チェックインへ（11/26 空港の形・PR #243。本人が決めたら）：三沢・岩国のターミナルが判定の円の外。terminals に行を足すと決まったら、src/index.html の TERMS にも同じ行（MSJ-T 40.696583,141.387750／IWK-T 34.158808,132.235052・ターミナルの印は出さない）。滑走路の線は data/ap_shape/runway_lines.json（id は airports の id）
 - デザインへ（11/26 同上）：印のカードの案A の滑走路の線は data/ap_shape/runway_lines.json の lines（0.15〜0.85。160 の箱なら ×160）。確かめ用のページ data/ap_shape/preview.html
 - **チェックイン担当へ（11/26・data/idem #240。詳しくは report-idem.md）**：印を押したときに crypto.randomUUID() で cid を1つ作って保留の p に持たせ、sendCheckin の本文に cid を足す（flushQueue の送り直しでも同じ cid）。返事の again: true は成功として扱う（ハンコを取り消さない・初めての演出なし）。manual_flights・intl_flights の追加は upsert(row, { onConflict: "user_id,client_id", ignoreDuplicates: true }) に client_id を付けて。関数 checkin を先に出せば、画面が後でも壊れない
