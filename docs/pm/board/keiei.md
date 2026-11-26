@@ -1,7 +1,7 @@
 # 経営ゲーム担当の帳面
 
 ## いま持っている仕事
-- co3-trouble-detect に時間の上限（PM 11/26 7時45分、データ担当の 11/16 からの依頼）：ブランチ keiei/timeout、下書き PR #258。報告 docs/pm/report-keiei-timeout.md
+- co3-trouble-detect に時間の上限（PM 11/26 7時45分、データ担当の 11/16 からの依頼）：ブランチ keiei/timeout、PR #258 は 11/26 9時半ごろ（日本時間）main に入った（移行204 を本番に流したかは PM の知らせで確かめる）。報告 docs/pm/report-keiei-timeout.md
   - この仕事は移行119（10/28）で止めてある（便ごとの co3-legs-check に置きかえ）。データ担当の見回りは unschedule を見ていなかったと思われる
   - 移行204（cron の付け直しだけ）：本番に残っているときだけ、同じ時刻・中身で文の先頭に statement_timeout 3分・lock_timeout 5秒を付ける。ないときは何もしない（作らない・消さない）。pg_cron の有無は cron.job の表で見る
   - テスト t143（13項目）を足した。t143・t128・移行の番号チェック通過（203 は data/ops-guard が使用中なので 204）
@@ -57,7 +57,7 @@
 - #82 の上限が足りているか見るため、読むだけの SQL（report-fix-sweep-1113.md の cron.job_run_details の経営の仕事の最長時間）を流してもらいたい
 
 ## 次にやること
-- PR #258 の結果を見る。本番の cron.job に co3-trouble-detect が残っていたら、止める移行（unschedule）を本人の OK のあとに書く
+- PR #258 は main に入った。本番の cron.job に co3-trouble-detect が残っていたら、止める移行（unschedule）を本人の OK のあとに書く
 - #190 は main に入った。本番に出たかを PM の知らせで確かめる。チェックイン担当がチェックイン直後の「経営の資金 +」の一言を隠したか見る
 - 経営を戻すと決まったら、KEIEI_VISIBLE を true にして組み立て直す（t170 の「切り替えは false」の確かめも true に直す）
 - （気づいたこと）遅れて0時をまたいで出た便を実際の出発時刻で記録すると、co_rides の日付の突き合わせが外れて機体が分からない。起きているか確かめる読むだけの SQL を用意するかは PM と相談
