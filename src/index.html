@@ -346,6 +346,33 @@ dialog::backdrop{background:rgba(15,22,38,.55)}
 .queuebar{margin:10px 0 0;padding:12px 14px;border-radius:12px;border:1.5px dashed var(--shu);background:var(--paper);font-size:14px}
 .queuebar b{display:block}
 .queuebar .btn2{margin-top:8px;padding:8px 12px;font-size:14px}
+/* 今日の便から記録（11/25 flight-suggest）：角丸カード・ピル・小さな航空会社の札（彩度を落とした色。ロゴは使わない） */
+.fsug{margin:12px 0 16px;padding:14px;border-radius:18px;background:var(--paper);box-shadow:0 1px 3px rgba(17,24,39,.06),0 6px 18px rgba(17,24,39,.05)}
+.fsh{display:flex;align-items:baseline;justify-content:space-between;gap:8px}.fsh b{font-size:16px;font-weight:800;color:#1F2937}.fsh small{font-size:12px;color:#6B7280}
+.fsg{margin:12px 0 6px;font-size:12px;font-weight:700;color:#6B7280}
+.fslist,.fsug-pick{display:flex;flex-direction:column;gap:6px}.fsug-pick{margin:6px 0 4px}
+.fsrow{display:flex;align-items:center;gap:10px;width:100%;min-height:52px;padding:8px 12px;border:0;border-radius:14px;background:#F4F6F9;color:#1F2937;font:inherit;text-align:left;cursor:pointer}
+.fsrow:active{transform:scale(.985)}
+.fsrow .fsno{min-width:2.6em;font-size:20px;font-weight:800;font-variant-numeric:tabular-nums;color:#111827}
+.fsrow .fsrt{flex:1;display:flex;flex-direction:column;min-width:0}.fsrow .fsrt b{font-size:14px;font-weight:700}.fsrow .fsrt small{font-size:12px;color:#6B7280;font-variant-numeric:tabular-nums}.fsrow .fsrt i{font-style:normal;color:#8A5A12;margin-left:2px}
+.fsrow>svg{flex:none;width:16px;height:16px;fill:none;stroke:#9CA3AF;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.altag{flex:none;display:inline-flex;align-items:center;justify-content:center;min-width:28px;height:20px;padding:0 6px;border-radius:999px;font-size:11px;font-weight:800;letter-spacing:.02em;background:#EEF1F5;color:#4B5563}
+.altag.jl{background:#F5E9EA;color:#8E4A52}.altag.nh{background:#E8EDF4;color:#3E5679}
+.fsempty{margin:10px 0 2px;font-size:13px;color:#4B5563;line-height:1.6}
+.fssrc{margin:10px 0 0;font-size:11px;color:#9CA3AF;line-height:1.6}
+.mnohint{margin:6px 0 0}
+dialog.fsugd .dlg{padding:6px 20px calc(22px + env(safe-area-inset-bottom,0px))}
+.fsugt{margin:16px 0 12px;font-size:20px;font-weight:900;color:var(--s-ink)}
+.fscard{padding:16px;border-radius:18px;background:#F4F6F9}.fscard .altag{margin-bottom:6px}
+.fsbig{display:block;font-size:34px;font-weight:900;line-height:1.1;color:#111827;font-variant-numeric:tabular-nums}.fsbig span{margin-left:6px}
+.fsrt2{margin:4px 0 10px;font-size:15px;font-weight:700;color:#374151}
+.fscard dl{display:flex;flex-wrap:wrap;gap:8px 20px;margin:0}.fscard dl div{min-width:0}.fscard dt{font-size:11px;color:#9CA3AF}.fscard dd{margin:2px 0 0;font-size:18px;font-weight:800;color:#1F2937;font-variant-numeric:tabular-nums}.fscard dd small{font-size:12px;font-weight:600;color:#6B7280;margin-left:4px}
+.fsnote{margin:12px 0 0}
+:root[data-night="on"] .fsug{background:rgba(255,255,255,.04);box-shadow:none}
+:root[data-night="on"] .fsrow,:root[data-night="on"] .fscard{background:rgba(255,255,255,.06);color:#E5E7EB}
+:root[data-night="on"] .fsrow .fsno,:root[data-night="on"] .fsbig,:root[data-night="on"] .fscard dd,:root[data-night="on"] .fsh b{color:#F3F4F6}
+:root[data-night="on"] .altag,:root[data-night="on"] .altag.jl,:root[data-night="on"] .altag.nh{background:transparent;color:#D1D5DB;box-shadow:inset 0 0 0 1px rgba(255,255,255,.25)}
+@media (prefers-reduced-motion: reduce){ .fsrow:active{transform:none} }
 /* 送信待ちの札（11/25 stamp-edge）：ピル型・薄いグレー。押すと送り直す */
 .qtags{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 0}
 .qtag{display:inline-flex;align-items:center;gap:6px;min-height:32px;padding:5px 12px;border:0;border-radius:999px;background:#EEF1F5;color:#374151;font:inherit;font-size:12.5px;font-weight:700;cursor:pointer}
@@ -856,7 +883,9 @@ dialog.spfull .dlg{padding:16px 16px 32px;max-width:480px;margin:0 auto;max-heig
 .rtl .tag .rcf{flex-direction:column;align-items:flex-end;gap:1px}.rcf>span{display:inline-flex;align-items:center;gap:5px}
 .rcf .d{display:inline-flex;gap:3px}.rcf .d i{width:9px;height:9px;border-radius:50%;background:var(--r-dot)}
 .rcf.c3 .d i,.rcf.c2 .d i:nth-child(-n+2),.rcf.c1 .d i:nth-child(1){background:var(--r-pred)}
-.rcf .n{font-weight:600;color:var(--r-sub);margin-left:4px}
+.rcf .n{display:inline;font-weight:600;color:var(--r-sub);margin-left:4px}.rcf .n b{font-weight:800;color:var(--r-ink2)}
+.rbasis{font-size:13px;line-height:1.6;color:var(--r-sub);margin:10px 0 0}.rbasis b{color:var(--r-ink2);font-weight:800;margin-right:6px}
+.rtl li.skip.miss .tx{color:var(--r-ink2)}.rtl li.skip.miss .tx small{display:block;color:var(--r-sub);font-size:13px}
 .rsrc{display:inline-flex;align-items:center;height:24px;padding:0 9px;border-radius:999px;background:var(--r-card);box-shadow:inset 0 0 0 1.5px #9AA3AE;font-size:13px;font-weight:800;color:var(--r-ink2);white-space:nowrap}
 .rtl.mini .tx .rsrc,.rtl.mini .tx .rcf{margin-top:3px}
 .rwarn{display:flex;gap:8px;align-items:flex-start;font-size:13px;line-height:1.6;color:var(--r-ink2);background:var(--r-wash);border-radius:14px;padding:10px 12px;margin-top:10px}
@@ -1413,6 +1442,14 @@ div.viewsw>button[aria-selected="true"]{background:none;border-color:var(--vw-in
 .spbbtns{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:16px}
 .spbbtn{min-height:48px;border-radius:24px;border:1px solid #C9CED6;background:var(--s-card);color:var(--s-ink);font:700 13px/1.3 var(--gothic);padding:6px 12px;cursor:pointer}
 .spbbtn[aria-pressed="true"]{background:var(--hero);color:#fff;border-color:#111827}
+/* 11/26 撮る人（gemini-small）：運航の期間・探す欄・地図で見る */
+.spbrow .spbterm{margin-left:auto;font:600 11px/1 var(--gothic);color:var(--s-mute);background:var(--s-line,#E5E7EB);border-radius:999px;padding:4px 8px;flex-shrink:0}.spbrow .spbterm.end{color:#6B7280}
+.spbperiod{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:4px 2px 0}.spbperiod small{font-size:12px;color:var(--s-mute)}
+.spbst{font:700 12px/1 var(--gothic);border-radius:999px;padding:5px 10px;background:color-mix(in srgb,#2F8F5B 14%,var(--s-card));color:#1F6B43}.spbst.end{background:var(--s-line,#E5E7EB);color:#4B5563}
+.spbfind{margin:10px 0 2px}.spbfind input{width:100%;box-sizing:border-box;min-height:44px;border-radius:22px;border:1px solid #C9CED6;background:var(--s-card);color:var(--s-ink);padding:0 16px;font:500 15px var(--gothic)}
+.spbfindn{margin:6px 4px 0;font-size:12.5px;color:var(--s-mute)}.spbfindn .linkbtn2{display:inline;padding:0;min-height:0}
+.spbfocus span{position:absolute;left:12px;top:-10px;white-space:nowrap;background:var(--s-card,#fff);color:var(--s-ink,#1F2937);border-radius:999px;padding:3px 9px;font:700 12px/1.3 var(--gothic);box-shadow:0 1px 6px rgba(17,24,39,.18)}
+.spstay .tm{color:var(--s-mute)}
 .spin{list-style:none;margin:6px 0 0;padding:0}
 #opsSpecial .spin li>button,.spin li>button,.spin li>div{width:100%;display:flex;align-items:center;gap:10px;min-height:52px;background:none;border:0;color:inherit;font:inherit;text-align:left;padding:4px 0}
 #opsSpecial .spin li>button{cursor:pointer;flex-direction:row;padding:4px 0;margin:0;border-radius:0}.spin li+li{border-top:1px solid var(--op-line,#E5E7EB)}
@@ -3739,6 +3776,9 @@ dialog.fbx .row2>button{flex:1;min-height:52px;border-radius:999px}
 .spinfo dd ul{margin:0;padding-left:18px}.spinfo dd li+li{margin-top:3px}
 .spinfo dd a{color:var(--s-ink);font-weight:800}.spinfo dd small{display:block;font-size:11.5px;color:var(--s-mute)}
 .spinfo .none{color:var(--s-mute)}
+.spinfo .sprwyd{list-style:none;margin:0;padding:0}.spinfo .sprwyd li{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px}.spinfo .sprwyd li+li{margin-top:6px}
+.spinfo .sprwyd b{font-weight:800;font-variant-numeric:tabular-nums}.spinfo .sprwyd span{font-weight:800;font-size:15px;font-variant-numeric:tabular-nums}.spinfo .sprwyd small{display:block;flex-basis:100%;font-size:11.5px;color:var(--s-mute)}
+.spinfo .sprwyn{margin-top:6px}
 .spinfo .src{margin:12px 0 0;font-size:11.5px;color:var(--s-mute);line-height:1.6}.spinfo .src a{display:block;margin-top:6px;color:var(--s-ink)}
 
 /* 滑走路の見方の地図（11-04）：撮影地の名札・着陸と離陸の向き・現在地 */
@@ -4496,6 +4536,7 @@ html:has(dialog[open]),html:has(dialog[open]) body{overscroll-behavior:none}
     <div id="lsBook" hidden>
     <button class="fbback" id="fbBack" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 5-7 7 7 7"/></svg>フライト</button>
     <h2>過去のフライトを日誌に残す</h2>
+    <section class="fsug" id="fsugBook" hidden aria-label="今日の便から記録"></section>
     <p class="hint">現地でチェックインしていないフライトも記録できます。印や路線の数には入らず、日誌にだけ残ります。</p>
     <div class="manual">
       <div class="row">
@@ -4503,6 +4544,8 @@ html:has(dialog[open]),html:has(dialog[open]) body{overscroll-behavior:none}
         <select id="mTo" aria-label="到着空港"></select>
       </div>
       <div class="row"><input type="date" id="mDate" aria-label="搭乗日"><select id="mAirline" aria-label="航空会社（任意）"></select></div>
+      <div class="row"><input id="mNo" inputmode="text" autocapitalize="characters" autocomplete="off" maxlength="7" placeholder="便名（数字だけでも・任意）" aria-label="便名（数字だけでも・任意）"></div>
+      <p class="hint mnohint" id="mNoHint" role="status" aria-live="polite" hidden></p><div class="fsug-pick" id="mNoPick" hidden></div>
       <div id="mFareSeat"></div><select id="mFare" aria-label="運賃（ステータスの目安の計算用）" hidden></select><div class="flist2" role="radiogroup" aria-label="運賃の区分"></div>
       <input id="mPrice" type="number" inputmode="numeric" min="0" step="100" placeholder="払った金額（円・任意）" aria-label="払った金額（円・任意）">
       <button class="btn2" id="mAdd">日誌に追加</button>
@@ -4675,6 +4718,7 @@ html:has(dialog[open]),html:has(dialog[open]) body{overscroll-behavior:none}
   <p class="msg" id="fMsg" role="status" aria-live="polite"></p>
   <div class="row2"><button class="btn2" id="fCancel">閉じる</button><button class="btn1" id="fSave">記録する</button></div>
 </div></dialog>
+<dialog id="dFsug" class="spsheet fsugd" aria-labelledby="fsugT"><div class="dlg" id="dFsugBody"></div></dialog>   <!-- 今日の便から記録（11/25 flight-suggest） -->
 <dialog id="dFbView" class="spfull fbx" aria-label="1便のくわしい所"><div class="dlg" id="dFbViewBody"></div></dialog>
 <dialog id="dFbShare" class="spsheet fbx" aria-label="画像で共有"><div class="dlg" id="dFbShareBody"></div></dialog>
 <dialog id="dFbYears" class="spsheet fbx" aria-label="年を選ぶ"><div class="dlg" id="dFbYearsBody"></div></dialog>
@@ -7279,7 +7323,9 @@ async function loadServer(){
     // 実際の出発・到着（11/20 data/flight-actual・移行187）。列がまだないサーバーでは前の列で読み直す
     fetchAll("flights", "id,from_airport,to_airport,dep_at,arr_at,distance_km,status,airline,flight_no,fare,seat,track,price,act_dep_at,act_arr_at,act_src", "arr_at")
       .then(r => r.error ? fetchAll("flights", "id,from_airport,to_airport,dep_at,arr_at,distance_km,status,airline,flight_no,fare,seat,track,price", "arr_at") : r),
-    fetchAll("manual_flights", "id,from_airport,to_airport,flown_on,airline,fare,seat,price", null),
+    // 便名 flight_no（移行202）がまだないサーバーでは、便名なしで読み直す
+    fetchAll("manual_flights", "id,from_airport,to_airport,flown_on,airline,fare,seat,price,flight_no", null)
+      .then(r => r.error ? fetchAll("manual_flights", "id,from_airport,to_airport,flown_on,airline,fare,seat,price", null) : r),
     fetchAll("intl_flights", "id,flown_on,dep,arr,flight_no,airline,seat,dep_at,arr_at,distance_km", null),
     sb.from("shugyo_prefs").select("data").maybeSingle().then(x => x, () => ({ data:null })),
   ]);
@@ -7290,7 +7336,7 @@ async function loadServer(){
   S = { demoClock:null,
     checkins: c.data.map(r => ({a:r.airport_id, term:r.terminal_id, t:Date.parse(r.created_at), acc:r.accuracy_m, wx:r.weather || null, wind:r.wind_kt ?? null, ops:r.ops || null})),
     flights: f.data.map(r => ({id:r.id, from:r.from_airport, to:r.to_airport, dep:Date.parse(r.dep_at), arr:Date.parse(r.arr_at), km:r.distance_km, status:r.status, airline:r.airline, no:r.flight_no, fare:r.fare || null, seat:r.seat || null, price:r.price ?? null, track:Array.isArray(r.track) ? r.track : null, ...fbActOf(r)})),
-    manual: m.data.map(r => ({id:r.id, from:r.from_airport, to:r.to_airport, d:r.flown_on, airline:r.airline, fare:r.fare || null, seat:r.seat || null, price:r.price ?? null})),
+    manual: m.data.map(r => ({id:r.id, from:r.from_airport, to:r.to_airport, d:r.flown_on, airline:r.airline, fare:r.fare || null, seat:r.seat || null, price:r.price ?? null, no:r.flight_no || null})),
     shugyo: sg && sg.data && sg.data.data ? sg.data.data : null,
     // 国際線の記録（読めなくてもほかの記録は出す。表がまだない古いサーバーでも動くように）
     intl: (g.data || []).map(r => ({id:r.id, dep:r.dep, arr:r.arr, d:r.flown_on, no:r.flight_no, airline:r.airline, seat:r.seat, km:r.distance_km != null ? r.distance_km : intlKm(r.dep, r.arr),
@@ -7946,7 +7992,7 @@ function showStamp(a, t, first, flight, term, firstTerm){
     : a.kind === "glider" ? `<p class="xnote"><b>${XKIND.glider.label}</b><br>グライダーが飛んでいるときは、滑走路や河川敷に入らず、関係者の案内に従ってください。</p>`
     : a.kind === "heli" ? `<p class="xnote"><b>${XKIND.heli.label}</b><br>公共用のヘリポートです。離着陸の場所には入らず、柵の外から楽しんでください。${ZKX_TITLE}に入ります（集めた空港の数とは別）。</p>`
     : a.kind === "field" ? `<p class="xnote"><b>${XKIND.field.label}</b><br>定期便のない空港や、小型機の飛行場です。滑走路や格納庫などには、許可なく入らないでください。見学できる場所や日が決まっているところもあります。</p>` : ""}
-  ${flight ? `<p><b>${BY[flight.from].name} → ${a.name}</b>　${fmtKm(flight.km)}km を記録しました。</p><button class="btn2" style="width:100%;margin-top:8px" data-flight="${fid(flight)}">乗った便を記録する</button>` : a.kind ? "" : `<p>次の空港でチェックインすると、ここからのフライトが記録されます。</p>`}
+  ${flight ? `<p><b>${BY[flight.from].name} → ${a.name}</b>　${fmtKm(flight.km)}km を記録しました。</p><button class="btn2" style="width:100%;margin-top:8px" data-flight="${fid(flight)}">乗った便を記録する</button>` : a.kind ? "" : `<p>次の空港でチェックインすると、ここからのフライトが記録されます。</p>${SERVER && /^[A-Z]{3}$/.test(a.iata || "") ? `<button class="btn2" style="width:100%;margin-top:8px" type="button" data-fsug-open="${a.id}">今日の便を記録</button>` : ""}`}
   ${(() => { if(!pendingSnap) return ""; const now = unlockedIds(); const fresh = ACH.filter(x => now.has(x.id) && !pendingSnap.has(x.id)); pendingSnap = null;
       return fresh.length ? `<div class="newach"><b>実績を達成</b>${fresh.map(x => x.name).join("、")}</div>` : ""; })()}
   <div class="row2"><button class="btn2" data-close>閉じる</button><button class="btn1" data-share-a="${a.id}" data-share-t="${term?term.id:""}" data-share-at="${t}">画像で共有</button></div>
@@ -8623,7 +8669,9 @@ function setLogSeg(s){
   LOG_SEG = s === "book" ? "book" : "list";
   $("lsList").hidden = LOG_SEG !== "list"; $("lsBook").hidden = LOG_SEG !== "book";
 }
-$("flAdd").onclick = () => { setLogSeg("book"); window.scrollTo(0, 0); const m = $("mFrom"); if(m){ m.scrollIntoView({ block:"center" }); m.focus({ preventScroll:true }); } };
+$("flAdd").onclick = () => { setLogSeg("book"); window.scrollTo(0, 0); const ap = fsugAirport();
+  if(ap){ fsugRenderBook(ap); return; }   // 今日の便の候補があれば、それを上に（手で入れる欄はその下）
+  $("fsugBook").hidden = true; const m = $("mFrom"); if(m){ m.scrollIntoView({ block:"center" }); m.focus({ preventScroll:true }); } };
 $("fbBack").onclick = () => { setLogSeg("list"); window.scrollTo(0, 0); };
 /* 「空の上」（11/20 PM・data/flight-actual）：実際の出発・到着（act_src があるとき）の差。ないときは今までどおりチェックインの時刻の差で「目安」
    act_src：odpt＝航空会社の運航情報・adsb＝機体の位置からの推定・timetable＝時刻表の定刻（推定） */
@@ -8672,11 +8720,11 @@ function fbYrHTML(ys, withNums){
 function fbRowHTML(e){
   const d = new Date(e.t), a = BY[e.from], b = BY[e.to], g = e.kind === "car" ? "CAR" : e.airline ? (ALBY[e.airline] || {}).group || "OTHER" : "NONE";
   const sub = e.kind === "car" ? `<span class="fbcar">車など</span>`
-    : e.kind === "book" ? `<span class="sub">手で記録${e.airline ? "・" + esc(fbAlName(e.airline)) : ""}</span>`
+    : e.kind === "book" ? `<span class="sub">手で記録${e.m.no ? "・" + esc(lgNo(e.m)) : e.airline ? "・" + esc(fbAlName(e.airline)) : ""}</span>`
     : `<span class="sub"><b>${hmOf(fbDepAt(e.f))}</b> 発・${esc(lgNo(e.f))}${statusBadge(e.f)}</span>`;
   const right = e.kind === "fly" ? `${fbDur(e.min)}${e.src ? "" : `<small class="fbmeyasu">目安</small>`}<small>${fmtKm(e.km)} km</small>`
     : `<span class="dur"><b>${fmtKm(e.km)}</b><small>km</small></span><small>${e.kind === "car" ? "空の上なし" : "時刻なし"}</small>`;
-  const what = e.kind === "car" ? "車などの移動" : e.kind === "book" ? "手で記録した便" : (e.f.no || "便");
+  const what = e.kind === "car" ? "車などの移動" : e.kind === "book" ? `手で記録した便${e.m.no ? "、" + e.m.no : ""}` : (e.f.no || "便");
   return `<li><button type="button" class="fbrow" data-g="${g}" data-fbv="${e.key}" aria-label="${d.getMonth() + 1}月${d.getDate()}日、${esc(godShort(a))}から${esc(godShort(b))}、${what}">
     <span class="d"><b>${d.getDate()}</b><small>${FB_WD[d.getDay()]}</small></span>
     <span class="m"><span class="rt">${esc(godShort(a))}<i aria-hidden="true">→</i>${esc(godShort(b))}</span>${sub}</span><span class="r">${right}</span></button></li>`;
@@ -8804,7 +8852,7 @@ function renderLog(){
   const mlAll = [...S.manual].sort((x,y)=>y.d.localeCompare(x.d)), ml = mlAll.slice(0, ML_SHOW);
   const mkm = mlAll.reduce((s,m)=>s+km(BY[m.from],BY[m.to]),0);
   $("manualList").innerHTML = ml.length ? `<h3>手で記録したフライト　${mlAll.length}件 ${fmtKm(mkm)}km</h3>` + ml.map(m => passHTML({ from:m.from, to:m.to, airline:m.airline && ALBY[m.airline] ? m.airline : null, km:km(BY[m.from],BY[m.to]),
-        badges:`<span class="badge">手入力</span>${m.airline && ALBY[m.airline] ? `<span class="alb">${ALBY[m.airline].short}</span>` : ""}`, stub:stubDate(m.d.replaceAll("-","/")) })).join("") + (mlAll.length > ml.length ? `<button class="btn2" id="mlMore" style="width:100%;margin-top:10px">もっと見る（残り${mlAll.length - ml.length}件）</button>` : "") : "";
+        badges:`<span class="badge">手入力</span>${m.airline && ALBY[m.airline] ? `<span class="alb">${ALBY[m.airline].short}</span>` : ""}${m.no ? `<span class="badge">${esc(lgNo(m))}</span>` : ""}`, stub:stubDate(m.d.replaceAll("-","/")) })).join("") + (mlAll.length > ml.length ? `<button class="btn2" id="mlMore" style="width:100%;margin-top:10px">もっと見る（残り${mlAll.length - ml.length}件）</button>` : "") : "";
   renderIntl();
 }
 // 日誌を下へ送ると、上の年が今見ている年に変わる（年の帯を過ぎたら）
@@ -9076,6 +9124,231 @@ document.addEventListener("click", e => { const b = e.target.closest("[data-cand
   if(ALBY[m[1]] && /^\d+$/.test(m[2])){ $("fAirline").value = m[1]; $("fNo").value = m[2]; } else { $("fAirline").value = "OT"; $("fNo").value = no; }
   syncPrefix(); syncFare();
   document.querySelectorAll("[data-cand]").forEach(x => x.setAttribute("aria-pressed", String(x === b))); track("fcand_pick", no); });
+/* ---------- 乗る便の候補から1回で記録（11/25 23時05分・本人が貼った案の7番） ----------
+   ・いまいる空港（今日チェックインした空港・なければ判定範囲の中の空港）の今日の運航情報（airport-now・ODPT）から、これから出る便といま着いた便を並べる
+   ・押すと確認の1枚（便名・区間・時刻・機材）→「記録する」の1回で記録
+       これから出る便：乗る便として覚え、着いた空港でチェックインしてできたフライトに便名を付ける（今の applyPlan。二重に数えない）
+       いま着いた便：今日のこの区間のフライト（チェックインの記録）があれば便名を付ける。なければ、ここでもうチェックインしていれば日誌に今日の便として残し、まだならチェックインしたときに付ける
+   ・電波がないときは候補を出さず、手で入れる欄へ。航空会社の記号は小さな札（色は彩度を落とした事実の記録。ロゴは使わない） */
+const FSUG = { cache:new Map(), list:[], cur:null };
+function fsugAirport(){
+  const today = jstDay(Date.now());
+  const c = [...S.checkins].reverse().find(x => jstDay(x.t) === today && BY[x.a] && !BY[x.a].kind && /^[A-Z]{3}$/.test(BY[x.a].iata || ""));
+  if(c) return BY[c.a];
+  const n = typeof HOME_NEAR !== "undefined" ? HOME_NEAR : null;
+  return n && n.within && !n.a.kind && /^[A-Z]{3}$/.test(n.a.iata || "") ? n.a : null;
+}
+const fsugAlCls = al => ["JL", "NU", "JH"].includes(al) ? "jl" : ["NH", "EH"].includes(al) ? "nh" : "ot";
+const fsugTag = al => `<span class="altag ${fsugAlCls(al)}" aria-hidden="true">${esc(al)}</span>`;
+// "HH:MM"（日本時間）→ いまにいちばん近い日の時刻
+function fsugMs(hm){
+  if(!/^\d{1,2}:\d{2}$/.test(hm || "")) return null;
+  const base = Date.parse(`${jstDay(Date.now())}T${hm.padStart(5, "0")}:00+09:00`), now = Date.now();
+  return [base - 864e5, base, base + 864e5].sort((u, v) => Math.abs(u - now) - Math.abs(v - now))[0];
+}
+async function fsugFetch(a){
+  if(navigator.onLine === false) return { off:true };
+  const c = FSUG.cache.get(a.iata); if(c && Date.now() - c.at < 120e3) return c.v;
+  let v = null;
+  try{
+    const ac = new AbortController(), tm = setTimeout(() => ac.abort(), 8000);
+    const r = await fetch(SORAMEMO_CONFIG.supabaseUrl.replace(/\/$/, "") + "/functions/v1/airport-now?iata=" + encodeURIComponent(a.iata), { signal:ac.signal, headers:{ apikey:SORAMEMO_CONFIG.supabaseAnonKey, Authorization:"Bearer " + SORAMEMO_CONFIG.supabaseAnonKey } });
+    clearTimeout(tm); if(!r.ok) throw new Error("now " + r.status);
+    const j = await r.json(); v = { flights:j.flights || null };
+  }catch(e){ return { off:true }; }
+  FSUG.cache.set(a.iata, { at:Date.now(), v }); return v;
+}
+// 候補：これから出る便（欠航・出発済みは除く）と、いま着いた便（90分前〜10分後）。国際線（相手が日本の空港でない便）は除く
+function fsugList(a, fl){
+  if(!fl) return [];
+  const now = Date.now(), out = [];
+  for(const x of fl.dep || []){
+    if(x.kind === "cancel" || x.kind === "done" || !IATA[x.place] || !x.no) continue;
+    const std = fsugMs(x.time), eff = fsugMs(x.newTime || x.time); if(std == null || eff < now - 10 * 60e3) continue;
+    out.push({ dir:"dep", no:x.no, airline:x.airline || x.no.slice(0, 2), from:a.iata, to:x.place, time:x.time, newTime:x.newTime, std, eff, ac:x.ac || null, kind:x.kind });
+  }
+  for(const x of fl.arr || []){
+    if(x.kind === "cancel" || !IATA[x.place] || !x.no) continue;
+    const std = fsugMs(x.time), eff = fsugMs(x.newTime || x.time); if(std == null) continue;
+    if(!(x.kind === "done" ? eff >= now - 90 * 60e3 : eff >= now - 90 * 60e3 && eff <= now + 10 * 60e3)) continue;
+    out.push({ dir:"arr", no:x.no, airline:x.airline || x.no.slice(0, 2), from:x.place, to:a.iata, time:x.time, newTime:x.newTime, std, eff, ac:x.ac || null, kind:x.kind });
+  }
+  const dep = out.filter(x => x.dir === "dep").sort((u, v) => u.eff - v.eff).slice(0, 6), arr = out.filter(x => x.dir === "arr").sort((u, v) => v.eff - u.eff).slice(0, 4);
+  return [...dep, ...arr];
+}
+const fsugRowHTML = (x, i) => `<button type="button" class="fsrow" data-fsug="${i}" aria-label="${esc(x.no)}、${esc(placeShort(x.from))}から${esc(placeShort(x.to))}、${x.dir === "dep" ? "出発" : "到着"} ${esc(x.newTime || x.time)}">${fsugTag(x.airline)}<span class="fsno">${esc(x.no.slice(2))}</span><span class="fsrt"><b>${esc(placeShort(x.from))} → ${esc(placeShort(x.to))}</b><small>${x.dir === "dep" ? "出発" : x.kind === "done" ? "到着" : "到着予定"} ${esc(x.time)}${x.newTime ? `<i>→${esc(x.newTime)}</i>` : ""}${x.ac ? `・機材 ${esc(x.ac)}` : ""}</small></span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>`;
+function fsugListHTML(a, res){
+  const head = `<div class="fsh"><b>今日の便から記録</b><small>${esc(nearShort(a))}・JAL・ANAグループ</small></div>`;
+  if(!res) return head + `<p class="fsempty">便を読み込んでいます…</p>`;
+  if(res.off) return head + `<p class="fsempty">電波がないため、候補は出せません。下の欄に手で入れてください。</p>`;
+  const l = FSUG.list = fsugList(a, res.flights);
+  if(!l.length) return head + `<p class="fsempty">いまの時間に、この空港の候補はありません。下の欄に手で入れてください。</p>`;
+  const dep = l.map((x, i) => [x, i]).filter(([x]) => x.dir === "dep"), arr = l.map((x, i) => [x, i]).filter(([x]) => x.dir === "arr");
+  return head + (dep.length ? `<p class="fsg">これから出る便</p><div class="fslist">${dep.map(([x, i]) => fsugRowHTML(x, i)).join("")}</div>` : "")
+    + (arr.length ? `<p class="fsg">いま着いた便</p><div class="fslist">${arr.map(([x, i]) => fsugRowHTML(x, i)).join("")}</div>` : "")
+    + `<p class="fssrc">押すと、便名・区間・時刻・機材が入った確認が出ます。${ODPT_CREDIT}</p>`;
+}
+async function fsugRenderBook(a){
+  const box = $("fsugBook"); FSUG.a = a; box.hidden = false; box.innerHTML = fsugListHTML(a, null);
+  const res = await fsugFetch(a); if(FSUG.a !== a) return;
+  box.innerHTML = fsugListHTML(a, res); track("fsug", res.off ? "off" : String(FSUG.list.length));
+  if(res.off || !FSUG.list.length){ const m = $("mFrom"); if(m && !m.value) m.value = String(a.id); }   // 候補がないときは、出発に今の空港を入れておく
+}
+// 印の画面の「今日の便を記録」：シートで候補 → 確認
+async function fsugOpenSheet(a){
+  FSUG.a = a; const b = $("dFsugBody");
+  const draw = res => { b.innerHTML = `<div class="sph"><span class="grab" aria-hidden="true"></span><button class="spx" type="button" data-close aria-label="閉じる">×</button></div><h3 id="fsugT" class="fsugt">今日の便を記録</h3>`
+    + fsugListHTML(a, res).replace(/下の欄に手で入れてください。/g, "フライトの「＋」から手で入れられます。") + (res && (res.off || !FSUG.list.length) ? `<button class="btn2" type="button" style="width:100%;margin-top:12px" data-fsug-manual>手で入れる</button>` : ""); };
+  draw(null); if(!$("dFsug").open) $("dFsug").showModal();
+  const res = await fsugFetch(a); if(FSUG.a !== a || !$("dFsug").open) return; draw(res); track("fsug_sheet", res.off ? "off" : String(FSUG.list.length));
+}
+// 押したあと：記録のしかたを決める（"plan"＝乗る便として覚える・"set"＝今日のフライトに便名・"manual"＝日誌に残す）
+function fsugPlan(x){
+  const today = jstDay(Date.now()), from = IATA[x.from], to = IATA[x.to];
+  if(x.dir === "dep") return { how:"plan" };
+  const f = S.flights.find(y => y.from === from.id && y.to === to.id && jstDay(y.arr) === today);
+  if(f && !f.pending) return { how:"set", f };
+  const here = S.checkins.some(c => c.a === to.id && jstDay(c.t) === today && !c.pending);
+  if(f || !here) return { how:"plan" };
+  return { how:"manual" };
+}
+function fsugConfirm(x){
+  FSUG.cur = x; const p = fsugPlan(x), b = $("dFsugBody"), from = IATA[x.from], to = IATA[x.to];
+  const hm = x.newTime ? `${esc(x.time)}<small>（${x.kind === "done" ? "実際" : "見込み"} ${esc(x.newTime)}）</small>` : esc(x.time);
+  const note = p.how === "plan" ? (x.dir === "dep" ? `${esc(nearShort(to))}でチェックインすると、このフライトにこの便名が付きます。` : `${esc(nearShort(to))}でチェックインすると、このフライトにこの便名が付きます。`)
+    : p.how === "set" ? `今日の${esc(nearShort(from))}からのフライト（チェックインの記録）に、この便名を付けます。`
+    : `日誌に今日の便として残します（印・路線の数には入りません）。`;
+  b.innerHTML = `<div class="sph"><span class="grab" aria-hidden="true"></span><button class="spx" type="button" data-close aria-label="閉じる">×</button></div>
+    <h3 id="fsugT" class="fsugt">この便で記録しますか</h3>
+    <div class="fscard">${fsugTag(x.airline)}<b class="fsbig">${esc(x.no.slice(0, 2))}<span>${esc(x.no.slice(2))}</span></b><p class="fsrt2">${esc(from.name)} → ${esc(to.name)}</p>
+      <dl><div><dt>${x.dir === "dep" ? "出発" : "到着"}</dt><dd>${hm}</dd></div><div><dt>日付</dt><dd>${+jstDay(x.std).slice(5, 7)}月${+jstDay(x.std).slice(8, 10)}日</dd></div>${x.ac ? `<div><dt>機材</dt><dd>${esc(x.ac)}</dd></div>` : ""}</dl></div>
+    <p class="hint fsnote">${note}</p><p class="msg" id="fsugMsg" role="status" aria-live="polite"></p>
+    <div class="row2"><button class="btn2" type="button" data-fsug-back>${FSUG.fromSheet ? "戻る" : "やめる"}</button><button class="btn1" type="button" data-fsug-go>記録する</button></div>`;
+  b.dataset.how = p.how;
+  if(!$("dFsug").open) $("dFsug").showModal();
+}
+async function fsugGo(){
+  const x = FSUG.cur, m = $("fsugMsg"), btn = document.querySelector("[data-fsug-go]"); if(!x) return;
+  const p = fsugPlan(x), from = IATA[x.from], to = IATA[x.to], day = jstDay(x.std);
+  const fail = t => { m.textContent = t; m.className = "msg err"; if(btn) btn.disabled = false; };
+  if(btn) btn.disabled = true;
+  if(p.how === "plan"){ savePlan({ from:from.id, to:to.id, airline:x.airline, no:x.no, day }); }
+  else if(p.how === "set"){
+    if(SERVER && !demo){ if(navigator.onLine === false) return fail("電波がないため記録できませんでした。つながってからもう一度押してください。");
+      const { error } = await sb.rpc("set_flight_airline", { p_flight_id:p.f.id, p_airline:x.airline, p_flight_no:x.no }); if(error) return fail("記録できませんでした。電波のよい場所でもう一度押してください。"); }
+    p.f.airline = x.airline; p.f.no = x.no; if(!SERVER || demo) save();
+  } else {
+    if(S.manual.some(y => y.from === from.id && y.to === to.id && y.d === day && (!y.airline || y.airline === x.airline))) return fail("この便は、もう日誌にあります。");
+    if(SERVER && !demo){ if(navigator.onLine === false) return fail("電波がないため記録できませんでした。つながってからもう一度押してください。");
+      const { error } = await mfInsert({ from_airport:from.id, to_airport:to.id, flown_on:day, airline:x.airline, fare:null, price:null }, x.no, "fsug"); if(error) return fail("記録できませんでした。電波のよい場所でもう一度押してください。");
+      formCidDone("fsug"); await reload(); }
+    else { S.manual.push({ from:from.id, to:to.id, d:day, airline:x.airline, fare:null, seat:null, price:null, no:x.no }); save(); }
+  }
+  track("fsug_go", p.how);
+  $("dFsug").close(); render();
+  toast(p.how === "plan" ? `${x.no}を乗る便として記録しました` : `${x.no}を記録しました`);
+}
+// 日誌の便名：手で入れた便名（航空会社が決まっているときだけ。数字だけなら航空会社の欄と合わせる）
+function mNoValue(){
+  const raw = ($("mNo").value || "").trim().toUpperCase().replace(/\s/g, ""), al = $("mAirline").value;
+  const m = /^([A-Z][A-Z0-9]|[0-9][A-Z])?(\d{1,4})$/.exec(raw); if(!m) return null;
+  const a = m[1] || (al && al !== "OT" ? al : null); return a ? a + String(+m[2]) : null;
+}
+// 日誌に入れる：送り直しても1行（idemInsert・client_id）。便名の列 flight_no（移行202）がまだないサーバーでは、便名を外して入れ直す
+async function mfInsert(row, no, key){
+  const cid = formCid(key || "mf", { ...row, no });
+  if(no){ const r = await idemInsert("manual_flights", { ...row, flight_no:no, client_id:cid }); if(!r.error || !/flight_no/i.test(String(r.error.message || ""))) return r; }
+  return idemInsert("manual_flights", { ...row, client_id:cid });
+}
+// 過去の便：日付＋便名（数字だけでも）から区間と時刻を補う。
+//   1 その日の記録 flight_lookup（移行202・毎日の記録 flight_history と時刻表。実際の時刻と機体も一緒に返る）
+//   2 見つからない・関数がまだないときは、今の時刻表（plan_timetable・JAL・ANA）で推定し、実際の時刻と機体は flight_facts から
+const fsugOp = al => ["JL", "NU"].includes(al) ? "JAL" : al === "NH" ? "ANA" : null;
+const fsugNz = no => String(no || "").replace(/^([A-Z0-9]{2})0+(\d)/, "$1$2");
+let MNO_T = null, MNO_SEQ = 0, MNO_LAST = {};
+async function mNoFill(){
+  const raw = ($("mNo").value || "").trim().toUpperCase().replace(/\s/g, ""), hint = $("mNoHint"), pick = $("mNoPick"), seq = ++MNO_SEQ;
+  const say2 = t => { hint.textContent = t; hint.hidden = !t; };
+  if(raw === MNO_LAST.raw && $("mDate").value === MNO_LAST.d && $("mAirline").value === MNO_LAST.al) return;   // 選ぶボタンを押したときの change で消さない
+  MNO_LAST = { raw, d:$("mDate").value, al:$("mAirline").value };
+  pick.hidden = true; pick.innerHTML = ""; say2("");
+  if(!raw) return;
+  const m = /^([A-Z][A-Z0-9]|[0-9][A-Z])?(\d{1,4})$/.exec(raw); if(!m) return say2("便名は「509」か「JL509」のように入れてください。");
+  const sel = $("mAirline").value, al = m[1] || (sel && sel !== "OT" ? sel : null), num = String(+m[2]);
+  const ops = al ? [fsugOp(al)].filter(Boolean) : ["JAL", "ANA"];
+  if(!SERVER) return say2(ops.length ? "区間と時刻を補うのは、サーバー版だけです。" : "区間と時刻を補えるのは、JAL・ANAグループの便だけです。出発と到着を選んでください。");
+  if(navigator.onLine === false) return say2("電波がないため補えませんでした。出発と到着を選んでください。");
+  const d = $("mDate").value, today = jstDay(Date.now()), yest = jstDay(Date.now() - 864e5), qd = d && d >= yest ? d : today, est = !(d && d >= yest);
+  // 1 その日の記録（便名が分かる形で。数字だけなら JAL・ANA の両方で引く）
+  if(d && /^\d{4}-\d{2}-\d{2}$/.test(d)){
+    say2("その日の記録から探しています…");
+    const lk = await mNoLookup(d, al ? [al + num] : ["JL" + num, "NH" + num]);
+    if(seq !== MNO_SEQ) return;
+    if(lk && lk.length) return mNoHits(lk);
+  }
+  if(!ops.length) return say2("区間と時刻を補えるのは、その日の記録にある便と、JAL・ANAグループの時刻表の便だけです。出発と到着を選んでください。");
+  say2("時刻表から探しています…");
+  const res = await Promise.all(ops.map(op => rpcPost("plan_timetable", { p_date:qd, p_operator:op })));
+  if(seq !== MNO_SEQ) return;
+  if(res.every(r => !r)) return say2("時刻表を読めませんでした。電波のよい場所でもう一度入れるか、出発と到着を選んでください。");
+  const hit = [];
+  for(const r of res) for(const t of (r && Array.isArray(r.f) ? r.f : [])){
+    const fm = /^([A-Z0-9]{2})0*(\d+)/.exec(t[0] || ""); if(!fm || fm[2] !== num || (al && fm[1] !== al) || !IATA[t[1]] || !IATA[t[2]]) continue;
+    if(!hit.some(h => h.no === fm[1] + fm[2] && h.dep === t[1])) hit.push({ no:fm[1] + fm[2], al:fm[1], dep:t[1], arr:t[2], std:t[3], sta:t[4], ac:t[6] || null, est });
+  }
+  if(!hit.length) return say2("時刻表に見つかりませんでした（JAL・ANAグループの便だけ探せます）。出発と到着を選んでください。");
+  mNoHits(hit);
+}
+// その日の記録 flight_lookup(p_date, p_flight)：返る形 { rows:[{ flight, dep, arr, std, sta, atd, ata, aircraft, type, reg, cancelled, src }] }。
+//   関数がまだない・読めないときは null（今の時刻表へ）、見つからないときは []
+const mNoHM = v => v ? new Date(v).toLocaleTimeString("ja-JP", { hour:"2-digit", minute:"2-digit", timeZone:"Asia/Tokyo" }) : "";
+async function mNoLookup(d, fns){
+  const res = await Promise.all(fns.map(fn => rpcPost("flight_lookup", { p_date:d, p_flight:fn })));
+  if(!res.some(r => r && Array.isArray(r.rows))) return null;
+  const out = [];
+  for(const r of res) for(const x of (r && Array.isArray(r.rows) ? r.rows : [])){
+    const no = fsugNz(x.flight); if(!/^[A-Z0-9]{2}\d/.test(no) || !IATA[x.dep] || !IATA[x.arr] || out.some(h => h.no === no && h.dep === x.dep)) continue;
+    out.push({ no, al:no.slice(0, 2), dep:x.dep, arr:x.arr, std:mNoHM(x.std), sta:mNoHM(x.sta), ac:x.aircraft || x.type || null, est:false,
+      src:x.src === "history" ? "history" : "schedule", fact:{ atd:x.atd || null, ata:x.ata || null, reg:x.reg || null, cancelled:!!x.cancelled } });
+  }
+  return out;
+}
+// 見つかった便：1つならそのまま入れる・いくつかなら選ぶ
+function mNoHits(hit){
+  const say2 = t => { const hint = $("mNoHint"); hint.textContent = t; hint.hidden = !t; }, pick = $("mNoPick");
+  if(hit.length === 1) return mNoApply(hit[0]);
+  say2("同じ番号の便がいくつかあります。乗った便を選んでください。");
+  MNO_HITS = hit;
+  pick.innerHTML = hit.map((h, i) => `<button type="button" class="fsrow" data-mno-pick="${i}">${fsugTag(h.al)}<span class="fsno">${esc(h.no.slice(2))}</span><span class="fsrt"><b>${esc(placeShort(h.dep))} → ${esc(placeShort(h.arr))}</b><small>${esc(String(h.std || "").slice(0, 5))}→${esc(String(h.sta || "").slice(0, 5))}${h.ac ? `・機材 ${esc(h.ac)}` : ""}</small></span></button>`).join("");
+  pick.hidden = false;
+}
+let MNO_HITS = [];
+async function mNoApply(h){
+  $("mFrom").value = String(IATA[h.dep].id); $("mTo").value = String(IATA[h.arr].id);
+  if([...$("mAirline").options].some(o => o.value === h.al)){ $("mAirline").value = h.al; $("mAirline").onchange && $("mAirline").onchange(); }
+  $("mNo").value = h.no; $("mNoPick").hidden = true; MNO_LAST = { raw:h.no, d:$("mDate").value, al:$("mAirline").value };
+  const hint = $("mNoHint"), t5 = v => String(v || "").slice(0, 5);
+  const from = h.src === "history" ? "その日の記録から" : h.src === "schedule" ? "その日の時刻表から" : h.est ? "今の時刻表から。その日の時刻と違うことがあります" : "時刻表から";
+  hint.textContent = `${h.no}　${placeShort(h.dep)} → ${placeShort(h.arr)}　${t5(h.std)}→${t5(h.sta)}${h.ac ? `・機材 ${h.ac}` : ""}（${from}）`; hint.hidden = false;
+  const hm = v => v ? mNoHM(v) : "—";
+  const fact = x => { if(x.cancelled){ hint.textContent += "　この日は欠航の記録があります"; return; }
+    const s = `${x.atd || x.ata ? `実際 ${hm(x.atd)}→${hm(x.ata)}` : ""}${x.reg ? `・機体 ${x.reg}` : ""}`.replace(/^・/, ""); if(s) hint.textContent += `　この日の記録：${s}`; };
+  if(h.fact) return fact(h.fact);   // flight_lookup で実際の時刻と機体も来ている
+  const d = $("mDate").value; if(!d || !SERVER) return;
+  const seq = MNO_SEQ, r = await rpcPost("flight_facts", [{ f:h.no, d, a:h.dep }]); if(seq !== MNO_SEQ) return;
+  const x = Array.isArray(r) && r[0]; if(!x) return;
+  fact(x);
+}
+$("mNo").addEventListener("input", () => { clearTimeout(MNO_T); MNO_T = setTimeout(mNoFill, 700); });
+$("mNo").addEventListener("change", () => { clearTimeout(MNO_T); mNoFill(); });
+document.addEventListener("click", e => {
+  const pk = e.target.closest("[data-mno-pick]"); if(pk){ const h = MNO_HITS[+pk.dataset.mnoPick]; if(h){ MNO_SEQ++; mNoApply(h); } return; }
+  const op = e.target.closest("[data-fsug-open]"); if(op){ const a = BY[+op.dataset.fsugOpen]; if(a){ FSUG.fromSheet = true; fsugOpenSheet(a); } return; }
+  const r = e.target.closest("[data-fsug]"); if(r){ const x = FSUG.list[+r.dataset.fsug]; if(x){ FSUG.fromSheet = !!r.closest("#dFsug"); fsugConfirm(x); } return; }
+  if(e.target.closest("[data-fsug-go]")) return void fsugGo();
+  if(e.target.closest("[data-fsug-back]")){ if(FSUG.fromSheet && FSUG.a) fsugOpenSheet(FSUG.a); else $("dFsug").close(); return; }
+  if(e.target.closest("[data-fsug-manual]")){ $("dFsug").close(); if($("dStamp").open) $("dStamp").close(); goTab("log"); setLogSeg("book"); const m = $("mFrom"); if(m && FSUG.a && !m.value) m.value = String(FSUG.a.id); return; }
+});
 function syncPrefix(){ const v = $("fAirline").value; $("fPrefix").textContent = v && v !== "OT" ? v : "";
   $("fNo").placeholder = v === "OT" ? "例：ABC123" : "例：501"; $("fNo").inputMode = v === "OT" ? "text" : "numeric"; }
 function syncFare(){ const opts = editing ? fareSeatSync($("fAirline").value, editing.dep, editing.fare, "fFare") : "";
@@ -9116,12 +9389,12 @@ $("mAdd").onclick = async () => {
   const done = () => { m.textContent=`${BY[f].name} → ${BY[t].name} を日誌に追加しました。`; m.className="msg"; };
   if(SERVER && !demo){
     if(!user){ m.textContent="ログインしてください。"; m.className="msg err"; return; }
-    const row = {from_airport:f, to_airport:t, flown_on:d, airline:$("mAirline").value || null, fare: $("mFare").hidden ? null : ($("mFare").value || null), price:priceOf($("mPrice").value)};
-    const { error } = await idemInsert("manual_flights", {...row, client_id:formCid("mAdd", row)});   // 押し直しても1行（data/idem）
+    const row = {from_airport:f, to_airport:t, flown_on:d, airline:$("mAirline").value || null, fare: $("mFare").hidden ? null : ($("mFare").value || null), price:priceOf($("mPrice").value)}, no = mNoValue();
+    const { error } = await mfInsert(row, no, "mAdd");   // 押し直しても1行（data/idem）・便名つき（移行202）
     if(error){ m.textContent="保存できませんでした。もう一度試してください。"; m.className="msg err"; return; }
     formCidDone("mAdd"); await reload(); return done();
   }
-  S.manual.push({from:f,to:t,d,airline:$("mAirline").value || null, fare: $("mFare").hidden ? null : ($("mFare").value || null), price:priceOf($("mPrice").value)}); save(); render(); done();
+  S.manual.push({from:f,to:t,d,airline:$("mAirline").value || null, fare: $("mFare").hidden ? null : ($("mFare").value || null), price:priceOf($("mPrice").value), no:mNoValue()}); save(); render(); done();
 };
 
 /* ---------- 国際線の記録（日本の空港と海外の空港を結ぶ便。印・路線・図鑑には入らない） ---------- */
@@ -12438,6 +12711,7 @@ const passTime = m => { const d = Math.floor(m / 1440), h = Math.floor(m % 1440 
 // 乗った機体の図鑑：便名を記録したフライトに、毎日の記録の登録記号・機種を付けて集める。特別塗装機は名前を添える
 const LIVERY_NAMES = /*@LIVERIES@*/{};
 const LIVERY_AIR = /*@LIVERY_AIR@*/{};
+const LIVERY_TERM = /*@LIVERY_TERM@*/{};   // 運航の期間 { 登録記号: [始まる日, 終わる日] }（分かっているものだけ。組み立てのときに liveries.ts から入れる）
 function fleetStats(){
   const regs = new Map(), types = new Map();
   for(const f of S.flights){ const x = FACTS.get(factKey(f)); if(!x || !x.reg) continue;
@@ -14234,16 +14508,30 @@ function spInboundHTML(){
     plans.push({ t:Date.parse(p.std), reg:null, name:p.livery, sub:`${esc(p.flight)}・${esc(placeShort(p.arr))}へ・出発の予定` });
   items.sort((a, b) => (a.t || 0) - (b.t || 0));   // 時刻の分からない「着陸に向かっている・離陸したところ」を先に
   plans.sort((a, b) => a.t - b.t);
+  const stays = spStayRows(here).filter(x => !items.some(i => i.reg === x.reg));
   const li = x => { const body = `<span class="tm${x.hot ? " hot" : ""}">${x.t ? spHM(x.t) : "—"}</span><span class="tx"><b>${esc(x.name)}</b><small>${x.sub}</small></span>`;
     return `<li>${x.reg ? `<button type="button" data-spb-open="${esc(x.reg)}">${body}</button>` : `<div>${body}</div>`}</li>`; };
   const name = esc(opsDef().name), planNote = `<small class="spinsrc">航空会社の運航情報に特別塗装機で運航すると書かれた便。機体の変更で変わることがあります。</small>`;
-  const body = items.length
-      ? `<ul class="spin">${items.map(li).join("")}</ul>` + (plans.length ? `<p class="spinsub">3時間以内の予定</p><ul class="spin">${plans.map(li).join("")}</ul>${planNote}` : "")
+  const stayHTML = stays.length ? `<p class="spinsub">いま${name}に滞在中</p><ul class="spin spstay">${stays.map(li).join("")}</ul>` : "";
+  const body = items.length || stays.length
+      ? (items.length ? `<ul class="spin">${items.map(li).join("")}</ul>` : "") + stayHTML + (plans.length ? `<p class="spinsub">3時間以内の予定</p><ul class="spin">${plans.map(li).join("")}</ul>${planNote}` : "")
     : plans.length
       ? `<p class="spinsub">いまは飛んでいません。3時間以内の予定</p><ul class="spin">${plans.map(li).join("")}</ul>${planNote}`
       : `<p class="hint" style="margin:4px 0 0">この3時間に${name}に着く・${name}を出る特別塗装機は、いまは見つかっていません。</p>`;
   return `<div class="opshead"><b>${name}に着く・${name}を出る特別塗装機</b><span>この3時間</span></div>` + body
     + `<div class="spinbtns"><button type="button" class="spinall" data-spb-open="">すべての特別塗装機</button>${spPushHTML()}</div>`;
+}
+// この空港に着いて、まだ次の便で飛んでいない特別塗装機（着いてから3時間まで）。足あとの最後の便がこの空港に着いた機体
+function spStayRows(here, now = Date.now()){
+  const out = [];
+  for(const r of spbRows(spbLiveSrc())){
+    if(r.st !== "today" || !r.legs.length) continue;
+    const l = r.legs[r.legs.length - 1], t = Date.parse(l.last);
+    if(l.arr !== here || !(t > now - SP_STAY_MS) || t > now + 6e4) continue;
+    if([...SPECIAL.values()].some(x => x.reg === r.reg && x.phase === "dep")) continue;   // もう離陸していった
+    out.push({ t, reg:r.reg, name:r.name, stay:true, sub:`${esc(spbFl(l.cs))}${l.dep ? `・${esc(placeShort(l.dep))}から` : ""}・${spHM(t)}ごろ着・次の離陸まで（推定）` });
+  }
+  return out.sort((a, b) => b.t - a.t);
 }
 function specialHTML(){
   const all = [...SPECIAL.values()].sort((a, b) => (b.iata === OPS_AP) - (a.iata === OPS_AP) || (!!b.iata) - (!!a.iata));
@@ -14288,10 +14576,23 @@ async function loadSpb(force){
 //（前は全部の機体を30機ずつ4回読んでいた。特別塗装機の画面を1分以内に開いていれば、その結果を使う）
 let SPB_LIVE = null, SPB_LIVE_AT = 0, SPB_LIVE_KEY = "";
 const spbLiveSrc = () => SPB && Date.now() - SPB_AT < 60_000 ? SPB : (SPB_LIVE || []);
+// 「いま○○に滞在中」のため：着陸に向かうのを見た特別塗装機を、端末に3時間だけ覚える（登録記号と空港と時刻だけ。位置は残さない）
+const SP_STAY_KEY = "soramemo.spStay", SP_STAY_MS = 3 * 36e5;
+function spStayMem(now = Date.now()){
+  let m = {}; try{ m = JSON.parse(localStorage.getItem(SP_STAY_KEY) || "{}") || {}; }catch(e){}
+  for(const [k, v] of Object.entries(m)) if(!v || !(now - v.t < SP_STAY_MS)) delete m[k];
+  return m;
+}
+function spStayNote(now = Date.now()){
+  const m = spStayMem(now); let ch = false;
+  for(const x of SPECIAL.values()) if(x && x.reg && LIVERY_NAMES[x.reg] && x.iata && x.phase === "arr"){ const o = m[x.reg]; if(!o || o.iata !== x.iata){ m[x.reg] = { iata:x.iata, t:now }; ch = true; } }
+  if(ch) try{ localStorage.setItem(SP_STAY_KEY, JSON.stringify(m)); }catch(e){}
+  return m;
+}
 async function loadSpbLive(){
   if(!SERVER) return [];
   if(SPB && Date.now() - SPB_AT < 60_000) return SPB;
-  const regs = [...SPECIAL.keys()].filter(r => LIVERY_NAMES[r]).sort(), key = regs.join(",");
+  const stay = spStayNote(), regs = [...new Set([...SPECIAL.keys(), ...Object.keys(stay).filter(r => stay[r].iata === OPS_AP)])].filter(r => LIVERY_NAMES[r]).sort(), key = regs.join(",");
   if(!regs.length){ SPB_LIVE = []; SPB_LIVE_KEY = ""; return SPB_LIVE; }
   if(SPB_LIVE && key === SPB_LIVE_KEY && opsFresh(SPB_LIVE_AT, 50_000)) return SPB_LIVE;
   const parts = []; for(let i = 0; i < regs.length; i += 30) parts.push(regs.slice(i, i + 30));
@@ -14324,6 +14625,19 @@ function spbEta(r){
 }
 const spbCode = c => c ? `<span class="spbc">${esc(c)}</span>` : `<span class="spbc q" aria-label="空港は分からない">？</span>`;
 const spbArrow = `<svg class="spbar" viewBox="0 0 20 12" aria-hidden="true"><path d="M1 6h16M13 2l4 4-4 4"/></svg>`;
+// 運航の期間：{ st:"on"|"end"|null, txt:"2027年3月31日まで（予定）" }。分からないときは txt が空
+const spbYmd = d => { const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(d || "")); return m ? `${+m[1]}年${+m[2]}月${+m[3]}日` : ""; };
+function spbTerm(reg, today = spJstDate(Date.now())){
+  const [f, u] = LIVERY_TERM[reg] || [];
+  if(u && u < today) return { st:"end", txt:`${f ? spbYmd(f) + "〜" : ""}${spbYmd(u)}で終了`, tag:"終了" };
+  const txt = f && u ? `${spbYmd(f)}〜${spbYmd(u)}（予定）` : u ? `${spbYmd(u)}まで（予定）` : f ? `${spbYmd(f)}から` : "";
+  const soon = u && Date.parse(u) - Date.parse(today) <= 60 * 864e5;
+  return { st:"on", txt, tag:soon ? `${spbMd(u)}まで` : "" };
+}
+// 探す：登録記号・塗装の名前・航空会社（全角・小文字・ハイフンのちがいは気にしない）
+let SPB_Q = "", SPB_FOCUS = null;
+const spbQn = s => String(s || "").normalize("NFKC").toUpperCase().replace(/[\s・ー\-]/g, "");
+const spbHit = (r, q) => !q || spbQn(r.reg).includes(q) || spbQn(r.name).includes(q) || spbQn(r.air).includes(q);
 function spbRowHTML(r){
   let main = "", sub = "";
   if(r.st === "flying"){
@@ -14336,12 +14650,13 @@ function spbRowHTML(r){
     main = `<span class="m">${l.arr ? `${esc(placeShort(l.arr))}に ${spHM(l.last)}ごろ着` : `${spHM(l.last)}まで見えた`}</span>`;
     sub = `今日 ${r.legs.length}便`;
   }else if(r.st === "recent") main = `<span class="m">${esc(spbMd(r.b.last_day))}に飛んだ</span>`;
-  return `<li><button type="button" class="spbrow g-${r.g}" data-spb-reg="${esc(r.reg)}"><span class="t"><b>${esc(r.name)}</b><small class="reg">${esc(r.reg)}</small></span>
+  const tm = spbTerm(r.reg);
+  return `<li><button type="button" class="spbrow g-${r.g}" data-spb-reg="${esc(r.reg)}"><span class="t"><b>${esc(r.name)}</b>${tm.tag ? `<small class="spbterm${tm.st === "end" ? " end" : ""}">${esc(tm.tag)}</small>` : ""}<small class="reg">${esc(r.reg)}</small></span>
     ${main ? `<span class="l">${main}</span>` : ""}${sub ? `<small class="s">${sub}</small>` : ""}</button></li>`;
 }
 function spbListHTML(){
   const rows = spbRows(), cnt = g => g === "all" ? rows.length : rows.filter(r => r.g === g).length;
-  const vis = rows.filter(r => SPB_TAB === "all" || r.g === SPB_TAB);
+  const q = spbQn(SPB_Q), vis = rows.filter(r => (SPB_TAB === "all" || r.g === SPB_TAB) && spbHit(r, q));
   const sec = (st, title, note) => { const xs = vis.filter(r => r.st === st); if(!xs.length) return "";
     if(st === "flying") xs.sort((a, b) => (spbEta(a) || 9e15) - (spbEta(b) || 9e15));
     if(st === "recent") xs.sort((a, b) => String(b.b.last_day).localeCompare(String(a.b.last_day)));
@@ -14350,14 +14665,22 @@ function spbListHTML(){
   return `<div class="spctop"><button class="mp-back" type="button" data-close><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>閉じる</button><h3>特別塗装機</h3><span class="sp" aria-hidden="true"></span></div>
     <div class="spbmapw"><div id="spbMap" class="spbmap" role="region" aria-label="いま飛んでいる特別塗装機の地図（${flying.length}機）"></div><span class="spbmapn">いま飛んでいる ${flying.length}機</span></div>
     <div class="spbtabs" role="group" aria-label="航空会社で絞り込む">${SPB_TABS.map(([k, n]) => `<button type="button" data-spb-tab="${k}" aria-pressed="${SPB_TAB === k}">${n} ${cnt(k)}</button>`).join("")}</div>
+    ${spbFindHTML(vis.length)}
     ${SPB ? "" : `<p class="hint">記録を読み込んでいます…</p>`}
     ${sec("flying", "いま飛んでいる", "直近15分に位置が届いた")}${sec("today", "今日飛んだ", "いまは地上か、記録の外")}${sec("recent", "この30日に飛んだ")}
     ${none.length ? `<details class="spbnone"><summary>しばらく見ていない ${none.length}機</summary><ul class="spbl">${none.map(spbRowHTML).join("")}</ul></details>` : ""}
     <p class="fwnote">位置は adsb.lol、時刻表と便名は航空会社の運航情報（${ODPT_CREDIT}）。足あとは主な空港のまわりで見えた分なので、抜けることがあります。時刻表にない便の行き先は、同じ便名のこの30日の路線からの推定です。着く時刻は位置と速さからの推定です。特別塗装機の一覧は航空会社の発表などをもとに そらメモ がまとめたもので、塗装の期間や機体の入れ替えで違うことがあります。</p>`;
 }
+// 探す欄。入れた字が登録記号の形なら、特別塗装機でなくても「機体の1日」へ
+function spbFindHTML(n){
+  const q = SPB_Q.trim(), reg = String(q).normalize("NFKC").toUpperCase().replace(/\s/g, "");
+  const isReg = /^[A-Z0-9]{1,3}-?[A-Z0-9]{2,6}$/.test(reg) && /\d/.test(reg) && reg.length >= 4;
+  return `<div class="spbfind"><input type="search" id="spbQ" inputmode="search" autocomplete="off" enterkeyhint="search" placeholder="登録記号・塗装の名前・航空会社で探す" aria-label="特別塗装機を探す" value="${esc(q)}"></div>
+    <div id="spbFindOut">${q ? `<p class="spbfindn">${n ? `${n}機` : "特別塗装機の一覧には見つかりません"}${isReg && !LIVERY_NAMES[reg] ? `　<button type="button" class="linkbtn2" data-plane="${esc(reg)}">${esc(reg)} の1日を見る ›</button>` : ""}</p>` : ""}</div>`;
+}
 function spbDetailHTML(reg){
   const r = spbRows().find(x => x.reg === reg); if(!r) return spbListHTML();
-  const eta = r.st === "flying" ? spbEta(r) : null, l = r.leg, on = pushSpRegs().includes(reg);
+  const eta = r.st === "flying" ? spbEta(r) : null, l = r.leg, on = pushSpRegs().includes(reg), tm = spbTerm(reg);
   const arr30 = Object.entries(r.b.arr30 || {}).sort((a, b) => b[1] - a[1]);
   const tile = (k, v) => `<div><span>${k}</span><b>${v}</b></div>`;
   const hero = r.st === "flying" ? `<div class="spbroute">${l.dep || l.arr ? `${spbCode(l.dep)}${spbArrow}${spbCode(l.arr)}` : `<span class="spbunk">行き先は分からない</span>`}<small>${esc(spbFl(l.cs))}</small></div>
@@ -14371,13 +14694,15 @@ function spbDetailHTML(reg){
   const fold = flown.length ? `<li class="fold"><button type="button" data-rot-fold aria-expanded="false"><span class="tm"><b>${spHM(flown[0].first)}</b>${flown[flown.length - 1].last ? `<small>〜${spHM(flown[flown.length - 1].last)}</small>` : ""}</span><span class="dot"><i></i></span><span class="tx"><b>今日飛んだ ${flown.length}便</b><small>${flown.slice(0, 4).map(x => esc(spbFl(x.cs))).join("・")}${flown.length > 4 ? " ほか" : ""}</small></span>${PRED_CHEV}</button></li>${flown.map(legLi).join("")}` : "";
   const curRow = curLeg ? predCurRow({ fl:spbFl(curLeg.cs), dep:curLeg.dep, arr:curLeg.arr, t:Date.parse(curLeg.first) || null, end:Date.parse(curLeg.last) || null, live:!!lastLive, eta, note:why(curLeg) || (lastLive ? "" : "見えた最後の便") }, false) : "";
   return `<div class="spctop"><button class="mp-back" type="button" data-spb-back><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>特別塗装機</button><h3 class="srt">${esc(r.name)}</h3><span class="spbreg">${esc(reg)}</span></div>
-    <div class="spbhero g-${r.g}"><div class="spbname"><small>${esc(r.air)}</small><b>${esc(r.name)}</b></div>${hero}</div>
+    <div class="spbhero g-${r.g}"><div class="spbname"><small>${esc(r.air)}${tm.tag ? `・${esc(tm.tag)}` : ""}</small><b>${esc(r.name)}</b></div>${hero}</div>
     <div class="rtlw"><div class="rsec"><b>今日の足あと</b><span>主な空港で見えた記録から</span></div>
     ${r.legs.length ? `<ul class="rtl">${fold}${curRow}</ul>` : `<p class="hint">今日は、まだ記録がありません。</p>`}
     ${SERVER ? `<div class="rsec"><b>この先（予想）</b><span>予想です。保証しません</span></div><div id="spbPredBox">${spbPredHTML(reg)}</div>` : ""}</div>
     <h4 class="loh">この30日に来た空港<small>着いた回数</small></h4>
     ${arr30.length ? `<div class="spbaps">${arr30.slice(0, 12).map(([c, n]) => `<span>${esc(placeShort(c))} <b>${n}</b>回</span>`).join("")}</div>` : `<p class="hint">この30日の記録はありません。</p>`}
-    <div class="spbbtns">${SERVER && PUSH_KEY && pushOK() ? `<button type="button" class="spbbtn" data-spb-push="${esc(reg)}" aria-pressed="${on}">${on ? "この機体の通知をやめる" : "この機体が飛んだら通知"}</button>` : ""}
+    <h4 class="loh">運航の期間</h4>
+    <p class="spbperiod"><span class="spbst ${tm.st}">${tm.st === "end" ? "運航終了" : "運航中"}</span><small>${tm.txt ? esc(tm.txt) : "期間は発表されていません"}</small></p>
+    <div class="spbbtns">${r.st === "flying" && r.now ? `<button type="button" class="spbbtn" data-spb-map="${esc(reg)}">地図で見る</button>` : ""}${SERVER && PUSH_KEY && pushOK() ? `<button type="button" class="spbbtn" data-spb-push="${esc(reg)}" aria-pressed="${on}">${on ? "この機体の通知をやめる" : "この機体が飛んだら通知"}</button>` : ""}
       <button type="button" class="spbbtn" data-spb-book>特別塗装機の図鑑</button></div>
     <p class="fwnote">位置は adsb.lol、時刻表と便名は航空会社の運航情報（${ODPT_CREDIT}）。主な空港から遠いところは記録がないので、足あとが抜けることがあります。通知は、この機体が新しい便で飛んでいるのを見つけたときに1便に1回です（推定）。</p>`;
 }
@@ -14386,8 +14711,13 @@ function spbMap(){
   const el = $("spbMap"); if(!el || !window.L) return;
   SPB_MAP = L.map(el, { zoomControl:false, attributionControl:true, keyboard:false, dragging:true, scrollWheelZoom:false }).setView([36.5, 136.5], 4);
   L.tileLayer("https://cyberjapandata.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png", { maxZoom:10, attribution:GSI_ATTR }).addTo(SPB_MAP);
-  for(const r of spbRows().filter(x => x.st === "flying" && (SPB_TAB === "all" || x.g === SPB_TAB)))
-    L.circleMarker([r.now.lat, r.now.lon], { radius:6, color:"#fff", weight:1.5, fillColor:"#A9822E", fillOpacity:1, interactive:false, keyboard:false }).addTo(SPB_MAP);
+  const q = spbQn(SPB_Q);
+  for(const r of spbRows().filter(x => x.st === "flying" && (SPB_TAB === "all" || x.g === SPB_TAB) && (spbHit(x, q) || x.reg === SPB_FOCUS))){
+    const on = r.reg === SPB_FOCUS;
+    L.circleMarker([r.now.lat, r.now.lon], { radius:on ? 9 : 6, color:on ? "#1F2937" : "#fff", weight:on ? 3 : 1.5, fillColor:"#A9822E", fillOpacity:1, interactive:false, keyboard:false }).addTo(SPB_MAP);
+    if(on){ SPB_MAP.setView([r.now.lat, r.now.lon], 7);
+      L.marker([r.now.lat, r.now.lon], { icon:L.divIcon({ className:"spbfocus", html:`<span>${esc(r.name)}</span>`, iconSize:[0, 0], iconAnchor:[0, 0] }), interactive:false, keyboard:false }).addTo(SPB_MAP); }
+  }
   setTimeout(() => SPB_MAP && SPB_MAP.invalidateSize(), 60);
 }
 let SPB_PRED = null;   // 特別塗装機のくわしくの予想 {reg, at, d}
@@ -14399,7 +14729,7 @@ function spbPredHTML(reg){
   const pm = pd === undefined ? null : predModel(pd, predLiveCtx(reg, SPB));
   const body = pm === null ? `<p class="hint">予想を読み込んでいます…</p>`
     : pm.none || !pm.steps.length ? predWarn(pm)
-    : `<ul class="rtl">${predRows(lastLive ? { ...pm, skip:null } : pm, false)}</ul>${predWarn(pm)}`;
+    : `<ul class="rtl">${predRows(lastLive ? { ...pm, skip:null } : pm, false)}</ul>${predBasis(pm)}${predWarn(pm)}`;
   return `${body}<div class="rbtns"><button type="button" class="rbtn line" data-plane="${esc(reg)}">機体の1日 ›</button><button type="button" class="rbtn" data-rot-conf>確からしさとは</button></div>
     <p class="rnote">${PRED_NOTE}<b>予想です。保証しません。</b></p>${predOdpt(pm)}`;
 }
@@ -14433,9 +14763,22 @@ document.addEventListener("click", e => {
   const g = e.target.closest("[data-spb-reg]"); if(g){ SPB_REG = g.dataset.spbReg; renderSpb(); $("dSpecial").scrollTop = 0; $("dSpecialBody").querySelector(".mp-back").focus(); return; }
   if(e.target.closest("[data-spb-back]")){ const prev = SPB_REG; SPB_REG = null; renderSpb(); const b = $("dSpecialBody").querySelector(`[data-spb-reg="${CSS.escape(prev || "")}"]`); if(b) b.focus(); return; }
   const p = e.target.closest("[data-spb-push]"); if(p){ toggleSpRegPush(p.dataset.spbPush); return; }
+  const mp = e.target.closest("[data-spb-map]"); if(mp){ SPB_FOCUS = mp.dataset.spbMap; SPB_REG = null; SPB_Q = ""; renderSpb(); track("special_map", "reg");
+    const w = $("dSpecialBody").querySelector(".spbmapw"); if(w) w.scrollIntoView({ block:"start" }); return; }
   if(e.target.closest("[data-spb-book]")){ $("dSpecial").close(); goTab("book"); return; }
 });
-$("dSpecial").addEventListener("close", () => { if(SPB_MAP){ SPB_MAP.remove(); SPB_MAP = null; } });
+$("dSpecial").addEventListener("close", () => { if(SPB_MAP){ SPB_MAP.remove(); SPB_MAP = null; } SPB_FOCUS = null; });
+// 探す欄：打つたびに一覧だけ描き直す（欄は描き直さないので、字の入力が途切れない）
+document.addEventListener("input", e => { if(e.target.id !== "spbQ") return;
+  SPB_Q = e.target.value.slice(0, 40); SPB_FOCUS = null;
+  const body = $("dSpecialBody"); if(!body || SPB_REG) return;
+  const tmp = document.createElement("div"); tmp.innerHTML = spbListHTML();
+  const keep = body.querySelector(".spbfind"), mapw = body.querySelector(".spbmapw");
+  // 地図・タブ・探す欄はそのまま。下の一覧と見つかった数だけ入れ替える
+  [...body.children].forEach(el => { if(el !== keep && el !== mapw && !el.classList.contains("spctop") && !el.classList.contains("spbtabs")) el.remove(); });
+  [...tmp.children].forEach(el => { if(!el.classList.contains("spctop") && !el.classList.contains("spbmapw") && !el.classList.contains("spbtabs") && !el.classList.contains("spbfind")) body.appendChild(el); });
+  spbMap();
+});
 // ---- 特別塗装機の図鑑：乗った（便名を入れたフライトの毎日の記録の登録記号）・見た（チェックインした空港に前後45分で着いた・出た機体） ----
 let LIV_TAB = "all", LIV_SEEN = null, LIV_SEEN_AT = 0;
 async function loadLivSeen(){
@@ -14509,7 +14852,7 @@ function planeHTML(reg, hist, pred){
     `<div class="rtlw"><div class="spcard"><div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px"><span><b style="font-size:22px">${esc(reg)}</b><small style="display:block;font-size:13px">${[type, nm && "★" + nm].filter(Boolean).map(esc).join("・") || "　"}</small></span>${live ? `<em class="pill" style="font-style:normal;background:var(--r-now-wash);color:var(--r-now);border-radius:999px;padding:6px 12px;font-size:13px;font-weight:800">飛行中</em>` : ""}</div></div>
       <div class="rsec"><b>今日</b><span>${predDay(Date.now())}</span></div>
       ${tl || `<p class="hint">今日この機体が飛んだ記録は、まだありません（日本の上空を飛んだ航空会社の便だけ記録しています）。</p>`}
-      ${m.none && tl ? predWarn({ steps:[] }) : predWarn(m)}
+      ${m.none ? "" : predBasis(m)}${m.none && tl ? predWarn({ steps:[] }) : predWarn(m)}
       <div class="rbtns"><button type="button" class="rbtn" data-rot-conf>確からしさとは</button>${/^JA[0-9A-Z]{3,5}$/.test(reg) && SERVER ? `<button class="rbtn line" data-plpush="${esc(reg)}" type="button">近づいたら知らせる</button>` : ""}</div>
       ${hasMap ? `<div class="rmap"><b>今日の地図</b><div class="plmap" id="plMap" role="img" aria-label="今日飛んだ道すじと予想の地図"></div><div class="rlegend"><span><i></i>飛んだ</span><span><i class="p"></i>予想</span></div></div>` : ""}
       <p class="rnote">飛んだ便は機体の位置の記録（adsb.lol）から。出発・到着の空港は毎晩の航跡から入るので、今日の便は空いていることがあります。${PRED_NOTE}${pred && pred.method ? "特別塗装機は、航空会社の運航情報にある予定の便も使っています。" : ""}<b>予想です。保証しません。</b></p>${predOdpt(m)}</div>`}`;
@@ -14679,8 +15022,10 @@ function predSteps(d){
     const sh = Number(n.share), seen = Number(n.seen), plan = n.src === "livery";
     // 時刻表の予想（predict_rotation）の seen は同じ曜日を2回と数えた点数なので、回数は少なめ（半分）に見て、画面には出さない
     const cnt = n.seen == null || !Number.isFinite(seen) ? null : reg ? seen : Math.ceil(seen / 2);
+    // 分母（前の便のあとを見た回数・重みなし）：データ担当が seen_of を返したときだけ「12回中11回」にする（返さないうちは「11回見た」）
+    const of = reg && n.seen_of != null && Number.isFinite(Number(n.seen_of)) && cnt != null && Number(n.seen_of) >= cnt ? Number(n.seen_of) : null;
     const st = { fl:reg ? csFlight(n.callsign) : n.flight, dep:n.dep, arr:n.arr, t:Number.isFinite(t) ? t : null, plan,
-      share:n.share != null && Number.isFinite(sh) ? sh : null, cnt, shown:reg && cnt != null ? cnt : null };
+      share:n.share != null && Number.isFinite(sh) ? sh : null, cnt, shown:reg && cnt != null ? cnt : null, of };
     if(!plan && !(st.share >= 0.4 && st.cnt >= 3)) break;
     out.push(st); if(st.t) prev = st.t;
   }
@@ -14697,20 +15042,26 @@ function predModel(d, ctx){
   const cur = { fl:reg ? csFlight(k.callsign) : k.flight, dep:k.dep, arr:k.arr, t:Date.parse(reg ? k.first : k.std) || null, end:Date.parse(reg ? k.last : k.sta) || null };
   cur.live = live ? predKey(live.fl) === predKey(cur.fl) : reg ? !!cur.end && now - cur.end < 6 * 60_000 : k.phase !== "landed" && !!cur.t && cur.t <= now && !!cur.end && now < cur.end;
   if(cur.live && live) cur.eta = live.eta || null;
-  let steps = predSteps(d), skip = null;
+  let steps = predSteps(d), skip = null, miss = null;
   if(live && !cur.live){
     const i = steps.findIndex(s => predKey(s.fl) === predKey(live.fl));
     if(i >= 0){ skip = { ...steps[i], dep:steps[i].dep || live.dep, arr:steps[i].arr || live.arr }; steps = steps.slice(i + 1); }
-    else{ skip = { fl:live.fl, dep:live.dep, arr:live.arr, t:live.t || null }; if(live.t) steps = steps.filter(s => !s.t || s.t > live.t); }
+    else{
+      // 外れ：予想の1便目と同じころ（前後90分）に、違う便で飛んでいる。隠さず「当時の予想」と並べる（出発の時刻が分かるときだけ）
+      const s0 = steps[0];
+      if(s0 && s0.t && live.t && Math.abs(s0.t - live.t) <= 90 * 60_000) miss = { fl:s0.fl, dep:s0.dep, arr:s0.arr, t:s0.t, plan:s0.plan };
+      skip = { fl:live.fl, dep:live.dep, arr:live.arr, t:live.t || null }; if(live.t) steps = steps.filter(s => !s.t || s.t > live.t);
+    }
   }
   steps = steps.filter(s => s.t == null || s.t > now);
-  return { cur, live, stale:!!(live && !cur.live), skip, steps, plan:steps.some(s => s.plan) };
+  return { cur, live, stale:!!(live && !cur.live), skip, miss, steps, plan:steps.some(s => s.plan), method:d.method || null, src:d.src || null };
 }
 const PRED_EDGE = `<li class="edge"><b>ここから予想</b><small>予想です。保証しません</small></li>`;
 function predConf(s){
   if(s.plan) return `<span class="rsrc">運航情報</span>`;
   const lv = predLevel(s), w = ["", "低い", "中くらい", "高い"][lv];
-  return `<span class="rcf c${lv}" aria-label="確からしさ ${w}${s.shown != null ? `・${s.shown}回見た` : ""}"><span><span class="d" aria-hidden="true"><i></i><i></i><i></i></span>${w}</span>${s.shown != null ? `<span class="n">${s.shown}回見た</span>` : ""}</span>`;
+  const n = s.shown == null ? "" : s.of != null ? `${s.of}回中<b>${s.shown}</b>回` : `<b>${s.shown}</b>回見た`;
+  return `<span class="rcf c${lv}" aria-label="確からしさ ${w}${n ? "・" + n.replace(/<\/?b>/g, "") : ""}"><span><span class="d" aria-hidden="true"><i></i><i></i><i></i></span>${w}</span>${n ? `<span class="n">${n}</span>` : ""}</span>`;
 }
 // 1行ずつ。mini＝カードの中の小さい線（便名と区間を1行に、確からしさは下）、そうでなければ機体の1日の大きい線（区間は2行目、確からしさは右）
 function predCurRow(c, mini){
@@ -14721,7 +15072,8 @@ function predCurRow(c, mini){
 }
 function predRows(m, mini, limit){
   const rows = [], today = jstDay(Date.now());
-  if(m.skip) rows.push(`<li class="skip"><div></div><div class="dot"></div><div class="tx">${m.skip.t ? spHM(m.skip.t) + " " : ""}${esc(m.skip.fl || "")} ${predRoute(m.skip.dep, m.skip.arr)}は、いま飛んでいるので予想に出しません</div></li>`);
+  if(m.miss) rows.push(`<li class="skip miss"><div></div><div class="dot"></div><div class="tx">いま実際は <b>${esc(m.live.fl)}</b> ${predRoute(m.live.dep, m.live.arr)}<small>当時の予想：${m.miss.t ? spHM(m.miss.t) + " " : ""}${esc(m.miss.fl || "")}</small></div></li>`);
+  else if(m.skip) rows.push(`<li class="skip"><div></div><div class="dot"></div><div class="tx">${m.skip.t ? spHM(m.skip.t) + " " : ""}${esc(m.skip.fl || "")} ${predRoute(m.skip.dep, m.skip.arr)}は、いま飛んでいるので予想に出しません</div></li>`);
   let day = today;
   const list = limit ? m.steps.slice(0, limit) : m.steps;
   for(const s of list){
@@ -14736,8 +15088,18 @@ function predRows(m, mini, limit){
 // 予想が出ないとき・いまの便が古いときの書き方
 function predWarn(m){
   if(m.none) return `<div class="rwarn"><span>…</span><span>${m.live ? `<b>いま飛んでいる ${esc(m.live.fl)} が記録に入ると</b>、そのあとの便を予想します` : `<b>今日この機体はまだ見えていません</b>。見えたら、そのあとの便を予想します（いまの便が、まだ分かっていません）`}</span></div>`;
-  return (m.stale ? `<div class="rwarn"><span>!</span><span><b>いま飛んでいる ${esc(m.live.fl)} が記録に入るまで</b>、${esc(m.cur.fl || "")} からの予想を出しています。</span></div>` : "")
+  return (m.miss ? `<div class="rwarn"><span>!</span><span><b>いま飛んでいる ${esc(m.live.fl)} は予想と違いました</b>（機体の入れ替えなどで変わることがあります）。記録に入るまで ${esc(m.cur.fl || "")} からたどった予想を出しているので、この先は外れやすくなっています。</span></div>`
+    : m.stale ? `<div class="rwarn"><span>!</span><span><b>いま飛んでいる ${esc(m.live.fl)} が記録に入るまで</b>、${esc(m.cur.fl || "")} からの予想を出しています。</span></div>` : "")
     + (m.steps.length ? "" : `<div class="rwarn"><span>…</span><span>この先の便は、<b>まだ記録が足りず予想できません</b>（同じ便を3回見ると出ます）</span></div>`);
+}
+// 根拠の1行：どの便から（記録の最後の時刻）・前の何日の記録でたどったか。先の便ほど外れやすい（予想の元の時刻と、先ほど外れやすいことを書く）
+//   learn・learn_hi（predict_rotation_v2）は前の42日、時刻表の predict_rotation と predict_rotation_reg は前の60日
+function predBasis(m){
+  if(!m || m.none || !m.steps.length) return "";
+  const c = m.cur, days = /^learn/.test(m.method || "") ? 42 : 60, end = c.end || c.t;
+  const from = c.live ? "（いま飛んでいる便）" : end ? `（${spHM(end)} ${c.arr ? "着" : "に見えた"}）` : "";
+  const learned = m.steps.some(s => !s.plan);
+  return `<p class="rbasis"><b>根拠</b>${learned ? `${esc(c.fl || "")}${from}から、前の${days}日の記録で続いた便をたどっています。` : ""}${m.plan ? "運航情報の便は、航空会社の予定から。" : ""}先の便ほど外れやすくなります。</p>`;
 }
 const predOdpt = m => m && m.plan ? `<p class="rodpt">運航情報の${ODPT_CREDIT}</p>` : "";
 const PRED_NOTE = "予想は、この機体が前の記録でいまの便のあとに飛んだ便から出しています（全機の位置の記録・adsb.lol）。機体の入れ替えで違うことがあります。";
@@ -14747,7 +15109,7 @@ function predictionHTML(d, ctx, o = {}){
   if(m.none) return `<div class="rtlw">${predWarn(m)}</div>`;
   const more = o.limit && m.steps.length > o.limit ? m.steps.length - o.limit : 0;
   const btns = o.reg ? `<div class="rbtns">${more ? `<small class="more">あと${more}便の予想</small>` : ""}<button type="button" class="rbtn line" data-plane="${esc(o.reg)}">機体の1日 ›</button>${o.conf ? `<button type="button" class="rbtn" data-rot-conf>確からしさとは</button>` : ""}</div>` : "";
-  return `<div class="rtlw"><ul class="rtl mini">${predCurRow(m.cur, true)}${PRED_EDGE}${predRows(m, true, o.limit)}</ul>${predWarn(m)}${btns}
+  return `<div class="rtlw"><ul class="rtl mini">${predCurRow(m.cur, true)}${PRED_EDGE}${predRows(m, true, o.limit)}</ul>${predBasis(m)}${predWarn(m)}${btns}
     <p class="rnote">${PRED_NOTE}<b>予想です。保証しません。</b></p>${predOdpt(m)}</div>`;
 }
 // 確からしさとは（シート）。割合の数字はここだけに出す
@@ -14760,6 +15122,7 @@ function predConfHTML(){
       ${ex(2, .7, 10, "<b>6〜8割</b>の日に続いた。または8割以上でも見たのが5回より少ない")}
       ${ex(1, .45, 5, "<b>4〜6割</b>の日に続いた。4割より少ない便は出しません")}</ul>
     <ul class="rlv"><li><h4>航空会社の運航情報にある便</h4><span class="rsrc">運航情報</span><p>運航情報に「この塗装機で運航」とある便。記録からの予想とは別の物差しで、機体の入れ替えで変わることがあります</p></li></ul>
+    <ul class="rlv"><li><h4>根拠と外れたとき</h4><p>予想の下の「根拠」に、どの便からたどったかと、前の何日の記録を使ったかを書きます。<b>先の便ほど外れやすくなります。</b>いま飛んでいる便が予想と違ったときは、隠さず「当時の予想」と並べます</p></li></ul>
     <ul class="rlv"><li><h4>予想に出さない便</h4><p>出発の時刻が過ぎた便と、いま飛んでいる便・それより前の便は、運航情報にあっても予想に出しません</p></li></ul>
     <p class="rodpt">運航情報の${ODPT_CREDIT}</p>
     <div class="rbtns" style="justify-content:flex-end"><button type="button" class="btn1" data-close>閉じる</button></div>`;
@@ -16107,6 +16470,24 @@ function spOpenState(ap, name, now = Date.now()){
   const open = a <= b ? m >= a && m < b : m >= a || m < b;
   return { open, until:spHMs(x.open_to), from:spHMs(x.open_from) };
 }
+// 撮影地から各滑走路までの距離（滑走路の中心線のいちばん近い所まで）と、焦点距離の目安
+// 目安：35mm判（フルサイズ）で、機体の幅が写真の横の6割になる長さ ＝ 36mm × 距離 ÷（機体の幅 ÷ 0.6）。中型機は幅36m（737・A320）、大型機は幅65m（777）
+const SP_FOCAL = { mid:36, big:65 };
+const spFocal = (m, span) => 36 * m / (span / 0.6);
+const spFocalTxt = mm => mm >= 1000 ? "1,000mm以上" : mm < 50 ? "50mmより短く" : `約${(Math.round(mm / 10) * 10).toLocaleString("ja-JP")}mm`;
+function spRwyDist(ap, name){
+  const def = OPS_AIRPORTS[ap], sp = (OPS_SPOTS[ap] || []).find(x => x[0] === name);
+  if(!def || !def.rwy || !sp) return [];
+  const q = [sp[1], sp[2]];
+  return def.rwy.map(([a, la1, lo1, , b, la2, lo2]) => ({ id:`${a}/${b}`, m:nmToLine(q, [[la1, lo1], [la2, lo2]]) * 1852 }))
+    .sort((x, y) => x.m - y.m);
+}
+function spRwyDistHTML(ap, name){
+  const rows = spRwyDist(ap, name); if(!rows.length) return "";
+  const km = m => m < 950 ? `約${Math.round(m / 50) * 50}m` : `約${(Math.round(m / 100) / 10).toFixed(1)}km`;
+  return `<dt>滑走路まで</dt><dd><ul class="sprwyd">${rows.map(r => `<li><b>${esc(r.id)}</b><span>${km(r.m)}</span><small>中型機 ${spFocalTxt(spFocal(r.m, SP_FOCAL.mid))}・大型機 ${spFocalTxt(spFocal(r.m, SP_FOCAL.big))}</small></li>`).join("")}</ul>
+    <small class="sprwyn">滑走路の中心線までのまっすぐな距離と、機体が写真の横の6割ほどになる焦点距離（35mm判に直した値）の目安です。地上を走る機体や、真上を通る機体は近くなります。</small></dd>`;
+}
 function spInfoHTML(ap, name){
   const x = spInfoOf(ap, name); if(!x) return "";
   const st = spOpenState(ap, name), none = `<span class="none">公式の案内に記載がありません</span>`;
@@ -16125,6 +16506,7 @@ function spInfoHTML(ap, name){
         <dt>駐車場</dt><dd>${x.parking ? esc(x.parking) : none}</dd>
         <dt>決まり</dt><dd>${(x.rules || []).length ? `<ul>${x.rules.map(r => `<li>${esc(r)}</li>`).join("")}</ul>` : none}</dd>
         <dt>問い合わせ</dt><dd>${contact}</dd>
+        ${spRwyDistHTML(ap, name)}
       </dl>
       <p class="src">${d ? `${d[0]}年${d[1]}月${d[2]}日に公式の案内で確認しました。変わっていることがあるので、出かける前に確かめてください。` : ""}${src}</p></div>`;
 }
@@ -16973,8 +17355,16 @@ function sgFixApply(L, fx){
 }
 const SG_FIX_TAG = `<span class="sgb-k m">自分で直した</span>`;
 // 予定の便のうち、記録した便（日本時間で同じ日・同じ区間）があるものは「乗った」として予定から外す（実績と二重に数えない）
-function sgDoneKeys(){ const k = new Set(); for(const r of statusRows()) k.add(`${sgJstDay(r.t)}|${r.from}|${r.to}`); return k; }
-const sgPlanDone = (p, keys = sgDoneKeys()) => keys.has(`${p.d}|${p.from}|${p.to}`);
+//   11/26（Gemini の案の2）：記録した便1つで外す予定は1つだけ。同じ日に同じ区間を2回乗る予定（羽田⇄伊丹を2往復など）で、1便だけ記録したときに
+//   残りの予定まで消えて見込みが減らないように、記録の数だけ・時刻の早い予定から外す。返すのは外す予定（予定そのもの）の集まり
+function sgDoneKeys(plans = sgGet().plans){
+  const cnt = new Map(); for(const r of statusRows()){ const k = `${sgJstDay(r.t)}|${r.from}|${r.to}`; cnt.set(k, (cnt.get(k) || 0) + 1); }
+  const out = new Set(), hm = p => p.hm || "99:99";
+  for(const p of [...plans].sort((a, b) => a.d < b.d ? -1 : a.d > b.d ? 1 : hm(a) < hm(b) ? -1 : hm(a) > hm(b) ? 1 : 0)){
+    const k = `${p.d}|${p.from}|${p.to}`, c = cnt.get(k) || 0; if(c > 0){ out.add(p); cnt.set(k, c - 1); } }
+  return out;
+}
+const sgPlanDone = (p, keys = sgDoneKeys()) => keys.has(p);
 const sgFuture = () => { const t = sgToday(), keys = sgDoneKeys(); return sgGet().plans.filter(p => p.d >= t && !sgPlanDone(p, keys)).sort((a, b) => { const x = a.d + " " + (a.hm || "99:99"), y = b.d + " " + (b.hm || "99:99"); return x < y ? -1 : x > y ? 1 : 0; }); };
 const sgPlanLeg = p => sgLeg(p.car, p.from, p.to, p.fare, sgDayT(p.d), p.price);
 // 使う航空会社（選んだもの、なければ今年よく乗っているほう）
@@ -17124,6 +17514,18 @@ function sgLS(){
   const after = rows.filter(r => sgJstDay(r.t) > e.at);
   return { v:e.v + after.length * 5, n:after.length, entered:e };
 }
+// 根拠の1行（11/26 Gemini の案の3）：区間マイル × 積算率 × 2 ＋ 搭乗ボーナス ＝ ポイント。各社の公開情報からの目安（航空会社の確定の数ではない）
+//   直した便は、自動で数えた数（auto）までの式。ANA は端数を掛けたあとに丸め、JAL は積算のマイルを丸めてから2倍するので、1ずれることがある
+const sgWhy = L => `${fmtKm(L.mi)}マイル × ${Math.round(L.fr.rate * 100)}% × 2 ＋ ${fmtKm(L.bonus)} ＝ ${fmtKm(L.auto)}`;
+// 今年あと何日と、届くための月あたりの目安（11/26 Gemini の案の9）。今日を入れて 12月31日まで（日本時間）。
+//   残りが1か月より長いときは月あたり、1か月以内は1週間あたり、1週間以内は残りの数そのもの。100 で切り上げた目安
+function sgPace(left, y = sgNowY()){
+  const t = sgToday(), days = Math.max(0, Math.round((Date.UTC(y, 11, 31) - Date.parse(t + "T00:00:00Z")) / 864e5) + 1), up = v => Math.ceil(v / 100) * 100;
+  if(!days || +t.slice(0, 4) !== y) return null;
+  if(days > 31) return { days, per:"月あたり", v:up(left / (days / (365.25 / 12))) };
+  if(days > 7) return { days, per:"1週間あたり", v:up(left / (days / 7)) };
+  return { days, per:"", v:left };
+}
 // 予定・計画を足したときの残り（実績とは別に、順に足す）
 function sgAfter(goal, F, N){
   if(goal.car === "ANA") return { left:Math.max(0, goal.pts - F), over:Math.max(0, F - goal.pts), done:F >= goal.pts };
@@ -17227,7 +17629,7 @@ function sgRoadView(){
   const nL = next && sgPlanLeg(next);
   const nx = !sh.next || !next ? "" : `<div class="sgb-h"><b>次に乗る便</b><button class="sg-a" data-sg-go="plan" type="button">予定と計画 ›</button></div>
     <button class="sgb-card sgb-next" data-sg-go="plan" type="button"><span class="m"><small>${sgMDj(next.d)}（${sgWD(next.d)}）${next.hm ? "　" + esc(next.hm) + "発" : ""}</small><b>${esc(placeShort(BY[next.from].iata))} → ${esc(placeShort(BY[next.to].iata))}</b>
-      <small>${[next.no || next.car, nL ? nL.fr.label.split("：").pop().split("・")[0] : ""].filter(Boolean).map(esc).join("・")}　<span class="sgb-k p">予定</span></small></span><span class="r"><b class="sgb-nx">＋${nL ? fmtKm(nL.pts) : "—"}</b><small>${sgUnit(next.car)}</small></span>
+      <small>${[next.no || next.car, nL ? nL.fr.label.split("：").pop().split("・")[0] : ""].filter(Boolean).map(esc).join("・")}　<span class="sgb-k p">予定</span></small>${nL ? `<small class="sgwhy">根拠 ${sgWhy(nL)}（目安）</small>` : ""}</span><span class="r"><b class="sgb-nx">＋${nL ? fmtKm(nL.pts) : "—"}</b><small>${sgUnit(next.car)}</small></span>
       <small class="t" id="sgNxRt">${SERVER ? "この路線の今日：読み込んでいます…" : "この路線の今日の便数は、サーバー版で出ます"}</small></button>`;
   const more = !sh.reach || !(P.n || C) ? "" : `<button class="sg-btn ghost" data-sg-go="${SERVER ? "find" : "planner"}" type="button">計画を作る</button>`;
   return `${hero}${two}${jgc}${reach}${nx}${more}
@@ -17309,11 +17711,12 @@ function sgMonthsView(){
   const D = sgRoadData(), { Y, car, goal, unit, cur, P, C, A0, A1, A2, fut } = D, nowM = +sgToday().slice(5, 7) - 1, nowY = +sgToday().slice(0, 4);
   const cnt = A => car === "JAL" ? `<small class="c">回数 あと ${A.leftN}回</small>` : "";
   const val = A => `<b>${fmtKm(A.left)}</b><small> ${unit}</small>`;
-  const dates = fut.map(p => sgMD(p.d)).filter((x, i, a) => a.indexOf(x) === i);
+  const dates = fut.map(p => sgMD(p.d)).filter((x, i, a) => a.indexOf(x) === i), pc = !A0.done && A0.left > 0 ? sgPace(A0.left, Y.y) : null;
   const end = `<div class="sgb-card sgb-end"><p class="t">12月31日の残り（${esc(goal.name)}まで・推定）</p>
     <div class="r"><span><b>実績のまま</b><small>このあと乗らなければ</small></span><span class="v">${A0.done ? `<b>0</b><small> ${unit}</small>` : val(A0)}${A0.done ? `<small class="c">届いています</small>` : cnt(A0)}</span></div>
     ${P.n ? `<div class="r p"><span><b>予定の${P.n}便に乗ると</b><small>${esc(dates.slice(0, 3).join("・"))}${dates.length > 3 ? " ほか" : ""}</small></span><span class="v">${val(A1)}${A1.done ? `<small class="c">${A1.over ? `${fmtKm(A1.over)} あまって届く` : "届く"}</small>` : cnt(A1)}</span></div>` : ""}
-    ${C ? `<div class="r c"><span><b>計画の${C.n}便${P.n ? "にも" : "に"}乗ると</b><small>${A2.done ? (A2.byF || car === "ANA" ? `${fmtKm(A2.over)} ${unit} あまって届く` : "回数の道で届く") : "まだ届かない"}</small></span><span class="v">${val(A2)}${cnt(A2)}</span></div>` : ""}</div>`;
+    ${C ? `<div class="r c"><span><b>計画の${C.n}便${P.n ? "にも" : "に"}乗ると</b><small>${A2.done ? (A2.byF || car === "ANA" ? `${fmtKm(A2.over)} ${unit} あまって届く` : "回数の道で届く") : "まだ届かない"}</small></span><span class="v">${val(A2)}${cnt(A2)}</span></div>` : ""}
+    ${pc ? `<p class="sgb-n sgb-pace">今年あと <b>${pc.days}日</b>。実績のままの残りに${car === "JAL" ? "、FOP だけで" : ""}届くには ${pc.per ? `${pc.per} 約 <b>${fmtKm(pc.v)}</b> ${unit}` : `あと <b>${fmtKm(pc.v)}</b> ${unit}`}（目安）</p>` : ""}</div>`;
   // 月末の残り：目標から、実績の月を順にひく。予定と計画は、そのあとに別のカードで足す
   const rows = Y.rows.filter(r => r.car === car), mo = Array.from({ length:12 }, () => 0);
   for(const r of rows) mo[sgJstM(r.t)] += r.L.pts;
@@ -17408,7 +17811,7 @@ function sgPlan(){
     <p class="sgverd">${sgPlanVerdict(car, Y, goal)}</p>
     ${byDay.map(({ d, rows: rs }) => { const tot = rs.reduce((x, r) => x + (r.L ? r.L.pts : 0), 0);
       return `<div class="sg-card sgpd"><div class="h"><i class="sgsw p" aria-hidden="true"></i><b>${+d.slice(5, 7)}月${+d.slice(8)}日（${sgWD(d)}）</b><span>${esc(dayLabel(rs))}</span><b class="n">+${fmtKm(tot)}</b></div>
-        ${rs.map(({ p, L }) => `<div class="r"><b class="t">${p.hm ? esc(p.hm) : "—"}</b><span><b>${esc(placeShort(BY[p.from].iata))} → ${esc(placeShort(BY[p.to].iata))}</b><small>${[p.no || (p.car !== car ? p.car : ""), L ? L.fr.label.split("：").pop().split("・")[0] : "", p.price && SG_MONEY ? sgYen(p.price) : ""].filter(Boolean).map(esc).join("　")}</small></span><b class="n">+${L ? fmtKm(L.pts) : "—"}</b><button class="sg-x" data-sg-unplan="${esc(p.id)}" aria-label="この予定を消す" type="button">×</button></div>`).join("")}</div>`; }).join("")
+        ${rs.map(({ p, L }) => `<div class="r"><b class="t">${p.hm ? esc(p.hm) : "—"}</b><span><b>${esc(placeShort(BY[p.from].iata))} → ${esc(placeShort(BY[p.to].iata))}</b><small>${[p.no || (p.car !== car ? p.car : ""), L ? L.fr.label.split("：").pop().split("・")[0] : "", p.price && SG_MONEY ? sgYen(p.price) : ""].filter(Boolean).map(esc).join("　")}</small>${L ? `<small class="sgwhy">根拠 ${sgWhy(L)}（目安）</small>` : ""}</span><b class="n">+${L ? fmtKm(L.pts) : "—"}</b><button class="sg-x" data-sg-unplan="${esc(p.id)}" aria-label="この予定を消す" type="button">×</button></div>`).join("")}</div>`; }).join("")
       || `<div class="sg-card"><p class="sg-note">予定の便はまだありません。</p></div>`}
     <button class="sg-btn main" data-sg-go="${SERVER ? "find" : "planner"}" type="button">計画を作って予定に足す</button>
     ${drafts.length ? `<div class="sg-h"><b class="hh">${SG_TAG_C}残した案（まだ予定ではない）</b><button class="sg-a" data-sg-go="compare" type="button">くらべる ›</button></div>
@@ -17650,7 +18053,8 @@ function sgQuick(){
         ${ML.bonusPct ? `<div><span>${esc(ML.bonusWhy)}のボーナス ＋${ML.bonusPct}%<small>ステイタスとカードのボーナスは重ならず、多いほうだけ</small></span><b>+${fmtKm(ML.bonusMi * x2)}</b></div>` : ""}
         ${ML.payMi ? `<div><span>${mc}カードで払う<small>${sgYen(mine.price)}${mc === "JAL" ? "・JAL の航空券は2倍" : "・ANAカードマイルプラスとカードのポイント"}</small></span><b>+${fmtKm(ML.payMi * x2)}</b></div>` : ""}</div>
         <div class="sg-sp2"><b>たまるマイル</b><span><b class="xxl">${fmtKm(ML.totalMi * x2)}</b> マイル</span></div>
-        <div class="sg-3 c"><span><small>${mc === "JAL" ? "FOP" : "PP"}</small><b class="${mc === "JAL" ? "redt" : ""}">${fmtKm(ML.pts * x2)}</b></span><span><small>搭乗回数</small><b>+${x2}</b></span><span><small>Life Status</small><b>${mc === "JAL" ? "+" + 5 * x2 : "—"}</b>${mc === "JAL" && ML.payMi ? `<small>カード分 ${fmtKm(ML.payMi * x2)}/2,000</small>` : ""}</span></div></div>` : `<p class="sg-note">この区間は計算できません。</p>`}
+        <div class="sg-3 c"><span><small>${mc === "JAL" ? "FOP" : "PP"}</small><b class="${mc === "JAL" ? "redt" : ""}">${fmtKm(ML.pts * x2)}</b></span><span><small>搭乗回数</small><b>+${x2}</b></span><span><small>Life Status</small><b>${mc === "JAL" ? "+" + 5 * x2 : "—"}</b>${mc === "JAL" && ML.payMi ? `<small>カード分 ${fmtKm(ML.payMi * x2)}/2,000</small>` : ""}</span></div>
+        <p class="sg-note sgwhy">${mc === "JAL" ? "FOP" : "PP"} の根拠 ${sgWhy(ML)}${x2 > 1 ? "（片道。往復はこの2倍）" : ""}（目安）</p></div>` : `<p class="sg-note">この区間は計算できません。</p>`}
     <div class="sg-h"><b>いちばん貯まる運賃なら</b><small>${SG_QSIDE === "round" ? "往復" : "片道"}・ボーナスなし</small></div>
     <div class="sg-2c">${card("ANA")}${card("JAL")}</div>
     <div class="sg-h"><b>運賃ごと</b>${sgSeg("qcar", [["ANA", "ANA"], ["JAL", "JAL"]], SG_QCAR)}</div>
@@ -18029,7 +18433,7 @@ document.addEventListener("click", async e => {
   if(k === "flew" && p){ if(!(await sgRecordPlan(p))){ b.disabled = false; b.textContent = "保存できませんでした"; return; } g.plans = g.plans.filter(x => x.id !== id); }
   else if(k === "no") g.plans = g.plans.filter(x => x.id !== id);
   else if(k === "later" && p) p.later = sgToday();
-  else if(k === "ok") g.plans = g.plans.filter(x => x.d !== id || !sgPlanDone(x));
+  else if(k === "ok"){ const keys = sgDoneKeys(); g.plans = g.plans.filter(x => x.d !== id || !sgPlanDone(x, keys)); }
   await sgSave(); if(k === "flew" && SERVER && !demo) await reload(); else render();
   for(const kk in DIRTY) DIRTY[kk] = true; renderPersonaCard(); if(currentView() === "sg" || $("dShugyo").open) sgKeep(() => {});
 });
