@@ -1,6 +1,14 @@
 # チェックイン担当の帳面
 
 ## いま持っている仕事
+- **11/26 手動の回（PM の指示「10時45分 羽田の空港ページの不合格の直し・checkin/hnd-fix」）**：checkin/hnd-fix・下書き **PR #264**（298b19c8・報告 docs/pm/report-hnd-fix.md・写真 docs/pm/shots-hnd-fix/）。main（594dd3ee）から。見張りを付けた。並びは変えていない（× の後ろのぼかしと、読めないときの一言が増えた）
+  - ⑦：.nowfoot>.linkbtn2 を縮めない・天気の枠は折れてよく単位は .wxu で小さく・12px 未満をなくす（.wxgrid small・.apitem small・.a3cr・.hndops .opshead span・.apnow の span と .src）・.nowterms と .pinpill の当たりを ::after で上下4px・送ったら #dAirportBody に .cxsc（.cxbar::before のぼかし、.cx は position:relative で上に）
+  - ⑥：NOW_MEMO（soramemo.now.last・8空港・24時間）。loadNow が失敗したら NOW.fail・NOW.prevAt で前の値、renderNow は .nowfail（○時○分 に読んだ情報です・もう一度 data-now-retry）。前の値がなくても見出しを残す。運用の一覧は OH_STAT_MEMO（soramemo.ops.stats・同じ日・6時間）、ohCardHTML で前の数を .prev と札「約○分前」
+  - ⑶：ul.spin li>button を flex に（.splist li button の all:unset と display:block に負けていた）。文（時刻の「—」・（推定）・地上の機体）は撮る人用の spInboundHTML なので依頼（下）
+  - ④：t202 で perf-ios の分（裏で描かない・取りに行かない・閉じたら返す）を確かめ直して成功。webglcontextlost はまだない
+  - 変えた関数：wxHTML・loadNow・renderNow・空港の今のクリック・openAirport・ohCardHTML・opsHubRender。足した：nowKeep・nowPrev・nowHas・ohStatKeep・ohStatPrev・ohJstDay・ohAgo・scroll の受け手
+  - テスト：t207 を足した（全部成功）。関わる e2e 25本・tests/ops 成功
+  - 本人（PM）に聞くこと：読めないときの書き方と24時間・× のぼかし・3D の文脈が失われたときの「開き直す」を作るか・改善担当の残りの小さい所
 - **11/26 定時の回（帳面の「次にやること」：撮る人用の依頼①②）**：checkin/a3-reg・下書き **PR #263**（ed373df4・報告 docs/pm/report-a3-reg.md・写真 docs/pm/shots-a3-reg/）。main（594dd3ee）から。見張りを付けた。見た目は一言の欄の文だけなので、テストが通れば PM が自動で反映してよい
   - ①：openAp3dReg(reg) で羽田の3D を開き、位置が届いたらその登録記号の機体を「追う」で開く（空・地上とも。a3RegKey で大文字・英数字だけにそろえる）。ボタンは data-ap3d-reg="JA01XJ" だけで動く。いない機体は全体のまま、下の一言の欄（A3.lost に miss:true）に「○○ はいま羽田の近くにいません。全体を出しています」と「ほかを追う」。デモは全体のまま
   - 変えた関数：a3Poll（最後に a3WantReg）・a3Loop（A3.regAux：形ができたら a3Pills と a3Aux を1回）・a3Aux（一言の文）・3D を開くクリックの受け手。足した：a3RegKey・openAp3dReg・a3WantReg
@@ -695,6 +703,7 @@
 - 確認コードは6けた。メールは Gmail、Supabase の送信上限は1時間100通
 
 ## 次にやること
+- 【11/26 hnd-fix】PR #264：PM の自動の反映を待つ。入る前に t207・t142・t202・t120・t121・t148・t159・t162・t163・t167・t184・t72・t194・tests/ops を流す。#263（a3-reg）とは src の別の所（3D とは CSS の最後のかたまりが近いだけ）。あとから入る方で web/ を作り直す。①（いまの羽田を一番上に）は design の画面案が来たら作る。残り：3D の webglcontextlost（PM が決めたら）・古い気象通報の「○時間前の観測」（データ担当の age_min が来たら）・遅れの欄の「読み込めませんでした」・予報の行を時刻順に
 - 【11/26 a3-reg】PR #263：PM の自動の反映を待つ。入る前に t205・t142・t159〜t163・t165・t166・t181・t190・t202・tests/ops を流す。本人の答え（いない機体の書き方・いるときだけ出すか）で直す。撮る人用が「3Dで見る」に data-ap3d-reg を付けたら t205 の作り物のボタンと同じ形か見る。②（図鑑の運航中／終了）は画面案が来たら作る（spbTerm(reg) が { st, txt, tag } を返す・LIVERY_TERM）
 - 【次の回】PM の指示がなければ、帳面の積みで残っているものを上から見る（いまは新しい積みなし。修行の sgRecordPlan は修行担当の分）
 - 【11/26 perf-ios】PR #255：PM の自動の反映を待つ。入る前に t202・t50・t142・t159〜t167・t181・t190・t195・t196・t24・t144〜t146・t183・t189・tests/ops を流す。#239（flight-suggest）・#257（test-steady）とは src の別の所（#257 はテストだけ）。#257 が先に入ったら t202 の three.js の用意も three_local.ensure_three にそろえる。あとから入る方で web/ を作り直す
@@ -833,6 +842,7 @@
 - tests/ops は手元では npm の playwright にブラウザがないので、全体に入っている playwright をつないで流した（すべて成功）
 
 ## ほかの担当への依頼
+- 【11/26 撮る人用へ（PM から satsuei.md に写してほしい・PR #264・改善担当 kaizen-hnd-done-1126 の 3）】spInboundHTML の「この3時間」：飛んでいる機体の行の時刻の欄が「—」になる。「着陸まで約○分」か「飛行中」を置いて予定の行と同じ形に、「着陸に向かっている」に（推定）を付ける、羽田の地上にいる機体は上の箱に「羽田にいます（推定）」で。行が縦に落ちる崩れは土台の CSS（ul.spin li>button）で直した
 - 【11/26 撮る人用へ（PM から satsuei.md に写してほしい・PR #263）】依頼①の入口を作った：`openAp3dReg(reg)`、ボタンなら属性 `data-ap3d-reg="JA01XJ"` を付けるだけ（クリックの受け手は土台にある）。位置が届いたらその機体を「追う」で開く。いない機体は全体のまま一言と「ほかを追う」。#263 が main に入ってからつなぐ。依頼②（図鑑の運航中／終了）は画面案を待つ
 - 【11/26 デザイン担当へ（PM が決める）】図鑑の特別塗装機に「運航中／終了」の切り替えを足すなら画面案がほしい（撮る人用の spbTerm を使う形）
 - 【11/26 修行担当へ（PM 経由）】修行の「乗った」（sgRecordPlan）の manual_flights の insert を、`idemInsert("manual_flights", {...row, client_id: formCid("sg:" + p.id, row)})` にしてほしい（送り直しで二重にしない。data/idem・移行200。PR #248 が main に入ってから）。列がまだないサーバーでは idemInsert が前と同じ insert にする
