@@ -2073,6 +2073,60 @@ dialog.mypage .mp-back{white-space:nowrap;min-height:44px}
 #v-ops .bdchart rect{fill:#93B4E8}
 #v-ops .bdchart rect.now{fill:#2563EB}
 #v-ops .bdchart .ref{fill:none;stroke:#6B7280;stroke-width:1.5;stroke-dasharray:3 3}
+/* 案内板の「これから着く便」の時刻表（11/26 本人の指示・design/board-timetable 案A 到着）：紺の地に白と黄。出発の欄は今のまま */
+#v-ops .bdtt{--yl:#FFD23F;--dim:rgba(245,247,250,.55);--lab:#A9B7CB;background:#0E1E36;color:#F5F7FA;border-radius:20px;padding:14px 8px 10px;margin:0 -10px;box-shadow:0 10px 30px -10px rgba(14,30,54,.45)}
+:root[data-night=on] #v-ops .bdtt{background:#0B1626;box-shadow:inset 0 0 0 1px rgba(255,255,255,.06);--yl:#4ADE80}
+#v-ops .bdtt+.bdhead,#v-ops .bdtt+.wokey+.bdhead,#v-ops .bdtt+.wobox{margin-top:16px}
+#v-ops .bdtt .num{font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-.01em;color:inherit}
+#v-ops .bdtt .bcap{display:flex;align-items:baseline;justify-content:space-between;gap:8px;padding:0 6px 8px}
+#v-ops .bdtt .bcap b{font-size:18px;font-weight:800;letter-spacing:.08em;color:#fff}
+#v-ops .bdtt .bcap>span{font-size:12px;font-weight:700;color:var(--lab);text-align:right}
+#v-ops .bdtt .bcap .num{font-size:13px;color:#fff}
+#v-ops .bdtt .cols,#v-ops .bdtt .tt{display:grid;grid-template-columns:46px 36px minmax(0,1fr) 34px 34px 58px;column-gap:5px;align-items:center}
+#v-ops .bdtt .cols{padding:6px;border-radius:12px;background:#162B4A;color:var(--lab);font-size:12px;font-weight:700;line-height:1.25}
+#v-ops .bdtt .cols .c-g,#v-ops .bdtt .cols .c-st{text-align:center;white-space:nowrap;letter-spacing:-.04em}
+#v-ops .bdtt .ttl{list-style:none;margin:0;padding:0}
+#v-ops .bdtt .tt{min-height:54px;padding:7px 6px;border-radius:12px;color:#fff}
+#v-ops .bdtt .tt+.tt{margin-top:2px}
+#v-ops .bdtt .tt:nth-child(even){background:rgba(255,255,255,.035)}
+#v-ops .bdtt .c-t,#v-ops .bdtt .c-no{display:flex;flex-direction:column;line-height:1.1;min-width:0}
+#v-ops .bdtt .sch{font-size:18px;letter-spacing:-.03em}
+#v-ops .bdtt .chg{font-size:14px;color:var(--yl)}
+#v-ops .bdtt .chg.ok2{color:#fff;opacity:.75}
+#v-ops .bdtt .chg:empty{display:none}
+#v-ops .bdtt .c-no small{font-size:12px;font-weight:800;letter-spacing:.04em;color:var(--lab)}
+#v-ops .bdtt .c-no b{font-size:15px}
+#v-ops .bdtt .c-dst{min-width:0;line-height:1.2}
+#v-ops .bdtt .c-dst b{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;font-size:16px;font-weight:800;line-height:1.2;overflow:hidden;overflow-wrap:anywhere;color:inherit}
+#v-ops .bdtt .c-dst b.lg{font-size:13.5px}
+#v-ops .bdtt .c-dst b.xl{font-size:12.5px}
+#v-ops .bdtt .c-dst small{display:block;font-size:12px;font-weight:700;color:var(--lab);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#v-ops .bdtt .c-dst .wobtn{margin-top:3px}
+#v-ops .bdtt .c-eq{font-size:12px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-.02em;color:#C9D3E0;overflow:hidden}
+#v-ops .bdtt .c-g{text-align:center;font-size:17px;font-weight:800}
+#v-ops .bdtt .c-g .na{font-size:14px;font-weight:700;color:var(--lab)}
+#v-ops .bdtt .c-st{text-align:center;font-size:13px;font-weight:800;white-space:nowrap}
+#v-ops .bdtt .s-late .c-st{color:var(--yl)}
+#v-ops .bdtt .s-x .c-st [data-k=st]{display:inline-block;padding:2px 8px;border-radius:999px;background:var(--yl);color:#0E1E36}
+:root[data-night=on] #v-ops .bdtt .s-x .c-st [data-k=st]{color:#0B1626}
+#v-ops .bdtt .s-x .sch,#v-ops .bdtt .s-x .c-dst b,#v-ops .bdtt .s-x .c-no b,#v-ops .bdtt .s-x .c-g .num,#v-ops .bdtt .s-x .c-eq{color:var(--dim)}
+#v-ops .bdtt .s-gone,#v-ops .bdtt .s-gone .c-eq,#v-ops .bdtt .s-gone .c-st{color:var(--dim)}
+#v-ops .bdtt .s-est .c-st{color:var(--lab);font-weight:700}
+#v-ops .bdtt .s-est .c-st [data-k=st]{border-bottom:1.5px dotted var(--lab)}
+#v-ops .bdtt .nowl{position:relative;display:flex;justify-content:flex-end;align-items:center;height:28px;margin:4px 6px}
+#v-ops .bdtt .nowl span{position:relative;z-index:1;padding-left:8px;font-size:12px;font-weight:700;color:var(--yl)}
+#v-ops .bdtt .nowl .num{font-size:13px}
+#v-ops .bdtt .nowl::before{content:"";position:absolute;left:0;right:76px;top:50%;height:2px;border-radius:2px;background:var(--yl);opacity:.5}
+#v-ops .bdtt .hrl{margin:12px 6px 4px;font-size:12px;font-weight:800;letter-spacing:.06em;color:var(--lab)}
+#v-ops .bdtt .cols>span{font-size:12px;font-weight:700}
+#v-ops .bdtt .tthint{margin:10px 6px 4px;font-size:13px;color:var(--lab)}
+/* パタパタ（状況・変更の時刻が変わったときだけ。動きを減らす設定では動かさない） */
+#v-ops .bdtt .fch{display:inline-block;transform-origin:50% 50%;backface-visibility:hidden}
+#v-ops .bdtt .fch.go{animation:ttflip .34s cubic-bezier(.2,.8,.2,1) both}
+@keyframes ttflip{0%{transform:perspective(200px) rotateX(-92deg);opacity:.15}55%{transform:perspective(200px) rotateX(12deg);opacity:1}100%{transform:perspective(200px) rotateX(0)}}
+#v-ops .bdtt .tt.flash{animation:ttflash 1.6s ease-out 1 both}
+@keyframes ttflash{0%,40%{background:rgba(255,210,63,.16)}100%{background:transparent}}
+@media (prefers-reduced-motion:reduce){#v-ops .bdtt .fch.go,#v-ops .bdtt .tt.flash{animation:none}}
 #v-ops .bdchart .base{stroke:color-mix(in srgb,var(--op-sub) 40%,transparent);stroke-width:1}
 #v-ops .bdchart text{font-size:9px;fill:var(--op-mute);font-family:var(--gothic)}
 [data-palette="board"] #v-ops .bdchart rect{fill:#3B5C93}
@@ -15400,12 +15454,79 @@ function boardRel(t, now){
   if(m < 0) return `${-m}分前`;
   return m < 60 ? `あと${m}分` : `あと${Math.floor(m / 60)}時間${m % 60 ? (m % 60) + "分" : ""}`;
 }
+/* 案内板の「これから着く便」を時刻表に（11/26 本人の指示・design/board-timetable 案A 到着 a2-arr）。
+   紺の地に白と黄の字。列は 時刻（定刻／変更）・便名・出発地（経由）・機材・ゲート・状況。「いま」の線・時の区切り。
+   状況は 定刻・遅れ（15分以上）・到着済み・欠航・推定。状況か変更の時刻が変わったときだけ、その字をパタパタ（動きを減らす設定では置き換えるだけ）。
+   欠航の便は next_arr に入らないので、今日の遅れ・欠航（bad）から同じ幅（20分前〜3時間先）の欠航の到着を足す。
+   ゲート・経由はサーバーが返したときだけ（gate・via。データ担当に依頼中）。出発の欄は今のまま */
+const TT_PREV = new Map();   // 空港|便名|定刻 → 前に出した状況と変更の時刻（変わったときだけ動かす）
+const ttReduce = () => { try{ return matchMedia("(prefers-reduced-motion: reduce)").matches; }catch(e){ return false; } };
+const ttFlap = (text, go) => !go || !text ? esc(text) : Array.from(String(text)).map((c, i) => `<span class="fch go" style="animation-delay:${i * 45}ms">${esc(c)}</span>`).join("");
+// 1便を時刻表の1行の形に
+function ttRow(f, now){
+  const sched = Date.parse(f.sched), cancel = f.cancelled === true;
+  const act = f.actual || f.inferred, actT = Date.parse(act || ""), estT = Date.parse(f.est || ""), preT = Date.parse(f.predicted || "");
+  const t = Number.isFinite(actT) ? actT : Number.isFinite(estT) ? estT : Number.isFinite(preT) ? preT : sched;
+  const late = Number.isFinite(t) && Number.isFinite(sched) ? Math.round((t - sched) / 60000) : 0;
+  let st, label;
+  if(cancel){ st = "x"; label = "欠航"; }
+  else if(Number.isFinite(actT) && actT <= now){ st = "gone"; label = "到着済み"; }
+  else if(late >= 15){ st = "late"; label = "遅れ"; }
+  else if(!Number.isFinite(estT) && Number.isFinite(preT) || (!f.actual && f.inferred)){ st = "est"; label = "推定"; }
+  else { st = "ok"; label = "定刻"; }
+  // 変更の時刻：到着済みは実際の時刻、遅れ・早着・見込みは定刻と5分以上ちがうときだけ（欠航は出さない）
+  const chg = cancel ? "" : st === "gone" ? jstHM(new Date(t).toISOString()) : Math.abs(late) >= 5 ? jstHM(new Date(t).toISOString()) : "";
+  const no = String(f.flight || "").match(/^([A-Z0-9]{2})\s*(\d.*)$/i);
+  return { f, sched, st, label, chg, chgLate:late > 0 && st !== "gone", al:no ? no[1].toUpperCase() : "", num:no ? no[2] : String(f.flight || ""),
+    gate:f.gate || f.arr_gate || "", via:f.via ? placeAny(f.via) : "", key:`${BOARD_AP}|${f.flight}|${f.sched}` };
+}
+// 時刻表に出す便：next_arr（欠航を除いた便）＋ bad の欠航の到着（同じ幅・同じ国内線／国際線の絞り込み）。定刻の順
+function ttList(d, now){
+  const xs = (d.next_arr || []).slice(), seen = new Set(xs.map(f => `${f.flight}|${f.sched}`));
+  (Array.isArray(d.bad) ? d.bad : []).forEach(f => { const t = Date.parse(f.sched);
+    if(f.dir !== "arr" || f.cancelled !== true || !Number.isFinite(t) || t < now - 20 * 60000 || t > now + 3 * 3600000) return;
+    if(BOARD_KIND !== "all" && (BOARD_KIND === "intl") !== !!f.intl) return;
+    const k = `${f.flight}|${f.sched}`; if(seen.has(k)) return; seen.add(k); xs.push(f); });
+  return xs.map(f => ttRow(f, now)).sort((a, b) => (a.sched || 0) - (b.sched || 0) || String(a.f.flight).localeCompare(String(b.f.flight)));
+}
+function boardArrTT(d, now){
+  const rows = ttList(d, now), anim = !ttReduce(), first = !rows.some(r => TT_PREV.has(r.key));
+  const nowHM = jstHM(new Date(now).toISOString()), hourOf = t => Number(jstHM(new Date(t).toISOString()).slice(0, 2));
+  const nCan = (Array.isArray(d.bad) ? d.bad : []).filter(f => f.dir === "arr" && f.cancelled === true && (BOARD_KIND === "all" || (BOARD_KIND === "intl") === !!f.intl)).length;
+  const nArr = Number.isFinite(+d.arr_today) && d.arr_today != null ? +d.arr_today : null;
+  let out = "", nowDone = false, prevH = null;
+  rows.forEach((r, i) => {
+    if(!nowDone && r.sched > now){ nowDone = true; if(i > 0) out += `<li class="nowl" aria-hidden="true"><span>いま <b class="num">${nowHM}</b></span></li>`; }
+    const h = Number.isFinite(r.sched) ? hourOf(r.sched) : null;
+    if(i > 0 && h != null && prevH != null && h !== prevH) out += `<li class="hrl" aria-hidden="true">${h}時台</li>`;
+    prevH = h;
+    const p = TT_PREV.get(r.key), goSt = anim && !first && p && p.label !== r.label, goT = anim && !first && p && p.chg !== r.chg && !!r.chg;
+    TT_PREV.set(r.key, { label:r.label, chg:r.chg });
+    const f = r.f, place = esc(placeAny(f.other) || f.other || "");
+    const aria = `${Number.isFinite(r.sched) ? jstHM(f.sched) : ""} ${f.flight || ""} ${placeAny(f.other) || ""}から ${r.label}${r.chg ? `（${r.st === "gone" ? "到着" : "変更"} ${r.chg}）` : ""}${r.gate ? ` ゲート${r.gate}` : ""}`;
+    out += `<li class="tt s-${r.st}${(goSt || goT) ? " flash" : ""}" data-tt="${esc(f.flight || "")}" aria-label="${esc(aria)}">
+      <span class="c-t"><span class="sch num">${Number.isFinite(r.sched) ? jstHM(f.sched) : "—"}</span><span class="chg num${r.chgLate ? "" : " ok2"}" data-k="t2">${ttFlap(r.chg, goT)}</span></span>
+      <span class="c-no">${r.al ? `<small>${esc(r.al)}</small>` : ""}<b class="num">${esc(r.num)}</b></span>
+      <span class="c-dst"><b${place.length >= 6 ? ` class="xl"` : place.length >= 5 ? ` class="lg"` : ""}>${place}</b>${r.via ? `<small>${esc(r.via)}経由</small>` : f.intl ? `<small>国際線</small>` : ""}${woRowTag(f, now)}</span>
+      <span class="c-eq">${esc(f.aircraft || "")}</span>
+      <span class="c-g">${r.gate ? `<span class="num">${esc(r.gate)}</span>` : `<span class="na">—</span>`}</span>
+      <span class="c-st"><span data-k="st">${ttFlap(r.label, goSt)}</span></span></li>`;
+  });
+  if(rows.length && !nowDone) out += `<li class="nowl" aria-hidden="true"><span>いま <b class="num">${nowHM}</b></span></li>`;
+  const cap = [nArr != null ? `今日 到着 <span class="num">${nArr}</span>便` : "", Array.isArray(d.bad) ? `今日の欠航 <span class="num">${nCan}</span>便` : ""].filter(Boolean).join("・");
+  return `<section class="bdtt" aria-label="これから着く便の時刻表">
+    <div class="bcap"><b>到着</b><span>${cap}</span></div>
+    <div class="cols" aria-hidden="true"><span class="c-t">定刻<br>変更</span><span class="c-no">便名</span><span class="c-dst">出発地</span><span class="c-eq">機材</span><span class="c-g">ゲート</span><span class="c-st">状況</span></div>
+    ${rows.length ? `<ol class="ttl">${out}</ol>` : `<p class="tthint">この3時間に着く JAL・ANA の時刻表の${BOARD_KIND === "intl" ? "国際線の" : BOARD_KIND === "dom" ? "国内線の" : ""}便はありません。</p>`}
+  </section>`;
+}
 function boardHTML(d, fg){
   const now = Date.now(), list = (BOARD_DIR === "arr" ? d.next_arr : d.next_dep) || [], arr = BOARD_DIR === "arr";
   const hmS = t => new Date(t).toLocaleTimeString("ja-JP", { hour:"2-digit", minute:"2-digit" });
   const name = placeAny;
   const kind = f => f.actual ? ["実際", f.actual] : f.est ? ["見込み", f.est] : (f.inferred || f.predicted) ? ["推定", f.inferred || f.predicted] : ["定刻", f.sched];
-  const items = list.map(f => { const [k, t] = kind(f), past = Date.parse(f.t) <= now, late = Math.round((Date.parse(t) - Date.parse(f.sched)) / 60000);
+  const tt = arr ? boardArrTT(d, now) : "";
+  const items = arr ? "" : list.map(f => { const [k, t] = kind(f), past = Date.parse(f.t) <= now, late = Math.round((Date.parse(t) - Date.parse(f.sched)) / 60000);
     return `<li class="${past ? "past" : ""}"><span class="dot" aria-hidden="true"></span>
       <b>${esc(name(f.other))}<span class="nw">${arr ? "から" : "へ"}</span></b><span class="fl">${f.intl ? `<i class="intl">国際</i>` : ""}${esc(f.flight)}${f.aircraft ? "・" + esc(f.aircraft) : ""}</span>
       <span class="rel">${boardRel(f.t, now)}</span><span class="tm">${k} ${hmS(t)}${late >= 15 && k !== "定刻" ? `<em>${late}分遅れ</em>` : ""}</span>${woRowTag(f, now)}</li>`; }).join("");
@@ -15419,7 +15540,7 @@ function boardHTML(d, fg){
   return `<div class="bdhead"><h3>${arr ? "これから着く便" : "これから出る便"}</h3><div class="bdtabs" role="group" aria-label="到着と出発">
       <button data-board-dir="arr" aria-pressed="${arr}">到着</button><button data-board-dir="dep" aria-pressed="${!arr}">出発</button></div></div>
     <div class="bdtabs bdkind" role="group" aria-label="国内線と国際線">${[["all", "すべて"], ["dom", "国内線"], ["intl", "国際線"]].map(([k, l]) => `<button data-board-kind="${k}" aria-pressed="${BOARD_KIND === k}">${l}</button>`).join("")}</div>
-    ${items ? `<ol class="bdseq">${items}</ol>${items.includes('class="wobtn"') ? `<p class="wokey"><i class="wopin" aria-hidden="true"></i>ピンの札は、行き先の空港全体のようすです（この便のことではありません）。押すとくわしく出ます。</p>` : ""}` : `<p class="hint">この3時間に${arr ? "着く" : "出る"} JAL・ANA の時刻表の${BOARD_KIND === "intl" ? "国際線の" : BOARD_KIND === "dom" ? "国内線の" : ""}便はありません。</p>`}
+    ${arr ? tt : items ? `<ol class="bdseq">${items}</ol>` : `<p class="hint">この3時間に出る JAL・ANA の時刻表の${BOARD_KIND === "intl" ? "国際線の" : BOARD_KIND === "dom" ? "国内線の" : ""}便はありません。</p>`}${(arr ? tt : items).includes('class="wobtn"') ? `<p class="wokey"><i class="wopin" aria-hidden="true"></i>ピンの札は、${arr ? "出発地" : "行き先"}の空港全体のようすです（この便のことではありません）。押すとくわしく出ます。</p>` : ""}
     ${worldOpsHTML(d)}
     ${foreignHTML(fg, arr)}
     <div class="bdhead"><h3>今日の遅れ・欠航</h3><span class="bdsum">遅れ <b>${late}</b>便・欠航 <b>${cancel}</b>便</span></div>
