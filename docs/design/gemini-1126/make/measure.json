@@ -55,6 +55,27 @@
   "over": [],
   "hscroll": 0
  },
+ "g2c-after": {
+  "small": [],
+  "tiny": [],
+  "cut": [],
+  "over": [],
+  "hscroll": 0
+ },
+ "g2c-after-667": {
+  "small": [],
+  "tiny": [],
+  "cut": [],
+  "over": [],
+  "hscroll": 0
+ },
+ "g2c-after-n": {
+  "small": [],
+  "tiny": [],
+  "cut": [],
+  "over": [],
+  "hscroll": 0
+ },
  "g3-same": {
   "small": [],
   "tiny": [],
@@ -69,6 +90,13 @@
   "over": [],
   "hscroll": 0
  },
+ "g3-same-n": {
+  "small": [],
+  "tiny": [],
+  "cut": [],
+  "over": [],
+  "hscroll": 0
+ },
  "g4-small": {
   "small": [],
   "tiny": [],
@@ -77,6 +105,20 @@
   "hscroll": 0
  },
  "g4-small-667": {
+  "small": [],
+  "tiny": [],
+  "cut": [],
+  "over": [],
+  "hscroll": 0
+ },
+ "g4b-small-arrive": {
+  "small": [],
+  "tiny": [],
+  "cut": [],
+  "over": [],
+  "hscroll": 0
+ },
+ "g4b-small-arrive-667": {
   "small": [],
   "tiny": [],
   "cut": [],

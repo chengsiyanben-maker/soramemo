@@ -35,7 +35,27 @@ html,body{overflow:hidden}
 .tag{display:inline-flex;align-items:center;gap:6px;min-height:28px;padding:0 12px;border-radius:999px;font-size:13px;font-weight:800}
 .tag.live{background:rgba(37,99,235,.10);color:#1D4ED8}
 .tag.live i{width:8px;height:8px;border-radius:50%;background:#2563EB;box-shadow:0 0 0 3px rgba(37,99,235,.18)}
-.tag.cxl{background:rgba(17,24,39,.06);color:var(--strong)}
+.tag.cxl{background:#fff;color:var(--strong);box-shadow:inset 0 0 0 1.5px var(--strong)}
+.tag.wait{background:rgba(17,24,39,.06);color:var(--strong)}
+.tag.wait i{width:8px;height:8px;border-radius:50%;box-shadow:inset 0 0 0 2px var(--strong)}
+:root[data-night=on] .tag.wait{background:rgba(220,227,234,.08);color:#E5E7EB}
+:root[data-night=on] .tag.wait i{box-shadow:inset 0 0 0 2px #E5E7EB}
+:root[data-night=on] .tag.cxl{background:transparent!important;box-shadow:inset 0 0 0 1.5px #E5E7EB}
+.aroute{display:flex;align-items:center;gap:10px;margin-top:10px}.aroute .aln{flex:1;position:relative;height:24px;color:var(--gold)}
+.aroute .aln::before{content:"";position:absolute;left:0;right:0;top:50%;border-top:2px dashed rgba(249,250,251,.35)}
+.aroute .aln svg{position:absolute;left:50%;top:50%;width:22px;height:22px;transform:translate(-50%,-50%) rotate(45deg);background:var(--deep);padding:1px}
+.cds.dk{color:#F9FAFB}.cds.dk small{color:var(--deep-sub)}
+.fact{margin-top:12px;font-size:18px;font-weight:800;color:var(--strong)}
+.foot2{display:flex;gap:8px;margin-top:12px}.foot2 .pill{flex:1;min-height:48px;justify-content:center}
+.okc{width:30px;height:30px;border-radius:50%;background:rgba(21,128,61,.12);color:var(--ok);display:inline-flex;align-items:center;justify-content:center}.okc svg{width:18px;height:18px;stroke-width:2.4}
+:root[data-night=on] .okc{background:rgba(74,222,128,.16)}
+.fly b.big{font-size:17px;color:var(--strong)}
+.kpi{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}.kpi div{display:flex;flex-direction:column;gap:4px}.kpi .k{font-size:13px;font-weight:700;color:var(--mute)}.kpi .num{font-size:26px}
+.box2{display:flex;align-items:center;gap:10px;margin-top:14px;padding:10px 12px;border-radius:12px;background:#F1F3F6}
+.box2 div{flex:1;display:flex;align-items:center;gap:8px;flex-wrap:wrap}.box2 .k{font-size:13px;font-weight:700;color:#5F6672}.box2 b{color:var(--strong);font-size:15px;display:inline-flex;align-items:center;gap:4px}.box2 .note{color:#5F6672}
+:root[data-night=on] .box2{background:#232830}:root[data-night=on] .box2 .k,:root[data-night=on] .box2 .note{color:#AEB9C6}
+.pill.wide{width:100%;min-height:48px;justify-content:center;margin-top:12px}
+@media (max-height:700px){.kpi,.box2{margin-top:8px}.pill.wide{margin-top:8px}.kpi .num{font-size:22px}.fly .route{margin-top:6px}}
 :root[data-night=on] .tag.live{background:rgba(74,222,128,.12);color:#4ADE80}
 :root[data-night=on] .tag.live i{background:#4ADE80;box-shadow:0 0 0 3px rgba(74,222,128,.2)}
 :root[data-night=on] .tag.cxl{background:rgba(220,227,234,.08);color:#E5E7EB}
@@ -246,44 +266,57 @@ CHIP_HND = '<span class="chip in" style="white-space:nowrap"><i></i>羽田の範
 # ───── ① 搭乗中・到着印待ち ─────
 def MORE(h):  # シートを上へ引くと続きが出るカード（測るときは切れに数えない）
     return h.replace('class="card', 'class="more card', 1)
-def fly(dest=True, foot_btn='搭乗しなかった'):
+# 2版（11/26 午後）：Gemini の29往復目の5つと、本人がホームを案B（黒いカード＋半券）に決めたことを入れた
+#  札は「出発の印あり・到着待ち」（見送り・見学でも気にならない）／消える時刻は出さない（着く見込み＋3時間、便が分からなければ12時間で静かに閉じる）
+#  着いたら「右へ引いて到着印をもらう」1つだけ（案B の半券と同じ動き）。便の確定・選び直しは押したあとの完了シートへ
+#  欠航は事実だけ＋「振替便を選ぶ」「今回は乗らない」／シートが小さいときは、別の空港の範囲に入ったときだけ少し上げて半券を見せる
+TAG = '<span class="tag wait"><i></i>出発の印あり・到着待ち</span>'
+def fly(dest=True):
     r = ('<div class="r"><span class="cd">CTS</span><span class="nm">新千歳（便から）</span></div>' if dest else
          '<div class="r"><span class="cd q">？</span><span class="nm">着いた空港で決まります</span></div>')
-    fl = ('<div class="fl"><span class="al jl">JL</span><b>JL503</b><span>09:45 着の見込み</span><span class="note">（航空会社の運航情報）</span></div>' if dest else
-          '<div class="fl"><button type="button" class="pill sm">乗る便を選ぶ%s</button><span class="note">羽田 08:00〜09:30 発の候補から</span></div>' % ic('chev'))
-    return ('<div class="card fly"><div class="row"><span class="tag live"><i></i>搭乗中・到着印待ち</span><span class="sp"></span>'
-            '<span class="note">羽田の印 08:02</span></div>'
+    fl = ('<div class="fl"><span class="al jl">JL</span><b>503</b><span>09:45 着の見込み</span><span class="note">（航空会社の運航情報）</span></div>' if dest else
+          '<div class="fl"><button type="button" class="pill sm">乗る便を選ぶ%s</button><span class="note">選ばなくても記録できます</span></div>' % ic('chev'))
+    return ('<div class="card fly"><div class="row">%s<span class="sp"></span><span class="note">羽田の印 08:02</span></div>'
             '<div class="route"><div><span class="cd">HND</span><span class="nm">羽田</span></div><div class="ln">%s</div>%s</div>%s'
             '<p class="msg">着いた空港でチェックインすると、羽田からのフライトになります</p>'
-            '<div class="foot"><span class="note">このカードは 16:02 に消えます（印から8時間）</span>'
-            '<button type="button" class="pill sm">%s</button></div></div>') % (ic('plane'), r, fl, foot_btn)
+            '<div class="foot" style="justify-content:flex-end"><button type="button" class="pill sm">今回は乗らない</button></div></div>') % (TAG, ic('plane'), r, fl)
 
-FLY_MINI = ('<div class="card fly mini"><div class="row"><span class="tag live"><i></i>搭乗中</span>'
+FLY_MINI = ('<div class="card fly mini"><div class="row"><span class="tag wait"><i></i>到着待ち</span>'
             '<span class="cds">HND<small>→</small>CTS</span><span class="sp"></span><span class="note">JL503・09:45 着</span></div></div>')
 
-ARRIVE = ('<div class="card fly"><div class="row"><span class="tag live"><i></i>新千歳に着きました</span><span class="sp"></span>'
-          '<span class="note">羽田の印 08:02</span></div>'
-          '<div class="route"><div><span class="cd">HND</span><span class="nm">羽田 08:02</span></div><div class="ln">%s</div>'
-          '<div class="r"><span class="cd">CTS</span><span class="nm">新千歳 いま</span></div></div>'
-          '<button type="button" class="bigarr">%s新千歳で到着印を押す</button>'
-          '<p class="msg" style="text-align:center">羽田 → 新千歳 819km を JL503 として記録します</p>'
-          '<div class="foot" style="justify-content:center"><button type="button" class="pill sm">便を選び直す</button>'
-          '<button type="button" class="pill sm">あとで</button></div></div>') % (ic('plane'), ic('land'))
+def arrive(mini=False):
+    top = ('<div class="top"><div class="row"><span class="lb">新千歳に着きました</span><span class="sp"></span><span class="lb">羽田の印 08:02</span></div>'
+           '<div class="aroute"><span class="flip"><span>H</span><span>N</span><span>D</span></span><span class="aln">%s</span>'
+           '<span class="flip"><span>C</span><span>T</span><span>S</span></span></div></div>') % ic('plane')
+    if mini:
+        top = ('<div class="top" style="padding:12px 16px"><div class="row"><span class="lb">新千歳に着きました</span><span class="sp"></span>'
+               '<span class="cds dk">HND<small>→</small>CTS</span></div></div>')
+    low = ('<div class="stubrow" role="slider" aria-label="右へ引いて到着印をもらう"><span class="kn">%s</span>'
+           '<span>右へ引いて到着印をもらう<small>羽田からのフライトになります</small></span></div>') % ic('arrow')
+    return '<div class="bp">%s%s</div>' % (top, low)
 
-SAME = ('<div class="card fly"><div class="row"><span class="tag cxl">まだ羽田にいます</span><span class="sp"></span>'
+AFTER = ('<div class="card fly"><div class="row"><span class="okc">%s</span><b class="big">到着印をもらいました</b><span class="sp"></span><span class="note">10:01</span></div>'
+         '<div class="route"><div><span class="cd">HND</span><span class="nm">羽田 08:02</span></div><div class="ln">%s</div>'
+         '<div class="r"><span class="cd">CTS</span><span class="nm">新千歳 10:01</span></div></div>'
+         '<div class="kpi"><div><span class="k">この区間</span><span class="num">819<span class="u">km</span></span></div>'
+         '<div><span class="k">空の上の時間（今年）</span><span class="num">42<span class="u">時間</span></span></div></div>'
+         '<div class="box2"><div><span class="k">便</span><b><span class="al jl">JL</span> 503</b><span class="note">運航情報から</span></div>'
+         '<button type="button" class="pill sm">選び直す</button></div>'
+         '<button type="button" class="pill dark wide">閉じる</button></div>') % (ic('check'), ic('plane'))
+
+SAME = ('<div class="card fly"><div class="row"><span class="tag cxl">欠航</span><span class="sp"></span>'
         '<span class="note">羽田の印 08:02</span></div>'
-        '<div class="route"><div><span class="cd">HND</span><span class="nm">羽田</span></div><div class="ln">%s</div>'
-        '<div class="r"><span class="cd">CTS</span><span class="nm">新千歳（便から）</span></div></div>'
-        '<div class="fl"><span class="al jl">JL</span><b>JL503</b><span>欠航</span><span class="note">（航空会社の運航情報 10:12）</span></div>'
-        '<p class="msg">欠航や取りやめのときは「搭乗しなかった」で閉じます。羽田の印はそのまま残ります</p>'
-        '<div class="foot"><button type="button" class="pill sm">別の便に乗る</button><span class="sp" style="flex:1"></span>'
-        '<button type="button" class="pill dark sm">搭乗しなかった</button></div></div>') % ic('plane')
+        '<p class="fact">JL503 は欠航になりました</p><p class="note">航空会社の運航情報 10:12</p>'
+        '<div class="foot2"><button type="button" class="pill dark">振替便を選ぶ</button><button type="button" class="pill">今回は乗らない</button></div>'
+        '<p class="note" style="margin-top:8px">どちらでも羽田の印はそのまま残ります</p></div>')
 
-add('g1-boarding.html', 'G1 搭乗中・到着印待ち（便が分かる）', mapw('AIR') + topbar(CHIP_N) + sheet(fly() + MORE(B.NEXT), 'm', 420) + tabs())
-add('g1b-nofl.html', 'G1b 搭乗中・便が分からない', mapw('AIR', arc=False) + topbar(CHIP_N) + sheet(fly(dest=False) + MORE(B.NEXT), 'm', 480) + tabs())
-add('g2-arrive.html', 'G2 別の空港に着いた・到着印を大きく', mapw('CTS') + topbar(CHIP_CTS) + sheet(ARRIVE + MORE(B.NOW3.replace('羽田', '新千歳')), 'm', 470) + tabs())
-add('g3-same.html', 'G3 同じ空港に戻った・欠航', mapw('HND', arc=True) + topbar(CHIP_HND) + sheet(SAME + MORE(B.NOW3), 'm', 440) + tabs())
-add('g4-small.html', 'G4 シート小のとき', mapw('AIR') + topbar(CHIP_N) + sheet(FLY_MINI, 's', 150) + tabs())
+add('g1-boarding.html', 'G1 出発の印あり・到着待ち（便が分かる）', mapw('AIR') + topbar(CHIP_N) + sheet(fly() + MORE(B.NEXT), 'm', 400) + tabs())
+add('g1b-nofl.html', 'G1b 到着待ち・便が分からない', mapw('AIR', arc=False) + topbar(CHIP_N) + sheet(fly(dest=False) + MORE(B.NEXT), 'm', 420) + tabs())
+add('g2-arrive.html', 'G2 別の空港に着いた・半券1つだけ', mapw('CTS') + topbar(CHIP_CTS) + sheet(arrive() + MORE(B.NOW3.replace('羽田', '新千歳')), 'm', 330) + tabs())
+add('g2c-after.html', 'G2c 到着印のあと（便の確定はここ）', mapw('CTS') + topbar(CHIP_CTS) + sheet(AFTER, 'm', 450) + tabs())
+add('g3-same.html', 'G3 欠航（事実＋振替便）', mapw('HND', arc=True) + topbar(CHIP_HND) + sheet(SAME + MORE(B.NOW3), 'm', 330) + tabs())
+add('g4-small.html', 'G4 シート小・空の上', mapw('AIR') + topbar(CHIP_N) + sheet(FLY_MINI, 's', 150) + tabs())
+add('g4b-small-arrive.html', 'G4b シート小・着いたら少し上がる', mapw('CTS') + topbar(CHIP_CTS) + sheet(arrive(mini=True), 's', 250) + tabs())
 
 # ───── ② 0件の画面の文言 ─────
 def empty(icn, h, p, btn, extra=''):

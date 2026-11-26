@@ -6,7 +6,7 @@ from playwright.async_api import async_playwright
 HERE = os.path.dirname(os.path.abspath(__file__)); D = os.path.dirname(HERE); PNG = D + '/png'
 os.makedirs(PNG, exist_ok=True); URL = 'file://' + D + '/'
 S = json.load(open(HERE + '/screens.json', encoding='utf-8'))
-NIGHT = {'g1-boarding', 'g2-arrive', 'f2-form', 'r1-repeat', 'c2-outdoor'}
+NIGHT = {'g1-boarding', 'g2-arrive', 'g2c-after', 'g3-same', 'f2-form', 'r1-repeat', 'c2-outdoor'}
 MEASURE = r'''(() => {
   const vis = e => { const r = e.getBoundingClientRect(); const s = getComputedStyle(e); return r.width > 0 && r.height > 0 && s.visibility !== 'hidden' && s.display !== 'none' && +s.opacity !== 0; };
   const small = [], tiny = [], cut = [], over = [];

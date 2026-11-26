@@ -37,7 +37,7 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer;-webki
 svg.ic{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
 .num{font-weight:800;font-variant-numeric:tabular-nums;color:var(--strong);letter-spacing:-.01em}
 .u{font-size:13px;color:var(--mute);font-weight:700;margin-left:2px;letter-spacing:0}
-:root{--gold:#E9C46A;--gold-ink:#111827;--deep:#0F1B2D;--deep-sub:#A7B0BC;--sheet:#F4F5F7}
+:root{--gold:#E9C46A;--gold-ink:#111827;--deep:#0F1B2D;--deep-sub:#A7B0BC;--sheet:#EEF1F5}
 :root[data-night=on]{--gold:#D9B45C;--deep:#1B1F26;--deep-sub:#AEB9C6;--sheet:#0F141B}
 .ph{position:relative;width:100%;height:100%;overflow:hidden}
 .map{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:top center}

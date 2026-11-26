@@ -3,8 +3,8 @@
 import os, json
 HERE = os.path.dirname(os.path.abspath(__file__)); D = os.path.dirname(HERE)
 S = json.load(open(HERE + '/screens.json', encoding='utf-8'))
-NIGHT = {'g1-boarding', 'g2-arrive', 'f2-form', 'r1-repeat', 'c2-outdoor'}
-GROUPS = [('g', '① 搭乗中・到着印待ちのカード', '出発の印から8時間、ホームのシートのいちばん上。別の空港の範囲に入ったら「到着印を押す」を大きく'),
+NIGHT = {'g1-boarding', 'g2-arrive', 'g2c-after', 'g3-same', 'f2-form', 'r1-repeat', 'c2-outdoor'}
+GROUPS = [('g', '① 出発の印あり・到着待ちのカード（2版）', '2版：札は「出発の印あり・到着待ち」、消える時刻は出さない（着く見込み＋3時間・便が分からなければ12時間で静かに閉じる）。着いたら案B の半券を引く1つだけ、便の確定は押したあと。欠航は事実＋振替便。シート小は着いたときだけ少し上がる'),
           ('e', '② 0件の画面の文言', '何の場所かを1行＋どうすると埋まるか1行＋押すもの1つ。E0 が今の文と案の表'),
           ('c', '③ 屋外で読めるか', 'C1 が今の色の測り（4.5:1 の目安）と案、C2 が色だけにしない見本'),
           ('f', '④ 意見を送る', 'マイページの目次の最後に1行。3択＋自由文、位置は送らない'),
