@@ -129,7 +129,7 @@ async def main():
         b = await p.chromium.launch(args=['--use-gl=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'])
         c, pg, errs = await open3d(b, 'day', PORT)
         r = await pg.evaluate("['B788','B789','B78X','B77W','B763','B738','B38M','A359','A21N','A321','A320','A20N','E190','DH8D','B744'].map(t => a3HdKey(t) || '-').join(' ')")
-        check('細かい形の機種（787・777・767・737・A350・A321・A320。ほかは前の形）', r == '787 787 787 777 767 737 737 350 a321 a321 320 320 - - -', r)
+        check('細かい形の機種（787・777・767・737・A350・A321・A320・E170・E190（11/26 3d-real）。ほかは前の形）', r == '787 787 787 777 767 737 737 350 a321 a321 320 320 e190 - -', r)
         r = await pg.evaluate("Object.fromEntries(Object.keys(A3_HD).map(k => [k, a3HdGeo(k).tri]))")
         check('最高の質：細かい形の三角形は1機種 3万より多い（1機種で1回作り、同じ機種で使い回す）', all(30000 < v < 60000 for v in r.values()), r)
         # 寸法：翼幅と長さの割合（FAA の表）。形の外側の箱で測る
