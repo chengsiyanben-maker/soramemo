@@ -3891,6 +3891,44 @@ dialog.neardlg .dlg{padding:14px 12px 28px}
 #v-home .bp-stub .s i{font-style:normal;font-size:16px;font-weight:800}
 #v-home .bp-stub.off{background:var(--h3-off-bg);color:var(--h3-off-ink);border-left-color:#9CA3AF;cursor:pointer}
 #v-home .bp-stub.off .s{color:var(--h3-off-ink)}
+/* 空港にいるとき（11/26 本人「B」・design/home-airport 案B の B1・B1b・B2・B3）：今の黒いカード＋半券を下の横長に。つまみを右へ引く。
+   ほかの状態（範囲の外・ログイン前・一時停止・位置がまだ）は今までの縦の半券のまま */
+#v-home .bp-stub .kn,#v-home .bp-stub .rt{display:none}
+#v-home .bpass[data-lay="row"]{flex-direction:column;min-height:0}
+#v-home .bpass[data-lay="row"] .bp-main{border-radius:24px 24px 0 0;padding:12px 16px 10px}
+#v-home .bpass[data-lay="row"] .bp-main .nearest .label{font-size:13px;font-weight:700;letter-spacing:.02em}
+#v-home .bpass[data-lay="row"] .bp-main .nearest{display:grid;grid-template-columns:auto minmax(0,1fr);column-gap:14px;align-items:center}
+#v-home .bpass[data-lay="row"] .bp-main .nearest .nlab{grid-column:1/-1}
+#v-home .bpass[data-lay="row"] .nrow{display:contents}
+#v-home .bpass[data-lay="row"] .bp-main .nrow .flap:not(:empty),#v-home .bpass[data-lay="row"] .nrow .ktag{grid-column:1;grid-row:2/4;margin:2px 0 0;align-self:center}
+#v-home .bpass[data-lay="row"] .nrow .flap:empty{display:none}
+#v-home .bpass[data-lay="row"] .nrow .nmore{grid-column:2;grid-row:4;justify-self:start;margin:6px 0 0}
+#homeSheet:not([data-snap="full"]) .bpass[data-lay="row"] .nrow .nmore{display:none}   /* 空港にいるときの「ほか○つ」は、シートを引き上げた位置だけ（最初の位置で半券の高さを増やさない） */
+#v-home .bpass[data-lay="row"] .bp-main .nearest .name{grid-column:2;grid-row:2;align-self:end;font-size:18px;margin-top:2px}
+#v-home .bpass[data-lay="row"] .bp-main .nearest .dist{grid-column:2;grid-row:3;align-self:start}
+#v-home .bpass[data-lay="row"] .bp-main .nrow .ktag[hidden]{display:none}
+#v-home .bpass[data-lay="row"] .bp-main .nearest .dist .vis{font-weight:700}
+#v-home .bpass[data-lay="row"] .bp-main .nearest .dist .vis b{color:#fff;font-size:16px;font-weight:800;margin-right:2px}
+#v-home .bpass[data-lay="row"] .bp-main .nearest .dist .first{display:inline-flex;align-items:center;min-height:26px;padding:0 10px;border-radius:999px;background:rgba(74,222,128,.16);color:#86EFAC;font-size:13px;font-weight:800}
+#v-home .bpass[data-lay="row"] .bp-stub{position:relative;width:auto;height:64px;flex-direction:row;justify-content:flex-start;align-items:center;gap:0;padding:0 16px 0 84px;border:0;border-radius:0 0 24px 24px;box-shadow:none;transform-origin:0 0;text-align:left}
+#v-home .bpass[data-lay="row"] .bp-stub::before{content:"";position:absolute;left:12px;right:12px;top:0;border-top:2px dashed rgba(15,27,45,.55)}
+#v-home .bpass[data-lay="row"] .bp-stub .v,#v-home .bpass[data-lay="row"] .bp-stub .s{display:none}
+#v-home .bpass[data-lay="row"] .bp-stub .kn{position:absolute;left:12px;top:8px;width:60px;height:48px;border-radius:999px;background:#0F1B2D;color:var(--stub);display:flex;align-items:center;justify-content:center;transition:transform .25s cubic-bezier(.2,.8,.2,1)}
+#v-home .bpass[data-lay="row"] .bp-stub .kn svg{width:24px;height:24px;stroke-width:2.2}
+#v-home .bpass[data-lay="row"] .bp-stub.dragging .kn{transition:none}
+#v-home .bpass[data-lay="row"] .bp-stub .rt{display:block;min-width:0;line-height:1.35;transition:opacity .2s ease}
+#v-home .bpass[data-lay="row"] .bp-stub .rt b{display:block;font-size:16px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#v-home .bpass[data-lay="row"] .bp-stub .rt small{display:block;font-size:13px;font-weight:700;color:var(--stub-sub)}
+#v-home .bpass[data-lay="row"] .bp-stub.net{background:#C9B78A}
+:root[data-night="on"] #v-home .bpass[data-lay="row"] .bp-stub.net{background:#7C6B45}
+#v-home .bpass[data-done="1"] .bp-stub{display:none}
+#v-home .bpdone{display:flex;align-items:center;gap:10px;min-height:56px;padding:0 16px;border-radius:0 0 24px 24px;background:var(--h3-hero);color:#F9FAFB;box-shadow:inset 0 1px 0 rgba(255,255,255,.08);font-size:15px;font-weight:800}
+#v-home .bpdone[hidden]{display:none}
+#v-home .bpdone .ck{flex:none;width:28px;height:28px;border-radius:50%;background:rgba(74,222,128,.16);color:#4ADE80;display:flex;align-items:center;justify-content:center}
+#v-home .bpdone .ck svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+#v-home .bpdone small{margin-left:auto;font-size:13px;font-weight:700;color:var(--h3-hero-sub)}
+#v-home .bpdone small.q{display:block;margin:0;font-size:13px}
+@media (prefers-reduced-motion:reduce){#v-home .bpass[data-lay="row"] .bp-stub,#v-home .bpass[data-lay="row"] .bp-stub .kn,#v-home .bpass[data-lay="row"] .bp-stub .rt{transition:none}}
 /* 今日の数字：最初の位置は1行の帯、引き上げると3枚 */
 #v-home .hstrip{display:flex;align-items:center;height:48px;margin-top:8px;padding:0 4px 0 16px;border-radius:22px;background:var(--h3-card);box-shadow:var(--h3-shadow);color:var(--h3-ink)}
 #v-home .hstrip[hidden]{display:none}
@@ -4289,7 +4327,8 @@ html:has(dialog[open]),html:has(dialog[open]) body{overscroll-behavior:none}
           <div class="dist" id="nearDist">半券を切ると、現在地からいちばん近い空港を調べます。</div>
         </div>
       </div>
-      <button class="bp-stub" id="checkin" aria-label="チェックイン（半券を右へ引いて切ります。押すと確かめてから切ります）"><span class="v">チェックイン</span><span class="s" id="stubSub"><i aria-hidden="true">→</i> 右へ引いて<br>印をもらう</span></button>
+      <button class="bp-stub" id="checkin" aria-label="チェックイン（半券を右へ引いて切ります。押すと確かめてから切ります）"><span class="v">チェックイン</span><span class="s" id="stubSub"><i aria-hidden="true">→</i> 右へ引いて<br>印をもらう</span><span class="kn" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></span><span class="rt" id="stubRt"><b>右へ引いて印をもらう</b><small>半券を切るとチェックイン</small></span></button>
+      <div class="bpdone" id="bpDone" hidden role="status"></div>
     </div>
     <p class="stubmsg" id="stubMsg" hidden aria-hidden="true"></p>
     <div class="nvloc" id="nvLocOff" hidden role="status"></div>   <!-- iPhone のアプリ：位置を許可しなかった人（design/ios-app 2版 I1c） -->
@@ -7685,7 +7724,7 @@ function ckFlightBtn(flight, st, id){
 async function ckSend(p, o){
   if(qLoad().length) await flushQueue(true);           // 保留分を先に送る（順番が逆にならないように）
   const r = navigator.onLine === false ? null : await sendCheckin(p, false);
-  if(!r){ track("checkin_queued"); const off = navigator.onLine === false; enqueue(p, off ? "offline" : "busy"); o.rec.queued = true; ckFlightBtn(o.flight, "queue"); toast("端末に保存しました。つながり次第送ります"); return; }
+  if(!r){ track("checkin_queued"); const off = navigator.onLine === false; enqueue(p, off ? "offline" : "busy"); o.rec.queued = true; ckFlightBtn(o.flight, "queue"); homeState(); toast("端末に保存しました。つながり次第送ります"); return; }
   if(!r.ok){
     track("checkin_fail", r.reason); if(r.reason === "server") reportClientError("checkin", r.message);
     S.checkins = S.checkins.filter(x => x !== o.rec); if(o.flight) S.flights = S.flights.filter(x => x !== o.flight);   // 先に出したハンコを取り消す（サーバーには何も残っていない）
@@ -7830,6 +7869,7 @@ function homeState(){
   ck.setAttribute("aria-label", st === "guest" ? "チェックイン（ログインすると使えます。押すとログインの画面を開きます）" : st === "out" ? "チェックイン（判定範囲に入ると切れます。押すと位置を調べ直します）"
     : st === "paused" ? "チェックイン（一時停止中）" : "チェックイン（半券を右へ引いて切ります。押すと確かめてから切ります）");
   $("stubSub").innerHTML = st === "guest" ? "ログイン<br>すると使える" : st === "out" ? "範囲に入る<br>と切れる" : st === "paused" ? "一時停止中" : '<i aria-hidden="true">→</i> 右へ引いて<br>印をもらう';
+  bpRow(st === "in" ? n : null);
   if(NATIVE){ nvGeoApply(); if(!NV_LW_DONE) nvLocWhyMaybe(); }   // iPhone のアプリ：位置の説明（I1）を1回・許可しなかった人は半券の代わりに I1c
   const gate = $("homeGate"), strip = $("homeStrip"), layoutChanged = gate.hidden === guest;
   gate.hidden = !guest; strip.hidden = guest;
@@ -7837,6 +7877,43 @@ function homeState(){
   $("openSettings").setAttribute("aria-label", guest ? "ログイン・登録" : "マイページ");
   if((layoutChanged || was !== st) && $("homeSheet").sheetGo) $("homeSheet").sheetGo($("homeSheet").dataset.snap || "half");
 }
+// 空港にいるときの半券（11/26 本人「B」・design/home-airport 案B）：範囲の中なら、黒いカードの下に横長の半券（つまみを右へ引く）。
+//   上の行は「いま空港にいます」と「○回目の訪問・前回 ○月○日」（はじめてなら「はじめての空港」）。
+//   同じ場所で印を押してから30分（RULE.sameAirportMin）は半券の代わりに「本日チェックイン済み ○時○分」の行。電波がないときは色を落として「電波が戻ったら、あとで送ります」
+const bpDay = t => new Date(t + 9 * 3600e3).toISOString().slice(0, 10);
+const bpMD = t => { const d = new Date(t + 9 * 3600e3); return `${d.getUTCMonth() + 1}月${d.getUTCDate()}日`; };
+const bpHM = t => { const d = new Date(t + 9 * 3600e3); return `${String(d.getUTCHours()).padStart(2, "0")}:${String(d.getUTCMinutes()).padStart(2, "0")}`; };
+let BP_T = 0;
+function bpVisits(a, now){
+  const mine = S.checkins.filter(x => x.a === a.id), days = [...new Set(mine.map(x => bpDay(x.t)))].sort(), today = bpDay(now);
+  const before = days.filter(d => d < today), inToday = days.includes(today);
+  const prev = before.length ? Math.max(...mine.filter(x => bpDay(x.t) === before[before.length - 1]).map(x => x.t)) : null;
+  return { n: before.length + 1, first: !before.length && !inToday, prev };
+}
+function bpRow(n){
+  const b = $("bpass"), ck = $("checkin"), dn = $("bpDone"); if(!b || !ck || !dn) return;
+  clearTimeout(BP_T);
+  if(!n){ delete b.dataset.lay; delete b.dataset.done; dn.hidden = true; ck.classList.remove("net"); return; }
+  const now = Date.now(), a = n.a, tid = n.term ? n.term.id : null, [kn] = nearKind(a);
+  const last = [...S.checkins].reverse().find(x => x.a === a.id && (x.term || null) === tid);
+  // デモは時刻を進めて押す（demoNow）ので、済みの行は出さない
+  const left = last && !demo && last.t <= now ? RULE.sameAirportMin * 60e3 - (now - last.t) : -1, done = left > 0;
+  b.dataset.lay = "row"; if(done) b.dataset.done = "1"; else delete b.dataset.done;
+  $("nearLabel").textContent = `いま${n.term ? n.term.name : a.kind ? kn : "空港"}にいます`;   // ターミナルが分かるときは「いま第1ターミナルにいます」（下の行を1行に収める）
+  const v = bpVisits(a, now), el = $("nearDist");
+  el.innerHTML = (v.first ? `<span class="first">はじめての${a.kind ? esc(kn) : "空港"}</span>` : `<span class="vis"><b>${v.n}</b>回目の訪問${v.prev ? `・前回 ${bpMD(v.prev)}` : ""}</span>`)
+    + (NEAR_XK.includes(a.kind) ? `<span class="nbook">${ZKX_TITLE}に入ります</span>` : "");
+  dn.hidden = !done;
+  if(done){
+    // 電波がなく端末に保存しただけの印は「済み」と言い切らない（最後に決めるのはサーバー。design/home-airport-alt の文）
+    dn.innerHTML = `<span class="ck" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></span><span>${last.queued ? "チェックインを保存しました<small class=\"q\">電波が戻ったら送ります</small>" : "本日チェックイン済み"}</span><small>${bpHM(last.t)}</small>`;
+    BP_T = setTimeout(homeState, left + 1000);   // 30分たったら半券に戻す
+  }
+  const net = navigator.onLine === false; ck.classList.toggle("net", net);
+  $("stubRt").innerHTML = `<b>右へ引いて印をもらう</b><small>${net ? "電波が戻ったら、あとで送ります" : "半券を切るとチェックイン"}</small>`;
+  ck.setAttribute("aria-label", `チェックイン（${placeName(a, n.term)}。半券を右へ引いて切ります。押すと確かめてから切ります${net ? "。電波が戻ったら、あとで送ります" : ""}）`);
+}
+addEventListener("online", () => homeState()); addEventListener("offline", () => homeState());
 // 印のときの振動（11/26 本人「消音モードじゃないなら振動」・PM の決め方）：ブラウザから消音モードは読めないので、
 //   印がサーバーで確定したときだけ短く1回（Android の Chrome など。端末の振動の設定に従う）。iPhone の Safari は仕組みがないので何もしない。
 //   マイページの「表示と色」の「印のときに振動」で切れる（はじめは ON・この端末だけ）。音は入れない。動きを減らす設定とは別
@@ -10138,8 +10215,17 @@ const TEAR_AT = 56, TEAR_MIN = 28, TEAR_AXIS = 10, TEAR_XY = 0.6, TEAR_FLICK_V =
 const tearAt = room => Math.max(TEAR_MIN, Math.min(TEAR_AT, Math.round(room / 2)));
 (() => { const b = $("checkin"), wrap = $("bpass"); if(!b || !wrap) return;
   let x0 = 0, y0 = 0, dx = 0, axis = "", drag = false, moved = false, need = TEAR_AT, pts = [];
-  const set = () => { b.style.transformOrigin = ""; b.style.transform = dx ? `translate(${dx}px,${Math.round(dx * .12)}px) rotate(${Math.round(dx / 10)}deg)` : ""; };
-  const reset = () => { dx = 0; axis = ""; pts = []; b.style.transform = ""; b.style.transformOrigin = ""; };
+  const row = () => wrap.dataset.lay === "row", rm = () => { try{ return matchMedia("(prefers-reduced-motion: reduce)").matches; }catch(e){ return false; } };
+  const kn = () => b.querySelector(".kn"), rt = () => b.querySelector(".rt");
+  // 横長（空港にいるとき）：つまみを指に合わせて右へ（半券の幅まで）、字は薄く。縦（今まで）：半券ごと傾けて動かす。
+  //   動きを減らす設定（11/26 PM の指示）では何も動かさず、切れる所まで引いたら字を「離すとチェックイン」に替える
+  const set = () => {
+    const ready = dx >= need; b.classList.toggle("ready", ready);
+    if(rm()){ const r = rt(); if(row() && r) r.firstElementChild.textContent = ready ? "離すとチェックイン" : "右へ引いて印をもらう"; return; }
+    if(row()){ const k = kn(), r = rt(), max = Math.max(0, b.clientWidth - 84); if(k) k.style.transform = dx ? `translateX(${Math.min(dx, max)}px)` : ""; if(r) r.style.opacity = dx ? String(Math.max(.15, 1 - dx / 120)) : ""; return; }
+    b.style.transformOrigin = ""; b.style.transform = dx ? `translate(${dx}px,${Math.round(dx * .12)}px) rotate(${Math.round(dx / 10)}deg)` : ""; };
+  const reset = () => { dx = 0; axis = ""; pts = []; b.style.transform = ""; b.style.transformOrigin = ""; b.classList.remove("ready");
+    const k = kn(), r = rt(); if(k) k.style.transform = ""; if(r){ r.style.opacity = ""; if(r.firstElementChild && r.firstElementChild.textContent === "離すとチェックイン") r.firstElementChild.textContent = "右へ引いて印をもらう"; } };
   const st = () => wrap.dataset.state || "idle", off = () => ["guest", "out", "paused"].includes(st());
   // 指を離す前の 100ms の右への速さ（px/ms）。時刻は指の動きの時刻（e.timeStamp）で数える
   const speed = () => { if(pts.length < 2) return 0; const z = pts[pts.length - 1], r = pts.filter(q => z.t - q.t <= 100), a = r[0]; return z.t > a.t ? (z.x - a.x) / (z.t - a.t) : 0; };
@@ -10151,7 +10237,7 @@ const tearAt = room => Math.max(TEAR_MIN, Math.min(TEAR_AT, Math.round(room / 2)
     pts.push({ x:e.clientX, t:e.timeStamp }); if(pts.length > 12) pts.shift();
     if(!axis && d >= TEAR_AXIS) axis = Math.abs(mx) >= Math.abs(my) * TEAR_XY ? "x" : "y";   // 縦に動かしたときは切らない（右へ引くだけ）
     if(d > 6) moved = true;
-    if(axis === "x" && !off()){ dx = Math.max(0, Math.min(170, mx)); set(); } });
+    if(axis === "x" && !off()){ dx = Math.max(0, Math.min(row() ? Math.max(170, b.clientWidth) : 170, mx)); set(); } });
   const end = () => { if(!drag) return; drag = false; b.classList.remove("dragging");
     const flick = axis === "x" && !off() && dx >= TEAR_FLICK_D && speed() >= TEAR_FLICK_V;
     if(axis === "x" && !off() && (dx >= need || flick)) tear(); else { const m = moved; reset(); if(!m) tap(); } };
@@ -10160,10 +10246,10 @@ const tearAt = room => Math.max(TEAR_MIN, Math.min(TEAR_AT, Math.round(room / 2)
   // 調べている間は引いた所で止めて待ち、押せなかったときは戻して小さく揺らし、理由を半券のすぐ下に出す（ckNote）
   async function tear(){
     track("tear", 1); ckNote("");
-    b.style.transform = "translate(64px,8px) rotate(6deg)";
+    if(!rm() && !row()) b.style.transform = "translate(64px,8px) rotate(6deg)";   // 横長は、つまみを引いた所で止めて待つ
     const before = S.checkins.length;
     try{ await checkin(); } finally {
-      if(S.checkins.length > before){ b.style.transform = "translate(210px,40px) rotate(26deg)"; b.style.opacity = "0"; setTimeout(() => { b.style.opacity = ""; reset(); }, 1200); }
+      if(S.checkins.length > before){ if(rm()){ reset(); } else { b.style.transform = row() ? "translate(40px,90px) rotate(8deg)" : "translate(210px,40px) rotate(26deg)"; b.style.opacity = "0"; setTimeout(() => { b.style.opacity = ""; reset(); }, 1200); } }
       else { reset(); wrap.classList.remove("no"); void wrap.offsetWidth; wrap.classList.add("no"); ckNote(); }
     }
   }

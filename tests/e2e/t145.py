@@ -37,7 +37,7 @@ async def main():
             tag = f'[{H}]'
             t = await pg.inner_text('#nearPin')
             check(tag + ' K1：いちばん近い（羽田）の右に「ピン止め」（していない形）', 'ピン止め' in t and 'ピン止め中' not in t, t)
-            r = await pg.evaluate("(() => { const a = $('nearPin').getBoundingClientRect(), b = $('nearLabel').getBoundingClientRect(), s = $('checkin').getBoundingClientRect(); return { same: Math.abs((a.top + a.height / 2) - (b.top + b.height / 2)) < 8, inCard: a.right <= s.left + 1, h: Math.round(a.height) }; })()")
+            r = await pg.evaluate("(() => { const a = $('nearPin').getBoundingClientRect(), b = $('nearLabel').getBoundingClientRect(), s = $('checkin').getBoundingClientRect(); return { same: Math.abs((a.top + a.height / 2) - (b.top + b.height / 2)) < 8, inCard: $('bpass').dataset.lay === 'row' ? a.bottom <= s.top + 1 : a.right <= s.left + 1, h: Math.round(a.height) }; })()")
             check(tag + ' K1：札は見出しの行・半券に重ならない', r['same'] and r['inCard'], r)
             check(tag + ' K1h：ピン止めが0のときは「ピン止めした空港」を出さない', await pg.evaluate("$('pinHome').hidden"))
             if H == 844: await pg.screenshot(path=os.path.join(SHOTS, '01-K1-not-844.png'))

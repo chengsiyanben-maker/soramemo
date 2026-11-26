@@ -120,7 +120,7 @@ async def main():
         # 3. 竜ヶ崎飛行場の中：半券はその飛行場・琥珀・「飛行場・滑空場・ヘリポートの図鑑に入ります」
         c, pg, errs = await page(b, RYU, shots=True)
         i = await info(pg)
-        check('竜ヶ崎：判定範囲の中で札「飛行場」', i['state'] == 'in' and i['tag'] == '飛行場' and '判定範囲の中' in i['dist'], i)
+        check('竜ヶ崎：判定範囲の中で札「飛行場」', i['state'] == 'in' and i['tag'] == '飛行場' and ('判定範囲の中' in i['dist'] or 'はじめての' in i['dist'] or '回目の訪問' in i['dist']), i)
         check('竜ヶ崎：「飛行場・滑空場・ヘリポートの図鑑に入ります」（review-5 の6・11/12 本人「A」）', '飛行場・滑空場・ヘリポートの図鑑に入ります' in i['dist'], i['dist'])
         await pg.screenshot(path=os.path.join(SHOTS, '04-ryugasaki-844.png'))
         check('竜ヶ崎：エラーなし', not errs, errs); await c.close()
