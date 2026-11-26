@@ -1,6 +1,12 @@
 # チェックイン担当の帳面
 
 ## いま持っている仕事
+- **11/26 定時の回（PM の指示「13時45分 本人が4つの画面案をすべて案Bに」の ①）**：checkin/tabs-b・下書き **PR #271**（b6a15720・報告 docs/pm/report-tabs-b.md・写真 docs/pm/shots-tabs-b/）。main（594dd3ee）から。見張りを付けた
+  - 下のタブ帯の「運用」→「いまの空港」。並びと出し方は今のまま（画面案 B1 どおり：ホーム・図鑑・フライト・いまの空港・修行）。画面の名前として出す所（aria-label・専用ページの戻る・表示の編集・マイページのタイル・構成の説明・提案の行・ログインの案内・位置の説明・構成のカードの「いまの空港を見る ›」・傾向とゴーアラウンドの戻る）もそろえた。「北風運用」など滑走路の意味の「運用」はそのまま
+  - 振動：showStamp・タブの長押し・roBind の3か所の navigator.vibrate を外した
+  - 変えた関数：showStamp・タブ帯の長押しの即時関数・roBind・vsName・loSec・loOffText・機体の側の行（pRow・VS.undo）・renderPersonaCard・マイページのタイル（TL）・構成の提案（TAB）・nvLocWhyHTML・openTrend・trendHTML・gaSetHTML・gaEvHTML・gaWxHTML。定数 TAB_NAME・LO_VIEW_SEC・LO_BLK_SEC・PERSONAS
+  - テスト：t208 を足した。t118・t119・t124・t138・t183・t189 の字を直した（成功）。t148・t195・tests/ops 成功
+  - 本人（PM）に聞くこと：CLAUDE.md は「ホーム・図鑑・フライト・いまの空港・マイページ」だが画面案 B1 は5つ目が修行（マイページは右上のピル）→ 画面案どおりにした。マイページをタブにするなら修行を外すか／長押し・並べ替えの振動も外してよいか
 - **11/26 手動の回（PM の指示「10時45分 羽田の空港ページの不合格の直し・checkin/hnd-fix」）**：checkin/hnd-fix・下書き **PR #264**（298b19c8・報告 docs/pm/report-hnd-fix.md・写真 docs/pm/shots-hnd-fix/）。main（594dd3ee）から。見張りを付けた。並びは変えていない（× の後ろのぼかしと、読めないときの一言が増えた）
   - ⑦：.nowfoot>.linkbtn2 を縮めない・天気の枠は折れてよく単位は .wxu で小さく・12px 未満をなくす（.wxgrid small・.apitem small・.a3cr・.hndops .opshead span・.apnow の span と .src）・.nowterms と .pinpill の当たりを ::after で上下4px・送ったら #dAirportBody に .cxsc（.cxbar::before のぼかし、.cx は position:relative で上に）
   - ⑥：NOW_MEMO（soramemo.now.last・8空港・24時間）。loadNow が失敗したら NOW.fail・NOW.prevAt で前の値、renderNow は .nowfail（○時○分 に読んだ情報です・もう一度 data-now-retry）。前の値がなくても見出しを残す。運用の一覧は OH_STAT_MEMO（soramemo.ops.stats・同じ日・6時間）、ohCardHTML で前の数を .prev と札「約○分前」
@@ -703,6 +709,7 @@
 - 確認コードは6けた。メールは Gmail、Supabase の送信上限は1時間100通
 
 ## 次にやること
+- 【11/26 tabs-b】PR #271：PM の反映を待つ。入る前に t208・t118・t119・t124・t138・t183・t189・t148・tests/ops を流す。本人の答え（マイページをタブに入れるか）で直す。次は ② checkin/home-stub（空港にいるときのホームの半券・#234 案B。押すだけでも印にできる道を残す・動きを減らす設定では動かさない）→ ③ checkin/stamp-card-b → ④ checkin/onboarding-b（出す前に PM が本人に見せる）。始める前に origin のブランチを見る
 - 【11/26 hnd-fix】PR #264：PM の自動の反映を待つ。入る前に t207・t142・t202・t120・t121・t148・t159・t162・t163・t167・t184・t72・t194・tests/ops を流す。#263（a3-reg）とは src の別の所（3D とは CSS の最後のかたまりが近いだけ）。あとから入る方で web/ を作り直す。①（いまの羽田を一番上に）は design の画面案が来たら作る。残り：3D の webglcontextlost（PM が決めたら）・古い気象通報の「○時間前の観測」（データ担当の age_min が来たら）・遅れの欄の「読み込めませんでした」・予報の行を時刻順に
 - 【11/26 a3-reg】PR #263：PM の自動の反映を待つ。入る前に t205・t142・t159〜t163・t165・t166・t181・t190・t202・tests/ops を流す。本人の答え（いない機体の書き方・いるときだけ出すか）で直す。撮る人用が「3Dで見る」に data-ap3d-reg を付けたら t205 の作り物のボタンと同じ形か見る。②（図鑑の運航中／終了）は画面案が来たら作る（spbTerm(reg) が { st, txt, tag } を返す・LIVERY_TERM）
 - 【次の回】PM の指示がなければ、帳面の積みで残っているものを上から見る（いまは新しい積みなし。修行の sgRecordPlan は修行担当の分）
@@ -842,6 +849,7 @@
 - tests/ops は手元では npm の playwright にブラウザがないので、全体に入っている playwright をつないで流した（すべて成功）
 
 ## ほかの担当への依頼
+- 【11/26 撮る人用へ（PM から satsuei.md に写してほしい・PR #271）】下のタブの「運用」が「いまの空港」になった。spSelHTML・spInfoHTML・spCondHTML・spSetHTML の戻るの字「運用」、spHomeHTML の「運用を見る ›」と「運用タブの『撮る人』で変えられます」を「いまの空港」にそろえてほしい（#271 が main に入ってから）
 - 【11/26 撮る人用へ（PM から satsuei.md に写してほしい・PR #264・改善担当 kaizen-hnd-done-1126 の 3）】spInboundHTML の「この3時間」：飛んでいる機体の行の時刻の欄が「—」になる。「着陸まで約○分」か「飛行中」を置いて予定の行と同じ形に、「着陸に向かっている」に（推定）を付ける、羽田の地上にいる機体は上の箱に「羽田にいます（推定）」で。行が縦に落ちる崩れは土台の CSS（ul.spin li>button）で直した
 - 【11/26 撮る人用へ（PM から satsuei.md に写してほしい・PR #263）】依頼①の入口を作った：`openAp3dReg(reg)`、ボタンなら属性 `data-ap3d-reg="JA01XJ"` を付けるだけ（クリックの受け手は土台にある）。位置が届いたらその機体を「追う」で開く。いない機体は全体のまま一言と「ほかを追う」。#263 が main に入ってからつなぐ。依頼②（図鑑の運航中／終了）は画面案を待つ
 - 【11/26 デザイン担当へ（PM が決める）】図鑑の特別塗装機に「運航中／終了」の切り替えを足すなら画面案がほしい（撮る人用の spbTerm を使う形）
