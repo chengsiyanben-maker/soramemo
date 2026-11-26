@@ -8,12 +8,14 @@
       then(res){ const d = {data: rows(), error:null}; if(window.__netDelay) setTimeout(() => res(d), window.__netDelay); else res(d); },   /* __netDelay：遅い電波のテスト（11/25 stamp-fast） */
       maybeSingle(){ if(!db[table]) return Promise.resolve({data:null, error:{message:'relation does not exist'}}); return Promise.resolve({data: db[table][0] || null, error:null}); },
       upsert(row, opt){ if(opt && opt.onConflict === 'user_id,client_id'){   /* 送り直しの二重防止（data/idem）。__noCidCol：移行200 の前のサーバー */
-          window.__idemUps = (window.__idemUps||0) + 1; if(window.__noCidCol) return Promise.resolve({error:{code:'PGRST204', message:"Could not find the 'client_id' column of '" + table + "' in the schema cache"}});
+          window.__idemUps = (window.__idemUps||0) + 1; if(window.__mfNoCol && table === 'manual_flights' && (Array.isArray(row) ? row : [row]).some(r => 'flight_no' in r)) return Promise.resolve({error:{code:'PGRST204', message:"Could not find the 'flight_no' column of 'manual_flights' in the schema cache"}});   /* 便名の列がまだないサーバー（11/25 flight-suggest） */
+          if(window.__noCidCol) return Promise.resolve({error:{code:'PGRST204', message:"Could not find the 'client_id' column of '" + table + "' in the schema cache"}});
           (Array.isArray(row) ? row : [row]).forEach(r => { if(r.client_id && db[table].some(x => x.client_id === r.client_id)) return; db[table].push(Object.assign({id: db[table].length+1}, r)); });
           if(window.__upLost){ window.__upLost--; return Promise.resolve({error:{message:'Failed to fetch'}}); }   /* 書けたのに返事だけ届かない */
           return Promise.resolve({error:null}); }
         db[table] = db[table].filter(r => r.user_id !== row.user_id); db[table].push(JSON.parse(JSON.stringify(row))); window.__upserts = (window.__upserts||0) + 1; return Promise.resolve({error:null}); },
-      insert(row){ if(window.__noCidCol && (Array.isArray(row) ? row : [row]).some(r => 'client_id' in r)) return Promise.resolve({error:{code:'PGRST204', message:'no client_id'}}); (Array.isArray(row) ? row : [row]).forEach(r => db[table].push(Object.assign({id: db[table].length+1}, r))); window.__inserts = (window.__inserts||0) + 1; return Promise.resolve({error:null}); },
+      insert(row){ if(window.__mfNoCol && table === 'manual_flights' && (Array.isArray(row) ? row : [row]).some(r => 'flight_no' in r)) return Promise.resolve({error:{message:'column "flight_no" of relation "manual_flights" does not exist'}});
+        if(window.__noCidCol && (Array.isArray(row) ? row : [row]).some(r => 'client_id' in r)) return Promise.resolve({error:{code:'PGRST204', message:'no client_id'}}); (Array.isArray(row) ? row : [row]).forEach(r => db[table].push(Object.assign({id: db[table].length+1}, r))); window.__inserts = (window.__inserts||0) + 1; return Promise.resolve({error:null}); },
       delete(){ return { eq(k, v){ db[table] = db[table].filter(r => r[k] !== v); return Promise.resolve({error:null}); } }; } };
     return api; }
   window.supabase = { createClient(){ return {
