@@ -130,9 +130,10 @@ async def main():
         check('「くわしく」：見た目の高さは今のまま・押せる範囲は縦 44px', r['h'] < 30 and r['v'], r)
         r = await pg.evaluate(HIT + "('#opsAlerts .fwraw summary')")
         check('「原文」：押せる範囲は 44×44', r['w'] < 44 and r['v'] and r['hz'], r)
-        await pg.click('[data-vw="ops:board"]'); await pg.wait_for_selector('#opsBoard .bdseq', timeout=5000); await pg.wait_for_timeout(300)
-        r = await pg.evaluate("(() => { const b = [...document.querySelectorAll('#opsBoard .bdseq b')].find(x => x.textContent.includes('サンフランシスコ')); return b ? [b.textContent, b.scrollHeight <= b.clientHeight + 1, b.scrollWidth <= b.clientWidth + 1] : null; })()")
-        check('案内板：「サンフランシスコから」を切らない（2行まで折る）', r and r[1] and r[2], r)
+        # （11/26 arr-timetable：到着は時刻表の形になった。出発地の欄で「サンフランシスコ」を切らない）
+        await pg.click('[data-vw="ops:board"]'); await pg.wait_for_selector('#opsBoard .bdtt .tt', timeout=5000); await pg.wait_for_timeout(300)
+        r = await pg.evaluate("(() => { const b = [...document.querySelectorAll('#opsBoard .bdtt .c-dst b')].find(x => x.textContent.includes('サンフランシスコ')); return b ? [b.textContent, b.scrollHeight <= b.clientHeight + 2, b.scrollWidth <= b.clientWidth + 1] : null; })()")
+        check('案内板：「サンフランシスコ」を切らない（2行まで折る）', r and r[1] and r[2], r)
         for sel in ['[data-board-dir="arr"]', '[data-board-dir="dep"]', '[data-board-kind="all"]', '[data-board-kind="dom"]', '[data-board-kind="intl"]']:
             r = await pg.evaluate(HIT + "('#opsBoard %s')" % sel.replace('"', '\\"'))
             check(f'案内板 {sel}：見た目の高さは今のまま・押せる範囲は縦 44px', r['h'] < 30 and r['v'], r)

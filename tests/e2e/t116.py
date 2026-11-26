@@ -67,7 +67,8 @@ async def main():
         # 1. 範囲の中（ログイン中・羽田）
         c, pg, errs = await page(b, HND, login=True, shots=True)
         check('範囲の中：形', await state(pg) == 'in', await state(pg))
-        check('範囲の中：空港名と「判定範囲の中」', '東京国際空港' in await pg.inner_text('#nearName') and '判定範囲の中' in await pg.inner_text('#nearDist'))
+        nd = await pg.inner_text('#nearDist')   # 11/26 home-stub：範囲の中は「いま空港にいます」と訪問の回数（横長の半券）
+        check('範囲の中：空港名と「判定範囲の中」', '東京国際空港' in await pg.inner_text('#nearName') and any(w in nd for w in ('判定範囲の中', 'はじめての空港', '回目の訪問')) and await pg.inner_text('#nearLabel') == 'いま空港にいます')
         check('範囲の中：半券は琥珀で「右へ引いて印をもらう」', '右へ引いて' in await pg.inner_text('#stubSub') and not await pg.evaluate('$("checkin").classList.contains("off")'))
         check('範囲の中：数字の帯が出て、ログインの案内は出ない', await pg.is_visible('#homeStrip') and not await pg.is_visible('#homeGate'))
         check('範囲の中：上の段は「マイページ」', (await pg.inner_text('#openSettings')).strip() == 'マイページ')

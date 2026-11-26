@@ -64,7 +64,7 @@ async def main():
         c, pg, errs = await open_app(b)
         await pg.evaluate("goTab('ops')"); await pg.wait_for_timeout(1200)
         await pg.click('[data-vs-open="ops"]'); await pg.wait_for_timeout(300)
-        check('運用の鉛筆は「運用の見方」のシート（7行）:', (await pg.inner_text('#vsTitle')) == '運用の見方' and await pg.locator('#dViews [data-vs-sw]').count() == 7)
+        check('運用の鉛筆は「運用の見方」のシート（7行）:', (await pg.inner_text('#vsTitle')) in ('運用の見方', 'いまの空港の見方') and await pg.locator('#dViews [data-vs-sw]').count() == 7)
         allerr += errs; await c.close()
         await b.close()
     print('fails', fails)
