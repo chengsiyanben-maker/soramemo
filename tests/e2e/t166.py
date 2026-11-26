@@ -78,7 +78,9 @@ async def open3d(b, sky, port, ground=True):
     await pg.evaluate("a3Poll()"); await pg.wait_for_timeout(2000)
     return c, pg, errs
 async def view(pg, v, yaw=0):
-    await pg.evaluate("([v, y]) => { A3.view = v; A3.yaw = y; A3.card = false; a3Pills(); a3Sheet(); A3.dirty = true; }", [v, yaw]); await pg.wait_for_timeout(1200)
+    t0 = await pg.evaluate("([v, y]) => { A3.view = v; A3.yaw = y; A3.card = false; a3Pills(); a3Sheet(); A3.dirty = true; return Date.now(); }", [v, yaw]); await pg.wait_for_timeout(1200)
+    # 重いとき（同時に流す）は 1.2 秒でもまだ新しい視点で描いていないことがある（11/27 t166-fix：管制塔の近い機体が 0 機になった）。新しい視点で2こま描くまで待つ
+    await pg.evaluate("t => new Promise(ok => { let n = 0; const f = () => { if(A3.drawn > t && ++n >= 2 && !A3.dirty) ok(); else { A3.dirty = true; setTimeout(f, 120); } }; f(); })", t0)
 SE = 1.25 * math.pi   # 管制塔から南東（第2ターミナルの駐機場と誘導路。この時間の地上の機体が多い側）
 INFO = "(() => { A3.r.render(A3.scene, A3.cam); const i = A3.r.info.render; return { tri: i.triangles, calls: i.calls }; })()"
 # 機体の画面の上の長さ（px）：機首と尾を画面に写した距離
@@ -122,7 +124,7 @@ async def main():
         check('地上の機体は札を出さない', not any(t['id'].startswith('g') for t in tags), [t['t'] for t in tags])
         check('札の字は13px以上', tags and all(t['fs'] >= 13 for t in tags), [t['fs'] for t in tags])
         ov = any(a['r']['left'] < b2['r']['right'] and a['r']['right'] > b2['r']['left'] and a['r']['top'] < b2['r']['bottom'] and a['r']['bottom'] > b2['r']['top'] for i, a in enumerate(tags) for b2 in tags[i + 1:])
-        check('札は重ならない', not ov, [t['t'] for t in tags])
+        check('札は重ならない', not ov, [(t['t'], [round(t['r'][k]) for k in ('left', 'top', 'right', 'bottom')]) for t in tags])
         info['new_all_day'] = await pg.evaluate(INFO)
         await pg.screenshot(path=os.path.join(SHOTS, 'new_all_day.png'))
         # 札を押すとその機体を選ぶ（下のシートもその機体のカード）
@@ -140,12 +142,20 @@ async def main():
         await pg.screenshot(path=os.path.join(SHOTS, 'new_tower_day.png'))
         await view(pg, 'tower', SE); info['new_towerSE_day'] = await pg.evaluate(INFO); await pg.screenshot(path=os.path.join(SHOTS, 'new_towerSE_day.png'))
         await view(pg, 'tower')
-        # 管制塔から見えている地上の機体（シートの上）を、景色の中で押す
-        gid = await pg.evaluate("(() => { const top = $('a3Sheet').getBoundingClientRect().top - $('a3Stage').getBoundingClientRect().top; const g = [...A3.objs.entries()].filter(([id, o]) => !a3Air(o.p) && o.sx != null && o.sy > 160 && o.sy < top - 160).sort((a, b) => a[1].cd - b[1].cd); return g.length ? [g[0][0], g[0][1].sx, g[0][1].sy] : null; })()")
+        # 11/27 t166-fix：こまの間が長い（重い端末・同時に流す）とき、答えの位置のまま描く地上の機体（走行中の速さつき）が前へずれていた（押す所から外れて選ばれない）。
+        #   1.2 秒おきのこまを6回まねて、地上の機体の描く位置が答えの位置から動かないことを確かめる
+        dr = await pg.evaluate("""(() => { let t = Date.now(), mx = 0, who = null;
+          for(let i = 0; i < 6; i++){ t += 1200; const ps = a3Planes(t); a3Sync(ps, t);
+            for(const p of ps){ if(a3Air(p) || (p.k && p.k.mv)) continue; const o = A3.objs.get(p.id), [x, z] = a3XZ(p.lat, p.lon), d = Math.hypot(o.g.position.x - x, o.g.position.z - z); if(d > mx){ mx = d; who = p.id; } } }
+          A3.dirty = true; return [Math.round(mx * 10) / 10, who]; })()""")
+        check('こまの間が長くても、止まって描く地上の機体は前へずれない（1m 未満）', dr[0] < 1, dr)
+        await pg.wait_for_timeout(1700)   # 6回まねた時刻のずれ（smooth は 5 秒より前の状態を捨てて合わせ直す）が落ち着くまで
+        # 管制塔から見えている地上の機体（シートの上）を、景色の中で押す。選ぶのと押すのは同じ評価の中で（間にこまが入って位置が変わらないように）
+        gid = await pg.evaluate("""(() => { A3.r.render(A3.scene, A3.cam); a3Labels(a3Planes(Date.now()).filter(p => A3.objs.has(p.id)));
+          const top = $('a3Sheet').getBoundingClientRect().top - $('a3Stage').getBoundingClientRect().top; const g = [...A3.objs.entries()].filter(([id, o]) => !a3Air(o.p) && o.sx != null && o.sy > 160 && o.sy < top - 160).sort((a, b) => a[1].cd - b[1].cd);
+          if(!g.length) return null; const r = $('a3Stage').getBoundingClientRect(), [id, o] = g[0]; a3Tap({ clientX: r.left + o.sx, clientY: r.top + o.sy }); return [id, o.sx, o.sy]; })()""")
         check('管制塔から見える地上の機体がある', gid is not None, gid)
-        if gid:
-            st = await pg.evaluate("(() => { const r = $('a3Stage').getBoundingClientRect(); return [r.left, r.top]; })()")
-            await pg.evaluate("([x, y]) => a3Tap({ clientX: x, clientY: y })", [st[0] + gid[1], st[1] + gid[2]]); await pg.wait_for_timeout(1500)
+        if gid: await pg.wait_for_timeout(1500)
         r = await pg.evaluate("({ sel: A3.sel, fl: (document.querySelector('#a3Sheet .a3fl') || {}).textContent, now: [...document.querySelectorAll('#a3Sheet .a3grid div')].map(d => d.innerText).join('|'), tag: [...document.querySelectorAll('#a3Labels .a3tag')].filter(t => t.dataset.a3Pick === A3.sel).map(t => t.innerText) })")
         check('地上の機体を押すと便名の札とカード（いまの様子つき）', gid and r['sel'] == gid[0] and len(r['tag']) == 1 and ('走行中' in r['now'] or '止まっている' in r['now']), r)
         await pg.screenshot(path=os.path.join(SHOTS, 'new_tower_day_pick.png'))
