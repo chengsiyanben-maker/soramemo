@@ -78,7 +78,11 @@ async def main():
         check('13 横にはみ出さない（390）', ov[0] >= 0 and ov[1] <= ov[3] and ov[2] <= ov[3], ov)
         # 状況が変わった（NH52 が遅れに）→ その行の状況と変更の時刻だけパタパタ
         STATE['nh52_late'] = True
-        await pg.evaluate("BOARD_AT = 0; renderBoard()"); await pg.wait_for_timeout(500)
+        await pg.evaluate("BOARD_AT = 0; renderBoard()"); await pg.wait_for_timeout(160)
+        # 写真：パタパタの途中（NH52 が「定刻」→「遅れ」に変わる所）
+        await pg.evaluate("document.querySelector('#opsBoard .bdtt .tt[data-tt=NH52]').scrollIntoView({block:'center'})")
+        await pg.locator('#opsBoard .bdtt').screenshot(path=os.path.join(SHOTS, 'arr-390-flap.png'), animations='allow')
+        await pg.wait_for_timeout(400)
         rows2 = await pg.evaluate(ROWS); by2 = {r['f']: r for r in rows2}
         check('14 変わった行だけパタパタ（状況と変更の時刻の字）', by2['NH52']['st'] == '遅れ' and by2['NH52']['go'] >= 4 and 'flash' in by2['NH52']['cls'] and all(r['go'] == 0 for r in rows2 if r['f'] != 'NH52'), [(r['f'], r['go']) for r in rows2])
         await pg.evaluate("BOARD_AT = 0; renderBoard()"); await pg.wait_for_timeout(400)
