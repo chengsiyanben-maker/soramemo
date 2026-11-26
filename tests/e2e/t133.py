@@ -58,17 +58,18 @@ async def main():
         b = await p.chromium.launch(); allerr = []
         # 1〜3 案内板
         c, pg, errs, reqs = await page(b)
-        reqs.clear(); await pg.evaluate("goTab('ops')"); await pg.wait_for_selector('#opsBoard .bdseq', timeout=8000); await pg.wait_for_timeout(500)
+        reqs.clear(); await pg.evaluate("goTab('ops')"); await pg.wait_for_selector('#opsBoard .bdtt .tt', timeout=8000); await pg.wait_for_timeout(500)
         check('案内板で world_airport_ops を1回読む', collections.Counter(reqs)['/rest/v1/rpc/world_airport_ops'] == 1, dict(collections.Counter(reqs)))
         await pg.click('#opsBoard [data-board-dir="arr"]'); await pg.wait_for_timeout(200)
-        lis = await pg.evaluate("[...document.querySelectorAll('#opsBoard .bdseq:not(.foreign) li')].map(li => ({t: li.innerText, tag: li.querySelector('.wobtn') ? li.querySelector('.wobtn').innerText : ''}))")
+        # （11/26 arr-timetable：到着は時刻表の行。便名は data-tt）
+        lis = await pg.evaluate("[...document.querySelectorAll('#opsBoard .bdtt .tt')].map(li => ({t: li.dataset.tt + ' ' + li.innerText, tag: li.querySelector('.wobtn') ? li.querySelector('.wobtn').innerText : ''}))")
         by = lambda k: next((x for x in lis if k in x['t']), {'t':'', 'tag':''})
         check('SFO から着く便に「到着の間引き中 FAA」の札', '到着の間引き中' in by('NH7')['tag'] and 'FAA' in by('NH7')['tag'], by('NH7'))
         check('着いた便（LAX）には札を出さない', by('JL61')['t'] != '' and by('JL61')['tag'] == '', by('JL61'))
         check('便の数の札（ICN 欠航）は便の列に出さない', by('NH862')['tag'] == '' and '欠航3便' not in by('NH862')['t'], by('NH862'))
         check('国内線の便に札を出さない', by('JL501')['tag'] == '', by('JL501'))
         t = await pg.inner_text('#opsBoard')
-        check('札があるときはピンの説明の1行', 'ピンの札は、行き先の空港全体のようすです' in t)
+        check('札があるときはピンの説明の1行（到着は出発地）', 'ピンの札は、出発地の空港全体のようすです' in t)
         await pg.click('#opsBoard [data-board-dir="dep"]'); await pg.wait_for_timeout(200)
         lis = await pg.evaluate("[...document.querySelectorAll('#opsBoard .bdseq:not(.foreign) li')].map(li => ({t: li.innerText, tag: li.querySelector('.wobtn') ? li.querySelector('.wobtn').innerText : ''}))")
         check('LAX へ出る便には、いちばん重い「地上待機中」（出発の遅れより重い）', '地上待機中' in by('JL62')['tag'] and '出発の遅れ' not in by('JL62')['tag'], by('JL62'))
@@ -118,13 +119,13 @@ async def main():
         await pg.evaluate("goTab('ops')"); await pg.wait_for_selector('#opsBoard .wobox', timeout=8000); await pg.wait_for_timeout(300)
         ov = await pg.evaluate("document.documentElement.scrollWidth <= window.innerWidth + 1")
         check('375 の幅で横にはみ出さない', ov)
-        await pg.evaluate("document.querySelector('#opsBoard .bdseq').scrollIntoView({block:'start'}); scrollBy(0, -120)"); await pg.wait_for_timeout(200)
+        await pg.evaluate("document.querySelector('#opsBoard .bdtt').scrollIntoView({block:'start'}); scrollBy(0, -120)"); await pg.wait_for_timeout(200)
         await pg.screenshot(path=os.path.join(WORK, 't133_board_667.png'))
         allerr += errs; await c.close()
         # 5 取れないとき・滑走路の見方
         for w, label in [([], '空'), ('fail', '失敗'), ({'source':'FAA NAS Status','note':NOTE,'airports':[]}, '空港なし')]:
             c, pg, errs, reqs = await page(b, wops=w)
-            await pg.evaluate("goTab('ops')"); await pg.wait_for_selector('#opsBoard .bdseq', timeout=8000); await pg.wait_for_timeout(400)
+            await pg.evaluate("goTab('ops')"); await pg.wait_for_selector('#opsBoard .bdtt .tt', timeout=8000); await pg.wait_for_timeout(400)
             t = await pg.inner_text('#opsBoard')
             check(f'取れないとき（{label}）は札も欄も出さない', '行き先の海外の空港のいま' not in t and await pg.locator('#opsBoard .wobtn').count() == 0 and 'これから' in t)
             allerr += errs; await c.close()
