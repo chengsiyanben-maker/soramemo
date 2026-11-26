@@ -1,6 +1,13 @@
 # データ担当の帳面
 
 ## いま持っている仕事
+- **【11/26 13時40分 PM から・本人の OK の①〜⑤】すべて下書きのプルリクエストまで作った（それぞれ main 594dd3e から別の枝）**
+  - ① data/term-misawa-iwakuni → **PR #266・移行206・t145**。報告 report-term-misawa-iwakuni.md。terminals に MSJ-T・IWK-T（stamp_m 0＝範囲を広げるだけ・ターミナルの印は出さない。制約を 0〜1500 に）。radius_m は変えない。**座標は国土数値情報 C28 で、使用許諾条件が未確認 → 本人の確認まで反映しない**（商用不可なら地理院地図で読み直して差し替え）。チェックインへ TERMS の依頼
+  - ② data/extra-safe-range → **PR #267・移行207（案）・t146**。報告 report-extra-safe-range.md・表 docs/pm/extra-safe-range.json・道具 tools/extra_safe_range.py。敷地の端（OurAirports の滑走路の端）＋余白（基地 500m・飛行場と滑空場 300m・ヘリポート 300m）に届かない10か所だけ広げる（千歳基地 2700・松島 2800・防府北 1700・小月 1700・横田 2200・嘉手納 2600・伊江島 1100・八尾 1600・鹿部 900・薩摩硫黄島 1100）。狭める所なし・airport_size はどの行も同じ。PM が見てから出す。見学所に寄せる案2 は本人が場所を挙げたら
+  - ③ data/round-pos → **PR #269・移行なし**。報告 report-round-pos.md。_shared/pos.ts の roundPos で、関数 checkin が checkins に書く lat・lon だけ小数3桁。判定は丸める前。deno の pos_test.ts
+  - ④ data/usage-counts → **PR #270・移行208・t147**。報告 report-usage-counts.md。ops.usage_daily（回数だけ）・ops.usage_daily_build／fill（cron usage-daily 3時37分・上限2分）・admin_usage_counts（管理者だけ）。checkins に created_at の索引 checkins_time。戻った割合は案だけ
+  - ⑤ data/job-alert → **PR #272・移行209・t148・Edge Function ops-alert**。報告 report-job-alert.md。cron ops-alert 毎時41分 → ops_alert_claim（ng があり今日まだ届いていなければ・1日6回まで試し直し）→ OPS_ALERT_TO（メールか Webhook）→ ops_alert_done。メールは本人の Gmail のアプリパスワード（OPS_SMTP_USER・OPS_SMTP_PASS）。**メールの実際の送信は未確認**
+  - deno を手元に入れた（npm の deno）。deno のテストは手元で流せる
 - **定期の手入れ 11/26 の4回目（木。PM の指示なしの定期の回）**：ブランチ maint/2026-11-26-4（main 594dd3e から）→ **PR #265（下書き）**。報告 docs/pm/maint/2026-11-26-4-report.md。**移行205・テスト t144**
   - 3回目のあとに入った移行は 204（経営の上限・関数なし）だけ。代わりに今の関数全部から「(列 at time zone …)::date で絞る」所を機械で洗い出した → admin_metrics と airport_hour_bad_roll の2つ。後者は先に範囲で絞るので問題なし
   - admin_metrics（管理の画面の日別）を、日ごとに4つの表をまるごと数える形から、期間で1回読んで日ごとにまとめる形に。返す形・権限・RLS は同じ。全部読み 121回 → 8回（模擬）
@@ -436,13 +443,14 @@
 - 11/25：data/sweep-1125（PR #216）が移行197・テスト t135（data/stamp-fast #225 は移行なし）
 - 11/25：data/hnd-nrt-priority（#227）と data/hnd-nrt-priority-b（#228・別の回の案）がどちらも移行198・t136。入れるのは片方だけ。#228 の A・B を足すなら199・t137
 - data/hnd-nrt-more（PR #230）が移行199・テスト t137。#228 の A・B を足すなら200 以降に付け直す
-- 11/26：data/idem（PR #240）が移行200・テスト t138。data/idem-b（#241・別の回の案）も200・t138 なので入れるのは片方だけ。maint/2026-11-26（PR #246）が移行201・t139。data/flight-no（PR #247）が202・t140。maint/2026-11-26-2（PR #254）は移行なし・t141。data/ops-guard（PR #256）が203・t142（11/26 main に入った）。maint/2026-11-26-3（PR #260）は移行なし・t141 に足しただけ（main に入った）。経営の keiei/timeout が204・t143（main に入った）。maint/2026-11-26-4（PR #265）が205・t144。次は206・t145 から
+- 11/26：data/idem（PR #240）が移行200・テスト t138。data/idem-b（#241・別の回の案）も200・t138 なので入れるのは片方だけ。maint/2026-11-26（PR #246）が移行201・t139。data/flight-no（PR #247）が202・t140。maint/2026-11-26-2（PR #254）は移行なし・t141。data/ops-guard（PR #256）が203・t142（11/26 main に入った）。maint/2026-11-26-3（PR #260）は移行なし・t141 に足しただけ（main に入った）。経営の keiei/timeout が204・t143（main に入った）。maint/2026-11-26-4（PR #265）が205・t144。11/26 本人の OK：#266 が206・t145、#267 が207・t146、#269 は移行なし、#270 が208・t147、#272 が209・t148（どれも main 594dd3e から。入る順が変わったら rebase）。次は210・t149 から
 - main に別の移行が先に入ったら、反映の前にもう一度 `node tools/migrations.mjs rebase`
 - 本番は小さいプランで一時ファイルの余裕がない。本人に流してもらう SQL は、大きな中間の表・自己結合・大きな並べ替えを避け、索引で引く形にする
 - PGlite は流す所の時間帯を使う（手元は日本時間・GitHub は UTC）。テストの種の日付と時刻は日本時間で作り、手元でも TZ=UTC で流して確かめる
 - SQL のテストは全部で約35分かかる（手元で流すときは裏で流してログを見る。t92 だけで約4分。同じログに2回流すと混ざるので、ログの名前を分ける）
 
 ## 次にやること
+- 本人の OK の①〜⑤（#266・#267・#269・#270・#272）：CI とレビューに答える。反映の前に main に別の移行が先なら rebase。① は本人が C28 の使用許諾条件を見るまで反映しない（商用不可なら地理院地図で座標を差し替え）。② は PM・本人が10か所と余白の数字を決めたら出す。④ は新しいログインの流れ（#237 案B）の記録の名前が決まったら onboard の一覧に足す。⑤ は本人が OPS_ALERT_TO などを入れたあと ops.ops_alert_log を見てもらう。知らせる項目を夜の処理だけにするなら ops_alert_claim で key を選ぶ
 - 定期の手入れ 11/26 の4回目（PR #265・移行205・t144）：CI とレビューに答える。反映の前に main に別の移行が先なら rebase。反映のあと管理の画面の「使われ方」が出るかを PM に見てもらう。次の定期の回：結果（*-result.csv）があれば死んだ行・使われていない索引・大きさの見込み。なければ main に新しく入った移行の関数だけを probe_seqscan.mjs で呼ぶ（洗い出しの残りの候補：atc_msgs (feeder)・cold-archive の1日の大きさ・push_subs の GIN）
 - t142 の直し（PR #261・main に入った）：反映の Actions で SQL のテストが通ったかを見る
 - 定期の手入れ 11/26 の3回目（PR #260・t141）：CI とレビューに答える。次の定期の回：結果（*-result.csv、2026-11-26-check.sql・2026-11-26-2 の ①）があれば死んだ行・使われていない索引・大きさの見込み。なければ main に新しく入った移行の関数だけを probe_seqscan.mjs で呼び、よく呼ばれるものを t141 に足す
@@ -502,6 +510,9 @@
 8. それ以外は PM の指示を待つ（勝手に新しい機能は始めない）。毎週月曜の昼の回は、下の「定期の仕事」（次の候補：点検の結果が来たら、死んだ行や使われていない索引の整理・遅い処理。cold-day-size.sql の結果で全機の航跡の1日が 20MB を超えるなら、ファイルを空港ごとに分ける案を作る。rwy-learn と daily-archive は 11/10 に見た（PR #58）。eta-calib・taxi-out・flight-watch は 11/11 に見た（PR #70）。結果がないまま次の回が来たら、ほかの毎晩・裏の処理（timetable-sync・schedule-sync・odpt-status・co3 の SQL の文）を同じ目で見て、時間の上限のない仕事の一覧を作る）
 
 ## ほかの担当への依頼
+- チェックインへ（11/26・#266）：src/index.html の TERMS に MSJ-T 40.6966,141.3878／IWK-T 34.1588,132.2351（範囲を広げるだけ。図鑑の「ターミナル ○/○」とターミナルの印の一覧からは外す：stamp_m 0 か tag「ビル」）。judge.ts 51行目を `(term.stamp_m ?? RULE.termStampM) > 0 &&` にすると 0m ちょうどでも印が出ない（任意）
+- チェックインへ（11/26・#267 が出ると決まったら）：EXTRA_RAW などの半径を同じ値に（1001 2700・1006 2800・1021 1700・1022 1700・1015 2200・1029 2600・76 1100・89 1600・3017 900・3020 1100）
+- チェックインへ（11/26・#270）：新しいログインの流れ（#237 案B）の段ごとの記録の名前を決めたら教えてほしい（使われ方の onboard に足す）
 - チェックインへ（11/26・data/flight-no #247。詳しくは report-flight-no.md の4）：記録帳の flight_no は大文字・空白なしの形（JL123）で送る。過去の便は `sb.rpc("flight_lookup", { p_date, p_flight })`。rows が2つ以上なら区間を選んでもらう。src = schedule の行は登録記号なし。400日より前は空
 - （済み）経営へ：co3-trouble-detect の時間の上限は経営の移行204（keiei/timeout）で入った（11/26 main）
 - チェックインへ（11/26 空港の形・PR #243。本人が決めたら）：三沢・岩国のターミナルが判定の円の外。terminals に行を足すと決まったら、src/index.html の TERMS にも同じ行（MSJ-T 40.696583,141.387750／IWK-T 34.158808,132.235052・ターミナルの印は出さない）。滑走路の線は data/ap_shape/runway_lines.json（id は airports の id）
@@ -838,7 +849,7 @@
 - 【11/26 1時30分 PM から】#240（idem）を本筋にして #241 は閉じた。#240・#243（ap-shape）・#230（hnd-nrt-more）は次の出す枝 pm/release-1126a に入れた。次の仕事：checkin/flight-suggest（#239）の依頼 ① manual_flights に flight_no（text・任意）を足す（移行と RLS をセット・本人の行だけ書ける今の決まりのまま）② flight_lookup(p_date date, p_flight text)：flight_history から出発・到着・時刻・機体を返す読むだけの関数（RLS／権限は今の flight_history の読み方に合わせる）。ブランチ data/flight-no。三沢・岩国の terminals の行は本人の OK まで足さない
 - 【11/26 3時25分 PM から・flight-no のあとの仕事】Gemini との話し合いの「裏側」10案（docs/pm/ext/gemini-kaizen-1126.md の10往復目）を今の作りと突き合わせて docs/pm/data-gemini-1126.md に表に（もうある／小さく足せる／本人の OK が要る／やらない）。「小さく足せる」で決まりに触れないもの（1 死活の記録と通知の下書き、2 外部取得のタイムアウトと前の値の保護、9 ログと秘密の文字列の確かめ）はブランチ data/ops-guard で作ってよい。5（速さで判定）・8（生の位置を残さない）は判定・個人情報の変更なので案だけ。3 は生の点を消さない
 - 【11/26 8時40分 PM から・急ぎ】【済み：PR #261・report-ops-guard-fix.md】#259（release-1126d）を main に入れたら、GitHub のテストで SQL の t142_ops_guard.mjs が1つ落ちて、データベースとアプリの反映が止まった（本番は前のまま）。落ちたのは「2 記録が戻れば作り直す（時刻も新しく）」で n2=80（n1 と違う）。手元（コンテナ）では通った。GitHub の実行は 23:29 UTC。日付・時刻・曜日（current_date・時間帯）にかかわる作りかテストの組み方を見て、どの時刻でも通るように直す枝 data/ops-guard-fix を出して（直し方は中身を弱めない）。できたら PM がすぐ出す
-- 【11/26 13時40分 PM から・本人の OK が出た仕事（CLAUDE.md の 11/26 の決定）】順に、それぞれ別の枝で：
+- 【11/26 13時40分 PM から・本人の OK が出た仕事（CLAUDE.md の 11/26 の決定）】順に、それぞれ別の枝で：【①〜⑤ 済み：PR #266・#267・#269・#270・#272】
   ① data/term-misawa-iwakuni：三沢・岩国の民間ターミナルの行を terminals に足す（#243 の比べる表の座標の根拠を書く。radius は変えない＝経営の数字を動かさない）。移行＋RLS はいまの terminals のまま
   ② data/extra-safe-range：番外編の判定範囲の見直し案。病院・基地・私有地・滑空場ごとに「敷地や門に近づかず公道・見学できる所から押せる」範囲にする（中心点を敷地の外の見学できる所へ寄せる行を足すか、範囲を広げるか。広げる場合は経営に効かないことを確かめる）。一覧の表（場所・種類・今の範囲・新しい範囲・理由）を docs/pm/report-extra-safe-range.md に。移行は案まで作ってよい（PM が見てから出す）
   ③ data/round-pos：新しい印から緯度・経度を小数3桁（約100m）に丸めて残す（関数 checkin で丸めてから保存。判定は丸める前の値で今のまま）。今までの記録は変えない。精度（accuracy）は残す
