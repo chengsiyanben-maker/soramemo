@@ -8,7 +8,8 @@ from playwright.async_api import async_playwright
 #   3 データが途切れた着陸機は最終進入の道すじで進み「推定」・薄くなる
 #   4 後ろ向きに動く地上の機体（プッシュバック）は機首の向きのまま・誘導路を走る機体は中心線に寄せて「推定」
 #   5 動きを減らす設定では灯りを点滅させない
-#   6 写真と短い動画（docs/pm/shots-3d-real/）
+#   6 写真（390・375 の昼と夜）と短い動画（docs/pm/shots-3d-real/）
+#   7 小型のジェット E170・E190 も細かい形（11/26 3d-real の2回目）
 #   偽のサーバーを使う。本物の Supabase には接続しない
 HERE = os.path.dirname(os.path.abspath(__file__)); ROOT = os.path.abspath(os.path.join(HERE, '..', '..')); WEB = os.path.join(ROOT, 'web')
 BASE = os.environ.get('SORAMEMO_TEST_WORK', '/tmp/soramemo-e2e'); WORK = os.path.join(BASE, 'a3-real-kin')
@@ -69,7 +70,9 @@ SEED = r"""(() => {
   const ll = (x, z) => ({ lat: A3_C[0] - z / M, lon: A3_C[1] + x / ml }), th = (Math.atan2(bx - ax, -(bz - az)) / D2R + 360) % 360;
   const g2 = { id: 'g2', callsign: 'JAL77', type: 'B788', ...ll(mx, mz), alt_ft: 0, ground: true, phase: 'ground', hdg: (th + 8) % 360, kt: 15 };
   window.__TW = { x: mx, z: mz, hdg: th };
-  A3.snaps = [{ t: N - 110e3, planes: [t1a, a2, a3, gp0, g1, g2] }, { t: N - 75e3, planes: [t1a, a2, a3, gpp, g1, g2] }, { t: N - 5e3, planes: [t1b, a2b, a3b, g1b, g2] }];
+  const e1 = P({ id: 'e1', callsign: 'JAL2201', type: 'E190', reg: 'JA241J', lat: 35.47, lon: 139.86, alt_ft: 2400, hdg: 337, kt: 160, fpm: -700 });
+  const e1b = { ...e1, ...mv(e1, -Math.sin(23 * D2R) * 160 * .5144 * 70, Math.cos(23 * D2R) * 160 * .5144 * 70), alt_ft: 1600 };
+  A3.snaps = [{ t: N - 110e3, planes: [t1a, a2, a3, gp0, g1, g2, e1] }, { t: N - 75e3, planes: [t1a, a2, a3, gpp, g1, g2, e1] }, { t: N - 5e3, planes: [t1b, a2b, a3b, g1b, g2, e1b] }];
   A3.poll && clearInterval(A3.poll); a3Poll = async () => {}; A3.dirty = true;
 })()"""
 async def main():
@@ -113,7 +116,22 @@ async def main():
         await pg.screenshot(path=os.path.join(SHOTS, 'day-approach-flaps.png'))
         await pg.evaluate("a3Select('t1', true)"); await pg.evaluate("A3.fside = 2; A3.fk = .5; A3.fup = .4; A3.yaw = 0.35; A3.dirty = true"); await pg.wait_for_timeout(2500)
         await pg.screenshot(path=os.path.join(SHOTS, 'day-turn-bank.png'))
+        # 小型のジェット（E170・E190）も細かい形（11/26 3d-real の2回目）
+        await pg.evaluate("a3Select('e1', true)"); await pg.evaluate("A3.fside = 1; A3.fk = .5; A3.fup = .6; A3.yaw = -0.5; A3.dirty = true"); await pg.wait_for_timeout(2500)
+        e = await pg.evaluate("(() => { const o = A3.objs.get('e1'), hd = o.g.getObjectByName('hd'); return { key: a3HdKey('E190'), k2: a3HdKey('E170'), k3: a3HdKey('E75L'), hd: !!(hd && hd.visible), flapOn: a3FlapList(o.g).filter(f => f.visible).length }; })()")
+        check('E190・E170 は細かい形（近いとき）・フラップも出す', e['key'] == 'e190' and e['k2'] == 'e170' and e['k3'] == 'e170' and e['hd'] and e['flapOn'] >= 2, e)
+        await pg.screenshot(path=os.path.join(SHOTS, 'day-e190-390.png'))
         allerr += errs; await c.close()
+        # 375×667：昼と夜（着陸に向かう機体と E190）
+        for sky in ('day', 'night'):
+            c, pg, errs = await open3d(b, port, sky, 375, 667)
+            await pg.evaluate("a3Select('a2', true)"); await pg.evaluate("A3.fside = 1; A3.fk = .5; A3.fup = .6; A3.yaw = -0.5; A3.dirty = true"); await pg.wait_for_timeout(2500)
+            await pg.screenshot(path=os.path.join(SHOTS, f'{sky}-approach-375.png'))
+            await pg.evaluate("a3Select('e1', true)"); await pg.evaluate("A3.fside = 1; A3.fk = .5; A3.fup = .6; A3.yaw = -0.5; A3.dirty = true"); await pg.wait_for_timeout(2500)
+            await pg.screenshot(path=os.path.join(SHOTS, f'{sky}-e190-375.png'))
+            await pg.evaluate("A3.fside = 0; A3.fk = 1; A3.fup = 1; A3.yaw = 0; a3Home && a3Home(); A3.dirty = true"); await pg.wait_for_timeout(2500)
+            await pg.screenshot(path=os.path.join(SHOTS, f'{sky}-all-375.png'))
+            allerr += errs; await c.close()
         # 夜：航法灯・着陸灯（写真）
         c, pg, errs = await open3d(b, port, 'night')
         a2n = await pg.evaluate("(() => { const o = A3.objs.get('a2'), l = o.g.getObjectByName('land'); return { land: !!(l && l.visible) }; })()")
@@ -133,6 +151,13 @@ async def main():
         await pg.evaluate("a3Select('t1', true)"); await pg.evaluate("A3.fside = 2; A3.fk = .5; A3.fup = .4; A3.yaw = 0.35; A3.dirty = true"); await pg.wait_for_timeout(7000)
         vp = await pg.video.path(); allerr += errs; await c.close()
         try: shutil.copy(vp, os.path.join(SHOTS, 'turn-follow.webm'))
+        except Exception as e: print('動画を写せなかった', e)
+        # 夜の短い動画：着陸に向かう機体（灯りの点滅・着陸灯）
+        shutil.rmtree(vd, ignore_errors=True)
+        c, pg, errs = await open3d(b, port, 'night', video=vd)
+        await pg.evaluate("a3Select('a2', true)"); await pg.evaluate("A3.fside = 1; A3.fk = .6; A3.fup = .6; A3.yaw = -0.5; A3.dirty = true"); await pg.wait_for_timeout(6000)
+        vp = await pg.video.path(); allerr += errs; await c.close()
+        try: shutil.copy(vp, os.path.join(SHOTS, 'night-approach.webm'))
         except Exception as e: print('動画を写せなかった', e)
         await b.close()
     print('JS のエラー', allerr)
