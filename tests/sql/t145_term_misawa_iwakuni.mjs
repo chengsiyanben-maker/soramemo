@@ -29,7 +29,9 @@ await db.exec(fs.readFileSync(dir + mine, 'utf8')); check('2回流しても行�
 
 // 判定：judge.ts をそのまま読み込み、表の行で呼ぶ
 const { locate, km } = await import('../../supabase/functions/_shared/judge.ts');
-const A = (await db.query(`select id, name, iata, lat, lon, radius_m, rare, coalesce(kind <> 'airport', false) extra from public.airports`).catch(() => db.query(`select id, name, iata, lat, lon, radius_m, rare, false extra from public.airports`))).rows;
+// 関数 checkin の loadMaster と同じ読み方（game_target か番外編の行・extra は game_target でない番外編）
+const A = (await db.query(`select id, name, coalesce(iata, icao, '') iata, lat, lon, radius_m, rare, (not coalesce(game_target, false) and extra_kind is not null) extra
+  from public.airports where game_target or extra_kind is not null`)).rows;
 const off = (p, dn, de) => ({ lat: p.lat + dn / 111320, lon: p.lon + de / (111320 * Math.cos(p.lat * Math.PI / 180)) });
 for (const [t, ap] of [[msj, 92], [iwk, 96]]) {
   const front = locate(off(t, 0, 50), A, T);
