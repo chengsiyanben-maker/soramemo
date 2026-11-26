@@ -36,7 +36,7 @@ jobs:
         run: deno test --allow-read supabase/tests/
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22  # SQL のテストが .ts を読む（t145）ので型を外せる 22 にする
       - name: データベースのテスト（すべてのSQLを模擬のデータベースに流す）
         working-directory: tests/sql
         run: |
