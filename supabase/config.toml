@@ -472,3 +472,5 @@ verify_jwt = false
 verify_jwt = false
 [functions.world-status]
 verify_jwt = false
+[functions.ops-alert]
+verify_jwt = false
