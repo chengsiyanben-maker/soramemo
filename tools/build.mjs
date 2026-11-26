@@ -16,6 +16,16 @@ function liveryAirlines() {
   for (const x of ts.matchAll(/\{\s*reg:\s*"([A-Z0-9-]+)",\s*name:\s*"[^"]+",\s*airline:\s*"([^"]+)"([^}]*)\}/g)) if (!/kind:\s*"alliance"/.test(x[3]) && !notYet(x[3])) m[x[1]] = x[2];
   return JSON.stringify(m);
 }
+// 特別塗装機の運航の期間（登録記号 → [始まる日, 終わる日]。分かっているものだけ。撮る人の特別塗装機のくわしくに出す）
+function liveryTerms() {
+  const ts = readFileSync(new URL("../supabase/functions/_shared/liveries.ts", import.meta.url), "utf8"), m = {};
+  for (const x of ts.matchAll(/\{\s*reg:\s*"([A-Z0-9-]+)",\s*name:\s*"[^"]+"([^}]*)\}/g)) {
+    if (/kind:\s*"alliance"/.test(x[2]) || notYet(x[2])) continue;
+    const f = (x[2].match(/from:\s*"(\d{4}-\d{2}-\d{2})"/) || [])[1] || null, u = (x[2].match(/until:\s*"(\d{4}-\d{2}-\d{2})"/) || [])[1] || null;
+    if (f || u) m[x[1]] = [f, u];
+  }
+  return JSON.stringify(m);
+}
 // 空港の名前の読み（図鑑の索引）。データ担当の移行 airport_yomi の読みをアプリに入れる（表があればアプリがサーバーの読みで上書きする）
 function airportYomi() {
   const dir = new URL("../supabase/migrations/", import.meta.url), f = readdirSync(dir).filter(n => /_airport_yomi\.sql$/.test(n)).sort().pop();
@@ -56,6 +66,7 @@ for (const f of files) {
   let out = f === "now.html" ? src.replace("/*@OPS_CORE@*/", () => opsCoreParts().join("\n")) : src;
   out = out.replace("/*@LIVERIES@*/{}", () => liveryNames());   // 特別塗装機の一覧（登録記号 → 名前）を、サーバーの liveries.ts からアプリに入れる（乗った機体の図鑑の印）
   out = out.replace("/*@LIVERY_AIR@*/{}", () => liveryAirlines());
+  out = out.replace("/*@LIVERY_TERM@*/{}", () => liveryTerms());   // 特別塗装機の運航の期間（撮る人用・11/26）
   out = out.replace("/*@AIRPORT_FACTS@*/{}", () => airportFacts());   // 図鑑の空港ページの供用開始・滑走路（国土交通省「空港一覧」を加工）
   out = out.replace("/*@AIRPORT_YOMI@*/{}", () => airportYomi());   // 空港の名前の読み（図鑑の索引・探す欄）   // 特別塗装機の航空会社（特別塗装機の図鑑で分ける）
   // CSS
