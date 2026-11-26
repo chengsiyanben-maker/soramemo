@@ -7,6 +7,7 @@ import { OPS_AIRPORTS } from "../_shared/ops_core.js";
 import { type CheckinWx, pickWx, WX_NONE } from "../_shared/checkin_wx.ts";
 import { readShared } from "../_shared/edge_cache.ts";
 import { againBody, type CheckinRow, type FlightRow, isUniqueViolation, parseCid } from "../_shared/idem.ts";
+import { roundPos } from "../_shared/pos.ts";
 
 const URL = Deno.env.get("SUPABASE_URL")!;
 const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -206,7 +207,8 @@ Deno.serve(async (req) => {
     const w = wx ?? WX_NONE;
     const { data: ci, error: ie } = await admin.from("checkins").insert({
       user_id: userId, airport_id: d.place.airport.id, terminal_id: d.place.terminal?.id ?? null,
-      lat: body.lat, lon: body.lon, accuracy_m: body.acc, position_at: new Date(Number(body.ts)).toISOString(),
+      // 位置は小数3桁（約100m）に丸めて残す（判定は上の decide で丸める前の値でした）。精度はそのまま
+      lat: roundPos(body.lat), lon: roundPos(body.lon), accuracy_m: body.acc, position_at: new Date(Number(body.ts)).toISOString(),
       created_at: new Date(d.at).toISOString(), flags: d.flags,
       weather: w.weather, wind_kt: w.wind_kt, ops, client_id: cid,
     }).select("id,created_at").single();
