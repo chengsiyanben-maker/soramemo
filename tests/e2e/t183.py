@@ -85,7 +85,7 @@ async def main():
         nb = await pg.evaluate("$('obNext').getBoundingClientRect().width / $('obNext').parentElement.getBoundingClientRect().width")
         check('「はじめる」は横いっぱい', nb > 0.95, nb)
         g3 = await pg.inner_text('#dGuide .ob-step.on')
-        check('3枚目に「運用（空港の今）や修行も、ログインしなくても見られます」', '運用（空港の今）や修行も、ログインしなくても見られます' in g3)
+        check('3枚目に「いまの空港（滑走路・便）や修行も、ログインしなくても見られます」', 'いまの空港（滑走路・便）や修行も、ログインしなくても見られます' in g3)
         await pg.screenshot(path=os.path.join(SHOTS, '02-guide3.png'))
         await pg.click('#obNext'); await pg.wait_for_timeout(200)
         brand = await pg.evaluate("getComputedStyle(document.querySelector('.brand')).fontFamily")

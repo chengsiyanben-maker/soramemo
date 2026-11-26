@@ -108,7 +108,7 @@ async def main():
             check(tag + ' 機体を選んでいるとき帯を押すとその見方（特別塗装機）', await vis(pg, '#opsPlDay') is None and await vis(pg, '#opsPSpecial') is not None and 'ジンベエジェット' in await pg.evaluate("document.getElementById('opsPSpecial').textContent"))
             # 4 鉛筆のシート
             await pg.click('#opsPside .vwedit'); await pg.wait_for_timeout(300)
-            t = await pg.inner_text('#dViews'); check(tag + ' 機体の側の鉛筆：運用の見方・機体の2つと「機体」を出す', '運用の見方' in t and '最近見た' in t and '特別塗装機' in t and '「機体」を出す' in t, t[:200])
+            t = await pg.inner_text('#dViews'); check(tag + ' 機体の側の鉛筆：運用の見方・機体の2つと「機体」を出す', 'いまの空港の見方' in t and '最近見た' in t and '特別塗装機' in t and '「機体」を出す' in t, t[:200])
             await pg.click('#dViews [data-vs-side="ops"]'); await pg.wait_for_timeout(200)
             t = await pg.inner_text('#dViews'); check(tag + ' シートの中で空港に切り替え（7つ）', '案内板' in t and '撮る人' in t and '「機体」を出す' not in t)
             await pg.click('#dViews [data-vs-side="opsp"]'); await pg.wait_for_timeout(200)
@@ -129,7 +129,7 @@ async def main():
             check(tag + ' ON に戻すと切り替えが戻る', await vis(pg, '#opsSide') is not None)
             # 表示の編集
             await pg.evaluate("openLayout('opsp', 'screen')"); await pg.wait_for_timeout(300)
-            t = await pg.inner_text('#dLayout'); check(tag + ' 表示の編集：運用（空港）と運用（機体）に分かれる', '運用（空港）' in t and '運用（機体）' in t and '「機体」を出す' in t, t[:300])
+            t = await pg.inner_text('#dLayout'); check(tag + ' 表示の編集：運用（空港）と運用（機体）に分かれる', 'いまの空港（空港）' in t and 'いまの空港（機体）' in t and '「機体」を出す' in t, t[:300])
             await pg.click('#dLayout [data-lo-plane]'); await pg.wait_for_timeout(300)
             check(tag + ' 表示の編集の同じ行で OFF', not await pg.evaluate('opsPlaneOn()') and '「機体」を隠しています' in await pg.inner_text('#dLayout'))
             await pg.click('#dLayout [data-lo-filter="off"]'); await pg.wait_for_timeout(200)
