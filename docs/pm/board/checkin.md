@@ -1,7 +1,7 @@
 # チェックイン担当の帳面
 
 ## いま持っている仕事
-- **11/26 定時の回（PM 20時45分の積み「これから着く便を時刻表に」）**：checkin/arr-timetable・下書き **PR #281**（5a95da14・報告 docs/pm/report-arr-timetable.md・写真 docs/pm/shots-arr-timetable/）。main（d88686a9）から。見張りを付けた。**出す前に PM が写真を本人に見せる**
+- **11/26 定時の回（PM 20時45分の積み「これから着く便を時刻表に」）**：checkin/arr-timetable・下書き **PR #281**（5a95da14、写真の撮り直しと「状況が変わった直後」の arr-390-flap.png を 953f278a で足した・報告 docs/pm/report-arr-timetable.md・写真 docs/pm/shots-arr-timetable/）。main（d88686a9）から。見張りを付けた。**出す前に PM が写真を本人に見せる**
   - 到着のときだけ紺の時刻表（案A a2）。列 定刻／変更・便名・出発地（経由）・機材・ゲート・状況。状況 定刻・遅れ（15分以上）・到着済み・欠航・推定。いまの線・時の区切り。状況か変更の時刻が変わったときだけパタパタ（TT_PREV で前と比べる・はじめは動かさない・動きを減らす設定では置き換えるだけ）。欠航の到着は bad から足す（next_arr に欠航がないため）。出発の欄は今のまま
   - 変えた関数：boardHTML。足した：boardArrTT・ttRow・ttList・ttFlap・ttReduce・TT_PREV・CSS #v-ops .bdtt
   - テスト：t212 を足した。t130・t133 の到着の確かめを時刻表に（.bdseq → .bdtt .tt・ピンの説明は到着では「出発地の」）
