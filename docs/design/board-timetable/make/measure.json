@@ -1,0 +1,89 @@
+{
+ "measure": {
+  "a1-dep": {
+   "small": [],
+   "tap": [],
+   "over": [],
+   "cut": []
+  },
+  "a1-dep-667": {
+   "small": [],
+   "tap": [],
+   "over": [],
+   "cut": []
+  },
+  "a1-dep-n": {
+   "small": [],
+   "tap": [],
+   "over": [],
+   "cut": []
+  },
+  "a1-dep-rm": {
+   "running": 0
+  },
+  "a2-arr": {
+   "small": [],
+   "tap": [],
+   "over": [],
+   "cut": []
+  },
+  "a2-arr-667": {
+   "small": [],
+   "tap": [],
+   "over": [],
+   "cut": []
+  },
+  "a2-arr-n": {
+   "small": [],
+   "tap": [],
+   "over": [],
+   "cut": []
+  },
+  "a2-arr-rm": {
+   "running": 0
+  },
+  "b1-dep": {
+   "small": [],
+   "tap": [],
+   "over": [],
+   "cut": []
+  },
+  "b1-dep-667": {
+   "small": [],
+   "tap": [],
+   "over": [],
+   "cut": []
+  },
+  "b1-dep-n": {
+   "small": [],
+   "tap": [],
+   "over": [],
+   "cut": []
+  },
+  "b1-dep-rm": {
+   "running": 0
+  },
+  "b2-arr": {
+   "small": [],
+   "tap": [],
+   "over": [],
+   "cut": []
+  },
+  "b2-arr-667": {
+   "small": [],
+   "tap": [],
+   "over": [],
+   "cut": []
+  },
+  "b2-arr-n": {
+   "small": [],
+   "tap": [],
+   "over": [],
+   "cut": []
+  },
+  "b2-arr-rm": {
+   "running": 0
+  }
+ },
+ "errors": []
+}

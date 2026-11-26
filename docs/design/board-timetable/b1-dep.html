@@ -1,0 +1,322 @@
+<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>案B 出発｜案内板を時刻表に</title><meta name="description" content="今の明るい角丸カードのまま列をそろえる。状況は小さなピル、遅れは今の茶色、欠航は線で消して枠のピル"><style>/* そらメモ 小さな動きの見本：共通の見た目（main の web/index.html の色と文字に合わせる） */
+:root{
+  --gothic:"Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic UI","Yu Gothic","Meiryo","Noto Sans JP","Noto Sans CJK JP",system-ui,sans-serif;
+  --bg:#EEF1F5; --card:#FFFFFF; --ink:#374151; --strong:#1F2937; --sub:#646B78; --mute:#6B7280;
+  --track:#EEF0F3; --pill:rgba(17,24,39,.05); --jal:#C8102E; --ana:#1C4FA0; --acc:#2563EB;
+  --ok:#15803D; --hero:#0F1B2D; --bar:#E3E7ED; --pin:#1B2B4B; --pin-wash:#EEF2F8;
+  --sw-on-bg:#16233A; --sw-off-bg:#E5E8EE; --sw-off-ring:#768090; --sw-on-ink:#FFFFFF; --sw-off-ink:#4B5563;
+  --shadow:0 1px 2px rgba(17,24,39,.04),0 10px 30px -8px rgba(17,24,39,.10),inset 0 0 0 1px rgba(17,24,39,.07);
+  --shadow-lift:0 2px 4px rgba(17,24,39,.06),0 22px 40px -10px rgba(17,24,39,.28),inset 0 0 0 1px rgba(17,24,39,.07);
+  --nav-glass:rgba(255,255,255,.82); --nav-ink:#6B7280; --nav-shadow:0 10px 30px -8px rgba(17,24,39,.22),0 2px 6px rgba(17,24,39,.06);
+  --skel:#E9ECF0; --skel-hi:#F5F7F9;
+  /* 動きの長さ（0.15〜0.4秒）と曲がり方 */
+  --t-tap:.12s; --t-fast:.15s; --t-mid:.25s; --t-slow:.4s;
+  --ease:cubic-bezier(.2,.8,.2,1); --ease-in:cubic-bezier(.4,0,1,1);
+}
+:root[data-night=on]{
+  --bg:#0F141B; --card:#1B1F26; --ink:#E5E7EB; --strong:#F3F4F6; --sub:#AEB9C6; --mute:#AEB9C6;
+  --track:#262B33; --pill:rgba(220,227,234,.08); --acc:#DCE3EA; --ok:#4ADE80; --hero:#4ADE80; --bar:#262B33;
+  --pin:#DCE3EA; --pin-wash:rgba(220,227,234,.08);
+  --sw-on-bg:rgba(220,227,234,.16); --sw-off-bg:transparent; --sw-off-ring:#66778C; --sw-on-ink:#DCE3EA; --sw-off-ink:#AEB9C6;
+  --shadow:0 12px 26px -16px rgba(0,0,0,.7),inset 0 0 0 1px rgba(255,255,255,.06);
+  --shadow-lift:0 22px 40px -12px rgba(0,0,0,.85),inset 0 0 0 1px rgba(255,255,255,.12);
+  --nav-glass:rgba(22,25,31,.86); --nav-ink:#8B95A3; --nav-shadow:0 10px 30px -6px rgba(0,0,0,.6);
+  --skel:#232830; --skel-hi:#2C323B; --amber:#FBBF24;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--bg);color:var(--ink);font-family:var(--gothic);-webkit-text-size-adjust:100%}
+body{max-width:430px;margin:0 auto;min-height:100vh;padding:0 16px 120px;line-height:1.6;font-size:15px}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.num{font-weight:800;font-variant-numeric:tabular-nums;color:var(--strong);letter-spacing:-.01em}
+.u{font-size:12px;color:var(--mute);font-weight:600;margin-left:2px}
+.card{background:var(--card);border-radius:20px;box-shadow:var(--shadow);padding:16px}
+.pill{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px;padding:0 18px;border-radius:999px;background:var(--card);box-shadow:var(--shadow);font-weight:700;font-size:14px;color:var(--strong)}
+.pill.dark{background:var(--strong);color:#fff;box-shadow:none}
+:root[data-night=on] .pill.dark{background:transparent;color:#fff;box-shadow:inset 0 0 0 1.5px #fff}
+.lead{font-size:13px;color:var(--sub)}
+h1{font-size:22px;font-weight:800;color:var(--strong);letter-spacing:.02em}
+h2{font-size:17px;font-weight:800;color:var(--strong)}
+svg.ic{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+
+/* ── M01 押すと少し縮む ── */
+.tap{transition:transform var(--t-tap) var(--ease)}
+.tap:active,.tap.is-down{transform:scale(.97)}
+
+/* ── M02 タブの点がすべる ── */
+.tabs{position:relative;display:grid;grid-template-columns:repeat(5,1fr);padding:6px;border-radius:999px;background:var(--nav-glass);box-shadow:var(--nav-shadow)}
+.tabs button{display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 0 14px;min-height:56px;border-radius:999px;font-size:12px;font-weight:700;color:var(--nav-ink);transition:color var(--t-mid) var(--ease)}
+.tabs button svg{transition:transform var(--t-fast) var(--ease)}
+.tabs button:active svg{transform:scale(.88)}
+.tabs button[aria-current=page]{color:var(--acc)}
+.tabs .dot{position:absolute;bottom:9px;left:0;width:5px;height:5px;border-radius:50%;background:var(--acc);transition:transform var(--t-mid) var(--ease)}
+
+/* ── M03 ON／OFF のつまみ ── */
+.sw{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 4px}
+.sw .tr{position:relative;width:52px;height:30px;border-radius:999px;background:var(--sw-off-bg);box-shadow:inset 0 0 0 1.5px var(--sw-off-ring);transition:background var(--t-mid) var(--ease),box-shadow var(--t-mid) var(--ease)}
+.sw .kn{position:absolute;top:4px;left:4px;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25),inset 0 0 0 1.5px var(--sw-off-ring);transition:transform var(--t-mid) var(--ease)}
+.sw .lb{min-width:30px;font-size:12px;font-weight:800;color:var(--sw-off-ink);text-align:right}
+.sw[aria-checked=true] .tr{background:var(--sw-on-bg);box-shadow:inset 0 0 0 1.5px var(--sw-on-bg)}
+.sw[aria-checked=true] .kn{transform:translateX(22px);box-shadow:0 1px 3px rgba(0,0,0,.25)}
+.sw[aria-checked=true] .lb{color:var(--strong)}
+.sw:active .kn{width:26px}
+.sw[aria-checked=true]:active .kn{transform:translateX(18px)}
+
+/* ── M04 ピンが刺さる ── */
+.pinbtn{display:inline-flex;align-items:center;gap:5px;min-height:44px;padding:0 14px;border-radius:999px;background:var(--card);color:var(--pin);font-weight:800;font-size:13px;box-shadow:inset 0 0 0 1.5px var(--pin);transition:background var(--t-mid) var(--ease),color var(--t-mid) var(--ease)}
+.pinbtn svg{width:18px;height:18px;transform-origin:50% 90%}
+.pinbtn.on{background:var(--pin);color:#fff}
+:root[data-night=on] .pinbtn.on{background:rgba(220,227,234,.16);color:#DCE3EA}
+.pinbtn.on.go svg{animation:pinIn var(--t-slow) var(--ease) both}
+@keyframes pinIn{0%{transform:translateY(-7px) rotate(-28deg);opacity:.2}60%{transform:translateY(1px) rotate(4deg);opacity:1}100%{transform:none}}
+
+/* ── M05 下から出る札 ── */
+.toast{position:absolute;left:50%;bottom:104px;display:flex;align-items:center;gap:8px;min-height:44px;padding:0 18px;border-radius:999px;background:#1F2937;color:#fff;font-size:14px;font-weight:700;white-space:nowrap;box-shadow:0 12px 30px -8px rgba(17,24,39,.4);transform:translate(-50%,16px);opacity:0;pointer-events:none;transition:transform var(--t-fast) var(--ease-in),opacity var(--t-fast) var(--ease-in)}
+.toast.show{transform:translate(-50%,0);opacity:1;transition:transform var(--t-mid) var(--ease),opacity var(--t-mid) var(--ease)}
+.toast svg{width:18px;height:18px;stroke:#86EFAC}
+:root[data-night=on] .toast{background:#262B33;box-shadow:inset 0 0 0 1px rgba(255,255,255,.12)}
+:root[data-night=on] .toast svg{stroke:#4ADE80}
+
+/* ── M06 骨組みの読み込み ── */
+.skel{position:relative;overflow:hidden;background:var(--skel);border-radius:10px}
+.skel::after{content:"";position:absolute;inset:0;transform:translateX(-100%);background:linear-gradient(90deg,transparent,var(--skel-hi),transparent);animation:shine 1.4s ease-in-out infinite}
+@keyframes shine{to{transform:translateX(100%)}}
+.fadein{animation:fadeIn var(--t-mid) var(--ease) both}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+
+/* ── M07 数字の繰り上がり ── */
+.roll{display:inline-flex;overflow:hidden;height:1.2em;line-height:1.2em;vertical-align:bottom}
+.roll .col{display:flex;flex-direction:column;transition:transform .35s var(--ease)}
+.roll .col span{height:1.2em}
+.roll.up .col{transform:translateY(-1.2em)}
+.plus{display:inline-block;font-size:12px;font-weight:800;color:var(--ok);opacity:0;transform:translateY(4px)}
+.plus.show{animation:plusUp 1.2s var(--ease) both}
+@keyframes plusUp{0%{opacity:0;transform:translateY(4px)}20%,70%{opacity:1;transform:none}100%{opacity:0;transform:translateY(-4px)}}
+
+/* ── M08 道のりの帯が伸びる ── */
+.bar{position:relative;height:12px;border-radius:6px;background:var(--bar);overflow:hidden}
+.bar i{position:absolute;left:0;top:0;bottom:0;border-radius:6px;background:var(--hero);width:0;transition:width var(--t-slow) var(--ease)}
+
+/* ── M09 並べ替えで持ち上がる ── */
+.sortlist{position:relative}
+.srow{position:relative;display:flex;align-items:center;gap:12px;min-height:60px;padding:0 8px 0 16px;margin-bottom:10px;background:var(--card);border-radius:18px;box-shadow:var(--shadow);transition:transform var(--t-mid) var(--ease),box-shadow var(--t-mid) var(--ease)}
+.srow b{flex:1;font-weight:700;color:var(--strong)}
+.srow .grip{display:flex;align-items:center;justify-content:center;width:44px;height:44px;color:var(--mute);touch-action:none;cursor:grab}
+.srow.lift{transform:scale(1.02);box-shadow:var(--shadow-lift);z-index:2;transition:box-shadow var(--t-mid) var(--ease),transform var(--t-fast) var(--ease)}
+
+/* ── M10 コピーが ✓ に ── */
+.copy{position:relative;display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:999px;background:var(--pill);color:var(--sub)}
+.copy svg{position:absolute;width:20px;height:20px;transition:transform var(--t-fast) var(--ease),opacity var(--t-fast) var(--ease)}
+.copy .ck{opacity:0;transform:scale(.5);stroke:var(--ok);stroke-width:2.4}
+.copy.done .cp{opacity:0;transform:scale(.5)}
+.copy.done .ck{opacity:1;transform:none}
+
+/* ── M11 鈴が揺れる ── */
+.bell svg{transform-origin:50% 12%}
+.bell.go svg{animation:bell var(--t-slow) ease-in-out both}
+@keyframes bell{0%,100%{transform:none}20%{transform:rotate(14deg)}45%{transform:rotate(-10deg)}70%{transform:rotate(5deg)}85%{transform:rotate(-2deg)}}
+
+/* ── M12 「もう一度」の矢印が回る ── */
+.retry svg{transition:none}
+.retry.go svg{animation:spin .6s var(--ease) 1}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── M13 シートが上がる ── */
+.scrim{position:absolute;inset:0;background:rgba(17,24,39,.32);opacity:0;pointer-events:none;transition:opacity var(--t-mid) var(--ease)}
+.sheet{position:absolute;left:0;right:0;bottom:0;background:var(--card);border-radius:24px 24px 0 0;box-shadow:0 -10px 30px -10px rgba(17,24,39,.25);padding:10px 20px 28px;transform:translateY(102%);transition:transform var(--t-fast) var(--ease-in)}
+.sheet .grab{width:40px;height:5px;border-radius:3px;background:var(--track);margin:0 auto 14px}
+.open .scrim{opacity:1;pointer-events:auto}
+.open .sheet{transform:none;transition:transform .3s var(--ease)}
+
+/* 動きを減らす：iPhone の設定、または見本の切り替え。状態は変わるが、動きはなし */
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+:root.rm *,:root.rm *::before,:root.rm *::after{animation:none!important;transition:none!important}
+
+body{padding:0 16px 132px}
+.tabs{position:fixed;left:50%;bottom:14px;width:calc(100% - 28px);max-width:402px;transform:translateX(-50%);z-index:20}
+.tabs button{position:relative}
+.tabs button span{white-space:nowrap;letter-spacing:-.03em}
+.tabs .dt{position:absolute;bottom:7px;left:50%;width:5px;height:5px;margin-left:-2.5px;border-radius:50%;background:var(--acc)}
+.head{display:flex;align-items:center;gap:8px;padding:18px 0 4px}
+.ap{display:inline-flex;align-items:center;gap:8px;min-height:48px;padding:0 14px 0 8px;border-radius:999px;background:var(--card);box-shadow:var(--shadow)}
+.ap .cd{display:inline-flex;align-items:center;justify-content:center;height:28px;padding:0 8px;border-radius:9px;background:var(--hero);color:#fff;font-size:13px;font-weight:800;letter-spacing:.06em}
+:root[data-night=on] .ap .cd{color:#0F141B}
+.ap b{font-size:18px;font-weight:800;color:var(--strong)}
+.ap svg{width:18px;height:18px;color:var(--sub)}
+.upd{margin-left:auto;display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:0 14px;border-radius:999px;background:var(--card);box-shadow:var(--shadow);font-size:13px;font-weight:800;color:var(--strong);font-variant-numeric:tabular-nums}
+.upd small{font-size:12px;font-weight:600;color:var(--mute)}
+.upd svg{width:17px;height:17px;color:var(--sub)}
+.seg3{display:flex;margin-top:12px;padding:4px;border-radius:999px;background:var(--pill)}
+.seg3 button{flex:1;min-height:44px;padding:0 6px;border-radius:999px;font-size:14px;font-weight:800;color:var(--sub);white-space:nowrap}
+.seg3 button[aria-pressed=true]{background:var(--card);color:var(--strong);box-shadow:var(--shadow)}
+.tools{display:flex;gap:8px;margin-top:12px;align-items:center}
+.dir{display:inline-flex;padding:3px;border-radius:999px;background:var(--card);box-shadow:var(--shadow)}
+.dir button{min-height:40px;min-width:56px;padding:0 12px;border-radius:999px;font-size:13px;font-weight:800;color:var(--sub)}
+.dir button[aria-pressed=true]{background:var(--strong);color:#fff}
+:root[data-night=on] .dir button[aria-pressed=true]{color:#0F141B}
+.chip{display:inline-flex;align-items:center;min-height:44px;padding:0 14px;border-radius:999px;background:var(--card);box-shadow:var(--shadow);font-size:13px;font-weight:700;color:var(--ink);white-space:nowrap}
+.srch{flex:1;min-width:0;display:flex;align-items:center;gap:6px;min-height:44px;padding:0 14px;border-radius:999px;background:var(--card);box-shadow:var(--shadow);font-size:13px;color:var(--mute);white-space:nowrap;overflow:hidden}
+.srch svg{width:17px;height:17px;flex:none}
+.plan{display:inline-flex;align-items:center;min-height:26px;padding:0 10px;border-radius:999px;background:var(--pill);font-size:12px;font-weight:800;color:var(--sub)}
+
+/* ── 時刻表の共通の骨組み（列の幅は 案A・案B で同じ） ── */
+.bd{margin-top:14px;border-radius:22px;padding:14px 10px 12px;overflow:hidden}
+.bcap{display:flex;align-items:baseline;justify-content:space-between;padding:0 6px 8px}
+.bcap b{font-size:20px;font-weight:800;letter-spacing:.08em}
+.bcap > span{font-size:12px;font-weight:700}
+.bcap .num{font-size:13px}
+.cols,.r{display:grid;grid-template-columns:50px 38px minmax(0,1fr) 34px 38px 62px;column-gap:6px;align-items:center}
+.cols{position:sticky;top:0;z-index:2;padding:6px 6px;border-radius:12px;font-size:12px;font-weight:700;line-height:1.25}
+.cols .c-g,.cols .c-st{text-align:center;white-space:nowrap;letter-spacing:-.04em}
+.bd .num{color:inherit}
+.cols > span{font-size:12px;font-weight:700}
+.r{width:100%;min-height:56px;padding:8px 6px;text-align:left;border-radius:12px}
+.r + .r{margin-top:2px}
+.c-t{display:flex;flex-direction:column;line-height:1.1}
+.sch{font-size:19px;font-weight:800;letter-spacing:-.03em}
+.chg{font-size:15px;font-weight:800;letter-spacing:-.02em;min-height:0}
+.chg:empty{display:none}
+.c-no{display:flex;flex-direction:column;line-height:1.1}
+.c-no small{font-size:12px;font-weight:800;letter-spacing:.04em}
+.c-no b{font-size:15px;font-weight:800;letter-spacing:-.02em}
+.c-dst{min-width:0;line-height:1.2}
+.c-dst b{display:block;font-size:17px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.c-dst small{display:block;font-size:12px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.c-eq{font-size:12px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.c-g{text-align:center;font-size:18px;font-weight:800}
+.c-g .na{font-size:14px;font-weight:700}
+.c-st{text-align:center;font-size:13px;font-weight:800;white-space:nowrap}
+.nowl{position:relative;display:flex;justify-content:flex-end;align-items:center;height:28px;margin:4px 6px}
+.nowl span{position:relative;z-index:1;padding:0 0 0 8px;font-size:12px;font-weight:700}
+.nowl .num{font-size:13px}
+.nowl::before{content:"";position:absolute;left:0;right:76px;top:50%;height:2px;border-radius:2px}
+.hrl{margin:12px 6px 4px;font-size:12px;font-weight:800;letter-spacing:.06em}
+.more{display:flex;justify-content:center;margin:8px 0 2px}
+.more button{min-height:44px;padding:0 16px;border-radius:999px;font-size:13px;font-weight:700}
+.src{margin:6px 6px 2px;font-size:12px;line-height:1.55}
+
+/* ── 案A：濃い紺の地に白・黄の文字（今日の便の一覧のカードの中だけ） ── */
+.bd-a{background:#0E1E36;color:#F5F7FA;box-shadow:0 10px 30px -10px rgba(14,30,54,.45)}
+.bd-a{--yl:#FFD23F;--dim:rgba(245,247,250,.55);--lab:#A9B7CB}
+.bd-a .bcap b{color:#fff}
+.bd-a .bcap > span{color:var(--lab)}
+.bd-a .bcap .num{color:#fff}
+.bd-a .cols{background:#162B4A;color:var(--lab)}
+.bd-a .r{color:#fff}
+.bd-a .r:nth-of-type(even){background:rgba(255,255,255,.035)}
+.bd-a .c-no small{color:var(--lab)}
+.bd-a .c-dst small{color:var(--lab)}
+.bd-a .c-eq{color:#C9D3E0}
+.bd-a .c-g .na{color:var(--lab)}
+.bd-a .chg{color:var(--yl)}
+.bd-a .chg.ok2{color:#fff;opacity:.75}
+.bd-a .s-ok .c-st{color:#fff}
+.bd-a .s-late .c-st,.bd-a .s-board .c-st{color:var(--yl)}
+.bd-a .s-board .c-st [data-k=st]::before{content:"";display:inline-block;width:7px;height:7px;margin:0 4px 1px 0;border-radius:50%;background:var(--yl)}
+.bd-a .s-x .c-st [data-k=st]{display:inline-block;padding:2px 8px;border-radius:999px;background:var(--yl);color:#0E1E36}
+.bd-a .s-x .sch,.bd-a .s-x .c-dst b,.bd-a .s-x .c-no b,.bd-a .s-x .c-g .num,.bd-a .s-x .c-eq{color:var(--dim)}
+.bd-a .s-gone{color:var(--dim)}
+.bd-a .s-gone .sch,.bd-a .s-gone .c-dst b,.bd-a .s-gone .c-no b,.bd-a .s-gone .c-g .num,.bd-a .s-gone .c-eq,.bd-a .s-gone .c-st{color:var(--dim)}
+.bd-a .s-est .c-st{color:var(--lab);font-weight:700}
+.bd-a .s-est .c-st [data-k=st]{border-bottom:1.5px dotted var(--lab)}
+.bd-a .nowl span{color:var(--yl)}
+.bd-a .nowl .num{color:var(--yl)}
+.bd-a .nowl::before{background:var(--yl);opacity:.5}
+.bd-a .hrl{color:var(--lab)}
+.bd-a .more button{color:#fff;background:rgba(255,255,255,.08)}
+.bd-a .src{color:var(--lab)}
+:root[data-night=on] .bd-a{background:#0B1626;box-shadow:inset 0 0 0 1px rgba(255,255,255,.06)}
+:root[data-night=on] .bd-a{--yl:#4ADE80}
+:root[data-night=on] .bd-a .s-x .c-st [data-k=st]{color:#0B1626}
+
+/* ── 案B：今の明るい角丸カードのまま列をそろえる ── */
+.bd-b{background:var(--card);box-shadow:var(--shadow);color:var(--strong)}
+.bd-b{--late:#9A3412}
+:root[data-night=on] .bd-b{--late:#FDBA74}
+.bd-b .bcap b{color:var(--strong)}
+.bd-b .bcap > span{color:var(--mute)}
+.bd-b .cols{background:#F1F3F6;color:var(--sub)}
+:root[data-night=on] .bd-b .cols{background:#232830}
+.bd-b .r{color:var(--strong)}
+.bd-b .c-no small{color:var(--sub)}
+.bd-b .c-no small::before{content:"";display:inline-block;width:3px;height:10px;margin-right:4px;border-radius:2px;background:#9CA3AF;vertical-align:-1px}
+.bd-b .r[id*="-JL"] .c-no small::before{background:var(--jal);opacity:.75}
+.bd-b .r[id*="-NH"] .c-no small::before{background:var(--ana);opacity:.75}
+.bd-b .c-dst small{color:var(--mute)}
+.bd-b .c-eq{color:var(--sub)}
+.bd-b .c-g .na{color:var(--mute)}
+.bd-b .chg{color:var(--late)}
+.bd-b .chg.ok2{color:var(--sub)}
+.bd-b .c-st [data-k=st]{display:inline-block;min-width:48px;padding:3px 4px;border-radius:999px;background:var(--pill);color:var(--sub)}
+.bd-b .s-ok .c-st [data-k=st]{color:var(--strong)}
+.bd-b .s-late .c-st [data-k=st]{background:rgba(154,52,18,.09);color:var(--late)}
+:root[data-night=on] .bd-b .s-late .c-st [data-k=st]{background:rgba(253,186,116,.12)}
+.bd-b .s-board .c-st [data-k=st]{background:var(--strong);color:#fff}
+:root[data-night=on] .bd-b .s-board .c-st [data-k=st]{color:#0F141B}
+.bd-b .s-x .c-st [data-k=st]{background:transparent;color:var(--strong);box-shadow:inset 0 0 0 1.5px var(--strong)}
+.bd-b .s-x .c-g .num{color:var(--mute)}
+.bd-b .s-x .sch,.bd-b .s-x .c-dst b,.bd-b .s-x .c-no b{color:var(--mute);text-decoration:line-through;text-decoration-thickness:1.5px}
+.bd-b .s-gone .sch,.bd-b .s-gone .c-dst b,.bd-b .s-gone .c-no b,.bd-b .s-gone .c-g .num,.bd-b .s-gone .chg{color:var(--mute)}
+.bd-b .s-est .c-st [data-k=st]{background:transparent;color:var(--mute);}
+.bd-b .s-est .c-st [data-k=st]{box-shadow:none;min-width:0;padding:0 2px;border-radius:0;border-bottom:1.5px dotted #9CA3AF;font-weight:700}
+.bd-b .nowl span{color:var(--acc)}
+.bd-b .nowl .num{color:var(--acc)}
+.bd-b .nowl::before{background:var(--acc);opacity:.35}
+.bd-b .hrl{color:var(--sub)}
+.bd-b .more button{color:var(--sub)}
+.bd-b .src{color:var(--mute)}
+
+/* ── パタパタ（状況が変わったときだけ。動きを減らす設定では動かさない） ── */
+.fch{display:inline-block;transform-origin:50% 50%;backface-visibility:hidden}
+.fch.go{animation:flip .34s var(--ease) both}
+@keyframes flip{0%{transform:perspective(200px) rotateX(-92deg);opacity:.15}55%{transform:perspective(200px) rotateX(12deg);opacity:1}100%{transform:perspective(200px) rotateX(0)}}
+.flash{animation:flash 1.6s ease-out 1 both}
+.bd-a .flash{--fl:rgba(255,210,63,.16)}
+.bd-b .flash{--fl:rgba(37,99,235,.08)}
+@keyframes flash{0%,40%{background:var(--fl)}100%{background:transparent}}
+@media (prefers-reduced-motion:reduce){.fch.go,.flash{animation:none!important}}
+html.rm .fch.go,html.rm .flash{animation:none!important}
+.demo{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px;justify-content:center}
+.demo .pill{font-size:13px}
+.demo .note{width:100%;text-align:center;font-size:12px;color:var(--mute)}
+</style></head><body><div class="head"><span class="ap"><span class="cd">HND</span><b>羽田</b><svg class="ic i-down" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></span><span class="upd"><small>最後に読んだ</small>14:22 <svg class="ic i-retry" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12a7 7 0 1 1-2.05-4.95M19 4.5v3.8h-3.8"/></svg></span></div><div class="seg3" role="group"><button type="button" aria-pressed="true">今日の便</button><button type="button" aria-pressed="false">滑走路・3D</button><button type="button" aria-pressed="false">特別塗装機</button></div><div class="tools"><span class="dir" role="group"><button type="button" aria-pressed="true">出発</button><button type="button" aria-pressed="false">到着</button></span><span class="chip">遅れあり</span><span class="srch"><svg class="ic i-search" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4 4"/></svg>便名・行き先</span></div><section class="bd bd-b" aria-label="今日の便 出発"><div class="bcap"><b>出発</b><span>今日 出発 <span class="num">186</span>便・欠航 <span class="num">3</span>便</span></div><div class="cols" aria-hidden="true"><span class="c-t">定刻<br>変更</span><span class="c-no">便名</span><span class="c-dst">行き先</span><span class="c-eq">機材</span><span class="c-g">ゲート</span><span class="c-st">状況</span></div><div class="list"><button type="button" class="r s-gone" id="dep-JL313" aria-label="14:05 JL313 福岡 出発済み"><span class="c-t"><span class="sch num">14:05</span><span class="chg num flap" data-k="t2"></span></span><span class="c-no"><small>JL</small><b class="num">313</b></span><span class="c-dst"><b>福岡</b></span><span class="c-eq">A359</span><span class="c-g"><span class="num">7</span></span><span class="c-st"><span class="flap" data-k="st">出発済み</span></span></button><button type="button" class="r s-gone" id="dep-NH247" aria-label="14:20 NH247 福岡 出発済み"><span class="c-t"><span class="sch num">14:20</span><span class="chg num flap" data-k="t2"></span></span><span class="c-no"><small>NH</small><b class="num">247</b></span><span class="c-dst"><b>福岡</b></span><span class="c-eq">B789</span><span class="c-g"><span class="num">59</span></span><span class="c-st"><span class="flap" data-k="st">出発済み</span></span></button><div class="nowl" role="separator"><span>いま <b class="num">14:22</b></span></div><button type="button" class="r s-late" id="dep-JL519" aria-label="14:30 JL519 新千歳 遅れ"><span class="c-t"><span class="sch num">14:30</span><span class="chg num flap" data-k="t2">14:45</span></span><span class="c-no"><small>JL</small><b class="num">519</b></span><span class="c-dst"><b>新千歳</b></span><span class="c-eq">A359</span><span class="c-g"><span class="num">15</span></span><span class="c-st"><span class="flap" data-k="st">遅れ</span></span></button><button type="button" class="r s-est" id="dep-BC513" aria-label="14:35 BC513 神戸 推定"><span class="c-t"><span class="sch num">14:35</span><span class="chg num flap" data-k="t2"></span></span><span class="c-no"><small>BC</small><b class="num">513</b></span><span class="c-dst"><b>神戸</b></span><span class="c-eq">B738</span><span class="c-g"><span class="na">—</span></span><span class="c-st"><span class="flap" data-k="st">推定</span></span></button><button type="button" class="r s-board" id="dep-JL461" aria-label="14:40 JL461 松山 搭乗中"><span class="c-t"><span class="sch num">14:40</span><span class="chg num flap" data-k="t2"></span></span><span class="c-no"><small>JL</small><b class="num">461</b></span><span class="c-dst"><b>松山</b></span><span class="c-eq">B738</span><span class="c-g"><span class="num">8</span></span><span class="c-st"><span class="flap" data-k="st">搭乗中</span></span></button><button type="button" class="r s-ok" id="dep-NH65" aria-label="14:45 NH65 新千歳 定刻"><span class="c-t"><span class="sch num">14:45</span><span class="chg num flap" data-k="t2"></span></span><span class="c-no"><small>NH</small><b class="num">65</b></span><span class="c-dst"><b>新千歳</b></span><span class="c-eq">B772</span><span class="c-g"><span class="num">62</span></span><span class="c-st"><span class="flap" data-k="st">定刻</span></span></button><button type="button" class="r s-x" id="dep-NH469" aria-label="14:50 NH469 那覇 欠航"><span class="c-t"><span class="sch num">14:50</span><span class="chg num flap" data-k="t2"></span></span><span class="c-no"><small>NH</small><b class="num">469</b></span><span class="c-dst"><b>那覇</b></span><span class="c-eq">B763</span><span class="c-g"><span class="num">61</span></span><span class="c-st"><span class="flap" data-k="st">欠航</span></span></button><button type="button" class="r s-ok" id="dep-JL907" aria-label="14:55 JL907 那覇 定刻"><span class="c-t"><span class="sch num">14:55</span><span class="chg num flap" data-k="t2"></span></span><span class="c-no"><small>JL</small><b class="num">907</b></span><span class="c-dst"><b>那覇</b></span><span class="c-eq">A359</span><span class="c-g"><span class="num">13</span></span><span class="c-st"><span class="flap" data-k="st">定刻</span></span></button><div class="hrl">15時台</div><button type="button" class="r s-ok" id="dep-NH255" aria-label="15:00 NH255 福岡 定刻"><span class="c-t"><span class="sch num">15:00</span><span class="chg num flap" data-k="t2"></span></span><span class="c-no"><small>NH</small><b class="num">255</b></span><span class="c-dst"><b>福岡</b></span><span class="c-eq">B789</span><span class="c-g"><span class="num">64</span></span><span class="c-st"><span class="flap" data-k="st">定刻</span></span></button><button type="button" class="r s-ok" id="dep-NH1793" aria-label="15:05 NH1793 石垣 定刻"><span class="c-t"><span class="sch num">15:05</span><span class="chg num flap" data-k="t2"></span></span><span class="c-no"><small>NH</small><b class="num">1793</b></span><span class="c-dst"><b>石垣</b><small>那覇経由</small></span><span class="c-eq">B738</span><span class="c-g"><span class="num">56</span></span><span class="c-st"><span class="flap" data-k="st">定刻</span></span></button><button type="button" class="r s-late" id="dep-JL323" aria-label="15:10 JL323 福岡 遅れ"><span class="c-t"><span class="sch num">15:10</span><span class="chg num flap" data-k="t2">15:35</span></span><span class="c-no"><small>JL</small><b class="num">323</b></span><span class="c-dst"><b>福岡</b></span><span class="c-eq">B763</span><span class="c-g"><span class="num">9</span></span><span class="c-st"><span class="flap" data-k="st">遅れ</span></span></button><button type="button" class="r s-ok" id="dep-HD23" aria-label="15:15 HD23 新千歳 定刻"><span class="c-t"><span class="sch num">15:15</span><span class="chg num flap" data-k="t2"></span></span><span class="c-no"><small>HD</small><b class="num">23</b></span><span class="c-dst"><b>新千歳</b></span><span class="c-eq">B763</span><span class="c-g"><span class="num">18</span></span><span class="c-st"><span class="flap" data-k="st">定刻</span></span></button></div><div class="more"><button type="button">16時台から先を見る</button></div><p class="src">出典 ODPT（運航情報 14時22分・時刻表 11月26日時点）。「推定」は時刻表にない便で、全機の記録からの見込み（出典 adsb.lol・ODbL）。ゲートは変わることがあります。</p></section><div class="demo"><p class="note">見本：押すと状況が変わり、変わったセルだけパタパタ（動きを減らす設定では字が変わるだけ）</p><button type="button" class="pill" data-demo="chg">NH 65 が遅れる</button><button type="button" class="pill" data-demo="board">JL 907 が搭乗中に</button><button type="button" class="pill" data-demo="x">NH 255 が欠航</button><button type="button" class="pill" data-demo="back">もとに戻す</button></div><nav class="tabs" aria-label="下のタブ"><button type="button"><svg class="ic i-home" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11l8-7 8 7v8a1 1 0 0 1-1 1h-4v-6H9v6H5a1 1 0 0 1-1-1z"/></svg><span>ホーム</span></button><button type="button"><svg class="ic i-book" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5c3-1.3 5.5-1 8 1 2.5-2 5-2.3 8-1v13c-3-1.3-5.5-1-8 1-2.5-2-5-2.3-8-1zM12 6.5v13"/></svg><span>図鑑</span></button><button type="button"><svg class="ic i-plane" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 4.5c-.6-.6-2-.5-2.9.4L14 9 5.5 7 4 8.5l7 3.5-3.2 3.2-2.6-.4L4 16l3.3 1.7L9 21l1.2-1.2-.4-2.6L13 14l3.5 7 1.5-1.5L16 11l4.1-4.1c.9-.9 1-2.3.4-2.9z"/></svg><span>フライト</span></button><button type="button" aria-current="page"><svg class="ic i-ops" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3.5"/><path d="M12 12l5.5-5.5"/></svg><span>いまの空港</span><i class="dt"></i></button><button type="button"><svg class="ic i-user" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4.5 20a7.5 7.5 0 0 1 15 0"/></svg><span>マイページ</span></button></nav><script>var DEMO={"chg": [["dep-NH65", "late", "遅れ", "15:05"]], "board": [["dep-JL907", "board", "搭乗中"]], "x": [["dep-NH255", "x", "欠航"]], "back": [["dep-NH65", "ok", "定刻", ""], ["dep-JL907", "ok", "定刻"], ["dep-NH255", "ok", "定刻"]]};
+(function(){
+  var q = new URLSearchParams(location.search);
+  if (q.get('n') === '1') document.documentElement.setAttribute('data-night','on');
+  if (q.get('rm') === '1') document.documentElement.classList.add('rm');
+  function chars(el, text){
+    el.textContent = '';
+    var spans = [];
+    Array.from(text).forEach(function(c, i){
+      var s = document.createElement('span'); s.className = 'fch'; s.textContent = c === ' ' ? ' ' : c;
+      s.style.animationDelay = (i * 0.045) + 's'; el.appendChild(s); spans.push(s);
+    });
+    return spans;
+  }
+  var reduce = function(){ return document.documentElement.classList.contains('rm') || matchMedia('(prefers-reduced-motion: reduce)').matches; };
+  // 状況を変える：変わったセルの字だけをパタパタ（動きを減らす設定では字を置き換えるだけ）
+  window.setState = function(id, st, label, t2){
+    var r = document.getElementById(id); if (!r) return;
+    r.className = r.className.replace(/s-\w+/, 's-' + st);
+    var cells = [[r.querySelector('[data-k=st]'), label]];
+    var tc = r.querySelector('[data-k=t2]');
+    if (t2 !== undefined && tc) { tc.className = 'chg num flap' + (st === 'late' ? '' : ' ok2'); cells.push([tc, t2]); }
+    cells.forEach(function(p){
+      if (p[0].textContent === p[1]) return;
+      var sp = chars(p[0], p[1]);
+      if (!reduce()) sp.forEach(function(s){ s.classList.add('go'); });
+    });
+    if (!reduce()) { r.classList.remove('flash'); void r.offsetWidth; r.classList.add('flash'); }
+  };
+  // 撮影用：動きを t 秒の所で止める
+  window.__frame = function(t){
+    document.querySelectorAll('.fch.go,.flash').forEach(function(s){
+      var d = parseFloat(s.style.animationDelay || 0);
+      s.style.animationPlayState = 'paused'; s.style.animationDelay = (-(t - d)) + 's';
+    });
+  };
+  window.__demo = DEMO;
+  document.querySelectorAll('[data-demo]').forEach(function(b){
+    b.addEventListener('click', function(){ var d = DEMO[b.dataset.demo]; d.forEach(function(a){ setState.apply(null, a); }); });
+  });
+})();
+</script></body></html>
