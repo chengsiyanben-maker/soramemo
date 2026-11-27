@@ -16,7 +16,18 @@ begin
 end $$;
 
 -- 既に誰かが作っていても、強い力は付けない形にそろえる（ログインの有無は本人が決めるので触らない）
-alter role pm_reader noinherit nosuperuser nocreatedb nocreaterole noreplication nobypassrls;
+-- Supabase の postgres は superuser ではないため、権限の足りない部分は飛ばす（作るときに既に弱い形で作っている）
+do $$
+begin
+  if exists (select 1 from pg_roles where rolname = 'pm_reader' and (rolsuper or rolbypassrls or rolreplication)) then
+    raise exception 'pm_reader に強い力が付いています。本人の確認が必要です';
+  end if;
+  begin
+    alter role pm_reader noinherit nocreatedb nocreaterole;
+  exception when insufficient_privilege then
+    null;
+  end;
+end $$;
 alter role pm_reader set default_transaction_read_only = on;
 alter role pm_reader set statement_timeout = '60s';
 alter role pm_reader set idle_in_transaction_session_timeout = '120s';
