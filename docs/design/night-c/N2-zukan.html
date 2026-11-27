@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<title>N2 図鑑（夜）｜そらメモ 夜の画面</title>
+<style>*{box-sizing:border-box}html,body{margin:0}
+:root{--gothic:"Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic UI","Noto Sans JP","Noto Sans CJK JP",system-ui,sans-serif;
+  --n-bg:#05080D;        /* 画面の地 */
+  --n-panel:#0D131B;     /* カード（計器の枠） */
+  --n-panel2:#141C26;    /* 押しボタン・入力欄・シート */
+  --n-bezel:#232E3B;     /* 枠のふち（1px・内側） */
+  --n-ink:#D3DBE4;       /* 本文（真っ白にしない） */
+  --n-strong:#E6ECF2;    /* 見出し */
+  --n-sub:#93A0B0;       /* 補足・単位 */
+  --n-g:#5EDB94;         /* 光る色1 緑：計器の数字・いま選んでいるもの・実績 */
+  --n-a:#F0AE4E;         /* 光る色2 琥珀：押してほしい所・判定範囲・予定・注意 */
+  --n-a-wash:#1D1810;    /* 琥珀の薄い地 */
+  --n-jal:#E37A86;       /* 会社の印（光らせない・細い線だけ） */
+  --n-ana:#86A8E6;
+  --n-stop:#E37A86;      /* 欠航（字と一緒にだけ使う） */
+  --n-glow:0 0 7px rgba(94,219,148,.32);   /* 数字の光り */
+  --n-glow-a:0 0 7px rgba(240,174,78,.30);
+  --n-frame:inset 0 0 0 1px var(--n-bezel);
+  --n-key:linear-gradient(#18212C,#10171F);
+  --num:ui-monospace,"SF Mono","Menlo","Roboto Mono","DejaVu Sans Mono",monospace;
+
+  }
+body{background:var(--n-bg);color:var(--n-ink);font-family:var(--gothic);font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased}
+.phone{position:relative;max-width:420px;min-height:100vh;min-height:100svh;margin:0 auto;background:var(--n-bg);overflow:hidden}
+.pg{padding:16px 16px 120px}
+.num{font-family:var(--num);font-weight:700;color:var(--n-g);text-shadow:var(--n-glow);font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.num.a{color:var(--n-a);text-shadow:var(--n-glow-a)}
+.num.w{color:var(--n-strong);text-shadow:none}
+.u{font-size:13px;color:var(--n-sub);font-weight:500;margin-left:3px;font-family:var(--gothic);text-shadow:none;letter-spacing:0}
+.card{background:var(--n-panel);border-radius:14px;box-shadow:var(--n-frame);padding:14px 16px}
+.lbl{font-size:13px;font-weight:700;color:var(--n-sub);letter-spacing:.06em;margin:22px 4px 8px}
+h1{font-size:26px;font-weight:800;color:var(--n-strong);margin:14px 4px 4px;letter-spacing:.01em}
+.sub{color:var(--n-sub);font-size:13px}
+.key{min-height:44px;display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:0 18px;border-radius:999px;background:var(--n-key);box-shadow:inset 0 0 0 1px #2C3846,inset 0 1px 0 rgba(255,255,255,.06);color:var(--n-ink);font-weight:700;font-size:15px;white-space:nowrap}
+.key.pri{color:var(--n-a);box-shadow:inset 0 0 0 1.5px var(--n-a),inset 0 1px 0 rgba(255,255,255,.06)}
+.key.on{color:var(--n-g);box-shadow:inset 0 0 0 1.5px var(--n-g)}
+.key.sm{min-height:44px;padding:0 14px;font-size:14px}
+.back{display:inline-flex;align-items:center;min-height:44px;padding:0 16px 0 12px;border-radius:999px;background:var(--n-panel);box-shadow:var(--n-frame);font-weight:700;color:var(--n-strong);font-size:15px}
+.band{display:flex;gap:6px;margin:14px 0 4px;padding:4px;background:var(--n-panel);border-radius:999px;box-shadow:var(--n-frame)}
+.band span{flex:1;min-height:44px;display:flex;align-items:center;justify-content:center;border-radius:999px;font-size:14px;font-weight:700;color:var(--n-sub)}
+.band span.on{color:var(--n-g);background:var(--n-panel2);box-shadow:inset 0 0 0 1.5px var(--n-g)}
+.row{display:flex;align-items:center;gap:12px;min-height:56px}
+.row+.row{margin-top:2px}
+.row .t{flex:1;min-width:0}
+.row .t b{display:block;font-size:16px;color:var(--n-strong)}
+.row .t small{display:block;font-size:13px;color:var(--n-sub)}
+.row .chev{color:var(--n-sub);font-size:18px}
+.ic{flex:none;width:44px;height:44px;border-radius:999px;background:var(--n-panel2);box-shadow:var(--n-frame);display:flex;align-items:center;justify-content:center}
+.ic svg{width:20px;height:20px;fill:none;stroke:var(--n-ink);stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.tag{display:inline-flex;align-items:center;height:24px;padding:0 9px;border-radius:999px;font-size:13px;font-weight:700;color:var(--n-sub);box-shadow:inset 0 0 0 1px #2C3846}
+.tag.g{color:var(--n-g);box-shadow:inset 0 0 0 1px rgba(94,219,148,.55)}
+.tag.a{color:var(--n-a);box-shadow:inset 0 0 0 1px rgba(240,174,78,.6)}
+nav.tabs{position:fixed;left:50%;transform:translateX(-50%);bottom:0;width:min(420px,100vw);display:flex;gap:6px;padding:8px 10px calc(12px + env(safe-area-inset-bottom,0));background:rgba(5,8,13,.96);box-shadow:inset 0 1px 0 var(--n-bezel);z-index:30}
+nav.tabs span{flex:1;min-height:54px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;border-radius:14px;font-size:13px;font-weight:700;color:var(--n-sub);background:var(--n-key);box-shadow:inset 0 0 0 1px #222C38}
+nav.tabs span svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+nav.tabs span.on{color:var(--n-g);box-shadow:inset 0 0 0 1.5px var(--n-g)}
+.foot{font-size:13px;color:var(--n-sub);margin:22px 4px 0}
+.ann{position:relative;z-index:90;max-width:392px;margin:16px auto 40px;font:13px/1.7 var(--gothic);background:#FFF8D6;color:#5A4A12;padding:12px 14px;border-radius:12px}.ann ul{margin:4px 0 0;padding-left:1.2em}
+
+.hd{display:flex;align-items:flex-end;justify-content:space-between;margin:10px 4px 0}
+.hd .num{font-size:34px;line-height:1}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.zk{background:var(--n-panel);border-radius:16px;box-shadow:var(--n-frame);padding:12px}
+.zk .sil{height:58px;border-radius:10px;background:var(--n-panel2);display:flex;align-items:center;justify-content:center;margin-bottom:8px}
+.zk .sil svg{width:84px;height:40px}
+.zk b{display:block;font-size:15px;color:var(--n-strong);line-height:1.35}
+.zk small{display:block;font-size:13px;color:var(--n-sub)}
+.zk .st{margin-top:6px;display:flex;justify-content:space-between;align-items:center}
+.zk .st .num{font-size:13px;color:var(--n-sub);text-shadow:none;font-weight:500}
+.zk.no{background:transparent;box-shadow:inset 0 0 0 1px #1A232E}
+.zk.no b{color:var(--n-sub)}
+</style></head><body>
+<main class="phone"><div class="pg">
+<h1>図鑑</h1><div class="hd"><span class="sub">特別塗装機</span><span><span class="num">7</span><span class="u">/42 機 集めた</span></span></div>
+<div class="band"><span class="on">すべて</span><span>集めた</span><span>まだ</span></div>
+<div class="grid"><div class="zk "><div class="sil"><svg viewBox="0 0 84 40" aria-hidden="true"><path d="M6 21h56l12-8h4l-6 9 6 1-4 2H8a3 3 0 0 1 0-4z M30 21l10-12h6l-6 12 M34 24l8 9h5l-4-9" fill="none" stroke="#5EDB94" stroke-width="1.6" stroke-linejoin="round"/></svg></div><b>記念塗装機 A（見本）</b><small>B787-9 ・ JA8xxA</small><div class="st"><span class="tag g">集めた</span><span class="num">11/02</span></div></div><div class="zk "><div class="sil"><svg viewBox="0 0 84 40" aria-hidden="true"><path d="M6 21h56l12-8h4l-6 9 6 1-4 2H8a3 3 0 0 1 0-4z M30 21l10-12h6l-6 12 M34 24l8 9h5l-4-9" fill="none" stroke="#5EDB94" stroke-width="1.6" stroke-linejoin="round"/></svg></div><b>記念塗装機 B（見本）</b><small>A350-900 ・ JA0xXJ</small><div class="st"><span class="tag g">集めた</span><span class="num">10/28</span></div></div><div class="zk "><div class="sil"><svg viewBox="0 0 84 40" aria-hidden="true"><path d="M6 21h56l12-8h4l-6 9 6 1-4 2H8a3 3 0 0 1 0-4z M30 21l10-12h6l-6 12 M34 24l8 9h5l-4-9" fill="none" stroke="#93A0B0" stroke-width="1.6" stroke-linejoin="round"/></svg></div><b>記念塗装機 C（見本）</b><small>B767-300ER ・ JA6xxJ</small><div class="st"><span class="tag ">見た</span><span class="num">10/12</span></div></div><div class="zk "><div class="sil"><svg viewBox="0 0 84 40" aria-hidden="true"><path d="M6 21h56l12-8h4l-6 9 6 1-4 2H8a3 3 0 0 1 0-4z M30 21l10-12h6l-6 12 M34 24l8 9h5l-4-9" fill="none" stroke="#93A0B0" stroke-width="1.6" stroke-linejoin="round"/></svg></div><b>記念塗装機 D（見本）</b><small>B737-800 ・ JA3xxK</small><div class="st"><span class="tag ">見た</span><span class="num">09/30</span></div></div><div class="zk no"><div class="sil"><svg viewBox="0 0 84 40" aria-hidden="true"><path d="M6 21h56l12-8h4l-6 9 6 1-4 2H8a3 3 0 0 1 0-4z M30 21l10-12h6l-6 12 M34 24l8 9h5l-4-9" fill="none" stroke="#3E4B5B" stroke-width="1.6" stroke-linejoin="round"/></svg></div><b>記念塗装機 E（見本）</b><small>B777-300ER</small><div class="st"><span class="tag ">まだ</span><span class="num"></span></div></div><div class="zk no"><div class="sil"><svg viewBox="0 0 84 40" aria-hidden="true"><path d="M6 21h56l12-8h4l-6 9 6 1-4 2H8a3 3 0 0 1 0-4z M30 21l10-12h6l-6 12 M34 24l8 9h5l-4-9" fill="none" stroke="#3E4B5B" stroke-width="1.6" stroke-linejoin="round"/></svg></div><b>記念塗装機 F（見本）</b><small>A321neo</small><div class="st"><span class="tag ">まだ</span><span class="num"></span></div></div></div>
+<p class="foot">機体の名前と塗装は見本です。非公式アプリです。航空会社・空港とは関係ありません。</p>
+</div><nav class="tabs" aria-label="タブ"><span class=""><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11l8-7 8 7v8a1 1 0 0 1-1 1h-4v-6h-6v6H5a1 1 0 0 1-1-1z"/></svg>ホーム</span><span class="on"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h6v14H4zM14 5h6v14h-6z"/></svg>図鑑</span><span class=""><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 13l7-1 5-7h2l-2 7 4-1 1-2h2l-1 4 1 4h-2l-1-2-4-1 2 7h-2l-5-7-7-1z"/></svg>フライト</span><span class=""><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v3M8 6h8M9 6l-2 15M15 6l2 15M8.5 13h7"/></svg>運用</span><span class=""><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="14" r="6"/><path d="M12 14V11M10 3h4M12 3v3"/></svg>修行</span></nav></main>
+<aside class="ann"><b>メモ（本番には出ません）</b><ul><li>図鑑は特別塗装機だけ（決定どおり）。昼の「金」は夜では琥珀にまとめず、集めた＝緑の札と緑の線画にした（光る色を2つに収めるため）</li><li>「見た」は灰色の線画＋灰色の札、「まだ」は枠だけで地を抜いた。数（7/42）は計器の数字で光らせる</li><li>機体の名前は見本（実在の塗装名・ロゴは描かない）</li></ul></aside>
+<script>if(window!==window.top){var a=document.querySelector('.ann');if(a)a.remove()}</script>
+</body></html>

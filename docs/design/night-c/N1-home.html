@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<title>N1 ホーム（夜）｜そらメモ 夜の画面</title>
+<style>*{box-sizing:border-box}html,body{margin:0}
+:root{--gothic:"Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic UI","Noto Sans JP","Noto Sans CJK JP",system-ui,sans-serif;
+  --n-bg:#05080D;        /* 画面の地 */
+  --n-panel:#0D131B;     /* カード（計器の枠） */
+  --n-panel2:#141C26;    /* 押しボタン・入力欄・シート */
+  --n-bezel:#232E3B;     /* 枠のふち（1px・内側） */
+  --n-ink:#D3DBE4;       /* 本文（真っ白にしない） */
+  --n-strong:#E6ECF2;    /* 見出し */
+  --n-sub:#93A0B0;       /* 補足・単位 */
+  --n-g:#5EDB94;         /* 光る色1 緑：計器の数字・いま選んでいるもの・実績 */
+  --n-a:#F0AE4E;         /* 光る色2 琥珀：押してほしい所・判定範囲・予定・注意 */
+  --n-a-wash:#1D1810;    /* 琥珀の薄い地 */
+  --n-jal:#E37A86;       /* 会社の印（光らせない・細い線だけ） */
+  --n-ana:#86A8E6;
+  --n-stop:#E37A86;      /* 欠航（字と一緒にだけ使う） */
+  --n-glow:0 0 7px rgba(94,219,148,.32);   /* 数字の光り */
+  --n-glow-a:0 0 7px rgba(240,174,78,.30);
+  --n-frame:inset 0 0 0 1px var(--n-bezel);
+  --n-key:linear-gradient(#18212C,#10171F);
+  --num:ui-monospace,"SF Mono","Menlo","Roboto Mono","DejaVu Sans Mono",monospace;
+
+  }
+body{background:var(--n-bg);color:var(--n-ink);font-family:var(--gothic);font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased}
+.phone{position:relative;max-width:420px;min-height:100vh;min-height:100svh;margin:0 auto;background:var(--n-bg);overflow:hidden}
+.pg{padding:16px 16px 120px}
+.num{font-family:var(--num);font-weight:700;color:var(--n-g);text-shadow:var(--n-glow);font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.num.a{color:var(--n-a);text-shadow:var(--n-glow-a)}
+.num.w{color:var(--n-strong);text-shadow:none}
+.u{font-size:13px;color:var(--n-sub);font-weight:500;margin-left:3px;font-family:var(--gothic);text-shadow:none;letter-spacing:0}
+.card{background:var(--n-panel);border-radius:14px;box-shadow:var(--n-frame);padding:14px 16px}
+.lbl{font-size:13px;font-weight:700;color:var(--n-sub);letter-spacing:.06em;margin:22px 4px 8px}
+h1{font-size:26px;font-weight:800;color:var(--n-strong);margin:14px 4px 4px;letter-spacing:.01em}
+.sub{color:var(--n-sub);font-size:13px}
+.key{min-height:44px;display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:0 18px;border-radius:999px;background:var(--n-key);box-shadow:inset 0 0 0 1px #2C3846,inset 0 1px 0 rgba(255,255,255,.06);color:var(--n-ink);font-weight:700;font-size:15px;white-space:nowrap}
+.key.pri{color:var(--n-a);box-shadow:inset 0 0 0 1.5px var(--n-a),inset 0 1px 0 rgba(255,255,255,.06)}
+.key.on{color:var(--n-g);box-shadow:inset 0 0 0 1.5px var(--n-g)}
+.key.sm{min-height:44px;padding:0 14px;font-size:14px}
+.back{display:inline-flex;align-items:center;min-height:44px;padding:0 16px 0 12px;border-radius:999px;background:var(--n-panel);box-shadow:var(--n-frame);font-weight:700;color:var(--n-strong);font-size:15px}
+.band{display:flex;gap:6px;margin:14px 0 4px;padding:4px;background:var(--n-panel);border-radius:999px;box-shadow:var(--n-frame)}
+.band span{flex:1;min-height:44px;display:flex;align-items:center;justify-content:center;border-radius:999px;font-size:14px;font-weight:700;color:var(--n-sub)}
+.band span.on{color:var(--n-g);background:var(--n-panel2);box-shadow:inset 0 0 0 1.5px var(--n-g)}
+.row{display:flex;align-items:center;gap:12px;min-height:56px}
+.row+.row{margin-top:2px}
+.row .t{flex:1;min-width:0}
+.row .t b{display:block;font-size:16px;color:var(--n-strong)}
+.row .t small{display:block;font-size:13px;color:var(--n-sub)}
+.row .chev{color:var(--n-sub);font-size:18px}
+.ic{flex:none;width:44px;height:44px;border-radius:999px;background:var(--n-panel2);box-shadow:var(--n-frame);display:flex;align-items:center;justify-content:center}
+.ic svg{width:20px;height:20px;fill:none;stroke:var(--n-ink);stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.tag{display:inline-flex;align-items:center;height:24px;padding:0 9px;border-radius:999px;font-size:13px;font-weight:700;color:var(--n-sub);box-shadow:inset 0 0 0 1px #2C3846}
+.tag.g{color:var(--n-g);box-shadow:inset 0 0 0 1px rgba(94,219,148,.55)}
+.tag.a{color:var(--n-a);box-shadow:inset 0 0 0 1px rgba(240,174,78,.6)}
+nav.tabs{position:fixed;left:50%;transform:translateX(-50%);bottom:0;width:min(420px,100vw);display:flex;gap:6px;padding:8px 10px calc(12px + env(safe-area-inset-bottom,0));background:rgba(5,8,13,.96);box-shadow:inset 0 1px 0 var(--n-bezel);z-index:30}
+nav.tabs span{flex:1;min-height:54px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;border-radius:14px;font-size:13px;font-weight:700;color:var(--n-sub);background:var(--n-key);box-shadow:inset 0 0 0 1px #222C38}
+nav.tabs span svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+nav.tabs span.on{color:var(--n-g);box-shadow:inset 0 0 0 1.5px var(--n-g)}
+.foot{font-size:13px;color:var(--n-sub);margin:22px 4px 0}
+.ann{position:relative;z-index:90;max-width:392px;margin:16px auto 40px;font:13px/1.7 var(--gothic);background:#FFF8D6;color:#5A4A12;padding:12px 14px;border-radius:12px}.ann ul{margin:4px 0 0;padding-left:1.2em}
+
+.map{position:absolute;left:0;right:0;top:0;height:300px}
+.map svg{width:100%;height:100%;display:block}
+.top{position:absolute;left:14px;right:14px;top:12px;display:flex;justify-content:space-between;align-items:flex-start;z-index:5}
+.sw{display:flex;padding:3px;border-radius:999px;background:rgba(13,19,27,.94);box-shadow:var(--n-frame)}
+.sw span{min-height:40px;display:flex;align-items:center;padding:0 13px;border-radius:999px;font-size:13px;font-weight:700;color:var(--n-sub)}
+.sw span.on{background:var(--n-panel2);color:var(--n-strong);box-shadow:inset 0 0 0 1px #34404F}
+.mp{min-height:46px;display:flex;align-items:center;gap:6px;padding:0 14px 0 11px;border-radius:999px;background:rgba(13,19,27,.94);box-shadow:var(--n-frame);color:var(--n-strong);font-size:13px;font-weight:800}
+.mp svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8}
+.here{position:absolute;left:0;top:74px;z-index:5;min-height:44px;display:flex;align-items:center;padding:0 16px 0 14px;border-radius:0 999px 999px 0;background:rgba(13,19,27,.94);box-shadow:var(--n-frame);font-weight:800;color:var(--n-strong);font-size:15px}
+.here .num{font-size:15px;margin-left:6px}
+.cred{position:absolute;left:14px;top:226px;z-index:5;font-size:13px;color:var(--n-sub);background:rgba(13,19,27,.9);padding:2px 10px;border-radius:6px}
+.sheet{position:relative;margin-top:262px;background:var(--n-bg);border-radius:22px 22px 0 0;box-shadow:0 -1px 0 var(--n-bezel);padding:10px 16px 120px;z-index:4}
+.grip{width:40px;height:4px;border-radius:9px;background:#2C3846;margin:0 auto 12px}
+.stub{display:flex;border-radius:16px;overflow:hidden;box-shadow:var(--n-frame)}
+.stub .l{flex:1;background:var(--n-panel);padding:12px 16px}
+.stub .l small{font-size:13px;color:var(--n-sub)}
+.code{display:flex;gap:6px;margin:6px 0 4px}
+.code i{font-style:normal;width:36px;height:42px;border-radius:7px;background:var(--n-panel2);box-shadow:inset 0 -1px 0 #000,inset 0 0 0 1px #2C3846;display:flex;align-items:center;justify-content:center;font:800 24px var(--gothic);color:var(--n-strong)}
+.stub .l b{display:block;font-size:16px;color:var(--n-strong)}
+.stub .l .d{font-size:13px;color:var(--n-sub)}
+.stub .r{width:96px;background:var(--n-panel2);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;font-size:13px;font-weight:700;color:var(--n-sub);line-height:1.45;padding:8px;box-shadow:inset 1px 0 0 var(--n-bezel)}
+.nums{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
+.nums div{background:var(--n-panel);border-radius:14px;box-shadow:var(--n-frame);padding:9px 12px 8px}
+.nums small{display:block;font-size:13px;color:var(--n-sub);font-weight:700}
+.nums .num{font-size:30px;line-height:1.15}
+.fl{display:flex;align-items:center;gap:12px;margin-top:10px}
+.fl .t{flex:1}
+.fl .t small{display:block;font-size:13px;color:var(--n-sub);font-weight:700}
+.fl .t b{font-size:16px;color:var(--n-strong)}
+.fl .num{font-size:24px}
+.rec{display:flex;gap:8px;margin-top:8px}
+.rec div{flex:1;background:var(--n-panel);border-radius:14px;box-shadow:var(--n-frame);padding:8px 6px 6px;text-align:center}
+.rec .cd{display:flex;gap:3px;justify-content:center}
+.rec .cd i{font-style:normal;width:22px;height:28px;border-radius:5px;background:var(--n-panel2);box-shadow:inset 0 0 0 1px #2C3846;font:800 16px/28px var(--gothic);color:var(--n-strong)}
+.rec small{display:block;font-size:13px;color:var(--n-sub);margin-top:3px;font-family:var(--num)}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:90px;width:calc(min(420px,100vw) - 24px);z-index:35;background:var(--n-panel2);border-radius:16px;box-shadow:inset 0 0 0 1px var(--n-g),0 10px 30px rgba(0,0,0,.6);padding:10px 8px 10px 14px;display:flex;align-items:center;gap:10px}
+.toast .ic2{flex:none;width:32px;height:32px;border-radius:999px;display:flex;align-items:center;justify-content:center;background:var(--n-bg)}
+.toast .ic2 svg{width:18px;height:18px;fill:none;stroke:var(--n-g);stroke-width:1.8}
+.toast p{margin:0;flex:1;font-size:14px;line-height:1.45;color:var(--n-ink)}
+.toast p .num{font-size:14px}
+</style></head><body>
+<main class="phone">
+<div class="map"><svg viewBox="0 0 390 300" preserveAspectRatio="xMidYMid slice" role="img" aria-label="夜の航空図：羽田の判定範囲と、いまいる所からの距離の輪">
+<rect width="390" height="300" fill="#070C12"/>
+<path d="M0 0H300C282 40 262 70 230 96C196 122 160 128 128 160C100 188 70 220 0 236Z" fill="#0C1219" stroke="#2C3846" stroke-width="1.5"/>
+<g stroke="rgba(147,160,176,.07)" stroke-width="1"><path d="M0 48H390M0 96H390M0 144H390M0 192H390M0 240H390M48 0V300M96 0V300M144 0V300M192 0V300M240 0V300M288 0V300M336 0V300"/></g>
+<g fill="none" stroke="#2C3846" stroke-width="1" stroke-dasharray="2 5"><circle cx="-40" cy="250" r="136"/><circle cx="-40" cy="250" r="273"/></g>
+<g font-family="ui-monospace,DejaVu Sans Mono,monospace" font-size="13" fill="#93A0B0"><text x="80" y="181">5km</text><text x="196" y="130">10km</text></g>
+<g stroke="#3E4B5B" stroke-width="5" stroke-linecap="round"><path d="M268 210L296 120M298 222L326 132M244 170L330 196M262 236L336 254"/></g>
+<circle cx="292" cy="186" r="74" fill="none" stroke="#F0AE4E" stroke-width="1.6" stroke-dasharray="6 6"/>
+<circle cx="292" cy="186" r="4" fill="#5EDB94"/>
+<text x="212" y="178" text-anchor="end" font-family="Hiragino Sans,Noto Sans CJK JP,sans-serif" font-size="15" font-weight="700" fill="#E6ECF2">HND 羽田</text>
+<text x="212" y="196" text-anchor="end" font-family="Hiragino Sans,Noto Sans CJK JP,sans-serif" font-size="13" fill="#F0AE4E">判定範囲 2.0km</text>
+<g fill="none" stroke="#93A0B0" stroke-width="1.4"><circle cx="26" cy="134" r="5"/></g>
+<text x="36" y="139" font-family="Hiragino Sans,Noto Sans CJK JP,sans-serif" font-size="13" fill="#93A0B0">NRT 成田 58km</text>
+</svg></div>
+<div class="top"><div class="sw"><span class="on">スタンプラリー</span><span>エアライン経営</span></div><span class="mp"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 20c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>マイページ</span></div>
+<div class="here">← いまここ<span class="num">12.4</span><span class="u">km</span></div>
+<div class="cred">地図：国土地理院</div>
+<section class="sheet"><div class="grip"></div>
+<div class="stub"><div class="l"><small>いちばん近い空港</small><div class="code"><i>H</i><i>N</i><i>D</i></div><b>東京国際空港（羽田）</b><span class="d">範囲まで 12.4km</span></div><div class="r">範囲に<br>入ったら<br>引けます</div></div>
+<div class="nums"><div><small>今日の印</small><span class="num">0</span></div><div><small>空港</small><span class="num">12</span><span class="u">/86</span></div><div><small>フライト</small><span class="num">8</span><span class="u">便</span></div></div>
+<div class="card fl"><div class="t"><small>これから乗る便</small><b>NH 247　羽田 → 福岡</b></div><div style="text-align:right"><span class="num">20:55</span><div class="sub">B787-9</div></div></div>
+<div class="lbl" style="margin-top:14px">最近の印</div>
+<div class="rec"><div><div class="cd"><i>F</i><i>U</i><i>K</i></div><small>11/02</small></div><div><div class="cd"><i>I</i><i>T</i><i>M</i></div><small>10/28</small></div><div><div class="cd"><i>C</i><i>T</i><i>S</i></div><small>10/12</small></div></div>
+</section>
+
+<nav class="tabs" aria-label="タブ"><span class="on"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11l8-7 8 7v8a1 1 0 0 1-1 1h-4v-6h-6v6H5a1 1 0 0 1-1-1z"/></svg>ホーム</span><span class=""><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h6v14H4zM14 5h6v14h-6z"/></svg>図鑑</span><span class=""><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 13l7-1 5-7h2l-2 7 4-1 1-2h2l-1 4 1 4h-2l-1-2-4-1 2 7h-2l-5-7-7-1z"/></svg>フライト</span><span class=""><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v3M8 6h8M9 6l-2 15M15 6l2 15M8.5 13h7"/></svg>運用</span><span class=""><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="14" r="6"/><path d="M12 14V11M10 3h4M12 3v3"/></svg>修行</span></nav>
+</main>
+<aside class="ann"><b>メモ（本番には出ません）</b><ul><li>ホームは昼と同じ「地図とシート」。地図は夜の航空図（陸と海を暗い2段・海岸線と方眼は薄いグレー）。いまいる所からの距離の輪（5・10・15km）を点線で足して、案B の計器の感じを残した</li><li>光る色は2つ：緑＝計器の数字（今日の印・空港・フライト・便の時刻）と羽田の点、琥珀＝判定範囲の輪と字。光らせる（うっすら光の影）のは数字だけ</li><li>本文・見出し・空港名はふだんのゴシック体。計器の字（等幅）は数字だけ。近い空港のコードと最近の印のコードは、昼と同じ「案内板風を許している2か所」で、色だけ夜にした（光らせない）</li><li>本文の字は真っ白にせず #D3DBE4。広い面はどれも暗くし、塗りつぶしの明るいボタンは置かない（夜のデッキで目がくらまないように）</li><li>カードは角丸＋1px の内側のふち（黒の上では影が見えないので、影のかわり）。ボタンとタブはピル型・角丸のまま（案B の四角い枠と押しボタンは、形だけ今の決まりに戻した → 報告の「決めてほしいこと」2）</li></ul></aside>
+<script>if(window!==window.top){var a=document.querySelector('.ann');if(a)a.remove()}</script>
+</body></html>
