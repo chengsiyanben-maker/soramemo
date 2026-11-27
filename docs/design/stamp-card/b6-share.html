@@ -1,0 +1,224 @@
+<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>B6 共有画像</title><style>/* そらメモ 印をもらったときのカード：見た目（main の web/ の色と文字、design/micro の動きの長さにそろえる） */
+:root{
+  --gothic:"Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic UI","Yu Gothic","Meiryo","Noto Sans JP","Noto Sans CJK JP",system-ui,sans-serif;
+  --bg:#F4F5F7; --card:#FFFFFF; --ink:#374151; --strong:#1F2937; --sub:#646B78; --mute:#6B7280;
+  --pill:rgba(17,24,39,.05); --panel:#F4F5F7; --hero:#0F1B2D; --bar:#E3E7ED; --ok:#15803D;
+  --shu:#111111; --gold:#A9822E; --first-bg:#1F2937; --first-ink:#FFFFFF; --mark-ring:#A9822E;
+  --scrim:rgba(15,22,38,.38);
+  --shadow:0 1px 2px rgba(17,24,39,.04),0 10px 30px -8px rgba(17,24,39,.10),inset 0 0 0 1px rgba(17,24,39,.07);
+  --card-drop:drop-shadow(0 18px 30px rgba(15,22,38,.28)) drop-shadow(0 2px 4px rgba(15,22,38,.10));
+  --t-tap:.12s; --t-fast:.15s; --t-mid:.25s; --t-slow:.4s;
+  --ease:cubic-bezier(.2,.8,.2,1); --ease-in:cubic-bezier(.4,0,1,1);
+}
+:root[data-night=on]{
+  --bg:#0F141B; --card:#1B1F26; --ink:#E5E7EB; --strong:#F3F4F6; --sub:#AEB9C6; --mute:#AEB9C6;
+  --pill:rgba(220,227,234,.08); --panel:#232830; --hero:#4ADE80; --bar:#323843; --ok:#4ADE80;
+  --shu:#E5E7EB; --gold:#AEB9C6; --first-bg:transparent; --first-ink:#4ADE80; --mark-ring:#DCE3EA;
+  --scrim:rgba(0,0,0,.45);
+  --shadow:0 12px 26px -16px rgba(0,0,0,.7),inset 0 0 0 1px rgba(255,255,255,.06);
+  --card-drop:drop-shadow(0 18px 30px rgba(0,0,0,.6));
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:var(--bg);color:var(--ink);font-family:var(--gothic);-webkit-text-size-adjust:100%}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.num{font-weight:800;font-variant-numeric:tabular-nums;color:var(--strong);letter-spacing:-.01em}
+.u{font-size:13px;color:var(--mute);font-weight:600;margin-left:3px}
+svg.ic{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+
+/* 画面 */
+.phone{position:relative;height:100vh;min-height:600px;max-width:430px;margin:0 auto;overflow:hidden;background:var(--bg)}
+.bgmap{position:absolute;inset:0;background-size:cover;background-position:center top}
+.scrim{position:absolute;inset:0;background:var(--scrim)}
+
+/* カード（浮かぶ白い角丸。外側の影は包みに、半券の切り欠きは中身の型抜きで） */
+.scw{position:absolute;left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom));filter:var(--card-drop)}
+.sc{position:relative;max-height:calc(100vh - 64px);overflow:auto;background:var(--card);border-radius:28px;padding:10px 20px 18px;
+  --ny:300px;
+  -webkit-mask:radial-gradient(circle 11px at 0 var(--ny),transparent 10.5px,#000 11px) left/51% 100% no-repeat,radial-gradient(circle 11px at 100% var(--ny),transparent 10.5px,#000 11px) right/51% 100% no-repeat;
+  mask:radial-gradient(circle 11px at 0 var(--ny),transparent 10.5px,#000 11px) left/51% 100% no-repeat,radial-gradient(circle 11px at 100% var(--ny),transparent 10.5px,#000 11px) right/51% 100% no-repeat}
+.grab{width:40px;height:5px;border-radius:3px;background:var(--bar);margin:0 auto 6px}
+.top{display:flex;align-items:center;gap:10px;min-height:44px}
+.st{display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 14px;border-radius:999px;font-size:13px;font-weight:800;letter-spacing:.04em;white-space:nowrap}
+.st.first{background:var(--first-bg);color:var(--first-ink)}
+:root[data-night=on] .st.first{box-shadow:inset 0 0 0 1.5px #4ADE80}
+.st.calm{background:var(--pill);color:var(--sub)}
+.st.wait{background:transparent;color:var(--sub);box-shadow:inset 0 0 0 1.5px var(--bar)}
+.st.wait svg{width:16px;height:16px}
+.st.ms{background:transparent;color:var(--strong);box-shadow:inset 0 0 0 1.5px var(--mark-ring)}
+.top time{font-size:13px;color:var(--mute);font-weight:600;font-variant-numeric:tabular-nums;margin-left:auto;white-space:nowrap}
+.x{flex:none;display:flex;align-items:center;justify-content:center;width:44px;height:44px;margin-right:-10px;border-radius:999px;color:var(--sub)}
+.x:active{background:var(--pill)}
+
+/* 印の場所 */
+.mark{position:relative;display:flex;align-items:center;justify-content:center;height:176px;margin:4px 0 2px}
+.mark .stamp{position:relative;width:164px;height:164px}
+.mark .stamp svg{position:absolute;inset:0;width:100%;height:100%}
+.mark.tier .stamp{width:300px;height:178px}
+.mark .ring{position:absolute;left:50%;top:50%;width:150px;height:150px;margin:-75px 0 0 -75px;border-radius:50%;border:3px solid var(--shu);opacity:0;pointer-events:none}
+.mark.tier .ring{top:44%}
+.mark .memo{position:absolute;left:50%;top:50%;width:150px;height:150px;margin:-75px 0 0 -75px;opacity:0}
+.mark .memo svg{width:100%;height:100%}
+.mark .memo circle{fill:none;stroke:var(--sub);stroke-width:2;stroke-dasharray:5 5;opacity:.7}
+.mark .memo text{fill:var(--sub);font-family:var(--gothic);font-weight:800;opacity:.7}
+.mark.pale .stamp{opacity:.36;filter:grayscale(1)}
+/* 案A：コード＋滑走路の線 */
+.rwy{width:176px;height:176px;border-radius:32px;background:var(--panel)}
+.rwy line{stroke:var(--strong);stroke-width:3;stroke-linecap:round;opacity:.75}
+.rwy text{font-family:var(--gothic);font-weight:800;font-size:40px;fill:var(--strong);letter-spacing:.02em}
+
+.name{text-align:center;font-size:21px;font-weight:800;color:var(--strong);line-height:1.35;letter-spacing:.02em}
+.pref{text-align:center;font-size:13px;color:var(--mute);font-weight:600;margin-top:2px}
+.note{margin:10px auto 0;max-width:300px;text-align:center;font-size:13px;color:var(--sub);line-height:1.6}
+.note b{color:var(--strong)}
+
+/* 数字（切り欠きの下） */
+.mx{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:22px}
+.mx > div{text-align:center}
+.mx .k{display:block;font-size:13px;font-weight:700;color:var(--sub)}
+.mx .v{display:flex;align-items:baseline;justify-content:center;gap:0;height:40px;line-height:40px}
+.mx .num{font-size:34px}
+.mx .num.sm{font-size:26px}
+.roll{display:inline-block;overflow:hidden;height:40px;line-height:40px;vertical-align:bottom}
+.roll .col{display:flex;flex-direction:column;transform:translateY(-40px)}
+.roll .col span{height:40px}
+.plus{position:relative;top:-14px;margin-left:4px;font-size:13px;font-weight:800;color:var(--ok);opacity:0}
+
+/* 次の小目標 */
+.goal{margin-top:16px;padding:12px 16px 14px;border-radius:18px;background:var(--panel)}
+.goal .gl{display:flex;align-items:baseline;gap:6px}
+.goal .gl b{font-size:14px;font-weight:800;color:var(--strong)}
+.goal .gl .gv{margin-left:auto;white-space:nowrap}.goal .gl .num{font-size:20px}
+.goal .bar{position:relative;height:8px;margin-top:8px;border-radius:4px;background:var(--bar);overflow:hidden}
+.goal .bar i{position:absolute;left:0;top:0;bottom:0;border-radius:4px;background:var(--hero)}
+.goal p{margin-top:8px;font-size:13px;color:var(--sub);font-weight:600}
+.more{margin-top:12px;display:grid;gap:8px}
+.more div{display:flex;align-items:center;gap:10px;min-height:44px;padding:8px 14px;border-radius:16px;background:var(--panel);font-size:13px;color:var(--sub)}
+.more div b{display:block;font-size:14px;color:var(--strong)}
+.more svg{flex:none;width:20px;height:20px}
+
+/* ボタン */
+.acts{margin-top:16px;display:grid;gap:10px}
+.pill{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 18px;border-radius:999px;background:var(--card);box-shadow:var(--shadow);font-weight:700;font-size:14px;color:var(--strong);transition:transform var(--t-tap) var(--ease)}
+.pill:active{transform:scale(.97)}
+.pill.main{min-height:52px;font-size:16px;font-weight:800;background:var(--strong);color:#fff;box-shadow:none}
+:root[data-night=on] .pill.main{background:transparent;color:#fff;box-shadow:inset 0 0 0 1.5px #fff}
+.pill svg{width:18px;height:18px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.hint{text-align:center;font-size:12px;color:var(--mute);font-weight:600}
+
+/* 見本の操作（デザインには入らない） */
+.replay{position:absolute;left:50%;bottom:40%;transform:translateX(-50%);display:none;min-height:44px;padding:0 18px;border-radius:999px;background:var(--card);box-shadow:var(--shadow);font-size:14px;font-weight:700;color:var(--strong)}
+.closed .replay{display:inline-flex;align-items:center}
+
+/* ── 動き（はじめの形は keyframes の from、止まった形がふだんの形。動きを減らすと最後の形だけ） ── */
+@keyframes fadeIn{from{opacity:0}}
+@keyframes rise{from{transform:translateY(calc(100% + 24px))}}
+@keyframes press{0%{transform:scale(1.8) rotate(-16deg);opacity:0}55%{opacity:1;transform:scale(.94) rotate(1deg)}100%{transform:scale(1) rotate(0);opacity:1}}
+@keyframes ring{0%{transform:scale(.85);opacity:.55}100%{transform:scale(1.35);opacity:0}}
+@keyframes rollUp{from{transform:translateY(0)}}
+@keyframes plusUp{0%{opacity:0;transform:translateY(4px)}20%,70%{opacity:1;transform:none}100%{opacity:0;transform:translateY(-4px)}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}}
+@keyframes memoOut{0%{opacity:1;transform:none}100%{opacity:0;transform:scale(.92)}}
+@keyframes draw{from{stroke-dashoffset:var(--len)}}
+@keyframes settle{0%{opacity:0;transform:scale(1.06)}100%{opacity:1;transform:none}}
+@keyframes paleIn{from{opacity:0;transform:scale(.96)}}
+@keyframes barGrow{from{width:var(--from)}}
+@keyframes sink{to{transform:translateY(calc(100% + 24px))}}
+@keyframes fadeOut{to{opacity:0}}
+
+.go .scrim{animation:fadeIn var(--t-mid) var(--ease) both}
+.go .scw{animation:rise .3s var(--ease) both}
+.go .mark .stamp{animation:press .5s .2s cubic-bezier(.2,1.5,.4,1) both}
+.go .mark .ring{animation:ring .7s .48s ease-out}
+.go .mark.pale .stamp{animation:paleIn var(--t-mid) .2s var(--ease) both}
+.go .mark .memo{animation:memoOut .2s .2s var(--ease-in) both}
+.go .mark.memo-on .stamp{animation-delay:.32s}
+.go .mark.memo-on .ring{animation-delay:.6s}
+.go .rwy line{animation:draw var(--t-slow) .2s var(--ease) both}
+.go .rwy text{animation:settle .3s .4s var(--ease) both}
+.go .roll .col{animation:rollUp .35s .7s var(--ease) both}
+.go .plus{animation:plusUp 1.2s .7s var(--ease) both}
+.go .goal .bar i{animation:barGrow var(--t-slow) .75s var(--ease) both}
+.go .acts{animation:fadeUp var(--t-mid) .9s var(--ease) both}
+.go .more{animation:fadeUp var(--t-mid) .85s var(--ease) both}
+.closing .scw{animation:sink var(--t-fast) var(--ease-in) both}
+.closing .scrim{animation:fadeOut var(--t-fast) var(--ease-in) both}
+.closed .scw,.closed .scrim{display:none}
+
+@media (max-height:700px){
+  .mark{height:132px}.mark .stamp{width:124px;height:124px}.mark.tier .stamp{width:228px;height:134px}
+  .mark .ring,.mark .memo{width:112px;height:112px;margin:-56px 0 0 -56px}
+  .rwy{width:132px;height:132px;border-radius:26px}
+  .mx{margin-top:16px}.goal{margin-top:12px;padding:10px 14px 12px}.acts{margin-top:12px;gap:8px}
+  .sc{padding-bottom:14px}
+}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+:root.rm *,:root.rm *::before,:root.rm *::after{animation:none!important;transition:none!important}
+
+
+
+.phone.share{background:var(--bg);padding:0 16px}
+.shtop{display:flex;align-items:center;gap:8px;height:64px}
+.shtop .back{display:inline-flex;align-items:center;gap:4px;min-height:44px;padding:0 16px 0 10px;border-radius:999px;background:var(--card);box-shadow:var(--shadow);font-size:14px;font-weight:700;color:var(--strong)}
+.shtop h1{font-size:17px;font-weight:800;color:var(--strong);margin-left:6px}
+.img45{position:relative;width:100%;aspect-ratio:4/5;border-radius:20px;background:#ECEEF1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:18px 26px 14px;box-shadow:var(--shadow)}
+.img45 .c{width:100%;background:#fff;border-radius:22px;padding:14px 16px 16px;box-shadow:0 10px 30px -10px rgba(17,24,39,.18);color:#374151}
+.img45 .c .t{display:flex;align-items:center;justify-content:space-between}
+.img45 .c .st.first{background:#1F2937;color:#fff;box-shadow:none;height:26px;font-size:12px}
+.img45 .c time{font-size:12px;color:#6B7280;font-weight:600}
+.img45 .c .s{width:118px;height:118px;margin:6px auto 0}
+.img45 .c .s svg{width:100%;height:100%}
+.img45{--shu:#111111}
+.img45 .c .n{text-align:center;font-size:17px;font-weight:800;color:#1F2937;margin-top:4px}
+.img45 .c .p{text-align:center;font-size:12px;color:#6B7280;font-weight:600}
+.img45 .c .m{display:grid;grid-template-columns:1fr 1fr;margin-top:10px;text-align:center}
+.img45 .c .m span{display:block;font-size:12px;color:#646B78;font-weight:700}
+.img45 .c .m b{font-size:26px;font-weight:800;color:#1F2937;font-variant-numeric:tabular-nums}
+.img45 .c .m small{font-size:12px;color:#6B7280;font-weight:600;margin-left:2px}
+.img45 .c .g{margin-top:10px;padding:8px 12px;border-radius:14px;background:#F4F5F7;font-size:12px;color:#646B78;font-weight:600;text-align:center}
+.img45 .c .g b{color:#1F2937}
+.img45 .foot{margin-top:10px;font-size:12px;font-weight:800;color:#646B78;letter-spacing:.08em}
+.shacts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px}
+.shnote{margin-top:14px;padding:12px 16px;border-radius:18px;background:var(--card);box-shadow:var(--shadow);font-size:13px;color:var(--sub);line-height:1.7}
+.shnote b{color:var(--strong)}
+</style></head><body><div class="phone share"><div class="shtop"><button class="back" type="button"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>戻る</button><h1>画像で保存・共有</h1></div><div class="img45" role="img" aria-label="共有する画像の見本"><div class="c"><div class="t"><span class="st first">はじめての印</span><time>2026.11.25</time></div><div class="s"><svg viewBox="0 0 120 120" aria-label="東京国際空港（羽田）の印" role="img"><defs>
+<filter id="inks5b"><feTurbulence type="fractalNoise" baseFrequency="1.4" numOctaves="1" seed="5"/><feColorMatrix values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -1.3 1.45"/><feComposite in="SourceGraphic" operator="in"/></filter>
+<path id="arcs5b" d="M22 60a38 38 0 0 1 76 0"/></defs>
+<g transform="rotate(7 60 60)" filter="url(#inks5b)" fill="none" stroke="var(--shu)">
+<circle cx="60" cy="60" r="54" stroke-width="4"/><circle cx="60" cy="60" r="47" stroke-width="1.2"/>
+
+
+<text font-family="var(--gothic)" font-weight="700" font-size="9" fill="var(--shu)" stroke="none" letter-spacing="1"><textPath href="#arcs5b" startOffset="50%" text-anchor="middle">東京国際（羽田）</textPath></text>
+<text x="60" y="72" text-anchor="middle" font-family="var(--gothic)" font-weight="800" font-size="30" fill="var(--shu)" stroke="none" letter-spacing="1">HND</text>
+<line x1="30" y1="82" x2="90" y2="82" stroke-width="1"/>
+<text x="60" y="95" text-anchor="middle" font-family="var(--gothic)" font-weight="700" font-size="9" fill="var(--shu)" stroke="none">2026/11/25</text>
+</g></svg></div><div class="n">東京国際空港（羽田）</div><div class="p">東京都</div><div class="m"><div><span>訪問</span><b>1</b><small>回目</small></div><div><span>集めた空港</span><b>17</b><small>/86</small></div></div><div class="g"><b>関東 3/9</b>・あと6空港</div></div><div class="foot">そらメモ</div></div><div class="shacts"><button class="pill" type="button"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M8 11l4 4 4-4"/><path d="M5 19h14"/></svg>画像を保存</button><button class="pill main" type="button"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15V4M8 8l4-4 4 4"/><path d="M5 12v6.5A1.5 1.5 0 006.5 20h11a1.5 1.5 0 001.5-1.5V12"/></svg>共有…</button></div><p class="shnote"><b>画像に入るもの</b>：印・空港名・日付・訪問の回数・集めた空港の数・小目標・「そらメモ」の字<br><b>入れないもの</b>：いる場所の地図や緯度経度・時刻・座席・便名・表示名</p></div><script>/* 見本の動かし方：?n=1 夜／?rm=1 動きを減らす／?t=0.5 その時刻で止める（撮影用） */
+(function(){
+  const q = new URLSearchParams(location.search), R = document.documentElement;
+  if(q.get('n') === '1') R.dataset.night = 'on';
+  if(q.get('rm') === '1') R.classList.add('rm');
+  const ph = document.querySelector('.phone');
+  // 半券の切り欠き：印の場所と数字の間（数字のかたまりの少し上）
+  function notch(){ const sc = document.querySelector('.sc'), mx = document.querySelector('.mx'); if(sc && mx) sc.style.setProperty('--ny', (mx.offsetTop - 11) + 'px'); }
+  function play(){ if(!ph) return; ph.classList.remove('go', 'closing', 'closed'); void ph.offsetWidth; ph.classList.add('go'); }
+  function close(){ if(!ph || ph.classList.contains('closed')) return; ph.classList.remove('go'); ph.classList.add('closing');
+    setTimeout(() => { ph.classList.remove('closing'); ph.classList.add('closed'); }, R.classList.contains('rm') || matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 160); }
+  window.play = play; window.closeCard = close;
+  window.__freeze = function(t){ play(); document.getAnimations().forEach(a => { a.pause(); a.currentTime = t * 1000; }); };
+  addEventListener('load', () => {
+    notch();
+    const t = q.get('t');
+    if(t != null) window.__freeze(parseFloat(t)); else play();
+  });
+  addEventListener('resize', notch);
+  document.addEventListener('click', e => {
+    if(e.target.closest('.x') || e.target.classList.contains('scrim')) close();
+    if(e.target.closest('.replay')) play();
+  });
+  // 下へなでて閉じる（見本は 60px 以上で閉じる）
+  let y0 = null;
+  document.addEventListener('pointerdown', e => { if(e.target.closest('.grab, .top')) y0 = e.clientY; });
+  document.addEventListener('pointerup', e => { if(y0 != null && e.clientY - y0 > 60) close(); y0 = null; });
+})();
+
+</script></body></html>
