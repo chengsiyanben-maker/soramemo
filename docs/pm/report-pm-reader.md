@@ -40,7 +40,6 @@
 2. **接続の文字列**：ダッシュボードの Connect → Session pooler の文字列の、ユーザー名 `postgres.<プロジェクトの記号>` を `pm_reader.<プロジェクトの記号>` に、パスワードを 1 のものに変え、末尾に `?sslmode=require` を付ける
 3. **GitHub の秘密の設定**：Settings → Secrets and variables → Actions → New repository secret
    - `PM_READER_URL`：2 の文字列
-   - `PM_RESULT_KEY`：結果を暗号にする合言葉（下の「決めてほしいこと」1）
 4. **流し方**：Actions →「PM の読むだけの問い合わせ」→ Run workflow → `query` と `params`。（この画面は、この yml が main に入ってから出る）
 5. **付けたあとの確かめ**（SQL Editor・読むだけ・軽い）：30行の public の表だけが出れば正しい
    ```sql
@@ -57,3 +56,7 @@
 1. **リポジトリが公開なので、結果の置き方**：公開のリポジトリの artifact は GitHub にログインした誰でも落とせる。ODPT の便のデータは「CSV を配らない」決まりなので、公開のあいだは**結果を合言葉（`PM_RESULT_KEY`）で暗号にして置く**形にし、合言葉がないと流さないようにした。PM が中身を読むには合言葉を PM に渡す必要がある。代わりに**リポジトリを非公開にする**なら合言葉なしで CSV のまま置ける（非公開にするとサイトの公開の仕方に影響しないか別に確かめが要る）。どちらにするか
 2. 読める表の一覧はこの30でよいか（運用の表のうち ga_events／ga_watch〈小型機〉・eta_calib・co3_wx は入れていない。足すなら移行と t151 の一覧を一緒に直す）
 3. 反映は自動の反映のあとに知らせる形でよいか（役割を足すだけで、今の画面・処理は変わらない）
+
+
+## PM の直し（11/27）
+- 結果の暗号は、合言葉（PM_RESULT_KEY）をやめて、PM の公開鍵 `tools/pm-queries/pm_result_pub.pem` で包む形にした（毎回の使い捨ての AES256 の鍵を RSA-OAEP で包む）。秘密鍵は PM の作業場所だけにあり、リポジトリには置かない。本人が入れる秘密の設定は `PM_READER_URL` の1つだけ。artifact は1日で消える

@@ -3,11 +3,10 @@
 #   流す前に tools/pm_query.mjs が中身を確かめ、select / with で始まる1文でなければ断る。取引は read only・1文60秒・全体10分まで。
 #   必要な設定（リポジトリの Settings → Secrets and variables → Actions → Secrets）：
 #     PM_READER_URL … pm_reader の接続の文字列（Session pooler。作り方は docs/pm/report-pm-reader.md）
-#     PM_RESULT_KEY … 結果の CSV を暗号にする合言葉（リポジトリが公開のあいだは必須。ないと流さない）
 #   公開のリポジトリの artifact は GitHub にログインした誰でも落とせるので、ODPT の便のデータを配らないために、
-#   公開のあいだは結果を gpg（AES256）で暗号にしてから置く。非公開のリポジトリなら合言葉なしで CSV のまま置く。
-#   開け方：gpg --batch --passphrase-file 合言葉のファイル -d ファイル.csv.gpg > ファイル.csv
-#   パスワードと合言葉はこのファイル・ログ・プルリクエストに書かない。結果の中身はログに出さない（行数と秒だけ）。
+#   結果は毎回つくる使い捨ての鍵（AES256）で暗号にし、その鍵を PM の公開鍵 tools/pm-queries/pm_result_pub.pem で包んで置く。
+#   開けるのは対の秘密鍵を持つ PM だけ（秘密鍵はリポジトリ・ログ・プルリクエストに置かない）。合言葉の秘密の設定は要らない。
+#   パスワードはこのファイル・ログ・プルリクエストに書かない。結果の中身はログに出さない（行数と秒だけ）。
 name: PM の読むだけの問い合わせ
 on:
   workflow_dispatch:
@@ -41,12 +40,7 @@ jobs:
         env:
           PM_QUERY: ${{ inputs.query }}
           PM_PARAMS: ${{ inputs.params }}
-          IS_PUBLIC: ${{ github.event.repository.private == false }}
-          HAS_KEY: ${{ secrets.PM_RESULT_KEY != '' }}
         run: |
-          if [ "$IS_PUBLIC" = "true" ] && [ "$HAS_KEY" != "true" ]; then
-            echo "断った：リポジトリが公開なので、結果を暗号にする合言葉 PM_RESULT_KEY がないと流さない（docs/pm/report-pm-reader.md）"; exit 2
-          fi
           node tools/pm_query.mjs --check
       - name: 読むだけで流す
         env:
@@ -54,22 +48,20 @@ jobs:
           PM_PARAMS: ${{ inputs.params }}
           PM_READER_URL: ${{ secrets.PM_READER_URL }}
         run: node tools/pm_query.mjs
-      - name: 結果を暗号にする（合言葉があるとき）
-        env:
-          PM_RESULT_KEY: ${{ secrets.PM_RESULT_KEY }}
+      - name: 結果を暗号にする（PM の公開鍵で包む）
         run: |
           rm -f out/.raw.csv out/.wrap.sql
-          if [ -n "$PM_RESULT_KEY" ]; then
-            for f in out/*.csv; do
-              printf '%s' "$PM_RESULT_KEY" | gpg --batch --yes --quiet --pinentry-mode loopback --passphrase-fd 0 --symmetric --cipher-algo AES256 -o "$f.gpg" "$f"
-              rm -f "$f"
-            done
-          fi
+          for f in out/*.csv; do
+            openssl rand -out "$f.k" 32
+            openssl enc -aes-256-cbc -pbkdf2 -salt -in "$f" -out "$f.enc" -pass file:"$f.k"
+            openssl pkeyutl -encrypt -pubin -inkey tools/pm-queries/pm_result_pub.pem -pkeyopt rsa_padding_mode:oaep -in "$f.k" -out "$f.key"
+            rm -f "$f" "$f.k"
+          done
       - uses: actions/upload-artifact@v4
         with:
           name: pm-query-${{ github.run_id }}
           path: |
-            out/*.csv
-            out/*.csv.gpg
-          retention-days: 7
+            out/*.csv.enc
+            out/*.csv.key
+          retention-days: 1
           if-no-files-found: error
