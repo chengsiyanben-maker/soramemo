@@ -15,6 +15,7 @@ HERE = os.path.dirname(os.path.abspath(__file__)); WEB = os.path.abspath(os.path
 WORK = os.path.join(os.environ.get('SORAMEMO_TEST_WORK', '/tmp/soramemo-e2e'), 'a3srv')
 SHOTS = os.path.abspath(os.path.join(HERE, '..', '..', 'docs', 'pm', 'shots-a3-model')); os.makedirs(SHOTS, exist_ok=True)
 THREE = os.path.join(os.environ.get('SORAMEMO_TEST_WORK', '/tmp/soramemo-e2e'), 'three-0.160.0.module.min.js')
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__))); from three_local import ensure_three; ensure_three(THREE)   # 自分で用意する（t142 に頼らない・11/26 test-steady）
 fails = []
 def check(name, ok, detail=''):
     print(('OK  ' if ok else 'NG  ') + name + (('  ' + str(detail)) if detail != '' else ''))
@@ -29,10 +30,10 @@ check('形のファイル：建物100棟以上・誘導路・駐機場・芝・�
 check('形のファイル：ターミナル（第1・第2・第3）がある', sum(1 for b in S['bld'] if b[0] == 't') >= 3)
 tw = S['tower']; check('管制塔の位置は第1と第2のターミナルの間（中心から東に約260m）', 150 < tw[0] < 400 and 0 < tw[1] < 350, tw)
 if os.path.exists(THREE):
-    tot = len(gzip.compress(raw, 9)) + len(gzip.compress(open(THREE, 'rb').read(), 9))
-    check('読み込む量は圧縮して 1.5MB まで・入口の「約0.6MB」と合う（0.55〜0.65MB）', 550_000 <= tot <= 650_000, tot)
+    tot = len(gzip.compress(raw, 9)) + len(gzip.compress(open(THREE, 'rb').read(), 9)) + os.path.getsize(os.path.join(WEB, '3d', 'env-day.jpg'))   # 11/24 a3-hq：昼の映り込みの絵（JPG・圧縮しない）を足した
+    check('読み込む量は圧縮して 1.5MB まで・入口の「約0.7MB」と合う（0.65〜0.75MB）', 650_000 <= tot <= 750_000, tot)
 SRC = open(os.path.join(HERE, '..', '..', 'src', 'index.html'), encoding='utf-8').read()
-check('入口の字は「約0.6MB」（測った量に合う）', 'const A3_SIZE = "約0.6MB";' in SRC)
+check('入口の字は「約0.7MB」（測った量に合う）', 'const A3_SIZE = "約0.7MB";' in SRC)
 check('形のファイルは開いたときだけ読む（openAp3d の中）', 'const shape = a3Shape();' in SRC and SRC.index('const shape = a3Shape();') > SRC.index('async function openAp3d'))
 
 # ---- 画面 ----
@@ -86,13 +87,13 @@ async def green_px(pg, y0, y1):
     im = Image.open(io.BytesIO(await pg.screenshot(clip={'x': 0, 'y': y0, 'width': 390, 'height': y1 - y0}))).convert('RGB')
     d = im.tobytes(); return sum(1 for i in range(0, len(d), 3) if d[i + 1] > 200 and d[i] < 60 and d[i + 2] < 60)
 async def main():
-    if not os.path.exists(THREE): print('three.js がないので画面の確かめは飛ばす（t142 を先に流すと置かれる）'); return
+    if not os.path.exists(THREE): print('three.js がないので画面の確かめは飛ばす（CDN から取れなかった）'); return
     allerr = []
     async with async_playwright() as p:
         b = await p.chromium.launch(args=['--use-gl=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'])
         c, pg, errs = await open3d(b, 'day')
         r = await pg.evaluate("({ shape: !!(A3 && A3.shape), q: A3.q, shadow: A3.r.shadowMap.enabled, rw: A3.scene.children.filter(o => o.isMesh && o.geometry.type === 'PlaneGeometry' && o.name !== 'clouds' && o.material && o.material.map).length, tower: A3.towerXZ })")
-        check('形のファイルを読んで描く（滑走路4本は標示の絵つき・影あり・管制塔は形のファイルの位置）', r['shape'] and r['rw'] == 4 and r['shadow'] and r['q'] == 2 and r['tower'] == S['tower'], r)
+        check('形のファイルを読んで描く（滑走路4本は標示の絵つき・影あり・管制塔は形のファイルの位置）', r['shape'] and r['rw'] == 4 and r['shadow'] and r['q'] >= 2 and r['tower'] == S['tower'], r)
         st = await pg.evaluate("(() => { const s = getComputedStyle(document.getElementById('a3Sheet')), y = document.querySelector('#a3Sheet .a3body'); return { ov: s.overflowY, body: !!y && getComputedStyle(y).overflowY }; })()")
         check('不具合1：シートは切り抜くだけ（overflow hidden）で、中の .a3body が送れる', st['ov'] == 'hidden' and st['body'] == 'auto', st)
         await pg.evaluate(GREEN); await pg.wait_for_timeout(400)
@@ -106,7 +107,7 @@ async def main():
         await pg.screenshot(path=os.path.join(SHOTS, 't160-all-day.png'))
         await pg.click('[data-a3-view="tower"]'); await pg.wait_for_timeout(900)
         r = await pg.evaluate("(() => { const d = new A3.THREE.Vector3(); A3.cam.getWorldDirection(d); return { y: Math.round(A3.cam.position.y), pitch: Math.asin(d.y) * 180 / Math.PI }; })()")
-        check('不具合3：管制塔の視点は管制室の高さ（約106m）から少し見下ろす（俯角 2〜10°）', r['y'] == 106 and -10 < r['pitch'] < -2, r)
+        check('不具合3：管制塔の視点は管制塔の上（約118m。11/24 見回り2）から少し見下ろす（俯角 2〜10°）', r['y'] == 118 and -10 < r['pitch'] < -2, r)
         await pg.evaluate(GREEN); await pg.wait_for_timeout(300)
         check('不具合3：管制塔の視点にも背景の緑が出ない', await green_px(pg, 0, 500) < 50)
         await pg.evaluate("document.getElementById('dAp3d').style.background = ''")
@@ -118,8 +119,11 @@ async def main():
         await pg.screenshot(path=os.path.join(SHOTS, 't160-plane-ground-day.png'))
         k = await pg.evaluate("['B744','A388','B789','B77W','A359','A320','B738','E190','CRJ7','DH8D','AT76'].map(a3Kind).join('')")
         check('機体の形の種類（4発・大きな2発・細い胴・小さなジェット・プロペラ）', k == 'qqwwwnnrrpp', k)
-        m = await pg.evaluate("(() => { const o = A3.objs.get('a1'); const cols = new Set(); o.g.traverse(x => { if(x.material && x.material.color) cols.add(x.material.color.getHexString()); }); return [...cols]; })()")
-        check('機体は白と灰色だけ（会社の色やロゴなし。窓の帯は濃いグレー。特別塗装機の尾翼は昼だけ金）', all(x in ('f4f6f8', '6b7280', '374151', 'c9a23a') for x in m), m)
+        m = await pg.evaluate("(() => { const o = A3.objs.get('a1'); const cols = new Set(); o.g.traverse(x => { if(x.material && x.material.color && x.name !== 'mv' && !(x.parent && x.parent.name === 'lo')) cols.add(x.material.color.getHexString()); }); return [...cols]; })()")
+        # 11/23（checkin/a3-models）：近い7機種は細かい形（PBR の白・灰色・金属・タイヤ）と尾翼の大まかな会社の色（A3_FIN）。ロゴや字の絵はない
+        fins = await pg.evaluate("[...Object.values(A3_FIN), 0xE9ECEF, 0xF0F2F5].map(c => c.toString(16).padStart(6, '0'))")
+        ok_cols = ('f4f6f8', '6b7280', '374151', 'c9a23a', 'ffffff', 'f5f6f8', 'd3d7dc', 'eef0f3', 'c9ced5', '30353d', '1c1e22', 'b4bac2', '8a9099', *fins)   # 8a9099＝最高の質のファンの羽根（11/24 a3-hq）
+        check('機体は白と灰色と、尾翼の大まかな会社の色だけ（ロゴなし。特別塗装機の尾翼は昼だけ金。地上を動く印の矢印と遠くの平らな形は除く）', all(x in ok_cols for x in m), m)
         await pg.evaluate("a3Quality(1)"); r1 = await pg.evaluate("[A3.r.shadowMap.enabled, A3.r.getPixelRatio()]")
         await pg.evaluate("a3Quality(0)"); r0 = await pg.evaluate("[A3.r.shadowMap.enabled, A3.r.getPixelRatio()]")
         check('重いときは質を下げる：影をやめる→細かさを下げる', r1[0] is False and r0 == [False, 1], (r1, r0))

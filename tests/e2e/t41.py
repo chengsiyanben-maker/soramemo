@@ -4,6 +4,7 @@ HERE=os.path.dirname(os.path.abspath(__file__)); WEB=os.path.abspath(os.path.joi
 # ページの防御設定（CSP）：ふだんの操作で違反が起きないこと、差し込まれたスクリプトは止まること。メンテナンス表示
 import asyncio, json
 from playwright.async_api import async_playwright
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__))); import keiei_on   # 経営の切り替えも押して確かめる（切り替えを true にしたときの動き）
 async def main():
     async with async_playwright() as p:
         b=await p.chromium.launch(); c=await b.new_context(viewport={'width':400,'height':860})
@@ -15,7 +16,7 @@ async def main():
         for v in ['book','log','stats']: await pg.click(f'nav.tabs button[data-v={v}]'); await pg.wait_for_timeout(150)
         await pg.evaluate("goTab('ach')"); await pg.wait_for_timeout(150)
         await pg.click('[data-mode=game]'); await pg.click('[data-mode=rally]')
-        await pg.click('#openSettings'); await pg.click('#dSettings .mp-back')
+        await pg.click('#openSettings'); await pg.evaluate("$('dSettings').close()")
         print('ふだんの操作での違反:', await pg.evaluate('window.__csp'))
         await pg.evaluate("""() => { const s = document.createElement('script'); s.textContent = 'window.__injected = true'; document.body.appendChild(s);
                                      const d = document.createElement('div'); d.innerHTML = '<img src=x onerror="window.__xss=true">'; document.body.appendChild(d); }""")

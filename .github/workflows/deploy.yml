@@ -28,11 +28,15 @@ jobs:
           deno-version: v2.x
       - name: SQLの番号の重なりがないか
         run: node tools/migrations.mjs check
+      - name: 秘密の文字列の直書きと、ログに位置・メール・鍵を出していないか
+        run: |
+          node tools/check_secrets.mjs --self-test
+          node tools/check_secrets.mjs
       - name: チェックインの判定・便の照合のテスト
         run: deno test --allow-read supabase/tests/
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22  # SQL のテストが .ts を読む（t145）ので型を外せる 22 にする
       - name: データベースのテスト（すべてのSQLを模擬のデータベースに流す）
         working-directory: tests/sql
         run: |
@@ -124,6 +128,22 @@ jobs:
       - uses: actions/upload-pages-artifact@v3
         with:
           path: web
+      # GitHub 側の不調で「artifact metadata の取得失敗」になることがあるので、少し待って2回まで流し直す
       - name: 公開する
         id: deploy
+        continue-on-error: true
+        uses: actions/deploy-pages@v4
+      - name: 公開に失敗したら少し待つ（1回目）
+        if: steps.deploy.outcome == 'failure'
+        run: sleep 90
+      - name: 公開する（2回目）
+        id: deploy2
+        if: steps.deploy.outcome == 'failure'
+        continue-on-error: true
+        uses: actions/deploy-pages@v4
+      - name: 公開に失敗したら少し待つ（2回目）
+        if: steps.deploy.outcome == 'failure' && steps.deploy2.outcome == 'failure'
+        run: sleep 180
+      - name: 公開する（3回目）
+        if: steps.deploy.outcome == 'failure' && steps.deploy2.outcome == 'failure'
         uses: actions/deploy-pages@v4

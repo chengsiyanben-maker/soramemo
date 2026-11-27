@@ -17,6 +17,7 @@ async def main():
                        {id:'x2',from:id('OKA'),to:id('HND'),dep:T(5,3),arr:T(5,3)+9e6,km:km(BY[id('HND')],BY[id('OKA')]),airline:'NH',no:'NH996',fare:'ANA:E_STD',seat:null},
                        {id:'x3',from:id('HND'),to:id('CTS'),dep:T(6,1),arr:T(6,1)+6e6,km:820,airline:'JL',no:'JL501',fare:'JAL:Y_SAVER',seat:null}]; S.manual = []; ACH_MEMO = null; render(); }""")
         await pg.evaluate("goTab('stats')"); await pg.wait_for_timeout(300)
+        await pg.evaluate("(() => { if(!$('statusBox')){ const d = document.createElement('div'); d.id = 'statusBox'; d.className = 'sgrid'; $('v-stats').appendChild(d); } renderStatus(); })()")   # 11/24：ステータスの目安と修行の計画は成績から外した（入口1枚）。関数は残っているので、置き場を足して確かめる
         print('無料 JALの次の段階:', [l for l in (await pg.inner_text('#statusBox')).split('\n') if 'クリスタル' in l][:1])
         print('無料 先読み:', await pg.is_visible('#planJoin'), '| ぼかし:', await pg.locator('#statusBox .yp.locked').count())
         # 加入中

@@ -39,7 +39,7 @@ async def main():
                 check('気軽に：図鑑は地方別だけ。帯は名前1つと鉛筆を残す（11/11 見方の設定 review-1 の6）:', await pg.evaluate("VIEW.book") == 'region' and await pg.evaluate("(() => { const r = [...document.querySelectorAll('#v-book .vwrow')].find(r => !r.hidden); return !!r && r.querySelectorAll('[data-vw]').length === 1 && !!r.querySelector('[data-vs-open]'); })()"))
                 check('気軽に：ホームの「これから乗る便」は出さない:', await pg.evaluate("loOff('home').has('ride')"))
                 await pg.evaluate("$('openSettings').click(); 0"); await pg.wait_for_timeout(500)
-                more = await pg.evaluate("[...document.querySelectorAll('#personaMore [data-persona-open]')].map(b => b.dataset.personaOpen)")
+                more = await pg.evaluate("[...mpTilesHTML().matchAll(/data-persona-open=\"(\\w+)\"/g)].map(m => m[1])")   # 11/24 案B：マイページのタイル
                 check(f'気軽に：成績と運用はマイページから開ける（{more}）:', 'stats' in more and 'ops' in more)
             else:
                 check(f'{per}：ホームの地図は航路を描かないので凡例はなく、出典は残す:', not leg and cred)

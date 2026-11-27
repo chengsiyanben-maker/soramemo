@@ -12,6 +12,7 @@ HERE=os.path.dirname(os.path.abspath(__file__)); WEB=os.path.abspath(os.path.joi
 import asyncio, json, math, shutil
 from datetime import datetime, timedelta, timezone
 from playwright.async_api import async_playwright
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__))); import keiei_on   # 経営の画面を出して確かめる（切り替えを true にしたときの動き）
 SHOTS = os.path.abspath(os.path.join(HERE, '..', '..', 'docs', 'pm', 'shots-sweep-1121')); os.makedirs(SHOTS, exist_ok=True)
 JST = timezone(timedelta(hours=9)); _d = datetime.now(timezone.utc)
 base = datetime(_d.year, _d.month, _d.day, tzinfo=JST)
@@ -120,12 +121,12 @@ async def main():
         await pg.screenshot(path=os.path.join(SHOTS, '05_map_card_loading_390.png'))
         await pg.wait_for_timeout(4500)
         r = await pg.evaluate("document.querySelector('[data-ohub=\"map\"] .ohv').innerText.replace(/\\s/g, '')")
-        check('4 届いたら数（3機）', r == '3機', r)
+        check('4 届いたら数（空3機。11/24 見回り5：3D は地上も数えるので「空」を付ける）', r == '空3機', r)
         await pg.evaluate("goTab('home')"); await pg.wait_for_timeout(300)
         await pg.evaluate("TRAFFIC_GOT = null; OPS_PLANES = []"); await pg.clock.set_fixed_time(at(15, 3))
         await pg.evaluate("opsHubRender()")
         r = await pg.evaluate("document.querySelector('[data-ohub=\"map\"] .ohv').innerText.replace(/\\s/g, '')")
-        check('4 次に開いて届くまでは、前の数を「約○分前」と添えて出す', r == '3機・約3分前', r)
+        check('4 次に開いて届くまでは、前の数を「約○分前」と添えて出す', r == '空3機・約3分前', r)
         await pg.clock.set_fixed_time(at(15, 20)); await pg.evaluate("opsHubRender()")
         r = await pg.evaluate("document.querySelector('[data-ohub=\"map\"] .ohv').innerText.trim()")
         check('4 10分より前の数は出さない（「—」）', r == '—', r)

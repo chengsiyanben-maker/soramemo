@@ -129,6 +129,10 @@ const ALLIANCE: [string, string, string, string, string?][] = [   // 登録記�
   ["G-YMMR", "ブリティッシュ・エアウェイズ", "777-200ER", "https://simpleflying.com/british-airways-1st-boeing-777-oneworld-livery/"],
   ["N375HA", "ハワイアン航空", "A330-200", "https://www.aviationwire.jp/archives/346352"],
   ["VN-A897", "ベトナム航空", "A350-900", "https://vietnamtourism.vn/en/index.php/news/items/14063"],
+  // 2026-11-23：アメリカン航空（羽田に来る 777-200ER）。N791AN は2009年に初のワンワールド塗装機になった（World Airline News 2009-04-28）。
+  //   今の塗装でのワンワールド機は airportspotting の一覧で確かめた。同じ一覧の 737-800（N837NN・N919NN・N973AN）は日本に来ないので入れない
+  ["N791AN", "アメリカン航空", "777-200ER", "https://airportspotting.com/a-guide-to-american-airlines-special-aircraft-liveries"],
+  ["N796AN", "アメリカン航空", "777-200ER", "https://airportspotting.com/a-guide-to-american-airlines-special-aircraft-liveries"],
 ];
 const ONEWORLD = new Set(["JAL", "北海道エアシステム", "ブリティッシュ・エアウェイズ", "アメリカン航空", "キャセイパシフィック航空", "カンタス航空", "カタール航空", "マレーシア航空", "スリランカ航空", "ハワイアン航空"]);
 const SKYTEAM = new Set(["ベトナム航空", "大韓航空", "中国東方航空", "デルタ航空", "エールフランス", "KLM"]);

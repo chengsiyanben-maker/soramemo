@@ -7,6 +7,7 @@ HERE=os.path.dirname(os.path.abspath(__file__)); WEB=os.path.abspath(os.path.joi
 #   偽のサーバー（fake_sb.js）を使う。本物の Supabase には接続しない
 import asyncio
 from playwright.async_api import async_playwright
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__))); import keiei_on   # 経営の画面を出して確かめる（切り替えを true にしたときの動き）
 SHOTS = os.path.join(WORK, 'home_v3_shots'); os.makedirs(SHOTS, exist_ok=True)
 HND = (35.5494, 139.7798); OUT = (35.62, 139.70); FAR = (33.0, 142.2)
 fails = []
@@ -66,7 +67,8 @@ async def main():
         # 1. 範囲の中（ログイン中・羽田）
         c, pg, errs = await page(b, HND, login=True, shots=True)
         check('範囲の中：形', await state(pg) == 'in', await state(pg))
-        check('範囲の中：空港名と「判定範囲の中」', '東京国際空港' in await pg.inner_text('#nearName') and '判定範囲の中' in await pg.inner_text('#nearDist'))
+        nd = await pg.inner_text('#nearDist')   # 11/26 home-stub：範囲の中は「いま空港にいます」と訪問の回数（横長の半券）
+        check('範囲の中：空港名と「判定範囲の中」', '東京国際空港' in await pg.inner_text('#nearName') and any(w in nd for w in ('判定範囲の中', 'はじめての空港', '回目の訪問')) and await pg.inner_text('#nearLabel') == 'いま空港にいます')
         check('範囲の中：半券は琥珀で「右へ引いて印をもらう」', '右へ引いて' in await pg.inner_text('#stubSub') and not await pg.evaluate('$("checkin").classList.contains("off")'))
         check('範囲の中：数字の帯が出て、ログインの案内は出ない', await pg.is_visible('#homeStrip') and not await pg.is_visible('#homeGate'))
         check('範囲の中：上の段は「マイページ」', (await pg.inner_text('#openSettings')).strip() == 'マイページ')
@@ -175,7 +177,7 @@ async def main():
         check('デモ：見本の数字（16空港・30フライト）', await pg.inner_text('#hsAp') == '16' and await pg.inner_text('#hsFl') == '30')
         await measure(pg, 'デモ')
         await pg.screenshot(path=os.path.join(SHOTS, '05-home-demo.png'))
-        await pg.click('#openSettings'); await pg.wait_for_timeout(300)
+        await pg.click('#openSettings'); await pg.wait_for_timeout(300); await pg.click('#mpIdx [data-mp-page="adv"]'); await pg.wait_for_timeout(150)
         check('デモ：マイページから終えられる', await pg.is_visible('#toggleDemo'))
         await pg.click('#toggleDemo'); await pg.wait_for_timeout(800)
         check('デモを終えると、ログインの案内に戻る', not await pg.evaluate('demo') and await state(pg) == 'guest' and not await pg.is_visible('#demoPill'))

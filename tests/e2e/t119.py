@@ -7,6 +7,7 @@ HERE=os.path.dirname(os.path.abspath(__file__)); WORK=os.environ.get('SORAMEMO_T
 #   保存：端末とサーバー（user_view_prefs）に並べた順も残る。偽のサーバー（fake_sb.js）を使い、小さなサーバーから開く
 import asyncio, threading, http.server, socketserver, functools
 from playwright.async_api import async_playwright
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__))); import keiei_on   # 経営の画面を出して確かめる（切り替えを true にしたときの動き）
 fails = []
 def check(label, ok, detail=''):
     print(label, ok, detail if detail != '' else '')
@@ -81,7 +82,7 @@ async def main():
         rows0 = await pg.evaluate("[...document.querySelectorAll('#dTabs .tprow[data-tp]')].map(r => r.dataset.tp).join(',')")
         await swipe(pg, '.tprow[data-tp="ops"]')
         check('左へはらうとタブから外れる（行はその場で OFF）:', 'ops' not in await pg.evaluate(TABS) and await pg.locator('#dTabs .tprow.off [data-tp-on="ops"]').count() == 1 and await pg.evaluate("[...document.querySelectorAll('#dTabs .tprow[data-tp]')].map(r => r.dataset.tp).join(',')") == rows0, rows0)
-        u = await pg.inner_text('#dTabs .tpundo'); check('外したら「元に戻す」と行き先（マイページの運用のタイル）:', '「運用」を外しました。マイページの「運用」のタイルから開けます' in u.replace('\n', ''), u)
+        u = await pg.inner_text('#dTabs .tpundo'); check('外したら「元に戻す」と行き先（マイページの運用のタイル）:', '「いまの空港」を外しました。マイページの「いまの空港」のタイルから開けます' in u.replace('\n', ''), u)
         check('4/5 のとき OFF の行の補足は「マイページから開けます」の1行:', (await pg.inner_text('#dTabs .tprow.off:has([data-tp-on="ops"]) small')).strip() == 'マイページから開けます' and await pg.evaluate("document.querySelector('#dTabs .tprow.off:has([data-tp-on=\"ops\"]) small').getClientRects().length === 1"))
         check('OFF の行のスイッチは OFF（札と aria-checked）:', await pg.get_attribute('#dTabs [data-tp-on="ops"]', 'aria-checked') == 'false' and (await pg.inner_text('#dTabs [data-tp-on="ops"]')).strip() == 'OFF')
         await pg.screenshot(path=os.path.join(SHOTS, '02-c1-removed.png'))
@@ -110,7 +111,7 @@ async def main():
         await pg.evaluate("openTabPicker('screen')"); await pg.wait_for_timeout(200)
         await pg.click('#dTabs [data-tp-reset]'); await pg.wait_for_timeout(300)
         rows = await pg.inner_text('#dReset .rsrows')
-        check('戻す前に戻る数を見せる（タブ・見方・かたまり）:', await pg.evaluate("$('dReset').open") and '図鑑・フライト・運用・修行を戻す' in rows and '成績を外す' in rows, rows)
+        check('戻す前に戻る数を見せる（タブ・見方・かたまり）:', await pg.evaluate("$('dReset').open") and '図鑑・フライト・いまの空港・修行を戻す' in rows and '成績を外す' in rows, rows)
         check('タブの順番の行がある:', 'タブの順番' in rows, rows)
         check('外していない所は「外しているものなし」（「そのまま」と言わない）:', '外しているものなし' in rows and 'そのまま' not in rows, rows)
         check('左の欄は折れない（「タブの順番」が1行）:', await pg.evaluate("[...document.querySelectorAll('#dReset .rsrow b')].every(e => e.getClientRects().length === 1 && e.getBoundingClientRect().height < 24)"))
@@ -130,7 +131,7 @@ async def main():
         check('もう一度戻す:', await pg.evaluate('loAllOn()'))
         await pg.evaluate("$('dTabs').close()")
         # C2：ホームに出すもの（ホームのシートの1行から）
-        check('ホームのシートの下に「ホームに出すものを選ぶ」:', await pg.locator('#v-home .helink[data-he-open]').count() == 1)
+        check('ホームのシートの下に「並べ替え・出すものを選ぶ」（11/24 見回り6）:', await pg.locator('#v-home .helink[data-he-open]').count() == 1 and '並べ替え・出すものを選ぶ' in await pg.inner_text('#v-home .helink[data-he-open]'))
         await pg.evaluate("document.querySelector('#v-home .helink').click()"); await pg.wait_for_timeout(300)
         check('ホームに出すものが開く（半券と今日の数字は「いつも」で切り替えなし・かたまりのスイッチは5つ（11/19 ピン止めした空港を足した）＋半券の枝の行（飛行場なども出す）1つ）:', await pg.evaluate("$('dHomeEd').open") and await pg.locator('#dHomeEd .helk').count() == 2 and await pg.locator('#dHomeEd [data-he-off]').count() == 5 and await pg.locator('#dHomeEd .losw:not([data-nearx])').count() == 5 and await pg.locator('#dHomeEd .losw[data-nearx]').count() == 1 and await pg.locator('#dHomeEd .hepc.hero .losw').count() == 0)
         check('ホームの文も「OFF にすると隠れます」:', 'OFF にすると隠れます' in await pg.inner_text('#dHomeEd .helead'))
@@ -161,7 +162,7 @@ async def main():
         check('ここからも全部乗せに戻す画面（かたまり ホーム 2）:', 'ホーム 2' in await pg.inner_text('#dReset .rsrows'))
         await pg.click('#dReset [data-rs-yes]'); await pg.wait_for_timeout(300)
         # マイページの入口
-        await pg.evaluate("$('dSettings').showModal(); renderMyPage()"); await pg.wait_for_timeout(300)
+        await pg.evaluate("openMyPage('lo')"); await pg.wait_for_timeout(300)
         check('マイページ：タブを選ぶ・ホームに出すもの・全部を見直す:', await pg.locator('#dSettings [data-tp-open]').count() == 1 and await pg.locator('#dSettings .lotile[data-he-open]').count() == 1 and await pg.locator('#dSettings [data-lo-open="top"]').count() == 1)
         check('数（タブ 5/5・ホーム 5/5）:', (await pg.inner_text('#tpTileN')).replace('\n', '') == '5/5' and (await pg.inner_text('#heTileN')).replace('\n', '') == '5/5')
         await pg.locator('#dSettings [aria-labelledby="mpPersona"]').screenshot(path=os.path.join(SHOTS, '06-mypage.png'))
@@ -250,7 +251,7 @@ async def main():
         await c.close()
         # 7. 画面の文に「× で外し」「−」で外し がない（11/9 1時 ON／OFF にした）
         c = await ctx(b, NEW); pg = await page(c, errs, True)
-        await pg.evaluate("$('dSettings').showModal(); renderMyPage()"); await pg.wait_for_timeout(300)
+        await pg.evaluate("openMyPage('lo')"); await pg.wait_for_timeout(300)
         txt = await pg.evaluate("document.body.innerText + [...document.querySelectorAll('dialog')].map(d => d.innerHTML).join('')")
         await pg.evaluate("$('dSettings').close(); openTabPicker('screen')"); await pg.wait_for_timeout(200); txt += await pg.inner_text('#dTabs')
         await pg.evaluate("$('dTabs').close(); openHomeEd('screen')"); await pg.wait_for_timeout(200); txt += await pg.inner_text('#dHomeEd')

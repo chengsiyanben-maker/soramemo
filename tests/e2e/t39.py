@@ -3,6 +3,7 @@ HERE=os.path.dirname(os.path.abspath(__file__)); WEB=os.path.abspath(os.path.joi
 # 使われ方とエラーの送信（偽のサーバー）。利用者IDや座標が入らないこと、オフにすると送らないこと
 import asyncio, json
 from playwright.async_api import async_playwright
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__))); import keiei_on   # 経営の切り替えも押して確かめる（切り替えを true にしたときの動き）
 async def main():
     async with async_playwright() as p:
         b=await p.chromium.launch(); c=await b.new_context(viewport={'width':400,'height':860}, geolocation={'latitude':35,'longitude':135,'accuracy':20}, permissions=['geolocation'])
@@ -30,7 +31,7 @@ async def main():
         blob = json.dumps([x[1] for x in sent], ensure_ascii=False)
         print('利用者IDを含む:', 'u1' in blob or 'test@example.com' in blob, '| 座標を含む:', '35.69' in blob or '139.98' in blob, '| 匿名キーで送信:', all(x[2] == 'Bearer anon' for x in sent))
         # オフにすると送らない
-        n0 = len(sent); await pg.click('#openSettings'); await pg.click('#anaToggle'); await pg.click('#dSettings .mp-back')
+        n0 = len(sent); await pg.click('#openSettings'); await pg.evaluate('openMyPage("adv")'); await pg.click('#anaToggle'); await pg.evaluate("$('dSettings').close()")
         await pg.click('nav.tabs button[data-v=log]'); await pg.evaluate('flushEvents()'); await pg.evaluate('window.dispatchEvent(new ErrorEvent("error", {message:"オフのとき"}))'); await pg.wait_for_timeout(400)
         print('オフ後に送った数:', len([x for x in sent[n0:] if not (x[0]=='log_events' and any(e['e']=='analytics' for e in x[1]['p_events']))]))
         print(errs); await b.close()

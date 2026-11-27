@@ -8,6 +8,7 @@ HERE=os.path.dirname(os.path.abspath(__file__)); WORK=os.environ.get('SORAMEMO_T
 #   偽のサーバー（fake_sb.js）とデモを使う。本物の Supabase には接続しない
 import asyncio
 from playwright.async_api import async_playwright
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__))); import keiei_on   # 経営の画面を出して確かめる（切り替えを true にしたときの動き）
 fails = []
 def check(name, ok, detail=''):
     print(('OK  ' if ok else 'NG  ') + name + (('  ' + str(detail)) if detail != '' else ''))
@@ -26,7 +27,7 @@ async def main():
         pg = await c.new_page(); errs = []; pg.on('pageerror', lambda e: errs.append(str(e)))
         await pg.goto('file://'+os.path.join(WORK,'index_server_test.html')); await pg.wait_for_load_state('load')
         await pg.wait_for_function('typeof render === "function"'); await pg.wait_for_timeout(1500)
-        await pg.evaluate('openMyPage()'); await pg.click('#toggleDemo'); await pg.wait_for_timeout(1200)
+        await pg.evaluate('openMyPage("adv")'); await pg.click('#toggleDemo'); await pg.wait_for_timeout(1200)
         await pg.evaluate('goTab("home")'); await pg.wait_for_timeout(400)
         # K6：会社を開いた時点では、路線・機体の一覧はまだ描かない
         await pg.evaluate('$("coRoutes").innerHTML = ""; $("coFleet").innerHTML = ""')

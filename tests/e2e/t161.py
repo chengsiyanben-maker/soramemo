@@ -12,6 +12,7 @@ HERE = os.path.dirname(os.path.abspath(__file__)); WEB = os.path.abspath(os.path
 WORK = os.path.join(os.environ.get('SORAMEMO_TEST_WORK', '/tmp/soramemo-e2e'), 'a3srv')
 SHOTS = os.path.abspath(os.path.join(HERE, '..', '..', 'docs', 'pm', 'shots-a3-real')); os.makedirs(SHOTS, exist_ok=True)
 THREE = os.path.join(os.environ.get('SORAMEMO_TEST_WORK', '/tmp/soramemo-e2e'), 'three-0.160.0.module.min.js')
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__))); from three_local import ensure_three; ensure_three(THREE)   # 自分で用意する（t142 に頼らない・11/26 test-steady）
 fails = []
 def check(name, ok, detail=''):
     print(('OK  ' if ok else 'NG  ') + name + (('  ' + str(detail)) if detail != '' else ''))
@@ -77,7 +78,7 @@ async def green_px(pg, y0, y1):
 
 GROUND = [{'id': 'g1', 'callsign': 'JAL501', 'lat': 35.5490, 'lon': 139.7845, 'alt_ft': None, 'kt': 0, 'hdg': 120, 'fpm': 0, 'phase': 'other', 'dist_km': 1, 'type': 'B763', 'reg': 'JA602J', 'trail': []}]
 async def main():
-    if not os.path.exists(THREE): print('three.js がないので画面の確かめは飛ばす（t142 を先に流すと置かれる）'); return
+    if not os.path.exists(THREE): print('three.js がないので画面の確かめは飛ばす（CDN から取れなかった）'); return
     allerr = []
     async with async_playwright() as p:
         b = await p.chromium.launch(args=['--use-gl=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'])
@@ -95,8 +96,8 @@ async def main():
         check('三角の表の向きが法線とそろう（街・誘導路・機体の左右の翼）', r['city'][0] > 0 and r['city'][1] == 0 and r['twy'] and r['twy'][1] == 0 and r['plane'][1] == 0, r)
         r = await pg.evaluate("['B789','B77W','A359','B738','A20N','B763','B744','A388','B39M','A321','E190','DH8D'].map(a3Model).join(' ')")
         check('機種ごとの形（787・777・A350・737・A320・767・747・A380・E170/E190・Q400）', r == '787 777 350 737 320 767 747 380 737 320 e q4', r)
-        r = await pg.evaluate("""(() => { const g = a3Geo('320'); const vis = id => { const o = A3.objs.get(id); return o && o.g.getObjectByName('gear').visible; };
-          return { win: g.win.attributes.position.count, gearGround: vis('a4'), gearClimb: vis('a2'), gearArr: vis('a1') }; })()""")
+        r = await pg.evaluate("""(() => { const g = a3Geo('320'); const vis = id => { const o = A3.objs.get(id); if(!o) return false; const h = o.g.getObjectByName('gearHD'); return o.hd && h ? h.visible : o.g.getObjectByName('gear').visible; };   /* 11/23：細かい形のときはその脚（11/24 a3-hq：最高の質では近くなくても細かい形） */
+          return { win: g.win.attributes.position.count, gearGround: vis('a4') || !!(A3.objs.get('a4').lo && A3.objs.get('a4').lo.visible),   /* 11/22：遠い地上の機体は平らな簡単な形（脚なし） */ gearClimb: vis('a2'), gearArr: vis('a1') }; })()""")
         check('窓の帯がある・脚は地上と着陸の前だけ（上昇中はしまう）', r['win'] > 30 and r['gearGround'] and r['gearArr'] and not r['gearClimb'], r)
         r = await pg.evaluate("""(() => { const rw = A3.scene.children.find(o => o.isMesh && o.geometry.type === 'PlaneGeometry' && o.name !== 'clouds' && o.material.map); const c = rw.material.map.image, g = c.getContext('2d'), d = g.getImageData(0, Math.floor(c.height * .5), 20, 200).data;
           let s = 0, s2 = 0, n = 0; for(let i = 0; i < d.length; i += 4){ s += d[i]; s2 += d[i] * d[i]; n++; } const m = s / n; return Math.sqrt(s2 / n - m * m); })()""")
@@ -134,7 +135,7 @@ async def main():
         await pg.wait_for_function("(() => { const l = document.getElementById('a3Load'); return !!l && l.hidden; })()", timeout=30000)
         await pg.evaluate("a3Poll()"); await pg.wait_for_timeout(1500)
         r = await pg.evaluate("({ g: A3.objs.has('g1'), air: A3.objs.has('g1') && a3Air(A3.objs.get('g1').p), txt: document.querySelector('#a3Sheet .a3range').textContent, row: !!document.querySelector('[data-a3-pick=\"g1\"]') })")
-        check('答えに ground があれば地上の機体を出し、一覧にも出す', r['g'] and not r['air'] and r['row'] and '地上の機体' in r['txt'] and 'まだ出ません' not in r['txt'], r)
+        check('答えに ground があれば地上の機体を出し、一覧にも出す', r['g'] and not r['air'] and r['row'] and '地上 1機' in r['txt'] and 'まだ出ません' not in r['txt'], r)
         allerr += errs; await c.close()
         await b.close()
     check('JS のエラーなし', not allerr, allerr[:3])

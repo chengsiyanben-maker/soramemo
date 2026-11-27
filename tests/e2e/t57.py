@@ -50,6 +50,7 @@ async def main():
         fb = await pg.inner_text('#fleetBook')
         print('図鑑:', 'JA01XJ' in fb and 'JA301J' in fb, '| 特別塗装機:', 'A350 1号機' in fb, '| 機種:', 'エアバスA350-900' in fb)
         # 3. 修行の計画（そらメモ＋なしでも出る）
+        await pg.evaluate("(() => { if(!$('statusBox')){ const d = document.createElement('div'); d.id = 'statusBox'; d.className = 'sgrid'; $('v-stats').appendChild(d); } renderStatus(); })()")   # 11/24：ステータスの目安と修行の計画は成績から外した（入口1枚）。関数は残っているので、置き場を足して確かめる
         await pg.click('[data-plan-q="HND-OKA"]'); await pg.wait_for_timeout(800)
         pl = await pg.inner_text('#statusBox .plan')
         print('修行の計画:', '修行の計画' in pl and 'あと' in pl, '| 路線の定時率:', '定時 80%' in pl)

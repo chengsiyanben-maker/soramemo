@@ -2,6 +2,7 @@ import os, sys
 HERE=os.path.dirname(os.path.abspath(__file__)); WEB=os.path.abspath(os.path.join(HERE,'..','..','web')); WORK=os.environ.get('SORAMEMO_TEST_WORK','/tmp/soramemo-e2e'); os.makedirs(WORK, exist_ok=True)
 import asyncio, json
 from playwright.async_api import async_playwright
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__))); import keiei_on   # 経営の画面を出して確かめる（切り替えを true にしたときの動き）
 async def main():
     async with async_playwright() as p:
         b=await p.chromium.launch(); c=await b.new_context(viewport={'width':400,'height':860}, timezone_id='Asia/Tokyo', device_scale_factor=2); await c.add_init_script("localStorage.setItem('soramemo.onboarded','1')")
@@ -10,7 +11,7 @@ async def main():
         print('件数: 民間', await pg.evaluate('A.length'), '| 番外編', await pg.evaluate("JSON.stringify({mil:XA.filter(a=>a.kind=='mil').length, glider:XA.filter(a=>a.kind=='glider').length, field:XA.filter(a=>a.kind=='field').length})"), '| 実績', await pg.evaluate('ACH.length'))
         # 判定：新千歳の範囲内で千歳基地のほうが近い地点、範囲外で千歳基地の範囲内の地点
         print('新千歳の範囲内:', await pg.evaluate("nearest({lat:42.7855, lon:141.6770}).a.name"), '| 千歳基地の範囲:', await pg.evaluate("nearest({lat:42.8050, lon:141.6550}).a.name"), '| 入間のフェンス外:', await pg.evaluate("nearest({lat:35.8580, lon:139.4100}).a.name"))
-        await pg.evaluate('openMyPage()'); await pg.click('#toggleDemo'); await pg.wait_for_timeout(200)
+        await pg.evaluate('openMyPage("adv")'); await pg.click('#toggleDemo'); await pg.wait_for_timeout(200)
         # 羽田 → 入間基地 → 妻沼滑空場 → 羽田 の順にデモでチェックイン
         for v in ['t:HND-T1', 'a:1010', 'a:2017', 'a:3002', 'a:89', 'a:5']:
             await pg.select_option('#demoAirport', v); await pg.press('#checkin','Enter'); await pg.wait_for_timeout(700)

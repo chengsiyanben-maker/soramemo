@@ -25,6 +25,7 @@ async def main():
         await pg.click('#fSave'); await pg.wait_for_timeout(500)
         print('保存した運賃:', await pg.evaluate("JSON.stringify(window.__details)"))
         await pg.click('nav.tabs button[data-v=stats]')
+        await pg.evaluate("(() => { if(!$('statusBox')){ const d = document.createElement('div'); d.id = 'statusBox'; d.className = 'sgrid'; $('v-stats').appendChild(d); } renderStatus(); })()")   # 11/24：ステータスの目安と修行の計画は成績から外した（入口1枚）。関数は残っているので、置き場を足して確かめる
         print('ステータス:', (await pg.inner_text('#statusBox')).replace('\n',' ')[:80])
         print('防御設定の違反:', await pg.evaluate('window.__csp'), errs)
         await b.close()

@@ -1,4 +1,4 @@
-import os, sys, shutil, urllib.request
+import os, sys, re, shutil, urllib.request
 HERE=os.path.dirname(os.path.abspath(__file__)); WEB=os.path.abspath(os.path.join(HERE,'..','..','web')); WORK=os.environ.get('SORAMEMO_TEST_WORK','/tmp/soramemo-e2e'); os.makedirs(WORK, exist_ok=True)
 SHOTS=os.path.abspath(os.path.join(HERE,'..','..','docs','pm','shots-airport-3d')); os.makedirs(SHOTS, exist_ok=True)
 # 空港の3D（決定事項【11/17】・画面案 design/airport-3d 4版）
@@ -20,13 +20,9 @@ def check(name, ok, detail=''):
     if not ok: fails.append(name)
 THREE_URL = 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.min.js'
 THREE = os.path.join(WORK, 'three-0.160.0.module.min.js')
-def get_three():
-    if os.path.exists(THREE) and os.path.getsize(THREE) > 100000: return True
-    try:
-        with urllib.request.urlopen(THREE_URL, timeout=30) as r: open(THREE, 'wb').write(r.read())
-        return os.path.getsize(THREE) > 100000
-    except Exception as e:
-        print('three.js を取れない:', e); return False
+def get_three():   # 共通の部品で用意する（同時に流しても壊れない・11/26 test-steady）
+    sys.path.insert(0, HERE); from three_local import ensure_three
+    return ensure_three(THREE)
 now = datetime.now(timezone.utc); iso = lambda s: (now + timedelta(seconds=s)).isoformat()
 P1 = [  # 1つめの答え（90秒前）
   {'id':'a1','callsign':'JAL318','lat':35.47,'lon':139.8550,'alt_ft':2400,'kt':150,'hdg':331,'fpm':-700,'phase':'arr','dist_km':14,'type':'A359','reg':'JA01XJ','trail':[]},
@@ -98,7 +94,7 @@ async def main():
         await pg.evaluate("goTab('book')"); await pg.evaluate("openAirport(IATA.HND.id)"); await pg.wait_for_timeout(500)
         r = await pg.evaluate("(() => { const b = document.querySelector('#dAirport .a3pill button'); if(!b) return null; const r = b.getBoundingClientRect(), dl = document.querySelector('#dAirport .zk-dl').getBoundingClientRect(); return {top:r.top, bottom:r.bottom, h:r.height, below:r.top >= dl.bottom, hint:document.querySelector('#dAirport .a3pill').innerText}; })()")
         check('羽田：数字のカードの下に「3Dで見る ›」（44px・844 で開いてすぐ見える）:', bool(r) and r['h'] >= 44 and r['below'] and r['bottom'] <= 844 - 80, str(r))
-        check('ピルの横に「押すと読み込みます（約0.6MB）」:', bool(r) and '押すと読み込みます（約0.6MB）' in r['hint'], str(r and r['hint']))
+        check('ピルの横に「押すと読み込みます（約0.7MB）」:', bool(r) and '押すと読み込みます（約0.7MB）' in r['hint'], str(r and r['hint']))
         check('開く前は three.js を読まない:', 'three' not in reqs)
         await pg.screenshot(path=os.path.join(SHOTS, '01-entry-pill-844.png'))
         await pg.evaluate("openAirport(IATA.CTS.id)"); await pg.wait_for_timeout(300)
@@ -135,7 +131,7 @@ async def main():
             pills = await pg.evaluate("[...document.querySelectorAll('[data-a3-view]')].map(b => b.innerText + ':' + b.getAttribute('aria-pressed'))")
             check('視点のピル（全体が選ばれている）:', pills == ['全体:true', '管制塔:false', '機体:false'], str(pills))
             sh = await pg.inner_text('#a3Sheet')
-            check('一覧：羽田の近くの機体・機の数・JL 318 福岡から・着陸まで約○分・C 滑走路へ:', '羽田の近くの機体' in sh and 'JL 318' in sh and '福岡から' in sh and '着陸まで約' in sh and 'C 滑走路へ' in sh, sh)
+            check('一覧：羽田の近くの機体・機の数・JL 318 福岡から・着陸まで約○分・34R（C）へ のように番号が先:', '羽田の近くの機体' in sh and 'JL 318' in sh and '福岡から' in sh and '着陸まで約' in sh and re.search(r'\d\d[LR]?（C）へ', sh) is not None, sh)
             check('一覧：特別塗装機の札・NH 59 新千歳へ（上昇中）:', '特別塗装機' in sh and 'NH 59' in sh and '新千歳へ' in sh and '上昇中' in sh, sh)
             check('一覧：地上の機体（JAL109）は「地上」:', 'JL 109' in sh and '地上' in sh, sh)
             chips = await pg.inner_text('#a3Chips')
@@ -167,7 +163,7 @@ async def main():
             check('「この機体から見る」でピルが「JL 318」:', pills[2] == 'JL 318:true', str(pills))
             await pg.screenshot(path=os.path.join(SHOTS, '06-follow-844.png'))
             await pg.click('[data-a3-view="tower"]'); await pg.wait_for_timeout(500)
-            check('管制塔の視点（管制室の高さ 約106m・塔は 115.7m）:', await pg.evaluate("Math.round(A3.cam.position.y)") == 106)
+            check('管制塔の視点（塔の上 約118m。塔は 115.7m。11/24 見回り2）:', await pg.evaluate("Math.round(A3.cam.position.y)") == 118)
             await pg.screenshot(path=os.path.join(SHOTS, '05-tower-844.png'))
             # 5 機体のピルを先に押す
             await pg.evaluate("A3.sel = null; A3.view = 'all'; a3Pills(); a3Sheet()")

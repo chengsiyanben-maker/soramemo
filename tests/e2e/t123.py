@@ -20,7 +20,7 @@ async def main():
     async with async_playwright() as p:
         b = await p.chromium.launch()
         c, pg, errs = await start(b)
-        await pg.evaluate('openMyPage()'); await pg.click('#toggleDemo'); await pg.wait_for_timeout(800)
+        await pg.evaluate('openMyPage("adv")'); await pg.click('#toggleDemo'); await pg.wait_for_timeout(800)
         await pg.evaluate("document.querySelectorAll('dialog[open]').forEach(d=>d.close())")
         await pg.evaluate("goTab('log')"); await pg.wait_for_timeout(400)
         check('見方は日誌・地図・年のまとめの3つ:', await pg.evaluate("[...document.querySelectorAll('#logViews [data-vw]')].map(x=>x.textContent).join(',')") == '日誌,地図,年のまとめ')

@@ -4,8 +4,8 @@
 //   保存した版がまだないとき（はじめて開いたとき）は、網から取る
 // ・アイコンや、版の番号が付いた外部の部品・フォントは、保存した版を使う
 // ・サーバー（Supabase）などとの通信には手を出さない（失敗は失敗としてアプリに伝える）
-const CACHE = "soramemo-959b4db4d4";   // 配る用を作るとき（tools/build.mjs）に中身から自動で付く
-const CORE = ["./", "./index.html", "./config.js", "./manifest.webmanifest", "./icon.svg", "./icon-192.png", "./icon-512.png", "./privacy.html", "./terms.html", "./tokushoho.html", "./fonts/mincho0-bb13716f45.woff2", "./fonts/dot0-e3ca7cb1dc.woff2", "./fonts/sign0-046a5a18b8.woff2"];
+const CACHE = "soramemo-cb6499ad48";   // 配る用を作るとき（tools/build.mjs）に中身から自動で付く
+const CORE = ["./", "./index.html", "./config.js", "./manifest.webmanifest", "./icon.svg", "./icon-192.png", "./icon-512.png", "./privacy.html", "./terms.html", "./tokushoho.html", "./fonts/mincho0-a68ff45a2e.woff2", "./fonts/dot0-90fdcf9162.woff2", "./fonts/sign0-046a5a18b8.woff2"];
 // フォント（fonts/ の中身はファイル名に中身の印が付いている）は、版が変わっても消さない別の保存場所に置く（公開のたびに取り直さない）
 const FONTS = "soramemo-fonts";
 const CDN = ["https://cdn.jsdelivr.net/", "https://fonts.googleapis.com/", "https://fonts.gstatic.com/"];

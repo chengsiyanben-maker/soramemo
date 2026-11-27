@@ -41,7 +41,7 @@ Deno.test("地上・便名なし・アライアンス塗装は知らせない", 
 
 Deno.test("使われなくなった購読（404・410）は消し、ほかの失敗では消さない", async () => {
   const f = fake({ JA339J: [sub(1), sub(2), sub(3)] }, { 2: 410, 3: 500 });
-  assertEquals(await notifyRegFly(v, f.deps), 1);
+  assertEquals(await notifyRegFly(v, f.deps, Date.parse("2026-10-26T03:00:00Z")), 1);   // 昼（日本時間12時）に固定。夜は静かな時間の人に送らない
   assertEquals(f.dropped, [2]);
 });
 
@@ -49,4 +49,10 @@ Deno.test("通知の文は、海外の登録記号でも開くリンクが作れ
   assertEquals(regFlyMessage({ ...v, reg: "B-16740" }).url, "./#special-B-16740");
   // サービスワーカーが受け付けるリンクの形（src/sw.js と同じ）
   assertEquals(/^\.\/#special-[A-Z0-9-]{2,10}$/.test(regFlyMessage({ ...v, reg: "B-16740" }).url), true);
+});
+
+Deno.test("夜の静かな時間（23〜7時）は quiet_night が false の人だけに送る", async () => {
+  const f = fake({ JA339J: [{ ...sub(1), quiet_night: true }, { ...sub(2), quiet_night: false }, sub(3)] });
+  assertEquals(await notifyRegFly(v, f.deps, Date.parse("2026-10-26T16:00:00Z")), 1);   // 日本時間 1時
+  assertEquals(f.sent.map(([id]) => id), [2]);
 });

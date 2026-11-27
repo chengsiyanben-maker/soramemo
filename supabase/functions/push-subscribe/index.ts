@@ -7,6 +7,8 @@
 //        spot:{ iata:"HND", kinds:["special","big","foreign","reg","ops","dep"], lead:5, regs:["JA01XJ"], flights:["JL123@2026-10-21"] } を付けると、
 //        撮影の知らせ（その空港に、選んだ種類の機体が着陸の lead 分前になったら。運用が変わったときも）。spot:null で撮影の知らせをやめる
 //        ga:{ airports:["HND","NRT"], kinds:["plane","cluster","wind","cloud","ts"], quiet:true, gap:3 } を付けると、ゴーアラウンドの知らせ（推定）
+//        quiet_night:true|false を付けると、夜の静かな時間（23〜7時）に特別塗装機・撮影・運用の変化の知らせを止めるかを変える（はじめは true＝止める）。
+//        付けなければ前の設定のまま。乗る便・空港の遅れや欠航の知らせは止めない。ゴーアラウンドは ga.quiet のまま
 //   POST /functions/v1/push-subscribe  { endpoint, remove:true }                              → 取り消し
 import { createClient } from "npm:@supabase/supabase-js@2.117.2";
 import { FAM_KEYS } from "../_shared/spot_push.ts";
@@ -51,7 +53,7 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: CORS });
   if (req.method === "GET") return res({ key: Deno.env.get("VAPID_PUBLIC_KEY") || null });
   if (req.method !== "POST") return res({ error: "GET/POST only" }, 405);
-  let b: { endpoint?: unknown; keys?: { p256dh?: unknown; auth?: unknown }; airports?: unknown; flights?: unknown; sp_airports?: unknown; sp_regs?: unknown; spot?: unknown; ga?: unknown; remove?: unknown };
+  let b: { endpoint?: unknown; keys?: { p256dh?: unknown; auth?: unknown }; airports?: unknown; flights?: unknown; sp_airports?: unknown; sp_regs?: unknown; spot?: unknown; ga?: unknown; quiet_night?: unknown; remove?: unknown };
   try { b = await req.json(); } catch { return res({ error: "bad json" }, 400); }
   const endpoint = typeof b.endpoint === "string" ? b.endpoint : "";
   if (!PUSH_HOSTS.test(endpoint) || endpoint.length > 1000) return res({ error: "bad endpoint" }, 400);
@@ -72,7 +74,9 @@ Deno.serve(async (req) => {
     return res({ ok: true, removed: true });
   }
   const row = { endpoint, p256dh, auth, airports, flights, sp_airports, sp_regs, ...(hasSpot ? spot : { spot_iata: null, spot_kinds: [] as string[], spot_lead: 5, spot_regs: [] as string[], spot_flights: [] as string[], spot_fams: [] as string[], spot_livs: [] as string[] }), ...(hasGa ? ga : { ga_airports: [] as string[], ga_kinds: [] as string[], ga_quiet: false, ga_gap: 3 }) };
+  // 夜の静かな時間：送られてきたときだけ書く（古い画面からの申し込みでは前の設定のまま。はじめての行は列のはじめの値 true）
+  if (typeof b.quiet_night === "boolean") Object.assign(row, { quiet_night: b.quiet_night });
   const { error } = await admin.from("push_subs").upsert(row, { onConflict: "endpoint" });
   if (error) { console.error(error); return res({ error: "save failed" }, 500); }
-  return res({ ok: true, airports, flights, sp_airports, sp_regs, spot: hasSpot ? spot : null, ga: hasGa ? ga : null });
+  return res({ ok: true, airports, flights, sp_airports, sp_regs, spot: hasSpot ? spot : null, ga: hasGa ? ga : null, ...(typeof b.quiet_night === "boolean" ? { quiet_night: b.quiet_night } : {}) });
 });

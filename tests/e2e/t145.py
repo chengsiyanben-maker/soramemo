@@ -37,7 +37,7 @@ async def main():
             tag = f'[{H}]'
             t = await pg.inner_text('#nearPin')
             check(tag + ' K1：いちばん近い（羽田）の右に「ピン止め」（していない形）', 'ピン止め' in t and 'ピン止め中' not in t, t)
-            r = await pg.evaluate("(() => { const a = $('nearPin').getBoundingClientRect(), b = $('nearLabel').getBoundingClientRect(), s = $('checkin').getBoundingClientRect(); return { same: Math.abs((a.top + a.height / 2) - (b.top + b.height / 2)) < 8, inCard: a.right <= s.left + 1, h: Math.round(a.height) }; })()")
+            r = await pg.evaluate("(() => { const a = $('nearPin').getBoundingClientRect(), b = $('nearLabel').getBoundingClientRect(), s = $('checkin').getBoundingClientRect(); return { same: Math.abs((a.top + a.height / 2) - (b.top + b.height / 2)) < 8, inCard: $('bpass').dataset.lay === 'row' ? a.bottom <= s.top + 1 : a.right <= s.left + 1, h: Math.round(a.height) }; })()")
             check(tag + ' K1：札は見出しの行・半券に重ならない', r['same'] and r['inCard'], r)
             check(tag + ' K1h：ピン止めが0のときは「ピン止めした空港」を出さない', await pg.evaluate("$('pinHome').hidden"))
             if H == 844: await pg.screenshot(path=os.path.join(SHOTS, '01-K1-not-844.png'))
@@ -150,8 +150,8 @@ async def main():
         # 4. マイページの入口とホームに出すもの（K1h：はじめ ON の行）
         c, pg, errs = await page(b, HND, init="localStorage.setItem('soramemo.pins', JSON.stringify([{k:'HND',sp:true,dl:false,ga:false}]));")
         await pg.click('#openSettings'); await pg.wait_for_timeout(400)
-        check('マイページ：表示の編集の下に「知らせ」の入口（1/12）', '知らせ' in await pg.inner_text('#dSettings') and (await pg.inner_text('#pinTileN')).replace('\n','') == '1/12')
-        await pg.click('[data-pins-open]'); await pg.wait_for_timeout(300)
+        check('マイページ：「知らせ」のタイル（1 / 12 空港）', '1/ 12 空港' in (await pg.inner_text('#mpTiles [data-pins-open]')).replace('\n',''))
+        await pg.click('#mpTiles [data-pins-open]'); await pg.wait_for_timeout(300)
         check('マイページ → 知らせ（戻るは「マイページ」）', await pg.is_visible('#dPins') and 'マイページ' in await pg.inner_text('#dPins .mp-back'))
         await pg.evaluate("$('dPins').close(); $('dSettings').close()")
         r = await pg.evaluate("LO_BLOCKS.home.map(x => x[0])")

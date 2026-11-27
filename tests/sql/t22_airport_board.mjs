@@ -24,6 +24,8 @@ await db.exec(`insert into public.flight_schedule (svc_date, flight, dep, arr, s
 await db.exec(`update public.flight_schedule set eta = sta + interval '30 minutes' where flight = 'NH201'`);
 await db.exec(`update public.flight_schedule set arr_status = 'Cancelled' where flight = 'JL900'`);
 await db.exec(`update public.flight_schedule set ata = sta + interval '20 minutes' where flight = 'JL777'`);
+// 移行 196 から、前の7日の目安は毎時のまとめ（airport_hour_bad）から読む。毎時の仕事の代わりにまとめ直す
+await db.exec(`select public.airport_hour_bad_roll((now() at time zone 'Asia/Tokyo')::date - 8, (now() at time zone 'Asia/Tokyo')::date - 1)`);
 let r = await as('anon', `select public.airport_board('HND')`);
 const arr = (r?.next_arr ?? []).map((f) => f.flight);
 check('これから着く便：早い順に並び、欠航の便は出さない', arr.join(',') === 'JL101,JL103,NH201', r?.next_arr);

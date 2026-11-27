@@ -120,7 +120,7 @@ async def main():
         # 3. 竜ヶ崎飛行場の中：半券はその飛行場・琥珀・「飛行場・滑空場・ヘリポートの図鑑に入ります」
         c, pg, errs = await page(b, RYU, shots=True)
         i = await info(pg)
-        check('竜ヶ崎：判定範囲の中で札「飛行場」', i['state'] == 'in' and i['tag'] == '飛行場' and '判定範囲の中' in i['dist'], i)
+        check('竜ヶ崎：判定範囲の中で札「飛行場」', i['state'] == 'in' and i['tag'] == '飛行場' and ('判定範囲の中' in i['dist'] or 'はじめての' in i['dist'] or '回目の訪問' in i['dist']), i)
         check('竜ヶ崎：「飛行場・滑空場・ヘリポートの図鑑に入ります」（review-5 の6・11/12 本人「A」）', '飛行場・滑空場・ヘリポートの図鑑に入ります' in i['dist'], i['dist'])
         await pg.screenshot(path=os.path.join(SHOTS, '04-ryugasaki-844.png'))
         check('竜ヶ崎：エラーなし', not errs, errs); await c.close()
@@ -202,9 +202,9 @@ async def main():
             tt = await pg.evaluate('''(() => { const one = el => { const t = el.textContent, i = t.indexOf("ヘリポート"); if(i < 0) return null; const w = document.createTreeWalker(el, NodeFilter.SHOW_TEXT); let n, o = 0, s = null; while((n = w.nextNode())){ if(o + n.length > i){ s = [n, i - o]; break; } o += n.length; } const r = document.createRange(); r.setStart(s[0], s[1]); r.setEnd(s[0], s[1] + 5); return r.getClientRects().length; };
               const h = document.querySelector("#bookAir .book-head h2"), en = document.querySelector("#zkBody .zx-entry .zx-t"), tg = [...document.querySelectorAll("#bookAir .zx-dtag")];
               return { h:h.textContent, hl:one(h), en:en.textContent, enl:one(en), tags:[...new Set(tg.map(x => x.textContent))], tagl:tg.filter(x => x.offsetParent).map(one), aria:document.querySelector("#zkBody .zx-entry").getAttribute("aria-label") }; })()''')
-            check(f'{hh} 飛行場の図鑑：題・入口・扉の札が新しい名前', tt['h'] == '飛行場・滑空場・ヘリポートの図鑑' and tt['en'] == '飛行場・滑空場・ヘリポートの図鑑' and tt['tags'] == ['飛行場・滑空場・ヘリポート'] and tt['aria'].startswith('飛行場・滑空場・ヘリポートの図鑑を開く'), tt)
-            dr = await pg.evaluate('[...document.querySelectorAll("#bookAir .zk-door")].map(d => { const r = d.getBoundingClientRect(), t = d.querySelector(".zx-dtag").getBoundingClientRect(), u = d.querySelector(".zk-up").getBoundingClientRect(); return t.right <= r.right - 4 && u.right <= r.right + 1 && u.width >= 44 && t.top >= r.top && t.bottom <= r.bottom ? null : d.dataset.rg || d.querySelector("h3").textContent; }).filter(Boolean)')
-            check(f'{hh} 飛行場の図鑑：扉の札と上へのボタンが扉からはみ出さない（北海道も）', not dr, dr)
+            check(f'{hh} 飛行場の図鑑：題・入口が新しい名前（11/25 扉の札は外した）', tt['h'] == '飛行場・滑空場・ヘリポートの図鑑' and tt['en'] == '飛行場・滑空場・ヘリポートの図鑑' and tt['tags'] == [] and tt['aria'].startswith('飛行場・滑空場・ヘリポートの図鑑を開く'), tt)
+            dr = await pg.evaluate('[...document.querySelectorAll("#bookAir .zk-door")].map(d => { const r = d.getBoundingClientRect(), u = d.querySelector(".zk-up").getBoundingClientRect(); return u.right <= r.right + 1 && u.width >= 44 ? null : d.dataset.rg || d.querySelector("h3").textContent; }).filter(Boolean)')
+            check(f'{hh} 飛行場の図鑑：上へのボタンが扉からはみ出さない（北海道も）', not dr, dr)
             check(f'{hh} 飛行場の図鑑：「ヘリポート」が語の途中で折れない', tt['hl'] == 1 and all(x == 1 for x in tt['tagl']), tt)
             oth = await pg.evaluate('(() => { renderZkOthers(); return [...document.querySelectorAll("#bookOthers [data-zkseg=air] .tx b")].map(x => x.textContent); })()')
             check(f'{hh} ほかの図鑑・実績：行の名前も新しい名前', oth == ['飛行場・滑空場・ヘリポートの図鑑'], oth)

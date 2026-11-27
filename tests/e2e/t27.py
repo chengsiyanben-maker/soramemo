@@ -2,6 +2,7 @@ import os, sys
 HERE=os.path.dirname(os.path.abspath(__file__)); WEB=os.path.abspath(os.path.join(HERE,'..','..','web')); WORK=os.environ.get('SORAMEMO_TEST_WORK','/tmp/soramemo-e2e'); os.makedirs(WORK, exist_ok=True)
 import asyncio
 from playwright.async_api import async_playwright
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__))); import keiei_on   # 経営の画面を出して確かめる（切り替えを true にしたときの動き）
 sys.path.insert(0, HERE); from keepls import reload_keep, goto_http   # 読み込み直すテストは http で開く（file:// だと localStorage が落ちることがある）
 async def main():
     async with async_playwright() as p:

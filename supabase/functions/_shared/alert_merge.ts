@@ -8,6 +8,8 @@
 //   ・送ってよいか（はじめて・重くなった・運航情報がはじめて届いた・遅れが30分以上ふえた）は、データベースの alert_push_claim が決める（下の shouldSend は同じ決まりの写し）
 //   ・着く空港か出る空港（アメリカ）が地上待機・閉鎖・到着の間引きなら、同じ通知に1行足す（FAA NAS Status。11/15 本人「OK」）。
 //     はじめて分かったときは同じ通知を上書きして知らせる。お知らせのない便は「この便に乗る」の人にだけ、止まり具合だけの通知（rank 0）を同じ tag で出す
+import { tidyPush } from "./push_text.ts";
+
 export type MergeSched = { id: number; flight: string; svc_date: string; dep: string; arr: string; std: string | number; sta?: string | number | null };
 export type MergeAlert = { schedule_id: number; kind: string; message: string; iata: string[]; late?: number | null; official?: boolean | null };
 export type MergeGroup = {
@@ -193,5 +195,5 @@ export function worldOnlyGroups(scheds: WorldSched[], have: MergeGroup[], status
 
 // 通知の中身。同じ便は同じ tag にして、端末の上で前の通知を上書きする（上書きのときも鳴らす：renotify）
 export function payloadOf(g: MergeGroup, again: boolean) {
-  return { title: `そらメモ：${g.flight}`, body: (again ? "【更新】" : "") + g.body, tag: `fw-${g.gkey}`, renotify: true, url: `./#ops-${g.dep}` };
+  return tidyPush({ title: `${g.flight}`, body: (again ? "【更新】" : "") + g.body, tag: `fw-${g.gkey}`, renotify: true, url: `./#ops-${g.dep}` });
 }

@@ -7,10 +7,11 @@
 // 見る人の呼び出しは、記録の処理が live_positions に残した位置（75秒以内）から作る。記録が止まっているときだけ adsb.lol に問い合わせる。
 // 通ってきた線は、位置をデータベース（traffic_trails）に足していって作る（関数の呼び出しをまたいで残すため）。
 import { createClient } from "npm:@supabase/supabase-js@2.117.2";
-import { acFromLive, type LiveRow, planesFromAdsb, recordPlan, retryAfterMs, type Trails, updateTrails } from "../_shared/traffic.ts";
+import { acFromLive, groundFromAdsb, type LiveRow, planesFromAdsb, recordPlan, retryAfterMs, type Trails, updateTrails } from "../_shared/traffic.ts";
 import { fetchMetars } from "../_shared/metar.ts";
 import { OPS_AIRPORTS, observeOps, runwaysOf } from "../_shared/ops_core.js";
 import { gaStep, guessRwy, quietNow, type Watch, wxRisk } from "../_shared/go_around.ts";
+import { awake, liveryTag } from "../_shared/livery_note.ts";
 import { type ArrWatch, arrStep } from "../_shared/rwy_learn.ts";
 import { LIVERIES, type Livery, liveryMap } from "../_shared/liveries.ts";
 import { type Dest, inboundEtaMin, inboundMessage, mergeLiveries, pickDest, type Seen, wantsInbound, wantsLiveryPush } from "../_shared/livery_extra.ts";
@@ -24,6 +25,8 @@ import { readShared, writeShared } from "../_shared/edge_cache.ts";
 import { adsbImHeaders, adsbLolHeaders } from "../_shared/adsblol.ts";
 import { activeAirports, slimPlanes, viewPlan } from "../_shared/traffic_view.ts";
 import { type Apt, type Cand, onClimbOut, onFinal, pickAirport, refinePhases, runwaysFor } from "../_shared/arr_dest.ts";
+import { tidyPush } from "../_shared/push_text.ts";
+import { type GRunway, groundStep, type GWatch } from "../_shared/ground_moves.ts";
 
 const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, { auth: { persistSession: false } });
 
@@ -202,16 +205,22 @@ async function build(iata: string, view: boolean, mark: (k: string) => void): Pr
   // まとめて取った円から、この空港の半径の中だけを使う
   // 着陸・離陸の見分けは、滑走路の向き・最終進入の範囲・高さで絞る（ほかの空港へ降りる機体を「着陸」にしない。11/21）
   // 便名の行き先が分かる機体は、それで決める（形の判定より先。11/21 本人「便の名前から行き先を判別して」）。問い合わせは着陸・離陸の機体の分を1回に束ねる
-  const raw = planesFromAdsb(j?.ac, a.at, 14000, NEARBY.filter((o) => o !== a.at)).filter((p) => p.dist_km <= a.nm * 1.852);
+  //   記録の処理では、羽田・成田は学習用に 60海里まで見る（LEARN_NM。11/25 成田も羽田と同じ細かさに）。画面に出す機体は今までどおり a.nm まで
+  const rnm = view ? a.nm : Math.max(a.nm, LEARN_NM[iata] ?? 0);
+  const raw = planesFromAdsb(j?.ac, a.at, 14000, NEARBY.filter((o) => o !== a.at)).filter((p) => p.dist_km <= rnm * 1.852);
   const routes = await lookupRoutes(ROUTES, raw.filter((p) => p.phase !== "other").map((p) => p.callsign));
   if (view) mark("routes");
-  const planes = applyRoutes(raw, refinePhases(raw, APT_OF(iata), OTHERS_OF(iata)), iata, runwaysFor(iata), routes);
+  const wide = applyRoutes(raw, refinePhases(raw, APT_OF(iata), OTHERS_OF(iata)), iata, runwaysFor(iata), routes);
+  if (!view && LEARN_NM[iata]) LEARN_PLANES.set(iata, { at: Date.now(), planes: wide });
+  const planes = rnm === a.nm ? wide : wide.filter((p) => p.dist_km <= a.nm * 1.852);
   const tr = await syncTrails(iata, planes, !view || !live);   // 記録が止まっていて adsb.lol に聞いたときは、今までどおり見る人の呼び出しでも線を書く
   mark("trails");
   // 線は画面が使う着陸・離陸の機体だけに付ける（ほかは空の配列。形は同じ）。11/21 見回り 7
   const body = JSON.stringify({
     iata, at: new Date(typeof j?.now === "number" ? j.now : Date.now()).toISOString(), source: "adsb.lol",
     planes: slimPlanes(planes, tr),
+    // 地上の機体（空港の中心から5km 以内。3D の駐機場・誘導路・滑走路の上の機体。11/22）。地図と数のカードは planes だけを使う
+    ground: groundFromAdsb(j?.ac, a.at, 5),
   });
   cache.set(iata, { at: Date.now(), body });
   // 見る人の呼び出しで作った答えは置き場に入れる。記録の処理の答えは、見ている人がいる空港だけ（Deno.serve の RECORD の最後）
@@ -348,7 +357,7 @@ async function notifyRegFly(v: any) {
   await notifyRegFlyWith(v, {
     notifiedSince: async (reg, key, since) => { const { data } = await admin.from("livery_notified").select("reg").eq("reg", reg).eq("iata", key).gt("notified_at", since); return !!data?.length; },
     markNotified: async (reg, key, at) => { await admin.from("livery_notified").upsert({ reg, iata: key, notified_at: at }); },
-    subsFor: async (reg) => { const { data } = await admin.from("push_subs").select("id, endpoint, p256dh, auth").contains("sp_regs", [reg]); return data ?? []; },
+    subsFor: async (reg) => { const { data } = await admin.from("push_subs").select("id, endpoint, p256dh, auth, quiet_night").contains("sp_regs", [reg]); return data ?? []; },
     send: async (s, payload) => { try { await webpush.sendNotification({ endpoint: s.endpoint, keys: { p256dh: s.p256dh, auth: s.auth } }, payload, { TTL: 900 }); return null; } catch (e) { return (e as { statusCode?: number }).statusCode ?? 0; } },
     drop: async (id) => { await admin.from("push_subs").delete().eq("id", id); },
   });
@@ -362,15 +371,16 @@ async function notifyLivery(v: any) {
   const { data: done } = await admin.from("livery_notified").select("reg").eq("reg", v.reg).eq("iata", v.iata).gt("notified_at", since);
   if (done?.length) return;
   await admin.from("livery_notified").upsert({ reg: v.reg, iata: v.iata, notified_at: new Date().toISOString() });
-  const { data: all } = await admin.from("push_subs").select("id, endpoint, p256dh, auth, spot_iata, spot_kinds").contains("sp_airports", [v.iata]);
+  const { data: all } = await admin.from("push_subs").select("id, endpoint, p256dh, auth, spot_iata, spot_kinds, quiet_night").contains("sp_airports", [v.iata]);
   // 撮影の知らせで同じ空港の特別塗装機を選んでいる人には、そちら（着陸の数分前）で知らせるので、ここでは送らない
   // （撮影の知らせはアライアンス塗装を出さないので、アライアンス塗装のときは撮影の知らせを選んでいる人にもここで送る）
-  const subs = (all ?? []).filter((s) => !(v.kind !== "alliance" && s.spot_iata === v.iata && (s.spot_kinds ?? []).includes("special")));
+  // 夜の静かな時間（23〜7時）を選んだ人には送らない（livery_note.ts）
+  const subs = awake((all ?? []).filter((s) => !(v.kind !== "alliance" && s.spot_iata === v.iata && (s.spot_kinds ?? []).includes("special"))));
   if (!subs.length) return;
   webpush.setVapidDetails(Deno.env.get("VAPID_SUBJECT") || "https://soramemo.jp", pub, priv);
   // deno-lint-ignore no-explicit-any
   const name = (OPS_AIRPORTS as any)[v.iata]?.name ?? v.iata;
-  const body = JSON.stringify({ title: `そらメモ：★${v.name}`, body: `${v.name}（${v.airline}${v.callsign ? "・" + v.callsign : ""}）が${name}に着陸に向かっています（推定）。`, tag: `sp-${v.reg}`, url: `./#ops-${v.iata}` });
+  const body = JSON.stringify(tidyPush({ title: `★${v.name}`, body: `${v.name}（${v.airline}${v.callsign ? "・" + v.callsign : ""}）が${name}に着陸に向かっています（推定）。`, tag: liveryTag({ callsign: v.callsign, reg: v.reg }), renotify: true, url: `./#ops-${v.iata}` }));
   for (const s of subs) {
     try { await webpush.sendNotification({ endpoint: s.endpoint, keys: { p256dh: s.p256dh, auth: s.auth } }, body, { TTL: 900 }); }
     catch (e) { const code = (e as { statusCode?: number }).statusCode; if (code === 404 || code === 410) await admin.from("push_subs").delete().eq("id", s.id); }
@@ -418,8 +428,9 @@ async function notifyInbound(list: Seen[]) {
     const { data: dup } = await admin.from("livery_notified").select("reg").eq("reg", v.reg).eq("iata", dest.iata).gt("notified_at", since);
     if (dup?.length) continue;
     await admin.from("livery_notified").upsert({ reg: v.reg, iata: dest.iata, notified_at: new Date(now).toISOString() });
-    const { data: subs } = await admin.from("push_subs").select("id, endpoint, p256dh, auth").contains("sp_airports", [dest.iata]);
-    if (!subs?.length) continue;
+    const { data: all } = await admin.from("push_subs").select("id, endpoint, p256dh, auth, quiet_night").contains("sp_airports", [dest.iata]);
+    const subs = awake(all ?? [], now);
+    if (!subs.length) continue;
     // deno-lint-ignore no-explicit-any
     const name = (OPS_AIRPORTS as any)[dest.iata]?.name ?? airports.get(dest.iata)?.name ?? dest.iata;
     const m = inboundMessage(v, dest, name, inboundEtaMin(dest.km, v.kt, dest.mins, now), now);
@@ -429,9 +440,10 @@ async function notifyInbound(list: Seen[]) {
 }
 
 // ---- 撮影の知らせ（いつもの空港に、選んだ種類の機体が着陸の数分前になったら。同じ機体は1日1回） ----
-const SPOT_COLS = "id, endpoint, p256dh, auth, spot_iata, spot_kinds, spot_lead, spot_regs, spot_flights, spot_fams, spot_livs";
-async function sendOne(s: { id: number; endpoint: string; p256dh: string; auth: string }, payload: Record<string, string>, ttl = 900) {
-  try { await webpush.sendNotification({ endpoint: s.endpoint, keys: { p256dh: s.p256dh, auth: s.auth } }, JSON.stringify(payload), { TTL: ttl }); return true; }
+const OPS_GAP = 60 * 60_000;   // 運用の知らせの間（前の知らせから）
+const SPOT_COLS = "id, endpoint, p256dh, auth, spot_iata, spot_kinds, spot_lead, spot_regs, spot_flights, spot_fams, spot_livs, quiet_night";
+async function sendOne(s: { id: number; endpoint: string; p256dh: string; auth: string }, payload: Record<string, string | boolean>, ttl = 900) {
+  try { await webpush.sendNotification({ endpoint: s.endpoint, keys: { p256dh: s.p256dh, auth: s.auth } }, JSON.stringify(tidyPush(payload)), { TTL: ttl }); return true; }
   catch (e) { const code = (e as { statusCode?: number }).statusCode; if (code === 404 || code === 410) await admin.from("push_subs").delete().eq("id", s.id); return false; }
 }
 // 知らせた記録を先に入れ、入ったとき（はじめてのとき）だけ送る
@@ -442,8 +454,9 @@ async function firstTime(sub_id: number, key: string) {
 async function notifySpot(bodies: Map<string, string>) {
   const pub = Deno.env.get("VAPID_PUBLIC_KEY"), priv = Deno.env.get("VAPID_PRIVATE_KEY");
   if (!pub || !priv) return 0;
-  const { data: subs } = await admin.from("push_subs").select(SPOT_COLS).not("spot_iata", "is", null);
-  if (!subs?.length) return 0;
+  const { data: all } = await admin.from("push_subs").select(SPOT_COLS).not("spot_iata", "is", null);
+  const subs = awake(all ?? []);   // 夜の静かな時間を選んだ人には送らない
+  if (!subs.length) return 0;
   webpush.setVapidDetails(Deno.env.get("VAPID_SUBJECT") || "https://soramemo.jp", pub, priv);
   const L = liveryMap(new Date(), await allLiveries()), planesOf = new Map<string, SpotPlane[]>(), today = jstDate();
   let sent = 0;
@@ -466,7 +479,7 @@ async function notifySpotDep() {
   const pub = Deno.env.get("VAPID_PUBLIC_KEY"), priv = Deno.env.get("VAPID_PRIVATE_KEY");
   if (!pub || !priv) return 0;
   const { data: subs } = await admin.from("push_subs").select(SPOT_COLS).not("spot_iata", "is", null);
-  const want = ((subs ?? []) as (SpotSub & { endpoint: string; p256dh: string; auth: string })[])
+  const want = awake((subs ?? []) as (SpotSub & { endpoint: string; p256dh: string; auth: string; quiet_night?: boolean | null })[])
     .filter((s) => (s.spot_kinds ?? []).includes("dep") || (s.spot_flights ?? []).length > 0);
   if (!want.length) return 0;
   const { data: deps, error } = await admin.rpc("spot_departures", { p_iatas: [...new Set(want.map((s) => s.spot_iata!))] });
@@ -483,12 +496,14 @@ async function notifySpotDep() {
   }
   return sent;
 }
-// 運用が変わったら、「運用が変わったとき」を選んでいる人に知らせる（ops_log の新しい4回から。同じ変化は1時間に1回）
+// 運用が変わったら、「運用が変わったとき」を選んでいる人に知らせる（ops_log の新しい4回から）。
+// その空港の運用の知らせは、前の知らせから60分たつまで送らない（北⇔南の行き来や時をまたいでも続けて届かない。11/25 見直し2回目の4番）
 async function notifyOpsChange(iatas: string[]) {
   const pub = Deno.env.get("VAPID_PUBLIC_KEY"), priv = Deno.env.get("VAPID_PRIVATE_KEY");
   if (!pub || !priv || !iatas.length) return 0;
-  const { data: subs } = await admin.from("push_subs").select(SPOT_COLS).in("spot_iata", iatas).contains("spot_kinds", ["ops"]);
-  if (!subs?.length) return 0;
+  const { data: all } = await admin.from("push_subs").select(SPOT_COLS).in("spot_iata", iatas).contains("spot_kinds", ["ops"]);
+  const subs = awake(all ?? []);   // 夜の静かな時間を選んだ人には送らない
+  if (!subs.length) return 0;
   webpush.setVapidDetails(Deno.env.get("VAPID_SUBJECT") || "https://soramemo.jp", pub, priv);
   let sent = 0;
   for (const iata of new Set(subs.map((s) => s.spot_iata as string))) {
@@ -496,10 +511,15 @@ async function notifyOpsChange(iatas: string[]) {
     const ch = opsChanged(rows ?? []); if (!ch) continue;
     // deno-lint-ignore no-explicit-any
     const def = (OPS_AIRPORTS as any)[iata], label = (k: string) => def?.modes?.[k]?.label ?? k;
-    const hour = new Date(Date.now() + 9 * 3600_000).toISOString().slice(0, 13);
-    for (const s of subs.filter((x) => x.spot_iata === iata)) {
-      if (!(await firstTime(s.id, `ops-${iata}-${ch.to}@${hour}`))) continue;
-      if (await sendOne(s, { title: `そらメモ：${def?.name ?? iata}の運用が変わりました`, body: `${label(ch.from)} → ${label(ch.to)}（実際の機体の動きからの推定）。`, tag: `ops-${iata}`, url: `./#ops-${iata}` })) sent++;
+    const mine = subs.filter((x) => x.spot_iata === iata), now = Date.now();
+    const { data: recent } = await admin.from("spot_notified").select("sub_id").in("sub_id", mine.map((x) => x.id))
+      .like("key", `ops-${iata}%`).gt("notified_at", new Date(now - OPS_GAP).toISOString());
+    const quiet = new Set((recent ?? []).map((r) => r.sub_id));
+    const minute = new Date(now + 9 * 3600_000).toISOString().slice(0, 16);
+    for (const s of mine) {
+      if (quiet.has(s.id)) continue;
+      if (!(await firstTime(s.id, `ops-${iata}@${minute}`))) continue;
+      if (await sendOne(s, { title: `${def?.name ?? iata}の運用が変わりました`, body: `${label(ch.from)} → ${label(ch.to)}（実際の機体の動きからの推定）。`, tag: `ops-${iata}`, url: `./#ops-${iata}` })) sent++;
     }
   }
   return sent;
@@ -508,6 +528,11 @@ async function notifyOpsChange(iatas: string[]) {
 
 // ---- 着陸する滑走路の学習用の記録（羽田・成田）：来た方面と途中のルート、着陸した滑走路を残す（運営の分析用） ----
 const LEARN_APS = ["HND", "NRT"];
+// 学習に使う半径（海里）。羽田は画面と同じ 60、成田は画面は 40 のまま学習だけ 60（11/25 PM の指示「成田も羽田と同じ細かさで」）。
+//   どちらも東の円（250海里）の中なので、adsb.lol に問い合わせる回数は変わらない
+const LEARN_NM: Record<string, number> = { HND: 60, NRT: 60 };
+// deno-lint-ignore no-explicit-any
+const LEARN_PLANES = new Map<string, { at: number; planes: any[] }>();   // 記録の処理の今回の回で作った、学習用の広い機体の一覧
 async function learnRunways(bodies: Map<string, string>) {
   const aps = LEARN_APS.filter((k) => bodies.has(k)); if (!aps.length) return 0;
   const { data: rows } = await admin.from("arr_watch").select("*").in("iata", aps).gt("updated_at", new Date(Date.now() - 10 * 60_000).toISOString());
@@ -516,10 +541,30 @@ async function learnRunways(bodies: Map<string, string>) {
     // deno-lint-ignore no-explicit-any
     const def = (OPS_AIRPORTS as any)[iata]; if (!def) continue;
     const w = new Map<string, ArrWatch>(); for (const r of (rows ?? []) as ArrWatch[]) if (r.iata === iata) w.set(r.hex, r);
-    const r = arrStep(iata, def.center, runwaysOf(def), JSON.parse(bodies.get(iata)!).planes ?? [], w, now);
+    const wide = LEARN_PLANES.get(iata), planes = wide && now - wide.at < 60_000 ? wide.planes : JSON.parse(bodies.get(iata)!).planes ?? [];
+    const r = arrStep(iata, def.center, runwaysOf(def), planes, w, now);
     if (r.upserts.length) await admin.from("arr_watch").upsert(r.upserts);
     if (r.samples.length) { const { error } = await admin.from("rwy_samples").insert(r.samples); if (error) console.error("rwy_samples", error.message); else n += r.samples.length; }
     if (r.deletes.length) await admin.from("arr_watch").delete().eq("iata", iata).in("hex", r.deletes);
+  }
+  return n;
+}
+
+// ---- 羽田・成田の地上の動き（移行199）：着陸 → スポットで止まる、動き出す → 離陸。地上を走った時間とスポットの位置を残す ----
+async function recordGround(bodies: Map<string, string>) {
+  const aps = LEARN_APS.filter((k) => bodies.has(k)); if (!aps.length) return 0;
+  const { data: rows, error } = await admin.from("ground_watch").select("*").in("iata", aps);
+  if (error) throw new Error("ground_watch " + error.message);
+  const now = Date.now(); let n = 0;
+  for (const iata of aps) {
+    // deno-lint-ignore no-explicit-any
+    const def = (OPS_AIRPORTS as any)[iata]; if (!def) continue;
+    const rw = runwaysOf(def), w = new Map<string, GWatch>();
+    for (const r of (rows ?? []) as GWatch[]) if (r.iata === iata) w.set(r.hex, r);
+    const r = groundStep(iata, Object.values(rw) as GRunway[], rw, JSON.parse(bodies.get(iata)!).ground ?? [], w, now);
+    if (r.upserts.length) { const { error: e } = await admin.from("ground_watch").upsert(r.upserts); if (e) console.error("ground_watch", e.message); }
+    if (r.moves.length) { const { error: e } = await admin.from("ground_moves").insert(r.moves); if (e) console.error("ground_moves", e.message); else n += r.moves.length; }
+    if (r.deletes.length) await admin.from("ground_watch").delete().eq("iata", iata).in("hex", r.deletes);
   }
   return n;
 }
@@ -560,7 +605,7 @@ async function trackGoArounds(bodies: Map<string, string>) {
       const name = e.flight ?? e.callsign ?? "機体";
       for (const s of await gaSubs(iata, "plane")) {
         if (!(await firstTime(s.id, `ga-${ins.id}`))) continue;
-        await sendOne(s, { title: `そらメモ：${apName(iata)}で ${name} がゴーアラウンドしたようです`, body: `${rwy ? rwy + " に" : ""}降りる手前で上昇に移りました（機体の位置からの推定）${wind}。`, tag: `ga-${ins.id}`, url: `./#ops-${iata}/ga/${ins.id}` });
+        await sendOne(s, { title: `${apName(iata)}で ${name} がゴーアラウンドしたようです`, body: `${rwy ? rwy + " に" : ""}降りる手前で上昇に移りました（機体の位置からの推定）${wind}。`, tag: `ga-${ins.id}`, url: `./#ops-${iata}/ga/${ins.id}` });
       }
       // 続いたとき：1時間に2機以上
       const { count } = await admin.from("ga_events").select("id", { count: "exact", head: true }).eq("iata", iata).gt("at", new Date(now - 3600_000).toISOString());
@@ -568,7 +613,7 @@ async function trackGoArounds(bodies: Map<string, string>) {
         const hour = new Date(now + 9 * 3600_000).toISOString().slice(0, 13);
         for (const s of await gaSubs(iata, "cluster")) {
           if (!(await firstTime(s.id, `gac-${iata}@${hour}`))) continue;
-          await sendOne(s, { title: `そらメモ：${apName(iata)}でゴーアラウンドが続いています`, body: `この1時間に ${count}機（機体の位置からの推定）${wind}。`, tag: `gac-${iata}`, url: `./#ops-${iata}/ga` });
+          await sendOne(s, { title: `${apName(iata)}でゴーアラウンドが続いています`, body: `この1時間に ${count}機（機体の位置からの推定）${wind}。`, tag: `gac-${iata}`, url: `./#ops-${iata}/ga` });
         }
       }
     }
@@ -587,7 +632,7 @@ async function notifyGaWeather(def: any, m: any, mode: string | null) {
   for (const kind of risk.kinds) for (const s of await gaSubs(def.iata, kind)) {
     const key = s.ga_gap === 0 ? `gaw-${def.iata}-${kind}@${m.time}` : `gaw-${def.iata}-${kind}@${Math.floor(Date.now() / (3 * 3600_000))}`;
     if (!(await firstTime(s.id, key.slice(0, 60)))) continue;
-    if (await sendOne(s, { title: `そらメモ：${def.name}は、ゴーアラウンドが起きやすい天気です`, body: `${risk.reasons.join("・")}（気象通報からの目安。${GA_KIND_JA[kind] ?? ""}）。`, tag: `gaw-${def.iata}`, url: `./#ops-${def.iata}/gawx` })) sent++;
+    if (await sendOne(s, { title: `${def.name}は、ゴーアラウンドが起きやすい天気です`, body: `${risk.reasons.join("・")}（気象通報からの目安。${GA_KIND_JA[kind] ?? ""}）。`, tag: `gaw-${def.iata}`, url: `./#ops-${def.iata}/gawx` })) sent++;
   }
   return sent;
 }
@@ -657,6 +702,9 @@ Deno.serve(async (req) => {
     // 着陸する滑走路の学習用の記録（羽田・成田）
     let learned = 0;
     try { learned = await learnRunways(bodies); } catch (e) { console.error("rwy learn", e); }
+    // 羽田・成田の地上の動き（移行199 の前は ground_watch が読めず、ここで止まるだけ）
+    let ground = 0;
+    try { ground = await recordGround(bodies); } catch (e) { console.error("ground", e); }
     // 撮影の知らせ（着陸の数分前）と、運用の変化の知らせ（運用を記録したあと）
     let spot = 0;
     try { spot = await notifySpot(bodies); } catch (e) { console.error("spot push", e); }
@@ -664,7 +712,7 @@ Deno.serve(async (req) => {
     if (logged) { try { spot += await notifyOpsChange([...bodies.keys()]); } catch (e) { console.error("ops push", e); } }
     // 知らせた記録は2日で消す（30分に1回）
     if (new Date().getUTCMinutes() % 30 === 0 && first) { try { await admin.from("spot_notified").delete().lt("notified_at", new Date(Date.now() - 2 * 864e5).toISOString()); } catch { /* 次の回に */ } }
-    return new Response(JSON.stringify({ recorded: done, logged, liveries, spot, ga, learned, shared }), { headers: JSON_HEADERS });
+    return new Response(JSON.stringify({ recorded: done, logged, liveries, spot, ga, learned, ground, shared }), { headers: JSON_HEADERS });
   }
   if (!AIRPORTS[iata]) return new Response(JSON.stringify({ error: "unsupported airport" }), { status: 404, headers: JSON_HEADERS });
   try {

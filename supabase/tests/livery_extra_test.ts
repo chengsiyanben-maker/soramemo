@@ -1,7 +1,7 @@
 // 特別塗装機の一覧の足し分（livery_extra）と、海外の塗装機の早めの知らせ（11/16 案1-A・案2-A・案3-A）
 import { assertEquals } from "jsr:@std/assert@1";
 import { LIVERIES, liveryMap } from "../functions/_shared/liveries.ts";
-import { hhmm, inboundEtaMin, inboundMessage, mergeLiveries, pickDest, wantsInbound, wantsLiveryPush } from "../functions/_shared/livery_extra.ts";
+import { hhmm, inboundEtaMin, jaTime, inboundMessage, mergeLiveries, pickDest, wantsInbound, wantsLiveryPush } from "../functions/_shared/livery_extra.ts";
 
 const ROWS = [
   { reg: "g-ymmu", name: "ワンワールド塗装（777-200ER）", airline: "ブリティッシュ・エアウェイズ", kind: "alliance", src: "https://example.org/ba", from_day: null, until_day: null },
@@ -58,6 +58,14 @@ Deno.test("着く見込み：距離と速さから。ふだんの時刻が40分�
   assertEquals(inboundEtaMin(370.4, 400, 10 * 60 + 150, now), 42);  // ふだんの時刻が遠すぎる→距離のほう
   assertEquals(hhmm(now, 42), "10:42");
   const m = inboundMessage(base, { iata: "HND" }, "羽田", 42, now);
-  assertEquals(m.body, "ワンワールド塗装（777-200ER）（ブリティッシュ・エアウェイズ・BAW5）が羽田に向かっています（推定）。着くのは10:42ごろの見込みです（推定）。");
-  assertEquals([m.tag, m.url], ["sp-G-YMMR", "./#ops-HND"]);
+  assertEquals(m.body, "ワンワールド塗装（777-200ER）（ブリティッシュ・エアウェイズ・BAW5）が羽田に向かっています。着くのは10時42分ごろ（推定）。");
+  assertEquals(m.body.split("推定").length - 1, 1); // 「（推定）」は1回だけ・「見込み」と重ねない
+  assertEquals(m.body.includes("見込み"), false);
+  assertEquals(jaTime(now, 42), "10時42分");
+  assertEquals(jaTime(now, -60 * 3 + 5), "7時05分"); // 時は0を付けない・分は2けた
+  const noCs = inboundMessage({ ...base, callsign: "" }, { iata: "HND" }, "羽田", 42, now);
+  assertEquals(noCs.body, "ワンワールド塗装（777-200ER）（ブリティッシュ・エアウェイズ）が羽田に向かっています。着くのは10時42分ごろ（推定）。");
+  // 1便で1つの tag（便名。予定・飛んでいる・着陸に向かっている と同じ通知の書き換え）。便名がなければ登録記号
+  assertEquals([m.tag, m.url, m.renotify], ["sp-BA5", "./#ops-HND", true]);
+  assertEquals(noCs.tag, "sp-G-YMMR");
 });

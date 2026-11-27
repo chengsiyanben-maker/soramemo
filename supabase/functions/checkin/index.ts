@@ -4,6 +4,10 @@ import { createClient } from "npm:@supabase/supabase-js@2.117.2";
 import { type Airport, decide, type Terminal } from "../_shared/judge.ts";
 import { weather, wxCode } from "../_shared/airport_now.ts";
 import { OPS_AIRPORTS } from "../_shared/ops_core.js";
+import { type CheckinWx, pickWx, WX_NONE } from "../_shared/checkin_wx.ts";
+import { readShared } from "../_shared/edge_cache.ts";
+import { againBody, type CheckinRow, type FlightRow, isUniqueViolation, parseCid } from "../_shared/idem.ts";
+import { roundPos } from "../_shared/pos.ts";
 
 const URL = Deno.env.get("SUPABASE_URL")!;
 const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -30,7 +34,8 @@ async function checkinAllowed(): Promise<boolean> {
 // deno-lint-ignore no-explicit-any
 const background = (p: PromiseLike<unknown>) => { const q = Promise.resolve(p).catch(() => {}); const rt = (globalThis as any).EdgeRuntime; if (rt?.waitUntil) rt.waitUntil(q); };
 
-// チェックインしたときの空港の天気（気象通報）。同じ空港は10分使い回し、2.5秒で取れなければあきらめる（チェックインは待たせない）
+// チェックインしたときの空港の天気（気象通報）。同じ空港は10分使い回し、2.5秒で取れなければあきらめる。
+// 配信元に取りに行くのは、データベースの中で決まらなかったときだけで、印を返したあとに回す（wxLater）
 const wxCache = new Map<string, { at: number; v: { weather: string | null; wind_kt: number | null } }>();
 async function wxAt(icao: string | null | undefined): Promise<{ weather: string | null; wind_kt: number | null }> {
   const none = { weather: null, wind_kt: null };
@@ -47,6 +52,32 @@ async function wxAt(icao: string | null | undefined): Promise<{ weather: string 
     wxCache.set(icao, { at: Date.now(), v });
     return v;
   } catch { return none; }
+}
+
+// 待たせない天気：記憶 → 置き場（edge_cache）→ 天気の記録（wx_obs）。データベースを1往復ずつ並べて読む（data/stamp-fast）
+// 決まらなければ null（印を返したあとで wxLater が配信元から書き足す）
+async function wxFast(icao: string | null | undefined): Promise<CheckinWx | null> {
+  if (!icao || !/^[A-Z]{4}$/.test(icao)) return WX_NONE;
+  const hit = wxCache.get(icao);
+  if (hit && Date.now() - hit.at < 10 * 60_000) return hit.v;
+  try {
+    const [sh, ob] = await Promise.all([
+      readShared(admin, [`now:wx:${icao}`]),
+      admin.from("wx_obs").select("at, raw, wspd").eq("icao", icao)
+        .gt("at", new Date(Date.now() - 2 * 3600_000).toISOString()).order("at", { ascending: false }).limit(1),
+    ]);
+    const v = pickWx(sh.get(`now:wx:${icao}`), ob.data?.[0]);
+    if (v) wxCache.set(icao, { at: Date.now(), v });
+    return v;
+  } catch { return null; }
+}
+// 印を返したあとで、配信元から天気を取ってその印に書き足す（まだ空のときだけ）
+function wxLater(icao: string, checkinId: number | string) {
+  background((async () => {
+    const v = await wxAt(icao);
+    if (v.weather == null && v.wind_kt == null) return;
+    await admin.from("checkins").update({ weather: v.weather, wind_kt: v.wind_kt }).eq("id", checkinId).is("weather", null).is("wind_kt", null);
+  })());
 }
 
 // チェックインしたときの空港の運用（運用タブの14空港だけ）：運用の判定の記録（ops_log）の直近10分から。
@@ -80,6 +111,20 @@ async function loadMaster() {
   return master;
 }
 
+// 同じ人・同じ client_id の印と、その印でできた便を読む（なければ null）
+async function findByCid(userId: string, cid: string): Promise<{ ci: CheckinRow; flight: FlightRow } | null> {
+  const { data: ci, error } = await admin.from("checkins")
+    .select("id,airport_id,terminal_id,created_at,flags,weather,wind_kt,ops")
+    .eq("user_id", userId).eq("client_id", cid).maybeSingle();
+  if (error) throw error;
+  if (!ci) return null;
+  const { data: fl, error: fe } = await admin.from("flights")
+    .select("id,from_airport,to_airport,dep_at,arr_at,distance_km")
+    .eq("user_id", userId).eq("arr_checkin", ci.id).limit(1);
+  if (fe) throw fe;
+  return { ci: ci as CheckinRow, flight: (fl?.[0] ?? null) as FlightRow };
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS });
   if (req.method !== "POST") return json({ ok: false, reason: "method", message: "POSTのみ" }, 405);
@@ -90,21 +135,41 @@ Deno.serve(async (req) => {
   if (ue || !u?.user) return json({ ok: false, reason: "auth", message: "ログインしてください。" }, 401);
   const userId = u.user.id;
 
-  // 非常停止と回数制限（1人1分に20回まで）
-  if (!(await checkinAllowed())) {
+  // 非常停止・回数制限（1人1分に20回まで）・空港の表・前の印・送られた中身は、互いに待たないので同時に読む（data/stamp-fast）。
+  // 判断の順番（止まっている → 回数 → 中身）は前と同じ。読むだけなので、断る場合に先に読んでいても記録は変わらない
+  const t0 = Date.now();
+  const bodyP = req.json().then((v) => ({ ok: true as const, v }), () => ({ ok: false as const, v: null }));
+  const [allowed, rate, bodyR, masterR, lastR, prevR] = await Promise.all([
+    checkinAllowed(),
+    admin.rpc("rl_check", { p_key: "checkin:" + userId, p_limit: 20, p_window_sec: 60 }),
+    bodyP,
+    loadMaster().then((v) => ({ v, e: null }), (e) => ({ v: null, e })),
+    admin.from("checkins").select("id,airport_id,terminal_id,created_at").eq("user_id", userId)
+      .order("created_at", { ascending: false }).limit(1),
+    // 送り直し（同じ client_id）なら1回目の印を読む（data/idem・移行200）。ID がなければ読まない
+    bodyP.then((b) => {
+      const cid = parseCid(b.v?.cid);
+      return cid ? findByCid(userId, cid).catch(() => null) : null;   // 読めなければ前と同じ判定へ（一意の索引が二重を止める）
+    }),
+  ]);
+  if (!allowed) {
     return json({ ok: false, reason: "paused", message: "ただいまチェックインを一時停止しています。しばらくしてからもう一度お試しください。" }, 503);
   }
-  const { data: rateOk } = await admin.rpc("rl_check", { p_key: "checkin:" + userId, p_limit: 20, p_window_sec: 60 });
-  if (rateOk === false) return json({ ok: false, reason: "rate", message: "短い時間に何度も押されています。少し待ってからもう一度押してください。" }, 429);
+  if (rate.data === false) return json({ ok: false, reason: "rate", message: "短い時間に何度も押されています。少し待ってからもう一度押してください。" }, 429);
 
-  let body: { lat?: number; lon?: number; acc?: number; ts?: number; queued?: boolean };
-  try { body = await req.json(); } catch { return json({ ok: false, reason: "bad_request", message: "送信内容を読めませんでした。" }, 400); }
+  if (!bodyR.ok) return json({ ok: false, reason: "bad_request", message: "送信内容を読めませんでした。" }, 400);
+  const body: { lat?: number; lon?: number; acc?: number; ts?: number; queued?: boolean; cid?: string } = bodyR.v ?? {};
+  const cid = parseCid(body.cid);
+  // 同じ ID の印がもうある＝返事だけ届かなかった送り直し。判定をやり直さず、1回目の印を成功として返す
+  if (prevR) {
+    console.log(JSON.stringify({ ev: "checkin_again", total: Date.now() - t0 }));
+    return json(againBody(prevR.ci, prevR.flight));
+  }
 
   try {
-    const { airports, terminals } = await loadMaster();
-    const { data: lastRows, error: le } = await admin.from("checkins")
-      .select("id,airport_id,terminal_id,created_at").eq("user_id", userId)
-      .order("created_at", { ascending: false }).limit(1);
+    if (!masterR.v) throw masterR.e;
+    const { airports, terminals } = masterR.v;
+    const { data: lastRows, error: le } = lastR;
     if (le) throw le;
     const last = lastRows?.[0]
       ? { airport_id: lastRows[0].airport_id, terminal_id: lastRows[0].terminal_id, at: Date.parse(lastRows[0].created_at) }
@@ -133,42 +198,56 @@ Deno.serve(async (req) => {
         ? admin.from("checkins").select("id", { count: "exact", head: true }).eq("user_id", userId).eq("terminal_id", d.place.terminal.id)
         : Promise.resolve({ count: 1 }),
       // deno-lint-ignore no-explicit-any
-      wxAt((d.place.airport as any).icao),
+      wxFast((d.place.airport as any).icao),
       // deno-lint-ignore no-explicit-any
       opsAt((d.place.airport as any).iata),
     ]);
 
+    const t1 = Date.now();
+    const w = wx ?? WX_NONE;
     const { data: ci, error: ie } = await admin.from("checkins").insert({
       user_id: userId, airport_id: d.place.airport.id, terminal_id: d.place.terminal?.id ?? null,
-      lat: body.lat, lon: body.lon, accuracy_m: body.acc, position_at: new Date(Number(body.ts)).toISOString(),
+      // 位置は小数3桁（約100m）に丸めて残す（判定は上の decide で丸める前の値でした）。精度はそのまま
+      lat: roundPos(body.lat), lon: roundPos(body.lon), accuracy_m: body.acc, position_at: new Date(Number(body.ts)).toISOString(),
       created_at: new Date(d.at).toISOString(), flags: d.flags,
-      weather: wx.weather, wind_kt: wx.wind_kt, ops,
+      weather: w.weather, wind_kt: w.wind_kt, ops, client_id: cid,
     }).select("id,created_at").single();
-    if (ie) throw ie;
+    if (ie) {
+      // 同じ ID がほぼ同時に2回届き、もう一方が先に書いた：その印を成功として返す
+      if (cid && isUniqueViolation(ie)) {
+        const again = await findByCid(userId, cid);
+        if (again) return json(againBody(again.ci, again.flight));
+      }
+      throw ie;
+    }
+    // データベースの中で天気が決まらなかったときだけ、返したあとで配信元から書き足す
+    // deno-lint-ignore no-explicit-any
+    if (wx == null) wxLater((d.place.airport as any).icao, ci.id);
 
-    // 行事のボーナス（期間中、空港ごとに1回。経営の資金）。失敗してもチェックインは成功のまま
+    // 行事のボーナス（期間中、空港ごとに1回。経営の資金）とフライトの記録は、どちらも印のあとで互いに待たないので同時に。
+    // ボーナスが失敗してもチェックインは成功のまま（前と同じ）。フライトの記録が失敗したら前と同じく 500
+    const [bonusR, flightR] = await Promise.all([
+      admin.rpc("grant_event_bonus", { p_uid: userId, p_airport: d.place.airport.id, p_at: ci.created_at }),
+      d.flight
+        ? admin.from("flights").insert({
+          user_id: userId, from_airport: d.flight.from, to_airport: d.flight.to,
+          dep_checkin: lastRows![0].id, arr_checkin: ci.id,
+          dep_at: new Date(d.flight.dep).toISOString(), arr_at: ci.created_at, distance_km: d.flight.km, client_id: cid,
+        }).select("id,from_airport,to_airport,dep_at,arr_at,distance_km").single()
+        : Promise.resolve({ data: null, error: null }),
+    ]);
     let bonus: unknown[] = [];
-    {
-      const { data: b, error: be } = await admin.rpc("grant_event_bonus", { p_uid: userId, p_airport: d.place.airport.id, p_at: ci.created_at });
-      if (be) console.error("event bonus", be.message); else if (Array.isArray(b)) bonus = b;
-    }
-
-    let flight = null;
-    if (d.flight) {
-      const { data: f, error: fe } = await admin.from("flights").insert({
-        user_id: userId, from_airport: d.flight.from, to_airport: d.flight.to,
-        dep_checkin: lastRows![0].id, arr_checkin: ci.id,
-        dep_at: new Date(d.flight.dep).toISOString(), arr_at: ci.created_at, distance_km: d.flight.km,
-      }).select("id,from_airport,to_airport,dep_at,arr_at,distance_km").single();
-      if (fe) throw fe;
-      flight = f;
-    }
+    if (bonusR.error) console.error("event bonus", bonusR.error.message); else if (Array.isArray(bonusR.data)) bonus = bonusR.data;
+    if (flightR.error) throw flightR.error;
+    const flight = flightR.data;
+    // かかった時間（利用者IDと位置は書かない）。読む・判定まで／記録まで
+    console.log(JSON.stringify({ ev: "checkin_ms", read: t1 - t0, total: Date.now() - t0, wx: wx == null ? "later" : "db", flight: !!d.flight }));
 
     return json({
       ok: true, at: ci.created_at,
       airport_id: d.place.airport.id, terminal_id: d.place.terminal?.id ?? null,
       first_airport: (fa.count ?? 0) === 0, first_terminal: (ft.count ?? 0) === 0,
-      flight, flags: d.flags, weather: wx.weather, wind_kt: wx.wind_kt, ops, bonus,
+      flight, flags: d.flags, weather: w.weather, wind_kt: w.wind_kt, ops, bonus,
     });
   } catch (e) {
     console.error(e);

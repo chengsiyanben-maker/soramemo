@@ -9,6 +9,8 @@
 import { createClient } from "npm:@supabase/supabase-js@2.117.2";
 import { liveryPlans, odptStatus } from "../_shared/odpt_status.ts";
 import { notifyFlights, sendSpPush } from "../_shared/alert_push.ts";
+import { liveryTag, quietWindow } from "../_shared/livery_note.ts";
+import { quietNow } from "../_shared/go_around.ts";
 import { fastTargets } from "../_shared/odpt_fast.ts";
 import { LIVERIES } from "../_shared/liveries.ts";
 import { feedDates, putFeedDates } from "../_shared/odpt_date.ts";
@@ -19,6 +21,12 @@ const ODPT = "https://api.odpt.org/api/v4";
 const OPERATORS = ["JAL", "ANA"];
 const JSON_HEADERS = { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" };
 const MIN = 60_000;
+
+// 特別塗装機の予定の知らせ。tag は便名（飛んでいる・着陸に向かっている と同じ通知の書き換え）
+const planMessage = (p: { flight: string; livery: string; dep: string; std: string }, dn: string, an: string, hm: (t: string) => string) => ({
+  title: `★${p.livery}（予定）`, tag: liveryTag({ flight: p.flight }), renotify: true, url: `./#ops-${p.dep}`,
+  body: `${p.livery}が、${hm(p.std)} ${dn}発の${p.flight}（${an}行き）で飛ぶ予定です（航空会社の運航情報）。`,
+});
 
 async function odpt(type: "Departure" | "Arrival", op: string, airport?: string): Promise<unknown[]> {
   if (!OPERATORS.includes(op)) return [];
@@ -154,9 +162,21 @@ Deno.serve(async (req) => {
         planNew++;
         const dn = names.get(p.dep) ?? p.dep, an = names.get(p.arr) ?? p.arr;
         try {
-          await sendSpPush(admin, [p.dep, p.arr], { title: `そらメモ：★${p.livery}（予定）`, tag: `plan-${p.schedule_id}`, url: `./#ops-${p.dep}`,
-            body: `${p.livery}が、${hm(p.std)} ${dn}発の${p.flight}（${an}行き）で飛ぶ予定です（航空会社の運航情報）。` });
+          await sendSpPush(admin, [p.dep, p.arr], planMessage(p, dn, an, hm));
         } catch (e) { errors.push("plan push " + String(e)); }
+      }
+    }
+    // 夜の静かな時間（23〜7時）に見つかった予定は、7時をすぎたら静かな時間を選んだ人へ1回だけ送る（まだ出発の前の便だけ。quiet_push_at で1回に）
+    if (!quietNow(now)) {
+      const w = quietWindow(now);
+      const { data: late, error } = await admin.from("livery_plans").update({ quiet_push_at: new Date(now).toISOString() })
+        .is("quiet_push_at", null).gte("created_at", w.from).lt("created_at", w.to).gt("std", new Date(now).toISOString())
+        .select("schedule_id, flight, dep, arr, std, livery");
+      if (error) errors.push("plans late " + error.message);
+      const hm = (t: string) => { const d = new Date(Date.parse(t) + 9 * 3600_000); return `${d.getUTCHours()}:${String(d.getUTCMinutes()).padStart(2, "0")}`; };
+      for (const p of late ?? []) {
+        try { await sendSpPush(admin, [p.dep, p.arr], planMessage(p, names.get(p.dep) ?? p.dep, names.get(p.arr) ?? p.arr, hm), "quiet"); }
+        catch (e) { errors.push("plan late push " + String(e)); }
       }
     }
     return new Response(JSON.stringify({ watching: scheds.length, dep: depItems.length, arr: arrItems.length, updated: updates.length, alerts: alerts.length, new: fresh.length, pushed, plans: plans.length, plan_new: planNew, errors: errors.slice(0, 3) }), { headers: JSON_HEADERS });

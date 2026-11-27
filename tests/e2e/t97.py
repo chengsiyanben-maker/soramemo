@@ -3,6 +3,7 @@ HERE=os.path.dirname(os.path.abspath(__file__)); WEB=os.path.abspath(os.path.joi
 # エアライン経営 v3 のリースと中古機：リースで借りる・返す・中古で売りに出す・取り下げる・中古機の売り場で買う
 import asyncio
 from playwright.async_api import async_playwright
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__))); import keiei_on   # 経営の画面を出して確かめる（切り替えを true にしたときの動き）
 fails = []
 def check(label, ok):
     print(label, ok)

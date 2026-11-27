@@ -1,0 +1,50 @@
+{
+ "new_all_day": {
+  "tri": 408460,
+  "calls": 127
+ },
+ "new_tower_day": {
+  "tri": 407634,
+  "calls": 29
+ },
+ "new_towerSE_day": {
+  "tri": 416054,
+  "calls": 91
+ },
+ "new_all_night": {
+  "tri": 407748,
+  "calls": 152
+ },
+ "new_tower_night": {
+  "tri": 407634,
+  "calls": 59
+ },
+ "new_towerSE_night": {
+  "tri": 416042,
+  "calls": 120
+ },
+ "old_all_day": {
+  "tri": 406652,
+  "calls": 28
+ },
+ "old_tower_day": {
+  "tri": 406434,
+  "calls": 23
+ },
+ "old_towerSE_day": {
+  "tri": 408330,
+  "calls": 34
+ },
+ "old_all_night": {
+  "tri": 406652,
+  "calls": 39
+ },
+ "old_tower_night": {
+  "tri": 406434,
+  "calls": 34
+ },
+ "old_towerSE_night": {
+  "tri": 408330,
+  "calls": 45
+ }
+}
