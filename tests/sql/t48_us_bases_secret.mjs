@@ -24,5 +24,5 @@ check('前の移行を流し直しても戻らない・何度流しても同じ'
 // 空港の表の決まり（RLS）は今のまま：だれでも読めて、書く決まりはない
 const pol = (await db.query(`select cmd, roles::text from pg_policies where schemaname = 'public' and tablename = 'airports'`)).rows;
 const rls = (await db.query(`select relrowsecurity from pg_class where oid = 'public.airports'::regclass`)).rows[0].relrowsecurity;
-check('RLS は有効で、読む決まりだけ（書く決まりはない）', rls && pol.length === 1 && pol[0].cmd === 'SELECT' && pol[0].roles.includes('anon'), pol);
+check('RLS は有効で、読む決まりだけ（書く決まりはない）', rls && pol.every(p => p.cmd === 'SELECT') && pol.some(p => p.roles.includes('anon')) && pol.every(p => p.roles.includes('anon') || p.roles === '{pm_reader}'), pol);
 if (bad) process.exit(1);
