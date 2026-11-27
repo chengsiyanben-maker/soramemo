@@ -1,6 +1,12 @@
 # データ担当の帳面
 
 ## いま持っている仕事
+- **【11/27 15時55分 PM から・本人の指示・急ぎ】PM が本番を読むだけで見る仕組み：済み**：ブランチ data/pm-reader（main 14646cad から）→ **PR #291（下書き）**。報告 docs/pm/report-pm-reader.md。**移行212・テスト t151**（11/27 夕方の定期の回で、帳面に積まれていたこの急ぎの仕事を先にした）
+  - 役割 pm_reader：nologin・強い力なし・noinherit。既定 default_transaction_read_only=on・statement_timeout 60s・idle_in_transaction 120s・idle_session 600s。public の使用だけ（ops・auth は不可）。読めるのは30表（flight_history・flight_tracks・track_points・reg_legs・flight_schedule・flight_changes・timetable・foreign_legs・foreign_usual・airport_daily・airports・terminals・airline_codes・airport_facts・airport_yomi・world_airport_status・ops_log・rwy_samples・rwy_learned_days・ground_moves・arr_watch・wx_obs・wx_taf・wx_taf_hours・livery_extra・livery_sightings・livery_plans・rot_pairs・rot_eval・rotation_obs）。RLS の表に pm_reader_read（select・to pm_reader）
+  - .github/workflows/pm-query.yml（workflow_dispatch・入力 query と params・10分）＋ tools/pm_query.mjs（select/with の1文だけ・; の2文目・バックスラッシュ・書く言葉を断る → begin read only → set local 60s → copy (select * from (…) limit 200001) to stdout csv → rollback。20万行で切る。ログは行数と秒だけ）。例 tools/pm-queries/promo_day.sql・reg_week.sql（変数 :'airline' など）
+  - **リポジトリは公開**（search で visibility public を確かめた）。公開の artifact は誰でも落とせ、ODPT の CSV を配らない決まりに触れるので、公開のあいだは秘密の設定 PM_RESULT_KEY で gpg 暗号にして置き、なければ流さない形にした（本人の決めごと）
+  - 確かめ：t151 30項目 UTC・日本時間 NG 0。手元に本物の Postgres 16 を立てて全移行＋本物の psql で最後まで流した。権限を見る既存テスト34本 UTC で NG 0。migrations check・check_secrets OK
+  - 本人に決めてほしいこと：① 公開のまま合言葉で暗号にするか、リポジトリを非公開にするか ② 30表でよいか ③ 反映は自動の反映のあと知らせる形でよいか。設定（alter role … login password・PM_READER_URL・PM_RESULT_KEY）は反映のあと本人
 - **【11/27 11時40分 PM から・本人の指示】不具合・意見の報告を受ける仕組み：済み**：ブランチ data/feedback（main 774c8d4 から）→ **PR #285（下書き）**。報告 docs/pm/report-feedback.md。**移行211・テスト t150・Edge Function feedback-submit**
   - 表 public.feedback（kind bug／request／airport_data・body 2000字まで・app_version・screen・device・last_error（種類の形だけ）・airport・user_id・session・status open／checking／fixed／wontfix・admin_note・updated_at）。位置・メール・IP の列なし
   - RLS：ログインした人は自分の分だけ入れて読める。列の権限で状態・運営のメモ・user_id は入れられず、運営のメモ・user_id・session は読めない。書き換え・消すのは運営の関数だけ。my_feedback()。退会は on delete cascade
@@ -465,12 +471,14 @@
 - data/hnd-nrt-more（PR #230）が移行199・テスト t137。#228 の A・B を足すなら200 以降に付け直す
 - 11/26：data/idem（PR #240）が移行200・テスト t138。data/idem-b（#241・別の回の案）も200・t138 なので入れるのは片方だけ。maint/2026-11-26（PR #246）が移行201・t139。data/flight-no（PR #247）が202・t140。maint/2026-11-26-2（PR #254）は移行なし・t141。data/ops-guard（PR #256）が203・t142（11/26 main に入った）。maint/2026-11-26-3（PR #260）は移行なし・t141 に足しただけ（main に入った）。経営の keiei/timeout が204・t143（main に入った）。maint/2026-11-26-4（PR #265）が205・t144。11/26 本人の OK：#266 が206・t145、#267 が207・t146、#269 は移行なし、#270 が208・t147、#272 が209・t148（どれも main 594dd3e から。入る順が変わったら rebase）。maint/2026-11-26-5（PR #274）が210・t149。次は211・t150 から
 - 11/27：data/feedback（PR #285）が移行211・テスト t150（main の最新は210。#267 の207 は main にない）。次に新しく作るものは 212 以降・テストは t151 以降
+- 11/27：data/pm-reader（PR #291）が移行212・テスト t151（main の最新は207〜210・211 は #285）。次に新しく作るものは 213 以降・テストは t152 以降
 - main に別の移行が先に入ったら、反映の前にもう一度 `node tools/migrations.mjs rebase`
 - 本番は小さいプランで一時ファイルの余裕がない。本人に流してもらう SQL は、大きな中間の表・自己結合・大きな並べ替えを避け、索引で引く形にする
 - PGlite は流す所の時間帯を使う（手元は日本時間・GitHub は UTC）。テストの種の日付と時刻は日本時間で作り、手元でも TZ=UTC で流して確かめる
 - SQL のテストは全部で約35分かかる（手元で流すときは裏で流してログを見る。t92 だけで約4分。同じログに2回流すと混ざるので、ログの名前を分ける）
 
 ## 次にやること
+- PM の読むだけの仕組み（PR #291・移行212・t151）：本人の決めごと（公開のまま暗号か非公開か）を待つ。反映のあと、本人の設定が済んだら付けたあとの確かめの SQL（報告の5）の結果で、Supabase 側の表（storage など）が読めていないか見る。pm_reader の一覧に表を足すときは移行と t151 の ALLOW を一緒に直す
 - 不具合・意見の報告（PR #285・移行211・t150）：CI とレビューに答える。反映の前に main に別の移行が先なら `node tools/migrations.mjs rebase`。反映のあと、本人に feedback-submit へ1件送ってもらい admin_feedback_list で見えるか確かめる。チェックイン担当の画面ができたら、使われ方（usage_events）に送った回数を足すか相談
 - 11/26 の反映 45800322241（#279＋#280）は成功：移行205〜209（#265・#266・#270・#272）と210（#274）が本番に入った（#267 の207 は main にない＝別に入るときは番号の rebase）。#279 は t145 が judge.ts を読み Node 20 で落ちて止まった → PM が #280 で Node 22 に。データ担当のテストは .ts を読むなら Node 22 の前提
 - 広報の動画の材料（PR #275）：本人が日を決めて SQL を流したら、行の数・登録記号の抜けを見る。本人が ODPT の第4条・第8条で広告に触れた文を見つけたら判定を直す（だめなら案B の SQL：adsb.lol だけで便名は呼び出し符号・区間は reg_legs）。CI とレビューに答える
@@ -883,7 +891,7 @@
   ⑤ data/job-alert：夜の処理が止まったら運営へ1日1回知らせる（11/26 の死活の記録を使う）。送り先は Supabase の秘密の設定（例 OPS_ALERT_TO）に入れ、コードに書かない。メールを送る仕組みが要るなら、新しい外部のアカウントは作らず、必要なものと設定の手順を本人向けに書く（作るのは本人）
 - 【11/26 14時20分 PM から・広報の動画の材料（①〜⑤より先に短く）】【済み：PR #275・report-promo-data.md】本人が「日本航空の全機の1日の動きを動画にして、広告・広報に使いたい」。(a) 本人が SQL Editor で流す読むだけの SQL を1本：ある1日（JST）の JAL 便（便名・登録記号・出発/到着空港・実際の出発/到着時刻）と、その機体の航跡の点（時刻・緯度・経度・高度。1機1分に1点くらいに間引いて読むだけ。記録は消さない）を CSV で取り出せる形。重くしない・一時ファイルなし (b) 規約の確認：ODPT の JAL の運航データと adsb.lol の航跡を「広告・広報の動画」に使ってよいか、出典の書き方（動画の中に入れる文）。だめ・不明なら、その場合の代わり（空港どうしの大圏の線だけ等）。docs/pm/report-promo-data.md に。ブランチ data/promo-sql
 - 【11/27 11時40分 PM から・本人の指示】【済み：PR #285・report-feedback.md】ブランチ data/feedback：不具合・意見の報告を受ける仕組み。① 表 feedback（id・作った時刻・種類＝不具合／ほしい機能／空港データの直し・本文（2000字まで）・自動の付けたし＝アプリの版・画面・端末の種類・直前のエラーの種類・任意で空港コード・利用者 ID（ログインしていれば）・状態＝受付／確認中／直した／対応しない・運営のメモ）。移行と RLS をセット：ログインした人は自分の分を入れる・自分の分だけ読める（運営のメモは見せない）。ログインしていない人（ログイン案B）は Edge Function feedback-submit から入れる ② 送りすぎの制限（同じ利用者・同じ起動の値で10分に3件まで。IP は保存しない）③ 運営コンソールの一覧と状態の切り替え（運営だけ）④ 夜の知らせ（ops-alert）に「新しい報告 ○件」を足す。位置・メール・IP は保存しない。テストを足す
-- 【11/27 15時55分 PM から・本人の指示・急ぎ】ブランチ data/pm-reader：PM が本番のデータを読むだけで見る仕組み。
+- 【11/27 15時55分 PM から・本人の指示・急ぎ】【済み：PR #291・report-pm-reader.md】ブランチ data/pm-reader：PM が本番のデータを読むだけで見る仕組み。
   ① 移行：役割 pm_reader（NOLOGIN で作る。パスワードとログインは本人が後で `alter role` で付ける）。default_transaction_read_only = on・statement_timeout = 60s・idle の時間の上限。select を許すのは公開に近い表だけ：flight_history・flight_tracks・track_points・reg_legs・foreign_legs・airports・terminals・airline の一覧・運用（滑走路・METAR/TAF・hnd/nrt の細かい表）・特別塗装機の一覧・運用予想の表（名前は今の表に合わせて一覧に）。利用者のデータ（checkins・flights・manual_flights・profiles・user_pins・feedback・usage_events・auth・経営の会社の表 など）は読めない。RLS が on の表は pm_reader 用の読むだけのポリシーを、上の表にだけ足す（移行と RLS をセット）
   ② GitHub Actions：.github/workflows/pm-query.yml（workflow_dispatch・入力は tools/pm-queries/ の中の .sql のファイル名だけ。psql を秘密の設定 PM_READER_URL で流し、結果を CSV（最大20万行）にして artifact に。select / with 以外の文は流す前に断る。実行は1回10分まで）
   ③ tools/pm-queries/ に例を2つ：promo_day.sql（会社と日付を変数で）・reg_week.sql（登録記号と期間）
