@@ -1,4 +1,5 @@
 // 運営への知らせ：夜の処理・取り込みが止まったら、1日1回メールか Webhook で知らせる（11/26 本人の OK ⑤）
+//   11/27：新しい不具合・意見の報告の数（種類ごと）も載せる。止まった処理がなく報告だけの日は20時以降に送る（ops_alert_claim が決める）
 //   pg_cron が毎時41分に呼ぶ（移行 ops_alert）。送るかどうかは ops_alert_claim が決める（ng があり、今日まだ届いていないときだけ）ので、
 //   誰がいつ何度呼んでも、届くのは1日1回まで
 //   送り先：秘密の設定 OPS_ALERT_TO（メールアドレスか https:// の Webhook。カンマ区切り）。メールは OPS_SMTP_USER・OPS_SMTP_PASS（ほかは任意）
@@ -17,7 +18,7 @@ Deno.serve(async () => {
 
   const targets = parseTargets(Deno.env.get("OPS_ALERT_TO"));
   const smtp = smtpConfig((k) => Deno.env.get(k));
-  const msg = alertText((data.items ?? []) as HealthItem[], new Date());
+  const msg = alertText((data.items ?? []) as HealthItem[], new Date(), Number(data.feedback_new ?? 0), (data.feedback_kinds ?? null) as Record<string, number> | null);
   const r = { mail: 0, hook: 0, failed: 0, skipped: [] as string[] };
   if (!targets.length) r.skipped.push("no_target");
 
