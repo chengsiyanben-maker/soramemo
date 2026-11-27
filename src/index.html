@@ -6358,7 +6358,9 @@ function a3Planes(now = Date.now()){
       else if(A3.tws && A3.tws.length && (q.kt || 0) >= 3 && (q.kt || 0) < 35){ const [x, z] = a3XZ(q.lat, q.lon), sn = A3K.snap(x, z, q.hdg, A3.tws);
         if(sn && sn.d > 1){ q.lat = A3_C[0] - sn.z / 110574; q.lon = A3_C[1] + sn.x / (111320 * Math.cos(A3_C[0] * D2R)); q.hdg = sn.hdg; est = est || "twy"; } }
     }
-    q.k = { rate, est, op:q.op == null ? 1 : q.op }; q.est = est;
+    // mv＝描く位置が時刻とともに動く（前後の答えのあいだ・空の先読み・途切れた着陸機）。地上で答えの位置のまま描く機体は動かない（11/27 t166-fix）
+    const mv = !A3.lite && (!!(a && b) || a3Air(q) || est === "gap");
+    q.k = { rate, est, op:q.op == null ? 1 : q.op, mv }; q.est = est;
     out.push(q);
   }
   return out;
@@ -6919,7 +6921,7 @@ function a3Sync(ps, now = Date.now()){
     const gy = L * M.rad * 2.3, low = !air && !p.ground && p.alt_ft != null && p.alt_ft > 0;   // low＝高さ 300ft までの空（引き起こし・離陸の直後）は地面から浮かせる（11/26 3d-real）
     let y = air ? p.alt_ft * 0.3048 : A3.lite ? 4 : gy + (low ? p.alt_ft * 0.3048 : 0);   // 地上は車輪が地面に着く高さ（大きく描いても同じ割合）
     let px = x, pz = z;
-    if(!A3.lite){ const v = (p.kt || 0) * 0.5144, h = (p.hdg || 0) * D2R; o.sm = A3K.smooth(o.sm, { x, z, y, vx:Math.sin(h) * v, vz:-Math.cos(h) * v }, now); px = o.sm.x; pz = o.sm.z; if(air) y = o.sm.y; }   // 跳んだ所は少しずつ合わせる
+    if(!A3.lite){ const v = p.k && p.k.mv === false ? 0 : (p.kt || 0) * 0.5144, h = (p.hdg || 0) * D2R; o.sm = A3K.smooth(o.sm, { x, z, y, vx:Math.sin(h) * v, vz:-Math.cos(h) * v }, now); px = o.sm.x; pz = o.sm.z; if(air) y = o.sm.y; }   // 跳んだ所は少しずつ合わせる。止まって描く地上の機体は速さ 0 で渡す（速さを渡すと、こまの間が長いとき「速さどおりに動かなかった＝跳んだ」と見なして前へずれていた・11/27 t166-fix）
     o.g.position.set(px, y, pz); o.g.scale.setScalar(L); o.g.rotation.y = -(p.hdg || 0) * D2R; o.p = p; o.cd = cd;
     if(!A3.lite){ const far = !air && cd > 3000 && !follow && p.id !== A3.sel;   // 遠い地上の機体は簡単な形
       if(far && !o.lo) o.lo = a3Lo(o);
@@ -7128,7 +7130,7 @@ function a3Labels(ps){
       const k = Math.max(Math.abs(ex), Math.abs(ey)) || 1, px = (ex / k + 1) / 2 * W, py = (1 - ey / k) / 2 * H;
       const ex2 = side === "r" ? W - 8 : side === "l" ? 8 : Math.max(70, Math.min(W - 70, hid ? o.sx : px));
       let ey2 = side === "t" ? 150 : side === "b" ? sheetTop - 30 : Math.max(150, Math.min(sheetTop - 30, py));
-      const tagBox = y => side === "r" ? [ex2 - 130, y - 16, ex2, y + 16] : side === "l" ? [ex2, y - 16, ex2 + 130, y + 16] : [ex2 - 65, y - 16, ex2 + 65, y + 16];
+      const tagBox = y => side === "r" ? [ex2 - 130, y - 18, ex2, y + 18] : side === "l" ? [ex2, y - 18, ex2 + 130, y + 18] : [ex2 - 65, y - 18, ex2 + 65, y + 18];   // 高さは実際の札（約32px）より少し大きく見積もる（32px ちょうどだと上下の札が接して重なった・11/27 t166-fix）
       const hit = r => placed.some(q => r[0] < q[2] && r[2] > q[0] && r[1] < q[3] && r[3] > q[1]);
       let r = tagBox(ey2);
       if(hit(r) && (side === "r" || side === "l")){ const y0 = ey2; for(const d of [38, -38, 76, -76, 114, -114, 152, 190]){ const y = y0 + d; if(y < 150 || y > sheetTop - 30) continue; const q = tagBox(y); if(!hit(q)){ ey2 = y; r = q; break; } } }   // 出典の札や左上の札に重なるときは、上か下の空いた所へずらす

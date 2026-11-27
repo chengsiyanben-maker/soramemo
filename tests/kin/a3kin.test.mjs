@@ -92,6 +92,10 @@ const xy = (o, p) => [(p.lon - o.lon) * mlon(o.lat), (p.lat - o.lat) * MLAT];
   check("なめらか：約5秒でほぼ答えの位置へ（差は 5% より小さく）", Math.abs(st.ox) < 10.5 && near(st.y, 160, 3), st);
   const far = A3K.smooth({ x: 0, z: 0, y: 0, ox: 0, oz: 0, oy: 0, t: 0 }, { x: 5000, z: 0, y: 0 }, 100);
   check("なめらか：3km より大きい差・5秒より空いたときは合わせない", far.x === 5000 && A3K.smooth({ x: 0, z: 0, y: 0, ox: 50, oz: 0, oy: 0, t: 0 }, { x: 10, z: 0, y: 0 }, 6000).x === 10);
+  // 11/27 t166-fix：答えの位置のまま描く（地上の）機体は速さ 0 で渡す。速さを渡すと、こまの間が長いと跳んだと見なして前へずれる（呼ぶ側 a3Sync の直しの確かめ）
+  { let s0 = A3K.smooth(null, { x: 0, z: 0, y: 0, vx: 0, vz: 0 }, 0); for (let t = 1200; t <= 7200; t += 1200) s0 = A3K.smooth(s0, { x: 0, z: 0, y: 0, vx: 0, vz: 0 }, t);
+    let s1 = A3K.smooth(null, { x: 0, z: 0, y: 0, vx: 25, vz: 0 }, 0); for (let t = 1200; t <= 7200; t += 1200) s1 = A3K.smooth(s1, { x: 0, z: 0, y: 0, vx: 25, vz: 0 }, t);
+    check("なめらか：止まった答えに速さ 0 なら、こまの間が長くても動かない（速さを渡すと前へずれる）", s0.x === 0 && s1.x > 10, [s0.x, s1.x]); }
   check("姿勢を少しずつ：1.2秒で約6割・はじめは目標そのまま", near(A3K.ease(0, 10, 1.2), 6.32, .01) && A3K.ease(undefined, 10, 1) === 10); }
 
 console.log(fails.length ? `\n失敗 ${fails.length}` : "\nすべて成功");
