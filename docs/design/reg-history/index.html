@@ -1,0 +1,160 @@
+<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>機体の1週間｜画面案</title><style>/* そらメモ 機体の1週間の画面案：共通の見た目（design/board-timetable から写した。main の web/index.html の色と文字。地 #EEF1F5） */
+:root{
+  --gothic:"Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic UI","Yu Gothic","Meiryo","Noto Sans JP","Noto Sans CJK JP",system-ui,sans-serif;
+  --bg:#EEF1F5; --card:#FFFFFF; --ink:#374151; --strong:#1F2937; --sub:#646B78; --mute:#6B7280;
+  --track:#EEF0F3; --pill:rgba(17,24,39,.05); --jal:#C8102E; --ana:#1C4FA0; --acc:#2563EB;
+  --ok:#15803D; --hero:#0F1B2D; --bar:#E3E7ED; --pin:#1B2B4B; --pin-wash:#EEF2F8;
+  --sw-on-bg:#16233A; --sw-off-bg:#E5E8EE; --sw-off-ring:#768090; --sw-on-ink:#FFFFFF; --sw-off-ink:#4B5563;
+  --shadow:0 1px 2px rgba(17,24,39,.04),0 10px 30px -8px rgba(17,24,39,.10),inset 0 0 0 1px rgba(17,24,39,.07);
+  --shadow-lift:0 2px 4px rgba(17,24,39,.06),0 22px 40px -10px rgba(17,24,39,.28),inset 0 0 0 1px rgba(17,24,39,.07);
+  --nav-glass:rgba(255,255,255,.82); --nav-ink:#6B7280; --nav-shadow:0 10px 30px -8px rgba(17,24,39,.22),0 2px 6px rgba(17,24,39,.06);
+  --skel:#E9ECF0; --skel-hi:#F5F7F9;
+  /* 動きの長さ（0.15〜0.4秒）と曲がり方 */
+  --t-tap:.12s; --t-fast:.15s; --t-mid:.25s; --t-slow:.4s;
+  --ease:cubic-bezier(.2,.8,.2,1); --ease-in:cubic-bezier(.4,0,1,1);
+}
+:root[data-night=on]{
+  --bg:#0F141B; --card:#1B1F26; --ink:#E5E7EB; --strong:#F3F4F6; --sub:#AEB9C6; --mute:#AEB9C6;
+  --track:#262B33; --pill:rgba(220,227,234,.08); --acc:#DCE3EA; --ok:#4ADE80; --hero:#4ADE80; --bar:#262B33;
+  --pin:#DCE3EA; --pin-wash:rgba(220,227,234,.08);
+  --sw-on-bg:rgba(220,227,234,.16); --sw-off-bg:transparent; --sw-off-ring:#66778C; --sw-on-ink:#DCE3EA; --sw-off-ink:#AEB9C6;
+  --shadow:0 12px 26px -16px rgba(0,0,0,.7),inset 0 0 0 1px rgba(255,255,255,.06);
+  --shadow-lift:0 22px 40px -12px rgba(0,0,0,.85),inset 0 0 0 1px rgba(255,255,255,.12);
+  --nav-glass:rgba(22,25,31,.86); --nav-ink:#8B95A3; --nav-shadow:0 10px 30px -6px rgba(0,0,0,.6);
+  --skel:#232830; --skel-hi:#2C323B; --amber:#FBBF24;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--bg);color:var(--ink);font-family:var(--gothic);-webkit-text-size-adjust:100%}
+body{max-width:430px;margin:0 auto;min-height:100vh;padding:0 16px 120px;line-height:1.6;font-size:15px}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.num{font-weight:800;font-variant-numeric:tabular-nums;color:var(--strong);letter-spacing:-.01em}
+.u{font-size:12px;color:var(--mute);font-weight:600;margin-left:2px}
+.card{background:var(--card);border-radius:20px;box-shadow:var(--shadow);padding:16px}
+.pill{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px;padding:0 18px;border-radius:999px;background:var(--card);box-shadow:var(--shadow);font-weight:700;font-size:14px;color:var(--strong)}
+.pill.dark{background:var(--strong);color:#fff;box-shadow:none}
+:root[data-night=on] .pill.dark{background:transparent;color:#fff;box-shadow:inset 0 0 0 1.5px #fff}
+.lead{font-size:13px;color:var(--sub)}
+h1{font-size:22px;font-weight:800;color:var(--strong);letter-spacing:.02em}
+h2{font-size:17px;font-weight:800;color:var(--strong)}
+svg.ic{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+
+/* ── M01 押すと少し縮む ── */
+.tap{transition:transform var(--t-tap) var(--ease)}
+.tap:active,.tap.is-down{transform:scale(.97)}
+
+/* ── M02 タブの点がすべる ── */
+.tabs{position:relative;display:grid;grid-template-columns:repeat(5,1fr);padding:6px;border-radius:999px;background:var(--nav-glass);box-shadow:var(--nav-shadow)}
+.tabs button{display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 0 14px;min-height:56px;border-radius:999px;font-size:12px;font-weight:700;color:var(--nav-ink);transition:color var(--t-mid) var(--ease)}
+.tabs button svg{transition:transform var(--t-fast) var(--ease)}
+.tabs button:active svg{transform:scale(.88)}
+.tabs button[aria-current=page]{color:var(--acc)}
+.tabs .dot{position:absolute;bottom:9px;left:0;width:5px;height:5px;border-radius:50%;background:var(--acc);transition:transform var(--t-mid) var(--ease)}
+
+/* ── M03 ON／OFF のつまみ ── */
+.sw{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 4px}
+.sw .tr{position:relative;width:52px;height:30px;border-radius:999px;background:var(--sw-off-bg);box-shadow:inset 0 0 0 1.5px var(--sw-off-ring);transition:background var(--t-mid) var(--ease),box-shadow var(--t-mid) var(--ease)}
+.sw .kn{position:absolute;top:4px;left:4px;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25),inset 0 0 0 1.5px var(--sw-off-ring);transition:transform var(--t-mid) var(--ease)}
+.sw .lb{min-width:30px;font-size:12px;font-weight:800;color:var(--sw-off-ink);text-align:right}
+.sw[aria-checked=true] .tr{background:var(--sw-on-bg);box-shadow:inset 0 0 0 1.5px var(--sw-on-bg)}
+.sw[aria-checked=true] .kn{transform:translateX(22px);box-shadow:0 1px 3px rgba(0,0,0,.25)}
+.sw[aria-checked=true] .lb{color:var(--strong)}
+.sw:active .kn{width:26px}
+.sw[aria-checked=true]:active .kn{transform:translateX(18px)}
+
+/* ── M04 ピンが刺さる ── */
+.pinbtn{display:inline-flex;align-items:center;gap:5px;min-height:44px;padding:0 14px;border-radius:999px;background:var(--card);color:var(--pin);font-weight:800;font-size:13px;box-shadow:inset 0 0 0 1.5px var(--pin);transition:background var(--t-mid) var(--ease),color var(--t-mid) var(--ease)}
+.pinbtn svg{width:18px;height:18px;transform-origin:50% 90%}
+.pinbtn.on{background:var(--pin);color:#fff}
+:root[data-night=on] .pinbtn.on{background:rgba(220,227,234,.16);color:#DCE3EA}
+.pinbtn.on.go svg{animation:pinIn var(--t-slow) var(--ease) both}
+@keyframes pinIn{0%{transform:translateY(-7px) rotate(-28deg);opacity:.2}60%{transform:translateY(1px) rotate(4deg);opacity:1}100%{transform:none}}
+
+/* ── M05 下から出る札 ── */
+.toast{position:absolute;left:50%;bottom:104px;display:flex;align-items:center;gap:8px;min-height:44px;padding:0 18px;border-radius:999px;background:#1F2937;color:#fff;font-size:14px;font-weight:700;white-space:nowrap;box-shadow:0 12px 30px -8px rgba(17,24,39,.4);transform:translate(-50%,16px);opacity:0;pointer-events:none;transition:transform var(--t-fast) var(--ease-in),opacity var(--t-fast) var(--ease-in)}
+.toast.show{transform:translate(-50%,0);opacity:1;transition:transform var(--t-mid) var(--ease),opacity var(--t-mid) var(--ease)}
+.toast svg{width:18px;height:18px;stroke:#86EFAC}
+:root[data-night=on] .toast{background:#262B33;box-shadow:inset 0 0 0 1px rgba(255,255,255,.12)}
+:root[data-night=on] .toast svg{stroke:#4ADE80}
+
+/* ── M06 骨組みの読み込み ── */
+.skel{position:relative;overflow:hidden;background:var(--skel);border-radius:10px}
+.skel::after{content:"";position:absolute;inset:0;transform:translateX(-100%);background:linear-gradient(90deg,transparent,var(--skel-hi),transparent);animation:shine 1.4s ease-in-out infinite}
+@keyframes shine{to{transform:translateX(100%)}}
+.fadein{animation:fadeIn var(--t-mid) var(--ease) both}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+
+/* ── M07 数字の繰り上がり ── */
+.roll{display:inline-flex;overflow:hidden;height:1.2em;line-height:1.2em;vertical-align:bottom}
+.roll .col{display:flex;flex-direction:column;transition:transform .35s var(--ease)}
+.roll .col span{height:1.2em}
+.roll.up .col{transform:translateY(-1.2em)}
+.plus{display:inline-block;font-size:12px;font-weight:800;color:var(--ok);opacity:0;transform:translateY(4px)}
+.plus.show{animation:plusUp 1.2s var(--ease) both}
+@keyframes plusUp{0%{opacity:0;transform:translateY(4px)}20%,70%{opacity:1;transform:none}100%{opacity:0;transform:translateY(-4px)}}
+
+/* ── M08 道のりの帯が伸びる ── */
+.bar{position:relative;height:12px;border-radius:6px;background:var(--bar);overflow:hidden}
+.bar i{position:absolute;left:0;top:0;bottom:0;border-radius:6px;background:var(--hero);width:0;transition:width var(--t-slow) var(--ease)}
+
+/* ── M09 並べ替えで持ち上がる ── */
+.sortlist{position:relative}
+.srow{position:relative;display:flex;align-items:center;gap:12px;min-height:60px;padding:0 8px 0 16px;margin-bottom:10px;background:var(--card);border-radius:18px;box-shadow:var(--shadow);transition:transform var(--t-mid) var(--ease),box-shadow var(--t-mid) var(--ease)}
+.srow b{flex:1;font-weight:700;color:var(--strong)}
+.srow .grip{display:flex;align-items:center;justify-content:center;width:44px;height:44px;color:var(--mute);touch-action:none;cursor:grab}
+.srow.lift{transform:scale(1.02);box-shadow:var(--shadow-lift);z-index:2;transition:box-shadow var(--t-mid) var(--ease),transform var(--t-fast) var(--ease)}
+
+/* ── M10 コピーが ✓ に ── */
+.copy{position:relative;display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:999px;background:var(--pill);color:var(--sub)}
+.copy svg{position:absolute;width:20px;height:20px;transition:transform var(--t-fast) var(--ease),opacity var(--t-fast) var(--ease)}
+.copy .ck{opacity:0;transform:scale(.5);stroke:var(--ok);stroke-width:2.4}
+.copy.done .cp{opacity:0;transform:scale(.5)}
+.copy.done .ck{opacity:1;transform:none}
+
+/* ── M11 鈴が揺れる ── */
+.bell svg{transform-origin:50% 12%}
+.bell.go svg{animation:bell var(--t-slow) ease-in-out both}
+@keyframes bell{0%,100%{transform:none}20%{transform:rotate(14deg)}45%{transform:rotate(-10deg)}70%{transform:rotate(5deg)}85%{transform:rotate(-2deg)}}
+
+/* ── M12 「もう一度」の矢印が回る ── */
+.retry svg{transition:none}
+.retry.go svg{animation:spin .6s var(--ease) 1}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── M13 シートが上がる ── */
+.scrim{position:absolute;inset:0;background:rgba(17,24,39,.32);opacity:0;pointer-events:none;transition:opacity var(--t-mid) var(--ease)}
+.sheet{position:absolute;left:0;right:0;bottom:0;background:var(--card);border-radius:24px 24px 0 0;box-shadow:0 -10px 30px -10px rgba(17,24,39,.25);padding:10px 20px 28px;transform:translateY(102%);transition:transform var(--t-fast) var(--ease-in)}
+.sheet .grab{width:40px;height:5px;border-radius:3px;background:var(--track);margin:0 auto 14px}
+.open .scrim{opacity:1;pointer-events:auto}
+.open .sheet{transform:none;transition:transform .3s var(--ease)}
+
+/* 動きを減らす：iPhone の設定、または見本の切り替え。状態は変わるが、動きはなし */
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+:root.rm *,:root.rm *::before,:root.rm *::after{animation:none!important;transition:none!important}
+
+body{max-width:860px;padding:24px 16px 60px}
+h1{font-size:24px;margin-bottom:6px}
+.intro{font-size:14px;color:var(--ink);line-height:1.8}
+.warn{margin:14px 0;padding:14px 16px;border-radius:16px;background:#FFF7E6;color:#7A4B00;font-size:13px;line-height:1.7}
+.it{margin-top:18px}.it h2{font-size:18px}
+.sh2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:10px;align-items:start}
+.sh2 img{width:100%;border-radius:14px;box-shadow:var(--shadow)}
+.lk{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.lk .pill{text-decoration:none;font-size:13px}
+table{width:100%;border-collapse:separate;border-spacing:0 6px;font-size:13px;margin-top:8px}
+td,th{padding:8px 10px;text-align:left;vertical-align:top;background:var(--card)}
+th{color:var(--sub);font-weight:700;background:transparent}
+td:first-child{border-radius:12px 0 0 12px;font-weight:800;color:var(--strong);white-space:nowrap}
+td:last-child{border-radius:0 12px 12px 0}
+</style></head><body>
+<h1>機体の1週間（画面案）</h1>
+<p class="intro">登録記号ごとに、その機体がこの1週間に飛んだ便を日ごとに並べる案です。今の「機体の1日」（今日と予想）の上に「今日｜1週間」を足し、入口は いまの空港の「機体」・撮る人の機体のくわしく・特別塗装機の図鑑 の3つ。地図は紺の地に航路の跡を重ねます。機体・便・時刻はすべて見本です。</p>
+<p class="warn"><b>本人の見直しで作った画面案です。</b>却下済みの「機体と運航の実績」を 11/27 に本人が見直し、「まず画面案を見て決める」段階。アプリには入れていません。機体図鑑は特別塗装機だけのままで、ふつうの機体は登録記号で探して出します。</p>
+<table><tr><th></th><th>案A 日ごとの一覧（おすすめ）</th><th>案B 1週間の帯</th></tr>
+<tr><td>見え方</td><td>今の「機体の1日」の行と同じ形が日ごとに続く。定刻・実際・遅れが1行で読める</td><td>7日の動きが1枚で分かる（どの時間に何便）。短い便は空港コードが入らない</td></tr>
+<tr><td>長さ</td><td>今日と前の2日は開き、ほかは「羽田→福岡→羽田…」の1行にたたむ</td><td>帯は1枚。くわしくは日を押してから</td></tr>
+<tr><td>推定</td><td>「推定」は点線の下線、時刻は「ごろ 離陸」</td><td>点線の枠だけの箱</td></tr>
+<tr><td>作る手間</td><td>今の行の部品をそのまま使える（少ない）</td><td>帯の部品を新しく作る</td></tr></table>
+<article class="card it"><h2>案A 日ごとの一覧（おすすめ）</h2><p class="lead">機体の1日に「今日｜1週間」を足す。上に7日のまとめと紺の地図、下に日ごとのカード（今日と前の2日は開き、ほかは飛んだ順の1行にたたむ）</p><div class="sh2"><a href="w1-week.html"><img src="png/w1-week.png" alt="案A 日ごとの一覧（おすすめ） 昼"></a><a href="w1-week.html?n=1"><img src="png/w1-week-n.png" alt="案A 日ごとの一覧（おすすめ） 夜"></a></div><p class="lk"><a class="pill" href="w1-week.html">開く</a><a class="pill" href="w1-week.html?n=1">夜</a></p></article><article class="card it"><h2>案B 1週間の帯</h2><p class="lead">7日を6時〜24時の帯に並べ、1週間の動きを1枚で。日を押すと、その日の便が下に出る</p><div class="sh2"><a href="w2-band.html"><img src="png/w2-band.png" alt="案B 1週間の帯 昼"></a><a href="w2-band.html?n=1"><img src="png/w2-band-n.png" alt="案B 1週間の帯 夜"></a></div><p class="lk"><a class="pill" href="w2-band.html">開く</a><a class="pill" href="w2-band.html?n=1">夜</a></p></article><article class="card it"><h2>地図 1週間の道すじ</h2><p class="lead">紺の地図。同じ区間はずらして重ね、航路の跡のように残す。今日は黄（夜は緑）、前の日ほど薄く、推定は点線。日のピルでその日だけ</p><div class="sh2"><a href="m1-map.html"><img src="png/m1-map.png" alt="地図 1週間の道すじ 昼"></a><a href="m1-map.html?n=1"><img src="png/m1-map-n.png" alt="地図 1週間の道すじ 夜"></a></div><p class="lk"><a class="pill" href="m1-map.html">開く</a><a class="pill" href="m1-map.html?n=1">夜</a></p></article><article class="card it"><h2>推定だけの機体</h2><p class="lead">ODPT にない会社の機体（どの機体でも登録記号で出せる）。すべて推定で、定刻と遅れの代わりに「いつもより ○分」</p><div class="sh2"><a href="w3-est.html"><img src="png/w3-est.png" alt="推定だけの機体 昼"></a><a href="w3-est.html?n=1"><img src="png/w3-est-n.png" alt="推定だけの機体 夜"></a></div><p class="lk"><a class="pill" href="w3-est.html">開く</a><a class="pill" href="w3-est.html?n=1">夜</a></p></article><article class="card it"><h2>「推定」とはのシート</h2><p class="lead">推定の便が何で、何を出して何を出さないか</p><div class="sh2"><a href="s1-est.html"><img src="png/s1-est.png" alt="「推定」とはのシート 昼"></a><a href="s1-est.html?n=1"><img src="png/s1-est-n.png" alt="「推定」とはのシート 夜"></a></div><p class="lk"><a class="pill" href="s1-est.html">開く</a><a class="pill" href="s1-est.html?n=1">夜</a></p></article><article class="card it"><h2>入口1 いまの空港の機体</h2><p class="lead">いまの空港 →「機体」の機体の1日の上に「今日｜1週間」と1週間の小さな帯</p><div class="sh2"><a href="e1-now.html"><img src="png/e1-now.png" alt="入口1 いまの空港の機体 昼"></a><a href="e1-now.html?n=1"><img src="png/e1-now-n.png" alt="入口1 いまの空港の機体 夜"></a></div><p class="lk"><a class="pill" href="e1-now.html">開く</a><a class="pill" href="e1-now.html?n=1">夜</a></p></article><article class="card it"><h2>入口2 撮る人の機体のくわしく</h2><p class="lead">撮る人の「つぎに来る機体」→ 機体のくわしく の下に「この機体の1週間」</p><div class="sh2"><a href="e2-spot.html"><img src="png/e2-spot.png" alt="入口2 撮る人の機体のくわしく 昼"></a><a href="e2-spot.html?n=1"><img src="png/e2-spot-n.png" alt="入口2 撮る人の機体のくわしく 夜"></a></div><p class="lk"><a class="pill" href="e2-spot.html">開く</a><a class="pill" href="e2-spot.html?n=1">夜</a></p></article><article class="card it"><h2>入口3 特別塗装機の図鑑</h2><p class="lead">機体図鑑（特別塗装機だけのまま）の1機のシートに「この機体の1週間」</p><div class="sh2"><a href="e3-zukan.html"><img src="png/e3-zukan.png" alt="入口3 特別塗装機の図鑑 昼"></a><a href="e3-zukan.html?n=1"><img src="png/e3-zukan-n.png" alt="入口3 特別塗装機の図鑑 夜"></a></div><p class="lk"><a class="pill" href="e3-zukan.html">開く</a><a class="pill" href="e3-zukan.html?n=1">夜</a></p></article>
+<p style="margin-top:18px;font-size:12px;color:var(--mute)">測った値（390×844・375×667・夜）：12px 未満 0・44 未満のボタン 0・はみ出し 0・字の切れ 0・エラー 0・動きを減らす設定で動くもの 0。全体の写真は png/*-full.png。作り方：make/build.py → make/shoot.py → make/index.py</p>
+</body></html>
