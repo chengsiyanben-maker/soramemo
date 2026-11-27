@@ -1,0 +1,154 @@
+<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=390,initial-scale=1"><title>W5 止まり具合の札の一覧</title><style>
+:root{--bg:#EEF1F5;--card:#FFFFFF;--ink:#24292F;--ink2:#374151;--mute:#6B7280;--sub:#8A919C;--pill:#EEF0F3;--hero:#0F1B2D;
+  --blue:#2563EB;--intl:#1D4ED8;--intl-wash:#DBEAFE;--late:#B45309;
+  --st1:#9A3412;--st2:#92400E;--st2-wash:#FEF3C7;--cnt:#374151;--cnt-wash:#EEF0F3;
+  --sh:0 12px 26px -18px rgba(15,23,42,.30),inset 0 0 0 1px rgba(17,24,39,.06);
+  --gothic:"Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic UI","Noto Sans CJK JP","Noto Sans JP",system-ui,sans-serif}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg)}
+body{width:390px;min-height:844px;margin:0 auto;font:500 15px/1.5 var(--gothic);color:var(--ink);-webkit-font-smoothing:antialiased;position:relative;overflow-x:hidden}
+.pad{padding:12px 16px 120px}
+button{font:inherit;color:inherit}
+/* 運用タブの上（今のアプリに合わせる） */
+.brand{display:flex;justify-content:space-between;align-items:center;height:52px}
+.brand b{font-size:20px;font-weight:800;letter-spacing:.06em}
+.brand span{height:44px;display:inline-flex;align-items:center;padding:0 16px;border-radius:999px;background:var(--card);box-shadow:var(--sh);font-size:14px;font-weight:800}
+.seg{display:flex;background:#E3E7EC;border-radius:999px;padding:4px;margin-top:8px}
+.seg span{flex:1;height:40px;display:flex;align-items:center;justify-content:center;border-radius:999px;font-size:15px;font-weight:800;color:var(--mute)}
+.seg span.on{background:var(--card);color:var(--ink);box-shadow:0 2px 8px -3px rgba(15,23,42,.3)}
+.aprow{display:flex;align-items:center;gap:8px;margin-top:14px}
+.ap{height:48px;display:inline-flex;align-items:center;gap:8px;padding:0 16px 0 8px;border-radius:999px;background:var(--card);box-shadow:var(--sh);font-size:18px;font-weight:800}
+.ap i{font-style:normal;font-size:13px;font-weight:800;color:#fff;background:#3B4350;border-radius:8px;padding:2px 7px}
+.views{display:flex;gap:22px;margin:18px 4px 12px;font-size:15px;font-weight:800;color:var(--mute);white-space:nowrap;overflow:hidden}
+.views span{padding-bottom:6px}
+.views span.on{color:var(--ink);box-shadow:inset 0 -3px 0 var(--ink)}
+.card{background:var(--card);border-radius:22px;box-shadow:var(--sh);padding:16px}
+.card+.card{margin-top:12px}
+/* 案内板（今の .bdhead・.bdtabs・.bdseq に合わせ、字は 13px 以上に） */
+.bdhead{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:2px 0 10px}
+.bdhead h3{margin:0;font-size:16px;font-weight:800}
+.bdhead h3 small{font-size:13px;font-weight:600;color:var(--mute);margin-left:4px}
+.bdtabs{display:inline-flex;gap:4px;background:var(--pill);padding:3px;border-radius:999px}
+.bdtabs span{border-radius:999px;padding:0 14px;height:44px;display:inline-flex;align-items:center;font-size:14px;font-weight:700;color:var(--mute)}
+.bdtabs span.on{background:var(--card);color:var(--ink);box-shadow:0 2px 6px -2px rgba(15,23,42,.25)}
+.bdkind{margin-bottom:6px}
+.bdseq{list-style:none;margin:0 -16px 0 0;padding:16px 16px 0 0;display:grid;grid-auto-flow:column;grid-auto-columns:128px;gap:10px;overflow:hidden;position:relative}
+.bdseq::before{content:"";position:absolute;left:0;right:0;top:6px;height:3px;border-radius:2px;background:linear-gradient(90deg,#BFDBFE,var(--blue))}
+.bdseq li{position:relative;display:flex;flex-direction:column;gap:2px;font-size:13px;color:var(--mute);min-width:0}
+.bdseq .dot{position:absolute;left:0;top:-14px;width:11px;height:11px;border-radius:50%;background:var(--card);border:2.5px solid var(--blue)}
+.bdseq b{font-size:15px;font-weight:800;color:var(--ink);line-height:1.3}
+.bdseq .fl{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bdseq .fl i{font-style:normal;font-size:13px;font-weight:700;color:var(--intl);background:var(--intl-wash);border-radius:4px;padding:0 5px;margin-right:5px}
+.bdseq .rel{font-size:17px;font-weight:800;color:var(--ink);margin-top:2px}
+.bdseq .tm em{font-style:normal;color:var(--late);font-weight:700;margin-left:4px}
+.bdseq li.past{opacity:.6}
+/* 止まり具合の札（空港全体のようす。ピン形の印をつけて、この便のことと分ける） */
+.st{display:inline-flex;align-items:center;gap:4px;max-width:100%;margin-top:6px;border-radius:999px;padding:3px 9px 3px 7px;font-size:13px;font-weight:800;line-height:1.35;white-space:nowrap;align-self:flex-start}
+.st svg{flex:none;width:13px;height:13px;fill:currentColor}
+.st small{font-size:13px;font-weight:700;opacity:.8;margin-left:2px}
+.st.s1{background:var(--st1);color:#fff}
+.st.s2{background:var(--st2-wash);color:var(--st2)}
+.st.s3{background:var(--cnt-wash);color:var(--cnt)}
+.stkey{display:flex;align-items:flex-start;gap:6px;font-size:13px;line-height:1.6;color:var(--mute);margin:12px 0 0}
+.stkey svg{flex:none;width:13px;height:13px;fill:var(--mute);margin-top:4px}
+/* 海外の空港のいま（案A） */
+.wo{margin-top:18px;background:#F7F8FA;border-radius:18px;padding:12px 14px 12px}
+.wo h4{margin:0 0 4px;font-size:15px;font-weight:800;display:flex;justify-content:space-between;align-items:baseline}
+.wo h4 small{font-size:13px;font-weight:600;color:var(--mute)}
+.wol{list-style:none;margin:0;padding:0}
+.wol li{display:grid;grid-template-columns:1fr auto;align-items:center;gap:2px 8px;min-height:56px;padding:8px 0}
+.wol li+li{box-shadow:0 -1px 0 #E6E9EE}
+.wol .nm{font-size:16px;font-weight:800}
+.wol .nm small{font-size:13px;font-weight:600;color:var(--sub);margin-left:4px}
+.wol .wh{grid-column:1;font-size:14px;color:var(--ink2);display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px}
+.wol .wh .st{margin-top:0}
+.wol .go{grid-row:1/3;grid-column:2;width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center}
+.wol .go svg{width:18px;height:18px;stroke:var(--sub);fill:none;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+.srcnote{font-size:13px;line-height:1.7;color:var(--mute);margin:8px 0 0}
+.srcnote b{color:var(--ink2);font-weight:800}
+.sec2{margin-top:18px}
+.sec2 p{font-size:14px;color:var(--sub);margin:4px 0 0}
+.fwnote{font-size:13px;line-height:1.7;color:var(--sub);margin:14px 0 0}
+.fwnote mark{background:none;color:var(--ink2);font-weight:700}
+/* 下のタブ帯 */
+.tabbar{position:fixed;left:50%;transform:translateX(-50%);bottom:12px;width:362px;height:68px;border-radius:999px;background:rgba(255,255,255,.96);box-shadow:0 14px 34px -16px rgba(15,23,42,.35),inset 0 0 0 1px rgba(17,24,39,.06);display:flex;justify-content:space-around;align-items:center;z-index:5}
+.tabbar span{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:13px;font-weight:800;color:var(--mute);min-width:56px}
+.tabbar span svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:1.8}
+.tabbar span.on{color:var(--blue)}
+/* シート */
+.dim{position:fixed;inset:0;background:rgba(15,23,42,.42);z-index:8}
+.sheet{position:fixed;left:50%;transform:translateX(-50%);bottom:0;width:390px;max-height:92vh;overflow:hidden;background:var(--card);border-radius:26px 26px 0 0;padding:10px 20px 28px;z-index:9;box-shadow:0 -18px 40px -20px rgba(15,23,42,.4)}
+.sheet .grab{width:40px;height:5px;border-radius:9px;background:#D5DAE1;margin:0 auto 10px}
+.shh{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+.shh h2{font-size:20px;font-weight:900;margin:0}
+.shh h2 small{font-size:14px;font-weight:700;color:var(--sub);margin-left:6px}
+.shh button{flex:none;height:44px;padding:0 16px;border:0;border-radius:999px;background:var(--pill);font-weight:800;font-size:14px}
+.big{margin-top:12px;border-radius:20px;padding:14px 16px}
+.big.s1{background:#FFF1EA}
+.big.s3{background:#F4F6F9}
+.big .k{display:flex;align-items:center;gap:8px}
+.big .k b{font-size:28px;font-weight:900;letter-spacing:.01em}
+.big.s1 .k b{color:var(--st1)}
+.big .k span{font-size:13px;font-weight:800;color:#fff;background:var(--st1);border-radius:999px;padding:2px 10px}
+.big.s3 .k span{background:#4B5563}
+.big .k b small{font-size:15px;font-weight:700;color:var(--sub);margin-left:2px}
+.big .why{font-size:15px;color:var(--ink2);margin-top:2px}
+.kv{list-style:none;margin:10px 0 0;padding:0}
+.kv li{display:grid;grid-template-columns:104px 1fr;gap:8px;padding:9px 0;font-size:15px}
+.kv li+li{box-shadow:0 -1px 0 #EEF0F3}
+.kv li span{color:var(--mute);font-size:14px}
+.kv li b{font-weight:800}
+.kv li b small{display:block;font-size:13px;font-weight:600;color:var(--sub)}
+.subh{font-size:15px;font-weight:800;margin:16px 0 4px}
+.cnt3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:6px}
+.cnt3 div{background:#F4F6F9;border-radius:14px;padding:10px 12px}
+.cnt3 span{display:block;font-size:13px;color:var(--mute)}
+.cnt3 b{font-size:24px;font-weight:900;font-variant-numeric:tabular-nums}
+.cnt3 b small{font-size:13px;font-weight:700;color:var(--sub);margin-left:2px}
+.cnt3 .hot b{color:var(--st1)}
+.box{display:flex;gap:8px;align-items:flex-start;font-size:13px;line-height:1.7;color:var(--ink2);background:#F4F6F9;border-radius:14px;padding:10px 12px;margin-top:14px}
+.box svg{flex:none;width:16px;height:16px;stroke:var(--mute);fill:none;stroke-width:2;margin-top:3px}
+/* ホーム（乗る便のカード）＝今の .ridecard に合わせ、字は 13px 以上に */
+.mapbg{height:300px;background:linear-gradient(180deg,#E9EDF1,#E3E8EE);position:relative;overflow:hidden}
+.mapbg svg{position:absolute;inset:0;width:100%;height:100%}
+.topbar{position:absolute;left:16px;right:16px;top:12px;display:flex;justify-content:space-between;gap:8px;z-index:2}
+.topbar .seg{margin:0;width:236px;background:rgba(255,255,255,.9);box-shadow:var(--sh)}
+.topbar .seg span{height:40px;font-size:14px}
+.topbar .seg span.on{background:#1F2937;color:#fff}
+.topbar .me{height:48px;padding:0 16px;border-radius:999px;background:var(--card);box-shadow:var(--sh);display:flex;align-items:center;font-size:14px;font-weight:800}
+.hsheet{position:relative;margin-top:-26px;background:#EEF1F5;border-radius:26px 26px 0 0;padding:10px 16px 120px;box-shadow:0 -10px 24px -18px rgba(15,23,42,.35)}
+.hsheet .grab{width:40px;height:5px;border-radius:9px;background:#C9CFD7;margin:0 auto 12px}
+.ride{padding:14px 16px;border-radius:18px;background:var(--card);box-shadow:var(--sh);font-size:14px;line-height:1.6}
+.ride .rh{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
+.ride .rh b{font-size:17px;font-weight:800}
+.ride .rh span{flex:1;font-size:15px;color:var(--ink2)}
+.ride .rh button{border:0;background:none;color:var(--mute);font-weight:700;font-size:14px;min-height:44px;padding:0 4px;text-decoration:underline}
+.ride .rl{display:block;color:var(--mute);font-size:13px;margin-top:4px}
+.ride .rv{display:block;font-weight:800;font-size:15px;margin-top:4px}
+.ride .rv.ok{color:#1F7A3F}
+.wline{display:flex;gap:8px;align-items:flex-start;margin-top:10px;border-radius:14px;padding:10px 12px;font-size:14px;line-height:1.55}
+.wline svg{flex:none;width:16px;height:16px;fill:currentColor;margin-top:3px}
+.wline.s1{background:#FFF1EA;color:var(--st1)}
+.wline.s3{background:#F4F6F9;color:var(--ink2)}
+.wline b{font-weight:800}
+.wline small{display:block;font-size:13px;color:var(--mute);font-weight:500;margin-top:2px}
+.rbar{height:6px;border-radius:9px;background:#E5E8EC;margin-top:8px;overflow:hidden}
+.rbar i{display:block;height:100%;background:var(--blue);border-radius:9px}
+.peek{margin-top:12px;height:86px;border-radius:18px;background:var(--card);box-shadow:var(--sh);padding:14px 16px;font-size:15px;font-weight:800;color:var(--ink2)}
+/* 札の一覧 */
+.cat{list-style:none;margin:0;padding:0}
+.cat li{display:grid;grid-template-columns:150px 1fr;gap:10px;align-items:center;padding:12px 0}
+.cat li+li{box-shadow:0 -1px 0 #EEF0F3}
+.cat li p{margin:0;font-size:14px;line-height:1.55;color:var(--ink2)}
+.cat li p small{display:block;font-size:13px;color:var(--mute)}
+.lvh{font-size:14px;font-weight:800;color:var(--mute);margin:16px 0 0}
+h1.t{font-size:20px;font-weight:900;margin:8px 0 4px}
+p.lead{font-size:14px;color:var(--ink2);margin:0 0 12px;line-height:1.7}
+/* 今の画面 */
+.shot{position:relative;border-radius:22px;overflow:hidden;box-shadow:var(--sh);background:#fff}
+.shot img{display:block;width:100%}
+.mk{position:absolute;width:30px;height:30px;border-radius:50%;background:#C2410C;color:#fff;font-size:15px;font-weight:900;display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 3px #fff}
+.nl{list-style:none;margin:12px 0 0;padding:0}
+.nl li{display:grid;grid-template-columns:30px 1fr;gap:10px;padding:8px 0;font-size:14px;line-height:1.6;color:var(--ink2)}
+.nl li i{font-style:normal;width:26px;height:26px;border-radius:50%;background:#C2410C;color:#fff;font-weight:900;font-size:14px;display:flex;align-items:center;justify-content:center}
+</style></head><body><div class="pad"><h1 class="t">止まり具合の札の一覧</h1><p class="lead">札は3つの重さで分けます。1つの空港に2つ以上あるときは、いちばん重いものを1つだけ札にし、ほかはくわしくに出します（重い順：閉鎖 → 地上待機 → 間引き → 遅れ → 除氷 → 便の数）。どの札にもピンの印をつけ、空港全体のようすだと分かるようにします。</p><div class="card"><div class="lvh">重い（濃い色）</div><ul class="cat"><li><span><span class="st s1"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1a5 5 0 0 0-5 5c0 3.6 5 9 5 9s5-5.4 5-9a5 5 0 0 0-5-5zm0 7a2 2 0 1 1 0-4 2 2 0 0 1 0 4z"/></svg>閉鎖中<small>FAA</small></span></span><p>空港が閉まっている<small>FAA の closure</small></p></li><li><span><span class="st s1"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1a5 5 0 0 0-5 5c0 3.6 5 9 5 9s5-5.4 5-9a5 5 0 0 0-5-5zm0 7a2 2 0 1 1 0-4 2 2 0 0 1 0 4z"/></svg>地上待機中<small>FAA</small></span></span><p>その空港へ向かう便を、出発する空港で止めている<small>FAA の ground_stop</small></p></li></ul><div class="lvh">注意（うすい黄）</div><ul class="cat"><li><span><span class="st s2"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1a5 5 0 0 0-5 5c0 3.6 5 9 5 9s5-5.4 5-9a5 5 0 0 0-5-5zm0 7a2 2 0 1 1 0-4 2 2 0 0 1 0 4z"/></svg>到着の間引き中<small>FAA</small></span></span><p>着く便を減らすため、出発を遅らせている<small>FAA の gdp（データでは「出発の間引き」）</small></p></li><li><span><span class="st s2"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1a5 5 0 0 0-5 5c0 3.6 5 9 5 9s5-5.4 5-9a5 5 0 0 0-5-5zm0 7a2 2 0 1 1 0-4 2 2 0 0 1 0 4z"/></svg>到着の遅れ<small>FAA</small></span></span><p>着く便が 15分以上遅れている。くわしくに平均<small>FAA の delay_arr</small></p></li><li><span><span class="st s2"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1a5 5 0 0 0-5 5c0 3.6 5 9 5 9s5-5.4 5-9a5 5 0 0 0-5-5zm0 7a2 2 0 1 1 0-4 2 2 0 0 1 0 4z"/></svg>出発の遅れ<small>FAA</small></span></span><p>出る便が 15分以上遅れている<small>FAA の delay_dep</small></p></li><li><span><span class="st s2"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1a5 5 0 0 0-5 5c0 3.6 5 9 5 9s5-5.4 5-9a5 5 0 0 0-5-5zm0 7a2 2 0 1 1 0-4 2 2 0 0 1 0 4z"/></svg>除氷中<small>FAA</small></span></span><p>雪や氷を落とすため、出発に時間がかかる<small>FAA の deicing</small></p></li></ul><div class="lvh">便の数（グレー・FAA の印なし）</div><ul class="cat"><li><span><span class="st s3"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1a5 5 0 0 0-5 5c0 3.6 5 9 5 9s5-5.4 5-9a5 5 0 0 0-5-5zm0 7a2 2 0 1 1 0-4 2 2 0 0 1 0 4z"/></svg>今日 欠航3便</span></span><p>JAL・ANA のその空港発着の便の欠航の数<small>world_flight_counts の cancelled</small></p></li><li><span><span class="st s3"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1a5 5 0 0 0-5 5c0 3.6 5 9 5 9s5-5.4 5-9a5 5 0 0 0-5-5zm0 7a2 2 0 1 1 0-4 2 2 0 0 1 0 4z"/></svg>今日 遅れ2便</span></span><p>30分以上の遅れの数（欠航がないときだけ札に出す）<small>late30</small></p></li></ul></div><p class="fwnote">出す決まり（データ担当の案に合わせる）：FAA の発表があるか、欠航・30分以上の遅れが1便以上の空港だけ。出る便は出発前、着く便は到着前の便だけに札をつける（過ぎた便にはつけない）。10分より古い発表は出さない（データ側で消える）。時刻は日本時間で出し、くわしくに現地の時刻を添える。夜の画面では、重いは琥珀の縁、注意は琥珀の字にする（金と会社の色は使わない）。</p></div></body></html>
