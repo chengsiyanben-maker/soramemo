@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>一覧｜そらメモ 改善案 11/06</title>
+<style>
+:root{
+  --gothic:"Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic UI","Yu Gothic","Meiryo","Noto Sans JP","Noto Sans CJK JP",system-ui,sans-serif;
+  --sign:"Barlow Condensed","Arial Narrow",var(--gothic);
+  --bg:#EEF1F5; --card:#FFFFFF; --ink:#374151; --strong:#1F2937; --sub:#5F6878; --mute:#9CA3AF;
+  --pill:rgba(17,24,39,.05); --hero:#0F1B2D; --on-hero:#F3F4F6; --hero-sub:#A7B0BC;
+  --shadow:0 1px 2px rgba(17,24,39,.04),0 10px 30px -8px rgba(17,24,39,.10),inset 0 0 0 1px rgba(17,24,39,.07);
+  --jal:#C8102E; --ana:#1C4FA0; --gold:#A9822E; --stub:#E7C873;
+  --chart-sea:#DCEAF3; --chart-land:#F4F2EA; --chart-coast:#A9B9AE; --chart-apt:#7A1F5C; --chart-grid:rgba(31,78,121,.10);
+  --tabs:rgba(255,255,255,.92);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){
+  --bg:#0B0D10; --card:#16191F; --ink:#D1D5DB; --strong:#F3F4F6; --sub:#A7B0BC; --mute:#8B95A3;
+  --pill:rgba(255,255,255,.07); --hero:#16233A; --on-hero:#F3F4F6; --hero-sub:#A7B0BC;
+  --shadow:0 12px 26px -16px rgba(0,0,0,.7),inset 0 0 0 1px rgba(255,255,255,.06);
+  --jal:#FF5A6E; --ana:#6EA0FF; --gold:#E0B85C;
+  --chart-sea:#0F1A24; --chart-land:#1A1F24; --chart-coast:#3A4A42; --chart-apt:#E07AB5; --chart-grid:rgba(127,166,217,.10);
+  --tabs:rgba(22,25,31,.92);
+}}
+:root[data-theme=dark]{
+  --bg:#0B0D10; --card:#16191F; --ink:#D1D5DB; --strong:#F3F4F6; --sub:#A7B0BC; --mute:#8B95A3;
+  --pill:rgba(255,255,255,.07); --hero:#16233A; --on-hero:#F3F4F6; --hero-sub:#A7B0BC;
+  --shadow:0 12px 26px -16px rgba(0,0,0,.7),inset 0 0 0 1px rgba(255,255,255,.06);
+  --jal:#FF5A6E; --ana:#6EA0FF; --gold:#E0B85C;
+  --chart-sea:#0F1A24; --chart-land:#1A1F24; --chart-coast:#3A4A42; --chart-apt:#E07AB5; --chart-grid:rgba(127,166,217,.10);
+  --tabs:rgba(22,25,31,.92);
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--gothic);font-size:15px;line-height:1.6;-webkit-text-size-adjust:100%}
+.phone{position:relative;max-width:420px;min-height:100vh;min-height:100svh;margin:0 auto;overflow:hidden}
+button{font:inherit;color:inherit}
+.pl{border:0;border-radius:999px;background:var(--pill);color:var(--strong);font-size:13px;font-weight:700;padding:8px 14px}
+.card{background:var(--card);border-radius:22px;box-shadow:var(--shadow)}
+.lab{font-size:12px;font-weight:700;color:var(--sub);letter-spacing:.02em}
+.num{font-weight:800;color:var(--strong);letter-spacing:-.01em;line-height:1.1}
+.u{font-size:12px;font-weight:600;color:var(--mute);margin-left:2px}
+.tabs{position:fixed;left:50%;transform:translateX(-50%);bottom:14px;width:calc(min(420px,100vw) - 28px);height:64px;border-radius:999px;background:var(--tabs);box-shadow:var(--shadow);display:flex;align-items:center;justify-content:space-around;backdrop-filter:blur(12px);z-index:30}
+.tabs b{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11px;font-weight:700;color:var(--mute)}
+.tabs b.on{color:var(--strong)}
+.tabs svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.ann{position:relative;z-index:40;max-width:392px;margin:16px auto 120px;font-size:12px;line-height:1.65;background:#FFF8D6;color:#5A4A12;padding:12px 14px;border-radius:16px}
+.ann b{display:block;font-size:11px}
+.ann ul{margin:4px 0 0;padding-left:1.2em}
+
+.ix{max-width:720px;margin:0 auto;padding:32px 20px 60px}
+.eyebrow{font-size:12px;font-weight:700;color:var(--sub);letter-spacing:.08em;margin:0 0 8px}
+h1{font-size:26px;color:var(--strong);margin:0}
+.lead{color:var(--sub);font-size:14px;margin:10px 0 0}
+.pair{margin-top:40px}.pair h2{font-size:17px;color:var(--strong);margin:0}.d{font-size:13px;color:var(--sub);margin:2px 0 14px}
+.two{display:flex;gap:24px;flex-wrap:wrap}
+.ix{max-width:1320px !important}
+.fix{font-size:13px;color:var(--sub);margin:12px 0 0;padding-left:1.2em}
+figure{margin:0;width:300px}figcaption{font-size:13px;font-weight:700;color:var(--sub);margin:0 0 6px 4px}
+figure img{display:block;width:300px;height:649px;object-fit:cover;object-position:top;border-radius:30px;box-shadow:var(--shadow)}
+.frame{width:300px;height:649px;border-radius:30px;overflow:hidden;box-shadow:var(--shadow);background:var(--bg)}
+.frame iframe{width:390px;height:844px;border:0;transform:scale(.7692);transform-origin:0 0}
+figure a{display:inline-block;margin-top:8px;font-size:13px;font-weight:700;color:var(--sub)}</style>
+</head>
+<body>
+<main class="ix">
+<p class="eyebrow">画面案 v1〜v5 ・ アプリにはまだ入っていません</p>
+<h1>そらメモ 改善案（上位3つ）</h1>
+<p class="lead">左から、今の本番・v1（最初の案）・v2（指摘1回目を直した版）・v3（指摘2回目を直した版）・v4（指摘3回目を直した版）・v5（指摘4回目を直した版・本人に見せる版）。v2 は端末の暗い表示にも合わせてあります（png/plan-*-dark-v2.png）。指摘ごとの直し方は answer-1.md（v2）と answer-2.md（v3）・answer-3.md（v4）にあります。v3 は暗い表示の PNG も png/plan-*-dark-v3.png、v4 は png/plan-*-v4.png・png/plan-*-dark-v4.png、v5 は png/plan-*-v5.png・png/plan-*-dark-v5.png（直し方は answer-4.md）にあります。</p>
+<section class="pair"><h2>1. ホーム（地図とシート）</h2><p class="d">v2：止まり位置を2段に。上の段は「スタンプラリー／エアライン経営」と人の図＋「マイページ」</p><div class="two"><figure><figcaption>いま（本番・デモ）</figcaption><img src="png/now-home.png" alt="いま（本番・デモ）" width="300"></figure><figure><figcaption>v1</figcaption><div class="frame"><iframe src="01-home.html" title="v1"></iframe></div><a href="01-home.html">この案だけ開く</a></figure><figure><figcaption>v2・最初の位置</figcaption><div class="frame"><iframe src="01-home-v2.html" title="v2・最初の位置"></iframe></div><a href="01-home-v2.html">この案だけ開く</a></figure><figure><figcaption>v2・引き上げた位置</figcaption><div class="frame"><iframe src="01b-home-open-v2.html" title="v2・引き上げた位置"></iframe></div><a href="01b-home-open-v2.html">この案だけ開く</a></figure><figure><figcaption>v3・最初の位置</figcaption><div class="frame"><iframe src="01-home-v3.html" title="v3・最初の位置"></iframe></div><a href="01-home-v3.html">この案だけ開く</a></figure><figure><figcaption>v3・引き上げた位置</figcaption><div class="frame"><iframe src="01b-home-open-v3.html" title="v3・引き上げた位置"></iframe></div><a href="01b-home-open-v3.html">この案だけ開く</a></figure><figure><figcaption>v4・最初の位置</figcaption><div class="frame"><iframe src="01-home-v4.html" title="v4・最初の位置"></iframe></div><a href="01-home-v4.html">この案だけ開く</a></figure><figure><figcaption>v4・引き上げた位置</figcaption><div class="frame"><iframe src="01b-home-open-v4.html" title="v4・引き上げた位置"></iframe></div><a href="01b-home-open-v4.html">この案だけ開く</a></figure><figure><figcaption>v5・最初の位置</figcaption><div class="frame"><iframe src="01-home-v5.html" title="v5・最初の位置"></iframe></div><a href="01-home-v5.html">この案だけ開く</a></figure><figure><figcaption>v5・引き上げた位置</figcaption><div class="frame"><iframe src="01b-home-open-v5.html" title="v5・引き上げた位置"></iframe></div><a href="01b-home-open-v5.html">この案だけ開く</a></figure></div><ul class="fix"><li>指摘4：「デ」の丸と「印／経営」をやめ、今の名前「スタンプラリー／エアライン経営」（どちらも高さ44px・濃いグレー）と人の図＋「マイページ」</li><li>指摘6：最初の位置で地図は上の段の下から約450px（今 約350・v1 約330）</li><li>指摘1：最初の位置は半券と今日の数字1列。最近の印は引き上げた位置でタブ帯の上に全部見える</li><li>指摘10：デモは白地の「デモ中」だけ。終了はマイページへ</li><li>指摘5：字13px（単位12px）・押せる所44px・補足 #5F6878。地図のラベルは HND 羽田</li><li>v3（2回目の指摘4）：半券は右へ引くだけ。金色の部分に「→」と「右へ引いて印をもらう」。押しても切れる（確かめ1回）</li><li>v3（2回目の指摘8・PM の指示）：図だけの小さいロゴ（36px）を左上、上の段のすぐ下に残した</li><li>v4（3回目の指摘5）：「→」を縦書きの横から外し、「右へ引いて印をもらう」の行の頭へ</li><li>v5（4回目の指摘1・2）：半券の右側をどの状態でも2行にし、高さを3つの状態とも同じに。シートを16px 上げ、高さ844で数字の行がタブ帯にもぐらない（下の端 743px・タブ帯 766px）</li></ul></section>
+<section class="pair"><h2>1b. ホーム：判定範囲の外・ログインしていない（v3 で足した）</h2><p class="d">はじめて開いた人がいちばん先に見る状態（2回目の指摘3）</p><div class="two"><figure><figcaption>v3・判定範囲の外</figcaption><div class="frame"><iframe src="01c-home-out-v3.html" title="v3・判定範囲の外"></iframe></div><a href="01c-home-out-v3.html">この案だけ開く</a></figure><figure><figcaption>v3・ログインしていない</figcaption><div class="frame"><iframe src="01d-home-guest-v3.html" title="v3・ログインしていない"></iframe></div><a href="01d-home-guest-v3.html">この案だけ開く</a></figure><figure><figcaption>v4・判定範囲の外</figcaption><div class="frame"><iframe src="01c-home-out-v4.html" title="v4・判定範囲の外"></iframe></div><a href="01c-home-out-v4.html">この案だけ開く</a></figure><figure><figcaption>v4・ログインしていない</figcaption><div class="frame"><iframe src="01d-home-guest-v4.html" title="v4・ログインしていない"></iframe></div><a href="01d-home-guest-v4.html">この案だけ開く</a></figure><figure><figcaption>v5・判定範囲の外</figcaption><div class="frame"><iframe src="01c-home-out-v5.html" title="v5・判定範囲の外"></iframe></div><a href="01c-home-out-v5.html">この案だけ開く</a></figure><figure><figcaption>v5・ログインしていない</figcaption><div class="frame"><iframe src="01d-home-guest-v5.html" title="v5・ログインしていない"></iframe></div><a href="01d-home-guest-v5.html">この案だけ開く</a></figure><figure><figcaption>v5・経営を押したとき</figcaption><div class="frame"><iframe src="01e-home-guest-airline-v5.html" title="v5・経営を押したとき"></iframe></div><a href="01e-home-guest-airline-v5.html">この案だけ開く</a></figure></div><ul class="fix"><li>範囲の外：切り取り部分を灰色にして押せないと分かるように、理由「範囲に入ると切れる」を1行。状態の行に「判定範囲の外・ここから 12.4km」</li><li>ログインしていない：数字の列の代わりに「ログイン・登録」「デモで試す」。理由が重なるときはログインを先に出す</li><li>v4（3回目の指摘2）：12.4km 先の自分は地図の外なので、左の端に「← いまここ 12.4km」のピル</li><li>v4（3回目の指摘4）：ログインしていないときは右上を「ログイン」に。「エアライン経営」を押してもログインの案内を出す</li><li>v5（4回目の指摘3）：「いまここ」のピルを画面の左の端にぴったり付け、ピルの中の青い点をやめた。点線は空港から端まで</li><li>v5（4回目の指摘8）：ログインしていないときに「エアライン経営」を押したあとのシート（01e）を足した</li></ul></section>
+<section class="pair"><h2>2. マイページ（タイル）</h2><p class="d">v2：大きい字はいつも今の値。下のタブにない画面・デモを終える・使い方の一覧</p><div class="two"><figure><figcaption>いま（本番・デモ）</figcaption><img src="png/now-mypage.png" alt="いま（本番・デモ）" width="300"></figure><figure><figcaption>v1</figcaption><div class="frame"><iframe src="02-mypage.html" title="v1"></iframe></div><a href="02-mypage.html">この案だけ開く</a></figure><figure><figcaption>v2</figcaption><div class="frame"><iframe src="02-mypage-v2.html" title="v2"></iframe></div><a href="02-mypage-v2.html">この案だけ開く</a></figure><figure><figcaption>v3</figcaption><div class="frame"><iframe src="02-mypage-v3.html" title="v3"></iframe></div><a href="02-mypage-v3.html">この案だけ開く</a></figure><figure><figcaption>v4</figcaption><div class="frame"><iframe src="02-mypage-v4.html" title="v4"></iframe></div><a href="02-mypage-v4.html">この案だけ開く</a></figure><figure><figcaption>v5</figcaption><div class="frame"><iframe src="02-mypage-v5.html" title="v5"></iframe></div><a href="02-mypage-v5.html">この案だけ開く</a></figure></div><ul class="fix"><li>指摘3：「下のタブにない画面」に修行・運用・成績。「構成」の2行目「タブの並びを変える」から表示を編集</li><li>指摘7：アカウント「デモ中」、データ「11/5 最後の書き出し」。使い方と規約は一覧の2行</li><li>指摘10：「デモを終える」（押すと確かめる画面）</li><li>v3（2回目の指摘7）：下の行は大きい字の説明だけ（気軽に／タブ3つ・ノーマル／全社を表示・デモ中／ログインしていない・11/5／最後に書き出した日）</li><li>v4（3回目の指摘8・9）：デモ中は上のカードだけで伝え、タイルは「ログイン・登録／未ログイン」に。「‹ ホーム」を白＋薄い影にそろえた</li><li>v5（4回目の指摘9）：「デモを終える」＝ホーム（ログインしていない）へ、「ログイン・登録」＝登録の画面へ、とメモに書いた</li></ul></section>
+<section class="pair"><h2>3. 運用（空の情報）</h2><p class="d">v2：推定のもとを出し分け、1枚目の下に「推定です。実際の運用と違うことがあります。」</p><div class="two"><figure><figcaption>いま（本番・デモ）</figcaption><img src="png/now-ops.png" alt="いま（本番・デモ）" width="300"></figure><figure><figcaption>v1</figcaption><div class="frame"><iframe src="03-ops.html" title="v1"></iframe></div><a href="03-ops.html">この案だけ開く</a></figure><figure><figcaption>v2・風が届いていない</figcaption><div class="frame"><iframe src="03-ops-v2.html" title="v2・風が届いていない"></iframe></div><a href="03-ops-v2.html">この案だけ開く</a></figure><figure><figcaption>v2・風が届いた</figcaption><div class="frame"><iframe src="03b-ops-wind-v2.html" title="v2・風が届いた"></iframe></div><a href="03b-ops-wind-v2.html">この案だけ開く</a></figure><figure><figcaption>v3・風が届いていない</figcaption><div class="frame"><iframe src="03-ops-v3.html" title="v3・風が届いていない"></iframe></div><a href="03-ops-v3.html">この案だけ開く</a></figure><figure><figcaption>v3・風が届いた</figcaption><div class="frame"><iframe src="03b-ops-wind-v3.html" title="v3・風が届いた"></iframe></div><a href="03b-ops-wind-v3.html">この案だけ開く</a></figure><figure><figcaption>v4・風が届いていない</figcaption><div class="frame"><iframe src="03-ops-v4.html" title="v4・風が届いていない"></iframe></div><a href="03-ops-v4.html">この案だけ開く</a></figure><figure><figcaption>v4・風が届いた</figcaption><div class="frame"><iframe src="03b-ops-wind-v4.html" title="v4・風が届いた"></iframe></div><a href="03b-ops-wind-v4.html">この案だけ開く</a></figure><figure><figcaption>v5・風が届いていない</figcaption><div class="frame"><iframe src="03-ops-v5.html" title="v5・風が届いていない"></iframe></div><a href="03-ops-v5.html">この案だけ開く</a></figure><figure><figcaption>v5・風が届いた</figcaption><div class="frame"><iframe src="03b-ops-wind-v5.html" title="v5・風が届いた"></iframe></div><a href="03b-ops-wind-v5.html">この案だけ開く</a></figure></div><ul class="fix"><li>指摘2：風がなければ「時間帯からの推定」、あれば「風からの推定」。定時は遅れと欠航がそろってからカードに</li><li>指摘9：断りの1行を i にしまわず、14px・濃いグレーで</li><li>指摘8：推定のピルを押すとほかの向きを選べる。並べ替え ✎ は右端に固定</li><li>v3（2回目の指摘1）：風がないときは見出し「いまの使い方（推定）」、大見出しは「着陸34R・離陸05」。「北風運用」は風が届いたときだけ</li><li>v3（2回目の指摘2）：タブの数は構成ごとに違ってよいが同じ構成ではそろえる（PM の判断）。見本は全部「気軽に」で、マイページから開いた運用もタブ3つ＋「‹ マイページ」</li><li>v3（2回目の指摘5・6・9・10）：「読み込み中」と「いまは出ていない」を分ける、距離は「ここからの距離」で場所ごとに違う値＋「おすすめ」、✎ は見出しの右、「今日の定時率」</li><li>v4（3回目の指摘1・3）：ここからの距離をホームの居場所に合わせ第1ターミナル 0.2km を上に、おすすめに理由「いまの着陸34R が正面に見える」。夜は3行とも「日の入り後」</li><li>v4（3回目の指摘6・7・10）：見出しはどちらも「いまの使い方」、風なしも着陸・離陸の2つの数字、ピルは「定時率の移り変わり」</li><li>v5（4回目の指摘4）：運用の画面はタブ帯を出さない（マイページと同じ）。戻るのは「‹ マイページ」だけ</li><li>v5（4回目の指摘5〜7）：風なしでも2枚並び（定時率は「読み込み中」）、3行とも「着陸機の線まで」、おすすめの理由は表の上に1行、ILS Z はどちらも数字の下</li></ul></section>
+</main>
+</body>
+</html>

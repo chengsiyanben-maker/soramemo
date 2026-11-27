@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>マイページ（タイル）｜そらメモ 改善案 11/06</title>
+<style>
+:root{
+  --gothic:"Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic UI","Yu Gothic","Meiryo","Noto Sans JP","Noto Sans CJK JP",system-ui,sans-serif;
+  --sign:"Barlow Condensed","Arial Narrow",var(--gothic);
+  --bg:#EEF1F5; --card:#FFFFFF; --ink:#374151; --strong:#1F2937; --sub:#6B7280; --mute:#9CA3AF;
+  --pill:rgba(17,24,39,.05); --hero:#0F1B2D; --on-hero:#F3F4F6; --hero-sub:#A7B0BC;
+  --shadow:0 1px 2px rgba(17,24,39,.04),0 10px 30px -8px rgba(17,24,39,.10),inset 0 0 0 1px rgba(17,24,39,.07);
+  --jal:#C8102E; --ana:#1C4FA0; --gold:#A9822E; --stub:#E7C873;
+  --chart-sea:#DCEAF3; --chart-land:#F4F2EA; --chart-coast:#A9B9AE; --chart-apt:#7A1F5C; --chart-grid:rgba(31,78,121,.10);
+  --tabs:rgba(255,255,255,.92);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){
+  --bg:#0B0D10; --card:#16191F; --ink:#D1D5DB; --strong:#F3F4F6; --sub:#A7B0BC; --mute:#8B95A3;
+  --pill:rgba(255,255,255,.07); --hero:#16233A; --on-hero:#F3F4F6; --hero-sub:#A7B0BC;
+  --shadow:0 12px 26px -16px rgba(0,0,0,.7),inset 0 0 0 1px rgba(255,255,255,.06);
+  --jal:#FF5A6E; --ana:#6EA0FF; --gold:#E0B85C;
+  --chart-sea:#0F1A24; --chart-land:#1A1F24; --chart-coast:#3A4A42; --chart-apt:#E07AB5; --chart-grid:rgba(127,166,217,.10);
+  --tabs:rgba(22,25,31,.92);
+}}
+:root[data-theme=dark]{
+  --bg:#0B0D10; --card:#16191F; --ink:#D1D5DB; --strong:#F3F4F6; --sub:#A7B0BC; --mute:#8B95A3;
+  --pill:rgba(255,255,255,.07); --hero:#16233A; --on-hero:#F3F4F6; --hero-sub:#A7B0BC;
+  --shadow:0 12px 26px -16px rgba(0,0,0,.7),inset 0 0 0 1px rgba(255,255,255,.06);
+  --jal:#FF5A6E; --ana:#6EA0FF; --gold:#E0B85C;
+  --chart-sea:#0F1A24; --chart-land:#1A1F24; --chart-coast:#3A4A42; --chart-apt:#E07AB5; --chart-grid:rgba(127,166,217,.10);
+  --tabs:rgba(22,25,31,.92);
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--gothic);font-size:15px;line-height:1.6;-webkit-text-size-adjust:100%}
+.phone{position:relative;max-width:420px;min-height:100vh;min-height:100svh;margin:0 auto;overflow:hidden}
+button{font:inherit;color:inherit}
+.pl{border:0;border-radius:999px;background:var(--pill);color:var(--strong);font-size:13px;font-weight:700;padding:8px 14px}
+.card{background:var(--card);border-radius:22px;box-shadow:var(--shadow)}
+.lab{font-size:12px;font-weight:700;color:var(--sub);letter-spacing:.02em}
+.num{font-weight:800;color:var(--strong);letter-spacing:-.01em;line-height:1.1}
+.u{font-size:12px;font-weight:600;color:var(--mute);margin-left:2px}
+.tabs{position:fixed;left:50%;transform:translateX(-50%);bottom:14px;width:calc(min(420px,100vw) - 28px);height:64px;border-radius:999px;background:var(--tabs);box-shadow:var(--shadow);display:flex;align-items:center;justify-content:space-around;backdrop-filter:blur(12px);z-index:30}
+.tabs b{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11px;font-weight:700;color:var(--mute)}
+.tabs b.on{color:var(--strong)}
+.tabs svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.ann{position:relative;z-index:40;max-width:392px;margin:16px auto 120px;font-size:12px;line-height:1.65;background:#FFF8D6;color:#5A4A12;padding:12px 14px;border-radius:16px}
+.ann b{display:block;font-size:11px}
+.ann ul{margin:4px 0 0;padding-left:1.2em}
+
+.wrap{padding:16px 16px 40px}
+.bar{display:flex;align-items:center;gap:10px;height:44px}
+.back{border:0;border-radius:999px;background:var(--pill);font-size:13px;font-weight:700;color:var(--strong);padding:8px 14px}
+.bar h1{font-size:17px;margin:0 auto 0 4px;color:var(--strong)}
+.prof{margin-top:14px;background:var(--hero);color:var(--on-hero);border-radius:24px;padding:18px;display:flex;align-items:center;gap:14px}
+.av{width:52px;height:52px;border-radius:999px;background:#2F5FD0;display:grid;place-items:center;font-weight:800;font-size:22px;color:#fff;flex:none}
+.prof b{font-size:18px;display:block}
+.prof small{color:var(--hero-sub);font-size:12px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
+.t{padding:16px;min-height:118px;display:flex;flex-direction:column;position:relative}
+.t.w{grid-column:1/-1;min-height:auto}
+.t .num{font-size:30px;margin-top:auto}
+.t .v{margin-top:auto;font-size:17px;font-weight:800;color:var(--strong)}
+.t .s{font-size:12px;color:var(--mute);margin-top:2px}
+.t .go{position:absolute;right:14px;top:14px;color:var(--mute);font-weight:700}
+.sw{display:flex;gap:8px;margin-top:auto}
+.sw i{width:26px;height:26px;border-radius:999px;display:block;box-shadow:inset 0 0 0 3px var(--card),0 0 0 1.5px var(--mute)}
+.sw i.on{box-shadow:inset 0 0 0 3px var(--card),0 0 0 2px var(--strong)}
+.two{display:flex;gap:18px;margin-top:auto}
+.two div{display:flex;flex-direction:column}
+.chip{display:inline-block;align-self:flex-start;margin-top:8px;font-size:11px;font-weight:700;color:var(--sub);background:var(--pill);border-radius:999px;padding:3px 10px}
+.foot{text-align:center;font-size:11px;color:var(--mute);margin-top:22px}
+</style>
+</head>
+<body>
+<main class="phone"><div class="wrap">
+<div class="bar"><button class="back">‹ ホーム</button><h1>マイページ</h1></div>
+<div class="prof"><span class="av">デ</span><div><b>デモモード</b><small>記録は本番と別・終えると消えます</small></div></div>
+<div class="grid">
+<div class="card t w"><span class="lab">これまで</span><span class="go">›</span><div class="two" style="margin-top:10px"><div><span class="num">16<span class="u">空港</span></span></div><div><span class="num">30<span class="u">フライト</span></span></div><div><span class="num">24,088<span class="u">km</span></span></div></div></div>
+<div class="card t"><span class="lab">構成</span><span class="go">›</span><span class="v">気軽に</span><span class="s">チェックインと図鑑</span></div>
+<div class="card t"><span class="lab">表示</span><span class="go">›</span><span class="v">ノーマル</span><span class="s">JAL・ANA で絞れる</span></div>
+<div class="card t"><span class="lab">色</span><div class="sw"><i class="on" style="background:#111"></i><i style="background:#233F9A"></i><i style="background:#D63131"></i></div><span class="s">白黒</span></div>
+<div class="card t"><span class="lab">拠点の空港</span><span class="go">›</span><span class="v">HND</span><span class="s">羽田</span></div>
+<div class="card t"><span class="lab">アカウント</span><span class="go">›</span><span class="v">ログイン</span><span class="s">コードで入る</span></div>
+<div class="card t"><span class="lab">データ</span><span class="go">›</span><span class="v">書き出し</span><span class="s">取り込みもここ</span></div>
+<div class="card t"><span class="lab">修行</span><span class="go">›</span><span class="v">開く</span><span class="s">下のタブにない画面</span></div>
+<div class="card t"><span class="lab">使い方</span><span class="go">›</span><span class="v">見る</span><span class="s">規約・プライバシー</span></div>
+</div>
+<p class="foot">非公式アプリ ・ 航空会社や空港とは関係ありません</p>
+</div></main>
+<aside class="ann"><b>案のメモ（本番には出ません）</b><ul><li><b>原則どおりタイルに</b>：今は「構成」「表示」などが説明文つきの縦の段で、目当てまで長くスクロールする。1枚＝1つの設定にして、今の値を大きく見せる。押すと今の中身（説明・切り替え）が下から出る</li><li>説明文はタイルの中では1行だけ。長い説明は押したあとの画面へ</li><li>「これまで」だけ横長で数字3つ。数字は大きく太く、単位は小さく薄く</li><li>左上の「ホーム」は今、黒い太い枠（押したときの印）が出たままになっている。薄いピルにする</li><li>課金の要素（そらメモ＋）は今の並びのまま別のタイルに置く想定。稼ぎやランキングには関係しない</li></ul></aside>
+<script>if(window!==window.top){var a=document.querySelector('.ann');if(a)a.remove()}</script>
+</body>
+</html>
