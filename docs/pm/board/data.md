@@ -9,6 +9,7 @@
   - 運営：admin_feedback_list（状態ごとの数・状態/種類で絞る・メモが見える）・admin_feedback_set（メモ null は今のまま・'' は空・admin_actions に残る）。運営コンソールの画面はリポジトリにない（本人の手元）
   - 夜の知らせ：ops_alert_log に fb_new・fb_kinds・fb_until。前に届けたあとの報告を種類ごとに数える。ng があればいつでも、報告だけなら20時以降（ops.flags の feedback_alert_hour で変えられる）
   - 確かめ：t150 60項目（UTC・日本時間）、t148・t149・t147・t142・t01・t10・t12・t14・t82 NG 0、deno 354件、SQL のテスト全部（150本）を UTC で流して NG 0
+  - 11/27 13時台（PM の手動の回「data/feedback を進めて」）：main（#267 の207・#288 の t145 の直し）を取り込み be43b09b。番号の重なりなし・t150・t148・t149・t145・t146・t147 は UTC で NG 0・deno 354件。PR に CI は付かない（反映の Actions は main だけ）。残りは本人の答えと PM の反映待ち。画面はチェックイン担当（#287 の後）
   - 本人に決めてほしいこと：報告だけの知らせの時刻（20時でよいか）・退会で報告も消すのでよいか・反映は自動の反映のあと知らせる形でよいか
 - **【11/26 14時20分 PM から・広報の動画の材料】済み**：ブランチ data/promo-sql（main 594dd3e から）→ **PR #275（下書き）**。報告 docs/pm/report-promo-data.md。表・移行は変えていない
   - docs/pm/promo-day.sql：① 便の一覧（JL＋NU・どの日でも）② 1機1分に1点の航跡（track_points は36時間なので今日か前の日だけ・前の日は翌日11時ごろまで）③ 古い日の線（flight_tracks）。docs/pm/promo-expand.py で ③ を点に（時刻は推定）
