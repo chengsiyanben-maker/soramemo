@@ -1,0 +1,150 @@
+{
+ "b1-backup": {
+  "small": [],
+  "tiny": [],
+  "cut": 0,
+  "h": 0,
+  "scroll": false
+ },
+ "b1-backup-667": {
+  "small": [],
+  "tiny": [],
+  "cut": 0,
+  "h": 0,
+  "scroll": false
+ },
+ "o1-intro": {
+  "small": [],
+  "tiny": [],
+  "cut": 0,
+  "h": 0,
+  "scroll": false
+ },
+ "o1-intro-667": {
+  "small": [],
+  "tiny": [],
+  "cut": 0,
+  "h": 0,
+  "scroll": false
+ },
+ "o1-intro-n": {
+  "small": [],
+  "tiny": [],
+  "cut": 0,
+  "h": 0,
+  "scroll": false
+ },
+ "o2-persona": {
+  "small": [],
+  "tiny": [],
+  "cut": 0,
+  "h": 0,
+  "scroll": false
+ },
+ "o2-persona-667": {
+  "small": [],
+  "tiny": [],
+  "cut": 0,
+  "h": 0,
+  "scroll": false
+ },
+ "o3-visited": {
+  "small": [],
+  "tiny": [],
+  "cut": 414,
+  "h": 0,
+  "scroll": true
+ },
+ "o3-visited-667": {
+  "small": [],
+  "tiny": [],
+  "cut": 590,
+  "h": 0,
+  "scroll": true
+ },
+ "o3-visited-n": {
+  "small": [],
+  "tiny": [],
+  "cut": 414,
+  "h": 0,
+  "scroll": true
+ },
+ "o3b-zero": {
+  "small": [],
+  "tiny": [],
+  "cut": 204,
+  "h": 0,
+  "scroll": true
+ },
+ "o3b-zero-667": {
+  "small": [],
+  "tiny": [],
+  "cut": 433,
+  "h": 0,
+  "scroll": true
+ },
+ "o4-plan": {
+  "small": [],
+  "tiny": [],
+  "cut": 0,
+  "h": 0,
+  "scroll": true
+ },
+ "o4-plan-667": {
+  "small": [],
+  "tiny": [],
+  "cut": 95,
+  "h": 0,
+  "scroll": true
+ },
+ "o4b-myap": {
+  "small": [],
+  "tiny": [],
+  "cut": 0,
+  "h": 0,
+  "scroll": true
+ },
+ "o4b-myap-667": {
+  "small": [],
+  "tiny": [],
+  "cut": 93,
+  "h": 0,
+  "scroll": true
+ },
+ "o5-ready": {
+  "small": [],
+  "tiny": [],
+  "cut": 0,
+  "h": 0,
+  "scroll": false
+ },
+ "o5-ready-667": {
+  "small": [],
+  "tiny": [],
+  "cut": 0,
+  "h": 0,
+  "scroll": false
+ },
+ "o6-home": {
+  "small": [],
+  "tiny": [],
+  "cut": 0,
+  "h": 0,
+  "scroll": false
+ },
+ "o6-home-667": {
+  "small": [],
+  "tiny": [],
+  "cut": 0,
+  "h": 0,
+  "scroll": false
+ },
+ "o6-home-n": {
+  "small": [],
+  "tiny": [],
+  "cut": 0,
+  "h": 0,
+  "scroll": false
+ },
+ "errors": []
+}
