@@ -51,7 +51,7 @@ async def main():
                 n = await pg.inner_text('#mpTNote')
                 check('タブ帯の言い方', '図鑑・フライト・いまの空港は下のタブ帯から' in n, n)
                 idx = await pg.evaluate("[...document.querySelectorAll('#mpIdx b')].map(e => e.textContent)")
-                check('設定は5行の目次', idx == ['表示の編集', 'データとバックアップ', '表示と色', 'アカウント', '詳しい設定'], idx)
+                check('設定は5行の目次＋「意見を送る」（11/27）', idx == ['表示の編集', 'データとバックアップ', '表示と色', 'アカウント', '詳しい設定', '意見を送る'], idx)
                 vis = await pg.evaluate("[...document.querySelectorAll('#dSettings .mp-sec')].filter(e => e.offsetParent).length")
                 check('目次のときは設定の中身を出さない', vis == 0, vis)
                 # 各ページ

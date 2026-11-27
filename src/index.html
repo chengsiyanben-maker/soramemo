@@ -4395,6 +4395,54 @@ html:has(dialog[open]),html:has(dialog[open]) body{overscroll-behavior:none}
 .dlg.cxsc>.cxbar::before{opacity:1}
 /* 特別塗装機の「この3時間」：ボタンの行（登録記号が分かる機体）が、外の .splist li button（display:block）に負けて時刻と名前が縦に落ちていた（改善担当の 3） */
 ul.spin li>button{display:flex;flex-direction:row;align-items:center;gap:10px;min-height:52px;padding:4px 0;width:100%;box-sizing:border-box;text-align:left}
+/* 不具合・意見を送る（11/27・design/gemini-1126 F1〜F4） */
+.fberr{display:block;margin:2px 0 0 auto;min-height:44px;padding:0 6px;border:0;background:none;font:700 13px var(--gothic);color:#5F6878;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.fberr[hidden]{display:none}
+dialog.fbsheet{background:#F4F5F7;max-height:92dvh;overflow-y:auto;overscroll-behavior:contain}
+dialog.fbsheet .dlg{padding:10px 20px calc(20px + env(safe-area-inset-bottom,0px));font-family:var(--gothic);color:#374151}
+dialog.fbsheet .sph{display:flex;justify-content:center;padding:2px 0 8px}
+dialog.fbsheet .sph .grab{width:40px;height:5px;border-radius:999px;background:#D7DCE3}
+dialog.fbsheet .fbhd{display:flex;align-items:center;justify-content:space-between}
+dialog.fbsheet h3{margin:0;font-size:21px;font-weight:900;color:#1F2937}
+dialog.fbsheet .x{width:44px;height:44px;border:0;border-radius:999px;background:#fff;box-shadow:0 1px 2px rgba(17,24,39,.06),inset 0 0 0 1px rgba(17,24,39,.07);font-size:20px;color:#1F2937;cursor:pointer}
+dialog.fbsheet .fbkinds{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px}
+dialog.fbsheet .fbkinds button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;min-height:80px;padding:10px 4px;border:0;border-radius:18px;background:#fff;box-shadow:0 1px 2px rgba(17,24,39,.04),0 10px 30px -8px rgba(17,24,39,.10),inset 0 0 0 1px rgba(17,24,39,.07);font:800 14px/1.3 var(--gothic);color:#1F2937;cursor:pointer;text-align:center}
+dialog.fbsheet .fbkinds svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+dialog.fbsheet .fbkinds button[aria-checked="true"]{background:#1F2937;color:#fff;box-shadow:none}
+dialog.fbsheet .fblab{margin:14px 0 6px;font-size:13px;font-weight:800;color:#5F6878}
+dialog.fbsheet .fbap{position:relative;display:flex;align-items:center;gap:10px;min-height:52px;padding:0 12px 0 14px;border-radius:16px;background:#fff;box-shadow:inset 0 0 0 1px rgba(17,24,39,.07)}
+dialog.fbsheet .fbap b{font-size:16px;font-weight:900;color:#1F2937;letter-spacing:.04em}
+dialog.fbsheet .fbap span{flex:1;min-width:0;font-size:14px;color:#374151;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+dialog.fbsheet .fbap em{font-style:normal;flex:none;padding:8px 14px;border-radius:999px;background:#EEF1F5;font-size:13px;font-weight:800;color:#1F2937}
+dialog.fbsheet .fbap select{position:absolute;inset:0;width:100%;height:100%;opacity:0;font-size:16px;cursor:pointer}
+dialog.fbsheet .fbparts{display:flex;flex-wrap:wrap;gap:8px}
+dialog.fbsheet .fbparts button{min-height:44px;padding:0 16px;border:0;border-radius:999px;background:#fff;box-shadow:inset 0 0 0 1px rgba(17,24,39,.1);font:800 14px var(--gothic);color:#1F2937;cursor:pointer}
+dialog.fbsheet .fbparts button[aria-checked="true"]{background:#1F2937;color:#fff;box-shadow:none}
+dialog.fbsheet textarea{display:block;width:100%;box-sizing:border-box;min-height:120px;margin-top:14px;padding:14px;border:0;border-radius:18px;background:#fff;box-shadow:inset 0 0 0 1px rgba(17,24,39,.07);font:400 16px/1.6 var(--gothic);color:#1F2937;resize:vertical;outline:none}
+dialog.fbsheet textarea:focus{box-shadow:inset 0 0 0 2px #1C4FA0}
+dialog.fbsheet .fbcount{margin:6px 4px 0;text-align:right;font-size:13px;color:#6B7280}
+dialog.fbsheet .fbcount b{font-weight:700;color:#374151}
+dialog.fbsheet .fbcount b.over{color:#C8102E}
+dialog.fbsheet .fbauto{margin:10px 0 0;padding:12px 14px;border-radius:16px;background:#E9ECF0;font-size:13px;line-height:1.65;color:#374151}
+dialog.fbsheet .fbauto b{color:#1F2937}
+dialog.fbsheet .fbmsg{margin:8px 4px 0;font-size:13px;color:#C8102E}
+dialog.fbsheet .fbmsg:empty{display:none}
+dialog.fbsheet .fbcta{display:block;width:100%;margin-top:14px;border:0;border-radius:999px;background:#1F2937;color:#fff;font:800 16px var(--gothic);padding:16px;cursor:pointer}
+dialog.fbsheet .fbcta[disabled]{opacity:.35;cursor:default}
+dialog.fbsheet .fbdone{text-align:center;padding:10px 4px 4px}
+dialog.fbsheet .fbdone .ok{display:inline-grid;place-items:center;width:56px;height:56px;border-radius:999px;background:#E7F6EC;color:#15803D}
+dialog.fbsheet .fbdone .ok svg{width:28px;height:28px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+dialog.fbsheet .fbdone h3{margin-top:12px}
+dialog.fbsheet .fbdone p{margin:8px 0 0;font-size:14px;line-height:1.7;color:#5F6878}
+:root[data-night="on"] dialog.fbsheet{background:#0F141B}
+:root[data-night="on"] dialog.fbsheet .dlg{color:#D1D5DB}
+:root[data-night="on"] dialog.fbsheet h3,:root[data-night="on"] dialog.fbsheet .fbap b,:root[data-night="on"] dialog.fbsheet .fbauto b{color:#F3F4F6}
+:root[data-night="on"] dialog.fbsheet .x,:root[data-night="on"] dialog.fbsheet .fbkinds button,:root[data-night="on"] dialog.fbsheet .fbap,:root[data-night="on"] dialog.fbsheet .fbparts button,:root[data-night="on"] dialog.fbsheet textarea{background:#1B1F26;color:#E5E7EB;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08)}
+:root[data-night="on"] dialog.fbsheet .fbkinds button[aria-checked="true"],:root[data-night="on"] dialog.fbsheet .fbparts button[aria-checked="true"],:root[data-night="on"] dialog.fbsheet .fbcta{background:#DCE3EA;color:#0F141B}
+:root[data-night="on"] dialog.fbsheet .fbauto{background:#1B1F26;color:#D1D5DB}
+:root[data-night="on"] dialog.fbsheet .fbap span,:root[data-night="on"] dialog.fbsheet .fblab,:root[data-night="on"] dialog.fbsheet .fbcount,:root[data-night="on"] dialog.fbsheet .fbdone p{color:#AEB9C6}
+:root[data-night="on"] dialog.fbsheet .fbap em{background:#262B33;color:#E5E7EB}
+:root[data-night="on"] .fberr{color:#AEB9C6}
 </style>
 </head>
 <body>
@@ -4444,6 +4492,7 @@ ul.spin li>button{display:flex;flex-direction:row;align-items:center;gap:10px;mi
       <div class="bpdone" id="bpDone" hidden role="status"></div>
     </div>
     <p class="stubmsg" id="stubMsg" hidden aria-hidden="true"></p>
+    <button class="fberr" type="button" id="fbErrStub" hidden data-fb-open="error">不具合を知らせる</button>
     <div class="nvloc" id="nvLocOff" hidden role="status"></div>   <!-- iPhone のアプリ：位置を許可しなかった人（design/ios-app 2版 I1c） -->
     <div class="nlist" id="nearList" hidden aria-label="近くの空港・飛行場の一覧"></div>
     <div class="hstrip" id="homeStrip" aria-label="今日の数字">
@@ -4458,6 +4507,7 @@ ul.spin li>button{display:flex;flex-direction:row;align-items:center;gap:10px;mi
       <div><button type="button" class="go" id="gateLogin">ログイン・登録</button><button type="button" id="gateDemo">デモで試す</button></div>
     </div>
     <p class="msg" id="msg" role="status" aria-live="polite"></p>
+    <button class="fberr" type="button" id="fbErrMsg" hidden data-fb-open="error">不具合を知らせる</button>
     <p class="hint ckhint">空港の判定範囲（1〜2km）の中で、半券を右へ引いて切ると印が押されます。押すだけでも、確かめてから切れます。</p>
     <div class="demo-pick">
       <label for="demoAirport">いる空港（デモ）</label>
@@ -4745,6 +4795,7 @@ ul.spin li>button{display:flex;flex-direction:row;align-items:center;gap:10px;mi
 <dialog id="dNvSheet" class="psheet nvsheet" aria-labelledby="nvShT"><div class="dlg" id="dNvSheetBody"></div></dialog>   <!-- iPhone のアプリ：小さい説明（I1e・I4c・I4m） -->
 <dialog id="dAirport" aria-label="空港"><div class="dlg" id="dAirportBody"></div></dialog>
 <dialog id="dAp3d" class="a3dlg" aria-label="羽田の3D"></dialog>
+<dialog id="dFb" class="psheet fbsheet" aria-labelledby="fbT"><div class="dlg" id="fbBody"></div></dialog>   <!-- 不具合・意見を送る（design/gemini-1126 F2〜F4） -->
 <dialog id="dAuth" class="auth" aria-label="ログイン・新規登録"><main class="phone"><div id="auStep"></div><div id="auCap" class="captcha"></div><div id="auFoot"></div></main></dialog>
 <dialog id="dGuide" aria-label="使い方"><div class="dlg">
   <div class="ob-step on">
@@ -5274,7 +5325,7 @@ function postRpc(fn, body){
 }
 function track(e, p){ if(!canSend()) return; EVQ.push({e, p: p == null ? null : String(p).slice(0, 60)}); if(EVQ.length >= 40) flushEvents(); }
 function flushEvents(){ if(!EVQ.length || !canSend()) return; postRpc("log_events", {p_session:SESSION, p_platform:PLATFORM, p_version:APP_VERSION, p_events:EVQ.splice(0, 50)}); }
-function reportClientError(kind, msg, detail){ if(!canSend() || ERRN >= 10) return; ERRN++;
+function reportClientError(kind, msg, detail){ fbNoteErr(kind); if(!canSend() || ERRN >= 10) return; ERRN++;
   postRpc("log_error", {p_session:SESSION, p_platform:PLATFORM, p_version:APP_VERSION, p_kind:kind, p_message:String(msg || "").slice(0, 300), p_detail:detail || null}); }
 setInterval(flushEvents, 20000);
 document.addEventListener("visibilitychange", () => { if(document.visibilityState === "hidden") flushEvents(); });
@@ -7776,7 +7827,7 @@ const code = a => a.iata !== "—" ? a.iata : a.name.slice(0,2);
 const fmtKm = n => Math.round(n).toLocaleString("ja-JP");
 const fmtDT = t => new Date(t).toLocaleString("ja-JP",{month:"numeric",day:"numeric",hour:"2-digit",minute:"2-digit"});
 const fmtD = t => new Date(t).toLocaleDateString("ja-JP",{year:"numeric",month:"numeric",day:"numeric"});
-function say(t, err){ const m=$("msg"), ok = !err && mxDone(t); m.textContent=t; m.classList.toggle("err", !!err); m.classList.toggle("mxsr", ok); if(ok) mxToast(t); }   // 「できた」は下から出る札（05）。字は読み上げ用に残す
+function say(t, err){ const m=$("msg"), ok = !err && mxDone(t); fbErrLink("fbErrMsg", !!err && !!t); if(err && t) fbNoteErr("app_msg"); m.textContent=t; m.classList.toggle("err", !!err); m.classList.toggle("mxsr", ok); if(ok) mxToast(t); }   // 「できた」は下から出る札（05）。字は読み上げ用に残す
 function homeBase(){
   try{ const v = +localStorage.getItem("soramemo.base"); if(v && BY[v] && !IS_EXTRA(v)) return v; }catch(e){}
   const first = [...S.checkins].sort((x, y) => x.t - y.t)[0]; return first ? first.a : null;
@@ -7992,6 +8043,7 @@ const ckIOS = () => NATIVE || /iPhone|iPad|iPod/.test(navigator.userAgent) || (n
 var CK_GEO_NG = null;   // ウェブで位置が使えないと分かったとき："denied"（開き直すか、許可に戻ると消える）
 // 何が足りないかと直し方のカード（押しても判定できないボタンは出さない）。kind："denied"（許可がない）・"precise"（正確な位置情報が OFF）
 function ckLocCard(kind, p){
+  fbNoteErr("loc_" + kind);
   if(kind === "denied"){ CK_GEO_NG = "denied"; try{ nvGeoApply(); }catch(e){} }
   const ios = ckIOS(), app = NATIVE ? "そらメモ" : "Safari";
   const path = kind === "precise"
@@ -10843,6 +10895,7 @@ function ckNote(t){
   clearTimeout(CK_NOTE_T);
   const txt = t === undefined ? (m ? m.textContent.trim() : "") : t;
   el.textContent = txt; el.hidden = !txt; el.classList.toggle("err", t === undefined && !!m && m.classList.contains("err"));
+  fbErrLink("fbErrStub", !!txt && el.classList.contains("err"));   // 押せなかったときだけ、札の下に「不具合を知らせる」（11/27）
   if(txt) CK_NOTE_T = setTimeout(() => { el.hidden = true; }, 8000);
 }
 // 範囲の外で押したとき：位置を新しく調べ直す（範囲に入っていれば、そのまま切れる形に変わる）
@@ -11311,7 +11364,8 @@ function mpIdxHTML(){
     acct:mail ? mail : demo ? "デモモード（記録は別）" : SERVER ? "ログインしていません" : "この端末の記録",
     adv:"デモ・判定のしくみ・ホーム画面に追加 ほか"
   };
-  return Object.keys(MP_PAGES).map(k => `<li><button type="button" data-mp-page="${k}"><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true">${MP_IC[k]}</svg></span><span class="t"><b>${MP_PAGES[k]}</b><small>${esc(sub[k])}</small></span><svg class="ch" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button></li>`).join("");
+  return Object.keys(MP_PAGES).map(k => `<li><button type="button" data-mp-page="${k}"><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true">${MP_IC[k]}</svg></span><span class="t"><b>${MP_PAGES[k]}</b><small>${esc(sub[k])}</small></span><svg class="ch" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button></li>`).join("")
+    + `<li><button type="button" data-fb-open="mypage"><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"/></svg></span><span class="t"><b>意見を送る</b><small>不具合・ほしい機能・空港データの直し</small></span><svg class="ch" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button></li>`;   // 11/27 不具合・意見を送る（F1）
 }
 // ログインしていないときの右上は「ログイン」。押すとログインの画面（そこから「あとで」「デモで試す」も選べる）
 $("openSettings").onclick = () => { if(SERVER && !user && !demo){ track("mp", "guest"); authOpen("login", "login"); return; } openMyPage(); };
@@ -19719,6 +19773,128 @@ function renderWelcome(){
 }
 document.addEventListener("click", e => { if(e.target.closest("#welcomeX")){ try{ localStorage.removeItem("soramemo.welcome"); }catch(_){} $("welcomeCard").hidden = true; track("welcome", "close"); } });
 $("nameEdit").onclick = () => authOpen("rename", "name");
+
+/* ---------- 不具合・意見を送る（11/27 本人の指示・画面案 design/gemini-1126 の F1〜F4・データ data/feedback） ----------
+   ・入口：マイページの目次の「意見を送る」と、押せなかった理由の札（半券の下・ホームの文）の下の小さな「不具合を知らせる」
+   ・3択（不具合 bug／ほしい機能 request／空港データの直し airport_data）＋本文（2000字まで。表の決まりと同じ）
+   ・自動で付けるのは アプリの版・開いていた画面・端末の種類・直前のエラーの種類 だけ。送る前に中身を見せる。位置・記録・写真・メールは送らない
+   ・ログインしていれば表 feedback に直接入れる（RLS で自分の分だけ）。していなければ Edge Function feedback-submit（ログイン案B）
+   ・電波がないときは端末に保留（soramemo.fbq・5件・7日）して、つながったら送る。断られたら理由（10分に3件まで・受け付けを止めている）を出す */
+const FB_KIND = { bug:"不具合", request:"ほしい機能", airport_data:"空港データの直し" };
+const FB_PART = ["名前・読み", "滑走路", "供用開始", "位置・範囲", "ほか"];
+const FB_MAX = 2000, FBQ_KEY = "soramemo.fbq";
+const FB_IC = {
+  bug:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 7.5a3 3 0 0 1 6 0"/><rect x="7" y="8" width="10" height="11" rx="5"/><path d="M12 11v8M3.5 12H7M17 12h3.5M5 7l2.2 2M19 7l-2.2 2M5 19l2.2-2M19 19l-2.2-2"/></svg>',
+  request:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 0-3.6 10.8c.7.6 1.1 1.4 1.1 2.2h5c0-.8.4-1.6 1.1-2.2A6 6 0 0 0 12 3z"/></svg>',
+  airport_data:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6.5l6-2.5 6 2.5 6-2.5v13.5l-6 2.5-6-2.5-6 2.5z"/><path d="M9 4v13.5M15 6.5V20"/></svg>',
+  ok:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>'
+};
+var FB_LAST_ERR = null;   // var：起動の途中（この下の定義より前）に say から書かれるため。直前のエラーの種類（client_errors の kind と同じ形：英小文字と _ だけ。中身の文は入れない）
+function fbNoteErr(k){ const v = String(k || "").toLowerCase().replace(/[^a-z_]/g, "_").slice(0, 20); if(/^[a-z_]{1,20}$/.test(v)) FB_LAST_ERR = v; }
+const FB = { kind:"bug", body:"", ap:"", part:"", from:"", screen:"home", busy:false, done:"", msg:"" };
+const fbDevice = () => `${PLATFORM}_${NATIVE ? "app" : "web"}`;
+const fbDeviceName = () => `${{ ios:"iPhone・iPad", android:"Android" }[PLATFORM] || "そのほかの端末"}（${NATIVE ? "アプリ" : "ブラウザ"}）`;
+const fbScreenName = s => s === "mypage" ? "マイページ" : TAB_NAME[s] || s;
+const FB_ERR_NAME = { js:"画面の不具合", promise:"読み込みの不具合", app_msg:"押せなかった・読めなかった", loc_denied:"位置の許可がない", loc_precise:"正確な位置情報が OFF" };
+function fbOpen(from){
+  const scr = $("dSettings").open ? "mypage" : currentView();
+  let ap = ""; try{ ap = HOME_NEAR && HOME_NEAR.a && !HOME_NEAR.a.kind ? HOME_NEAR.a.iata : ""; }catch(e){}
+  Object.assign(FB, { kind:"bug", body:"", ap: ap || (() => { try{ return OPS_AP || "HND"; }catch(e){ return "HND"; } })(), part:"", from: from || "", screen:scr, busy:false, done:"", msg:"" });
+  fbRender(); const d = $("dFb"); if(!d.open) d.showModal();
+  track("feedback_open", from || scr);
+}
+function fbAuto(){
+  const row = { app_version:APP_VERSION, screen:FB.screen, device:fbDevice(), last_error:FB_LAST_ERR };
+  return { row, html:`<p class="fbauto"><b>いっしょに送るもの</b>：アプリの版 ${esc(APP_VERSION)}・端末の種類 ${esc(fbDeviceName())}・開いていた画面 ${esc(fbScreenName(FB.screen))}・直前のエラー ${FB_LAST_ERR ? esc(FB_ERR_NAME[FB_LAST_ERR] || FB_LAST_ERR) : "なし"}${FB.kind === "airport_data" && FB.ap ? `・空港 ${esc(FB.ap)}` : ""}<br><b>送らないもの</b>：位置・記録・写真・メールアドレス</p>` };
+}
+function fbRender(){
+  const box = $("fbBody"); if(!box) return;
+  if(FB.done){
+    const q = FB.done === "queued";
+    box.innerHTML = `<div class="sph"><span class="grab" aria-hidden="true"></span></div>
+      <div class="fbdone" role="status"><span class="ok">${FB_IC.ok}</span><h3 id="fbT">${q ? "保存しました" : "受け付けました"}</h3>
+      <p>${q ? "いまは電波がないため、この端末に保存しました。つながったら送ります。" : "ありがとうございます。返事はしていませんが、届いたものはすべて読みます。"}</p></div>
+      <button class="fbcta" type="button" data-fb="close">閉じる</button>`;
+    return;
+  }
+  const n = [...FB.body.trim()].length, A3 = FB.kind === "airport_data", apA = IATA[FB.ap];
+  const ph = { bug:"どの画面で、何をしたら、どうなったか", request:"あったらうれしい機能や、こうしてほしい所", airport_data:"正しい内容と、分かれば出典（公式の案内など）" }[FB.kind];
+  box.innerHTML = `<div class="sph"><span class="grab" aria-hidden="true"></span></div>
+    <div class="fbhd"><h3 id="fbT">意見を送る</h3><button class="x" type="button" data-fb="close" aria-label="閉じる">×</button></div>
+    <div class="fbkinds" role="radiogroup" aria-label="種類">${Object.keys(FB_KIND).map(k => `<button type="button" role="radio" aria-checked="${FB.kind === k}" data-fb-kind="${k}">${FB_IC[k]}<span>${k === "airport_data" ? "空港データの<br>直し" : FB_KIND[k]}</span></button>`).join("")}</div>
+    ${A3 ? `<p class="fblab">空港</p><label class="fbap"><b>${esc(FB.ap)}</b><span>${apA ? esc(apA.name) : ""}</span><select id="fbAp" aria-label="空港を変える">${A.map(a => `<option value="${esc(a.iata)}"${a.iata === FB.ap ? " selected" : ""}>${esc(a.iata)} ${esc(a.name)}</option>`).join("")}</select><em aria-hidden="true">変える</em></label>
+      <p class="fblab">どこが違いますか</p><div class="fbparts" role="radiogroup" aria-label="どこが違いますか">${FB_PART.map(p => `<button type="button" role="radio" aria-checked="${FB.part === p}" data-fb-part="${esc(p)}">${esc(p)}</button>`).join("")}</div>` : ""}
+    <textarea id="fbText" maxlength="${FB_MAX + 200}" aria-label="本文" placeholder="${esc(ph)}">${esc(FB.body)}</textarea>
+    <p class="fbcount"><b id="fbN"${n > FB_MAX ? ' class="over"' : ""}>${n}</b> / ${FB_MAX}</p>
+    ${fbAuto().html}
+    <p class="fbmsg" id="fbMsg" role="status" aria-live="polite">${esc(FB.msg)}</p>
+    <button class="fbcta" type="button" data-fb="send"${!n || n > FB_MAX || FB.busy ? " disabled" : ""}>${FB.busy ? "送っています…" : "送る"}</button>`;
+}
+function fbRow(){
+  const body = (FB.kind === "airport_data" && FB.part ? `【${FB.part}】` : "") + FB.body.trim();
+  return Object.assign({ kind:FB.kind, body }, fbAuto().row, FB.kind === "airport_data" && /^[A-Z0-9]{3,4}$/.test(FB.ap) ? { airport:FB.ap } : {});
+}
+const fbNetErr = e => !!e && /fetch|network|load failed|offline/i.test(String(e.message || e));
+// 1件送る。{ ok } / { queue }（電波がない・届かない）/ { err:"too_many"|"closed"|"failed"|"noserver" }
+async function fbPost(row){
+  if(!SERVER || typeof sb === "undefined" || !sb) return { err:"noserver" };
+  if(navigator.onLine === false) return { queue:true };
+  const r0 = Object.assign({}, row, { session:SESSION }); delete r0.at;
+  try{
+    if(user){   // ログインしている人：表に直接（返す行は読まない）
+      const { error } = await sb.from("feedback").insert(r0);
+      if(!error) return { ok:true };
+      if(fbNetErr(error)) return { queue:true };
+      return { err: error.code === "54000" ? "too_many" : error.code === "55000" ? "closed" : "failed" };
+    }
+    const base = SORAMEMO_CONFIG.supabaseUrl.replace(/\/$/, ""), key = SORAMEMO_CONFIG.supabaseAnonKey;
+    const res = await fetch(base + "/functions/v1/feedback-submit", { method:"POST", headers:{ "Content-Type":"application/json", apikey:key, Authorization:"Bearer " + key }, body:JSON.stringify(r0) });
+    if(res.ok) return { ok:true };
+    const j = await res.json().catch(() => ({}));
+    return { err: j.error === "too_many" || res.status === 429 ? "too_many" : j.error === "closed" || res.status === 503 ? "closed" : "failed" };
+  }catch(e){ return { queue:true }; }
+}
+const fbqGet = () => { try{ const q = JSON.parse(localStorage.getItem(FBQ_KEY) || "[]"); return Array.isArray(q) ? q.filter(r => r && r.at > Date.now() - 7 * 864e5) : []; }catch(e){ return []; } };
+const fbqPut = q => { try{ q.length ? localStorage.setItem(FBQ_KEY, JSON.stringify(q.slice(-5))) : localStorage.removeItem(FBQ_KEY); }catch(e){} };
+let FBQ_BUSY = false;
+async function fbqFlush(){
+  if(FBQ_BUSY || navigator.onLine === false) return; const q = fbqGet(); if(!q.length) return;
+  FBQ_BUSY = true; const left = [];
+  try{ for(const r of q){ const x = await fbPost(r); if(x.queue) left.push(r); else track("feedback_sent", x.ok ? "queued_ok" : "queued_" + x.err); } }finally{ FBQ_BUSY = false; }
+  fbqPut(left);
+}
+addEventListener("online", () => setTimeout(fbqFlush, 1500));
+setTimeout(fbqFlush, 6000);   // 開いたとき（サーバーの用意のあと）に、前に保存した分を送る
+const FB_ERR_TXT = { too_many:"送れるのは10分に3件までです。少しおいてから送ってください。", closed:"いまは受け付けを止めています。時間をおいて試してください。", failed:"送れませんでした。少しおいてからもう一度送ってください。", noserver:"この画面ではサーバーにつながっていないため、送れません。" };
+async function fbSend(){
+  const row = fbRow(); if(!row.body || [...FB.body.trim()].length > FB_MAX) return;
+  FB.busy = true; FB.msg = ""; fbRender();
+  const x = await fbPost(row); FB.busy = false;
+  if(x.queue){ fbqPut([...fbqGet(), Object.assign({ at:Date.now() }, row)]); FB.done = "queued"; track("feedback_sent", "queued"); }
+  else if(x.ok){ FB.done = "ok"; track("feedback_sent", row.kind); }
+  else { FB.msg = FB_ERR_TXT[x.err] || FB_ERR_TXT.failed; track("feedback_sent", "err_" + x.err); }
+  fbRender();
+}
+document.addEventListener("click", e => {
+  const o = e.target.closest("[data-fb-open]"); if(o){ e.preventDefault(); fbOpen(o.dataset.fbOpen); return; }
+  if(!$("dFb").open) return;
+  const k = e.target.closest("[data-fb-kind]"); if(k){ FB.body = ($("fbText") || {}).value ?? FB.body; FB.kind = k.dataset.fbKind; FB.msg = ""; fbRender(); return; }
+  const p = e.target.closest("[data-fb-part]"); if(p){ FB.body = ($("fbText") || {}).value ?? FB.body; FB.part = FB.part === p.dataset.fbPart ? "" : p.dataset.fbPart; fbRender(); return; }
+  const b = e.target.closest("[data-fb]"); if(!b) return;
+  if(b.dataset.fb === "close") $("dFb").close();
+  else if(b.dataset.fb === "send") fbSend();
+});
+document.addEventListener("input", e => {
+  if(e.target.id !== "fbText") return;
+  FB.body = e.target.value; const n = [...FB.body.trim()].length, el = $("fbN"), cta = document.querySelector('#fbBody [data-fb="send"]');
+  if(el){ el.textContent = n; el.classList.toggle("over", n > FB_MAX); }
+  if(cta) cta.disabled = !n || n > FB_MAX || FB.busy;
+  const m = $("fbMsg"); if(m) m.textContent = n > FB_MAX ? `${FB_MAX}字までにしてください。` : "";
+});
+document.addEventListener("change", e => { if(e.target.id === "fbAp"){ FB.body = ($("fbText") || {}).value ?? FB.body; FB.ap = e.target.value; fbRender(); } });
+// 押せなかった理由の札の下の「不具合を知らせる」：札が出ている間だけ
+var FB_LINK_T = {};
+function fbErrLink(id, on){ const el = $(id); if(!el) return; el.hidden = !on; clearTimeout(FB_LINK_T[id]); if(on) FB_LINK_T[id] = setTimeout(() => { el.hidden = true; }, 20000); }
 
 /* ---------- オフライン用の仕組みと、新しい版のお知らせ ---------- */
 $("appVer").textContent = "版 " + APP_VERSION;
