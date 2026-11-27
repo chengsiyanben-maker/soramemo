@@ -1,0 +1,35 @@
+<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>T2 カードの輪郭と小箱</title><style>
+:root{
+  --gothic:"Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic UI","Yu Gothic","Meiryo","Noto Sans JP","Noto Sans CJK JP",system-ui,sans-serif;
+  --bg:#EEF1F5; --card:#FFFFFF; --ink:#374151; --strong:#1F2937; --sub:#4B5563; --mute:#6B7280; --mute-on-box:#5F6672;
+  --box:#F1F3F6; --ring:#DCE1E8; --ring-now:rgba(17,24,39,.07); --hero:#0F1B2D; --hero-sub:#C9D2DE;
+  --late:#B42318; --ok:#15803D; --pill:#E6E9EE; --pill-on:#1F2937; --pill-on-ink:#FFFFFF;
+  --shadow:0 1px 2px rgba(17,24,39,.04),0 10px 30px -8px rgba(17,24,39,.10);
+  --keep:#E7EEF7; --keep-ink:#23406A; --take:#E7F4EC; --take-ink:#1F6B3A; --no:#F4E9E7; --no-ink:#8A2A1C;
+}
+:root[data-night=on]{
+  --bg:#0F141B; --card:#1B1F26; --ink:#E5E7EB; --strong:#F3F4F6; --sub:#C3CBD5; --mute:#AEB9C6; --mute-on-box:#AEB9C6;
+  --box:#232830; --ring:rgba(255,255,255,.10); --ring-now:rgba(255,255,255,.06); --hero:#141B24; --hero-sub:#AEB9C6;
+  --late:#F87171; --ok:#4ADE80; --pill:#262B33; --pill-on:#DCE3EA; --pill-on-ink:#0F141B;
+  --shadow:0 12px 26px -16px rgba(0,0,0,.7);
+  --keep:#1E2A3B; --keep-ink:#B9CDE8; --take:#1B2E23; --take-ink:#9EDDB4; --no:#33201D; --no-ink:#F1B3A8;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--bg);color:var(--ink);font-family:var(--gothic);-webkit-text-size-adjust:100%}
+body{padding:20px 20px 48px;font-size:15px;line-height:1.55}
+.top{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.back{display:inline-flex;align-items:center;justify-content:center;min-width:44px;height:44px;padding:0 14px;border-radius:999px;background:var(--card);box-shadow:var(--shadow),inset 0 0 0 1px var(--ring);color:var(--strong);font-weight:700;font-size:14px;text-decoration:none}
+h1{font-size:22px;font-weight:800;color:var(--strong);line-height:1.3}
+.lead{font-size:13px;color:var(--mute);margin:6px 0 18px}
+h2{font-size:17px;font-weight:800;color:var(--strong);margin:26px 0 10px}
+.card{background:var(--card);border-radius:22px;padding:16px;box-shadow:var(--shadow),inset 0 0 0 1px var(--ring)}
+.card + .card{margin-top:12px}
+.num{font-weight:800;font-variant-numeric:tabular-nums;color:var(--strong);letter-spacing:-.01em}
+.u{font-size:13px;color:var(--mute);font-weight:700;margin-left:2px}
+.tag{display:inline-flex;align-items:center;height:26px;padding:0 11px;border-radius:999px;font-size:13px;font-weight:800;white-space:nowrap}
+.keep{background:var(--keep);color:var(--keep-ink)} .take{background:var(--take);color:var(--take-ink)} .no{background:var(--no);color:var(--no-ink)}
+.sw{display:inline-block;width:16px;height:16px;border-radius:5px;vertical-align:-3px;margin-right:6px;box-shadow:inset 0 0 0 1px rgba(17,24,39,.12)}
+.box{background:var(--box);border-radius:12px;padding:12px}
+.small{font-size:13px;color:var(--mute)}
+.lab{font-size:13px;color:var(--mute);font-weight:700}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:10px}.cap{font-size:13px;font-weight:800;color:var(--mute);margin:0 0 6px 4px}.dc{padding:14px 12px;border-radius:22px}.dc .v{font-size:13px;color:var(--strong);font-weight:700;margin-top:2px}.lined{border:1px solid #D6D6D6;border-radius:12px;padding:10px 10px;margin-top:10px}.dc .box{margin-top:10px;padding:10px}.dc .box .lab{color:var(--mute-on-box)}:root[data-night=on] .lined{border-color:#3A414C}.dl{display:flex;flex-direction:column;margin-top:12px;font-size:13px;color:var(--mute);font-weight:700}.late{color:var(--late);font-size:22px;font-variant-numeric:tabular-nums}.li{margin:8px 0 0 18px;font-size:14px;display:grid;gap:6px}.sun{filter:contrast(.55) brightness(1.18) saturate(.7)}</style><script>if(/night=1/.test(location.search))document.documentElement.setAttribute("data-night","on")</script></head><body><div class="top"><a class="back" href="index.html" aria-label="一覧へ戻る">‹ 一覧</a></div><h1>T2 カードの輪郭と小箱</h1><p class="lead">影は今のまま。日なたで影が消えても輪郭が残るよう、極薄の枠を1色にそろえ、小箱は面で分ける</p><h2>屋内（ふつうの見え方）</h2><div class="pair"><div><p class="cap">今</p><div class="card dc" style="box-shadow:var(--shadow),inset 0 0 0 1px var(--ring-now)"><div class="lab">集めた空港</div><div><span class="num" style="font-size:34px">16</span><span class="u">/ 86</span></div><div class="lined"><span class="lab">小目標</span><div class="v">関東 <span class="num">5</span><span class="u">/ 6</span>・あと1空港</div></div><div class="dl"><span>平均の遅れ（推定）</span><b class="late">▲ 12<span class="u" style="color:inherit">分</span></b></div></div></div><div><p class="cap">案</p><div class="card dc" style="box-shadow:var(--shadow),inset 0 0 0 1px var(--ring)"><div class="lab">集めた空港</div><div><span class="num" style="font-size:34px">16</span><span class="u">/ 86</span></div><div class="box"><span class="lab">小目標</span><div class="v">関東 <span class="num">5</span><span class="u">/ 6</span>・あと1空港</div></div><div class="dl"><span>平均の遅れ（推定）</span><b class="late">▲ 12<span class="u" style="color:inherit">分</span></b></div></div></div></div><h2>日なた（画面に光が当たったときの見え方の目安）</h2><p class="small">コントラストを 55%・明るさを 118% にして近づけた。今は影とカードの縁が地に溶け、案は 1px の枠と小箱の面が残る</p><div class="pair sun"><div><p class="cap">今</p><div class="card dc" style="box-shadow:var(--shadow),inset 0 0 0 1px var(--ring-now)"><div class="lab">集めた空港</div><div><span class="num" style="font-size:34px">16</span><span class="u">/ 86</span></div><div class="lined"><span class="lab">小目標</span><div class="v">関東 <span class="num">5</span><span class="u">/ 6</span>・あと1空港</div></div><div class="dl"><span>平均の遅れ（推定）</span><b class="late">▲ 12<span class="u" style="color:inherit">分</span></b></div></div></div><div><p class="cap">案</p><div class="card dc" style="box-shadow:var(--shadow),inset 0 0 0 1px var(--ring)"><div class="lab">集めた空港</div><div><span class="num" style="font-size:34px">16</span><span class="u">/ 86</span></div><div class="box"><span class="lab">小目標</span><div class="v">関東 <span class="num">5</span><span class="u">/ 6</span>・あと1空港</div></div><div class="dl"><span>平均の遅れ（推定）</span><b class="late">▲ 12<span class="u" style="color:inherit">分</span></b></div></div></div></div><div class="card" style="margin-top:16px"><b style="color:var(--strong)">変えるのは2つだけ</b><ul class="li"><li>カードの内側の 1px を <b>#DCE1E8</b> の1色に（今は #E3E6EB と 7% の黒が混ざる）。夜は今の白 10%</li><li>カードの中の小箱は線で囲まず <b>面 #F1F3F6・角丸 12</b>。上の灰の字は #5F6672（5.2:1）</li></ul></div></body></html>
