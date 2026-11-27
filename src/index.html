@@ -5692,6 +5692,24 @@ async function a3Shape(){
   if(A3_SHAPE_DATA) return A3_SHAPE_DATA;
   try{ const r = await fetch(A3_SHAPE); if(!r.ok) return null; const d = await r.json(); if(!d || !Array.isArray(d.land) || !Array.isArray(d.bld)) return null; A3_SHAPE_DATA = d; return d; }catch(e){ return null; }
 }
+// 登録記号を決めて開く（11/26 checkin/a3-reg・撮る人用の依頼①）。特別塗装機のくわしくの「3Dで見る」などから呼ぶ。
+//   ボタンなら data-ap3d-reg="JA01XJ" を付けるだけでよい。位置が届いたら、その機体を「追う」で開く。
+//   いま羽田の近く（30km）にいなければ全体のまま、下に一言と「ほかを追う」（10秒）。デモでは位置がないので全体のまま
+const a3RegKey = r => String(r || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
+async function openAp3dReg(reg){
+  const want = a3RegKey(reg), op = openAp3d();
+  if(A3 && want) A3.wantReg = want;
+  await op;
+}
+// 位置が届いたあと（a3Poll）に、待っている登録記号の機体を探す。見つけたら追う、なければ一言
+function a3WantReg(){
+  if(!A3 || !A3.wantReg || !A3.snaps.length) return;
+  const want = A3.wantReg, last = A3.snaps[A3.snaps.length - 1].planes;
+  const p = last.find(x => a3RegKey(x.reg) === want);
+  A3.wantReg = null;
+  if(p){ a3Select(p.id, true); A3.regAux = true; return; }   // 機体の形は次のこまで作られるので、上の札とピルはそのあと出し直す（a3Loop）
+  A3.lost = { no:want, at:Date.now(), miss:true }; a3Aux();
+}
 let A3_OFF_LITE = false;   // 「ふつうに」を押したら、この回は自動で軽くしない
 function closeAp3d(keep){
   if(!A3) return;
@@ -6193,6 +6211,7 @@ async function a3Poll(){
   while(A3.snaps.length > 6) A3.snaps.shift();
   A3.err = Date.now() - t > 5 * 60e3 ? "pos" : false; A3.lastAt = t;
   a3Status(); a3Sheet(); A3.dirty = true;
+  if(A3.wantReg && !A3.err) a3WantReg();
 }
 /*@A3_KIN@*/
 // 動きの推測（11/26 本人「3Dモデルをもっとリアルに、動きも推測を加えて」・checkin/3d-real）。three.js も画面も使わない計算だけ（tests/kin/a3kin.test.mjs で単体テスト）。
@@ -6385,7 +6404,8 @@ function a3Loop(){
   if(A3.view === "fly" && a3FlyStep((now - (A3.drawn || now)) / 1000)){ A3.dirty = true; a3FlyAlt(); }   // 飛ぶ：つまみを動かしているあいだは毎こま描く
   A3.drawn = now;
   const ps = a3Planes(now);
-  a3Sync(ps, now); a3Camera(ps); a3ShadowFollow(); if(A3.sky) A3.sky.position.copy(A3.cam.position);
+  a3Sync(ps, now); if(A3.regAux && A3.objs.get(A3.sel)){ A3.regAux = false; a3Pills(); a3Aux(); }
+  a3Camera(ps); a3ShadowFollow(); if(A3.sky) A3.sky.position.copy(A3.cam.position);
   if(A3.lmats){ const t = (now - A3.t0) / 1000; for(const m of A3.lmats) m.uniforms.uT.value = t; } a3Papi();   // 灯りの点滅と PAPI の色
   if(A3.post) a3PostRender(); else A3.r.render(A3.scene, A3.cam); a3Labels(ps);
 }
@@ -7294,7 +7314,7 @@ function a3Aux(){
   // 追う機体が見えなくなった：下に一言と「ほかを追う」（10秒）
   const lost = A3.lost && Date.now() - A3.lost.at < 10000;
   toast.hidden = !lost;
-  if(lost){ const t = `<p><b>${esc(A3.lost.no)}</b> の位置が届かなくなりました。今の所から自由に動かせます</p><button type="button" data-a3-other>ほかを追う</button>`; if(toast._h !== t){ toast.innerHTML = t; toast._h = t; }
+  if(lost){ const t = `<p><b>${esc(A3.lost.no)}</b> ${A3.lost.miss ? "はいま羽田の近くにいません。全体を出しています" : "の位置が届かなくなりました。今の所から自由に動かせます"}</p><button type="button" data-a3-other>ほかを追う</button>`; if(toast._h !== t){ toast.innerHTML = t; toast._h = t; }
     clearTimeout(A3.lostTm); A3.lostTm = setTimeout(() => { if(A3){ A3.lost = null; a3Aux(); A3.dirty = true; } }, 10000 - (Date.now() - A3.lost.at) + 50); }
   // はじめての1回だけの案内
   gd.hidden = !(A3.guide && md === "free");
@@ -7342,6 +7362,7 @@ function a3GuideOk(){ A3.guide = false; try{ localStorage.setItem(A3_GUIDE_KEY, 
   document.addEventListener("pointerup", up); document.addEventListener("pointercancel", up);
 })();
 document.addEventListener("click", e => {
+  const rg = e.target.closest("[data-ap3d-reg]"); if(rg){ e.preventDefault(); openAp3dReg(rg.dataset.ap3dReg); return; }
   if(e.target.closest("[data-ap3d]")){ e.preventDefault(); openAp3d(); return; }
   if(!e.target.closest("#dAp3d")) return;
   const t = s => e.target.closest(s);
