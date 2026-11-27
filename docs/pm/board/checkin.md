@@ -1,6 +1,14 @@
 # チェックイン担当の帳面
 
 ## いま持っている仕事
+- **11/27 定時の回（帳面の「次にやること」：③は PM の答え待ちのまま → ④ onboarding-b）**：checkin/onboarding-b・下書き **PR #287**（dc7eda92＋main 取り込み bdf2da54・報告 docs/pm/report-onboarding-b.md・写真 docs/pm/shots-onboarding-b/）。main（774c8d46）から作り、fe0f24e7（release-1127b）を取り込んだ。見張りを付けた。**ログインと個人情報にかかわるので、出す前に PM が本人に見せる**
+  - はじめて開いたら O1〜O5（dAuth の flow "onb"）。メモ・予定・答えは端末だけ（soramemo.ob）。構成は全部乗せのまま。3枚の案内はマイページの「使い方」からだけ
+  - ログインしていない人：半券は同じ形（homeState から "guest" の形をなくした）。#homeGate の中を「試せます」（#obTry・閉じると #gateNorm のログイン／デモ）に。次のフライト #obPlanCard
+  - b1（#dObReg）：checkinServer で user がなく範囲の中なら obRegOpen。登録・ログインを終えたら obPendRun（15分以内・位置を測り直して checkin）。やめる／途中で閉じると「印は押されていません」
+  - 登録：O2 で答えた人はアンケートを、O5 で許可した人は位置の説明を飛ばす（auSteps・auPersonaNext）。図鑑の zkTile に「メモ」。マイページ #memoEdit
+  - 変えた関数：maybeGuide・obDone・authRender・auTop・authAfterLoad・auVerify・auFinish・data-au の受け手・homeState・checkinServer・zkTile。足した：auPersonaNext・auSkipSurvey・auSkipLoc・auSteps・ob* 一式（報告に全部）
+  - テスト：t213 を足した。t114・t116・t183・t8 を合わせた。約40本と tests/ops 成功。tests/a11y/check.py は main でも止まる（別件）
+- 【11/27】PR #284（t166-fix）は main に入った（release-1127b・fe0f24e7）。見張りは外れた
 - 【11/27 12時ごろ】PR #284（t166-fix）は閉じられ、中身（518c8e36・d6024b5b）は release-1127b（#286・fe0f24e7）で main に入った。見張りは外れた。いま見張っている PR はない
 - **11/27 手動の回（「t166 の直しを進めて」）**：PR #284 に足した（d6024b5b・報告 report-t166-fix.md の「2回目」）。残っていた「札は重ならない」のまれな落ちを6本同時で捕まえた：画面の端の札の見積もりの高さ 32px が実際（32.09px）より小さく、上下に並べると接して重なっていた → **a3Labels** の tagBox を上下 18px（36px）に。t166 に札の高さの確かめを足した。t166 4本同時×2回すべて成功、t142・t160・t162・t163・t165・t181・t190・t211・kin 成功。6本同時はブラウザが落ちる（作業場の容量）ので4本まで
 - **11/27 定時の回（PM 1時50分の積み「t166 を checkin へ」）**：checkin/t166-fix・下書き **PR #284**（518c8e36・報告 docs/pm/report-t166-fix.md）。main（774c8d46・release-1127a）から。見張りを付けた。見た目は変えていないので、テストが通れば PM が自動で反映してよい
@@ -742,6 +750,8 @@
 - 確認コードは6けた。メールは Gmail、Supabase の送信上限は1時間100通
 
 ## 次にやること
+- 【11/27 onboarding-b】PR #287：PM が本人に写真を見せて OK を待つ。入る前に t213・t114・t116・t183・t8・t7・t24・t127・t128・t145・t195・t196・t210・tests/ops を流す。本人の答え（報告の1〜7：メモと予定を端末だけか・通知を聞く時機・置き場所・9空港・15分・「あとで設定する」）で直す。メモと予定をアカウントに残すなら、データ担当の表ができてから登録の最後に送る
+- 【次の回】③ checkin/stamp-card-b は PM の答え待ちのまま（下の依頼）。答えが来たら作る。来ていなければ、帳面の積みの残りを上から見る（新しい積みなし）。PM が 11/27 に決めた「不具合・意見を送る」の画面はデータ担当の data/feedback と画面案（design/gemini-1126 F1・F2）のあとで PM から来る見込み
 - 【11/27 t166-fix】PR #284：**main に入った（#286）**。元は「PM の自動の反映を待つ。入る前に t166・tests/kin/a3kin.test.mjs・t142・t159〜t165・t181・t190・t211 を流す。「札は重ならない」の落ちは d6024b5b で直した（端の札の高さの見積もり）
 - 【次の回】③ checkin/stamp-card-b は PM の答え待ちのまま（下の依頼）。答えがなければ ④ onboarding-b を始めてよいか PM の帳面を見る
 - 【11/27 1時50分】#276（home-stub）が main に入った（774c8d46・release-1127a）。#271（tabs-b）は #276 に含まれていたので閉じられた（中身は main に入っている）。PM が t122 を「いまの空港」に合わせた。見張りは両方外れた。③（印のカード）は PM の答え待ちのまま
@@ -890,6 +900,7 @@
 - tests/ops は手元では npm の playwright にブラウザがないので、全体に入っている playwright をつないで流した（すべて成功）
 
 ## ほかの担当への依頼
+- データ担当へ（11/27・#287）：(a) 行ったことがある空港（メモ）と次の予定を登録したらアカウントに残す表（移行と RLS）を作るかは本人の答え待ち。作るなら自分の分だけ読み書き (b) 新しいログインの流れ（#237 案B）の使われ方の名前（#270 の onboard に足す分）：onb＝open・o2〜o5・skip:<段>・loc_allow・loc_later・login・demo・done:<allow|later>:<答え>:<メモの数>[:plan|:myap]・memo_edit・memo_save／obreg＝open・send・later・login・stamp／ob_try＝hnd・close／ob_plan＝off／gate＝demo_try
 - 【11/26 データ担当へ（PR #281・PM から data.md に写してほしい）】airport_board の next_arr の各便に gate（flight_schedule.arr_gate）と via（経由。あれば）を足してほしい。今日の到着の便の数 arr_today（国内線／国際線の絞り込みに合わせる）も。任意：欠航の到着も next_arr に cancelled:true で入れてよい（画面は同じ便名・定刻を1つにまとめる）
 - 【11/26 PM へ（③の前に答えがほしい）】CLAUDE.md の 11/26 は「#236 案B：印のカードは滑走路の線入り・2回目から『通算○回目』・節目の飾りの縁なし」。ところが design/stamp-card の報告では、案B＝今のハンコ（stampSVG）のカード、滑走路の線（#243 のデータ）は案A の絵。どちらで作るか：(1) 画面案どおり案B（ハンコ・線なし）(2) 案B に滑走路の線を足す（置き場所の画面案が要る：デザイン担当へ）。あわせて「通算○回目」は B3 の「訪問 12回目」の形でよいか
 - 【11/26 PM へ・#276】空港にいるときの「本日チェックイン済み」は30分で半券に戻る（決まりは30分あけば押せる）。「本日」を外すか。訪問の回数は日の数で数えた
