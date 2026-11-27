@@ -75,8 +75,9 @@ async def main():
         check('JS のエラーがない（デモ）', not errs, errs[:3])
         await c.close()
         # ---- はじめの案内：3枚目は「はじめる」1つ・運用と修行の一文・明朝体なし ----
-        c, pg, errs = await newpage(b, 390, 844, onboarded=False)
-        check('はじめて開くと案内', await pg.is_visible('#dGuide'))
+        c, pg, errs = await newpage(b, 390, 844)   # 案B（11/26）：はじめて開いたときは O1〜O5（t213）。3枚の案内はマイページの「使い方」から
+        await pg.evaluate("obShow(0); $('dGuide').showModal()"); await pg.wait_for_timeout(200)
+        check('使い方から開くと案内', await pg.is_visible('#dGuide'))
         hnd = await pg.evaluate("getComputedStyle(document.querySelector('#dGuide .ob-step text')).fontFamily")
         check('案内の印の「HND」はゴシック', 'Mincho' not in hnd and 'serif' not in hnd.replace('sans-serif', ''), hnd)
         check('1枚目には「とばす」がある', await pg.is_visible('#obSkip'))
