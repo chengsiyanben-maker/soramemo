@@ -15,7 +15,7 @@
           return Promise.resolve({error:null}); }
         db[table] = db[table].filter(r => r.user_id !== row.user_id); db[table].push(JSON.parse(JSON.stringify(row))); window.__upserts = (window.__upserts||0) + 1; return Promise.resolve({error:null}); },
       insert(row){ if(window.__mfNoCol && table === 'manual_flights' && (Array.isArray(row) ? row : [row]).some(r => 'flight_no' in r)) return Promise.resolve({error:{message:'column "flight_no" of relation "manual_flights" does not exist'}});
-        if(window.__noCidCol && (Array.isArray(row) ? row : [row]).some(r => 'client_id' in r)) return Promise.resolve({error:{code:'PGRST204', message:'no client_id'}}); (Array.isArray(row) ? row : [row]).forEach(r => db[table].push(Object.assign({id: db[table].length+1}, r))); window.__inserts = (window.__inserts||0) + 1; return Promise.resolve({error:null}); },
+        if(window.__noCidCol && (Array.isArray(row) ? row : [row]).some(r => 'client_id' in r)) return Promise.resolve({error:{code:'PGRST204', message:'no client_id'}}); if(table === 'feedback' && window.__fbErr) return Promise.resolve({error:window.__fbErr}); /* 不具合・意見（11/27） */ db[table] = db[table] || []; (Array.isArray(row) ? row : [row]).forEach(r => db[table].push(Object.assign({id: db[table].length+1}, r))); window.__inserts = (window.__inserts||0) + 1; return Promise.resolve({error:null}); },
       delete(){ return { eq(k, v){ db[table] = db[table].filter(r => r[k] !== v); return Promise.resolve({error:null}); } }; } };
     return api; }
   window.supabase = { createClient(){ return {
