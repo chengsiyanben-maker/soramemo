@@ -1,5 +1,5 @@
 import { assertEquals } from "jsr:@std/assert@1";
-import { alertText, parseTargets, resultText, smtpConfig } from "../functions/_shared/ops_alert.ts";
+import { alertText, feedbackLine, parseTargets, resultText, smtpConfig } from "../functions/_shared/ops_alert.ts";
 
 Deno.test("parseTargets：メールと https の Webhook だけ・同じものは1つ・最大5つ", () => {
   const t = parseTargets(" ops@example.com, https://hooks.example.com/abc \n bad, http://x.example.com, OPS@example.com, javascript:alert(1)");
@@ -44,4 +44,26 @@ Deno.test("resultText：宛先は入らない", () => {
   const s = resultText({ mail: 1, hook: 0, failed: 1, skipped: ["no_smtp"] });
   assertEquals(s, "mail 1 / hook 0 / failed 1 / skip no_smtp");
   assertEquals(s.includes("@"), false);
+});
+
+Deno.test("alertText：止まった処理がなく報告だけなら、件名は報告の数・本文に種類ごとの数（本文は載せない）", () => {
+  const m = alertText([], new Date("2026-11-27T11:41:00Z"), 3, { request: 1, bug: 2 });
+  assertEquals(m.subject, "そらメモ：新しい不具合・意見の報告（3件）");
+  assertEquals(m.text.startsWith("11/27 20:41 時点で、止まっている処理はありません。"), true);
+  assertEquals(m.text.includes("新しい不具合・意見の報告：3件（不具合 2・ほしい機能 1）"), true);
+  assertEquals(m.text.includes("admin_feedback_list"), true);
+});
+
+Deno.test("alertText：止まった処理があるときは今までの件名のまま、報告の数を足す。報告がなければ足さない", () => {
+  const it = [{ key: "wx", label: "気象", last: null, limit_min: 90 }];
+  const a = alertText(it, new Date(), 1, { airport_data: 1 });
+  assertEquals(a.subject, "そらメモ：夜の処理・取り込みが止まっています（1件）");
+  assertEquals(a.text.includes("新しい不具合・意見の報告：1件（空港データの直し 1）"), true);
+  const b = alertText(it, new Date());
+  assertEquals(b.text.includes("報告"), false);
+});
+
+Deno.test("feedbackLine：数が0の種類は出さない・種類がなければ数だけ", () => {
+  assertEquals(feedbackLine(2, { bug: 2, request: 0 }), "新しい不具合・意見の報告：2件（不具合 2）");
+  assertEquals(feedbackLine(1, null), "新しい不具合・意見の報告：1件");
 });

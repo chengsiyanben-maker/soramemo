@@ -474,3 +474,5 @@ verify_jwt = false
 verify_jwt = false
 [functions.ops-alert]
 verify_jwt = false
+[functions.feedback-submit]
+verify_jwt = false

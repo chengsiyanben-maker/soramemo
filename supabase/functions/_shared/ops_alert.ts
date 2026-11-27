@@ -35,8 +35,31 @@ const jst = (iso: string | null) => {
   return `${p(d.getUTCMonth() + 1)}/${p(d.getUTCDate())} ${p(d.getUTCHours())}:${p(d.getUTCMinutes())}`;
 };
 
-// 件名と本文（日本語）。項目の名前と最後の時刻だけ。利用者の情報は入らない
-export function alertText(items: HealthItem[], now: Date): { subject: string; text: string } {
+// 報告の種類の名前（夜の知らせに数だけ載せる。本文は載せない）
+export const FEEDBACK_KIND: Record<string, string> = { bug: "不具合", request: "ほしい機能", airport_data: "空港データの直し" };
+
+// 新しい報告の行（種類ごとの数だけ。本文・利用者の情報は入らない）
+export function feedbackLine(n: number, kinds: Record<string, number> | null | undefined): string {
+  const parts = Object.entries(kinds ?? {}).filter(([, v]) => Number(v) > 0)
+    .sort(([a], [b]) => Object.keys(FEEDBACK_KIND).indexOf(a) - Object.keys(FEEDBACK_KIND).indexOf(b))
+    .map(([k, v]) => `${FEEDBACK_KIND[k] ?? k} ${v}`);
+  return `新しい不具合・意見の報告：${n}件${parts.length ? `（${parts.join("・")}）` : ""}`;
+}
+
+// 件名と本文（日本語）。項目の名前と最後の時刻、新しい報告の数だけ。利用者の情報は入らない
+export function alertText(items: HealthItem[], now: Date, fbNew = 0, fbKinds: Record<string, number> | null = null): { subject: string; text: string } {
+  const fb = fbNew > 0 ? ["", feedbackLine(fbNew, fbKinds), "中身は運営コンソールか、SQL Editor の select public.admin_feedback_list(); で見てください。"] : [];
+  if (!items.length) {
+    return {
+      subject: `そらメモ：新しい不具合・意見の報告（${fbNew}件）`,
+      text: [
+        `${jst(now.toISOString())} 時点で、止まっている処理はありません。`,
+        ...fb,
+        "",
+        "この知らせは1日1回までです。",
+      ].join("\n"),
+    };
+  }
   const list = items.slice(0, 20);
   const lines = list.map((x) => {
     const lim = x.limit_min != null ? `・上限 ${x.limit_min >= 120 ? `${Math.round(x.limit_min / 60)}時間` : `${x.limit_min}分`}` : "";
@@ -51,6 +74,8 @@ export function alertText(items: HealthItem[], now: Date): { subject: string; te
       ...lines,
       "",
       "くわしくは Supabase の SQL Editor で select public.admin_data_health(); か、cron.job_run_details を見てください。",
+      ...fb,
+      "",
       "この知らせは1日1回までです（届かなかったときは1時間ごとに試し直します）。",
     ].join("\n"),
   };
