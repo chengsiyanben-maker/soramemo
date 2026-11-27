@@ -6,6 +6,7 @@
   - .github/workflows/pm-query.yml（workflow_dispatch・入力 query と params・10分）＋ tools/pm_query.mjs（select/with の1文だけ・; の2文目・バックスラッシュ・書く言葉を断る → begin read only → set local 60s → copy (select * from (…) limit 200001) to stdout csv → rollback。20万行で切る。ログは行数と秒だけ）。例 tools/pm-queries/promo_day.sql・reg_week.sql（変数 :'airline' など）
   - **リポジトリは公開**（search で visibility public を確かめた）。公開の artifact は誰でも落とせ、ODPT の CSV を配らない決まりに触れるので、公開のあいだは秘密の設定 PM_RESULT_KEY で gpg 暗号にして置き、なければ流さない形にした（本人の決めごと）
   - 確かめ：t151 30項目 UTC・日本時間 NG 0。手元に本物の Postgres 16 を立てて全移行＋本物の psql で最後まで流した。権限を見る既存テスト34本 UTC で NG 0。migrations check・check_secrets OK
+  - 11/27 夜（PM の手動の回「data/pm-reader を進めて」）：PR #291 は前の回で仕上がっていた。コメント・レビューなし、main は 14646cad のまま（rebase は要らない）。残りは本人の決めごとと PM の反映だけ
   - 本人に決めてほしいこと：① 公開のまま合言葉で暗号にするか、リポジトリを非公開にするか ② 30表でよいか ③ 反映は自動の反映のあと知らせる形でよいか。設定（alter role … login password・PM_READER_URL・PM_RESULT_KEY）は反映のあと本人
 - **【11/27 11時40分 PM から・本人の指示】不具合・意見の報告を受ける仕組み：済み**：ブランチ data/feedback（main 774c8d4 から）→ **PR #285（下書き）**。報告 docs/pm/report-feedback.md。**移行211・テスト t150・Edge Function feedback-submit**
   - 表 public.feedback（kind bug／request／airport_data・body 2000字まで・app_version・screen・device・last_error（種類の形だけ）・airport・user_id・session・status open／checking／fixed／wontfix・admin_note・updated_at）。位置・メール・IP の列なし
