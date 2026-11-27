@@ -25,9 +25,9 @@ async def main():
         b = await p.chromium.launch()
         # 1. 新しい人：使い方の案内 → ログイン → 新規登録 → メール → コード → 表示名 → アンケート → 同意 → 位置情報 → ホーム
         c, pg, errs = await page(b, f"window.__profiles = {NEW}; window.__viewPrefs = [];", onboarded=False, shots=True)
-        check('はじめて開くと使い方の案内', await pg.is_visible('#dGuide'))
-        for _ in range(3): await pg.click('#obNext'); await pg.wait_for_timeout(120)
-        check('案内のあとにログインの画面', await step(pg) == 'login'); await shot(pg, '01-login')
+        check('はじめて開くと、はじめての流れ（案B・ログインの画面ではない）', await pg.evaluate('$("dAuth").open && AU.flow === "onb" && AU.step === "o1"'))
+        await pg.click('[data-ob=login]'); await pg.wait_for_timeout(120)   # 「もう使っている人は ログイン」から今のログインの画面（新しい人の登録は t213 の b1 から・ここではこれまでの登録の流れを確かめる）
+        check('O1 の「ログイン」でログインの画面', await step(pg) == 'login'); await shot(pg, '01-login')
         check('ログインの画面に「デモで試す」', await pg.is_visible('#dAuth [data-au=demo]'))
         await pg.click('#dAuth [data-au=to-signup]'); await pg.wait_for_timeout(100)
         check('新規登録 → メール', await step(pg) == 'email')
@@ -103,8 +103,8 @@ async def main():
         check('右上の「ログイン」でログインの画面', await step(pg) == 'login')
         await pg.fill('#auEmail', 'new2@example.jp'); await pg.click('#dAuth [data-au=login-send]'); await pg.wait_for_timeout(300)
         check('右上から開いたログインでも新規登録へ案内', await step(pg) == 'nouser' and 'new2@example.jp' in await pg.inner_text('#auStep'))
-        await pg.evaluate('authClose()'); await pg.click('#gateLogin'); await pg.wait_for_timeout(200)
-        check('シートの「ログイン・登録」でログインの画面', await step(pg) == 'login')
+        await pg.evaluate('authClose()'); await pg.click('#obTryX'); await pg.wait_for_timeout(100); await pg.click('#gateLogin'); await pg.wait_for_timeout(200)
+        check('シートの「ログイン」（「試せます」を閉じたあと）でログインの画面', await step(pg) == 'login')
         await pg.click('#dAuth [data-au=to-signup]'); await pg.wait_for_timeout(100)
         check('ログインの画面の「はじめての方は新規登録」', await step(pg) == 'email')
         check('未登録：エラーなし', not errs, errs); await c.close()

@@ -8,11 +8,12 @@ async def run(scheme):
         c=await b.new_context(viewport={'width':400,'height':860}, color_scheme=scheme, device_scale_factor=2)
         pg=await c.new_page(); errs=[]; pg.on('pageerror', lambda e: errs.append(str(e))); pg.on('console', lambda m: m.type=='error' and (None if ('woff2' in m.text or m.text.startswith('Failed to load resource')) else errs.append(m.text)))
         await pg.goto('file://'+os.path.join(WEB,'index.html')); await pg.wait_for_load_state('load'); await pg.wait_for_function('document.readyState === "complete" && typeof render === "function"'); await pg.wait_for_timeout(1200)
-        print(scheme,'guide open:', await pg.is_visible('#dGuide'))
+        print(scheme,'onboarding open:', await pg.evaluate('$("dAuth").open && AU.flow === "onb"'))   # 案B（11/26）：はじめての流れ（O1〜O5）
         await pg.screenshot(path=os.path.join(WORK,f'u_guide_{scheme}.png'))
-        for _ in range(3): await pg.click('#obNext'); await pg.wait_for_timeout(150)
-        print('guide closed:', not await pg.is_visible('#dGuide'))
-        if await pg.is_visible('#dAuth'): await pg.click('#dAuth [data-au=close]')   # サーバー版で未ログインなら、案内のあとにログインの画面が出る（「あとで」で閉じる）
+        await pg.click('[data-ob=start]')
+        for _ in range(3): await pg.click('[data-ob=skip]'); await pg.wait_for_timeout(150)
+        await pg.click('[data-ob=later]'); await pg.wait_for_timeout(300)
+        print('onboarding closed:', not await pg.is_visible('#dAuth'))
         await pg.screenshot(path=os.path.join(WORK,f'u_home_{scheme}.png'))
         await pg.evaluate('openMyPage("adv")'); await pg.click('#toggleDemo')
         cts = await pg.evaluate("'a:'+A.find(a=>a.iata=='CTS').id"); oka = await pg.evaluate("'a:'+A.find(a=>a.iata=='ISG').id")

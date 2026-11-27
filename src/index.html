@@ -4395,6 +4395,135 @@ html:has(dialog[open]),html:has(dialog[open]) body{overscroll-behavior:none}
 .dlg.cxsc>.cxbar::before{opacity:1}
 /* 特別塗装機の「この3時間」：ボタンの行（登録記号が分かる機体）が、外の .splist li button（display:block）に負けて時刻と名前が縦に落ちていた（改善担当の 3） */
 ul.spin li>button{display:flex;flex-direction:row;align-items:center;gap:10px;min-height:52px;padding:4px 0;width:100%;box-sizing:border-box;text-align:left}
+/* はじめての流れとログイン案B（11/26 本人「B」・design/onboarding の O1〜O5・b1・O6）。ログインの画面（.auth）の部品を使い、足りない所だけ */
+.auth .obill{margin:-20px -24px 0;border-radius:0 0 28px 28px;overflow:hidden;box-shadow:var(--a-shadow)}
+.auth .obill svg{display:block}
+.auth .obhero{margin-top:28px}
+.auth .oblist{list-style:none;margin:20px 0 0;padding:0;display:grid;gap:10px}
+.auth .oblist li{display:flex;align-items:center;gap:12px;font-size:15px;font-weight:800;color:var(--a-strong)}
+.auth .oblist svg,.auth .obopt .ic svg,.auth .obperm svg,.auth .obchip svg{width:20px;height:20px;flex:none;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.auth .obalt{margin:10px 0 0;text-align:center;font-size:13px;color:var(--a-sub)}
+.auth .obalt .linkish{min-height:44px;padding:0 6px;font-weight:800;color:var(--a-strong);text-decoration:none}
+.auth .obsteps .obn{margin-left:8px;font-size:13px;font-weight:700;color:var(--a-sub);font-variant-numeric:tabular-nums}
+.auth .obh{margin-top:24px}
+.auth .obopts{display:grid;gap:10px;margin-top:24px}
+.auth .obopt{display:flex;align-items:center;gap:14px;width:100%;text-align:left;border:0;border-radius:22px;background:var(--a-card);box-shadow:var(--a-shadow);padding:14px 16px;font-family:inherit;font-style:normal;cursor:pointer;color:var(--a-strong)}
+.auth .obopt .ic{width:44px;height:44px;flex:none;border-radius:14px;background:var(--a-track);display:grid;place-items:center}
+.auth .obopt .ic svg{width:18px;height:18px}
+.auth .obopt b{display:block;font-size:16px}
+.auth .obopt small{display:block;font-size:13px;color:var(--a-sub);line-height:1.5}
+.auth .obopt[aria-checked="true"]{box-shadow:inset 0 0 0 2px var(--a-strong)}
+.auth .obcnt{margin-top:20px;padding:16px 18px}
+.auth .obcnt small{display:block;font-size:13px;color:var(--a-sub)}
+.auth .obcnt p{margin:2px 0;display:flex;align-items:baseline;gap:8px}
+.auth .obcnt p b{font-size:44px;line-height:1.1;font-weight:900;color:var(--a-strong);font-variant-numeric:tabular-nums}
+.auth .obcnt p span{font-size:14px;font-weight:700;color:var(--a-sub)}
+.auth .obcnt p.z{font-size:19px;font-weight:900;color:var(--a-strong)}
+.auth .obnote{margin-top:12px;padding:14px 16px;display:flex;gap:10px;font-size:13px;line-height:1.6;color:var(--a-ink)}
+.auth .obnote i{flex:none;width:10px;height:10px;margin-top:5px;border-radius:999px;background:#E8A3B4}
+.auth .obnote b{color:var(--a-strong)}
+.auth .obsec{margin:22px 0 10px;font-size:15px;font-weight:800;color:var(--a-strong)}
+.auth .obchips{display:flex;flex-wrap:wrap;gap:8px}
+.auth .obchip{display:inline-flex;align-items:center;gap:4px;min-height:44px;padding:0 16px;border:0;border-radius:999px;background:var(--a-card);box-shadow:var(--a-shadow);font-family:inherit;font-style:normal;font-size:14px;font-weight:800;color:var(--a-strong);cursor:pointer}
+.auth .obchip svg{width:15px;height:15px}
+.auth .obchip.on{background:#F7DCE3;color:#8A2140;box-shadow:inset 0 0 0 1.5px #E8A3B4}
+.auth .obrgs{display:grid;gap:8px}
+.auth .obrg{background:var(--a-card);border-radius:20px;box-shadow:var(--a-shadow)}
+.auth .obrgh{display:flex;align-items:center;gap:10px;width:100%;min-height:52px;padding:0 16px;border:0;background:none;font-family:inherit;font-style:normal;text-align:left;cursor:pointer;color:var(--a-strong)}
+.auth .obrgh>b{flex:1;font-size:15px}
+.auth .obrgh span{font-size:13px;color:var(--a-sub)}
+.auth .obrgh span b{color:#8A2140}
+.auth .obrgh i{font-style:normal;font-size:18px;color:var(--a-sub);transition:transform .2s}
+.auth .obrg.open .obrgh i{transform:rotate(90deg)}
+.auth .obrg .obchips{padding:0 12px 14px}
+.auth .obrg .obchip{box-shadow:inset 0 0 0 1px rgba(17,24,39,.1)}
+.auth .obrg .obchip.on{box-shadow:inset 0 0 0 1.5px #E8A3B4}
+.auth .obplanf{margin-top:20px;padding:16px}
+.auth .obplanf .t{display:block;font-size:13px;font-weight:700;color:var(--a-sub);margin-bottom:8px}
+.auth .obpr{display:flex;align-items:center;gap:8px}
+.auth .obpr>i{font-style:normal;color:var(--a-sub);font-weight:800}
+.auth .obpr label,.auth .obday,.auth .obsel{flex:1;min-width:0;display:block;background:var(--a-track);border-radius:16px;padding:6px 12px 0}
+.auth .obpr span,.auth .obday span,.auth .obsel span{display:block;font-size:12px;font-weight:700;color:var(--a-sub)}
+.auth .obpr select,.auth .obday input,.auth .obsel select{width:100%;border:0;background:transparent;font-family:inherit;font-style:normal;font-size:16px;font-weight:800;color:var(--a-strong);padding:0;min-height:44px;box-sizing:border-box}
+.auth[data-step^="o"] .top .back{width:44px;height:44px}
+/* はじめての流れ：「次へ」は画面の下に固定（375×667 でも送らずに押せる。同意の画面と同じ形） */
+.auth[data-step="o2"] #auFoot,.auth[data-step="o3"] #auFoot,.auth[data-step="o4"] #auFoot,.auth[data-step="o5"] #auFoot{position:sticky;bottom:0;z-index:1;margin:0 -24px calc(-32px - env(safe-area-inset-bottom,0px));padding:22px 24px calc(20px + env(safe-area-inset-bottom,0px));background:linear-gradient(rgba(244,245,247,0),var(--a-bg) 22px)}
+.auth .obday{margin-top:8px;position:relative}
+.auth .obday em{position:absolute;right:14px;bottom:12px;font-style:normal;font-size:13px;font-weight:700;color:var(--a-sub);pointer-events:none}
+.auth .obor{margin:18px 0 10px;text-align:center;font-size:13px;font-weight:700;color:var(--a-sub)}
+.auth .obmy{padding:16px}
+.auth .obmy>b{display:block;font-size:15px;color:var(--a-strong)}
+.auth .obmy>small{display:block;font-size:13px;color:var(--a-sub);margin-bottom:10px}
+.auth .obmy .obchip{box-shadow:inset 0 0 0 1px rgba(17,24,39,.1)}
+.auth .obmy .obchip.on{background:var(--a-strong);color:#fff;box-shadow:none}
+.auth .obsel{margin-top:10px}
+.auth .obtiles{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:20px}
+.auth .obtiles .card,.auth .obgoal{padding:14px 16px}
+.auth .obtiles small,.auth .obgoal small{display:block;font-size:13px;color:var(--a-sub)}
+.auth .obtiles p{margin:2px 0 0;display:flex;align-items:baseline;gap:6px;font-size:14px;font-weight:700;color:var(--a-sub)}
+.auth .obtiles p b{font-size:34px;line-height:1.15;font-weight:900;color:var(--a-strong);font-variant-numeric:tabular-nums}
+.auth .obtiles p b.nm{font-size:22px}
+.auth .obgoal{margin-top:10px}
+.auth .obgoal b{display:block;font-size:15px;color:var(--a-strong);line-height:1.5}
+.auth .obgoal span{display:block;font-size:13px;color:var(--a-sub)}
+.auth .obperm{margin-top:10px;padding:14px 16px;display:grid;gap:12px}
+.auth .obperm>div{display:flex;gap:12px;align-items:flex-start}
+.auth .obperm svg{width:40px;height:40px;padding:10px;box-sizing:border-box;border-radius:12px;background:var(--a-track)}
+.auth .obperm p{margin:0;font-size:13px;line-height:1.6;color:var(--a-ink)}
+.auth .obperm p b{display:block;font-size:15px;color:var(--a-strong)}
+.auth .obperm p b small{font-size:12px;font-weight:700;color:var(--a-sub)}
+@media (max-height:700px){.auth .obill svg{height:150px}.auth .obhero{margin-top:18px}.auth .obhero h1{font-size:26px}.auth .oblist{margin-top:14px;gap:6px}}
+/* ホーム：ログインしていない人の「試せます」（O6）と次のフライト */
+#v-home .hgate:has(.obtry:not([hidden])){padding:0;background:none;box-shadow:none}
+#v-home .hgate .gnorm{display:block}
+#v-home .hgate .gnorm[hidden]{display:none}
+#v-home .hgate .obtry{position:relative;display:block;padding:14px 44px 14px 16px;border-radius:22px;background:var(--h3-hero);color:#fff;box-shadow:var(--h3-shadow)}
+#v-home .hgate .obtry[hidden]{display:none}
+#v-home .hgate .obtry b{display:block;font-size:16px;line-height:1.4}
+#v-home .hgate .obtry small{display:block;margin-top:4px;font-size:13px;line-height:1.55;color:rgba(255,255,255,.78)}
+#v-home .hgate .obtry .trow{display:flex;gap:8px;margin-top:10px}
+#v-home .hgate .obtry .tgo{flex:none;display:inline-flex;align-items:center;gap:6px;width:auto;padding:0 16px;height:44px;background:#fff;color:var(--h3-hero)}
+#v-home .hgate .obtry .tdm{flex:none;width:auto;padding:0 14px;height:44px;background:rgba(255,255,255,.12);color:#fff;font-weight:700}
+@media (max-height:700px){#v-home .hgate .obtry small{display:none}}
+#v-home .hgate .obtry .x{position:absolute;top:6px;right:6px;flex:none;width:44px;height:44px;padding:0;background:transparent;color:rgba(255,255,255,.8);font-size:20px;font-weight:400}
+#v-home .obplan{position:relative;display:flex;align-items:center;gap:12px;margin-top:10px;padding:14px 48px 14px 16px;border-radius:22px;background:var(--h3-card);box-shadow:var(--h3-shadow);font-family:var(--gothic)}
+#v-home .obplan[hidden]{display:none}
+#v-home .obplan .l small{display:block;font-size:13px;color:var(--h3-sub)}
+#v-home .obplan .l p{margin:0;display:flex;align-items:baseline;gap:4px;font-size:14px;font-weight:700;color:var(--h3-sub)}
+#v-home .obplan .l p b{font-size:32px;line-height:1.15;font-weight:900;color:var(--h3-strong);font-variant-numeric:tabular-nums}
+#v-home .obplan .l p b.td{font-size:24px}
+#v-home .obplan .r{margin-left:auto;text-align:right}
+#v-home .obplan .r b{display:block;font-size:17px;font-weight:900;color:var(--h3-strong);letter-spacing:.02em}
+#v-home .obplan .r span{font-size:13px;color:var(--h3-sub)}
+#v-home .obplan .x{position:absolute;top:4px;right:2px;width:44px;height:44px;border:0;background:none;color:var(--h3-mute);font-size:18px;cursor:pointer}
+/* b1：はじめての印のときの登録（下から出るシート） */
+dialog.obreg .dlg{padding:10px 20px calc(20px + env(safe-area-inset-bottom,0px));font-family:var(--gothic)}
+dialog.obreg .sph{display:flex;justify-content:center;padding:2px 0 10px}
+dialog.obreg .sph .grab{width:40px;height:5px;border-radius:999px;background:#D7DCE3}
+dialog.obreg .obfree{display:inline-block;padding:3px 10px;border-radius:999px;background:#E7F6EC;color:#166534;font-size:13px;font-weight:800}
+dialog.obreg h3{margin:10px 0 0;font-size:21px;font-weight:900;line-height:1.45;color:#1F2937}
+dialog.obreg p{margin:10px 0 0;font-size:14px;line-height:1.7;color:#374151}
+dialog.obreg p b{color:#1F2937}
+dialog.obreg p.sm{font-size:13px;color:#5F6878}
+dialog.obreg .lb{display:block;margin:16px 0 6px 4px;font-size:13px;font-weight:700;color:#5F6878}
+dialog.obreg .in{width:100%;box-sizing:border-box;border:0;border-radius:16px;background:#EEF1F5;padding:15px 16px;font:500 17px var(--gothic);color:#1F2937;outline:none}
+dialog.obreg .in:focus{box-shadow:0 0 0 2px #1C4FA0}
+dialog.obreg .amsg{margin:8px 4px 0;font-size:13px;color:#C8102E}
+dialog.obreg .amsg:empty{display:none}
+dialog.obreg .cta{display:block;width:100%;margin-top:14px;border:0;border-radius:999px;background:#1F2937;color:#fff;font:800 16px var(--gothic);padding:16px;cursor:pointer}
+dialog.obreg .lk,dialog.obreg .ghost{display:block;width:100%;min-height:44px;margin-top:6px;border:0;background:none;font:700 14px var(--gothic);color:#5F6878;cursor:pointer}
+dialog.obreg .lk{color:#1F2937;text-decoration:underline;text-underline-offset:3px}
+/* 図鑑：行ったことがある（メモ）は印のない枠を淡いピンに */
+#v-book .zk-ap.no.memo{background:#FBEFF2;box-shadow:inset 0 0 0 1px #F0C9D3}
+#v-book .zk-ap.no.memo .ft{color:#8A2140}
+#v-book .zk-memo{display:inline-block;width:8px;height:8px;margin-right:4px;border-radius:999px;background:#E8A3B4;vertical-align:1px}
+:root[data-night="on"] #v-book .zk-ap.no.memo{background:rgba(232,163,180,.10);box-shadow:inset 0 0 0 1px rgba(232,163,180,.35)}
+:root[data-night="on"] #v-book .zk-ap.no.memo .ft{color:#F0C9D3}
+:root[data-night="on"] dialog.obreg .dlg{background:#1B1F26}
+:root[data-night="on"] dialog.obreg h3,:root[data-night="on"] dialog.obreg p b{color:#F3F4F6}
+:root[data-night="on"] dialog.obreg p,:root[data-night="on"] dialog.obreg .lb,:root[data-night="on"] dialog.obreg .lk,:root[data-night="on"] dialog.obreg .ghost{color:#D1D5DB}
+:root[data-night="on"] dialog.obreg .in{background:#262B33;color:#F3F4F6}
+:root[data-night="on"] dialog.obreg .cta{background:#DCE3EA;color:#0F141B}
 </style>
 </head>
 <body>
@@ -4454,9 +4583,12 @@ ul.spin li>button{display:flex;flex-direction:row;align-items:center;gap:10px;mi
     </div>
     <div class="allin-card" id="allinCard" hidden role="status"></div>   <!-- はじめの1枚：半券と今日の数字の下（高さ667でも数字が見えるように） -->
     <div class="hgate" id="homeGate" hidden>
-      <p>空港で印を集めるには、ログインが要ります。</p>
-      <div><button type="button" class="go" id="gateLogin">ログイン・登録</button><button type="button" id="gateDemo">デモで試す</button></div>
+      <div class="obtry" id="obTry"><button class="x" type="button" id="obTryX" aria-label="閉じる">×</button><b>いま空港にいなくても試せます</b><small>羽田の今日の便や、いまいる特別塗装機をのぞいてみませんか</small>
+        <div class="trow"><button type="button" class="tgo" id="obTryGo">羽田のいまを見てみる <i aria-hidden="true">›</i></button><button type="button" class="tdm" data-gate-demo>デモで試す</button></div></div>
+      <div class="gnorm" id="gateNorm"><p>登録しなくても使えます。印を残すときにメールで登録します。</p>
+      <div><button type="button" class="go" id="gateLogin">ログイン</button><button type="button" id="gateDemo">デモで試す</button></div></div>
     </div>
+    <div class="obplan" id="obPlanCard" hidden></div>   <!-- はじめての流れで入れた次のフライト（O6） -->
     <p class="msg" id="msg" role="status" aria-live="polite"></p>
     <p class="hint ckhint">空港の判定範囲（1〜2km）の中で、半券を右へ引いて切ると印が押されます。押すだけでも、確かめてから切れます。</p>
     <div class="demo-pick">
@@ -4746,6 +4878,7 @@ ul.spin li>button{display:flex;flex-direction:row;align-items:center;gap:10px;mi
 <dialog id="dAirport" aria-label="空港"><div class="dlg" id="dAirportBody"></div></dialog>
 <dialog id="dAp3d" class="a3dlg" aria-label="羽田の3D"></dialog>
 <dialog id="dAuth" class="auth" aria-label="ログイン・新規登録"><main class="phone"><div id="auStep"></div><div id="auCap" class="captcha"></div><div id="auFoot"></div></main></dialog>
+<dialog id="dObReg" class="psheet obreg" aria-labelledby="obRegT"><div class="dlg" id="obRegBody"></div></dialog>   <!-- 案B：はじめての印のときに登録（design/onboarding b1） -->
 <dialog id="dGuide" aria-label="使い方"><div class="dlg">
   <div class="ob-step on">
     <svg viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="50" fill="none" stroke="var(--shu)" stroke-width="4"/><circle cx="60" cy="60" r="43" fill="none" stroke="var(--shu)" stroke-width="1.2"/><text x="60" y="72" text-anchor="middle" style="font-family:var(--gothic)" font-weight="800" font-size="32" fill="var(--shu)">HND</text></svg>
@@ -4904,6 +5037,7 @@ ul.spin li>button{display:flex;flex-direction:row;align-items:center;gap:10px;mi
     <div class="set-row" id="anaRow"><div>使われ方とエラーを送る<small>アプリの改善のため、開いた画面や使った機能、エラーを送ります。利用者のIDや位置は含みません。</small></div><button class="btn2" id="anaToggle" aria-pressed="true">送る（オン）</button></div>
     <div class="set-row" id="dataRow"><div>データの使い方<small>統計に使うか、案内や調査に協力するかを選べます。</small></div><button class="btn2" id="openData">選ぶ</button></div>
     <div class="set-row"><div>使い方<small>はじめに出る案内をもう一度見ます。</small></div><button class="btn2" id="openGuide">見る</button></div>
+    <div class="set-row"><div>行ったことがある空港（メモ）<small>印とは別に、図鑑に淡く出します。この端末に残ります。</small></div><button class="btn2" id="memoEdit">直す</button></div>
   </section>
   <button class="btn2 close" id="closeSettings">閉じる</button>
 </div></dialog>
@@ -8017,8 +8151,13 @@ function ckJudge(p, n, now){
   return null;
 }
 async function checkinServer(p, n){
-  if(!user) return say("ログインしてください。", true);
   n = n || nearest(p);
+  if(!user){   // 案B：ログインしていない人。範囲の中なら登録の画面（b1）。登録しないと印は押されない
+    const why = ckJudge(p, n, Date.now());
+    if(why === "low_accuracy"){ CK_NEAR(); if(ckCoarse(p) && ckIOS()) ckLocCard("precise", p); return say(CK_TXT.drift + CK_TXT.driftHint, true); }
+    if(why === "out_of_range"){ CK_NEAR(); return say(ckOutText(p), true); }
+    CK_NEAR(); obRegOpen(n); return say("印を残すには、メールで登録します（登録しないと印は押されません）。");
+  }
   p = {...p, cid:ckCid()};   // 押すたびに新しい ID（使い回した位置でも別の印として送る。data/idem）
   const why = ckJudge(p, n, Date.now());
   if(why === "already") return say(CK_TXT.already);
@@ -8195,7 +8334,8 @@ function homeState(){
   const b = $("bpass"), ck = $("checkin"); if(!b || !ck) return;
   const guest = SERVER && !user && !demo;
   const paused = SERVER && !demo && typeof APP_STATUS !== "undefined" && (APP_STATUS.maintenance || !APP_STATUS.checkin_enabled);
-  const n = (() => { try{ return HOME_NEAR; }catch(e){ return null; } })(), st = guest ? "guest" : paused ? "paused" : n && !n.within ? "out" : n ? "in" : "idle";
+  // 案B（11/26）：ログインしていなくても半券は同じ形（範囲の中なら切れる）。切ったときに登録の画面（b1）を出す
+  const n = (() => { try{ return HOME_NEAR; }catch(e){ return null; } })(), st = paused ? "paused" : n && !n.within ? "out" : n ? "in" : "idle";
   const was = b.dataset.state; b.dataset.state = st;
   const off = st === "guest" || st === "out" || st === "paused";
   ck.classList.toggle("off", off);   // 押せなくはしない（押すとログインの画面・位置の調べ直し）。わけは aria-label で伝える
@@ -8389,10 +8529,10 @@ const ZK_YET = `<svg class="zk-stp no" viewBox="0 0 26 26" aria-hidden="true"><c
 const zkRegionList = rg => { const r = REGION.find(x => x[0] === rg); return r ? A.filter(a => r[1].includes(a.pref)).sort((x, y) => y.lat - x.lat) : []; };
 // 1つの枠：コード・短い名前・行った（✓ と回数）／まだ（点線の丸）
 function zkTile(a, o){
-  const c = code(a), jp = /[^\x00-\x7f]/.test(c), n = o.n || 0, on = o.on;
-  const ft = on ? `${o.total ? "" : ZK_CHECK}${o.total ? "計" : ""}<b>${n}</b>回` : `${ZK_YET}まだ`;   // 行った順は行った空港だけなので ✓ の丸を出さない
-  const lbl = `${a.name}、${on ? (o.total ? "計" : "") + n + "回" : "まだ"}`;
-  return `<button class="zk-ap${on ? "" : " no"}${o.dim ? " dim" : ""}" type="button" data-zka="${a.id}" style="--c:${zkCol(regionOf(a))}" aria-label="${esc(lbl)}${o.sub ? "、" + esc(o.sub) : ""}">
+  const c = code(a), jp = /[^\x00-\x7f]/.test(c), n = o.n || 0, on = o.on, memo = !on && !a.kind && !demo && obMemo().has(a.id);   // 行ったことがある（メモ・案B）：印のない空港を淡く
+  const ft = on ? `${o.total ? "" : ZK_CHECK}${o.total ? "計" : ""}<b>${n}</b>回` : memo ? `<i class="zk-memo" aria-hidden="true"></i>メモ` : `${ZK_YET}まだ`;   // 行った順は行った空港だけなので ✓ の丸を出さない
+  const lbl = `${a.name}、${on ? (o.total ? "計" : "") + n + "回" : memo ? "印はまだ・行ったことがある（メモ）" : "まだ"}`;
+  return `<button class="zk-ap${on ? "" : " no"}${memo ? " memo" : ""}${o.dim ? " dim" : ""}" type="button" data-zka="${a.id}" style="--c:${zkCol(regionOf(a))}" aria-label="${esc(lbl)}${o.sub ? "、" + esc(o.sub) : ""}">
     <span class="cd${jp ? " jp" : ""}">${esc(jp ? godShort(a) : c)}</span><span class="nm${jp ? " nc" : ""}">${jp ? "コードなし" : esc(godShort(a))}${o.pend ? `<small class="pend">便が未記録</small>` : ""}</span>${o.sub ? `<span class="sb">${esc(o.sub)}</span>` : ""}<span class="ft">${ft}</span></button>`;
 }
 // ターミナルの枠（名前は「新千歳 国内」「羽田 第1」の短さ。86 の数には入らない）
@@ -19181,12 +19321,10 @@ function obShow(i){ obIdx = i; document.querySelectorAll(".ob-step").forEach((el
   document.querySelectorAll(".ob-dots i").forEach((el,k)=>el.classList.toggle("on", k===i));
   $("obNext").textContent = i === 2 ? "はじめる" : "次へ";
   $("obSkip").hidden = i === 2; $("obNext").parentElement.classList.toggle("one", i === 2); }   // 3枚目は「はじめる」1つ（11/24 見回り sweep-all-a の8番）
-function obDone(){ try{ localStorage.setItem("soramemo.onboarded","1"); }catch(e){} $("dGuide").close();
-  if(SERVER && sb && !user && !demo) authOpen("login"); }   // サーバー版で、まだログインしていなければ、続けてログインの画面を出す
+function obDone(){ try{ localStorage.setItem("soramemo.onboarded","1"); }catch(e){} $("dGuide").close(); }   // 案B（11/26）：ログインの画面は続けて出さない（印を残すときに登録する）
 $("obNext").onclick = () => { if(obIdx < 2) obShow(obIdx+1); else { track("guide", "done"); obDone(); } };
 $("obSkip").onclick = () => { track("guide", "skip"); obDone(); };
 $("openGuide").onclick = () => { $("dSettings").close(); obShow(0); $("dGuide").showModal(); };
-function maybeGuide(){ let seen = false; try{ seen = !!localStorage.getItem("soramemo.onboarded"); }catch(e){} if(!seen){ obShow(0); $("dGuide").showModal(); } }
 
 /* ---------- share images ---------- */
 const XCOL = { mil:"#2B4A73", glider:"#1F7FB6", field:"#3D7A4E", secret:"#6B3FA0", heli:"#7A5A24" };   // 共有画像の印の色（自衛隊は濃紺、滑空場は空色、飛行場は緑）
@@ -19378,7 +19516,6 @@ if(SERVER){ S = blank(); render(); updateAuthUI(); initServer(); } else { load()
 applyLayout(); renderPersonaSettings(); LAST_TAB.rally = loTabs()[0];   // 構成：タブの並びと、はじめに開くタブ
 setGameOn(GAME_ON); setAnalytics(ANALYTICS_ON); $("anaRow").hidden = !SERVER; renderInstall();
 track("open", MODE);
-maybeGuide();
 /* ログインの回数制限（この端末の中）。連打やコードの総当たりを減らす。サーバー側の上限は Supabase の Auth 設定で別に決める */
 const LOGIN_GUARD = {
   get(k){ try{ return JSON.parse(localStorage.getItem("soramemo." + k) || "null"); }catch(e){ return null; } },
@@ -19421,6 +19558,7 @@ async function authAfterLoad(){
   if(!SERVER || !user || demo) return;
   const uid = user.id, p = await loadProfile(); if(!user || user.id !== uid || !p) return;
   if($("dAuth").open && AU.flow === "signup") return;   // 登録の途中は、登録の画面が決める
+  if($("dAuth").open && AU.flow === "onb" && !OBS.single){ AU.flow = "login"; authClose(); try{ localStorage.setItem("soramemo.onboarded", "1"); }catch(e){} }   // ログインしたままの人には、はじめての流れを出さない
   // 表示の設定：サーバーの表（user_view_prefs）があればそれを正にする。表がまだないときは前と同じ（ただし全部乗せの人は、古い答えで変えない）
   const vr = await viewPrefsLoad(p); if(!user || user.id !== uid) return;
   if(vr === "none" && PERSONA !== "all"){
@@ -19450,9 +19588,13 @@ const AU_ICON = {
   shugyo:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 13.5l19-7-5 13-3.4-5.2z"/><path d="M13.1 14.3L21.5 6.5"/></svg>',
   casual:'<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M8.5 14.2c1.8 2.2 5.2 2.2 7 0"/><path d="M9 9.6h.01M15 9.6h.01"/></svg>'
 };
+// はじめての流れ（案B）で使い方に答えた人はアンケートを、位置の許可を聞いた人は位置の説明を飛ばす
+const auSkipSurvey = () => { try{ return !!obGet().persona; }catch(e){ return false; } };
+const auSkipLoc = () => { try{ return obGet().done === "allow"; }catch(e){ return false; } };
+const auSteps = () => AU_STEPS.filter(s => !(s === "survey" && auSkipSurvey()) && !(s === "location" && auSkipLoc()));
 function auTop(back, right){
-  const i = AU_STEPS.indexOf(AU.step), bars = AU.flow === "signup" && i >= 0
-    ? `<div class="steps" aria-label="6つのうち${i + 1}つ目">${AU_STEPS.map((s, k) => `<i class="${k < i ? "done" : k === i ? "on" : ""}"></i>`).join("")}</div>` : "<span></span>";
+  const L = auSteps(), i = L.indexOf(AU.step), bars = AU.flow === "signup" && i >= 0
+    ? `<div class="steps" aria-label="${L.length}つのうち${i + 1}つ目">${L.map((s, k) => `<i class="${k < i ? "done" : k === i ? "on" : ""}"></i>`).join("")}</div>` : "<span></span>";
   return `<div class="top">${back ? `<button class="back" type="button" data-au="${back}" aria-label="戻る">←</button>` : '<span style="width:40px"></span>'}${bars}${right || '<span style="width:40px"></span>'}</div>`;
 }
 const auMsg = () => `<p class="amsg${AU.err ? " err" : ""}" id="auMsg" role="status" aria-live="polite">${esc(AU.msg)}</p>`;
@@ -19463,6 +19605,7 @@ function authRender(){
   clearInterval(AU_TICK); AU_TICK = null;
   const capOn = (s === "login" || s === "email" || s === "code") && captchaOn();   // コードの画面にも置く（送り直しに使う）
   $("auCap").hidden = !capOn; if(capOn) initAuthCaptcha();
+  if(F === "onb"){ obnRender(st, ft); $("dAuth").dataset.step = s; return; }   // はじめての流れ（案B）
   if(s === "login"){
     top = `<div class="top" style="justify-content:flex-end"><button class="skip" type="button" data-au="close">あとで</button></div>
       <div class="hero au-lhero" style="text-align:center">
@@ -19522,7 +19665,7 @@ function authRender(){
     foot = `<button class="cta" type="button" data-au="survey-next"${AU.busy ? " disabled" : ""}>次へ</button><button class="ghost" type="button" data-au="survey-skip">答えずに進む</button>`;
   } else if(s === "terms"){
     const G = F === "gate", again = G && PROFILE && PROFILE.agreed_at;
-    top = `${auTop(G ? "" : "to-survey")}<div class="hero" style="margin-top:36px"><span class="badge">非公式アプリです</span>
+    top = `${auTop(G ? "" : auSkipSurvey() ? "to-name" : "to-survey")}<div class="hero" style="margin-top:36px"><span class="badge">非公式アプリです</span>
       <h1 style="margin-top:14px">${G ? (again ? "利用規約などが<br>改定されました" : "続ける前に<br>確認してください") : "はじめる前に<br>確認してください"}</h1>
       ${G ? `<p class="lead">${again ? "新しい内容を読んで、同意をお願いします。" : "そらメモを続けて使うために、一度だけ同意をお願いしています。"}</p>` : ""}</div>
       <div class="card" style="margin-top:26px"><ul class="pts">
@@ -19606,7 +19749,7 @@ async function auVerify(){
     if(u) auSetPending(u.id); AU.name = ""; AU.step = "name"; authRender(); return; }
   track("login", "code");
   if(needsConsent(p)){ AU.flow = "gate"; AU.step = "terms"; AU.agree = false; authRender(); return; }
-  authClose(); authAfterLoad();
+  authClose(); authAfterLoad(); obPendRun();
 }
 async function auFinish(){
   auSetPending(""); authClose();
@@ -19617,6 +19760,7 @@ async function auFinish(){
   // 「これを隠しますか？」（答えた人）／はじめの1枚（「あとで決める」の人）。どちらも1回だけ
   let ask = ""; try{ ask = localStorage.getItem("soramemo.hideAsk") || ""; localStorage.removeItem("soramemo.hideAsk"); }catch(_){}
   if(ask && PERSONA === "all"){ if(HS[ask]) setTimeout(() => showHideSuggest(ask), 400); else allinCardSet("all"); }
+  obPendRun();   // 案B：印を押そうとして登録した人は、そのまま印へ
 }
 document.addEventListener("input", e => {
   if(!$("dAuth").open) return;
@@ -19633,6 +19777,20 @@ document.addEventListener("change", e => { if(e.target.id === "auAgree"){ AU.agr
 document.addEventListener("keydown", e => { if(e.key !== "Enter" || !$("dAuth").open) return; const id = e.target.id;
   if(id === "auEmail"){ e.preventDefault(); auSend(AU.step === "email"); } else if(id === "auCode"){ e.preventDefault(); auVerify(); }
   else if(id === "auName"){ e.preventDefault(); const b = document.querySelector('#auFoot .cta'); if(b && !b.disabled) b.click(); } });
+// 使い方の答えを保存して同意へ（アンケートの「次へ」と、はじめての流れで答えた人の表示名の「次へ」）
+async function auPersonaNext(p){
+  AU.persona = p;
+  AU.busy = true; authRender();
+  const ok = await saveProfile({ display_name:AU.name.trim(), persona:p }); AU.busy = false;
+  if(!ok){ authRender(); auSay("保存できませんでした。電波のよい場所でもう一度試してください。", true); return; }
+  // 11/8：答えで構成は変えない（全部乗せで始める）。答えは、ホームが開いたときの「これを隠しますか？」に1回だけ使う
+  //   提案を出してよいかはサーバーが決める（別の端末でも1回だけ）。行がなければここで作り、今の見え方を入れる
+  let ask = false;
+  try{ const r = await sb.rpc("view_prefs_claim_suggest"); if(r && !r.error){ VP.ok = true; VP.hasRow = true; ask = r.data === true; await vpWrite(); } }catch(_){}
+  try{ if(ask && PERSONA === "all") localStorage.setItem("soramemo.hideAsk", p); else localStorage.removeItem("soramemo.hideAsk"); }catch(_){}
+  track("signup", "persona:" + p);
+  AU.step = "terms"; AU.agree = false; AU.msg = ""; authRender();
+}
 document.addEventListener("click", async e => {
   const pb = e.target.closest("[data-au-persona]"); if(pb){ AU.persona = pb.dataset.auPersona; document.querySelectorAll("[data-au-persona]").forEach(x => x.setAttribute("aria-checked", String(x === pb))); return; }
   const b = e.target.closest("[data-au]"); if(!b || !$("dAuth").contains(b)) return;
@@ -19648,25 +19806,15 @@ document.addEventListener("click", async e => {
   if(a === "signup-send") return auSend(true);
   if(a === "resend") return auSend(AU.flow === "signup");
   if(a === "verify") return auVerify();
-  if(a === "exists-go"){ if(needsConsent(PROFILE)){ AU.flow = "gate"; AU.step = "terms"; AU.agree = false; authRender(); } else { authClose(); authAfterLoad(); } return; }
+  if(a === "exists-go"){ if(needsConsent(PROFILE)){ AU.flow = "gate"; AU.step = "terms"; AU.agree = false; authRender(); } else { authClose(); authAfterLoad(); obPendRun(); } return; }
   if(a === "name-next"){
     if(!nameOk(AU.name)) return;
     if(AU.flow === "rename"){ AU.busy = true; authRender(); const ok = await saveProfile({ display_name:AU.name.trim() }); AU.busy = false;
       if(!ok){ authRender(); auSay("保存できませんでした。電波のよい場所でもう一度試してください。", true); return; }
       track("profile", "rename"); authClose(); renderMyPage(); renderWelcome(); return; }
+    if(auSkipSurvey()) return auPersonaNext(obGet().persona);   // はじめての流れで答えた使い方を、そのまま保存する
     AU.step = "survey"; AU.msg = ""; authRender(); return; }
-  if(a === "survey-next" || a === "survey-skip"){
-    const p = a === "survey-skip" || !AU.persona ? "unanswered" : AU.persona; AU.persona = p;
-    AU.busy = true; authRender();
-    const ok = await saveProfile({ display_name:AU.name.trim(), persona:p }); AU.busy = false;
-    if(!ok){ authRender(); auSay("保存できませんでした。電波のよい場所でもう一度試してください。", true); return; }
-    // 11/8：答えで構成は変えない（全部乗せで始める）。答えは、ホームが開いたときの「これを隠しますか？」に1回だけ使う
-    //   提案を出してよいかはサーバーが決める（別の端末でも1回だけ）。行がなければここで作り、今の見え方を入れる
-    let ask = false;
-    try{ const r = await sb.rpc("view_prefs_claim_suggest"); if(r && !r.error){ VP.ok = true; VP.hasRow = true; ask = r.data === true; await vpWrite(); } }catch(_){}
-    try{ if(ask && PERSONA === "all") localStorage.setItem("soramemo.hideAsk", p); else localStorage.removeItem("soramemo.hideAsk"); }catch(_){}
-    track("signup", "persona:" + p);
-    AU.step = "terms"; AU.agree = false; AU.msg = ""; authRender(); return; }
+  if(a === "survey-next" || a === "survey-skip") return auPersonaNext(a === "survey-skip" || !AU.persona ? "unanswered" : AU.persona);
   if(a === "agree"){
     const cb = $("auAgree"); if(!cb || !cb.checked){ auSay("同意するには、チェックを入れてください。", true); return; }
     AU.busy = true; authRender();
@@ -19675,8 +19823,8 @@ document.addEventListener("click", async e => {
     if(!r || r.error){ authRender(); auSay("記録できませんでした。電波のよい場所でもう一度試してください。", true); return; }
     PROFILE = Object.assign({}, PROFILE || {}, { terms_version:TERMS_VER, privacy_version:PRIVACY_VER, agreed_at:(r.data && r.data.agreed_at) || new Date().toISOString() });
     track("terms", AU.flow === "gate" ? "agree_again" : "agree");
-    if(AU.flow === "signup"){ AU.step = "location"; AU.msg = ""; authRender(); return; }
-    authClose(); renderWelcome(); return; }
+    if(AU.flow === "signup"){ if(auSkipLoc()) return auFinish(); AU.step = "location"; AU.msg = ""; authRender(); return; }
+    authClose(); renderWelcome(); obPendRun(); return; }
   if(a === "disagree"){
     track("terms", "disagree:" + AU.flow); auSetPending("");
     try{ await sb.auth.signOut(); }catch(_){}
@@ -19717,6 +19865,215 @@ function renderWelcome(){
 }
 document.addEventListener("click", e => { if(e.target.closest("#welcomeX")){ try{ localStorage.removeItem("soramemo.welcome"); }catch(_){} $("welcomeCard").hidden = true; track("welcome", "close"); } });
 $("nameEdit").onclick = () => authOpen("rename", "name");
+/* ---------- はじめての流れとログイン案B（11/26 本人「B」・画面案 design/onboarding #237 の O1〜O5・b1・O6） ----------
+   ・はじめて開いたら、ログインなしで O1 導入 → O2 使い方 → O3 行ったことがある空港（メモ）→ O4 次の予定 → O5 できた記録と位置の許可 → ホーム
+   ・メモ・予定・使い方の答えは、この端末の中（soramemo.ob）。印とは別に数える（印はサーバーで確かめたものだけ）
+   ・ログインしていない人が判定範囲の中で半券を切ると、b1「印を残すために、記録をバックアップします」。登録しないと印は押されない（そう書く）
+   ・登録（またはログイン）を終えたら、15分以内なら位置を測り直して、その印を押す（サーバーで判定し直す）
+   ・今の利用者のログイン（右上の「ログイン」・6けたのコード・同意）はそのまま。画面は dAuth（flow "onb"）の中に描く */
+const OB_KEY = "soramemo.ob", OB_TRY_KEY = "soramemo.obTry", OB_PEND_MIN = 15;
+const OB_STEPS = ["o2", "o3", "o4", "o5"];
+const OB_POP = ["HND", "NRT", "CTS", "ITM", "KIX", "FUK", "OKA", "NGO", "KOJ"];   // よく選ばれる空港（画面案の仮の9つ・乗降客の多い順のつもり）
+const OB_MYAP = ["HND", "ITM", "CTS", "FUK"];
+function obGet(){ try{ const o = JSON.parse(localStorage.getItem(OB_KEY) || "null"); return o && typeof o === "object" ? o : {}; }catch(e){ return {}; } }
+function obPut(o){ try{ localStorage.setItem(OB_KEY, JSON.stringify(o)); }catch(e){} }
+// 行ったことがある（メモ）：空港の id の集まり（図鑑で印のない空港を淡く出す）
+function obMemo(){ const m = obGet().memo; return new Set(Array.isArray(m) ? m.filter(id => BY[id] && !BY[id].kind) : []); }
+const obJstDay = t => new Date((t == null ? Date.now() : t) + 9 * 36e5).toISOString().slice(0, 10);
+const obDaysTo = d => Math.round((Date.parse(d + "T00:00:00Z") - Date.parse(obJstDay() + "T00:00:00Z")) / 864e5);
+const obMDW = d => { const x = new Date(d + "T00:00:00Z"); return `${x.getUTCMonth() + 1}月${x.getUTCDate()}日（${"日月火水木金土"[x.getUTCDay()]}）`; };
+// 予定：出発・到着・日付がそろい、今日より前でないものだけ
+function obPlanOk(p){ return !!p && !!BY[p.from] && !!BY[p.to] && p.from !== p.to && /^\d{4}-\d{2}-\d{2}$/.test(p.day || "") && obDaysTo(p.day) >= 0; }
+const OBS = { step:"o1", single:false, persona:null, memo:new Set(), from:"", to:"", day:"", myAp:"", rgOpen:"" };
+function obnOpen(step, single){
+  const o = obGet();
+  Object.assign(OBS, { step: step || "o1", single: !!single, persona: o.persona || null, memo: obMemo(),
+    from: o.plan && BY[o.plan.from] ? String(o.plan.from) : "", to: o.plan && BY[o.plan.to] ? String(o.plan.to) : "", day: o.plan ? o.plan.day || "" : "", myAp: o.myAp && BY[o.myAp] ? String(o.myAp) : "", rgOpen:"" });
+  Object.assign(AU, { flow:"onb", step:OBS.step, msg:"", err:false, busy:false });
+  if(!$("dAuth").open) $("dAuth").showModal();
+  authRender(); track("onb", OBS.single ? "memo_edit" : "open");
+}
+function obnSave(extra){
+  const o = obGet(), plan = { from:+OBS.from, to:+OBS.to, day:OBS.day };
+  Object.assign(o, { persona:OBS.persona, memo:[...OBS.memo], plan: obPlanOk(plan) ? plan : null, myAp: OBS.myAp ? +OBS.myAp : null }, extra || {});
+  obPut(o); return o;
+}
+const OB_ICON = {
+  pin:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-6.5-6.2-6.5-11a6.5 6.5 0 0 1 13 0c0 4.8-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.3"/></svg>',
+  plane:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 13.5l19-7-5 13-3.4-5.2z"/><path d="M13.1 14.3L21.5 6.5"/></svg>',
+  now:'<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1"/></svg>',
+  later:'<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>',
+  bell:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 20.5a2 2 0 0 0 4 0"/></svg>',
+  loc:'<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="7.5"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22"/></svg>'
+};
+function obTop(){
+  const i = OB_STEPS.indexOf(OBS.step);
+  if(OBS.single) return `<div class="top"><button class="back" type="button" data-ob="close" aria-label="閉じる">×</button><span></span><span style="width:40px"></span></div>`;
+  const bars = i >= 0 ? `<div class="steps obsteps" aria-label="4つのうち${i + 1}つ目">${OB_STEPS.map((s, k) => `<i class="${k < i ? "done" : k === i ? "on" : ""}"></i>`).join("")}<span class="obn">${i + 1} / ${OB_STEPS.length}</span></div>` : "<span></span>";
+  return `<div class="top"><button class="back" type="button" data-ob="back" aria-label="戻る">←</button>${bars}${OBS.step === "o5" ? '<span style="width:40px"></span>' : '<button class="skip" type="button" data-ob="skip">あとで</button>'}</div>`;
+}
+const obApName = id => BY[id] ? placeShort(BY[id].iata) : "";
+const obChip = (a, on, attr) => `<button class="obchip${on ? " on" : ""}" type="button" ${attr}="${a.id}" aria-pressed="${on}">${on ? OB_ICON.pin : ""}${esc(placeShort(a.iata))}</button>`;
+function obApOpts(sel, none){
+  return `<option value="">${none}</option>` + REGION.map(([rg]) => `<optgroup label="${rg}">${zkRegionList(rg).map(a => `<option value="${a.id}"${String(a.id) === String(sel) ? " selected" : ""}>${esc(placeShort(a.iata))}（${esc(a.iata)}）</option>`).join("")}</optgroup>`).join("");
+}
+function obnRender(st, ft){
+  const s = OBS.step; let top = "", foot = "";
+  if(s === "o1"){
+    top = `<div class="obill" aria-hidden="true"><svg viewBox="0 0 320 170" width="100%" preserveAspectRatio="xMidYMid slice"><rect width="320" height="170" fill="#F7F9FB"/>
+        <g fill="#fff" stroke="#B8C0CC" stroke-width="1.4">${[[226,22],[262,40],[248,70],[214,96],[196,60],[150,112],[118,132],[86,150],[176,140],[278,92],[60,120],[132,80]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="4.5"/>`).join("")}</g>
+        <path d="M214 96 C 200 120 186 132 176 140" fill="none" stroke="#C8102E" stroke-width="2" stroke-dasharray="4 5" stroke-linecap="round"/>
+        <circle cx="214" cy="96" r="7" fill="#1F2937"/><circle cx="176" cy="140" r="5" fill="#fff" stroke="#C8102E" stroke-width="2"/></svg></div>
+      <div class="hero obhero"><h1>日本の空港を、<br>旅の記録に。</h1><p class="lead">空港に着いたらチェックインして印を集める。乗った便も、地図に残していけます。</p></div>
+      <ul class="oblist"><li>${OB_ICON.pin}空港で印を押す</li><li>${OB_ICON.plane}乗った便を残す</li><li>${OB_ICON.now}空港のいまを見る</li></ul><div class="spacer"></div>`;
+    foot = `<button class="cta" type="button" data-ob="start">はじめる</button>
+      <p class="obalt">もう使っている人は ${SERVER ? '<button class="linkish" type="button" data-ob="login">ログイン</button> ・ ' : ""}<button class="linkish" type="button" data-ob="demo">デモで試す</button></p>`;
+  } else if(s === "o2"){
+    const o = (k, t, sub, ic) => `<button class="obopt" type="button" role="radio" aria-checked="${OBS.persona === k}" data-ob-persona="${k}"><span class="ic">${ic}</span><span><b>${t}</b><small>${sub}</small></span></button>`;
+    top = `${obTop()}<div class="hero obh"><h1>どんなふうに<br>使いますか？</h1><p class="lead">答えに合わせて、使わなそうなものを隠すかを1回だけ聞きます。マイページの「表示の編集」でいつでも変えられます。</p></div>
+      <div class="obopts" role="radiogroup" aria-label="使い方">${o("spot", "飛行機を撮る", "空港の運用や特別塗装機を見たい", AU_ICON.spot)}${o("shugyo", "修行をする", "乗った便とポイントを数えたい", AU_ICON.shugyo)}${o("casual", "気軽に集める", "旅のついでに空港の印を集めたい", AU_ICON.casual)}${o("unanswered", "あとで決める", "いまは全部をそのまま出す", OB_ICON.later)}</div><div class="spacer"></div>`;
+    foot = `<button class="cta" type="button" data-ob="next">次へ</button>`;
+  } else if(s === "o3"){
+    const n = OBS.memo.size, rgs = REGION.map(([rg]) => { const l = zkRegionList(rg); return { rg, l, got:l.filter(a => OBS.memo.has(a.id)).length }; });
+    top = `${obTop()}<div class="hero obh"><h1>行ったことがある空港を<br>選んでください</h1></div>
+      <div class="card obcnt" aria-live="polite">${n ? `<small>選んだ空港</small><p><b id="obMemoN">${n}</b><span>/ ${A.length} 空港</span></p>` : `<p class="z">これから最初の1空港へ</p>`}<small>${OBS.single ? "選び直すと、すぐに図鑑に出ます" : "あとから、マイページで足したり外したりできます（登録のあと）"}</small></div>
+      <div class="card obnote"><i aria-hidden="true"></i><span>ここで選んだ空港は<b>「行ったことがある（メモ）」</b>として図鑑に淡く残ります。次に行ってチェックインすると、<b>印</b>に変わります。メモは印の数に入りません</span></div>
+      <h2 class="obsec">よく選ばれる空港</h2><div class="obchips">${OB_POP.map(c => IATA[c]).filter(Boolean).map(a => obChip(a, OBS.memo.has(a.id), "data-ob-memo")).join("")}</div>
+      <h2 class="obsec">地方から探す</h2><div class="obrgs">${rgs.map(r => `<div class="obrg${OBS.rgOpen === r.rg ? " open" : ""}"><button class="obrgh" type="button" data-ob-rg="${r.rg}" aria-expanded="${OBS.rgOpen === r.rg}"><b>${r.rg}</b><span>${r.got ? `<b>${r.got}</b> / ` : ""}${r.l.length} 空港</span><i aria-hidden="true">›</i></button>${OBS.rgOpen === r.rg ? `<div class="obchips">${r.l.map(a => obChip(a, OBS.memo.has(a.id), "data-ob-memo")).join("")}</div>` : ""}</div>`).join("")}</div><div class="spacer"></div>`;
+    foot = OBS.single ? `<button class="cta" type="button" data-ob="memo-save">保存する</button>` : `<button class="cta" type="button" data-ob="next">${n ? `${n}空港で次へ` : "まだない・次へ"}</button>`;
+  } else if(s === "o4"){
+    const plan = { from:+OBS.from, to:+OBS.to, day:OBS.day }, ok = obPlanOk(plan), left = ok ? obDaysTo(OBS.day) : null;
+    top = `${obTop()}<div class="hero obh"><h1>次に飛行機に乗る<br>予定はありますか？</h1><p class="lead">入れておくと、ホームに出発までの日数が出ます。便名はあとからで大丈夫です。</p></div>
+      <div class="card obplanf"><small class="t">次のフライト</small>
+        <div class="obpr"><label><span>出発</span><select id="obFrom">${obApOpts(OBS.from, "選ぶ")}</select></label><i aria-hidden="true">→</i><label><span>到着</span><select id="obTo">${obApOpts(OBS.to, "選ぶ")}</select></label></div>
+        <label class="obday"><span>日付</span><input type="date" id="obDay" min="${obJstDay()}" value="${esc(OBS.day)}">${ok ? `<em>${left ? `あと${left}日` : "今日"}</em>` : ""}</label>
+        ${OBS.from && OBS.from === OBS.to ? '<p class="amsg err">出発と到着が同じです。</p>' : ""}</div>
+      <p class="obor">予定はまだない</p>
+      <div class="card obmy"><b>いちばん身近な空港を1つ</b><small>ホームから、その空港の今日の便をすぐ見られます</small>
+        <div class="obchips">${OB_MYAP.map(c => IATA[c]).filter(Boolean).map(a => obChip(a, String(a.id) === OBS.myAp, "data-ob-myap")).join("")}</div>
+        <label class="obsel"><span>ほかの空港</span><select id="obMyAp">${obApOpts(OB_MYAP.some(c => IATA[c] && String(IATA[c].id) === OBS.myAp) ? "" : OBS.myAp, "選ばない")}</select></label></div><div class="spacer"></div>`;
+    foot = `<button class="cta" type="button" data-ob="next">${ok ? "この予定で次へ" : OBS.myAp ? "この空港で次へ" : "予定なしで次へ"}</button>`;
+  } else if(s === "o5"){
+    const plan = { from:+OBS.from, to:+OBS.to, day:OBS.day }, ok = obPlanOk(plan), n = OBS.memo.size;
+    const base = ok ? BY[plan.from] : OBS.myAp ? BY[+OBS.myAp] : [...OBS.memo].map(id => BY[id]).find(Boolean) || IATA.HND;
+    const rg = regionOf(base), rl = zkRegionList(rg), rm = rl.filter(a => OBS.memo.has(a.id)).length;
+    const t2 = ok ? `<small>次のフライト</small><p>あと <b>${obDaysTo(plan.day)}</b><span>日</span></p>` : `<small>いちばん身近な空港</small><p><b class="nm">${esc(placeShort(base.iata))}</b></p>`;
+    top = `${obTop()}<div class="hero obh"><h1>あなたのそらメモが<br>できました</h1></div>
+      <div class="obtiles"><div class="card"><small>行ったことがある</small><p><b>${n}</b><span>空港</span></p></div><div class="card">${t2}</div></div>
+      <div class="card obgoal"><small>最初の小目標</small><b>${esc(placeShort(base.iata))}でチェックインして、最初の印に</b><span>${esc(rg)}の空港 ${rl.length}（メモ ${rm}）</span></div>
+      <div class="card obperm"><div>${OB_ICON.loc}<p><b>位置情報</b>空港の中にいるか確かめて、印を押すために使います。${NATIVE ? "アプリを開いている間だけで、送るのは印を押すときだけです" : "このページを開いている間だけで、送るのは印を押すときだけです"}</p></div>
+        <div>${OB_ICON.bell}<p><b>通知 <small>入れなくても使えます</small></b>空港の知らせをピン止めしたときに聞きます。いまは聞きません</p></div></div>${auMsg()}<div class="spacer"></div>`;
+    foot = `<button class="cta" type="button" data-ob="allow"${AU.busy ? " disabled" : ""}>次へ（位置の許可を聞きます）</button><button class="ghost" type="button" data-ob="later">あとで設定する</button>`;
+  }
+  st.innerHTML = top; ft.innerHTML = foot;
+}
+async function obnFinish(how){
+  const o = obnSave({ at: obGet().at || Date.now(), done:how });
+  try{ localStorage.setItem("soramemo.onboarded", "1"); }catch(e){}
+  track("onb", "done:" + how + ":" + (o.persona || "none") + ":" + (o.memo || []).length + (o.plan ? ":plan" : o.myAp ? ":myap" : ""));
+  AU.flow = "login"; authClose();
+  if(o.myAp && BY[o.myAp] && OPS_AIRPORTS[BY[o.myAp].iata] && !OPS_PICKED){ try{ localStorage.setItem("soramemo.opsAirport", BY[o.myAp].iata); }catch(e){} }   // 身近な空港は「いまの空港」のはじめの空港に（選んだことがない人だけ）
+  if(currentView() !== "home") goTab("home");
+  obHomeRender(); homeState(); try{ renderBook(); }catch(e){}
+  homeLocStart();
+}
+function obnGo(step){ OBS.step = step; AU.step = step; AU.msg = ""; authRender(); const s = $("dAuth"); if(s) s.scrollTop = 0; track("onb", step); }
+document.addEventListener("click", async e => {
+  if(!$("dAuth").open || AU.flow !== "onb") return;
+  const pp = e.target.closest("[data-ob-persona]"); if(pp){ OBS.persona = pp.dataset.obPersona; document.querySelectorAll("[data-ob-persona]").forEach(x => x.setAttribute("aria-checked", String(x === pp))); return; }
+  const mm = e.target.closest("[data-ob-memo]"); if(mm){ const id = +mm.dataset.obMemo; OBS.memo.has(id) ? OBS.memo.delete(id) : OBS.memo.add(id); const y = $("dAuth").scrollTop; authRender(); $("dAuth").scrollTop = y; return; }
+  const my = e.target.closest("[data-ob-myap]"); if(my){ OBS.myAp = OBS.myAp === my.dataset.obMyap ? "" : my.dataset.obMyap; const y = $("dAuth").scrollTop; authRender(); $("dAuth").scrollTop = y; return; }
+  const rg = e.target.closest("[data-ob-rg]"); if(rg){ OBS.rgOpen = OBS.rgOpen === rg.dataset.obRg ? "" : rg.dataset.obRg; const y = $("dAuth").scrollTop; authRender(); $("dAuth").scrollTop = y; return; }
+  const b = e.target.closest("[data-ob]"); if(!b) return;
+  const a = b.dataset.ob, i = OB_STEPS.indexOf(OBS.step);
+  if(a === "start") return obnGo("o2");
+  if(a === "login"){ track("onb", "login"); try{ localStorage.setItem("soramemo.onboarded", "1"); }catch(_){} authOpen("login", "login"); return; }
+  if(a === "demo"){ track("onb", "demo"); AU.flow = "login"; authClose(); try{ localStorage.setItem("soramemo.onboarded", "1"); }catch(_){} if(!demo) $("toggleDemo").click(); return; }
+  if(a === "close"){ AU.flow = "login"; authClose(); return; }
+  if(a === "memo-save"){ obnSave(); track("onb", "memo_save:" + OBS.memo.size); AU.flow = "login"; authClose(); try{ renderBook(); }catch(_){} if($("dSettings").open) renderMyPage(); return; }
+  if(a === "back") return obnGo(i <= 0 ? "o1" : OB_STEPS[i - 1]);
+  if(a === "skip"){ track("onb", "skip:" + OBS.step); if(OBS.step === "o2") OBS.persona = OBS.persona || "unanswered"; return obnGo(OB_STEPS[i + 1] || "o5"); }
+  if(a === "next"){ if(OBS.step === "o2" && !OBS.persona) OBS.persona = "unanswered"; obnSave(); return obnGo(OB_STEPS[i + 1] || "o5"); }
+  if(a === "later"){ track("onb", "loc_later"); return obnFinish("later"); }
+  if(a === "allow"){
+    track("onb", "loc_allow"); AU.busy = true; authRender();
+    if(NATIVE){ nvSet(NV_KEY.loc, "1"); NV_GEO = await geoPermAsk(); }
+    else if(navigator.geolocation) await new Promise(res => { let done = false; const fin = () => { if(!done){ done = true; res(); } };
+      try{ navigator.geolocation.getCurrentPosition(fin, fin, { enableHighAccuracy:false, timeout:15000, maximumAge:600000 }); }catch(_){ fin(); } setTimeout(fin, 16000); });
+    AU.busy = false; return obnFinish("allow");
+  }
+});
+document.addEventListener("change", e => {
+  if(!$("dAuth").open || AU.flow !== "onb") return;
+  const id = e.target.id; if(!["obFrom", "obTo", "obDay", "obMyAp"].includes(id)) return;
+  if(id === "obFrom") OBS.from = e.target.value; else if(id === "obTo") OBS.to = e.target.value; else if(id === "obDay") OBS.day = e.target.value; else OBS.myAp = e.target.value;
+  const y = $("dAuth").scrollTop; authRender(); $("dAuth").scrollTop = y;
+});
+// はじめて開いたとき：今までの3枚の案内の代わりに、この流れ（3枚は、マイページの「使い方」から見られる）
+function maybeGuide(){ let seen = false; try{ seen = !!localStorage.getItem("soramemo.onboarded"); }catch(e){} if(!seen) obnOpen("o1"); }
+/* ---------- ホーム：ログインしていない人の「試せます」と、次のフライト（O6） ---------- */
+function obTryOn(){ try{ return localStorage.getItem(OB_TRY_KEY) !== "0"; }catch(e){ return true; } }
+function obHomeRender(){
+  const t = $("obTry"), g = $("gateNorm"); if(t) t.hidden = !obTryOn(); if(g) g.hidden = obTryOn();   // 「試せます」を閉じたら、今までの案内（ログイン・デモ）
+  if($("homeSheet").sheetGo && !$("homeGate").hidden) $("homeSheet").sheetGo($("homeSheet").dataset.snap || "half");
+  const box = $("obPlanCard"); if(!box) return;
+  const p = obGet().plan, rp = (() => { try{ return ridePlan(); }catch(e){ return null; } })();
+  if(!obPlanOk(p) || rp || demo){ box.hidden = true; box.innerHTML = ""; return; }
+  const left = obDaysTo(p.day);
+  box.innerHTML = `<div class="l"><small>次のフライト</small><p>${left ? `あと <b>${left}</b><span>日</span>` : "<b class=\"td\">今日</b>"}</p></div>
+    <div class="r"><b class="rt">${esc(BY[p.from].iata)} → ${esc(BY[p.to].iata)}</b><span>${obMDW(p.day)}</span></div><button class="x" type="button" data-obplan-off aria-label="次のフライトの予定を消す">×</button>`;
+  box.hidden = false;
+}
+document.addEventListener("click", async e => {
+  if(e.target.closest("[data-gate-demo]")){ track("gate", "demo_try"); if(!demo) $("toggleDemo").click(); return; }
+  if(e.target.closest("#obTryX")){ try{ localStorage.setItem(OB_TRY_KEY, "0"); }catch(_){} obHomeRender(); track("ob_try", "close"); return; }
+  if(e.target.closest("#obTryGo")){ track("ob_try", "hnd"); OPS_PICKED = true; if(OPS_AP !== "HND") await setOpsAirport("HND"); goTab("ops"); return; }
+  if(e.target.closest("[data-obplan-off]")){ const o = obGet(); o.plan = null; obPut(o); obHomeRender(); track("ob_plan", "off"); return; }
+  if(e.target.closest("#memoEdit")){ $("dSettings").close(); obnOpen("o3", true); }
+});
+/* ---------- b1：ログインしていない人が範囲の中で半券を切ったとき ---------- */
+let OB_PEND = null;   // { a, term, at }：登録を終えたら押し直す印
+function obRegOpen(n){
+  OB_PEND = { a:n.a.id, term:n.term ? n.term.id : null, at:Date.now() };
+  const memo = obMemo().size, plan = obPlanOk(obGet().plan);
+  $("obRegBody").innerHTML = `<div class="sph"><span class="grab" aria-hidden="true"></span></div><span class="obfree">無料</span>
+    <h3 id="obRegT">印を残すために、<br>記録をバックアップします</h3>
+    <p>印はサーバーで確かめてから押します。<b>メールで登録しないと、${esc(placeName(n.a, n.term))}の印は押されません。</b>登録すると、機種を変えても記録を戻せます。</p>
+    ${memo || plan ? `<p class="sm">行ったことがある空港のメモ${memo ? `（${memo}空港）` : ""}${plan ? "と次の予定" : ""}は、いまはこの端末にだけ残ります。</p>` : ""}
+    <label class="lb" for="obRegEmail">メールアドレス</label><input class="in" id="obRegEmail" type="email" autocomplete="email" inputmode="email" placeholder="メールアドレス">
+    <p class="amsg" id="obRegMsg" role="status" aria-live="polite"></p>
+    <button class="cta" type="button" data-obreg="send">確認コードを送る</button>
+    <button class="lk" type="button" data-obreg="login">登録済みの方はログイン</button>
+    <button class="ghost" type="button" data-obreg="later">いまはやめる（印は押されません）</button>`;
+  const d = $("dObReg"); if(!d.open) d.showModal();
+  track("obreg", "open"); return true;
+}
+function obRegSay(t){ const m = $("obRegMsg"); if(m){ m.textContent = t; m.classList.toggle("err", !!t); } }
+document.addEventListener("click", e => {
+  const b = e.target.closest("[data-obreg]"); if(!b) return;
+  const a = b.dataset.obreg;
+  if(a === "later"){ track("obreg", "later"); OB_PEND = null; $("dObReg").close(); say("登録しなかったため、印は押されていません。登録すると、次から印を押せます。", true); ckNote(); return; }
+  if(a === "login"){ track("obreg", "login"); $("dObReg").close(); authOpen("login", "login"); return; }
+  if(a === "send"){
+    const v = String($("obRegEmail").value || "").trim();
+    if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v)){ obRegSay("メールアドレスを確かめてください。"); return; }
+    track("obreg", "send"); $("dObReg").close();
+    authOpen("signup", "email"); AU.email = v; authRender();
+    if(!captchaOn()) auSend(true);   // 確認の表示が要るときは、メールの画面でそれを済ませてから送る
+  }
+});
+document.addEventListener("keydown", e => { if(e.key === "Enter" && e.target.id === "obRegEmail"){ e.preventDefault(); const b = document.querySelector('[data-obreg="send"]'); if(b) b.click(); } });
+// 登録・ログインを終えたら：15分以内なら位置を測り直して押す（判定はサーバーがやり直す）
+function obPendRun(){
+  const p = OB_PEND; OB_PEND = null;
+  if(!p || !user || demo || Date.now() - p.at > OB_PEND_MIN * 60e3) return false;
+  track("obreg", "stamp"); if(currentView() !== "home") goTab("home");
+  setTimeout(() => { const before = S.checkins.length; checkin().then(() => { if(S.checkins.length <= before) ckNote(); }); }, 300);
+  return true;
+}
+// 登録の画面を途中で閉じたとき（ログインしないまま）：印は押されていないと伝える
+$("dAuth").addEventListener("close", () => { if(OB_PEND && !user && AU.flow !== "onb"){ OB_PEND = null; say("登録を終えていないため、印は押されていません。", true); try{ ckNote(); }catch(e){} } });
+obHomeRender(); maybeGuide();   // はじめての流れは、ログインの画面の部品（AU など）ができてから開く
 
 /* ---------- オフライン用の仕組みと、新しい版のお知らせ ---------- */
 $("appVer").textContent = "版 " + APP_VERSION;
