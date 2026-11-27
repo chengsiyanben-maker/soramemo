@@ -17,13 +17,13 @@ create table auth.users (id uuid primary key, email text, created_at timestamptz
 create function auth.uid() returns uuid language sql stable as $$ select null::uuid $$;
 create function auth.jwt() returns jsonb language sql stable as $$ select '{}'::jsonb $$;
 grant usage on schema public, auth to anon, authenticated, service_role;`);
-for (const f of files) { if (f === mine) { var before = (await db.query(`select id, stamp_m from public.terminals order by id`)).rows; var rad = (await db.query(`select id, radius_m from public.airports order by id`)).rows; } await db.exec(fs.readFileSync(dir + f, 'utf8')); }
+for (const f of files) { if (f === mine) { var before = (await db.query(`select id, stamp_m from public.terminals order by id`)).rows; var rad = (await db.query(`select id, radius_m from public.airports where game_target order by id`)).rows; } await db.exec(fs.readFileSync(dir + f, 'utf8')); }
 const T = (await db.query(`select * from public.terminals order by id`)).rows;
 const msj = T.find(t => t.id === 'MSJ-T'), iwk = T.find(t => t.id === 'IWK-T');
 check('MSJ-T（三沢・airport 92・stamp_m 0）', msj && msj.airport_id === 92 && msj.stamp_m === 0, msj);
 check('IWK-T（岩国・airport 96・stamp_m 0）', iwk && iwk.airport_id === 96 && iwk.stamp_m === 0, iwk);
 check('ほかの行の stamp_m は変わらない', JSON.stringify(before) === JSON.stringify(T.filter(t => !['MSJ-T', 'IWK-T'].includes(t.id)).map(t => ({ id: t.id, stamp_m: t.stamp_m }))));
-check('airports の radius_m は変わらない', JSON.stringify(rad) === JSON.stringify((await db.query(`select id, radius_m from public.airports order by id`)).rows));
+check('86空港の radius_m は変わらない（番外編はあとの移行207で広げる所がある）', JSON.stringify(rad) === JSON.stringify((await db.query(`select id, radius_m from public.airports where game_target order by id`)).rows));
 for (const v of [-1, 1501]) { let e = ''; try { await db.exec(`update public.terminals set stamp_m = ${v} where id = 'MSJ-T'`); } catch (x) { e = x.message; } check(`stamp_m = ${v} は入らない`, /check/.test(e), e); }
 await db.exec(fs.readFileSync(dir + mine, 'utf8')); check('2回流しても行は増えない', (await db.query(`select count(*)::int n from public.terminals where id in ('MSJ-T','IWK-T')`)).rows[0].n === 2);
 
