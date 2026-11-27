@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>K1 ホーム｜決まりなしの実験 その2</title>
+<style>*{box-sizing:border-box}html,body{margin:0}body{font-family:"Hiragino Sans","Hiragino Kaku Gothic ProN","Noto Sans CJK JP","Noto Sans JP",system-ui,sans-serif;font-size:15px;line-height:1.6;-webkit-text-size-adjust:100%}
+.phone{position:relative;max-width:420px;min-height:100vh;min-height:100svh;margin:0 auto;overflow:hidden}
+.ann{position:relative;z-index:99;max-width:392px;margin:16px auto 40px;font:13px/1.7 "Hiragino Sans","Hiragino Kaku Gothic ProN","Noto Sans CJK JP","Noto Sans JP",system-ui,sans-serif;background:#FFF8D6;color:#5A4A12;padding:12px 14px;border-radius:16px}.ann b{display:block}
+.unoff{font-size:13px}
+body{background:#123A6B;color:#E6F0FA}.phone{background:#123A6B;background-image:linear-gradient(rgba(230,240,250,.07) 1px,transparent 1px),linear-gradient(90deg,rgba(230,240,250,.07) 1px,transparent 1px);background-size:20px 20px;padding:14px 16px 40px}
+.tb{display:flex;justify-content:space-between;align-items:center;border:1.5px solid #E6F0FA;padding:6px 10px;font:700 13px ui-monospace,"SF Mono","Menlo","DejaVu Sans Mono",monospace}
+.plan{border:1.5px solid #E6F0FA;margin-top:10px}
+.dim{font:700 13px ui-monospace,"SF Mono","Menlo","DejaVu Sans Mono",monospace;fill:#E6F0FA}
+.spec{display:grid;grid-template-columns:1fr 1fr 1fr;border:1.5px solid #E6F0FA;border-top:0}
+.spec div{padding:8px 10px;border-right:1.5px solid #E6F0FA}.spec div:last-child{border-right:0}
+.spec small{display:block;font:700 13px ui-monospace,"SF Mono","Menlo","DejaVu Sans Mono",monospace;color:#B9D0EA}.spec b{font:800 30px/1.1 ui-monospace,"SF Mono","Menlo","DejaVu Sans Mono",monospace}.u{font-size:13px;color:#B9D0EA;margin-left:2px}
+.call{display:flex;justify-content:space-between;border:1.5px solid #E6F0FA;border-top:0;padding:10px}
+.call b{font-size:17px}.call span{font:700 13px ui-monospace,"SF Mono","Menlo","DejaVu Sans Mono",monospace;color:#B9D0EA}
+.tabs{display:flex;margin-top:14px;border:1.5px solid #E6F0FA}.tabs a{flex:1;min-height:52px;display:grid;place-items:center;font-size:13px;font-weight:800;border-right:1.5px solid #E6F0FA}.tabs a:last-child{border-right:0}.tabs a.on{background:#E6F0FA;color:#123A6B}
+h1{font-size:24px;margin:16px 0 4px}.lead{color:#C9DBEF;margin:0 0 12px;font-size:14px}
+.part{display:flex;align-items:center;gap:10px;min-height:60px;border:1.5px solid #E6F0FA;margin-top:-1.5px;padding:0 8px 0 10px}
+.part .no{font:700 13px ui-monospace,"SF Mono","Menlo","DejaVu Sans Mono",monospace;color:#B9D0EA;width:44px}.part b{flex:1;font-size:17px}
+.part.off{border-style:dashed}.part.off b{color:#B9D0EA}
+.part .sw{min-width:88px;height:44px;display:grid;place-items:center;font:800 14px ui-monospace,"SF Mono","Menlo","DejaVu Sans Mono",monospace;border:1.5px solid #E6F0FA}.part .sw.on{background:#E6F0FA;color:#123A6B}
+.legend{font:700 13px ui-monospace,"SF Mono","Menlo","DejaVu Sans Mono",monospace;color:#C9DBEF;margin-top:12px}</style></head><body>
+<main class="phone"><div class="tb"><span>SORAMEMO / HOME</span><span>非公式アプリ・見本</span></div>
+<svg class="plan" viewBox="0 0 356 330" width="100%" role="img" aria-label="設計図風の地図：羽田と判定範囲の寸法">
+<path d="M0 0H356V80C310 110 280 150 240 158C200 166 190 210 150 236C110 262 50 250 0 280" fill="none" stroke="#E6F0FA" stroke-width="1.5"/>
+<circle cx="250" cy="250" r="56" fill="none" stroke="#E6F0FA" stroke-width="1.5" stroke-dasharray="6 4"/>
+<path d="M228 286 258 214M240 292 270 220M218 246 290 262" stroke="#E6F0FA" stroke-width="5"/>
+<path d="M250 250H306" stroke="#E6F0FA"/><text class="dim" x="258" y="244">R 2.0km</text>
+<circle cx="60" cy="60" r="6" fill="#E6F0FA"/><path d="M66 66 200 200" stroke="#E6F0FA" stroke-dasharray="2 4"/>
+<path d="M78 46 214 180" stroke="#E6F0FA"/><path d="M74 42 82 50M210 176 218 184" stroke="#E6F0FA"/><text class="dim" x="150" y="100" transform="rotate(45 150 100)">12.4 km</text>
+<text class="dim" x="74" y="70">現在地</text><text class="dim" x="180" y="318" text-anchor="middle">HND 羽田</text></svg>
+<div class="spec"><div><small>今日の印</small><b>0</b></div><div><small>空港</small><b>14</b><span class="u">/86</span></div><div><small>フライト</small><b>23</b><span class="u">便</span></div></div>
+<div class="call"><b>範囲まで 12.4km</b><span>図番 HND-01</span></div>
+<nav class="tabs"><a class="on">ホーム</a><a>図鑑</a><a>フライト</a><a>運用</a><a>修行</a></nav></main>
+<aside class="ann"><b>メモ（本番には出ません）</b>案K「設計図」：青い紙に白い線の設計図。距離と判定範囲を寸法線で描き、数字は部品表の欄に入れる</aside>
+<script>if(window!==window.top){var a=document.querySelector('.ann');if(a)a.remove()}</script>
+</body></html>
