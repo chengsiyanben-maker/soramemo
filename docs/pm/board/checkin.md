@@ -1,6 +1,12 @@
 # チェックイン担当の帳面
 
 ## いま持っている仕事
+- **11/27 手動の回（PM「11時40分の checkin/feedback-ui を進めて・データ側に合わせ・テストは偽のサーバー・写真は docs/pm/shots-feedback/」）**：checkin/feedback-ui・下書き **PR #289**（c5eabdc2・報告 docs/pm/report-feedback-ui.md・写真 docs/pm/shots-feedback/）。main（fe0f24e7）から。見張りを付けた。**出す前に PM が本人に写真を見せる。data/feedback（表 feedback・関数 feedback-submit）が先に main に入らないと本番では送れない**
+  - 入口：マイページの目次の「意見を送る」（mpIdxHTML）・押せなかった札の下の「不具合を知らせる」（#fbErrStub・#fbErrMsg。say のエラーと ckNote のエラーのときだけ・20秒）
+  - シート #dFb：3択＋本文（2000字・表に合わせた。画面案は400）・空港データは空港と「どこが違いますか」（本文の頭に【滑走路】）・自動の情報（版・端末・画面・直前のエラー）を見せる・送らないもの
+  - ログインしていれば from("feedback").insert（kind・body・app_version・screen・device・last_error・airport・session）、していなければ functions/v1/feedback-submit。54000/429 → 10分に3件、55000/503 → 止めている。電波なしは soramemo.fbq に保留（5件・7日）→ online と開いたときに送る
+  - 変えた関数：say・ckNote・ckLocCard・reportClientError・mpIdxHTML。足した：fbOpen・fbRender・fbAuto・fbRow・fbPost・fbSend・fbqGet・fbqPut・fbqFlush・fbNoteErr・fbErrLink ほか
+  - テスト：t214 を足した。t189 を合わせた。fake_sb.js に feedback の表（insert の db[table] を空で作る）と __fbErr を足した。約35本と tests/ops 成功
 - **11/27 定時の回（帳面の「次にやること」：③は PM の答え待ちのまま → ④ onboarding-b）**：checkin/onboarding-b・下書き **PR #287**（dc7eda92＋main 取り込み bdf2da54・報告 docs/pm/report-onboarding-b.md・写真 docs/pm/shots-onboarding-b/）。main（774c8d46）から作り、fe0f24e7（release-1127b）を取り込んだ。見張りを付けた。**ログインと個人情報にかかわるので、出す前に PM が本人に見せる**
   - はじめて開いたら O1〜O5（dAuth の flow "onb"）。メモ・予定・答えは端末だけ（soramemo.ob）。構成は全部乗せのまま。3枚の案内はマイページの「使い方」からだけ
   - ログインしていない人：半券は同じ形（homeState から "guest" の形をなくした）。#homeGate の中を「試せます」（#obTry・閉じると #gateNorm のログイン／デモ）に。次のフライト #obPlanCard
@@ -750,6 +756,7 @@
 - 確認コードは6けた。メールは Gmail、Supabase の送信上限は1時間100通
 
 ## 次にやること
+- 【11/27 feedback-ui】PR #289：data/feedback が main に入ってから PM が本人に写真を見せて出す。入る前に t214・t189・t24・t195・t196・t118・t119・t124・tests/ops を流す。#287（onboarding-b）とは src/index.html の別の所（どちらも CSS の最後・HTML の dAuth の前後が近い）。あとから入る方で main を取り込み web/ を作り直す。テストの番号は #287 が t213・#289 が t214。本人の答え（上限 400 か 2000・「最近の更新」・ログインしていない人の入口・送ったあとの文）で直す
 - 【11/27 onboarding-b】PR #287：PM が本人に写真を見せて OK を待つ。入る前に t213・t114・t116・t183・t8・t7・t24・t127・t128・t145・t195・t196・t210・tests/ops を流す。本人の答え（報告の1〜7：メモと予定を端末だけか・通知を聞く時機・置き場所・9空港・15分・「あとで設定する」）で直す。メモと予定をアカウントに残すなら、データ担当の表ができてから登録の最後に送る
 - 【次の回】③ checkin/stamp-card-b は PM の答え待ちのまま（下の依頼）。答えが来たら作る。来ていなければ、帳面の積みの残りを上から見る（新しい積みなし）。PM が 11/27 に決めた「不具合・意見を送る」の画面はデータ担当の data/feedback と画面案（design/gemini-1126 F1・F2）のあとで PM から来る見込み
 - 【11/27 t166-fix】PR #284：**main に入った（#286）**。元は「PM の自動の反映を待つ。入る前に t166・tests/kin/a3kin.test.mjs・t142・t159〜t165・t181・t190・t211 を流す。「札は重ならない」の落ちは d6024b5b で直した（端の札の高さの見積もり）
@@ -900,6 +907,7 @@
 - tests/ops は手元では npm の playwright にブラウザがないので、全体に入っている playwright をつないで流した（すべて成功）
 
 ## ほかの担当への依頼
+- データ担当へ（11/27・#289）：data/feedback を先に main へ（画面はそれがないと送れない）。画面が入れる列は kind・body・app_version・screen・device・last_error・airport・session（ログインした人も session を送る）。screen は home・book・log・ops・sg・mypage、device は ios_web・ios_app・android_web・other_web など
 - データ担当へ（11/27・#287）：(a) 行ったことがある空港（メモ）と次の予定を登録したらアカウントに残す表（移行と RLS）を作るかは本人の答え待ち。作るなら自分の分だけ読み書き (b) 新しいログインの流れ（#237 案B）の使われ方の名前（#270 の onboard に足す分）：onb＝open・o2〜o5・skip:<段>・loc_allow・loc_later・login・demo・done:<allow|later>:<答え>:<メモの数>[:plan|:myap]・memo_edit・memo_save／obreg＝open・send・later・login・stamp／ob_try＝hnd・close／ob_plan＝off／gate＝demo_try
 - 【11/26 データ担当へ（PR #281・PM から data.md に写してほしい）】airport_board の next_arr の各便に gate（flight_schedule.arr_gate）と via（経由。あれば）を足してほしい。今日の到着の便の数 arr_today（国内線／国際線の絞り込みに合わせる）も。任意：欠航の到着も next_arr に cancelled:true で入れてよい（画面は同じ便名・定刻を1つにまとめる）
 - 【11/26 PM へ（③の前に答えがほしい）】CLAUDE.md の 11/26 は「#236 案B：印のカードは滑走路の線入り・2回目から『通算○回目』・節目の飾りの縁なし」。ところが design/stamp-card の報告では、案B＝今のハンコ（stampSVG）のカード、滑走路の線（#243 のデータ）は案A の絵。どちらで作るか：(1) 画面案どおり案B（ハンコ・線なし）(2) 案B に滑走路の線を足す（置き場所の画面案が要る：デザイン担当へ）。あわせて「通算○回目」は B3 の「訪問 12回目」の形でよいか
