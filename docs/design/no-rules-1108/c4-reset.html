@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>案C 大きな字のポスター・全部乗せに戻す｜そらメモ 決まりを外した実験</title>
+<style>*{box-sizing:border-box}html,body{margin:0}.phone{position:relative;max-width:420px;min-height:100vh;min-height:100svh;margin:0 auto;overflow:hidden}
+.ann{position:relative;z-index:90;max-width:392px;margin:16px auto 40px;font:13px/1.7 "Noto Sans CJK JP",sans-serif;background:#FFF8D6;color:#5A4A12;padding:12px 14px;border-radius:12px}.ann ul{margin:4px 0 0;padding-left:1.2em}
+
+:root{--bg:#F7F6F2;--ink:#141414;--sub:#575757;--acc:#E04A00;--acct:#B23800;--jp:"Noto Sans CJK JP",sans-serif;--mono:"DejaVu Sans Mono",monospace}
+body{background:#DDDCD6;color:var(--ink);font-family:var(--jp);font-size:15px;line-height:1.55}
+.phone{background:var(--bg)}
+.pg{padding:16px 18px 110px}
+.mast{display:flex;justify-content:space-between;align-items:baseline;border-bottom:4px solid var(--ink);padding-bottom:6px}
+.mast b{font-size:20px;font-weight:900;letter-spacing:.02em}
+.mast small{font-size:13px;color:var(--sub)}
+.hero{font-weight:900;font-size:120px;line-height:.86;letter-spacing:-.04em;margin:18px 0 0}
+.hl{font-size:22px;font-weight:900;line-height:1.3;margin:8px 0 0}
+.dek{font-size:14px;color:var(--sub);margin:4px 0 0}
+.cols{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--ink);border-bottom:1px solid var(--ink);margin-top:16px}
+.cols div{padding:8px 8px 6px}
+.cols div+div{border-left:1px solid var(--ink)}
+.cols small{display:block;font-size:13px;color:var(--sub)}
+.cols b{font-size:44px;font-weight:900;line-height:1}
+.cols b i{font-style:normal;font-size:14px;font-weight:700;color:var(--sub)}
+.box{margin-top:16px;border:3px solid var(--acc);padding:12px 14px}
+.box b{display:block;font-size:17px;font-weight:900}
+.box p{margin:4px 0 0;font-size:14px}
+.acts{display:flex;gap:0;margin-top:10px;border:2px solid var(--ink)}
+.acts span{flex:1;min-height:48px;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:900}
+.acts span+span{border-left:2px solid var(--ink)}
+.acts span.k{background:var(--ink);color:var(--bg)}
+.acts.v{flex-direction:column}
+.acts.v span+span{border-left:0;border-top:2px solid var(--ink)}
+.item{display:grid;grid-template-columns:36px 1fr;border-top:1px solid var(--ink);padding:10px 0;min-height:52px}
+.item .n{font-size:13px;font-weight:700;color:var(--sub);padding-top:2px}
+.item b{display:block;font-size:17px;font-weight:900}
+.item small{font-size:13px;color:var(--sub)}
+.nav{position:fixed;left:50%;transform:translateX(-50%);bottom:0;width:min(420px,100vw);display:flex;background:var(--bg);border-top:4px solid var(--ink);z-index:30;padding:0 10px 10px}
+.nav span{flex:1;min-height:52px;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:900;color:var(--sub)}
+.nav span.on{color:var(--ink);box-shadow:inset 0 4px 0 var(--acc)}
+.tbl{margin-top:8px}
+.tbl h3{margin:22px 0 0;font-size:30px;font-weight:900;display:flex;justify-content:space-between;align-items:baseline;border-bottom:4px solid var(--ink);line-height:1.2}
+.tbl h3 small{font-size:15px;font-weight:700}
+.tbl h4{margin:10px 0 0;font-size:13px;font-weight:900;color:var(--sub)}
+.tr{display:flex;align-items:center;min-height:46px;border-bottom:1px solid var(--ink);font-size:16px;font-weight:700}
+.tr .nm{flex:1}
+.tr .v{width:88px;display:flex;justify-content:flex-end;align-items:center;gap:8px;font-size:14px;font-weight:900}
+.tr .v::after{content:"";width:20px;height:20px;border:2px solid var(--ink);background:var(--ink)}
+.tr.off .nm{color:var(--sub);font-weight:400}
+.tr.off .v{color:var(--acct)}
+.tr.off .v::after{background:transparent;border-color:var(--acc)}
+.tr.lk .v{color:var(--sub)}
+.tr.lk .v::after{background:repeating-linear-gradient(45deg,var(--ink) 0 2px,transparent 2px 5px)}
+.dim{position:fixed;inset:0;background:rgba(20,20,20,.55);z-index:50}
+.full{position:fixed;inset:0;max-width:420px;margin:0 auto;background:var(--acc);color:#141414;z-index:60;padding:20px 20px}
+.full .hero{font-size:150px}
+.full .acts{border-color:#141414}
+.full .acts span.k{background:#141414;color:var(--acc)}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:76px;width:calc(min(420px,100vw) - 36px);background:var(--ink);color:var(--bg);padding:6px 6px 6px 14px;z-index:35;display:flex;align-items:center;gap:8px;font-size:15px;font-weight:700}
+.toast span{flex:1}
+.toast i{font-style:normal;min-height:44px;display:flex;align-items:center;padding:0 14px;background:var(--bg);color:var(--ink)}
+.foot{font-size:13px;color:var(--sub);margin-top:18px;border-top:1px solid var(--ink);padding-top:6px}
+</style></head><body>
+<main class="phone"><div class="pg"><div class="mast"><b>‹ マイページ</b><small>押すたびに保存</small></div><div class="hero" style="font-size:96px">33<span style="font-size:32px;color:var(--sub);letter-spacing:0">/40</span></div><div class="hl">表示の編集</div><div class="dek">黒い四角が出す、オレンジの空いた四角が隠す。</div><div class="tbl"><h3>タブ<small>3/4</small></h3><div class="tr lk"><span class="nm">ホーム</span><span class="v">いつも</span></div><div class="tr"><span class="nm">図鑑</span><span class="v">出す</span></div><div class="tr"><span class="nm">フライト</span><span class="v">出す</span></div><div class="tr off"><span class="nm">運用</span><span class="v">隠す</span></div><div class="tr"><span class="nm">修行</span><span class="v">出す</span></div><h3>見方<small>17/21</small></h3><h4>図鑑</h4><div class="tr"><span class="nm">地図</span><span class="v">出す</span></div><div class="tr"><span class="nm">案内標</span><span class="v">出す</span></div><div class="tr"><span class="nm">タイル</span><span class="v">出す</span></div><div class="tr off"><span class="nm">年代記</span><span class="v">隠す</span></div><div class="tr"><span class="nm">地方</span><span class="v">出す</span></div><h4>フライト</h4><div class="tr"><span class="nm">修行</span><span class="v">出す</span></div><div class="tr"><span class="nm">搭乗券</span><span class="v">出す</span></div><div class="tr"><span class="nm">案内板</span><span class="v">出す</span></div><div class="tr"><span class="nm">地図</span><span class="v">出す</span></div><div class="tr off"><span class="nm">カレンダー</span><span class="v">隠す</span></div><div class="tr"><span class="nm">月ごと</span><span class="v">出す</span></div><div class="tr off"><span class="nm">高度</span><span class="v">隠す</span></div><div class="tr off"><span class="nm">文字だけ</span><span class="v">隠す</span></div><div class="tr"><span class="nm">路線</span><span class="v">出す</span></div><h4>運用</h4><div class="tr"><span class="nm">案内板</span><span class="v">出す</span></div><div class="tr"><span class="nm">1日の山</span><span class="v">出す</span></div><div class="tr"><span class="nm">滑走路</span><span class="v">出す</span></div><div class="tr"><span class="nm">定時</span><span class="v">出す</span></div><div class="tr"><span class="nm">空の道すじ</span><span class="v">出す</span></div><div class="tr"><span class="nm">短冊</span><span class="v">出す</span></div><div class="tr"><span class="nm">撮る人</span><span class="v">出す</span></div><h3>かたまり<small>13/15</small></h3><h4>ホーム</h4><div class="tr"><span class="nm">これから乗る便</span><span class="v">出す</span></div><div class="tr off"><span class="nm">イベントのお知らせ</span><span class="v">隠す</span></div><div class="tr"><span class="nm">これまでの記録</span><span class="v">出す</span></div><div class="tr"><span class="nm">最近の印</span><span class="v">出す</span></div><h4>運用</h4><div class="tr"><span class="nm">遅れ・ダイバート</span><span class="v">出す</span></div><div class="tr"><span class="nm">地図と近くの機体</span><span class="v">出す</span></div><div class="tr"><span class="nm">特別塗装機</span><span class="v">出す</span></div><div class="tr"><span class="nm">撮影地</span><span class="v">出す</span></div><div class="tr"><span class="nm">門限のある時間</span><span class="v">出す</span></div><div class="tr"><span class="nm">ゴーアラウンド（推定）</span><span class="v">出す</span></div><h4>成績</h4><div class="tr"><span class="nm">パスポート</span><span class="v">出す</span></div><div class="tr"><span class="nm">乗った機体</span><span class="v">出す</span></div><div class="tr"><span class="nm">航空会社別</span><span class="v">出す</span></div><div class="tr"><span class="nm">ステータスの目安</span><span class="v">出す</span></div><div class="tr off"><span class="nm">修行のまとめ</span><span class="v">隠す</span></div></div><div class="acts" style="margin-top:20px"><span>全部乗せに戻す（7）</span></div><p class="foot">ログインしているので、ほかの端末でも同じ表示になります。</p></div><div class="full"><div class="mast" style="border-color:#141414"><b>全部乗せに戻す</b><small style="color:#141414">確認</small></div><div class="hero">7→0</div><div class="hl">隠している7こを、全部また出します。</div><div class="cols" style="border-color:#141414"><div><small style="color:#141414">タブ</small><b>1</b></div><div style="border-color:#141414"><small style="color:#141414">見方</small><b>4</b></div><div style="border-color:#141414"><small style="color:#141414">かたまり</small><b>2</b></div></div><p style="font-size:15px;font-weight:700;margin:12px 0 0">記録はそのままです。</p><div class="acts v" style="margin-top:16px"><span class="k">全部出す</span><span>やめる</span></div></div></main>
+<aside class="ann"><b>メモ（本番には出ません・実験）</b><ul><li>案C 大きな字のポスター：全部乗せに戻す</li><li>外した決まり：大胆な余白の代わりに、120px の巨大な字で画面を埋める／黒い太線と細い罫線で区切る／角丸・影をなくし、全部まっすぐな四角／ピルをやめて四角を塗る・空けるで出す・隠す／ホームの地図をやめて、空港コードを見出しにした紙面／確認はシートでなく、画面全体をオレンジにする</li><li>中身（全部乗せで始める・隠す・すぐ保存・戻す・提案は1回）はふだんの画面案（all-in-filter）と同じ</li></ul></aside>
+<script>if(window!==window.top){var a=document.querySelector('.ann');if(a)a.remove()}</script>
+</body></html>

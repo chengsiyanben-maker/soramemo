@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>案E ドット絵の携帯ゲーム・表示の編集（7こ隠したとき）｜そらメモ 決まりを外した実験</title>
+<style>*{box-sizing:border-box}html,body{margin:0}.phone{position:relative;max-width:420px;min-height:100vh;min-height:100svh;margin:0 auto;overflow:hidden}
+.ann{position:relative;z-index:90;max-width:392px;margin:16px auto 40px;font:13px/1.7 "Noto Sans CJK JP",sans-serif;background:#FFF8D6;color:#5A4A12;padding:12px 14px;border-radius:12px}.ann ul{margin:4px 0 0;padding-left:1.2em}
+
+
+:root{--nv:#1C2340;--cr:#F4ECD6;--co:#C2412F;--tl:#237069;--sub:#4A4F66;--jp:"Noto Sans CJK JP",sans-serif;--mono:"DejaVu Sans Mono",monospace}
+body{background:#10142A;color:var(--nv);font-family:var(--jp);font-size:15px;line-height:1.55}
+.phone{background:var(--cr);background-image:radial-gradient(rgba(28,35,64,.08) 1px,transparent 1px);background-size:6px 6px}
+.pg{padding:14px 14px 110px}
+.px{background:#FFFBEF;position:relative;margin:4px;box-shadow:0 -4px 0 var(--nv),0 4px 0 var(--nv),-4px 0 0 var(--nv),4px 0 0 var(--nv),4px 8px 0 rgba(28,35,64,.25)}
+.top{display:flex;justify-content:space-between;align-items:center}
+.top .px{padding:6px 10px;font-weight:900}
+.top .px small{font-size:13px;font-weight:700;color:var(--sub);margin-left:6px}
+.mp{min-height:44px;display:flex;align-items:center;padding:0 12px;font-weight:900;font-size:14px}
+.stage{margin-top:16px;padding:14px;background:var(--nv);color:var(--cr)}
+.stage .sky{height:150px;position:relative;background:linear-gradient(#2A3460 0 25%,#34407A 25% 50%,#3E4C8E 50% 75%,#4A59A2 75%)}
+.stage svg{position:absolute;left:0;top:0;width:100%;height:100%;image-rendering:pixelated}
+.stage .row{display:flex;justify-content:space-between;align-items:flex-end;margin-top:10px}
+.code{font-family:var(--mono);font-size:56px;font-weight:900;letter-spacing:.06em;line-height:1;color:#FFD86B}
+.stage small{display:block;font-size:13px;color:#C9CDE6}
+.dist{text-align:right;font-family:var(--mono);font-size:28px;font-weight:900}
+.dist i{font-style:normal;font-size:14px;color:#C9CDE6}
+.hud{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:18px}
+.hud .px{padding:6px 8px;text-align:center}
+.hud small{display:block;font-size:13px;font-weight:700;color:var(--sub)}
+.hud b{font-family:var(--mono);font-size:28px;font-weight:900;line-height:1.1}
+.hud b i{font-style:normal;font-size:13px;color:var(--sub)}
+.msg{margin-top:20px;padding:12px 14px}
+.msg .who{position:absolute;top:-14px;left:10px;background:var(--co);color:#fff;font-size:13px;font-weight:900;padding:0 8px;box-shadow:0 -2px 0 var(--nv),0 2px 0 var(--nv),-2px 0 0 var(--nv),2px 0 0 var(--nv)}
+.msg b{display:block;font-size:17px;margin-top:4px}
+.msg p{margin:4px 0 0;font-size:14px}
+.ch{margin-top:10px;display:flex;flex-direction:column;gap:2px}
+.ch span{min-height:44px;display:flex;align-items:center;gap:8px;font-weight:900;font-size:16px;padding:0 6px}
+.ch span::before{content:"▶";color:var(--co);font-size:14px;width:14px}
+.ch span.o::before{content:"";}
+.sfx{font-size:13px;font-weight:900;color:var(--tl);margin-left:auto}
+.lst{margin-top:20px;padding:4px 12px}
+.lst div{display:flex;gap:10px;align-items:center;min-height:52px}
+.lst div+div{border-top:2px dotted rgba(28,35,64,.35)}
+.lst i{font-style:normal;width:22px;height:22px;background:var(--tl);flex:none;box-shadow:inset -4px -4px 0 rgba(0,0,0,.2)}
+.lst b{display:block;font-size:15px}
+.lst small{display:block;font-size:13px;color:var(--sub)}
+.unoff{font-size:13px;color:var(--sub);margin:18px 4px 0}
+.nav{position:fixed;left:50%;transform:translateX(-50%);bottom:0;width:min(420px,100vw);background:var(--nv);display:flex;z-index:30;padding:6px 6px 10px}
+.nav span{flex:1;min-height:52px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:900;color:#C9CDE6}
+.nav span.on{color:var(--nv);background:#FFD86B}
+/* 編集 */
+.tt{margin-top:16px;padding:10px 14px;display:flex;justify-content:space-between;align-items:center}
+.tt b{font-size:20px}
+.tt .n{font-family:var(--mono);font-size:34px;font-weight:900}.tt .n i{font-style:normal;font-size:15px;color:var(--sub)}
+.menu{margin-top:18px;padding:8px 12px}
+.menu h3{margin:4px 0 2px;font-size:16px;display:flex;justify-content:space-between;color:var(--co)}
+.menu h3 small{font-family:var(--mono);font-size:14px;color:var(--nv)}
+.menu h4{margin:8px 0 0;font-size:13px;color:var(--tl)}
+.op{display:flex;align-items:center;gap:8px;min-height:44px;font-weight:900;font-size:15px}
+.op::before{content:"";width:14px;flex:none}
+.op.cur::before{content:"▶";color:var(--co);font-size:14px}
+.op .s{margin-left:auto;font-family:var(--mono);font-size:14px;padding:2px 8px;background:var(--tl);color:#fff;box-shadow:0 -2px 0 var(--nv),0 2px 0 var(--nv),-2px 0 0 var(--nv),2px 0 0 var(--nv)}
+.op.off{color:var(--sub);font-weight:500}
+.op.off .s{background:#FFFBEF;color:var(--sub)}
+.op.lk .s{background:var(--nv)}
+.btn{margin-top:22px;min-height:50px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:16px;color:var(--co)}
+
+</style></head><body>
+<main class="phone"><div class="pg" style="padding-bottom:40px">
+<div class="top"><div class="px mp">‹ マイページ</div><div class="px" style="font-size:13px">押すたびに保存</div></div>
+<div class="tt px"><b>表示の編集</b><span class="n">33<i>/40</i></span></div>
+<div class="menu px"><h3>タブ<small>3/4</small></h3><div class="op lk"><span>ホーム</span><span class="s">いつも</span></div><div class="op "><span>図鑑</span><span class="s">ON</span></div><div class="op "><span>フライト</span><span class="s">ON</span></div><div class="op off cur"><span>運用</span><span class="s">‐‐</span></div><div class="op "><span>修行</span><span class="s">ON</span></div></div><div class="menu px"><h3>見方<small>17/21</small></h3><h4>図鑑</h4><div class="op "><span>地図</span><span class="s">ON</span></div><div class="op "><span>案内標</span><span class="s">ON</span></div><div class="op "><span>タイル</span><span class="s">ON</span></div><div class="op off"><span>年代記</span><span class="s">‐‐</span></div><div class="op "><span>地方</span><span class="s">ON</span></div><h4>フライト</h4><div class="op "><span>修行</span><span class="s">ON</span></div><div class="op "><span>搭乗券</span><span class="s">ON</span></div><div class="op "><span>案内板</span><span class="s">ON</span></div><div class="op "><span>地図</span><span class="s">ON</span></div><div class="op off"><span>カレンダー</span><span class="s">‐‐</span></div><div class="op "><span>月ごと</span><span class="s">ON</span></div><div class="op off"><span>高度</span><span class="s">‐‐</span></div><div class="op off"><span>文字だけ</span><span class="s">‐‐</span></div><div class="op "><span>路線</span><span class="s">ON</span></div><h4>運用</h4><div class="op "><span>案内板</span><span class="s">ON</span></div><div class="op "><span>1日の山</span><span class="s">ON</span></div><div class="op "><span>滑走路</span><span class="s">ON</span></div><div class="op "><span>定時</span><span class="s">ON</span></div><div class="op "><span>空の道すじ</span><span class="s">ON</span></div><div class="op "><span>短冊</span><span class="s">ON</span></div><div class="op "><span>撮る人</span><span class="s">ON</span></div></div><div class="menu px"><h3>かたまり<small>13/15</small></h3><h4>ホーム</h4><div class="op "><span>これから乗る便</span><span class="s">ON</span></div><div class="op off"><span>イベントのお知らせ</span><span class="s">‐‐</span></div><div class="op "><span>これまでの記録</span><span class="s">ON</span></div><div class="op "><span>最近の印</span><span class="s">ON</span></div><h4>運用</h4><div class="op "><span>遅れ・ダイバート</span><span class="s">ON</span></div><div class="op "><span>地図と近くの機体</span><span class="s">ON</span></div><div class="op "><span>特別塗装機</span><span class="s">ON</span></div><div class="op "><span>撮影地</span><span class="s">ON</span></div><div class="op "><span>門限のある時間</span><span class="s">ON</span></div><div class="op "><span>ゴーアラウンド（推定）</span><span class="s">ON</span></div><h4>成績</h4><div class="op "><span>パスポート</span><span class="s">ON</span></div><div class="op "><span>乗った機体</span><span class="s">ON</span></div><div class="op "><span>航空会社別</span><span class="s">ON</span></div><div class="op "><span>ステータスの目安</span><span class="s">ON</span></div><div class="op off"><span>修行のまとめ</span><span class="s">‐‐</span></div></div><div class="btn px">全部乗せに戻す（7）</div><p class="unoff">ログインしているので、ほかの端末でも同じ表示になります。</p></div></main>
+<aside class="ann"><b>メモ（本番には出ません・実験）</b><ul><li>案E ドット絵の携帯ゲーム：表示の編集（7こ隠したとき）</li><li>外した決まり：角丸カードと影をやめ、段々の角のドット枠に／ゴシックの細い字をやめ、等幅の数字と太い字だけ／色は紺・クリーム・珊瑚・青緑の4色だけ／ピルをやめて「▶」のカーソルと［ON］［‐‐］の札／押したときの「ピコッ」などの効果音の文字を小さく添える</li><li>良い点：印集めの「集める楽しさ」が出る。表示の編集が「設定メニュー」に見え、出す・隠すが［ON］［‐‐］ではっきりする</li><li>困る点：経営の数字や運用の細かい表には合いにくい。大人の利用者や撮る人には子どもっぽく見えるおそれ。ドットの字は持てないので、字はふつうの字で代わりにしている</li><li>中身（全部乗せで始める・隠す・すぐ保存・戻す・提案は1回）はふだんの画面案（all-in-filter）と同じ</li></ul></aside>
+<script>if(window!==window.top){var a=document.querySelector('.ann');if(a)a.remove()}</script>
+</body></html>

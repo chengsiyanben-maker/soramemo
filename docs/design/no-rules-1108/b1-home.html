@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>案B 夜の操縦席・ホーム（はじめて・全部乗せ）｜そらメモ 決まりを外した実験</title>
+<style>*{box-sizing:border-box}html,body{margin:0}.phone{position:relative;max-width:420px;min-height:100vh;min-height:100svh;margin:0 auto;overflow:hidden}
+.ann{position:relative;z-index:90;max-width:392px;margin:16px auto 40px;font:13px/1.7 "Noto Sans CJK JP",sans-serif;background:#FFF8D6;color:#5A4A12;padding:12px 14px;border-radius:12px}.ann ul{margin:4px 0 0;padding-left:1.2em}
+
+:root{--bg:#04060A;--panel:#0C1118;--bezel:#1B232E;--txt:#D8E1EA;--sub:#8C9AAB;--cyan:#4FD8E8;--grn:#57E38A;--amb:#FFB547;--mag:#F07AE0;--mono:"DejaVu Sans Mono",ui-monospace,monospace;--jp:"Noto Sans CJK JP",sans-serif}
+body{background:#000;color:var(--txt);font-family:var(--jp);font-size:15px;line-height:1.55}
+.phone{background:var(--bg)}
+.pg{padding:14px 14px 120px}
+.top{display:flex;justify-content:space-between;align-items:center;font-family:var(--mono);font-size:13px;color:var(--sub);border-bottom:1px solid var(--bezel);padding-bottom:8px}
+.top b{color:var(--grn);font-weight:700}
+.nd{position:relative;margin:10px -14px 0;height:300px}
+.nd svg{width:100%;height:100%;display:block}
+.dp{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:10px}
+.dp div{background:var(--panel);border:1px solid var(--bezel);padding:8px 10px}
+.dp small{display:block;font-size:13px;color:var(--sub)}
+.dp b{font-family:var(--mono);font-size:30px;color:var(--grn);line-height:1.1}
+.dp b i{font-style:normal;font-size:13px;color:var(--sub);margin-left:3px}
+.msg{margin-top:10px;border:1px solid var(--cyan);padding:10px 12px;color:var(--cyan);font-size:14px}
+.msg b{display:block;color:var(--txt);font-size:15px}
+.keys{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
+.k{min-height:48px;flex:1;display:flex;align-items:center;justify-content:center;background:linear-gradient(#222B37,#151B23);border:1px solid #2E3947;border-radius:4px;font-size:14px;font-weight:700;color:var(--txt);padding:0 10px;box-shadow:inset 0 1px 0 rgba(255,255,255,.08)}
+.k.cy{color:var(--cyan)}
+.lst{margin-top:10px;background:var(--panel);border:1px solid var(--bezel)}
+.lst .r{display:flex;justify-content:space-between;align-items:center;min-height:44px;padding:0 12px;font-size:14px;border-bottom:1px solid var(--bezel)}
+.lst .r:last-child{border-bottom:0}
+.lst .r span{color:var(--sub)}
+.lst .r b{font-family:var(--mono);color:var(--txt);font-weight:400}
+.lbl{font-family:var(--mono);font-size:13px;color:var(--cyan);letter-spacing:.12em;margin-top:16px}
+.sk{position:fixed;left:50%;transform:translateX(-50%);bottom:0;width:min(420px,100vw);display:flex;gap:4px;padding:8px 8px 14px;background:#000;border-top:1px solid var(--bezel);z-index:30}
+.sk span{flex:1;min-height:52px;display:flex;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(#1E2630,#11161D);border:1px solid #2E3947;border-radius:4px;font-size:13px;font-weight:700;color:var(--sub)}
+.sk span.on{color:var(--grn);border-color:var(--grn);box-shadow:0 0 0 1px var(--grn) inset}
+.ovh{margin-top:12px;background:#2A3340;padding:10px;border-radius:6px;box-shadow:inset 0 0 0 2px #3A4554}
+.ovh h3{margin:0 0 8px;font-size:13px;font-weight:700;color:#E8EDF2;letter-spacing:.15em;display:flex;justify-content:space-between}
+.ovh h3 i{font-style:normal;font-family:var(--mono);color:#E8EDF2}
+.ovh h4{margin:8px 0 6px;font-size:13px;color:#C7D0DA;font-weight:700}
+.sw{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.pb{min-height:58px;background:#0B0F14;border:2px solid #4A5565;border-radius:4px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:4px;text-align:center}
+.pb b{font-size:13px;color:#E8EDF2;line-height:1.25;font-weight:700}
+.pb i{font-style:normal;font-family:var(--mono);font-size:13px;font-weight:700;margin-top:3px;letter-spacing:.05em}
+.pb.on i{color:var(--grn);text-shadow:0 0 6px rgba(87,227,138,.6)}
+.pb.off{background:#0B0F14;border-color:var(--amb)}
+.pb.off i{color:var(--amb)}
+.pb.off b{color:#B8C2CD}
+.pb.lk i{color:var(--sub)}
+.dim{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:50}
+.cau{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);width:calc(min(420px,100vw) - 32px);background:var(--panel);border:2px solid var(--amb);z-index:60;padding:16px}
+.cau .hdr{font-family:var(--mono);font-size:13px;color:#04060A;background:var(--amb);display:inline-block;padding:2px 8px;font-weight:700}
+.cau h3{margin:10px 0 0;font-size:20px;color:var(--txt)}
+.cau .g{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:12px}
+.cau .g div{border:1px solid var(--bezel);padding:8px;text-align:center}
+.cau .g small{display:block;font-size:14px;color:var(--txt);font-weight:700}
+.cau .g b{font-family:var(--mono);font-size:30px;color:var(--amb)}
+.cau p{font-size:14px;color:var(--sub);margin:10px 0 0}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:86px;width:calc(min(420px,100vw) - 28px);background:#0C1118;border:1px solid var(--grn);color:var(--grn);padding:6px 6px 6px 12px;z-index:35;display:flex;align-items:center;gap:8px;font-size:14px}
+.toast span{flex:1}
+.foot{font-size:13px;color:var(--sub);margin-top:16px}
+.chk{display:flex;align-items:center;gap:10px;min-height:52px;border-bottom:1px dotted #2E3947;font-size:15px}
+.chk .nm{flex:1}
+.chk .nm small{display:block;font-size:13px;color:var(--sub)}
+.chk .st{font-family:var(--mono);font-size:14px;font-weight:700;color:var(--amb);min-width:76px;text-align:right}
+.chk .dots{flex:none;color:var(--sub);font-family:var(--mono)}
+</style></head><body>
+<main class="phone"><div class="pg"><div class="top"><span>そらメモ</span><span>近い空港 <b>HND</b> ・ 範囲まで 12.4km</span></div><div class="nd"><svg viewBox="0 0 390 300" role="img" aria-label="近くの空港を円で示す計器風の地図">
+<g fill="none" stroke="#2E3947" stroke-width="1"><path d="M40 270 A155 155 0 0 1 350 270"/><path d="M95 270 A100 100 0 0 1 295 270"/><path d="M145 270 A50 50 0 0 1 245 270"/></g>
+<g fill="#FFFFFF" font-family="DejaVu Sans Mono" font-size="13"><text x="28" y="268" fill="#8C9AAB">20</text><text x="83" y="268" fill="#8C9AAB">10</text><text x="134" y="268" fill="#8C9AAB">5</text></g>
+<g stroke="#D8E1EA" stroke-width="1.5"><path d="M195 112v-10M117 133l-6-8M273 133l6-8M70 190l-9-4M320 190l9-4"/></g>
+<text x="195" y="96" text-anchor="middle" font-family="DejaVu Sans Mono" font-size="14" fill="#D8E1EA">N</text>
+<path d="M195 252 l-10 20 h20z" fill="none" stroke="#FFB547" stroke-width="2"/>
+<g><circle cx="240" cy="160" r="9" fill="none" stroke="#F07AE0" stroke-width="2"/><text x="254" y="158" font-family="DejaVu Sans Mono" font-size="16" fill="#F07AE0" font-weight="700">HND</text><text x="254" y="176" font-family="Noto Sans CJK JP" font-size="13" fill="#F07AE0">12.4km</text></g>
+<path d="M195 262 L240 160" stroke="#F07AE0" stroke-width="1.5" stroke-dasharray="5 4"/>
+<g fill="none" stroke="#4FD8E8" stroke-width="1.6"><circle cx="70" cy="60" r="6"/><circle cx="330" cy="40" r="6"/></g>
+<g font-family="DejaVu Sans Mono" font-size="14" fill="#4FD8E8"><text x="80" y="64">NRT 58km</text><text x="282" y="64">IBR</text></g>
+</svg></div><div class="dp"><div><small>今日の印</small><b>0</b></div><div><small>空港</small><b>0<i>/86</i></b></div><div><small>フライト</small><b>0</b></div></div><div class="msg"><b>全部の系統を入れてあります</b>使わないものは「表示の編集」で切れます。切っても記録は消えません。<div class="keys"><span class="k cy">このままでよい</span><span class="k">表示の編集</span></div></div><div class="lbl">ホームの中身</div><div class="lst"><div class="r"><span>これから乗る便</span><b>便名を入れる</b></div><div class="r"><span>イベントのお知らせ</span><b>11/14 見学デッキ</b></div><div class="r"><span>これまでの記録</span><b>0 便</b></div><div class="r"><span>最近の印</span><b>なし</b></div></div><p class="foot">非公式アプリです。航空会社・空港とは関係ありません。</p></div><nav class="sk"><span class="on">ホーム</span><span class="">図鑑</span><span class="">フライト</span><span class="">運用</span><span class="">修行</span></nav></main>
+<aside class="ann"><b>メモ（本番には出ません・実験）</b><ul><li>案B 夜の操縦席：ホーム（はじめて・全部乗せ）</li><li>外した決まり：画面全体を黒に／等幅の数字と、緑・水色・黄色・桃色の光る字（JAL赤・ANA青は使わない）／角丸カードをやめて四角い計器の枠／ピルをやめて押しボタン（入＝緑・切＝黄色の枠）とソフトキー／ホームの航空図をやめて、扇形の計器風の地図（近い空港を桃色）／案内板風は「一部だけ」の決まりを外し、数字は全部計器の字</li><li>中身（全部乗せで始める・隠す・すぐ保存・戻す・提案は1回）はふだんの画面案（all-in-filter）と同じ</li></ul></aside>
+<script>if(window!==window.top){var a=document.querySelector('.ann');if(a)a.remove()}</script>
+</body></html>
