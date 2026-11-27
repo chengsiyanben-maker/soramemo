@@ -1,0 +1,173 @@
+{
+ "measure": {
+  "w1-week": {
+   "small": [],
+   "tap": [],
+   "over": [],
+   "cut": []
+  },
+  "w1-week-667": {
+   "small": [],
+   "tap": [],
+   "over": [],
+   "cut": []
+  },
+  "w1-week-n": {
+   "small": [],
+   "tap": [],
+   "over": [],
+   "cut": []
+  },
+  "w1-week-rm": {
+   "running": 0
+  },
+  "w2-band": {
+   "small": [],
+   "tap": [],
+   "over": [],
+   "cut": []
+  },
+  "w2-band-667": {
+   "small": [],
+   "tap": [],
+   "over": [],
+   "cut": []
+  },
+  "w2-band-n": {
+   "small": [],
+   "tap": [],
+   "over": [],
+   "cut": []
+  },
+  "w2-band-rm": {
+   "running": 0
+  },
+  "m1-map": {
+   "small": [],
+   "tap": [],
+   "over": [],
+   "cut": []
+  },
+  "m1-map-667": {
+   "small": [],
+   "tap": [],
+   "over": [],
+   "cut": []
+  },
+  "m1-map-n": {
+   "small": [],
+   "tap": [],
+   "over": [],
+   "cut": []
+  },
+  "m1-map-rm": {
+   "running": 0
+  },
+  "w3-est": {
+   "small": [],
+   "tap": [],
+   "over": [],
+   "cut": []
+  },
+  "w3-est-667": {
+   "small": [],
+   "tap": [],
+   "over": [],
+   "cut": []
+  },
+  "w3-est-n": {
+   "small": [],
+   "tap": [],
+   "over": [],
+   "cut": []
+  },
+  "w3-est-rm": {
+   "running": 0
+  },
+  "s1-est": {
+   "small": [],
+   "tap": [],
+   "over": [],
+   "cut": []
+  },
+  "s1-est-667": {
+   "small": [],
+   "tap": [],
+   "over": [],
+   "cut": []
+  },
+  "s1-est-n": {
+   "small": [],
+   "tap": [],
+   "over": [],
+   "cut": []
+  },
+  "s1-est-rm": {
+   "running": 0
+  },
+  "e1-now": {
+   "small": [],
+   "tap": [],
+   "over": [],
+   "cut": []
+  },
+  "e1-now-667": {
+   "small": [],
+   "tap": [],
+   "over": [],
+   "cut": []
+  },
+  "e1-now-n": {
+   "small": [],
+   "tap": [],
+   "over": [],
+   "cut": []
+  },
+  "e1-now-rm": {
+   "running": 0
+  },
+  "e2-spot": {
+   "small": [],
+   "tap": [],
+   "over": [],
+   "cut": []
+  },
+  "e2-spot-667": {
+   "small": [],
+   "tap": [],
+   "over": [],
+   "cut": []
+  },
+  "e2-spot-n": {
+   "small": [],
+   "tap": [],
+   "over": [],
+   "cut": []
+  },
+  "e2-spot-rm": {
+   "running": 0
+  },
+  "e3-zukan": {
+   "small": [],
+   "tap": [],
+   "over": [],
+   "cut": []
+  },
+  "e3-zukan-667": {
+   "small": [],
+   "tap": [],
+   "over": [],
+   "cut": []
+  },
+  "e3-zukan-n": {
+   "small": [],
+   "tap": [],
+   "over": [],
+   "cut": []
+  },
+  "e3-zukan-rm": {
+   "running": 0
+  }
+ },
+ "errors": []
+}
