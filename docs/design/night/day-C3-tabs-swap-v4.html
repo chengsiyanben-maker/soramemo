@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="ja" data-theme="day"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>タブを選ぶ（昼・5つのときの入れ替え）｜そらメモ ON／OFF の試し（4版）</title>
+<style>:root{
+  --bg:#EEF1F5; --card:#FFFFFF; --card2:#F4F6F9; --ink:#374151; --strong:#1F2937; --sub:#5F6878; --mute:#6B7280; --link:#1E3A6E;
+  --ring:rgba(17,24,39,.08); --shadow:0 1px 2px rgba(17,24,39,.04),0 10px 30px -8px rgba(17,24,39,.10),inset 0 0 0 1px rgba(17,24,39,.07);
+  --tabs:rgba(255,255,255,.94); --dim:rgba(17,24,39,.38); --grab:#D1D5DB; --edge:#9FB3CF; --toast:#1F2937; --toast-ink:#F3F4F6; --toast-btn:#374151;
+  /* スイッチ（4版）：ON＝紺の地に白い字、OFF＝灰色の地に濃いグレーの字。OFF の縁とつまみの縁は地と 3:1 以上（#768090） */
+  --sw-on-bg:#16233A; --sw-on-ring:#16233A; --sw-on-ink:#FFFFFF; --sw-on-knob:#FFFFFF;
+  --sw-off-bg:#E5E8EE; --sw-off-ring:#768090; --sw-off-ink:#4B5563; --sw-off-knob:#FFFFFF; --sw-off-knob-ring:#768090;
+  --num:"Barlow Condensed","Arial Narrow",var(--gothic);
+  --prev:#E3E7ED; --prev-row:#FFFFFF; --prev-lock:#F4F6F9; --row-off:#F7F8FA;
+  color-scheme:light;
+}
+:root{--gothic:"Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic UI","Yu Gothic","Meiryo","Noto Sans JP","Noto Sans CJK JP",system-ui,sans-serif;}
+*{box-sizing:border-box}html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--gothic);font-size:15px;line-height:1.6;-webkit-text-size-adjust:100%}
+.phone{position:relative;max-width:420px;min-height:100vh;min-height:100svh;margin:0 auto;overflow:hidden;background:var(--bg)}
+.wrap{padding:14px 16px 110px}
+.top{display:flex;justify-content:space-between;padding:14px 16px}.top span{height:44px;display:inline-flex;align-items:center;padding:0 16px;border-radius:999px;background:var(--card);box-shadow:var(--shadow);font-size:14px;font-weight:800;color:var(--strong)}
+.tabs{position:fixed;left:50%;transform:translateX(-50%);bottom:14px;width:calc(min(420px,100vw) - 28px);height:64px;border-radius:999px;background:var(--tabs);box-shadow:0 10px 30px -6px rgba(0,0,0,.35),inset 0 0 0 1px var(--ring);display:flex;padding:0 8px;z-index:70}
+.tabs b{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;font-size:13px;font-weight:700;color:var(--sub);position:relative}
+.tabs b.on{color:var(--strong)}
+.tabs svg,.mini svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.dim{position:fixed;inset:0;background:var(--dim);z-index:50}
+.sheet{position:fixed;left:50%;transform:translateX(-50%);bottom:0;width:min(420px,100vw);background:var(--card);border-radius:28px 28px 0 0;box-shadow:0 -10px 40px -10px rgba(0,0,0,.4);z-index:60;padding:10px 16px 28px;max-height:calc(100svh - 56px);overflow:auto}
+.grab{width:40px;height:5px;border-radius:3px;background:var(--grab);margin:2px auto 10px}
+.bar{display:flex;align-items:center;justify-content:space-between;gap:8px}
+h3{margin:0;font-size:22px;color:var(--strong)}
+h1{font-size:26px;line-height:1.3;color:var(--strong);margin:18px 4px 0}
+.done,.back{height:44px;display:inline-flex;align-items:center;padding:0 18px;border-radius:999px;background:var(--card2);box-shadow:inset 0 0 0 1px var(--ring);font-size:15px;font-weight:800;color:var(--strong)}
+.back{background:var(--card);box-shadow:var(--shadow);font-size:14px;padding:0 16px}
+.lead{font-size:14px;color:var(--ink);margin:8px 2px 0;line-height:1.65}
+ol{list-style:none;margin:10px 0 0;padding:0}
+.ts{display:flex;align-items:center;gap:10px;min-height:60px;border-radius:18px;background:var(--card2);padding:0 0 0 12px;margin-top:8px}
+.ts .n{width:16px;font-family:var(--num);font-weight:700;font-size:18px;color:var(--sub);text-align:center;flex:none}
+.ts .ii{width:36px;height:36px;border-radius:999px;background:var(--card);display:grid;place-items:center;color:var(--strong);flex:none}
+.ts .ii svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.ts b{flex:1;min-width:0;font-size:15px;color:var(--strong);line-height:1.4;padding:8px 0}.ts b small{display:block;font-size:13px;font-weight:500;color:var(--sub);line-height:1.45}
+.ts b small.full{color:var(--strong);font-weight:700}
+.ts .lockt{font-size:13px;font-weight:700;color:var(--sub);padding-right:16px;white-space:nowrap}
+.ts .h{width:44px;height:44px;display:grid;place-items:center;color:var(--sub);flex:none;margin-right:2px}
+.ts .h svg{width:20px;height:20px;stroke:currentColor;stroke-width:2;fill:none;stroke-linecap:round}
+/* OFF の行：地をなくし縁だけ・字は薄く。スイッチの濃さは落とさない */
+.ts.off{background:var(--row-off);box-shadow:inset 0 0 0 1.5px var(--ring)}
+.ts.off b{color:var(--sub)}
+.ts.off .n{width:0;margin-right:-10px}
+.ts.off .ii{color:var(--sub);background:var(--card2)}
+.ts.pick{box-shadow:inset 0 0 0 2px var(--edge)}
+.sw{width:76px;height:44px;display:grid;place-items:center;flex:none}
+.sw i{position:relative;display:block;width:68px;height:34px;border-radius:999px;font-style:normal;font-size:13px;font-weight:800;line-height:34px;letter-spacing:.04em}
+.sw i::after{content:"";position:absolute;top:4px;width:26px;height:26px;border-radius:50%}
+.sw.on i{background:var(--sw-on-bg);box-shadow:inset 0 0 0 1.5px var(--sw-on-ring);color:var(--sw-on-ink);padding-left:11px;text-align:left}
+.sw.on i::after{right:4px;background:var(--sw-on-knob)}
+.sw.off i{background:var(--sw-off-bg);box-shadow:inset 0 0 0 1.5px var(--sw-off-ring);color:var(--sw-off-ink);padding-right:8px;text-align:right;letter-spacing:0}
+.sw.off i::after{left:4px;background:var(--sw-off-knob);box-shadow:inset 0 0 0 1.5px var(--sw-off-knob-ring)}
+.undo{display:flex;align-items:center;gap:10px;margin-top:12px;border-radius:20px;background:var(--toast);color:var(--toast-ink);padding:10px 8px 10px 18px;font-size:14px;line-height:1.55}
+.undo span{flex:1}.undo em{font-style:normal;height:44px;display:inline-flex;align-items:center;padding:0 16px;border-radius:999px;background:var(--toast-btn);font-weight:800;white-space:nowrap}
+.swap{margin-top:12px;border-radius:20px;background:var(--card2);box-shadow:inset 0 0 0 2px var(--edge);padding:14px 14px 12px}
+.swap p{margin:0;font-size:15px;font-weight:700;color:var(--strong);line-height:1.55}.swap p small{display:block;font-size:13px;font-weight:500;color:var(--sub);margin-top:2px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.chips span{height:44px;display:inline-flex;align-items:center;gap:6px;padding:0 16px;border-radius:999px;background:var(--card);box-shadow:inset 0 0 0 1.5px var(--sw-off-ring);font-size:15px;font-weight:800;color:var(--strong)}
+.chips span svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.chips span.no{box-shadow:none;background:transparent;color:var(--sub)}
+.more{display:flex;justify-content:space-between;gap:8px;margin-top:14px}
+.more span{min-height:44px;display:inline-flex;align-items:center;padding:0 8px;font-size:15px;font-weight:800;color:var(--link)}
+.more span.dis{color:var(--mute);font-weight:700}
+.hsl{font-size:14px;font-weight:800;color:var(--strong);margin:12px 2px 6px}
+.mini{display:flex;height:64px;border-radius:999px;background:var(--card);box-shadow:inset 0 0 0 1.5px var(--edge);padding:0 6px}
+.mini b{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:var(--sub)}
+.mini b.new{color:var(--strong)}
+.prev{position:relative;border-radius:26px;background:var(--prev);padding:42px 10px 10px;margin-top:14px;box-shadow:inset 0 0 0 1px var(--ring)}
+.prev .tag{position:absolute;left:14px;top:10px;height:24px;display:inline-flex;align-items:center;padding:0 10px;border-radius:999px;background:var(--card);color:var(--sub);font-size:13px;font-weight:800}
+.prev .ts{background:var(--prev-row);padding-left:16px;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+.prev .ts:first-of-type{margin-top:0}
+.prev .ts.lock{background:var(--prev-lock);box-shadow:inset 0 0 0 1px var(--ring)}
+.prev .ts.off{background:var(--row-off);box-shadow:inset 0 0 0 1.5px var(--ring)}
+.allc{display:flex;align-items:center;gap:12px;margin-top:16px;border-radius:24px;background:var(--card);box-shadow:var(--shadow);padding:16px 14px 16px 18px}
+.allc div{flex:1}.allc b{display:block;font-size:16px;color:var(--strong)}.allc small{display:block;font-size:13px;color:var(--sub);line-height:1.55;margin-top:2px}
+.allc em{font-style:normal;height:48px;display:inline-flex;align-items:center;padding:0 18px;border-radius:999px;box-shadow:inset 0 0 0 1.5px var(--sw-off-ring);font-size:15px;font-weight:800;color:var(--strong);white-space:nowrap}
+.foot{font-size:13px;color:var(--sub);margin:12px 4px 0;line-height:1.6}
+.ann{position:relative;z-index:40;max-width:392px;margin:16px auto 120px;font:13px/1.7 var(--gothic);background:#FFF8D6;color:#5A4A12;padding:12px 14px;border-radius:16px}
+.ann b{display:block}.ann ul{margin:4px 0 0;padding-left:1.2em}
+</style></head><body>
+<main class="phone"><div class="top"><span>スタンプラリー｜エアライン経営</span><span>マイページ</span></div></main><div class="dim"></div><div class="sheet" role="dialog" aria-label="タブを選ぶ"><div class="grab"></div><div class="bar"><h3>タブを選ぶ</h3><span class="done">完了</span></div><p class="lead">OFF にすると隠れます。「≡」を持って並べ替えます。5つまで。隠した画面はマイページから開けます。</p><ol aria-label="タブに出せる画面"><li class="ts"><span class="n">1</span><span class="ii"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 10.5 12 4l8.5 6.5"/><path d="M5.5 9v10h4.5v-5.5h4V19h4.5V9"/></svg></span><b>ホーム</b><span class="lockt">いつも</span></li><li class="ts"><span class="n">2</span><span class="ii"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5C4 4.7 4.7 4 5.5 4H11v15H5.5c-.8 0-1.5.5-1.5 1.2V5.5Z"/><path d="M20 5.5c0-.8-.7-1.5-1.5-1.5H13v15h5.5c.8 0 1.5.5 1.5 1.2V5.5Z"/></svg></span><b>図鑑</b><span class="sw on" role="switch" aria-checked="true" aria-label="図鑑をタブに出す"><i>ON</i></span><span class="h" aria-label="図鑑を並べ替え"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 9h14M5 15h14"/></svg></span></li><li class="ts"><span class="n">3</span><span class="ii"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10.5 13.5 4 11l1.4-1.4 7 1.1 3.9-3.9c.8-.8 2.1-.8 2.9 0s.8 2.1 0 2.9l-3.9 3.9 1.1 7L15 22l-2.5-6.5-3 3v2.5L8 22.5l-1.3-3.2L3.5 18 5 16.5h2.5Z"/></svg></span><b>フライト</b><span class="sw on" role="switch" aria-checked="true" aria-label="フライトをタブに出す"><i>ON</i></span><span class="h" aria-label="フライトを並べ替え"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 9h14M5 15h14"/></svg></span></li><li class="ts"><span class="n">4</span><span class="ii"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.5"/><path d="M12 12 18 6"/><circle cx="12" cy="12" r="1" fill="currentColor"/></svg></span><b>運用</b><span class="sw on" role="switch" aria-checked="true" aria-label="運用をタブに出す"><i>ON</i></span><span class="h" aria-label="運用を並べ替え"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 9h14M5 15h14"/></svg></span></li><li class="ts"><span class="n">5</span><span class="ii"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 19.5h5v-5h5v-5h5v-5"/><path d="M15.5 4.5h3v3"/></svg></span><b>修行</b><span class="sw on" role="switch" aria-checked="true" aria-label="修行をタブに出す"><i>ON</i></span><span class="h" aria-label="修行を並べ替え"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 9h14M5 15h14"/></svg></span></li><li class="ts off pick"><span class="n"></span><span class="ii"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h16"/><path d="M7 16v-4"/><path d="M12 16V8"/><path d="M17 16v-6"/></svg></span><b>成績<small>空港・路線・距離<br>マイページのタイルから</small><small class="full">ON で外すタブを選びます</small></b><span class="sw off" role="switch" aria-checked="false" aria-label="成績をタブに出す（5つまでなので入れ替えます）"><i>OFF</i></span><span class="h" aria-label="成績を並べ替え"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 9h14M5 15h14"/></svg></span></li></ol><div class="swap" role="group" aria-label="入れ替えるタブ"><p>タブは5つまでです。「成績」とどれを入れ替えますか？<small>選んだタブは OFF になり、マイページのタイルから開けます</small></p><div class="chips"><span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5C4 4.7 4.7 4 5.5 4H11v15H5.5c-.8 0-1.5.5-1.5 1.2V5.5Z"/><path d="M20 5.5c0-.8-.7-1.5-1.5-1.5H13v15h5.5c.8 0 1.5.5 1.5 1.2V5.5Z"/></svg>図鑑</span><span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10.5 13.5 4 11l1.4-1.4 7 1.1 3.9-3.9c.8-.8 2.1-.8 2.9 0s.8 2.1 0 2.9l-3.9 3.9 1.1 7L15 22l-2.5-6.5-3 3v2.5L8 22.5l-1.3-3.2L3.5 18 5 16.5h2.5Z"/></svg>フライト</span><span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.5"/><path d="M12 12 18 6"/><circle cx="12" cy="12" r="1" fill="currentColor"/></svg>運用</span><span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 19.5h5v-5h5v-5h5v-5"/><path d="M15.5 4.5h3v3"/></svg>修行</span><span class="no">やめる</span></div></div><div class="more"><span>ホームに出すもの ›</span><span>全部乗せに戻す</span></div><p class="hsl">いまのタブ帯</p><div class="mini" aria-hidden="true"><b class=""><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 10.5 12 4l8.5 6.5"/><path d="M5.5 9v10h4.5v-5.5h4V19h4.5V9"/></svg><span>ホーム</span></b><b class=""><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5C4 4.7 4.7 4 5.5 4H11v15H5.5c-.8 0-1.5.5-1.5 1.2V5.5Z"/><path d="M20 5.5c0-.8-.7-1.5-1.5-1.5H13v15h5.5c.8 0 1.5.5 1.5 1.2V5.5Z"/></svg><span>図鑑</span></b><b class=""><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10.5 13.5 4 11l1.4-1.4 7 1.1 3.9-3.9c.8-.8 2.1-.8 2.9 0s.8 2.1 0 2.9l-3.9 3.9 1.1 7L15 22l-2.5-6.5-3 3v2.5L8 22.5l-1.3-3.2L3.5 18 5 16.5h2.5Z"/></svg><span>フライト</span></b><b class=""><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.5"/><path d="M12 12 18 6"/><circle cx="12" cy="12" r="1" fill="currentColor"/></svg><span>運用</span></b><b class=""><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 19.5h5v-5h5v-5h5v-5"/><path d="M15.5 4.5h3v3"/></svg><span>修行</span></b></div></div><script>addEventListener("load",function(){var s=document.querySelector(".sheet");s.scrollTop=s.scrollHeight})</script>
+<aside class="ann"><b>メモ（本番には出ません）</b><ul><li><b>4版（11/9 3時35分の PM の指示・review-2 を受けて）</b>：並びをアプリ（feat/all-in-tabs の 15・16）にそろえた。番号・絵・名前・スイッチ・≡（右端）の順。OFF の行にも ≡ を出す</li><li>下のタブ帯はシートの下に隠し、シートの中の「いまのタブ帯」で見せる（アプリと同じ。667 でも戻したい OFF の行がタブ帯にもぐらない）</li><li>「全部乗せに戻す」はボタンをやめ、「ホームに出すもの ›」と並ぶ右の字のリンク（アプリと同じ）</li><li>タブ帯とシートの絵は本番（main の web/）の絵：図鑑＝本・フライト＝飛行機・運用＝的・修行＝階段・成績＝棒</li><li><b>5／5 のときに OFF のタブ（成績）を ON にしたとき</b>：スイッチはすぐには ON にせず、行を縁で囲んで、すぐ下に「どれを入れ替えますか？」を出す（アプリの tpswap と同じ文）。選ぶとそのタブが OFF になり、成績が ON になる。「やめる」でこの帯が消え、スイッチは OFF のまま</li><li>5／5 のときだけ、OFF の行に「ON で外すタブを選びます」を強い字で1行出す。押す前に入れ替えになると分かる（review-2 の4）</li><li>ホームは入れ替えの候補に出さない（いつも）</li><li>入れ替えの帯が出たら、シートを帯が見える所まで送る（この画面はいちばん下まで送った形）</li></ul></aside>
+<script>if(window!==window.top){var a=document.querySelector('.ann');if(a)a.remove()}</script>
+</body></html>
